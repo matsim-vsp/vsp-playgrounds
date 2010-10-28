@@ -1,6 +1,6 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * Municipality.java
+ * Location.java
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
@@ -18,76 +18,69 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.balmermi.census2000.data;
+package playground.balmermi.world;
 
+import org.matsim.api.core.v01.BasicLocation;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.core.basic.v01.IdImpl;
+import org.matsim.core.facilities.ActivityFacilityImpl;
+import org.matsim.core.gbl.Gbl;
+import org.matsim.core.network.LinkImpl;
 
-import playground.balmermi.world.Zone;
-
-
-public class Municipality implements Comparable<Municipality> {
+/**
+ * Basic geographical class in MATSim.
+ * @see LinkImpl
+ * @see ActivityFacilityImpl
+ * @see Zone
+ * @author Michael Balmer
+ */
+public abstract class AbstractLocation implements BasicLocation {
 
 	//////////////////////////////////////////////////////////////////////
 	// member variables
 	//////////////////////////////////////////////////////////////////////
 
-	protected final Zone zone;
-	protected int k_id;
-	protected double income; // average monthly income
-	protected int reg_type; // degree of urbanization
-	protected double fuelcost; // per liter
-	
+	protected final Id id;
+	protected final Coord center;
+
 	//////////////////////////////////////////////////////////////////////
-	// constructors
+	// constructor
 	//////////////////////////////////////////////////////////////////////
 
-	public Municipality(Zone zone) {
-		this.zone = zone;
-	}
-	
-	//////////////////////////////////////////////////////////////////////
-	// methods
-	//////////////////////////////////////////////////////////////////////
-
-	public int compareTo(Municipality other) {
-		return ((IdImpl)this.zone.getId()).compareTo((IdImpl)other.zone.getId());
+	/**
+	 * A unique location for a given layer.
+	 * @param id The unique id of that location.
+	 * @param center The center of that location. Does not have to be the middle of the location object.
+	 */
+	protected AbstractLocation(final Id id, final Coord center) {
+		this.id = id;
+		this.center = center;
+		if (this.center == null) {
+			Gbl.errorMsg("Location id=" + id + " instanciate without coordinate!");
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////
-
-	public final Id getId() {
-		return this.zone.getId();
-	}
-	
-	public final double getIncome() {
-		return this.income;
-	}
-
-	public final int getRegType() {
-		return this.reg_type;
-	}
-	
-	public final int getCantonId() {
-		return this.k_id;
-	}
-	
-	public final double getFuelCost() {
-		return this.fuelcost;
-	}
-	
-	public final Zone getZone() {
-		return this.zone;
-	}
-	
+	// get methods
 	//////////////////////////////////////////////////////////////////////
 
 	@Override
-	public final String toString() {
-		return "[m_id=" + this.getId() + "]" +
-			"[k_id=" + this.k_id + "]" +
-			"[income=" + this.income + "]" +
-			"[reg_type=" + this.reg_type + "]" +
-			"[fuelcost=" + this.fuelcost + "]";
+	public final Id getId() {
+		return this.id;
+	}
+
+	@Override
+	public final Coord getCoord() {
+		return this.center;
+	}
+
+	//////////////////////////////////////////////////////////////////////
+	// print methods
+	//////////////////////////////////////////////////////////////////////
+
+	@Override
+	public String toString() {
+		return "[id=" + this.getId() + "]" +
+		       "[center=" + this.center + "]";
 	}
 }
