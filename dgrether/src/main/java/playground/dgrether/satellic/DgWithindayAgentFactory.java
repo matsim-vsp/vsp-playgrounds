@@ -24,7 +24,7 @@ import java.util.Random;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.ptproject.qsim.QSim;
 import org.matsim.ptproject.qsim.agents.DefaultAgentFactory;
-import org.matsim.ptproject.qsim.agents.DefaultPersonDriverAgent;
+import org.matsim.ptproject.qsim.agents.PersonDriverAgentImpl;
 
 
 /**
@@ -41,8 +41,8 @@ public class DgWithindayAgentFactory extends DefaultAgentFactory {
 	}
 
 	@Override
-	public DefaultPersonDriverAgent createPersonAgent(final Person p) {
-		DefaultPersonDriverAgent agent = new DgWithindayQPersonAgent(p, this.simulation, this.random);
+	public PersonDriverAgentImpl createPersonAgent(final Person p) {
+		PersonDriverAgentImpl agent = new DgWithindayQPersonAgent(p, this.simulation, this.random);
 		return agent;
 	}
 	
