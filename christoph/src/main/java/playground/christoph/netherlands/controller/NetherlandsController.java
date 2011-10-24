@@ -36,7 +36,7 @@ public class NetherlandsController extends Controler {
 	 */
 	@Override
 	protected ScoringFunctionFactory loadScoringFunctionFactory() {
-		return new CharyparNagelOpenTimesScoringFunctionFactory(this.config.planCalcScore(), this.getFacilities());
+		return new CharyparNagelOpenTimesScoringFunctionFactory(this.config.planCalcScore(), this.getScenario());
 	}
 
 	public static void main(final String[] args) {
