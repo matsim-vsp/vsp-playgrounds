@@ -17,11 +17,16 @@
  *                                                                         *
  * *********************************************************************** */
 
-package org.matsim.ptproject.qsim.qnetsimengine;
+package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.ptproject.qsim.interfaces.MobsimEngine;
+import org.matsim.core.mobsim.qsim.interfaces.MobsimEngine;
+import org.matsim.core.mobsim.qsim.qnetsimengine.NetsimNetworkFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkInternalI;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNetwork;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNode;
 
 
 

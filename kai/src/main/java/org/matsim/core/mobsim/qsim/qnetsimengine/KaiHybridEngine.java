@@ -18,15 +18,15 @@
  *                                                                         *
  * *********************************************************************** */
 
-package org.matsim.ptproject.qsim.qnetsimengine;
+package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.ptproject.qsim.InternalInterface;
-import org.matsim.ptproject.qsim.interfaces.MobsimEngine;
-import org.matsim.ptproject.qsim.interfaces.Netsim;
+import org.matsim.core.mobsim.qsim.InternalInterface;
+import org.matsim.core.mobsim.qsim.interfaces.MobsimEngine;
+import org.matsim.core.mobsim.qsim.interfaces.Netsim;
 
 public class KaiHybridEngine implements MobsimEngine {
 

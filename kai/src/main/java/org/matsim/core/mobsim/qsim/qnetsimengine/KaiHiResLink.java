@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package org.matsim.ptproject.qsim.qnetsimengine;
+package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 import java.util.Collection;
 import java.util.Map;
@@ -27,7 +27,11 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.MobsimDriverAgent;
-import org.matsim.ptproject.qsim.interfaces.MobsimVehicle;
+import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkInternalI;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNetwork;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNode;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vis.snapshotwriters.VisData;
 
 class KaiHiResLink extends QLinkInternalI {
