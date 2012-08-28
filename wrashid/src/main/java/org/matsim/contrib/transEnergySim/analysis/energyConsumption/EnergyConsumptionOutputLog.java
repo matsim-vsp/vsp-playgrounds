@@ -48,23 +48,15 @@ public class EnergyConsumptionOutputLog {
 	}
 
 	public String getTitleRowFileOutput() {
-		return "personId\tlinkId\tenergyConsumptionInJoule";
+		return "";
 	}
 
 	public void printToConsole() {
-		System.out.println(getTitleRowFileOutput());
-		
-		for (EnergyConsumptionLogRow row:log){
-			System.out.println(row.getAgentId() + "\t" + row.getLinkId() + "\t" + row.getEnergyConsumedInJoules());
-		}
+		// TODO:implement this.
 	}
 
 	public void writeToFile(String outputFile) {
 		// TODO:implement this.
-	}
-	
-	public int size(){
-		return log.size();
 	}
 
 }
