@@ -40,12 +40,12 @@ public class TransitDepartureHandler implements DepartureHandler {
 	}
 
 	@Override
-	public void handleDeparture(final PlanAgent agent) {
+	public void handleDeparture(final double now, final PlanAgent agent) {
 		Leg leg = (Leg) agent.getCurrentPlanElement();
 		ExperimentalTransitRoute route = (ExperimentalTransitRoute) leg.getRoute();
 		Id accessStopId = route.getAccessStopId();
 		PTPassengerAgent passenger = new PassengerAgentImpl(agent.getPlan().getPerson().getId(), route, agent.getWeight());
-		this.agentTracker.addAgentToStop(passenger, accessStopId);
+		this.agentTracker.addAgentToStop(now, passenger, accessStopId);
 	}
 
 }
