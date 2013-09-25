@@ -17,10 +17,11 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.vrp.taxi;
+package playground.michalm.vrp;
 
 import java.util.*;
 
+import org.matsim.contrib.dvrp.data.MatsimVrpData;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 import org.matsim.core.mobsim.framework.listeners.MobsimBeforeSimStepListener;
@@ -29,8 +30,7 @@ import org.matsim.core.mobsim.qsim.interfaces.*;
 
 import pl.poznan.put.vrp.dynamic.data.VrpData;
 import pl.poznan.put.vrp.dynamic.data.model.*;
-import pl.poznan.put.vrp.dynamic.optimizer.taxi.TaxiOptimizer;
-import playground.michalm.vrp.data.MatsimVrpData;
+import pl.poznan.put.vrp.dynamic.taxi.TaxiOptimizer;
 
 
 public class TaxiSimEngine

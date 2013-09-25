@@ -17,17 +17,17 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.vrp.data.file;
+package playground.michalm.supply;
 
 import java.io.*;
 import java.util.Set;
 
 import org.matsim.api.core.v01.*;
+import org.matsim.contrib.dvrp.run.VrpConfigUtils;
 import org.matsim.core.network.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import pl.poznan.put.util.random.*;
-import playground.michalm.vrp.run.VrpConfigUtils;
 
 
 public class DepotGenerator

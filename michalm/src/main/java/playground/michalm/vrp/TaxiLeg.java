@@ -17,52 +17,22 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.vrp.data.network;
+package playground.michalm.vrp;
 
-import java.util.*;
+import org.matsim.contrib.dvrp.data.network.shortestpath.ShortestPathDynLeg;
 
-import org.matsim.api.core.v01.Id;
-
-import pl.poznan.put.vrp.dynamic.data.network.*;
+import pl.poznan.put.vrp.dynamic.data.schedule.DriveTask;
 
 
-/**
- * It consists of ShortestPathsArcs with ShortestPath of any type (Sparse, Full or other) - type of
- * the ShortestPath depends on the given ArcBuilder.
- * 
- * @author michalm
- */
-public class GrowingMatsimVrpGraph
-    extends GrowingVrpGraph
-    implements MatsimVrpGraph
+public class TaxiLeg
+    extends ShortestPathDynLeg
 {
-    private final Map<Id, MatsimVertex> linkIdToVertex;
-
-
-    public GrowingMatsimVrpGraph(ArcFactory arcFactory)
+    public TaxiLeg(DriveTask driveTask)
     {
-        super(arcFactory);
-        linkIdToVertex = new LinkedHashMap<Id, MatsimVertex>();
+        super(driveTask);
     }
 
 
-    @Override
-    public MatsimVertex getVertex(Id linkId)
-    {
-        return linkIdToVertex.get(linkId);
-    }
-
-
-    @Override
-    public void addVertex(Vertex vertex)
-    {
-        MatsimVertex mVertex = (MatsimVertex)vertex;
-        Id linkId = mVertex.getLink().getId();
-
-        if (linkIdToVertex.put(linkId, mVertex) != null) {
-            throw new RuntimeException("Duplicated vertex for link=" + linkId);
-        }
-
-        super.addVertex(mVertex);
-    }
+    public void endLeg(double now)
+    {}
 }

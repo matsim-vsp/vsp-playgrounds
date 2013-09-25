@@ -17,10 +17,13 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.vrp.taxi;
+package playground.michalm.vrp;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.dvrp.data.model.MobsimAgentCustomer;
+import org.matsim.contrib.dvrp.data.network.MatsimVrpGraph;
+import org.matsim.contrib.dvrp.dynagent.*;
 import org.matsim.core.api.experimental.events.*;
 import org.matsim.core.mobsim.framework.*;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
@@ -29,10 +32,7 @@ import pl.poznan.put.vrp.dynamic.data.model.Vehicle;
 import pl.poznan.put.vrp.dynamic.data.online.VehicleTrackerListener;
 import pl.poznan.put.vrp.dynamic.data.schedule.*;
 import pl.poznan.put.vrp.dynamic.data.schedule.Schedule.ScheduleStatus;
-import pl.poznan.put.vrp.dynamic.optimizer.taxi.schedule.TaxiDriveTask;
-import playground.michalm.dynamic.*;
-import playground.michalm.vrp.data.model.TaxiCustomer;
-import playground.michalm.vrp.data.network.MatsimVrpGraph;
+import pl.poznan.put.vrp.dynamic.taxi.schedule.TaxiDriveTask;
 
 
 public class TaxiAgentLogic
@@ -174,7 +174,7 @@ public class TaxiAgentLogic
     private TaxiTaskActivity createServeActivity(ServeTask task, double now)
     {
         // serve the customer
-        MobsimAgent passenger = ((TaxiCustomer)task.getRequest().getCustomer()).getPassenger();
+        MobsimAgent passenger = ((MobsimAgentCustomer)task.getRequest().getCustomer()).getPassenger();
         Id currentLinkId = passenger.getCurrentLinkId();
 
         if (currentLinkId != agent.getCurrentLinkId()) {
@@ -220,7 +220,7 @@ public class TaxiAgentLogic
                 // following line only works if PassengerAgent can indeed be cast into MobsimAgent
                 // ...
                 // ... but that makes sense for what the current system is constructed. kai, sep'12
-                MobsimAgent passenger = ((TaxiCustomer)driveTask.getRequest().getCustomer())
+                MobsimAgent passenger = ((MobsimAgentCustomer)driveTask.getRequest().getCustomer())
                         .getPassenger();
 
                 // deliver the passenger

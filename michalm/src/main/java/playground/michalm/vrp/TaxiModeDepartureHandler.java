@@ -17,18 +17,18 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.vrp.taxi;
+package playground.michalm.vrp;
 
 import java.util.List;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.dvrp.data.MatsimVrpData;
+import org.matsim.contrib.dvrp.data.model.MobsimAgentCustomer;
+import org.matsim.contrib.dvrp.data.network.*;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.interfaces.DepartureHandler;
 
 import pl.poznan.put.vrp.dynamic.data.model.*;
-import playground.michalm.vrp.data.MatsimVrpData;
-import playground.michalm.vrp.data.model.TaxiCustomer;
-import playground.michalm.vrp.data.network.*;
 
 
 public class TaxiModeDepartureHandler
@@ -61,7 +61,7 @@ public class TaxiModeDepartureHandler
 
             // agent -> customerId -> Customer
             int id = requests.size();
-            Customer customer = new TaxiCustomer(id, fromVertex, agent);// TODO
+            Customer customer = new MobsimAgentCustomer(id, fromVertex, agent);// TODO
             int duration = 120; // approx. 120 s for entering the taxi
             int t0 = (int)now;
             int t1 = t0 + 0; // hardcoded values!

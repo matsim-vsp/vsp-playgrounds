@@ -17,21 +17,21 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.vrp.taxi;
+package playground.michalm.vrp;
 
 import java.util.List;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.dvrp.data.MatsimVrpData;
+import org.matsim.contrib.dvrp.data.model.DynAgentVehicle;
+import org.matsim.contrib.dvrp.data.network.MatsimVertex;
+import org.matsim.contrib.dvrp.data.schedule.VrpSchedulePlanFactory;
+import org.matsim.contrib.dvrp.dynagent.*;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.vehicles.VehicleUtils;
 
 import pl.poznan.put.vrp.dynamic.data.model.Vehicle;
-import playground.michalm.dynamic.*;
-import playground.michalm.vrp.data.MatsimVrpData;
-import playground.michalm.vrp.data.model.DynAgentVehicle;
-import playground.michalm.vrp.data.network.MatsimVertex;
-import playground.michalm.vrp.driver.VrpSchedulePlanFactory;
 
 
 public class TaxiAgentSource

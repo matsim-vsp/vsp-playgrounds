@@ -1,10 +1,9 @@
 /* *********************************************************************** *
- * project: michalm
- * PassengerTaxiRequestEventHandler.java
+ * project: org.matsim.*
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2011 by the members listed in the COPYING,        *
+ * copyright       : (C) 2012 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -18,14 +17,49 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.taxicab;
+package playground.michalm.vrp;
 
-import org.matsim.core.events.handler.EventHandler;
+import org.matsim.contrib.dvrp.dynagent.DynActivity;
 
-/**
- * @author nagel
- *
- */
-public interface PassengerTaxiRequestEventHandler extends EventHandler {
-	public void handleEvent( PassengerTaxiRequestEvent event ) ;
+import pl.poznan.put.vrp.dynamic.data.schedule.*;
+
+
+class TaxiTaskActivity
+    implements DynActivity
+{
+    private StayTask stayTask;
+    private String activityType;
+
+
+    TaxiTaskActivity(String activityType, StayTask stayTask)
+    {
+        this.activityType = activityType;
+        this.stayTask = stayTask;
+    }
+
+
+    @Override
+    public double getEndTime()
+    {
+        return stayTask.getEndTime();
+    }
+
+
+    @Override
+    public String getActivityType()
+    {
+        return activityType;
+    }
+
+
+    static TaxiTaskActivity createServeActivity(ServeTask serveTask)
+    {
+        return new TaxiTaskActivity("ServeTask" + serveTask.getRequest().getId(), serveTask);
+    }
+
+
+    static TaxiTaskActivity createWaitActivity(WaitTask waitTask)
+    {
+        return new TaxiTaskActivity("WaitTask", waitTask);
+    }
 }
