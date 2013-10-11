@@ -17,41 +17,42 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.immediaterequest;
+package playground.michalm.taxi.schedule;
 
-import pl.poznan.put.vrp.dynamic.data.VrpData;
-import pl.poznan.put.vrp.dynamic.data.model.Vehicle;
-import playground.michalm.taxi.schedule.TaxiTask;
+import pl.poznan.put.vrp.dynamic.data.model.Request;
+import pl.poznan.put.vrp.dynamic.data.schedule.impl.StayTaskImpl;
 
 
-public class OTSTaxiOptimizer
-    extends ImmediateRequestTaxiOptimizer
+public class TaxiPickupStayTask
+    extends StayTaskImpl
+    implements TaxiTask
 {
-    private final TaxiOptimizationPolicy optimizationPolicy;
+    private final Request request;
 
 
-    public OTSTaxiOptimizer(VrpData data, boolean destinationKnown, boolean minimizePickupTripTime,
-            int pickupDuration, TaxiOptimizationPolicy optimizationPolicy)
+    public TaxiPickupStayTask(int beginTime, int endTime, Request request)
     {
-        super(data, destinationKnown, minimizePickupTripTime, pickupDuration);
-        this.optimizationPolicy = optimizationPolicy;
+        super(beginTime, endTime, request.getFromVertex());
+        this.request = request;
     }
 
 
     @Override
-    protected boolean shouldOptimizeBeforeNextTask(Vehicle vehicle, boolean scheduleUpdated)
+    public TaxiTaskType getTaxiTaskType()
     {
-        if (!scheduleUpdated) {// no changes
-            return false;
-        }
+        return TaxiTaskType.PICKUP_STAY;
+    }
 
-        return optimizationPolicy.shouldOptimize((TaxiTask)vehicle.getSchedule().getCurrentTask());
+
+    public Request getRequest()
+    {
+        return request;
     }
 
 
     @Override
-    protected boolean shouldOptimizeAfterNextTask(Vehicle vehicle, boolean scheduleUpdated)
+    protected String commonToString()
     {
-        return false;
+        return "[" + getTaxiTaskType().name() + "]" + super.commonToString();
     }
 }

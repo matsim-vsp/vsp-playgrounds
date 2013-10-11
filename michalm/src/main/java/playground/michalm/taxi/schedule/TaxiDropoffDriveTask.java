@@ -17,41 +17,48 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.immediaterequest;
+package playground.michalm.taxi.schedule;
 
-import pl.poznan.put.vrp.dynamic.data.VrpData;
-import pl.poznan.put.vrp.dynamic.data.model.Vehicle;
-import playground.michalm.taxi.schedule.TaxiTask;
+import pl.poznan.put.vrp.dynamic.data.model.Request;
+import pl.poznan.put.vrp.dynamic.data.network.Arc;
+import pl.poznan.put.vrp.dynamic.data.schedule.impl.DriveTaskImpl;
 
 
-public class OTSTaxiOptimizer
-    extends ImmediateRequestTaxiOptimizer
+public class TaxiDropoffDriveTask
+    extends DriveTaskImpl
+    implements TaxiTask
 {
-    private final TaxiOptimizationPolicy optimizationPolicy;
+    private final Request request;
 
 
-    public OTSTaxiOptimizer(VrpData data, boolean destinationKnown, boolean minimizePickupTripTime,
-            int pickupDuration, TaxiOptimizationPolicy optimizationPolicy)
+    public TaxiDropoffDriveTask(int beginTime, int endTime, Arc arc, Request request)
     {
-        super(data, destinationKnown, minimizePickupTripTime, pickupDuration);
-        this.optimizationPolicy = optimizationPolicy;
-    }
+        super(beginTime, endTime, arc);
+        this.request = request;
 
-
-    @Override
-    protected boolean shouldOptimizeBeforeNextTask(Vehicle vehicle, boolean scheduleUpdated)
-    {
-        if (!scheduleUpdated) {// no changes
-            return false;
+        if (request.getFromVertex() != arc.getFromVertex()
+                && request.getToVertex() != arc.getToVertex()) {
+            throw new IllegalArgumentException();
         }
-
-        return optimizationPolicy.shouldOptimize((TaxiTask)vehicle.getSchedule().getCurrentTask());
     }
 
 
     @Override
-    protected boolean shouldOptimizeAfterNextTask(Vehicle vehicle, boolean scheduleUpdated)
+    public TaxiTaskType getTaxiTaskType()
     {
-        return false;
+        return TaxiTaskType.DROPOFF_DRIVE;
+    }
+
+
+    public Request getRequest()
+    {
+        return request;
+    }
+
+
+    @Override
+    protected String commonToString()
+    {
+        return "[" + getTaxiTaskType().name() + "]" + super.commonToString();
     }
 }

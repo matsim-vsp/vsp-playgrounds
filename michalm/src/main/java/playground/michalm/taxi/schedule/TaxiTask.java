@@ -17,41 +17,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.immediaterequest;
+package playground.michalm.taxi.schedule;
 
-import pl.poznan.put.vrp.dynamic.data.VrpData;
-import pl.poznan.put.vrp.dynamic.data.model.Vehicle;
-import playground.michalm.taxi.schedule.TaxiTask;
+import pl.poznan.put.vrp.dynamic.data.schedule.Task;
 
 
-public class OTSTaxiOptimizer
-    extends ImmediateRequestTaxiOptimizer
+public interface TaxiTask
+    extends Task
 {
-    private final TaxiOptimizationPolicy optimizationPolicy;
-
-
-    public OTSTaxiOptimizer(VrpData data, boolean destinationKnown, boolean minimizePickupTripTime,
-            int pickupDuration, TaxiOptimizationPolicy optimizationPolicy)
+    static enum TaxiTaskType
     {
-        super(data, destinationKnown, minimizePickupTripTime, pickupDuration);
-        this.optimizationPolicy = optimizationPolicy;
+        PICKUP_DRIVE, PICKUP_STAY, DROPOFF_DRIVE, DROPOFF_STAY, CRUISE_DRIVE, WAIT_STAY;
     }
 
 
-    @Override
-    protected boolean shouldOptimizeBeforeNextTask(Vehicle vehicle, boolean scheduleUpdated)
-    {
-        if (!scheduleUpdated) {// no changes
-            return false;
-        }
-
-        return optimizationPolicy.shouldOptimize((TaxiTask)vehicle.getSchedule().getCurrentTask());
-    }
-
-
-    @Override
-    protected boolean shouldOptimizeAfterNextTask(Vehicle vehicle, boolean scheduleUpdated)
-    {
-        return false;
-    }
+    TaxiTaskType getTaxiTaskType();
 }

@@ -17,41 +17,32 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.immediaterequest;
+package playground.michalm.taxi.schedule;
 
-import pl.poznan.put.vrp.dynamic.data.VrpData;
-import pl.poznan.put.vrp.dynamic.data.model.Vehicle;
-import playground.michalm.taxi.schedule.TaxiTask;
+import pl.poznan.put.vrp.dynamic.data.network.Vertex;
+import pl.poznan.put.vrp.dynamic.data.schedule.impl.StayTaskImpl;
 
 
-public class OTSTaxiOptimizer
-    extends ImmediateRequestTaxiOptimizer
+public class TaxiWaitStayTask
+    extends StayTaskImpl
+    implements TaxiTask
 {
-    private final TaxiOptimizationPolicy optimizationPolicy;
-
-
-    public OTSTaxiOptimizer(VrpData data, boolean destinationKnown, boolean minimizePickupTripTime,
-            int pickupDuration, TaxiOptimizationPolicy optimizationPolicy)
+    public TaxiWaitStayTask(int beginTime, int endTime, Vertex atVertex)
     {
-        super(data, destinationKnown, minimizePickupTripTime, pickupDuration);
-        this.optimizationPolicy = optimizationPolicy;
+        super(beginTime, endTime, atVertex);
     }
 
 
     @Override
-    protected boolean shouldOptimizeBeforeNextTask(Vehicle vehicle, boolean scheduleUpdated)
+    public TaxiTaskType getTaxiTaskType()
     {
-        if (!scheduleUpdated) {// no changes
-            return false;
-        }
-
-        return optimizationPolicy.shouldOptimize((TaxiTask)vehicle.getSchedule().getCurrentTask());
+        return TaxiTaskType.WAIT_STAY;
     }
 
 
     @Override
-    protected boolean shouldOptimizeAfterNextTask(Vehicle vehicle, boolean scheduleUpdated)
+    protected String commonToString()
     {
-        return false;
+        return "[" + getTaxiTaskType().name() + "]" + super.commonToString();
     }
 }
