@@ -20,7 +20,7 @@
 package playground.pieter.pseudosimulation.replanning.selectors;
 
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.HasPlansAndId;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.replanning.selectors.PathSizeLogitSelector;
@@ -39,7 +39,7 @@ public class PSimPathSizeLogitSelector implements PlanSelector{
 		delegate=new PathSizeLogitSelector(planCalcScore, network);
 	}
 	@Override
-	public Plan selectPlan(Person person) {
+	public Plan selectPlan(HasPlansAndId<Plan> person) {
 		if (MobSimSwitcher.isQSimIteration)
 			return delegate.selectPlan(person);
 		else
