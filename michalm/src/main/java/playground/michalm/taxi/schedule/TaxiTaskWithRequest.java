@@ -19,55 +19,14 @@
 
 package playground.michalm.taxi.schedule;
 
-import pl.poznan.put.vrp.dynamic.data.network.Arc;
-import pl.poznan.put.vrp.dynamic.data.schedule.impl.DriveTaskImpl;
 import playground.michalm.taxi.model.TaxiRequest;
 
 
-public class TaxiDropoffDriveTask
-    extends DriveTaskImpl
-    implements TaxiTaskWithRequest
+public interface TaxiTaskWithRequest
+    extends TaxiTask
 {
-    private final TaxiRequest request;
-
-
-    public TaxiDropoffDriveTask(int beginTime, int endTime, Arc arc, TaxiRequest request)
-    {
-        super(beginTime, endTime, arc);
-
-        if (request.getFromVertex() != arc.getFromVertex()
-                && request.getToVertex() != arc.getToVertex()) {
-            throw new IllegalArgumentException();
-        }
-
-        this.request = request;
-        request.setDropoffDriveTask(this);
-    }
-
-
-    @Override
-    public void removeFromRequest()
-    {
-        request.setDropoffDriveTask(null);
-    }
-
-
-    @Override
-    public TaxiTaskType getTaxiTaskType()
-    {
-        return TaxiTaskType.DROPOFF_DRIVE;
-    }
-
-
-    public TaxiRequest getRequest()
-    {
-        return request;
-    }
-
-
-    @Override
-    protected String commonToString()
-    {
-        return "[" + getTaxiTaskType().name() + "]" + super.commonToString();
-    }
+    TaxiRequest getRequest();
+    
+    //called (when removing a task) in order to update the request-2-task assignment 
+    void removeFromRequest();
 }

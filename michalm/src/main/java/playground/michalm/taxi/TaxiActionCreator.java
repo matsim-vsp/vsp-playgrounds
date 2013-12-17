@@ -29,7 +29,7 @@ import playground.michalm.taxi.schedule.*;
 
 
 public class TaxiActionCreator
-    implements VrpAgentLogic.ActionCreator
+    implements VrpAgentLogic.DynActionCreator
 {
     private final VrpSimEngine vrpSimEngine;
 
@@ -53,11 +53,15 @@ public class TaxiActionCreator
 
             case PICKUP_STAY:
                 TaxiPickupStayTask pst = (TaxiPickupStayTask)task;
+
+                //TODO maybe at the end of the stay task?
                 PassengerHandlingUtils.pickUpPassenger(vrpSimEngine, task, pst.getRequest(), now);
                 return new VrpActivity("ServeTask" + pst.getRequest().getId(), pst);
 
             case DROPOFF_STAY:
                 TaxiDropoffStayTask dst = (TaxiDropoffStayTask)task;
+                
+                //TODO maybe at the end of the stay task?
                 PassengerHandlingUtils.dropOffPassenger(vrpSimEngine, dst, dst.getRequest(), now);
                 return new VrpActivity("ServeTask" + dst.getRequest().getId(), dst);
 
