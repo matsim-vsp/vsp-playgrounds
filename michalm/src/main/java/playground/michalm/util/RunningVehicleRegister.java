@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm;
+package playground.michalm.util;
 
 import java.util.*;
 
