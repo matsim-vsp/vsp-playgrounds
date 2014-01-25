@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2014 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -19,39 +19,48 @@
 
 package playground.michalm.taxi.model;
 
-import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.*;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.extensions.electric.*;
-import org.matsim.contrib.dvrp.vrpagent.VrpAgentVehicleImpl;
-import org.matsim.contrib.transEnergySim.vehicles.energyConsumption.EnergyConsumptionModel;
 
 
-public class VrpAgentElectricTaxi
-    extends VrpAgentVehicleImpl
-    implements ElectricVehicle
+public class TaxiRank
+    implements BasicLocation
 {
-    private Battery battery;
-    private EnergyConsumptionModel ecm;
+    private final Id id;
+    private final String name;
+    private final Link link;
 
 
-    public VrpAgentElectricTaxi(Id id, Link startLink, double t0, double t1,
-            EnergyConsumptionModel ecm)
+    public TaxiRank(Id id, String name, Link link)
     {
-        super(id, startLink, 4, t0, t1);
-        this.ecm = ecm;
+        this.id = id;
+        this.name = name;
+        this.link = link;
     }
 
 
     @Override
-    public Battery getBattery()
+    public Id getId()
     {
-        return battery;
+        return id;
     }
 
 
     @Override
-    public void setBattery(Battery battery)
+    public Coord getCoord()
     {
-        this.battery = battery;
+        return link.getCoord();
+    }
+
+
+    public String getName()
+    {
+        return name;
+    }
+
+
+    public Link getLink()
+    {
+        return link;
     }
 }
