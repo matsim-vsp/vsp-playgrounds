@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.emissions;
+package playgrund.vsp.analysis.modules.emissions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,12 +26,12 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.emissions.events.WarmEmissionEvent;
+import org.matsim.contrib.emissions.events.WarmEmissionEventImpl;
+import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.basic.v01.IdImpl;
 import org.matsim.testcases.MatsimTestUtils;
 
-import playground.vsp.emissions.events.WarmEmissionEvent;
-import playground.vsp.emissions.events.WarmEmissionEventImpl;
-import playground.vsp.emissions.types.WarmPollutant;
 import playground.vsp.analysis.modules.emissionsAnalyzer.EmissionsPerPersonWarmEventHandler;
 
 /**
