@@ -39,7 +39,7 @@ public class TrajectoryReRealizerModule extends AbstractModule {
 
     @Override
     public void install() {
-        addPlanStrategyByProvider("ReRealize", TrajectoryReRealizerProvider.class);
+        addPlanStrategyBinding("ReRealize").toProvider(TrajectoryReRealizerProvider.class);
     }
 
     static class TrajectoryReRealizerProvider implements Provider<PlanStrategy> {
