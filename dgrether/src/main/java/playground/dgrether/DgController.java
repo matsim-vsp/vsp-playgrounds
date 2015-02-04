@@ -53,22 +53,6 @@ public class DgController {
 		Config config = ConfigUtils.loadConfig( args[0]) ;
 		
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
-		PopulationFactory pf = scenario.getPopulation().getFactory() ;
-		
-		Population pop2 = ScenarioUtils.createScenario(config).getPopulation() ; // dummy population, see next ;
-		
-		for ( Person person : scenario.getPopulation().getPersons().values() ) {
-			for ( int ii=0 ; ii<9 ; ii++ ) {
-				Person newPerson = pf.createPerson( Id.create( person.getId() + "_" + ii, Person.class )) ;
-				
-				// deepcopy of person into newPerson
-				
-				// Can't we implement Person newPerson = PopulationUtils.deepCopy( person ) ???
-				// (there may be a problem with the routes)
-				
-				pop2.addPerson(newPerson);
-			}
-		}
 		
 		Controler c = new Controler( scenario );
 		c.addSnapshotWriterFactory("otfvis", new OTFFileWriterFactory());
@@ -79,30 +63,12 @@ public class DgController {
 		// (fixed time) signal controller will be used.  kai & theresa, oct'14
 		
 		signalsFactory.setAlwaysSameMobsimSeed(false);
-        //FIXME: Take care that the normal SignalsControllerListener is NOT added.
+
+		//FIXME: Take care that the normal SignalsControllerListener is NOT added.
+		// yyyy ????
         c.addControlerListener(signalsFactory.createSignalsControllerListener());
+
         c.setOverwriteFiles(true);
-		
-		if ( false ) {
-			IterationStartsListener strategyWeightsManager = new IterationStartsListener() {
-				@Override
-				public void notifyIterationStarts(IterationStartsEvent event) {
-
-					GenericPlanStrategy<Plan, Person> strategy 
-					= new PlanStrategyImpl(new ExpBetaPlanChanger(Double.NaN) );
-					// (dummy strategy, just to get the type.  Not so great.  Not even sure if it will work. Ask MZ. Kai)
-
-					String subpopulation= null ;
-					// (I think this is just null. Kai)
-
-					double newWeight = 1./event.getIteration() ;
-					// (program function as you want/need)
-
-					event.getControler().getStrategyManager().changeWeightOfStrategy(strategy, subpopulation, newWeight) ;
-				}
-			} ;
-			c.addControlerListener(strategyWeightsManager);
-		}
 		
 		c.run();
 	}
