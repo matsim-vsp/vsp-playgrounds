@@ -19,12 +19,12 @@
 
 package playground.michalm.ttcalc_error;
 
+import java.util.Map;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.router.util.TravelTime;
-
-import java.util.Map;
 
 
 public class SimLauncher
