@@ -25,13 +25,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.population.PersonImpl;
-import org.matsim.core.population.PlanImpl;
-import org.matsim.core.replanning.selectors.RandomPlanSelector;
-import org.matsim.population.Desires;
-import org.matsim.utils.customize.Customizable;
-import org.matsim.utils.customize.CustomizableImpl;
-
-import java.util.*;
 
 /**
  * Default implementation of {@link org.matsim.api.core.v01.population.Person} interface.
