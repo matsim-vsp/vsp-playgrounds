@@ -37,7 +37,7 @@ public class ExtendCurrentActivityReplannerFactory extends WithinDayDuringActivi
 	@Override
 	public WithinDayDuringActivityReplanner createReplanner() {
 		WithinDayDuringActivityReplanner replanner = new ExtendCurrentActivityReplanner(super.getId(),
-				scenario, this.getWithinDayEngine().getInternalInterface());
+				scenario, this.getWithinDayEngine().getActivityRescheduler());
 		return replanner;
 	}
 
