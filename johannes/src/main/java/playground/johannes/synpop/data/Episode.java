@@ -33,4 +33,6 @@ public interface Episode extends Element {
     public void addActivity(Element activity);
 
     public void addLeg(Element leg);
+
+    public Person getPerson();
 }
