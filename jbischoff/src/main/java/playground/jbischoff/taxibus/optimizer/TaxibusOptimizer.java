@@ -1,6 +1,6 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * RunSiteVisitIdentifier.java                                                                        *
+ *                                                                         *
  * *********************************************************************** *
  *                                                                         *
  * copyright       : (C) 2015 by the members listed in the COPYING,        *
@@ -16,47 +16,41 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-/**
- * 
- */
-package playground.jjoubert.projects.wasteCollection.dataHandling;
+
+package playground.jbischoff.taxibus.optimizer;
+
+import java.util.Collection;
+import java.util.Set;
+
+import org.matsim.contrib.dvrp.data.Vehicle;
+
+import playground.michalm.taxi.data.TaxiRequest;
+import playground.michalm.taxi.optimizer.AbstractTaxiOptimizer;
 
 /**
- * Class to run different instances of the {@link SiteVisitIdentifier} class.
- * 
- * @author jwjoubert
+ * @author  jbischoff
+ *
  */
-public class RunSiteVisitIdentifier {
+public class TaxibusOptimizer extends AbstractTaxiOptimizer {
+	
+    private Set<Vehicle> possibleVehicles;
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		SiteVisitIdentifier.main(getOneDayArgumentsForMacMini());
-//		SiteVisitIdentifier.main(getOneDayArgumentsForMacbook());
-	}
 	
-	
-	public static String[] getOneDayArgumentsForMacMini(){
-		String[] result = {
-				"/Users/jwjoubert/Documents/Projects/CapeTownWaste/data/waste.txt.gz",
-				"1000000000",
-				"/Users/jwjoubert/Documents/Projects/CapeTownWaste/wasteSiteCoordinates.csv",
-				"/Users/jwjoubert/workspace/r-CapeTownWaste/data/wasteSiteVisits.csv",
-		};
-		
-		return result;
+
+	public TaxibusOptimizer(TaxibusOptimizerConfiguration optimConfig, Collection<TaxiRequest> unplannedRequests,
+			boolean doUnscheduleAwaitingRequests) {
+		super(optimConfig, unplannedRequests, doUnscheduleAwaitingRequests);
 	}
 
-	public static String[] getOneDayArgumentsForMacbook(){
-		String[] result = {
-				"/Users/jwjoubert/Downloads/wasteSample.txt",
-				"200000",
-				"/Volumes/Nifty/workspace/coct-data/WasteSiteCoordinates.csv",
-				"/Volumes/Nifty/workspace/coct-data/WasteSiteVisits.csv"
-		};
+	@Override
+	protected void scheduleUnplannedRequests() {
+		initPossibleVehicles();
 		
-		return result;
 	}
 	
+	private void initPossibleVehicles(){
+		//check if vehicle is either freely available or can take more passengers
+	}
+	
+
 }
