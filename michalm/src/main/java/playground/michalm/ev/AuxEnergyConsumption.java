@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,19 +17,9 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.util;
+package playground.michalm.ev;
 
-import org.matsim.contrib.dvrp.data.Vehicle;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
-
-public class TaxicabUtils
+public interface AuxEnergyConsumption
 {
-    public static int countVehicles(Iterable<? extends Vehicle> vehicles,
-            Predicate<Vehicle> predicate)
-    {
-        return Iterables.size(Iterables.filter(vehicles, predicate));
-    }
+    double calcEnergy(double period);
 }

@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -19,78 +19,50 @@
 
 package playground.michalm.taxi.data;
 
-import java.util.*;
+import org.matsim.contrib.dvrp.data.*;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.Vehicle;
+import playground.michalm.ev.*;
 
 
-public class TaxiRank
-    implements BasicLocation<TaxiRank>
+public class ETaxi
+    extends VehicleImpl
+    implements ElectricVehicle
 {
-    private final Id<TaxiRank> id;
-    private final String name;
-    private final Link link;
-    private final int capacity;
-
-    private final Map<Id<Vehicle>, Vehicle> taxis = new HashMap<>();
+    private final Battery battery;
+    private final DriveEnergyConsumption driveEnergyConsumption;
+    private final AuxEnergyConsumption auxEnergyConsumption;
 
 
-    public TaxiRank(Id<TaxiRank> id, String name, Link link, int capacity)
+    public ETaxi(Vehicle vehicle, Battery battery,
+            DriveEnergyConsumption driveEnergyConsumption,
+            AuxEnergyConsumption auxEnergyConsumption)
     {
-        this.id = id;
-        this.name = name;
-        this.link = link;
-        this.capacity = capacity;
+        super(vehicle.getId(), vehicle.getStartLink(), vehicle.getCapacity(), vehicle.getT0(),
+                vehicle.getT1());
+
+        this.battery = battery;
+        this.driveEnergyConsumption = driveEnergyConsumption;
+        this.auxEnergyConsumption = auxEnergyConsumption;
     }
 
 
     @Override
-    public Id<TaxiRank> getId()
+    public Battery getBattery()
     {
-        return id;
+        return battery;
     }
 
 
     @Override
-    public Coord getCoord()
+    public DriveEnergyConsumption getDriveEnergyConsumption()
     {
-        return link.getCoord();
+        return driveEnergyConsumption;
     }
 
 
-    public String getName()
+    @Override
+    public AuxEnergyConsumption getAuxEnergyConsumption()
     {
-        return name;
-    }
-
-
-    public Link getLink()
-    {
-        return link;
-    }
-
-
-    public boolean addTaxi(Vehicle veh)
-    {
-        if (taxis.size() == this.capacity) {
-            throw new IllegalStateException();
-        }
-
-        taxis.put(veh.getId(), veh);
-        return true;
-    }
-
-
-    public void removeTaxi(Vehicle veh)
-    {
-        taxis.remove(veh.getId());
-    }
-
-
-    public boolean hasCapacity()
-    {
-        return taxis.size() < this.capacity;
+        return auxEnergyConsumption;
     }
 }

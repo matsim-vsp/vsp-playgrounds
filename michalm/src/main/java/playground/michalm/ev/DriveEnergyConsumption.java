@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,33 +17,16 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer;
+package playground.michalm.ev;
 
-import org.matsim.contrib.dvrp.data.Vehicles;
-
-import playground.michalm.taxi.data.*;
-import playground.michalm.taxi.data.TaxiRequest.TaxiRequestStatus;
-import playground.michalm.taxi.scheduler.TaxiSchedulerUtils;
+import org.matsim.api.core.v01.network.Link;
 
 
-public class TaxiOptimizationValidation
+/**
+ * Net energy taken from the battery to propel the vehicle, i.e. consumed by the motor minus
+ * effectively regenerated (returned back to the battery).
+ */
+public interface DriveEnergyConsumption
 {
-    public static void assertNoUnplannedRequestsWhenIdleVehicles(
-            TaxiOptimizerConfiguration optimConfig)
-    {
-        ETaxiData taxiData = (ETaxiData)optimConfig.context.getVrpData();
-
-        if (Vehicles.countVehicles(taxiData.getVehicles(),
-                TaxiSchedulerUtils.createIsIdle(optimConfig.scheduler)) == 0) {
-            return;//OK
-        }
-
-        if (TaxiRequests.countRequestsWithStatus(taxiData.getTaxiRequests(),
-                TaxiRequestStatus.UNPLANNED) == 0) {
-            return; //OK
-        }
-
-        //idle vehicles and unplanned requests
-        throw new IllegalStateException();
-    }
+    double calcEnergy(Link link, double travelTime);
 }

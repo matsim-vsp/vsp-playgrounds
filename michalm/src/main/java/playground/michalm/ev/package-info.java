@@ -17,80 +17,20 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data;
+package playground.michalm.ev;
 
-import java.util.*;
-
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.Vehicle;
-
-
-public class TaxiRank
-    implements BasicLocation<TaxiRank>
-{
-    private final Id<TaxiRank> id;
-    private final String name;
-    private final Link link;
-    private final int capacity;
-
-    private final Map<Id<Vehicle>, Vehicle> taxis = new HashMap<>();
-
-
-    public TaxiRank(Id<TaxiRank> id, String name, Link link, int capacity)
-    {
-        this.id = id;
-        this.name = name;
-        this.link = link;
-        this.capacity = capacity;
-    }
-
-
-    @Override
-    public Id<TaxiRank> getId()
-    {
-        return id;
-    }
-
-
-    @Override
-    public Coord getCoord()
-    {
-        return link.getCoord();
-    }
-
-
-    public String getName()
-    {
-        return name;
-    }
-
-
-    public Link getLink()
-    {
-        return link;
-    }
-
-
-    public boolean addTaxi(Vehicle veh)
-    {
-        if (taxis.size() == this.capacity) {
-            throw new IllegalStateException();
-        }
-
-        taxis.put(veh.getId(), veh);
-        return true;
-    }
-
-
-    public void removeTaxi(Vehicle veh)
-    {
-        taxis.remove(veh.getId());
-    }
-
-
-    public boolean hasCapacity()
-    {
-        return taxis.size() < this.capacity;
-    }
-}
+/**
+ * All values used in this package use SI base and derived units. In particular:
+ * <ul>
+ * <li>distance - meter [m]</li>
+ * <li>time - second [s]</li>
+ * <li>energy - joule [J]</li>
+ * <li>power - watt [W]</li>
+ * </ul>
+ * <p>
+ * Particularly, use of [kWh] and [s] generates confusion and leads to bugs, as 1 kWh = 1 J * 1 s *
+ * 3,600,000
+ * <p>
+ * Consequently, energy consumption is measured in [J/m], instead of [kWh/100km] or [Wh/km], as
+ * usually in transport.
+ */

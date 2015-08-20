@@ -17,66 +17,30 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data;
+package playground.michalm.ev;
 
-import java.util.*;
+import org.matsim.api.core.v01.BasicLocation;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.facilities.Facility;
 
-import org.matsim.contrib.dvrp.data.VrpDataImpl;
-import org.matsim.contrib.dvrp.extensions.electric.*;
 
-
-public class TaxiData
-    extends VrpDataImpl
-    implements ElectricVrpData
+public interface Charger
+    extends BasicLocation<Charger>
 {
-    private final List<TaxiRank> taxiRanks = new ArrayList<>();
-    private final List<Charger> chargers = new ArrayList<>();
-
-    private final List<TaxiRank> unmodifiableTaxiRanks = Collections.unmodifiableList(taxiRanks);
-    private final List<Charger> unmodifiableChargers = Collections.unmodifiableList(chargers);
-
-
-    public List<TaxiRank> getTaxiRanks()
-    {
-        return unmodifiableTaxiRanks;
-    }
+    ChargingLogic getLogic();
+    
+    
+    Link getLink();
 
 
-    public List<Charger> getChargers()
-    {
-        return unmodifiableChargers;
-    }
+    /**
+     * @return max power at a single plug, in [W]
+     */
+    double getPower();
 
 
-    public List<ElectricVehicle> getElectricVehicles()
-    {
-        return convertList(getVehicles());
-    }
-
-
-    public List<TaxiRequest> getTaxiRequests()
-    {
-        return convertList(getRequests());
-    }
-
-
-    public void addTaxiRank(TaxiRank taxiRank)
-    {
-        taxiRanks.add(taxiRank);
-    }
-
-
-    @Override
-    public void addCharger(Charger charger)
-    {
-        chargers.add(charger);
-    }
-
-
-    //casts List of supertype S to List of type T
-    @SuppressWarnings("unchecked")
-    private static <S, T> List<T> convertList(List<S> list)
-    {
-        return (List<T>)list;
-    }
+    /**
+     * @return capacity == number of plugs
+     */
+    int getCapacity();
 }

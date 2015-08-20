@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,80 +17,63 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data;
+package playground.michalm.ev;
 
-import java.util.*;
-
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.Vehicle;
-
-
-public class TaxiRank
-    implements BasicLocation<TaxiRank>
+public class BatteryImpl
+    implements Battery
 {
-    private final Id<TaxiRank> id;
-    private final String name;
-    private final Link link;
-    private final int capacity;
-
-    private final Map<Id<Vehicle>, Vehicle> taxis = new HashMap<>();
+    private final double capacity;
+    private final double initialSoc;
+    private double soc;
 
 
-    public TaxiRank(Id<TaxiRank> id, String name, Link link, int capacity)
+    public BatteryImpl(double capacity, double initialSoc)
     {
-        this.id = id;
-        this.name = name;
-        this.link = link;
         this.capacity = capacity;
+        this.initialSoc = initialSoc;
+        this.soc = initialSoc;
     }
 
 
     @Override
-    public Id<TaxiRank> getId()
+    public double getCapacity()
     {
-        return id;
+        return capacity;
     }
 
 
     @Override
-    public Coord getCoord()
+    public double getSoc()
     {
-        return link.getCoord();
+        return soc;
     }
 
 
-    public String getName()
+    @Override
+    public void charge(double energy)
     {
-        return name;
+        if (energy < 0 || energy > capacity - soc) {
+            throw new IllegalArgumentException();
+        }
+
+        soc += energy;
     }
 
 
-    public Link getLink()
+    @Override
+    public void discharge(double energy)
     {
-        return link;
-    }
-
-
-    public boolean addTaxi(Vehicle veh)
-    {
-        if (taxis.size() == this.capacity) {
+        if (energy < 0 || energy > soc) {
             throw new IllegalStateException();
         }
 
-        taxis.put(veh.getId(), veh);
-        return true;
+        soc -= energy;
     }
 
 
-    public void removeTaxi(Vehicle veh)
+    @Override
+    public void resetSoc()
     {
-        taxis.remove(veh.getId());
-    }
-
-
-    public boolean hasCapacity()
-    {
-        return taxis.size() < this.capacity;
+        soc = initialSoc;
     }
 }

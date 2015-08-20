@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,39 +17,70 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data;
-
-import java.util.*;
+package playground.michalm.ev;
 
 import org.matsim.api.core.v01.*;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.Vehicle;
 
 
-public class TaxiRank
-    implements BasicLocation<TaxiRank>
+public class ChargerImpl
+    implements Charger
 {
-    private final Id<TaxiRank> id;
-    private final String name;
-    private final Link link;
+    private final Id<Charger> id;
+    private final double power;
     private final int capacity;
+    private final Link link;
 
-    private final Map<Id<Vehicle>, Vehicle> taxis = new HashMap<>();
+    private ChargingLogic logic;
 
 
-    public TaxiRank(Id<TaxiRank> id, String name, Link link, int capacity)
+    public ChargerImpl(Id<Charger> id, double power, int capacity, Link link)
     {
         this.id = id;
-        this.name = name;
-        this.link = link;
+        this.power = power;
         this.capacity = capacity;
+        this.link = link;
     }
 
 
     @Override
-    public Id<TaxiRank> getId()
+    public ChargingLogic getLogic()
+    {
+        return logic;
+    }
+
+
+    public void setLogic(ChargingLogic logic)
+    {
+        this.logic = logic;
+    }
+
+
+    @Override
+    public Id<Charger> getId()
     {
         return id;
+    }
+
+
+    @Override
+    public double getPower()
+    {
+        return power;
+    }
+
+
+    @Override
+    public int getCapacity()
+    {
+        return capacity;
+    }
+
+
+    @Override
+    public Link getLink()
+    {
+        return link;
     }
 
 
@@ -57,40 +88,5 @@ public class TaxiRank
     public Coord getCoord()
     {
         return link.getCoord();
-    }
-
-
-    public String getName()
-    {
-        return name;
-    }
-
-
-    public Link getLink()
-    {
-        return link;
-    }
-
-
-    public boolean addTaxi(Vehicle veh)
-    {
-        if (taxis.size() == this.capacity) {
-            throw new IllegalStateException();
-        }
-
-        taxis.put(veh.getId(), veh);
-        return true;
-    }
-
-
-    public void removeTaxi(Vehicle veh)
-    {
-        taxis.remove(veh.getId());
-    }
-
-
-    public boolean hasCapacity()
-    {
-        return taxis.size() < this.capacity;
     }
 }

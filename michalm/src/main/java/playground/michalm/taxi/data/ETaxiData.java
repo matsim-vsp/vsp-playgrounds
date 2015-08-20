@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -21,76 +21,61 @@ package playground.michalm.taxi.data;
 
 import java.util.*;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.data.VrpDataImpl;
+
+import playground.michalm.ev.*;
 
 
-public class TaxiRank
-    implements BasicLocation<TaxiRank>
+public class ETaxiData
+    extends VrpDataImpl
 {
-    private final Id<TaxiRank> id;
-    private final String name;
-    private final Link link;
-    private final int capacity;
+    private final List<TaxiRank> taxiRanks = new ArrayList<>();
+    private final List<Charger> chargers = new ArrayList<>();
 
-    private final Map<Id<Vehicle>, Vehicle> taxis = new HashMap<>();
+    private final List<TaxiRank> unmodifiableTaxiRanks = Collections.unmodifiableList(taxiRanks);
+    private final List<Charger> unmodifiableChargers = Collections.unmodifiableList(chargers);
 
 
-    public TaxiRank(Id<TaxiRank> id, String name, Link link, int capacity)
+    public List<TaxiRank> getTaxiRanks()
     {
-        this.id = id;
-        this.name = name;
-        this.link = link;
-        this.capacity = capacity;
+        return unmodifiableTaxiRanks;
     }
 
 
-    @Override
-    public Id<TaxiRank> getId()
+    public List<Charger> getChargers()
     {
-        return id;
+        return unmodifiableChargers;
     }
 
 
-    @Override
-    public Coord getCoord()
+    public List<ETaxi> getETaxis()
     {
-        return link.getCoord();
+        return convertList(getVehicles());
     }
 
 
-    public String getName()
+    public List<TaxiRequest> getTaxiRequests()
     {
-        return name;
+        return convertList(getRequests());
     }
 
 
-    public Link getLink()
+    public void addTaxiRank(TaxiRank taxiRank)
     {
-        return link;
+        taxiRanks.add(taxiRank);
     }
 
 
-    public boolean addTaxi(Vehicle veh)
+    public void addCharger(Charger charger)
     {
-        if (taxis.size() == this.capacity) {
-            throw new IllegalStateException();
-        }
-
-        taxis.put(veh.getId(), veh);
-        return true;
+        chargers.add(charger);
     }
 
 
-    public void removeTaxi(Vehicle veh)
+    //casts List of supertype S to List of type T
+    @SuppressWarnings("unchecked")
+    private static <S, T> List<T> convertList(List<S> list)
     {
-        taxis.remove(veh.getId());
-    }
-
-
-    public boolean hasCapacity()
-    {
-        return taxis.size() < this.capacity;
+        return (List<T>)list;
     }
 }
