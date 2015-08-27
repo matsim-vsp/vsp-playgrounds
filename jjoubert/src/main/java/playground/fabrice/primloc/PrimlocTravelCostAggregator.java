@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2008 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,24 +17,10 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.johannes.gsv.synPop.io;
+package playground.fabrice.primloc;
 
-/**
- * @author johannes
- *
- */
-interface Constants {
 
-	static final String PERSONS_TAG = "persons";
-	
-	static final String PERSON_TAG = "person";
-	
-	static final String ID_KEY = "id";
-	
-	static final String PLAN_TAG = "plan";
-	
-	static final String ACTIVITY_TAG = "activity";
-	
-	static final String LEG_TAG = "leg";
-	
+
+public interface PrimlocTravelCostAggregator {
+	double travelCost(Zone i, Zone j);
 }
