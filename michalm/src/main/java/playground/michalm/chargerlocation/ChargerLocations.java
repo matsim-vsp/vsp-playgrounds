@@ -1,10 +1,9 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * ConvertDesiresObjectAttributes.java
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,35 +16,34 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.thibautd.scripts;
 
-import org.matsim.population.Desires;
-import org.matsim.utils.objectattributes.ObjectAttributes;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
-import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
+package playground.michalm.chargerlocation;
 
-import playground.thibautd.utils.DesiresConverter;
-import playground.thibautd.utils.DesiresXmlLikeConverter;
+import java.util.*;
 
-/**
- * @author thibautd
- */
-public class ConvertDesiresObjectAttributes {
-	public static void main(final String[] args) {
-		final String inputFile = args[ 0 ];
-		final String outputFile = args[ 1  ];
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
 
-		final ObjectAttributes attributes = new ObjectAttributes();
-		final ObjectAttributesXmlReader reader =
-			new ObjectAttributesXmlReader( attributes );
-		reader.putAttributeConverter( Desires.class , new DesiresXmlLikeConverter() );
-		reader.parse( inputFile );
+import playground.michalm.zone.Zone;
 
-		final ObjectAttributesXmlWriter writer =
-			new ObjectAttributesXmlWriter( attributes );
-		writer.putAttributeConverter( Desires.class , new DesiresConverter() );
-		writer.writeFile( outputFile );
 
-	}
+public class ChargerLocations
+{
+    public static ChargerLocation createLocation(long id, double x, double y, double power)
+    {
+        return new ChargerLocation(Id.create(id, ChargerLocation.class), new Coord(x, y),
+                power);
+    }
+
+
+    public static List<ChargerLocation> createLocationsInZones(Iterable<Zone> zones, double power)
+    {
+        List<ChargerLocation> locations = new ArrayList<>();
+        for (Zone z : zones) {
+            locations.add(new ChargerLocation(Id.create(z.getId(), ChargerLocation.class),
+                    z.getCoord(), power));
+        }
+
+        return locations;
+    }
 }
-

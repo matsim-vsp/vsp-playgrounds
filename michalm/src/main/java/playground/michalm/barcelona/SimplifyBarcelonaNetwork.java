@@ -17,43 +17,34 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.chargerlocation;
+package playground.michalm.barcelona;
 
-import org.matsim.api.core.v01.*;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.network.MatsimNetworkReader;
+import org.matsim.core.scenario.ScenarioUtils;
 
+import com.google.common.collect.Sets;
 
-public class ChargingStation
-    implements BasicLocation<ChargingStation>
+import playground.andreas.utils.net.NetworkSimplifier;
+
+public class SimplifyBarcelonaNetwork
 {
-    private final Id<ChargingStation> id;
-    private final Coord coord;
-    private final double power;
-
-
-    public ChargingStation(Id<ChargingStation> id, Coord coord, double power)
+    public static void main(String[] args)
     {
-        this.id = id;
-        this.coord = coord;
-        this.power = power;
-    }
+        String dir = "d:/PP-rad/Barcelona/data/network/";
+        String networkFile = dir + "barcelona_network.xml";
+        String simplifiedNetworkFile = dir + "barcelona_simplified_network.xml";
 
+        Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+        new MatsimNetworkReader(scenario).readFile(networkFile);
 
-    @Override
-    public Id<ChargingStation> getId()
-    {
-        return id;
-    }
+        NetworkSimplifier simplifier = new NetworkSimplifier();
+        simplifier.setNodesToMerge(Sets.newHashSet(4, 5));
+        simplifier.run(scenario.getNetwork());
+        simplifier.run(scenario.getNetwork());//2nd run
 
-
-    @Override
-    public Coord getCoord()
-    {
-        return coord;
-    }
-
-
-    public double getPower()
-    {
-        return power;
+        new NetworkWriter(scenario.getNetwork()).write(simplifiedNetworkFile);
     }
 }
