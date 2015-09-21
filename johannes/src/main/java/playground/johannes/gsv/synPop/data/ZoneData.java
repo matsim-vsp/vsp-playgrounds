@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,       *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,32 +16,29 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.johannes.gsv.synPop.data;
 
-package playground.juliakern.distribution.withScoringFast;
+import playground.johannes.gsv.zones.ZoneCollection;
 
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.config.Config;
-import org.matsim.core.scoring.ScoringFunction;
-import org.matsim.core.scoring.ScoringFunctionFactory;
-import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ResponsibilityScoringFunctionFactory implements
-		ScoringFunctionFactory {
+/**
+ * @author jillenberger
+ */
+public class ZoneData {
 
-	private CharyparNagelScoringFunctionFactory delegate;
-	private EmissionControlerListener ecl;
-	
-	public ResponsibilityScoringFunctionFactory(Config config, Network network, EmissionControlerListener ecl) {
-		this.delegate = new CharyparNagelScoringFunctionFactory(config.planCalcScore(), config.scenario(), network);
-		this.ecl = ecl;
-		// TODO Auto-generated constructor stub
-	}
+    private final Map<String, ZoneCollection> layers;
 
-	@Override
-	public ScoringFunction createNewScoringFunction(Person person) {
-		// TODO Auto-generated method stub
-		return new ResponsiblityScoringFunction(person.getSelectedPlan(), delegate.createNewScoringFunction(person), ecl);
-	}
+    public ZoneData() {
+        layers = new HashMap<>();
+    }
 
+    public ZoneCollection getLayer(String name) {
+        return layers.get(name);
+    }
+
+    ZoneCollection setLayer(ZoneCollection zones, String name) {
+        return layers.put(name, zones);
+    }
 }
