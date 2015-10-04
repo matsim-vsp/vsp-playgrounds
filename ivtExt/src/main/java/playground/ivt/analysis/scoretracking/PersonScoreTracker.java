@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2015 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,46 +16,29 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.ivt.analysis.scoretracking;
 
-package playground.johannes.gsv.counts;
+import org.matsim.core.scoring.SumScoringFunction.BasicScoring;
 
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.counts.Count;
-import org.matsim.counts.Counts;
-import org.matsim.counts.CountsReaderMatsimV1;
+import java.util.*;
 
 /**
- * @author johannes
- *
+ * @author thibautd
  */
-public class CountsCompare {
+class PersonScoreTracker {
+	private final Map<String, BasicScoring> scoringElements = new HashMap<>();
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Counts<Link> countsOld = new Counts();
-		CountsReaderMatsimV1 reader = new CountsReaderMatsimV1(countsOld);
-		reader.parse("/home/johannes/gsv/counts/counts.2009.net20140909.5.24h.xml");
-		
-		Counts<Link> countsNew = new Counts();
-		reader = new CountsReaderMatsimV1(countsNew);
-		reader.parse("/home/johannes/gsv/counts/counts.2013.net20140909.5.24h.xml");
-
-		double errsumAbs = 0;
-		double errsum = 0;
-		double cnt = 0;
-		for(Count countOld : countsOld.getCounts().values()) {
-			Count countNew = countsNew.getCount(countOld.getLocId());
-			if(countNew != null) {
-				double err = (countNew.getVolume(1).getValue() - countOld.getVolume(1).getValue()) / countOld.getVolume(1).getValue();
-				errsumAbs += Math.abs(err);
-				errsum += err;
-				cnt++;
-			}
-		}
-		
-		System.out.println("Average error = " + errsum/cnt);
+	public void addScoringFunction( final String name, final BasicScoring scoring ) {
+		this.scoringElements.put(name, scoring);
 	}
 
+	public Map<String, Double> getDecomposedScoring() {
+		final Map<String,Double> map = new LinkedHashMap<>();
+
+		for (Map.Entry<String,BasicScoring> s :scoringElements.entrySet()) {
+			map.put( s.getKey() , s.getValue().getScore() );
+		}
+
+		return map;
+	}
 }

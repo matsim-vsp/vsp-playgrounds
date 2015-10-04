@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2015 by the members listed in the COPYING,        *
+ * copyright       : (C) 2014 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,45 +17,44 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.johannes.gsv.counts;
+package playground.johannes.synpop.gis;
 
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.counts.Count;
-import org.matsim.counts.Counts;
-import org.matsim.counts.CountsReaderMatsimV1;
+import com.vividsolutions.jts.geom.Geometry;
+import org.opengis.feature.Property;
+import org.opengis.feature.simple.SimpleFeature;
+import playground.johannes.socialnetworks.gis.io.FeatureSHP;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author johannes
  *
  */
-public class CountsCompare {
+public class ZoneEsriShapeIO {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Counts<Link> countsOld = new Counts();
-		CountsReaderMatsimV1 reader = new CountsReaderMatsimV1(countsOld);
-		reader.parse("/home/johannes/gsv/counts/counts.2009.net20140909.5.24h.xml");
+	public static ZoneCollection read(String filename) {
+		ZoneCollection zones = new ZoneCollection();
+		Set<Zone> zoneSet = new HashSet<>();
 		
-		Counts<Link> countsNew = new Counts();
-		reader = new CountsReaderMatsimV1(countsNew);
-		reader.parse("/home/johannes/gsv/counts/counts.2013.net20140909.5.24h.xml");
-
-		double errsumAbs = 0;
-		double errsum = 0;
-		double cnt = 0;
-		for(Count countOld : countsOld.getCounts().values()) {
-			Count countNew = countsNew.getCount(countOld.getLocId());
-			if(countNew != null) {
-				double err = (countNew.getVolume(1).getValue() - countOld.getVolume(1).getValue()) / countOld.getVolume(1).getValue();
-				errsumAbs += Math.abs(err);
-				errsum += err;
-				cnt++;
+		try {
+			for(SimpleFeature feature : FeatureSHP.readFeatures(filename)) {
+				Zone zone = new Zone((Geometry) feature.getDefaultGeometry());
+		
+				for(Property prop : feature.getProperties()) {
+					zone.setAttribute(prop.getName().getLocalPart(), prop.getValue().toString());
+					
+				}
+				
+				zoneSet.add(zone);
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
-		System.out.println("Average error = " + errsum/cnt);
+		zones.addAll(zoneSet);
+		
+		return zones;
 	}
-
 }

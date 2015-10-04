@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,47 +16,17 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.ivt.analysis.scoretracking;
 
-package playground.johannes.gsv.zones.io;
-
-import com.vividsolutions.jts.geom.Geometry;
-import org.opengis.feature.Property;
-import org.opengis.feature.simple.SimpleFeature;
-import playground.johannes.socialnetworks.gis.io.FeatureSHP;
-import playground.johannes.synpop.gis.Zone;
-import playground.johannes.synpop.gis.ZoneCollection;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import org.matsim.core.controler.AbstractModule;
 
 /**
- * @author johannes
- *
+ * @author thibautd
  */
-public class ZoneCollectionSHPReader {
-
-	public static ZoneCollection read(String filename) {
-		ZoneCollection zones = new ZoneCollection();
-		Set<Zone> zoneSet = new HashSet<>();
-		
-		try {
-			for(SimpleFeature feature : FeatureSHP.readFeatures(filename)) {
-				Zone zone = new Zone((Geometry) feature.getDefaultGeometry());
-		
-				for(Property prop : feature.getProperties()) {
-					zone.setAttribute(prop.getName().getLocalPart(), prop.getValue().toString());
-					
-				}
-				
-				zoneSet.add(zone);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		zones.addAll(zoneSet);
-		
-		return zones;
+public class ScoreTrackingModule extends AbstractModule {
+	@Override
+	public void install() {
+		bind( ScoreTrackingListener.class );
+		addControlerListenerBinding().to( ScoreTrackingListener.class );
 	}
 }
