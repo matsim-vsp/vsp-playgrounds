@@ -1,4 +1,4 @@
-package playground.kai.convert;
+package playground.benjamin.scenarios.santiago.gtfs;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;

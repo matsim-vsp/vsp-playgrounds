@@ -1,4 +1,4 @@
-package playground.dhosse.cl.population;
+package playground.benjamin.scenarios.santiago.population;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,9 +31,6 @@ import org.matsim.core.utils.gis.PointFeatureFactory;
 import org.matsim.core.utils.gis.ShapeFileWriter;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
-
-import playground.agarwalamit.analysis.activity.ActivityType2ActDurationsAnalyzer;
-import playground.dhosse.cl.Constants;
 
 public class Freight {
 

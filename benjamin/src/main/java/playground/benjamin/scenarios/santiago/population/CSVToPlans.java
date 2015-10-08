@@ -1,4 +1,4 @@
-package playground.dhosse.cl.population;
+package playground.benjamin.scenarios.santiago.population;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,7 +38,7 @@ import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.dhosse.cl.Constants;
+import playground.benjamin.scenarios.santiago.Constants;
 
 import com.vividsolutions.jts.geom.Geometry;
 

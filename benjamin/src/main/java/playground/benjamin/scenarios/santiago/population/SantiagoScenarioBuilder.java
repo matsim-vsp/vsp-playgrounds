@@ -1,4 +1,4 @@
-package playground.dhosse.cl.population;
+package playground.benjamin.scenarios.santiago.population;
 
 import java.io.File;
 import java.util.HashMap;
@@ -66,10 +66,8 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
 
-import playground.agarwalamit.munich.inputs.AddingActivitiesInPlans;
-import playground.dhosse.cl.Constants;
-import playground.dhosse.cl.Constants.SubpopulationName;
-import playground.dhosse.cl.Constants.SubpopulationValues;
+import playground.benjamin.scenarios.santiago.Constants;
+import playground.benjamin.scenarios.santiago.Constants.SubpopulationName;
 
 public class SantiagoScenarioBuilder {
 

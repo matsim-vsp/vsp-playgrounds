@@ -1,4 +1,4 @@
-package playground.dhosse.cl.network;
+package playground.benjamin.scenarios.santiago.network;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package playground.dhosse.cl.analysis;
+package playground.benjamin.scenarios.santiago.analysis;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,8 +23,8 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 
-import playground.dhosse.cl.Constants.SubpopulationName;
-import playground.dhosse.cl.Constants.SubpopulationValues;
+import playground.benjamin.scenarios.santiago.Constants.SubpopulationName;
+import playground.benjamin.scenarios.santiago.Constants.SubpopulationValues;
 
 
 public class PopulationAnalysis {

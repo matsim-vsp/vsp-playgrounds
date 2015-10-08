@@ -1,4 +1,4 @@
-package playground.dhosse.cl.roadpricing;
+package playground.benjamin.scenarios.santiago.roadpricing;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,15 +12,12 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
-import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingScheme;
 import org.matsim.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.roadpricing.RoadPricingWriterXMLv1;
 
-import playground.dhosse.cl.counts.CreateCountingStations;
+import playground.benjamin.scenarios.santiago.counts.CreateCountingStations;
 
 public class CreateRoadPricingScheme {
 

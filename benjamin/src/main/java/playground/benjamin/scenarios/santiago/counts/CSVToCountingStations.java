@@ -1,4 +1,4 @@
-package playground.dhosse.cl.counts;
+package playground.benjamin.scenarios.santiago.counts;
 
 import java.io.BufferedReader;
 import java.io.IOException;
