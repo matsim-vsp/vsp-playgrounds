@@ -1,4 +1,4 @@
-package playground.dhosse.cl.run;
+package playground.benjamin.scenarios.santiago.run;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;

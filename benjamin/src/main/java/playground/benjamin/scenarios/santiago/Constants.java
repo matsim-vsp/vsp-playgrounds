@@ -1,4 +1,4 @@
-package playground.dhosse.cl;
+package playground.benjamin.scenarios.santiago;
 
 public final class Constants {
 

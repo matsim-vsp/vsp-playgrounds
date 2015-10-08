@@ -1,4 +1,4 @@
-package playground.kai.convert;
+package playground.benjamin.scenarios.santiago.gtfs;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.NetworkWriter;
@@ -20,7 +20,7 @@ public class SantiagoGtfsConvert {
 		Config config = ConfigUtils.createConfig();
 		Scenario scenario0 = ScenarioUtils.createScenario(config);
 		// ---
-		final String filepath0 = "/Users/nagel/shared-svn/studies/countries/cl/santiago_pt_demand_matrix/gtfs_201306";
+		final String filepath0 = "../../../shared-svn/studies/countries/cl/santiago_pt_demand_matrix/gtfs_201306";
 		// ---
 		GtfsConverter converter = new GtfsConverter(filepath0, scenario0, transform0 ) ;
 		converter.convert() ;

@@ -1,4 +1,4 @@
-package playground.dhosse.cl.population;
+package playground.benjamin.scenarios.santiago.population;
 
 public class FreightTrip {
 	
