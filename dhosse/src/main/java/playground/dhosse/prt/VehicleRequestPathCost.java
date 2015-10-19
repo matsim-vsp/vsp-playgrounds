@@ -17,7 +17,9 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.vehreqpath;
+package playground.dhosse.prt;
+
+import playground.michalm.taxi.vehreqpath.VehicleRequestPath;
 
 public interface VehicleRequestPathCost
 {
