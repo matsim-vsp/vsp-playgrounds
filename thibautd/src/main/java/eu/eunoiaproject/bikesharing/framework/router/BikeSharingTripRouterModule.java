@@ -28,39 +28,36 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.router.DefaultTripRouterFactoryImpl;
-import org.matsim.core.router.RoutingContext;
-import org.matsim.core.router.RoutingModule;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.TripRouter;
-import org.matsim.core.router.TripRouterFactory;
+import org.matsim.core.router.*;
 import org.matsim.core.scoring.functions.CharyparNagelScoringParameters;
 import org.matsim.facilities.Facility;
 
 import eu.eunoiaproject.bikesharing.framework.BikeSharingConstants;
 import eu.eunoiaproject.bikesharing.framework.scenario.BikeSharingConfigGroup;
-import eu.eunoiaproject.bikesharing.framework.scenario.BikeSharingFacilities;
 import playground.thibautd.router.multimodal.LinkSlopeScorer;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Builds a standard trip router factory for bike sharing simulations.
  * @author thibautd
  */
-public class BikeSharingTripRouterFactory implements TripRouterFactory {
+public class BikeSharingTripRouterModule extends AbstractModule {
 	
 	private boolean routePtUsingSchedule = false;
 
-	private final TripRouterFactory delegate;
+	private final Provider<TripRouter> delegate;
 	private final Scenario scenario;
 	private final LinkSlopeScorer slopeScorer;
 
 	private final TransitMultiModalAccessRoutingModule.RoutingData data;
 
-	public BikeSharingTripRouterFactory(
+	public BikeSharingTripRouterModule(
 			final TransitMultiModalAccessRoutingModule.RoutingData routingData,
-			final TripRouterFactory delegate,
+			final Provider<TripRouter> delegate,
 			final Scenario scenario,
 			final LinkSlopeScorer slopeScorer) {
 		this.delegate = delegate;
@@ -69,8 +66,8 @@ public class BikeSharingTripRouterFactory implements TripRouterFactory {
 		this.slopeScorer = slopeScorer;
 	}
 
-	public BikeSharingTripRouterFactory(
-			final TripRouterFactory delegate,
+	public BikeSharingTripRouterModule(
+			final Provider<TripRouter> delegate,
 			final Scenario scenario,
 			final LinkSlopeScorer slopeScorer) {
 		this( scenario.getConfig().transit().isUseTransit() ?
@@ -81,39 +78,59 @@ public class BikeSharingTripRouterFactory implements TripRouterFactory {
 			slopeScorer );
 	}
 
-	public BikeSharingTripRouterFactory(
+	public BikeSharingTripRouterModule(
 			final TransitMultiModalAccessRoutingModule.RoutingData routingData,
 			final Scenario scenario,
 			final LinkSlopeScorer slopeScorer) {
 		this( routingData,
-				DefaultTripRouterFactoryImpl.createRichTripRouterFactoryImpl(scenario) ,
+				TripRouterFactoryBuilderWithDefaults.createDefaultTripRouterFactoryImpl(scenario),
 				scenario,
 				slopeScorer );
 	}
 
-	public BikeSharingTripRouterFactory(
+	public BikeSharingTripRouterModule(
 			final Scenario scenario,
 			final LinkSlopeScorer slopeScorer) {
-		this( DefaultTripRouterFactoryImpl.createRichTripRouterFactoryImpl(scenario) ,
+		this(TripRouterFactoryBuilderWithDefaults.createDefaultTripRouterFactoryImpl(scenario),
 				scenario,
 				slopeScorer );
 	}
 
 	@Override
-	public TripRouter instantiateAndConfigureTripRouter(final RoutingContext iterationContext) {
-		final TripRouter router = delegate.instantiateAndConfigureTripRouter(iterationContext);
-
-		final BikeSharingConfigGroup configGroup = (BikeSharingConfigGroup)
-			scenario.getConfig().getModule( BikeSharingConfigGroup.GROUP_NAME );
-		router.setRoutingModule(
-				BikeSharingConstants.MODE,
-				new BikeSharingRoutingModule(
-					MatsimRandom.getLocalInstance(),
-					(BikeSharingFacilities) scenario.getScenarioElement( BikeSharingFacilities.ELEMENT_NAME ),
-					configGroup.getSearchRadius(),
-					router) );
+	public void install() {
+		addRoutingModuleBinding( BikeSharingConstants.MODE ).to(BikeSharingRoutingModule.class);
 
 		if ( routePtUsingSchedule || scenario.getConfig().transit().isUseTransit() ) {
+			addRoutingModuleBinding( TransportMode.pt ).toProvider( InitialNodePtProvider.class );
+		}
+
+		bind( MainModeIdentifier.class ).toInstance(
+				new MainModeIdentifierForMultiModalAccessPt(
+					new BikeSharingModeIdentifier(
+						 new MainModeIdentifierImpl() ) ) );
+	}
+
+	private boolean contains(
+			final String[] modes,
+			final String mode) {
+		for ( String m : modes ) if ( mode.equals( m ) ) return true;
+		return false;
+	}
+
+	public void setRoutePtUsingSchedule( boolean routePtUsingSchedule ) {
+		this.routePtUsingSchedule = routePtUsingSchedule;
+	}
+
+	private class InitialNodePtProvider implements Provider<RoutingModule> {
+		private final RoutingModule bsRouting;
+
+		@Inject
+		private InitialNodePtProvider(RoutingModule bsRouting) {
+			this.bsRouting = bsRouting;
+		}
+
+		@Override
+		public RoutingModule get() {
 			// XXX should be person-dependent
 			final CharyparNagelScoringParameters scoringParams =
 					CharyparNagelScoringParameters.getBuilder(
@@ -121,21 +138,17 @@ public class BikeSharingTripRouterFactory implements TripRouterFactory {
 							scenario.getConfig().planCalcScore().getScoringParameters( null ),
 							scenario.getConfig().scenario()).create();
 			final Collection<InitialNodeRouter> initialNodeRouters = new ArrayList<InitialNodeRouter>( 2 );
-			initialNodeRouters.add( 
+			initialNodeRouters.add(
 					new InitialNodeRouter(
-							new RoutingModuleProxy(
-								TransportMode.walk,
-								router ),
+							bsRouting,
 							scenario.getConfig().transitRouter().getSearchRadius(),
 							1,
 							scoringParams ) );
 			if ( contains( scenario.getConfig().subtourModeChoice().getModes() , BikeSharingConstants.MODE ) ) {
 				initialNodeRouters.add(
 						new InitialNodeRouter(
-								new RoutingModuleProxy(
-									BikeSharingConstants.MODE,
-									router ),
-								configGroup.getPtSearchRadius(),
+								bsRouting,
+								( (BikeSharingConfigGroup) scenario.getConfig().getModule( BikeSharingConfigGroup.GROUP_NAME ) ).getPtSearchRadius(),
 								3, // there is randomness: keep the "best" of a few draws
 								scoringParams ) {
 							@Override
@@ -153,63 +166,11 @@ public class BikeSharingTripRouterFactory implements TripRouterFactory {
 							}
 						});
 			}
-			router.setRoutingModule(
-					TransportMode.pt,
-					new TransitMultiModalAccessRoutingModule(
+
+			return	new TransitMultiModalAccessRoutingModule(
 							0.75,
 							data,
-							initialNodeRouters ) );
-		}
-
-		router.setMainModeIdentifier(
-				new MainModeIdentifierForMultiModalAccessPt(
-					new BikeSharingModeIdentifier(
-						router.getMainModeIdentifier() )) );
-
-		return router;
-	}
-
-	private boolean contains(
-			final String[] modes,
-			final String mode) {
-		for ( String m : modes ) if ( mode.equals( m ) ) return true;
-		return false;
-	}
-
-	public void setRoutePtUsingSchedule( boolean routePtUsingSchedule ) {
-		this.routePtUsingSchedule = routePtUsingSchedule;
-	}
-
-	// not sure this really corresponds to the "proxy" pattern...
-	// the idea it  to always get the last added routing module,
-	// to avoid problems with "piped" factories.
-	private static class RoutingModuleProxy implements RoutingModule {
-		final String mode;
-		final TripRouter router;
-
-		public RoutingModuleProxy(
-				final String mode,
-				final TripRouter router ) {
-			this.mode = mode;
-			this.router = router;
-		}
-
-		@Override
-		public List<? extends PlanElement> calcRoute(
-				final Facility fromFacility,
-				final Facility toFacility,
-				final double departureTime,
-				final Person person ) {
-			return router.getRoutingModule( mode ).calcRoute(
-					fromFacility,
-					toFacility,
-					departureTime,
-					person );
-		}
-
-		@Override
-		public StageActivityTypes getStageActivityTypes() {
-			return router.getRoutingModule( mode ).getStageActivityTypes();
+							initialNodeRouters );
 		}
 	}
 }

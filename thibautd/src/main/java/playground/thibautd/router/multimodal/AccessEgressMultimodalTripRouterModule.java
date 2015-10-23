@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -33,12 +34,12 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.multimodal.config.MultiModalConfigGroup;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.network.NetworkImpl;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.population.PersonImpl;
-import org.matsim.core.router.RoutingContext;
+import org.matsim.core.router.RoutingModule;
 import org.matsim.core.router.TripRouter;
-import org.matsim.core.router.TripRouterFactory;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.FastAStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
@@ -53,48 +54,64 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.core.utils.collections.MapUtils;
 import playground.thibautd.utils.SoftCache;
 
+import javax.inject.Provider;
+
 /**
  * @author thibautd
  */
-public class AccessEgressMultimodalTripRouterFactory implements TripRouterFactory {
+public class AccessEgressMultimodalTripRouterModule extends AbstractModule {
 	private final Scenario scenario;
 	private final TravelDisutilityFactory travelDisutilityFactory;
 	private final Map<String, TravelTime> multimodalTravelTimes;
 	private final Map<String, TravelDisutilityFactory> disutilityFactories = new HashMap< >();
-	private final TripRouterFactory delegateFactory;
-	
+
 	private final Map<String, Network> multimodalSubNetworks = new HashMap<String, Network>();
 	private final Map<String, LeastCostPathCalculatorFactory> multimodalFactories = new HashMap<String, LeastCostPathCalculatorFactory>();
 	private final ConcurrentMap<String, SoftCache<Tuple<Node, Node>, Path>> caches = new ConcurrentHashMap<String, SoftCache<Tuple<Node, Node>, Path>>();
-	
-	public AccessEgressMultimodalTripRouterFactory(
+
+	public AccessEgressMultimodalTripRouterModule(
 			final Scenario scenario,
 			final Map<String, TravelTime> multimodalTravelTimes,
-			final TravelDisutilityFactory travelDisutilityFactory,
-			final TripRouterFactory delegateFactory) {
+			final TravelDisutilityFactory travelDisutilityFactory) {
 		this.scenario = scenario;
 		this.multimodalTravelTimes = multimodalTravelTimes;
 		this.travelDisutilityFactory = travelDisutilityFactory;
-		this.delegateFactory = delegateFactory;
 	}
 	
 	@Override
-	public TripRouter instantiateAndConfigureTripRouter(RoutingContext routingContext) {
-		final TripRouter instance = this.delegateFactory.instantiateAndConfigureTripRouter(routingContext);
-		
+	public void install() {
 		final Network network = this.scenario.getNetwork();
 
         final MultiModalConfigGroup multiModalConfigGroup = (MultiModalConfigGroup) scenario.getConfig().getModule(MultiModalConfigGroup.GROUP_NAME);
         final Set<String> simulatedModes = CollectionUtils.stringToSet(multiModalConfigGroup.getSimulatedModes());
 		for (String mode : simulatedModes) {
-			
-			final TravelTime travelTime = this.multimodalTravelTimes.get(mode);
+			addRoutingModuleBinding( mode )
+					.toProvider(
+							new AccessEgressNetworkBasedTeleportationRoutingModuleProvider(
+								mode,
+								network ) );
+		}
+	}
+
+	private class AccessEgressNetworkBasedTeleportationRoutingModuleProvider implements Provider<RoutingModule> {
+		private final String mode;
+		private final Network network;
+
+		private AccessEgressNetworkBasedTeleportationRoutingModuleProvider(String mode, Network network) {
+			this.mode = mode;
+			this.network = network;
+		}
+
+		@Override
+		public RoutingModule get() {
+
+			final TravelTime travelTime = multimodalTravelTimes.get(mode);
 			if (travelTime == null) {
 				throw new RuntimeException("No travel time object was found for mode " + mode + "! Aborting.");
 			}
-			
+
 			final Network subNetwork = getSubnetwork(network, mode);
-			
+
 			/*
 			 * We cannot use the travel disutility object from the routingContext since it
 			 * has not been created for the modes used here.
@@ -151,19 +168,16 @@ public class AccessEgressMultimodalTripRouterFactory implements TripRouterFactor
 								subNetwork,
 								nonPersonnalizableDisutility,
 								travelTime) );
-			final double crowFlyDistanceFactor = scenario.getConfig().plansCalcRoute().getModeRoutingParams().get( mode ).getBeelineDistanceFactor();
+			final double crowFlyDistanceFactor = scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode).getBeelineDistanceFactor();
 			final double crowFlySpeed = scenario.getConfig().plansCalcRoute().getTeleportedModeSpeeds().get( mode );
-			instance.setRoutingModule(
-					mode,
-					new AccessEgressNetworkBasedTeleportationRoutingModule(
-							mode,
-							subNetwork,
-							crowFlyDistanceFactor,
-							crowFlySpeed,
-							routeAlgo) ); 
-		}
 
-		return instance;
+			return new AccessEgressNetworkBasedTeleportationRoutingModule(
+									mode,
+									subNetwork,
+									crowFlyDistanceFactor,
+									crowFlySpeed,
+									routeAlgo );
+		}
 	}
 
 	private SoftCache<Tuple<Node, Node>, Path> getCache(final String mode) {

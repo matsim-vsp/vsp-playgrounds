@@ -1,6 +1,6 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * RunEmissionToolOffline.java
+ * DefaultTravelCostCalculatorFactoryImpl
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
@@ -17,34 +17,36 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.jbischoff.taxi.usability;
+package playground.ikaddoura.router;
 
-import org.matsim.core.controler.Controler;
-import org.matsim.core.router.DefaultTripRouterFactoryImpl;
-import org.matsim.core.router.RoutingContext;
-import org.matsim.core.router.TripRouter;
-import org.matsim.core.router.TripRouterFactory;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
+
+import playground.ikaddoura.analysis.vtts.VTTSHandler;
+
 
 /**
- * @author jbischoff
+ * @author ikaddoura
  *
  */
-public class TaxiTripRouterFactory implements TripRouterFactory {
+public final class VTTSTimeDistanceTravelDisutilityFactory implements TravelDisutilityFactory {
 
-	private Controler controler; 
+	private double sigma = 0. ;
+	private VTTSHandler vttsHandler;
 	
-	public TaxiTripRouterFactory(Controler controler) {
-		this.controler = controler;
+	public VTTSTimeDistanceTravelDisutilityFactory(VTTSHandler vttsHandler) {
+		this.vttsHandler = vttsHandler ;
+	}
+
+	@Override
+	public final TravelDisutility createTravelDisutility(TravelTime timeCalculator, PlanCalcScoreConfigGroup cnScoringGroup) {
+		return new VTTSTimeDistanceTravelDisutility(timeCalculator, cnScoringGroup, this.sigma, vttsHandler);
 	}
 	
-	@Override
-	public TripRouter instantiateAndConfigureTripRouter(
-			RoutingContext routingContext) {
-        final TripRouterFactory delegate = DefaultTripRouterFactoryImpl.createRichTripRouterFactoryImpl(controler.getScenario());
-
-        TripRouter tr = delegate.instantiateAndConfigureTripRouter(routingContext);
-        tr.setRoutingModule("taxi", new TaxiserviceRoutingModule(controler));
-		return tr;
+	public void setSigma ( double val ) {
+		this.sigma = val;
 	}
 
 }

@@ -17,41 +17,33 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.taxibus.scenario;
+package playground.benjamin.scenarios.santiago;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.network.MatsimNetworkReader;
-import org.matsim.core.network.NetworkWriter;
-import org.matsim.core.scenario.ScenarioUtils;
+public final class SantiagoScenarioConstants {
 
-/**
- * @author  jbischoff
- *
- */
-public class ReduceNetworkSpeeds {
-
-	public static void main(String[] args) {
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		String basedir = "C:/Users/Joschka/Documents/shared-svn/projects/vw_rufbus/scenario/input/";
-		new MatsimNetworkReader(scenario).readFile(basedir+"network.xml");
-		for (Link link : scenario.getNetwork().getLinks().values()){
-			double speed = link.getFreespeed();
-			if (speed<10) link.setFreespeed(0.75*speed);
-			else if (speed<20) link.setFreespeed(0.7*speed);
-			else if (speed<30) 
-			{
-				if (link.getNumberOfLanes()<2) link.setFreespeed(0.7*speed);
-				else link.setFreespeed(0.75*speed);
-			}
-			else link.setFreespeed(0.7*speed);
-			
-		}
-		new NetworkWriter(scenario.getNetwork()).write(basedir+"networks.xml");
-		
-		
-		
+	// additional modes
+	public enum Modes{
+							bus,
+							metro,
+							colectivo,
+							school_bus,
+							taxi,
+							motorcycle,
+							train,
+							truck
+						};
+					
+	//Santiago greater area population according to "Informe de Difusión", page 9, tabla 1			
+	public final static int N = 6651700;
+	
+	public final static String toCRS = "EPSG:32719";
+	
+	public final class SubpopulationName {
+		public final static String carUsers = "carUsers";
 	}
-
+	
+	public final class SubpopulationValues {
+		public final static String carAvail = "carAvail";
+	}
+	
 }
