@@ -1,9 +1,10 @@
 /* *********************************************************************** *
  * project: org.matsim.*
+ * EstimDiffContainer.java
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2010 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,41 +17,20 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.johannes.studies.snowball.postprocess;
 
-package playground.johannes.gsv.synPop;
-
-import org.matsim.contrib.common.util.XORShiftRandom;
-import playground.johannes.synpop.data.CommonKeys;
-import playground.johannes.synpop.data.Person;
-import playground.johannes.synpop.processing.PersonTask;
-
-import java.util.Random;
+import gnu.trove.TIntDoubleHashMap;
+import gnu.trove.TIntIntHashMap;
 
 /**
- * @author johannes
+ * @author illenberger
  *
  */
-public class DeleteRandom implements PersonTask {
+public class EstimDiffContainer {
 
-	private final Random random;
+	protected TIntIntHashMap kSum = new TIntIntHashMap();
 	
-	private final double proba;
+	protected TIntDoubleHashMap pSum = new TIntDoubleHashMap();
 	
-	public DeleteRandom(double proba) {
-		this.random = new XORShiftRandom();
-		this.proba = proba;
-	}
-	
-	public DeleteRandom(double proba, Random random) {
-		this.random = random;
-		this.proba = proba;
-	}
-	@Override
-	public void apply(Person person) {
-		if(proba > random.nextDouble()) {
-			person.setAttribute(CommonKeys.DELETE, "true");
-		}
-
-	}
-
+	protected TIntIntHashMap kCount = new TIntIntHashMap();
 }
