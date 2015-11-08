@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2015 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,       *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,43 +16,25 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-
 package playground.johannes.gsv.popsim.analysis;
 
-import playground.johannes.synpop.data.Episode;
-import playground.johannes.synpop.data.Person;
-import playground.johannes.synpop.data.Segment;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
- * @author johannes
+ * @author jillenberger
  */
-public class LegCollector<T> extends AbstractCollector<T, Segment> {
+public class Executor {
 
-    public LegCollector(ValueProvider<T, Segment> provider) {
-        super(provider);
-    }
+    private static java.util.concurrent.ExecutorService service;
 
-    @Override
-    public List<T> collect(Collection<? extends Person> persons) {
-        ArrayList<T> values = new ArrayList<>(persons.size() * 10);
-
-        for (Person p : persons) {
-            for (Episode e : p.getEpisodes()) {
-                for (Segment leg : e.getLegs()) {
-                    if (predicate == null || predicate.test(leg)) {
-                        values.add(provider.get(leg));
-                    }
-                }
-            }
+    private static void init() {
+        if (service == null) {
+            service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         }
-
-        values.trimToSize();
-
-        return values;
     }
 
+    public static Future<?> submit(Runnable task) {
+        return service.submit(task);
+    }
 }

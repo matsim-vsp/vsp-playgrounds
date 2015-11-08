@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2015 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,       *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,43 +16,45 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-
 package playground.johannes.gsv.popsim.analysis;
 
-import playground.johannes.synpop.data.Episode;
-import playground.johannes.synpop.data.Person;
-import playground.johannes.synpop.data.Segment;
+import org.matsim.contrib.common.collections.Composite;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
- * @author johannes
+ * @author jillenberger
  */
-public class LegCollector<T> extends AbstractCollector<T, Segment> {
-
-    public LegCollector(ValueProvider<T, Segment> provider) {
-        super(provider);
-    }
+public class ConcurrentAnalyzerTask<T> extends Composite<AnalyzerTask<T>> implements AnalyzerTask<T> {
 
     @Override
-    public List<T> collect(Collection<? extends Person> persons) {
-        ArrayList<T> values = new ArrayList<>(persons.size() * 10);
+    public void analyze(final T object, final List<StatsContainer> containers) {
+        final List<StatsContainer> concurrentContainers = new CopyOnWriteArrayList<>();
+        List<Future<?>> futures = new ArrayList<>(components.size());
 
-        for (Person p : persons) {
-            for (Episode e : p.getEpisodes()) {
-                for (Segment leg : e.getLegs()) {
-                    if (predicate == null || predicate.test(leg)) {
-                        values.add(provider.get(leg));
-                    }
+        for (final AnalyzerTask<T> task : components) {
+            futures.add(Executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    task.analyze(object, concurrentContainers);
                 }
+            }));
+        }
+
+        for(Future<?> future : futures) {
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
         }
 
-        values.trimToSize();
-
-        return values;
+        containers.addAll(concurrentContainers);
     }
-
 }

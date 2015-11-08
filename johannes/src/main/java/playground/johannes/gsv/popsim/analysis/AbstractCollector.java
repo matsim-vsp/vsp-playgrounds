@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2015 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,       *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,43 +16,29 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-
 package playground.johannes.gsv.popsim.analysis;
 
-import playground.johannes.synpop.data.Episode;
-import playground.johannes.synpop.data.Person;
-import playground.johannes.synpop.data.Segment;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import playground.johannes.synpop.data.Attributable;
 
 /**
- * @author johannes
+ * @author jillenberger
  */
-public class LegCollector<T> extends AbstractCollector<T, Segment> {
+public abstract class AbstractCollector<T, A extends Attributable> implements Collector<T> {
 
-    public LegCollector(ValueProvider<T, Segment> provider) {
-        super(provider);
+    protected Predicate<A> predicate;
+
+    protected final ValueProvider<T, A> provider;
+
+    public AbstractCollector(ValueProvider<T, A> provider) {
+        this.provider = provider;
     }
 
-    @Override
-    public List<T> collect(Collection<? extends Person> persons) {
-        ArrayList<T> values = new ArrayList<>(persons.size() * 10);
+    public void setPredicate(Predicate<A> predicate) {
+        this.predicate = predicate;
+    }
 
-        for (Person p : persons) {
-            for (Episode e : p.getEpisodes()) {
-                for (Segment leg : e.getLegs()) {
-                    if (predicate == null || predicate.test(leg)) {
-                        values.add(provider.get(leg));
-                    }
-                }
-            }
-        }
-
-        values.trimToSize();
-
-        return values;
+    public Predicate<A> getPredicate() {
+        return predicate;
     }
 
 }
