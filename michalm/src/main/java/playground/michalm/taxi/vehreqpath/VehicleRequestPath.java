@@ -17,12 +17,25 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dhosse.prt;
+package playground.michalm.taxi.vehreqpath;
 
-import playground.michalm.taxi.optimizer.BestDispatchFinder;
+import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
+
+import playground.michalm.taxi.data.TaxiRequest;
 
 
-public interface VehicleRequestPathCost
+public class VehicleRequestPath
 {
-    double getCost(BestDispatchFinder.Dispatch vrp);
+    public final Vehicle vehicle;
+    public final TaxiRequest request;
+    public final VrpPathWithTravelData path;
+
+
+    public VehicleRequestPath(Vehicle vehicle, TaxiRequest request, VrpPathWithTravelData path)
+    {
+        this.vehicle = vehicle;
+        this.request = request;
+        this.path = path;
+    }
 }
