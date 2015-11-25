@@ -1,17 +1,9 @@
-package playground.dgrether;
-import org.matsim.contrib.otfvis.OTFVisFileWriterModule;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.vis.otfvis.OTFFileWriterFactory;
-
-
 /* *********************************************************************** *
  * project: org.matsim.*
- * DgOtfVisController
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -25,21 +17,32 @@ import org.matsim.vis.otfvis.OTFFileWriterFactory;
  *                                                                         *
  * *********************************************************************** */
 
+package playground.johannes.gsv.matrices.analysis;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 /**
- * Runs the MATSim default controler with the OTFVis snapshot writing attached. 
- * @author dgrether
- *
+ * @author johannes
  */
-public class DgOtfVisController {
+public class MatrixReader {
 
-	public static void main(String[] args) {
-		Controler c = new Controler(args);
-		c.addOverridingModule(new OTFVisFileWriterModule());
-		c.getConfig().controler().setOverwriteFileSetting(
-				true ?
-						OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles :
-						OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
-		c.run();
-	}
+    private String separator = ";";
 
+    public void read(String file, RowHandler handler) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line = reader.readLine();
+        while((line = reader.readLine()) != null) {
+            String tokens[] = line.split(separator);
+            handler.handleRow(tokens[0], tokens[1], tokens[2], tokens[3], tokens[4], tokens[5], tokens[6], tokens[7], Double.parseDouble(tokens[8]));
+        }
+        reader.close();
+    }
+
+    public interface RowHandler {
+
+        void handleRow(String from, String to, String purpose, String year, String mode, String direction, String
+                day, String season, double volume);
+    }
 }
