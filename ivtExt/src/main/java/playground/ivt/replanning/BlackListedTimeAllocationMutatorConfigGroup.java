@@ -1,10 +1,9 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * KtiTravelCostCalculatorFactory.java
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,27 +16,41 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.ivt.replanning;
 
-package playground.meisterk.kti.router;
+import org.matsim.core.config.ReflectiveConfigGroup;
+import org.matsim.core.utils.collections.CollectionUtils;
 
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
-import org.matsim.core.router.util.TravelDisutility;
-import org.matsim.core.router.util.TravelTime;
-import playground.meisterk.kti.config.KtiConfigGroup;
+import java.util.Collections;
+import java.util.Set;
 
-public class KtiTravelCostCalculatorFactory implements TravelDisutilityFactory {
+/**
+ * @author thibautd
+ */
+public class BlackListedTimeAllocationMutatorConfigGroup extends ReflectiveConfigGroup {
+	public static final String GROUP_NAME = "blackListedTimeAllocationMutator";
 
-	private KtiConfigGroup ktiConfigGroup = null;
-	
-	public KtiTravelCostCalculatorFactory(KtiConfigGroup ktiConfigGroup) {
-		super();
-		this.ktiConfigGroup = ktiConfigGroup;
+	private Set<String> blackList = Collections.EMPTY_SET;
+
+	public BlackListedTimeAllocationMutatorConfigGroup( ) {
+		super( GROUP_NAME );
 	}
 
-	@Override
-	public TravelDisutility createTravelDisutility(TravelTime timeCalculator,	PlanCalcScoreConfigGroup cnScoringGroup) {
-		return new KtiTravelTimeDistanceCostCalculator(timeCalculator, cnScoringGroup, ktiConfigGroup);
+	@StringGetter( "blackList" )
+	private String getBlackListString() {
+		return CollectionUtils.setToString( getBlackList() );
 	}
 
+	@StringSetter( "blackList" )
+	private void setBlackListString( String blackList ) {
+		setBlackList( CollectionUtils.stringToSet( blackList ) );
+	}
+
+	public Set<String> getBlackList() {
+		return blackList;
+	}
+
+	public void setBlackList( Set<String> blackList ) {
+		this.blackList = blackList;
+	}
 }

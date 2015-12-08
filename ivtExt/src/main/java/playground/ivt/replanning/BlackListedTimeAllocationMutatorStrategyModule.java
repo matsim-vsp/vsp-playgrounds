@@ -1,10 +1,9 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * SwitchNonChainBasedMode.java
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -20,43 +19,47 @@
 package playground.ivt.replanning;
 
 import com.google.inject.Inject;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.HasPlansAndId;
+import com.google.inject.Provider;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl;
-import org.matsim.core.replanning.ReplanningContext;
-import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
+import org.matsim.core.router.CompositeStageActivityTypes;
+import org.matsim.core.router.StageActivityTypesImpl;
+import org.matsim.core.router.TripRouter;
 
 /**
  * @author thibautd
  */
-public class SwitchNonChainBasedMode implements PlanStrategy {
-	final PlanStrategyImpl delegate;
-
-	@Inject
-	public SwitchNonChainBasedMode(final Scenario sc) {
-		delegate = new PlanStrategyImpl( new RandomPlanSelector<Plan, Person>() );
-
-		delegate.addStrategyModule( new SwitchNonChainBasedModeModule( sc.getConfig() ) );
-		delegate.addStrategyModule( new ReRoute( sc ) );
-	}
-
+public class BlackListedTimeAllocationMutatorStrategyModule extends AbstractModule {
 	@Override
-	public void run(final HasPlansAndId<Plan, Person> person) {
-		delegate.run( person );
-	}
+	public void install() {
+		addPlanStrategyBinding( "BlackListedTimeAllocationMutator" ).toProvider(
+				new Provider<PlanStrategy>() {
+					@Inject
+					private TripRouter tripRouter;
 
-	@Override
-	public void init(final ReplanningContext replanningContext) {
-		delegate.init( replanningContext );
-	}
-
-	@Override
-	public void finish() {
-		delegate.finish();
+					@Override
+					public PlanStrategy get() {
+						BlackListedTimeAllocationMutatorConfigGroup configGroup =
+								ConfigUtils.addOrGetModule(
+									getConfig(),
+									BlackListedTimeAllocationMutatorConfigGroup.GROUP_NAME,
+									BlackListedTimeAllocationMutatorConfigGroup.class );
+						return new PlanStrategyImpl.Builder(
+										new RandomPlanSelector<Plan, Person>() )
+								.addStrategyModule(
+										new BlackListedTimeAllocationMutatorModule(
+												getConfig(),
+												new CompositeStageActivityTypes(
+														new StageActivityTypesImpl(
+																configGroup.getBlackList() ),
+														tripRouter.getStageActivityTypes() )) )
+								.build();
+					}
+				} );
 	}
 }
-

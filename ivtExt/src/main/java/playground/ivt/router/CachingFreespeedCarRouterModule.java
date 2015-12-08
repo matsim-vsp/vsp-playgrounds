@@ -16,34 +16,44 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.ivt.analysis.activityhistogram;
+package playground.ivt.router;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.events.handler.EventHandler;
-import org.matsim.core.scoring.EventsToActivities;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
+import org.matsim.core.router.RoutingModule;
+import org.matsim.core.router.TripRouter;
+import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
+import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 
 /**
  * @author thibautd
  */
-public class ActivityHistogramModule extends AbstractModule {
+public class CachingFreespeedCarRouterModule extends AbstractModule {
+	private final TripSoftCache cache = new TripSoftCache( false , TripSoftCache.LocationType.link );
+
 	@Override
 	public void install() {
-		bind(ActivityHistogram.class);
-		addEventHandlerBinding().to(ActivityHistogram.class);
-		addEventHandlerBinding().toProvider(
-				new Provider<EventHandler>() {
-					@Inject ActivityHistogram hist;
-
+		addRoutingModuleBinding( TransportMode.car ).toProvider(
+				new Provider<RoutingModule>() {
+					@Inject
+					Scenario sc = null;
 					@Override
-					public EventHandler get() {
-						final EventsToActivities e2a = new EventsToActivities();
-						e2a.setActivityHandler( hist );
-						return e2a;
+					public RoutingModule get() {
+						final FreespeedTravelTimeAndDisutility tt = new FreespeedTravelTimeAndDisutility(sc.getConfig().planCalcScore());
+
+						final TripRouterFactoryBuilderWithDefaults b = new TripRouterFactoryBuilderWithDefaults();
+						b.setTravelTime( tt );
+						b.setTravelDisutility( tt );
+						final TripRouter tripRouter = b.build(sc).get();
+
+						return new CachingRoutingModuleWrapper(
+										cache,
+										tripRouter.getRoutingModule(
+												TransportMode.car));
 					}
-				});
-		addControlerListenerBinding().to(ActivityHistogramListener.class);
+				} );
 	}
 }
