@@ -16,61 +16,34 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-
-/**
- * 
- */
-package playground.kai.usecases.plansremoval;
+package playground.ivt.scripts;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.config.Config;
+import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.ControlerDefaultsModule;
-import org.matsim.core.replanning.selectors.PlanSelector;
+import org.matsim.core.network.MatsimNetworkReader;
+import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.network.algorithms.NetworkMergeDoubleLinks;
+import org.matsim.core.network.algorithms.NetworkSimplifier;
 import org.matsim.core.scenario.ScenarioUtils;
 
-
 /**
- * @author nagel
- *
+ * @author thibautd
  */
-public class Main {
+public class SimplifyNetwork {
+	public static void main( final String... args ) {
+		final String inputNetworkFile = args[ 0 ];
+		final String outputNetworkFile = args[ 1 ];
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		final String selectorName = "MySelectorForRemoval" ;
+		final Scenario sc = ScenarioUtils.createScenario( ConfigUtils.createConfig() );
+		new MatsimNetworkReader( sc ).readFile( inputNetworkFile );
 
-		Config config = ConfigUtils.loadConfig( args[0] ) ;
-		
-		config.strategy().setPlanSelectorForRemoval( selectorName );
-		
-		Scenario scenario = ScenarioUtils.loadScenario(config) ;
-		
-		Controler ctrl = new Controler( scenario ) ;
-		
-		// create a controler defaults "module":
-		AbstractModule modules = new ControlerDefaultsModule() ;
+		final NetworkSimplifier simplifier = new NetworkSimplifier();
+		simplifier.setMergeLinkStats( true );
+		simplifier.run( sc.getNetwork() );
+		new NetworkMergeDoubleLinks( NetworkMergeDoubleLinks.MergeType.ADDITIVE ).run( sc.getNetwork() );
+		new NetworkCleaner().run( sc.getNetwork() );
 
-		// create the module that adds the new functionality:
-		AbstractModule modules2 = new AbstractModule(){
-			@Override
-			public void install() {
-				PlanSelector selector = new MySelectorForRemoval() ;
-				if (getConfig().strategy().getPlanSelectorForRemoval().equals(selectorName)) {
-					bindPlanSelectorForRemoval().toInstance( selector);
-				}
-			}
-		} ; 
-
-		// set both of them simultaneously ; 
-		ctrl.setModules(modules,modules2);
-		
-		ctrl.run();
-
+		new NetworkWriter( sc.getNetwork() ).write( outputNetworkFile );
 	}
-
 }
