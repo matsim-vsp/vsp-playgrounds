@@ -17,52 +17,59 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.johannes.gsv.zones.io;
+package playground.johannes.synpop.matrix;
 
-import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.io.MatsimXmlWriter;
-import playground.johannes.gsv.zones.KeyMatrix;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author johannes
- *
  */
-public class KeyMatrixXMLWriter extends MatsimXmlWriter {
+public class HashMatrix<K, V> implements Matrix<K, V> {
 
-	static final String MATRIX_TAG = "matrix";
-	static final String CELL_TAG = "cell";
-	static final String ROW_KEY = "row";
-	static final String COL_KEY = "col";
-	static final String VALUE_KEY = "value";
+    private Map<K, Map<K, V>> matrix;
 
-	public void write(KeyMatrix m, String file) {
-		openFile(file);
-		writeXmlHead();
-		writeStartTag("matrix", null);
-		writeEntries(m);
-		writeEndTag("matrix");
-		close();
-	}
-	
-	
-	
-	protected void writeEntries(KeyMatrix m) {
-		Set<String> keys = m.keys();
-		for(String i : keys) {
-			for(String j : keys) {
-				Double val = m.get(i, j);
-				if(val != null) {
-					List<Tuple<String, String>> atts = new ArrayList<>(3);
-					atts.add(createTuple("row", i));
-					atts.add(createTuple("col", j));
-					atts.add(createTuple("value", val));
-					writeStartTag("cell", atts, true);
-				}
-			}
-		}
-	}
+    public HashMatrix() {
+        matrix = new HashMap<>();
+    }
+
+    public V set(K row, K column, V value) {
+        Map<K, V> rowCells = matrix.get(row);
+        if (rowCells == null) {
+            rowCells = new HashMap<>();
+            matrix.put(row, rowCells);
+        }
+
+        return rowCells.put(column, value);
+    }
+
+    public V get(K row, K column) {
+        Map<K, V> rowCells = getRow(row);
+        if (rowCells == null) {
+            return null;
+        } else {
+            return rowCells.get(column);
+        }
+    }
+
+    public Map<K, V> getRow(K row) {
+        return matrix.get(row);
+    }
+
+
+    public Set<K> keys() {
+        Set<K> keys = new HashSet<>(matrix.keySet());
+        for (Map.Entry<K, Map<K, V>> entry : matrix.entrySet()) {
+            keys.addAll(entry.getValue().keySet());
+        }
+
+        return keys;
+    }
+
+    public Collection<V> values() {
+        List<V> values = new ArrayList<>();
+        for (Map.Entry<K, Map<K, V>> entry : matrix.entrySet()) {
+            values.addAll(entry.getValue().values());
+        }
+        return values;
+    }
 }

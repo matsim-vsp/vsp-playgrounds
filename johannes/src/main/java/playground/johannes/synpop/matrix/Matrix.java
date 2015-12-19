@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2015 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,       *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,30 +16,21 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.johannes.synpop.matrix;
 
-package playground.johannes.gsv.matrices.io;
-
-import playground.johannes.gsv.zones.KeyMatrix;
-import playground.johannes.gsv.zones.MatrixOperations;
-import playground.johannes.gsv.zones.io.KeyMatrixXMLWriter;
-import playground.johannes.gsv.zones.io.VisumOMatrixReader;
-
-import java.io.IOException;
+import java.util.Collection;
+import java.util.Set;
 
 /**
- * @author johannes
+ * @author jillenberger
  */
-public class JoinMatrices {
+public interface Matrix<K, V> {
 
-    public static void main(String[] args) throws IOException {
-        KeyMatrix sum = new KeyMatrix();
-        for(int i = 0; i < args.length - 1; i++) {
-            KeyMatrix m = new KeyMatrix();
-            VisumOMatrixReader.read(m, args[i]);
-            MatrixOperations.add(sum, m);
-        }
+    V set(K row, K column, V value);
 
-        KeyMatrixXMLWriter writer = new KeyMatrixXMLWriter();
-        writer.write(sum, args[args.length - 1]);
-    }
+    V get(K row, K column);
+
+    Set<K> keys();
+
+    Collection<V> values();
 }

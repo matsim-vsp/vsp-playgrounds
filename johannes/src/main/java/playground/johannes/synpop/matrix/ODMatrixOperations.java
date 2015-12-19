@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,       *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,42 +16,39 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.johannes.synpop.matrix;
 
-package playground.johannes.gsv.zones.io;
+import playground.johannes.synpop.gis.Zone;
+import playground.johannes.synpop.gis.ZoneCollection;
 
-import org.matsim.core.utils.io.MatsimXmlParser;
-import org.xml.sax.Attributes;
-import playground.johannes.gsv.zones.KeyMatrix;
-
-import java.util.Stack;
+import java.util.Set;
 
 /**
- * @author johannes
- *
+ * @author jillenberger
  */
-public class KeyMatrixXMLReader extends MatsimXmlParser {
+public class ODMatrixOperations {
 
-	private KeyMatrix m;
-	
-	public KeyMatrix getMatrix() {
-		return m;
-	}
-	
-	@Override
-	public void startTag(String name, Attributes atts, Stack<String> context) {
-		if(name.equalsIgnoreCase(KeyMatrixXMLWriter.MATRIX_TAG)) {
-			m = new KeyMatrix();
-		} else if(name.equalsIgnoreCase(KeyMatrixXMLWriter.CELL_TAG)) {
-			String row = atts.getValue(KeyMatrixXMLWriter.ROW_KEY);
-			String col = atts.getValue(KeyMatrixXMLWriter.COL_KEY);
-			String val = atts.getValue(KeyMatrixXMLWriter.VALUE_KEY);
-			
-			m.set(row, col, new Double(val));
-		}
+    public static NumericMatrix aggregate(NumericMatrix m, ZoneCollection zones, String key) {
+        NumericMatrix newM = new NumericMatrix();
 
-	}
+        Set<String> keys = m.keys();
+        for (String i : keys) {
+            for (String j : keys) {
+                Double val = m.get(i, j);
+                if (val != null) {
+                    Zone zone_i = zones.get(i);
+                    Zone zone_j = zones.get(j);
 
-	@Override
-	public void endTag(String name, String content, Stack<String> context) {
-	}
+                    if (zone_i != null && zone_j != null) {
+                        String att_i = zone_i.getAttribute(key);
+                        String att_j = zone_j.getAttribute(key);
+
+                        newM.add(att_i, att_j, val);
+                    }
+                }
+            }
+        }
+
+        return newM;
+    }
 }

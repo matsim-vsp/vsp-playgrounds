@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2012 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,       *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,38 +16,33 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.johannes.studies.matrix2014.sim;
 
-package playground.kai.usecases.ownmobsim;
+import playground.johannes.synpop.analysis.Predicate;
+import playground.johannes.synpop.sim.data.CachedSegment;
 
-import java.util.List;
+/**
+ * @author jillenberger
+ */
+public class CachedModePredicate implements Predicate<CachedSegment> {
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Node;
+    private static Object dataKey = new Object();
 
-class MobsimNode {
-	Node originalNode ;
-	
-	MobsimNode(Node node) {
-		this.originalNode = node ;
-	}
-	
-	private List<MobsimLink> incomingLinks ;
+    private final String key;
 
-	public void doSimStep() {
-		for ( MobsimLink inLink : incomingLinks ) {
-			DriverVehicleUnit vehicle = inLink.peek() ;
-			if ( vehicle != null ) {
-				Id nextLinkId = vehicle.getNextLinkId() ;
-				MobsimLink outLink = null ; // (find outLink)
-				if ( outLink.hasSpace() ) {
-					inLink.remove() ;
-					outLink.addFromIntersection( vehicle ) ;
-				}
-			}
-			
-		
-		}
-		
-	}
+    private final String value;
 
+    public CachedModePredicate(String key, String value) {
+        this.key = key;
+        this.value = value;
+    }
+    @Override
+    public boolean test(CachedSegment cachedSegment) {
+        Boolean isMode = (Boolean) cachedSegment.getData(dataKey);
+        if(isMode == null) {
+            isMode = value.equals(cachedSegment.getAttribute(key));
+            cachedSegment.setData(dataKey, isMode);
+        }
+        return isMode;
+    }
 }

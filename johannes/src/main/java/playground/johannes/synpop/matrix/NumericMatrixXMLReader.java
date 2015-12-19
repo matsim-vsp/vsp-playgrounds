@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2012 by the members listed in the COPYING,        *
+ * copyright       : (C) 2014 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,40 +17,40 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.kai.usecases.ownmobsim;
+package playground.johannes.synpop.matrix;
 
-import org.junit.Assert;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
+import org.matsim.core.utils.io.MatsimXmlParser;
+import org.xml.sax.Attributes;
 
-public class DriverVehicleUnit {
+import java.util.Stack;
 
-	private Person originalPerson;
-	private Id currentLinkId;
-	private int idx=0 ;
+/**
+ * @author johannes
+ *
+ */
+public class NumericMatrixXMLReader extends MatsimXmlParser {
 
-	DriverVehicleUnit(Person person) {
-		this.originalPerson = person ;
-		Plan plan = person.getSelectedPlan() ;
-		Activity act = (Activity) plan.getPlanElements().get(this.idx) ;
-		this.currentLinkId = act.getLinkId() ;
-		Assert.assertNotNull(this.currentLinkId) ;
+	private NumericMatrix m;
+	
+	public NumericMatrix getMatrix() {
+		return m;
 	}
 	
-	Id getCurrentLinkId() {
-		return this.currentLinkId ;
-	}
-	
-	double getCurrentActivityEndTime() {
-		Activity act = (Activity) originalPerson.getSelectedPlan().getPlanElements().get(this.idx) ;
-		return act.getEndTime() ;
+	@Override
+	public void startTag(String name, Attributes atts, Stack<String> context) {
+		if(name.equalsIgnoreCase(NumericMatrixXMLWriter.MATRIX_TAG)) {
+			m = new NumericMatrix();
+		} else if(name.equalsIgnoreCase(NumericMatrixXMLWriter.CELL_TAG)) {
+			String row = atts.getValue(NumericMatrixXMLWriter.ROW_KEY);
+			String col = atts.getValue(NumericMatrixXMLWriter.COL_KEY);
+			String val = atts.getValue(NumericMatrixXMLWriter.VALUE_KEY);
+			
+			m.set(row, col, new Double(val));
+		}
+
 	}
 
-	 Id getNextLinkId() {
-		// TODO Auto-generated method stub
-		return null;
+	@Override
+	public void endTag(String name, String content, Stack<String> context) {
 	}
-	
 }
