@@ -17,39 +17,47 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.zone.util;
+package playground.michalm.taxi.util.stats;
 
-import java.util.*;
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.matsim.contrib.taxi.util.stats.StatsCollector.StatsCalculator;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.*;
-
-import playground.michalm.zone.*;
+import playground.michalm.ev.UnitConversionRatios;
+import playground.michalm.taxi.data.*;
 
 
-public class NetworkWithZonesUtils
+public class EStatsCalculators
 {
-    //if SRSs of the network and zones are different, zoneFinder should convert between CRSs
-    public static Map<Id<Link>, Zone> createLinkToZoneMap(Network network, ZoneFinder zoneFinder)
+    public static StatsCalculator<Integer> createDischargedVehiclesCounter(final ETaxiData taxiData)
     {
-        Map<Id<Link>, Zone> linkToZone = new HashMap<>();
-
-        for (Link l : network.getLinks().values()) {
-            linkToZone.put(l.getId(), zoneFinder.findZone(l.getToNode().getCoord()));
-        }
-
-        return linkToZone;
+        return new StatsCalculator<Integer>() {
+            @Override
+            public Integer calculateStat()
+            {
+                int count = 0;
+                for (ETaxi t : taxiData.getETaxis().values()) {
+                    if (t.getBattery().getSoc() < 0) {
+                        count++;
+                    }
+                }
+                return count;
+            }
+        };
     }
 
 
-    public static Map<Id<Node>, Zone> createNodeToZoneMap(Network network, ZoneFinder zoneFinder)
+    public static StatsCalculator<Double> createMeanSocCalculator(final ETaxiData taxiData)
     {
-        Map<Id<Node>, Zone> nodeToZone = new HashMap<>();
-
-        for (Node n : network.getNodes().values()) {
-            nodeToZone.put(n.getId(), zoneFinder.findZone(n.getCoord()));
-        }
-
-        return nodeToZone;
+        return new StatsCalculator<Double>() {
+            @Override
+            public Double calculateStat()
+            {
+                Mean mean = new Mean();
+                for (ETaxi t : taxiData.getETaxis().values()) {
+                    mean.increment(t.getBattery().getSoc());
+                }
+                return mean.getResult() / UnitConversionRatios.J_PER_kWh;//print out in [kWh]
+            }
+        };
     }
 }
