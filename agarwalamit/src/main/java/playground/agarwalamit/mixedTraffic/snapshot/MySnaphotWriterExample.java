@@ -1,5 +1,6 @@
 /* *********************************************************************** *
  * project: org.matsim.*
+ *                                                                         *
  * *********************************************************************** *
  *                                                                         *
  * copyright       : (C) 2016 by the members listed in the COPYING,        *
@@ -16,30 +17,31 @@
  *                                                                         *
  * *********************************************************************** */
 
+package playground.agarwalamit.mixedTraffic.snapshot;
 
-package playground.polettif.multiModalMap.workbench;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.scenario.ScenarioUtils;
 
-import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import playground.polettif.multiModalMap.gtfs.GTFSReader;
-import playground.polettif.multiModalMap.tools.ScheduleCleaner;
-import playground.polettif.multiModalMap.tools.ScheduleTools;
+/**
+ * @author amit
+ */
 
-public class RunGTFS2UnmappedMTS {
-	
-	public static void main(final String[] args) {
-//		final String gtfsPath = "C:/Users/polettif/Desktop/data/gtfs/zvv/";
-		final String gtfsPath = "C:/Users/polettif/Desktop/data/gtfs/zvv/";
-		final String mtsFile = "C:/Users/polettif/Desktop/data/mts/unmapped/fromGtfs/zvv_mostServices.xml";
-		final String shapeFile = "C:/Users/polettif/Desktop/data/gtfs/shp/zvv_mostServices.shp";
-//		final String mtsFile = "C:/Users/polettif/Desktop/output/gtfs2mts/zvv_unmappedSchedule.xml";
-//		final String mtsFile = "C:/Users/polettif/Desktop/output/gtfs2mts/google_sample.xml";
+public class MySnaphotWriterExample {
 
-		// Load Schedule
-		GTFSReader gtfsReader = new GTFSReader(gtfsPath, GTFSReader.DAY_WITH_MOST_SERVICES, "CH1903_LV03_Plus");
-		gtfsReader.writeShapeFile(shapeFile);
-		TransitSchedule schedule = gtfsReader.getSchedule();
-		ScheduleCleaner.removeNotUsedStopFacilities(schedule);
-		ScheduleTools.writeTransitSchedule(schedule, mtsFile);
+	public static void main(String[] args) {
+		Scenario sc = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
+
+		Controler controler = new Controler(sc);
+
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addSnapshotWriterBinding().to(MyPositionSnapShotWriter.class);
+			}
+		});
+		controler.run();
 	}
-	
 }
