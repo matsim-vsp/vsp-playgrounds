@@ -16,21 +16,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.polettif.publicTransitMapping.workbench;
+
+package playground.polettif.publicTransitMapping.workbench.santiago;
 
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import playground.polettif.publicTransitMapping.mapping.PTMapperModesFilterAndMerge;
 import playground.polettif.publicTransitMapping.tools.ScheduleCleaner;
 import playground.polettif.publicTransitMapping.tools.ScheduleTools;
 
-public class GtfsZvvCleaner {
-	
-	public static void main(final String[] args) {
-		String in = "C:/Users/polettif/Desktop/data/mts/unmapped/fromGtfs/zvv_clean.xml";
-		TransitSchedule schedule = ScheduleTools.loadTransitSchedule(in);
+public class RunPTMapping {
 
-		ScheduleCleaner.removeNotUsedStopFacilities(schedule);
-
-		ScheduleTools.writeTransitSchedule(schedule, in);
+	public static void main(String[] args) {
+		String base = "C:/Users/Flavio/Desktop/data/santiago/";
+		PTMapperModesFilterAndMerge.run(base+"mts/mappingConfig.xml");
 	}
-	
+
 }
