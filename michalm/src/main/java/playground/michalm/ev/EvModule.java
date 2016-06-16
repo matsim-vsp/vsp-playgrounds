@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,35 +17,41 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data.file;
+package playground.michalm.ev;
 
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.*;
-import org.matsim.contrib.dvrp.data.file.*;
-import org.xml.sax.Attributes;
+import org.matsim.core.controler.AbstractModule;
 
-import playground.michalm.ev.*;
-import playground.michalm.ev.data.BatteryImpl;
-import playground.michalm.taxi.data.ETaxi;
+import playground.michalm.ev.charging.ChargingHandler;
+import playground.michalm.ev.data.EvData;
+import playground.michalm.ev.discharging.*;
 
 
-public class ETaxiReader
-    extends VehicleReader
+public class EvModule
+    extends AbstractModule
 {
-    public ETaxiReader(Network network, VrpData data)
+    private final EvData evData;
+
+
+    public EvModule(EvData evData)
     {
-        super(network, data);
+        this.evData = evData;
     }
 
 
     @Override
-    protected Vehicle createVehicle(Attributes atts)
+    public void install()
     {
-        Vehicle v = super.createVehicle(atts);
-        double batteryCapacity = ReaderUtils.getDouble(atts, "battery_capacity", 20)
-                * UnitConversionRatios.J_PER_kWh;
-        double initialSoc = ReaderUtils.getDouble(atts, "initial_soc", 0.8 * 20)
-                * UnitConversionRatios.J_PER_kWh;
-        return new ETaxi(v, new BatteryImpl(batteryCapacity, initialSoc));
+        bind(EvData.class).toInstance(evData);
+        bind(DriveDischargingHandler.class).asEagerSingleton();
+        addEventHandlerBinding().to(DriveDischargingHandler.class);
+        bind(AuxDischargingHandler.class).asEagerSingleton();
+        addMobsimListenerBinding().to(AuxDischargingHandler.class);
+        bind(ChargingHandler.class).asEagerSingleton();
+        addMobsimListenerBinding().to(ChargingHandler.class);
+
+        if (EvConfigGroup.get(getConfig()).getTimeProfiles()) {
+            addMobsimListenerBinding().toProvider(EvTimeProfileCollectorProvider.class);
+            //add more time profiles if necessary
+        }
     }
 }

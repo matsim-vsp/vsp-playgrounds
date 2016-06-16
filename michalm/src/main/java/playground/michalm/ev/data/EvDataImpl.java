@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,35 +17,50 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data.file;
+package playground.michalm.ev.data;
 
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.*;
-import org.matsim.contrib.dvrp.data.file.*;
-import org.xml.sax.Attributes;
+import java.util.*;
 
-import playground.michalm.ev.*;
-import playground.michalm.ev.data.BatteryImpl;
-import playground.michalm.taxi.data.ETaxi;
+import org.matsim.api.core.v01.Id;
+import org.matsim.vehicles.Vehicle;
 
 
-public class ETaxiReader
-    extends VehicleReader
+public class EvDataImpl
+    implements EvData
 {
-    public ETaxiReader(Network network, VrpData data)
+    private final Map<Id<Charger>, Charger> chargers = new LinkedHashMap<>();
+    private final Map<Id<Vehicle>, ElectricVehicle> eVehicles = new LinkedHashMap<>();
+
+    private final Map<Id<Charger>, Charger> unmodifiableChargers = Collections
+            .unmodifiableMap(chargers);
+    private final Map<Id<Vehicle>, ElectricVehicle> unmodifiableEVehicles = Collections
+            .unmodifiableMap(eVehicles);
+
+
+    @Override
+    public Map<Id<Charger>, Charger> getChargers()
     {
-        super(network, data);
+        return unmodifiableChargers;
     }
 
 
     @Override
-    protected Vehicle createVehicle(Attributes atts)
+    public void addCharger(Charger charger)
     {
-        Vehicle v = super.createVehicle(atts);
-        double batteryCapacity = ReaderUtils.getDouble(atts, "battery_capacity", 20)
-                * UnitConversionRatios.J_PER_kWh;
-        double initialSoc = ReaderUtils.getDouble(atts, "initial_soc", 0.8 * 20)
-                * UnitConversionRatios.J_PER_kWh;
-        return new ETaxi(v, new BatteryImpl(batteryCapacity, initialSoc));
+        chargers.put(charger.getId(), charger);
+    }
+
+
+    @Override
+    public Map<Id<Vehicle>, ElectricVehicle> getElectricVehicles()
+    {
+        return unmodifiableEVehicles;
+    }
+
+
+    @Override
+    public void addElectricVehicle(Id<Vehicle> vehicleId, ElectricVehicle ev)
+    {
+        eVehicles.put(vehicleId, ev);
     }
 }

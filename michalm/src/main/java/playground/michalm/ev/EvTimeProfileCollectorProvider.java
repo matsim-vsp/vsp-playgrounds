@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,35 +17,43 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data.file;
+package playground.michalm.ev;
 
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.dvrp.data.*;
-import org.matsim.contrib.dvrp.data.file.*;
-import org.xml.sax.Attributes;
+import org.matsim.contrib.taxi.util.stats.*;
+import org.matsim.contrib.taxi.util.stats.TimeProfileCollector.ProfileCalculator;
+import org.matsim.core.controler.MatsimServices;
+import org.matsim.core.mobsim.framework.listeners.MobsimListener;
 
-import playground.michalm.ev.*;
-import playground.michalm.ev.data.BatteryImpl;
-import playground.michalm.taxi.data.ETaxi;
+import com.google.inject.*;
+
+import playground.michalm.ev.data.EvData;
+import playground.michalm.taxi.ev.EvTimeProfiles;
 
 
-public class ETaxiReader
-    extends VehicleReader
+public class EvTimeProfileCollectorProvider
+    implements Provider<MobsimListener>
 {
-    public ETaxiReader(Network network, VrpData data)
+    private final EvData evData;
+    private final MatsimServices matsimServices;
+
+
+    @Inject
+    public EvTimeProfileCollectorProvider(EvData evData, MatsimServices matsimServices)
     {
-        super(network, data);
+        this.evData = evData;
+        this.matsimServices = matsimServices;
     }
 
 
     @Override
-    protected Vehicle createVehicle(Attributes atts)
+    public MobsimListener get()
     {
-        Vehicle v = super.createVehicle(atts);
-        double batteryCapacity = ReaderUtils.getDouble(atts, "battery_capacity", 20)
-                * UnitConversionRatios.J_PER_kWh;
-        double initialSoc = ReaderUtils.getDouble(atts, "initial_soc", 0.8 * 20)
-                * UnitConversionRatios.J_PER_kWh;
-        return new ETaxi(v, new BatteryImpl(batteryCapacity, initialSoc));
+        ProfileCalculator<String> calc = TimeProfiles.combineProfileCalculators(
+                EvTimeProfiles.createMeanSocCalculator(evData),
+                EvTimeProfiles.createDischargedVehiclesCounter(evData));
+
+        return new TimeProfileCollector<>(calc, 300,
+                TimeProfiles.combineValues("meanSOC", "discharged"), //
+                "ev_time_profiles.txt", matsimServices);
     }
 }
