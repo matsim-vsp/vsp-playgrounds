@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.ev;
+package playground.michalm.taxi.ev;
 
 import org.matsim.contrib.taxi.util.stats.*;
 import org.matsim.contrib.taxi.util.stats.TimeProfileCollector.ProfileCalculator;
@@ -29,7 +29,7 @@ import com.google.inject.*;
 import playground.michalm.ev.data.EvData;
 
 
-public class EvTimeProfileCollectorProvider
+public class ETaxiTimeProfileCollectorProvider
     implements Provider<MobsimListener>
 {
     private final EvData evData;
@@ -37,7 +37,7 @@ public class EvTimeProfileCollectorProvider
 
 
     @Inject
-    public EvTimeProfileCollectorProvider(EvData evData, MatsimServices matsimServices)
+    public ETaxiTimeProfileCollectorProvider(EvData evData, MatsimServices matsimServices)
     {
         this.evData = evData;
         this.matsimServices = matsimServices;
@@ -47,9 +47,7 @@ public class EvTimeProfileCollectorProvider
     @Override
     public MobsimListener get()
     {
-        ProfileCalculator calc = TimeProfiles.combineProfileCalculators(
-                EvTimeProfiles.createMeanSocCalculator(evData),
-                EvTimeProfiles.createDischargedVehiclesCounter(evData));
-        return new TimeProfileCollector(calc, 300, "ev_time_profiles.txt", matsimServices);
+        ProfileCalculator calc = ETaxiChargerProfiles.createChargerCalculator(evData);
+        return new TimeProfileCollector(calc, 300, "etaxi_time_profiles.txt", matsimServices);
     }
 }
