@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,42 +16,28 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.thibautd.initialdemandgeneration.empiricalsocnet.framework;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * 
+ * @author thibautd
  */
-package playground.jbischoff.ffcs.sim;
+public class Ego {
+	final Person person;
+	final int degree;
+	final Set<Ego> alters = new HashSet<>();
 
-import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.controler.events.IterationEndsEvent;
-import org.matsim.core.controler.listener.IterationEndsListener;
-
-import com.google.inject.Inject;
-
-import playground.jbischoff.ffcs.manager.FreefloatingCarsharingManager;
-import playground.jbischoff.parking.manager.ParkingSearchManager;
-
-/**
- * @author  jbischoff
- *
- */
-/**
- *
- */
-public class CarsharingListener implements IterationEndsListener {
-
-	
-	@Inject
-	FreefloatingCarsharingManager manager;
-	@Inject
-	OutputDirectoryHierarchy output;
-	
-	/* (non-Javadoc)
-	 * @see org.matsim.core.controler.listener.IterationEndsListener#notifyIterationEnds(org.matsim.core.controler.events.IterationEndsEvent)
-	 */
-	@Override
-	public void notifyIterationEnds(IterationEndsEvent event) {
-		manager.reset(event.getIteration());
+	public Ego( final Person person, final int degree ) {
+		this.person = person;
+		this.degree = degree;
 	}
 
+	public Id<Person> getId() {
+		return person.getId();
+	}
 }

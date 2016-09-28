@@ -16,7 +16,9 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.thibautd.initialdemandgeneration.empiricalsocnet;
+package playground.thibautd.initialdemandgeneration.empiricalsocnet.framework;
+
+import playground.thibautd.utils.KDTree;
 
 import java.util.Set;
 
@@ -24,5 +26,11 @@ import java.util.Set;
  * @author thibautd
  */
 public interface CliquesFiller {
-	Set<Ego> sampleClique( final Ego ego );
+	/**
+	 * Sample a feasible clique, fills the alters lists of the egos, and returns the clique.
+	 * @param ego the "center" of the clique
+	 * @param egosWithFreeStubs
+	 * @return The set of egos pertaining to the clique, including the "center", already modified.
+	 */
+	Set<Ego> sampleClique( Ego ego, KDTree<Ego> egosWithFreeStubs );
 }
