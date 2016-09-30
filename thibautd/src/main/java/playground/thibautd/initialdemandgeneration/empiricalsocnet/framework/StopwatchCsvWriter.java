@@ -16,35 +16,39 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.thibautd.initialdemandgeneration.empiricalsocnet.simplesnowball;
+package playground.thibautd.initialdemandgeneration.empiricalsocnet.framework;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.gbl.MatsimRandom;
-import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.DegreeDistribution;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 
-import java.util.Random;
+import java.util.Collections;
+import java.util.Set;
 
 /**
- * Very simple implementation, that does not care about socio-demographics
- *
  * @author thibautd
  */
 @Singleton
-public class SimpleDegreeDistribution implements DegreeDistribution {
-	private final Random random = MatsimRandom.getLocalInstance();
-	// could be compressed a lot, by storing (cumulative) counts in another array and searching with binary search on count
-	private final int[] degrees;
+public class StopwatchCsvWriter extends AbstractCsvWriter {
+	private final long startTime;
+	private int cliqueNr = 0;
 
 	@Inject
-	public SimpleDegreeDistribution( final SnowballCliques cliques ) {
-		degrees = new int[ cliques.getEgos().size() ];
-		for ( int i = 0; i < degrees.length; i++ ) degrees[ i ] = cliques.getEgos().get( i ).getDegree();
+	protected StopwatchCsvWriter(
+			final ControlerConfigGroup config,
+			final SocialNetworkSampler sampler,
+			final AutocloserModule.Closer closer ) {
+		super( config.getOutputDirectory() +"/cliquesStopWatch.dat", sampler, closer );
+		this.startTime = System.currentTimeMillis();
 	}
 
 	@Override
-	public int sampleDegree( final Person person ) {
-		return degrees[ random.nextInt( degrees.length ) ];
+	protected String titleLine() {
+		return "cliqueNr\ttotalElapsedTime_ms";
+	}
+
+	@Override
+	protected Iterable<String> cliqueLines( final Set<Ego> clique ) {
+		return Collections.singleton( (cliqueNr++ )+"\t"+(System.currentTimeMillis() - startTime) );
 	}
 }

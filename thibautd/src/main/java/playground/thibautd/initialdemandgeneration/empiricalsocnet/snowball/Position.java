@@ -16,13 +16,13 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.thibautd.initialdemandgeneration.empiricalsocnet.framework;
+package playground.thibautd.initialdemandgeneration.empiricalsocnet.snowball;
 
-import org.matsim.api.core.v01.population.Person;
+import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.Ego;
 
 /**
  * @author thibautd
  */
-public interface DegreeDistribution {
-	int sampleDegree( Person person );
+public interface Position {
+	double[] calcPosition( Ego center, SocialPositions.CliquePosition position );
 }
