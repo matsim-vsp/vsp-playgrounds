@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2012 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,25 +16,25 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
+package playground.thibautd.initialdemandgeneration.empiricalsocnet.framework;
 
-package playground.andreas.mzilske.osm;
+import com.google.inject.Module;
+import org.matsim.contrib.socnetsim.framework.population.SocialNetwork;
+import org.matsim.core.config.Config;
+import org.matsim.core.controler.Injector;
 
-import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
-import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
-import org.jdesktop.swingx.mapviewer.wms.WMSService;
+import java.util.Arrays;
 
-public class MyWMSTileFactory extends DefaultTileFactory {
-	public MyWMSTileFactory(final WMSService wms, final int maxZoom) {
-		super(new TileFactoryInfo(0, maxZoom, maxZoom, 
-				256, true, true, // tile size and x/y orientation is r2l & t2b
-				"","x","y","zoom") {
-			@Override
-			public String getTileUrl(int x, int y, int zoom) {
-				int zz = maxZoom - zoom;
-				int z = (int)Math.pow(2,(double)zz-1);
-				return wms.toWMSURL(x-z, z-1-y, zz, getTileSize(zoom));
-			}
+/**
+ * @author thibautd
+ */
+public class SocialNetworkSamplerUtils {
+	public static SocialNetwork sampleSocialNetwork( final Config config, final Module... modules ) {
+		final Module[] allModules = Arrays.copyOf( modules , modules.length + 1 );
+		allModules[ allModules.length - 1 ] = new SocialNetworkSamplerModule();
+		final com.google.inject.Injector injector = Injector.createInjector( config , allModules );
 
-		});
+		return injector.getInstance( SocialNetworkSampler.class ).sampleSocialNetwork();
 	}
 }
+
