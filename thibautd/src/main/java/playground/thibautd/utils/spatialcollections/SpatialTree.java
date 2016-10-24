@@ -1,9 +1,9 @@
 /* *********************************************************************** *
- * project: org.matsim.*												   *
+ * project: org.matsim.*
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,23 +16,30 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.mzilske.teach;
+package playground.thibautd.utils.spatialcollections;
 
-import tutorial.programming.createNetworkSHP.RunCreateNetworkSHP;
+import java.util.Collection;
+import java.util.function.Predicate;
 
 /**
- * @author nagel
- *
+ * @author thibautd
  */
-public class CreateNetworkSHP {
-	// moved the original class to the tutorial section of the matsim main repository.  This here serves as a pointer so you find it. Kai, mar'15
+public interface SpatialTree<C, T> {
+	int size();
 
-	/**
-	 * @param args
-	 * @throws Exception 
-	 */
-	public static void main(String[] args) throws Exception {
-		RunCreateNetworkSHP.main( args ) ;
-	}
+	T getAny();
 
+	Collection<T> getAll();
+
+	void add( Collection<T> toAdd );
+
+	boolean remove( T value );
+
+	boolean contains( T value );
+
+	T getClosest( C coord );
+
+	T getClosest(
+			C coord,
+			Predicate<T> predicate );
 }

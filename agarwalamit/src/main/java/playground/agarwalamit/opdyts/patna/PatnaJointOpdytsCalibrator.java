@@ -39,44 +39,50 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.agarwalamit.opdyts.ModalStatsControlerListner;
-import playground.agarwalamit.opdyts.ModeChoiceObjectiveFunction;
-import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
-import playground.agarwalamit.opdyts.OpdytsObjectiveFunctionCases;
+import org.matsim.core.scoring.functions.CharyparNagelScoringParametersForPerson;
+import playground.agarwalamit.analysis.controlerListner.ModalShareControlerListner;
+import playground.agarwalamit.analysis.controlerListner.ModalTravelTimeControlerListner;
+import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
+import playground.agarwalamit.analysis.travelTime.ModalTripTravelTimeHandler;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
+import playground.agarwalamit.opdyts.*;
 import playground.agarwalamit.utils.FileUtils;
-import playground.kai.usecases.opdytsintegration.modechoice.ModeChoiceDecisionVariable;
+import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
 /**
  * @author amit
  */
 
-public class PatnaOpdytsCalibrator {
+public class PatnaJointOpdytsCalibrator {
 
-	private static String OUT_DIR = FileUtils.RUNS_SVN+"/patnaIndia/run108/opdyts/output/";
+	public static final String SUB_POP_NAME = PatnaPersonFilter.PatnaUserGroup.urban.toString();
+	public static final OpdytsObjectiveFunctionCases PATNA_10_PCT = OpdytsObjectiveFunctionCases.PATNA_10Pct;
+	private static String OUT_DIR = FileUtils.RUNS_SVN+"/patnaIndia/run108/opdyts/output222/";
 	private static final String configDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/opdyts/input/";
 
 	public static void main(String[] args) {
 
-		Config config;
-		int iterationsToConvergence = 100; //
-		int averagingIterations = 10;
-		boolean isRunningOnCluster = false;
+		String configFile;
+		int iterationsToConvergence = 300; //
+		int averagingIterations = 100;
+		double randomVariance = 0.1;
 
-		if (args.length>0) isRunningOnCluster = true;
-
-		if ( isRunningOnCluster ) {
+		if ( args.length>0 ) {
 			OUT_DIR = args[0];
-			config = ConfigUtils.loadConfig(args[1]);
+			configFile = args[1];
 			averagingIterations = Integer.valueOf(args[2]);
 			iterationsToConvergence = Integer.valueOf(args[3]);
+			randomVariance = Double.valueOf(args[4]);
 		} else {
-			config = ConfigUtils.loadConfig(configDir+"/config_urban_1pct.xml");
+			configFile = configDir+"/config_urban_1pct.xml";
 		}
+
+		Config config = ConfigUtils.loadConfig(configFile);
+		OUT_DIR += "/calibration/";
 
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
 
 		config.controler().setOutputDirectory(OUT_DIR);
-		config.qsim().setEndTime(50.*3600.);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
@@ -103,20 +109,24 @@ public class PatnaOpdytsCalibrator {
 
 			@Override
 			public void install() {
-				// add here whatever should be attached to matsim controler
-				addTravelTimeBinding("bike").to(networkTravelTime());
-				addTravelDisutilityFactoryBinding("bike").to(carTravelDisutilityFactoryKey());
-				// no need to add travel time and travel disutility for motorbike (same as car), should be inserted auto-magically, now
 
 				// some stats
 				addControlerListenerBinding().to(KaiAnalysisListener.class);
 				addControlerListenerBinding().toInstance(stasControlerListner);
+
+				this.bind(ModalShareEventHandler.class);
+				this.addControlerListenerBinding().to(ModalShareControlerListner.class);
+
+				this.bind(ModalTripTravelTimeHandler.class);
+				this.addControlerListenerBinding().to(ModalTravelTimeControlerListner.class);
+
+				bind(CharyparNagelScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
 			}
 		});
 
 		// this is the objective Function which returns the value for given SimulatorState
 		// in my case, this will be the distance based modal split
-		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(OpdytsObjectiveFunctionCases.PATNA); // in this, the method argument (SimulatorStat) is not used.
+		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(OpdytsObjectiveFunctionCases.PATNA_1Pct); // in this, the method argument (SimulatorStat) is not used.
 
 		//search algorithm
 		int maxIterations = 10; // this many times simulator.run(...) and thus controler.run() will be called.
@@ -127,10 +137,11 @@ public class PatnaOpdytsCalibrator {
 		boolean includeCurrentBest = false;
 
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
-		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario);
+		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
+				RandomizedUtilityParametersChoser.ONLY_ASC, randomVariance, PATNA_10_PCT, SUB_POP_NAME);
 
 		// what would be the decision variables to optimize the objective function.
-		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario);
+		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, PATNA_10_PCT, SUB_POP_NAME);
 
 		// what would decide the convergence of the objective function
 		ConvergenceCriterion convergenceCriterion = new FixedIterationNumberConvergenceCriterion(iterationsToConvergence, averagingIterations);
