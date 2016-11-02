@@ -16,37 +16,41 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.thibautd.initialdemandgeneration.empiricalsocnet.snowball.degreebased;
+package playground.thibautd.initialdemandgeneration.empiricalsocnet.toy;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.utils.collections.Tuple;
+import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.CliqueStub;
 import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.Ego;
 import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.EgoCharacteristicsDistribution;
-import playground.thibautd.initialdemandgeneration.empiricalsocnet.snowball.SnowballCliques;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
- * Very simple implementation, that does not care about socio-demographics
- *
  * @author thibautd
  */
 @Singleton
-public class SimpleEgoDistribution implements EgoCharacteristicsDistribution {
-	private final Random random = MatsimRandom.getLocalInstance();
-	// could be compressed a lot, by storing (cumulative) counts in another array and searching with binary search on count
-	private final int[] degrees;
+public class ToyEgoDistribution implements EgoCharacteristicsDistribution {
+	private final ToySocialNetworkConfigGroup configGroup;
 
 	@Inject
-	public SimpleEgoDistribution( final SnowballCliques cliques ) {
-		degrees = new int[ cliques.getEgos().size() ];
-		for ( int i = 0; i < degrees.length; i++ ) degrees[ i ] = cliques.getEgos().get( i ).getDegree();
+	public ToyEgoDistribution( final ToySocialNetworkConfigGroup configGroup ) {
+		this.configGroup = configGroup;
 	}
 
 	@Override
-	public Ego sampleEgo( final Person person ) {
-		return new Ego( person , degrees[ random.nextInt( degrees.length ) ] );
+	public Tuple<Ego, Collection<CliqueStub>> sampleEgo( final Person person ) {
+		final int nCliques = configGroup.getNumberOfCliques();
+
+		final Ego ego = new Ego( person , nCliques * configGroup.getCliqueSize() );
+		final Collection<CliqueStub> stubs = new ArrayList<>( nCliques );
+		for ( int i = 0; i < nCliques; i++ ) {
+			stubs.add( new CliqueStub( configGroup.getCliqueSize() , ego ) );
+		}
+
+		return new Tuple<>( ego , stubs );
 	}
 }

@@ -1,9 +1,9 @@
 /* *********************************************************************** *
- * project: org.matsim.*												   *
+ * project: org.matsim.*
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,23 +16,35 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.mzilske.teach;
+package playground.thibautd.utils;
 
-import tutorial.programming.createNetworkSHP.RunCreateNetworkSHP;
+import java.util.Random;
 
 /**
- * @author nagel
- *
+ * @author thibautd
  */
-public class CreateNetworkSHP {
-	// moved the original class to the tutorial section of the matsim main repository.  This here serves as a pointer so you find it. Kai, mar'15
+public class RandomUtils {
+	private RandomUtils() {}
 
-	/**
-	 * @param args
-	 * @throws Exception 
-	 */
-	public static void main(String[] args) throws Exception {
-		RunCreateNetworkSHP.main( args ) ;
+	public static double nextLognormal( final Random random , final double location , final double scale ) {
+		return Math.exp( nextNormal( random , location , scale ) );
 	}
 
+	public static double nextNormal( final Random random, final double mean, final double sd ) {
+		return mean + sd * nextStandardNormal( random );
+	}
+
+	public static double nextStandardNormal( final Random random ) {
+		// Approximation based on CLT.
+		// Irwin-Hall distribution. Approximation gets better with increasing N.
+		// TODO Zigurat would be more efficient and exact.
+		return nextIrwinHall( random , 20 ) - 10;
+	}
+
+	public static double nextIrwinHall( final Random random , final int n ) {
+		double sum = 0;
+		for ( int i=0; i < n; i++ ) sum += random.nextDouble();
+		return sum - n;
+	}
 }
+
