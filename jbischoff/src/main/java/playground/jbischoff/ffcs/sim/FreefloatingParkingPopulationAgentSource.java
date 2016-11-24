@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.parking.sim;
+package playground.jbischoff.ffcs.sim;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -53,8 +53,9 @@ import org.matsim.vehicles.Vehicles;
 
 import playground.jbischoff.ffcs.FFCSUtils;
 
-public final class ParkingPopulationAgentSource implements AgentSource {
-	private static final Logger log = Logger.getLogger( ParkingPopulationAgentSource.class );
+
+public final class FreefloatingParkingPopulationAgentSource implements AgentSource {
+	private static final Logger log = Logger.getLogger( FreefloatingParkingPopulationAgentSource.class );
 
 	private final Population population;
 	private final AgentFactory agentFactory;
@@ -64,7 +65,7 @@ public final class ParkingPopulationAgentSource implements AgentSource {
 	private Map<Id<Vehicle>,Id<Link>> seenVehicleIds = new HashMap<>() ;
 
 	@Inject
-	public ParkingPopulationAgentSource(Population population, AgentFactory agentFactory, QSim qsim ) {
+	public FreefloatingParkingPopulationAgentSource(Population population, AgentFactory agentFactory, QSim qsim ) {
 		Vehicles vehicles = qsim.getScenario().getVehicles() ;
 		QSimConfigGroup qsimConfig = qsim.getScenario().getConfig().qsim() ;
 		

@@ -30,14 +30,14 @@ import java.util.Random;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
+import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.vehicles.Vehicle;
 
 import playground.jbischoff.ffcs.manager.FreefloatingCarsharingManager;
-import playground.jbischoff.parking.routing.ParkingRouter;
-import playground.jbischoff.parking.search.ParkingSearchLogic;
 
 /**
  * @author jbischoff
