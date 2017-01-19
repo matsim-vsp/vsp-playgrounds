@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,58 +17,31 @@
  *                                                                         *
  * *********************************************************************** */
 
-/**
- * 
- */
-package playground.jbischoff.pt;
+package playground.agarwalamit.utils;
 
-import java.util.Collection;
-
-import org.matsim.core.config.ConfigGroup;
-import org.matsim.core.config.ReflectiveConfigGroup;
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.vehicles.VehicleReaderV1;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.Vehicles;
 
 /**
- * @author  jbischoff
- *
+ * Created by amit on 13/01/2017.
  */
-/**
- *
- */
-public class VariableAccessConfigGroup extends ReflectiveConfigGroup {
 
-	public static final String GROUPNAME = "variableAccess";
-	
-	
-	public static final String MODEGROUPNAME = "variableAccessMode";
 
-	/**
-	 * @param name
-	 */
-	public VariableAccessConfigGroup() {
-		super(GROUPNAME);
-		// TODO Auto-generated constructor stub
-	}
-	
-	  public Collection< ConfigGroup> getVariableAccessModeConfigGroups()
-	    {
-	        return (Collection<ConfigGroup>) getParameterSets(MODEGROUPNAME);
-	    }
-	  
-	  public void setAccessModeGroup(ConfigGroup modeConfig)
-	    {
-	        addParameterSet(modeConfig);
-	    }
-	  
-		@Override
-		public ConfigGroup createParameterSet(final String type) {
-			switch ( type ) {
-				
-				case MODEGROUPNAME:
-					return new VariableAccessModeConfigGroup();
-				default:
-					throw new IllegalArgumentException( type );
-			}
-		}
+public final class VehicleUtils {
 
+    private static final Logger LOGGER = Logger.getLogger(VehicleUtils.class);
+
+    public static void addVehiclesToScenarioFromVehicleFile(final String vehiclesFile, final Scenario scenario){
+        Vehicles vehs = org.matsim.vehicles.VehicleUtils.createVehiclesContainer();
+        new VehicleReaderV1(vehs).readFile(vehiclesFile);
+
+        for(VehicleType vt : vehs.getVehicleTypes().values()) {
+
+            scenario.getVehicles().addVehicleType(vt);
+        }
+    }
 
 }

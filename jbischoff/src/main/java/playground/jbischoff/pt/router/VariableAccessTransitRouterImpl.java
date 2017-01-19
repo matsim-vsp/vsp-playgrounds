@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.pt;
+package playground.jbischoff.pt.router;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -103,7 +103,7 @@ public class VariableAccessTransitRouterImpl implements TransitRouter {
 		Map<Node, InitialNode> wrappedNearestNodes = new LinkedHashMap<>();
 		for (TransitRouterNetworkNode node : nearestNodes) {
 			Coord toCoord = node.stop.getStopFacility().getCoord();
-			Leg initialLeg = getAccessEgressLeg(person, coord, toCoord);
+			Leg initialLeg = getAccessEgressLeg(person, coord, toCoord, departureTime);
 			double initialTime = initialLeg.getTravelTime();
 			double initialCost = getAccessEgressDisutility(person, coord, toCoord);
 			wrappedNearestNodes.put(node, new InitialNode(initialCost, initialTime + departureTime));
@@ -111,8 +111,8 @@ public class VariableAccessTransitRouterImpl implements TransitRouter {
 		return wrappedNearestNodes;
 	}
 
-	private Leg getAccessEgressLeg(Person person, Coord coord, Coord toCoord) {
-		return variableAccessEgressTravelDisutility.getAccessEgressModeAndTraveltime(person, coord, toCoord);
+	private Leg getAccessEgressLeg(Person person, Coord coord, Coord toCoord, double time) {
+		return variableAccessEgressTravelDisutility.getAccessEgressModeAndTraveltime(person, coord, toCoord, time);
 	}
 
 
@@ -144,15 +144,15 @@ public class VariableAccessTransitRouterImpl implements TransitRouter {
 		double directWalkCost = getAccessEgressDisutility(person, fromFacility.getCoord(), toFacility.getCoord());
 		double pathCost = p.travelCost + wrappedFromNodes.get(p.nodes.get(0)).initialCost + wrappedToNodes.get(p.nodes.get(p.nodes.size() - 1)).initialCost;
 
-		if (directWalkCost < pathCost) {
-			return this.createDirectAccessEgressModeLegList(null, fromFacility.getCoord(), toFacility.getCoord());
+		if (directWalkCost * config.getDirectWalkFactor() < pathCost) {
+			return this.createDirectAccessEgressModeLegList(null, fromFacility.getCoord(), toFacility.getCoord(), departureTime);
 		}
 		return convertPathToLegList(departureTime, p, fromFacility.getCoord(), toFacility.getCoord(), person);
 	}
 
-	private List<Leg> createDirectAccessEgressModeLegList(Person person, Coord fromCoord, Coord toCoord) {
+	private List<Leg> createDirectAccessEgressModeLegList(Person person, Coord fromCoord, Coord toCoord, double time) {
 		List<Leg> legs = new ArrayList<>();
-		Leg leg = getAccessEgressLeg(person, fromCoord, toCoord);
+		Leg leg = getAccessEgressLeg(person, fromCoord, toCoord, time);
 		legs.add(leg);
 		return legs;
 	}
@@ -231,7 +231,7 @@ public class VariableAccessTransitRouterImpl implements TransitRouter {
 								legs.add(leg);
 							} else {
 								// accessStop == null, so it must be the first access-leg. If mode is e.g. taxi, we need a transit_walk to get to pt link
-								leg = getAccessEgressLeg(person, fromCoord, egressStop.getCoord());
+								leg = getAccessEgressLeg(person, fromCoord, egressStop.getCoord(),time);
 								if (variableAccessEgressTravelDisutility.isTeleportedAccessEgressMode(leg.getMode()))
 								{
 									leg.getRoute().setEndLinkId(egressStop.getLinkId());
@@ -293,11 +293,11 @@ public class VariableAccessTransitRouterImpl implements TransitRouter {
 		if (prevLink != null) {
 			if (accessStop == null) {
 				// no use of pt
-				leg = getAccessEgressLeg(person, fromCoord, toCoord);
+				leg = getAccessEgressLeg(person, fromCoord, toCoord, time);
 				legs.add(leg);
 
 			} else {
-				Leg eleg = getAccessEgressLeg(person, accessStop.getCoord(), toCoord);
+				Leg eleg = getAccessEgressLeg(person, accessStop.getCoord(), toCoord, time);
 				
 				if (variableAccessEgressTravelDisutility.isTeleportedAccessEgressMode(eleg.getMode())){
 					leg = eleg;
@@ -321,9 +321,13 @@ public class VariableAccessTransitRouterImpl implements TransitRouter {
 		if (transitLegCnt == 0) {
 			// it seems, the agent only walked
 			legs.clear();
-			leg = getAccessEgressLeg(person, accessStop.getCoord(), toCoord);
+			try{
+			leg = getAccessEgressLeg(person, fromCoord, toCoord, time);
 
 			legs.add(leg);
+			} catch (NullPointerException e){
+				throw new RuntimeException(" npe: person"+ person + fromCoord + toCoord + time);
+			}
 		}
 		return legs;
 	}

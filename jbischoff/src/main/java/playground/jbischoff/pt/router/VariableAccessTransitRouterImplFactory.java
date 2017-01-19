@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.jbischoff.pt;
+package playground.jbischoff.pt.router;
 
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
@@ -38,6 +38,9 @@ import org.matsim.pt.router.TransitRouterNetworkTravelTimeAndDisutility;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 
 import com.google.inject.name.Named;
+
+import playground.jbischoff.pt.router.config.VariableAccessConfigGroup;
+import playground.jbischoff.pt.router.config.VariableAccessModeConfigGroup;
 
 import java.util.HashSet;
 
@@ -61,7 +64,7 @@ public class VariableAccessTransitRouterImplFactory implements Provider<TransitR
 	@Inject
 	VariableAccessTransitRouterImplFactory(final @Named("variableAccess") TransitSchedule schedule, final Config config, final Network network) {
 		this.config = config;
-
+		
 		this.transitRouterconfig = new TransitRouterConfig(config.planCalcScore(),config.plansCalcRoute(),config.transitRouter(),config.vspExperimental());
 		this.routerNetwork = TransitRouterNetwork.createFromSchedule(schedule, this.transitRouterconfig.getBeelineWalkConnectionDistance());
 		this.preparedTransitSchedule = new PreparedTransitSchedule(schedule);
@@ -77,18 +80,26 @@ public class VariableAccessTransitRouterImplFactory implements Provider<TransitR
 
 	@Override
 	public TransitRouter get() {
-		DistancebasedVariableAccessModule variableAccessEgressTravelDisutility = new DistancebasedVariableAccessModule(carnetwork,config);
+		
+				
 		VariableAccessConfigGroup vaConfig = (VariableAccessConfigGroup) config.getModule(VariableAccessConfigGroup.GROUPNAME);
+		VariableAccessEgressTravelDisutility variableAccessEgressTravelDisutility;
+		if (vaConfig.getStyle().equals("fixed")){
+		variableAccessEgressTravelDisutility = new FixedDistanceBasedVariableAccessModule(carnetwork,config);
+		
 		for (ConfigGroup cg: vaConfig.getVariableAccessModeConfigGroups()){
 			VariableAccessModeConfigGroup modeconfig = (VariableAccessModeConfigGroup) cg;
-			LeastCostPathCalculator lcp = null; 
-			if (!modeconfig.isTeleported()){
-				FreespeedTravelTimeAndDisutility fs =new FreespeedTravelTimeAndDisutility(-1, 1,-0.1);
-				lcp =  new DijkstraFactory().createPathCalculator(carnetwork, fs,fs);
-			}
-			variableAccessEgressTravelDisutility.registerMode(modeconfig.getMode(), (int) modeconfig.getDistance(), modeconfig.isTeleported(), lcp);
+			((FixedDistanceBasedVariableAccessModule) variableAccessEgressTravelDisutility).registerMode(modeconfig.getMode(), (int) modeconfig.getDistance(), modeconfig.isTeleported());
 		}
-		
+		} else if (vaConfig.getStyle().equals("flexible")){
+			variableAccessEgressTravelDisutility = new FlexibleDistanceBasedVariableAccessModule(carnetwork,config);
+			for (ConfigGroup cg: vaConfig.getVariableAccessModeConfigGroups()){
+				VariableAccessModeConfigGroup modeconfig = (VariableAccessModeConfigGroup) cg;
+				((FlexibleDistanceBasedVariableAccessModule) variableAccessEgressTravelDisutility).registerMode(modeconfig.getMode(), (int) modeconfig.getDistance(), modeconfig.isTeleported());
+			}
+		} else {
+			throw new RuntimeException("Unsupported Style");
+		}
 		TransitRouterNetworkTravelTimeAndDisutility ttCalculator = new TransitRouterNetworkTravelTimeAndDisutility(this.transitRouterconfig, this.preparedTransitSchedule);
 		return new VariableAccessTransitRouterImpl(this.transitRouterconfig, this.preparedTransitSchedule, this.routerNetwork, ttCalculator, ttCalculator, variableAccessEgressTravelDisutility, network);
 	}

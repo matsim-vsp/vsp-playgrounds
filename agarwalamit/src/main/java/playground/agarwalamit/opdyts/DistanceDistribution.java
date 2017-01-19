@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,38 +17,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-/**
- * 
- */
-package playground.jbischoff.pt;
+package playground.agarwalamit.opdyts;
 
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
+import java.util.Map;
 
 /**
- * @author  jbischoff
- *
+ * Created by amit on 13/01/2017.
  */
-/**
- *
- */
-public interface VariableAccessEgressTravelDisutility {
+@SuppressWarnings("DefaultFileTemplate")
+public interface DistanceDistribution {
 
-	/**
-	 * 
-	 * @param person
-	 * @param coord
-	 * @param toCoord
-	 * @return
-	 */
-	Leg getAccessEgressModeAndTraveltime(Person person, Coord coord, Coord toCoord);
-	/**
-	 * 
-	 * @param mode
-	 * @return whether a mode is teleported. 
-	 * Non-teleported modes require an additional stage activity for the agent to get from street network to pt network
-	 */
-	boolean isTeleportedAccessEgressMode(String mode);
-	
+    double [] getDistClasses();
+
+    Map<String, double[]> getMode2DistanceBasedLegs();
+
+    OpdytsScenario getOpdytsScenario();
 }

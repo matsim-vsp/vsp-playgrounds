@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,17 +17,21 @@
  *                                                                         *
  * *********************************************************************** */
 
+package playground.ikaddoura.utils.prepare;
 
-package playground.agarwalamit.opdyts;
+import playground.agarwalamit.utils.plans.SelectedPlansFilter;
 
 /**
- * Created by amit on 03/10/16.
- */
-public enum OpdytsScenarios {
+* @author ikaddoura
+*/
 
-    EQUIL,
-    EQUIL_MIXEDTRAFFIC,
-    PATNA_1Pct,
-    PATNA_10Pct;
+public class FilterSelectedPlans {
+
+	public static void main(String[] args) {
+		SelectedPlansFilter spf = new SelectedPlansFilter();
+		spf.run("/Users/ihab/Documents/workspace/runs-svn/cemdapMatsimCadyts/run_194c/run_194c.output_plans.xml.gz");
+		spf.writePlans("/Users/ihab/Documents/workspace/runs-svn/cemdapMatsimCadyts/run_194c/run_194c.150.plans_selected.xml.gz");
+	}
 
 }
+
