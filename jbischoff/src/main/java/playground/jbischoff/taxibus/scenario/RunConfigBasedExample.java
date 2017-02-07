@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.jbischoff.taxibus.run;
+package playground.jbischoff.taxibus.scenario;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
