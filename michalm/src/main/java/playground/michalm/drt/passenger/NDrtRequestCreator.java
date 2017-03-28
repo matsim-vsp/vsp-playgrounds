@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,21 +17,23 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.scheduler;
+package playground.michalm.drt.passenger;
 
-import playground.michalm.drt.run.DrtConfigGroup;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.dvrp.data.Request;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
+import org.matsim.core.mobsim.framework.MobsimPassengerAgent;
+
+import playground.michalm.drt.data.NDrtRequest;
 
 /**
  * @author michalm
  */
-public class DrtSchedulerParams {
-	public final double stopDuration;
-
-	public DrtSchedulerParams(DrtConfigGroup drtCfg) {
-		this.stopDuration = drtCfg.getStopDuration();
-	}
-
-	public DrtSchedulerParams(double stopDuration) {
-		this.stopDuration = stopDuration;
+public class NDrtRequestCreator implements PassengerRequestCreator {
+	@Override
+	public NDrtRequest createRequest(Id<Request> id, MobsimPassengerAgent passenger, Link fromLink, Link toLink,
+			double earliestStartTime, double latestStartTime, double submissionTime) {
+		return new NDrtRequest(id, passenger, fromLink, toLink, earliestStartTime, submissionTime);
 	}
 }
