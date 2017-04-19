@@ -21,7 +21,7 @@ package playground.michalm.taxi.run;
 
 import org.junit.Test;
 
-public class KNTaxiTest {
+public class KNTaxiIT {
 	@Test
 	public void testRun() {
 		String configFile = "src/main/resources/mielec_2014_02/KN_config.xml";

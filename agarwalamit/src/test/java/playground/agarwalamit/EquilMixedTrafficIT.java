@@ -63,7 +63,7 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTime
  * @author amit
  */
 
-public class EquilMixedTrafficTest {
+public class EquilMixedTrafficIT {
 
     private static final String EQUIL_DIR = "../../examples/scenarios/equil-mixedTraffic/";
 
