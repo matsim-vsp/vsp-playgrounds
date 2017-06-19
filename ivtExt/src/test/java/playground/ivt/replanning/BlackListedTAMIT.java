@@ -29,7 +29,7 @@ import org.matsim.testcases.MatsimTestUtils;
 /**
  * @author thibautd
  */
-public class BlackListedTAMTest {
+public class BlackListedTAMIT {
 	@Rule
 	public final MatsimTestUtils utils = new MatsimTestUtils();
 
