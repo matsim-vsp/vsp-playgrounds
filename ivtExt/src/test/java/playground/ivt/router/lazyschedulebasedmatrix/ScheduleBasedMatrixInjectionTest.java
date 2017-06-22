@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 /**
@@ -35,7 +37,7 @@ public class ScheduleBasedMatrixInjectionTest {
 
 	@Test
 	public void testInstanciation() {
-		final Config config = utils.loadConfig( "../../examples/scenarios/pt-simple/config.xml" );
+		final Config config = utils.loadConfig( IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("pt-simple"), "config.xml") );
 
 		config.controler().setLastIteration( 0 );
 

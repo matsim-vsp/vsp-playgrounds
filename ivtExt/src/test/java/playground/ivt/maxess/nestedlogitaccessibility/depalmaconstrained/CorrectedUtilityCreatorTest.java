@@ -28,6 +28,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.examples.ExamplesUtils;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.testcases.MatsimTestUtils;
 import playground.ivt.maxess.nestedlogitaccessibility.framework.Alternative;
@@ -131,7 +133,7 @@ public class CorrectedUtilityCreatorTest {
 	}
 
 	private Scenario loadScenario() {
-		final Config config = ConfigUtils.loadConfig("../../examples/scenarios/chessboard/config.xml");
+		final Config config = ConfigUtils.loadConfig(IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("chessboard"), "config.xml"));
 		final ConstrainedAccessibilityConfigGroup configGroup = new ConstrainedAccessibilityConfigGroup();
 		config.addModule(configGroup);
 

@@ -13,6 +13,39 @@
 		<connection>scm:git:git://github.com/matsim-org/matsim.git</connection>
 		<developerConnection>scm:git:git@github.com:matsim-org/matsim.git</developerConnection>
 	</scm>
+	<repositories>
+		<repository>
+			<id>matsim</id>
+			<url>https://dl.bintray.com/matsim/matsim</url>
+		</repository>
+		<repository>
+			<id>ojo-snapshots</id>
+			<url>http://oss.jfrog.org/libs-snapshot</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<!-- Geotools is not on Maven central -->
+			<id>osgeo</id>
+			<name>Geotools repository</name>
+			<url>http://download.osgeo.org/webdav/geotools</url>
+		</repository>
+		<repository>
+			<!-- for older jsprit versions. please migrate to new, they are on Maven central -->
+			<id>jsprit-releases</id>
+			<url>https://github.com/jsprit/mvn-rep/raw/master/releases</url>
+		</repository>
+		<repository>
+			<!-- Some custom-hosted dependencies on our web page, maintained by mrieser -->
+			<id>matsim-custom</id>
+			<url>http://matsim.org/m2repo</url>
+		</repository>
+
+	</repositories>
 	<build>
 		<plugins>
 			<plugin>
@@ -79,6 +112,16 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.8</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.2.1</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -143,23 +186,7 @@
 		<module>wbean</module>
 		<module>vbmh</module>
 	</modules>
-	<repositories>
-		<repository>
-			<!-- Geotools is not on Maven central -->
-			<id>osgeo</id>
-			<name>Geotools repository</name>
-			<url>http://download.osgeo.org/webdav/geotools</url>
-		</repository>
-		<repository>
-			<id>matsim</id>
-			<url>http://matsim.org/m2repo</url>
-		</repository>
-		<repository>
-			<id>bintray</id>
-			<url>http://dl.bintray.com/matsim/matsim</url>
-		</repository>
-	</repositories>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>

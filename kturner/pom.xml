@@ -16,11 +16,6 @@
 			<version>0.10.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.matsim.contrib</groupId>
-			<artifactId>freight</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
 		<!--  Jsprit 1.4.2
 		<dependency>
 			<groupId>jsprit</groupId>

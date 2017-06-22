@@ -18,6 +18,7 @@
  * *********************************************************************** */
 package playground.agarwalamit;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -40,6 +41,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 /**
@@ -50,7 +53,7 @@ public class NetworkRouteForUncongestedModeTest {
 
 	@Rule public MatsimTestUtils helper = new MatsimTestUtils();
 
-	private final static String EQUIL_NETWORK = "../../examples/scenarios/equil/network.xml";
+	private final static URL EQUIL_NETWORK = IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("equil"), "network.xml");
 
 	/**
 	 * Every link must allow car and ride mode if networkModes are car and ride. 
@@ -84,7 +87,7 @@ public class NetworkRouteForUncongestedModeTest {
 
 	private Scenario createSceanrio () {
 		Config config = ConfigUtils.createConfig();
-		config.network().setInputFile(EQUIL_NETWORK);
+		config.network().setInputFile(EQUIL_NETWORK.toString());
 		config.controler().setLastIteration(1);
 
 		{

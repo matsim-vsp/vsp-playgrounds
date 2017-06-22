@@ -19,6 +19,7 @@
 
 package playground.agarwalamit;
 
+import java.net.URL;
 import java.util.*;
 import com.google.inject.Inject;
 import org.junit.Assert;
@@ -49,6 +50,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
@@ -63,14 +66,14 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTime
 
 public class EquilMixedTrafficIT {
 
-    private static final String EQUIL_DIR = "../../examples/scenarios/equil-mixedTraffic/";
+    private static final URL EQUIL_DIR = ExamplesUtils.getTestScenarioURL("equil-mixedTraffic");
 
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
 
     @Test
     public void runSameVehiclesTypesInTrips() {
-        Config config = ConfigUtils.loadConfig(EQUIL_DIR + "/config-with-mode-vehicles.xml");
+        Config config = ConfigUtils.loadConfig(IOUtils.newUrl(EQUIL_DIR,"config-with-mode-vehicles.xml"));
         config.controler().setOutputDirectory(helper.getOutputDirectory());
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -127,7 +130,7 @@ public class EquilMixedTrafficIT {
      */
     @Test
     public void runDifferentVehiclesTypesInTrips() {
-        Config config = ConfigUtils.loadConfig(EQUIL_DIR + "/config-with-mode-vehicles.xml");
+        Config config = ConfigUtils.loadConfig(IOUtils.newUrl(EQUIL_DIR,"config-with-mode-vehicles.xml"));
         String outDir = helper.getOutputDirectory();
         config.controler().setOutputDirectory(outDir);
 
