@@ -64,40 +64,28 @@ import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScorin
 public class PatnaUrbanOpdytsCalibrator {
 
 	private static final OpdytsScenario PATNA_1_PCT = OpdytsScenario.PATNA_1Pct;
-	private static boolean isPlansRelaxed = true;
 
 	public static void main(String[] args) {
-
 		String configFile;
 		String OUT_DIR = null;
+		String relaxedPlans ;
 
 		if ( args.length>0 ) {
 			configFile = args[0];
 			OUT_DIR = args[1];
-
-			isPlansRelaxed = Boolean.valueOf(args[2]);;
+			relaxedPlans = args[2];
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/"+"/config_allModes.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/";
+			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
-		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
-
-		String relaxedPlansDir = OUT_DIR+"/initialPlans2RelaxedPlans/";
-		if (! isPlansRelaxed ) {
-			// relax the plans first.
-			config.controler().setOutputDirectory(relaxedPlansDir);
-			PatnaPlansRelaxor relaxor = new PatnaPlansRelaxor();
-			relaxor.run(config);
-		}
-
-		OUT_DIR = OUT_DIR+"/calibration_variationSize"+opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable()+"_AvgIts"+opdytsConfigGroup.getNumberOfIterationsForAveraging()+"/";
-		config.plans().setInputFile(relaxedPlansDir+"/output_plans.xml.gz");
-
+		config.plans().setInputFile(relaxedPlans);
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
-
 		config.controler().setOutputDirectory(OUT_DIR);
+
+		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -135,7 +123,6 @@ public class PatnaUrbanOpdytsCalibrator {
 
 			@Override
 			public void install() {
-				// some stats
 				addControlerListenerBinding().to(KaiAnalysisListener.class);
 				addControlerListenerBinding().toInstance(stasControlerListner);
 
