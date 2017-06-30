@@ -17,14 +17,13 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea;
 
 /**
  * Created by amit on 29.06.17.
  *
  * see ChandraKumar2003EffctLaneWidthMxdTrfc for details about the projected area.
  */
-
 
 public enum VehicleProjectedAreaRatio {
 
@@ -47,7 +46,7 @@ public enum VehicleProjectedAreaRatio {
     public static double getProjectedAreaRatio (final String vehicleType) {
         double ratio =0.;
         for (VehicleProjectedAreaRatio vpar : VehicleProjectedAreaRatio.values()) {
-            if (vehicleType.equals(vpar.toString())) return ratio;
+            if (vehicleType.equals(vpar.toString())) return vpar.getProjectedAreaRatio();
         }
         return ratio;
     }

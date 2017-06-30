@@ -67,6 +67,7 @@ import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation.DynamicPCUUpdator;
 
 /**
  * @author amit after ssix
@@ -408,8 +409,15 @@ public class FundamentalDiagramDataGenerator {
 				fdNetworkGenerator.getLastLinkIdOfTrack(),
 				fdNetworkGenerator.getLengthOfTrack());
 
+		DynamicPCUUpdator dynamicPCUUpdator = new DynamicPCUUpdator(
+				this.scenario,
+				fdNetworkGenerator.getFirstLinkIdOfTrack(),
+				fdNetworkGenerator.getLastLinkIdOfTrack(),
+				fdNetworkGenerator.getLengthOfTrack());
+
 		events.addHandler(globalFlowDynamicsUpdator);
 		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
+		events.addHandler(dynamicPCUUpdator);
 
 		EventWriterXML eventWriter = null;
 
@@ -496,6 +504,11 @@ public class FundamentalDiagramDataGenerator {
 				writer.format("%.2f\t", passingEventsUpdator.getNoOfCarsPerKm());
 
 				writer.format("%.2f\t", passingEventsUpdator.getAvgBikesPassingRate());
+			}
+
+			for (String travelMode : travelModes) {
+				String str = String.valueOf( scenario.getVehicles().getVehicleTypes().get(Id.create(travelMode,VehicleType.class)).getPcuEquivalents() );
+				writer.print(str + "\t");
 			}
 
 			writer.print("\n");
@@ -627,6 +640,10 @@ public class FundamentalDiagramDataGenerator {
 			writer.print("avgBikePassingRatePerkm \t");
 		}
 
+		for (String travelMode : travelModes) {
+			String str = "pcu_"+travelMode;
+			writer.print(str + "\t");
+		}
 		writer.print("\n");
 	}
 

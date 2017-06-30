@@ -18,7 +18,7 @@
  * *********************************************************************** */
 
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea;
 
 /**
  * Created by amit on 29.06.17.
