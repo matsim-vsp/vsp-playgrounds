@@ -18,7 +18,7 @@
 			        <configuration>
 			          <archive>
 			            <manifest>
-			              <mainClass>playground.vsptelematics.ha2.HA2GUI</mainClass>
+			              <mainClass>playground.vsptelematics.roadpricing.RoadpricingGUI</mainClass>
 			            </manifest>
 			          </archive>
 			        </configuration>

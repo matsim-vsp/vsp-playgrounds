@@ -39,7 +39,7 @@ public class RoadpricingGUI {
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>playground.vsptelematics.bangbang.KNBangBangGUI</mainClass>
+									<mainClass>playground.vsptelematics.roadpricing.RoadpricingGUI</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
