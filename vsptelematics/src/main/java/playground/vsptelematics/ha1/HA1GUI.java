@@ -39,7 +39,7 @@ public class HA1GUI {
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>playground.vsptelematics.bangbang.KNBangBangGUI</mainClass>
+									<mainClass>playground.vsptelematics.ha1.HA1GUI</mainClass>
 								</manifest>
 							</archive>
 						</configuration>

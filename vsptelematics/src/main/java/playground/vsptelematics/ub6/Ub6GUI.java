@@ -39,7 +39,7 @@ public class Ub6GUI {
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>playground.vsptelematics.bangbang.KNBangBangGUI</mainClass>
+									<mainClass>playground.vsptelematics.ub6.Ub6GUI</mainClass>
 								</manifest>
 							</archive>
 						</configuration>
