@@ -57,7 +57,7 @@ import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
-/**
+/**®
  * @author amit
  */
 
@@ -69,15 +69,18 @@ public class PatnaUrbanOpdytsCalibrator {
 		String configFile;
 		String OUT_DIR = null;
 		String relaxedPlans ;
+		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
 
 		if ( args.length>0 ) {
 			configFile = args[0];
 			OUT_DIR = args[1];
 			relaxedPlans = args[2];
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.valueOf(args[3]);
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/"+"/config_allModes.xml";
-			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/";
+			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial;
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
@@ -166,7 +169,7 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
-				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, allModes);
+				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, allModes, ascRandomizeStyle);
 
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, allModes, PATNA_1_PCT);
