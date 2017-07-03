@@ -38,14 +38,12 @@ public class TeleportationODAnalyzer implements PersonDepartureEventHandler {
 
     private final Map<String, MATSimCountingStateAnalyzer<Zone>> mode2stateAnalyzer;
     private final Set<Zone> relevantZones;
-    private final TimeDiscretization timeDiscretization;
 
     public TeleportationODAnalyzer(final TimeDiscretization timeDiscretization,
                                    final Set<Zone> relevantZones,
                                    final Set<String> relevantModes) {
         this.relevantZones = relevantZones;
         this.mode2stateAnalyzer = new LinkedHashMap<>();
-        this.timeDiscretization = timeDiscretization;
         for (String mode : relevantModes) {
             this.mode2stateAnalyzer.put(mode, new MATSimCountingStateAnalyzer<Zone>(timeDiscretization));
         }
@@ -68,6 +66,7 @@ public class TeleportationODAnalyzer implements PersonDepartureEventHandler {
 
     @Override
     public void handleEvent(PersonDepartureEvent event) {
+        // TODO need to use coordinates from plans than link for beeline distances. Amit July'17
         final MATSimCountingStateAnalyzer<Zone> stateAnalyzer = this.mode2stateAnalyzer.get(event.getLegMode());
         if (this.mode2stateAnalyzer.containsKey(event.getLegMode())) {
             for (Zone zone : this.relevantZones ) {
