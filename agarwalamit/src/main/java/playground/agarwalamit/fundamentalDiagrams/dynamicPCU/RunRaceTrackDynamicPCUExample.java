@@ -23,8 +23,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.VspExperimentalConfigGroup;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -46,14 +44,12 @@ public class RunRaceTrackDynamicPCUExample {
         boolean isRunningOnServer = args.length > 0;
 
         String outDir ;
-        boolean isRunningDistribution = false;
         Config config = null;
 
         if ( isRunningOnServer ) {
             outDir = args[0];
-            isRunningDistribution = Boolean.valueOf(args[1]);
-            if (args.length>2) {
-                config = ConfigUtils.loadConfig(args[2]);
+            if (args.length>1) {
+                config = ConfigUtils.loadConfig(args[1]);
             }
         } else {
             config = ConfigUtils.loadConfig(FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml");
@@ -77,9 +73,6 @@ public class RunRaceTrackDynamicPCUExample {
                 vehicles.addVehicleType(bike);
             }
         } else scenario = ScenarioUtils.loadScenario(config); // network and plans will anywaye be generated internally
-
-        scenario.getConfig().vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
-        scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         Vehicles vehicles = scenario.getVehicles();
         vehicles.getVehicleTypes().values().forEach(vt -> {
