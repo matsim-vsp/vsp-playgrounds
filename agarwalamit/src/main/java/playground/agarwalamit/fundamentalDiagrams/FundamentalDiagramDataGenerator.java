@@ -58,15 +58,16 @@ import org.matsim.core.mobsim.qsim.interfaces.Netsim;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
 import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation.DynamicPCUUpdator;
 
 /**
  * @author amit after ssix
@@ -79,12 +80,8 @@ public class FundamentalDiagramDataGenerator {
 	static final double MAX_ACT_END_TIME = 1800.;
 
 	private String runDir ;
-	private boolean isWritingEventsFileForEachIteration = false;
 
 	private boolean isUsingLiveOTFVis = false;
-	private boolean isPlottingDistribution = false;
-
-	private int reduceDataPointsByFactor = 1;
 
 	private int flowUnstableWarnCount [] ;
 	private int speedUnstableWarnCount [] ;
@@ -105,32 +102,13 @@ public class FundamentalDiagramDataGenerator {
 	private String[] travelModes;
 	private Double[] modalShareInPCU;
 
-	public FundamentalDiagramDataGenerator(final RaceTrackLinkProperties raceTrackLinkProperties, final Scenario scenario){
-		fdNetworkGenerator = new FDNetworkGenerator(raceTrackLinkProperties);
+	private FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
+
+	public FundamentalDiagramDataGenerator( final Scenario scenario){
+		fundamentalDiagramConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FundamentalDiagramConfigGroup.class);
+		fdNetworkGenerator = new FDNetworkGenerator(fundamentalDiagramConfigGroup);
 		fdNetworkGenerator.createNetwork(scenario);
 		this.scenario = scenario;
-	}
-
-	/**
-	 * All default values will be used.
-	 */
-	public FundamentalDiagramDataGenerator(){
-		this (ScenarioUtils.loadScenario(ConfigUtils.createConfig()));
-	}
-
-	/**
-	 * A constructor to use the default values for the race track network.
-	 * @param scenario
-	 */
-	public FundamentalDiagramDataGenerator(final Scenario scenario){
-		this(new RaceTrackLinkProperties(
-				1000.0,
-				1600.0,
-				60.0/3.6,
-				1.0,
-				new HashSet<>(
-						scenario.getConfig().qsim().getMainModes())),
-				scenario);
 	}
 
 	public void run(){
@@ -139,12 +117,13 @@ public class FundamentalDiagramDataGenerator {
 
 		openFileAndWriteHeader(runDir+"/data.txt");
 
-		if(isPlottingDistribution){
+		if(fundamentalDiagramConfigGroup.isRunningDistribution()){
 			parametricRunAccordingToDistribution();
 		} else parametricRunAccordingToGivenModalSplit();
 
 		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/config.xml");
 		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/network.xml");
+		new VehicleWriterV1(scenario.getVehicles()).writeFile(this.runDir+"/vehicles.xml");
 
 		closeFile();
 	}
@@ -155,14 +134,14 @@ public class FundamentalDiagramDataGenerator {
 
 		createLogFile();
 
-		if(reduceDataPointsByFactor != 1) {
+		if(fundamentalDiagramConfigGroup.getReduceDataPointsByFactor() != 1) {
 			LOG.info("===============");
-			LOG.warn("Number of modes for each mode type in FD will be reduced by a factor of "+reduceDataPointsByFactor+". This will not change the traffic dynamics.");
+			LOG.warn("Number of modes for each mode type in FD will be reduced by a factor of "+fundamentalDiagramConfigGroup.getReduceDataPointsByFactor()+". This will not change the traffic dynamics.");
 			if (scenario.getConfig().qsim().getTrafficDynamics()== QSimConfigGroup.TrafficDynamics.queue) LOG.warn("Make sure this is what you want because it will be more likely to have less or no points in congested regime in absence of queue model with holes.");
 			LOG.info("===============");
 		}
 
-		if(isWritingEventsFileForEachIteration) Log.warn("This will write one event file corresponding to each iteration and thus ");
+		if(fundamentalDiagramConfigGroup.isWritingEvents()) Log.warn("This will write one event file corresponding to each iteration and thus ");
 
 		Collection<String> mainModes = scenario.getConfig().qsim().getMainModes();
 		travelModes = mainModes.toArray(new String[mainModes.size()]);
@@ -174,7 +153,7 @@ public class FundamentalDiagramDataGenerator {
 
 				VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
             	car.setPcuEquivalents(1.0);
-            	car.setMaximumVelocity( fdNetworkGenerator.getLinkProperties().getLinkFreeSpeedMPS() );
+            	car.setMaximumVelocity( fundamentalDiagramConfigGroup.getTrackLinkSpeed() );
             	scenario.getVehicles().addVehicleType(car);
 
 			} else {
@@ -199,7 +178,9 @@ public class FundamentalDiagramDataGenerator {
 				this.modalShareInPCU[index] = 1.0;
 			}
 		} else if (this.modalShareInPCU.length != this.travelModes.length) {
-			throw new RuntimeException("Number of modes is not equal to the provided modal share (in PCU). Aborting...");
+			LOG.warn("Number of modes is not equal to the provided modal share (in PCU). Running for equal modal share");
+			this.modalShareInPCU = new Double[this.travelModes.length];
+			Arrays.fill(this.modalShareInPCU, 1.0);
 		}
 	}
 
@@ -227,27 +208,6 @@ public class FundamentalDiagramDataGenerator {
 			Network netImpl = scenario.getNetwork();
 			netImpl.getFactory().setLinkFactory(new VariableIntervalTimeVariantLinkFactory());
 		}
-	}
-
-	public void setModalShareInPCU(Double[] modalShareInPCU) {
-		this.modalShareInPCU = modalShareInPCU;
-	}
-
-	public void setReduceDataPointsByFactor(int reduceDataPointsByFactor) {
-		this.reduceDataPointsByFactor = reduceDataPointsByFactor;
-	}
-
-	public void setIsPlottingDistribution(boolean isPlottingDistribution) {
-		this.isPlottingDistribution = isPlottingDistribution;
-	}
-
-	public void setIsUsingLiveOTFVis(boolean liveOTFVis) {
-		this.isUsingLiveOTFVis = liveOTFVis;
-	}
-
-	public void setIsWritingEventsFileForEachIteration(
-			boolean isWritingEventsFileForEachIteration) {
-		this.isWritingEventsFileForEachIteration = isWritingEventsFileForEachIteration;
 	}
 
 	private void parametricRunAccordingToGivenModalSplit(){
@@ -285,15 +245,15 @@ public class FundamentalDiagramDataGenerator {
 			minSteps.set(0, 1);
 		}
 
-		if(reduceDataPointsByFactor!=1) {
+		if(fundamentalDiagramConfigGroup.getReduceDataPointsByFactor()!=1) {
 			for(int index=0;index<minSteps.size();index++){
-				minSteps.set(index, minSteps.get(index)*reduceDataPointsByFactor);
+				minSteps.set(index, minSteps.get(index)*fundamentalDiagramConfigGroup.getReduceDataPointsByFactor());
 			}
 		}
 
 		//set up number of Points to run.
 		double cellSizePerPCU = scenario.getNetwork().getEffectiveCellSize();
-		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fdNetworkGenerator.getLinkProperties().getNumberOfLanes() / cellSizePerPCU;
+		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 		double sumOfPCUInEachStep = 0;
 
 		for(int index=0;index<travelModes.length;index++){
@@ -328,13 +288,13 @@ public class FundamentalDiagramDataGenerator {
 
 		for(int ii=0;ii<travelModes.length;ii++){
 			this.startingPoint [ii] =0;
-			this.stepSize [ii] = this.reduceDataPointsByFactor;
+			this.stepSize [ii] = this.fundamentalDiagramConfigGroup.getReduceDataPointsByFactor();
 		}
 		this.startingPoint = new Integer[] {1,1};
 
 		maxAgentDistribution = new Integer [travelModes.length];
 		double cellSizePerPCU = this.scenario.getNetwork().getEffectiveCellSize();
-		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fdNetworkGenerator.getLinkProperties().getNumberOfLanes() / cellSizePerPCU;
+		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 
 		for(int ii=0;ii<maxAgentDistribution.length;ii++){
 			double pcu = this.mode2FlowData.get(travelModes[ii]).getVehicleType().getPcuEquivalents();
@@ -408,12 +368,19 @@ public class FundamentalDiagramDataGenerator {
 				fdNetworkGenerator.getLastLinkIdOfTrack(),
 				fdNetworkGenerator.getLengthOfTrack());
 
+		DynamicPCUUpdator dynamicPCUUpdator = new DynamicPCUUpdator(
+				this.scenario,
+				fdNetworkGenerator.getFirstLinkIdOfTrack(),
+				fdNetworkGenerator.getLastLinkIdOfTrack(),
+				fdNetworkGenerator.getLengthOfTrack());
+
 		events.addHandler(globalFlowDynamicsUpdator);
 		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
+		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) events.addHandler(dynamicPCUUpdator);
 
 		EventWriterXML eventWriter = null;
 
-		if(isWritingEventsFileForEachIteration){
+		if(fundamentalDiagramConfigGroup.isWritingEvents()){
 			String eventsDir = runDir+"/events/";
 
 			if (! new File(eventsDir).exists() ) new File(eventsDir).mkdir();
@@ -466,7 +433,7 @@ public class FundamentalDiagramDataGenerator {
 
 		// sometimes higher density points are also executed (stuck time), to exclude them density check.
 		double cellSizePerPCU = scenario.getNetwork().getEffectiveCellSize();
-		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fdNetworkGenerator.getLinkProperties().getNumberOfLanes() / cellSizePerPCU;
+		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 
 		if(stableState){
 			double globalLinkDensity = globalFlowDynamicsUpdator.getGlobalData().getPermanentDensity();
@@ -498,10 +465,17 @@ public class FundamentalDiagramDataGenerator {
 				writer.format("%.2f\t", passingEventsUpdator.getAvgBikesPassingRate());
 			}
 
+			if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
+				for (String travelMode : travelModes) {
+					String str = String.valueOf( scenario.getVehicles().getVehicleTypes().get(Id.create(travelMode,VehicleType.class)).getPcuEquivalents() );
+					writer.print(str + "\t");
+				}
+			}
+
 			writer.print("\n");
 		}
 
-		if(isWritingEventsFileForEachIteration) {
+		if(fundamentalDiagramConfigGroup.isWritingEvents()) {
 			assert eventWriter != null;
 			eventWriter.closeFile();
 		}
@@ -626,7 +600,12 @@ public class FundamentalDiagramDataGenerator {
 
 			writer.print("avgBikePassingRatePerkm \t");
 		}
-
+		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
+			for (String travelMode : travelModes) {
+				String str = "pcu_"+travelMode;
+				writer.print(str + "\t");
+			}
+		}
 		writer.print("\n");
 	}
 
@@ -669,10 +648,11 @@ public class FundamentalDiagramDataGenerator {
 		String conversionPattern = " %d %4p %c{1} %L %m%n";
 		layout.setConversionPattern(conversionPattern);
 		FileAppender appender;
+		String filename = runDir + "/fdlogfile.log";
 		try {
-			appender = new FileAppender(layout, runDir+"/fdlogfile.log",false);
+			appender = new FileAppender(layout, filename,false);
 		} catch (IOException e1) {
-			throw new RuntimeException("File not found.");
+			throw new RuntimeException("File "+filename+" not found.");
 		}
 		LOG.addAppender(appender);
 	}

@@ -17,37 +17,42 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
-
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.ScenarioUtils;
-import playground.agarwalamit.utils.FileUtils;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea;
 
 /**
- * Created by amit on 16/02/2017.
+ * Created by amit on 29.06.17.
+ *
+ * see ChandraKumar2003EffctLaneWidthMxdTrfc for details about the projected area.
  */
 
-public class RunFDDataExample {
+public enum VehicleProjectedAreaRatio {
 
-    public static void main(String[] args) {
+    // vehicleType (ratio with respect to car), // area
+    car (1.0), // 5.39
+    bicycle (0.16), // 0.85
+    bike (0.16), // 0.85
+    motorbike (0.22), // 1.2
+    truck (3.27), // 17.62
+    bus(4.59), // 24.74
+    tractor (3.02), // 16.28
+    cycleRickshaw (0.48) ;// 2.56
 
-        boolean runUsingConfig = false;
+    private double projectedAreaRatio;
 
-        Scenario scenario ;
-
-        if (runUsingConfig ) {
-            String configFile = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml";
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
-        } else {
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-        }
-
-        String myDir = FileUtils.SHARED_SVN+"/projects/mixedTraffic/triangularNetwork/run314/carMotorbikeBikeTruck/holes/laneVariation/";
-        String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
-
-        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(scenario);
-        fundamentalDiagramDataGenerator.run();
+    public double getProjectedAreaRatio() {
+        return this.projectedAreaRatio;
     }
+
+    public static double getProjectedAreaRatio (final String vehicleType) {
+        double ratio =0.;
+        for (VehicleProjectedAreaRatio vpar : VehicleProjectedAreaRatio.values()) {
+            if (vehicleType.equals(vpar.toString())) return vpar.getProjectedAreaRatio();
+        }
+        return ratio;
+    }
+
+    private VehicleProjectedAreaRatio (double projectedAreaRatio) {
+        this.projectedAreaRatio = projectedAreaRatio;
+    }
+
 }

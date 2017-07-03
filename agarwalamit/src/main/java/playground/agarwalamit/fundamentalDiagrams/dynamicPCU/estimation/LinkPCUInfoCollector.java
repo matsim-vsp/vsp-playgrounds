@@ -17,37 +17,34 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.ScenarioUtils;
-import playground.agarwalamit.utils.FileUtils;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 
 /**
- * Created by amit on 16/02/2017.
+ * Created by amit on 29.06.17.
+ *
+ * update pcu at the end of track, eventually, this will also have effect on flow capacity
+ *
  */
 
-public class RunFDDataExample {
 
-    public static void main(String[] args) {
+public class LinkPCUInfoCollector {
 
-        boolean runUsingConfig = false;
+    private final Id<Link> linkId;
+    private final double timeBin;
 
-        Scenario scenario ;
+    private double pcu;
 
-        if (runUsingConfig ) {
-            String configFile = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml";
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
-        } else {
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-        }
-
-        String myDir = FileUtils.SHARED_SVN+"/projects/mixedTraffic/triangularNetwork/run314/carMotorbikeBikeTruck/holes/laneVariation/";
-        String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
-
-        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(scenario);
-        fundamentalDiagramDataGenerator.run();
+    LinkPCUInfoCollector (final Id<Link> linkId, final double timeBin) {
+        this.linkId = linkId;
+        this.timeBin = timeBin;
     }
+
+    public double getPCU () {
+        return this.pcu;
+    }
+
+
 }

@@ -41,13 +41,13 @@ final class FDNetworkGenerator {
 	private Id<Link> firstLinkOfMiddleSide; // link just after lastLinkOfBase
 	private Id<Link> lastLinkOfTrack; // left link
 
-	private final RaceTrackLinkProperties linkProperties;
+	private final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
 
 	/**
-	 * @param linkProperties of the equilateral triangle; only properties of the link will be used.
+	 * @param fundamentalDiagramConfigGroup
 	 */
-	public FDNetworkGenerator(final RaceTrackLinkProperties linkProperties) {
-		this.linkProperties = linkProperties;
+	public FDNetworkGenerator(final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup) {
+		this.fundamentalDiagramConfigGroup = fundamentalDiagramConfigGroup;
 	}
 
 	public void createNetwork(final Scenario scenario) {
@@ -60,8 +60,8 @@ final class FDNetworkGenerator {
 	 */
 	private void createTriangularNetwork(final Scenario scenario) {
 		Network network = scenario.getNetwork();
-		int subdivisionFactor = linkProperties.getSubDivisionalFactor();
-		double linkLength = linkProperties.getLinkLength();
+		int subdivisionFactor = fundamentalDiagramConfigGroup.getTrackLinkDivisionFactor();
+		double linkLength = fundamentalDiagramConfigGroup.getTrackLinkLength();
 
 		//nodes of the equilateral triangle base starting, left node at (0,0)
 		for (int i = 0; i < subdivisionFactor + 1; i++) {
@@ -116,11 +116,11 @@ final class FDNetworkGenerator {
 			Node to = network.getNodes().get(idTo);
 
 			Link link = scenario.getNetwork().getFactory().createLink(Id.createLinkId(i+1), from, to);
-			link.setCapacity(linkProperties.getLinkCapacity());
-			link.setFreespeed(linkProperties.getLinkFreeSpeedMPS());
-			link.setLength(linkProperties.getLinkLength());
-			link.setNumberOfLanes(linkProperties.getNumberOfLanes());
-			link.setAllowedModes(linkProperties.getAllowedModes());
+			link.setCapacity(fundamentalDiagramConfigGroup.getTrackLinkCapacity());
+			link.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
+			link.setLength(fundamentalDiagramConfigGroup.getTrackLinkLength());
+			link.setNumberOfLanes(fundamentalDiagramConfigGroup.getTrackLinkLanes());
+			link.setAllowedModes(fundamentalDiagramConfigGroup.getTrackLinkAllowedModes());
 			network.addLink(link);
 
 			if (i==0) {
@@ -143,31 +143,27 @@ final class FDNetworkGenerator {
 								 .createLink(startLinkId,
 										 startNode,
 										 scenario.getNetwork().getNodes().get(Id.createNodeId(0)));
-		startLink.setCapacity(10 * linkProperties.getLinkCapacity());
-		startLink.setFreespeed(linkProperties.getLinkFreeSpeedMPS());
+		startLink.setCapacity(10 * fundamentalDiagramConfigGroup.getTrackLinkCapacity());
+		startLink.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
 		startLink.setLength(25.);
 		startLink.setNumberOfLanes(1.);
-		startLink.setAllowedModes(linkProperties.getAllowedModes());
+		startLink.setAllowedModes(fundamentalDiagramConfigGroup.getTrackLinkAllowedModes());
 		network.addLink(startLink);
 
 		Link endLink = scenario.getNetwork()
 							   .getFactory()
 							   .createLink(endLinkId, scenario.getNetwork().getNodes().get(Id.createNodeId(
 									   subdivisionFactor)), endNode);
-		endLink.setCapacity(10 * linkProperties.getLinkCapacity());
-		endLink.setFreespeed(linkProperties.getLinkFreeSpeedMPS());
+		endLink.setCapacity(10 * fundamentalDiagramConfigGroup.getTrackLinkCapacity());
+		endLink.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
 		endLink.setLength(25.);
 		endLink.setNumberOfLanes(1.);
-		endLink.setAllowedModes(linkProperties.getAllowedModes());
+		endLink.setAllowedModes(fundamentalDiagramConfigGroup.getTrackLinkAllowedModes());
 		network.addLink(endLink);
 	}
 
-	public RaceTrackLinkProperties getLinkProperties(){
-		return this.linkProperties;
-	}
-
 	public double getLengthOfTrack(){
-		return linkProperties.getLinkLength()* noOfSides;
+		return fundamentalDiagramConfigGroup.getTrackLinkLength()* noOfSides;
 	}
 
 	Id<Link> getFirstLinkIdOfTrack() {

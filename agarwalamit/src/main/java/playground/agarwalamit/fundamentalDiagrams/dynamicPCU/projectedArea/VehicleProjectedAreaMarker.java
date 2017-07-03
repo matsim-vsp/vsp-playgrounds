@@ -17,37 +17,14 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.ScenarioUtils;
-import playground.agarwalamit.utils.FileUtils;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea;
 
 /**
- * Created by amit on 16/02/2017.
+ * Created by amit on 29.06.17.
  */
+public enum VehicleProjectedAreaMarker {
 
-public class RunFDDataExample {
+    BEGIN_VEHILCE_PROJECTED_AREA, END_VEHILCE_PROJECTED_AREA
 
-    public static void main(String[] args) {
-
-        boolean runUsingConfig = false;
-
-        Scenario scenario ;
-
-        if (runUsingConfig ) {
-            String configFile = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml";
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
-        } else {
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-        }
-
-        String myDir = FileUtils.SHARED_SVN+"/projects/mixedTraffic/triangularNetwork/run314/carMotorbikeBikeTruck/holes/laneVariation/";
-        String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
-
-        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(scenario);
-        fundamentalDiagramDataGenerator.run();
-    }
 }
