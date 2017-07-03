@@ -52,6 +52,7 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
+import playground.agarwalamit.opdyts.plots.StateVectorElementsSizePlotter;
 import playground.agarwalamit.opdyts.teleportationModes.TeleportationODAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
@@ -143,6 +144,25 @@ public class PatnaUrbanOpdytsCalibrator {
 				addControlerListenerBinding().toInstance(new ShutdownListener() {
 					@Override
 					public void notifyShutdown(ShutdownEvent event) {
+						// plot the size of the state vector elements
+						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizePlots/";
+						new File(outDir).mkdirs();
+
+						int firstIt = event.getServices().getConfig().controler().getFirstIteration();
+						int lastIt = event.getServices().getConfig().controler().getLastIteration();
+						int plotEveryItr = 50;
+
+						for (int itr = firstIt+1; itr <=lastIt; itr++) {
+							if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(event.getServices().getControlerIO().getIterationPath(itr)).exists() ) {
+								StateVectorElementsSizePlotter.gnuHistogramPlot(
+										event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt"),
+										outDir+"/"+itr+".stateVector_networkModes.eps", "networkModes");
+								StateVectorElementsSizePlotter.gnuHistogramPlot(
+										event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt"),
+										outDir+"/"+itr+".stateVector_teleportationModes.eps", "teleportationModes");
+							}
+						}
+
 						// remove the unused iterations
 						String dir2remove = event.getServices().getControlerIO().getOutputPath()+"/ITERS/";
 						IOUtils.deleteDirectoryRecursively(new File(dir2remove).toPath());
