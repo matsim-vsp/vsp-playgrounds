@@ -1,26 +1,32 @@
-package playground.dziemke.analysis.general.srv;
+package playground.dziemke.analysis.general.matsim;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import playground.dziemke.analysis.general.Trip;
 import playground.dziemke.analysis.general.TripFilter;
+import playground.dziemke.utils.ShapeReader;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author gthunig on 04.04.2017.
  */
-public class FromSrvTripFilterImpl implements TripFilter {
-    public static final Logger log = Logger.getLogger(FromSrvTripFilterImpl.class);
+public class MatsimTripFilterImpl implements TripFilter {
+    public static final Logger log = Logger.getLogger(MatsimTripFilterImpl.class);
 
     // Parameters
     private boolean onlyAnalyzeTripsWithMode;
-    private String mode;
+    private List<String> modes;
 
     private boolean onlyAnalyzeTripInteriorOfArea; // formerly results labelled as "int"
     private boolean onlyAnalyzeTripsStartingOrEndingInArea; // formerly results labelled as "ber" (Berlin-based) <----------
-    private String[] areaIds;
+    private int areaId;
 
     private boolean onlyAnalyzeTripsInDistanceRange; // "dist"; usually varied for analysis // <----------
     private double minDistance_km = -1;
@@ -39,19 +45,35 @@ public class FromSrvTripFilterImpl implements TripFilter {
     private double minDepartureTime_s;
     private double maxDepartureTime_s;
 
-    public void activateModeChoice(String mode) {
+    private Network network;
+    private Geometry areaGeometry;
+
+    public void activateModeChoice(String... mode) {
         onlyAnalyzeTripsWithMode = true;
-        this.mode = mode;
+        this.modes = Arrays.asList(mode);
     }
 
-    public void activateInt(String... areIds) {
+    public void activateInt(Network network, String areaShapeFile, int areaId) {
+        this.areaId = areaId;
+        assignNetwork(network);
+        assignAreGeometry(areaShapeFile);
         this.onlyAnalyzeTripInteriorOfArea = true;
-        this.areaIds = areIds;
     }
 
-    public void activateSOE(String... areaIds) {
+    public void activateStartsOrEndsIn(Network network, String areaShapeFile, int areaId) {
+        this.areaId = areaId;
+        assignNetwork(network);
+        assignAreGeometry(areaShapeFile);
         onlyAnalyzeTripsStartingOrEndingInArea = true;
-        this.areaIds = areaIds;
+    }
+
+    private void assignNetwork(Network network) {
+        this.network = network;
+    }
+
+    private void assignAreGeometry(String areaShapeFile) {
+        Map<Integer, Geometry> zoneGeometries = ShapeReader.read(areaShapeFile, "NR");
+        areaGeometry = zoneGeometries.get(areaId);
     }
 
     public void activateDist(double minDistance_km, double maxDistance_km) {
@@ -82,57 +104,69 @@ public class FromSrvTripFilterImpl implements TripFilter {
         this.maxDepartureTime_s = maxDepartureTime_s;
     }
 
-    public List<? extends Trip> filter(List<? extends Trip> inputTrips) {
-        log.info("Unfiltered trips size: " + inputTrips.size());
-        List<FromSrvTrip> filteredTrips = new LinkedList<>();
+    public List<? extends Trip> filter(List<? extends Trip> tripMap) {
+        List<FromMatsimTrip> trips = new LinkedList<>();
         boolean printedWarn1 = false;
         boolean printedWarn2 = false;
 
-        for (Trip currentTrip : inputTrips) {
-            FromSrvTrip trip = (FromSrvTrip)currentTrip;
+        for (Trip currentTrip : tripMap) {
+            FromMatsimTrip trip = (FromMatsimTrip)currentTrip;
             // Choose if trip will be considered
             if (onlyAnalyzeTripInteriorOfArea || onlyAnalyzeTripsStartingOrEndingInArea) {
-                boolean startingInArea = Arrays.asList(areaIds).contains(trip.getDepartureZoneId().toString());
-                boolean endingInArea = Arrays.asList(areaIds).contains(trip.getArrivalZoneId().toString());
+                // get coordinates of links
+                Id<Link> departureLinkId = trip.getDepartureLinkId();
+                Id<Link> arrivalLinkId = trip.getArrivalLinkId();
+                //
+                Link departureLink = network.getLinks().get(departureLinkId);
+                Link arrivalLink = network.getLinks().get(arrivalLinkId);
+
+                // TODO use coords of toNode instead of center coord of link
+                double arrivalCoordX = arrivalLink.getCoord().getX();
+                double arrivalCoordY = arrivalLink.getCoord().getY();
+                double departureCoordX = departureLink.getCoord().getX();
+                double departureCoordY = departureLink.getCoord().getY();
+
+                // create points
+                Point arrivalLocation = MGC.xy2Point(arrivalCoordX, arrivalCoordY);
+                Point departureLocation = MGC.xy2Point(departureCoordX, departureCoordY);
+
                 if (onlyAnalyzeTripsStartingOrEndingInArea) {
-                    if (!startingInArea && !endingInArea)
+                    if (!areaGeometry.contains(arrivalLocation) && !areaGeometry.contains(departureLocation)) {
                         continue;
+                    }
                 }
                 if (onlyAnalyzeTripInteriorOfArea) {
                     if (onlyAnalyzeTripsStartingOrEndingInArea && !printedWarn1) {
                         log.warn("onlyAnalyzeTripInteriorOfArea and onlyAnalyzeTripsStartingOrEndingInArea activated at the same time!");
                         printedWarn1 = true;
                     }
-                    if (!startingInArea || !endingInArea)
+                    if (!areaGeometry.contains(arrivalLocation) || !areaGeometry.contains(departureLocation)) {
                         continue;
+                    }
                 }
             }
 
             if (onlyAnalyzeTripsWithMode) {
-                if (!trip.getLegMode().equals(mode)) {
+                if (!modes.contains(trip.getLegMode())) {
                     continue;
                 }
             }
-
             if (onlyAnalyzeTripsInDistanceRange && (trip.getDistanceBeeline_m() / 1000.) > maxDistance_km) {
                 continue;
             }
             if (onlyAnalyzeTripsInDistanceRange && (trip.getDistanceBeeline_m() / 1000.) < minDistance_km) {
                 continue;
             }
-
             if (onlyAnalyzeTripsWithActivityTypeBeforeTrip && onlyAnalyzeTripsWithActivityTypeAfterTrip && !printedWarn2) {
                 log.warn("onlyAnalyzeTripsWithActivityTypeBeforeTrip and onlyAnalyzeTripsWithActivityTypeAfterTrip activated at the same time."
                         + "This may lead to results that are hard to interpret: rather not use these options simultaneously.");
                 printedWarn2 = true;
             }
-
             if (onlyAnalyzeTripsWithActivityTypeBeforeTrip) {
                 if (!trip.getActivityTypeBeforeTrip().equals(activityTypeBeforeTrip)) {
                     continue;
                 }
             }
-
             if (onlyAnalyzeTripsWithActivityTypeAfterTrip) {
                 if (!trip.getActivityTypeAfterTrip().equals(activityTypeAfterTrip)) {
                     continue;
@@ -146,28 +180,24 @@ public class FromSrvTripFilterImpl implements TripFilter {
                 continue;
             }
 
-            // activity times and durations
-            if ((trip.getArrivalTime_s() < 0) || (trip.getDepartureTime_s() < 0) || (trip.getDuration_s() < 0) ) {
-                continue;
-            }
-
-			/* Only filteredTrips that fullfill all checked criteria are added; otherwise that loop would have been "continued" already */
-            filteredTrips.add(trip);
+			/* Only trips that fullfill all checked criteria are added; otherwise that loop would have been "continued" already */
+            trips.add(trip);
         }
 
-        log.info("Filtered trips size: " + filteredTrips.size());
-        return filteredTrips;
+        return trips;
     }
 
     public String adaptOutputDirectory(String outputDirectory) {
         if (onlyAnalyzeTripsWithMode) {
-            outputDirectory = outputDirectory + "_" + mode;
+        	for (String mode : modes) {
+        		outputDirectory = outputDirectory + "_" + mode;
+        	}
         }
         if (onlyAnalyzeTripInteriorOfArea) {
-            outputDirectory = outputDirectory + "_inside-" + areaIds[0];
+            outputDirectory = outputDirectory + "_inside-" + areaId;
         }
         if (onlyAnalyzeTripsStartingOrEndingInArea) {
-            outputDirectory = outputDirectory + "_soe-in-" + areaIds[0];
+            outputDirectory = outputDirectory + "_soe-in-" + areaId;
         }
         if (onlyAnalyzeTripsInDistanceRange) {
             outputDirectory = outputDirectory + "_dist-" + minDistance_km + "-" + maxDistance_km;
@@ -187,4 +217,36 @@ public class FromSrvTripFilterImpl implements TripFilter {
         return outputDirectory;
     }
 
+    private boolean isOnlyAnalyzeTripsWithModeActivated(String identifier) {
+        return identifier.contains("[") && identifier.contains("]");
+    }
+
+    private String[] getModesFrom(String identifier) {
+        String modeContainingString = identifier.split(Pattern.quote("["))[1].split(Pattern.quote("]"))[0];
+        return modeContainingString.split(", ");
+    }
+
+    private boolean isOnlyAnalyzeTripInteriorOfAreaActivated(String identifier) {
+        return identifier.contains("_inside-");
+    }
+
+    private boolean isOnlyAnalyzeTripsStartingOrEndingInAreaActivated(String identifier) {
+        return identifier.contains("_soe-in-");
+    }
+
+    private boolean isOnlyAnalyzeTripsInDistanceRangeActivated(String identifier) {
+        return identifier.contains("_dist-");
+    }
+
+    private boolean isOnlyAnalyzeTripsWithActivityTypeBeforeTripActivated(String identifier) {
+        return identifier.contains("_act-bef-");
+    }
+
+    private boolean isOnlyAnalyzeTripsWithActivityTypeAfterTripActivated(String identifier) {
+        return identifier.contains("_act-aft-");
+    }
+
+    private boolean isOnlyAnalyzeTripsDoneByPeopleInAgeRangeActivated(String identifier) {
+        return identifier.contains("_age-");
+    }
 }
