@@ -111,8 +111,8 @@ public class ShockwaveExperiment {
 		fundamentalDiagramDataGenerator.setModalShareInPCU(new Double [] {1.0});
 		fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(10);
 		fundamentalDiagramDataGenerator.setIsWritingEventsFileForEachIteration(true);
-		fundamentalDiagramDataGenerator.setIsPlottingDistribution(false);
-		fundamentalDiagramDataGenerator.setIsUsingLiveOTFVis(isUsingOTFVis);
+		fundamentalDiagramDataGenerator.setPlottingDistribution(false);
+		fundamentalDiagramDataGenerator.setUsingLiveOTFVis(isUsingOTFVis);
 		fundamentalDiagramDataGenerator.run();
 	}
 }

@@ -64,6 +64,7 @@ import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
@@ -106,6 +107,8 @@ public class FundamentalDiagramDataGenerator {
 	private String[] travelModes;
 	private Double[] modalShareInPCU;
 
+	private boolean isUsingDynamicPCU = false;
+
 	public FundamentalDiagramDataGenerator(final RaceTrackLinkProperties raceTrackLinkProperties, final Scenario scenario){
 		fdNetworkGenerator = new FDNetworkGenerator(raceTrackLinkProperties);
 		fdNetworkGenerator.createNetwork(scenario);
@@ -146,6 +149,7 @@ public class FundamentalDiagramDataGenerator {
 
 		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/config.xml");
 		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/network.xml");
+		new VehicleWriterV1(scenario.getVehicles()).writeFile(this.runDir+"/vehicles.xml");
 
 		closeFile();
 	}
@@ -238,17 +242,21 @@ public class FundamentalDiagramDataGenerator {
 		this.reduceDataPointsByFactor = reduceDataPointsByFactor;
 	}
 
-	public void setIsPlottingDistribution(boolean isPlottingDistribution) {
+	public void setPlottingDistribution(boolean isPlottingDistribution) {
 		this.isPlottingDistribution = isPlottingDistribution;
 	}
 
-	public void setIsUsingLiveOTFVis(boolean liveOTFVis) {
+	public void setUsingLiveOTFVis(boolean liveOTFVis) {
 		this.isUsingLiveOTFVis = liveOTFVis;
 	}
 
 	public void setIsWritingEventsFileForEachIteration(
 			boolean isWritingEventsFileForEachIteration) {
 		this.isWritingEventsFileForEachIteration = isWritingEventsFileForEachIteration;
+	}
+
+	public void setUsingDynamicPCU(boolean usingDynamicPCU) {
+		isUsingDynamicPCU = usingDynamicPCU;
 	}
 
 	private void parametricRunAccordingToGivenModalSplit(){
@@ -417,7 +425,7 @@ public class FundamentalDiagramDataGenerator {
 
 		events.addHandler(globalFlowDynamicsUpdator);
 		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
-		events.addHandler(dynamicPCUUpdator);
+		if (isUsingDynamicPCU) events.addHandler(dynamicPCUUpdator);
 
 		EventWriterXML eventWriter = null;
 

@@ -47,6 +47,18 @@ public class RunRaceTrackDynamicPCUExample {
 
     public static void main(String[] args) {
 
+        boolean isRunningOnServer = args.length > 0;
+
+        String outDir ;
+        boolean isRunningDistribution = false;
+
+        if ( isRunningOnServer ) {
+            outDir = args[0];
+            isRunningDistribution = Boolean.valueOf(args[1]);
+        } else {
+            outDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/output/run002/";
+        }
+
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
 
         List<String> mainModes = Arrays.asList("car","bike"
@@ -72,7 +84,7 @@ public class RunRaceTrackDynamicPCUExample {
         }
         {
             VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike",VehicleType.class));
-            bike.setPcuEquivalents(0.25);
+            bike.setPcuEquivalents(1.0);
             bike.setMaximumVelocity(15.0/3.6);
             vehicles.addVehicleType(bike);
         }
@@ -97,9 +109,8 @@ public class RunRaceTrackDynamicPCUExample {
                         +VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA);
         });
 
-        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/output/run00/";
-        String outFolder ="/carBike_holes_passing/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
+        String outFolder ="/"+scenario.getConfig().qsim().getTrafficDynamics()+"_"+scenario.getConfig().qsim().getLinkDynamics()+"/";
+        scenario.getConfig().controler().setOutputDirectory(outDir+outFolder);
 
         // a container, used to store the link properties,
         // all sides of triangle will have these properties (identical links).
@@ -112,10 +123,11 @@ public class RunRaceTrackDynamicPCUExample {
         fundamentalDiagramDataGenerator.setModalShareInPCU(new Double [] {1.0,1.0
 //                ,1.0,1.0
         }); // equal modal split
-        fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(1);
+        fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(100);
         fundamentalDiagramDataGenerator.setIsWritingEventsFileForEachIteration(false);
-        fundamentalDiagramDataGenerator.setIsPlottingDistribution(false);
-        fundamentalDiagramDataGenerator.setIsUsingLiveOTFVis(false);
+        fundamentalDiagramDataGenerator.setPlottingDistribution(isRunningDistribution);
+        fundamentalDiagramDataGenerator.setUsingLiveOTFVis(false);
+        fundamentalDiagramDataGenerator.setUsingDynamicPCU(true);
         fundamentalDiagramDataGenerator.run();
     }
 }

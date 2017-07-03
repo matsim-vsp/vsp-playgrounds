@@ -96,8 +96,8 @@ public class RunFDDataExample {
         fundamentalDiagramDataGenerator.setModalShareInPCU(new Double [] {1.0,1.0,1.0,1.0}); // equal modal split
         fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(1);
         fundamentalDiagramDataGenerator.setIsWritingEventsFileForEachIteration(false);
-        fundamentalDiagramDataGenerator.setIsPlottingDistribution(false);
-        fundamentalDiagramDataGenerator.setIsUsingLiveOTFVis(false);
+        fundamentalDiagramDataGenerator.setPlottingDistribution(false);
+        fundamentalDiagramDataGenerator.setUsingLiveOTFVis(false);
         fundamentalDiagramDataGenerator.run();
     }
 }
