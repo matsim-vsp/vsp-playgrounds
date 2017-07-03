@@ -204,7 +204,9 @@ public class FundamentalDiagramDataGenerator {
 				this.modalShareInPCU[index] = 1.0;
 			}
 		} else if (this.modalShareInPCU.length != this.travelModes.length) {
-			throw new RuntimeException("Number of modes is not equal to the provided modal share (in PCU). Aborting...");
+			LOG.warn("Number of modes is not equal to the provided modal share (in PCU). Running for equal modal share");
+			this.modalShareInPCU = new Double[this.travelModes.length];
+			Arrays.fill(this.modalShareInPCU, 1.0);
 		}
 	}
 
@@ -514,9 +516,11 @@ public class FundamentalDiagramDataGenerator {
 				writer.format("%.2f\t", passingEventsUpdator.getAvgBikesPassingRate());
 			}
 
-			for (String travelMode : travelModes) {
-				String str = String.valueOf( scenario.getVehicles().getVehicleTypes().get(Id.create(travelMode,VehicleType.class)).getPcuEquivalents() );
-				writer.print(str + "\t");
+			if (this.isUsingDynamicPCU ) {
+				for (String travelMode : travelModes) {
+					String str = String.valueOf( scenario.getVehicles().getVehicleTypes().get(Id.create(travelMode,VehicleType.class)).getPcuEquivalents() );
+					writer.print(str + "\t");
+				}
 			}
 
 			writer.print("\n");
@@ -647,10 +651,11 @@ public class FundamentalDiagramDataGenerator {
 
 			writer.print("avgBikePassingRatePerkm \t");
 		}
-
-		for (String travelMode : travelModes) {
-			String str = "pcu_"+travelMode;
-			writer.print(str + "\t");
+		if (this.isUsingDynamicPCU ) {
+			for (String travelMode : travelModes) {
+				String str = "pcu_"+travelMode;
+				writer.print(str + "\t");
+			}
 		}
 		writer.print("\n");
 	}
@@ -694,10 +699,11 @@ public class FundamentalDiagramDataGenerator {
 		String conversionPattern = " %d %4p %c{1} %L %m%n";
 		layout.setConversionPattern(conversionPattern);
 		FileAppender appender;
+		String filename = runDir + "/fdlogfile.log";
 		try {
-			appender = new FileAppender(layout, runDir+"/fdlogfile.log",false);
+			appender = new FileAppender(layout, filename,false);
 		} catch (IOException e1) {
-			throw new RuntimeException("File not found.");
+			throw new RuntimeException("File "+filename+" not found.");
 		}
 		LOG.addAppender(appender);
 	}

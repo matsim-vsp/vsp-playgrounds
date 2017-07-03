@@ -19,13 +19,11 @@
 
 package playground.agarwalamit.fundamentalDiagrams.dynamicPCU;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -51,57 +49,41 @@ public class RunRaceTrackDynamicPCUExample {
 
         String outDir ;
         boolean isRunningDistribution = false;
+        Config config = null;
 
         if ( isRunningOnServer ) {
             outDir = args[0];
             isRunningDistribution = Boolean.valueOf(args[1]);
+            if (args.length>2) {
+                config = ConfigUtils.loadConfig(args[2]);
+            }
         } else {
+            config = ConfigUtils.loadConfig(FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml");
             outDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/output/run002/";
         }
 
-        Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-
-        List<String> mainModes = Arrays.asList("car","bike"
-//                ,"motorbike","truck"
-        );
-
-        // queue model parameters
-        QSimConfigGroup qSimConfigGroup = scenario.getConfig().qsim();
-        qSimConfigGroup.setMainModes(mainModes);
-        qSimConfigGroup.setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
-        qSimConfigGroup.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
-        qSimConfigGroup.setUsingFastCapacityUpdate(true);
+        Scenario scenario;
+        if (config== null) {
+            scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
+            Vehicles vehicles = scenario.getVehicles();
+            {
+                VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
+                car.setPcuEquivalents(1.0);
+                car.setMaximumVelocity(60.0/3.6);
+                vehicles.addVehicleType(car);
+            }
+            {
+                VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike",VehicleType.class));
+                bike.setPcuEquivalents(0.25);
+                bike.setMaximumVelocity(15.0/3.6);
+                vehicles.addVehicleType(bike);
+            }
+        } else scenario = ScenarioUtils.loadScenario(config); // network and plans will anywaye be generated internally
 
         scenario.getConfig().vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
         scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         Vehicles vehicles = scenario.getVehicles();
-        {
-            VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
-            car.setPcuEquivalents(1.0);
-            car.setMaximumVelocity(60.0/3.6);
-            vehicles.addVehicleType(car);
-        }
-        {
-            VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike",VehicleType.class));
-            bike.setPcuEquivalents(1.0);
-            bike.setMaximumVelocity(15.0/3.6);
-            vehicles.addVehicleType(bike);
-        }
-//        {
-//            VehicleType motorbike = VehicleUtils.getFactory().createVehicleType(Id.create("motorbike",VehicleType.class));
-//            motorbike.setPcuEquivalents(0.25);
-//            motorbike.setMaximumVelocity(60.0/3.6);
-//            vehicles.addVehicleType(motorbike);
-//        }
-//        {
-//            VehicleType truck = VehicleUtils.getFactory().createVehicleType(Id.create("truck",VehicleType.class));
-//            truck.setPcuEquivalents(3.0);
-//            truck.setMaximumVelocity(30.0/3.6);
-//            vehicles.addVehicleType(truck);
-//        }
-
-
         vehicles.getVehicleTypes().values().forEach(vt -> {
             vt.setDescription(
                 VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA
@@ -116,14 +98,11 @@ public class RunRaceTrackDynamicPCUExample {
         // all sides of triangle will have these properties (identical links).
 
         RaceTrackLinkProperties raceTrackLinkProperties = new RaceTrackLinkProperties(1000.0, 1600.0,
-                60.0/3.6, 1.0, new HashSet<>(mainModes));
+                60.0/3.6, 1.0, new HashSet<>(scenario.getConfig().qsim().getMainModes()));
 
 //        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator( scenario );
         FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(raceTrackLinkProperties, scenario);
-        fundamentalDiagramDataGenerator.setModalShareInPCU(new Double [] {1.0,1.0
-//                ,1.0,1.0
-        }); // equal modal split
-        fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(100);
+        fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(3);
         fundamentalDiagramDataGenerator.setIsWritingEventsFileForEachIteration(false);
         fundamentalDiagramDataGenerator.setPlottingDistribution(isRunningDistribution);
         fundamentalDiagramDataGenerator.setUsingLiveOTFVis(false);
