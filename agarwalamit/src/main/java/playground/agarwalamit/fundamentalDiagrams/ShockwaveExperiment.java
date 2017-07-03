@@ -19,7 +19,6 @@
 package playground.agarwalamit.fundamentalDiagrams;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -104,15 +103,7 @@ public class ShockwaveExperiment {
             NetworkUtils.addNetworkChangeEvent(scenario.getNetwork(), event);
 		}
 
-		RaceTrackLinkProperties raceTrackLinkProperties = new RaceTrackLinkProperties(1000.0, 1600.0,
-				60.0/3.6, 1.0, new HashSet<>(mainModes));
-
-		FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(raceTrackLinkProperties, scenario);
-		fundamentalDiagramDataGenerator.setModalShareInPCU(new Double [] {1.0});
-		fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(10);
-		fundamentalDiagramDataGenerator.setIsWritingEventsFileForEachIteration(true);
-		fundamentalDiagramDataGenerator.setPlottingDistribution(false);
-		fundamentalDiagramDataGenerator.setUsingLiveOTFVis(isUsingOTFVis);
+		FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(scenario);
 		fundamentalDiagramDataGenerator.run();
 	}
 }

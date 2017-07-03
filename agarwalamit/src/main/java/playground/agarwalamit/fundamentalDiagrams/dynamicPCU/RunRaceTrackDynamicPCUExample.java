@@ -19,7 +19,6 @@
 
 package playground.agarwalamit.fundamentalDiagrams.dynamicPCU;
 
-import java.util.HashSet;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -31,7 +30,6 @@ import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.fundamentalDiagrams.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.RaceTrackLinkProperties;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea.VehicleProjectedAreaMarker;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea.VehicleProjectedAreaRatio;
 import playground.agarwalamit.utils.FileUtils;
@@ -94,19 +92,7 @@ public class RunRaceTrackDynamicPCUExample {
         String outFolder ="/"+scenario.getConfig().qsim().getTrafficDynamics()+"_"+scenario.getConfig().qsim().getLinkDynamics()+"/";
         scenario.getConfig().controler().setOutputDirectory(outDir+outFolder);
 
-        // a container, used to store the link properties,
-        // all sides of triangle will have these properties (identical links).
-
-        RaceTrackLinkProperties raceTrackLinkProperties = new RaceTrackLinkProperties(1000.0, 1600.0,
-                60.0/3.6, 1.0, new HashSet<>(scenario.getConfig().qsim().getMainModes()));
-
-//        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator( scenario );
-        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(raceTrackLinkProperties, scenario);
-        fundamentalDiagramDataGenerator.setReduceDataPointsByFactor(3);
-        fundamentalDiagramDataGenerator.setIsWritingEventsFileForEachIteration(false);
-        fundamentalDiagramDataGenerator.setPlottingDistribution(isRunningDistribution);
-        fundamentalDiagramDataGenerator.setUsingLiveOTFVis(false);
-        fundamentalDiagramDataGenerator.setUsingDynamicPCU(true);
+        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator( scenario);
         fundamentalDiagramDataGenerator.run();
     }
 }
