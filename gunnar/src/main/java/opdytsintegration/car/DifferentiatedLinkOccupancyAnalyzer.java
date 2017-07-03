@@ -166,7 +166,7 @@ public class DifferentiatedLinkOccupancyAnalyzer implements LinkLeaveEventHandle
 
 		@Override
 		public String getStringIdentifier() {
-			return "network modes";
+			return "networkModes";
 		}
 
 		@Override
