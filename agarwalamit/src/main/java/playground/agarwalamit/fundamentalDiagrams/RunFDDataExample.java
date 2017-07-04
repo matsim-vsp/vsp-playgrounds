@@ -32,7 +32,7 @@ public class RunFDDataExample {
 
     public static void main(String[] args) {
 
-        boolean runUsingConfig = false;
+        boolean runUsingConfig = true;
 
         Scenario scenario ;
 
@@ -43,7 +43,7 @@ public class RunFDDataExample {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = FileUtils.SHARED_SVN+"/projects/mixedTraffic/triangularNetwork/run314/carMotorbikeBikeTruck/holes/laneVariation/";
+        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/output";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
 

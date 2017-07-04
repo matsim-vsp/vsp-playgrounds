@@ -121,9 +121,9 @@ public class FundamentalDiagramDataGenerator {
 			parametricRunAccordingToDistribution();
 		} else parametricRunAccordingToGivenModalSplit();
 
-		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/config.xml");
-		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/network.xml");
-		new VehicleWriterV1(scenario.getVehicles()).writeFile(this.runDir+"/vehicles.xml");
+		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/output_config.xml");
+		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/output_network.xml");
+		new VehicleWriterV1(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
 
 		closeFile();
 	}
@@ -182,6 +182,9 @@ public class FundamentalDiagramDataGenerator {
 			this.modalShareInPCU = new Double[this.travelModes.length];
 			Arrays.fill(this.modalShareInPCU, 1.0);
 		}
+		this.fundamentalDiagramConfigGroup.setModalShareInPCU(
+				Arrays.stream(this.modalShareInPCU).map(String::valueOf).collect(Collectors.joining(","))
+		);
 	}
 
 	private void setUpConfig() {

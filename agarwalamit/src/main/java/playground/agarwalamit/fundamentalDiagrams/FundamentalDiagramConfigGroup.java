@@ -21,12 +21,9 @@ package playground.agarwalamit.fundamentalDiagrams;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.ReflectiveConfigGroup;
-import org.matsim.core.utils.collections.CollectionUtils;
 
 /**
  * Created by amit on 03.07.17.
@@ -42,36 +39,44 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
 
     private static final String TRACK_LINK_LENGTH = "trackLinkLength";
     private double trackLinkLength = 1000.0;
+    static final String TRACK_LINK_LENGTH_CMT = "length of one side of the triangular equilateral race track. Default is 1000m.";
 
     private static final String TRACK_LINK_CAPACITY = "trackLinkCapacity";
     private double trackLinkCapacity = 1600.;
+    static final String TRACK_LINK_CAPACITY_CMT = "capacity of the link of the triangular network. Deafult is 1600. PCU/h";
 
     private static final String TRACK_LINK_SPEED = "trackLinkSpeed";
-    private double trackLinkSpeed = 16.67;
+    private double trackLinkSpeed = 60.0/3.6;
+    static final String TRACK_LINK_SPEED_CMT = "maximum speed (in mps) on the link of the triangular network. Default is 60 kph.";
 
     private static final String TRACK_LINK_LANES = "trackLinkLanes";
     private double trackLinkLanes = 1;
-
-    private static final String TRACK_LINK_ALLOWED_MODS = "trackLinkAllowedModes";
-    private Collection<String> trackLinkAllowedModes = Arrays.asList(TransportMode.car);
+    static final String TRACK_LINK_LANES_CMT = "number of lanes of the link of the triangular network. Default is 1.";
 
     private static final String TRACK_LINK_DIVISON_FACTOR = "trackLinkDivisionFactor";
     private int trackLinkDivisionFactor = 1;
+    static final String TRACK_LINK_DIVISON_FACTOR_CMT = "a factor to cut each link of the triangular network in equal parts. Default is 1.";
 
     private static final String REDUCE_DATA_POINTS_BY_FACTOR = "reduceDataPointsByFactor";
     private int reduceDataPointsByFactor = 1;
+    static final String REDUCE_DATA_POINTS_BY_FACTOR_CMT = "a factor by which the number of data points will be reduced to get quick results. \n" +
+            " By default, all possible combinations for given modal share will be executed.";
 
     private static final String WRITING_EVENTS = "isWritingEvents";
     private boolean isWritingEvents = false;
+    static final String WRITING_EVENTS_CMT = "set to true, if events must be written for every combination. Default is false.";
 
     private static final String RUNNIG_DISTRIBUTION = "isRunningDistribution";
     private boolean isRunningDistribution = false;
+    private static final String RUNNIG_DISTRIBUTION_CMT = "set to true if all possible combinations for all possible modal share should be executed. Default is false.";
 
     private static final String DYNAMIC_PCU = "isUsingDynamicPCU";
     private boolean isUsingDynamicPCU = false;
+    private static final String DYNAMIC_PCU_CMT = "set to true if pcu should be updated dynamically. It is experimental. Default is false.";
 
     private static final String MODAL_SHARE_PCU = "modalShareInPCU";
     private Collection<Double> modalShareInPCU = Arrays.asList(1.0);
+    private static final String MODAL_SHARE_PCU_CMT = "comma seperated modal share in PCU. By default, equal modal share will be used.";
 
     @StringGetter(TRACK_LINK_LENGTH)
     public double getTrackLinkLength() {
@@ -111,20 +116,6 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
     @StringSetter(TRACK_LINK_LANES)
     public void setTrackLinkLanes(double trackLinkLanes) {
         this.trackLinkLanes = trackLinkLanes;
-    }
-
-    @StringGetter(TRACK_LINK_ALLOWED_MODS)
-    public String getTrackLinkAllowedModesAsString() {
-        return CollectionUtils.setToString(new HashSet<>(getTrackLinkAllowedModes()));
-    }
-
-    public Set<String> getTrackLinkAllowedModes() {
-        return new HashSet<>(trackLinkAllowedModes);
-    }
-
-    @StringSetter(TRACK_LINK_ALLOWED_MODS)
-    public void setTrackLinkAllowedModes(String trackLinkAllowedModes) {
-        this.trackLinkAllowedModes = Arrays.asList(trackLinkAllowedModes.split(","));
     }
 
     @StringGetter(TRACK_LINK_DIVISON_FACTOR)
@@ -179,7 +170,7 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
 
     @StringGetter(MODAL_SHARE_PCU)
     public String getModalShareInPCUAsString() {
-        return CollectionUtils.setToString(new HashSet<>(getModalShareInPCU().stream().map(String::valueOf).collect(Collectors.toList())));
+        return this.modalShareInPCU.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 
     public Collection<Double> getModalShareInPCU() {
@@ -188,6 +179,25 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
 
     @StringSetter(MODAL_SHARE_PCU)
     public void setModalShareInPCU(String modalShareInPCU) {
-        this.modalShareInPCU = Arrays.asList(modalShareInPCU.split(",")).stream().map(Double::valueOf).collect(Collectors.toList());
+        this.modalShareInPCU = Arrays.asList(modalShareInPCU.split(","))
+                                     .stream()
+                                     .map(Double::valueOf)
+                                     .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, String> getComments() {
+        Map<String, String> map = super.getComments();
+        map.put(TRACK_LINK_LENGTH, TRACK_LINK_LENGTH_CMT);
+        map.put(TRACK_LINK_CAPACITY, TRACK_LINK_CAPACITY_CMT);
+        map.put(TRACK_LINK_SPEED, TRACK_LINK_SPEED_CMT);
+        map.put(TRACK_LINK_LANES, TRACK_LINK_LANES_CMT);
+        map.put(TRACK_LINK_DIVISON_FACTOR, TRACK_LINK_DIVISON_FACTOR_CMT);
+        map.put(REDUCE_DATA_POINTS_BY_FACTOR, REDUCE_DATA_POINTS_BY_FACTOR_CMT);
+        map.put(WRITING_EVENTS, WRITING_EVENTS_CMT);
+        map.put(RUNNIG_DISTRIBUTION, RUNNIG_DISTRIBUTION_CMT);
+        map.put(DYNAMIC_PCU, DYNAMIC_PCU_CMT);
+        map.put(MODAL_SHARE_PCU, MODAL_SHARE_PCU_CMT);
+        return map;
     }
 }

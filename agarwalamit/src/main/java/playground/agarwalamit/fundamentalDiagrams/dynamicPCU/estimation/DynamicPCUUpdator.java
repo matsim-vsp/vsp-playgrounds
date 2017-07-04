@@ -112,6 +112,11 @@ public class DynamicPCUUpdator implements VehicleEntersTrafficEventHandler, Link
         for (VehicleType vehicleType : scenario.getVehicles().getVehicleTypes().values() ) {
             vehicleTypeToLastNotedSpeed.put(vehicleType.getId().toString(), vehicleType.getMaximumVelocity());
 
+            if (vehicleType.getDescription()==null ||
+                    (! vehicleType.getDescription().contains(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString()))  ) {
+                throw new RuntimeException("Vehicle projected area ratio is not provided in the vehicle description. This is required if using dynamic PCU settings. Aborting...");
+            }
+
             int startIndex = vehicleType.getDescription().indexOf(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString()) + VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString().length();
             int endIndex = vehicleType.getDescription().lastIndexOf(VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA.toString());
 

@@ -120,7 +120,6 @@ final class FDNetworkGenerator {
 			link.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
 			link.setLength(fundamentalDiagramConfigGroup.getTrackLinkLength());
 			link.setNumberOfLanes(fundamentalDiagramConfigGroup.getTrackLinkLanes());
-			link.setAllowedModes(fundamentalDiagramConfigGroup.getTrackLinkAllowedModes());
 			network.addLink(link);
 
 			if (i==0) {
@@ -147,7 +146,6 @@ final class FDNetworkGenerator {
 		startLink.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
 		startLink.setLength(25.);
 		startLink.setNumberOfLanes(1.);
-		startLink.setAllowedModes(fundamentalDiagramConfigGroup.getTrackLinkAllowedModes());
 		network.addLink(startLink);
 
 		Link endLink = scenario.getNetwork()
@@ -158,7 +156,6 @@ final class FDNetworkGenerator {
 		endLink.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
 		endLink.setLength(25.);
 		endLink.setNumberOfLanes(1.);
-		endLink.setAllowedModes(fundamentalDiagramConfigGroup.getTrackLinkAllowedModes());
 		network.addLink(endLink);
 	}
 
