@@ -29,7 +29,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -70,22 +69,22 @@ public final class FixBraessBehaviorIT{
 	
     @Test
 	public void testBraessWoPricing() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.NONE, 26, 1920, 14, 3785111);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.NONE, 35, 1941, 24, 3928399);
 	}
 
     @Test
 	public void testV3() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V3, 456, 1091, 453, 2995253);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V3, 690, 668, 642, 2778328);
 	}
 
 	@Test
 	public void testV8() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V8, 538, 1026, 436, 2965792);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V8, 878, 303, 819, 2080747);
 	}
 
 	@Test
 	public void testV9() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V9, 605, 850, 545, 2814891);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V9, 881, 277, 842, 2003426);
 	}
 	
 	private void fixRouteDistributionAndTT(RunBraessSimulation.PricingType pricingType, int expectedNOAgentsOnUpperRoute,
@@ -181,9 +180,8 @@ public final class FixBraessBehaviorIT{
 
 		config.qsim().setStuckTime(3600 * 0.5);
 		
-		// set end time to 12 am (4 hours after simulation start) to
-		// shorten simulation run time
-		config.qsim().setEndTime(3600 * 10);
+		// set end time to 4 am (4 hours after simulation start) to shorten simulation run time
+		config.qsim().setEndTime(3600 * 4);
 
 		config.controler().setOutputDirectory(testUtils.getOutputDirectory());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
@@ -196,9 +194,6 @@ public final class FixBraessBehaviorIT{
 
 		ActivityParams dummyAct = new ActivityParams("dummy");
 		dummyAct.setTypicalDuration(12 * 3600);
-		dummyAct.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.uniform);
-		/* uniform was the default before MATSIM-679 was resolved. But why does Braess' paradox depend on activity scoring? 
-		 * Does this mean that with the new default scoring setting we do not find the user equilibrium anymore?? theresa, jul'17 */
 		config.planCalcScore().addActivityParams(dummyAct);
 
 		config.controler().setCreateGraphs(false);
@@ -208,11 +203,10 @@ public final class FixBraessBehaviorIT{
 
 	private static void createPopulation(Scenario scenario) {
 		
-		TtCreateBraessPopulation popCreator = 
-				new TtCreateBraessPopulation(scenario.getPopulation(), scenario.getNetwork());
+		TtCreateBraessPopulation popCreator = new TtCreateBraessPopulation(scenario.getPopulation(), scenario.getNetwork());
 		popCreator.setNumberOfPersons(2000);
-		popCreator.setSimulationStartTime(8*3600);
-		popCreator.createPersons(InitRoutes.ALL, 110.);
+		popCreator.setSimulationStartTime(0);
+		popCreator.createPersons(InitRoutes.ALL, null);
 	}
 	
 }
