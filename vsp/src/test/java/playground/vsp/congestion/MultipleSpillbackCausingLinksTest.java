@@ -65,8 +65,6 @@ import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
 
 public class MultipleSpillbackCausingLinksTest {
 
-	private final boolean isUsingOTFVis = false;
-
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 
@@ -139,6 +137,11 @@ public class MultipleSpillbackCausingLinksTest {
 		pseudoInputs.createPopulation();
 		Scenario sc = pseudoInputs.scenario;
 
+		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
+		car.setMaximumVelocity(20);
+		car.setPcuEquivalents(1.0);
+		sc.getVehicles().addVehicleType(car);
+
 		EventsManager events = EventsUtils.createEventsManager();
 
 		final List<CongestionEvent> congestionEvents = new ArrayList<CongestionEvent>();
@@ -158,46 +161,11 @@ public class MultipleSpillbackCausingLinksTest {
 
 		events.addHandler(new CongestionHandlerImplV4(events, sc));
 
-		QSim sim = createQSim(sc, events);
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		QSim sim = QSimUtils.createDefaultQSim(sc,events);
 		sim.run();
 
 		return congestionEvents;
-	}
-
-	private QSim createQSim (Scenario sc, EventsManager manager){
-		QSim qSim1 = new QSim(sc, manager);
-		ActivityEngine activityEngine = new ActivityEngine(manager, qSim1.getAgentCounter());
-		qSim1.addMobsimEngine(activityEngine);
-		qSim1.addActivityHandler(activityEngine);
-
-		QNetsimEngine netsimEngine = new QNetsimEngine(qSim1);
-		qSim1.addMobsimEngine(netsimEngine);
-		qSim1.addDepartureHandler(netsimEngine.getDepartureHandler());
-		TeleportationEngine teleportationEngine = new TeleportationEngine(sc, manager);
-		qSim1.addMobsimEngine(teleportationEngine);
-		QSim qSim = qSim1;
-		AgentFactory agentFactory = new DefaultAgentFactory(qSim);
-		PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
-
-		Map<String, VehicleType> modeVehicleTypes = new HashMap<String, VehicleType>();
-
-		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
-		car.setMaximumVelocity(20);
-		car.setPcuEquivalents(1.0);
-		modeVehicleTypes.put("car", car);
-		agentSource.setModeVehicleTypes(modeVehicleTypes);
-		qSim.addAgentSource(agentSource);
-
-		if(isUsingOTFVis){
-			// otfvis configuration.  There is more you can do here than via file!
-			final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
-			otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
-			//				otfVisConfig.setShowParking(true) ; // this does not really work
-
-			OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(sc.getConfig(), sc, manager, qSim);
-			OTFClientLive.run(sc.getConfig(), server);
-		}
-		return qSim;
 	}
 
 	private class createPseudoInputs {

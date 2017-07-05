@@ -42,6 +42,24 @@ public class TelAvivRunner {
 		if (basePath != null) TelAvivConfig.basePath = basePath;
 		
 		Config config = scenario.getConfig();
+
+		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
+		car.setPcuEquivalents(TelAvivConfig.carPcuEquivalents);
+		car.setMaximumVelocity(TelAvivConfig.carMaximumVelocity);
+		scenario.getVehicles().addVehicleType(car);
+
+		VehicleType truck = VehicleUtils.getFactory().createVehicleType(Id.create("truck", VehicleType.class));
+		truck.setPcuEquivalents(TelAvivConfig.truckPcuEquivalents);
+		truck.setMaximumVelocity(TelAvivConfig.truckMaximumVelocity);
+		scenario.getVehicles().addVehicleType(truck);
+
+		VehicleType commercial = VehicleUtils.getFactory().createVehicleType(Id.create("commercial", VehicleType.class));
+		commercial.setPcuEquivalents(TelAvivConfig.commercialPcuEquivalents);
+		commercial.setMaximumVelocity(TelAvivConfig.commercialMaximumVelocity);
+		scenario.getVehicles().addVehicleType(commercial);
+
+		scenario.getConfig().qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
+
 		final Controler controler = new Controler(scenario);
 		
 		/*

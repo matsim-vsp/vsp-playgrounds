@@ -87,8 +87,9 @@ class TestNetworkExperiment {
 		EventWriterXML writer = new EventWriterXML(outputDir+"/events.xml.gz");
 		events.addHandler(writer);
 
-		final boolean useOTFVis = true ;
-		QSim qSim = createQSim(sc, events, useOTFVis);
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		QSim qSim = QSimUtils.createDefaultQSim(sc,events);
+
 		qSim.run();
 		writer.closeFile();
 	}
@@ -142,6 +143,12 @@ class TestNetworkExperiment {
 		pseudoInputs.createNetwork();
 		pseudoInputs.createPopulation(numberOfPersonInPlan);
 		Scenario sc = pseudoInputs.scenario;
+		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
+		car.setMaximumVelocity(20);
+		car.setPcuEquivalents(1.0);
+		sc.getVehicles().addVehicleType(car);
+
+		sc.getConfig().qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
 		EventsManager events = EventsUtils.createEventsManager();
 
@@ -164,7 +171,8 @@ class TestNetworkExperiment {
 		else if(congestionPricingImpl.equalsIgnoreCase("v4")) events.addHandler(new CongestionHandlerImplV4(events, sc));
 //		else if(congestionPricingImpl.equalsIgnoreCase("v6")) events.addHandler(new CongestionHandlerImplV6(events, sc));
 
-		QSim sim = createQSim(sc, events, false);
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		QSim sim = QSimUtils.createDefaultQSim(sc,events);
 		sim.run();
 
 		for (CongestionEvent event : congestionEvents) {
@@ -178,42 +186,6 @@ class TestNetworkExperiment {
 			} else personId2Delay.put(desiredPerson, event.getDelay());
 		}
 		return personId2Delay;
-	}
-
-	private static QSim createQSim (Scenario sc, EventsManager manager,boolean useOTFVis){
-		QSim qSim1 = new QSim(sc, manager);
-		ActivityEngine activityEngine = new ActivityEngine(manager, qSim1.getAgentCounter());
-		qSim1.addMobsimEngine(activityEngine);
-		qSim1.addActivityHandler(activityEngine);
-
-		QNetsimEngine netsimEngine = new QNetsimEngine(qSim1);
-		qSim1.addMobsimEngine(netsimEngine);
-		qSim1.addDepartureHandler(netsimEngine.getDepartureHandler());
-		TeleportationEngine teleportationEngine = new TeleportationEngine(sc, manager);
-		qSim1.addMobsimEngine(teleportationEngine);
-		QSim qSim = qSim1;
-		AgentFactory agentFactory = new DefaultAgentFactory(qSim);
-		PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
-
-		Map<String, VehicleType> modeVehicleTypes = new HashMap<>();
-
-		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
-		car.setMaximumVelocity(20);
-		car.setPcuEquivalents(1.0);
-		modeVehicleTypes.put("car", car);
-		agentSource.setModeVehicleTypes(modeVehicleTypes);
-		qSim.addAgentSource(agentSource);
-
-		if ( useOTFVis ) {
-			// otfvis configuration.  There is more you can do here than via file!
-			final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
-			otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
-			//				otfVisConfig.setShowParking(true) ; // this does not really work
-
-			OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(sc.getConfig(), sc, manager, qSim);
-			OTFClientLive.run(sc.getConfig(), server);
-		}
-		return qSim;
 	}
 
 	/**

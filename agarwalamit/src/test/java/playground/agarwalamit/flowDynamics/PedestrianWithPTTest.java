@@ -306,6 +306,7 @@ public class PedestrianWithPTTest {
 			EventsManager events = EventsUtils.createEventsManager();
 			events.addHandler(eventHandler);
 
+			PrepareForSimUtils.createDefaultPrepareForSim(scenario,events).run();
 			QSim qSim = QSimUtils.createDefaultQSim(this.scenario,events);
 			qSim.run();
 		}

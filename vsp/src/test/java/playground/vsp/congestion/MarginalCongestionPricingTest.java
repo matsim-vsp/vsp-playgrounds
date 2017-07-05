@@ -79,6 +79,13 @@ public class MarginalCongestionPricingTest {
 		pseudoInputs.createPopulation(numberOfPersonInPlan);
 		Scenario sc = pseudoInputs.scenario;
 
+		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
+		car.setMaximumVelocity(20);
+		car.setPcuEquivalents(1.0);
+		sc.getVehicles().addVehicleType(car);
+
+		sc.getConfig().qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
+
 		EventsManager events = EventsUtils.createEventsManager();
 
 		final List<CongestionEvent> congestionEvents = new ArrayList<CongestionEvent>();
@@ -98,7 +105,8 @@ public class MarginalCongestionPricingTest {
 
 		events.addHandler(new CongestionHandlerImplV4(events, (MutableScenario) sc));
 
-		QSim sim = createQSim(sc, events);
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		QSim sim = QSimUtils.createDefaultQSim(sc,events);
 		sim.run();
 
 		Assert.assertEquals("wrong number of congestion events" , 15, congestionEvents.size());
@@ -199,32 +207,6 @@ public class MarginalCongestionPricingTest {
 
 		Assert.assertEquals("some events are not checked on link 2" , 2, link2Delays);
 		Assert.assertEquals("some events are not checked on link 3" , 13, link3Delays);
-	}
-
-	private QSim createQSim (Scenario sc, EventsManager manager){
-		QSim qSim1 = new QSim(sc, manager);
-		ActivityEngine activityEngine = new ActivityEngine(manager, qSim1.getAgentCounter());
-		qSim1.addMobsimEngine(activityEngine);
-		qSim1.addActivityHandler(activityEngine);
-
-		QNetsimEngine netsimEngine = new QNetsimEngine(qSim1);
-		qSim1.addMobsimEngine(netsimEngine);
-		qSim1.addDepartureHandler(netsimEngine.getDepartureHandler());
-		TeleportationEngine teleportationEngine = new TeleportationEngine(sc, manager);
-		qSim1.addMobsimEngine(teleportationEngine);
-		QSim qSim = qSim1;
-		AgentFactory agentFactory = new DefaultAgentFactory(qSim);
-		PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
-
-		Map<String, VehicleType> modeVehicleTypes = new HashMap<String, VehicleType>();
-
-		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
-		car.setMaximumVelocity(20);
-		car.setPcuEquivalents(1.0);
-		modeVehicleTypes.put("car", car);
-		agentSource.setModeVehicleTypes(modeVehicleTypes);
-		qSim.addAgentSource(agentSource);
-		return qSim;
 	}
 
 	/**

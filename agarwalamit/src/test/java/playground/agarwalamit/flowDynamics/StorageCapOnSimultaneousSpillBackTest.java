@@ -153,6 +153,8 @@ public class StorageCapOnSimultaneousSpillBackTest {
 
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(new VehicleLinkEnterLeaveTime(vehicle2LinkEnterTime));
+
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = QSimUtils.createDefaultQSim(sc, events);
 		sim.run();
 		return vehicle2LinkEnterTime;

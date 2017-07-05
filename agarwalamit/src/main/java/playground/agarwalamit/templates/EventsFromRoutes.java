@@ -62,51 +62,32 @@ public class EventsFromRoutes {
 		CorridorNetworkAndPlans pseudoInputs = new CorridorNetworkAndPlans();
 		pseudoInputs.createNetwork();
 		pseudoInputs.createPopulation(10);
-		 Scenario net = pseudoInputs.getDesiredScenario();
-		
+		Scenario net = pseudoInputs.getDesiredScenario();
+
+		VehicleType cars = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
+		cars.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(cars.getId().toString()));
+		cars.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(cars.getId().toString()));
+		net.getVehicles().addVehicleType(cars);
+
+		VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike",VehicleType.class));
+		bike.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(bike.getId().toString()));
+		bike.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(bike.getId().toString()));
+		net.getVehicles().addVehicleType(bike);
+
+		net.getConfig().qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
+
 		Map<Id<Person>, Map<Id<Link>, Double>> personLinkTravelTimes = new HashMap<>();
 
 		EventsManager manager = EventsUtils.createEventsManager();
 		manager.addHandler(new PersonLinkTravelTimeEventHandler(personLinkTravelTimes));
 		EventWriterXML eventWriterXML = new EventWriterXML(OUTPUT_FOLDER+"/events.xml");
 		manager.addHandler(eventWriterXML);
-		
-		QSim qSim = createQSim(net,manager);
+
+		PrepareForSimUtils.createDefaultPrepareForSim(net,manager).run();
+		QSim qSim = QSimUtils.createDefaultQSim(net,manager);
 		qSim.run();
 		eventWriterXML.closeFile();
 	}
-
-	QSim createQSim (Scenario sc, EventsManager manager){
-		QSim qSim1 = new QSim(sc, manager);
-		ActivityEngine activityEngine = new ActivityEngine(manager, qSim1.getAgentCounter());
-		qSim1.addMobsimEngine(activityEngine);
-		qSim1.addActivityHandler(activityEngine);
-
-		QNetsimEngine netsimEngine = new QNetsimEngine(qSim1);
-		qSim1.addMobsimEngine(netsimEngine);
-		qSim1.addDepartureHandler(netsimEngine.getDepartureHandler());
-		TeleportationEngine teleportationEngine = new TeleportationEngine(sc, manager);
-		qSim1.addMobsimEngine(teleportationEngine);
-		QSim qSim = qSim1;
-		AgentFactory agentFactory = new DefaultAgentFactory(qSim);
-		PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
-		Map<String, VehicleType> modeVehicleTypes = new HashMap<>();
-
-		VehicleType cars = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
-		cars.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(cars.getId().toString()));
-		cars.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(cars.getId().toString()));
-		modeVehicleTypes.put("car", cars);
-
-		VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike",VehicleType.class));
-		bike.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(bike.getId().toString()));
-		bike.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(bike.getId().toString()));
-		modeVehicleTypes.put("bike", bike);
-		
-		agentSource.setModeVehicleTypes(modeVehicleTypes);
-		qSim.addAgentSource(agentSource);
-		return qSim;
-	}
-
 
 	private static class PersonLinkTravelTimeEventHandler implements LinkEnterEventHandler, LinkLeaveEventHandler {
 
