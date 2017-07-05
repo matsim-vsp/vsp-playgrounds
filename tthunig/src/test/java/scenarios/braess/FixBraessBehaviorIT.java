@@ -23,13 +23,13 @@ package scenarios.braess;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -68,25 +68,21 @@ public final class FixBraessBehaviorIT{
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 	
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
     @Test
 	public void testBraessWoPricing() {
 		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.NONE, 26, 1920, 14, 3785111);
 	}
 
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
     @Test
 	public void testV3() {
 		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V3, 456, 1091, 453, 2995253);
 	}
 
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
 	@Test
 	public void testV8() {
 		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V8, 538, 1026, 436, 2965792);
 	}
 
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
 	@Test
 	public void testV9() {
 		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V9, 605, 850, 545, 2814891);
@@ -200,6 +196,9 @@ public final class FixBraessBehaviorIT{
 
 		ActivityParams dummyAct = new ActivityParams("dummy");
 		dummyAct.setTypicalDuration(12 * 3600);
+		dummyAct.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.uniform);
+		/* uniform was the default before MATSIM-679 was resolved. But why does Braess' paradox depend on activity scoring? 
+		 * Does this mean that with the new default scoring setting we do not find the user equilibrium anymore?? theresa, jul'17 */
 		config.planCalcScore().addActivityParams(dummyAct);
 
 		config.controler().setCreateGraphs(false);
