@@ -82,7 +82,7 @@ public class DecongestionTollingP_MCP implements DecongestionTollSetting, LinkLe
 					demand = this.linkId2time2leavingAgents.get(linkId).get(intervalNr);
 				}
 				
-				double toll = vtts * demand * averageDelay;
+				double toll = vtts * demand * averageDelay / 3600.;
 
 				// prevent negative tolls
 				
