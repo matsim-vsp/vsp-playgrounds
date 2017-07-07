@@ -11,6 +11,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 import playground.pbouman.transitfares.TransitFares;
@@ -27,7 +29,8 @@ public class PeakPricingIT {
 	 */
 	@Test public final void testPeakPricing() {
 
-		Config config = ConfigUtils.loadConfig("../../examples/scenarios/pt-simple/config.xml");
+//		Config config = ConfigUtils.loadConfig("../../examples/scenarios/pt-simple/config.xml");
+		Config config = ConfigUtils.loadConfig(IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("pt-simple"), "config.xml") ) ;
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setLastIteration(10);

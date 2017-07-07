@@ -73,7 +73,7 @@ public class PatnaNetworkModesCalibrator {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_networkModes/"+"/config_networkModesOnly.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_networkModes/calib_trial/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_networkModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
-			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial;
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());

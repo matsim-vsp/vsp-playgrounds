@@ -31,6 +31,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 import com.google.inject.Inject;
@@ -57,7 +59,7 @@ public class TripHistogramIT {
 	 */
 	@Test
 	public void ensure_trip_counts_equal_number_of_planned_legs_in_input_population_file() {
-		Config config = this.utils.loadConfig("../../examples/scenarios/pt-tutorial/0.config.xml");
+		Config config = this.utils.loadConfig(IOUtils.newUrl( ExamplesUtils.getTestScenarioURL("pt-tutorial"), "0.config.xml") ) ;
 
 		config.vspExperimental().setAbleToOverwritePtInteractionParams(true);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);

@@ -58,7 +58,7 @@ import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
-/**®
+/**
  * @author amit
  */
 
@@ -81,7 +81,7 @@ public class PatnaUrbanOpdytsCalibrator {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/"+"/config_allModes.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
-			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial;
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
