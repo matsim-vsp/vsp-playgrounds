@@ -31,6 +31,7 @@ import playground.ikaddoura.decongestion.handler.PersonVehicleTracker;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollSetting;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingBangBang;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingPID;
+import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingP_MCP;
 
 /**
 * @author ikaddoura
@@ -51,6 +52,11 @@ public class DecongestionModule extends AbstractModule {
 			this.bind(DecongestionTollingPID.class).asEagerSingleton();
 			this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
 			this.addEventHandlerBinding().to(DecongestionTollingPID.class);
+			
+		} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.P_MC.toString())) {
+			this.bind(DecongestionTollingP_MCP.class).asEagerSingleton();
+			this.bind(DecongestionTollSetting.class).to(DecongestionTollingP_MCP.class);
+			this.addEventHandlerBinding().to(DecongestionTollingP_MCP.class);
 		
 		} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.BangBang.toString())) {
 			this.bind(DecongestionTollingBangBang.class).asEagerSingleton();
