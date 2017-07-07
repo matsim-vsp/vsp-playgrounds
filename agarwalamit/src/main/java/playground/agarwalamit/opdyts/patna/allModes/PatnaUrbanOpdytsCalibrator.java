@@ -20,10 +20,12 @@
 package playground.agarwalamit.opdyts.patna.allModes;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
 import opdytsintegration.MATSimSimulator2;
@@ -52,7 +54,6 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
-import playground.agarwalamit.opdyts.plots.StateVectorElementsSizePlotter;
 import playground.agarwalamit.opdyts.teleportationModes.TeleportationODAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
@@ -144,8 +145,8 @@ public class PatnaUrbanOpdytsCalibrator {
 				addControlerListenerBinding().toInstance(new ShutdownListener() {
 					@Override
 					public void notifyShutdown(ShutdownEvent event) {
-						// plot the size of the state vector elements
-						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizePlots/";
+						// copy the state vector elements files before removing ITERS dir
+						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizeFiles/";
 						new File(outDir).mkdirs();
 
 						int firstIt = event.getServices().getConfig().controler().getFirstIteration();
@@ -154,12 +155,24 @@ public class PatnaUrbanOpdytsCalibrator {
 
 						for (int itr = firstIt+1; itr <=lastIt; itr++) {
 							if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(event.getServices().getControlerIO().getIterationPath(itr)).exists() ) {
-								StateVectorElementsSizePlotter.gnuHistogramPlot(
-										event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt"),
-										outDir+"/"+itr+".stateVector_networkModes.eps", "networkModes");
-								StateVectorElementsSizePlotter.gnuHistogramPlot(
-										event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt"),
-										outDir+"/"+itr+".stateVector_teleportationModes.eps", "teleportationModes");
+								{
+									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt");
+									String sinkFile =  outDir+"/"+itr+".stateVector_networkModes.txt";
+									try {
+										Files.copy(new File(sourceFile), new File(sinkFile));
+									} catch (IOException e) {
+										throw new RuntimeException("Data is not copied. Reason : " + e);
+									}
+								}
+								{
+									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt");
+									String sinkFile =  outDir+"/"+itr+".stateVector_teleportationModes.txt";
+									try {
+										Files.copy(new File(sourceFile), new File(sinkFile));
+									} catch (IOException e) {
+										throw new RuntimeException("Data is not copied. Reason : " + e);
+									}
+								}
 							}
 						}
 
