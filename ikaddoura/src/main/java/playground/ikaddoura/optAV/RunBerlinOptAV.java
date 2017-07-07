@@ -24,7 +24,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseCalculationOnline;
+import org.matsim.contrib.noise.NoiseComputationModule;
 import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.noise.NoiseModule;
 import org.matsim.contrib.noise.data.NoiseContext;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
 import org.matsim.contrib.noise.utils.ProcessNoiseImmissions;
@@ -123,8 +125,8 @@ public class RunBerlinOptAV {
 		} else {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
-		controler.addControlerListener(new NoiseCalculationOnline(new NoiseContext(controler.getScenario())));
-
+		controler.addOverridingModule(new NoiseComputationModule(scenario));
+		
 		// #############################
 		// congestion pricing
 		// #############################

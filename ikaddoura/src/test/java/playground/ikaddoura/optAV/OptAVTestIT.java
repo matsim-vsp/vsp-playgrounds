@@ -29,7 +29,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseCalculationOnline;
+import org.matsim.contrib.noise.NoiseComputationModule;
 import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.noise.NoiseModule;
 import org.matsim.contrib.noise.data.NoiseContext;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
@@ -95,7 +97,7 @@ public class OptAVTestIT {
 		
 		NoiseContext noiseContext1 = new NoiseContext(controler1.getScenario());
 		noiseContext1.getNoiseParams().setInternalizeNoiseDamages(false);
-		controler1.addControlerListener(new NoiseCalculationOnline(noiseContext1));
+		controler1.addOverridingModule(new NoiseModule(scenario1));
 		
 		// taxi
 
@@ -170,7 +172,7 @@ public class OptAVTestIT {
 		// noise pricing
 		
 		NoiseContext noiseContext2 = new NoiseContext(controler2.getScenario());
-		controler2.addControlerListener(new NoiseCalculationOnline(noiseContext2));
+		controler2.addOverridingModule(new NoiseModule(scenario2));
 		
 		// analysis
 		        

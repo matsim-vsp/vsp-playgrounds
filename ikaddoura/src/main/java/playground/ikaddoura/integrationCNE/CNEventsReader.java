@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.ikaddoura.integrationCN;
+package playground.ikaddoura.integrationCNE;
 
 import java.util.Map;
 import java.util.Stack;

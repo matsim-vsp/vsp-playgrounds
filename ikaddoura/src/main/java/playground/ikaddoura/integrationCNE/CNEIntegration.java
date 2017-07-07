@@ -28,7 +28,9 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseCalculationOnline;
+import org.matsim.contrib.noise.NoiseComputationModule;
 import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.noise.NoiseModule;
 import org.matsim.contrib.noise.data.NoiseContext;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -177,20 +179,17 @@ public class CNEIntegration {
 		}
 						
 		// ########################## Noise ##########################
-		
-		NoiseContext noiseContext = null;
-		
+				
 		if (analyzeNoise) {
 			
-			noiseContext = new NoiseContext(controler.getScenario());
 			NoiseConfigGroup ncg = (NoiseConfigGroup) controler.getScenario().getConfig().getModules().get(NoiseConfigGroup.GROUP_NAME);
 			
 			if (noisePricing) {	
 				ncg.setInternalizeNoiseDamages(true);
-				controler.addControlerListener(new NoiseCalculationOnline(noiseContext));
+				controler.addOverridingModule(new NoiseComputationModule(controler.getScenario()));
 			} else {
 				ncg.setInternalizeNoiseDamages(false);
-				controler.addControlerListener(new NoiseCalculationOnline(noiseContext));
+				controler.addOverridingModule(new NoiseComputationModule(controler.getScenario()));
 			}
 		}
 						

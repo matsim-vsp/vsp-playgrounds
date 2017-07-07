@@ -65,7 +65,7 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	}
 	
 	public enum DecongestionApproach {
-		BangBang, PID, P_MC
+		NoPricing, BangBang, PID, P_MC
 	}
 	
 	@StringGetter( "Kp" )

@@ -48,7 +48,10 @@ public class DecongestionModule extends AbstractModule {
 	@Override
 	public void install() {
 		
-		if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
+		if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.NoPricing.toString())) {
+			// no pricing
+			
+		} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
 			this.bind(DecongestionTollingPID.class).asEagerSingleton();
 			this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
 			this.addEventHandlerBinding().to(DecongestionTollingPID.class);
@@ -69,8 +72,8 @@ public class DecongestionModule extends AbstractModule {
 		this.bind(DecongestionInfo.class).asEagerSingleton();
 		
 		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingAll.class);
-		
 		this.bind(IntervalBasedTollingAll.class).asEagerSingleton();
+		
 		this.bind(DelayAnalysis.class).asEagerSingleton();
 		this.bind(PersonVehicleTracker.class).asEagerSingleton();
 						
