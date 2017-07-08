@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Properties;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -37,16 +38,17 @@ import playground.sebhoerl.mexec.ssh.utils.SSHUtils;
 
 public class RunSSHScript {
 
-    private static final String myPassword = "xxxx";
+    private static final String myPassword = "xxx";
 
     public static void main(String[] args) {
         new RunSSHScript().runViaChannelDirectly();
+//        new RunSSHScript().runViaSSHUtils();
     }
 
     /*
      * dependency only on Jsch lib.
      */
-    public static void runViaChannelDirectly() {
+    public void runViaChannelDirectly() {
 
         try {
             JSch jSch = new JSch();
@@ -62,32 +64,44 @@ public class RunSSHScript {
             try {
                 session.connect();
 
-                ChannelExec channel = (ChannelExec) session.openChannel("exec");
-
-                channel.setCommand("ls -l");
-
                 String script = "/net/ils4/agarwal/patnaOpdyts/script_allModes.sh";
-//                channel.setCommand("qsub "+script);
 
                 String myJobs = "qstat -u agarwal";
-                channel.setCommand(myJobs);
+                String [] commands = {
+                        myJobs,
+                        "ls -l /net/ils4/agarwal/patnaOpdyts/output_allModes/stateVectorFiles/*/*",
+//                      "qsub "+script,
+                        myJobs
+                };
 
                 StringBuilder output = new StringBuilder();
-                InputStream stdout = channel.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout));
-
-                channel.connect();
-                String line = bufferedReader.readLine();
-                while ( line != null) {
-                    output.append(line+"\n");
-                    line = bufferedReader.readLine();
-                }
+                Arrays.stream(commands).forEach(cmd -> executeCommand(session, cmd, output));
 
                 System.out.println(output.toString());
-                channel.disconnect();
             } finally {
                 session.disconnect();
             }
+        } catch (JSchException e) {
+            throw new RuntimeException("Aborting. Reason : " + e);
+        }
+    }
+
+    private void executeCommand(final Session session, final String command, final StringBuilder output) {
+        try {
+            ChannelExec channel = (ChannelExec) session.openChannel("exec");
+
+            channel.setCommand(command);
+            InputStream stdout = channel.getInputStream();
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout));
+            channel.connect();
+            String line = bufferedReader.readLine();
+            while ( line != null) {
+                output.append(line+"\n");
+                line = bufferedReader.readLine();
+            }
+
+            channel.disconnect();
         } catch (JSchException e) {
             throw new RuntimeException("Aborting. Reason : " + e);
         } catch (IOException exx) {
@@ -95,7 +109,7 @@ public class RunSSHScript {
         }
     }
 
-    public static void runViaSSHUtils() {
+    public void runViaSSHUtils() {
         try {
             JSch jSch = new JSch();
             jSch.setKnownHosts("~/.ssh/known_hosts"); // location of the ssh fingerprint (unique host key)
