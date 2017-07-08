@@ -21,6 +21,7 @@ package playground.agarwalamit.opdyts.teleportationModes;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 
@@ -36,6 +37,12 @@ public class Zone {
     }
     private final Id<Zone> zoneId;
 
+    public Id<Zone> getZoneId() {
+        return zoneId;
+    }
+
+    // link ids inside zone
+
     public Set<Id<Link>> getLinksInsideZone() {
         return linksInsideZone;
     }
@@ -46,8 +53,13 @@ public class Zone {
 
     private Set<Id<Link>> linksInsideZone = new LinkedHashSet<>();
 
-    public Id<Zone> getZoneId() {
-        return zoneId;
-    }
+    // coordinates of origin/destination
 
+    private Set<Coord> coordsInsideZone = new LinkedHashSet<>();
+
+    public  Set<Coord> getCoordsInsideZone() {return coordsInsideZone;}
+
+    public void addCoordsToZone(final Coord coord) {
+        this.coordsInsideZone.add(coord);
+    }
 }

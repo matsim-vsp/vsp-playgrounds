@@ -54,9 +54,10 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
-import playground.agarwalamit.opdyts.teleportationModes.TeleportationODAnalyzer;
+import playground.agarwalamit.opdyts.teleportationModes.TeleportationODLinkAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
+import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
 /**
@@ -118,10 +119,10 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
-		PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(path+"/network.xml.gz", path+"/Wards.shp");
+		PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(LoadMyScenarios.loadScenarioFromNetwork(path+"/network.xml.gz").getNetwork(), path+"/Wards.shp");
 		Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
 
-		simulator.addSimulationStateAnalyzer(new TeleportationODAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		simulator.addSimulationStateAnalyzer(new TeleportationODLinkAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
