@@ -20,7 +20,9 @@
 package playground.agarwalamit.opdyts.patna.allModes;
 
 import java.util.*;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -30,11 +32,13 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.network.algorithms.CalcBoundingBox;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
+import playground.agarwalamit.analysis.spatial.GeneralGrid;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
@@ -59,6 +63,56 @@ public final class PatnaZoneToLinkIdentifier {
     private static final Set<Zone> zones = new LinkedHashSet<>();
     private final CoordinateTransformation coordinateTransformation = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
 
+    /*
+     * First create the cells from the network and stores the origins in each zone.
+     */
+    PatnaZoneToLinkIdentifier (final Population population, final Network network, final double gridWidth) {
+        // create polygon from bounding box
+        CalcBoundingBox boundingBox = new CalcBoundingBox();
+        boundingBox.run(network);
+        GeometryFactory geometryFactory = new GeometryFactory();
+        Geometry geometry = geometryFactory.createPolygon(new Coordinate[]{
+                new Coordinate(boundingBox.getMinX(),boundingBox.getMinY()),
+                new Coordinate(boundingBox.getMaxX(),boundingBox.getMinY()),
+                new Coordinate(boundingBox.getMaxX(),boundingBox.getMaxY()),
+                new Coordinate(boundingBox.getMinX(),boundingBox.getMaxY()),
+                new Coordinate(boundingBox.getMinX(),boundingBox.getMinY()),
+        });
+
+        // create zones
+        GeneralGrid generalGrid = new GeneralGrid(gridWidth, GeneralGrid.GridType.SQUARE);
+        generalGrid.generateGrid(geometry);
+
+        Collection<Point> points = generalGrid.getGrid().values();
+        int index = 0;
+        for (Point point : points) {
+            Zone zone = new Zone(String.valueOf(index));
+
+            for (Person p : population.getPersons().values()) {
+                List<PlanElement> pes = p.getSelectedPlan().getPlanElements();
+                for (PlanElement pe : pes ) {
+                    if (pe instanceof Activity) {
+                        Coord coord = coordinateTransformation.transform( ((Activity)pe).getCoord() );
+                        Point origin = MGC.xy2Point(coord.getX(), coord.getY());
+                        if ( generalGrid.getCellGeometry(point).contains(origin) ) {
+                            zone.addCoordsToZone(coord);
+                        }
+                    }
+                }
+            }
+
+            if (zone.getCoordsInsideZone().isEmpty()) {
+                LOGGER.warn("No coordinates found in the zone "+ zone.getZoneId());
+            } else {
+                LOGGER.info(zone.getCoordsInsideZone().size() + " coords are inside the zone "+ zone.getZoneId());
+                zones.add(zone);
+            }
+        }
+    }
+
+    /*
+     * Stores the coordinates of origins in each zone of the provided zone file.
+     */
     PatnaZoneToLinkIdentifier (final Population population, final String zoneFile) {
         ShapeFileReader reader = new ShapeFileReader();
         Collection<SimpleFeature> features = reader.readFileAndInitialize(zoneFile);
@@ -91,6 +145,9 @@ public final class PatnaZoneToLinkIdentifier {
         }
     }
 
+    /*
+     * Stores the link ids of network in each zone of the provided zone file.
+     */
     PatnaZoneToLinkIdentifier (final Network network, final String zoneFile) {
         ShapeFileReader reader = new ShapeFileReader();
         Collection<SimpleFeature> features = reader.readFileAndInitialize(zoneFile);
