@@ -54,7 +54,8 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
-import playground.agarwalamit.opdyts.teleportationModes.TeleportationODAnalyzer;
+import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
+import playground.agarwalamit.opdyts.teleportationModes.TeleportationODLinkAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
@@ -72,6 +73,7 @@ public class PatnaUrbanOpdytsCalibrator {
 		String OUT_DIR = null;
 		String relaxedPlans ;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
+		boolean usingLinkIdsForStateVecotrs = false;
 
 		if ( args.length>0 ) {
 			configFile = args[0];
@@ -118,10 +120,18 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
-		PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(path+"/network.xml.gz", path+"/Wards.shp");
-		Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
 
-		simulator.addSimulationStateAnalyzer(new TeleportationODAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		if(usingLinkIdsForStateVecotrs) {
+			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), scenario.getNetwork(), 500.0);
+			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
+			simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		} else {
+			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
+			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
+			simulator.addSimulationStateAnalyzer(new TeleportationODLinkAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		}
+
+
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
