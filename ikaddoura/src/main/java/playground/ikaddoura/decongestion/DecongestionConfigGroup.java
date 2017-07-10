@@ -33,7 +33,20 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	public DecongestionConfigGroup() {
 		super(GROUP_NAME);
 	}
-
+	
+	// General parameters
+	private boolean enableDecongestionPricing = true;
+	private DecongestionApproach decongestionApproach = DecongestionApproach.PID;
+	private boolean RUN_FINAL_ANALYSIS = true;
+	private int UPDATE_PRICE_INTERVAL = 1;
+	private int WRITE_OUTPUT_ITERATION = 1;
+	private boolean WRITE_LINK_INFO_CHARTS = true; // set to false for big networks
+	private double TOLERATED_AVERAGE_DELAY_SEC = 1.0; // set to 1.0 to account for rounding errors
+	private double FRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT = 0.1; // set above 0.0 to disable pricing in the previous iterations
+	private double FRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT = 1.0; // set below 1.0 to disable price adjustment for final iterations
+	private double TOLL_BLEND_FACTOR = 1.0; // default: 1.0
+	private boolean msa = false;
+	
 	// BangBang approach
 	private double INITIAL_TOLL = 10.0;
 	private double TOLL_ADJUSTMENT = 1.0;
@@ -46,18 +59,6 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	private double integralApproachAverageAlpha = 0.1;
 	private double integralApproachUnusedHeadwayFactor = 10.;
 	
-	// General parameters
-	private DecongestionApproach decongestionApproach = DecongestionApproach.PID;
-	private boolean RUN_FINAL_ANALYSIS = true;
-	private int UPDATE_PRICE_INTERVAL = 1;
-	private int WRITE_OUTPUT_ITERATION = 1;
-	private boolean WRITE_LINK_INFO_CHARTS = true; // set to false for big networks
-	private double TOLERATED_AVERAGE_DELAY_SEC = 1.0; // set to 1.0 to account for rounding errors
-	private double FRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT = 0.1; // set above 0.0 to disable pricing in the previous iterations
-	private double FRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT = 1.0; // set below 1.0 to disable price adjustment for final iterations
-	private double TOLL_BLEND_FACTOR = 1.0; // default: 1.0
-	private boolean msa = false;
-	
 	// ######################################################################################
 	
 	public enum IntegralApproach {
@@ -65,7 +66,7 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	}
 	
 	public enum DecongestionApproach {
-		BangBang, PID
+		BangBang, PID, P_MC
 	}
 	
 	@StringGetter( "Kp" )
@@ -179,17 +180,6 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 		FRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT = fRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT;
 	}
 
-//	@Override
-//	public String toString() {
-//		return "DecongestionConfigGroup [INITIAL_TOLL=" + INITIAL_TOLL + ", TOLL_ADJUSTMENT=" + TOLL_ADJUSTMENT
-//				+ ", TOLL_BLEND_FACTOR=" + TOLL_BLEND_FACTOR + ", Kp=" + Kp
-//				+ ", Ki=" + Ki + ", Kd=" + Kd + ", UPDATE_PRICE_INTERVAL=" + UPDATE_PRICE_INTERVAL
-//				+ ", WRITE_OUTPUT_ITERATION=" + WRITE_OUTPUT_ITERATION + ", TOLERATED_AVERAGE_DELAY_SEC="
-//				+ TOLERATED_AVERAGE_DELAY_SEC + ", FRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT="
-//				+ FRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT + ", FRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT="
-//				+ FRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT + "]";
-//	}
-
 	@StringGetter( "RUN_FINAL_ANALYSIS" )
 	public boolean isRUN_FINAL_ANALYSIS() {
 		return RUN_FINAL_ANALYSIS;
@@ -258,6 +248,16 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter( "decongestionApproach" )
 	public void setDecongestionApproach(DecongestionApproach decongestionApproach) {
 		this.decongestionApproach = decongestionApproach;
+	}
+
+	@StringGetter( "enableDecongestionPricing" )
+	public boolean isEnableDecongestionPricing() {
+		return enableDecongestionPricing;
+	}
+
+	@StringSetter( "enableDecongestionPricing" )
+	public void setEnableDecongestionPricing(boolean enableDecongestionPricing) {
+		this.enableDecongestionPricing = enableDecongestionPricing;
 	}
 			
 }

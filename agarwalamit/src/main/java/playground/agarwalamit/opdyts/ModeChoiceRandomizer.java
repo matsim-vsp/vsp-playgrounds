@@ -34,6 +34,13 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<ModeChoiceDecisionVariable> {
     private static final Logger log = Logger.getLogger(ModeChoiceRandomizer.class);
 
+    public enum ASCRandomizerStyle {
+        axial_randomVariation, // combinations like (0,+), (0,-), (+,0), (-,0)
+        diagonal_randomVariation, // combinations like (+,+), (+,-), (-,+), (-,-)
+        axial_fixed,
+        diagonal_fixed
+    }
+
     private final Scenario scenario;
     private final Random rnd;
     private final RandomizedUtilityParametersChoser randomizedUtilityParametersChoser;
@@ -43,8 +50,10 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
     private final OpdytsConfigGroup opdytsConfigGroup;
     private final Collection<String> considerdModes ;
 
+    private final ASCRandomizerStyle ascRandomizerStyle;
+
     public ModeChoiceRandomizer(final Scenario scenario, final RandomizedUtilityParametersChoser randomizedUtilityParametersChoser,
-             final OpdytsScenario opdytsScenario, final String subPopName, final Collection<String> considerdModes) {
+             final OpdytsScenario opdytsScenario, final String subPopName, final Collection<String> considerdModes, final ASCRandomizerStyle ascRandomizerStyle) {
         this.scenario = scenario;
         opdytsConfigGroup = (OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME);
         this.rnd = new Random(opdytsConfigGroup.getRandomSeedToRandomizeDecisionVariable());
@@ -52,13 +61,19 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         //        this.rnd = new Random(4711);
         // this will create an identical sequence of candidate decision variables for each experiment where a new ModeChoiceRandomizer instance is created.
         // That's not good; the parametrized runs are then all conditional on the 4711 random seed.
-        // (careful with using matsim-random since it is always the same sequence in one createCombinations)
+        // (careful with using matsim-random since it is always the same sequence in one createDiagonalCombinations)
         this.randomizedUtilityParametersChoser = randomizedUtilityParametersChoser;
         this.subPopName = subPopName;
         this.opdytsScenario = opdytsScenario;
         this.considerdModes = considerdModes;
+        this.ascRandomizerStyle = ascRandomizerStyle;
 
         opdytsConfigGroup.setNumberOfDecisionVariableTrials(0); // will update once decision variables are created
+    }
+
+    public ModeChoiceRandomizer(final Scenario scenario, final RandomizedUtilityParametersChoser randomizedUtilityParametersChoser,
+                                final OpdytsScenario opdytsScenario, final String subPopName, final Collection<String> considerdModes) {
+        this(scenario,randomizedUtilityParametersChoser, opdytsScenario, subPopName, considerdModes, ASCRandomizerStyle.diagonal_randomVariation);
     }
 
     @Override
@@ -67,22 +82,35 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
 
         final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();
         PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet = oldScoringConfig.getScoringParametersPerSubpopulation().get(this.subPopName);
-        double ascChangeAmount = opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * rnd.nextDouble();
 
         int totalNumberOfCombination = (int) Math.pow(2, this.considerdModes.size()-1); // exclude car
         List<PlanCalcScoreConfigGroup> allCombinations = new ArrayList<>(totalNumberOfCombination);
         List<String> remainingModes = new ArrayList<>(this.considerdModes);
 
-        { // create planCalcScoreConfigGroup with car modes
-            PlanCalcScoreConfigGroup configGroupWithCarModeParams = new PlanCalcScoreConfigGroup();
-            for ( PlanCalcScoreConfigGroup.ModeParams modeParams : oldParameterSet.getModes().values()) {
-                configGroupWithCarModeParams.getScoringParametersPerSubpopulation().get(this.subPopName).addModeParams(copyOfModeParam(modeParams) );
-            }
-            allCombinations.add(configGroupWithCarModeParams);
+        { // create one planCalcScoreConfigGroup with all starting params.
+            PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
+            allCombinations.add(configGroupWithStartingModeParams);
             remainingModes.remove(TransportMode.car);
         }
 
-        createCombinations(oldParameterSet, allCombinations, remainingModes, ascChangeAmount);
+        double randomVariationOfStepSize =  rnd.nextDouble();
+        log.warn("creating randomVariation combinations of decision variable as "+ this.ascRandomizerStyle);
+        switch (this.ascRandomizerStyle) {
+            case axial_randomVariation:
+                allCombinations  = createAxialCombinations(oldParameterSet, remainingModes, randomVariationOfStepSize);
+                break;
+            case axial_fixed:
+                allCombinations  = createAxialCombinations(oldParameterSet, remainingModes, 1);
+                break;
+            case diagonal_randomVariation:
+                createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
+                break;
+            case diagonal_fixed:
+                createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, 1);
+                break;
+            default:
+                throw new RuntimeException("not implemented yet.");
+        }
 
         result = allCombinations.parallelStream().map(e -> new ModeChoiceDecisionVariable(e, this.scenario, this.opdytsScenario, this.considerdModes, this.subPopName)).collect(
                 Collectors.toList());
@@ -100,8 +128,8 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         return result;
     }
 
-    private void createCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double ascChangeAmount) {
-        // create combinations with one mode and call createCombinations again
+    private void createDiagonalCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
+        // create combinations with one mode and call createDiagonalCombinations again
         if (remainingModes.isEmpty()) return;
         else {
             String mode = remainingModes.remove(0);
@@ -109,11 +137,11 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
                 throw new RuntimeException("The parameters of the car remain unchanged. Therefore, car mode should not end up here, it should be removed in the previous step. ");
             } else {
                 PlanCalcScoreConfigGroup.ModeParams sourceModeParam = copyOfModeParam(oldParameterSet.getModes().get(mode));
-                {// positive: since this mode is never called before, update existing one only
-                    double newASC =  sourceModeParam.getConstant() + ascChangeAmount;
+                {// positive: since this mode is never updated before, update existing one only
+                    double newASC =  sourceModeParam.getConstant() + opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * randomVariationOfStepSize;
                     allCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
                 }
-                { // negative: since this mode is already called before, first copy existing ones, update values and then add them to main collection
+                { // negative: since this mode is already updated above, first copy existing ones, update values and then add them to main collection
                     List<PlanCalcScoreConfigGroup> tempCombinations = new ArrayList<>();
                     allCombinations.parallelStream().forEach(e -> {
                         PlanCalcScoreConfigGroup planCalcScoreConfigGroup = new PlanCalcScoreConfigGroup();
@@ -123,13 +151,36 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
                         }
                         tempCombinations.add(planCalcScoreConfigGroup);
                     });
-                    double newASC =  sourceModeParam.getConstant() - ascChangeAmount;
+                    double newASC =  sourceModeParam.getConstant() - opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * randomVariationOfStepSize;
                     tempCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
                     allCombinations.addAll(tempCombinations);
                 }
             }
-            createCombinations(oldParameterSet, allCombinations, remainingModes, ascChangeAmount);
+            createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
         }
+    }
+
+    private List<PlanCalcScoreConfigGroup> createAxialCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<String> remainingModes, final double randomVariationOfStepSize) {
+
+        final List<PlanCalcScoreConfigGroup> allCombinations = new ArrayList<>();
+        for(String mode : this.considerdModes) {
+            if ( mode.equals(TransportMode.car)) continue;
+            { // positive
+                PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
+                PlanCalcScoreConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
+                double newASC =  sourceModeParam.getConstant() + opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * randomVariationOfStepSize;
+                sourceModeParam.setConstant(newASC);
+                allCombinations.add(configGroupWithStartingModeParams);
+            }
+            { // negative
+                PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
+                PlanCalcScoreConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
+                double newASC =  sourceModeParam.getConstant() - opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() *  randomVariationOfStepSize;
+                sourceModeParam.setConstant(newASC);
+                allCombinations.add(configGroupWithStartingModeParams);
+            }
+        }
+        return allCombinations;
     }
 
     private PlanCalcScoreConfigGroup.ModeParams copyOfModeParam(final PlanCalcScoreConfigGroup.ModeParams modeParams) {
@@ -139,5 +190,13 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         newModeParams.setMarginalUtilityOfTraveling(modeParams.getMarginalUtilityOfTraveling());
         newModeParams.setMonetaryDistanceRate(modeParams.getMonetaryDistanceRate());
         return newModeParams;
+    }
+
+    private PlanCalcScoreConfigGroup copyOfPlanCalcScore(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet){
+        PlanCalcScoreConfigGroup configGroupWithStartingModeParams = new PlanCalcScoreConfigGroup();
+        for ( PlanCalcScoreConfigGroup.ModeParams modeParams : oldParameterSet.getModes().values()) {
+            configGroupWithStartingModeParams.getScoringParametersPerSubpopulation().get(this.subPopName).addModeParams(copyOfModeParam(modeParams) );
+        }
+        return configGroupWithStartingModeParams;
     }
 }

@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,44 +17,34 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsptelematics.ub6;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation;
 
-import org.matsim.run.gui.Gui;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 
-public class Ub6GUI {
+/**
+ * Created by amit on 29.06.17.
+ *
+ * update pcu at the end of track, eventually, this will also have effect on flow capacity
+ *
+ */
 
-	public static void main(String[] args) {
-		Gui.show("MATSim: Methoden der Verkehrstelematik Ub6", Controller.class);
-	}
 
-	/* To start this class upon double-clicking the jar-file, add the following lines to the pom.xml
-	 * and configure the mainClass correctly:
-	 * 
-	 * 
-	 		<build>
-				<plugins>
-			  	<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>playground.vsptelematics.ub6.Ub6GUI</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-	 * 
-	 * and then, to create the clickable jar-file:
-	 * 
-	 * - make sure the dependencies (including MATSim-core) is maven-installed, 
-	 *   e.g. do "mvn install -DskipTests=true" for all required dependencies
-	 * - change to the directory of this project, e.g. cd /path/to/playground/vsptelematics/
-	 * - mvn clean
-	 * - mvn -Prelease
-	 * 
-	 * This will result in a zip file in the target-directory which includes the clickable jar-file.
-	 */
+public class LinkPCUInfoCollector {
+
+    private final Id<Link> linkId;
+    private final double timeBin;
+
+    private double pcu;
+
+    LinkPCUInfoCollector (final Id<Link> linkId, final double timeBin) {
+        this.linkId = linkId;
+        this.timeBin = timeBin;
+    }
+
+    public double getPCU () {
+        return this.pcu;
+    }
+
+
 }

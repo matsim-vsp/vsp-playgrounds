@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,44 +17,42 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsptelematics.ub6;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea;
 
-import org.matsim.run.gui.Gui;
+/**
+ * Created by amit on 29.06.17.
+ *
+ * see ChandraKumar2003EffctLaneWidthMxdTrfc for details about the projected area.
+ */
 
-public class Ub6GUI {
+public enum VehicleProjectedAreaRatio {
 
-	public static void main(String[] args) {
-		Gui.show("MATSim: Methoden der Verkehrstelematik Ub6", Controller.class);
-	}
+    // vehicleType (ratio with respect to car), // area
+    car (1.0), // 5.39
+    bicycle (0.16), // 0.85
+    bike (0.16), // 0.85
+    motorbike (0.22), // 1.2
+    truck (3.27), // 17.62
+    bus(4.59), // 24.74
+    tractor (3.02), // 16.28
+    cycleRickshaw (0.48) ;// 2.56
 
-	/* To start this class upon double-clicking the jar-file, add the following lines to the pom.xml
-	 * and configure the mainClass correctly:
-	 * 
-	 * 
-	 		<build>
-				<plugins>
-			  	<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>playground.vsptelematics.ub6.Ub6GUI</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-	 * 
-	 * and then, to create the clickable jar-file:
-	 * 
-	 * - make sure the dependencies (including MATSim-core) is maven-installed, 
-	 *   e.g. do "mvn install -DskipTests=true" for all required dependencies
-	 * - change to the directory of this project, e.g. cd /path/to/playground/vsptelematics/
-	 * - mvn clean
-	 * - mvn -Prelease
-	 * 
-	 * This will result in a zip file in the target-directory which includes the clickable jar-file.
-	 */
+    private double projectedAreaRatio;
+
+    public double getProjectedAreaRatio() {
+        return this.projectedAreaRatio;
+    }
+
+    public static double getProjectedAreaRatio (final String vehicleType) {
+        double ratio =0.;
+        for (VehicleProjectedAreaRatio vpar : VehicleProjectedAreaRatio.values()) {
+            if (vehicleType.equals(vpar.toString())) return vpar.getProjectedAreaRatio();
+        }
+        return ratio;
+    }
+
+    private VehicleProjectedAreaRatio (double projectedAreaRatio) {
+        this.projectedAreaRatio = projectedAreaRatio;
+    }
+
 }

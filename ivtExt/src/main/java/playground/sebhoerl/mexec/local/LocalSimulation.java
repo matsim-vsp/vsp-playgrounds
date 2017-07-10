@@ -1,7 +1,6 @@
 package playground.sebhoerl.mexec.local;
 
 import org.apache.commons.io.FileUtils;
-import playground.polettif.publicTransitMapping.workbench.Run;
 import playground.sebhoerl.mexec.Config;
 import playground.sebhoerl.mexec.ConfigUtils;
 import playground.sebhoerl.mexec.Simulation;

@@ -1,9 +1,10 @@
 /* *********************************************************************** *
  * project: org.matsim.*
+ * LinksEventHandler.java
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2011 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,44 +18,46 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsptelematics.ub6;
+/**
+ * 
+ */
+package playground.ikaddoura.analysis.distanceFromEvents;
 
-import org.matsim.run.gui.Gui;
 
-public class Ub6GUI {
+import org.matsim.api.core.v01.events.LinkLeaveEvent;
+import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
+import org.matsim.api.core.v01.network.Network;
 
-	public static void main(String[] args) {
-		Gui.show("MATSim: Methoden der Verkehrstelematik Ub6", Controller.class);
+/**
+ * @author Ihab
+ *
+ */
+public class IKEventHandler implements  LinkLeaveEventHandler {
+
+	private final Network network;
+	private double totalDistance = 0.;
+	
+	public IKEventHandler(Network network) {
+		this.network = network;
 	}
 
-	/* To start this class upon double-clicking the jar-file, add the following lines to the pom.xml
-	 * and configure the mainClass correctly:
-	 * 
-	 * 
-	 		<build>
-				<plugins>
-			  	<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>playground.vsptelematics.ub6.Ub6GUI</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-	 * 
-	 * and then, to create the clickable jar-file:
-	 * 
-	 * - make sure the dependencies (including MATSim-core) is maven-installed, 
-	 *   e.g. do "mvn install -DskipTests=true" for all required dependencies
-	 * - change to the directory of this project, e.g. cd /path/to/playground/vsptelematics/
-	 * - mvn clean
-	 * - mvn -Prelease
-	 * 
-	 * This will result in a zip file in the target-directory which includes the clickable jar-file.
-	 */
+
+	@Override
+	public void reset(int iteration) {
+		
+	}
+
+	
+	@Override
+	public void handleEvent(LinkLeaveEvent event) {
+		this.totalDistance = totalDistance + network.getLinks().get(event.getLinkId()).getLength();
+	}
+
+
+	public double getTotalDistance() {
+		return totalDistance;
+	}
+	
+	
+
 }

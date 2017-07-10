@@ -41,6 +41,8 @@ public final class FileUtils {
 
     public static final String SHARED_SVN = "/Users/amit/Documents/repos/shared-svn/";
 
+    public static final String GNU_SCRIPT_DIR = "/Users/amit/Documents/git/playgrounds/agarwalamit/src/main/resources/gnuplot/";
+
     /*
     * To delete all intermediate iteration except first and last.
     */

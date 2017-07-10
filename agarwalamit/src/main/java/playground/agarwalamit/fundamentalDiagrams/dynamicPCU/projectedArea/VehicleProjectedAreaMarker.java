@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,44 +17,14 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsptelematics.ub6;
 
-import org.matsim.run.gui.Gui;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea;
 
-public class Ub6GUI {
+/**
+ * Created by amit on 29.06.17.
+ */
+public enum VehicleProjectedAreaMarker {
 
-	public static void main(String[] args) {
-		Gui.show("MATSim: Methoden der Verkehrstelematik Ub6", Controller.class);
-	}
+    BEGIN_VEHILCE_PROJECTED_AREA, END_VEHILCE_PROJECTED_AREA
 
-	/* To start this class upon double-clicking the jar-file, add the following lines to the pom.xml
-	 * and configure the mainClass correctly:
-	 * 
-	 * 
-	 		<build>
-				<plugins>
-			  	<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>playground.vsptelematics.ub6.Ub6GUI</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-	 * 
-	 * and then, to create the clickable jar-file:
-	 * 
-	 * - make sure the dependencies (including MATSim-core) is maven-installed, 
-	 *   e.g. do "mvn install -DskipTests=true" for all required dependencies
-	 * - change to the directory of this project, e.g. cd /path/to/playground/vsptelematics/
-	 * - mvn clean
-	 * - mvn -Prelease
-	 * 
-	 * This will result in a zip file in the target-directory which includes the clickable jar-file.
-	 */
 }

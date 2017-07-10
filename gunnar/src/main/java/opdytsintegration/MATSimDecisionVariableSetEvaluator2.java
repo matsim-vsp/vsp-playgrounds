@@ -1,5 +1,7 @@
 package opdytsintegration;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.*;
 import com.google.inject.Inject;
 import floetteroed.opdyts.DecisionVariable;
@@ -8,19 +10,17 @@ import floetteroed.utilities.math.Vector;
 import opdytsintegration.utils.OpdytsConfigGroup;
 import opdytsintegration.utils.TimeDiscretization;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
-import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
-import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
-import org.matsim.core.utils.charts.StackedBarChart;
+import org.matsim.core.utils.io.IOUtils;
 
 /**
  * Identifies the approximately best out of a set of decision variables.
@@ -31,7 +31,7 @@ import org.matsim.core.utils.charts.StackedBarChart;
  *
  */
 public class MATSimDecisionVariableSetEvaluator2<U extends DecisionVariable>
-		implements StartupListener, BeforeMobsimListener, ShutdownListener, IterationEndsListener {
+		implements StartupListener, BeforeMobsimListener, ShutdownListener {
 
 	// -------------------- MEMBERS --------------------
 
@@ -208,14 +208,10 @@ public class MATSimDecisionVariableSetEvaluator2<U extends DecisionVariable>
 
 		// TODO NEW
 		this.justStarted = true;
-
-		//NEW: amit
-		this.stateVectorSizePlotter = new StateVectorSizePlotter();
 	}
 
 	@Override
 	public void notifyBeforeMobsim(final BeforeMobsimEvent event) {
-
 		/*
 		 * (0) The mobsim must have been run at least once to allow for the
 		 * extraction of a vector-valued system state. The "just started" MATSim
@@ -228,17 +224,24 @@ public class MATSimDecisionVariableSetEvaluator2<U extends DecisionVariable>
 			/*
 			 * (1) Extract the instantaneous state vector.
 			 */
-
 			Vector newInstantaneousStateVector = null;
 			for (SimulationStateAnalyzerProvider analyzer : this.simulationStateAnalyzers) {
 				if (newInstantaneousStateVector == null) {
 					newInstantaneousStateVector = analyzer.newStateVectorRepresentation();
 
-					stateVectorSizePlotter.addStateSize(newInstantaneousStateVector.size(),analyzer.getStringIdentifier()); // amit
+					//NEW: amit
+					String outFile = event.getServices().getControlerIO().getIterationFilename(event.getIteration(),"stateVector_"+analyzer.getStringIdentifier()+".txt");
+					StateVectorSizeWriter.writeData(newInstantaneousStateVector, outFile);
 				} else {
+//					newInstantaneousStateVector = Vector.concat(newInstantaneousStateVector,
+//							analyzer.newStateVectorRepresentation());
+					// NEW: amit
+					Vector tempVector = analyzer.newStateVectorRepresentation();
 					newInstantaneousStateVector = Vector.concat(newInstantaneousStateVector,
-							analyzer.newStateVectorRepresentation());
-					stateVectorSizePlotter.addStateSize(newInstantaneousStateVector.size(),analyzer.getStringIdentifier()); // amit
+							tempVector);
+					//NEW: amit
+					String outFile = event.getServices().getControlerIO().getIterationFilename(event.getIteration(),"stateVector_"+analyzer.getStringIdentifier()+".txt");
+					StateVectorSizeWriter.writeData(newInstantaneousStateVector, outFile);
 				}
 			}
 
@@ -355,50 +358,21 @@ public class MATSimDecisionVariableSetEvaluator2<U extends DecisionVariable>
 	}
 
 	//NEW: Amit
-	private StateVectorSizePlotter stateVectorSizePlotter ;
+	static class StateVectorSizeWriter {
+		public static void writeData(final Vector vector, final String outFile) {
+			List<Double> vectorElements = new ArrayList<>(vector.asList());
+			Collections.sort(vectorElements, Collections.reverseOrder());
 
-	@Override
-	public void notifyIterationEnds(IterationEndsEvent event) {
-		this.stateVectorSizePlotter.plotData(event.getServices().getControlerIO().getOutputFilename("stateVectorSize.png"));
-	}
-
-	class StateVectorSizePlotter {
-
-		StateVectorSizePlotter () {
-			identifierToVectorSizes = new HashMap<>();
-		}
-
-		private final Map<String, List<Integer>> identifierToVectorSizes ;
-
-		public void addStateSize(final int vectorSize, final String identifier) {
-			List<Integer> sizes = this.identifierToVectorSizes.get(identifier);
-			if (sizes == null) {
-				sizes = new ArrayList<>();
-				sizes.add(vectorSize);
-			} else {
-				sizes.add(vectorSize);
-			}
-			this.identifierToVectorSizes.put(identifier, sizes);
-		}
-
-		public void plotData(final String outFile){
-			StackedBarChart chart = new StackedBarChart("Size of the state vector element","iteration", "size");
-			for (String mode : this.identifierToVectorSizes.keySet()) {
-				double[] ys = new double[ identifierToVectorSizes.get(mode).size()];
-
-				List<Integer> sizes = this.identifierToVectorSizes.get(mode);
-				Collections.sort(sizes, Collections.reverseOrder());
-
-				for (int index = 0; index < ys.length ; index++) {
-					ys[index] = sizes.get(index);
+			try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile) ){
+				for(Double d : vectorElements) {
+					writer.write(d+"\n");
 				}
-
-				chart.addSeries(mode, ys);
+				writer.close();
+			} catch (IOException e) {
+				throw new RuntimeException("Data is not written/read. Reason : " + e);
 			}
-			chart.saveAsPng(outFile,1200,800);
 		}
 	}
-
 }
 
 // @Override

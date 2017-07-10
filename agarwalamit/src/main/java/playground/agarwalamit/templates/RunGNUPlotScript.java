@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,44 +17,34 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsptelematics.ub6;
+package playground.agarwalamit.templates;
 
-import org.matsim.run.gui.Gui;
+import org.matsim.core.utils.misc.ExeRunner;
 
-public class Ub6GUI {
+/**
+ * Created by amit on 03.07.17.
+ */
 
-	public static void main(String[] args) {
-		Gui.show("MATSim: Methoden der Verkehrstelematik Ub6", Controller.class);
-	}
 
-	/* To start this class upon double-clicking the jar-file, add the following lines to the pom.xml
-	 * and configure the mainClass correctly:
-	 * 
-	 * 
-	 		<build>
-				<plugins>
-			  	<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-jar-plugin</artifactId>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>playground.vsptelematics.ub6.Ub6GUI</mainClass>
-								</manifest>
-							</archive>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-	 * 
-	 * and then, to create the clickable jar-file:
-	 * 
-	 * - make sure the dependencies (including MATSim-core) is maven-installed, 
-	 *   e.g. do "mvn install -DskipTests=true" for all required dependencies
-	 * - change to the directory of this project, e.g. cd /path/to/playground/vsptelematics/
-	 * - mvn clean
-	 * - mvn -Prelease
-	 * 
-	 * This will result in a zip file in the target-directory which includes the clickable jar-file.
-	 */
+public class RunGNUPlotScript {
+
+    public static void main(String[] args) {
+
+
+        String dir = "/Users/amit/Documents/git/playgrounds/agarwalamit/src/main/resources/gnuplot/";
+
+        String inputFile = dir+"test/1.stateVector_networkModes.txt";
+        String outputFile = dir+"test/1.stateVector_networkModes.eps";
+
+        String cmd = "gnuplot -c histogram.gnu ";
+        cmd += " "+inputFile;
+        cmd += " "+outputFile;
+        cmd += " networkModes";
+
+        ExeRunner.run(cmd, dir+"/gnulog.log", 99999 ,dir);
+
+
+    }
+
+
 }
