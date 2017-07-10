@@ -48,25 +48,28 @@ public class DecongestionModule extends AbstractModule {
 	@Override
 	public void install() {
 		
-		if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.NoPricing.toString())) {
+		if (decongestionConfigGroup.isEnableDecongestionPricing()) {
+			if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
+				this.bind(DecongestionTollingPID.class).asEagerSingleton();
+				this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
+				this.addEventHandlerBinding().to(DecongestionTollingPID.class);
+				
+			} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.P_MC.toString())) {
+				this.bind(DecongestionTollingP_MCP.class).asEagerSingleton();
+				this.bind(DecongestionTollSetting.class).to(DecongestionTollingP_MCP.class);
+				this.addEventHandlerBinding().to(DecongestionTollingP_MCP.class);
+			
+			} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.BangBang.toString())) {
+				this.bind(DecongestionTollingBangBang.class).asEagerSingleton();
+				this.bind(DecongestionTollSetting.class).to(DecongestionTollingBangBang.class);
+			
+			} else {
+				throw new RuntimeException("Unknown decongestion pricing approach. Aborting...");
+			}
+			
+		} else {
 			// no pricing
 			
-		} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
-			this.bind(DecongestionTollingPID.class).asEagerSingleton();
-			this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
-			this.addEventHandlerBinding().to(DecongestionTollingPID.class);
-			
-		} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.P_MC.toString())) {
-			this.bind(DecongestionTollingP_MCP.class).asEagerSingleton();
-			this.bind(DecongestionTollSetting.class).to(DecongestionTollingP_MCP.class);
-			this.addEventHandlerBinding().to(DecongestionTollingP_MCP.class);
-		
-		} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.BangBang.toString())) {
-			this.bind(DecongestionTollingBangBang.class).asEagerSingleton();
-			this.bind(DecongestionTollSetting.class).to(DecongestionTollingBangBang.class);
-		
-		} else {
-			throw new RuntimeException("Unknown decongestion pricing approach. Aborting...");
 		}
 		
 		this.bind(DecongestionInfo.class).asEagerSingleton();

@@ -35,6 +35,7 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	}
 	
 	// General parameters
+	private boolean enableDecongestionPricing = true;
 	private DecongestionApproach decongestionApproach = DecongestionApproach.PID;
 	private boolean RUN_FINAL_ANALYSIS = true;
 	private int UPDATE_PRICE_INTERVAL = 1;
@@ -65,7 +66,7 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	}
 	
 	public enum DecongestionApproach {
-		NoPricing, BangBang, PID, P_MC
+		BangBang, PID, P_MC
 	}
 	
 	@StringGetter( "Kp" )
@@ -247,6 +248,16 @@ public class DecongestionConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter( "decongestionApproach" )
 	public void setDecongestionApproach(DecongestionApproach decongestionApproach) {
 		this.decongestionApproach = decongestionApproach;
+	}
+
+	@StringGetter( "enableDecongestionPricing" )
+	public boolean isEnableDecongestionPricing() {
+		return enableDecongestionPricing;
+	}
+
+	@StringSetter( "enableDecongestionPricing" )
+	public void setEnableDecongestionPricing(boolean enableDecongestionPricing) {
+		this.enableDecongestionPricing = enableDecongestionPricing;
 	}
 			
 }
