@@ -20,6 +20,7 @@
 package playground.agarwalamit.opdyts.teleportationModes;
 
 import java.util.*;
+import javax.inject.Inject;
 import floetteroed.utilities.math.Vector;
 import opdytsintegration.MATSimCountingStateAnalyzer;
 import opdytsintegration.SimulationStateAnalyzerProvider;
@@ -114,20 +115,19 @@ public class TeleportationODCoordAnalyzer implements PersonDepartureEventHandler
         private final TimeDiscretization timeDiscretization;
         private final Set<String> relevantTeleportationMdoes;
         private final Set<Zone> relevantZones;
-        private final Population population;
+        @Inject private Population population;
 
         private TeleportationODCoordAnalyzer teleportationODAnalyzer;
 
 
         public Provider(final TimeDiscretization timeDiscretization,
                                                          final Set<String> relevantTeleportationMdoes,
-                                                         final Set<Zone> relevantZones,
-                                                        final Population population) {
+                                                         final Set<Zone> relevantZones
+                                                        ) {
             this.timeDiscretization = timeDiscretization;
             this.relevantTeleportationMdoes = relevantTeleportationMdoes;
 
             this.relevantZones = relevantZones;
-            this.population = population;
         }
 
         @Override

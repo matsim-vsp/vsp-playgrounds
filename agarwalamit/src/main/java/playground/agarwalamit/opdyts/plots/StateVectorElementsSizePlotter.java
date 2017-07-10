@@ -43,21 +43,21 @@ public class StateVectorElementsSizePlotter {
 
 
         // plot the size of the state vector elements
-        String outDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/"+"/vectorElementSizePlots/";
-        new File(outDir).mkdirs();
+        String outDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_5/"+"/vectorElementSizeFiles/";
+//        new File(outDir).mkdirs();
 
         int firstIt = 0;
-        int lastIt = 50;
-        int plotEveryItr = 5;
+        int lastIt = 1000;
+        int plotEveryItr = 50;
 
         for (int itr = firstIt+1; itr <=lastIt; itr++) {
-            if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/ITERS/it."+itr+"/").exists() ) {
+            if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(outDir).exists() ) {
                 StateVectorElementsSizePlotter.gnuHistogramPlot(
-                        FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/ITERS/it."+itr+"/"+itr+".stateVector_networkModes.txt",
-                        outDir+"/"+itr+".stateVector_networkModes.eps", "networkModes");
+                        outDir+"/"+itr+".stateVector_networkModes.txt",
+                        outDir+"/plots/"+itr+".stateVector_networkModes.eps", "networkModes");
                 StateVectorElementsSizePlotter.gnuHistogramPlot(
-                        FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/ITERS/it."+itr+"/"+itr+".stateVector_teleportationModes.txt",
-                        outDir+"/"+itr+".stateVector_teleportationModes.eps", "teleportationModes");
+                        outDir+"/"+itr+".stateVector_teleportationModes.txt",
+                        outDir+"/plots/"+itr+".stateVector_teleportationModes.eps", "teleportationModes");
             }
         }
     }
