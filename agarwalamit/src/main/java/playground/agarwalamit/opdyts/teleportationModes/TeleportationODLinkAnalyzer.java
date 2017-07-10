@@ -66,6 +66,7 @@ public class TeleportationODLinkAnalyzer implements PersonDepartureEventHandler 
 
     @Override
     public void handleEvent(PersonDepartureEvent event) {
+        // adapt this for coordinates than link ids. Amit July'17
         final MATSimCountingStateAnalyzer<Zone> stateAnalyzer = this.mode2stateAnalyzer.get(event.getLegMode());
         if (this.mode2stateAnalyzer.containsKey(event.getLegMode())) {
             for (Zone zone : this.relevantZones ) {
