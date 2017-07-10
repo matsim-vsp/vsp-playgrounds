@@ -30,13 +30,12 @@ import org.matsim.contrib.taxi.run.TaxiOutputModule;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import playground.ikaddoura.decongestion.DecongestionModule;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
+import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.optAV.OptAVConfigGroup.OptAVApproach;
 
 /**
@@ -73,13 +72,12 @@ public class OptAVModule extends AbstractModule {
 		if (optAVParams.getOptAVApproach().toString().equals(OptAVApproach.ExternalCost.toString()) ||
 				optAVParams.getOptAVApproach().toString().equals(OptAVApproach.PrivateAndExternalCost.toString())) {
 			
-			// internalize
 			noiseParams.setInternalizeNoiseDamages(true);
-			decongestionParams.setDecongestionApproach(DecongestionApproach.P_MC);
+			decongestionParams.setEnableDecongestionPricing(true);
 			
 		} else {
 			noiseParams.setInternalizeNoiseDamages(false);
-			decongestionParams.setDecongestionApproach(DecongestionApproach.NoPricing);
+			decongestionParams.setEnableDecongestionPricing(false);
 		}
 		
 		// #############################
@@ -96,23 +94,26 @@ public class OptAVModule extends AbstractModule {
         // #############################
         // travel disutility
         // #############################
-       
-        TravelDisutilityFactory dvrpTravelDisutilityFactory = null;
-        
+               
 		if (optAVParams.getOptAVApproach().toString().equals(OptAVApproach.ExternalCost.toString())) {
-        	dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);        	
+			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);     
+        	
+    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory, new AVAgentFilter()));
         	
         } else if (optAVParams.getOptAVApproach().toString().equals(OptAVApproach.PrivateAndExternalCost.toString())) {
-        	dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
+        	MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
 				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()));
        
+    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory, new AVAgentFilter()));
+        	
         } else if (optAVParams.getOptAVApproach().toString().equals(OptAVApproach.NoPricing.toString())) {
-        	dvrpTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
+        	RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
+        	
+        	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);
+        	
         	// TODO: acccount for operating costs...
         }
-		
-    	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(dvrpTravelDisutilityFactory);
-
+				
 		// #############################
 		// welfare analysis
 		// #############################
