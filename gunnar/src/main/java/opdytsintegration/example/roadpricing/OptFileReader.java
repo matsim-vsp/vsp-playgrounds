@@ -1,7 +1,6 @@
 package opdytsintegration.example.roadpricing;
 
 import java.io.IOException;
-
 import floetteroed.opdyts.searchalgorithms.OuterIterationStatistics;
 import floetteroed.utilities.tabularfileparser.AbstractTabularFileHandlerWithHeaderLine;
 import floetteroed.utilities.tabularfileparser.TabularFileParser;

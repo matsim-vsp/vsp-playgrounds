@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-
-import org.matsim.core.gbl.MatsimRandom;
-
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.utilities.math.MathHelpers;
+import org.matsim.core.gbl.MatsimRandom;
 
 /**
  * 
