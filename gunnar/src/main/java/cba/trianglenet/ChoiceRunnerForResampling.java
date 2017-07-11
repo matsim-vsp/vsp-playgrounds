@@ -1,24 +1,15 @@
 package cba.trianglenet;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
+import java.util.*;
+import cba.resampling.MyGumbelDistribution;
+import com.google.inject.Provider;
+import floetteroed.utilities.math.MultinomialLogit;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
-
-import com.google.inject.Provider;
-
-import cba.resampling.MyGumbelDistribution;
-import floetteroed.utilities.math.MultinomialLogit;
 
 /**
  * 

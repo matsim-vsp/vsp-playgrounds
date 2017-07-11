@@ -22,9 +22,6 @@ package playground.agarwalamit.opdyts.teleportationModes;
 import java.util.*;
 import javax.inject.Inject;
 import floetteroed.utilities.math.Vector;
-import opdytsintegration.MATSimCountingStateAnalyzer;
-import opdytsintegration.SimulationStateAnalyzerProvider;
-import opdytsintegration.utils.TimeDiscretization;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
@@ -33,10 +30,13 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.opdyts.MATSimCountingStateAnalyzer;
+import org.matsim.contrib.opdyts.SimulationStateAnalyzerProvider;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.events.handler.EventHandler;
 
 /**
- * Created by amit on 15.06.17. Adapted after {@link opdytsintegration.car.DifferentiatedLinkOccupancyAnalyzer}
+ * Created by amit on 15.06.17. Adapted after {@link org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer}
  */
 
 public class TeleportationODCoordAnalyzer implements PersonDepartureEventHandler {

@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import opdytsintegration.utils.TimeDiscretization;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 
 /**
  * 

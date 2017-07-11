@@ -1,29 +1,21 @@
 package cba.trianglenet;
 
 import java.util.Map;
-
 import javax.inject.Provider;
-
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.core.router.ActivityWrapperFacility;
-import org.matsim.core.router.TripRouter;
-import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
-import org.matsim.core.utils.geometry.CoordUtils;
-import org.matsim.facilities.Facility;
-
 import besttimeresponse.TimeAllocator;
 import besttimeresponse.TripTravelTimes;
 import besttimeresponseintegration.BestTimeResponseStrategyFunctionality;
 import besttimeresponseintegration.BestTimeResponseTravelTimes;
 import floetteroed.utilities.Units;
 import matsimintegration.TimeDiscretizationFactory;
-import opdytsintegration.utils.TimeDiscretization;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
+import org.matsim.core.router.TripRouter;
+import org.matsim.core.router.util.TravelTime;
+import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
+import org.matsim.facilities.Facility;
 
 /**
  * Computes optimal time structures for given travel plans.

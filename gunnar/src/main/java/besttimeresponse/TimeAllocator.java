@@ -10,12 +10,12 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.optim.linear.SimplexSolver;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.gbl.MatsimRandom;
 
 import floetteroed.utilities.Units;
 import floetteroed.utilities.searchrepeater.SearchAlgorithm;
 import floetteroed.utilities.searchrepeater.SearchRepeater;
-import opdytsintegration.utils.TimeDiscretization;
 
 /**
  * 
