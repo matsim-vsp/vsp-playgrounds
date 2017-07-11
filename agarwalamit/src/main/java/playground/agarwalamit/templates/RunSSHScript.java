@@ -38,7 +38,11 @@ import playground.sebhoerl.mexec.ssh.utils.SSHUtils;
 
 public class RunSSHScript {
 
-    private static final String myPassword = "xxx";
+    // create a private key as follows:
+    // ssh-keygen -t rsa -b 4096 -f $HOME/.ssh/id_rsa_hlrn
+    // see brief documentation https://www.hlrn.de/home/view/System3/PubkeyLogin
+    // afterward, password is not required.
+//    private static final String myPassword = "xxx";
 
     public static void main(String[] args) {
         new RunSSHScript().runViaChannelDirectly();
@@ -53,13 +57,15 @@ public class RunSSHScript {
         try {
             JSch jSch = new JSch();
             jSch.setKnownHosts("~/.ssh/known_hosts"); // location of the ssh fingerprint (unique host key)
+            jSch.addIdentity("~/.ssh/id_rsa_tub_math"); // this is the private key required.
+
 
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no"); // so that no question asked, and script run without any problem
 
             Session session = jSch.getSession("agarwal", "cluster-i.math.tu-berlin.de", 22);
             session.setConfig(config);
-            session.setPassword(myPassword);
+//            session.setPassword(myPassword);
 
             try {
                 session.connect();
@@ -119,7 +125,7 @@ public class RunSSHScript {
 
             Session session = jSch.getSession("agarwal", "cluster-i.math.tu-berlin.de", 22);
             session.setConfig(config);
-            session.setPassword(myPassword);
+//            session.setPassword(myPassword);
 
             try {
                 session.connect();
