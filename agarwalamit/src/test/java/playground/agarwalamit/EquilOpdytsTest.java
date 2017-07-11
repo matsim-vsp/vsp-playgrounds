@@ -65,7 +65,7 @@ public class EquilOpdytsTest {
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
 
-    private static String EQUIL_DIR = "../../examples/scenarios/equil-mixedTraffic/";
+    private static String EQUIL_DIR = "../../matsim-git/examples/scenarios/equil-mixedTraffic/";
     private static final OpdytsScenario EQUIL_MIXEDTRAFFIC = OpdytsScenario.EQUIL_MIXEDTRAFFIC;
 
     private static final boolean isPlansRelaxed = true;
