@@ -1,9 +1,17 @@
 package saleem.ptoptimisation;
 
 import java.util.LinkedHashSet;
-
+import floetteroed.opdyts.DecisionVariableRandomizer;
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
+import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
+import floetteroed.opdyts.searchalgorithms.RandomSearch;
+import floetteroed.opdyts.searchalgorithms.SelfTuner;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.opdyts.MATSimSimulator2;
+import org.matsim.contrib.opdyts.pt.PTOccupancyAnalyzer;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -14,16 +22,6 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.utils.CreatePseudoNetwork;
-
-import floetteroed.opdyts.DecisionVariableRandomizer;
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
-import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
-import floetteroed.opdyts.searchalgorithms.RandomSearch;
-import floetteroed.opdyts.searchalgorithms.SelfTuner;
-import opdytsintegration.MATSimSimulator2;
-import opdytsintegration.pt.PTOccupancyAnalyzer;
-import opdytsintegration.utils.TimeDiscretization;
 import saleem.ptoptimisation.optimisationintegration.PTMatsimStateFactoryImpl;
 import saleem.ptoptimisation.optimisationintegration.PTObjectiveFunction;
 import saleem.ptoptimisation.optimisationintegration.PTSchedule;
@@ -88,7 +86,7 @@ public class OptimisePT {
 		final MATSimSimulator2<PTSchedule> matsimSimulator = new MATSimSimulator2(
 				new PTMatsimStateFactoryImpl<>(scenario, occupancyScale),
 				scenario, timeDiscretization);
-		matsimSimulator.addSimulationStateAnalyzer(new PTOccupancyAnalyzer.Provider(timeDiscretization, 
+		matsimSimulator.addSimulationStateAnalyzer(new PTOccupancyAnalyzer.Provider(timeDiscretization,
 				new LinkedHashSet<>(scenario.getTransitSchedule().getFacilities().keySet())));
 		// <<<<< NEW, UNTESTED <<<<<
 		
