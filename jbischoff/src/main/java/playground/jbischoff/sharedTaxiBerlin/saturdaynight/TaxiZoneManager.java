@@ -102,22 +102,30 @@ public class TaxiZoneManager implements IterationEndsListener {
 
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
+		
 		Map<String, Double> zoneOccupancy = aggregator.calculateZoneOccupancy();
 		Map<String, Double> zoneFares = calculateZoneFares(fareCalculator.getFaresPerLink()); 
 		List<String> zonetable = new ArrayList<>();
 		int k = 10;
         PartialSort<String> worstZoneSort = new PartialSort<>(k);
         
-		for (Entry<String, Double> e : zoneFares.entrySet()){
-			Double occupancy = zoneOccupancy.get(e.getKey());
+		for (Entry<String, Double> e : zoneOccupancy.entrySet()){
+			Double occupancy = e.getValue();
 			if (occupancy == null) throw new RuntimeException();
-			double performance = e.getValue()*occupancy;
+			if (occupancy == Double.NaN){
+				occupancy = 0.0;
+			}
+			Double fare = zoneFares.get(e.getKey());
+			if (fare == null) {
+				fare = 0.0;}
+			
+			double performance = fare*occupancy;
 			
 			double indicator;
 			
 			switch (zonalSystem.getOptimizationCriterion()){
 			case Fare:
-				indicator = e.getValue();
+				indicator = fare;
 			case Performance:
 				indicator = performance;
 			case Occupancy:

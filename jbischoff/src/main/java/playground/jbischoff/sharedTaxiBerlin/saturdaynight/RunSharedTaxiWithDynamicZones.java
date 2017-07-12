@@ -55,19 +55,20 @@ public class RunSharedTaxiWithDynamicZones {
 		
 		String folder = "../../../shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt_saturdaynight/";
 		Config config = ConfigUtils.loadConfig(folder+"config0.1.xml", new DrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
-		config.plans().setInputFile("testplans.xml");
+		config.plans().setInputFile("population_night_bln.xml");
 		config.controler().setLastIteration(5);
 		ZonalSystem zones = new ZonalSystem(JbUtils.readShapeFileAndExtractGeometry(folder+"shp/berlin_grid_1500.shp", "ID"),OptimizationCriterion.Fare);
 		
 
 		DrtConfigGroup drt = (DrtConfigGroup) config.getModules().get(DrtConfigGroup.GROUP_NAME);
 		drt.setEstimatedBeelineDistanceFactor(1.5);
-		drt.setVehiclesFile("new_net.taxis4to4_cap1.xml");
+		drt.setVehiclesFile("vehicles_100.xml");
 		drt.setNumberOfThreads(7);
 		drt.setMaxTravelTimeAlpha(1.5);
-		drt.setMaxTravelTimeBeta(4200);
-		drt.setMaxWaitTime(4200);
-		drt.setkNearestVehicles(49);
+		drt.setMaxTravelTimeBeta(420);
+		drt.setMaxWaitTime(420);
+		drt.setIdleVehiclesReturnToDepots(true);
+		drt.setkNearestVehicles(7);
 		
 		Controler controler = DrtControlerCreator.createControler(config, false);
 		ZonalBasedRequestValidator validator = new ZonalBasedRequestValidator(controler.getScenario().getNetwork(), zones);
