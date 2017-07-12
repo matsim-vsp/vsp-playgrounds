@@ -200,7 +200,7 @@
 			<artifactId>matsim</artifactId>
 			<version>vehiclesInPrepareForSim</version>
 			<!--<version>0.10.0-SNAPSHOT</version>-->
-			<type>jar</type>
+			<!--<type>jar</type>-->
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -208,7 +208,7 @@
 			<artifactId>matsim</artifactId>
 			<version>vehiclesInPrepareForSim</version>
 			<!--<version>0.10.0-SNAPSHOT</version>-->
-			<type>test-jar</type>
+			<!--<type>test-jar</type>-->
 			<scope>test</scope>
 		</dependency>
 		<dependency>
