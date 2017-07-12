@@ -201,7 +201,7 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>matsim</artifactId>
-			<version>vehiclesInPrepareForSim</version>
+			<version>vehiclesInPrepareForSim-SNAPSHOT</version>
 		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>org.matsim</groupId>-->
