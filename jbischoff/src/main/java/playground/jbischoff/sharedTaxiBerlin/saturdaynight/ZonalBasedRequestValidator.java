@@ -32,6 +32,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.data.DrtRequest;
+import org.matsim.contrib.drt.data.validator.DefaultDrtRequestValidator;
 import org.matsim.contrib.drt.data.validator.DrtRequestValidator;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -52,14 +53,15 @@ public class ZonalBasedRequestValidator implements DrtRequestValidator {
 	private Map<String,Geometry> zones ;
 	private Map<Id<Link>,String> link2zone = new HashMap<>();
 	private Network network;
-	
+	DefaultDrtRequestValidator delegate = new DefaultDrtRequestValidator();
 	/**
 	 * 
 	 */
 	@Inject
-	public ZonalBasedRequestValidator(Network network, @Named(DrtConfigGroup.DRT_MODE)Map<String,Geometry> initialZones) {
-		this.zones = initialZones;
+	public ZonalBasedRequestValidator(Network network, ZonalSystem initialZones) {
+		this.zones = initialZones.getZones();
 		this.network = network;
+		
 	}
 	
 	
@@ -68,8 +70,11 @@ public class ZonalBasedRequestValidator implements DrtRequestValidator {
 	 */
 	@Override
 	public boolean validateDrtRequest(DrtRequest request) {
+		if (delegate.validateDrtRequest(request)){
 		if (linkIsCovered(request.getFromLink())&linkIsCovered(request.getToLink())) return true;
-		else return false;
+		}
+		
+		return false;
 	}
 
 	
@@ -80,9 +85,11 @@ public class ZonalBasedRequestValidator implements DrtRequestValidator {
 	
 	
 	private boolean linkIsCovered(Link l){
-		if (getZoneForLinkId(l.getId())!=null) return true;
+		if (getZoneForLinkId(l.getId())!=null) 
+			return true;
 		else return false;
 	}	
+	
 	private String getZoneForLinkId(Id<Link> linkId){
 		if (this.link2zone.containsKey(linkId)){
 			return link2zone.get(linkId);

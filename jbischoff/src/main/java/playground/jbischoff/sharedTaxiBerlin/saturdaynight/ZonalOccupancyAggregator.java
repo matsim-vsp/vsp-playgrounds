@@ -74,11 +74,10 @@ public class ZonalOccupancyAggregator implements PersonEntersVehicleEventHandler
 	private double revenueMileage = 0.0;
 	
 	@Inject
-	public ZonalOccupancyAggregator(Network network, EventsManager events, @Named(DrtConfigGroup.DRT_MODE)Map<String,Geometry> drtzones) {
-		this.zones = drtzones;
+	public ZonalOccupancyAggregator(Network network, EventsManager events, ZonalSystem drtzones) {
+		this.zones = drtzones.getZones();
 		this.network = network;
 		events.addHandler(this);
-		prepareZones();
 	}
 
 	/**
@@ -99,7 +98,7 @@ public class ZonalOccupancyAggregator implements PersonEntersVehicleEventHandler
 	public void reset(int iteration) {
 		taxiDrivers.clear();
 		currentOccupancy.clear();
-		zoneOcc.clear();
+		prepareZones();
 		overallMileage = 0.0;
 		revenueMileage = 0.0;
 	}

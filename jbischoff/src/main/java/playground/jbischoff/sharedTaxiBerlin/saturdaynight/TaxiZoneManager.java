@@ -112,17 +112,17 @@ public class TaxiZoneManager implements IterationEndsListener {
 			
 		}	
 		
-		JbUtils.collection2Text(zonetable,matsimServices.getControlerIO().getIterationPath(event.getIteration())+"zoneperformance.csv", "zone;occupancy;fares;performance");
+		JbUtils.collection2Text(zonetable,matsimServices.getControlerIO().getIterationFilename(event.getIteration(),"zoneperformance.csv"), "zone;occupancy;fares;performance");
 		
 		Map<String,Geometry> currentZones = validator.getZones();
+		writeShape(matsimServices.getControlerIO().getIterationFilename(event.getIteration(),"zones.shp"), currentZones, zoneOccupancy, zoneFares);
+		writeRevenues(event.getIteration(),zoneFares);
 		
 		for(String z : worstZoneSort.retriveKSmallestElements()){
 			currentZones.remove(z);
 		}
+		validator.updateZones(currentZones);
 		
-		writeRevenues(event.getIteration(),zoneFares);
-		
-		writeShape(matsimServices.getControlerIO().getIterationPath(event.getIteration())+"zones.shp", currentZones, zoneOccupancy, zoneFares);
 	}
 
 
@@ -184,17 +184,21 @@ public class TaxiZoneManager implements IterationEndsListener {
 		  	CoordinateReferenceSystem crs = MGC.getCRS(TransformationFactory.DHDN_GK4);
 
 			PolygonFeatureFactory factory = new PolygonFeatureFactory.Builder().addAttribute("ID", String.class)
-					.setCrs(crs).setName("zone").addAttribute("occupancy", Double.class).addAttribute("fare", Double.class).addAttribute("performance", Double.class).create();
+					.setCrs(crs).setName("zone").addAttribute("occupancy", Double.class).addAttribute("fare", Double.class).addAttribute("perf.", Double.class).create();
 
 			List<SimpleFeature> features = new ArrayList<>();
 			
 			
 			for (Entry<String,Geometry> z :currentZones.entrySet()) {
                 Object[] attribs = new Object[4];
+                Double occ = zoneOccupancy.get(z.getKey());
+                Double fare = zoneFares.get(z.getKey());
                 attribs[0] = z.getKey();
-                attribs[1] = zoneOccupancy.get(z.getKey());
-                attribs[2] = zoneFares.get(z.getKey());
-                attribs[3] = (Double) attribs[1] * (Double) attribs[2];
+                attribs[1] = occ; 
+                attribs[2] = fare;
+                if(occ!=null&&fare!=null){
+                attribs[3] =  occ*fare;}
+                else {attribs[3] = null;}
 				features.add(factory.createPolygon(z.getValue().getCoordinates(), attribs, z.getKey()));
 			}
 
