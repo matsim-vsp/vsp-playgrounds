@@ -44,7 +44,10 @@
 			<id>matsim-custom</id>
 			<url>http://matsim.org/m2repo</url>
 		</repository>
-
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
 	</repositories>
 	<build>
 		<plugins>
@@ -196,21 +199,24 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.matsim</groupId>
+			<groupId>com.github.matsim-org</groupId>
 			<artifactId>matsim</artifactId>
 			<version>vehiclesInPrepareForSim</version>
+		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.matsim</groupId>-->
+			<!--<artifactId>matsim</artifactId>-->
 			<!--<version>0.10.0-SNAPSHOT</version>-->
 			<!--<type>jar</type>-->
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.matsim</groupId>
-			<artifactId>matsim</artifactId>
-			<version>vehiclesInPrepareForSim</version>
+			<!--<scope>compile</scope>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>org.matsim</groupId>-->
+			<!--<artifactId>matsim</artifactId>-->
 			<!--<version>0.10.0-SNAPSHOT</version>-->
 			<!--<type>test-jar</type>-->
-			<scope>test</scope>
-		</dependency>
+			<!--<scope>test</scope>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim-examples</artifactId>
