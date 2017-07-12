@@ -78,7 +78,12 @@ public class TaxiZoneManager implements IterationEndsListener {
 	ZonalBasedRequestValidator validator;
 	
 	@Inject
+	ZonalSystem zonalSystem;
+	
+	@Inject
 	MatsimServices matsimServices;
+	
+	
 	private final DecimalFormat format = new DecimalFormat();
 	private boolean headerWritten = false;
 	private double cost_km = 0.3;
@@ -100,14 +105,30 @@ public class TaxiZoneManager implements IterationEndsListener {
 		Map<String, Double> zoneOccupancy = aggregator.calculateZoneOccupancy();
 		Map<String, Double> zoneFares = calculateZoneFares(fareCalculator.getFaresPerLink()); 
 		List<String> zonetable = new ArrayList<>();
-		
-        PartialSort<String> worstZoneSort = new PartialSort<>(10);
+		int k = 10;
+        PartialSort<String> worstZoneSort = new PartialSort<>(k);
         
 		for (Entry<String, Double> e : zoneFares.entrySet()){
 			Double occupancy = zoneOccupancy.get(e.getKey());
 			if (occupancy == null) throw new RuntimeException();
 			double performance = e.getValue()*occupancy;
-			worstZoneSort.add(e.getKey(), performance);
+			
+			double indicator;
+			
+			switch (zonalSystem.getOptimizationCriterion()){
+			case Fare:
+				indicator = e.getValue();
+			case Performance:
+				indicator = performance;
+			case Occupancy:
+				indicator = occupancy;
+			default:
+				indicator = Double.NaN;
+			}
+				
+			
+			worstZoneSort.add(e.getKey(), indicator);
+			
 			zonetable.add(e.getKey()+";"+format.format(occupancy)+";"+format.format(e.getValue())+";"+format.format(performance));
 			
 		}	
@@ -117,11 +138,11 @@ public class TaxiZoneManager implements IterationEndsListener {
 		Map<String,Geometry> currentZones = validator.getZones();
 		writeShape(matsimServices.getControlerIO().getIterationFilename(event.getIteration(),"zones.shp"), currentZones, zoneOccupancy, zoneFares);
 		writeRevenues(event.getIteration(),zoneFares);
-		
+		if (currentZones.size()>2*k){
 		for(String z : worstZoneSort.retriveKSmallestElements()){
 			currentZones.remove(z);
-		}
-		validator.updateZones(currentZones);
+			validator.updateZones(currentZones);
+		}}
 		
 	}
 

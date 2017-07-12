@@ -39,6 +39,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import com.google.inject.name.Names;
 import com.vividsolutions.jts.geom.Geometry;
 
+import playground.jbischoff.sharedTaxiBerlin.saturdaynight.ZonalSystem.OptimizationCriterion;
 import playground.jbischoff.utils.JbUtils;
 
 
@@ -56,7 +57,7 @@ public class RunSharedTaxiWithDynamicZones {
 		Config config = ConfigUtils.loadConfig(folder+"config0.1.xml", new DrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
 		config.plans().setInputFile("testplans.xml");
 		config.controler().setLastIteration(5);
-		ZonalSystem zones = new ZonalSystem(JbUtils.readShapeFileAndExtractGeometry(folder+"shp/berlin_grid_1500.shp", "ID"));
+		ZonalSystem zones = new ZonalSystem(JbUtils.readShapeFileAndExtractGeometry(folder+"shp/berlin_grid_1500.shp", "ID"),OptimizationCriterion.Fare);
 		
 
 		DrtConfigGroup drt = (DrtConfigGroup) config.getModules().get(DrtConfigGroup.GROUP_NAME);
@@ -67,6 +68,7 @@ public class RunSharedTaxiWithDynamicZones {
 		drt.setMaxTravelTimeBeta(4200);
 		drt.setMaxWaitTime(4200);
 		drt.setkNearestVehicles(49);
+		
 		Controler controler = DrtControlerCreator.createControler(config, false);
 		ZonalBasedRequestValidator validator = new ZonalBasedRequestValidator(controler.getScenario().getNetwork(), zones);
 

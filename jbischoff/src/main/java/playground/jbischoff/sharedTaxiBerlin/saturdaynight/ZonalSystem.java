@@ -35,13 +35,17 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class ZonalSystem {
 
-	private final Map<String,Geometry> zones;
+	public enum OptimizationCriterion {Fare, Occupancy, Performance}
 	
+	private final Map<String,Geometry> zones;
+	private final OptimizationCriterion optimizationCriterion;
 	/**
 	 * 
 	 */
-	public ZonalSystem(Map<String,Geometry> zones) {
+	public ZonalSystem(Map<String,Geometry> zones, OptimizationCriterion c) {
 		this.zones = zones;
+		this.optimizationCriterion = c;
+		
 	}
 	
 	/**
@@ -49,6 +53,13 @@ public class ZonalSystem {
 	 */
 	public Map<String, Geometry> getZones() {
 		return zones;
+	}
+
+	/**
+	 * @return the optimizationCriterion
+	 */
+	public OptimizationCriterion getOptimizationCriterion() {
+		return optimizationCriterion;
 	}
 	
 }
