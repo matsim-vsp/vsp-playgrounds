@@ -1,9 +1,8 @@
 package matsimintegration;
 
-import org.matsim.core.config.Config;
-
 import floetteroed.utilities.Units;
-import opdytsintegration.utils.TimeDiscretization;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
+import org.matsim.core.config.Config;
 
 /**
  * 

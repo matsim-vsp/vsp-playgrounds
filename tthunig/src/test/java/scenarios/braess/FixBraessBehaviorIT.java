@@ -23,7 +23,6 @@ package scenarios.braess;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Scenario;
@@ -68,28 +67,24 @@ public final class FixBraessBehaviorIT{
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 	
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
     @Test
 	public void testBraessWoPricing() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.NONE, 26, 1920, 14, 3785111);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.NONE, 35, 1941, 24, 3928399);
 	}
 
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
     @Test
 	public void testV3() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V3, 456, 1091, 453, 2995253);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V3, 690, 668, 642, 2778328);
 	}
 
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
 	@Test
 	public void testV8() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V8, 538, 1026, 436, 2965792);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V8, 878, 303, 819, 2080747);
 	}
 
-//	@Ignore("due to bugfixes in fast capacity update (by michalm) this tests give different results on jenkins and travis")
 	@Test
 	public void testV9() {
-		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V9, 605, 850, 545, 2814891);
+		fixRouteDistributionAndTT(RunBraessSimulation.PricingType.V9, 881, 277, 842, 2003426);
 	}
 	
 	private void fixRouteDistributionAndTT(RunBraessSimulation.PricingType pricingType, int expectedNOAgentsOnUpperRoute,
@@ -185,9 +180,8 @@ public final class FixBraessBehaviorIT{
 
 		config.qsim().setStuckTime(3600 * 0.5);
 		
-		// set end time to 12 am (4 hours after simulation start) to
-		// shorten simulation run time
-		config.qsim().setEndTime(3600 * 10);
+		// set end time to 4 am (4 hours after simulation start) to shorten simulation run time
+		config.qsim().setEndTime(3600 * 4);
 
 		config.controler().setOutputDirectory(testUtils.getOutputDirectory());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
@@ -209,11 +203,10 @@ public final class FixBraessBehaviorIT{
 
 	private static void createPopulation(Scenario scenario) {
 		
-		TtCreateBraessPopulation popCreator = 
-				new TtCreateBraessPopulation(scenario.getPopulation(), scenario.getNetwork());
+		TtCreateBraessPopulation popCreator = new TtCreateBraessPopulation(scenario.getPopulation(), scenario.getNetwork());
 		popCreator.setNumberOfPersons(2000);
-		popCreator.setSimulationStartTime(8*3600);
-		popCreator.createPersons(InitRoutes.ALL, 110.);
+		popCreator.setSimulationStartTime(0);
+		popCreator.createPersons(InitRoutes.ALL, null);
 	}
 	
 }

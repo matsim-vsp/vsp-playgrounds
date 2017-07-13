@@ -8,12 +8,10 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
 import floetteroed.utilities.Tuple;
 import floetteroed.utilities.math.Covariance;
 import floetteroed.utilities.math.Vector;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
  * 

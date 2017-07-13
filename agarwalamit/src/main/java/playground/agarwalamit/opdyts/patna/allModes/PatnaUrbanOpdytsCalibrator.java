@@ -20,17 +20,19 @@
 package playground.agarwalamit.opdyts.patna.allModes;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
-import opdytsintegration.MATSimSimulator2;
-import opdytsintegration.MATSimStateFactoryImpl;
-import opdytsintegration.utils.OpdytsConfigGroup;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
+import org.matsim.contrib.opdyts.MATSimSimulator2;
+import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -52,13 +54,13 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
-import playground.agarwalamit.opdyts.plots.StateVectorElementsSizePlotter;
-import playground.agarwalamit.opdyts.teleportationModes.TeleportationODAnalyzer;
+import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
+import playground.agarwalamit.opdyts.teleportationModes.TeleportationODLinkAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
-/**®
+/**
  * @author amit
  */
 
@@ -71,6 +73,7 @@ public class PatnaUrbanOpdytsCalibrator {
 		String OUT_DIR = null;
 		String relaxedPlans ;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
+		boolean usingLinkIdsForStateVecotrs = false;
 
 		if ( args.length>0 ) {
 			configFile = args[0];
@@ -81,7 +84,7 @@ public class PatnaUrbanOpdytsCalibrator {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/"+"/config_allModes.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
-			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial;
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
@@ -117,10 +120,18 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
-		PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(path+"/network.xml.gz", path+"/Wards.shp");
-		Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
 
-		simulator.addSimulationStateAnalyzer(new TeleportationODAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		if(usingLinkIdsForStateVecotrs) {
+			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), scenario.getNetwork(), 500.0);
+			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
+			simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		} else {
+			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
+			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
+			simulator.addSimulationStateAnalyzer(new TeleportationODLinkAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		}
+
+
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
@@ -144,8 +155,8 @@ public class PatnaUrbanOpdytsCalibrator {
 				addControlerListenerBinding().toInstance(new ShutdownListener() {
 					@Override
 					public void notifyShutdown(ShutdownEvent event) {
-						// plot the size of the state vector elements
-						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizePlots/";
+						// copy the state vector elements files before removing ITERS dir
+						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizeFiles/";
 						new File(outDir).mkdirs();
 
 						int firstIt = event.getServices().getConfig().controler().getFirstIteration();
@@ -154,12 +165,24 @@ public class PatnaUrbanOpdytsCalibrator {
 
 						for (int itr = firstIt+1; itr <=lastIt; itr++) {
 							if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(event.getServices().getControlerIO().getIterationPath(itr)).exists() ) {
-								StateVectorElementsSizePlotter.gnuHistogramPlot(
-										event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt"),
-										outDir+"/"+itr+".stateVector_networkModes.eps", "networkModes");
-								StateVectorElementsSizePlotter.gnuHistogramPlot(
-										event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt"),
-										outDir+"/"+itr+".stateVector_teleportationModes.eps", "teleportationModes");
+								{
+									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt");
+									String sinkFile =  outDir+"/"+itr+".stateVector_networkModes.txt";
+									try {
+										Files.copy(new File(sourceFile), new File(sinkFile));
+									} catch (IOException e) {
+										throw new RuntimeException("Data is not copied. Reason : " + e);
+									}
+								}
+								{
+									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt");
+									String sinkFile =  outDir+"/"+itr+".stateVector_teleportationModes.txt";
+									try {
+										Files.copy(new File(sourceFile), new File(sinkFile));
+									} catch (IOException e) {
+										throw new RuntimeException("Data is not copied. Reason : " + e);
+									}
+								}
 							}
 						}
 

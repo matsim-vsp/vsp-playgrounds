@@ -2,10 +2,11 @@ package opdytsintegration.example.roadpricing;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -13,9 +14,6 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
-
-import opdytsintegration.car.DifferentiatedLinkOccupancyAnalyzer;
-import opdytsintegration.utils.TimeDiscretization;
 
 /**
  * 

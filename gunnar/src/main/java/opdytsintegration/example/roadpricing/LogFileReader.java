@@ -1,7 +1,6 @@
 package opdytsintegration.example.roadpricing;
 
 import java.io.IOException;
-
 import floetteroed.opdyts.logging.EquilibriumGapWeight;
 import floetteroed.opdyts.logging.UniformityGapWeight;
 import floetteroed.opdyts.searchalgorithms.RandomSearch;

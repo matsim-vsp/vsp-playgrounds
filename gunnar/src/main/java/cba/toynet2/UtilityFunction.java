@@ -1,14 +1,7 @@
 package cba.toynet2;
 
-import static floetteroed.utilities.Units.H_PER_S;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 
 /**
  * 

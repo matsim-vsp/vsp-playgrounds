@@ -31,6 +31,7 @@ import playground.ikaddoura.decongestion.handler.PersonVehicleTracker;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollSetting;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingBangBang;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingPID;
+import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingP_MCP;
 
 /**
 * @author ikaddoura
@@ -47,24 +48,35 @@ public class DecongestionModule extends AbstractModule {
 	@Override
 	public void install() {
 		
-		if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
-			this.bind(DecongestionTollingPID.class).asEagerSingleton();
-			this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
-			this.addEventHandlerBinding().to(DecongestionTollingPID.class);
-		
-		} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.BangBang.toString())) {
-			this.bind(DecongestionTollingBangBang.class).asEagerSingleton();
-			this.bind(DecongestionTollSetting.class).to(DecongestionTollingBangBang.class);
-		
+		if (decongestionConfigGroup.isEnableDecongestionPricing()) {
+			if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
+				this.bind(DecongestionTollingPID.class).asEagerSingleton();
+				this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
+				this.addEventHandlerBinding().to(DecongestionTollingPID.class);
+				
+			} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.P_MC.toString())) {
+				this.bind(DecongestionTollingP_MCP.class).asEagerSingleton();
+				this.bind(DecongestionTollSetting.class).to(DecongestionTollingP_MCP.class);
+				this.addEventHandlerBinding().to(DecongestionTollingP_MCP.class);
+			
+			} else if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.BangBang.toString())) {
+				this.bind(DecongestionTollingBangBang.class).asEagerSingleton();
+				this.bind(DecongestionTollSetting.class).to(DecongestionTollingBangBang.class);
+			
+			} else {
+				throw new RuntimeException("Unknown decongestion pricing approach. Aborting...");
+			}
+			
 		} else {
-			throw new RuntimeException("Unknown decongestion pricing approach. Aborting...");
+			// no pricing
+			
 		}
 		
 		this.bind(DecongestionInfo.class).asEagerSingleton();
 		
 		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingAll.class);
-		
 		this.bind(IntervalBasedTollingAll.class).asEagerSingleton();
+		
 		this.bind(DelayAnalysis.class).asEagerSingleton();
 		this.bind(PersonVehicleTracker.class).asEagerSingleton();
 						
