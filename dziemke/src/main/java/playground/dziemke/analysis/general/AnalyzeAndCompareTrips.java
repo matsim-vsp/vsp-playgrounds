@@ -27,7 +27,8 @@ public class AnalyzeAndCompareTrips {
 	// Input and output
 //	private static final String NETWORK_FILE = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network.xml.gz"; // <----------
 	private static final String NETWORK_FILE = "../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
-	private static final String CONFIG_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/" + RUN_ID + ".output_config.xml.gz";
+//	private static final String CONFIG_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/" + RUN_ID + ".output_config.xml.gz";
+	private static final String CONFIG_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/config_be_202.xml";
 //	private static final String EVENTS_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/" + RUN_ID + ".output_events.xml.gz";
 	private static final String EVENTS_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/ITERS/it." + ITERATION_FOR_ANALYSIS + "/" + RUN_ID + "." + ITERATION_FOR_ANALYSIS + ".events.xml.gz";
 //	private static final String cemdapPersonsInputFile = "../../shared-svn/projects/cemdapMatsimCadyts/scenario/cemdap_berlin/" + CEMDAP_PERSONS_INPUT_FILE_ID + "/persons1.dat"; // TODO
@@ -51,7 +52,7 @@ public class AnalyzeAndCompareTrips {
 		List<FromMatsimTrip> fromMatsimTrips = events2TripsParser.getTrips();
 
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
-//		matsimTripFilter.activateModeChoice(TransportMode.car);
+		matsimTripFilter.activateModeChoice(TransportMode.car);
 //		matsimTripFilter.activateModeChoice("pt", "ptSlow");
 		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
 		matsimTripFilter.activateDist(0, 100);
@@ -79,7 +80,7 @@ public class AnalyzeAndCompareTrips {
 		List<FromSrvTrip> fromSrvTrips = srv2MATSimPopulation.getTrips();
 
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
-//		srvTripFilter.activateModeChoice(TransportMode.pt);
+		srvTripFilter.activateModeChoice(TransportMode.car);
 		srvTripFilter.activateDist(0, 100);
 //		srvTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
