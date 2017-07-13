@@ -80,6 +80,7 @@ public class PatnaUrbanOpdytsCalibrator {
 			OUT_DIR = args[1];
 			relaxedPlans = args[2];
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.valueOf(args[3]);
+			usingLinkIdsForStateVecotrs = Boolean.valueOf(args[4]);
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/"+"/config_allModes.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
@@ -121,17 +122,15 @@ public class PatnaUrbanOpdytsCalibrator {
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
 
-		if(usingLinkIdsForStateVecotrs) {
-			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), scenario.getNetwork(), 500.0);
-			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
-			simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
-		} else {
+		if( usingLinkIdsForStateVecotrs ) {
 			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
 			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
 			simulator.addSimulationStateAnalyzer(new TeleportationODLinkAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		} else{
+			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), scenario.getNetwork(), 250.0);
+			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
+			simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
 		}
-
-
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {

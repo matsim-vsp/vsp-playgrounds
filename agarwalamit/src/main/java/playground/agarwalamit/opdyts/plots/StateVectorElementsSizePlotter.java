@@ -43,7 +43,7 @@ public class StateVectorElementsSizePlotter {
 
 
         // plot the size of the state vector elements
-        String outDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_0/"+"/vectorElementSizeFiles/";
+        String outDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_5/"+"/vectorElementSizeFiles/";
 //        new File(outDir).mkdirs();
 
         int firstIt = 0;

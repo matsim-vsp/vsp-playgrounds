@@ -85,14 +85,15 @@ public final class PatnaZoneToLinkIdentifier {
 
         Collection<Point> points = generalGrid.getGrid().values();
         int index = 0;
+        int numberOfOrigins = 0;
         for (Point point : points) {
-            Zone zone = new Zone(String.valueOf(index));
+            Zone zone = new Zone(String.valueOf(index++));
 
             for (Person p : population.getPersons().values()) {
                 List<PlanElement> pes = p.getSelectedPlan().getPlanElements();
                 for (PlanElement pe : pes ) {
                     if (pe instanceof Activity) {
-                        Coord coord = coordinateTransformation.transform( ((Activity)pe).getCoord() );
+                        Coord coord = ((Activity)pe).getCoord();
                         Point origin = MGC.xy2Point(coord.getX(), coord.getY());
                         if ( generalGrid.getCellGeometry(point).contains(origin) ) {
                             zone.addCoordsToZone(coord);
@@ -104,10 +105,12 @@ public final class PatnaZoneToLinkIdentifier {
             if (zone.getCoordsInsideZone().isEmpty()) {
                 LOGGER.warn("No coordinates found in the zone "+ zone.getZoneId());
             } else {
+                numberOfOrigins += zone.getCoordsInsideZone().size();
                 LOGGER.info(zone.getCoordsInsideZone().size() + " coords are inside the zone "+ zone.getZoneId());
                 zones.add(zone);
             }
         }
+        LOGGER.info("Total stored coordinates are "+ numberOfOrigins);
     }
 
     /*

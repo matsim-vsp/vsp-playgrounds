@@ -20,10 +20,10 @@
 package playground.agarwalamit.opdyts.teleportationModes;
 
 import java.util.*;
-import javax.inject.Inject;
 import floetteroed.utilities.math.Vector;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Activity;
@@ -115,19 +115,19 @@ public class TeleportationODCoordAnalyzer implements PersonDepartureEventHandler
         private final TimeDiscretization timeDiscretization;
         private final Set<String> relevantTeleportationMdoes;
         private final Set<Zone> relevantZones;
-        @Inject private Population population;
+        private final Population population;
 
         private TeleportationODCoordAnalyzer teleportationODAnalyzer;
 
 
         public Provider(final TimeDiscretization timeDiscretization,
-                                                         final Set<String> relevantTeleportationMdoes,
-                                                         final Set<Zone> relevantZones
-                                                        ) {
+                        final Set<String> relevantTeleportationMdoes,
+                        final Set<Zone> relevantZones,
+                        Scenario scenario) {
             this.timeDiscretization = timeDiscretization;
             this.relevantTeleportationMdoes = relevantTeleportationMdoes;
-
             this.relevantZones = relevantZones;
+            this.population = scenario.getPopulation();
         }
 
         @Override
