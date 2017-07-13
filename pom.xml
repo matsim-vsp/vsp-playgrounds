@@ -200,7 +200,7 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.matsim</groupId>
+			<groupId>com.github.matsim-org.matsim</groupId>
 			<artifactId>matsim</artifactId>
 			<version>vehiclesInPrepareForSim-SNAPSHOT</version>
 			<type>jar</type>
