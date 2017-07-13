@@ -20,17 +20,23 @@
 
 package playground.telaviv.controler;
 
-import com.google.inject.Provider;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
 import org.matsim.contrib.locationchoice.bestresponse.DestinationChoiceBestResponseContext;
 import org.matsim.contrib.locationchoice.bestresponse.DestinationChoiceInitializer;
 import org.matsim.contrib.locationchoice.facilityload.FacilitiesLoadCalculator;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
+
+import com.google.inject.Provider;
+
 import playground.telaviv.config.TelAvivConfig;
 import playground.telaviv.core.mobsim.qsim.TTAQSimFactory;
 import playground.telaviv.locationchoice.matsimdc.DCScoringFunctionFactory;
