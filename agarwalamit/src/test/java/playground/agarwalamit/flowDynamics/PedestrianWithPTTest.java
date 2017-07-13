@@ -110,6 +110,7 @@ public class PedestrianWithPTTest {
 		this.walkModeName = walkModeName;
 	}
 
+//  since, PrepareForSimUtils bind trip router, it doesn't matter is using controler or not, the problem appears. Amit July'17
 	@Parameterized.Parameters(name = "{index}: isUsingControler == {0}; walkModeName == {1}")
 	public static Collection<Object[]> parameterObjects () {
 		Object [][] runMethod = new Object [][] {
@@ -131,7 +132,8 @@ public class PedestrianWithPTTest {
 		
 		LinkEnterLeaveTimeEventHandler lelteh = new LinkEnterLeaveTimeEventHandler();
 		
-		if (isUsingControler && this.walkModeName.equals(TransportMode.walk) & ! letTheTestFail) {
+	//  since, PrepareForSimUtils bind trip router, it doesn't matter is using controler or not, the problem appears. Amit July'17
+		if ( this.walkModeName.equals(TransportMode.walk) & ! letTheTestFail) {
 			try {
 				runSim(lelteh);
 				Assert.assertTrue("Expected CreationException does not occur.", false);
