@@ -55,20 +55,23 @@ public class RunSharedTaxiWithDynamicZones {
 		
 		String folder = "../../../shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt_saturdaynight/";
 		Config config = ConfigUtils.loadConfig(folder+"config0.1.xml", new DrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
-		config.plans().setInputFile("population_night_bln.xml");
-		config.controler().setLastIteration(5);
+		config.plans().setInputFile("population_night_bln_dummy_0.1.xml");
+		config.controler().setOutputDirectory("D:/runs-svn/sharedTaxi/trb_zones/fare_10");
+		config.controler().setLastIteration(250);
+		config.controler().setWriteEventsInterval(10);
 		ZonalSystem zones = new ZonalSystem(JbUtils.readShapeFileAndExtractGeometry(folder+"shp/berlin_grid_1500.shp", "ID"),OptimizationCriterion.Fare);
 		
 
 		DrtConfigGroup drt = (DrtConfigGroup) config.getModules().get(DrtConfigGroup.GROUP_NAME);
 		drt.setEstimatedBeelineDistanceFactor(1.5);
-		drt.setVehiclesFile("vehicles_100.xml");
+		drt.setVehiclesFile("vehicles_50.xml");
 		drt.setNumberOfThreads(7);
 		drt.setMaxTravelTimeAlpha(1.5);
 		drt.setMaxTravelTimeBeta(420);
 		drt.setMaxWaitTime(420);
-		drt.setIdleVehiclesReturnToDepots(true);
-		drt.setkNearestVehicles(7);
+		drt.setIdleVehiclesReturnToDepots(false);
+		drt.setkNearestVehicles(21);
+		
 		
 		Controler controler = DrtControlerCreator.createControler(config, false);
 		ZonalBasedRequestValidator validator = new ZonalBasedRequestValidator(controler.getScenario().getNetwork(), zones);
@@ -88,5 +91,6 @@ public class RunSharedTaxiWithDynamicZones {
 		});
 		controler.run();
 		
-	}
+		
+}
 }

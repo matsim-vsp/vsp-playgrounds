@@ -22,6 +22,9 @@
  */
 package playground.jbischoff.sharedTaxiBerlin.saturdaynight;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
 import org.matsim.api.core.v01.Coord;
@@ -52,20 +55,25 @@ import playground.jbischoff.utils.JbUtils;
  *
  */
 public class MergeDemand {
+	Scenario scenario;
 public static void main(String[] args) {
+	new MergeDemand().run();
+}
+private void run(){
 	Random rnd = MatsimRandom.getLocalInstance();
 	double startTime = 18*3600;
 	double endTime = 4*3600;
-	Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+	double scale = 0.1;
+	scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 	new PopulationReader(scenario).readFile("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/taxi_berlin/2013/OD/20130420/OD_20130420_SCALE_2.0_plans.xml.gz");
 	
 	Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 	new PopulationReader(scenario2).readFile("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/taxi_berlin/2013/OD/20130421/OD_20130421_SCALE_2.0_plans.xml.gz");
 	
 	new MatsimNetworkReader(scenario.getNetwork()).readFile("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/network/berlin_brb.xml.gz");
-	
+	boolean addDummyPlans = true;
 	Geometry geo = JbUtils.readShapeFileAndExtractGeometry("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt_saturdaynight/shp/berlin_all.shp").get("010113");
-	
+	Random r = MatsimRandom.getRandom();
 	Population mergedPop = PopulationUtils.createPopulation(ConfigUtils.createConfig());
 	for (Person p : scenario.getPopulation().getPersons().values()){
 		Plan plan = p.getSelectedPlan();
@@ -76,7 +84,9 @@ public static void main(String[] args) {
 			Coord endCoord = ParkingUtils.getRandomPointAlongLink(rnd, scenario.getNetwork().getLinks().get(act2.getLinkId()));
 			if (geo.contains(MGC.coord2Point(startCoord))&&geo.contains(MGC.coord2Point(endCoord))){
 			Person np = mergedPop.getFactory().createPerson(p.getId());
+//			if (r.nextDouble()<scale){
 			mergedPop.addPerson(np);
+//			}
 			Plan nplan = PopulationUtils.createPlan();
 			np.addPlan(nplan);
 			Activity a0 = PopulationUtils.createActivityFromCoord("dummy", startCoord);
@@ -85,6 +95,16 @@ public static void main(String[] args) {
 			nplan.addLeg(PopulationUtils.createLeg("taxi"));
 			Activity a1 = PopulationUtils.createActivityFromCoord("dummy", endCoord);
 			nplan.addActivity(a1);
+			if (addDummyPlans){
+				for (int i = 0; i<9; i++){
+					np.addPlan(createDummyPlan(startCoord));
+				}
+			}
+			ArrayList<Plan> plans = new ArrayList<>();
+			plans.addAll(np.getPlans());
+			Collections.shuffle(plans);
+			np.setSelectedPlan(plans.get(0));
+			
 			}
 		}
 	}
@@ -97,9 +117,11 @@ public static void main(String[] args) {
 			Activity act2 = (Activity) plan.getPlanElements().get(2);
 			Coord endCoord = ParkingUtils.getRandomPointAlongLink(rnd, scenario.getNetwork().getLinks().get(act2.getLinkId()));
 			if (geo.contains(MGC.coord2Point(startCoord))&&geo.contains(MGC.coord2Point(endCoord))){
-
+				
 			Person np = mergedPop.getFactory().createPerson(p.getId());
-			mergedPop.addPerson(np);
+//			if (r.nextDouble()<scale){
+				mergedPop.addPerson(np);
+//				}
 			Plan nplan = PopulationUtils.createPlan();
 			np.addPlan(nplan);
 			Activity a0 = PopulationUtils.createActivityFromCoord("dummy", startCoord);
@@ -108,10 +130,27 @@ public static void main(String[] args) {
 			nplan.addLeg(PopulationUtils.createLeg("taxi"));
 			Activity a1 = PopulationUtils.createActivityFromCoord("dummy", endCoord);
 			nplan.addActivity(a1);
+			if (addDummyPlans){
+				for (int i = 0; i<9; i++){
+					np.addPlan(createDummyPlan(startCoord));
+				}
+			}
+			ArrayList<Plan> plans = new ArrayList<>();
+			plans.addAll(np.getPlans());
+			Collections.shuffle(plans);
+			np.setSelectedPlan(plans.get(0));
+			
 		}}
 		
 	}
-	new PopulationWriter(mergedPop).write("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt_saturdaynight/population_night_bln.xml");
+	new PopulationWriter(mergedPop).write("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt_saturdaynight/population_night_bln_dummy_"+scale+".xml");
 	
 }
+	Plan createDummyPlan(Coord coord){
+		Plan plan = scenario.getPopulation().getFactory().createPlan();
+		Activity act = scenario.getPopulation().getFactory().createActivityFromCoord("dummy", coord);
+		plan.addActivity(act);
+		return plan;
+	
+	}
 }
