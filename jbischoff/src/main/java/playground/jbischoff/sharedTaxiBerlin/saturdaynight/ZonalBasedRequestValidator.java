@@ -22,24 +22,18 @@
  */
 package playground.jbischoff.sharedTaxiBerlin.saturdaynight;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.*;
 import org.matsim.contrib.drt.data.DrtRequest;
-import org.matsim.contrib.drt.data.validator.DefaultDrtRequestValidator;
-import org.matsim.contrib.drt.data.validator.DrtRequestValidator;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.data.validator.*;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
-import com.google.inject.name.Named;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.*;
 
 /**
  * @author  jbischoff
@@ -70,11 +64,8 @@ public class ZonalBasedRequestValidator implements DrtRequestValidator {
 	 */
 	@Override
 	public boolean validateDrtRequest(DrtRequest request) {
-		if (delegate.validateDrtRequest(request)){
-		if (linkIsCovered(request.getFromLink())&linkIsCovered(request.getToLink())) return true;
-		}
-		
-		return false;
+		return delegate.validateDrtRequest(request) && //
+				linkIsCovered(request.getFromLink()) && linkIsCovered(request.getToLink());
 	}
 
 	

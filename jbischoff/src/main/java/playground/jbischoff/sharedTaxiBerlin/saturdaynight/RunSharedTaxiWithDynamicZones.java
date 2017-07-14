@@ -77,7 +77,6 @@ public class RunSharedTaxiWithDynamicZones {
 						
 			@Override
 			public void install() {
-				install( new DvrpModule(DrtControlerCreator.createModuleForQSimPlugin(JbDrtOptimizerProvider.class), DrtOptimizer.class) ) ;
 				addControlerListenerBinding().to(TaxiZoneManager.class).asEagerSingleton();
 				bind(ZonalOccupancyAggregator.class).asEagerSingleton();
 				bind(SharedTaxiFareCalculator.class).asEagerSingleton();
