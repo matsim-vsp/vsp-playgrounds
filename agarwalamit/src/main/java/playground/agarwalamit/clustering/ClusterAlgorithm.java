@@ -38,7 +38,19 @@ import playground.agarwalamit.utils.NumberUtils;
 
 public class ClusterAlgorithm {
 
-    public enum ClusterType { EQUAL_POINTS, K_MEANS }
+    /**
+     * Currently, two enums are implemented both are based on K-Means clustering algorithms.
+     * However, EQUAL_POINTS offers same number of points in each cluster.
+     */
+    public enum ClusterType {
+        /**
+         * Clusters will be created such that number of points are same in each cluster.
+         */
+        EQUAL_POINTS,
+        /**
+         * Simply use of K-Means algorithm which means, cluster may have different number of points.
+         */
+        K_MEANS }
 
     private static final Logger LOGGER = Logger.getLogger(ClusterAlgorithm.class);
 
@@ -56,6 +68,7 @@ public class ClusterAlgorithm {
 
         clusters = new ArrayList<>(numberOfClusters);
         this.clusterType = clusterType;
+        LOGGER.info("Using clustering type "+ this.clusterType);
     }
 
     public void process(final List<Point> pointsForClustering) {
@@ -99,15 +112,6 @@ public class ClusterAlgorithm {
         jFrame.pack();
         jFrame.setVisible(true);
     }
-
-//    private void getContentPane(){
-//        BufferedImage bufferedImage = new BufferedImage( (int) (this.boundingBox.getxMax()- boundingBox.getxMin()) ,
-//                (int) (this.boundingBox.getyMax()- boundingBox.getyMin()) ,BufferedImage.TYPE_INT_RGB);
-//        Graphics g = bufferedImage.getGraphics();
-//
-//        g.drawImage(bufferedImage, 0, 0, null);
-//        g.dispose();
-//    }
 
     private void assignCluster(final List<Point> pointsForClustering) {
 
@@ -163,9 +167,9 @@ public class ClusterAlgorithm {
 //                    clusterIndex = index;
 //                }
 //            }
-//            Cluster clusetr = clusters.get(clusterIndex);
-//            point.setCluster(clusetr.getId());
-//            clusetr.addPoint(point);
+//            Cluster cluster = clusters.get(clusterIndex);
+//            point.setCluster(cluster.getId());
+//            cluster.addPoint(point);
 //        }
 //    }
 
