@@ -29,7 +29,8 @@ public class Point {
 
     private final double x;
     private final double y;
-    private final double weight;
+
+    private double weight;
     private Id<Cluster> clusterId;
 
     public Point(final double x, final double y, final double weight) {
@@ -54,6 +55,10 @@ public class Point {
 
     public double getWeight() {
         return weight;
+    }
+
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 
     public void setCluster(final Id<Cluster> id) {

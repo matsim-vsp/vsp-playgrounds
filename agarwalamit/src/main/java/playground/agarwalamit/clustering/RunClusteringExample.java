@@ -35,14 +35,16 @@ public class RunClusteringExample {
        BoundingBox boundingBox = new BoundingBox(0,0,100,100);
 
         // let's say, we have 100 points
-        int numberOfPoints = 1000;
+        int numberOfPoints = 100;
 
         List<Point> sites = new ArrayList<>(numberOfPoints);
         for (int i =0 ; i< numberOfPoints ; i++) {
-            sites.add(ClusterUtils.getRandomPoint(boundingBox));
+            Point point = ClusterUtils.getRandomPoint(boundingBox);
+//            point.setWeight(new Random().nextInt(5));
+            sites.add(point);
         }
 
-        int numberOfCluster = 10;
+        int numberOfCluster = 5;
 
         ClusterAlgo clusterAlgo = new ClusterAlgo(numberOfCluster, boundingBox);
         clusterAlgo.process(sites);
