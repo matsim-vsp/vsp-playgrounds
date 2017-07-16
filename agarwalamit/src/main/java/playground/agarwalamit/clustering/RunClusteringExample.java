@@ -44,9 +44,10 @@ public class RunClusteringExample {
             sites.add(point);
         }
 
-        int numberOfCluster = 5;
+        int numberOfCluster = 10;
 
-        ClusterAlgo clusterAlgo = new ClusterAlgo(numberOfCluster, boundingBox);
+        ClusterAlgorithm clusterAlgo = new ClusterAlgorithm(numberOfCluster, boundingBox, ClusterAlgorithm.ClusterType.EQUAL_POINTS);
+//        ClusterAlgo clusterAlgo = new ClusterAlgo(numberOfCluster, boundingBox, ClusterAlgo.ClusterType.K_MEANS);
         clusterAlgo.process(sites);
 
         clusterAlgo.plotClusters();

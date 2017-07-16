@@ -20,8 +20,7 @@
 package playground.agarwalamit.clustering;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import org.apache.log4j.Logger;
@@ -31,14 +30,17 @@ import playground.agarwalamit.utils.NumberUtils;
 
 /**
  *
- * If weight of all points is 1, it is called as K-Mean cluster algorithm.
+ * If weight of all points is 1, it is called as K-Mean cluster algorithm
+ *  @see <a href="https://home.deib.polimi.it/matteucc/Clustering/tutorial_html/kmeans.html">K-Means</a>.
  *
  * Created by amit on 15.07.17.
  */
 
-public class ClusterAlgo {
+public class ClusterAlgorithm {
 
-    private static final Logger LOGGER = Logger.getLogger(ClusterAlgo.class);
+    public enum ClusterType { EQUAL_POINTS, K_MEANS }
+
+    private static final Logger LOGGER = Logger.getLogger(ClusterAlgorithm.class);
 
     private final int numberOfClusters;
     private final BoundingBox boundingBox;
@@ -46,11 +48,14 @@ public class ClusterAlgo {
     private final List<Cluster> clusters;
     private boolean terminate = false;
 
-    public ClusterAlgo(final int numberOfClusters, final BoundingBox boundingBox) {
+    private final ClusterType clusterType;
+
+    public ClusterAlgorithm(final int numberOfClusters, final BoundingBox boundingBox, final ClusterType clusterType) {
         this.numberOfClusters = numberOfClusters;
         this.boundingBox = boundingBox;
 
         clusters = new ArrayList<>(numberOfClusters);
+        this.clusterType = clusterType;
     }
 
     public void process(final List<Point> pointsForClustering) {
@@ -95,37 +100,74 @@ public class ClusterAlgo {
         jFrame.setVisible(true);
     }
 
-    private void getContentPane(){
-        BufferedImage bufferedImage = new BufferedImage( (int) (this.boundingBox.getxMax()- boundingBox.getxMin()) ,
-                (int) (this.boundingBox.getyMax()- boundingBox.getyMin()) ,BufferedImage.TYPE_INT_RGB);
-        Graphics g = bufferedImage.getGraphics();
-
-        g.drawImage(bufferedImage, 0, 0, null);
-        g.dispose();
-
-    }
+//    private void getContentPane(){
+//        BufferedImage bufferedImage = new BufferedImage( (int) (this.boundingBox.getxMax()- boundingBox.getxMin()) ,
+//                (int) (this.boundingBox.getyMax()- boundingBox.getyMin()) ,BufferedImage.TYPE_INT_RGB);
+//        Graphics g = bufferedImage.getGraphics();
+//
+//        g.drawImage(bufferedImage, 0, 0, null);
+//        g.dispose();
+//    }
 
     private void assignCluster(final List<Point> pointsForClustering) {
-        double min = Double.MAX_VALUE;
-        int clusterIndex = 0;
+
+        if (pointsForClustering.size()%numberOfClusters != 0) {
+            throw new RuntimeException("Number of points are "+ pointsForClustering.size() + " and number of required cluster are "+
+            numberOfClusters + ". Don't know how to cluster these points equally in required clusters.");
+        }
+        int numberOfPointsPerCluster = pointsForClustering.size() / numberOfClusters ;
+
         double distance = 0.0;
 
         for(Point point : pointsForClustering) {
-            min = Double.MAX_VALUE;
-            for(int index = 0; index < this.clusters.size() ; index++ ) {
-                Cluster cluster = this.clusters.get(index);
+            SortedMap<Double, Integer> distanceToClusterIndexMap = new TreeMap<>();
+            for(int clusterIndex = 0; clusterIndex < this.clusters.size() ; clusterIndex++ ) {
+                Cluster cluster = this.clusters.get(clusterIndex);
                 distance = ClusterUtils.euclideanDistance(cluster.getCentroid(), point);
 
-                if(distance < min){
-                    min = distance;
-                    clusterIndex = index;
+                distanceToClusterIndexMap.put(distance, clusterIndex);
+            }
+
+            // assign cluster
+            Iterator<Map.Entry<Double, Integer>> iterator = distanceToClusterIndexMap.entrySet().iterator();
+            while ( iterator.hasNext() ) {
+                Map.Entry<Double, Integer> entry = iterator.next();
+                int clusterIndex = entry.getValue();
+                Cluster cluster = clusters.get(clusterIndex);
+                if (cluster.getPoints().size() == numberOfPointsPerCluster
+                        && this.clusterType.equals(ClusterType.EQUAL_POINTS) ) {
+                    continue;
+                } else {
+                    point.setCluster(cluster.getId());
+                    cluster.addPoint(point);
+                    break;
                 }
             }
-            Cluster clusetr = clusters.get(clusterIndex);
-            point.setCluster(clusetr.getId());
-            clusetr.addPoint(point);
         }
     }
+
+    // K-Means
+//    private void assignClusterKMeans(final List<Point> pointsForClustering) {
+//        double min = Double.MAX_VALUE;
+//        int clusterIndex = 0;
+//        double distance = 0.0;
+//
+//        for(Point point : pointsForClustering) {
+//            min = Double.MAX_VALUE;
+//            for(int index = 0; index < this.clusters.size() ; index++ ) {
+//                Cluster cluster = this.clusters.get(index);
+//                distance = ClusterUtils.euclideanDistance(cluster.getCentroid(), point);
+//
+//                if(distance < min){
+//                    min = distance;
+//                    clusterIndex = index;
+//                }
+//            }
+//            Cluster clusetr = clusters.get(clusterIndex);
+//            point.setCluster(clusetr.getId());
+//            clusetr.addPoint(point);
+//        }
+//    }
 
     private void updateCentroids() {
         for(Cluster cluster : clusters) {
