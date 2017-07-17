@@ -34,6 +34,7 @@ import org.matsim.core.events.handler.EventHandler;
  * Created by amit on 15.06.17. Adapted after {@link org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer}
  */
 
+@Deprecated
 public class TeleportationODLinkAnalyzer implements PersonDepartureEventHandler {
 
     private final Map<String, MATSimCountingStateAnalyzer<Zone>> mode2stateAnalyzer;

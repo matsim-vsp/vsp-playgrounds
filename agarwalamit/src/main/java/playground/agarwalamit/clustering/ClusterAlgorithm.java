@@ -73,7 +73,6 @@ public class ClusterAlgorithm {
     }
 
     public void process(final List<Point> pointsForClustering) {
-        LOGGER.info("Using K-Mean algorithm to cluster points.");
         for (int i =0; i< numberOfClusters ; i++) {
             Cluster cluster = new Cluster(i);
             Point centroid = ClusterUtils.getRandomPoint(boundingBox);

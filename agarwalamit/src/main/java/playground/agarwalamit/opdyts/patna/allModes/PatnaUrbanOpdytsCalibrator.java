@@ -56,7 +56,7 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
-import playground.agarwalamit.opdyts.teleportationModes.TeleportationODLinkAnalyzer;
+import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
@@ -71,7 +71,7 @@ public class PatnaUrbanOpdytsCalibrator {
 		wardFile,
 		simpleGrid,
 		clusterAlgoKmeans,
-		clusterAlgoEqualOrigins
+		clusterAlgoEqualPoints
 	}
 
 	private static final OpdytsScenario PATNA_1_PCT = OpdytsScenario.PATNA_1Pct;
@@ -94,8 +94,10 @@ public class PatnaUrbanOpdytsCalibrator {
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
-			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.clusterAlgoEqualOrigins;
+			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.wardFile;
 		}
+
+		OUT_DIR += ascRandomizeStyle+"_"+patnaTeleportationModesZonesType+"/";
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
 		config.plans().setInputFile(relaxedPlans);
@@ -130,26 +132,26 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
-		PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = null ;
+		PatnaZoneIdentifier patnaZoneIdentifier = null ;
 		switch (patnaTeleportationModesZonesType){
 			case wardFile:
-				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
 				break;
 			case simpleGrid:
-				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), scenario.getNetwork(), 250);
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), scenario.getNetwork(), 250);
 				break;
 			case clusterAlgoKmeans:
-				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000,
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000,
 						ClusterAlgorithm.ClusterType.K_MEANS);
 				break;
-			case clusterAlgoEqualOrigins:
-				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000, // 18 origins in each cluster.
+			case clusterAlgoEqualPoints:
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000, // 18 origins in each cluster.
 						ClusterAlgorithm.ClusterType.EQUAL_POINTS);
 				break;
 				default:throw new RuntimeException("not implemented yet.");
 		}
-		Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
-		simulator.addSimulationStateAnalyzer(new TeleportationODLinkAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
+		Set<Zone> relevantZones = patnaZoneIdentifier.getZones();
+		simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {

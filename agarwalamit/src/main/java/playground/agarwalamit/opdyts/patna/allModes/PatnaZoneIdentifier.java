@@ -53,15 +53,15 @@ import playground.agarwalamit.utils.LoadMyScenarios;
  * Created by amit on 15.06.17.
  */
 
-public final class PatnaZoneToLinkIdentifier {
+public final class PatnaZoneIdentifier {
 
-    private static final Logger LOGGER = Logger.getLogger(PatnaZoneToLinkIdentifier.class);
+    private static final Logger LOGGER = Logger.getLogger(PatnaZoneIdentifier.class);
 
     //BEGIN_EXAMPLE
     public static void main(String[] args) {
         String zoneFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/Wards.shp";
         String networkFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/network.xml.gz";
-        new PatnaZoneToLinkIdentifier(LoadMyScenarios.loadScenarioFromNetwork(networkFile).getNetwork(), zoneFile);
+        new PatnaZoneIdentifier(LoadMyScenarios.loadScenarioFromNetwork(networkFile).getNetwork(), zoneFile);
     }
     //END_EXAMPLE
 
@@ -77,7 +77,7 @@ public final class PatnaZoneToLinkIdentifier {
      * @param numberOfClusters
      * @param clusterType
      */
-    PatnaZoneToLinkIdentifier (final Population population, final BoundingBox boundingBox, final int numberOfClusters, final ClusterAlgorithm.ClusterType clusterType) {
+    PatnaZoneIdentifier(final Population population, final BoundingBox boundingBox, final int numberOfClusters, final ClusterAlgorithm.ClusterType clusterType) {
         List<playground.agarwalamit.clustering.Point> listOfOrigins = new ArrayList<>();
         for (Person person : population.getPersons().values()) {
             List<PlanElement> planElementList = person.getSelectedPlan().getPlanElements();
@@ -105,7 +105,7 @@ public final class PatnaZoneToLinkIdentifier {
     /**
      * First create the cells from the network and stores the origins in each zone.
      */
-    PatnaZoneToLinkIdentifier (final Population population, final Network network, final double gridWidth) {
+    PatnaZoneIdentifier(final Population population, final Network network, final double gridWidth) {
         // create polygon from bounding box
         CalcBoundingBox boundingBox = new CalcBoundingBox();
         boundingBox.run(network);
@@ -155,7 +155,7 @@ public final class PatnaZoneToLinkIdentifier {
     /**
      * Stores the coordinates of origins in each zone of the provided zone file.
      */
-    PatnaZoneToLinkIdentifier (final Population population, final String zoneFile) {
+    PatnaZoneIdentifier(final Population population, final String zoneFile) {
         ShapeFileReader reader = new ShapeFileReader();
         Collection<SimpleFeature> features = reader.readFileAndInitialize(zoneFile);
 
@@ -191,7 +191,7 @@ public final class PatnaZoneToLinkIdentifier {
      * Stores the link ids of network in each zone of the provided zone file. I think, this should not be used because using a link to identify the zone will be erroneous if link is longer.
      */
     @Deprecated
-    PatnaZoneToLinkIdentifier (final Network network, final String zoneFile) {
+    PatnaZoneIdentifier(final Network network, final String zoneFile) {
         ShapeFileReader reader = new ShapeFileReader();
         Collection<SimpleFeature> features = reader.readFileAndInitialize(zoneFile);
 
