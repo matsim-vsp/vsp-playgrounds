@@ -30,8 +30,8 @@ import org.matsim.counts.algorithms.CountsComparisonAlgorithm;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.tripDistance.TripDistanceHandler;
 import playground.santiago.analysis.eventHandlers.SantiagoLinkVolumeHandler;
-import playground.santiago.analysis.eventHandlers.SantiagoModalTripTravelTimeHandler;
-import playground.santiago.analysis.eventHandlers.SantiagoTripDistanceHandler;
+import playground.santiago.analysis.eventHandlers.SantiagoModeTripTravelTimeHandler;
+import playground.santiago.analysis.eventHandlers.SantiagoModeTripTravelDistanceHandler;
 
 /** 
  * 
@@ -41,10 +41,10 @@ import playground.santiago.analysis.eventHandlers.SantiagoTripDistanceHandler;
 
 public class SantiagoAnalysis {
 	//Fields related to the scenario and its steps - they must be changed depending on the step . a comment
-	private static final String CASE_NAME = "baseCase1pct";
-	private static final String STEP_NAME = "Step1";
-	private static final int FIRST_IT = 100;
-	private static final int LAST_IT = 600;
+	private static final String CASE_NAME = "testingCase";
+	private static final String STEP_NAME = "StepTesting";
+	private static final int FIRST_IT = 0;
+	private static final int LAST_IT = 0;
 	private static final int LENGTH = LAST_IT - FIRST_IT;
 	
 	//Fields related to the outputDir - Do not change these.
@@ -70,17 +70,17 @@ public class SantiagoAnalysis {
 			
 		String itFolder = OUTPUT_FOLDER + "ITERS/it." + it + "/";		
 		String events = itFolder + it +".events.xml.gz";	
-	//	String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
+		String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
 	//	String countsCompareOutputDir = ANALYSIS_DIR + itAux + ".countscompare.txt"; //TODO: BE AWARE!!
 	//	String flowPatternOutputDir = ANALYSIS_DIR + itAux + ".link2Vol.txt";		 //TODO: BE AWARE!!
 	//	String enterTravelTimesOutputDir = ANALYSIS_DIR + itAux + ".modeTravelTimes.txt";	//TODO: BE AWARE!!
-		String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
+	//	String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
 		
-	//	writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
+		writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
 	//	writeCountsCompare(events, countsCompareOutputDir);							 //TODO: BE AWARE!!
 	//	processEventsAndWriteFileForLinkVolumes(events,flowPatternOutputDir);		 //TODO: BE AWARE!!
 	//	writeFileForTravelTimesByMode(events,enterTravelTimesOutputDir);		 //TODO: BE AWARE!!
-		writeFileForTravelDistanceByMode(events,travelDistanceOutputDir);		 //TODO: BE AWARE!!
+	//	writeFileForTravelDistanceByMode(events,travelDistanceOutputDir);		 //TODO: BE AWARE!!
 		
 		it = it + 50;
 		itAux = itAux + 50;
@@ -217,14 +217,14 @@ public class SantiagoAnalysis {
 		
 		/*running Amit's handler*/
 		
-		SantiagoModalTripTravelTimeHandler handler = new SantiagoModalTripTravelTimeHandler();
+		SantiagoModeTripTravelTimeHandler handler = new SantiagoModeTripTravelTimeHandler();
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(handler);
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
 		
 		
-		SortedMap<String, Map<Id<Person>, List<String>>> travelTimesByMode = handler.getLegMode2PesonId2TripTimes ();
+		SortedMap<String, Map<Id<Person>, List<String>>> travelTimesByMode = handler.getLegModePesonIdTripDepartureTravelTimes ();
 		
 		/*writing*/		
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
@@ -253,7 +253,7 @@ public class SantiagoAnalysis {
 
 		/*running Amit's handler*/
 		
-		SantiagoTripDistanceHandler handler = new SantiagoTripDistanceHandler(config,network);
+		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network);
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(handler);
 		MatsimEventsReader reader = new MatsimEventsReader(events);
