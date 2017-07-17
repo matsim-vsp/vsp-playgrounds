@@ -33,7 +33,7 @@ import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import playground.agarwalamit.analysis.tripDistance.TripDistanceHandler;
 import playground.sebhoerl.mexec.ConfigUtils;
 
-public class SantiagoTripDistanceHandler
+public class SantiagoModeTripTravelDistanceHandler
 		implements PersonDepartureEventHandler, LinkLeaveEventHandler, PersonArrivalEventHandler,
 		TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 	private final static Logger LOG = Logger.getLogger(TripDistanceHandler.class);
@@ -50,7 +50,7 @@ public class SantiagoTripDistanceHandler
 
 	private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 
-	public SantiagoTripDistanceHandler(final Config config, final Network network){
+	public SantiagoModeTripTravelDistanceHandler(final Config config, final Network network){
 		LOG.info("Route distance will be calculated based on events.");
 		LOG.warn("During distance calculation, link from which person is departed or arrived will not be considered.");
 		this.config=config;
