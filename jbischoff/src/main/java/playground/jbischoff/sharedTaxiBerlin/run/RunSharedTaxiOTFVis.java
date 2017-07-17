@@ -48,6 +48,7 @@ public class RunSharedTaxiOTFVis {
 			String configFile = "../../../shared-svn/projects/bvg_sharedTaxi/input/config0.1.xml";
 			Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
 					new OTFVisConfigGroup(), new TaxiFareConfigGroup());
+			config.controler().setOutputDirectory("output");
 			DrtConfigGroup drt = (DrtConfigGroup) config.getModules().get(DrtConfigGroup.GROUP_NAME);
 			drt.setEstimatedBeelineDistanceFactor(1.5);
 			drt.setVehiclesFile("vehicles_net_bvg/cap_"+capacity+"/taxis_"+vehicles+".xml.gz");

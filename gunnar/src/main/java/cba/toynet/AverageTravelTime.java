@@ -2,10 +2,9 @@ package cba.toynet;
 
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
-
-import opdytsintegration.utils.TimeDiscretization;
 
 /**
  * 

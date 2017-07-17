@@ -3,7 +3,7 @@ package besttimeresponse;
 import java.util.Arrays;
 
 import floetteroed.utilities.Time;
-import opdytsintegration.utils.TimeDiscretization;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 
 /**
  * 

@@ -16,7 +16,7 @@ import org.matsim.testcases.MatsimTestUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
-import playground.ikaddoura.integrationCN.CNEventsReader;
+import playground.ikaddoura.integrationCNE.CNEventsReader;
 import playground.tschlenther.createNetwork.ForkNetworkCreator;
 
 /**

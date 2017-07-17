@@ -1,14 +1,12 @@
 package saleem.ptoptimisation.optimisationintegration;
 
-import opdytsintegration.MATSimState;
-import opdytsintegration.MATSimStateFactory;
-
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.controler.Controler;
-
 import floetteroed.opdyts.DecisionVariable;
 import floetteroed.utilities.math.Vector;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.opdyts.MATSimState;
+import org.matsim.contrib.opdyts.MATSimStateFactory;
+import org.matsim.core.controler.Controler;
 
 /**
  * A factory class to create PTMatSimState objects.
@@ -17,7 +15,7 @@ import floetteroed.utilities.math.Vector;
  *
  */
 public class PTMatsimStateFactoryImpl<U extends DecisionVariable> implements
-MATSimStateFactory<U> {
+		MATSimStateFactory<U> {
 	private Scenario scenario;
 	final double occupancyScale;
 	public PTMatsimStateFactoryImpl(Scenario scenario, final double occupancyScale) {
@@ -27,7 +25,7 @@ MATSimStateFactory<U> {
 
 	@Override
 	public MATSimState newState(final Population population,
-		final Vector stateVector, final U decisionVariable) {
+								final Vector stateVector, final U decisionVariable) {
 		return new PTMatsimState(population, stateVector, scenario, (PTSchedule)decisionVariable, occupancyScale);
 		
 	}

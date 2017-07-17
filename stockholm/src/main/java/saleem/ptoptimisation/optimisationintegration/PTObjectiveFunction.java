@@ -1,18 +1,13 @@
 package saleem.ptoptimisation.optimisationintegration;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
-import opdytsintegration.MATSimState;
-
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.SimulatorState;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-
+import org.matsim.contrib.opdyts.MATSimState;
 import saleem.ptoptimisation.utils.ScenarioHelper;
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.SimulatorState;
 
 /**
  * Returns the negative sum of the scores of the selected plans of all agents, 

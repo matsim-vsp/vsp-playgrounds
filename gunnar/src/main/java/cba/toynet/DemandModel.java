@@ -2,16 +2,15 @@ package cba.toynet;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
+import cba.resampling.ResamplingTest;
+import cba.resampling.Sampers2MATSimResampler;
+import com.google.inject.Provider;
+import floetteroed.utilities.Tuple;
+import floetteroed.utilities.math.BasicStatistics;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
@@ -19,13 +18,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
-
-import com.google.inject.Provider;
-
-import cba.resampling.ResamplingTest;
-import cba.resampling.Sampers2MATSimResampler;
-import floetteroed.utilities.Tuple;
-import floetteroed.utilities.math.BasicStatistics;
 
 /**
  * 

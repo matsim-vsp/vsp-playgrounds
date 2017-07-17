@@ -66,8 +66,8 @@ public class DecongestionRun {
 			log.info("output directory: "+ outputBaseDirectory);
 
 		} else {
-			configFile = "../../../runs-svn/vickrey-decongestion/input/config.xml";
-			outputBaseDirectory = "../../../runs-svn/vickrey-decongestion/output-FINAL/";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/vickrey-decongestion/input/config.xml";
+			outputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/vickrey-decongestion/output-FINAL/";
 		}
 		
 		DecongestionRun main = new DecongestionRun();
@@ -84,7 +84,9 @@ public class DecongestionRun {
 		decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
 		decongestionSettings.setMsa(false);
 		decongestionSettings.setTOLL_BLEND_FACTOR(1.0);
-		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
+		
+		decongestionSettings.setDecongestionApproach(DecongestionApproach.P_MC);
+//		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
 		
 		decongestionSettings.setKd(0.005);
 		decongestionSettings.setKi(0.005);
@@ -137,6 +139,12 @@ public class DecongestionRun {
 					"_integral" + decongestionSettings.getIntegralApproach() + 
 					"_alpha" + decongestionSettings.getIntegralApproachAverageAlpha() + 
 					"_factor" + decongestionSettings.getIntegralApproachUnusedHeadwayFactor();
+			
+		} else if (decongestionSettings.getDecongestionApproach().toString().equals(DecongestionApproach.P_MC.toString())) {
+			outputDirectory = outputDirectory +
+					"_KpVTTSxDemandLevel" +
+					"_Ki0" +
+					"_Kd0";
 		}
 							
 		log.info("Output directory: " + outputDirectory);

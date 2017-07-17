@@ -3,7 +3,6 @@ package cba.trianglenet;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import floetteroed.utilities.tabularfileparser.TabularFileHandler;
 import floetteroed.utilities.tabularfileparser.TabularFileParser;
 

@@ -28,6 +28,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.noise.NoiseCalculationOnline;
 import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.noise.NoiseModule;
 import org.matsim.contrib.noise.data.NoiseAllocationApproach;
 import org.matsim.contrib.noise.data.NoiseContext;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
@@ -117,7 +118,7 @@ public class RunBaseCase {
 		
 		noiseContext = new NoiseContext(controler.getScenario());
 		
-		controler.addControlerListener(new NoiseCalculationOnline(noiseContext));
+		controler.addOverridingModule(new NoiseModule(scenario));
 		controler.run();
 		
 		// analysis

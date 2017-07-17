@@ -1,11 +1,6 @@
 package cba.resampling;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-
+import java.util.*;
 import floetteroed.utilities.Tuple;
 import floetteroed.utilities.math.MathHelpers;
 import floetteroed.utilities.math.Vector;

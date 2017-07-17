@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
-
 import javax.inject.Inject;
-
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.SimulatorState;
 import org.apache.log4j.Logger;
 import org.matsim.analysis.TransportPlanningMainModeIdentifier;
 import org.matsim.api.core.v01.TransportMode;
@@ -24,9 +24,6 @@ import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scoring.ExperiencedPlansService;
 import org.matsim.core.utils.geometry.CoordUtils;
-
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.SimulatorState;
 
 /**
  * 

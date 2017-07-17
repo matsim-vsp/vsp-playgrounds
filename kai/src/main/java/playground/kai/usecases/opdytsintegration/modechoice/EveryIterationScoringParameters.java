@@ -21,9 +21,7 @@ package playground.kai.usecases.opdytsintegration.modechoice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import javax.inject.Inject;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
@@ -33,9 +31,9 @@ import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.ScenarioConfigGroup;
 import org.matsim.core.replanning.ReplanningContext;
 import org.matsim.core.scoring.functions.ActivityUtilityParameters;
+import org.matsim.core.scoring.functions.ModeUtilityParameters;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.core.scoring.functions.ModeUtilityParameters;
 import org.matsim.pt.PtConstants;
 import org.matsim.pt.config.TransitConfigGroup;
 import org.matsim.utils.objectattributes.ObjectAttributes;

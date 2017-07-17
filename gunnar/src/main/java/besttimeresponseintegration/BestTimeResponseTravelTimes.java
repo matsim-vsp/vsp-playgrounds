@@ -2,20 +2,18 @@ package besttimeresponseintegration;
 
 import java.util.List;
 import java.util.Map;
-
+import besttimeresponse.TripTravelTimes;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.facilities.Facility;
-
-import besttimeresponse.TripTravelTimes;
-import opdytsintegration.utils.TimeDiscretization;
 
 /**
  * 

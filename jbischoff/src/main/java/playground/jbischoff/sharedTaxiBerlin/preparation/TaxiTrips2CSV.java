@@ -61,19 +61,19 @@ public class TaxiTrips2CSV {
 	public static void main(String[] args) {
 
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new MatsimNetworkReader(scenario.getNetwork()).readFile("Y:/bvg-taxi/old-taxidata-comparison/berlin_brb.xml.gz");
+		new MatsimNetworkReader(scenario.getNetwork()).readFile("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt/network_shortIds_v1.xml.gz");
 //		new PopulationReader(scenario).readFile("Y:/bvg-taxi/old-taxidata-comparison/OD_20130420_SCALE_1.0_plans.xml.gz");
-		new PopulationReader(scenario).readFile("Y:/bvg-taxi/old-taxidata-comparison/OD_20130421_SCALE_1.0_plans.xml.gz");
+		new PopulationReader(scenario).readFile("C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt_saturdaynight/population_night.xml");
 		List<String> trips = new ArrayList<>();
 		Random r = MatsimRandom.getRandom();
-		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.DHDN_GK4, "EPSG:25833");
+		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.DHDN_GK4, TransformationFactory.DHDN_GK4);
 		for (Person p : scenario.getPopulation().getPersons().values())
 		{
 			Plan plan  = p.getSelectedPlan();
 			Activity act0 = (Activity) plan.getPlanElements().get(0);
-			Coord coord0 = ParkingUtils.getRandomPointAlongLink(r, scenario.getNetwork().getLinks().get(act0.getLinkId())); 
+			Coord coord0 = act0.getCoord(); 
 			Activity act1 = (Activity) plan.getPlanElements().get(2);
-			Coord coord1 = ParkingUtils.getRandomPointAlongLink(r, scenario.getNetwork().getLinks().get(act1.getLinkId())); 
+			Coord coord1 = act1.getCoord();
 			Trip trip = new Trip();
 			trip.departureTime=act0.getEndTime();
 			trip.fromCoord = ct.transform(coord0);
@@ -87,7 +87,7 @@ public class TaxiTrips2CSV {
 		}
 		
 //        JbUtils.collection2Text(trips,"Y:/bvg-taxi/old-taxidata-comparison/taxitripsSat.csv", "time;fromLOR;toLOR;fromX;fromY;toX;toY");
-        JbUtils.collection2Text(trips,"Y:/bvg-taxi/old-taxidata-comparison/taxitripsSun.csv", "time;fromLOR;toLOR;fromX;fromY;toX;toY");
+        JbUtils.collection2Text(trips,"C:/Users/Joschka/Documents/shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/taxitripsSun.csv", "time;fromLOR;toLOR;fromX;fromY;toX;toY");
 
 	}
 
@@ -96,11 +96,11 @@ public class TaxiTrips2CSV {
 	 * @return
 	 */
 	private static boolean isValidTrip(Trip trip) {
-	
-//		if ((trip.departureTime>18*3600)&&(trip.fromCoord.getX()>minX&&trip.fromCoord.getX()<maxX&trip.fromCoord.getY()>minY&&trip.fromCoord.getY()<maxY)&&(trip.toCoord.getX()>minX&&trip.toCoord.getX()<maxX&trip.toCoord.getY()>minY&&trip.toCoord.getY()<maxY))
-		if ((trip.departureTime<5*3600)&&(trip.fromCoord.getX()>minX&&trip.fromCoord.getX()<maxX&trip.fromCoord.getY()>minY&&trip.fromCoord.getY()<maxY)&&(trip.toCoord.getX()>minX&&trip.toCoord.getX()<maxX&trip.toCoord.getY()>minY&&trip.toCoord.getY()<maxY))
 		return true;
-			else return false;
+//		if ((trip.departureTime>18*3600)&&(trip.fromCoord.getX()>minX&&trip.fromCoord.getX()<maxX&trip.fromCoord.getY()>minY&&trip.fromCoord.getY()<maxY)&&(trip.toCoord.getX()>minX&&trip.toCoord.getX()<maxX&trip.toCoord.getY()>minY&&trip.toCoord.getY()<maxY))
+//		if ((trip.departureTime<5*3600)&&(trip.fromCoord.getX()>minX&&trip.fromCoord.getX()<maxX&trip.fromCoord.getY()>minY&&trip.fromCoord.getY()<maxY)&&(trip.toCoord.getX()>minX&&trip.toCoord.getX()<maxX&trip.toCoord.getY()>minY&&trip.toCoord.getY()<maxY))
+//		return true;
+//			else return false;
 	}
 
 }
