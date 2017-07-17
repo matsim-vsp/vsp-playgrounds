@@ -81,8 +81,12 @@ public class ClusterAlgorithm {
             this.clusters.add(cluster);
         }
 
-        int iteration = 0;
+        if (clusterType.equals(ClusterType.EQUAL_POINTS) && pointsForClustering.size()%numberOfClusters != 0) {
+            LOGGER.warn("Number of points are "+ pointsForClustering.size() + " and number of required cluster are "+
+                    numberOfClusters + ". The algorithm will continue by adding additional points to the nearest cluster.");
+        }
 
+        int iteration = 1;
         while ( ! terminate ) {
             LOGGER.info("Running "+String.valueOf(iteration++)+" iteration");
             clusters.stream().forEach(c -> c.clear());
@@ -115,11 +119,6 @@ public class ClusterAlgorithm {
     }
 
     private void assignCluster(final List<Point> pointsForClustering) {
-
-        if (pointsForClustering.size()%numberOfClusters != 0) {
-            throw new RuntimeException("Number of points are "+ pointsForClustering.size() + " and number of required cluster are "+
-            numberOfClusters + ". Don't know how to cluster these points equally in required clusters.");
-        }
         int numberOfPointsPerCluster = pointsForClustering.size() / numberOfClusters ;
 
         double distance = 0.0;
@@ -134,6 +133,7 @@ public class ClusterAlgorithm {
             }
 
             // assign cluster
+            boolean isAssigned = false;
             Iterator<Map.Entry<Double, Integer>> iterator = distanceToClusterIndexMap.entrySet().iterator();
             while ( iterator.hasNext() ) {
                 Map.Entry<Double, Integer> entry = iterator.next();
@@ -145,9 +145,22 @@ public class ClusterAlgorithm {
                 } else {
                     point.setCluster(cluster.getId());
                     cluster.addPoint(point);
+                    isAssigned = true;
                     break;
                 }
             }
+
+            if (! isAssigned) {
+                if (clusterType.equals(ClusterType.EQUAL_POINTS)) {
+                    // assign the nearest cluster if all the clusters are full. This happens because number of points are not divisible by number of clusters.
+                    Cluster cluster = clusters.get( distanceToClusterIndexMap.entrySet().iterator().next().getValue());
+                    cluster.addPoint(point);
+                    point.setCluster(cluster.getId());
+                } else {
+                    throw new RuntimeException("No cluster is assigned to point "+ point.toString()+". Aborting...");
+                }
+            }
+
         }
     }
 
@@ -181,7 +194,7 @@ public class ClusterAlgorithm {
             List<Point> list = cluster.getPoints();
             double sumWeight = list.stream().mapToDouble(site -> site.getWeight()).sum();
 
-            // weighted sum
+            // weighted sum: same as kmeans if weight of each point is 1.
             for(Point point : list) {
                 sumX += point.getWeight() * point.getX();
                 sumY += point.getWeight() * point.getY();
