@@ -70,7 +70,7 @@ public class PatnaUrbanOpdytsCalibrator {
 	public enum PatnaTeleportationModesZonesType {
 		wardFile,
 		simpleGrid,
-		clusterAlogKmeans,
+		clusterAlgoKmeans,
 		clusterAlgoEqualOrigins
 	}
 
@@ -138,12 +138,12 @@ public class PatnaUrbanOpdytsCalibrator {
 			case simpleGrid:
 				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), scenario.getNetwork(), 250);
 				break;
-			case clusterAlogKmeans:
+			case clusterAlgoKmeans:
 				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000,
 						ClusterAlgorithm.ClusterType.K_MEANS);
 				break;
 			case clusterAlgoEqualOrigins:
-				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2213, // 18 origins in each cluster.
+				patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000, // 18 origins in each cluster.
 						ClusterAlgorithm.ClusterType.EQUAL_POINTS);
 				break;
 				default:throw new RuntimeException("not implemented yet.");
