@@ -45,6 +45,7 @@ public class ClusterAlgorithm {
     public enum ClusterType {
         /**
          * Clusters will be created such that number of points are same in each cluster.
+         * TODO : adapt if number of points is not divisible by number of clusters
          */
         EQUAL_POINTS,
         /**
@@ -199,5 +200,9 @@ public class ClusterAlgorithm {
                 this.terminate = false;
             }
         }
+    }
+
+    public List<Cluster> getClusters() {
+        return clusters;
     }
 }
