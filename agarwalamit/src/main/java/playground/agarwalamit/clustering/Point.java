@@ -23,6 +23,7 @@ import org.matsim.api.core.v01.Id;
 
 /**
  * Created by amit on 16.07.17.
+ * Though {@link org.matsim.api.core.v01.Coord} could be a good way to go but here, I need to assign a weight to each point.
  */
 
 public class Point {
