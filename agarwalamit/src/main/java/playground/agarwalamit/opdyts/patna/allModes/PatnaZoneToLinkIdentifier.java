@@ -20,6 +20,7 @@
 package playground.agarwalamit.opdyts.patna.allModes;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -39,6 +40,10 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.analysis.spatial.GeneralGrid;
+import playground.agarwalamit.clustering.BoundingBox;
+import playground.agarwalamit.clustering.Cluster;
+import playground.agarwalamit.clustering.ClusterAlgorithm;
+import playground.agarwalamit.clustering.ClusterUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
@@ -63,7 +68,41 @@ public final class PatnaZoneToLinkIdentifier {
     private static final Set<Zone> zones = new LinkedHashSet<>();
     private final CoordinateTransformation coordinateTransformation = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
 
-    /*
+
+    /**
+     *
+     * This will create clusters depending on the departure locations.
+     * @param population
+     * @param boundingBox
+     * @param numberOfClusters
+     * @param clusterType
+     */
+    PatnaZoneToLinkIdentifier (final Population population, final BoundingBox boundingBox, final int numberOfClusters, final ClusterAlgorithm.ClusterType clusterType) {
+        List<playground.agarwalamit.clustering.Point> listOfOrigins = new ArrayList<>();
+        for (Person person : population.getPersons().values()) {
+            List<PlanElement> planElementList = person.getSelectedPlan().getPlanElements();
+            List<playground.agarwalamit.clustering.Point> list = planElementList.stream().filter(pe -> pe instanceof Activity).map(pe ->
+            {
+                Coord cord = ((Activity)pe).getCoord();
+                return ClusterUtils.getPoint(cord);
+            }
+            ).collect(Collectors.toList());
+            listOfOrigins.addAll(list);
+        }
+
+        ClusterAlgorithm clusterAlgorithm = new ClusterAlgorithm(numberOfClusters, boundingBox, clusterType);
+        clusterAlgorithm.process(listOfOrigins);
+        List<Cluster> clusters = clusterAlgorithm.getClusters();
+        for (Cluster cluster : clusters) {
+            Zone zone = new Zone(cluster.getId().toString());
+            cluster.getPoints().stream().forEach(
+                    p -> zone.addCoordsToZone(ClusterUtils.getCoord(p))
+            );
+            zones.add(zone);
+        }
+    }
+
+    /**
      * First create the cells from the network and stores the origins in each zone.
      */
     PatnaZoneToLinkIdentifier (final Population population, final Network network, final double gridWidth) {
@@ -113,7 +152,7 @@ public final class PatnaZoneToLinkIdentifier {
         LOGGER.info("Total stored coordinates are "+ numberOfOrigins);
     }
 
-    /*
+    /**
      * Stores the coordinates of origins in each zone of the provided zone file.
      */
     PatnaZoneToLinkIdentifier (final Population population, final String zoneFile) {
@@ -148,9 +187,10 @@ public final class PatnaZoneToLinkIdentifier {
         }
     }
 
-    /*
-     * Stores the link ids of network in each zone of the provided zone file.
+    /**
+     * Stores the link ids of network in each zone of the provided zone file. I think, this should not be used because using a link to identify the zone will be erroneous if link is longer.
      */
+    @Deprecated
     PatnaZoneToLinkIdentifier (final Network network, final String zoneFile) {
         ShapeFileReader reader = new ShapeFileReader();
         Collection<SimpleFeature> features = reader.readFileAndInitialize(zoneFile);
