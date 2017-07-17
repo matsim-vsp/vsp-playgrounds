@@ -106,10 +106,10 @@ public abstract class AbstractNodeSimulation {
             FreeSpeedTravelTime travelTime = new FreeSpeedTravelTime();
             OnlyTimeDependentTravelDisutility travelDisutility = new OnlyTimeDependentTravelDisutility((TravelTime)travelTime);
             Dijkstra leastCostPathCalculator = new Dijkstra(this.getNetwork(), (TravelDisutility)travelDisutility, (TravelTime)travelTime);
-            Link inLink = (Link)this.getNetwork().getLinks().get((Object)route.getStartLinkId());
-            Link outLink = (Link)this.getNetwork().getLinks().get((Object)route.getEndLinkId());
+            Link inLink = (Link)this.getNetwork().getLinks().get(route.getStartLinkId());
+            Link outLink = (Link)this.getNetwork().getLinks().get(route.getEndLinkId());
             LeastCostPathCalculator.Path links = leastCostPathCalculator.calcLeastCostPath(inLink.getToNode(), outLink.getFromNode(), 0.0, null, null);
-            List link_ids = links.links.stream().map((Function<Link, Id>)LambdaMetafactory.metafactory(null, null, null, (Ljava/lang/Object;)Ljava/lang/Object;, getId(), (Lorg/matsim/api/core/v01/network/Link;)Lorg/matsim/api/core/v01/Id;)()).collect(Collectors.toList());
+            List link_ids = links.links.stream().map(Link::getId).collect(Collectors.toList());
             route.setLinkIds(route.getStartLinkId(), link_ids, route.getEndLinkId());
         }
         for (int i = 0; i < demand; ++i) {
@@ -118,8 +118,8 @@ public abstract class AbstractNodeSimulation {
                 this.createOnePerson(population, route, t, gap);
             }
             for (Id id : route.getLinkIds()) {
-                this.inflows.putIfAbsent((Id)id, 0);
-                this.inflows.merge((Id)id, 1, (arg_0, arg_1) -> Math.addExact(arg_0, arg_1));
+                this.inflows.putIfAbsent(id, 0);
+                this.inflows.merge(id, 1, Math::addExact);
             }
         }
     }
@@ -139,7 +139,7 @@ public abstract class AbstractNodeSimulation {
         Activity work = population.getFactory().createActivityFromLinkId("work", r.getEndLinkId());
         work.setEndTime((double)((timestep + 17) * 60 * 60));
         plan.addActivity(work);
-        person.addPlan((BasicPlan)plan);
+        person.addPlan(plan);
         population.addPerson(person);
     }
 
@@ -147,11 +147,11 @@ public abstract class AbstractNodeSimulation {
         System.out.println("  a     t:\t  q_a\t  s_a\tred_a\t  c_a\tred_a\ttt_q_a");
         for (Id linkid : volumes.getLinkIds()) {
             if (linkid.toString().startsWith("x")) continue;
-            Link link = (Link)network.getLinks().get((Object)Id.createLinkId((Id)linkid));
+            Link link = (Link)network.getLinks().get(Id.createLinkId(linkid));
             double[] link_volumes = volumes.getVolumesPerHourForLink(linkid);
             for (int i = 11; i < 12; ++i) {
                 double tt_freeflow = link.getLength() / link.getFreespeed();
-                double inflow = this.inflows.get((Object)linkid).intValue();
+                double inflow = this.inflows.get(linkid);
                 double capacity = link.getCapacity();
                 double reduction_factor = link_volumes[i] / inflow;
                 double cap_red_factor = link_volumes[i] / capacity;
