@@ -40,7 +40,7 @@ import playground.santiago.analysis.eventHandlers.SantiagoTripDistanceHandler;
  */
 
 public class SantiagoAnalysis {
-	//Fields related to the scenario and its steps - they must be changed depending on the step.
+	//Fields related to the scenario and its steps - they must be changed depending on the step . a comment
 	private static final String CASE_NAME = "baseCase1pct";
 	private static final String STEP_NAME = "Step1";
 	private static final int FIRST_IT = 100;
