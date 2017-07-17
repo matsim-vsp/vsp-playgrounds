@@ -96,7 +96,7 @@ public final class PatnaZoneIdentifier {
         for (Cluster cluster : clusters) {
             Zone zone = new Zone(cluster.getId().toString());
             cluster.getPoints().stream().forEach(
-                    p -> zone.addCoordsToZone(ClusterUtils.getCoord(p))
+                    p -> zone.addCoordsToZone( ClusterUtils.getCoord(p))
             );
             zones.add(zone);
         }
@@ -135,7 +135,7 @@ public final class PatnaZoneIdentifier {
                         Coord coord = ((Activity)pe).getCoord();
                         Point origin = MGC.xy2Point(coord.getX(), coord.getY());
                         if ( generalGrid.getCellGeometry(point).contains(origin) ) {
-                            zone.addCoordsToZone(coord);
+                            zone.addCoordsToZone(  ((Activity)pe).getCoord() );
                         }
                     }
                 }
@@ -172,7 +172,7 @@ public final class PatnaZoneIdentifier {
                         Coord coord = coordinateTransformation.transform( ((Activity)pe).getCoord() );
                         Point point = MGC.xy2Point(coord.getX(), coord.getY());
                         if ( ((Geometry) feature.getDefaultGeometry()).contains(point)) {
-                            zone.addCoordsToZone(coord);
+                            zone.addCoordsToZone(  ((Activity)pe).getCoord() );
                         }
                     }
                 }

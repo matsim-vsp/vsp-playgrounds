@@ -94,7 +94,7 @@ public class PatnaUrbanOpdytsCalibrator {
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
-			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.wardFile;
+			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.clusterAlgoKmeans;
 		}
 
 		OUT_DIR += ascRandomizeStyle+"_"+patnaTeleportationModesZonesType+"/";

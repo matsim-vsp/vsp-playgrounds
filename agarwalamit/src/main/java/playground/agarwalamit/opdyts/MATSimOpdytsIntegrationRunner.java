@@ -63,7 +63,7 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
 
     private MATSimSimulator2<U> matSimSimulator2;
 
-    // trying to mimize the opdyts infrastructure outside this Class
+    // trying to minimize the opdyts infrastructure outside this Class
     @Deprecated
     public TimeDiscretization newTimeDiscretization() {
         throw new UnsupportedOperationException("not implmented yet.");
