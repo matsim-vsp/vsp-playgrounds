@@ -36,13 +36,15 @@ import playground.sebhoerl.mexec.ConfigUtils;
 public class SantiagoModeTripTravelDistanceHandler
 		implements PersonDepartureEventHandler, LinkLeaveEventHandler, PersonArrivalEventHandler,
 		TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
-	private final static Logger LOG = Logger.getLogger(TripDistanceHandler.class);
+	private final static Logger LOG = Logger.getLogger(SantiagoModeTripTravelDistanceHandler.class);
 
 	private final Network network;
 	private final Config config;
-	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2distances = new TreeMap<>();
+	private final SortedMap<String, Map<Id<Person>, List<String>>> mode2PersonId2Distances = new TreeMap<>();
+	
 	private final SortedMap<String, Map<Id<Person>, Double>> mode2PersonId2OneTripdist = new TreeMap<>();
 	private final SortedMap<String, Map<Id<Person>, Double>> mode2PersonId2TeleportDist = new TreeMap<>();
+	private final Map<Id<Person>, Double> personIdDepartureTime = new HashMap<>();
 	private final List<String> mainModes = new ArrayList<>();
 	private final Map<Id<Person>, String> personId2LegModes = new HashMap<>();
 	private double maxDist = Double.NEGATIVE_INFINITY;
@@ -70,12 +72,14 @@ public class SantiagoModeTripTravelDistanceHandler
 		this.mode2NumberOfLegs.clear();
 	}
 
+	/*LEAVING LINK EVENT*/
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
 		Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
 		Id<Link> linkId = event.getLinkId();
 		// TODO if a person is in more than two groups, then which one is correct mode ?
 		String mode = this.personId2LegModes.get(personId);
+		
 		Map<Id<Person>, Double> person2Dist = mode2PersonId2OneTripdist.get(mode);
 		double distSoFar = person2Dist.get(personId);
 		double distNew = distSoFar+ network.getLinks().get(linkId).getLength();
@@ -94,14 +98,18 @@ public class SantiagoModeTripTravelDistanceHandler
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		String tavelMode = event.getLegMode();
+		String legMode = event.getLegMode();
 		Id<Person> personId = event.getPersonId();
-		this.personId2LegModes.put(personId, tavelMode);
-
-		if(mainModes.contains(tavelMode)){
+		
+		double departureTime = event.getTime();
+		this.personIdDepartureTime.put(personId, departureTime);
+		
+		this.personId2LegModes.put(personId, legMode);
+		
+		if(mainModes.contains(legMode)){
 			//initialize one trip distance map
-			if(mode2PersonId2OneTripdist.containsKey(tavelMode)){
-				Map<Id<Person>, Double> personId2Dist = mode2PersonId2OneTripdist.get(tavelMode);
+			if(mode2PersonId2OneTripdist.containsKey(legMode)){
+				Map<Id<Person>, Double> personId2Dist = mode2PersonId2OneTripdist.get(legMode);
 				if(!personId2Dist.containsKey(personId)){
 					personId2Dist.put(personId, 0.0);
 				} else {
@@ -110,12 +118,12 @@ public class SantiagoModeTripTravelDistanceHandler
 			} else {
 				Map<Id<Person>, Double> personId2Dist = new TreeMap<>();
 				personId2Dist.put(personId, 0.0);
-				mode2PersonId2OneTripdist.put(tavelMode, personId2Dist);
+				mode2PersonId2OneTripdist.put(legMode, personId2Dist);
 			}
 		} else {
 			//initialize teleporation dist map
-			if(mode2PersonId2TeleportDist.containsKey(tavelMode)){
-				Map<Id<Person>, Double> personId2Dist = mode2PersonId2TeleportDist.get(tavelMode);
+			if(mode2PersonId2TeleportDist.containsKey(legMode)){
+				Map<Id<Person>, Double> personId2Dist = mode2PersonId2TeleportDist.get(legMode);
 				if(!personId2Dist.containsKey(personId)){
 					personId2Dist.put(personId, 0.0);
 				} else {
@@ -124,19 +132,19 @@ public class SantiagoModeTripTravelDistanceHandler
 			} else {
 				Map<Id<Person>, Double> personId2Dist = new TreeMap<>();
 				personId2Dist.put(personId, 0.0);
-				mode2PersonId2TeleportDist.put(tavelMode, personId2Dist);
+				mode2PersonId2TeleportDist.put(legMode, personId2Dist);
 			}
 		}
 		//initialize distances map
-		if(mode2PersonId2distances.containsKey(tavelMode)){
-			Map<Id<Person>, List<Double>> personId2Dists = mode2PersonId2distances.get(tavelMode);
+		if(mode2PersonId2Distances.containsKey(legMode)){
+			Map<Id<Person>, List<String>> personId2Dists = mode2PersonId2Distances.get(legMode);
 			if(!personId2Dists.containsKey(personId)){
 				personId2Dists.put(personId, new ArrayList<>());
 			}
 		} else {
-			Map<Id<Person>, List<Double>> personId2Dists = new TreeMap<>();
+			Map<Id<Person>, List<String>> personId2Dists = new TreeMap<>();
 			personId2Dists.put(personId, new ArrayList<>());
-			mode2PersonId2distances.put(tavelMode, personId2Dists);
+			mode2PersonId2Distances.put(legMode, personId2Dists);
 		}
 	}
 
@@ -146,33 +154,36 @@ public class SantiagoModeTripTravelDistanceHandler
 		Id<Person> personId = event.getPersonId();
 		if(!travelMode.equals(this.personId2LegModes.get(personId))) throw new RuntimeException("Person is leaving and arriving with different travel modes. Can not happen.");
 
-		Map<Id<Person>, List<Double>> personId2Dists = mode2PersonId2distances.get(travelMode);
+		Map<Id<Person>, List<String>> personId2Dists = mode2PersonId2Distances.get(travelMode);
 		if(mainModes.contains(travelMode)){
 			if(personId2Dists.containsKey(personId) ){
-				List<Double> dists = personId2Dists.get(personId); // it might happen, person is departing and arriving on same link.
+				List<String> dists = personId2Dists.get(personId); // it might happen, person is departing and arriving on same link.
 				double tripDist = mode2PersonId2OneTripdist.get(travelMode).get(personId);
 				if(maxDist<tripDist) maxDist = tripDist;
-				dists.add(tripDist);
+				double departureTime = 	personIdDepartureTime.remove(personId);
+				dists.add(String.valueOf(departureTime)+"-"+String.valueOf(tripDist));
 				personId2Dists.put(personId, dists);
 				mode2PersonId2OneTripdist.get(travelMode).remove(personId);
+
 			} else throw new RuntimeException("Person is not registered in the map and still arriving. This can not happen.");
 		} else {
-			List<Double> dists = personId2Dists.get(personId);
+			List<String> dists = personId2Dists.get(personId);
 			double tripDist = mode2PersonId2TeleportDist.get(travelMode).get(personId);
+			double departureTime = personIdDepartureTime.remove(personId);
 			if(maxDist<tripDist) maxDist = tripDist;
-			dists.add(tripDist);
+			dists.add(String.valueOf(departureTime)+"-"+String.valueOf(tripDist));
 			personId2Dists.put(personId, dists);
 			mode2PersonId2TeleportDist.get(travelMode).remove(personId);
 		}
 	}
 
-	public SortedMap<String,Map<Id<Person>,List<Double>>> getMode2PersonId2TravelDistances (){
-		return this.mode2PersonId2distances;
+	public SortedMap<String,Map<Id<Person>,List<String>>> getMode2PersonId2TravelDistances (){
+		return this.mode2PersonId2Distances;
 	}
 
 	public SortedSet<String> getUsedModes (){
 		SortedSet<String> modes = new TreeSet<>();
-		modes.addAll(mode2PersonId2distances.keySet());
+		modes.addAll(mode2PersonId2Distances.keySet());
 		return modes;
 	}
 
@@ -190,32 +201,7 @@ public class SantiagoModeTripTravelDistanceHandler
 		person2Dist.put(personId, teleportDist);
 	}
 
-	/**
-	 * @return  Total distance (summed for all trips for that person) for each person segregated w.r.t. travel modes.
-	 */
-	public SortedMap<String, Map<Id<Person>, Double>> getLegMode2PersonId2TotalTravelDistance(){
-		SortedMap<String, Map<Id<Person>, Double>> mode2PersonId2TotalTravelDistance = new TreeMap<>();
-		for(String mode:this.mode2PersonId2distances.keySet()){
-			double noOfLeg =0;
-			Map<Id<Person>, Double> personId2TotalTravelDist = new HashMap<>();
-			for(Id<Person> id:this.mode2PersonId2distances.get(mode).keySet()){
-				double travelDist=0;
-				for(double d:this.mode2PersonId2distances.get(mode).get(id)){
-					travelDist += d;
-					noOfLeg++;
-				}
-				personId2TotalTravelDist.put(id, travelDist);
-			}
-			mode2PersonId2TotalTravelDistance.put(mode, personId2TotalTravelDist);
-			this.mode2NumberOfLegs.put(mode, noOfLeg);
-		}
-		return mode2PersonId2TotalTravelDistance;
-	}
 
-	public SortedMap<String,Double> getTravelMode2NumberOfLegs(){
-		getLegMode2PersonId2TotalTravelDistance();
-		return this.mode2NumberOfLegs;
-	}
 
 
 }
