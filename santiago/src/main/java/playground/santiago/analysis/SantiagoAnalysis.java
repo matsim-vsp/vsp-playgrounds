@@ -260,7 +260,7 @@ public class SantiagoAnalysis {
 		reader.readFile(eventsFile);
 		
 		
-		SortedMap<String, Map<Id<Person>, Double>> travelDistanceByMode = handler.getLegMode2PersonId2TotalTravelDistance();
+		SortedMap<String, Map<Id<Person>, List<String>>> travelDistanceByMode = handler.getMode2PersonId2TravelDistances();
 		
 		/*writing*/		
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
