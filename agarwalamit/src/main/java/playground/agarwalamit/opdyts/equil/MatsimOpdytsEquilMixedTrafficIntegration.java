@@ -194,7 +194,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(modes2consider,distanceDistribution);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario, timeDiscretization);
+		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
@@ -245,7 +245,8 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 				MatsimRandom.getRandom(),
 				opdytsConfigGroup.isInterpolate(),
 				objectiveFunction,
-				opdytsConfigGroup.isIncludeCurrentBest()
+				opdytsConfigGroup.isIncludeCurrentBest(),
+				opdytsConfigGroup.getWarmUpIterations()
 				);
 
 		// probably, an object which decide about the inertia

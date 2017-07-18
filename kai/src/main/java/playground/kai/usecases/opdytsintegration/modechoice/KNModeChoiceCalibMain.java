@@ -116,7 +116,7 @@ class KNModeChoiceCalibMain {
 
 			final TimeDiscretization timeDiscretization = new TimeDiscretization(0, 3600, 24);
 			final MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>( new MATSimStateFactoryImpl<>(),
-					scenario, timeDiscretization); 
+					scenario);
 			simulator.addOverridingModule( overrides ) ;
 
 			//
@@ -130,6 +130,8 @@ class KNModeChoiceCalibMain {
 			int populationSize = 10 ;
 			boolean interpolate = true ;
 			boolean includeCurrentBest = false ;
+			int warmupIterations = 1;
+
 			final ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable( scenario.getConfig().planCalcScore(), scenario );
 			final FixedIterationNumberConvergenceCriterion convergenceCriterion ;
 			if ( testcase ) {
@@ -145,7 +147,7 @@ class KNModeChoiceCalibMain {
 					MatsimRandom.getRandom(),
 					interpolate,
 					new ModeChoiceObjectiveFunction(equil),
-					includeCurrentBest ) ;
+					includeCurrentBest, warmupIterations ) ;
 
 			randomSearch.setLogPath( outputDirectory );
 

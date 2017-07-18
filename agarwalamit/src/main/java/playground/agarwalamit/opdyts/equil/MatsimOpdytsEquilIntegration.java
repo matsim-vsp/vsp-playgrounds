@@ -181,7 +181,7 @@ public class MatsimOpdytsEquilIntegration {
 
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(),
-				scenario, new TimeDiscretization(startTime, binSize, binCount));
+				scenario);
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
@@ -208,6 +208,8 @@ public class MatsimOpdytsEquilIntegration {
 		boolean interpolate = true;
 		boolean includeCurrentBest = false;
 
+		int warmupIterations = 1;
+
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
 				RandomizedUtilityParametersChoser.ONLY_ASC, EQUIL, null, modes2consider);
@@ -231,7 +233,8 @@ public class MatsimOpdytsEquilIntegration {
 				MatsimRandom.getRandom(),
 				interpolate,
 				objectiveFunction,
-				includeCurrentBest
+				includeCurrentBest,
+				warmupIterations
 				);
 
 		// probably, an object which decide about the inertia

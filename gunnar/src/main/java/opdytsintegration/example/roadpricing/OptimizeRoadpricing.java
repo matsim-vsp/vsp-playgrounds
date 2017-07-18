@@ -106,6 +106,9 @@ class OptimizeRoadpricing {
 		final int maxRandomSearchIterations = Integer.parseInt(myConfig.get("opdyts", "maxiterations"));
 		final int maxRandomSearchTransitions = Integer.parseInt(myConfig.get("opdyts", "maxtransitions"));
 
+		//NEW: amit
+		final int warmupIterations = 1; //Integer.parseInt(myConfig.get("opdyts", "warmupIterations®"));
+
 		/*
 		 * Create the MATSim scenario.
 		 */
@@ -161,8 +164,8 @@ class OptimizeRoadpricing {
 		relevantModes.add("car");
 
 		final MATSimSimulator2<TollLevels> matsimSimulator = new MATSimSimulator2<>(
-				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario,
-				timeDiscretization);
+				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario
+        );
 		matsimSimulator.addSimulationStateAnalyzer(
 				new DifferentiatedLinkOccupancyAnalyzer.Provider(timeDiscretization, relevantModes, relevantLinkIds));
 
@@ -175,7 +178,7 @@ class OptimizeRoadpricing {
 		final RandomSearch<TollLevels> randomSearch = new RandomSearch<>(matsimSimulator, decisionVariableRandomizer,
 				initialTollLevels, convergenceCriterion, maxRandomSearchIterations, maxRandomSearchTransitions,
 				randomSearchPopulationSize, MatsimRandom.getRandom(), parallelSampling, objectiveFunction,
-				includeCurrentBest);
+				includeCurrentBest, 1);
 		randomSearch.setLogFileName(originalOutputDirectory + "opdyts.log");
 		randomSearch.setConvergenceTrackingFileName(originalOutputDirectory + "opdyts.con");
 		randomSearch.setOuterIterationLogFileName(originalOutputDirectory + "opdyts.opt");

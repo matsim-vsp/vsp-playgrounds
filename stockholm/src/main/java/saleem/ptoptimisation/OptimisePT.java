@@ -85,7 +85,7 @@ public class OptimisePT {
 		@SuppressWarnings("unchecked")		
 		final MATSimSimulator2<PTSchedule> matsimSimulator = new MATSimSimulator2(
 				new PTMatsimStateFactoryImpl<>(scenario, occupancyScale),
-				scenario, timeDiscretization);
+				scenario);
 		matsimSimulator.addSimulationStateAnalyzer(new PTOccupancyAnalyzer.Provider(timeDiscretization,
 				new LinkedHashSet<>(scenario.getTransitSchedule().getFacilities().keySet())));
 		// <<<<< NEW, UNTESTED <<<<<

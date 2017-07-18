@@ -85,7 +85,7 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
     }
 
     public MATSimSimulator2<U> newMATSimSimulator(final MATSimStateFactory<U> stateFactory) {
-        this.matSimSimulator2 = new MATSimSimulator2<>(stateFactory, scenario, this.timeDiscretization);
+        this.matSimSimulator2 = new MATSimSimulator2<>(stateFactory, scenario);
 
         // the name is not necessarily exactly same as network modes in MATSim PlansCalcRouteConfigGroup.
         // Here, this means, which needs to be counted on the links.
