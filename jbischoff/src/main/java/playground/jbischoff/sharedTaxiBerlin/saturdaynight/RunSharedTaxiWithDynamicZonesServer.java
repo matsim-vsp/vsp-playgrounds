@@ -31,6 +31,7 @@ import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -58,7 +59,7 @@ public class RunSharedTaxiWithDynamicZonesServer {
 		config.controler().setOutputDirectory(config.controler().getOutputDirectory()+"/"+args[1]+"/");
 		OptimizationCriterion criterion = OptimizationCriterion.valueOf(args[1]);
 		
-		ZonalSystem zones = new ZonalSystem(JbUtils.readShapeFileAndExtractGeometry(config.getContext().getFile()+"/shp/berlin_grid_1500.shp", "ID"),criterion);
+		ZonalSystem zones = new ZonalSystem(JbUtils.readShapeFileAndExtractGeometry(ConfigGroup.getInputFileURL(config.getContext(), "shp/berlin_grid_1500.shp").getFile(), "ID"),criterion);
 		Controler controler = DrtControlerCreator.createControler(config, false);
 		ZonalBasedRequestValidator validator = new ZonalBasedRequestValidator(controler.getScenario().getNetwork(), zones);
 

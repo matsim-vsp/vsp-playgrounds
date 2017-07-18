@@ -38,6 +38,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.log4j.Logger;
+import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.util.PartialSort;
@@ -52,6 +53,7 @@ import org.matsim.core.utils.gis.ShapeFileWriter;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.matrices.Matrix;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -245,7 +247,7 @@ public class TaxiZoneManager implements IterationEndsListener {
 				headerWritten = true;
 				}
 				bw.newLine();
-				bw.write(iteration+";"+vkm+";"+pkm+";"+format.format(revenue)+";"+format.format(revenueperkm)+";"+";"+cost+";"+profit);
+				bw.write(iteration+";"+vkm+";"+pkm+";"+format.format(revenue)+";"+format.format(revenueperkm)+";"+cost+";"+profit);
 				bw.flush();
 				bw.close();
 			} catch (IOException e) {
@@ -279,30 +281,38 @@ public class TaxiZoneManager implements IterationEndsListener {
 	  private void writeShape(String outfile,Map<String,Geometry> currentZones, Map<String, Double> zoneOccupancy, Map<String, Double> zoneFares )
 	    {
 		  
-		  	CoordinateReferenceSystem crs = MGC.getCRS(TransformationFactory.DHDN_GK4);
-
-			PolygonFeatureFactory factory = new PolygonFeatureFactory.Builder().addAttribute("ID", String.class)
-					.setCrs(crs).setName("zone").addAttribute("occupancy", Double.class).addAttribute("fare", Double.class).addAttribute("perf.", Double.class).create();
-
-			List<SimpleFeature> features = new ArrayList<>();
-			
-			
-			for (Entry<String,Geometry> z :currentZones.entrySet()) {
-                Object[] attribs = new Object[4];
-                Double occ = zoneOccupancy.get(z.getKey());
-                if (occ!=null) occ/=aggregateInterval;
-                Double fare = zoneFares.get(z.getKey());
-                if(fare!=null) fare/=aggregateInterval;
-                attribs[0] = z.getKey();
-                attribs[1] = occ  ; 
-                attribs[2] = fare ;
-                if(occ!=null&&fare!=null){
-                attribs[3] =  occ*fare;}
-                else {attribs[3] = null;}
-				features.add(factory.createPolygon(z.getValue().getCoordinates(), attribs, z.getKey()));
+		  	String gk4 = "PROJCS[\"DHDN / 3-degree Gauss-Kruger zone 4\", GEOGCS[\"DHDN\", DATUM[\"Deutsches Hauptdreiecksnetz\", SPHEROID[\"Bessel 1841\", 6377397.155, 299.1528128, AUTHORITY[\"EPSG\",\"7004\"]], TOWGS84[612.4, 77.0, 440.2, -0.054, 0.057, -2.797, 2.55], AUTHORITY[\"EPSG\",\"6314\"]], PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], UNIT[\"degree\", 0.017453292519943295], AXIS[\"Geodetic longitude\", EAST], AXIS[\"Geodetic latitude\", NORTH], AUTHORITY[\"EPSG\",\"4314\"]], PROJECTION[\"Transverse_Mercator\", AUTHORITY[\"EPSG\",\"9807\"]], PARAMETER[\"central_meridian\", 12.0], PARAMETER[\"latitude_of_origin\", 0.0], PARAMETER[\"scale_factor\", 1.0], PARAMETER[\"false_easting\", 4500000.0], PARAMETER[\"false_northing\", 0.0], UNIT[\"m\", 1.0], AXIS[\"Easting\", EAST], AXIS[\"Northing\", NORTH], AUTHORITY[\"EPSG\",\"31468\"]]";
+		  	//some weird problems with that, when running on cluster
+		  	CoordinateReferenceSystem crs;
+			try {
+				crs = CRS.parseWKT(gk4);
+				
+				PolygonFeatureFactory factory = new PolygonFeatureFactory.Builder().addAttribute("ID", String.class)
+						.setCrs(crs).setName("zone").addAttribute("occupancy", Double.class).addAttribute("fare", Double.class).addAttribute("perf.", Double.class).create();
+				
+				List<SimpleFeature> features = new ArrayList<>();
+				
+				
+				for (Entry<String,Geometry> z :currentZones.entrySet()) {
+					Object[] attribs = new Object[4];
+					Double occ = zoneOccupancy.get(z.getKey());
+					if (occ!=null) occ/=aggregateInterval;
+					Double fare = zoneFares.get(z.getKey());
+					if(fare!=null) fare/=aggregateInterval;
+					attribs[0] = z.getKey();
+					attribs[1] = occ  ; 
+					attribs[2] = fare ;
+					if(occ!=null&&fare!=null){
+						attribs[3] =  occ*fare;}
+					else {attribs[3] = null;}
+					features.add(factory.createPolygon(z.getValue().getCoordinates(), attribs, z.getKey()));
+				}
+				
+				ShapeFileWriter.writeGeometries(features, outfile);
+			} catch (FactoryException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-
-			ShapeFileWriter.writeGeometries(features, outfile);
 	    }
 
 }
