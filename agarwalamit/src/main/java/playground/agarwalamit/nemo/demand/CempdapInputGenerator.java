@@ -20,27 +20,28 @@
 package playground.agarwalamit.nemo.demand;
 
 import playground.agarwalamit.utils.FileUtils;
-import playground.vsp.demandde.cemdapMATSimCadyts.DemandGeneratorCensus;
+import playground.vsp.demandde.cemdapMATSimCadyts.ZoneAndLOSGeneratorV2;
 
 /**
  * Created by amit on 22.06.17.
  */
 
-public class NRWDemandGenerator {
+public class CempdapInputGenerator {
 
     public static void main(String[] args) {
 
         String sharedSVNDir = FileUtils.SHARED_SVN; // "../../../shared-svn";
 
-        String commuterFileOutgoing1 = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/051NRW2009Ga.txt";
-        String commuterFileOutgoing2 = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/053NRW2009Ga.txt";
-        String commuterFileOutgoing3 = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/055NRW2009Ga.txt";
-        String commuterFileOutgoing4 = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/057NRW2009Ga.txt";
-        String commuterFileOutgoing5 = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/059NRW2009Ga.txt";
+        String baseDir = sharedSVNDir + "/projects/nemo_mercator/30_Scenario/cemdap_input";
+        String commuterFileOutgoing1 = baseDir + "/pendlerstatistik/051NRW2009Ga.txt";
+        String commuterFileOutgoing2 = baseDir + "/pendlerstatistik/053NRW2009Ga.txt";
+        String commuterFileOutgoing3 = baseDir + "/pendlerstatistik/055NRW2009Ga.txt";
+        String commuterFileOutgoing4 = baseDir + "/pendlerstatistik/057NRW2009Ga.txt";
+        String commuterFileOutgoing5 = baseDir + "/pendlerstatistik/059NRW2009Ga.txt";
 
-        String censusFile = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_input/zensus_2011/Zensus11_Datensatz_Bevoelkerung_NRW.csv";
-        String shapeFileLors = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
-        String outputBase = sharedSVNDir+"/projects/nemo_mercator/30_Scenario/cemdap_output/";
+        String censusFile = baseDir + "/zensus_2011/Zensus11_Datensatz_Bevoelkerung_NRW.csv";
+        String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
+        String outputBase = baseDir ;
 
         // Parameters
         int numberOfPlansPerPerson = 5;
@@ -52,9 +53,12 @@ public class NRWDemandGenerator {
 
         String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4, commuterFileOutgoing5};
 
-        new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
-                defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren);
-
+//        {// person and plans file which contains only attributes; these will be required to generate matsim plans files
+//            new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
+//                    defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren);
+//        }
+        { // zones and lor files
+            new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFileLors, outputBase);
+        }
     }
-
 }

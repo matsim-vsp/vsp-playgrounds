@@ -45,20 +45,13 @@ import com.vividsolutions.jts.geom.Geometry;
 public class ZoneAndLOSGeneratorV2 {
 	private static final Logger LOG = Logger.getLogger(ZoneAndLOSGeneratorV2.class);
 
-	// Input and output
-	private static final String commuterFileBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
-	private static final String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
-	private static final String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
-	private static final String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
-	private static final String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
+	private final String shapeFile;
 	
-	private static final String shapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
-	
-	private static final String outputBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
-	private static final String outputFileZone2Zone = outputBase + "zone2zone.dat";
-	private static final String outputFileZones = outputBase + "zones.dat";
-	private static final String outputFileLosOffPkAM = outputBase + "losoffpkam.dat";
-	private static final String outputFileLosPeakAM = outputBase + "lospeakam.dat";
+	private final String outputBase ;
+	private final String outputFileZone2Zone ;
+	private final String outputFileZones;
+	private final String outputFileLosOffPkAM ;
+	private final String outputFileLosPeakAM ;
 	
 	// Parameters
 	private static final double defaultIntraZoneDistance = 1.72; // in miles; equals 2.76km.
@@ -68,7 +61,7 @@ public class ZoneAndLOSGeneratorV2 {
 	private static final double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
 	
 	// Storage objects
-	private final String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
+	private final String[] commuterFilesOutgoing ;
 	private final Set<String> municipalities = new HashSet<>();
 	private final List<Integer> zones = new LinkedList<>();
 	private final Map<Integer, Geometry> zoneMap = new HashMap<>();
@@ -77,11 +70,33 @@ public class ZoneAndLOSGeneratorV2 {
 
 	
 	public static void main(String[] args) {
-		new ZoneAndLOSGeneratorV2();
+		// Input and output
+		String commuterFileBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
+		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
+		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
+		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
+		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
+
+		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
+
+		String shapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+		String outputBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
+
+		new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase);
 	}
 
-	
-	public ZoneAndLOSGeneratorV2() {
+	public ZoneAndLOSGeneratorV2( String[] commuterFilesOutgoing, String shapeFile, String outputBase ) {
+
+		this.commuterFilesOutgoing = commuterFilesOutgoing;
+		this.shapeFile = shapeFile;
+		this.outputBase = outputBase;
+
+		outputFileZone2Zone = outputBase + "zone2zone.dat";
+		outputFileZones = outputBase + "zones.dat";
+		outputFileLosOffPkAM = outputBase + "losoffpkam.dat";
+		outputFileLosPeakAM = outputBase + "lospeakam.dat";
+
+
 		LogToOutputSaver.setOutputDirectory(outputBase);
 		readMunicipalities();
 		readShape();
