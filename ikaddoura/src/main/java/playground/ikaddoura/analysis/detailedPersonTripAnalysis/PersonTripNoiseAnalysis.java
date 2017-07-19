@@ -470,7 +470,8 @@ public class PersonTripNoiseAnalysis {
 			
 			bw.write("path;" + outputPath);
 			bw.newLine();
-
+			
+			bw.write("-----------");
 			bw.newLine();
 			
 			for (String mode : basicHandler.getScenario().getConfig().planCalcScore().getModes().keySet()) {
@@ -683,6 +684,10 @@ public class PersonTripNoiseAnalysis {
 			bw.write("air pollution toll payments (sample size) (payed by private car users) [monetary units];" + airPollutionPayments);
 			bw.newLine();
 			
+			double taxiCapitalCosts = taxiVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getSAVCapitalCostDifferencePerDay();
+			bw.write("taxi capital costs (sample size) (should be negative = revenue) [monetary units];" + taxiCapitalCosts);
+			bw.newLine();
+			
 			bw.write("-----------");
 			bw.newLine();
 			
@@ -695,10 +700,6 @@ public class PersonTripNoiseAnalysis {
 			double taxiOperatingCosts = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
 			bw.write("taxi operating costs (sample size) [monetary units];" + taxiOperatingCosts);
 			bw.newLine();
-
-			double taxiCapitalCosts = taxiVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getSAVCapitalCostDifferencePerDay();
-			bw.write("taxi capital costs (sample size) (should be negative = revenue) [monetary units];" + taxiCapitalCosts);
-			bw.newLine();
 			
 			double revenues = moneyPaymentsByUsers + taxiCapitalCosts;
 			double savOperatorCost = taxiOperatingCosts; // distance-based cost
@@ -710,7 +711,7 @@ public class PersonTripNoiseAnalysis {
 			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + revenues);
 			bw.newLine();
 			
-			bw.write("system welfare (sample size) (with taxi operating and capital costs) [monetary units];" + welfare);
+			bw.write("system welfare (sample size) [monetary units];" + welfare);
 			bw.newLine();
 		
 			log.info("Output written to " + fileName);
