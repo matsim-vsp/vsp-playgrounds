@@ -74,7 +74,6 @@ public class OptAVModule extends AbstractModule {
 		// consistency check
 		// #############################
 		
-		
 		ModeParams taxiOptimizerModeParams = null;
 		if (this.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) != null) {
 			taxiOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER);
@@ -119,6 +118,10 @@ public class OptAVModule extends AbstractModule {
 		if (taxiOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
 			throw new RuntimeException("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer' should be the same..."
 					+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs.");
+		}
+		
+		if (ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getSAVCapitalCostDifferencePerDay() > 0.) {
+			throw new RuntimeException("SAV capital costs (per user) are higher than car capital costs (per user). Aborting... "); 
 		}
 		
 		// #############################
@@ -198,14 +201,19 @@ public class OptAVModule extends AbstractModule {
         	
         	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);        	
         }
-				
+		
+		// #############################
+        // scoring
+        // #############################
+		
+		addEventHandlerBinding().to(SAVCapitalCostHandler.class).asEagerSingleton();
+		
 		// #############################
 		// welfare analysis
 		// #############################
 
 		install(new PersonTripAnalysisModule());
 		
-		// TODO: operator cost analysis!
 	}
 
 }

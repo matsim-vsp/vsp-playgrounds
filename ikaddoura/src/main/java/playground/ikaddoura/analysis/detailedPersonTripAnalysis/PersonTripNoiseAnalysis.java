@@ -591,7 +591,7 @@ public class PersonTripNoiseAnalysis {
 			int allTrips = 0;
 			int allStuckAndAbortTrips = 0;
 			double affectedNoiseCost = 0.;
-			double tollPayments = 0.;
+			double moneyPaymentsByUsers = 0.;
 			double congestionPayments = 0.;
 			double noisePayments = 0.;
 			double airPollutionPayments = 0.;
@@ -618,7 +618,7 @@ public class PersonTripNoiseAnalysis {
 						}
 						
 						if (basicHandler.getPersonId2tripNumber2payment().containsKey(id) && basicHandler.getPersonId2tripNumber2payment().get(id).containsKey(trip)) {
-							tollPayments = tollPayments + basicHandler.getPersonId2tripNumber2payment().get(id).get(trip);
+							moneyPaymentsByUsers = moneyPaymentsByUsers + basicHandler.getPersonId2tripNumber2payment().get(id).get(trip);
 						}
 						
 						if (moneyHandler.getPersonId2tripNumber2congestionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).containsKey(trip)) {
@@ -656,7 +656,7 @@ public class PersonTripNoiseAnalysis {
 			bw.write("number of car vehicles (sample size);" + carVehicles);
 			bw.newLine();
 			
-			bw.write("car capital costs (sample size) [monetary units];" + carVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getCarCostPerDay());
+			bw.write("car capital costs (sample size) (costs per vehicle and user are set to 0) [monetary units];" + carVehicles * 0.);
 			bw.newLine();
 			
 			bw.write("-----------");
@@ -689,31 +689,27 @@ public class PersonTripNoiseAnalysis {
 			bw.write("travel related user benefits (sample size) (including toll payments) [monetary units];" + userBenefits);
 			bw.newLine();
 			
-			bw.write("revenues (sample size) (tolls/fares payed by private car users or passengers) [monetary units];" + tollPayments);
-			bw.newLine();
-			
 			bw.write("affected noise damage costs (sample size) [monetary units];" + affectedNoiseCost);
 			bw.newLine();
 			
-			bw.write("-----------");
-			bw.newLine();
-					
-			double welfareWithoutOperatingCosts = tollPayments + userBenefits - affectedNoiseCost;
-			bw.write("system welfare (sample size) (without pt / taxi operating costs) [monetary units];" + welfareWithoutOperatingCosts);
-			bw.newLine();
-			
-			bw.write("-----------");
-			bw.newLine();
-
 			double taxiOperatingCosts = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
 			bw.write("taxi operating costs (sample size) [monetary units];" + taxiOperatingCosts);
 			bw.newLine();
 
-			double taxiCapitalCosts = taxiVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getSAVCostPerDay();
-			bw.write("taxi capital costs (sample size) [monetary units];" + taxiCapitalCosts);
+			double taxiCapitalCosts = taxiVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getSAVCapitalCostDifferencePerDay();
+			bw.write("taxi capital costs (sample size) (should be negative = revenue) [monetary units];" + taxiCapitalCosts);
 			bw.newLine();
 			
-			double welfare = welfareWithoutOperatingCosts - taxiOperatingCosts - taxiCapitalCosts;
+			double revenues = moneyPaymentsByUsers + taxiCapitalCosts;
+			double savOperatorCost = taxiOperatingCosts; // distance-based cost
+			double userBenefitsWithMonetaryPayments = userBenefits; // with monetary payments, with operating costs
+			double externalCosts = affectedNoiseCost;
+			
+			double welfare = revenues - savOperatorCost + userBenefitsWithMonetaryPayments  - externalCosts; // TODO: check
+			
+			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + revenues);
+			bw.newLine();
+			
 			bw.write("system welfare (sample size) (with taxi operating and capital costs) [monetary units];" + welfare);
 			bw.newLine();
 		

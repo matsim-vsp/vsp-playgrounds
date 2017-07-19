@@ -38,8 +38,7 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	private boolean chargeOperatingCostsFromPassengers = true;
 	private boolean chargeSAVTollsFromPassengers = true;
 	
-	private double carCostPerDay = 0.;
-	private double sAVCostPerDay = -10.;
+	private double sAVCapitalCostDifferencePerDay = -10.; // per user! (negative difference means a SAV is cheaper than a car)
 	
 	private SAVTollingApproach optAVApproach = SAVTollingApproach.NoPricing;
 			
@@ -97,24 +96,14 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 		this.chargeSAVTollsFromPassengers = chargeSAVTollsFromPassengers;
 	}
 
-	@StringGetter( "sAVCostPerDay" )
-	public double getSAVCostPerDay() {
-		return sAVCostPerDay;
+	@StringGetter( "sAVCapitalCostDifferencePerDay" )
+	public double getSAVCapitalCostDifferencePerDay() {
+		return sAVCapitalCostDifferencePerDay;
 	}
 
-	@StringSetter( "sAVCostPerDay" )
-	public void setSAVCostPerDay(double sAVCostPerDay) {
-		this.sAVCostPerDay = sAVCostPerDay;
-	}
-
-	@StringGetter( "carCostPerDay" )
-	public double getCarCostPerDay() {
-		return carCostPerDay;
-	}
-
-	@StringSetter( "carCostPerDay" )
-	public void setCarCostPerDay(double carCostPerDay) {
-		this.carCostPerDay = carCostPerDay;
+	@StringSetter( "sAVCapitalCostDifferencePerDay" )
+	public void setSAVCapitalCostDifferencePerDay(double sAVCostPerDay) {
+		this.sAVCapitalCostDifferencePerDay = sAVCostPerDay;
 	}
 	
 }
