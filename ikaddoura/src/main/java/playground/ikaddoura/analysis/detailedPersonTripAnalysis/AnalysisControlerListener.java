@@ -114,6 +114,8 @@ public class AnalysisControlerListener implements IterationEndsListener {
 		analysis.printAggregatedResults(outputPathAnalysisIteration, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
 		analysis.printAggregatedResults(outputPathAnalysisIteration, null, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
 		
+		analysis.printAggregatedResults(outputPathAnalysisIteration, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
+		
 		// all iterations
 				
 		this.iteration2userBenefits.put(event.getIteration(), userBenefits);
