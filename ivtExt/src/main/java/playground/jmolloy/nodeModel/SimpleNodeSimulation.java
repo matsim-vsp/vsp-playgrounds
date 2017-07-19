@@ -34,14 +34,14 @@ extends AbstractNodeSimulation {
         String network_filename = "networks/network_simple_node.xml";
         String outputDirectory = "output/simple_node";
         int timesteps = 5;
-        List<Id> links13 = Arrays.asList(new Id[]{Id.createLinkId((String)"1"), Id.createLinkId((String)"3")});
-        List<Id> links14 = Arrays.asList(new Id[]{Id.createLinkId((String)"1"), Id.createLinkId((String)"4")});
-        List<Id> links23 = Arrays.asList(new Id[]{Id.createLinkId((String)"2"), Id.createLinkId((String)"3")});
-        List<Id> links24 = Arrays.asList(new Id[]{Id.createLinkId((String)"2"), Id.createLinkId((String)"4")});
-        LinkNetworkRouteImpl route13 = new LinkNetworkRouteImpl(Id.createLinkId((String)"x_1"), links13, Id.createLinkId((String)"x_3"));
-        LinkNetworkRouteImpl route14 = new LinkNetworkRouteImpl(Id.createLinkId((String)"x_1"), links14, Id.createLinkId((String)"x_4"));
-        LinkNetworkRouteImpl route23 = new LinkNetworkRouteImpl(Id.createLinkId((String)"x_2"), links23, Id.createLinkId((String)"x_3"));
-        LinkNetworkRouteImpl route24 = new LinkNetworkRouteImpl(Id.createLinkId((String)"x_2"), links24, Id.createLinkId((String)"x_4"));
+        List<Id<Link>> links13 = Arrays.asList(Id.createLinkId("1"), Id.createLinkId("3"));
+        List<Id<Link>> links14 = Arrays.asList(Id.createLinkId("1"), Id.createLinkId("4"));
+        List<Id<Link>> links23 = Arrays.asList(Id.createLinkId("2"), Id.createLinkId("3"));
+        List<Id<Link>> links24 = Arrays.asList(Id.createLinkId("2"), Id.createLinkId("4"));
+        LinkNetworkRouteImpl route13 = new LinkNetworkRouteImpl(Id.createLinkId("x_1"), links13, Id.createLinkId("x_3"));
+        LinkNetworkRouteImpl route14 = new LinkNetworkRouteImpl(Id.createLinkId("x_1"), links14, Id.createLinkId("x_4"));
+        LinkNetworkRouteImpl route23 = new LinkNetworkRouteImpl(Id.createLinkId("x_2"), links23, Id.createLinkId("x_3"));
+        LinkNetworkRouteImpl route24 = new LinkNetworkRouteImpl(Id.createLinkId("x_2"), links24, Id.createLinkId("x_4"));
         HashMap<NetworkRoute, Integer> flows = new HashMap<NetworkRoute, Integer>();
         int[] route_flows = new int[]{1000, 0, 4000, 0};
         flows.put((NetworkRoute)route13, route_flows[0]);
@@ -62,9 +62,9 @@ extends AbstractNodeSimulation {
     private void editNetwork() {
         for (int i = 0; i < this.capacities.length; ++i) {
             int link_id = i + 1;
-            Link link = (Link)this.scenario.getNetwork().getLinks().get((Object)Id.createLinkId((long)link_id));
+            Link link = (Link)this.scenario.getNetwork().getLinks().get(Id.createLinkId(link_id));
             if (this.capacities[i] == 0) {
-                Link linkb = (Link)this.scenario.getNetwork().getLinks().get((Object)Id.createLinkId((String)("x_" + link_id)));
+                Link linkb = (Link)this.scenario.getNetwork().getLinks().get(Id.createLinkId("x_" + link_id));
                 this.scenario.getNetwork().removeLink(link.getId());
                 this.scenario.getNetwork().removeNode(linkb.getFromNode().getId());
                 this.scenario.getNetwork().removeNode(linkb.getToNode().getId());

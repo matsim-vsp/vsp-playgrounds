@@ -18,6 +18,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
@@ -41,12 +42,12 @@ extends AbstractNodeSimulation {
         int[][] gibb_flows = new int[][]{{1, 6, 525}, {1, 7, 150}, {1, 8, 75}, {2, 5, 450}, {2, 7, 300}, {2, 8, 900}, {3, 5, 300}, {3, 6, 300}, {3, 8, 225}, {4, 5, 225}, {4, 6, 1275}, {4, 7, 75}};
         FullIntersectionNodeSimulation nodeSim = new FullIntersectionNodeSimulation(flows, network_filename, outputDirectory, timesteps);
         Map<NetworkRoute, Integer> route_flows = Arrays.stream(flows).map(a -> {
-            Id inLinkId = Id.createLinkId((String)("x_in_" + a[0]));
-            Id outLinkId = Id.createLinkId((String)("x_out_" + a[1]));
-            NetworkRoute route = RouteUtils.createNetworkRoute(Arrays.asList(new Id[]{inLinkId, outLinkId}), (Network)nodeSim.getNetwork());
-            return new Tuple((Object)route, (Object)a[2]);
+            Id<Link> inLinkId = Id.createLinkId((String)("x_in_" + a[0]));
+            Id<Link> outLinkId = Id.createLinkId((String)("x_out_" + a[1]));
+            NetworkRoute route = RouteUtils.createNetworkRoute(Arrays.asList(inLinkId, outLinkId), (Network)nodeSim.getNetwork());
+            return new Tuple<>(route, a[2]);
         }
-        ).collect(Collectors.toMap((Function<Tuple, NetworkRoute>)LambdaMetafactory.metafactory(null, null, null, (Ljava/lang/Object;)Ljava/lang/Object;, getFirst(), (Lorg/matsim/core/utils/collections/Tuple;)Lorg/matsim/core/population/routes/NetworkRoute;)(), (Function<Tuple, Integer>)LambdaMetafactory.metafactory(null, null, null, (Ljava/lang/Object;)Ljava/lang/Object;, getSecond(), (Lorg/matsim/core/utils/collections/Tuple;)Ljava/lang/Integer;)()));
+        ).collect(Collectors.toMap(Tuple::getFirst, Tuple::getSecond));
         nodeSim.addFlows(route_flows, true);
         nodeSim.run();
     }
