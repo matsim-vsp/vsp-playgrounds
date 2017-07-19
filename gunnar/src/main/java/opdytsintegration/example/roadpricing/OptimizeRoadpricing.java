@@ -184,7 +184,7 @@ class OptimizeRoadpricing {
 		final RandomSearch<TollLevels> randomSearch = new RandomSearch<>(matsimSimulator, decisionVariableRandomizer,
 				initialTollLevels, convergenceCriterion, maxRandomSearchIterations, maxRandomSearchTransitions,
 				randomSearchPopulationSize, MatsimRandom.getRandom(), parallelSampling, objectiveFunction,
-				includeCurrentBest, 1);
+				includeCurrentBest, 1, false);
 		randomSearch.setLogFileName(originalOutputDirectory + "opdyts.log");
 		randomSearch.setConvergenceTrackingFileName(originalOutputDirectory + "opdyts.con");
 		randomSearch.setOuterIterationLogFileName(originalOutputDirectory + "opdyts.opt");
