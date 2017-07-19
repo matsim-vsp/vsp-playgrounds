@@ -96,7 +96,7 @@ public class OptimisePT {
 				convergenceCriterion, maxRandomSearchIterations,
 				maxRandomSearchTransitions, 8,
 				MatsimRandom.getRandom(), interpolate, objectiveFunction,
-				includeCurrentBest);
+				includeCurrentBest, 1);
 		new CreatePseudoNetwork(schedule, network, "tr_").createNetwork();
 		randomSearch.setLogFileName(originalOutputDirectory + "opdyts.log");
 		randomSearch.setConvergenceTrackingFileName(originalOutputDirectory

@@ -1,15 +1,11 @@
 package opdytsintegration.example.roadpricing;
 
-import java.util.*;
-import floetteroed.opdyts.DecisionVariableRandomizer;
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
-import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
-import floetteroed.opdyts.searchalgorithms.RandomSearch;
-import floetteroed.opdyts.searchalgorithms.SelfTuner;
-import floetteroed.utilities.Units;
-import floetteroed.utilities.config.ConfigReader;
-import floetteroed.utilities.math.MathHelpers;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -26,6 +22,16 @@ import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingReaderXMLv1;
 import org.matsim.roadpricing.RoadPricingSchemeImpl;
+
+import floetteroed.opdyts.DecisionVariableRandomizer;
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
+import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
+import floetteroed.opdyts.searchalgorithms.RandomSearch;
+import floetteroed.opdyts.searchalgorithms.SelfTuner;
+import floetteroed.utilities.Units;
+import floetteroed.utilities.config.ConfigReader;
+import floetteroed.utilities.math.MathHelpers;
 
 /**
  * 
