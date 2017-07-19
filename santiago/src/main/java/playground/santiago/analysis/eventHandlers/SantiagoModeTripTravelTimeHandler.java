@@ -29,7 +29,9 @@ import org.matsim.pt.PtConstants;
  * It excludes the transitDriverPersons. Transit users are treated separately, see followings
  * transit_walk - transit_walk --> walk &
  * transit_walk - pt - transit_walk --> pt &
- * transit_walk - pt - transit_walk - pt - transit_walk --> pt 
+ * transit_walk - pt - transit_walk - pt - transit_walk --> pt
+ * 
+ * This means that the handler calculate the travel times only between regular activities.
  */
 
 public class SantiagoModeTripTravelTimeHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler,
@@ -59,9 +61,12 @@ PersonStuckEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHand
 	public void reset(int iteration) {
 		this.modePersonIdDepartureTravelTimes.clear();
 		this.personIdDepartureTime.clear();
-		this.modesForTransitUsers.clear();
+		
 		this.transitDriverPersons.clear();
+		this.transitUserDepartureTime.clear();
+		this.transitUserArrivalTime.clear();
 		this.modesForTransitUsers.clear();
+		
 	}
 
 	/*ARRIVAL EVENT*/	
@@ -93,7 +98,7 @@ PersonStuckEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHand
 		String legMode = event.getLegMode();
 
 		if(transitDriverPersons.contains(personId)) {
-
+			//Omitting Transit Drivers ...
 		} else {
 			if (legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ) {
 
