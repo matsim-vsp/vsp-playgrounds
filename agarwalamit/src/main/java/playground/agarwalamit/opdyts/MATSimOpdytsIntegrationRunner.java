@@ -29,14 +29,14 @@ import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
 import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
 import floetteroed.opdyts.searchalgorithms.RandomSearch;
 import floetteroed.opdyts.searchalgorithms.SelfTuner;
-import opdytsintegration.MATSimSimulator2;
-import opdytsintegration.MATSimStateFactory;
-import opdytsintegration.car.DifferentiatedLinkOccupancyAnalyzer;
-import opdytsintegration.pt.PTOccupancyAnalyzer;
-import opdytsintegration.utils.MATSimConfiguredFactories;
-import opdytsintegration.utils.OpdytsConfigGroup;
-import opdytsintegration.utils.TimeDiscretization;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.opdyts.MATSimSimulator2;
+import org.matsim.contrib.opdyts.MATSimStateFactory;
+import org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer;
+import org.matsim.contrib.opdyts.pt.PTOccupancyAnalyzer;
+import org.matsim.contrib.opdyts.utils.MATSimConfiguredFactories;
+import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 
 /**
  * Created by amit on 15.06.17.
@@ -48,7 +48,7 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
 
     // probably, cant inject scenario because it is required before (MATSim) controler
     public MATSimOpdytsIntegrationRunner(final Scenario scenario){
-        this.delegate = new MATSimConfiguredFactories((OpdytsConfigGroup)scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME));
+        this.delegate = new MATSimConfiguredFactories((OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME));
 
         this.timeDiscretization = this.delegate.newTimeDiscretization();
         this.convergenceCriterion = this.delegate.newFixedIterationNumberConvergenceCriterion();
@@ -63,7 +63,7 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
 
     private MATSimSimulator2<U> matSimSimulator2;
 
-    // trying to mimize the opdyts infrastructure outside this Class
+    // trying to minimize the opdyts infrastructure outside this Class
     @Deprecated
     public TimeDiscretization newTimeDiscretization() {
         throw new UnsupportedOperationException("not implmented yet.");
@@ -85,7 +85,7 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
     }
 
     public MATSimSimulator2<U> newMATSimSimulator(final MATSimStateFactory<U> stateFactory) {
-        this.matSimSimulator2 = new MATSimSimulator2<>(stateFactory, scenario, this.timeDiscretization);
+        this.matSimSimulator2 = new MATSimSimulator2<>(stateFactory, scenario);
 
         // the name is not necessarily exactly same as network modes in MATSim PlansCalcRouteConfigGroup.
         // Here, this means, which needs to be counted on the links.
@@ -95,7 +95,8 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
 
         // add for network modes
         if (networkModes.size() > 0.) {
-            matSimSimulator2.addSimulationStateAnalyzer(new DifferentiatedLinkOccupancyAnalyzer.Provider(this.timeDiscretization, networkModes,
+            matSimSimulator2.addSimulationStateAnalyzer(new DifferentiatedLinkOccupancyAnalyzer.Provider(this.timeDiscretization,
+                    networkModes,
                     new LinkedHashSet<>(scenario.getNetwork().getLinks().keySet())));
         }
 

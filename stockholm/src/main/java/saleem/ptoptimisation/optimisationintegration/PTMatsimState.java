@@ -1,15 +1,13 @@
 package saleem.ptoptimisation.optimisationintegration;
 
-import opdytsintegration.MATSimState;
-
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import org.matsim.vehicles.Vehicles;
-
-import saleem.ptoptimisation.utils.ScenarioHelper;
 import floetteroed.opdyts.SimulatorState;
 import floetteroed.utilities.math.Vector;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.opdyts.MATSimState;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.vehicles.Vehicles;
+import saleem.ptoptimisation.utils.ScenarioHelper;
 
 /**
  * Considering the "day-to-day" iterations of MATSim as the stages of a

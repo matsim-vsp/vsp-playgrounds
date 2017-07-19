@@ -51,12 +51,12 @@ public class RunSharedBerlinTaxiCase {
 			drt.setEstimatedBeelineDistanceFactor(1.5);
 			drt.setVehiclesFile("new_net.taxis4to4_cap1.xml");
 			drt.setNumberOfThreads(7);
-			drt.setMaxTravelTimeAlpha(1.5);
-			drt.setMaxTravelTimeBeta(300);
-			drt.setkNearestVehicles(105);
+			drt.setMaxTravelTimeAlpha(5);
+			drt.setMaxTravelTimeBeta(3000);
+			drt.setkNearestVehicles(56);
 			
 			config.controler().setRunId(runId);
-			config.controler().setOutputDirectory("D:/runs-svn/sharedTaxi/c1_reference");
+			config.controler().setOutputDirectory("D:/runs-svn/sharedTaxi/c1_reference2");
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 			DrtControlerCreator.createControler(config, false).run();
 		

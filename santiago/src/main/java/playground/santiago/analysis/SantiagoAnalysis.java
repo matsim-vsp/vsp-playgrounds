@@ -1,38 +1,50 @@
 package playground.santiago.analysis;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.SortedMap;
 
 import org.matsim.analysis.VolumesAnalyzer;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.counts.Counts;
 import org.matsim.counts.MatsimCountsReader;
 import org.matsim.counts.algorithms.CountSimComparisonTableWriter;
 import org.matsim.counts.algorithms.CountsComparisonAlgorithm;
 
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
-import playground.benjamin.scenarios.munich.analysis.modular.legModeDistanceDistribution.RunLegModeDistanceDistribution;
+import playground.agarwalamit.analysis.tripDistance.TripDistanceHandler;
+import playground.santiago.analysis.eventHandlers.SantiagoLinkVolumeHandler;
+import playground.santiago.analysis.eventHandlers.SantiagoModeTripTravelTimeHandler;
+import playground.santiago.analysis.eventHandlers.SantiagoModeTripTravelDistanceHandler;
 
 /** 
  * 
- * Class to write ALL THE NECESSARY ANALYSIS FILES
+ * Class to write ALL THE NECESSARY ANALYSIS FILES. Currently: Modal split, counts comparison and link volumes per hour from an events file.
  * 
  */
 
 public class SantiagoAnalysis {
-	//Fields related to the scenario and its steps - they must be changed depending on the step.
-	private static final String CASE_NAME = "baseCase10pct";
-	private static final String STEP_NAME = "Step1xB";
-	private static final int FIRST_IT = 600;
-	private static final int LAST_IT = 800;
+	//Fields related to the scenario and its steps - they must be changed depending on the step . a comment
+	private static final String CASE_NAME = "testingCase";
+	private static final String STEP_NAME = "StepTesting";
+	private static final int FIRST_IT = 0;
+	private static final int LAST_IT = 0;
 	private static final int LENGTH = LAST_IT - FIRST_IT;
 	
 	//Fields related to the outputDir - Do not change these.
@@ -42,37 +54,39 @@ public class SantiagoAnalysis {
 
 	//Fields related to the inputFiles	
 	private static final String NET_FILE = OUTPUT_FOLDER + "output_network.xml.gz";
+	private static final String CONFIG_FILE = OUTPUT_FOLDER + "output_config.xml.gz";
 	private static final String COUNTS_FILE = OUTPUT_FOLDER + "output_counts.xml.gz";
-	
-
-//	private static final String PLANS = IT_FOLDER + IT_NUMBER +".plans.xml.gz";
-//	private static final String CONFIG_FILE = RUN_DIR + "config_" + CASE_NAME + "_sim7.xml";
-//	private static final String CONFIG_FILE = RUN_DIR + "configStepP1_1.xml";
-	
-	
-	private static final UserGroup USER_GROUP = null;
 	
 	
 	public static void main (String[]arg){
 		
 		int it = 0;	
-		
-		while (it<=LENGTH){
 		int itAux = FIRST_IT;
+		
+	//	String linkLengthsOutputDir = ANALYSIS_DIR + "networkLinks.txt";		
+	//	writeLinkLenghts(NET_FILE, linkLengthsOutputDir);
+				
+		while (it<=LENGTH){
+			
 		String itFolder = OUTPUT_FOLDER + "ITERS/it." + it + "/";		
 		String events = itFolder + it +".events.xml.gz";	
-		String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt";
-		String countsCompareOutputDir = ANALYSIS_DIR + itAux + ".countscompare.txt";		
-		writeModalShare(events, modalShareOutputDir);
-		writeCountsCompare(events, countsCompareOutputDir);
+		String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
+	//	String countsCompareOutputDir = ANALYSIS_DIR + itAux + ".countscompare.txt"; //TODO: BE AWARE!!
+	//	String flowPatternOutputDir = ANALYSIS_DIR + itAux + ".link2Vol.txt";		 //TODO: BE AWARE!!
+	//	String enterTravelTimesOutputDir = ANALYSIS_DIR + itAux + ".modeTravelTimes.txt";	//TODO: BE AWARE!!
+	//	String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
+		
+		writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
+	//	writeCountsCompare(events, countsCompareOutputDir);							 //TODO: BE AWARE!!
+	//	processEventsAndWriteFileForLinkVolumes(events,flowPatternOutputDir);		 //TODO: BE AWARE!!
+	//	writeFileForTravelTimesByMode(events,enterTravelTimesOutputDir);		 //TODO: BE AWARE!!
+	//	writeFileForTravelDistanceByMode(events,travelDistanceOutputDir);		 //TODO: BE AWARE!!
+		
 		it = it + 50;
+		itAux = itAux + 50;
+		
 		}
 
-
-
-
-//		writeModeDistanceDistribution();
-//		writeModalTravelTimes();
 
 	}
 	
@@ -80,8 +94,26 @@ public class SantiagoAnalysis {
 		file.mkdirs();	
 	}
 	
+	private static void writeLinkLenghts(String networkFile, String outFile){
+		Network network = readNetwork( networkFile );
+		Link[] links = NetworkUtils.getSortedLinks(network);
+		
+		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+			writer.write("linkId\tLength\tCapacity\n");
+			
+			for (Link link: links){										
+				writer.write(link.getId() +"\t"+  link.getLength() + "\t" + link.getCapacity() + "\n");
+			}
+			writer.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Data is not written. Reason "+e );
+		}		
 	
-	public static void writeModalShare(String eventsFile , String outputFile){
+	}
+	
+	
+	
+	private static void writeModalShare(String eventsFile , String outputFile){
 			
 		File analysisDir = new File(ANALYSIS_DIR);
 		if(!analysisDir.exists()) createDir(analysisDir);			
@@ -94,6 +126,9 @@ public class SantiagoAnalysis {
 	}
 	
 	private static void writeCountsCompare (String eventsFile, String outputFile){
+		
+		File analysisDir = new File(ANALYSIS_DIR);
+		if(!analysisDir.exists()) createDir(analysisDir);	
 		Network network = readNetwork( NET_FILE );
 		Counts counts = readCounts( COUNTS_FILE );
 		VolumesAnalyzer volumes = readVolumes( network , eventsFile );
@@ -146,26 +181,102 @@ public class SantiagoAnalysis {
 		new MatsimNetworkReader(sc.getNetwork()).readFile( netFile );
 		return sc.getNetwork();
 	}
+	
+	/*Trying extracts of Amit's codes to write the link volumes*/
+	private static void processEventsAndWriteFileForLinkVolumes(String eventsFile, String outFile){
+		
+		File analysisDir = new File(ANALYSIS_DIR);
+		if(!analysisDir.exists()) createDir(analysisDir);	
+		
+		/*running*/		
+		SantiagoLinkVolumeHandler handler = new SantiagoLinkVolumeHandler();
+		EventsManager events = EventsUtils.createEventsManager();
+		events.addHandler(handler);
+		MatsimEventsReader reader = new MatsimEventsReader(events);
+		reader.readFile(eventsFile);
+		Map<Id<Link>, Map<Integer, Double>> linksVolumes = handler.getLinksVolumes();
+		
+		/*writing*/
+		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+			writer.write("linkId\tTimeSlot\tVolume\n");
+			for(Id<Link> l : linksVolumes.keySet()){				
+				for (int timeSlot: linksVolumes.get(l).keySet()){
+					writer.write(l+"\t"+  timeSlot + "\t" + linksVolumes.get(l).get(timeSlot) + "\n" );
+				}
+			}
+			writer.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Data is not written. Reason "+e );
+		}
+	}
+	
+	
+	private static void writeFileForTravelTimesByMode(String eventsFile, String outFile){
+		File analysisDir = new File(ANALYSIS_DIR);
+		if(!analysisDir.exists()) createDir(analysisDir);
+		
+		/*running Amit's handler*/
+		
+		SantiagoModeTripTravelTimeHandler handler = new SantiagoModeTripTravelTimeHandler();
+		EventsManager events = EventsUtils.createEventsManager();
+		events.addHandler(handler);
+		MatsimEventsReader reader = new MatsimEventsReader(events);
+		reader.readFile(eventsFile);
+		
+		
+		SortedMap<String, Map<Id<Person>, List<String>>> travelTimesByMode = handler.getLegModePesonIdTripDepartureTravelTimes ();
+		
+		/*writing*/		
+		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+			writer.write("mode\tpersonId\tstartTime-travelTime\n");
+			
+			for(String mode : travelTimesByMode.keySet()){				
+				for (Id<Person> person: travelTimesByMode.get(mode).keySet()){
+					for (String time: travelTimesByMode.get(mode).get(person)){						
+						writer.write(mode+"\t"+  person + "\t" + time + "\n");
+					}
+					
+				}
+			}
+			writer.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Data is not written. Reason "+e );
+		}
+	}
+	
+	private static void writeFileForTravelDistanceByMode(String eventsFile, String outFile){
+		
+		File analysisDir = new File(ANALYSIS_DIR);
+		if(!analysisDir.exists()) createDir(analysisDir);
+		Config config = ConfigUtils.loadConfig(CONFIG_FILE);
+		Network network = readNetwork( NET_FILE );
 
-
+		/*running Amit's handler*/
+		
+		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network);
+		EventsManager events = EventsUtils.createEventsManager();
+		events.addHandler(handler);
+		MatsimEventsReader reader = new MatsimEventsReader(events);
+		reader.readFile(eventsFile);
+		
+		
+		SortedMap<String, Map<Id<Person>, List<String>>> travelDistanceByMode = handler.getMode2PersonId2TravelDistances();
+		
+		/*writing*/		
+		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+			writer.write("mode\tpersonId\tdistance\n");
+			
+			for(String mode : travelDistanceByMode.keySet()){				
+				for (Id<Person> person: travelDistanceByMode.get(mode).keySet()){						
+						writer.write(mode+"\t"+  person + "\t" + travelDistanceByMode.get(mode).get(person) + "\n");					
+					
+				}
+			}
+			writer.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Data is not written. Reason "+e );
+		}
+	}
 	
 	
-//	public static void writeModalTravelTimes(){
-//		
-//			String eventsFile = EVENTS;			
-//			ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(eventsFile);		
-//			mtta.run();
-//			String outputFile = ANALYSIS_DIR +"modalTravelTimes_It"+ IT_NUMBER  + ".txt";
-//			mtta.writeResults(outputFile);
-//		}
-//	
-//	public static void writeModeDistanceDistribution(){
-//	RunLegModeDistanceDistribution rlmdd = new RunLegModeDistanceDistribution(OUTPUT_FOLDER, CONFIG_FILE, IT_NUMBER, USER_GROUP);	
-//	rlmdd.run();
-//	}
-	
-	
-
-	
-
 }

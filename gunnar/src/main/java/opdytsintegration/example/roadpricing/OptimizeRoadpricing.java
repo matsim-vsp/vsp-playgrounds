@@ -9,6 +9,9 @@ import java.util.Set;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.opdyts.MATSimSimulator2;
+import org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -29,9 +32,6 @@ import floetteroed.opdyts.searchalgorithms.SelfTuner;
 import floetteroed.utilities.Units;
 import floetteroed.utilities.config.ConfigReader;
 import floetteroed.utilities.math.MathHelpers;
-import opdytsintegration.MATSimSimulator2;
-import opdytsintegration.car.DifferentiatedLinkOccupancyAnalyzer;
-import opdytsintegration.utils.TimeDiscretization;
 
 /**
  * 
@@ -112,6 +112,9 @@ class OptimizeRoadpricing {
 		final int maxRandomSearchIterations = Integer.parseInt(myConfig.get("opdyts", "maxiterations"));
 		final int maxRandomSearchTransitions = Integer.parseInt(myConfig.get("opdyts", "maxtransitions"));
 
+		//NEW: amit
+		final int warmupIterations = 1; //Integer.parseInt(myConfig.get("opdyts", "warmupIterations®"));
+
 		/*
 		 * Create the MATSim scenario.
 		 */
@@ -167,8 +170,8 @@ class OptimizeRoadpricing {
 		relevantModes.add("car");
 
 		final MATSimSimulator2<TollLevels> matsimSimulator = new MATSimSimulator2<>(
-				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario,
-				timeDiscretization);
+				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario
+        );
 		matsimSimulator.addSimulationStateAnalyzer(
 				new DifferentiatedLinkOccupancyAnalyzer.Provider(timeDiscretization, relevantModes, relevantLinkIds));
 
@@ -181,7 +184,7 @@ class OptimizeRoadpricing {
 		final RandomSearch<TollLevels> randomSearch = new RandomSearch<>(matsimSimulator, decisionVariableRandomizer,
 				initialTollLevels, convergenceCriterion, maxRandomSearchIterations, maxRandomSearchTransitions,
 				randomSearchPopulationSize, MatsimRandom.getRandom(), parallelSampling, objectiveFunction,
-				includeCurrentBest);
+				includeCurrentBest, 1, false);
 		randomSearch.setLogFileName(originalOutputDirectory + "opdyts.log");
 		randomSearch.setConvergenceTrackingFileName(originalOutputDirectory + "opdyts.con");
 		randomSearch.setOuterIterationLogFileName(originalOutputDirectory + "opdyts.opt");

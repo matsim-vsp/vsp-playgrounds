@@ -1,21 +1,19 @@
 package besttimeresponseintegration;
 
 import java.util.Map;
-
+import besttimeresponse.TimeAllocator;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.replanning.PlanStrategyModule;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.replanning.ReplanningContext;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.facilities.Facility;
-
-import besttimeresponse.TimeAllocator;
-import opdytsintegration.utils.TimeDiscretization;
 
 /**
  * 
@@ -45,8 +43,8 @@ class BestTimeResponseStrategyModule implements PlanStrategyModule {
 	// -------------------- CONSTRUCTION --------------------
 
 	BestTimeResponseStrategyModule(final Scenario scenario, final ScoringParametersForPerson scoringParams,
-			final TimeDiscretization timeDiscretization, final TripRouter tripRouter,
-			final Map<String, TravelTime> mode2travelTime, final int maxTrials, final int maxFailures) {
+								   final TimeDiscretization timeDiscretization, final TripRouter tripRouter,
+								   final Map<String, TravelTime> mode2travelTime, final int maxTrials, final int maxFailures) {
 		this.scenario = scenario;
 		this.scoringParams = scoringParams;
 		this.timeDiscretization = timeDiscretization;

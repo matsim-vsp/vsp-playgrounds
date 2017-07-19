@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import floetteroed.opdyts.DecisionVariableRandomizer;
-import opdytsintegration.utils.OpdytsConfigGroup;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 
 public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<ModeChoiceDecisionVariable> {
@@ -67,8 +67,6 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         this.opdytsScenario = opdytsScenario;
         this.considerdModes = considerdModes;
         this.ascRandomizerStyle = ascRandomizerStyle;
-
-        opdytsConfigGroup.setNumberOfDecisionVariableTrials(0); // will update once decision variables are created
     }
 
     public ModeChoiceRandomizer(final Scenario scenario, final RandomizedUtilityParametersChoser randomizedUtilityParametersChoser,
@@ -122,9 +120,6 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         for (ModeChoiceDecisionVariable var : result) {
             log.warn(var.toString());
         }
-
-        log.warn("updating the numer of decision variables trials");
-        opdytsConfigGroup.setNumberOfDecisionVariableTrials(opdytsConfigGroup.getNumberOfDecisionVariableTrials()+result.size());
         return result;
     }
 

@@ -1,13 +1,13 @@
 package besttimeresponseintegration;
 
 import java.util.Map;
-
 import javax.inject.Inject;
 import javax.inject.Provider;
-
+import matsimintegration.TimeDiscretizationInjection;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.groups.GlobalConfigGroup;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl;
@@ -17,9 +17,6 @@ import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.facilities.ActivityFacilities;
-
-import matsimintegration.TimeDiscretizationInjection;
-import opdytsintegration.utils.TimeDiscretization;
 
 /**
  * 

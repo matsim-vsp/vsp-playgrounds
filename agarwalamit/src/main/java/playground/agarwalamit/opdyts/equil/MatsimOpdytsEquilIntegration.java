@@ -29,14 +29,14 @@ import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
 import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
 import floetteroed.opdyts.searchalgorithms.RandomSearch;
 import floetteroed.opdyts.searchalgorithms.SelfTuner;
-import opdytsintegration.MATSimSimulator2;
-import opdytsintegration.MATSimStateFactoryImpl;
-import opdytsintegration.utils.TimeDiscretization;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
+import org.matsim.contrib.opdyts.MATSimSimulator2;
+import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -181,7 +181,7 @@ public class MatsimOpdytsEquilIntegration {
 
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(),
-				scenario, new TimeDiscretization(startTime, binSize, binCount));
+				scenario);
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
@@ -208,6 +208,8 @@ public class MatsimOpdytsEquilIntegration {
 		boolean interpolate = true;
 		boolean includeCurrentBest = false;
 
+		int warmupIterations = 1;
+
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
 				RandomizedUtilityParametersChoser.ONLY_ASC, EQUIL, null, modes2consider);
@@ -231,7 +233,8 @@ public class MatsimOpdytsEquilIntegration {
 				MatsimRandom.getRandom(),
 				interpolate,
 				objectiveFunction,
-				includeCurrentBest
+				includeCurrentBest,
+				warmupIterations
 				);
 
 		// probably, an object which decide about the inertia

@@ -1,10 +1,9 @@
 package opdytsintegration.example.roadpricing;
 
-import org.matsim.api.core.v01.population.Population;
-
 import floetteroed.utilities.math.Vector;
-import opdytsintegration.MATSimState;
-import opdytsintegration.utils.TimeDiscretization;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.opdyts.MATSimState;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 
 /**
  * 

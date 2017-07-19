@@ -7,11 +7,11 @@ import java.util.Set;
 import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
 import floetteroed.opdyts.searchalgorithms.RandomSearch;
 import floetteroed.opdyts.searchalgorithms.SelfTuner;
-import opdytsintegration.MATSimSimulator2;
-import opdytsintegration.MATSimStateFactoryImpl;
-import opdytsintegration.car.DifferentiatedLinkOccupancyAnalyzer;
-import opdytsintegration.utils.TimeDiscretization;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.opdyts.MATSimSimulator2;
+import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
@@ -116,7 +116,7 @@ class KNModeChoiceCalibMain {
 
 			final TimeDiscretization timeDiscretization = new TimeDiscretization(0, 3600, 24);
 			final MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>( new MATSimStateFactoryImpl<>(),
-					scenario, timeDiscretization); 
+					scenario);
 			simulator.addOverridingModule( overrides ) ;
 
 			//
@@ -130,6 +130,8 @@ class KNModeChoiceCalibMain {
 			int populationSize = 10 ;
 			boolean interpolate = true ;
 			boolean includeCurrentBest = false ;
+			int warmupIterations = 1;
+
 			final ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable( scenario.getConfig().planCalcScore(), scenario );
 			final FixedIterationNumberConvergenceCriterion convergenceCriterion ;
 			if ( testcase ) {
@@ -145,7 +147,7 @@ class KNModeChoiceCalibMain {
 					MatsimRandom.getRandom(),
 					interpolate,
 					new ModeChoiceObjectiveFunction(equil),
-					includeCurrentBest ) ;
+					includeCurrentBest, warmupIterations ) ;
 
 			randomSearch.setLogPath( outputDirectory );
 

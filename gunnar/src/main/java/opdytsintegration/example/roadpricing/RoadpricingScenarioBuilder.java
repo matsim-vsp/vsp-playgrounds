@@ -2,11 +2,10 @@ package opdytsintegration.example.roadpricing;
 
 import static floetteroed.utilities.math.MathHelpers.draw;
 import static org.matsim.core.gbl.MatsimRandom.getRandom;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+import floetteroed.utilities.Units;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -14,12 +13,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -32,8 +26,6 @@ import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
-
-import floetteroed.utilities.Units;
 
 /**
  * 

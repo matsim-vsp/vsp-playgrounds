@@ -29,12 +29,12 @@ import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
-import org.matsim.contrib.taxibus.algorithm.utils.TaxibusUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
+
 
 /**
  * @author jbischoff
@@ -118,7 +118,7 @@ public class SharedTaxiTripAnalyzer
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		if (event.getLegMode().equals(TaxibusUtils.TAXIBUS_MODE)) {
+		if (event.getLegMode().equals("taxi")) {
 			this.departureTime.put(event.getPersonId(), event.getTime());
 		}
 

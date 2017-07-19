@@ -1,7 +1,8 @@
 package cba.toynet2;
 
 import java.util.Random;
-
+import cba.resampling.ChoiceManager;
+import matsimintegration.TimeDiscretizationInjection;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -12,9 +13,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import cba.resampling.ChoiceManager;
-import matsimintegration.TimeDiscretizationInjection;
 
 /**
  * 

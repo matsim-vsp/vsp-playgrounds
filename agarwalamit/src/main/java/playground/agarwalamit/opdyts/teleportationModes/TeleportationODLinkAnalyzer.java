@@ -23,17 +23,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import floetteroed.utilities.math.Vector;
-import opdytsintegration.MATSimCountingStateAnalyzer;
-import opdytsintegration.SimulationStateAnalyzerProvider;
-import opdytsintegration.utils.TimeDiscretization;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.contrib.opdyts.MATSimCountingStateAnalyzer;
+import org.matsim.contrib.opdyts.SimulationStateAnalyzerProvider;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.events.handler.EventHandler;
 
 /**
- * Created by amit on 15.06.17. Adapted after {@link opdytsintegration.car.DifferentiatedLinkOccupancyAnalyzer}
+ * Created by amit on 15.06.17. Adapted after {@link org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer}
  */
 
+@Deprecated
 public class TeleportationODLinkAnalyzer implements PersonDepartureEventHandler {
 
     private final Map<String, MATSimCountingStateAnalyzer<Zone>> mode2stateAnalyzer;

@@ -1,9 +1,8 @@
 package cba.resampling;
 
+import floetteroed.utilities.math.BasicStatistics;
 import org.apache.commons.math3.distribution.GumbelDistribution;
 import org.apache.commons.math3.util.FastMath;
-
-import floetteroed.utilities.math.BasicStatistics;
 
 /**
  * Wrote my own instance of
