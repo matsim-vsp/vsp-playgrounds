@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.optAV.congestionAV;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;

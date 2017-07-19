@@ -35,10 +35,12 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	
 	private boolean accountForCongestion = false;
 	private boolean accountForNoise = false;
+	private boolean chargeOperatingCostsFromPassengers = true;
+	private boolean chargeSAVTollsFromPassengers = true;	
 	
-	private OptAVApproach optAVApproach = OptAVApproach.NoPricing;
+	private SAVTollingApproach optAVApproach = SAVTollingApproach.NoPricing;
 			
-	public enum OptAVApproach {
+	public enum SAVTollingApproach {
 		NoPricing, PrivateAndExternalCost, ExternalCost
 	}
 	
@@ -63,14 +65,34 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	@StringGetter( "optAVApproach" )
-	public OptAVApproach getOptAVApproach() {
+	public SAVTollingApproach getOptAVApproach() {
 		return optAVApproach;
 	}
 
 	@StringSetter( "optAVApproach" )
-	public void setOptAVApproach(OptAVApproach optAVApproach) {
+	public void setOptAVApproach(SAVTollingApproach optAVApproach) {
 		this.optAVApproach = optAVApproach;
 	}
 
+	@StringGetter( "chargeOperatingCostsFromPassengers" )
+	public boolean isChargeOperatingCostsFromPassengers() {
+		return chargeOperatingCostsFromPassengers;
+	}
+
+	@StringSetter( "chargeOperatingCostsFromPassengers" )
+	public void setChargeOperatingCostsFromPassengers(boolean chargeOperatingCostsFromPassengers) {
+		this.chargeOperatingCostsFromPassengers = chargeOperatingCostsFromPassengers;
+	}
+
+	@StringGetter( "chargeSAVTollsFromPassengers" )
+	public boolean isChargeSAVTollsFromPassengers() {
+		return chargeSAVTollsFromPassengers;
+	}
+
+	@StringSetter( "chargeSAVTollsFromPassengers" )
+	public void setChargeSAVTollsFromPassengers(boolean chargeSAVTollsFromPassengers) {
+		this.chargeSAVTollsFromPassengers = chargeSAVTollsFromPassengers;
+	}
+	
 }
 

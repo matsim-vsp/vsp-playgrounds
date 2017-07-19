@@ -17,16 +17,17 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.decongestion;
+package playground.ikaddoura.optAV.congestionAV;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.controler.AbstractModule;
 
+import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
+import playground.ikaddoura.decongestion.DecongestionControlerListener;
 import playground.ikaddoura.decongestion.data.DecongestionInfo;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 import playground.ikaddoura.decongestion.handler.IntervalBasedTolling;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTollingAll;
 import playground.ikaddoura.decongestion.handler.PersonVehicleTracker;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollSetting;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingBangBang;
@@ -34,20 +35,22 @@ import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingPID;
 import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingP_MCP;
 
 /**
+ * the
+ * 
 * @author ikaddoura
 */
 
-public class DecongestionModule extends AbstractModule {
+public class DecongestionModuleSAV extends AbstractModule {
 
 	private final DecongestionConfigGroup decongestionConfigGroup;
 	
-	public DecongestionModule(Scenario scenario) {
+	public DecongestionModuleSAV(Scenario scenario) {
 		this.decongestionConfigGroup = (DecongestionConfigGroup) scenario.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
 	}
 
 	@Override
 	public void install() {
-		
+				
 		if (decongestionConfigGroup.isEnableDecongestionPricing()) {
 			if (decongestionConfigGroup.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
 				this.bind(DecongestionTollingPID.class).asEagerSingleton();
@@ -74,8 +77,8 @@ public class DecongestionModule extends AbstractModule {
 		
 		this.bind(DecongestionInfo.class).asEagerSingleton();
 		
-		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingAll.class);						
-		this.addEventHandlerBinding().to(IntervalBasedTollingAll.class).asEagerSingleton();
+		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingSAV.class);
+		this.addEventHandlerBinding().to(IntervalBasedTollingSAV.class).asEagerSingleton();
 		
 		this.addEventHandlerBinding().to(DelayAnalysis.class).asEagerSingleton();
 		

@@ -161,6 +161,11 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			}
 			
 		} else {
+			
+			if (this.personId2currentTripNumber.get(event.getPersonId()) == null) {
+				throw new RuntimeException("No trip number for " + event.getPersonId() + " at time " + event.getTime());
+			}
+			
 			int tripNumber = this.personId2currentTripNumber.get(event.getPersonId());
 			
 			double paymentBefore = personId2tripNumber2payment.get(event.getPersonId()).get(tripNumber);

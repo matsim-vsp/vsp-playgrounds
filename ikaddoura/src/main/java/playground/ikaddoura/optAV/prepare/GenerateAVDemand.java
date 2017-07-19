@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.optAV.prepare;
 
 import java.util.List;
 import java.util.Random;
