@@ -36,7 +36,10 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	private boolean accountForCongestion = false;
 	private boolean accountForNoise = false;
 	private boolean chargeOperatingCostsFromPassengers = true;
-	private boolean chargeSAVTollsFromPassengers = true;	
+	private boolean chargeSAVTollsFromPassengers = true;
+	
+	private double carCostPerDay = 0.;
+	private double sAVCostPerDay = -10.;
 	
 	private SAVTollingApproach optAVApproach = SAVTollingApproach.NoPricing;
 			
@@ -92,6 +95,26 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter( "chargeSAVTollsFromPassengers" )
 	public void setChargeSAVTollsFromPassengers(boolean chargeSAVTollsFromPassengers) {
 		this.chargeSAVTollsFromPassengers = chargeSAVTollsFromPassengers;
+	}
+
+	@StringGetter( "sAVCostPerDay" )
+	public double getSAVCostPerDay() {
+		return sAVCostPerDay;
+	}
+
+	@StringSetter( "sAVCostPerDay" )
+	public void setSAVCostPerDay(double sAVCostPerDay) {
+		this.sAVCostPerDay = sAVCostPerDay;
+	}
+
+	@StringGetter( "carCostPerDay" )
+	public double getCarCostPerDay() {
+		return carCostPerDay;
+	}
+
+	@StringSetter( "carCostPerDay" )
+	public void setCarCostPerDay(double carCostPerDay) {
+		this.carCostPerDay = carCostPerDay;
 	}
 	
 }

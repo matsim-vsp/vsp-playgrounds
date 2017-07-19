@@ -61,7 +61,6 @@ public class PersonMoneyLinkHandler implements PersonLinkMoneyEventHandler {
 	@Override
 	public void handleEvent(PersonLinkMoneyEvent event) {
 		
-		
 		if (this.basicHandler.getTaxiDrivers().contains(event.getPersonId()) || this.basicHandler.getPtDrivers().contains(event.getPersonId())) {
 			if (warnCnt0 <= 5) {
 				log.warn("A person link money event is thrown for a public tranist driver or taxi driver: " + event.toString());

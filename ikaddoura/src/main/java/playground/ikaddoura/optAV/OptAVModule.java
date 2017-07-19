@@ -40,6 +40,7 @@ import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.ikaddoura.decongestion.DecongestionModule;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
+import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 import playground.ikaddoura.optAV.OptAVConfigGroup.SAVTollingApproach;
 import playground.ikaddoura.optAV.congestionAV.DecongestionModuleSAV;
 import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
@@ -178,17 +179,19 @@ public class OptAVModule extends AbstractModule {
         // #############################
         // travel disutility
         // #############################
+		
+		this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
                
 		if (optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.ExternalCost.toString())) {
 			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);     
         	
-    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory, new AVAgentFilter()));
+    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
         	
         } else if (optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.PrivateAndExternalCost.toString())) {
         	MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
 				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()));
        
-    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory, new AVAgentFilter()));
+    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
         	
         } else if (optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.NoPricing.toString())) {
         	RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 

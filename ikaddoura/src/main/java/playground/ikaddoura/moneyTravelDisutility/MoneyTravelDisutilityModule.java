@@ -21,6 +21,8 @@ package playground.ikaddoura.moneyTravelDisutility;
 
 import org.matsim.core.controler.AbstractModule;
 
+import com.google.inject.Inject;
+
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 
 /**
@@ -31,24 +33,30 @@ public class MoneyTravelDisutilityModule extends AbstractModule {
 	
 	private final String mode;
 	private final MoneyTimeDistanceTravelDisutilityFactory factory;
-	private final AgentFilter agentFilter;
+	
+	@Inject(optional = true)
+	private AgentFilter agentFilter;
+	
+	private final AgentFilter agentFilterToBind;
 	
 	public MoneyTravelDisutilityModule(String mode, MoneyTimeDistanceTravelDisutilityFactory factory, AgentFilter agentFilter) {
 		this.mode = mode;
 		this.factory = factory;
-		this.agentFilter = agentFilter;
+		this.agentFilterToBind = agentFilter;
 	}
 
 	public MoneyTravelDisutilityModule(String mode, MoneyTimeDistanceTravelDisutilityFactory factory) {
 		this.mode = mode;
 		this.factory = factory;
-		this.agentFilter = null;
+		this.agentFilterToBind = null;
 	}
 
 	@Override
 	public void install() {
 		
-		if (agentFilter != null) this.bind(AgentFilter.class).toInstance(agentFilter);
+		if (agentFilterToBind != null && agentFilter == null ) {
+			this.bind(AgentFilter.class).toInstance(agentFilterToBind);
+		}
 		
 		this.addTravelDisutilityFactoryBinding(mode).toInstance(factory);
 		

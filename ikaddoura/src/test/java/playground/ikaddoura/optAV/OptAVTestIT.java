@@ -302,8 +302,8 @@ public class OptAVTestIT {
 	}
 	
 	private void printResults1(LinkDemandEventHandler handler) {
-		System.out.println("long but uncongested: " + getLongUncongestedDemand(handler));
-		System.out.println("high external cost: " + (getNoiseSensitiveRouteDemand(handler)));
+		System.out.println("long but low external costs: " + getLongUncongestedDemand(handler));
+		System.out.println("short but high external costs: " + (getNoiseSensitiveRouteDemand(handler)));
 	}
 	
 	private int getNoiseSensitiveRouteDemand(LinkDemandEventHandler handler) {
