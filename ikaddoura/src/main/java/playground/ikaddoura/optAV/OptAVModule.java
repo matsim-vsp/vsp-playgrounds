@@ -42,7 +42,6 @@ import playground.ikaddoura.decongestion.DecongestionModule;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.optAV.OptAVConfigGroup.SAVTollingApproach;
-import playground.ikaddoura.optAV.congestionAV.AVAgentFilter;
 import playground.ikaddoura.optAV.congestionAV.DecongestionModuleSAV;
 import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 
