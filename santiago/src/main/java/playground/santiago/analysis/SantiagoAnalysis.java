@@ -13,6 +13,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -20,6 +21,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.counts.Counts;
@@ -54,7 +56,7 @@ public class SantiagoAnalysis {
 
 	//Fields related to the inputFiles	
 	private static final String NET_FILE = OUTPUT_FOLDER + "output_network.xml.gz";
-	private static final String CONFIG_FILE = OUTPUT_FOLDER + "output_config.xml.gz";
+	private static final String CONFIG_FILE = OUTPUT_FOLDER + "output_config.xml"; //TODO: BE AWARE OF THE .GZ OF THE CONFIG.
 	private static final String COUNTS_FILE = OUTPUT_FOLDER + "output_counts.xml.gz";
 	
 	
@@ -69,18 +71,19 @@ public class SantiagoAnalysis {
 		while (it<=LENGTH){
 			
 		String itFolder = OUTPUT_FOLDER + "ITERS/it." + it + "/";		
-		String events = itFolder + it +".events.xml.gz";	
-		String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
+		String events = itFolder + it +".events.xml.gz";
+		String plans = itFolder + it + ".plans.xml.gz";
+	//	String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
 	//	String countsCompareOutputDir = ANALYSIS_DIR + itAux + ".countscompare.txt"; //TODO: BE AWARE!!
 	//	String flowPatternOutputDir = ANALYSIS_DIR + itAux + ".link2Vol.txt";		 //TODO: BE AWARE!!
 	//	String enterTravelTimesOutputDir = ANALYSIS_DIR + itAux + ".modeTravelTimes.txt";	//TODO: BE AWARE!!
-	//	String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
+		String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
 		
-		writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
+	//	writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
 	//	writeCountsCompare(events, countsCompareOutputDir);							 //TODO: BE AWARE!!
 	//	processEventsAndWriteFileForLinkVolumes(events,flowPatternOutputDir);		 //TODO: BE AWARE!!
 	//	writeFileForTravelTimesByMode(events,enterTravelTimesOutputDir);		 //TODO: BE AWARE!!
-	//	writeFileForTravelDistanceByMode(events,travelDistanceOutputDir);		 //TODO: BE AWARE!!
+		writeFileForTravelDistanceByMode(events,plans, travelDistanceOutputDir);		 //TODO: BE AWARE!!
 		
 		it = it + 50;
 		itAux = itAux + 50;
@@ -244,34 +247,54 @@ public class SantiagoAnalysis {
 		}
 	}
 	
-	private static void writeFileForTravelDistanceByMode(String eventsFile, String outFile){
+	private static void writeFileForTravelDistanceByMode(String eventsFile, String plansFile, String outFile){
 		
 		File analysisDir = new File(ANALYSIS_DIR);
 		if(!analysisDir.exists()) createDir(analysisDir);
 		Config config = ConfigUtils.loadConfig(CONFIG_FILE);
 		Network network = readNetwork( NET_FILE );
+		
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		PopulationReader popReader = new PopulationReader(scenario);
+		popReader.readFile(plansFile);
+		Population population =  scenario.getPopulation();
 
 		/*running Amit's handler*/
 		
-		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network);
+		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network, population);
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(handler);
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
 		
 		
-		SortedMap<String, Map<Id<Person>, List<String>>> travelDistanceByMode = handler.getMode2PersonId2TravelDistances();
+		SortedMap<String, Map<Id<Person>, List<String>>> privateTravelDistanceByMode = handler.getMode2PersonId2TravelDistances();
+		SortedMap<String, Map<Id<Person>,List<String>>> PtTravelDistanceByMode = handler.getPT2PersonId2TravelDistances();
 		
 		/*writing*/		
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-			writer.write("mode\tpersonId\tdistance\n");
+			writer.write("mode\tpersonId\tstartTime-distance\n");
 			
-			for(String mode : travelDistanceByMode.keySet()){				
-				for (Id<Person> person: travelDistanceByMode.get(mode).keySet()){						
-						writer.write(mode+"\t"+  person + "\t" + travelDistanceByMode.get(mode).get(person) + "\n");					
+			for(String mode : privateTravelDistanceByMode.keySet()){				
+				for (Id<Person> person: privateTravelDistanceByMode.get(mode).keySet()){
+					for (String distances: privateTravelDistanceByMode.get(mode).get(person))
+						writer.write(mode+"\t"+  person + "\t" + distances + "\n");					
 					
 				}
 			}
+			for(String mode : PtTravelDistanceByMode.keySet()){				
+				for (Id<Person> person: PtTravelDistanceByMode.get(mode).keySet()){
+					for (String distances: PtTravelDistanceByMode.get(mode).get(person))
+						writer.write(mode+"\t"+  person + "\t" + distances + "\n");					
+					
+				}
+			}
+			
+			
+			
+			
+			
+			
 			writer.close();
 		} catch (Exception e) {
 			throw new RuntimeException("Data is not written. Reason "+e );
