@@ -38,8 +38,11 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	private boolean chargeOperatingCostsFromPassengers = true;
 	private boolean chargeSAVTollsFromPassengers = true;
 	
-	private double sAVCapitalCostDifferencePerDay = -10.; // per user! (negative difference means a SAV is cheaper than a car)
+	private boolean tagInitialCarUsers = true;
 	
+	private double fixCostsSAVinsteadOfCar = -10.; // negative difference means SAV fix costs (per user) are lower than for a private car)
+	private double fixCostSAV = 5.;
+
 	private SAVTollingApproach optAVApproach = SAVTollingApproach.NoPricing;
 			
 	public enum SAVTollingApproach {
@@ -96,15 +99,37 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 		this.chargeSAVTollsFromPassengers = chargeSAVTollsFromPassengers;
 	}
 
-	@StringGetter( "sAVCapitalCostDifferencePerDay" )
-	public double getSAVCapitalCostDifferencePerDay() {
-		return sAVCapitalCostDifferencePerDay;
+	@StringGetter( "tagInitialCarUsers" )
+	public boolean isTagInitialCarUsers() {
+		return tagInitialCarUsers;
 	}
 
-	@StringSetter( "sAVCapitalCostDifferencePerDay" )
-	public void setSAVCapitalCostDifferencePerDay(double sAVCostPerDay) {
-		this.sAVCapitalCostDifferencePerDay = sAVCostPerDay;
+	@StringSetter( "tagInitialCarUsers" )
+	public void setTagInitialCarUsers(boolean tagInitialCarUsers) {
+		this.tagInitialCarUsers = tagInitialCarUsers;
 	}
+
+	@StringGetter( "fixCostsSAVinsteadOfCar" )
+	public double getFixCostsSAVinsteadOfCar() {
+		return fixCostsSAVinsteadOfCar;
+	}
+
+	@StringSetter( "fixCostsSAVinsteadOfCar" )
+	public void setFixCostsSAVinsteadOfCar(double fixCostsSAVinsteadOfCar) {
+		this.fixCostsSAVinsteadOfCar = fixCostsSAVinsteadOfCar;
+	}
+
+	@StringGetter( "fixCostSAV" )
+	public double getFixCostSAV() {
+		return fixCostSAV;
+	}
+
+	@StringSetter( "fixCostSAV" )
+	public void setFixCostSAV(double fixCostSAV) {
+		this.fixCostSAV = fixCostSAV;
+	}
+	
+	
 	
 }
 

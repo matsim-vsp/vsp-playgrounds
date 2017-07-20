@@ -49,8 +49,6 @@ public class SAVPassengerTracker implements ActivityEndEventHandler, PersonEnter
 
 	@Override
 	public void reset(int iteration) {
-		this.taxiDrivers.clear();
-		this.taxiVehicles.clear();
 		this.vehicle2passenger.clear();
 		this.vehicle2lastPassenger.clear();
 	}
@@ -69,7 +67,6 @@ public class SAVPassengerTracker implements ActivityEndEventHandler, PersonEnter
 		if (taxiDrivers.contains(event.getPersonId())) {
 			
 			// taxi driver
-			
 			taxiVehicles.add(event.getVehicleId());
 			
 		} else {
@@ -108,7 +105,7 @@ public class SAVPassengerTracker implements ActivityEndEventHandler, PersonEnter
 				if (vehicle2passenger.get(event.getVehicleId()) != null) {
 					vehicle2passenger.remove(event.getVehicleId());
 				} else {
-					throw new RuntimeException("The passenger should have entered the vehicle before. Aborting...");
+					throw new RuntimeException("The passenger " + event.getPersonId() + " should have entered the taxi vehicle " + event.getVehicleId() + " before time = " + event.getTime() + ". Aborting...");
 				}
 			}	
 		}

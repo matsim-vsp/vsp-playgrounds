@@ -684,7 +684,7 @@ public class PersonTripNoiseAnalysis {
 			bw.write("air pollution toll payments (sample size) (payed by private car users) [monetary units];" + airPollutionPayments);
 			bw.newLine();
 			
-			double taxiCapitalCosts = taxiVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getSAVCapitalCostDifferencePerDay();
+			double taxiCapitalCosts = taxiVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getFixCostSAV();
 			bw.write("taxi capital costs (sample size) (should be negative = revenue) [monetary units];" + taxiCapitalCosts);
 			bw.newLine();
 			

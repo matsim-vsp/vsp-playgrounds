@@ -21,6 +21,12 @@ package playground.ikaddoura.optAV;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -120,18 +126,45 @@ public class OptAVModule extends AbstractModule {
 					+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs.");
 		}
 		
-		if (ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getSAVCapitalCostDifferencePerDay() > 0.) {
-			throw new RuntimeException("SAV capital costs (per user) are higher than car capital costs (per user). Aborting... "); 
+		OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), OptAVConfigGroup.class);
+
+		if (optAVParams.getFixCostsSAVinsteadOfCar() > optAVParams.getFixCostSAV()) {
+			throw new RuntimeException("SAV capital costs (per user) should be lower than car capital costs (per user). Aborting... "); 
 		}
+		
+		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
+		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
+		
+		// #############################
+		// tag car owners
+		// #############################
+		
+		if (optAVParams.isTagInitialCarUsers()) {
+			for (Person person : this.scenario.getPopulation().getPersons().values()) {
+				Plan selectedPlan = person.getSelectedPlan();
+				if (selectedPlan == null) {
+					throw new RuntimeException("No selected plan. Aborting...");
+				}
+				
+				boolean personHasCarTrip = false;
+				
+				for (PlanElement pE : selectedPlan.getPlanElements()) {
+					
+					if (pE instanceof Leg) {
+						Leg leg = (Leg) pE;
+						if (leg.getMode().equals(TransportMode.car)) {
+							personHasCarTrip = true;
+						}	
+					}	
+				}
+				person.getAttributes().putAttribute("CarOwnerInBaseCase", personHasCarTrip);					
+			}	
+		}		
 		
 		// #############################
 		// pricing
 		// #############################
 		
-		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
-		OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), OptAVConfigGroup.class);
-		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
-
 		if (optAVParams.isChargeSAVTollsFromPassengers()) {
 			this.bind(SAVPassengerTracker.class).asEagerSingleton();
 			addEventHandlerBinding().to(SAVPassengerTracker.class);
@@ -206,7 +239,7 @@ public class OptAVModule extends AbstractModule {
         // scoring
         // #############################
 		
-		addEventHandlerBinding().to(SAVCapitalCostHandler.class).asEagerSingleton();
+		addEventHandlerBinding().to(SAVFixCostHandler.class).asEagerSingleton();
 		
 		// #############################
 		// welfare analysis
