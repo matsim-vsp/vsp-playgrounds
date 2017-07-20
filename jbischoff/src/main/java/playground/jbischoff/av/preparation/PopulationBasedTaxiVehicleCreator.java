@@ -66,10 +66,10 @@ public class PopulationBasedTaxiVehicleCreator
 //	
     
 //	private String networkFile = "../../../shared-svn/studies/jbischoff/multimodal/berlin/input/10pct/network.final10pct_car.xml.gz";
-	private String networkFile = "C:/Users/Joschka/Documents/public-svn/matsim/scenarios/countries/de/berlin/car-traffic-only-10pct-2016-04-21/network.xml.gz";
-	private String shapeFile = "../../../shared-svn/projects/audi_av/shp/Planungsraum.shp";
-	private String vehiclesFilePrefix = "../../../shared-svn/studies/jbischoff/berlin-internalisation/vehicles/v";
-	private String populationData = "../../../shared-svn/projects/audi_av/shp/bevoelkerung.txt";
+	private String networkFile = "/Users/ihab/Desktop/ils4/kaddoura/optAV/input/be_251.output_network.xml.gz";
+	private String shapeFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/Planungsraum.shp";
+	private String vehiclesFilePrefix = "/Users/ihab/Documents/workspace/shared-svn/studies/jbischoff/berlin-internalisation/vehicles_be_251/v";
+	private String populationData = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/bevoelkerung.txt";
 	
 	
 	private Scenario scenario ;

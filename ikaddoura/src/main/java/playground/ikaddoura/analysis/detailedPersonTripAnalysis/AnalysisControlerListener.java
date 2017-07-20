@@ -48,6 +48,7 @@ import com.google.inject.Inject;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
+import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 
 /**
@@ -77,6 +78,9 @@ public class AnalysisControlerListener implements IterationEndsListener {
 	
 	@Inject
 	private PersonMoneyLinkHandler moneyHandler;
+	
+	@Inject
+	private DelayAnalysis delayAnalysis;
 	
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
@@ -110,11 +114,11 @@ public class AnalysisControlerListener implements IterationEndsListener {
 			log.info("Print person information... Done.");
 		}
 
-		analysis.printAggregatedResults(outputPathAnalysisIteration, TaxiModule.TAXI_MODE, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
-		analysis.printAggregatedResults(outputPathAnalysisIteration, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
-		analysis.printAggregatedResults(outputPathAnalysisIteration, null, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
+		analysis.printAggregatedResults(outputPathAnalysisIteration, TaxiModule.TAXI_MODE, personId2userBenefit, basicHandler, noiseHandler);
+		analysis.printAggregatedResults(outputPathAnalysisIteration, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
+		analysis.printAggregatedResults(outputPathAnalysisIteration, null, personId2userBenefit, basicHandler, noiseHandler);
 		
-		analysis.printAggregatedResults(outputPathAnalysisIteration, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
+		analysis.printAggregatedResults(outputPathAnalysisIteration, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis);
 		
 		// all iterations
 				

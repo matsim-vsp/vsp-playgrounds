@@ -90,7 +90,6 @@ public class OptAVModeChoiceTestIT {
 		Controler controler1 = new Controler(scenario1);
 		
 		controler1.addOverridingModule(new OptAVModule(scenario1));		
-		controler1.addOverridingModule(new PersonTripAnalysisModule());
 		
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
 		
@@ -129,7 +128,6 @@ public class OptAVModeChoiceTestIT {
 		Controler controler2 = new Controler(scenario2);
 		
 		controler2.addOverridingModule(new OptAVModule(scenario2));		        
-		controler2.addOverridingModule(new PersonTripAnalysisModule());
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
 

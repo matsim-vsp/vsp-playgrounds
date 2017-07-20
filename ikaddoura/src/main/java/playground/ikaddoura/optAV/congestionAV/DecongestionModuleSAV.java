@@ -77,10 +77,11 @@ public class DecongestionModuleSAV extends AbstractModule {
 		
 		this.bind(DecongestionInfo.class).asEagerSingleton();
 		
-		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingSAV.class);
-		this.addEventHandlerBinding().to(IntervalBasedTollingSAV.class).asEagerSingleton();
+		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingSAV.class).asEagerSingleton();
+		this.addEventHandlerBinding().to(IntervalBasedTollingSAV.class);
 		
-		this.addEventHandlerBinding().to(DelayAnalysis.class).asEagerSingleton();
+		this.bind(DelayAnalysis.class).asEagerSingleton();
+		this.addEventHandlerBinding().to(DelayAnalysis.class);
 		
 		this.addEventHandlerBinding().to(PersonVehicleTracker.class).asEagerSingleton();
 		

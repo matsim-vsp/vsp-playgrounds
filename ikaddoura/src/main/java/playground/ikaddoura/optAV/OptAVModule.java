@@ -22,7 +22,6 @@ package playground.ikaddoura.optAV;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
@@ -41,9 +40,13 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
+import playground.ikaddoura.analysis.detailedPersonTripAnalysis.AnalysisControlerListener;
+import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
+import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
+import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.ikaddoura.decongestion.DecongestionModule;
+import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
@@ -53,8 +56,8 @@ import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 
 /**
  * Idea:
- * (1) Adjust the SAV's (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer')
- * (2) Add the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'taxi'), i.e. waiting for or sitting inside the SAV.
+ * (1) Adjusts the SAV's (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer')
+ * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'taxi'), i.e. waiting for or sitting inside the SAV.
  * 
  * Marginal operating costs are charged from the passengers via the 'TaxiFareHandler'
  * Marginal external costs are charged from the passengers via the 'SAVTolls2FareHandler'
@@ -242,11 +245,25 @@ public class OptAVModule extends AbstractModule {
 		addEventHandlerBinding().to(SAVFixCostHandler.class).asEagerSingleton();
 		
 		// #############################
-		// welfare analysis
+		// analysis
 		// #############################
 
-		install(new PersonTripAnalysisModule());
+		this.bind(BasicPersonTripAnalysisHandler.class).asEagerSingleton();
+		this.addEventHandlerBinding().to(BasicPersonTripAnalysisHandler.class);
+
+		this.bind(NoiseAnalysisHandler.class).asEagerSingleton();
+		this.addEventHandlerBinding().to(NoiseAnalysisHandler.class);
+
+		this.bind(PersonMoneyLinkHandler.class).asEagerSingleton();
+		this.addEventHandlerBinding().to(PersonMoneyLinkHandler.class);
 		
+		if (!optAVParams.isAccountForCongestion()) {
+			this.bind(DelayAnalysis.class).asEagerSingleton();
+			this.addEventHandlerBinding().to(DelayAnalysis.class);
+		}
+		
+		this.addControlerListenerBinding().to(AnalysisControlerListener.class);
+				
 	}
 
 }

@@ -43,6 +43,7 @@ import org.matsim.vehicles.Vehicle;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
+import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 import playground.ikaddoura.optAV.OptAVConfigGroup;
 
 /**
@@ -352,8 +353,7 @@ public class PersonTripNoiseAnalysis {
 			String mode,
 			Map<Id<Person>, Double> personId2userBenefit,
 			BasicPersonTripAnalysisHandler basicHandler,
-			NoiseAnalysisHandler noiseHandler,
-			PersonMoneyLinkHandler moneyHandler) {
+			NoiseAnalysisHandler noiseHandler) {
 		
 		boolean ignoreModes = false;
 		if (mode == null) {
@@ -460,7 +460,8 @@ public class PersonTripNoiseAnalysis {
 			Map<Id<Person>, Double> personId2userBenefit,
 			BasicPersonTripAnalysisHandler basicHandler,
 			NoiseAnalysisHandler noiseHandler,
-			PersonMoneyLinkHandler moneyHandler) {
+			PersonMoneyLinkHandler moneyHandler,
+			DelayAnalysis delayAnalysis) {
 	
 		String fileName = outputPath + "aggregated_info.csv";
 		File file = new File(fileName);			
@@ -471,8 +472,13 @@ public class PersonTripNoiseAnalysis {
 			bw.write("path;" + outputPath);
 			bw.newLine();
 			
-			bw.write("-----------");
+			bw.write("-----------------------------");
 			bw.newLine();
+			bw.write("## Mode-specific analysis ##");
+			bw.newLine();
+			bw.write("-----------------------------");
+			bw.newLine();
+
 			
 			for (String mode : basicHandler.getScenario().getConfig().planCalcScore().getModes().keySet()) {
 				int mode_trips = 0;
@@ -565,8 +571,6 @@ public class PersonTripNoiseAnalysis {
 				bw.write("-----------");
 				bw.newLine();
 					
-				bw.write("-----------");
-				bw.newLine();
 			}
 			
 
@@ -642,6 +646,14 @@ public class PersonTripNoiseAnalysis {
 				}
 		
 			}
+			
+			bw.write("-----------------------------");
+			bw.newLine();
+			bw.write("## Analysis for all modes ##");
+			bw.newLine();
+			bw.write("-----------------------------");
+			bw.newLine();
+			
 			bw.write("-----------");
 			bw.newLine();
 			
@@ -673,6 +685,9 @@ public class PersonTripNoiseAnalysis {
 			bw.newLine();
 			
 			bw.write("caused noise damage costs (sample size) (caused by car users or passengers) [monetary units];" + causedNoiseCost);
+			bw.newLine();
+			
+			bw.write("total delay (sample size) [hours];" + delayAnalysis.getTotalDelay() / 3600.);
 			bw.newLine();
 			
 			bw.write("congestion toll payments (sample size) (payed by private car users) [monetary units];" + congestionPayments);
