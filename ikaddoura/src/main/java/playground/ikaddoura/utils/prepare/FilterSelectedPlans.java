@@ -39,9 +39,10 @@ public class FilterSelectedPlans {
 	
 	private static final Logger log = Logger.getLogger(FilterSelectedPlans.class);
 	
-	private final static String inputPlans = "/Users/ihab/Desktop/ils4i/kaddoura/bln-dz-time/output_route_time_baseCase_1000it/perf6.0_lateArrival-18.0_asas-true_actDurBin3600.0_tolerance3600.0_pricing-NoPricing_tollBlendFactor0.0_2017-02-16_15-28-38/output_plans.xml.gz";
-	private final static String outputPlans = "/Users/ihab/Documents/workspace/runs-svn/berlin-dz-time/input/input_0.1sample/run_194c.150.plans.selected-1000it.route.time.output.plans-selected.xml.gz";
-	private static final String[] attributes = {"OpeningClosingTimes"};
+	private final static String inputPlans = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/2017-07-20_car_pt_slowPt_bike_walk_10pct/be_251.output_plans.xml.gz";
+	private final static String outputPlans = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/2017-07-20_car_pt_slowPt_bike_walk_10pct/be_251.output_plans_selected.xml.gz";
+//	private static final String[] attributes = {"OpeningClosingTimes"};
+	private static final String[] attributes = {};
 	
 	public static void main(String[] args) {
 		
