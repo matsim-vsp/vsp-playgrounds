@@ -47,9 +47,6 @@ public class RunExampleOptAV {
 
 	private static String configFile;
 	private static String outputDirectory;
-	private static boolean internalizeNoise;
-	private static boolean internalizeCongestion;
-	private static boolean minExtCost;
 		
 	private static boolean otfvis;
 	
@@ -62,23 +59,11 @@ public class RunExampleOptAV {
 			outputDirectory = args[1];
 			log.info("outputDirectory: "+ outputDirectory);
 			
-			internalizeCongestion = Boolean.parseBoolean(args[2]);
-			log.info("internalizeCongestion: "+ internalizeCongestion);
-			
-			internalizeNoise = Boolean.parseBoolean(args[3]);
-			log.info("internalizeNoise: "+ internalizeNoise);
-			
-			minExtCost = Boolean.parseBoolean(args[4]);
-			log.info("minExtCost: " + minExtCost);
-			
 			otfvis = false;
 			
 		} else {
 			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config_be_10pct_test.xml";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_test_2taxiTrips/";
-			internalizeNoise = false;
-			internalizeCongestion = false;
-			minExtCost = false;
 			otfvis = false;
 		}
 		
