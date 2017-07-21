@@ -15,10 +15,6 @@
 	</scm>
 	<repositories>
 	<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-		<repository>
 			<id>matsim</id>
 			<url>https://dl.bintray.com/matsim/matsim</url>
 		</repository>
@@ -203,20 +199,7 @@
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
-			<!--<type>jar</type>-->
-			<exclusions>
-				<exclusion>  <!-- declare the exclusion here -->
-					<groupId>org.matsim</groupId>
-					<artifactId>matsim</artifactId>
-					<!--<version>0.8.0-SNAPSHOT</version>-->
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.github.matsim-org.matsim</groupId>
-			<artifactId>matsim</artifactId>
-			<version>vehiclesInPrepareForSim-SNAPSHOT</version>
-			<!--<type>jar</type>-->
+			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
