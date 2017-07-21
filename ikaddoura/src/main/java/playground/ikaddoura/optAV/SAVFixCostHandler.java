@@ -79,6 +79,8 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 					this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), costsPerDay ));
 					
 					this.passengersThatHaveAlreadyPaid.add(event.getPersonId());
+				} else {
+					// passenger has already paid...
 				}
 			}
 		}

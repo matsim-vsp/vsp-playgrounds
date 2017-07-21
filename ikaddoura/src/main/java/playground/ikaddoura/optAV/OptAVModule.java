@@ -165,13 +165,21 @@ public class OptAVModule extends AbstractModule {
 		}		
 		
 		// #############################
-		// pricing
+		// passenger-vehicle tracking
+		// #############################
+				
+		this.bind(SAVPassengerTracker.class).asEagerSingleton();
+		addEventHandlerBinding().to(SAVPassengerTracker.class);
+		
+		// #############################
+		// fix cost pricing
 		// #############################
 		
-		if (optAVParams.isChargeSAVTollsFromPassengers()) {
-			this.bind(SAVPassengerTracker.class).asEagerSingleton();
-			addEventHandlerBinding().to(SAVPassengerTracker.class);
-		}
+		addEventHandlerBinding().to(SAVFixCostHandler.class).asEagerSingleton();
+				
+		// #############################
+        // noise and congestion pricing
+        // #############################
 		
 		if (optAVParams.isAccountForNoise()) {
 			
@@ -237,12 +245,6 @@ public class OptAVModule extends AbstractModule {
         	
         	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);        	
         }
-		
-		// #############################
-        // scoring
-        // #############################
-		
-		addEventHandlerBinding().to(SAVFixCostHandler.class).asEagerSingleton();
 		
 		// #############################
 		// analysis
