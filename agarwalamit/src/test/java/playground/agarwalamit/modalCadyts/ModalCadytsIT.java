@@ -21,13 +21,10 @@ package playground.agarwalamit.modalCadyts;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -38,7 +35,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
-import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup.MobsimType;
@@ -46,21 +42,9 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.ControlerDefaultsModule;
-import org.matsim.core.controler.ControlerI;
-import org.matsim.core.controler.Injector;
-import org.matsim.core.controler.NewControlerModule;
-import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModule;
-import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.TeleportationEngine;
-import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
-import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
-import org.matsim.core.scenario.ScenarioByConfigModule;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
@@ -106,6 +90,7 @@ public class ModalCadytsIT {
 
 		List<String> mainModes = Arrays.asList("car","bike");
 		config.qsim().setMainModes(mainModes );
+		config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
 //		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
 		// I switched this off for this piece of code since the vehicles are added as mode vehicles directly into the agent source.  
@@ -121,6 +106,18 @@ public class ModalCadytsIT {
 		strategySettings.setWeight(1.0);
 		config.strategy().addStrategySettings(strategySettings);
 
+		Scenario scenario = ScenarioUtils.loadScenario(config);
+
+		VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
+		car.setMaximumVelocity(100.0/3.6);
+		car.setPcuEquivalents(1.0);
+		scenario.getVehicles().addVehicleType(car);
+
+		VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike", VehicleType.class));
+		bike.setMaximumVelocity(50.0/3.6);
+		bike.setPcuEquivalents(0.25);
+		scenario.getVehicles().addVehicleType(bike);
+
 		// ===
 
 		CountsInserter jcg = new CountsInserter();		
@@ -129,57 +126,45 @@ public class ModalCadytsIT {
 		Counts<ModalLink> modalLinkCounts = jcg.getModalLinkCounts();
 		Map<String, ModalLink> modalLinkContainer = jcg.getModalLinkContainer();
 
-		com.google.inject.Injector injector = Injector.createInjector(config, new AbstractModule() {
+		Controler controler = new Controler(scenario);
+		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				install(new NewControlerModule());
-				install(new ControlerDefaultCoreListenersModule());
-				install(AbstractModule.override(Collections.singleton(new ControlerDefaultsModule()), new AbstractModule() {
+				bind(Key.get(new TypeLiteral<Counts<ModalLink>>(){}, Names.named("calibration"))).toInstance(modalLinkCounts);
+				bind(Key.get(new TypeLiteral<Map<String,ModalLink>>(){})).toInstance(modalLinkContainer);
+
+				bind(ModalCadytsContext.class).asEagerSingleton();
+				addControlerListenerBinding().to(ModalCadytsContext.class);
+
+				bindScoringFunctionFactory().toInstance(new ScoringFunctionFactory() {
+					@Inject private ScoringParametersForPerson parameters;
+					@Inject private Network network;
+					@Inject ModalCadytsContext cadytsContext;
 					@Override
-					public void install() {
+					public ScoringFunction createNewScoringFunction(Person person) {
+						final ScoringParameters params = parameters.getScoringParameters(person);
 
-						bindMobsim().toProvider(MultipleModeVehiclesQSimFactory.class);
+						SumScoringFunction scoringFunctionAccumulator = new SumScoringFunction();
+						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelLegScoring(params, network));
+						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
+						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-						bind(Key.get(new TypeLiteral<Counts<ModalLink>>(){}, Names.named("calibration"))).toInstance(modalLinkCounts);
-						bind(Key.get(new TypeLiteral<Map<String,ModalLink>>(){})).toInstance(modalLinkContainer);
+						final CadytsScoring<ModalLink> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
+						final double cadytsScoringWeight = beta*30.;
+						scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight) ;
+						scoringFunctionAccumulator.addScoringFunction(scoringFunction );
 
-						bind(ModalCadytsContext.class).asEagerSingleton();
-						addControlerListenerBinding().to(ModalCadytsContext.class);
-
-
-						bindScoringFunctionFactory().toInstance(new ScoringFunctionFactory() {
-							@Inject private ScoringParametersForPerson parameters;
-							@Inject private Network network;
-							@Inject ModalCadytsContext cadytsContext;
-							@Override
-							public ScoringFunction createNewScoringFunction(Person person) {
-								final ScoringParameters params = parameters.getScoringParameters(person);
-
-								SumScoringFunction scoringFunctionAccumulator = new SumScoringFunction();
-								scoringFunctionAccumulator.addScoringFunction(new CharyparNagelLegScoring(params, network));
-								scoringFunctionAccumulator.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
-								scoringFunctionAccumulator.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
-
-								final CadytsScoring<ModalLink> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
-								final double cadytsScoringWeight = beta*30.;
-								scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight) ;
-								scoringFunctionAccumulator.addScoringFunction(scoringFunction );
-
-								return scoringFunctionAccumulator;
-							}
-						});
-
-						this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
+						return scoringFunctionAccumulator;
 					}
-				}));
-				install(new ScenarioByConfigModule());
+				});
+
+				this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
 			}
 		});
-		ControlerI controler = injector.getInstance(ControlerI.class);
+
 		controler.run();
 
 		//scenario data  test
-		Scenario scenario = injector.getInstance(Scenario.class);
 		Assert.assertEquals("Different number of links in network.", scenario.getNetwork().getLinks().size() , 23 );
 		Assert.assertEquals("Different number of nodes in network.", scenario.getNetwork().getNodes().size() , 15 );
 
@@ -269,56 +254,6 @@ public class ModalCadytsIT {
 		return count.getVolume(hour).getValue();
 	}
 
-	private static class MultipleModeVehiclesQSimFactory implements Provider<Mobsim> {
-
-		@Inject Scenario scenario;
-		@Inject EventsManager eventsManager;
-
-		@Override
-		public Mobsim get() {
-
-			QSimConfigGroup conf = scenario.getConfig().qsim();
-			if (conf == null) {
-				throw new NullPointerException("There is no configuration set for the QSim. Please add the module 'qsim' to your config file.");
-			}
-
-			// construct the QSim:
-			QSim qSim = new QSim(scenario, eventsManager);
-
-			// add the activity engine:
-			ActivityEngine activityEngine = new ActivityEngine(eventsManager, qSim.getAgentCounter());
-			qSim.addMobsimEngine(activityEngine);
-			qSim.addActivityHandler(activityEngine);
-
-			// add the netsim engine:
-			QNetsimEngine netsimEngine = new QNetsimEngine(qSim) ;
-			qSim.addMobsimEngine(netsimEngine);
-			qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
-
-			TeleportationEngine teleportationEngine = new TeleportationEngine(scenario, eventsManager);
-			qSim.addMobsimEngine(teleportationEngine);
-
-			AgentFactory agentFactory = new DefaultAgentFactory(qSim);
-
-			PopulationAgentSource agentSource = new PopulationAgentSource(scenario.getPopulation(), agentFactory, qSim);
-			Map<String, VehicleType> modeVehicleTypes = new HashMap<>();
-
-			VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car", VehicleType.class));
-			car.setMaximumVelocity(100.0/3.6);
-			car.setPcuEquivalents(1.0);
-			modeVehicleTypes.put("car", car);
-
-			VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike", VehicleType.class));
-			bike.setMaximumVelocity(50.0/3.6);
-			bike.setPcuEquivalents(0.25);
-			modeVehicleTypes.put("bike", bike);
-
-			agentSource.setModeVehicleTypes(modeVehicleTypes);
-
-			qSim.addAgentSource(agentSource);
-			return qSim ;
-		}
-	}
 
 	private static Config createTestConfig(String inputDir, String outputDir) {
 		Config config = ConfigUtils.createConfig() ;
