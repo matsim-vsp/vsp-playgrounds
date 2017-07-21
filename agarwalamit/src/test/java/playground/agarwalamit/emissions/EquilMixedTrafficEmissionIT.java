@@ -91,7 +91,7 @@ public class EquilMixedTrafficEmissionIT {
 	}
 
 	@Parameterized.Parameters(name = "{index}: considerCO2 == {0}; vehicleSource == {1}")
-	public static List<Object> considerCO2 () {
+	public static List<Object[]> considerCO2 () {
 		Object[] [] considerCO2 = new Object [] [] {
 				{true, QSimConfigGroup.VehiclesSource.fromVehiclesData} ,
 				{false,QSimConfigGroup.VehiclesSource.fromVehiclesData},
