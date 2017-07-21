@@ -139,21 +139,23 @@ class KNModeChoiceCalibMain {
 			} else {
 				convergenceCriterion= new FixedIterationNumberConvergenceCriterion(100, 10 );
 			}
-			RandomSearch<ModeChoiceDecisionVariable> randomSearch = new RandomSearch<>( simulator,
-					new ModeChoiceRandomizer(scenario) ,
-					initialDecisionVariable ,
-					convergenceCriterion ,
-					maxIterations, maxTransitions, populationSize, 
-					MatsimRandom.getRandom(),
-					interpolate,
-					new ModeChoiceObjectiveFunction(equil),
-					includeCurrentBest, warmupIterations ) ;
-
-			randomSearch.setLogPath( outputDirectory );
-
-			// ---
-
-			randomSearch.run(new SelfTuner(0.95));
+			RandomSearch<ModeChoiceDecisionVariable> randomSearch = null ;
+			
+//			new RandomSearch<>( simulator,
+//					new ModeChoiceRandomizer(scenario) ,
+//					initialDecisionVariable ,
+//					convergenceCriterion ,
+//					maxIterations, maxTransitions, populationSize, 
+//					MatsimRandom.getRandom(),
+//					interpolate,
+//					new ModeChoiceObjectiveFunction(equil),
+//					includeCurrentBest, warmupIterations ) ;
+//
+//			randomSearch.setLogPath( outputDirectory );
+//
+//			// ---
+//
+//			randomSearch.run(new SelfTuner(0.95));
 
 		} else {
 			config.controler().setLastIteration(1000);
