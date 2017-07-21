@@ -1,4 +1,4 @@
-package playground.santiago.analysis.eventHandlers;
+package playground.santiago.analysis.eventHandlers.travelTimes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
