@@ -1,4 +1,4 @@
-package playground.santiago.analysis.eventHandlers;
+package playground.santiago.analysis.eventHandlers.travelDistances;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ import org.matsim.core.api.experimental.events.handler.TeleportationArrivalEvent
 import org.matsim.core.config.Config;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 
-import playground.santiago.analysis.SantiagoPTDistanceFromPlans;
+import playground.santiago.analysis.travelDistances.SantiagoPTDistanceFromPlans;
 
 
 
@@ -63,19 +63,21 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 	private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 	private final SantiagoPTDistanceFromPlans delegatePT;
 	
-	/*Ignoring transit drivers - Same as SantiagoModeTripTravelTimeHandler*/
+	/*Ignoring transit drivers & stuck agents - Same as SantiagoModeTripTravelTimeHandler*/
 	private final List<Id<Person>> transitDriverPersons = new ArrayList<>();
+	private List<Id<Person>> stuckAgents = new ArrayList<>();
 
 
 
-	public SantiagoModeTripTravelDistanceHandler(final Config config, final Network network, final Population population){
+	public SantiagoModeTripTravelDistanceHandler(final Config config, final Network network, final Population population, 
+			List<Id<Person>> stuckAgents){
 		LOG.info("Route distance will be calculated based on events.");
 		LOG.warn("During distance calculation, link from which person is departed or arrived will not be considered.");
 		this.delegatePT = new SantiagoPTDistanceFromPlans(population);
 		this.config=config;
 		this.mainModes.addAll(this.config.qsim().getMainModes());
 		this.network = network;
-
+		this.stuckAgents=stuckAgents;
 
 	}
 
@@ -101,7 +103,7 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		// TODO if a person is in more than two groups, then which one is correct mode ?
 		String mode = this.personIdDepartureLegModes.get(personId);
 
-		if(transitDriverPersons.contains(personId)) {
+		if(transitDriverPersons.contains(personId)||stuckAgents.contains(personId)) {
 			//Omitting...
 		} else {
 			Map<Id<Person>, Double> personDist = mainModePersonIdDistTemporal.get(mode);
@@ -134,7 +136,7 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		double departureTime = event.getTime();
 		this.personIdDepartureLegModes.put(personId, departureLegMode);
 
-		if(transitDriverPersons.contains(personId)){
+		if(transitDriverPersons.contains(personId)||stuckAgents.contains(personId)){
 			//Omitting
 		} else {		
 			if(departureLegMode.equals(TransportMode.transit_walk)||departureLegMode.equals(TransportMode.pt)){
@@ -196,7 +198,7 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		String arrivalLegMode = event.getLegMode();
 		Id<Person> personId = event.getPersonId();
 
-		if (transitDriverPersons.remove(personId)){
+		if (transitDriverPersons.remove(personId)||stuckAgents.contains(personId)){
 			//Omitting...
 		} else {
 
@@ -230,8 +232,8 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		}
 	}
 	
-	public SortedMap<String,Map<Id<Person>,List<String>>> getPT2PersonId2TravelDistances(){
-		return this.delegatePT.getPt2PersonId2TravelDistances();
+	public SortedMap<String,Map<Id<Person>,List<String>>> getPT2PersonId2TravelDistances(List<Id<Person>> stuckAgents){
+		return this.delegatePT.getPt2PersonId2TravelDistances(stuckAgents);
 	}
 	
 	public SortedMap<String,Map<Id<Person>,List<String>>> getMode2PersonId2TravelDistances (){
@@ -240,11 +242,6 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		return this.modePersonIdDistances;
 	}
 
-	public SortedSet<String> getUsedModes (){
-		SortedSet<String> modes = new TreeSet<>();
-		modes.addAll(modePersonIdDistances.keySet());
-		return modes;
-	}
 
 	public double getLongestDistance(){
 		return maxDist;
