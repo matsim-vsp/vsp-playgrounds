@@ -1,4 +1,4 @@
-package playground.santiago.analysis.eventHandlers;
+package playground.santiago.analysis.eventHandlers.trafficVolumes;
 
 import java.util.HashMap;
 import java.util.Map;
