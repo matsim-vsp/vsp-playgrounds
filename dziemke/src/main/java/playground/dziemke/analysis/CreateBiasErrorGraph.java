@@ -17,32 +17,28 @@ import org.matsim.counts.CountSimComparison;
 import org.matsim.counts.CountSimComparisonImpl;
 import org.matsim.counts.algorithms.graphs.BiasErrorGraph;
 
+/**
+ * @author dziemke
+ */
 public class CreateBiasErrorGraph {
-	private final static Logger log = Logger.getLogger(CreateBiasErrorGraph.class);
+	private final static Logger LOG = Logger.getLogger(CreateBiasErrorGraph.class);
 	
-	/**
-	 * @param args
-	 * @throws IOException 
-	 */
 	public static void main(String[] args) throws IOException {
-		// parameters
-		String runId = "run_193";
+		// Parameters
+		String runId = "be_203";
 		int iterationNumber = 300;
 		int width=440;
 		int height=330;
 		String filename = "biasErrorGraph.png";
 		
-		// input file and output directory
-		String inputFile = "D:/Workspace/runs-svn/cemdapMatsimCadyts/" + runId + "/ITERS/it." + iterationNumber
-				+ "/" + runId + "." + iterationNumber + ".countscompare.txt";
-		//String outputDirectory = "D:/VSP/cemdapMatsimCadyts/Images/" + runId + "/";
-		String outputDirectory = "D:/Workspace/shared-svn/papers/2014/cemdapMatsimCadyts/Images/" + runId + "/";
+		// Input and output
+		String inputFile = "../../runs-svn/berlin_scenario_2016/" + runId + "/ITERS/it." + iterationNumber + "/" + runId + "." + iterationNumber + ".countscompare.txt";
+		String outputFile = "../../runs-svn/berlin_scenario_2016/" + runId + "/ITERS/it." + iterationNumber + "/" + runId + "." + iterationNumber + "." + filename;
 		
-		// other objects
+		// Other objects
 		List<CountSimComparison> countSimComparisonList = new ArrayList<CountSimComparison>();
-			
 		
-		// collect the data for the graph
+		// Collect the data for the graph
 		try {
 			BufferedReader bufferedReader = IOUtils.getBufferedReader(inputFile);
 			String currentLine = bufferedReader.readLine();
@@ -59,23 +55,21 @@ public class CreateBiasErrorGraph {
 				countSimComparisonList.add(countSimComparison);
 			}
 		} catch (IOException e) {
-			log.error(new Exception(e));
-			//Gbl.errorMsg(e);
+			LOG.error(new Exception(e));
 		}
-		log.info("Done collecting data for files.");
+		LOG.info("Done collecting data for files.");
 		
 		// following taken from "package org.matsim.counts.algorithms.CountSimComparisonKMLWriter"
 		// BiasErrorGraph ep = new BiasErrorGraph(this.countComparisonFilter.getCountsForHour(null), this.iterationNumber, null, "error graph");
 		
-		// create the graph
-		BiasErrorGraph ep = new BiasErrorGraph(countSimComparisonList, iterationNumber, outputDirectory + null, "error graph");
+		// Create the graph
+		BiasErrorGraph ep = new BiasErrorGraph(countSimComparisonList, iterationNumber, outputFile, "error graph");
 		ep.createChart(0);
 		
 		// The following is (partially) taken from "org.matsim.counts.algorithms.graphs.helper.OutputDelegate.java"
 		ChartRenderingInfo info = new ChartRenderingInfo(new StandardEntityCollection());
-		new File(outputDirectory).mkdir();
-		File graphicsFile = new File(outputDirectory + filename);
+		File graphicsFile = new File(outputFile);
 		ChartUtilities.saveChartAsPNG(graphicsFile, ep.getChart(), width, height, info);
-		log.info("Done creating graphics file.");
+		LOG.info("Done creating graphics file.");
 	}
 }
