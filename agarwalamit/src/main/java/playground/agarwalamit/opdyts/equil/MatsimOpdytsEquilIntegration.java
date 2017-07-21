@@ -209,6 +209,7 @@ public class MatsimOpdytsEquilIntegration {
 		boolean includeCurrentBest = false;
 
 		int warmupIterations = 1;
+		boolean useAllWarmUpIterations = false;
 
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
@@ -234,7 +235,8 @@ public class MatsimOpdytsEquilIntegration {
 				interpolate,
 				objectiveFunction,
 				includeCurrentBest,
-				warmupIterations
+				warmupIterations,
+				useAllWarmUpIterations
 				);
 
 		// probably, an object which decide about the inertia

@@ -246,7 +246,8 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 				opdytsConfigGroup.isInterpolate(),
 				objectiveFunction,
 				opdytsConfigGroup.isIncludeCurrentBest(),
-				opdytsConfigGroup.getWarmUpIterations()
+				opdytsConfigGroup.getWarmUpIterations(),
+				opdytsConfigGroup.getUseAllWarmUpIterations()
 				);
 
 		// probably, an object which decide about the inertia
