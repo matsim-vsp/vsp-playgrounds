@@ -131,7 +131,7 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 		this.fixCostSAV = fixCostSAV;
 	}
 
-	@StringSetter( "runDefaultAnalysis" )
+	@StringGetter( "runDefaultAnalysis" )
 	public boolean isRunDefaultAnalysis() {
 		return runDefaultAnalysis;
 	}
