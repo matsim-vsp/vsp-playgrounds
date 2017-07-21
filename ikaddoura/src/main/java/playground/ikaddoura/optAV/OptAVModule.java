@@ -249,22 +249,24 @@ public class OptAVModule extends AbstractModule {
 		// #############################
 		// analysis
 		// #############################
-
-		this.bind(BasicPersonTripAnalysisHandler.class).asEagerSingleton();
-		this.addEventHandlerBinding().to(BasicPersonTripAnalysisHandler.class);
-
-		this.bind(NoiseAnalysisHandler.class).asEagerSingleton();
-		this.addEventHandlerBinding().to(NoiseAnalysisHandler.class);
-
-		this.bind(PersonMoneyLinkHandler.class).asEagerSingleton();
-		this.addEventHandlerBinding().to(PersonMoneyLinkHandler.class);
 		
-		if (!optAVParams.isAccountForCongestion()) {
-			this.bind(DelayAnalysis.class).asEagerSingleton();
-			this.addEventHandlerBinding().to(DelayAnalysis.class);
+		if (optAVParams.isRunDefaultAnalysis()) {
+			this.bind(BasicPersonTripAnalysisHandler.class).asEagerSingleton();
+			this.addEventHandlerBinding().to(BasicPersonTripAnalysisHandler.class);
+
+			this.bind(NoiseAnalysisHandler.class).asEagerSingleton();
+			this.addEventHandlerBinding().to(NoiseAnalysisHandler.class);
+
+			this.bind(PersonMoneyLinkHandler.class).asEagerSingleton();
+			this.addEventHandlerBinding().to(PersonMoneyLinkHandler.class);
+			
+			if (!optAVParams.isAccountForCongestion()) {
+				this.bind(DelayAnalysis.class).asEagerSingleton();
+				this.addEventHandlerBinding().to(DelayAnalysis.class);
+			}
+			
+			this.addControlerListenerBinding().to(AnalysisControlerListener.class);
 		}
-		
-		this.addControlerListenerBinding().to(AnalysisControlerListener.class);
 				
 	}
 

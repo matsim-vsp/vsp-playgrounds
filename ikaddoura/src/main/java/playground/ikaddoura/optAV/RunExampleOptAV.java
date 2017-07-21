@@ -95,7 +95,6 @@ public class RunExampleOptAV {
 		// #############################
 				
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());	
-        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		controler.run();
 		
 		// #############################
