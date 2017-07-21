@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.santiago.analysis;
+package playground.santiago.analysis.travelDistances;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;

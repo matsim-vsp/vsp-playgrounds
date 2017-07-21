@@ -131,6 +131,7 @@ class KNModeChoiceCalibMain {
 			boolean interpolate = true ;
 			boolean includeCurrentBest = false ;
 			int warmupIterations = 1;
+			boolean useAllWarmUpIterations = false;
 
 			final ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable( scenario.getConfig().planCalcScore(), scenario );
 			final FixedIterationNumberConvergenceCriterion convergenceCriterion ;
@@ -139,15 +140,17 @@ class KNModeChoiceCalibMain {
 			} else {
 				convergenceCriterion= new FixedIterationNumberConvergenceCriterion(100, 10 );
 			}
-			RandomSearch<ModeChoiceDecisionVariable> randomSearch = new RandomSearch<>( simulator,
+			RandomSearch<ModeChoiceDecisionVariable> randomSearch = null ;
+			
+			new RandomSearch<>( simulator,
 					new ModeChoiceRandomizer(scenario) ,
 					initialDecisionVariable ,
 					convergenceCriterion ,
-					maxIterations, maxTransitions, populationSize, 
+					maxIterations, maxTransitions, populationSize,
 					MatsimRandom.getRandom(),
 					interpolate,
 					new ModeChoiceObjectiveFunction(equil),
-					includeCurrentBest, warmupIterations ) ;
+					includeCurrentBest, warmupIterations, useAllWarmUpIterations ) ;
 
 			randomSearch.setLogPath( outputDirectory );
 

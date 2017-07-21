@@ -22,9 +22,7 @@
 package scenarios.illustrative.braess.conversion;
 
 import java.util.Calendar;
-
-import playground.dgrether.DgPaths;
-import playground.dgrether.koehlerstrehlersignal.conversion.TtMatsim2KS2015;
+import optimize.convert.TtMatsim2KS2015;
 
 /**
  * Class to convert the Braess scenario into KS format.
@@ -35,17 +33,18 @@ import playground.dgrether.koehlerstrehlersignal.conversion.TtMatsim2KS2015;
 public class ConvertBraess2KS2015 {
 
 	public static void main(String[] args) throws Exception {
-		String inputDir = "../../../shared-svn/projects/cottbus/data/scenarios/braess_scenario/cap3600_4Signals/";
+		String inputDir = "../../shared-svn/projects/cottbus/data/scenarios/braess_scenario/cap3600-1800_noSignals/";
 		// input files
 		String signalSystemsFilename = inputDir + "signalSystems.xml";
 		String signalGroupsFilename = inputDir + "signalGroups.xml";
-		String signalControlFilename = inputDir + "signalControl_greenWaveZ.xml";
-		String networkFilename = inputDir + "network_cap3600.xml";
-		String lanesFilename = inputDir + "realisticLanes.xml";
-		String populationFilename = inputDir + "plans3600_initRoutes.xml";
+		String signalControlFilename = inputDir + "signalControl.xml";
+		String networkFilename = inputDir + "network.xml";
+//		String lanesFilename = inputDir + "realisticLanes.xml";
+		String lanesFilename = null;
+		String populationFilename = inputDir + "plans3600.xml";
 
 		// output files
-		String outputDirectory = "../../../shared-svn/projects/cottbus/data/optimization/braess2ks/";
+		String outputDirectory = "../../shared-svn/projects/cottbus/data/optimization/braess2ks/";
 		
 		// get the current date in format "yyyy-mm-dd"
 		Calendar cal = Calendar.getInstance();
@@ -74,7 +73,7 @@ public class ConvertBraess2KS2015 {
 		int cellsX = 5; // = default value
 		int cellsY = 5; // = default value
 		/* other parameters */
-		String scenarioDescription = "run braess with 2000 agents";
+		String scenarioDescription = "braess with 3600 agents, capacity 1800 and one all green signal";
 
 		TtMatsim2KS2015.convertMatsim2KS(signalSystemsFilename,
 				signalGroupsFilename, signalControlFilename, networkFilename,

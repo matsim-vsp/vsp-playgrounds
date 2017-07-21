@@ -1,9 +1,11 @@
-package playground.santiago.analysis.eventHandlers;
+package playground.santiago.analysis.eventHandlers.travelTimes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -31,18 +33,20 @@ import org.matsim.pt.PtConstants;
  * transit_walk - pt - transit_walk --> pt &
  * transit_walk - pt - transit_walk - pt - transit_walk --> pt
  * 
- * This means that the handler calculate the travel times only between regular activities.
+ * This means that the handler calculate the travel times only between regular activities. The stuck agents are omitted.
  */
 
-public class SantiagoModeTripTravelTimeHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler,
-PersonStuckEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHandler {
+public class SantiagoModeTripTravelTimeHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHandler {
 
 	private static final Logger LOGGER = Logger.getLogger(SantiagoModeTripTravelTimeHandler.class);
 	private final SortedMap<String, Map<Id<Person>, List<String>>> modePersonIdDepartureTravelTimes;
 	private final Map<Id<Person>, Double> personIdDepartureTime;
-	private int warnCount = 0;
+	
 
+//	private final SantiagoStuckAndAbortEventHandler delegateStuck = new SantiagoStuckAndAbortEventHandler();
 	private final List<Id<Person>> transitDriverPersons = new ArrayList<>();
+	private List<Id<Person>> stuckAgents = new ArrayList<>();
+
 
 
 	private final Map<Id<Person>, Double> transitUserDepartureTime = new HashMap<>();
@@ -51,10 +55,11 @@ PersonStuckEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHand
 
 
 
-	public SantiagoModeTripTravelTimeHandler() {
+	public SantiagoModeTripTravelTimeHandler(List<Id<Person>> stuckAgents) {
 		this.modePersonIdDepartureTravelTimes = new TreeMap<>();
 		this.personIdDepartureTime = new HashMap<>();
-		LOGGER.warn("Excluding the departure and arrivals of transit drivers.");
+		LOGGER.warn("Excluding the departure and arrivals of transit drivers. Excluding stuck agents");		
+		this.stuckAgents = stuckAgents;
 	}
 
 	@Override
@@ -76,8 +81,8 @@ PersonStuckEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHand
 		String legMode = event.getLegMode();
 		double arrivalTime = event.getTime();
 
-		if(transitDriverPersons.remove(personId)) {
-
+		if(transitDriverPersons.remove(personId)||stuckAgents.contains(personId)) {
+			//Omitting transitDrivers and stuckAgents.
 		} else {
 			if( legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ){
 				transitUserArrivalTime.put(personId, event.getTime());
@@ -97,8 +102,8 @@ PersonStuckEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHand
 		double departureTime = event.getTime();
 		String legMode = event.getLegMode();
 
-		if(transitDriverPersons.contains(personId)) {
-			//Omitting Transit Drivers ...
+		if(transitDriverPersons.contains(personId)||stuckAgents.contains(personId)) {
+			//Omitting transitDrivers and stuckAgents...
 		} else {
 			if (legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ) {
 
@@ -124,12 +129,7 @@ PersonStuckEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHand
 		return this.modePersonIdDepartureTravelTimes;
 	}
 
-	@Override
-	public void handleEvent(PersonStuckEvent event) {
-		this.warnCount++;
-		LOGGER.warn("'StuckAndAbort' event is thrown for person "+event.getPersonId()+" on link "+event.getLinkId()+" at time "+event.getTime()+
-				". \n Correctness of travel time for such persons can not be guaranteed. The number of stuckAndAbort events are " + warnCount);
-	}
+
 
 	@Override
 	public void handleEvent(TransitDriverStartsEvent event) {

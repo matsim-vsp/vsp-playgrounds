@@ -1,7 +1,7 @@
 /**
  * 
  */
-package playground.dgrether.koehlerstrehlersignal.conversion;
+package optimize.convert;
 
 import java.io.File;
 
@@ -13,10 +13,10 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import optimize.run.Cottbus2KS2010;
 import playground.dgrether.koehlerstrehlersignal.demand.PopulationToOd;
 import playground.dgrether.koehlerstrehlersignal.demand.ZoneBuilder;
 import playground.dgrether.koehlerstrehlersignal.network.NetLanesSignalsShrinker;
-import playground.dgrether.koehlerstrehlersignal.run.Cottbus2KS2010;
 import playground.dgrether.signalsystems.utils.DgScenarioUtils;
 import playground.dgrether.utils.zones.DgZones;
 
@@ -129,8 +129,8 @@ public class TtMatsim2KS2015 {
 		converter.setMinCommodityFlow(minCommodityFlow);
 		converter.convertAndWrite(outputDirectory, shapeFileDirectory,
 				ksModelOutputFilename, scenarioDescription, description, zones, startTime,
-				endTime);
-
+				endTime);		
+		
 		printStatistics(cellsX, cellsY, cuttingBoundingBoxOffset, startTime,
 				endTime);
 		log.info("output ist written to " + outputDirectory);

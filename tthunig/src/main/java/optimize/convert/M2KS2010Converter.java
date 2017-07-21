@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dgrether.koehlerstrehlersignal.conversion;
+package optimize.convert;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -31,6 +31,11 @@ import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.lanes.data.Lanes;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import optimize.gurobi.OptimizeMIP;
+import playground.dgrether.koehlerstrehlersignal.conversion.DgKS2010Router;
+import playground.dgrether.koehlerstrehlersignal.conversion.DgKSNet2MatsimNet;
+import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010NetworkConverter;
+import playground.dgrether.koehlerstrehlersignal.conversion.TtMorningCommodityAsMatsimPopWriter;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodities;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodity;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodityUtils;
@@ -174,6 +179,10 @@ public class M2KS2010Converter {
 		signalsBoundingBox.writeBoundingBox(shapeFileDirectory + "signals_");
 		
 		idPool.writeToFile(outputDirectory + "id_conversions.txt");
+		
+		// ---- TODO start gurobi and optimize MIP ----
+//		OptimizeMIP opt = new OptimizeMIP(commodities, ksNet);
+//		opt.optimize();
 	}
 
 

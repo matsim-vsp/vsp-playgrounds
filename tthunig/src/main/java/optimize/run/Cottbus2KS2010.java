@@ -17,10 +17,9 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dgrether.koehlerstrehlersignal.run;
+package optimize.run;
 
-import playground.dgrether.DgPaths;
-import playground.dgrether.koehlerstrehlersignal.conversion.TtMatsim2KS2015;
+import optimize.convert.TtMatsim2KS2015;
 
 /**
  * Class to convert the Cottbus scenario into KS format.
@@ -34,23 +33,16 @@ public class Cottbus2KS2010 {
 
 	public static void main(String[] args) throws Exception {
 		// input files
-		String signalSystemsFilename = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/cottbus_scenario/signal_systems_no_13.xml";
-		String signalGroupsFilename = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/cottbus_scenario/signal_groups_no_13.xml";
-		String signalControlFilename = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/cottbus_scenario/signal_control_no_13.xml";
-		String networkFilename = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/cottbus_scenario/network_wgs84_utm33n.xml.gz";
-		String lanesFilename = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/cottbus_scenario/lanes.xml";
+		String signalSystemsFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/signal_systems_no_13.xml";
+		String signalGroupsFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/signal_groups_no_13.xml";
+		String signalControlFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/signal_control_no_13.xml";
+		String networkFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/network_wgs84_utm33n.xml.gz";
+		String lanesFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/lanes.xml";
 		// change run number here to use another base case
-		String populationFilename = DgPaths.REPOS
-				+ "runs-svn/cottbus/before2015/run1728/1728.output_plans.xml.gz";
+		String populationFilename = "../../../runs-svn/cottbus/before2015/run1728/1728.output_plans.xml.gz";
 
 		// output files
-		String outputDirectory = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/cb2ks2010/";
+		String outputDirectory = "../../../shared-svn/projects/cottbus/cb2ks2010/";
 		String dateFormat = "2015-02-25";
 
 		/* parameters for the time interval */

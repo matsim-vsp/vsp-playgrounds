@@ -1,4 +1,4 @@
-package playground.santiago.analysis;
+package playground.santiago.analysis.travelDistances;
 
 
 import java.util.ArrayList;
@@ -50,11 +50,15 @@ public class SantiagoPTDistanceFromPlans {
 
 	}
 
-	private void getData(){
+	private void getData(List<Id<Person>>stuckAgents){
 
 		for (Person p: population.getPersons().values()) {
 
 			Id<Person> personId = p.getId();
+			
+			if(stuckAgents.contains(personId)){
+				//Omitting...
+			} else {
 
 			String lastAct="";
 			String currentAct="";
@@ -215,15 +219,15 @@ public class SantiagoPTDistanceFromPlans {
 				}
 
 			}
-
+			}
 		}
 
 
 	}
 
 
-	public SortedMap<String,Map<Id<Person>,List<String>>> getPt2PersonId2TravelDistances(){
-		getData();
+	public SortedMap<String,Map<Id<Person>,List<String>>> getPt2PersonId2TravelDistances(List<Id<Person>> stuckAgents){
+		getData(stuckAgents);
 		return this.Pt2PersonId2TravelDistances;
 	}
 

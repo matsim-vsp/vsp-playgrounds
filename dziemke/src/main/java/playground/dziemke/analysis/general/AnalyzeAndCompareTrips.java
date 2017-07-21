@@ -20,7 +20,7 @@ public class AnalyzeAndCompareTrips {
 	public static final Logger log = Logger.getLogger(AnalyzeAndCompareTrips.class);
 
 	// Parameters
-	private static final String RUN_ID = "be_203"; // <----------
+	private static final String RUN_ID = "be_252"; // <----------
 	private static final String ITERATION_FOR_ANALYSIS = ""; // use empty string is not used
 //	private static final String CEMDAP_PERSONS_INPUT_FILE_ID = "21"; // Check if this number corresponds correctly to the RUN_ID
 
@@ -52,12 +52,14 @@ public class AnalyzeAndCompareTrips {
 		List<FromMatsimTrip> fromMatsimTrips = events2TripsParser.getTrips();
 
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
-//		matsimTripFilter.activateModeChoice(TransportMode.car);
+		matsimTripFilter.activateModeChoice(TransportMode.pt);
 //		matsimTripFilter.activateModeChoice("pt", "ptSlow");
+//		matsimTripFilter.activateModeChoice("ptSlow");
+//		matsimTripFilter.activateModeChoice("bicycle");
 		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
 		matsimTripFilter.activateDist(0, 100);
 //		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
-		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
+//		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
 		List<Trip> filteredFromMatsimTrips = TripFilter.castTrips(matsimTripFilter.filter(fromMatsimTrips));
 
 		// Determine output directory
@@ -80,10 +82,10 @@ public class AnalyzeAndCompareTrips {
 		List<FromSrvTrip> fromSrvTrips = srv2MATSimPopulation.getTrips();
 
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
-//		srvTripFilter.activateModeChoice(TransportMode.car);
+		srvTripFilter.activateModeChoice(TransportMode.pt);
 		srvTripFilter.activateDist(0, 100);
 //		srvTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
-		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
+//		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
 
 		// Determine output directory
 		String srvOutputDirectory = srvTripFilter.adaptOutputDirectory("analysis_srv");
