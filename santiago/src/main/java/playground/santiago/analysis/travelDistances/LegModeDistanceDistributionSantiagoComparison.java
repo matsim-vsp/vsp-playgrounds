@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.santiago.analysis;
+package playground.santiago.analysis.travelDistances;
 
 import java.util.List;
 import java.util.Map;
