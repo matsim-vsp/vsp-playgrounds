@@ -93,6 +93,8 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalBas
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalControlLogic;
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
 import signals.CombinedSignalsModule;
+import signals.laemmer.model.LaemmerConfig;
+import signals.sylvia.controler.DgSylviaConfig;
 
 /**
  * Class to run a simulation of the braess scenario with or without signals. 
@@ -119,7 +121,7 @@ public final class RunBraessSimulation {
 	// defines which kind of signals should be used. use 'SIGNAL_LOGIC = SignalControlLogic.NONE' if signals should not be used
 	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.NONE;
 	// if SignalBasePlan SIGNAL4_X_Seconds_Z.. is used, SECONDS_Z_GREEN gives the green time for Z
-	private static final int SECONDS_Z_GREEN = 59;
+	private static final int SECONDS_Z_GREEN = 30;
 	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.NONE;
 	
 	// defines which kind of lanes should be used
@@ -137,7 +139,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../../runs-svn/braess/hEART_congestionPricing/";
+	private static final String OUTPUT_BASE_DIR = "../../../runs-svn/braess/btuOverloadScenario/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -323,6 +325,17 @@ public final class RunBraessSimulation {
 			boolean alwaysSameMobsimSeed = false;
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 			signalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
+			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+			// TODO modify sylvia config parameter here if you like
+			sylviaConfig.setSignalGroupMaxGreenScale(1.5);
+			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+			signalsModule.setSylviaConfig(sylviaConfig);
+			LaemmerConfig laemmerConfig = new LaemmerConfig();
+			// TODO modify laemmer config parameter here if you like
+			laemmerConfig.setMAX_PERIOD(90);
+			laemmerConfig.setDESIRED_PERIOD(60);
+			laemmerConfig.setDEFAULT_INTERGREEN(0);
+			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 			break;
 		}
@@ -491,7 +504,7 @@ public final class RunBraessSimulation {
 		netCreator.setSimulateInflowCap( false );
 		netCreator.setMiddleLinkExists( true );
 		
-		netCreator.setCapFirstLast(4000);
+		netCreator.setCapFirstLast(3600);
 		netCreator.setCapZ(1800);
 		netCreator.setCapFast(1800);
 		netCreator.setCapSlow(1800);
@@ -692,6 +705,9 @@ public final class RunBraessSimulation {
 				break;
 			case SIGNAL4_X_SECOND_Z_Z2V:
 				runName += "_S4_" + SECONDS_Z_GREEN + "sZ_Z2V";
+				break;
+			case SIGNAL4_ALL_GREEN:
+				runName += "_S4_allGreen";
 				break;
 			default:
 				runName += "_" + SIGNAL_BASE_PLAN;

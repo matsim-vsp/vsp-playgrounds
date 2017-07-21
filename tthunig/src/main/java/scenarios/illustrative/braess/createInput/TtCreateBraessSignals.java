@@ -54,6 +54,7 @@ import org.matsim.lanes.data.LanesToLinkAssignment;
 
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes.LaneType;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.laemmer.model.LaemmerSignalController;
 import signals.sylvia.data.DgSylviaPreprocessData;
 
 /**
@@ -67,11 +68,11 @@ public final class TtCreateBraessSignals {
 	private static final Logger log = Logger.getLogger(TtCreateBraessSignals.class);
 
 	public enum SignalBasePlan {
-		NONE, ALL_NODES_ALL_GREEN, ALL_NODES_ONE_SECOND_Z, ALL_NODES_ONE_SECOND_SO, ALL_NODES_GREEN_WAVE_Z, ALL_NODES_GREEN_WAVE_SO, SIGNAL4_X_SECOND_Z_V2Z, SIGNAL4_X_SECOND_Z_Z2V
+		NONE, ALL_NODES_ALL_GREEN, ALL_NODES_ONE_SECOND_Z, ALL_NODES_ONE_SECOND_SO, ALL_NODES_GREEN_WAVE_Z, ALL_NODES_GREEN_WAVE_SO, SIGNAL4_X_SECOND_Z_V2Z, SIGNAL4_X_SECOND_Z_Z2V, SIGNAL4_ALL_GREEN
 	}
 
 	public enum SignalControlLogic {
-		NONE, PLANBASED, SYLVIA, SIMPLE_RESPONSIVE, DOWNSTREAM_RESPONSIVE
+		NONE, PLANBASED, SYLVIA, SIMPLE_RESPONSIVE, DOWNSTREAM_RESPONSIVE, LAEMMER
 	}
 
 	private static final int CYCLE_TIME = 60;
@@ -156,6 +157,7 @@ public final class TtCreateBraessSignals {
 		switch (basePlan) {
 		case SIGNAL4_X_SECOND_Z_V2Z:
 		case SIGNAL4_X_SECOND_Z_Z2V:
+		case SIGNAL4_ALL_GREEN:
 			// create only one signal system at node 4
 			createSignalSystemAtNode(this.scenario.getNetwork().getNodes().get(Id.createNodeId(4)));
 			break;
@@ -257,6 +259,9 @@ public final class TtCreateBraessSignals {
 			case DOWNSTREAM_RESPONSIVE:
 				signalSystemControl.setControllerIdentifier(DownstreamPlanbasedSignalController.IDENTIFIER);
 				break;
+			case LAEMMER:
+				signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+				break;
 			default:
 				// planbased controller identifier needed for planbased signal control, sylvia and the simple responsive signals used here
 				signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
@@ -282,6 +287,7 @@ public final class TtCreateBraessSignals {
 					createGreenWaveSOSignalControl(fac, signalPlan, signalGroup.getId());
 					break;
 				case ALL_NODES_ALL_GREEN:
+				case SIGNAL4_ALL_GREEN:
 				case ALL_NODES_ONE_SECOND_Z:
 				case ALL_NODES_ONE_SECOND_SO:
 					// create all day green onset and dropping
