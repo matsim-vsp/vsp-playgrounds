@@ -232,7 +232,7 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		}
 	}
 	
-	public SortedMap<String,Map<Id<Person>,List<String>>> getPT2PersonId2TravelDistances(List<Id<Person>> stuckAgents){
+	public SortedMap<String,Map<Id<Person>,List<String>>> getPT2PersonId2TravelDistances(){
 		return this.delegatePT.getPt2PersonId2TravelDistances(stuckAgents);
 	}
 	
