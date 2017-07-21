@@ -1,4 +1,4 @@
-package playground.santiago.analysis;
+package playground.santiago.analysis.travelTimes;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,9 +31,10 @@ import org.matsim.counts.algorithms.CountsComparisonAlgorithm;
 
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.tripDistance.TripDistanceHandler;
-import playground.santiago.analysis.eventHandlers.SantiagoLinkVolumeHandler;
-import playground.santiago.analysis.eventHandlers.SantiagoModeTripTravelTimeHandler;
-import playground.santiago.analysis.eventHandlers.SantiagoModeTripTravelDistanceHandler;
+import playground.santiago.analysis.eventHandlers.others.SantiagoStuckAndAbortEventHandler;
+import playground.santiago.analysis.eventHandlers.trafficVolumes.SantiagoLinkVolumeHandler;
+import playground.santiago.analysis.eventHandlers.travelDistances.SantiagoModeTripTravelDistanceHandler;
+import playground.santiago.analysis.eventHandlers.travelTimes.SantiagoModeTripTravelTimeHandler;
 
 /** 
  * 
@@ -43,10 +44,10 @@ import playground.santiago.analysis.eventHandlers.SantiagoModeTripTravelDistance
 
 public class SantiagoAnalysis {
 	//Fields related to the scenario and its steps - they must be changed depending on the step . a comment
-	private static final String CASE_NAME = "testingCase";
-	private static final String STEP_NAME = "StepTesting";
+	private static final String CASE_NAME = "baseCase1pct";
+	private static final String STEP_NAME = "Step0";
 	private static final int FIRST_IT = 0;
-	private static final int LAST_IT = 0;
+	private static final int LAST_IT = 100;
 	private static final int LENGTH = LAST_IT - FIRST_IT;
 	
 	//Fields related to the outputDir - Do not change these.
@@ -56,7 +57,7 @@ public class SantiagoAnalysis {
 
 	//Fields related to the inputFiles	
 	private static final String NET_FILE = OUTPUT_FOLDER + "output_network.xml.gz";
-	private static final String CONFIG_FILE = OUTPUT_FOLDER + "output_config.xml"; //TODO: BE AWARE OF THE .GZ OF THE CONFIG.
+	private static final String CONFIG_FILE = OUTPUT_FOLDER + "output_config.xml.gz"; //TODO: BE AWARE OF THE .GZ OF THE CONFIG.
 	private static final String COUNTS_FILE = OUTPUT_FOLDER + "output_counts.xml.gz";
 	
 	
@@ -73,17 +74,22 @@ public class SantiagoAnalysis {
 		String itFolder = OUTPUT_FOLDER + "ITERS/it." + it + "/";		
 		String events = itFolder + it +".events.xml.gz";
 		String plans = itFolder + it + ".plans.xml.gz";
+		
 	//	String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
 	//	String countsCompareOutputDir = ANALYSIS_DIR + itAux + ".countscompare.txt"; //TODO: BE AWARE!!
 	//	String flowPatternOutputDir = ANALYSIS_DIR + itAux + ".link2Vol.txt";		 //TODO: BE AWARE!!
-	//	String enterTravelTimesOutputDir = ANALYSIS_DIR + itAux + ".modeTravelTimes.txt";	//TODO: BE AWARE!!
+		String departureTravelTimesOutputDir = ANALYSIS_DIR + itAux + ".modeTravelTimes.txt";	//TODO: BE AWARE!!
 		String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
+//		String agentsStuckOutputDir =  ANALYSIS_DIR + itAux + ".agentsStucked.txt"; //TODO: BE AWARE!!
+		
 		
 	//	writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
 	//	writeCountsCompare(events, countsCompareOutputDir);							 //TODO: BE AWARE!!
 	//	processEventsAndWriteFileForLinkVolumes(events,flowPatternOutputDir);		 //TODO: BE AWARE!!
-	//	writeFileForTravelTimesByMode(events,enterTravelTimesOutputDir);		 //TODO: BE AWARE!!
-		writeFileForTravelDistanceByMode(events,plans, travelDistanceOutputDir);		 //TODO: BE AWARE!!
+		List<Id<Person>> stuckAgents = getStuckAgents(events);
+		writeFileForTravelTimesByMode(events,departureTravelTimesOutputDir, stuckAgents);		 //TODO: BE AWARE!!
+		writeFileForTravelDistanceByMode(events,plans, travelDistanceOutputDir, stuckAgents);		 //TODO: BE AWARE!!
+//		writeStuckEvents(events,agentsStuckOutputDir);							//TODO: BE AWARE!!
 		
 		it = it + 50;
 		itAux = itAux + 50;
@@ -214,13 +220,11 @@ public class SantiagoAnalysis {
 	}
 	
 	
-	private static void writeFileForTravelTimesByMode(String eventsFile, String outFile){
+	private static void writeFileForTravelTimesByMode(String eventsFile, String outFile, List<Id<Person>> stuckAgents){
 		File analysisDir = new File(ANALYSIS_DIR);
-		if(!analysisDir.exists()) createDir(analysisDir);
+		if(!analysisDir.exists()) createDir(analysisDir);	
 		
-		/*running Amit's handler*/
-		
-		SantiagoModeTripTravelTimeHandler handler = new SantiagoModeTripTravelTimeHandler();
+		SantiagoModeTripTravelTimeHandler handler = new SantiagoModeTripTravelTimeHandler(stuckAgents);
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(handler);
 		MatsimEventsReader reader = new MatsimEventsReader(events);
@@ -247,7 +251,7 @@ public class SantiagoAnalysis {
 		}
 	}
 	
-	private static void writeFileForTravelDistanceByMode(String eventsFile, String plansFile, String outFile){
+	private static void writeFileForTravelDistanceByMode(String eventsFile, String plansFile, String outFile, List<Id<Person>> stuckAgents){
 		
 		File analysisDir = new File(ANALYSIS_DIR);
 		if(!analysisDir.exists()) createDir(analysisDir);
@@ -259,9 +263,8 @@ public class SantiagoAnalysis {
 		popReader.readFile(plansFile);
 		Population population =  scenario.getPopulation();
 
-		/*running Amit's handler*/
 		
-		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network, population);
+		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network, population, stuckAgents);
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(handler);
 		MatsimEventsReader reader = new MatsimEventsReader(events);
@@ -269,7 +272,7 @@ public class SantiagoAnalysis {
 		
 		
 		SortedMap<String, Map<Id<Person>, List<String>>> privateTravelDistanceByMode = handler.getMode2PersonId2TravelDistances();
-		SortedMap<String, Map<Id<Person>,List<String>>> PtTravelDistanceByMode = handler.getPT2PersonId2TravelDistances();
+		SortedMap<String, Map<Id<Person>,List<String>>> PtTravelDistanceByMode = handler.getPT2PersonId2TravelDistances(stuckAgents);
 		
 		/*writing*/		
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
@@ -277,16 +280,16 @@ public class SantiagoAnalysis {
 			
 			for(String mode : privateTravelDistanceByMode.keySet()){				
 				for (Id<Person> person: privateTravelDistanceByMode.get(mode).keySet()){
-					for (String distances: privateTravelDistanceByMode.get(mode).get(person))
+					for (String distances: privateTravelDistanceByMode.get(mode).get(person)){
 						writer.write(mode+"\t"+  person + "\t" + distances + "\n");					
-					
+					}	
 				}
 			}
 			for(String mode : PtTravelDistanceByMode.keySet()){				
 				for (Id<Person> person: PtTravelDistanceByMode.get(mode).keySet()){
-					for (String distances: PtTravelDistanceByMode.get(mode).get(person))
+					for (String distances: PtTravelDistanceByMode.get(mode).get(person)){
 						writer.write(mode+"\t"+  person + "\t" + distances + "\n");					
-					
+					}	
 				}
 			}
 			
@@ -299,6 +302,50 @@ public class SantiagoAnalysis {
 		} catch (Exception e) {
 			throw new RuntimeException("Data is not written. Reason "+e );
 		}
+	}
+	
+	public static void writeStuckEvents(String eventsFile, String outFile){
+		File analysisDir = new File(ANALYSIS_DIR);
+		if(!analysisDir.exists()) createDir(analysisDir);
+
+
+		
+		SantiagoStuckAndAbortEventHandler handler = new SantiagoStuckAndAbortEventHandler();
+		EventsManager events = EventsUtils.createEventsManager();
+		events.addHandler(handler);
+		MatsimEventsReader reader = new MatsimEventsReader(events);
+		reader.readFile(eventsFile);
+		
+		
+		SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2Times = handler.getMode2IdAgentsStuck2Time();
+
+		
+		/*writing*/		
+		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+			writer.write("mode\tpersonId\teventTime\n");
+
+			for(String mode : mode2PersonId2Times.keySet()){				
+				for (Id<Person> person: mode2PersonId2Times.get(mode).keySet()){
+					for (double eventTime: mode2PersonId2Times.get(mode).get(person)){
+						writer.write(mode+"\t"+  person + "\t" + eventTime + "\n");		
+					}					
+				}
+			}
+
+			writer.close();
+		} catch (Exception e) {
+			throw new RuntimeException("Data is not written. Reason "+e );
+		}
+	}
+	
+	public static List<Id<Person>> getStuckAgents (String eventsFile){
+		SantiagoStuckAndAbortEventHandler handler = new SantiagoStuckAndAbortEventHandler();
+		EventsManager events = EventsUtils.createEventsManager();
+		events.addHandler(handler);
+		MatsimEventsReader reader = new MatsimEventsReader(events);
+		reader.readFile(eventsFile);
+		
+		return handler.getAgentsStuck();
 	}
 	
 	
