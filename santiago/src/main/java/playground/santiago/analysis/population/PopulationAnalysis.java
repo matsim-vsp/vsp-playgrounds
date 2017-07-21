@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.santiago.analysis;
+package playground.santiago.analysis.population;
 
 import java.io.BufferedWriter;
 import java.io.File;
