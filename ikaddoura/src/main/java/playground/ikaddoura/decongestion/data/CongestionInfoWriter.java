@@ -116,6 +116,8 @@ public class CongestionInfoWriter {
 				if (!isEmpty) chart.addSeries("Link " + linkId, timeBins, values);
 			}
 			chart.saveAsPng(outputPathCongestionInfo + "delays_perLinkAndTimeBin.png", 800, 600);
+			log.info("Output written to " + outputPathCongestionInfo + "delays_perLinkAndTimeBin.png");
+
 		}
 		
 	}

@@ -31,7 +31,6 @@ import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
@@ -47,6 +46,7 @@ public class RunExampleOptAV {
 
 	private static String configFile;
 	private static String outputDirectory;
+	private static String runId;
 		
 	private static boolean otfvis;
 	
@@ -59,11 +59,15 @@ public class RunExampleOptAV {
 			outputDirectory = args[1];
 			log.info("outputDirectory: "+ outputDirectory);
 			
+			runId = args[2];
+			log.info("runId: "+ runId);
+			
 			otfvis = false;
 			
 		} else {
 			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config_be_10pct_test.xml";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_test_2taxiTrips/";
+			runId = null;
 			otfvis = false;
 		}
 		
@@ -84,6 +88,7 @@ public class RunExampleOptAV {
 				new DecongestionConfigGroup());
 		
 		config.controler().setOutputDirectory(outputDirectory);
+		config.controler().setRunId(runId);
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
