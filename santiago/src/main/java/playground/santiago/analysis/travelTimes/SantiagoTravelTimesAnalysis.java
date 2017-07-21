@@ -36,317 +36,111 @@ import playground.santiago.analysis.eventHandlers.trafficVolumes.SantiagoLinkVol
 import playground.santiago.analysis.eventHandlers.travelDistances.SantiagoModeTripTravelDistanceHandler;
 import playground.santiago.analysis.eventHandlers.travelTimes.SantiagoModeTripTravelTimeHandler;
 
-/** 
- * 
- * Class to write ALL THE NECESSARY ANALYSIS FILES. Currently: Modal split, counts comparison and link volumes per hour from an events file.
- * 
- */
 
-public class SantiagoAnalysis {
-	//Fields related to the scenario and its steps - they must be changed depending on the step . a comment
-	private static final String CASE_NAME = "baseCase1pct";
-	private static final String STEP_NAME = "Step0";
-	private static final int FIRST_IT = 0;
-	private static final int LAST_IT = 100;
-	private static final int LENGTH = LAST_IT - FIRST_IT;
+public class SantiagoTravelTimesAnalysis {
 	
-	//Fields related to the outputDir - Do not change these.
-	private static final String RUN_DIR = "../../../runs-svn/santiago/" + CASE_NAME + "/";	
-	private static final String OUTPUT_FOLDER = RUN_DIR + "outputOf" + STEP_NAME + "/";	
-	private static final String ANALYSIS_DIR = OUTPUT_FOLDER + "analysis/";
-
-	//Fields related to the inputFiles	
-	private static final String NET_FILE = OUTPUT_FOLDER + "output_network.xml.gz";
-	private static final String CONFIG_FILE = OUTPUT_FOLDER + "output_config.xml.gz"; //TODO: BE AWARE OF THE .GZ OF THE CONFIG.
-	private static final String COUNTS_FILE = OUTPUT_FOLDER + "output_counts.xml.gz";
+	private String runDir;	
+	private String outputDir;
+	private String analysisDir;
+	private List<Id<Person>> stuckAgents;
 	
-	
-	public static void main (String[]arg){
-		
-		int it = 0;	
-		int itAux = FIRST_IT;
-		
-	//	String linkLengthsOutputDir = ANALYSIS_DIR + "networkLinks.txt";		
-	//	writeLinkLenghts(NET_FILE, linkLengthsOutputDir);
-				
-		while (it<=LENGTH){
-			
-		String itFolder = OUTPUT_FOLDER + "ITERS/it." + it + "/";		
-		String events = itFolder + it +".events.xml.gz";
-		String plans = itFolder + it + ".plans.xml.gz";
-		
-	//	String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
-	//	String countsCompareOutputDir = ANALYSIS_DIR + itAux + ".countscompare.txt"; //TODO: BE AWARE!!
-	//	String flowPatternOutputDir = ANALYSIS_DIR + itAux + ".link2Vol.txt";		 //TODO: BE AWARE!!
-		String departureTravelTimesOutputDir = ANALYSIS_DIR + itAux + ".modeTravelTimes.txt";	//TODO: BE AWARE!!
-		String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
-//		String agentsStuckOutputDir =  ANALYSIS_DIR + itAux + ".agentsStucked.txt"; //TODO: BE AWARE!!
-		
-		
-	//	writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
-	//	writeCountsCompare(events, countsCompareOutputDir);							 //TODO: BE AWARE!!
-	//	processEventsAndWriteFileForLinkVolumes(events,flowPatternOutputDir);		 //TODO: BE AWARE!!
-		List<Id<Person>> stuckAgents = getStuckAgents(events);
-		writeFileForTravelTimesByMode(events,departureTravelTimesOutputDir, stuckAgents);		 //TODO: BE AWARE!!
-		writeFileForTravelDistanceByMode(events,plans, travelDistanceOutputDir, stuckAgents);		 //TODO: BE AWARE!!
-//		writeStuckEvents(events,agentsStuckOutputDir);							//TODO: BE AWARE!!
-		
-		it = it + 50;
-		itAux = itAux + 50;
-		
-		}
+	public SantiagoTravelTimesAnalysis(String caseName, String stepName, List<Id<Person>> stuckAgents){
 
-
+		this.runDir = "../../../runs-svn/santiago/" + caseName + "/";
+		this.outputDir = runDir + "outputOf" + stepName + "/";
+		this.analysisDir = outputDir + "analysis/";	
+		this.stuckAgents=stuckAgents;
 	}
 	
-	private static void createDir(File file) {
+	private void createDir(File file) {
 		file.mkdirs();	
 	}
 	
-	private static void writeLinkLenghts(String networkFile, String outFile){
-		Network network = readNetwork( networkFile );
-		Link[] links = NetworkUtils.getSortedLinks(network);
+	public void writeFileForTravelTimesByMode(int it){
 		
-		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-			writer.write("linkId\tLength\tCapacity\n");
-			
-			for (Link link: links){										
-				writer.write(link.getId() +"\t"+  link.getLength() + "\t" + link.getCapacity() + "\n");
-			}
-			writer.close();
-		} catch (Exception e) {
-			throw new RuntimeException("Data is not written. Reason "+e );
-		}		
+	File analysisDir = new File(this.analysisDir);
+	if(!analysisDir.exists()) createDir(analysisDir);	
 	
-	}
+	String eventsFile = outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".events.xml.gz";
 	
+	SantiagoModeTripTravelTimeHandler handler = new SantiagoModeTripTravelTimeHandler(stuckAgents);
+	EventsManager events = EventsUtils.createEventsManager();
+	events.addHandler(handler);
+	MatsimEventsReader reader = new MatsimEventsReader(events);
 	
-	
-	private static void writeModalShare(String eventsFile , String outputFile){
-			
-		File analysisDir = new File(ANALYSIS_DIR);
-		if(!analysisDir.exists()) createDir(analysisDir);			
-		ModalShareFromEvents msc = new ModalShareFromEvents(eventsFile);
-		msc.run();
-		msc.writeResults(outputFile);
 
-			
-
-	}
+	reader.readFile(eventsFile);
 	
-	private static void writeCountsCompare (String eventsFile, String outputFile){
-		
-		File analysisDir = new File(ANALYSIS_DIR);
-		if(!analysisDir.exists()) createDir(analysisDir);	
-		Network network = readNetwork( NET_FILE );
-		Counts counts = readCounts( COUNTS_FILE );
-		VolumesAnalyzer volumes = readVolumes( network , eventsFile );
-		double scaleFactor;
-		if (CASE_NAME.substring(8,10).equals("10")){
-			scaleFactor = 10;
-		}else{
-			scaleFactor = 1;
-		}
-
-
 	
-	final CountsComparisonAlgorithm cca =
-			new CountsComparisonAlgorithm(
-					volumes,
-					counts,
-					network,
-					scaleFactor );
+	SortedMap<String, Map<Id<Person>, List<String>>> travelTimesByMode = handler.getLegModePesonIdTripDepartureTravelTimes ();
 
-		cca.run();
-		
-		try {
-			final CountSimComparisonTableWriter ctw=
-				new CountSimComparisonTableWriter(
-						cca.getComparison(),
-						Locale.ENGLISH);
-			ctw.writeFile( outputFile );
-		}
-		catch ( Exception e ) {
+	String outputFile = analysisDir + String.valueOf(it) + ".modeTravelTimes.txt";
 
-		}
-	}
-	
-	private static VolumesAnalyzer readVolumes ( Network network, String eventsFile ) {
-		final VolumesAnalyzer volumes = new VolumesAnalyzer( 3600 , 24 * 3600 - 1 , network );
-		final EventsManager events = EventsUtils.createEventsManager();
-		events.addHandler( volumes );
-		new MatsimEventsReader( events ).readFile( eventsFile );
-		return volumes;
-	}
-	
-	private static Counts readCounts(final String countsFile) {
-		final Counts counts = new Counts();
-		new MatsimCountsReader( counts ).readFile( countsFile );
-		return counts;
-	}
+	try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)) {
+		writer.write("mode\tpersonId\tstartTime-travelTime\n");
 
-	private static Network readNetwork(final String netFile) {
-		final Scenario sc = ScenarioUtils.createScenario( ConfigUtils.createConfig() );
-		new MatsimNetworkReader(sc.getNetwork()).readFile( netFile );
-		return sc.getNetwork();
-	}
-	
-	/*Trying extracts of Amit's codes to write the link volumes*/
-	private static void processEventsAndWriteFileForLinkVolumes(String eventsFile, String outFile){
-		
-		File analysisDir = new File(ANALYSIS_DIR);
-		if(!analysisDir.exists()) createDir(analysisDir);	
-		
-		/*running*/		
-		SantiagoLinkVolumeHandler handler = new SantiagoLinkVolumeHandler();
-		EventsManager events = EventsUtils.createEventsManager();
-		events.addHandler(handler);
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(eventsFile);
-		Map<Id<Link>, Map<Integer, Double>> linksVolumes = handler.getLinksVolumes();
-		
-		/*writing*/
-		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-			writer.write("linkId\tTimeSlot\tVolume\n");
-			for(Id<Link> l : linksVolumes.keySet()){				
-				for (int timeSlot: linksVolumes.get(l).keySet()){
-					writer.write(l+"\t"+  timeSlot + "\t" + linksVolumes.get(l).get(timeSlot) + "\n" );
+		for(String mode : travelTimesByMode.keySet()){				
+			for (Id<Person> person: travelTimesByMode.get(mode).keySet()){
+				for (String time: travelTimesByMode.get(mode).get(person)){						
+					writer.write(mode+"\t"+  person + "\t" + time + "\n");
 				}
+
 			}
-			writer.close();
-		} catch (Exception e) {
-			throw new RuntimeException("Data is not written. Reason "+e );
 		}
+		writer.close();
+	} catch (Exception e) {
+		throw new RuntimeException("Data is not written. Reason "+e );
 	}
-	
-	
-	private static void writeFileForTravelTimesByMode(String eventsFile, String outFile, List<Id<Person>> stuckAgents){
-		File analysisDir = new File(ANALYSIS_DIR);
-		if(!analysisDir.exists()) createDir(analysisDir);	
-		
-		SantiagoModeTripTravelTimeHandler handler = new SantiagoModeTripTravelTimeHandler(stuckAgents);
-		EventsManager events = EventsUtils.createEventsManager();
-		events.addHandler(handler);
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(eventsFile);
-		
-		
-		SortedMap<String, Map<Id<Person>, List<String>>> travelTimesByMode = handler.getLegModePesonIdTripDepartureTravelTimes ();
-		
-		/*writing*/		
-		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-			writer.write("mode\tpersonId\tstartTime-travelTime\n");
-			
-			for(String mode : travelTimesByMode.keySet()){				
-				for (Id<Person> person: travelTimesByMode.get(mode).keySet()){
-					for (String time: travelTimesByMode.get(mode).get(person)){						
-						writer.write(mode+"\t"+  person + "\t" + time + "\n");
-					}
-					
-				}
-			}
-			writer.close();
-		} catch (Exception e) {
-			throw new RuntimeException("Data is not written. Reason "+e );
-		}
 	}
+
 	
-	private static void writeFileForTravelDistanceByMode(String eventsFile, String plansFile, String outFile, List<Id<Person>> stuckAgents){
-		
-		File analysisDir = new File(ANALYSIS_DIR);
-		if(!analysisDir.exists()) createDir(analysisDir);
-		Config config = ConfigUtils.loadConfig(CONFIG_FILE);
-		Network network = readNetwork( NET_FILE );
-		
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		PopulationReader popReader = new PopulationReader(scenario);
-		popReader.readFile(plansFile);
-		Population population =  scenario.getPopulation();
-
-		
-		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network, population, stuckAgents);
-		EventsManager events = EventsUtils.createEventsManager();
-		events.addHandler(handler);
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(eventsFile);
-		
-		
-		SortedMap<String, Map<Id<Person>, List<String>>> privateTravelDistanceByMode = handler.getMode2PersonId2TravelDistances();
-		SortedMap<String, Map<Id<Person>,List<String>>> PtTravelDistanceByMode = handler.getPT2PersonId2TravelDistances(stuckAgents);
-		
-		/*writing*/		
-		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-			writer.write("mode\tpersonId\tstartTime-distance\n");
-			
-			for(String mode : privateTravelDistanceByMode.keySet()){				
-				for (Id<Person> person: privateTravelDistanceByMode.get(mode).keySet()){
-					for (String distances: privateTravelDistanceByMode.get(mode).get(person)){
-						writer.write(mode+"\t"+  person + "\t" + distances + "\n");					
-					}	
-				}
-			}
-			for(String mode : PtTravelDistanceByMode.keySet()){				
-				for (Id<Person> person: PtTravelDistanceByMode.get(mode).keySet()){
-					for (String distances: PtTravelDistanceByMode.get(mode).get(person)){
-						writer.write(mode+"\t"+  person + "\t" + distances + "\n");					
-					}	
-				}
-			}
-			
-			
-			
-			
-			
-			
-			writer.close();
-		} catch (Exception e) {
-			throw new RuntimeException("Data is not written. Reason "+e );
-		}
-	}
 	
-	public static void writeStuckEvents(String eventsFile, String outFile){
-		File analysisDir = new File(ANALYSIS_DIR);
-		if(!analysisDir.exists()) createDir(analysisDir);
 
-
-		
-		SantiagoStuckAndAbortEventHandler handler = new SantiagoStuckAndAbortEventHandler();
-		EventsManager events = EventsUtils.createEventsManager();
-		events.addHandler(handler);
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(eventsFile);
-		
-		
-		SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2Times = handler.getMode2IdAgentsStuck2Time();
-
-		
-		/*writing*/		
-		try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-			writer.write("mode\tpersonId\teventTime\n");
-
-			for(String mode : mode2PersonId2Times.keySet()){				
-				for (Id<Person> person: mode2PersonId2Times.get(mode).keySet()){
-					for (double eventTime: mode2PersonId2Times.get(mode).get(person)){
-						writer.write(mode+"\t"+  person + "\t" + eventTime + "\n");		
-					}					
-				}
-			}
-
-			writer.close();
-		} catch (Exception e) {
-			throw new RuntimeException("Data is not written. Reason "+e );
-		}
-	}
 	
-	public static List<Id<Person>> getStuckAgents (String eventsFile){
-		SantiagoStuckAndAbortEventHandler handler = new SantiagoStuckAndAbortEventHandler();
-		EventsManager events = EventsUtils.createEventsManager();
-		events.addHandler(handler);
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(eventsFile);
-		
-		return handler.getAgentsStuck();
-	}
-	
+//	public static void main (String[]arg){
+//		
+//		int it = 0;	
+//		int itAux = FIRST_IT;
+//		
+//	//	String linkLengthsOutputDir = ANALYSIS_DIR + "networkLinks.txt";		
+//	//	writeLinkLenghts(NET_FILE, linkLengthsOutputDir);
+//				
+//		while (it<=LENGTH){
+//			
+//		String itFolder = OUTPUT_FOLDER + "ITERS/it." + it + "/";		
+//		String events = itFolder + it +".events.xml.gz";
+//		String plans = itFolder + it + ".plans.xml.gz";
+//		
+//	//	String modalShareOutputDir = ANALYSIS_DIR +"modalSplit_It"+ itAux  + ".txt"; //TODO: BE AWARE!!
+//	//	String countsCompareOutputDir = ANALYSIS_DIR + itAux + ".countscompare.txt"; //TODO: BE AWARE!!
+//	//	String flowPatternOutputDir = ANALYSIS_DIR + itAux + ".link2Vol.txt";		 //TODO: BE AWARE!!
+//		String departureTravelTimesOutputDir = ANALYSIS_DIR + itAux + ".modeTravelTimes.txt";	//TODO: BE AWARE!!
+//		String travelDistanceOutputDir = ANALYSIS_DIR + itAux + ".modeTravelDistances.txt";	//TODO: BE AWARE!!
+////		String agentsStuckOutputDir =  ANALYSIS_DIR + itAux + ".agentsStucked.txt"; //TODO: BE AWARE!!
+//		
+//		
+//	//	writeModalShare(events, modalShareOutputDir);								 //TODO: BE AWARE!!
+//	//	writeCountsCompare(events, countsCompareOutputDir);							 //TODO: BE AWARE!!
+//	//	processEventsAndWriteFileForLinkVolumes(events,flowPatternOutputDir);		 //TODO: BE AWARE!!
+//		List<Id<Person>> stuckAgents = getStuckAgents(events);
+//		writeFileForTravelTimesByMode(events,departureTravelTimesOutputDir, stuckAgents);		 //TODO: BE AWARE!!
+//		writeFileForTravelDistanceByMode(events,plans, travelDistanceOutputDir, stuckAgents);		 //TODO: BE AWARE!!
+////		writeStuckEvents(events,agentsStuckOutputDir);							//TODO: BE AWARE!!
+//		
+//		it = it + 50;
+//		itAux = itAux + 50;
+//		
+//		}
+//
+//
+//	}
+//	
+//	TODO
+
+//	
+
+//	
+
+//	
 	
 }
