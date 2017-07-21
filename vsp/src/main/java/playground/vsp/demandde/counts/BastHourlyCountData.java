@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * @author Tilmann Schlenther
  */
-class BastHourlyCountData{
+public class BastHourlyCountData{
 	
 	private String id;
 	private Day representedDay;
