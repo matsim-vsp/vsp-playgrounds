@@ -140,9 +140,7 @@ class KNModeChoiceCalibMain {
 			} else {
 				convergenceCriterion= new FixedIterationNumberConvergenceCriterion(100, 10 );
 			}
-			RandomSearch<ModeChoiceDecisionVariable> randomSearch = null ;
-			
-			new RandomSearch<>( simulator,
+			RandomSearch<ModeChoiceDecisionVariable> randomSearch = new RandomSearch<>( simulator,
 					new ModeChoiceRandomizer(scenario) ,
 					initialDecisionVariable ,
 					convergenceCriterion ,
