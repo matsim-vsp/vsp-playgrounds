@@ -231,13 +231,14 @@ public class MatsimOpdytsEquilIntegration {
 				maxIterations, // this many times simulator.run(...) and thus controler.run() will be called.
 				maxTransitions,
 				populationSize,
-				MatsimRandom.getRandom(),
-				interpolate,
-				objectiveFunction,
-				includeCurrentBest,
-				warmupIterations,
-				useAllWarmUpIterations
+				objectiveFunction
 				);
+
+		randomSearch.setRandom(MatsimRandom.getRandom());
+		randomSearch.setInterpolate(interpolate);
+		randomSearch.setIncludeCurrentBest(includeCurrentBest);
+		randomSearch.setWarmupIterations(warmupIterations);
+		randomSearch.setUseAllWarmupIterations(useAllWarmUpIterations);
 
 		// probably, an object which decide about the inertia
 		SelfTuner selfTuner = new SelfTuner(0.95);
@@ -245,7 +246,7 @@ public class MatsimOpdytsEquilIntegration {
 		randomSearch.setLogPath(OUT_DIR);
 
 		// run it, this will eventually call simulator.run() and thus controler.run
-		randomSearch.run(selfTuner );
+//		randomSearch.run(selfTuner );
 
 		// remove the unused iterations
 		for (int index =0; index < maxIterations; index++) {
