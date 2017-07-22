@@ -22,16 +22,9 @@
  */
 package playground.vsp.congestion;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -47,12 +40,7 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -60,6 +48,7 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.ControlerListener;
 import org.matsim.core.controler.listener.IterationStartsListener;
@@ -78,15 +67,9 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
-
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.events.CongestionEvent;
-import playground.vsp.congestion.handlers.CongestionEventHandler;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
-import playground.vsp.congestion.handlers.TollHandler;
+import playground.vsp.congestion.handlers.*;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
 
 /**
@@ -202,6 +185,7 @@ public class MarginalCongestionHandlerFlowSpillbackQueueQsimTest {
 
 		events.addHandler(new CongestionHandlerImplV9(events, (MutableScenario) sc));
 
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 
@@ -242,6 +226,7 @@ public class MarginalCongestionHandlerFlowSpillbackQueueQsimTest {
 
 		events.addHandler(new CongestionHandlerImplV8(events, (MutableScenario) sc));
 
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 
