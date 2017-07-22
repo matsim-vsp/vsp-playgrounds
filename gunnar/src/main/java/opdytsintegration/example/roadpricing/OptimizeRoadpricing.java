@@ -112,8 +112,9 @@ class OptimizeRoadpricing {
 		final int maxRandomSearchIterations = Integer.parseInt(myConfig.get("opdyts", "maxiterations"));
 		final int maxRandomSearchTransitions = Integer.parseInt(myConfig.get("opdyts", "maxtransitions"));
 
-		//NEW: amit
-		final int warmupIterations = 1; //Integer.parseInt(myConfig.get("opdyts", "warmupIterations®"));
+		// NEW: amit
+		final int warmupIterations = 1; // Integer.parseInt(myConfig.get("opdyts",
+										// "warmupIterations®"));
 
 		/*
 		 * Create the MATSim scenario.
@@ -170,8 +171,7 @@ class OptimizeRoadpricing {
 		relevantModes.add("car");
 
 		final MATSimSimulator2<TollLevels> matsimSimulator = new MATSimSimulator2<>(
-				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario
-        );
+				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario);
 		matsimSimulator.addSimulationStateAnalyzer(
 				new DifferentiatedLinkOccupancyAnalyzer.Provider(timeDiscretization, relevantModes, relevantLinkIds));
 
@@ -183,12 +183,16 @@ class OptimizeRoadpricing {
 		 */
 		final RandomSearch<TollLevels> randomSearch = new RandomSearch<>(matsimSimulator, decisionVariableRandomizer,
 				initialTollLevels, convergenceCriterion, maxRandomSearchIterations, maxRandomSearchTransitions,
-				randomSearchPopulationSize, MatsimRandom.getRandom(), parallelSampling, objectiveFunction,
-				includeCurrentBest, 1, false);
+				randomSearchPopulationSize, objectiveFunction);
 		randomSearch.setLogFileName(originalOutputDirectory + "opdyts.log");
 		randomSearch.setConvergenceTrackingFileName(originalOutputDirectory + "opdyts.con");
 		randomSearch.setOuterIterationLogFileName(originalOutputDirectory + "opdyts.opt");
 		randomSearch.setMaxTotalMemory(averageIterations);
+
+		randomSearch.setWarmupIterations(1);
+		randomSearch.setUseAllWarmupIterations(false);
+		randomSearch.setRandom(MatsimRandom.getRandom());
+		randomSearch.setInterpolate(parallelSampling);
 
 		/*
 		 * Run it.
@@ -196,10 +200,13 @@ class OptimizeRoadpricing {
 		if (adjustWeights) {
 			final SelfTuner selfTuner = new SelfTuner(0.95);
 			selfTuner.setNoisySystem(true);
-			randomSearch.run(selfTuner);
+			randomSearch.setSelfTuner(selfTuner);
 		} else {
-			randomSearch.run(initialEquilibriumWeight, initialUniformityWeight);
+			randomSearch.setSelfTuner(null);
+			randomSearch.setInitialEquilibriumGapWeight(initialEquilibriumWeight);
+			randomSearch.setInitialUniformityGapWeight(initialUniformityWeight);
 		}
+		randomSearch.run();
 
 		System.out.println("... DONE.");
 	}
