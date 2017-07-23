@@ -32,21 +32,9 @@ public class SantiagoPTDistanceFromPlans {
 	private Population population;
 	public SortedMap<String,Map<Id<Person>,List<String>>> Pt2PersonId2TravelDistances = new TreeMap<>();
 
-	//	public static void main (String[]args){
-	//		String netFile = "../../../runs-svn/santiago/baseCase1pct/outputOfStep1/output_network.xml.gz";
-	//		String plansFile = "../../../runs-svn/santiago/baseCase1pct/outputOfStep1/ITERS/it.0/0.plans.xml.gz";
-	//		SantiagoPTDistanceFromPlans spd = new SantiagoPTDistanceFromPlans(netFile,plansFile);
-	//		spd.Run();
-	//	}
-
-
-	public SantiagoPTDistanceFromPlans(/*String netFile,*/ Population population){
+	public SantiagoPTDistanceFromPlans(Population population){
 
 		this.population = population;
-
-		//		MatsimNetworkReader netReader = new MatsimNetworkReader(scenario.getNetwork());
-		//		netReader.readFile(netFile);
-		//		this.network=scenario.getNetwork();						
 
 	}
 
@@ -231,18 +219,4 @@ public class SantiagoPTDistanceFromPlans {
 		return this.Pt2PersonId2TravelDistances;
 	}
 
-	//	private void Run() {
-	//		getData();
-	//		SortedMap<String,Map<Id<Person>,List<String>>> test = getPt2PersonId2TravelDistances();
-	//		
-	//		for(String mode : test.keySet()){
-	//			for(Id<Person> person: test.get(mode).keySet()){
-	//				for (String depDistances : test.get(mode).get(person)){
-	//					System.out.println(mode + " " + person.toString() + " " + depDistances);
-	//				}
-	//			}
-	//			
-	//		}
-	//		
-	//	}
 }
