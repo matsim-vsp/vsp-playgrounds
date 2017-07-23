@@ -24,23 +24,23 @@ import contrib.baseline.lib.NetworkUtils;
 import playground.santiago.analysis.eventHandlers.travelDistances.SantiagoModeTripTravelDistanceHandler;
 
 public class SantiagoTravelDistancesAnalysis {
-	
+
 	private String runDir;	
 	private String outputDir;
 	private String analysisDir;
 	private List<Id<Person>> stuckAgents;
-	
+
 	public SantiagoTravelDistancesAnalysis(String caseName, String stepName, List<Id<Person>> stuckAgents) {		
 		this.runDir = "../../../runs-svn/santiago/" + caseName + "/";
 		this.outputDir = runDir + "outputOf" + stepName + "/";
 		this.analysisDir = outputDir + "analysis/";	
 		this.stuckAgents=stuckAgents;
 	}
-	
+
 	private void createDir(File file) {
 		file.mkdirs();	
 	}
-	
+
 	public void writeFileForTravelDistancesByMode(int it, int itAux){
 
 		File analysisDir = new File(this.analysisDir);
@@ -59,14 +59,14 @@ public class SantiagoTravelDistancesAnalysis {
 		popReader.readFile(popFile);
 		Population population =  scenario.getPopulation();
 
-		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network,population,stuckAgents);
+		SantiagoModeTripTravelDistanceHandler handler = new SantiagoModeTripTravelDistanceHandler(config,network,stuckAgents);
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(handler);
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
 
 		SortedMap<String, Map<Id<Person>, List<String>>> privateTravelDistanceByMode = handler.getMode2PersonId2TravelDistances();
-		SortedMap<String, Map<Id<Person>,List<String>>> PtTravelDistanceByMode = handler.getPT2PersonId2TravelDistances();
+		//		SortedMap<String, Map<Id<Person>,List<String>>> PtTravelDistanceByMode = handler.getPT2PersonId2TravelDistances();
 
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)) {
 			writer.write("mode\tpersonId\tstartTime-distance\n");
@@ -78,6 +78,9 @@ public class SantiagoTravelDistancesAnalysis {
 					}	
 				}
 			}
+
+			SantiagoPTDistanceFromPlans ptDistancesHand = new SantiagoPTDistanceFromPlans(population);
+			SortedMap<String,Map<Id<Person>,List<String>>> PtTravelDistanceByMode=ptDistancesHand.getPt2PersonId2TravelDistances(stuckAgents);
 			for(String mode : PtTravelDistanceByMode.keySet()){				
 				for (Id<Person> person: PtTravelDistanceByMode.get(mode).keySet()){
 					for (String distances: PtTravelDistanceByMode.get(mode).get(person)){
