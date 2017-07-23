@@ -33,7 +33,7 @@ public class SantiagoStuckAgentsAnalysis {
 		file.mkdirs();	
 	}
 	
-	public void writeStuckEvents(int it){
+	public void writeStuckEvents(int it, int itAux){
 		File analysisDir = new File(this.analysisDir);
 		if(!analysisDir.exists()) createDir(analysisDir);
 
@@ -47,7 +47,7 @@ public class SantiagoStuckAgentsAnalysis {
 
 		SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2Times = handler.getMode2IdAgentsStuck2Time();
 
-		String outputFile = analysisDir + String.valueOf(it) + ".modeStuckAgents.txt";
+		String outputFile = this.analysisDir + String.valueOf(itAux) + ".modeStuckAgents.txt";
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)) {
 			writer.write("mode\tpersonId\teventTime\n");
 			for(String mode : mode2PersonId2Times.keySet()){				
