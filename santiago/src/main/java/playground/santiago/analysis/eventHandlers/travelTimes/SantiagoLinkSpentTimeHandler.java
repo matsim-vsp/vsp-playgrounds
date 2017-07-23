@@ -20,8 +20,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 
 /**
- * @author LeoCamus, HEAVILY based on Amit's code. The intention is to get the information
- * of the link enter and spent times by every agent that use the networks.
+ * @author Get the information of the link enter and spent times by every agent that use the networks. Stuck agents are considered, be aware.
  */
 
 public class SantiagoLinkSpentTimeHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
