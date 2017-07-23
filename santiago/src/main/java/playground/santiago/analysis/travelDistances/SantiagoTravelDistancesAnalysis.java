@@ -41,7 +41,7 @@ public class SantiagoTravelDistancesAnalysis {
 		file.mkdirs();	
 	}
 	
-	public void writeFileForTravelDistancesByMode(int it){
+	public void writeFileForTravelDistancesByMode(int it, int itAux){
 
 		File analysisDir = new File(this.analysisDir);
 		if(!analysisDir.exists()) createDir(analysisDir);
@@ -50,7 +50,7 @@ public class SantiagoTravelDistancesAnalysis {
 		String netFile = outputDir + "output_network.xml.gz";
 		String popFile = outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".plans.xml.gz";
 		String eventsFile = outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".events.xml.gz";
-		String outputFile = analysisDir + String.valueOf(it) + ".modeTravelDistances.txt";
+		String outputFile = this.analysisDir + String.valueOf(itAux) + ".modeTravelDistances.txt";
 
 		Config config = ConfigUtils.loadConfig(configFile);
 		Network network = NetworkUtils.readNetwork(netFile);
