@@ -41,8 +41,6 @@ public class TtStaticLinkFlowValuesPerHour implements LinkEnterEventHandler, Veh
 		
 	private Map<Id<Link>, int[]> staticLinkFlowsPerHour = new HashMap<>();
 	
-	private int counter = 0;
-	
 	@Override
 	public void reset(int iteration) {
 		staticLinkFlowsPerHour.clear();
@@ -59,17 +57,9 @@ public class TtStaticLinkFlowValuesPerHour implements LinkEnterEventHandler, Veh
 	}
 	
 	private void increment(Id<Link> linkId, int hour) {
-		if (hour >= 24){
-			if (counter < 1){
-				LOG.warn("An event on link " + linkId + " is ignored in the static link flow analysis per hour since it happened after midnight at hour "
-						+ hour + ". This warning is only given once.");
-			}
-			counter++;
-			return;
-		}
 		if (!staticLinkFlowsPerHour.containsKey(linkId))
 			staticLinkFlowsPerHour.put(linkId, new int[24]);
-		staticLinkFlowsPerHour.get(linkId)[hour]++;
+		staticLinkFlowsPerHour.get(linkId)[hour%24]++;
 	}
 
 	/**
@@ -89,10 +79,6 @@ public class TtStaticLinkFlowValuesPerHour implements LinkEnterEventHandler, Veh
 		if (!staticLinkFlowsPerHour.containsKey(linkId))
 			return new int[24];
 		return staticLinkFlowsPerHour.get(linkId);
-	}
-	
-	public int getNumberOfIgnoredEvents(){
-		return counter;
 	}
 
 }
