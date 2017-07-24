@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
@@ -41,7 +42,8 @@ import org.matsim.vehicles.Vehicle;
  */
 
 public class SAVPassengerTracker implements ActivityEndEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
-	
+	private static final Logger log = Logger.getLogger(SAVPassengerTracker.class);
+
 	private final Set<Id<Person>> taxiDrivers = new HashSet<>();
 	private final Set<Id<Vehicle>> taxiVehicles = new HashSet<>();
 	private final Map<Id<Vehicle>, Id<Person>> vehicle2passenger = new HashMap<>();
@@ -105,7 +107,10 @@ public class SAVPassengerTracker implements ActivityEndEventHandler, PersonEnter
 				if (vehicle2passenger.get(event.getVehicleId()) != null) {
 					vehicle2passenger.remove(event.getVehicleId());
 				} else {
-					throw new RuntimeException("The passenger " + event.getPersonId() + " should have entered the taxi vehicle " + event.getVehicleId() + " before time = " + event.getTime() + ". Aborting...");
+					log.warn("The passenger " + event.getPersonId() + " should have entered the taxi vehicle " + event.getVehicleId() + " before time = " + event.getTime() + ".");
+					for (Id<Vehicle> vehicleId : vehicle2passenger.keySet()) {
+						log.warn("taxi vehicle: " + vehicleId + " ## passenger: " + vehicle2passenger.get(vehicleId));
+					}
 				}
 			}	
 		}
