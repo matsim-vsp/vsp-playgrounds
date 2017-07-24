@@ -22,6 +22,7 @@
 package utils;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -33,6 +34,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
+import contrib.baseline.lib.PopulationUtils;
+
 /**
  * Class to modify a population file.
  * It removes all link information of activities and all routes.
@@ -41,33 +44,52 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class ModifyPopulation {
 
-	private static final String INPUT_BASE_DIR = "../../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
+	private static final String INPUT_BASE_DIR = "../../public-svn/matsim/scenarios/countries/de/berlin/2017-07-20_car_pt_ptSlow_bicycle_walk_10pct/";
 	
 	public static void main(String[] args) {
 		
 		Config config = ConfigUtils.createConfig();
-		config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n.xml.gz");
-		config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/"
-				+ "commuter_population_wgs84_utm33n_car_only.xml.gz");
+		config.network().setInputFile(INPUT_BASE_DIR + "be_251.output_network.xml.gz");
+		config.plans().setInputFile(INPUT_BASE_DIR + "be_251.output_plans_selected.xml.gz");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
-		for (Person p : scenario.getPopulation().getPersons().values()) {
-			Plan plan = p.getPlans().get(0);
-			for (PlanElement pe : plan.getPlanElements()) {
-				if (pe instanceof Activity) {
-					// remove link
-					((Activity) pe).setLinkId(null);
-				}
-				if (pe instanceof Leg) {
-					// remove route
-					((Leg) pe).setRoute(null);
+//		removeAllLinkInfos(scenario.getPopulation());		
+		
+		new PopulationWriter(onlyKeepCarUsers(scenario.getPopulation())).write(INPUT_BASE_DIR + "be_251.output_plans_selected_carOnly.xml.gz");
+	}
+	
+	public static Population onlyKeepCarUsers(Population population){
+		Population carPop = PopulationUtils.getEmptyPopulation();
+		for (Person p : population.getPersons().values()){
+			Plan plan = p.getSelectedPlan();
+			for (PlanElement pe : plan.getPlanElements()){
+				if (pe instanceof Leg){
+					if (((Leg) pe).getMode().equals(TransportMode.car)){
+						carPop.addPerson(p);
+						break;
+					}
 				}
 			}
 		}
-		
-		new PopulationWriter(scenario.getPopulation()).write(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/"
-				+ "commuter_population_wgs84_utm33n_car_only_woLinks.xml.gz");
+		return carPop;
+	}
+	
+	public static void removeAllLinkInfos(Population population){
+		for (Person p : population.getPersons().values()) {
+			for (Plan plan : p.getPlans()) {
+				for (PlanElement pe : plan.getPlanElements()) {
+					if (pe instanceof Activity) {
+						// remove link
+						((Activity) pe).setLinkId(null);
+					}
+					if (pe instanceof Leg) {
+						// remove route
+						((Leg) pe).setRoute(null);
+					}
+				}
+			}
+		}
 	}
 	
 	public static void removeRoutesLeaveFirstPlan(Population population){

@@ -106,7 +106,7 @@ public class DgIdConverter {
 	 * @param toLinkId
 	 * @return the light id
 	 */
-	public Id<DgGreen> convertFromLinkIdToLinkId2LightId(Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> toLinkId){
+	public Id<DgStreet> convertFromLinkIdToLinkId2LightId(Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> toLinkId){
 		String id =  null;
 		if (fromLaneId == null){
 			id = fromLinkId.toString()  + "55" + toLinkId.toString();
@@ -115,7 +115,7 @@ public class DgIdConverter {
 			id = fromLinkId.toString() + "66" + fromLaneId.toString() + "55" + toLinkId.toString();
 		}
 		String idString = id.toString();
-		return idPool.createId(idString, DgGreen.class);
+		return idPool.createId(idString, DgStreet.class);
 	}
 	
 	/**

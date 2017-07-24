@@ -33,17 +33,21 @@ public class Cottbus2KS2010 {
 
 	public static void main(String[] args) throws Exception {
 		// input files
-		String signalSystemsFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/signal_systems_no_13.xml";
-		String signalGroupsFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/signal_groups_no_13.xml";
-		String signalControlFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/signal_control_no_13.xml";
-		String networkFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/network_wgs84_utm33n.xml.gz";
-		String lanesFilename = "../../../shared-svn/projects/cottbus/cottbus_scenario/lanes.xml";
+		String signalSystemsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_systems_no_13.xml";
+//		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13.xml";
+		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmerLinkBased.xml";
+//		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_no_13.xml";
+		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_laemmer.xml";
+		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n.xml.gz";
+		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes.xml";
 		// change run number here to use another base case
-		String populationFilename = "../../../runs-svn/cottbus/before2015/run1728/1728.output_plans.xml.gz";
+//		String populationFilename = "../../runs-svn/cottbus/before2015/run1728/1728.output_plans.xml.gz";
+		String populationFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/cb_spn_gemeinde_nachfrage_landuse_woMines/"
+				+ "commuter_population_wgs84_utm33n_car_only_100it_MS_cap0.7.xml.gz";
 
 		// output files
-		String outputDirectory = "../../../shared-svn/projects/cottbus/cb2ks2010/";
-		String dateFormat = "2015-02-25";
+		String outputDirectory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/";
+		String dateFormat = "2017-07-24";
 
 		/* parameters for the time interval */
 		double startTime = 5.5 * 3600.0;
@@ -52,11 +56,10 @@ public class Cottbus2KS2010 {
 		// double endTime = 18.5 * 3600.0;
 		/* parameters for the network area */
 		double signalsBoundingBoxOffset = 500.0;
-		// Okt'14: sBB 500 instead of 50 to avoid effect that travelers drive
-		// from the ring around cottbus outside and inside again to jump in time
-		double cuttingBoundingBoxOffset = 50.0; // an offset >= 31000.0 results
-												// in a bounding box that
-												// contains the hole network
+		/* Okt'14: sBB 500 instead of 50 to avoid effect that travelers drive
+		 * from the ring around cottbus outside and inside again to jump in time */
+		// an offset >= 31000.0 results in a bounding box that contains the hole network
+		double cuttingBoundingBoxOffset = 50.0;
 		/* parameters for the interior link filter */
 		double freeSpeedFilter = 15.0;
 		boolean useFreeSpeedTravelTime = true;
@@ -69,7 +72,7 @@ public class Cottbus2KS2010 {
 		int cellsX = 5; // = default value
 		int cellsY = 5; // = default value
 		/* other parameters */
-		String scenarioDescription = "run run1728 output plans between 05:30 and 09:30";
+		String scenarioDescription = "run 100it 0.7cap output plans with flexible signals between 05:30 and 09:30";
 		// String scenarioDescription =
 		// "run run1728 output plans between 13:30 and 18:30";
 

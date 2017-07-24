@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Node;
 
 
 /**
@@ -40,7 +39,10 @@ public class DgCrossing {
 	private Map<Id<DgCrossingNode>, DgCrossingNode> nodes = new HashMap<>();
 	private Map<Id<DgStreet>, DgStreet> lights = new HashMap<>();
 	private Map<Id<DgProgram>, DgProgram> programs = new HashMap<>();
+	private Map<Id<DgStreet>, TtRestriction> restrictions = new HashMap<>();
 	private String type;
+	private int cycle;
+	private int clearTime = 2;
 
 	public DgCrossing(Id<DgCrossing> id) {
 		this.id = id;
@@ -80,11 +82,38 @@ public class DgCrossing {
 		return this.programs;
 	}
 	
+	public void addRestriction(TtRestriction r){
+		if (this.restrictions.containsKey(r.getLightId())){
+			log.warn("A restriction for light " + r.getLightId() + " already exists!");
+		}
+		this.restrictions.put(r.getLightId(), r);
+	}
+	
+	public Map<Id<DgStreet>, TtRestriction> getRestrictions(){
+		return this.restrictions;
+	}
+	
 	public String getType() {
 		return type;
 	}
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public int getCycle() {
+		return cycle;
+	}
+
+	public void setCycle(int cycle) {
+		this.cycle = cycle;
+	}
+
+	public int getClearTime() {
+		return clearTime;
+	}
+
+	public void setClearTime(int clearTime) {
+		this.clearTime = clearTime;
 	}
 }
