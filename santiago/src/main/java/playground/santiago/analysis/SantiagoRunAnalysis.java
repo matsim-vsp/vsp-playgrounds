@@ -31,8 +31,8 @@ public class SantiagoRunAnalysis {
 			SantiagoTravelTimesAnalysis timesAnalysis = new SantiagoTravelTimesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
 			timesAnalysis.writeFileForTravelTimesByMode(it,itAux);
 			
-			SantiagoTravelDistancesAnalysis distancesAnalysis = new SantiagoTravelDistancesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
-			distancesAnalysis.writeFileForTravelDistancesByMode(it,itAux);
+//			SantiagoTravelDistancesAnalysis distancesAnalysis = new SantiagoTravelDistancesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
+//			distancesAnalysis.writeFileForTravelDistancesByMode(it,itAux);
 			
 			it+=50;
 			itAux+=50;	
