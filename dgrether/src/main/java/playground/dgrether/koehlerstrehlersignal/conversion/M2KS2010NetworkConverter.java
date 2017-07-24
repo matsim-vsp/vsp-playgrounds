@@ -23,7 +23,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,22 +36,27 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
+import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.model.Signal;
+import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 import org.matsim.lanes.data.LanesToLinkAssignment;
-import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.contrib.signals.model.Signal;
-import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.vis.vecmathutils.VectorUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossingNode;
@@ -58,11 +65,9 @@ import playground.dgrether.koehlerstrehlersignal.data.DgKSNetwork;
 import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
 import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.data.TtCrossingType;
+import playground.dgrether.koehlerstrehlersignal.data.TtRestriction;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Class to convert a MATSim network into a KS-model network with crossings and
@@ -75,11 +80,15 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class M2KS2010NetworkConverter {
 
-	private static final Logger log = Logger
-			.getLogger(M2KS2010NetworkConverter.class);
+	private static final Logger LOG = Logger.getLogger(M2KS2010NetworkConverter.class);
+	
+	private static final int MIN_GREEN_RILSA = 5;
+	// TODO adapt this if necessary (Nicos Laemmer implemenation also uses a standard clear time of 5 seconds for all group switches)
+	private static final int DEFAULT_CLEAR_TIME = 5;
+	// TODO adapt this if necessary (90 seconds is the cycle time of fixed-time and laemmer signals in the cottbus scenario)
+	private static final int DEFAULT_CYCLE_TIME = 90;
 
 	private Integer cycle = null;
-	// public static final String DEFAULT_PROGRAM_ID = "4711";
 
 	private DgKSNetwork dgNetwork;
 	private double timeInterval;
@@ -87,6 +96,8 @@ public class M2KS2010NetworkConverter {
 	private DgIdConverter idConverter;
 
 	private Set<Id<Link>> signalizedLinks;
+	private Map<Id<Signal>, List<Id<DgStreet>>> signalToLightsMap = new HashMap<>(); 
+	private Map<Id<SignalSystem>, Id<DgCrossing>> systemToCrossingMap = new HashMap<>();
 
 	private Envelope signalsBoundingBox;
 
@@ -120,34 +131,34 @@ public class M2KS2010NetworkConverter {
 	public DgKSNetwork convertNetworkLanesAndSignals(Network network,
 			Lanes lanes, SignalsData signals,
 			Envelope signalsBoundingBox, double startTime, double endTime) {
-		log.info("Checking cycle time...");
-		this.cycle = readCycle(signals);
-		log.info("cycle set to " + this.cycle);
-		signalizedLinks = this.getSignalizedLinkIds(signals
-				.getSignalSystemsData());
-		log.info("Converting network ...");
+		LOG.info("Checking cycle time...");
+		readCycle(signals);
+		LOG.info("cycle set to " + this.cycle);
+		signalizedLinks = this.getSignalizedLinkIds(signals.getSignalSystemsData());
+		LOG.info("Converting network ...");
 		this.timeInterval = endTime - startTime;
 		this.signalsBoundingBox = signalsBoundingBox;
 		this.dgNetwork = this.convertNetwork(network, lanes, signals);
-		log.info("Network converted.");
+		LOG.info("Network converted.");
 		return this.dgNetwork;
 	}
 
-	private int readCycle(SignalsData signalsData) {
-		Integer c = null;
-		for (SignalSystemControllerData ssc : signalsData
-				.getSignalControlData()
-				.getSignalSystemControllerDataBySystemId().values()) {
-			for (SignalPlanData plan : ssc.getSignalPlanData().values()) {
-				if (c == null) {
-					c = plan.getCycleTime();
-				} else if (c != plan.getCycleTime()) {
-					throw new IllegalStateException(
-							"Signal plans must have a common cycle time!");
+	private void readCycle(SignalsData signalsData) {
+		for (SignalSystemControllerData ssc : signalsData.getSignalControlData().getSignalSystemControllerDataBySystemId().values()) {
+			if (ssc.getControllerIdentifier().equals(DefaultPlanbasedSignalSystemController.IDENTIFIER)) {
+				for (SignalPlanData plan : ssc.getSignalPlanData().values()) {
+					if (cycle == null) {
+						cycle = plan.getCycleTime();
+					} else if (cycle != plan.getCycleTime()) {
+						throw new IllegalStateException("Signal plans must have a common cycle time!");
+					}
 				}
 			}
+			if (cycle == null) {
+				// no signal controller is a fixed-time signal. use a default cycle time
+				cycle = DEFAULT_CYCLE_TIME;
+			}
 		}
-		return c;
 	}
 
 	/*
@@ -178,7 +189,7 @@ public class M2KS2010NetworkConverter {
 			DgCrossing crossing = ksnet.getCrossings().get(
 					this.idConverter.convertNodeId2CrossingId(link.getToNode()
 							.getId()));
-			// lights and programs are only necessary for expanded crossings
+			// lights are only necessary for expanded crossings
 			if (!crossing.getType().equals(TtCrossingType.NOTEXPAND)) {
 				// prepare some objects/data
 				Link backLink = this.getBackLink(link);
@@ -189,19 +200,74 @@ public class M2KS2010NetworkConverter {
 								.getId()));
 				LanesToLinkAssignment l2l = lanes.getLanesToLinkAssignments()
 						.get(link.getId());
+				if (link.getId().equals(Id.createLinkId(40))){
+					System.out.println("Stopp");
+				}
 				// create crossing layout
 				if (signalizedLinks.contains(link.getId())) {
-					log.debug("link: " + link.getId() + " is signalized...");
+					LOG.debug("link: " + link.getId() + " is signalized...");
 					SignalSystemData system = this
 							.getSignalSystem4SignalizedLinkId(
 									signalsData.getSignalSystemsData(),
 									link.getId());
+					// remember system - crossing relation
+					systemToCrossingMap.put(system.getId(), crossing.getId());
 					this.createCrossing4SignalizedLink(crossing, link,
 							inLinkToNode, backLinkId, l2l, system, signalsData);
 				} else {
-					log.debug("link: " + link.getId() + " not signalized...");
+					LOG.debug("link: " + link.getId() + " not signalized...");
 					this.createCrossing4NotSignalizedLink(crossing, link,
 							inLinkToNode, backLinkId, l2l);
+				}
+			}
+		}		
+		
+		// create restrictions based on signal groups if crossing type is "flexible"
+		for (SignalSystemData system : signalsData.getSignalSystemsData().getSignalSystemData().values()){
+			DgCrossing crossing = ksnet.getCrossings().get(systemToCrossingMap.get(system.getId()));
+			if (!crossing.getType().equals(TtCrossingType.FLEXIBLE)){
+				// only add restrictions for crossings with type flexible
+				continue;
+			}
+			Map<Id<SignalGroup>, SignalGroupData> groupsOfThisSystem = 
+					signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(system.getId());
+			// preprocessing: look for groups of signals of this system
+			Map<Id<Signal>, Id<SignalGroup>> signalToGroupMap = new HashMap<>();
+			for (SignalGroupData group : groupsOfThisSystem.values()){
+				for (Id<Signal> signalId : group.getSignalIds()){
+					signalToGroupMap.put(signalId, group.getId());
+				}
+			}
+			for (Id<Signal> signalId : system.getSignalData().keySet()){
+				SignalGroupData groupOfThisSignal = groupsOfThisSystem.get(signalToGroupMap.get(signalId));
+				// a signal in MATSim can correspond to more than one light in the (over time unexpanded) ks network
+				for (Id<DgStreet> lightId : signalToLightsMap.get(signalId)){
+					// TODO adapt this when more flexible signal groups (other than Nicos Laemmer groups) should be allowed
+					if (crossing.getRestrictions().containsKey(lightId)){
+						LOG.info("restrictions for this light are already processed");
+						// note: this assumes that signals leading to the same light belong to the same group
+						continue;
+					}
+					TtRestriction restriction = new TtRestriction(lightId, false);
+					crossing.addRestriction(restriction);
+					for (Id<Signal> otherSignalId : system.getSignalData().keySet()) {
+						for (Id<DgStreet> otherLightId : signalToLightsMap.get(otherSignalId)) {
+							if (lightId.equals(otherLightId)) {
+								// found itself
+								continue;
+							}
+							if (groupOfThisSignal.getSignalIds().contains(otherSignalId)) {
+								// same group - add all corresponding lights to "on" and "off" rlight
+								restriction.addOnLight(otherLightId);
+								restriction.addOffLight(otherLightId);
+
+							} else {
+								// different group - do not allow green at the same time (as for Nicos Laemmer implementation)
+								// i.e. add all corresponding lights as rlight with allowed=false
+								restriction.addAllowedLight(otherLightId);
+							}
+						}
+					}	
 				}
 			}
 		}
@@ -222,50 +288,32 @@ public class M2KS2010NetworkConverter {
 	 */
 	private void convertNodes2Crossings(DgKSNetwork ksNet, Network net) {
 		for (Node node : net.getNodes().values()) {
-			DgCrossing crossing = new DgCrossing(
-					this.idConverter.convertNodeId2CrossingId(node.getId()));
+			DgCrossing crossing = new DgCrossing(this.idConverter.convertNodeId2CrossingId(node.getId()));
 
 			// create crossing type
 			Coordinate nodeCoordinate = MGC.coord2Coordinate(node.getCoord());
-			if (this.signalsBoundingBox == null || // there is no signals
-													// bounding box to stop
-													// expansion -> all nodes
-													// will be expanded
-					this.signalsBoundingBox.contains(nodeCoordinate)) { // node
-																		// is
-																		// within
-																		// the
-																		// signals
-																		// bounding
-																		// box
+			if (// there is no signals bounding box to stop expansion -> all nodes will be expanded
+				this.signalsBoundingBox == null || 
+					// OR: node is within the signals bounding box
+					this.signalsBoundingBox.contains(nodeCoordinate)) { 
 
-				// create crossing type "fixed" if node is signalized,
-				// "equalRank" else
+				// create (default) crossing type "fixed" if node is signalized, "equalRank" else
 				for (Link link : node.getInLinks().values()) {
-					if (signalizedLinks.contains(link.getId())) { // node is
-																	// signalized
+					// node is signalized. set fixed as default type - may be overwritten later in createCrossing4SignalizedLink()
+					if (signalizedLinks.contains(link.getId())) {
 						crossing.setType(TtCrossingType.FIXED);
-						// // create default program for signalized crossing
-						// DgProgram program = new
-						// DgProgram(Id.create(M2KS2010NetworkConverter.DEFAULT_PROGRAM_ID,
-						// DgProgram.class));
-						// program.setCycle(this.cycle);
-						// crossing.addProgram(program);
 					}
 				}
-				if (crossing.getType() == null) { // node isn't signalized, but
-													// within the signals
-													// bounding box
+				// node isn't signalized, but within the signals bounding box
+				if (crossing.getType() == null) { 
 					crossing.setType(TtCrossingType.EQUALRANK);
 				}
 			} else { // node is outside the signals bounding box
 				crossing.setType(TtCrossingType.NOTEXPAND);
-				// create and add the single crossing node of the not expanded
-				// crossing
+				// create and add the single crossing node of the not expanded crossing
 				DgCrossingNode crossingNode = new DgCrossingNode(
 						this.idConverter
-								.convertNodeId2NotExpandedCrossingNodeId(node
-										.getId()));
+								.convertNodeId2NotExpandedCrossingNodeId(node.getId()));
 				crossingNode.setCoordinate(node.getCoord());
 				crossing.addNode(crossingNode);
 			}
@@ -341,7 +389,7 @@ public class M2KS2010NetworkConverter {
 			if (fs != 0) {
 				street.setCost(fs);
 			} else {
-				log.warn("Street id " + street.getId()
+				LOG.warn("Street id " + street.getId()
 						+ " has a freespeed tt of " + fsd
 						+ " that is rounded to " + fs + " replacing by 1");
 				street.setCost(0);
@@ -421,7 +469,7 @@ public class M2KS2010NetworkConverter {
 		return Math.sqrt(Math.pow(deltaLink.x, 2) + Math.pow(deltaLink.y, 2));
 	}
 
-	private Tuple<SignalPlanData, SignalGroupSettingsData> getPlanAndSignalGroupSettings4Signal(
+	private static Tuple<SignalPlanData, SignalGroupSettingsData> getPlanAndSignalGroupSettings4Signal(
 			Id<SignalSystem> signalSystemId, Id<Signal> signalId,
 			SignalsData signalsData) {
 		SignalSystemControllerData controllData = signalsData
@@ -455,44 +503,45 @@ public class M2KS2010NetworkConverter {
 	 *            the target crossing of the fromLink
 	 * @return the id of the created light
 	 */
-	private Id<DgGreen> createLights(Id<Link> fromLinkId, Id<Lane> fromLaneId,
+	private Id<DgStreet> createLights(Id<Link> fromLinkId, Id<Lane> fromLaneId,
 			Id<Link> outLinkId, Id<Link> backLinkId,
-			DgCrossingNode inLinkToNode, DgCrossing crossing) {
+			DgCrossingNode inLinkToNode, DgCrossing crossing, Id<Signal> signalId) {
 		if (backLinkId != null && backLinkId.equals(outLinkId)) {
 			return null; // do nothing if it is the backlink
 		}
-		Id<DgGreen> lightId = this.idConverter
+		Id<DgStreet> lightId = this.idConverter
 				.convertFromLinkIdToLinkId2LightId(fromLinkId, fromLaneId,
 						outLinkId);
-		log.debug("    light id: " + lightId);
+		LOG.debug("    light id: " + lightId);
 		Id<Link> convertedOutLinkId = Id.create(
 				this.idConverter.convertLinkId2FromCrossingNodeId(outLinkId),
 				Link.class);
-		log.debug("    outLinkId : " + outLinkId + " converted id: "
+		LOG.debug("    outLinkId : " + outLinkId + " converted id: "
 				+ convertedOutLinkId);
 		DgCrossingNode outLinkFromNode = crossing.getNodes().get(
 				convertedOutLinkId);
 		if (outLinkFromNode == null) {
-			log.error("Crossing " + crossing.getId() + " has no node with id "
+			LOG.error("Crossing " + crossing.getId() + " has no node with id "
 					+ convertedOutLinkId);
 			throw new IllegalStateException("outLinkFromNode not found.");
 			// return null;
 		}
-		Collection<DgStreet> crossingLights = crossing.getLights().values();
-		boolean sameLightExists = false;
-		for (DgStreet crossingLight : crossingLights) {
+		for (DgStreet crossingLight : crossing.getLights().values()) {
 			if (crossingLight.getFromNode().equals(inLinkToNode)
-					&& crossingLight.getToNode().equals(outLinkFromNode))
-				sameLightExists = true;
+					&& crossingLight.getToNode().equals(outLinkFromNode)){
+				if (signalId!=null) rememberLightSignalRelation(crossingLight.getId(), signalId);
+				return null; // same light exists already
+			}
 		}
-		if (!sameLightExists) {
-			DgStreet street = new DgStreet(Id.create(lightId, DgStreet.class),
-					inLinkToNode, outLinkFromNode);
-			street.setCost(0);
-			crossing.addLight(street);
-			return lightId;
+		DgStreet street = new DgStreet(lightId, inLinkToNode, outLinkFromNode);
+		street.setCost(0);
+		if (crossing.getType().equals(TtCrossingType.FLEXIBLE)) {
+			// TODO adapt this when no min green time should be used
+			street.setMinGreen(MIN_GREEN_RILSA);
 		}
-		return null; // same light exists already
+		crossing.addLight(street);
+		if (signalId!=null) rememberLightSignalRelation(lightId, signalId);
+		return lightId;
 	}
 
 	/**
@@ -524,30 +573,35 @@ public class M2KS2010NetworkConverter {
 			DgCrossingNode inLinkToNode, Id<Link> backLinkId,
 			LanesToLinkAssignment l2l, SignalSystemData system,
 			SignalsData signalsData) {
-		// //remove default program
-		// if (
-		// crossing.getPrograms().containsKey(M2KS2010NetworkConverter.DEFAULT_PROGRAM_ID))
-		// {
-		// crossing.getPrograms().remove(M2KS2010NetworkConverter.DEFAULT_PROGRAM_ID);
-		// }
-		// create program if not existing...
+		
 		DgProgram program = null;
-		Id<DgProgram> programId = idConverter.convertSignalSystemId2ProgramId(system.getId());
-		if (!crossing.getPrograms().containsKey(programId)) {
-			program = new DgProgram(programId);
-			program.setCycle(this.cycle);
-			crossing.addProgram(program);
+		if (signalsData.getSignalControlData().getSignalSystemControllerDataBySystemId().get(system.getId()).getControllerIdentifier()
+			.equals(DefaultPlanbasedSignalSystemController.IDENTIFIER)){
+			// it is a fixed-time signal
+			crossing.setType(TtCrossingType.FIXED);
+			// create program for fixed crossings
+			Id<DgProgram> programId = idConverter.convertSignalSystemId2ProgramId(system.getId());
+			if (!crossing.getPrograms().containsKey(programId)) {
+				program = new DgProgram(programId);
+				program.setCycle(this.cycle);
+				crossing.addProgram(program);
+			} else {
+				program = crossing.getPrograms().get(programId);
+			}
 		} else {
-			program = crossing.getPrograms().get(programId);
+			// it is a flexible signal
+			crossing.setType(TtCrossingType.FLEXIBLE);
+			crossing.setClearTime(DEFAULT_CLEAR_TIME);
+			crossing.setCycle(this.cycle);
 		}
 
 		List<SignalData> signals4Link = this.getSignals4LinkId(system,
 				link.getId());
 		// first get the outlinks that are controlled by the signal
 		for (SignalData signal : signals4Link) {
-			log.debug("    signal: " + signal.getId() + " system: "
+			LOG.debug("    signal: " + signal.getId() + " system: "
 					+ system.getId());
-			Id<DgGreen> lightId = null;
+			Id<DgStreet> lightId = null;
 			if (l2l == null) {
 				Set<Id<Link>> outLinkIds = new HashSet<>();
 				if (signals4Link.size() > 1
@@ -563,21 +617,12 @@ public class M2KS2010NetworkConverter {
 				}
 				// create lights and green settings
 				for (Id<Link> outLinkId : outLinkIds) {
-					log.debug("    outLinkId: " + outLinkId);
+					LOG.debug("    outLinkId: " + outLinkId);
 					lightId = this.createLights(link.getId(), null, outLinkId,
-							backLinkId, inLinkToNode, crossing);
-					log.debug("    created Light " + lightId);
+							backLinkId, inLinkToNode, crossing, signal.getId());
 					if (lightId != null) {
-						Tuple<SignalPlanData, SignalGroupSettingsData> planGroupSettings = this
-								.getPlanAndSignalGroupSettings4Signal(
-										system.getId(), signal.getId(),
-										signalsData);
-						SignalPlanData signalPlan = planGroupSettings
-								.getFirst();
-						SignalGroupSettingsData groupSettings = planGroupSettings
-								.getSecond();
-						this.createAndAddGreen4Settings(lightId, program,
-								groupSettings, signalPlan);
+						LOG.debug("    created Light " + lightId);
+						fillProgramForFixedCrossings(system, signalsData, program, signal, lightId);
 					}
 				}
 			} else { // link with lanes
@@ -587,49 +632,47 @@ public class M2KS2010NetworkConverter {
 							|| signal.getTurningMoveRestrictions().isEmpty()) { 
 						// no turning move restrictions for signal -> outlinks come from lane
 						for (Id<Link> outLinkId : lane.getToLinkIds()) {
-							log.debug("    outLinkId: " + outLinkId);
+							LOG.debug("    outLinkId: " + outLinkId);
 							lightId = this.createLights(link.getId(), laneId,
 									outLinkId, backLinkId, inLinkToNode,
-									crossing);
-							log.debug("    created Light " + lightId);
+									crossing, signal.getId());
 							if (lightId != null) {
-								Tuple<SignalPlanData, SignalGroupSettingsData> planGroupSettings = this
-										.getPlanAndSignalGroupSettings4Signal(
-												system.getId(), signal.getId(),
-												signalsData);
-								SignalPlanData signalPlan = planGroupSettings
-										.getFirst();
-								SignalGroupSettingsData groupSettings = planGroupSettings
-										.getSecond();
-								this.createAndAddGreen4Settings(lightId,
-										program, groupSettings, signalPlan);
+								LOG.debug("    created Light " + lightId);
+								fillProgramForFixedCrossings(system, signalsData, program, signal, lightId);
 							}
 						}
-					} else { // turning move restrictions on signal -> outlinks
-								// taken from signal
-						for (Id<Link> outLinkId : signal
-								.getTurningMoveRestrictions()) {
-							log.debug("    outLinkId: " + outLinkId);
+					} else { // turning move restrictions on signal -> outlinks taken from signal
+						for (Id<Link> outLinkId : signal.getTurningMoveRestrictions()) {
+							LOG.debug("    outLinkId: " + outLinkId);
 							lightId = this.createLights(link.getId(), laneId,
 									outLinkId, backLinkId, inLinkToNode,
-									crossing);
-							log.debug("    created Light " + lightId);
+									crossing, signal.getId());
 							if (lightId != null) {
-								Tuple<SignalPlanData, SignalGroupSettingsData> planGroupSettings = this
-										.getPlanAndSignalGroupSettings4Signal(
-												system.getId(), signal.getId(),
-												signalsData);
-								SignalPlanData signalPlan = planGroupSettings
-										.getFirst();
-								SignalGroupSettingsData groupSettings = planGroupSettings
-										.getSecond();
-								this.createAndAddGreen4Settings(lightId,
-										program, groupSettings, signalPlan);
+								LOG.debug("    created Light " + lightId);
+								fillProgramForFixedCrossings(system, signalsData, program, signal, lightId);
 							}
 						}
 					}
 				}
 			}
+		}
+	}
+
+	private void rememberLightSignalRelation(Id<DgStreet> lightId, Id<Signal> signalId) {
+		if (!signalToLightsMap.containsKey(signalId)){
+			signalToLightsMap.put(signalId, new LinkedList<>());
+		}
+		signalToLightsMap.get(signalId).add(lightId);
+	}
+
+	private static void fillProgramForFixedCrossings(SignalSystemData system, SignalsData signalsData, DgProgram program, SignalData signal,
+			Id<DgStreet> lightId) {
+		if (program != null) {
+			Tuple<SignalPlanData, SignalGroupSettingsData> planGroupSettings = getPlanAndSignalGroupSettings4Signal(system.getId(), signal.getId(),
+					signalsData);
+			SignalPlanData signalPlan = planGroupSettings.getFirst();
+			SignalGroupSettingsData groupSettings = planGroupSettings.getSecond();
+			createAndAddGreen4Settings(lightId, program, groupSettings, signalPlan);
 		}
 	}
 
@@ -648,25 +691,12 @@ public class M2KS2010NetworkConverter {
 	private void createCrossing4NotSignalizedLink(DgCrossing crossing,
 			Link link, DgCrossingNode inLinkToNode, Id<Link> backLinkId,
 			LanesToLinkAssignment l2l) {
-		// DgProgram program = null;
-		// if (crossing.getPrograms().containsKey(this.DEFAULT_PROGRAM_ID)){
-		// program = crossing.getPrograms().get(this.DEFAULT_PROGRAM_ID);
-		// }
-		// else {
-		// log.error("Link: " + link.getId() + " fromNode: " +
-		// link.getFromNode().getId() + " toNode: " + link.getToNode().getId());
-		// throw new
-		// IllegalStateException("Default program must exist at not signalized crossing: "
-		// + crossing.getId());
-		// }
+		
 		if (l2l == null) { // create lights for link without lanes
 			List<Id<Link>> toLinks = this.getTurningMoves4LinkWoLanes(link);
 			for (Id<Link> outLinkId : toLinks) {
-				Id<DgGreen> lightId = this.createLights(link.getId(), null,
-						outLinkId, backLinkId, inLinkToNode, crossing);
-				// if (lightId != null){
-				// this.createAndAddAllTimeGreen(lightId, program);
-				// }
+				this.createLights(link.getId(), null,
+						outLinkId, backLinkId, inLinkToNode, crossing, null);
 			}
 		} else {
 			for (Lane lane : l2l.getLanes().values()) {
@@ -675,12 +705,9 @@ public class M2KS2010NetworkConverter {
 				if (lane.getToLaneIds() == null
 						|| lane.getToLaneIds().isEmpty()) {
 					for (Id<Link> outLinkId : lane.getToLinkIds()) {
-						Id<DgGreen> lightId = this.createLights(link.getId(),
+						this.createLights(link.getId(),
 								lane.getId(), outLinkId, backLinkId,
-								inLinkToNode, crossing);
-						// if (lightId != null){
-						// this.createAndAddAllTimeGreen(lightId, program);
-						// }
+								inLinkToNode, crossing, null);
 					}
 				}
 			}
@@ -688,19 +715,19 @@ public class M2KS2010NetworkConverter {
 	}
 
 	// TODO check this again which offset is needed for green
-	private void createAndAddGreen4Settings(Id<DgGreen> lightId,
+	private static void createAndAddGreen4Settings(Id<DgStreet> lightId,
 			DgProgram program, SignalGroupSettingsData groupSettings,
 			SignalPlanData signalPlan) {
-		DgGreen green = new DgGreen(lightId);
+		DgGreen green = new DgGreen(Id.create(lightId, DgGreen.class));
 		green.setOffset(groupSettings.getOnset());
-		green.setLength(this.calculateGreenTimeSeconds(groupSettings,
+		green.setLength(calculateGreenTimeSeconds(groupSettings,
 				signalPlan.getCycleTime()));
-		log.debug("    green time " + green.getLength() + " offset: "
+		LOG.debug("    green time " + green.getLength() + " offset: "
 				+ green.getOffset());
 		program.addGreen(green);
 	}
 
-	private int calculateGreenTimeSeconds(SignalGroupSettingsData settings,
+	private static int calculateGreenTimeSeconds(SignalGroupSettingsData settings,
 			Integer cycle) {
 		if (settings.getOnset() <= settings.getDropping()) {
 			return settings.getDropping() - settings.getOnset();
