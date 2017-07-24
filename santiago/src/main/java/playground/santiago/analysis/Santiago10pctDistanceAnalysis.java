@@ -1,6 +1,7 @@
 package playground.santiago.analysis;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -42,28 +43,33 @@ public class Santiago10pctDistanceAnalysis {
 	static String ANALYSIS_DIR;
 
 	public static void main(String[]args){
+		
 		String CASE_NAME = args[0];
 		String STEP_NAME = args[1];
-		RUN_DIR=CASE_NAME;
 		
-		int FIRST_IT = Integer.parseInt(args[2]);
-		int LAST_IT = Integer.parseInt(args[3]);
+		RUN_DIR="/net/ils4/lcamus/runs-svn/santiago/" + CASE_NAME + "/";
+		OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
+		ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
 		
-
+		int IT_TO_EVALUATE = Integer.parseInt(args[2]);
+		int REFERENCE_IT = Integer.parseInt(args[3]);
+			
 		
-		
-		int it=0;
-		int itAux=FIRST_IT;
-		while(itAux<=LAST_IT){
+		int it=IT_TO_EVALUATE;
+		int itAux=REFERENCE_IT+IT_TO_EVALUATE;
+//		while(itAux<=LAST_IT){
 			List<Id<Person>> stuckAgents = getStuckAgents(it);
 			writeFileForNonPublicLegDistances(it,itAux,stuckAgents);
 			writeFileForPublicLegsDistances(it,itAux,stuckAgents);
-			it+=50;
-			itAux+=50;
-		}
+//			it+=50;
+//			itAux+=50;
+//		}
 	}
 
 
+	private static void createDir(File file) {
+		file.mkdirs();	
+	}
 
 	private static List<Id<Person>> getStuckAgents(int it){
 
@@ -80,6 +86,9 @@ public class Santiago10pctDistanceAnalysis {
 
 	private static void writeFileForNonPublicLegDistances(int it, int itAux, List<Id<Person>> stuckAgents){	
 
+		File analysisDir = new File(ANALYSIS_DIR);
+		if(!analysisDir.exists()) createDir(analysisDir);
+		
 		String configFile = OUTPUT_DIR + "output_config.xml.gz";
 		Config config = ConfigUtils.loadConfig(configFile);
 		String netFile = OUTPUT_DIR + "output_network.xml.gz";
