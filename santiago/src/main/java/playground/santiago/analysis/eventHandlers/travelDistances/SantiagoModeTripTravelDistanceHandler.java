@@ -61,7 +61,6 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 	private final SortedMap<String, Double> modeNumberOfLegs = new TreeMap<>();
 
 	private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
-	private final SantiagoPTDistanceFromPlans delegatePT;
 	
 	/*Ignoring transit drivers & stuck agents - Same as SantiagoModeTripTravelTimeHandler*/
 	private final List<Id<Person>> transitDriverPersons = new ArrayList<>();
@@ -69,11 +68,9 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 
 
 
-	public SantiagoModeTripTravelDistanceHandler(final Config config, final Network network, final Population population, 
-			List<Id<Person>> stuckAgents){
+	public SantiagoModeTripTravelDistanceHandler(final Config config, final Network network, List<Id<Person>> stuckAgents){
 		LOG.info("Route distance will be calculated based on events.");
 		LOG.warn("During distance calculation, link from which person is departed or arrived will not be considered.");
-		this.delegatePT = new SantiagoPTDistanceFromPlans(population);
 		this.config=config;
 		this.mainModes.addAll(this.config.qsim().getMainModes());
 		this.network = network;
@@ -232,13 +229,8 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		}
 	}
 	
-	public SortedMap<String,Map<Id<Person>,List<String>>> getPT2PersonId2TravelDistances(){
-		return this.delegatePT.getPt2PersonId2TravelDistances(stuckAgents);
-	}
 	
 	public SortedMap<String,Map<Id<Person>,List<String>>> getMode2PersonId2TravelDistances (){
-//		SortedMap <String,Map<Id<Person>,List<String>>> Pt2PersonId2TravelDistances = getPT2PersonId2TravelDistances();
-//		modePersonIdDistances.putAll(Pt2PersonId2TravelDistances);
 		return this.modePersonIdDistances;
 	}
 

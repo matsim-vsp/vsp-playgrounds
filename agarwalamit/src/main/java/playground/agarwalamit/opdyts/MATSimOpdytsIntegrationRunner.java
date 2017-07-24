@@ -52,7 +52,7 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
 
         this.timeDiscretization = this.delegate.newTimeDiscretization();
         this.convergenceCriterion = this.delegate.newFixedIterationNumberConvergenceCriterion();
-        this.selfTuner = this.delegate.newSelfTuner();
+//        this.selfTuner = this.delegate.newSelfTuner();
         this.scenario = scenario;
     }
 
@@ -128,10 +128,11 @@ public class MATSimOpdytsIntegrationRunner<U extends DecisionVariable>  {
         OpdytsConfigGroup opdytsConfigGroup = (OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME);
 
         if ( Double.isFinite(opdytsConfigGroup.getUniformityGapWeight()) &&  Double.isFinite( opdytsConfigGroup.getEquilibriumGapWeight() ) ) {
-            randomSearch.run(opdytsConfigGroup.getUniformityGapWeight(), opdytsConfigGroup.getEquilibriumGapWeight(), selfTuner);
+//            randomSearch.run(opdytsConfigGroup.getUniformityGapWeight(), opdytsConfigGroup.getEquilibriumGapWeight(), selfTuner);
         } else {
-            randomSearch.run(selfTuner);
+//            randomSearch.run(selfTuner);
         }
+        throw new RuntimeException("not implemented yet.");
     }
 
     public TimeDiscretization getTimeDiscretization() {

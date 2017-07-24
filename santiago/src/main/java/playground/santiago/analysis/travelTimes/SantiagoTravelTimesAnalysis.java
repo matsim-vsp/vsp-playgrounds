@@ -56,7 +56,7 @@ public class SantiagoTravelTimesAnalysis {
 		file.mkdirs();	
 	}
 	
-	public void writeFileForTravelTimesByMode(int it){
+	public void writeFileForTravelTimesByMode(int it, int itAux){
 		
 	File analysisDir = new File(this.analysisDir);
 	if(!analysisDir.exists()) createDir(analysisDir);	
@@ -74,7 +74,7 @@ public class SantiagoTravelTimesAnalysis {
 	
 	SortedMap<String, Map<Id<Person>, List<String>>> travelTimesByMode = handler.getLegModePesonIdTripDepartureTravelTimes ();
 
-	String outputFile = analysisDir + String.valueOf(it) + ".modeTravelTimes.txt";
+	String outputFile = this.analysisDir + String.valueOf(itAux) + ".modeTravelTimes.txt";
 
 	try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)) {
 		writer.write("mode\tpersonId\tstartTime-travelTime\n");

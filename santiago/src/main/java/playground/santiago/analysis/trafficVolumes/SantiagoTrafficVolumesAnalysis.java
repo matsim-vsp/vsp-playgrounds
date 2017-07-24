@@ -77,14 +77,19 @@ public class SantiagoTrafficVolumesAnalysis {
 
 	}
 
-	public void writeCountsCompare (int it, double scaleFactor){
+	/**
+	 * It considers stuck agents. Be aware.
+	 * @param it
+	 * @param scaleFactor
+	 */
+	public void writeCountsCompare (int it, int itAux, double scaleFactor){
 
 		File analysisDir = new File(this.analysisDir);
 		if(!analysisDir.exists()) createDir(analysisDir);
 		
 		String networkFile = this.outputDir + "output_network.xml.gz";
 		
-		String outputFile = analysisDir + String.valueOf(it) + ".countsCompare.txt";
+		String outputFile = this.analysisDir + String.valueOf(itAux) + ".countsCompare.txt";
 		
 		Network network = readNetwork(networkFile);
 		Counts counts = readCounts();
@@ -130,13 +135,14 @@ public class SantiagoTrafficVolumesAnalysis {
 		return counts;
 	}
 
-	public void writeFileForLinkVolumes(int it){
+	
+	public void writeFileForLinkVolumes(int it, int itAux){
 
 		File analysisDir = new File(this.analysisDir);
 		if(!analysisDir.exists()) createDir(analysisDir);
 
 		String eventsFile = this.outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".events.xml.gz";
-		String outputFile = analysisDir + String.valueOf(it) + ".linksVolumes.txt";
+		String outputFile = analysisDir + String.valueOf(itAux) + ".linksVolumes.txt";
 
 		SantiagoLinkVolumeHandler handler = new SantiagoLinkVolumeHandler();
 		EventsManager events = EventsUtils.createEventsManager();

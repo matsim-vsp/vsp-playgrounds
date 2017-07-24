@@ -41,6 +41,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.handler.BasicEventHandler;
 import org.matsim.core.mobsim.qsim.QSim;
@@ -193,6 +194,7 @@ public class CorridorNetworkTest {
 		}
 		else if(congestionPricingImpl.equalsIgnoreCase("v4")) events.addHandler(new CongestionHandlerImplV4(events, sc));
 
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = QSimUtils.createDefaultQSim(sc, events);
 		sim.run();
 

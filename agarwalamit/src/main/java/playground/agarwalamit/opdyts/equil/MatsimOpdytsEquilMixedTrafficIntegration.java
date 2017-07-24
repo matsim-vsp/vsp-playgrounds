@@ -242,13 +242,14 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 				opdytsConfigGroup.getMaxIteration(), // this many times simulator.run(...) and thus controler.run() will be called.
 				opdytsConfigGroup.getMaxTransition(),
 				opdytsConfigGroup.getPopulationSize(),
-				MatsimRandom.getRandom(),
-				opdytsConfigGroup.isInterpolate(),
-				objectiveFunction,
-				opdytsConfigGroup.isIncludeCurrentBest(),
-				opdytsConfigGroup.getWarmUpIterations(),
-				opdytsConfigGroup.getUseAllWarmUpIterations()
+				objectiveFunction
 				);
+
+		randomSearch.setRandom(MatsimRandom.getRandom());
+		randomSearch.setInterpolate(opdytsConfigGroup.isInterpolate());
+		randomSearch.setIncludeCurrentBest(opdytsConfigGroup.isIncludeCurrentBest());
+		randomSearch.setWarmupIterations(opdytsConfigGroup.getWarmUpIterations());
+		randomSearch.setUseAllWarmupIterations(opdytsConfigGroup.getUseAllWarmUpIterations());
 
 		// probably, an object which decide about the inertia
 		SelfTuner selfTuner = new SelfTuner(opdytsConfigGroup.getInertia());
@@ -257,7 +258,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		randomSearch.setLogPath(opdytsConfigGroup.getOutputDirectory());
 
 		// run it, this will eventually call simulator.run() and thus controler.run
-		randomSearch.run(selfTuner );
+//		randomSearch.run(selfTuner );
 
 
 		OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();

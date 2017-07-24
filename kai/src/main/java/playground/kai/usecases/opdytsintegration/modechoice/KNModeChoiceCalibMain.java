@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
 import floetteroed.opdyts.searchalgorithms.RandomSearch;
-import floetteroed.opdyts.searchalgorithms.SelfTuner;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
@@ -140,23 +139,24 @@ class KNModeChoiceCalibMain {
 			} else {
 				convergenceCriterion= new FixedIterationNumberConvergenceCriterion(100, 10 );
 			}
-			RandomSearch<ModeChoiceDecisionVariable> randomSearch = null ;
-			
-			new RandomSearch<>( simulator,
+			RandomSearch<ModeChoiceDecisionVariable> randomSearch = new RandomSearch<>( simulator,
 					new ModeChoiceRandomizer(scenario) ,
 					initialDecisionVariable ,
 					convergenceCriterion ,
 					maxIterations, maxTransitions, populationSize,
-					MatsimRandom.getRandom(),
-					interpolate,
-					new ModeChoiceObjectiveFunction(equil),
-					includeCurrentBest, warmupIterations, useAllWarmUpIterations ) ;
+					new ModeChoiceObjectiveFunction(equil)
+			) ;
 
 			randomSearch.setLogPath( outputDirectory );
+			randomSearch.setRandom(MatsimRandom.getRandom());
+			randomSearch.setInterpolate(interpolate);
+			randomSearch.setIncludeCurrentBest(includeCurrentBest);
+			randomSearch.setWarmupIterations(warmupIterations);
+			randomSearch.setUseAllWarmupIterations(useAllWarmUpIterations);
 
 			// ---
 
-			randomSearch.run(new SelfTuner(0.95));
+//			randomSearch.run(new SelfTuner(0.95));
 
 		} else {
 			config.controler().setLastIteration(1000);

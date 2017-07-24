@@ -13,13 +13,13 @@ public class SantiagoModalSplitAnalysis {
 	private String runDir;	
 	private String outputDir;
 	private String analysisDir;
-	private List<Id<Person>> stuckAgents;
+//	private List<Id<Person>> stuckAgents;
 	
 	public SantiagoModalSplitAnalysis(String caseName, String stepName, List<Id<Person>> stuckAgents){
 		this.runDir = "../../../runs-svn/santiago/" + caseName + "/";
 		this.outputDir = runDir + "outputOf" + stepName + "/";
 		this.analysisDir = outputDir + "analysis/";	
-		this.stuckAgents=stuckAgents;
+//		this.stuckAgents=stuckAgents;
 		
 	}
 	
@@ -29,16 +29,16 @@ public class SantiagoModalSplitAnalysis {
 	
 	
 	/**
-	 * writeModalShare uses ModalShareFromEvents from playground.agarwalamit.analysis.modalShare.ModalShareFromEvents
+	 * writeModalShare uses ModalShareFromEvents from playground.agarwalamit.analysis.modalShare.ModalShareFromEvents. Stuck agents are considered, be aware.
 	 */
-	public void writeModalShare(int it){
+	public void writeModalShare(int it, int itAux){
 
 		File analysisDir = new File(this.analysisDir);
 		if(!analysisDir.exists()) createDir(analysisDir);
 		String eventsFile = outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".events.xml.gz";
 		ModalShareFromEvents msc = new ModalShareFromEvents(eventsFile);
 		msc.run();
-		String outputFile = analysisDir + String.valueOf(it) + ".modalSplit.txt";
+		String outputFile = analysisDir + String.valueOf(itAux) + ".modalSplit.txt";
 		msc.writeResults(outputFile);
 
 

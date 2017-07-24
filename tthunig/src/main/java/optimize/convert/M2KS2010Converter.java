@@ -31,7 +31,7 @@ import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.lanes.data.Lanes;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import optimize.gurobi.OptimizeMIP;
+//import optimize.gurobi.OptimizeMIP;
 import playground.dgrether.koehlerstrehlersignal.conversion.DgKS2010Router;
 import playground.dgrether.koehlerstrehlersignal.conversion.DgKSNet2MatsimNet;
 import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010NetworkConverter;
