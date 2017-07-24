@@ -62,7 +62,7 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 		} else {
 			// passenger
 			
-			if (savTracker.getTaxiVehicles().contains(event.getVehicleId())) {
+			if (savTracker.isTaxiPassenger(event.getPersonId())) {
 				
 				// passenger getting into a taxi
 				

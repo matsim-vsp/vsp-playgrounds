@@ -133,25 +133,18 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	public void handleEvent(PersonEntersVehicleEvent event) {
 		
 		if (chargeNextPassenger) {
-			if (this.savPassengerTracker.getTaxiDrivers().contains(event.getPersonId())) {
-				// taxi driver
-							
-			} else {
-				// passenger
-				
-				if (this.savPassengerTracker.getTaxiVehicles().contains(event.getVehicleId())) {
+			
+			if (this.savPassengerTracker.isTaxiPassenger(event.getPersonId())) {
+				// passenger getting into a taxi
+
+				if (this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) != null) {
+
+					log.info("First passenger of vehicle " + event.getVehicleId() + ". Toll: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
 					
-					// passenger getting into a taxi
-
-					if (this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) != null) {
-
-						log.info("First passenger of vehicle " + event.getVehicleId() + ". Toll: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
-						
-						this.events.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId())));
-						this.vehicle2tollToBeChargedFromNextPassenger.remove(event.getVehicleId());
-					}
+					this.events.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId())));
+					this.vehicle2tollToBeChargedFromNextPassenger.remove(event.getVehicleId());
 				}
-			}	
+			}
 		}
 	}	
 

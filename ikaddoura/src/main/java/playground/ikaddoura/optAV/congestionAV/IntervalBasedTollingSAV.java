@@ -120,25 +120,17 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 	@Override
 	public void handleEvent(PersonEntersVehicleEvent event) {
 		
-		if (this.tracker.getTaxiDrivers().contains(event.getPersonId())) {
-			// taxi driver
-						
-		} else {
-			// passenger
-			
-			if (this.tracker.getTaxiVehicles().contains(event.getVehicleId())) {
+		if (this.tracker.isTaxiPassenger(event.getPersonId())) {
+			// passenger getting into a taxi
+
+			if (this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) != null) {
+
+//				log.info("First passenger of vehicle " + event.getVehicleId() + ". Toll: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
 				
-				// passenger getting into a taxi
-
-				if (this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) != null) {
-
-//					log.info("First passenger of vehicle " + event.getVehicleId() + ". Toll: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
-					
-					this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), -1. * this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId())));
-					this.vehicle2tollToBeChargedFromNextPassenger.remove(event.getVehicleId());
-				}
+				this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), -1. * this.vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId())));
+				this.vehicle2tollToBeChargedFromNextPassenger.remove(event.getVehicleId());
 			}
-		}	
+		}
 	}	
 }
 
