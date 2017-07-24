@@ -69,6 +69,15 @@ public class KS2010ModelWriter {
 	private static final String LENGTH = "length";
 	private static final String XCOORD = "x";
 	private static final String YCOORD = "y";
+	private static final String CLEARTIME = "clearTime";
+	private static final String MINGREEN = "minGreen";
+	private static final String MAXGREEN = "maxGreen";
+	private static final String RESTRICTIONS = "restrictions";
+	private static final String RESTRICTION = "restriction";
+	private static final String ALLOWED = "allowed";
+	private static final String RLIGHT = "rlight";
+	private static final String ON = "on";
+	private static final String OFF = "off";
 
 	// tags for the streets element
 	private static final String STREETS = "streets";
@@ -144,6 +153,11 @@ public class KS2010ModelWriter {
 			atts.clear();
 			atts.addAttribute("", "", ID, CDATA, crossing.getId().toString());
 			atts.addAttribute("", "", TYPE, CDATA, crossing.getType());
+			// add cycle and clearTime for flexible crossings
+			if (crossing.getType().equals(TtCrossingType.FLEXIBLE)){
+				atts.addAttribute("", "", CYCLE, CDATA, Integer.toString(crossing.getCycle()));
+				atts.addAttribute("", "", CLEARTIME, CDATA, Integer.toString(crossing.getClearTime()));
+			}
 			hd.startElement("", "", CROSSING, atts);
 			// nodes
 			atts.clear();
@@ -169,6 +183,12 @@ public class KS2010ModelWriter {
 //				log.error("  toCrossingId: "  + light.getToNode().getId());
 				
 				atts.addAttribute("", "", TO, CDATA, light.getToNode().getId().toString());
+				atts.addAttribute("", "", COST, CDATA, Long.toString(light.getCost())); // is usually 0 in MATSim
+				// add min/maxGreen for flexible crossings
+				if (crossing.getType().equals(TtCrossingType.FLEXIBLE)){
+					atts.addAttribute("", "", MINGREEN, CDATA, Integer.toString(light.getMinGreen()));
+					if (light.getMaxGreen()!=0) atts.addAttribute("", "", MAXGREEN, CDATA, Integer.toString(light.getMaxGreen()));
+				}
 				hd.startElement("", "", LIGHT, atts);
 				hd.endElement("", "", LIGHT);
 			}
@@ -194,6 +214,37 @@ public class KS2010ModelWriter {
 					hd.endElement("", "", PROGRAM);
 				}
 				hd.endElement("", "", PROGRAMS);
+			} 
+			// restrictions for crossings with type flexible
+			else if (crossing.getType().equals(TtCrossingType.FLEXIBLE)){
+				atts.clear();
+				hd.startElement("", "", RESTRICTIONS, atts);
+				for (TtRestriction restriction : crossing.getRestrictions().values()){
+					atts.clear();
+					atts.addAttribute("", "", LIGHT, CDATA, restriction.getLightId().toString());
+					atts.addAttribute("", "", ALLOWED, CDATA, Boolean.toString(restriction.isAllowed()));
+					hd.startElement("", "", RESTRICTION, atts);
+					for (Id<DgStreet> rlight : restriction.getRlightsAllowed()){
+						atts.clear();
+						atts.addAttribute("", "", LIGHT, CDATA, rlight.toString());
+						hd.startElement("", "", RLIGHT, atts);
+						hd.endElement("", "", RLIGHT);
+					}
+					for (Id<DgStreet> rlight : restriction.getRlightsOn()){
+						atts.clear();
+						atts.addAttribute("", "", ON, CDATA, rlight.toString());
+						hd.startElement("", "", RLIGHT, atts);
+						hd.endElement("", "", RLIGHT);
+					}
+					for (Id<DgStreet> rlight : restriction.getRlightsOff()){
+						atts.clear();
+						atts.addAttribute("", "", OFF, CDATA, rlight.toString());
+						hd.startElement("", "", RLIGHT, atts);
+						hd.endElement("", "", RLIGHT);
+					}
+					hd.endElement("", "", RESTRICTION);
+				}
+				hd.endElement("", "", RESTRICTIONS);
 			}
 			hd.endElement("", "", CROSSING);
 		}
