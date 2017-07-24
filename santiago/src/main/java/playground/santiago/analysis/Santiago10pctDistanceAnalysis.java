@@ -27,19 +27,33 @@ import playground.santiago.analysis.travelDistances.SantiagoPTDistanceFromPlans;
 
 public class Santiago10pctDistanceAnalysis {
 
-	final static String CASE_NAME = "baseCase10pct";
-	final static String STEP_NAME = "Step1";
+//	final static String CASE_NAME = "baseCase10pct";
+//	final static String STEP_NAME = "Step1";
 
-	final static String RUN_DIR = "../../../runs-svn/santiago/" + CASE_NAME + "/";
-	final static String OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
-	final static String ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
+//	final static String RUN_DIR = "../../../runs-svn/santiago/" + CASE_NAME + "/";
+//	final static String OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
+//	final static String ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
 
-	final static int FIRST_IT = 100;
-	final static int LAST_IT = 400;
+//	final static int FIRST_IT = 100;
+//	final static int LAST_IT = 400;
+	
+	static String RUN_DIR;
+	static String OUTPUT_DIR;
+	static String ANALYSIS_DIR;
 
 	public static void main(String[]args){
+		String CASE_NAME = args[0];
+		String STEP_NAME = args[1];
+		RUN_DIR=CASE_NAME;
+		
+		int FIRST_IT = Integer.parseInt(args[2]);
+		int LAST_IT = Integer.parseInt(args[3]);
+		
+
+		
+		
 		int it=0;
-		int itAux=LAST_IT;
+		int itAux=FIRST_IT;
 		while(itAux<=LAST_IT){
 			List<Id<Person>> stuckAgents = getStuckAgents(it);
 			writeFileForNonPublicLegDistances(it,itAux,stuckAgents);
