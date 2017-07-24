@@ -90,18 +90,6 @@ public class OptAVModule extends AbstractModule {
 			throw new RuntimeException("There is no 'taxi_optimizer' mode in the planCalcScore config group.");
 		}
 		
-		if (taxiOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
-			log.warn("The monetary distance rate for 'taxi_optimizer' is zero. Are you sure, the operating costs are zero?");
-		}
-		
-		if (taxiOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
-			throw new RuntimeException("The monetary distance rate for 'taxi_optimizer' should be negative.");
-		}
-		
-		if (taxiOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
-			throw new RuntimeException("The marginal utility of distance for 'taxi_optimizer' should be zero.");
-		}
-		
 		ModeParams taxiModeParams = null;
 		if (this.getConfig().planCalcScore().getModes().get(TaxiModule.TAXI_MODE) != null) {
 			taxiModeParams = this.getConfig().planCalcScore().getModes().get(TaxiModule.TAXI_MODE);
@@ -109,24 +97,37 @@ public class OptAVModule extends AbstractModule {
 			throw new RuntimeException("There is no 'taxi' mode in the planCalcScore config group.");
 		}
 		
+		if (taxiOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
+			log.warn("The monetary distance rate for 'taxi_optimizer' is zero. Are you sure, the operating costs are zero?");
+		}
+		
+		if (taxiOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
+			log.warn("The monetary distance rate for 'taxi_optimizer' should be negative.");
+		}
+		
+		if (taxiOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
+			log.warn("The marginal utility of distance for 'taxi_optimizer' should be zero.");
+		}
+		
 		if (taxiModeParams.getMonetaryDistanceRate() != 0.) {
-			throw new RuntimeException("The monetary distance rate for 'taxi' should be zero. The fare is considered somewhere else.");
+			log.warn("The monetary distance rate for 'taxi' should be zero. The fare is considered somewhere else.");
 		}
 		
 		if (taxiModeParams.getMarginalUtilityOfDistance() != 0.) {
-			throw new RuntimeException("The marginal utility of distance for 'taxi' should be zero.");
+			log.warn("The marginal utility of distance for 'taxi' should be zero.");
 		}
 		
 		if (taxiOptimizerModeParams.getMarginalUtilityOfTraveling() != taxiModeParams.getMarginalUtilityOfTraveling()) {
-			throw new RuntimeException("The marginal utility of traveling for 'taxi' and 'taxi_optimizer' should be the same..."
+			log.warn("The marginal utility of traveling for 'taxi' and 'taxi_optimizer' should be the same..."
 					+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
 		}
 		
 		TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
 		
 		if (taxiOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
-			throw new RuntimeException("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer' should be the same..."
-					+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs.");
+			log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer' should be (approximately) the same..."
+					+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
+					+ " It may make sense to charge a slighlty higher fare...");
 		}
 		
 		OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), OptAVConfigGroup.class);
