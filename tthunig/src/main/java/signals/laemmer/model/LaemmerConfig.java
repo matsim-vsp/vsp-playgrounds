@@ -24,7 +24,7 @@ public class LaemmerConfig {
 
     private double DEFAULT_INTERGREEN = 5;
 
-    private boolean analysisEnabled = true;
+    private boolean analysisEnabled = false;
     private double MIN_G = 0;
 
     //    @Nullable
@@ -107,6 +107,10 @@ public class LaemmerConfig {
 
     public boolean analysisEnabled() {
         return analysisEnabled;
+    }
+    
+    public void setAnalysisEnabled(boolean enabled){
+    	analysisEnabled = enabled;
     }
 
 
