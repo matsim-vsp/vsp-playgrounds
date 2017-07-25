@@ -10,6 +10,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
 import org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer;
+import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
