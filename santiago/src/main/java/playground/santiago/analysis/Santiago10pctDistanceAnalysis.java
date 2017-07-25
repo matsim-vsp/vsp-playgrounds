@@ -28,15 +28,15 @@ import playground.santiago.analysis.travelDistances.SantiagoPTDistanceFromPlans;
 
 public class Santiago10pctDistanceAnalysis {
 
-//	final static String CASE_NAME = "baseCase10pct";
-//	final static String STEP_NAME = "Step1";
-
+//	final static String CASE_NAME = "policyRuns/10pct";
+//	final static String STEP_NAME = "StepTriangle0";
+//
 //	final static String RUN_DIR = "../../../runs-svn/santiago/" + CASE_NAME + "/";
 //	final static String OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
 //	final static String ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
-
-//	final static int FIRST_IT = 100;
-//	final static int LAST_IT = 400;
+//
+//	final static int REFERENCE_IT = 600;
+//	final static int IT_TO_EVALUATE = 200;
 	
 	static String RUN_DIR;
 	static String OUTPUT_DIR;
@@ -60,7 +60,7 @@ public class Santiago10pctDistanceAnalysis {
 //		while(itAux<=LAST_IT){
 			List<Id<Person>> stuckAgents = getStuckAgents(it);
 			writeFileForNonPublicLegDistances(it,itAux,stuckAgents);
-			writeFileForPublicLegsDistances(it,itAux,stuckAgents);
+//			writeFileForPublicLegsDistances(it,itAux,stuckAgents);
 //			it+=50;
 //			itAux+=50;
 //		}
