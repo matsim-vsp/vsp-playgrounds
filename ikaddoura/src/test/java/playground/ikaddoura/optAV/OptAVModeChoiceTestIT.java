@@ -82,8 +82,8 @@ public class OptAVModeChoiceTestIT {
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		optAVParams1.setOptAVApproach(SAVTollingApproach.NoPricing);
-		optAVParams1.setFixCostSAV(1000.);
-		optAVParams1.setFixCostsSAVinsteadOfCar(1000);
+		optAVParams1.setDailyFixCostAllSAVusers(1000.);
+		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
 
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
@@ -121,8 +121,8 @@ public class OptAVModeChoiceTestIT {
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(false);
 		optAVParams2.setOptAVApproach(SAVTollingApproach.NoPricing);
-		optAVParams2.setFixCostSAV(-10000.);
-		optAVParams2.setFixCostsSAVinsteadOfCar(-10000);
+		optAVParams2.setDailyFixCostAllSAVusers(-10000.);
+		optAVParams2.setFixCostsSAVinsteadOfCar(0);
 		
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);
@@ -183,8 +183,8 @@ public class OptAVModeChoiceTestIT {
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		optAVParams1.setOptAVApproach(SAVTollingApproach.NoPricing);
-		optAVParams1.setFixCostSAV(1000.);
-		optAVParams1.setFixCostsSAVinsteadOfCar(1000);
+		optAVParams1.setDailyFixCostAllSAVusers(1000.);
+		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
@@ -223,7 +223,7 @@ public class OptAVModeChoiceTestIT {
 		optAVParams2.setAccountForCongestion(false);
 		optAVParams2.setOptAVApproach(SAVTollingApproach.NoPricing);
 		optAVParams2.setFixCostsSAVinsteadOfCar(-10000);
-		optAVParams1.setFixCostSAV(1000.);
+		optAVParams2.setDailyFixCostAllSAVusers(1000.);
 		
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);

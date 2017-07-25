@@ -132,8 +132,8 @@ public class OptAVModule extends AbstractModule {
 		
 		OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), OptAVConfigGroup.class);
 
-		if (optAVParams.getFixCostsSAVinsteadOfCar() > optAVParams.getFixCostSAV()) {
-			throw new RuntimeException("SAV capital costs (per user) should be lower than car capital costs (per user). Aborting... "); 
+		if (optAVParams.getFixCostsSAVinsteadOfCar() > 0) {
+			log.warn("Daily SAV fix costs (per user) should be lower than 0, meaning SAV users who are no longer private car users should 'earn' something."); 
 		}
 		
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);

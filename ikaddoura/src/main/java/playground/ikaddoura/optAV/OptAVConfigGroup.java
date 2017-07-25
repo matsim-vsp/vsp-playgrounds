@@ -42,8 +42,8 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	
 	private boolean runDefaultAnalysis = true;
 	
-	private double fixCostsSAVinsteadOfCar = -10.; // negative difference means SAV fix costs (per user) are lower than for a private car)
-	private double fixCostSAV = 5.;
+	private double fixCostsSAVinsteadOfCar = -10.; // negative values are interpreted as a revenue for no longer owning a car
+	private double dailyFixCostAllSAVusers = 5.;
 
 	private SAVTollingApproach optAVApproach = SAVTollingApproach.NoPricing;
 			
@@ -121,14 +121,14 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 		this.fixCostsSAVinsteadOfCar = fixCostsSAVinsteadOfCar;
 	}
 
-	@StringGetter( "fixCostSAV" )
-	public double getFixCostSAV() {
-		return fixCostSAV;
+	@StringGetter( "dailyFixCostAllSAVusers" )
+	public double getDailyFixCostAllSAVusers() {
+		return dailyFixCostAllSAVusers;
 	}
 
-	@StringSetter( "fixCostSAV" )
-	public void setFixCostSAV(double fixCostSAV) {
-		this.fixCostSAV = fixCostSAV;
+	@StringSetter( "dailyFixCostAllSAVusers" )
+	public void setDailyFixCostAllSAVusers(double fixCostSAV) {
+		this.dailyFixCostAllSAVusers = fixCostSAV;
 	}
 
 	@StringGetter( "runDefaultAnalysis" )

@@ -567,7 +567,11 @@ public class PersonTripNoiseAnalysis {
 				bw.newLine();
 				
 				bw.write(mode + " waiting time costs (sample size) (considered to be 0 EUR / hour) [monetary units];" + (mode_waitingTime / 3600.) * vtts_mode_waiting);
-				bw.newLine();				
+				bw.newLine();	
+				
+				bw.write("-----------------------------");
+				bw.newLine();	
+
 			}	
 
 			double userBenefitsIncludingMonetaryPayments = 0.;
