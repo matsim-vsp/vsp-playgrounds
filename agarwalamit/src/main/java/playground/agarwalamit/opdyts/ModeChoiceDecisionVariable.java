@@ -62,7 +62,7 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         final Map<String, PlanCalcScoreConfigGroup.ModeParams> allModes = this.newScoreConfig.getScoringParameters(this.subPopulation).getModes();
         switch (this.opdytsScenario){
             case EQUIL:
@@ -82,8 +82,8 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
                 return str.toString();
             default:
                 throw new RuntimeException("not implemented yet.");
+            }
         }
-    }
 
     public PlanCalcScoreConfigGroup getScoreConfig() {
         return this.delegate.getScoreConfig();

@@ -32,6 +32,8 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -59,7 +61,6 @@ import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
-import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
 /**
  * @author amit
@@ -117,7 +118,7 @@ public class PatnaUrbanOpdytsCalibrator {
 		mp.setMonetaryDistanceRate(0.0);
 
 		// == opdyts settings
-		MATSimOpdytsIntegrationRunner<ModeChoiceDecisionVariable> factories = new MATSimOpdytsIntegrationRunner<ModeChoiceDecisionVariable>(scenario);
+		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<ModeChoiceDecisionVariable>(scenario);
 		Set<String> networkModes = new HashSet<>(scenario.getConfig().qsim().getMainModes());
 		Set<String> teleportationModes = new HashSet<>(scenario.getConfig().plansCalcRoute().getModeRoutingParams().keySet());
 
@@ -128,7 +129,7 @@ public class PatnaUrbanOpdytsCalibrator {
 		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(allModes, referenceStudyDistri);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = factories.newMATSimSimulator(new MATSimStateFactoryImpl<>());
+		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
 
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
@@ -151,7 +152,7 @@ public class PatnaUrbanOpdytsCalibrator {
 				default:throw new RuntimeException("not implemented yet.");
 		}
 		Set<Zone> relevantZones = patnaZoneIdentifier.getZones();
-		simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
+		simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(opdytsControler.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
@@ -236,6 +237,8 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, allModes, PATNA_1_PCT);
-		factories.run(decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
+
+		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
+		opdytsControler.run(simulator, decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
 	}
 }
