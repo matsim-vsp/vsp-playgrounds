@@ -40,7 +40,7 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 		for (String actType : activityTypes) {
 			String actSpecificWorkingDirectory = workingDirectory + actType + "/";
 			for (String mode : modes) {
-				VisualizationUtils.createQGisOutput(actType, mode, new Envelope(100000,180000,-3720000,-3675000), workingDirectory, TransformationFactory.WGS84_SA_Albers, includeDensityLayer,
+				VisualizationUtils.createQGisOutputGraduated(actType, mode, new Envelope(100000,180000,-3720000,-3675000), workingDirectory, TransformationFactory.WGS84_SA_Albers, includeDensityLayer,
 						lowerBound, upperBound, range, cellSize, populationThreshold);
 //				VisualizationUtils.createQGisOutput(actType, mode, new Envelope(251800.0, 258300.0, 9854300.0, 9858700.0), workingDirectory, "EPSG:21037", includeDensityLayer,
 //						lowerBound, upperBound, range, cellSize, populationThreshold);
