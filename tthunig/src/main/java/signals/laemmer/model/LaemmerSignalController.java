@@ -19,8 +19,11 @@
  * *********************************************************************** */
 package signals.laemmer.model;
 
-import com.google.inject.Provider;
-import org.apache.log4j.Logger;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -31,11 +34,12 @@ import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
+
+import com.google.inject.Provider;
+
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.sensor.LinkSensorManager;
-
-import java.util.*;
 
 
 /**
@@ -341,7 +345,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
                         double outflow = lanes.getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId).getCapacityVehiclesPerHour() / 3600;
                         outflowSum += outflow;
                         double tempLoad = arrivalRate / outflow;
-                        if (tempLoad > this.determiningLoad) {
+                        if (tempLoad >= this.determiningLoad) {
                             this.determiningLoad = tempLoad;
                             this.determiningArrivalRate = arrivalRate;
                             this.determiningLane = laneId;
@@ -354,7 +358,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
                     outflowSum += outflow;
                     double arrivalRate = getAverageArrivalRate(now, signal.getLinkId());
                     double tempLoad = arrivalRate / outflow;
-                    if (tempLoad > this.determiningLoad) {
+                    if (tempLoad >= this.determiningLoad) {
                         this.determiningLoad = tempLoad;
                         this.determiningArrivalRate = arrivalRate;
                         this.determiningLane = null;
