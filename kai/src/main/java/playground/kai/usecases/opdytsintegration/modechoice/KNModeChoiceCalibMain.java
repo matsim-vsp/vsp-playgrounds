@@ -18,7 +18,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.DefaultPrepareForSimModule;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
@@ -109,7 +108,6 @@ class KNModeChoiceCalibMain {
 		overrides = AbstractModule.override(Arrays.asList(overrides), new AbstractModule(){
 			@Override public void install() {
 				bind( ScoringParametersForPerson.class ).to( EveryIterationScoringParameters.class ) ;
-				install(new DefaultPrepareForSimModule());
 			}
 		}  ) ;
 
