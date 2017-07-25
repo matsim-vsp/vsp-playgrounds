@@ -37,14 +37,13 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.vehicles.Vehicle;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
-import playground.ikaddoura.optAV.OptAVConfigGroup;
+import playground.ikaddoura.optAV.SAVFixCostHandler;
 
 /**
  * @author ikaddoura
@@ -461,7 +460,9 @@ public class PersonTripNoiseAnalysis {
 			BasicPersonTripAnalysisHandler basicHandler,
 			NoiseAnalysisHandler noiseHandler,
 			PersonMoneyLinkHandler moneyHandler,
-			DelayAnalysis delayAnalysis) {
+			DelayAnalysis delayAnalysis,
+			SAVFixCostHandler savFixCostHandler
+			) {
 	
 		String fileName = outputPath + "aggregated_info.csv";
 		File file = new File(fileName);			
@@ -566,17 +567,12 @@ public class PersonTripNoiseAnalysis {
 				bw.newLine();
 				
 				bw.write(mode + " waiting time costs (sample size) (considered to be 0 EUR / hour) [monetary units];" + (mode_waitingTime / 3600.) * vtts_mode_waiting);
-				bw.newLine();
-				
-				bw.write("-----------");
-				bw.newLine();
-					
-			}
-			
+				bw.newLine();				
+			}	
 
-			double userBenefits = 0.;
+			double userBenefitsIncludingMonetaryPayments = 0.;
 			for (Double userBenefit : personId2userBenefit.values()) {
-				userBenefits = userBenefits + userBenefit;
+				userBenefitsIncludingMonetaryPayments = userBenefitsIncludingMonetaryPayments + userBenefit;
 			}
 			
 			double taxiVehicleDistance = 0.;
@@ -654,9 +650,6 @@ public class PersonTripNoiseAnalysis {
 			bw.write("-----------------------------");
 			bw.newLine();
 			
-			bw.write("-----------");
-			bw.newLine();
-			
 			bw.write("car vehicle distance (sample size) [vehicle-km];" + carVehicleDistance / 1000.);
 			bw.newLine();
 			
@@ -669,9 +662,6 @@ public class PersonTripNoiseAnalysis {
 			bw.write("number of car vehicles (sample size);" + carVehicles);
 			bw.newLine();
 			
-			bw.write("car capital costs (sample size) (costs per vehicle and user are set to 0) [monetary units];" + carVehicles * 0.);
-			bw.newLine();
-			
 			bw.write("-----------");
 			bw.newLine();
 									
@@ -681,13 +671,13 @@ public class PersonTripNoiseAnalysis {
 			bw.write("number of stuck and abort trips (sample size, all modes);" + allStuckAndAbortTrips);
 			bw.newLine();
 			
+			bw.write("-----------");
+			bw.newLine();
+			
 			bw.write("total payments (sample size) (including pt and taxi drivers) [monetary units];" + basicHandler.getTotalPayments());
 			bw.newLine();
 			
 			bw.write("caused noise damage costs (sample size) (caused by car users or passengers) [monetary units];" + causedNoiseCost);
-			bw.newLine();
-			
-			bw.write("total delay (sample size) [hours];" + delayAnalysis.getTotalDelay() / 3600.);
 			bw.newLine();
 			
 			bw.write("congestion toll payments (sample size) (payed by private car users) [monetary units];" + congestionPayments);
@@ -699,36 +689,69 @@ public class PersonTripNoiseAnalysis {
 			bw.write("air pollution toll payments (sample size) (payed by private car users) [monetary units];" + airPollutionPayments);
 			bw.newLine();
 			
-			double taxiCapitalCosts = taxiVehicles * ConfigUtils.addOrGetModule(basicHandler.getScenario().getConfig(), OptAVConfigGroup.class).getFixCostSAV();
-			bw.write("taxi capital costs (sample size) (should be negative = revenue) [monetary units];" + taxiCapitalCosts);
+			if (delayAnalysis != null) {
+				bw.write("total delay (sample size) [hours];" + delayAnalysis.getTotalDelay() / 3600.);
+				bw.newLine();
+			}
+			
+			bw.write("-----------");
+			bw.newLine();
+						
+			double paymentsSAVUserFormerCarUser = 0.;
+			double paymentsSAVUserFormerNonCarUser = 0.;
+
+			int savUsersFormerCarUsers = 0;
+			int savUsersFormerNonCarUsers = 0;
+			
+			if (savFixCostHandler != null) {
+				savUsersFormerCarUsers = savFixCostHandler.getSavUsersFormerCarUsers();
+				savUsersFormerNonCarUsers = savFixCostHandler.getSavUsersFormerNonCarUsers();
+				paymentsSAVUserFormerCarUser = savFixCostHandler.getTotalSAVFixCostPaidBySAVusersFormerCarUsers();
+				paymentsSAVUserFormerNonCarUser = savFixCostHandler.getTotalSAVFixCostPaidBySAVusersFormerNonCarUsers();
+			}
+			
+			// TODO: other money payments by users?
+			
+			bw.write("number of taxi users (former car users) (sample size);" + savUsersFormerCarUsers);
+			bw.newLine();
+			
+			bw.write("number of taxi users (former non-car users) (sample size);" + savUsersFormerNonCarUsers);
+			bw.newLine();
+			
+			bw.write("fix cost payments by taxi users (former car users) (sample size) [monetary units];" + paymentsSAVUserFormerCarUser);
+			bw.newLine();
+			
+			bw.write("fix cost payments by taxi users (former non-car users) (sample size) [monetary units];" + paymentsSAVUserFormerNonCarUser);
 			bw.newLine();
 			
 			bw.write("-----------");
 			bw.newLine();
+			bw.write("-----------");
+			bw.newLine();
 			
-			bw.write("travel related user benefits (sample size) (including toll payments) [monetary units];" + userBenefits);
+			bw.write("travel related user benefits (sample size) (including toll payments) [monetary units];" + userBenefitsIncludingMonetaryPayments);
 			bw.newLine();
 			
 			bw.write("affected noise damage costs (sample size) [monetary units];" + affectedNoiseCost);
 			bw.newLine();
-			
-			double taxiOperatingCosts = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
-			bw.write("taxi operating costs (sample size) [monetary units];" + taxiOperatingCosts);
+
+			double distanceBasedSAVoCost = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
+			bw.write("taxi operating costs (sample size) [monetary units];" + distanceBasedSAVoCost);
 			bw.newLine();
 			
-			double revenues = moneyPaymentsByUsers + taxiCapitalCosts;
-			double savOperatorCost = taxiOperatingCosts; // distance-based cost
-			double userBenefitsWithMonetaryPayments = userBenefits; // with monetary payments, with operating costs
-			double externalCosts = affectedNoiseCost;
-			
-			double welfare = revenues - savOperatorCost + userBenefitsWithMonetaryPayments  - externalCosts; // TODO: check
-			
-			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + revenues);
+			double tollAndFarePaymentsByUsers = moneyPaymentsByUsers - paymentsSAVUserFormerCarUser - paymentsSAVUserFormerNonCarUser;
+			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + tollAndFarePaymentsByUsers);
 			bw.newLine();
 			
+			double welfare = tollAndFarePaymentsByUsers - distanceBasedSAVoCost + userBenefitsIncludingMonetaryPayments  - affectedNoiseCost;
 			bw.write("system welfare (sample size) [monetary units];" + welfare);
 			bw.newLine();
 		
+			bw.write("-----------");
+			bw.newLine();
+			bw.write("-----------");
+			bw.newLine();
+			
 			log.info("Output written to " + fileName);
 			bw.close();
 			

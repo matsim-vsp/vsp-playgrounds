@@ -176,7 +176,8 @@ public class OptAVModule extends AbstractModule {
 		// fix cost pricing
 		// #############################
 		
-		addEventHandlerBinding().to(SAVFixCostHandler.class).asEagerSingleton();
+		this.bind(SAVFixCostHandler.class).asEagerSingleton();
+		addEventHandlerBinding().to(SAVFixCostHandler.class);
 				
 		// #############################
         // noise and congestion pricing

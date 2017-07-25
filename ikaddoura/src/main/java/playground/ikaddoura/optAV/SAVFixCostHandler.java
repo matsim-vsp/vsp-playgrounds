@@ -45,6 +45,12 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 
 	private final Set<Id<Person>> passengersThatHaveAlreadyPaid = new HashSet<>();
 	
+	private int savUsersFormerNonCarUsers = 0;
+	private double totalSAVFixCostPaidBySAVusersFormerNonCarUsers = 0.;
+	
+	private int savUsersFormerCarUsers = 0;
+	private double totalSAVFixCostPaidBySAVusersFormerCarUsers = 0.;
+	
 	@Inject
 	private SAVPassengerTracker savTracker;
 	
@@ -56,32 +62,31 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 	
 	@Override
 	public void handleEvent(PersonEntersVehicleEvent event) {
-		if (savTracker.getTaxiDrivers().contains(event.getPersonId())) {
-			// taxi driver
+		
+		if (savTracker.isTaxiPassenger(event.getPersonId())) {
 			
-		} else {
-			// passenger
+			// passenger getting into a taxi
 			
-			if (savTracker.isTaxiPassenger(event.getPersonId())) {
+			if (!passengersThatHaveAlreadyPaid.contains(event.getPersonId())) {
+				Person person = scenario.getPopulation().getPersons().get(event.getPersonId());
+				boolean carOwnerInBaseCase = (boolean) person.getAttributes().getAttribute("CarOwnerInBaseCase");
 				
-				// passenger getting into a taxi
-				
-				if (!passengersThatHaveAlreadyPaid.contains(event.getPersonId())) {
-					Person person = scenario.getPopulation().getPersons().get(event.getPersonId());
-					boolean carOwnerInBaseCase = (boolean) person.getAttributes().getAttribute("CarOwnerInBaseCase");
+				double costsPerDay = 0.;
+				if (carOwnerInBaseCase && personWithoutCarTrips(person.getSelectedPlan())) {
+					costsPerDay = (-1) * ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getFixCostsSAVinsteadOfCar()
+							+ (-1) * ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getFixCostSAV();					
+					savUsersFormerCarUsers++;
+					totalSAVFixCostPaidBySAVusersFormerCarUsers += (-1) * costsPerDay;
 					
-					double costsPerDay = 0.;
-					if (carOwnerInBaseCase && personWithoutCarTrips(person.getSelectedPlan())) {
-						costsPerDay = (-1) * ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getFixCostsSAVinsteadOfCar();					
-					} else {
-						costsPerDay = (-1) * ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getFixCostSAV();
-					}
-					this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), costsPerDay ));
-					
-					this.passengersThatHaveAlreadyPaid.add(event.getPersonId());
 				} else {
-					// passenger has already paid...
+					costsPerDay = (-1) * ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getFixCostSAV();
+					savUsersFormerNonCarUsers++;
+					totalSAVFixCostPaidBySAVusersFormerNonCarUsers += (-1) * costsPerDay;
 				}
+				this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), event.getPersonId(), costsPerDay ));				
+				this.passengersThatHaveAlreadyPaid.add(event.getPersonId());
+			} else {
+				// passenger has already paid for the daily fix costs...
 			}
 		}
 	}
@@ -101,7 +106,29 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 
 	@Override
 	public void reset(int iteration) {
+		
 		this.passengersThatHaveAlreadyPaid.clear();
+		
+		this.savUsersFormerCarUsers = 0;
+		this.savUsersFormerNonCarUsers = 0;
+		this.totalSAVFixCostPaidBySAVusersFormerCarUsers = 0.;
+		this.totalSAVFixCostPaidBySAVusersFormerNonCarUsers = 0.;
+	}
+
+	public int getSavUsersFormerNonCarUsers() {
+		return savUsersFormerNonCarUsers;
+	}
+
+	public double getTotalSAVFixCostPaidBySAVusersFormerNonCarUsers() {
+		return totalSAVFixCostPaidBySAVusersFormerNonCarUsers;
+	}
+
+	public int getSavUsersFormerCarUsers() {
+		return savUsersFormerCarUsers;
+	}
+
+	public double getTotalSAVFixCostPaidBySAVusersFormerCarUsers() {
+		return totalSAVFixCostPaidBySAVusersFormerCarUsers;
 	}
 
 }

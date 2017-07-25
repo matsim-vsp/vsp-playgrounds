@@ -49,6 +49,7 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPer
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
+import playground.ikaddoura.optAV.SAVFixCostHandler;
 
 
 /**
@@ -79,8 +80,11 @@ public class AnalysisControlerListener implements IterationEndsListener {
 	@Inject
 	private PersonMoneyLinkHandler moneyHandler;
 	
-	@Inject
+	@Inject(optional=true)
 	private DelayAnalysis delayAnalysis;
+	
+	@Inject(optional=true)
+	private SAVFixCostHandler savFixCostHandler;
 	
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
@@ -118,7 +122,7 @@ public class AnalysisControlerListener implements IterationEndsListener {
 		analysis.printAggregatedResults(outputPathAnalysisIteration, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
 		analysis.printAggregatedResults(outputPathAnalysisIteration, null, personId2userBenefit, basicHandler, noiseHandler);
 		
-		analysis.printAggregatedResults(outputPathAnalysisIteration, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis);
+		analysis.printAggregatedResults(outputPathAnalysisIteration, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis, savFixCostHandler);
 		
 		// all iterations
 				

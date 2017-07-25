@@ -191,7 +191,7 @@ public class PersonTripNoiseAnalysisRun {
 		analysis.printAggregatedResults(outputPath, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
 		analysis.printAggregatedResults(outputPath, null, personId2userBenefit, basicHandler, noiseHandler);
 		
-		analysis.printAggregatedResults(outputPath, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis);
+		analysis.printAggregatedResults(outputPath, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis, null);
 		
 		SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
 		analysis.printAvgValuePerParameter(outputPath + "tollsPerDepartureTime_car_3600.csv", departureTime2tolls);
