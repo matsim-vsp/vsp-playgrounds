@@ -44,12 +44,18 @@ public class Santiago10pctDistanceAnalysis {
 
 	public static void main(String[]args){
 		
-		String CASE_NAME = args[0];
-		String STEP_NAME = args[1];
+//		String CASE_NAME = args[0];
+//		String STEP_NAME = args[1];
 		
-		RUN_DIR="/net/ils4/lcamus/runs-svn/santiago/" + CASE_NAME + "/";
-		OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
+//		RUN_DIR="/net/ils4/lcamus/runs-svn/santiago/" + CASE_NAME + "/";
+//		OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
+//		ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
+		
+		RUN_DIR = args[0];
+		String STEP_NAME = args[1];
+		OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME +"/";
 		ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
+		
 		
 		int IT_TO_EVALUATE = Integer.parseInt(args[2]);
 		int REFERENCE_IT = Integer.parseInt(args[3]);
@@ -60,7 +66,7 @@ public class Santiago10pctDistanceAnalysis {
 //		while(itAux<=LAST_IT){
 			List<Id<Person>> stuckAgents = getStuckAgents(it);
 			writeFileForNonPublicLegDistances(it,itAux,stuckAgents);
-//			writeFileForPublicLegsDistances(it,itAux,stuckAgents);
+			writeFileForPublicLegsDistances(it,itAux,stuckAgents);
 //			it+=50;
 //			itAux+=50;
 //		}
