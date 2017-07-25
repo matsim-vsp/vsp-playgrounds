@@ -28,15 +28,15 @@ import playground.santiago.analysis.travelDistances.SantiagoPTDistanceFromPlans;
 
 public class Santiago10pctDistanceAnalysis {
 
-//	final static String CASE_NAME = "baseCase10pct";
-//	final static String STEP_NAME = "Step1";
-
+//	final static String CASE_NAME = "policyRuns/10pct";
+//	final static String STEP_NAME = "StepTriangle0";
+//
 //	final static String RUN_DIR = "../../../runs-svn/santiago/" + CASE_NAME + "/";
 //	final static String OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
 //	final static String ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
-
-//	final static int FIRST_IT = 100;
-//	final static int LAST_IT = 400;
+//
+//	final static int REFERENCE_IT = 600;
+//	final static int IT_TO_EVALUATE = 200;
 	
 	static String RUN_DIR;
 	static String OUTPUT_DIR;
@@ -44,12 +44,18 @@ public class Santiago10pctDistanceAnalysis {
 
 	public static void main(String[]args){
 		
-		String CASE_NAME = args[0];
-		String STEP_NAME = args[1];
+//		String CASE_NAME = args[0];
+//		String STEP_NAME = args[1];
 		
-		RUN_DIR="/net/ils4/lcamus/runs-svn/santiago/" + CASE_NAME + "/";
-		OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
+//		RUN_DIR="/net/ils4/lcamus/runs-svn/santiago/" + CASE_NAME + "/";
+//		OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME + "/";
+//		ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
+		
+		RUN_DIR = args[0];
+		String STEP_NAME = args[1];
+		OUTPUT_DIR = RUN_DIR + "outputOf" + STEP_NAME +"/";
 		ANALYSIS_DIR = OUTPUT_DIR + "analysis/";
+		
 		
 		int IT_TO_EVALUATE = Integer.parseInt(args[2]);
 		int REFERENCE_IT = Integer.parseInt(args[3]);
