@@ -104,9 +104,9 @@ private static final String OUTPUT_DIR = "C:/Users/Nico/Dropbox/MA-Arbeit/Ergebn
         PlanCalcScoreConfigGroup.ActivityParams home = new PlanCalcScoreConfigGroup.ActivityParams("home");
         home.setTypicalDuration(16 * 3600);
         config.planCalcScore().addActivityParams(home);
-        PlanCalcScoreConfigGroup.ActivityParams fb = new PlanCalcScoreConfigGroup.ActivityParams("fb");
-        work.setTypicalDuration(2 * 3600);
-        config.planCalcScore().addActivityParams(work);
+//        PlanCalcScoreConfigGroup.ActivityParams fb = new PlanCalcScoreConfigGroup.ActivityParams("fb");
+//        fb.setTypicalDuration(2 * 3600);
+//        config.planCalcScore().addActivityParams(fb);
 
         config.plans().setInputFile(PLANS_PATH);
 
