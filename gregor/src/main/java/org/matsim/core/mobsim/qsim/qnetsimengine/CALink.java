@@ -75,7 +75,7 @@ public class CALink extends QLinkI {
 	}
 
 	@Override
-	QNode getToNode() {
+	QNodeI getToNode() {
 		// TODO Auto-generated method stub
 		return null;
 	}

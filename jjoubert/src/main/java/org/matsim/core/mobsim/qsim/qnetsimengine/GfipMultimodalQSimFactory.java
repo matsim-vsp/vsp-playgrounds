@@ -152,7 +152,7 @@ public class GfipMultimodalQSimFactory implements Provider<Mobsim> {
 				this.netsimEngine = netsimEngine1 ;
 			}
 			@Override
-			public QLinkImpl createNetsimLink(final Link link, final QNode toQueueNode) {
+			public QLinkImpl createNetsimLink(final Link link, final QNodeI toQueueNode) {
 				VehicleQ<QVehicle> vehicleQ = null;
 				switch (queueType) {
 				case FIFO:
@@ -177,8 +177,8 @@ public class GfipMultimodalQSimFactory implements Provider<Mobsim> {
 				return linkBuilder.build(link, toQueueNode) ;
 			}
 			@Override
-			public QNode createNetsimNode(final Node node) {
-				QNode.Builder builder = new QNode.Builder( netsimEngine, context ) ;
+			public QNodeI createNetsimNode(final Node node) {
+				QNodeImpl.Builder builder = new QNodeImpl.Builder( netsimEngine, context ) ;
 				return builder.build( node ) ;
 			}
 		};

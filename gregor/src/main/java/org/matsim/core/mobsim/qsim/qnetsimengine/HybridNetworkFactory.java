@@ -58,20 +58,20 @@ public class HybridNetworkFactory extends QNetworkFactory {
 		AgentSnapshotInfoFactory snapshotInfoFactory = new AgentSnapshotInfoFactory(linkWidthCalculator);
 		AbstractAgentSnapshotInfoBuilder snapshotInfoBuilder = QNetsimEngine.createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
 		
-		double effectiveCellSize = ((Network) network ).getEffectiveCellSize() ;
+		double effectiveCellSize = network.getEffectiveCellSize() ;
 		this.context = new NetsimEngineContext(events, effectiveCellSize, agentCounter, snapshotInfoBuilder, qsimConfig, mobsimTimer, linkWidthCalculator ) ;
 		
 		this.netsimEngine = netsimEngine1 ;
 	}
 
 	@Override
-	public QNode createNetsimNode(Node node) {
-		QNode.Builder builder = new QNode.Builder( netsimEngine, context ) ;
+	public QNodeI createNetsimNode(Node node) {
+		QNodeImpl.Builder builder = new QNodeImpl.Builder( netsimEngine, context ) ;
 		return builder.build( node ) ;
 	}
 
 	@Override
-	public QLinkI createNetsimLink(Link link, QNode queueNode) {
+	public QLinkI createNetsimLink(Link link, QNodeI queueNode) {
 		
 		for (Entry<String, QNetworkFactory> e : this.facs.entrySet()) {
 			if (link.getAllowedModes().contains(e.getKey())) {

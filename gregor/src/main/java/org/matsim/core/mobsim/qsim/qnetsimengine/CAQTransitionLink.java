@@ -83,7 +83,7 @@ public class CAQTransitionLink extends QLinkI{
 	}
 
 	@Override
-	QNode getToNode() {
+	QNodeI getToNode() {
 		return this.ql.getToNode();
 	}
 

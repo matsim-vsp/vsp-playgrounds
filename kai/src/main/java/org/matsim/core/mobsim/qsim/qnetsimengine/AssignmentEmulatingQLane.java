@@ -112,7 +112,10 @@ class AssignmentEmulatingQLane extends QLaneI {
 		// (called from two places, thus separate method)
 
 		buffer.add(veh); // we always accept
-		qLink.getToNode().activateNode();
+		final QNodeI toNode = qLink.getToNode();
+		if ( toNode instanceof QNodeImpl ) {
+			((QNodeImpl) toNode).activateNode();
+		}
 	}
 	@Override
 	public final boolean isAcceptingFromWait(QVehicle veh) {

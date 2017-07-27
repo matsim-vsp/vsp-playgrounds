@@ -22,7 +22,7 @@ import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 
 public final class AssignmentEmulatingQLaneNetworkFactory extends QNetworkFactory {
 	
-	private QNode.Builder nodeBuilder;
+	private QNodeImpl.Builder nodeBuilder;
 	private QLinkImpl.Builder linkBuilder;
 	private Scenario scenario;
 	private EventsManager events;
@@ -47,7 +47,7 @@ public final class AssignmentEmulatingQLaneNetworkFactory extends QNetworkFactor
 
 		final NetsimEngineContext context = new NetsimEngineContext(events, network.getEffectiveCellSize(), agentCounter1, snapshotInfoBuilder, qsimConfig, mobsimTimer1, linkWidthCalculator ) ;
 
-		nodeBuilder = new QNode.Builder( netsimEngine, context );
+		nodeBuilder = new QNodeImpl.Builder( netsimEngine, context );
 
 		linkBuilder = new QLinkImpl.Builder(context, netsimEngine) ;
 		linkBuilder.setLaneFactory(new LaneFactory() {
@@ -61,12 +61,12 @@ public final class AssignmentEmulatingQLaneNetworkFactory extends QNetworkFactor
 	}
 
 	@Override
-	public QNode createNetsimNode(Node node) {
+	public QNodeI createNetsimNode(Node node) {
 		return nodeBuilder.build( node ) ;
 	}
 
 	@Override
-	public QLinkI createNetsimLink(Link link, QNode queueNode) {
+	public QLinkI createNetsimLink(Link link, QNodeI queueNode) {
 		return linkBuilder.build(link, queueNode) ; 
 	}
 
