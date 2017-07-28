@@ -263,7 +263,7 @@ public class SAString_v1 {
 								+ " to distance of type double.");
 						e.printStackTrace();
 					}
-					distanceMatrix.createEntry(demandPointId,
+					distanceMatrix.createAndAddEntry(demandPointId,
 							siteIndexMap.get(i), distance);
 				}
 			}
@@ -884,7 +884,7 @@ public class SAString_v1 {
 //				for(String s : representation){
 //					List<Entry> entries = distanceMatrix.getToLocEntries(s);
 //					for(Entry e : entries){
-//						solutionMatrix.createEntry(e.getFromLocation(), e.getToLocation(), e.getValue());
+//						solutionMatrix.createAndAddEntry(e.getFromLocation(), e.getToLocation(), e.getValue());
 //					}
 //				}
 			} else{
@@ -905,7 +905,7 @@ public class SAString_v1 {
 			for(String rep : this.representation){
 				List<Entry> entries = distanceMatrix.getToLocEntries(rep);
 				for(Entry e : entries){
-					matrix.createEntry(e.getFromLocation(), e.getToLocation(), e.getValue());
+					matrix.createAndAddEntry(e.getFromLocation(), e.getToLocation(), e.getValue());
 				}
 			}
 
@@ -1057,7 +1057,7 @@ public class SAString_v1 {
 			/* Add all the distance entries of the incoming site. */
 			List<Entry> add = distanceMatrix.getToLocEntries(inId);
 			for(Entry e : add){
-				solutionMatrix.createEntry(e.getFromLocation(), e.getToLocation(), e.getValue());
+				solutionMatrix.createAndAddEntry(e.getFromLocation(), e.getToLocation(), e.getValue());
 			}
 		}
 	}

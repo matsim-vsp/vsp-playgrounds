@@ -138,7 +138,7 @@ public class ITP2Visum {
 //							}
 							Entry e = m.getEntry(gsvFrom, gsvTo);
 							if(e == null) {
-								m.createEntry(gsvFrom, gsvTo, trips);
+								m.createAndAddEntry(gsvFrom, gsvTo, trips);
 							} else {
 								e.setValue(e.getValue() + trips);
 							}
@@ -147,7 +147,7 @@ public class ITP2Visum {
 							 */
 							e = m.getEntry(gsvTo, gsvFrom);
 							if(e == null) {
-								m.createEntry(gsvTo, gsvFrom, trips);
+								m.createAndAddEntry(gsvTo, gsvFrom, trips);
 							} else {
 								e.setValue(e.getValue() + trips);
 							}

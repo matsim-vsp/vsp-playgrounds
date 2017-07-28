@@ -56,7 +56,7 @@ public class EmmeTravelTimes implements TabularFileHandler {
 			final String[] destData = row[i].split("\\Q" + ":" + "\\E");
 			final String toZoneId = destData[0];
 			final double value = Double.parseDouble(destData[1]);
-			this.currentlyReadMatrix.createEntry(fromZoneId, toZoneId, value);
+			this.currentlyReadMatrix.createAndAddEntry(fromZoneId, toZoneId, value);
 		}
 	}
 

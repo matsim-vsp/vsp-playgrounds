@@ -62,8 +62,8 @@ public class TryOutZoneWriting {
 		for (String fromZone : sampleZoneIds) {
 			System.out.println((++fromZoneCnt) + " / " + coveredZones.size());
 			for (String toZone : sampleZoneIds) {
-				work.createEntry(fromZone, toZone, Math.random());
-				other.createEntry(fromZone, toZone, Math.random());
+				work.createAndAddEntry(fromZone, toZone, Math.random());
+				other.createAndAddEntry(fromZone, toZone, Math.random());
 			}
 		}
 

@@ -108,7 +108,7 @@ public class MyDemandMatrix {
 						if(!locationCoordinates.containsKey(fromId)){
 							log.warn("Location " + toId + " not found in list of locations. May not be fatal.");
 						}
-						matrix.createEntry(fromId, toId, Double.parseDouble(sa[i]));
+						matrix.createAndAddEntry(fromId, toId, Double.parseDouble(sa[i]));
 					}					
 				}
 			} finally{
@@ -153,7 +153,7 @@ public class MyDemandMatrix {
 				String fromId = entries[0];
 				String toId = entries[1];
 				Double trips = Double.parseDouble(entries[2]);
-				matrix.createEntry(fromId, toId, trips);				
+				matrix.createAndAddEntry(fromId, toId, trips);
 			}
 			
 		} catch (IOException e) {

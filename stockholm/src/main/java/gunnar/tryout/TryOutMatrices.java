@@ -13,17 +13,17 @@ public class TryOutMatrices {
 		{
 			final Matrix m1 = matrices.createMatrix("WORK",
 					"work tour costs, averaged over entire population");
-			m1.createEntry("fromId1", "toId2", 12.34);
-			m1.createEntry("fromId1", "toId3", 56.78);
-			m1.createEntry("fromId4", "toId4", 90.12);
+			m1.createAndAddEntry("fromId1", "toId2", 12.34);
+			m1.createAndAddEntry("fromId1", "toId3", 56.78);
+			m1.createAndAddEntry("fromId4", "toId4", 90.12);
 		}
 
 		{
 			final Matrix m2 = matrices.createMatrix("OTHER",
 					"other tour costs, averaged over entire population");
-			m2.createEntry("fromId10", "toId20", 11);
-			m2.createEntry("fromId10", "toId30", 22);
-			m2.createEntry("fromId40", "toId40", 33);
+			m2.createAndAddEntry("fromId10", "toId20", 11);
+			m2.createAndAddEntry("fromId10", "toId30", 22);
+			m2.createAndAddEntry("fromId40", "toId40", 33);
 		}
 
 		final MatricesWriter writer = new MatricesWriter(matrices);
