@@ -25,10 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
-import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
-import floetteroed.opdyts.searchalgorithms.RandomSearch;
-import floetteroed.opdyts.searchalgorithms.SelfTuner;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
@@ -36,8 +32,9 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
-import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -49,7 +46,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
-import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
@@ -59,7 +55,6 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.utils.FileUtils;
-import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
 /**
  * @author amit
@@ -188,13 +183,11 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		//****************************** mainly opdyts settings ******************************
 
-		TimeDiscretization timeDiscretization = new TimeDiscretization(opdytsConfigGroup.getStartTime(), opdytsConfigGroup.getBinSize(), opdytsConfigGroup.getBinCount());
-
 		DistanceDistribution distanceDistribution = new EquilDistanceDistribution(EQUIL_MIXEDTRAFFIC);
 		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(modes2consider,distanceDistribution);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario, timeDiscretization);
+		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
@@ -231,31 +224,10 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, EQUIL_MIXEDTRAFFIC);
 
-		// what would decide the convergence of the objective function
-		ConvergenceCriterion convergenceCriterion = new FixedIterationNumberConvergenceCriterion(opdytsConfigGroup.getNumberOfIterationsForConvergence(), opdytsConfigGroup.getNumberOfIterationsForAveraging());
+		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
+		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
+		opdytsControler.run(simulator, decisionVariableRandomizer,  initialDecisionVariable, objectiveFunction);
 
-		RandomSearch<ModeChoiceDecisionVariable> randomSearch = new RandomSearch<>(
-				simulator,
-				decisionVariableRandomizer,
-				initialDecisionVariable,
-				convergenceCriterion,
-				opdytsConfigGroup.getMaxIteration(), // this many times simulator.run(...) and thus controler.run() will be called.
-				opdytsConfigGroup.getMaxTransition(),
-				opdytsConfigGroup.getPopulationSize(),
-				MatsimRandom.getRandom(),
-				opdytsConfigGroup.isInterpolate(),
-				objectiveFunction,
-				opdytsConfigGroup.isIncludeCurrentBest()
-				);
-
-		// probably, an object which decide about the inertia
-		SelfTuner selfTuner = new SelfTuner(opdytsConfigGroup.getInertia());
-		selfTuner.setWeightScale(opdytsConfigGroup.getSelfTuningWeight());
-
-		randomSearch.setLogPath(opdytsConfigGroup.getOutputDirectory());
-
-		// run it, this will eventually call simulator.run() and thus controler.run
-		randomSearch.run(selfTuner );
 
 
 		OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();

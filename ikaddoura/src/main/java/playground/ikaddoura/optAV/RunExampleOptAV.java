@@ -23,30 +23,18 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.noise.NoiseCalculationOnline;
 import org.matsim.contrib.noise.NoiseConfigGroup;
-import org.matsim.contrib.noise.data.NoiseContext;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
 import org.matsim.contrib.noise.utils.ProcessNoiseImmissions;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.TaxiOutputModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionModule;
-import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 
 /**
 * @author ikaddoura
@@ -58,9 +46,7 @@ public class RunExampleOptAV {
 
 	private static String configFile;
 	private static String outputDirectory;
-	private static boolean internalizeNoise;
-	private static boolean internalizeCongestion;
-	private static boolean minExtCost;
+	private static String runId;
 		
 	private static boolean otfvis;
 	
@@ -73,23 +59,15 @@ public class RunExampleOptAV {
 			outputDirectory = args[1];
 			log.info("outputDirectory: "+ outputDirectory);
 			
-			internalizeCongestion = Boolean.parseBoolean(args[2]);
-			log.info("internalizeCongestion: "+ internalizeCongestion);
-			
-			internalizeNoise = Boolean.parseBoolean(args[3]);
-			log.info("internalizeNoise: "+ internalizeNoise);
-			
-			minExtCost = Boolean.parseBoolean(args[4]);
-			log.info("minExtCost: " + minExtCost);
+			runId = args[2];
+			log.info("runId: "+ runId);
 			
 			otfvis = false;
 			
 		} else {
 			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config_be_10pct_test.xml";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_test_2taxiTrips/";
-			internalizeNoise = false;
-			internalizeCongestion = false;
-			minExtCost = false;
+			runId = null;
 			otfvis = false;
 		}
 		
@@ -110,6 +88,7 @@ public class RunExampleOptAV {
 				new DecongestionConfigGroup());
 		
 		config.controler().setOutputDirectory(outputDirectory);
+		config.controler().setRunId(runId);
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
@@ -121,7 +100,6 @@ public class RunExampleOptAV {
 		// #############################
 				
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());	
-        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		controler.run();
 		
 		// #############################

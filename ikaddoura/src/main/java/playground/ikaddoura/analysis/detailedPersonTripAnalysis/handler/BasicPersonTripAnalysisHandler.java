@@ -161,6 +161,11 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			}
 			
 		} else {
+			
+			if (this.personId2currentTripNumber.get(event.getPersonId()) == null) {
+				throw new RuntimeException("No trip number for " + event.getPersonId() + " at time " + event.getTime());
+			}
+			
 			int tripNumber = this.personId2currentTripNumber.get(event.getPersonId());
 			
 			double paymentBefore = personId2tripNumber2payment.get(event.getPersonId()).get(tripNumber);
@@ -186,13 +191,13 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 				
 		double linkLength = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getLength();
 		
-		if (ptVehicleId2totalDistance.containsKey(event.getVehicleId())) {
+		if (ptVehicleId2totalDistance.get(event.getVehicleId()) != null) {
 			ptVehicleId2totalDistance.put(event.getVehicleId(), ptVehicleId2totalDistance.get(event.getVehicleId()) + linkLength);
 		 
-		} else if (taxiVehicleId2totalDistance.containsKey(event.getVehicleId())) {
+		} else if (taxiVehicleId2totalDistance.get(event.getVehicleId()) != null) {
 			taxiVehicleId2totalDistance.put(event.getVehicleId(), taxiVehicleId2totalDistance.get(event.getVehicleId()) + linkLength);
 		
-		} else if (carVehicleId2totalDistance.containsKey(event.getVehicleId())) {
+		} else if (carVehicleId2totalDistance.get(event.getVehicleId()) != null) {
 			carVehicleId2totalDistance.put(event.getVehicleId(), carVehicleId2totalDistance.get(event.getVehicleId()) + linkLength);
 
 		} else {
@@ -590,10 +595,6 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 		return taxiDrivers;
 	}
 
-//	public Set<Id<Vehicle>> getPtVehicles() {
-//		return ptVehicles;
-//	}
-
 	public Scenario getScenario() {
 		return scenario;
 	}
@@ -626,6 +627,18 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			}
 		}
 		return totalTravelTimeByPersons;
+	}
+
+	public Map<Id<Vehicle>, Double> getTaxiVehicleId2totalDistance() {
+		return taxiVehicleId2totalDistance;
+	}
+
+	public Map<Id<Vehicle>, Double> getPtVehicleId2totalDistance() {
+		return ptVehicleId2totalDistance;
+	}
+
+	public Map<Id<Vehicle>, Double> getCarVehicleId2totalDistance() {
+		return carVehicleId2totalDistance;
 	}
 
 }

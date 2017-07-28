@@ -21,6 +21,7 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimUtils;
@@ -75,7 +76,8 @@ public class LanesTest {
 		
 		LaneTestEventHandler handler = new LaneTestEventHandler();
 		events.addHandler(handler);
-		
+
+		PrepareForSimUtils.createDefaultPrepareForSim(scenario, events).run();
 		QSim qsim = QSimUtils.createDefaultQSim(scenario, events);
 		qsim.run();
 		

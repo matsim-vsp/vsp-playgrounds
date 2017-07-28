@@ -162,7 +162,7 @@ public class TripCostMatrices {
 		for (Map.Entry<Zone, Set<Node>> fromZone2sampledNodesEntry : zone2sampledNodes
 				.entrySet()) {
 			for (Zone toZone : zone2sampledNodes.keySet()) {
-				cntMatrix.createEntry(fromZone2sampledNodesEntry.getKey()
+				cntMatrix.createAndAddEntry(fromZone2sampledNodesEntry.getKey()
 						.getId(), toZone.getId(), fromZone2sampledNodesEntry
 						.getValue().size()
 						* zone2sampledNodes.get(toZone).size());

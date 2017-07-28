@@ -144,6 +144,9 @@ public class RunOsmAmenityReaderBerlin {
 	}
 	
 
+	// rather use
+	// AccessibilityFacilityUtils.buildOsmAmenityToMatsimTypeMap()
+	@Deprecated
 	private static Map<String, String> buildOsmAmentityTypeToMatsimTypeMap(){
 		Map<String, String> map = new TreeMap<String, String>();
 		

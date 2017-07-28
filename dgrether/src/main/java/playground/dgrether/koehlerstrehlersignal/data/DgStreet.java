@@ -33,6 +33,8 @@ public class DgStreet {
 	private Id<DgStreet> id;
 	private long cost;
 	private double capacity;
+	private int minGreen; //default 0
+	private int maxGreen; //default cycle time
 	
 
 	public DgStreet(Id<DgStreet> id, DgCrossingNode fromNode, DgCrossingNode toNode) {
@@ -80,6 +82,22 @@ public class DgStreet {
 	
 	public void setCapacity(double capacity) {
 		this.capacity = capacity;
+	}
+
+	public int getMinGreen() {
+		return minGreen;
+	}
+
+	public void setMinGreen(int minGreen) {
+		this.minGreen = minGreen;
+	}
+
+	public int getMaxGreen() {
+		return maxGreen;
+	}
+
+	public void setMaxGreen(int maxGreen) {
+		this.maxGreen = maxGreen;
 	}
 
 }

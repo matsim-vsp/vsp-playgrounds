@@ -22,6 +22,7 @@ package playground.balmermi.census2000.modules;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.matsim.api.core.v01.BasicLocation;
@@ -197,7 +198,7 @@ public class PersonSetPrimLoc extends AbstractPersonAlgorithm implements PlanAlg
 	// private methods
 	//////////////////////////////////////////////////////////////////////
 
-	private final Zone getPrimActZone(final ArrayList<Entry> from_loc_entries) {
+	private final Zone getPrimActZone(final List<Entry> from_loc_entries) {
 		if (from_loc_entries.isEmpty()) { throw new RuntimeException("From Loc Entries are empty! This should not happen!"); }
 
 		int[] dist_sum = new int[from_loc_entries.size()];

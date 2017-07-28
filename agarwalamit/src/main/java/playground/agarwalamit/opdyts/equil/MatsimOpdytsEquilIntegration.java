@@ -36,6 +36,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -56,7 +57,6 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.utils.FileUtils;
-import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
 /**
  * @author amit
@@ -181,7 +181,7 @@ public class MatsimOpdytsEquilIntegration {
 
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(),
-				scenario, new TimeDiscretization(startTime, binSize, binCount));
+				scenario);
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
@@ -208,6 +208,9 @@ public class MatsimOpdytsEquilIntegration {
 		boolean interpolate = true;
 		boolean includeCurrentBest = false;
 
+		int warmupIterations = 1;
+		boolean useAllWarmUpIterations = false;
+
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
 				RandomizedUtilityParametersChoser.ONLY_ASC, EQUIL, null, modes2consider);
@@ -228,11 +231,14 @@ public class MatsimOpdytsEquilIntegration {
 				maxIterations, // this many times simulator.run(...) and thus controler.run() will be called.
 				maxTransitions,
 				populationSize,
-				MatsimRandom.getRandom(),
-				interpolate,
-				objectiveFunction,
-				includeCurrentBest
+				objectiveFunction
 				);
+
+		randomSearch.setRandom(MatsimRandom.getRandom());
+		randomSearch.setInterpolate(interpolate);
+		randomSearch.setIncludeCurrentBest(includeCurrentBest);
+		randomSearch.setWarmupIterations(warmupIterations);
+		randomSearch.setUseAllWarmupIterations(useAllWarmUpIterations);
 
 		// probably, an object which decide about the inertia
 		SelfTuner selfTuner = new SelfTuner(0.95);
@@ -240,7 +246,7 @@ public class MatsimOpdytsEquilIntegration {
 		randomSearch.setLogPath(OUT_DIR);
 
 		// run it, this will eventually call simulator.run() and thus controler.run
-		randomSearch.run(selfTuner );
+//		randomSearch.run(selfTuner );
 
 		// remove the unused iterations
 		for (int index =0; index < maxIterations; index++) {

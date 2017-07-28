@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE network SYSTEM "http://www.matsim.org/files/dtd/network_v2.dtd">
+
+<network name="Tampere">
+
+<!-- ====================================================================== -->
+
+	<nodes>
+		<node id="x_1" x="0.0" y="1100.0" />
+		<node id="x_2" x="1100.0" y="0.0" />
+		<node id="x_3" x="0.0" y="-1100.0" />
+		<node id="x_4" x="-1100.0" y="0.0" />
+		
+		<node id="n_1" x="0.0" y="1000.0" />
+		<node id="n_2" x="1000.0" y="0.0" />
+		<node id="n_3" x="0.0" y="-1000.0" />
+		<node id="n_4" x="-1000.0" y="0.0" />
+		<node id="node" x="0.0" y="0.0" />
+	</nodes>
+<!-- ====================================================================== -->
+
+	<links capperiod="01:00:00" effectivecellsize="7.5" effectivelanewidth="3.75">
+		<link id="x_in_1" from="x_1" to="n_1" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="x_out_5" from="n_1" to="x_1" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+
+		<link id="x_in_2" from="x_2" to="n_2" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="x_out_6" from="n_2" to="x_2" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+
+		<link id="x_in_3" from="x_3" to="n_3" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="x_out_7" from="n_3" to="x_3" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+
+		<link id="x_in_4" from="x_4" to="n_4" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="x_out_8" from="n_4" to="x_4" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+
+
+		<link id="1" from="n_1" to="node" length="1000.0" freespeed="7.5" capacity="1000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="5" from="node" to="n_1" length="1000.0" freespeed="7.5" capacity="1000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+
+		<link id="2" from="n_2" to="node" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="6" from="node" to="n_2" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+
+		<link id="3" from="n_3" to="node" length="1000.0" freespeed="7.5" capacity="1000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="7" from="node" to="n_3" length="1000.0" freespeed="7.5" capacity="1000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+
+		<link id="4" from="n_4" to="node" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		<link id="8" from="node" to="n_4" length="1000.0" freespeed="7.5" capacity="2000.0" permlanes="1.0" oneway="1" origid="1" type="1" />
+		
+
+		
+
+	</links>
+<!-- ====================================================================== -->
+
+</network>

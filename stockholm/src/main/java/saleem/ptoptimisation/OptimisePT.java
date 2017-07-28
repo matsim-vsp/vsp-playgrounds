@@ -85,7 +85,7 @@ public class OptimisePT {
 		@SuppressWarnings("unchecked")		
 		final MATSimSimulator2<PTSchedule> matsimSimulator = new MATSimSimulator2(
 				new PTMatsimStateFactoryImpl<>(scenario, occupancyScale),
-				scenario, timeDiscretization);
+				scenario);
 		matsimSimulator.addSimulationStateAnalyzer(new PTOccupancyAnalyzer.Provider(timeDiscretization,
 				new LinkedHashSet<>(scenario.getTransitSchedule().getFacilities().keySet())));
 		// <<<<< NEW, UNTESTED <<<<<
@@ -95,17 +95,24 @@ public class OptimisePT {
 				matsimSimulator, decisionVariableRandomizer, ptschedule,
 				convergenceCriterion, maxRandomSearchIterations,
 				maxRandomSearchTransitions, 8,
-				MatsimRandom.getRandom(), interpolate, objectiveFunction,
-				includeCurrentBest);
+				objectiveFunction);
+		randomSearch.setIncludeCurrentBest(includeCurrentBest);
+		randomSearch.setInterpolate(interpolate);
+		randomSearch.setRandom(MatsimRandom.getRandom());
+		
 		new CreatePseudoNetwork(schedule, network, "tr_").createNetwork();
 		randomSearch.setLogFileName(originalOutputDirectory + "opdyts.log");
 		randomSearch.setConvergenceTrackingFileName(originalOutputDirectory
 				+ "opdyts.con");
 		randomSearch.setOuterIterationLogFileName(originalOutputDirectory
 				+ "opdyts.opt");
+		
 		final SelfTuner tuner = new SelfTuner(0.95);
 		tuner.setNoisySystem(true);
-		randomSearch.run(tuner);
+		randomSearch.setSelfTuner(tuner);
+		
+		randomSearch.run();
+		
 		System.out.println("... DONE.");
 	}
 }

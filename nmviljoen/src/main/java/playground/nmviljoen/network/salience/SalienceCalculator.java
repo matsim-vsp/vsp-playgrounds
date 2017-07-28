@@ -245,7 +245,7 @@ public class SalienceCalculator {
 					String o = nodes.getFirst().getId();
 					String d = nodes.getSecond().getId();
 					if(matrix.getEntry(o, d) == null){
-						matrix.createEntry(o, d, 1.0);
+						matrix.createAndAddEntry(o, d, 1.0);
 					} 
 				}
 			}

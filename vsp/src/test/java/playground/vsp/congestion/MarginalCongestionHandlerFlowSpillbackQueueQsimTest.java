@@ -25,8 +25,10 @@ package playground.vsp.congestion;
 import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -46,6 +48,7 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.ControlerListener;
 import org.matsim.core.controler.listener.IterationStartsListener;
@@ -68,7 +71,6 @@ import playground.vsp.congestion.controler.MarginalCongestionPricingContolerList
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.*;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
-import playground.vsp.congestion.routing.TollDisutilityCalculatorFactory;
 
 /**
  * 
@@ -183,6 +185,7 @@ public class MarginalCongestionHandlerFlowSpillbackQueueQsimTest {
 
 		events.addHandler(new CongestionHandlerImplV9(events, (MutableScenario) sc));
 
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 
@@ -223,6 +226,7 @@ public class MarginalCongestionHandlerFlowSpillbackQueueQsimTest {
 
 		events.addHandler(new CongestionHandlerImplV8(events, (MutableScenario) sc));
 
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 

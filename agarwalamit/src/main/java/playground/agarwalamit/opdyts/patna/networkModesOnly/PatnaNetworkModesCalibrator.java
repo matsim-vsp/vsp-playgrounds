@@ -28,6 +28,8 @@ import floetteroed.opdyts.ObjectiveFunction;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -48,7 +50,6 @@ import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.utils.FileUtils;
-import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
 /**
  * @author amit
@@ -88,13 +89,14 @@ public class PatnaNetworkModesCalibrator {
 		scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		// == opdyts settings
-		MATSimOpdytsIntegrationRunner<ModeChoiceDecisionVariable> factories = new MATSimOpdytsIntegrationRunner<ModeChoiceDecisionVariable>(scenario);
+		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
+
 		List<String> modes2consider = Arrays.asList("car","bike","motorbike");
 		DistanceDistribution referenceStudyDistri = new PatnaNetworkModesOneBinDistanceDistribution(PATNA_1_PCT);
 		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(modes2consider,referenceStudyDistri);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = factories.newMATSimSimulator( new MATSimStateFactoryImpl<>());
+		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>( new MATSimStateFactoryImpl<>(), scenario);
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
@@ -146,6 +148,8 @@ public class PatnaNetworkModesCalibrator {
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, PATNA_1_PCT);
 
-		factories.run(decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
+		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
+		opdytsControler.run(simulator, decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
+
 	}
 }

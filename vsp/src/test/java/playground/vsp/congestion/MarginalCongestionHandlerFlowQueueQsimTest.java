@@ -39,6 +39,7 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
 import org.matsim.core.mobsim.qsim.QSim;
@@ -119,7 +120,8 @@ public class MarginalCongestionHandlerFlowQueueQsimTest {
 		});
 		
 		events.addHandler(congestionHandler);
-				
+
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 					
@@ -157,7 +159,8 @@ public class MarginalCongestionHandlerFlowQueueQsimTest {
 		});
 		
 		events.addHandler(congestionHandler);
-				
+
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 			
@@ -207,7 +210,8 @@ public class MarginalCongestionHandlerFlowQueueQsimTest {
 		});
 		
 		events.addHandler(congestionHandler);
-				
+
+		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 			

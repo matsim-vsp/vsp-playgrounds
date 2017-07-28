@@ -106,7 +106,7 @@ public class TaxiStatusToMatrix
             for (int i = 1; i < row.length; i += 2) {
                 String statusId = row[i];
                 double vehicles = Double.parseDouble(row[i + 1]);
-                this.matrix.createEntry(lor.toString(), statusId, vehicles);
+                this.matrix.createAndAddEntry(lor.toString(), statusId, vehicles);
             }
         }
     }

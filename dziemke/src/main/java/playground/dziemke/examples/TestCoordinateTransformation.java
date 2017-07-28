@@ -13,9 +13,9 @@ public class TestCoordinateTransformation {
 //		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(
 //				TransformationFactory.DHDN_GK4, TransformationFactory.WGS84);
 		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation
-//				("EPSG:4326", "EPSG:31468");
+				("EPSG:4326", "EPSG:31468");
 //				("EPSG:4326", "EPSG:21037");
-				("EPSG:4326", "EPSG:26911");
+//				("EPSG:4326", "EPSG:26911");
 //				("EPSG:3006", "EPSG:4326");
 //				(TransformationFactory.WGS84_SA_Albers, "EPSG:4326");
 
@@ -28,8 +28,12 @@ public class TestCoordinateTransformation {
 //		Coord coordSW = new Coord(33.88, -4.75); // Kenya southwest corner 
 //		Coord coordNE = new Coord(36.8014, -1.3055); // Kibera northeast corner 
 //		Coord coordSW = new Coord(36.7715, -1.3198); // Kibera southwest corner 
-		Coord coordNE = new Coord(-119.55, 34.45); // Santa Barbara northeast corner
-		Coord coordSW = new Coord(-119.90, 34.38); // Santa Barbara southwest corner
+//		Coord coordNE = new Coord(-119.55, 34.45); // Santa Barbara northeast corner
+//		Coord coordSW = new Coord(-119.90, 34.38); // Santa Barbara southwest corner
+//		Coord coordNE = new Coord(13.3643, 52.5526); // Berlin-GG northeast corner
+//		Coord coordSW = new Coord(13.3275, 52.5384); // Berlin-GG southwest corner
+		Coord coordNE = new Coord(13.3436, 52.5268); // Berlin-SG northeast corner
+		Coord coordSW = new Coord(13.3121, 52.5119); // Berlin-SG southwest corner
 		
 		Coord convertedCoordNE = transformation.transform(coordNE);
 		Coord convertedCoordSW = transformation.transform(coordSW);

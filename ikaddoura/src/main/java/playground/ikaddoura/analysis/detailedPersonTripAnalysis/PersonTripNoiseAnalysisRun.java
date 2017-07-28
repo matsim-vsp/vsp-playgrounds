@@ -42,6 +42,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
+import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
  * 
@@ -138,10 +139,14 @@ public class PersonTripNoiseAnalysisRun {
 		PersonMoneyLinkHandler moneyHandler = new PersonMoneyLinkHandler();
 		moneyHandler.setBasicHandler(basicHandler);
 		
+		DelayAnalysis delayAnalysis = new DelayAnalysis();
+		delayAnalysis.setScenario(scenario);
+		
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(basicHandler);
 		events.addHandler(noiseHandler);
 		events.addHandler(moneyHandler);
+		events.addHandler(delayAnalysis);
 		
 		log.info("Reading the events file...");
 		IKEventsReader reader = new IKEventsReader(events);
@@ -183,8 +188,10 @@ public class PersonTripNoiseAnalysisRun {
 		analysis.printPersonInformation(outputPath, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);	
 		log.info("Print person information... Done.");
 
-		analysis.printAggregatedResults(outputPath, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
-		analysis.printAggregatedResults(outputPath, null, personId2userBenefit, basicHandler, noiseHandler, moneyHandler);
+		analysis.printAggregatedResults(outputPath, TransportMode.car, personId2userBenefit, basicHandler, noiseHandler);
+		analysis.printAggregatedResults(outputPath, null, personId2userBenefit, basicHandler, noiseHandler);
+		
+		analysis.printAggregatedResults(outputPath, personId2userBenefit, basicHandler, noiseHandler, moneyHandler, delayAnalysis, null);
 		
 		SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
 		analysis.printAvgValuePerParameter(outputPath + "tollsPerDepartureTime_car_3600.csv", departureTime2tolls);

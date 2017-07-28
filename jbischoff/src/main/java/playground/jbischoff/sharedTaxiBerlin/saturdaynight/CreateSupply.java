@@ -63,7 +63,7 @@ public class CreateSupply {
 		Network network = NetworkUtils.createNetwork();
 		new MatsimNetworkReader(network).readFile(folder+"network_shortIds_v1.xml.gz");
 		
-		int noOfVehiclesPerRank = 10;
+		int noOfVehiclesPerRank = 5;
 		int capacity = 3;
 		double serviceBeginTime = 17*3600;
 		double serviceEndTime = 31*3600;

@@ -33,12 +33,16 @@ public class BerlinAgentFilter implements AgentFilter {
 	@Override
 	public String getAgentTypeFromId(Id<Person> id) {
 		
-		for (String prefix : vehicleTypeIdPrefixes) {
-			if (id.toString().startsWith(prefix)) {
-				return prefix;
+		if (id==null) {
+			return "null";
+		} else {
+			for (String prefix : vehicleTypeIdPrefixes) {
+				if (id.toString().startsWith(prefix)) {
+					return prefix;
+				}
 			}
+			return "other";
 		}
-		return "other";
 	}
 
 }

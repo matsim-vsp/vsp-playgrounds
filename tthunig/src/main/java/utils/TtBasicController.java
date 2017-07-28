@@ -45,7 +45,10 @@ public class TtBasicController {
 	 * @param args the config file
 	 */
 	public static void main(String[] args) {
-		
+		prepareBasicControler(args).run();
+	}
+
+	static Controler prepareBasicControler(String[] args) {
 		Config config = ConfigUtils.loadConfig( args[0]) ;
 		
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
@@ -75,8 +78,7 @@ public class TtBasicController {
 				this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
 			}
 		});
-		
-		controler.run();
+		return controler;
 	}
 
 }

@@ -114,7 +114,7 @@ class TaxiDemandParser
 
         double demand = Double.parseDouble(row[2]);
         System.out.println(from);
-        this.matrix.createEntry(from, to, demand);
+        this.matrix.createAndAddEntry(from, to, demand);
 
     }
 }

@@ -52,7 +52,7 @@ public class MatrixUtils {
 		for (int i = 0; i < idArray.length; i++) {
 			for (int j = 0; j < idArray.length; j++) {
 				if (denseMatrix || values[i][j] != 0) {
-					matrix.createEntry(idArray[i].toString(), idArray[j].toString(), values[i][j]);
+					matrix.createAndAddEntry(idArray[i].toString(), idArray[j].toString(), values[i][j]);
 				}
 			}
 		}
@@ -80,7 +80,7 @@ public class MatrixUtils {
 		Entry entry = matrix.getEntry(fromId, toId);
 
 		if (entry == null) {
-			matrix.createEntry(fromId, toId, value);
+			matrix.createAndAddEntry(fromId, toId, value);
 		} else {
 			entry.setValue(entry.getValue() + value);
 		}

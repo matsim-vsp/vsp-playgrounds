@@ -43,6 +43,10 @@ public class Zone {
 
     // link ids inside zone
 
+    /**
+     * I think, this should not be used because using a link to identify the zone will be erroneous if link is longer.
+     */
+    @Deprecated
     public Set<Id<Link>> getLinksInsideZone() {
         return linksInsideZone;
     }
@@ -51,6 +55,10 @@ public class Zone {
         this.linksInsideZone.add(linkId);
     }
 
+    /**
+     * I think, this should not be used because using a link to identify the zone will be erroneous if link is longer.
+     */
+    @Deprecated
     private Set<Id<Link>> linksInsideZone = new LinkedHashSet<>();
 
     // coordinates of origin/destination

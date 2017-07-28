@@ -1,15 +1,11 @@
 package opdytsintegration.example.roadpricing;
 
-import java.util.*;
-import floetteroed.opdyts.DecisionVariableRandomizer;
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
-import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
-import floetteroed.opdyts.searchalgorithms.RandomSearch;
-import floetteroed.opdyts.searchalgorithms.SelfTuner;
-import floetteroed.utilities.Units;
-import floetteroed.utilities.config.ConfigReader;
-import floetteroed.utilities.math.MathHelpers;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -26,6 +22,16 @@ import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingReaderXMLv1;
 import org.matsim.roadpricing.RoadPricingSchemeImpl;
+
+import floetteroed.opdyts.DecisionVariableRandomizer;
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
+import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
+import floetteroed.opdyts.searchalgorithms.RandomSearch;
+import floetteroed.opdyts.searchalgorithms.SelfTuner;
+import floetteroed.utilities.Units;
+import floetteroed.utilities.config.ConfigReader;
+import floetteroed.utilities.math.MathHelpers;
 
 /**
  * 
@@ -106,6 +112,10 @@ class OptimizeRoadpricing {
 		final int maxRandomSearchIterations = Integer.parseInt(myConfig.get("opdyts", "maxiterations"));
 		final int maxRandomSearchTransitions = Integer.parseInt(myConfig.get("opdyts", "maxtransitions"));
 
+		// NEW: amit
+		final int warmupIterations = 1; // Integer.parseInt(myConfig.get("opdyts",
+										// "warmupIterations®"));
+
 		/*
 		 * Create the MATSim scenario.
 		 */
@@ -161,8 +171,7 @@ class OptimizeRoadpricing {
 		relevantModes.add("car");
 
 		final MATSimSimulator2<TollLevels> matsimSimulator = new MATSimSimulator2<>(
-				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario,
-				timeDiscretization);
+				new RoadpricingStateFactory(timeDiscretization, occupancyScale, tollScale), scenario);
 		matsimSimulator.addSimulationStateAnalyzer(
 				new DifferentiatedLinkOccupancyAnalyzer.Provider(timeDiscretization, relevantModes, relevantLinkIds));
 
@@ -174,12 +183,16 @@ class OptimizeRoadpricing {
 		 */
 		final RandomSearch<TollLevels> randomSearch = new RandomSearch<>(matsimSimulator, decisionVariableRandomizer,
 				initialTollLevels, convergenceCriterion, maxRandomSearchIterations, maxRandomSearchTransitions,
-				randomSearchPopulationSize, MatsimRandom.getRandom(), parallelSampling, objectiveFunction,
-				includeCurrentBest);
+				randomSearchPopulationSize, objectiveFunction);
 		randomSearch.setLogFileName(originalOutputDirectory + "opdyts.log");
 		randomSearch.setConvergenceTrackingFileName(originalOutputDirectory + "opdyts.con");
 		randomSearch.setOuterIterationLogFileName(originalOutputDirectory + "opdyts.opt");
 		randomSearch.setMaxTotalMemory(averageIterations);
+
+		randomSearch.setWarmupIterations(1);
+		randomSearch.setUseAllWarmupIterations(false);
+		randomSearch.setRandom(MatsimRandom.getRandom());
+		randomSearch.setInterpolate(parallelSampling);
 
 		/*
 		 * Run it.
@@ -187,10 +200,13 @@ class OptimizeRoadpricing {
 		if (adjustWeights) {
 			final SelfTuner selfTuner = new SelfTuner(0.95);
 			selfTuner.setNoisySystem(true);
-			randomSearch.run(selfTuner);
+			randomSearch.setSelfTuner(selfTuner);
 		} else {
-			randomSearch.run(initialEquilibriumWeight, initialUniformityWeight);
+			randomSearch.setSelfTuner(null);
+			randomSearch.setInitialEquilibriumGapWeight(initialEquilibriumWeight);
+			randomSearch.setInitialUniformityGapWeight(initialUniformityWeight);
 		}
+		randomSearch.run();
 
 		System.out.println("... DONE.");
 	}

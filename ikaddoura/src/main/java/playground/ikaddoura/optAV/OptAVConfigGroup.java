@@ -35,10 +35,19 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	
 	private boolean accountForCongestion = false;
 	private boolean accountForNoise = false;
+	private boolean chargeOperatingCostsFromPassengers = true;
+	private boolean chargeSAVTollsFromPassengers = true;
 	
-	private OptAVApproach optAVApproach = OptAVApproach.NoPricing;
+	private boolean tagInitialCarUsers = true;
+	
+	private boolean runDefaultAnalysis = true;
+	
+	private double fixCostsSAVinsteadOfCar = -10.; // negative values are interpreted as a revenue for no longer owning a car
+	private double dailyFixCostAllSAVusers = 5.;
+
+	private SAVTollingApproach optAVApproach = SAVTollingApproach.NoPricing;
 			
-	public enum OptAVApproach {
+	public enum SAVTollingApproach {
 		NoPricing, PrivateAndExternalCost, ExternalCost
 	}
 	
@@ -63,14 +72,76 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	@StringGetter( "optAVApproach" )
-	public OptAVApproach getOptAVApproach() {
+	public SAVTollingApproach getOptAVApproach() {
 		return optAVApproach;
 	}
 
 	@StringSetter( "optAVApproach" )
-	public void setOptAVApproach(OptAVApproach optAVApproach) {
+	public void setOptAVApproach(SAVTollingApproach optAVApproach) {
 		this.optAVApproach = optAVApproach;
 	}
 
+	@StringGetter( "chargeOperatingCostsFromPassengers" )
+	public boolean isChargeOperatingCostsFromPassengers() {
+		return chargeOperatingCostsFromPassengers;
+	}
+
+	@StringSetter( "chargeOperatingCostsFromPassengers" )
+	public void setChargeOperatingCostsFromPassengers(boolean chargeOperatingCostsFromPassengers) {
+		this.chargeOperatingCostsFromPassengers = chargeOperatingCostsFromPassengers;
+	}
+
+	@StringGetter( "chargeSAVTollsFromPassengers" )
+	public boolean isChargeSAVTollsFromPassengers() {
+		return chargeSAVTollsFromPassengers;
+	}
+
+	@StringSetter( "chargeSAVTollsFromPassengers" )
+	public void setChargeSAVTollsFromPassengers(boolean chargeSAVTollsFromPassengers) {
+		this.chargeSAVTollsFromPassengers = chargeSAVTollsFromPassengers;
+	}
+
+	@StringGetter( "tagInitialCarUsers" )
+	public boolean isTagInitialCarUsers() {
+		return tagInitialCarUsers;
+	}
+
+	@StringSetter( "tagInitialCarUsers" )
+	public void setTagInitialCarUsers(boolean tagInitialCarUsers) {
+		this.tagInitialCarUsers = tagInitialCarUsers;
+	}
+
+	@StringGetter( "fixCostsSAVinsteadOfCar" )
+	public double getFixCostsSAVinsteadOfCar() {
+		return fixCostsSAVinsteadOfCar;
+	}
+
+	@StringSetter( "fixCostsSAVinsteadOfCar" )
+	public void setFixCostsSAVinsteadOfCar(double fixCostsSAVinsteadOfCar) {
+		this.fixCostsSAVinsteadOfCar = fixCostsSAVinsteadOfCar;
+	}
+
+	@StringGetter( "dailyFixCostAllSAVusers" )
+	public double getDailyFixCostAllSAVusers() {
+		return dailyFixCostAllSAVusers;
+	}
+
+	@StringSetter( "dailyFixCostAllSAVusers" )
+	public void setDailyFixCostAllSAVusers(double fixCostSAV) {
+		this.dailyFixCostAllSAVusers = fixCostSAV;
+	}
+
+	@StringGetter( "runDefaultAnalysis" )
+	public boolean isRunDefaultAnalysis() {
+		return runDefaultAnalysis;
+	}
+
+	@StringSetter( "runDefaultAnalysis" )
+	public void setRunDefaultAnalysis(boolean runDefaultAnalysis) {
+		this.runDefaultAnalysis = runDefaultAnalysis;
+	}
+	
+	
+	
 }
 

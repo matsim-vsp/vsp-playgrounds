@@ -222,7 +222,7 @@ public class SAString {
 								+ " to distance of type double.");
 						e.printStackTrace();
 					}
-					distanceMatrix.createEntry(demandPointId,
+					distanceMatrix.createAndAddEntry(demandPointId,
 							siteIndexMap.get(i), distance);
 				}
 			}

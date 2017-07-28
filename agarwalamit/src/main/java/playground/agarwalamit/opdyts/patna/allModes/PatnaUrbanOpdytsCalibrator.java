@@ -32,6 +32,8 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -48,6 +50,8 @@ import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
 import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
 import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
+import playground.agarwalamit.clustering.ClusterAlgorithm;
+import playground.agarwalamit.clustering.ClusterUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.agarwalamit.opdyts.*;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
@@ -55,16 +59,21 @@ import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
-import playground.agarwalamit.opdyts.teleportationModes.TeleportationODLinkAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
-import playground.kai.usecases.opdytsintegration.modechoice.EveryIterationScoringParameters;
 
 /**
  * @author amit
  */
 
 public class PatnaUrbanOpdytsCalibrator {
+
+	public enum PatnaTeleportationModesZonesType {
+		wardFile,
+		simpleGrid,
+		clusterAlgoKmeans,
+		clusterAlgoEqualPoints
+	}
 
 	private static final OpdytsScenario PATNA_1_PCT = OpdytsScenario.PATNA_1Pct;
 
@@ -73,20 +82,23 @@ public class PatnaUrbanOpdytsCalibrator {
 		String OUT_DIR = null;
 		String relaxedPlans ;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
-		boolean usingLinkIdsForStateVecotrs = false;
+		PatnaTeleportationModesZonesType patnaTeleportationModesZonesType ;
 
 		if ( args.length>0 ) {
 			configFile = args[0];
 			OUT_DIR = args[1];
 			relaxedPlans = args[2];
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.valueOf(args[3]);
-			usingLinkIdsForStateVecotrs = Boolean.valueOf(args[4]);
+			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.valueOf(args[4]);
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/"+"/config_allModes.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
+			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.clusterAlgoKmeans;
 		}
+
+		OUT_DIR += ascRandomizeStyle+"_"+patnaTeleportationModesZonesType+"/";
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
 		config.plans().setInputFile(relaxedPlans);
@@ -106,7 +118,7 @@ public class PatnaUrbanOpdytsCalibrator {
 		mp.setMonetaryDistanceRate(0.0);
 
 		// == opdyts settings
-		MATSimOpdytsIntegrationRunner<ModeChoiceDecisionVariable> factories = new MATSimOpdytsIntegrationRunner<ModeChoiceDecisionVariable>(scenario);
+		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<ModeChoiceDecisionVariable>(scenario);
 		Set<String> networkModes = new HashSet<>(scenario.getConfig().qsim().getMainModes());
 		Set<String> teleportationModes = new HashSet<>(scenario.getConfig().plansCalcRoute().getModeRoutingParams().keySet());
 
@@ -117,20 +129,30 @@ public class PatnaUrbanOpdytsCalibrator {
 		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(allModes, referenceStudyDistri);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = factories.newMATSimSimulator(new MATSimStateFactoryImpl<>());
+		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
 
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
-
-		if( usingLinkIdsForStateVecotrs ) {
-			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
-			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
-			simulator.addSimulationStateAnalyzer(new TeleportationODLinkAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones));
-		} else{
-			PatnaZoneToLinkIdentifier patnaZoneToLinkIdentifier = new PatnaZoneToLinkIdentifier(scenario.getPopulation(), scenario.getNetwork(), 250.0);
-			Set<Zone> relevantZones = patnaZoneToLinkIdentifier.getZones();
-			simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(factories.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
+		PatnaZoneIdentifier patnaZoneIdentifier = null ;
+		switch (patnaTeleportationModesZonesType){
+			case wardFile:
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
+				break;
+			case simpleGrid:
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), scenario.getNetwork(), 250);
+				break;
+			case clusterAlgoKmeans:
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000,
+						ClusterAlgorithm.ClusterType.K_MEANS);
+				break;
+			case clusterAlgoEqualPoints:
+				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000, // 18 origins in each cluster.
+						ClusterAlgorithm.ClusterType.EQUAL_POINTS);
+				break;
+				default:throw new RuntimeException("not implemented yet.");
 		}
+		Set<Zone> relevantZones = patnaZoneIdentifier.getZones();
+		simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(opdytsControler.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
@@ -215,6 +237,8 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, allModes, PATNA_1_PCT);
-		factories.run(decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
+
+		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
+		opdytsControler.run(simulator, decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
 	}
 }

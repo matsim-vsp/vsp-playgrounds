@@ -37,6 +37,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.util.PartialSort;
@@ -86,8 +87,14 @@ public class TaxiZoneManager implements IterationEndsListener {
 	
 	private final DecimalFormat format = new DecimalFormat();
 	private boolean headerWritten = false;
+	private boolean firstRun = true;
 	private double cost_km = 0.3;
 	private double fix_cost_vehicle = 150;
+	private int aggregateInterval = 10
+			;
+	Map<String, Double> zoneFaresSum = new HashMap<>();
+	Map<String, Double> zoneOccupancySum = new HashMap<>();
+	
 
 	/**
 	 * 
@@ -105,53 +112,114 @@ public class TaxiZoneManager implements IterationEndsListener {
 		
 		Map<String, Double> zoneOccupancy = aggregator.calculateZoneOccupancy();
 		Map<String, Double> zoneFares = calculateZoneFares(fareCalculator.getFaresPerLink()); 
+		aggregateZones(zoneOccupancy,zoneFares);
+		int it = event.getIteration();
+		
+		writeRevenues(it,zoneFares);
+		
+		if (it%aggregateInterval == 0&&it>0){
+			
+		updateZones(it);
+		zoneOccupancySum.clear();
+		zoneFaresSum.clear();
+		}
+		
+	}
+
+
+
+	/**
+	 * @param zoneOccupancy
+	 * @param zoneFares
+	 */
+	private void aggregateZones(Map<String, Double> zoneOccupancy, Map<String, Double> zoneFares) {
+		for (Entry<String, Double> e : zoneOccupancy.entrySet()){
+			double occ = e.getValue();
+			if (zoneOccupancySum.containsKey(e.getKey())){
+				occ += zoneOccupancySum.get(e.getKey());
+			}
+			zoneOccupancySum.put(e.getKey(), occ);
+			
+		}
+		
+		for (Entry<String, Double> e : zoneFares.entrySet()){
+			double occ = e.getValue();
+			if (zoneFaresSum.containsKey(e.getKey())){
+				occ += zoneFaresSum.get(e.getKey());
+			}
+			zoneFaresSum.put(e.getKey(), occ);
+			
+		}
+		
+	}
+
+
+
+	private void updateZones(int it) {
 		List<String> zonetable = new ArrayList<>();
+		List<String> nonperformers = new ArrayList<>();
 		int k = 10;
         PartialSort<String> worstZoneSort = new PartialSort<>(k);
-        
-		for (Entry<String, Double> e : zoneOccupancy.entrySet()){
+		Map<String,Geometry> currentZones = validator.getZones();
+
+		for (Entry<String, Double> e : zoneOccupancySum.entrySet()){
 			Double occupancy = e.getValue();
 			if (occupancy == null) throw new RuntimeException();
-			if (occupancy == Double.NaN){
+			if (occupancy.isNaN()){
 				occupancy = 0.0;
 			}
-			Double fare = zoneFares.get(e.getKey());
+			Double fare = zoneFaresSum.get(e.getKey());
 			if (fare == null) {
 				fare = 0.0;}
 			
 			double performance = fare*occupancy;
-			
+			if (fare == 0.0){
+				nonperformers.add(e.getKey());
+			}
 			double indicator;
 			
 			switch (zonalSystem.getOptimizationCriterion()){
 			case Fare:
 				indicator = fare;
+				break;
 			case Performance:
 				indicator = performance;
+				break;
 			case Occupancy:
 				indicator = occupancy;
+				break;
 			default:
 				indicator = Double.NaN;
+				break;
 			}
 				
-			
+			if (currentZones.containsKey(e.getKey())){
+				Logger.getLogger(getClass()).info("adding\t"+e.getKey()+"\t"+indicator );
 			worstZoneSort.add(e.getKey(), indicator);
-			
-			zonetable.add(e.getKey()+";"+format.format(occupancy)+";"+format.format(e.getValue())+";"+format.format(performance));
-			
+			}
+			zonetable.add(e.getKey()+";"+format.format(occupancy/aggregateInterval)+";"+format.format(e.getValue()/aggregateInterval)+";"+format.format(performance/aggregateInterval));
+			JbUtils.collection2Text(zonetable,matsimServices.getControlerIO().getIterationFilename(it,"zoneperformance.csv"), "zone;occupancy;fares;performance");
+
 		}	
 		
-		JbUtils.collection2Text(zonetable,matsimServices.getControlerIO().getIterationFilename(event.getIteration(),"zoneperformance.csv"), "zone;occupancy;fares;performance");
 		
-		Map<String,Geometry> currentZones = validator.getZones();
-		writeShape(matsimServices.getControlerIO().getIterationFilename(event.getIteration(),"zones.shp"), currentZones, zoneOccupancy, zoneFares);
-		writeRevenues(event.getIteration(),zoneFares);
+		writeShape(matsimServices.getControlerIO().getIterationFilename(it,"zones.shp"), currentZones, zoneOccupancySum, zoneFaresSum);
+		if (firstRun){
+			for (String z : nonperformers)
+			{
+				currentZones.remove(z);
+			}
+			validator.updateZones(currentZones);
+			firstRun = false;
+		} else
 		if (currentZones.size()>2*k){
+			Logger.getLogger(getClass()).info("Removing zones in iteration "+it);
 		for(String z : worstZoneSort.retriveKSmallestElements()){
 			currentZones.remove(z);
+			Logger.getLogger(getClass()).info("Removing zone\t"+z);
+		}
 			validator.updateZones(currentZones);
-		}}
-		
+		}
 	}
 
 
@@ -169,14 +237,15 @@ public class TaxiZoneManager implements IterationEndsListener {
 		}
 		double cost = fix_cost_vehicle * aggregator.getFleetSize() + vkm* cost_km;
 		double profit = revenue-cost;
+		double revenueperkm = revenue/vkm;
 		
 			try {
 				if (!headerWritten){
-				bw.write("iteration);vkm;pkm;revenue;cost;profit");
+				bw.write("iteration);vkm;pkm;revenue;revenuePerVkm;cost;profit");
 				headerWritten = true;
 				}
 				bw.newLine();
-				bw.write(iteration+";"+vkm+";"+pkm+";"+revenue+";"+cost+";"+profit);
+				bw.write(iteration+";"+vkm+";"+pkm+";"+format.format(revenue)+";"+format.format(revenueperkm)+";"+";"+cost+";"+profit);
 				bw.flush();
 				bw.close();
 			} catch (IOException e) {
@@ -221,10 +290,12 @@ public class TaxiZoneManager implements IterationEndsListener {
 			for (Entry<String,Geometry> z :currentZones.entrySet()) {
                 Object[] attribs = new Object[4];
                 Double occ = zoneOccupancy.get(z.getKey());
+                if (occ!=null) occ/=aggregateInterval;
                 Double fare = zoneFares.get(z.getKey());
+                if(fare!=null) fare/=aggregateInterval;
                 attribs[0] = z.getKey();
-                attribs[1] = occ; 
-                attribs[2] = fare;
+                attribs[1] = occ  ; 
+                attribs[2] = fare ;
                 if(occ!=null&&fare!=null){
                 attribs[3] =  occ*fare;}
                 else {attribs[3] = null;}
