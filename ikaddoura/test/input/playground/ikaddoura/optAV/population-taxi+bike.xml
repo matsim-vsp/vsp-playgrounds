@@ -1,152 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v6.dtd">
 
 <population>
 
-<person id="person_0" employed="no">
+<person id="person_0">
+		<attributes>
+            <attribute name="CarOwnerInBaseCase" class="java.lang.Boolean" >true</attribute>
+            <attribute name="subpopulation" class="java.lang.String" >potentialSAVuser</attribute>
+        </attributes>
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:00" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:00" />
 			<leg mode="car">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="car">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0"/>
+			<activity type="home" x="-500.0" y="9000.0"/>
 		</plan>
 
 	</person>
 
 <!-- ====================================================================== -->
 
-	<person id="person_1" employed="no">
+	<person id="person_1">
+		<attributes>
+            <attribute name="CarOwnerInBaseCase" class="java.lang.Boolean" >true</attribute>
+            <attribute name="subpopulation" class="java.lang.String" >potentialSAVuser</attribute>
+        </attributes>
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:01" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:01" />
 			<leg mode="car">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="car">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 
 <!-- ====================================================================== -->
 
-	<person id="person_2" employed="no">
+	<person id="person_2" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:02" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:02" />
 			<leg mode="bike">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="bike">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 	
 <!-- ====================================================================== -->
 
-	<person id="person_3" employed="no">
+	<person id="person_3" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:03" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:03" />
 			<leg mode="bike">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="bike">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 	
 <!-- ====================================================================== -->
 
-	<person id="person_4" employed="no">
+	<person id="person_4" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:04" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:04" />
 			<leg mode="bike">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="bike">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 	
 <!-- ====================================================================== -->
 
-	<person id="person_5" employed="no">
+	<person id="person_5" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:05" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:05" />
 			<leg mode="taxi">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="taxi">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 	
 <!-- ====================================================================== -->
 
-	<person id="person_6" employed="no">
+	<person id="person_6" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:06" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:06" />
 			<leg mode="taxi">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="taxi">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 	
 <!-- ====================================================================== -->
 
-	<person id="person_7" employed="no">
+	<person id="person_7" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:07" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:07" />
 			<leg mode="taxi">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="taxi">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 	
 <!-- ====================================================================== -->
 
-	<person id="person_8" employed="no">
+	<person id="person_8" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:08" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:08" />
 			<leg mode="taxi">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="taxi">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
 	
 <!-- ====================================================================== -->
 
-	<person id="person_9" employed="no">
+	<person id="person_9" >
 		<plan selected="yes">
-			<act type="home" x="-500.0" y="9000.0" end_time="08:00:09" />
+			<activity type="home" x="-500.0" y="9000.0" end_time="08:00:09" />
 			<leg mode="taxi">
 			</leg>
-			<act type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
+			<activity type="work" x="10500.0" y="9000.0" end_time="16:00:01" />
 			<leg mode="taxi">
 			</leg>
-			<act type="home" x="-500.0" y="9000.0" />
+			<activity type="home" x="-500.0" y="9000.0" />
 		</plan>
 
 	</person>
