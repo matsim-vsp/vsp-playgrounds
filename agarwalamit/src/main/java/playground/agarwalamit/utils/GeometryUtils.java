@@ -135,7 +135,7 @@ public final class GeometryUtils {
 	public static Point getRandomPointsInsideFeatures (List<SimpleFeature> features) {
 		Tuple<Double,Double> xs = getMaxMinXFromFeatures(features);
 		Tuple<Double,Double> ys = getMaxMinYFromFeatures(features);
-		Geometry combinedGeometry = getGemetryFromListOfFeatures(features);
+		Geometry combinedGeometry = getGeometryFromListOfFeatures(features);
 		Point p = null;
 		double x,y;
 		do {
@@ -168,7 +168,7 @@ public final class GeometryUtils {
 		return new Tuple<>(minY, maxY);
 	}
 
-	public static Geometry getGemetryFromListOfFeatures(List<SimpleFeature> featues) {
+	public static Geometry getGeometryFromListOfFeatures(List<SimpleFeature> featues) {
 		List<Geometry> geoms = new ArrayList<>();
 		for(SimpleFeature sf : featues){
 			geoms.add( (Geometry) sf.getDefaultGeometry() );
