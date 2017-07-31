@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.vsp.demandde.cemdapMATSimCadyts;
+package playground.vsp.demandde.cemdap.input;
 
 /**
  * Storage object for commuter relations.

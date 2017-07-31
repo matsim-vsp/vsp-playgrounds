@@ -16,24 +16,22 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.vsp.demandde.cemdapMATSimCadyts;
+package playground.vsp.demandde.cemdap.input;
 
 import org.apache.log4j.Logger;
 
 /**
  * @author dziemke
  */
-public class CommuterFileReaderV2Starter {
-	private static final Logger LOG = Logger.getLogger(CommuterFileReaderV2Starter.class);
+public class CensusReaderStarter {
+	private static final Logger LOG = Logger.getLogger(CensusReaderStarter.class);
 
 	public static void main(String[] args) {
-		String commuterFileOutgoing = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
-		String delimiter = "\t";
+		String censusFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung.csv";
+		String delimiter = ";";
 		
-		CommuterFileReaderV2 commuterFileReader = new CommuterFileReaderV2(commuterFileOutgoing, delimiter);
+		CensusReader censusReader = new CensusReader(censusFile, delimiter);
 		
-		int origin = 12051000; // "Brandenburg an der Havel, St."
-		int destination = 11000000; // "Berlin, Stadt"
-		LOG.info("Test: 1513 = " + commuterFileReader.getRelationsMap().get(origin).get(destination).getTrips());
+		LOG.info("Test: 434 = " + censusReader.getMunicipalities().getAttribute("16077039", "marriedMale"));
 	}
 }

@@ -20,7 +20,7 @@
 package playground.agarwalamit.nemo.demand;
 
 import playground.agarwalamit.utils.FileUtils;
-import playground.vsp.demandde.cemdapMATSimCadyts.ZoneAndLOSGeneratorV2;
+import playground.vsp.demandde.cemdap.input.ZoneAndLOSGeneratorV2;
 
 /**
  * Created by amit on 22.06.17.

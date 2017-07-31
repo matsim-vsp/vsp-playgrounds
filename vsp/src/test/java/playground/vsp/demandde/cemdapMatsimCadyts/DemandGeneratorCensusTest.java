@@ -6,7 +6,8 @@ import org.junit.Test;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.testcases.MatsimTestUtils;
-import playground.vsp.demandde.cemdapMATSimCadyts.DemandGeneratorCensus;
+
+import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
 
 import java.io.File;
 import java.util.ArrayList;

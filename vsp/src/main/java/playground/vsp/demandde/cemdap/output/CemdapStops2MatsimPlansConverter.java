@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dziemke.cemdapMatsimCadyts.cemdap2matsim;
+package playground.vsp.demandde.cemdap.output;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +40,7 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.dziemke.utils.LogToOutputSaver;
+import playground.vsp.demandde.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke
