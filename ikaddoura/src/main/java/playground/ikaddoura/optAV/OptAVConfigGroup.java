@@ -35,17 +35,20 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 		
 	private boolean accountForCongestion = false;
 	private boolean accountForNoise = false;
+
 	private boolean chargeOperatingCostsFromPassengers = true;
+	
 	private boolean chargeSAVTollsFromPassengers = true;
-		
+	private boolean chargeTollsFromCarUsers = true;
+	
 	private boolean runDefaultAnalysis = true;
 	
 	private double fixCostsSAVinsteadOfCar = -10.; // negative values are interpreted as a revenue for no longer owning a car
 	private double dailyFixCostAllSAVusers = 5.;
 
-	private SAVTollingApproach optAVApproach = SAVTollingApproach.NoPricing;
+	private TollingApproach optAVApproach = TollingApproach.NoPricing;
 			
-	public enum SAVTollingApproach {
+	public enum TollingApproach {
 		NoPricing, PrivateAndExternalCost, ExternalCost
 	}
 	
@@ -70,12 +73,12 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	@StringGetter( "optAVApproach" )
-	public SAVTollingApproach getOptAVApproach() {
+	public TollingApproach getOptAVApproach() {
 		return optAVApproach;
 	}
 
 	@StringSetter( "optAVApproach" )
-	public void setOptAVApproach(SAVTollingApproach optAVApproach) {
+	public void setOptAVApproach(TollingApproach optAVApproach) {
 		this.optAVApproach = optAVApproach;
 	}
 
@@ -128,6 +131,18 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	public void setRunDefaultAnalysis(boolean runDefaultAnalysis) {
 		this.runDefaultAnalysis = runDefaultAnalysis;
 	}
+
+	@StringGetter( "chargeTollsFromCarUsers" )
+	public boolean isChargeTollsFromCarUsers() {
+		return chargeTollsFromCarUsers;
+	}
+
+	@StringSetter( "chargeTollsFromCarUsers" )
+	public void setChargeTollsFromCarUsers(boolean chargeTollsFromCarUsers) {
+		this.chargeTollsFromCarUsers = chargeTollsFromCarUsers;
+	}
+	
+	
 	
 }
 

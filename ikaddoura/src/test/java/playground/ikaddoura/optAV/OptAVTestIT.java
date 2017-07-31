@@ -44,7 +44,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.optAV.OptAVConfigGroup.SAVTollingApproach;
+import playground.ikaddoura.optAV.OptAVConfigGroup.TollingApproach;
 
 /**
  * @author ikaddoura
@@ -82,7 +82,7 @@ public class OptAVTestIT {
 		OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
-		optAVParams1.setOptAVApproach(SAVTollingApproach.NoPricing);
+		optAVParams1.setOptAVApproach(TollingApproach.NoPricing);
 
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
@@ -118,7 +118,7 @@ public class OptAVTestIT {
 		OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
 		optAVParams2.setAccountForNoise(true);
 		optAVParams2.setAccountForCongestion(false);
-		optAVParams2.setOptAVApproach(SAVTollingApproach.PrivateAndExternalCost);
+		optAVParams2.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
 		
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);
@@ -156,7 +156,7 @@ public class OptAVTestIT {
 		OptAVConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, OptAVConfigGroup.class);
 		optAVParams3.setAccountForNoise(true);
 		optAVParams3.setAccountForCongestion(false);
-		optAVParams3.setOptAVApproach(SAVTollingApproach.PrivateAndExternalCost);
+		optAVParams3.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
 		
 		Scenario scenario3 = ScenarioUtils.loadScenario(config3);
 		Controler controler3 = new Controler(scenario3);
@@ -223,7 +223,7 @@ public class OptAVTestIT {
 		final OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
-		optAVParams1.setOptAVApproach(SAVTollingApproach.NoPricing);
+		optAVParams1.setOptAVApproach(TollingApproach.NoPricing);
 		
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
@@ -258,7 +258,7 @@ public class OptAVTestIT {
 		final OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(true);
-		optAVParams2.setOptAVApproach(SAVTollingApproach.PrivateAndExternalCost);
+		optAVParams2.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
 		
 		final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config2, DecongestionConfigGroup.class);
 		decongestionSettings.setMsa(true);

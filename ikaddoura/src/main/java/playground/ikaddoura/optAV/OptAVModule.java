@@ -21,6 +21,7 @@ package playground.ikaddoura.optAV;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -45,7 +46,7 @@ import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
-import playground.ikaddoura.optAV.OptAVConfigGroup.SAVTollingApproach;
+import playground.ikaddoura.optAV.OptAVConfigGroup.TollingApproach;
 import playground.ikaddoura.optAV.congestionAV.DecongestionModuleSAV;
 import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 
@@ -170,8 +171,8 @@ public class OptAVModule extends AbstractModule {
 			}
 		}
 		
-		if (optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.ExternalCost.toString()) ||
-				optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.PrivateAndExternalCost.toString())) {
+		if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.ExternalCost.toString()) ||
+				optAVParams.getOptAVApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
 			
 			noiseParams.setInternalizeNoiseDamages(true);
 			decongestionParams.setEnableDecongestionPricing(true);
@@ -197,25 +198,50 @@ public class OptAVModule extends AbstractModule {
         // #############################
         // travel disutility
         // #############################
+		               
+		// taxi_optimizer
 		
-		this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
-               
-		if (optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.ExternalCost.toString())) {
+		if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
 			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);     
         	
     		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
         	
-        } else if (optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.PrivateAndExternalCost.toString())) {
+        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
         	MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
 				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()));
        
     		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
         	
-        } else if (optAVParams.getOptAVApproach().toString().equals(SAVTollingApproach.NoPricing.toString())) {
+        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.NoPricing.toString())) {
         	RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
         	
         	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);        	
         }
+		
+		// car
+		
+		if (optAVParams.isChargeTollsFromCarUsers()) {
+			if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
+				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);     
+	        	
+	    		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
+	        	
+	        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
+	        	MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
+					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()));
+	       
+	    		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
+	        	
+	        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.NoPricing.toString())) {
+	        	RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()); 
+	        	
+	        	this.addTravelDisutilityFactoryBinding(TransportMode.car).toInstance(defaultTravelDisutilityFactory);        	
+	        }
+			
+		} else {
+			
+			this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
+		}
 		
 		// #############################
 		// analysis
