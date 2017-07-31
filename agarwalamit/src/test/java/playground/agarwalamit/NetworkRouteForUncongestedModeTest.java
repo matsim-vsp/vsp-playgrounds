@@ -21,9 +21,7 @@ package playground.agarwalamit;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
-
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -60,7 +58,7 @@ public class NetworkRouteForUncongestedModeTest {
 	 * Every link must allow car and ride mode if networkModes are car and ride. 
 	 * Using overriding modules to get network route for ride mode.  
 	 */
-	@Test@Ignore //TODO : fix test
+	@Test
 	public void testWithAllowedModesOnLink(){
 
 		Scenario sc = createSceanrio();
@@ -141,7 +139,6 @@ public class NetworkRouteForUncongestedModeTest {
 			work.setEndTime(16*3600);
 
 			plan.addActivity(work);
-			plan.addLeg(leg);
 
 			sc.getPopulation().addPerson(p);
 		}
