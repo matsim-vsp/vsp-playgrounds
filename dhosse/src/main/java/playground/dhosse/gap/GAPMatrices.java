@@ -99,7 +99,7 @@ public class GAPMatrices {
 			
 			for(int j = 0; j < dij.length; j++){
 				
-				distances.createEntry(getId(i), getId(j), dij[i][j]);
+				distances.createAndAddEntry(getId(i), getId(j), dij[i][j]);
 				
 			}
 			
@@ -167,7 +167,7 @@ public class GAPMatrices {
 				String toId = getId(j);
 				
 				double v = result[i][j];
-				m.createEntry(fromId, toId, v);
+				m.createAndAddEntry(fromId, toId, v);
 				
 			}
 			

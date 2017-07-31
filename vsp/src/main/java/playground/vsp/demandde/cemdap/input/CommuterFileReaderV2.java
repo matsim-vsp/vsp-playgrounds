@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdapMATSimCadyts;
+package playground.vsp.demandde.cemdap.input;
 
 
 import java.util.HashMap;

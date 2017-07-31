@@ -25,8 +25,8 @@ public class CreateBiasErrorGraph {
 	
 	public static void main(String[] args) throws IOException {
 		// Parameters
-		String runId = "be_203";
-		int iterationNumber = 300;
+		String runId = "be_253";
+		int iterationNumber = 500;
 		int width=440;
 		int height=330;
 		String filename = "biasErrorGraph.png";

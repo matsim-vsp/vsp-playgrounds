@@ -37,7 +37,7 @@ public class MatrixUtils {
 		if (entry != null) {
 			entry.setValue(value);
 		} else {
-			matrix.createEntry(rowId, columnId, value);
+			matrix.createAndAddEntry(rowId, columnId, value);
 		}
 	}
 

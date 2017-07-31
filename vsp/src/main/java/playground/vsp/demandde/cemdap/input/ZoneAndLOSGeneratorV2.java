@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdapMATSimCadyts;
+package playground.vsp.demandde.cemdap.input;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,6 +38,8 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
+
+import playground.vsp.demandde.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke

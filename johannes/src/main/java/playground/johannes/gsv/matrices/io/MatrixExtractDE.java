@@ -65,7 +65,7 @@ public class MatrixExtractDE {
 					if (gsv2nuts.get(to).startsWith("DE")) {
 						Entry e = m1.getEntry(from, to);
 						if (e != null) {
-							m2.createEntry(from, to, e.getValue());
+							m2.createAndAddEntry(from, to, e.getValue());
 						}
 					}
 				}

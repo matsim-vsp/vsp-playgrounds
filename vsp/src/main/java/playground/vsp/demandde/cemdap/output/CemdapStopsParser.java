@@ -1,6 +1,5 @@
 /* *********************************************************************** *
  * project: org.matsim.*                                                   *
- * CemdapStopsParser.java                                                  *
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
@@ -18,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dziemke.cemdapMatsimCadyts.cemdap2matsim;
+package playground.vsp.demandde.cemdap.output;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;

@@ -3,6 +3,8 @@
 .settings
 target
 *.DS_Store
+*.iml
+.idea
 
 */test/output/
 */output

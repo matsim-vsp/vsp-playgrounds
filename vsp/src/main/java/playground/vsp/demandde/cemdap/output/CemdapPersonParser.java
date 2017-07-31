@@ -1,6 +1,5 @@
 /* *********************************************************************** *
  * project: org.matsim.*                                                   *
- * CemdapActivityParser.java                                               *
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
@@ -18,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dziemke.cemdapMatsimCadyts.cemdap2matsim;
+package playground.vsp.demandde.cemdap.output;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +32,7 @@ import org.matsim.core.utils.io.IOUtils;
 /**
  * @author dziemke
  */
+@Deprecated
 public class CemdapPersonParser {
 
 	private final static Logger LOG = Logger.getLogger(CemdapPersonParser.class);
