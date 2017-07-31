@@ -37,6 +37,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
+import org.opengis.geometry.BoundingBox;
 
 /**
  * @author amit
@@ -48,19 +49,23 @@ public final class GeometryUtils {
 	private static final Random RAND = MatsimRandom.getRandom(); // matsim random will return same coord.
 	private static final GeometryFactory GF = new GeometryFactory();
 
-	public static Point getRandomPointsInsideFeature (SimpleFeature feature) {
+	public static Point getRandomPointsInsideFeature (final SimpleFeature feature) {
 		Point p = null;
+		BoundingBox bounds = feature.getBounds();
 		double x,y;
 		do {
-			x = feature.getBounds().getMinX()+RAND.nextDouble()*(feature.getBounds().getMaxX()-feature.getBounds().getMinX());
-			y = feature.getBounds().getMinY()+RAND.nextDouble()*(feature.getBounds().getMaxY()-feature.getBounds().getMinY());
+			double minX = bounds.getMinX();
+			double minY = bounds.getMinY();
+			x = minX +RAND.nextDouble()*(bounds.getMaxX()- minX);
+			y = minY +RAND.nextDouble()*(bounds.getMaxY()- minY);
 			p= MGC.xy2Point(x, y);
-		} while (!((Geometry) feature.getDefaultGeometry()).contains(p));
+		} while ( ! ( (Geometry) feature.getDefaultGeometry() ).contains(p) );
 		return p;
 	}
 
-	public static boolean isLinkInsideGeometries(Collection<Geometry> features, Link link) {
-		Geometry linkGeo = GF.createPoint(new Coordinate(link.getCoord().getX(), link.getCoord().getY()));
+	public static boolean isLinkInsideGeometries(final Collection<Geometry> features, final Link link) {
+		Coord coord = link.getCoord();
+		Geometry linkGeo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
 		for(Geometry  geo: features){
 			if ( geo.contains(linkGeo) ) {
 				return true;
@@ -79,8 +84,9 @@ public final class GeometryUtils {
 		return false;
 	}
 	
-	public static boolean isLinkInsideCity(Collection<SimpleFeature> features, Link link) {
-		Geometry geo = GF.createPoint(new Coordinate(link.getCoord().getX(), link.getCoord().getY()));
+	public static boolean isLinkInsideCity(final Collection<SimpleFeature> features, final Link link) {
+		Coord coord = link.getCoord();
+		Geometry geo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
 		for(SimpleFeature sf : features){
 			if ( ( getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
 				return true;
@@ -89,7 +95,7 @@ public final class GeometryUtils {
 		return false;
 	}
 
-	public static boolean isPointInsideCity(Collection<SimpleFeature> features, Point point) {
+	public static boolean isPointInsideCity(final Collection<SimpleFeature> features, final Point point) {
 		Geometry geo = GF.createPoint( new Coordinate( point.getCoordinate() ) );
 		for(SimpleFeature sf : features){
 			if ( ( getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
@@ -99,7 +105,7 @@ public final class GeometryUtils {
 		return false;
 	}
 
-	public static Collection<Geometry> getSimplifiedGeometries(Collection<SimpleFeature> features){
+	public static Collection<Geometry> getSimplifiedGeometries(final Collection<SimpleFeature> features){
 		Collection<Geometry> geoms = new ArrayList<>();
 		for(SimpleFeature sf:features){
 			geoms.add(getSimplifiedGeom( (Geometry) sf.getDefaultGeometry()));
@@ -132,7 +138,7 @@ public final class GeometryUtils {
 		return geom.getNumPoints();
 	}
 
-	public static Point getRandomPointsInsideFeatures (List<SimpleFeature> features) {
+	public static Point getRandomPointsInsideFeatures (final List<SimpleFeature> features) {
 		Tuple<Double,Double> xs = getMaxMinXFromFeatures(features);
 		Tuple<Double,Double> ys = getMaxMinYFromFeatures(features);
 		Geometry combinedGeometry = getGeometryFromListOfFeatures(features);
@@ -146,37 +152,43 @@ public final class GeometryUtils {
 		return p;
 	}
 
-	public static Tuple<Double,Double> getMaxMinXFromFeatures (List<SimpleFeature> features){
+	public static Tuple<Double,Double> getMaxMinXFromFeatures (final List<SimpleFeature> features){
 		double minX = Double.POSITIVE_INFINITY;
 		double maxX = Double.NEGATIVE_INFINITY;
 
 		for (SimpleFeature f : features){
-			if (minX > f.getBounds().getMinX()) minX =  f.getBounds().getMinX();
-			if (maxX < f.getBounds().getMaxX()) maxX =  f.getBounds().getMaxX();
+			BoundingBox bounds = f.getBounds();
+			double localMinX = bounds.getMinX();
+			double localMaxX = bounds.getMaxX();
+			if (minX > localMinX) minX = localMinX;
+			if (maxX < localMaxX) maxX = localMaxX;
 		}
 		return new Tuple<>(minX, maxX);
 	}
 
-	public static Tuple<Double,Double> getMaxMinYFromFeatures (List<SimpleFeature> features){
+	public static Tuple<Double,Double> getMaxMinYFromFeatures (final List<SimpleFeature> features){
 		double minY = Double.POSITIVE_INFINITY;
 		double maxY = Double.NEGATIVE_INFINITY;
 
 		for (SimpleFeature f : features){
-			if (minY > f.getBounds().getMinY()) minY =  f.getBounds().getMinY();
-			if (maxY < f.getBounds().getMaxY()) maxY =  f.getBounds().getMaxY();
+			BoundingBox bounds = f.getBounds();
+			double localMinY = bounds.getMinY();
+			double localMaxY = bounds.getMaxY();
+			if (minY > localMinY) minY = localMinY;
+			if (maxY < localMaxY) maxY = localMaxY;
 		}
 		return new Tuple<>(minY, maxY);
 	}
 
-	public static Geometry getGeometryFromListOfFeatures(List<SimpleFeature> featues) {
+	public static Geometry getGeometryFromListOfFeatures(final List<SimpleFeature> features) {
 		List<Geometry> geoms = new ArrayList<>();
-		for(SimpleFeature sf : featues){
+		for(SimpleFeature sf : features){
 			geoms.add( (Geometry) sf.getDefaultGeometry() );
 		}
 		return combine(geoms);
 	}
 
-	public static Geometry combine(List<Geometry> geoms){
+	public static Geometry combine(final List<Geometry> geoms){
 		Geometry geom = null;
 		for(Geometry g : geoms){
 			if(geom==null) geom = g;
@@ -187,7 +199,7 @@ public final class GeometryUtils {
 		return geom;
 	}
 
-	public static ReferencedEnvelope getBoundingBox(String shapeFile){
+	public static ReferencedEnvelope getBoundingBox(final String shapeFile){
 		ShapeFileReader shapeFileReader = new ShapeFileReader();
 		shapeFileReader.readFileAndInitialize(shapeFile);
 		return shapeFileReader.getBounds();
