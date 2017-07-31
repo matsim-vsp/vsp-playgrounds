@@ -53,7 +53,7 @@ public class AreaFilter {
 	}
 
 	public boolean isCellInsideShape(final Coord cellCentroid) {
-		return GeometryUtils.isCoordInsideShape(features, cellCentroid);
+		return GeometryUtils.isCoordInsideFeatures(features, cellCentroid);
 	}
 	
 	public boolean isLinkInsideShape(final Link link) {

@@ -74,7 +74,7 @@ public final class GeometryUtils {
 		return false;
 	}
 	
-	public static boolean isCoordInsideShape(final Collection<Geometry> features, final Coord coord) {
+	public static boolean isCoordInsideFeatures(final Collection<Geometry> features, final Coord coord) {
 		Geometry point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
 		for(Geometry  geo: features){
 			if ( geo.contains(point) ) {
@@ -84,7 +84,7 @@ public final class GeometryUtils {
 		return false;
 	}
 	
-	public static boolean isLinkInsideCity(final Collection<SimpleFeature> features, final Link link) {
+	public static boolean isLinkInsideFeatures(final Collection<SimpleFeature> features, final Link link) {
 		Coord coord = link.getCoord();
 		Geometry geo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
 		for(SimpleFeature sf : features){
@@ -95,7 +95,7 @@ public final class GeometryUtils {
 		return false;
 	}
 
-	public static boolean isPointInsideCity(final Collection<SimpleFeature> features, final Point point) {
+	public static boolean isPointInsideFeatures(final Collection<SimpleFeature> features, final Point point) {
 		Geometry geo = GF.createPoint( new Coordinate( point.getCoordinate() ) );
 		for(SimpleFeature sf : features){
 			if ( ( getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
