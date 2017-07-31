@@ -1,6 +1,5 @@
 /* *********************************************************************** *
  * project: org.matsim.*                                                   *
- * Cemdap2MatsimUtils.java                                                 *
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
@@ -36,7 +35,7 @@ import com.vividsolutions.jts.geom.Point;
  * @author dziemke
  */
 public class Cemdap2MatsimUtils {
-	public final static Random r = MatsimRandom.getRandom();
+	public final static Random random = MatsimRandom.getRandom();
 	private final static GeometryFactory geometryFactory = new GeometryFactory();
 
 	public static final Coord getRandomCoordinate(SimpleFeature feature) {
@@ -51,8 +50,8 @@ public class Cemdap2MatsimUtils {
 	}
 	
 	public static final Point getRandomCoordinate(Envelope envelope) {
-		double x = envelope.getMinX() + r.nextDouble() * envelope.getWidth();
-		double y = envelope.getMinY() + r.nextDouble() * envelope.getHeight();
+		double x = envelope.getMinX() + random.nextDouble() * envelope.getWidth();
+		double y = envelope.getMinY() + random.nextDouble() * envelope.getHeight();
 		return geometryFactory.createPoint(new Coordinate(x,y));
 	}
 	

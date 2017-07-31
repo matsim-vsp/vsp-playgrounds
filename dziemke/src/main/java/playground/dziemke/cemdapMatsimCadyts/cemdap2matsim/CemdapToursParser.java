@@ -1,6 +1,5 @@
 /* *********************************************************************** *
- * project: org.matsim.*
- * UCSBStopsParser.java
+ * project: org.matsim.*                                                   *
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
@@ -30,8 +29,8 @@ import org.matsim.core.utils.io.IOUtils;
 
 /**
  * @author dziemke
- *
- * */
+ */
+@Deprecated
 public class CemdapToursParser {
 
 	private final static Logger log = Logger.getLogger(CemdapToursParser.class);
