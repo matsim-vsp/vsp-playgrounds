@@ -22,6 +22,7 @@ package playground.ikaddoura.optAV;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -42,6 +43,7 @@ import com.google.inject.Inject;
 */
 
 public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
+	private static final Logger log = Logger.getLogger(SAVFixCostHandler.class);
 
 	private final Set<Id<Person>> passengersThatHaveAlreadyPaid = new HashSet<>();
 	
@@ -69,8 +71,14 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 			
 			if (!passengersThatHaveAlreadyPaid.contains(event.getPersonId())) {
 				Person person = scenario.getPopulation().getPersons().get(event.getPersonId());
-				boolean carOwnerInBaseCase = (boolean) person.getAttributes().getAttribute("CarOwnerInBaseCase");
 				
+				boolean carOwnerInBaseCase = false;
+				if (person.getAttributes().getAttribute("CarOwnerInBaseCase") == null) {
+					log.warn("no person attribute 'CarOwnerInBaseCase = true/false' found. Assuming this person not to be a car owner.");
+				} else {
+					carOwnerInBaseCase = (boolean) person.getAttributes().getAttribute("CarOwnerInBaseCase");
+				}
+								
 				double costsPerDay = ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getDailyFixCostAllSAVusers();
 				if (carOwnerInBaseCase && personWithoutCarTrips(person.getSelectedPlan())) {
 					costsPerDay += ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getFixCostsSAVinsteadOfCar();

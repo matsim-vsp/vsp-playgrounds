@@ -21,11 +21,6 @@ package playground.ikaddoura.optAV;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -75,7 +70,7 @@ public class OptAVModule extends AbstractModule {
 	public OptAVModule(Scenario scenario) {
 		this.scenario = scenario;
 	}
-	
+		
 	@Override
 	public void install() {
 		
@@ -138,32 +133,6 @@ public class OptAVModule extends AbstractModule {
 		
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
 		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
-		
-		// #############################
-		// tag car owners
-		// #############################
-		
-		if (optAVParams.isTagInitialCarUsers()) {
-			for (Person person : this.scenario.getPopulation().getPersons().values()) {
-				Plan selectedPlan = person.getSelectedPlan();
-				if (selectedPlan == null) {
-					throw new RuntimeException("No selected plan. Aborting...");
-				}
-				
-				boolean personHasCarTrip = false;
-				
-				for (PlanElement pE : selectedPlan.getPlanElements()) {
-					
-					if (pE instanceof Leg) {
-						Leg leg = (Leg) pE;
-						if (leg.getMode().equals(TransportMode.car)) {
-							personHasCarTrip = true;
-						}	
-					}	
-				}
-				person.getAttributes().putAttribute("CarOwnerInBaseCase", personHasCarTrip);					
-			}	
-		}		
 		
 		// #############################
 		// passenger-vehicle tracking
@@ -271,6 +240,5 @@ public class OptAVModule extends AbstractModule {
 		}
 				
 	}
-
 }
 

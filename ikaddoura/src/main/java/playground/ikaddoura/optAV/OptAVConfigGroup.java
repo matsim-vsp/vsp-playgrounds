@@ -32,14 +32,12 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	public OptAVConfigGroup() {
 		super(GROUP_NAME);
 	}
-	
+		
 	private boolean accountForCongestion = false;
 	private boolean accountForNoise = false;
 	private boolean chargeOperatingCostsFromPassengers = true;
 	private boolean chargeSAVTollsFromPassengers = true;
-	
-	private boolean tagInitialCarUsers = true;
-	
+		
 	private boolean runDefaultAnalysis = true;
 	
 	private double fixCostsSAVinsteadOfCar = -10.; // negative values are interpreted as a revenue for no longer owning a car
@@ -101,16 +99,6 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 		this.chargeSAVTollsFromPassengers = chargeSAVTollsFromPassengers;
 	}
 
-	@StringGetter( "tagInitialCarUsers" )
-	public boolean isTagInitialCarUsers() {
-		return tagInitialCarUsers;
-	}
-
-	@StringSetter( "tagInitialCarUsers" )
-	public void setTagInitialCarUsers(boolean tagInitialCarUsers) {
-		this.tagInitialCarUsers = tagInitialCarUsers;
-	}
-
 	@StringGetter( "fixCostsSAVinsteadOfCar" )
 	public double getFixCostsSAVinsteadOfCar() {
 		return fixCostsSAVinsteadOfCar;
@@ -140,8 +128,6 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	public void setRunDefaultAnalysis(boolean runDefaultAnalysis) {
 		this.runDefaultAnalysis = runDefaultAnalysis;
 	}
-	
-	
 	
 }
 

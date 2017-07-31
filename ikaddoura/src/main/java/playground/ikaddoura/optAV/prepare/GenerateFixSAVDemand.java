@@ -41,9 +41,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 * @author ikaddoura
 */
 
-public class GenerateAVDemand {
+public class GenerateFixSAVDemand {
 
-	private static final Logger log = Logger.getLogger(GenerateAVDemand.class);
+	private static final Logger log = Logger.getLogger(GenerateFixSAVDemand.class);
 	
 	private static final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/berlin_scenario_2016/be_122/";
 	private static final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV-be122/input/";
@@ -85,7 +85,7 @@ public class GenerateAVDemand {
 		}
 		outputPlans = outputDirectory + inputPlansFileName + ".avTripShare" + taxiTripShare + ".specificArea-" + specificArea + ".xml.gz";
 		
-		GenerateAVDemand generateAVDemand = new GenerateAVDemand();
+		GenerateFixSAVDemand generateAVDemand = new GenerateFixSAVDemand();
 		generateAVDemand.run();
 	}
 
