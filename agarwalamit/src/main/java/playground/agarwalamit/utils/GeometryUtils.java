@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import com.vividsolutions.jts.geom.*;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
@@ -32,10 +33,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 import org.opengis.geometry.BoundingBox;
 
@@ -60,6 +57,20 @@ public final class GeometryUtils {
 			y = minY +RAND.nextDouble()*(bounds.getMaxY()- minY);
 			p= MGC.xy2Point(x, y);
 		} while ( ! ( (Geometry) feature.getDefaultGeometry() ).contains(p) );
+		return p;
+	}
+
+	public static Point getRandomPointsInsideGeometry (final Geometry geometry) {
+		Point p = null;
+		Envelope bounds = geometry.getEnvelopeInternal();
+		double x,y;
+		do {
+			double minX = bounds.getMinX();
+			double minY = bounds.getMinY();
+			x = minX +RAND.nextDouble()*(bounds.getMaxX()- minX);
+			y = minY +RAND.nextDouble()*(bounds.getMaxY()- minY);
+			p= MGC.xy2Point(x, y);
+		} while ( ! (geometry).contains(p) );
 		return p;
 	}
 
