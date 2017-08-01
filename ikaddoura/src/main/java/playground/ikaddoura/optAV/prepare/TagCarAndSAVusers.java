@@ -39,6 +39,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -56,7 +57,8 @@ public class TagCarAndSAVusers {
 	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/";
 	
 	private final String inputPlansFile = "be_251.output_plans_selected.xml.gz";
-	private final String outputPlansFile = "be_251.output_plans_selected_withPersonAttributes2.xml.gz";
+	private final String outputPlansFile = "be_251.output_plans_selected_taggedCarUsers.xml.gz";
+	private final String outputPersonAttributesFile = "be_251.personAttributes_potentialSAVusers.xml.gz";
 	
 	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
 	private final String crsSHPFile = "EPSG:25833";
@@ -66,6 +68,8 @@ public class TagCarAndSAVusers {
 		
 	private String inputPlans;
 	private String outputPlans;
+	private String outputPersonAttributes;
+	
 	private Scenario scenario;
 	
 	private int potentialSAVusers = 0;
@@ -83,6 +87,7 @@ public class TagCarAndSAVusers {
 		
 		inputPlans = inputDirectory + inputPlansFile;
 		outputPlans = outputDirectory + outputPlansFile;
+		outputPersonAttributes = outputDirectory + outputPersonAttributesFile;
 		
 		Config config = ConfigUtils.createConfig();
 		config.plans().setInputFile(inputPlans);
@@ -97,6 +102,7 @@ public class TagCarAndSAVusers {
 		log.info("No car users: " + noCarUsers);
 		
 		new PopulationWriter(scenario.getPopulation()).write(outputPlans);
+		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile(outputPersonAttributes);
 	}
 
 	private void tagPotentialSAVusers() {
@@ -154,10 +160,13 @@ public class TagCarAndSAVusers {
 			}
 			
 			if (allActivitiesInArea) { 
-				person.getAttributes().putAttribute("subpopulation", "potentialSAVuser");
+				
+				scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "potentialSAVuser");
+//				person.getAttributes().putAttribute("subpopulation", "potentialSAVuser");
 				potentialSAVusers++;
 			} else {
-				person.getAttributes().putAttribute("subpopulation", "noPotentialSAVuser");
+				scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "noPotentialSAVuser");
+//				person.getAttributes().putAttribute("subpopulation", "noPotentialSAVuser");
 				noPotentialSAVusers++;
 			}
 		}
