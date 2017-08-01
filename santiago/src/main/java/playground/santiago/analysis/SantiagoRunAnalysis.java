@@ -11,20 +11,21 @@ import playground.santiago.analysis.travelTimes.SantiagoTravelTimesAnalysis;
 
 public class SantiagoRunAnalysis {
 	//Fields related to the scenario and its steps - they must be changed depending on the step
-	private static final String CASE_NAME = "policyRuns/1pct";
-	private static final String STEP_NAME = "StepOuter0";
-	private static final int FIRST_IT = 600;
-	private static final int LAST_IT = 800;
+	private static final String CASE_NAME = "policyRuns/10pct";
+	private static final String STEP_NAME = "StepTriangle0";
+	private static final int IT_TO_EVALUATE = 200; //From the local counter
+	private static final int REFERENCE_IT = 600; //Reference iteration (same as first iteration of the step)
+//	private static final int LAST_IT = 600;
 	
 	
 	public static void main (String[]args){
 		SantiagoStuckAgentsAnalysis stuckAnalysis = new SantiagoStuckAgentsAnalysis(CASE_NAME,STEP_NAME);
 		
 
-		int it = 0;
-		int itAux = FIRST_IT;
+		int it = IT_TO_EVALUATE;
+		int itAux = IT_TO_EVALUATE+REFERENCE_IT;
 		
-		while(itAux<=LAST_IT){
+//		while(itAux<=LAST_IT){
 			
 			List<Id<Person>> stuckAgents = stuckAnalysis.getStuckAgents(it);
 			
@@ -34,9 +35,9 @@ public class SantiagoRunAnalysis {
 //			SantiagoTravelDistancesAnalysis distancesAnalysis = new SantiagoTravelDistancesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
 //			distancesAnalysis.writeFileForTravelDistancesByMode(it,itAux);
 			
-			it+=50;
-			itAux+=50;	
-		}
+//			it+=50;
+//			itAux+=50;	
+//		}
 				
 		
 	}
