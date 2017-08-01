@@ -24,6 +24,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.core.utils.gis.ShapeFileWriter;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.utils.GeometryUtils;
 
@@ -51,6 +52,7 @@ public class LandCoversMerger {
     }
 
     public void merge(final  Collection<SimpleFeature>  zoneFeatures) {
+        Collection<SimpleFeature> usefullandcoverzones = new ArrayList<>();
         LOGGER.info("Filtering landcover zones for each zone...");
         Map<SimpleFeature, Map<ActivityTypeFromLandCover, List<Geometry>>> zone2activityType2landcoverGeom = new HashMap<>();
         for (SimpleFeature lancoverZone : this.landcoverFeatures) {
@@ -58,16 +60,19 @@ public class LandCoversMerger {
             List<ActivityTypeFromLandCover> acts = LandCoverUtils.getActivitiesTypeFromZone(landcoverId);
 
             for(SimpleFeature zone : zoneFeatures ) {
-                if ( ((Geometry) zone.getDefaultGeometry()).contains( (Geometry) lancoverZone.getDefaultGeometry()  ) ) {
+                // TODO i dont know, how a commonn geometry should be covered. Yet to fix.
+                if ( ((Geometry) zone.getDefaultGeometry()).covers( (Geometry) lancoverZone.getDefaultGeometry()  ) ) {
                      if ( zone2activityType2landcoverGeom.containsKey(zone) ) {
                          Map<ActivityTypeFromLandCover, List<Geometry>> activityTypeFromLandCoverListMap = zone2activityType2landcoverGeom.get(zone);
                         for(ActivityTypeFromLandCover activityTypeFromLandCover : acts) {
                          if (activityTypeFromLandCoverListMap.containsKey(activityTypeFromLandCover)) {
                              activityTypeFromLandCoverListMap.get(activityTypeFromLandCover).add((Geometry) lancoverZone.getDefaultGeometry());
+                             usefullandcoverzones.add(lancoverZone);
                          } else {
                              List<Geometry> geometryList = new ArrayList<>();
                              geometryList.add((Geometry) lancoverZone.getDefaultGeometry());
                              activityTypeFromLandCoverListMap.put(activityTypeFromLandCover, geometryList);
+                             usefullandcoverzones.add(lancoverZone);
                          }
                         }
                      } else {
@@ -75,6 +80,7 @@ public class LandCoversMerger {
                          for(ActivityTypeFromLandCover activityTypeFromLandCover : acts) {
                              List<Geometry> geometryList = new ArrayList<>();
                              geometryList.add((Geometry) lancoverZone.getDefaultGeometry());
+                             usefullandcoverzones.add(lancoverZone);
                              activityTypeFromLandCoverListMap.put(activityTypeFromLandCover, geometryList);
                          }
                          zone2activityType2landcoverGeom.put(zone, activityTypeFromLandCoverListMap);
@@ -91,6 +97,8 @@ public class LandCoversMerger {
             }
             zone2act2geo.put(zone, act2geom);
         }
+        // writing merged geoms for checks.
+        ShapeFileWriter.writeGeometries( usefullandcoverzones,  "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/CORINE_landcover_nrw/usefulZones.shp"  );
     }
 
     public Geometry getGeometry(final SimpleFeature feature, final ActivityTypeFromLandCover activityTypeFromLandCover) {
