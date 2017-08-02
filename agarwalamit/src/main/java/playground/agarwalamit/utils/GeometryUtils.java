@@ -81,7 +81,7 @@ public final class GeometryUtils {
 	/**
 	 * @return a random point which is covered by all the geometries
 	 */
-	public static Point getRandomPointsInsideGeometries (final List<Geometry> geometries) {
+	public static Point getRandomPointCommonToAllGeometries(final List<Geometry> geometries) {
 		Point p = null;
 		double minX = Double.POSITIVE_INFINITY;
 		double minY = Double.POSITIVE_INFINITY;
@@ -103,6 +103,16 @@ public final class GeometryUtils {
 			p= MGC.xy2Point(x, y);
 		} while ( ! isPointInsideAllGeometries(geometries, p) );
 		return p;
+	}
+
+	/**
+	 * Create one geometry from given list of features and then find a random point side the geoemtry.
+	 */
+	public static Point getRandomPointsInsideFeatures (final List<SimpleFeature> features) {
+		Tuple<Double,Double> xs = getMaxMinXFromFeatures(features);
+		Tuple<Double,Double> ys = getMaxMinYFromFeatures(features);
+		Geometry combinedGeometry = getGeometryFromListOfFeatures(features);
+		return getRandomPointsInsideGeometry(combinedGeometry);
 	}
 
 	/**
@@ -205,16 +215,6 @@ public final class GeometryUtils {
 
 	public static int getNumberOfVertices(final Geometry geom){
 		return geom.getNumPoints();
-	}
-
-	/**
-	 * Create one geometry from given list of features and then find a random point side the geoemtry.
-	 */
-	public static Point getRandomPointsInsideFeatures (final List<SimpleFeature> features) {
-		Tuple<Double,Double> xs = getMaxMinXFromFeatures(features);
-		Tuple<Double,Double> ys = getMaxMinYFromFeatures(features);
-		Geometry combinedGeometry = getGeometryFromListOfFeatures(features);
-		return getRandomPointsInsideGeometry(combinedGeometry);
 	}
 
 	public static Tuple<Double,Double> getMaxMinXFromFeatures (final List<SimpleFeature> features){

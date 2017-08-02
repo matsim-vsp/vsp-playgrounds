@@ -57,7 +57,7 @@ public class GeometryUtilsTest {
 
         List<Geometry> geoms = Arrays.asList(combinedGeom, intersectingGeom);
 
-        Point point = GeometryUtils.getRandomPointsInsideGeometries(geoms);
+        Point point = GeometryUtils.getRandomPointCommonToAllGeometries(geoms);
         System.out.println(point.toString());
 
         // this point must be within (geometry 1 OR geometry2) AND withing intersecting geom

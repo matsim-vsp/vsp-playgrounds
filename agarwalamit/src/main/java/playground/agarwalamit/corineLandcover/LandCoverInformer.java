@@ -31,49 +31,48 @@ import playground.agarwalamit.utils.GeometryUtils;
  * Created by amit on 31.07.17.
  */
 
-public class LandCoversMerger {
+public class LandCoverInformer {
 
-    public static final Logger LOGGER = Logger.getLogger(LandCoversMerger.class);
-
-    private final Collection<SimpleFeature> landcoverFeatures ;
+    public static final Logger LOGGER = Logger.getLogger(LandCoverInformer.class);
     private final Map<ActivityTypeFromLandCover, Geometry> activityType2LandcoverZone = new HashMap<>();
 
-    public LandCoversMerger(final String corineLandCoverShapeFile) {
+    public LandCoverInformer(final String corineLandCoverShapeFile) {
         LOGGER.info("Reading CORINE landcover shape file . . .");
-        this.landcoverFeatures = ShapeFileReader.getAllFeatures(corineLandCoverShapeFile);
-    }
+        Collection<SimpleFeature> landCoverFeatures = ShapeFileReader.getAllFeatures(corineLandCoverShapeFile);
 
-    public static void main(String[] args) {
-        String landcoverFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
-        String zoneFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
-        new LandCoversMerger(landcoverFile).mergeLandCoverZones();
-    }
-
-    public void mergeLandCoverZones(){
         LOGGER.info("Merging the geometries of the same activity types ...");
         Map<ActivityTypeFromLandCover, List<Geometry>> activityTypes2ListOfGeometries = new HashMap<>();
-        for (SimpleFeature lancoverZone : this.landcoverFeatures) {
-            int landcoverId = Integer.valueOf( (String) lancoverZone.getAttribute(LandCoverUtils.CORINE_LANDCOVER_TAG_ID));
-            List<ActivityTypeFromLandCover> acts = LandCoverUtils.getActivitiesTypeFromZone(landcoverId);
+
+        for (SimpleFeature lancoverZone : landCoverFeatures) {
+            int landCoverId = Integer.valueOf( (String) lancoverZone.getAttribute(LandCoverUtils.CORINE_LANDCOVER_TAG_ID));
+            List<ActivityTypeFromLandCover> acts = LandCoverUtils.getActivitiesTypeFromZone(landCoverId);
+
             for (ActivityTypeFromLandCover activityTypeFromLandCover : acts ) {
                 List<Geometry> geoms = activityTypes2ListOfGeometries.get(activityTypeFromLandCover);
-                if (geoms==null) {
-                    geoms = new ArrayList<>();
-                    activityTypes2ListOfGeometries.put(activityTypeFromLandCover, geoms);
-                }
+                if (geoms==null) geoms = new ArrayList<>();
+
                 geoms.add(  (Geometry)lancoverZone.getDefaultGeometry() );
+                activityTypes2ListOfGeometries.put(activityTypeFromLandCover, geoms);
             }
         }
 
+        // combined geoms of the same activity types
         for (ActivityTypeFromLandCover activityTypeFromLandCover : activityTypes2ListOfGeometries.keySet()) {
             activityType2LandcoverZone.put(activityTypeFromLandCover, GeometryUtils.combine(activityTypes2ListOfGeometries.get(activityTypeFromLandCover)));
         }
     }
 
+    public static void main(String[] args) {
+        String landcoverFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
+        String zoneFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
+        new LandCoverInformer(landcoverFile);
+    }
+
+
     public Point getRandomPoint (final SimpleFeature feature, final  ActivityTypeFromLandCover activityTypeFromLandCover) {
         List<Geometry> geoms = new ArrayList<>();
         geoms.add(  (Geometry) feature.getDefaultGeometry() );
         geoms.add( this.activityType2LandcoverZone.get(activityTypeFromLandCover) );
-        return GeometryUtils.getRandomPointsInsideGeometries( geoms  );
+        return GeometryUtils.getRandomPointCommonToAllGeometries( geoms  );
     }
 }
