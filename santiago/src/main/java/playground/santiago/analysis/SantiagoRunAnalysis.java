@@ -6,6 +6,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 
 import playground.santiago.analysis.others.SantiagoStuckAgentsAnalysis;
+import playground.santiago.analysis.trafficVolumes.SantiagoTrafficVolumesAnalysis;
 import playground.santiago.analysis.travelDistances.SantiagoTravelDistancesAnalysis;
 import playground.santiago.analysis.travelTimes.SantiagoTravelTimesAnalysis;
 
@@ -19,7 +20,7 @@ public class SantiagoRunAnalysis {
 	
 	
 	public static void main (String[]args){
-		SantiagoStuckAgentsAnalysis stuckAnalysis = new SantiagoStuckAgentsAnalysis(CASE_NAME,STEP_NAME);
+//		SantiagoStuckAgentsAnalysis stuckAnalysis = new SantiagoStuckAgentsAnalysis(CASE_NAME,STEP_NAME);
 		
 
 		int it = IT_TO_EVALUATE;
@@ -27,10 +28,13 @@ public class SantiagoRunAnalysis {
 		
 //		while(itAux<=LAST_IT){
 			
-			List<Id<Person>> stuckAgents = stuckAnalysis.getStuckAgents(it);
+//			List<Id<Person>> stuckAgents = stuckAnalysis.getStuckAgents(it);
 			
-			SantiagoTravelTimesAnalysis timesAnalysis = new SantiagoTravelTimesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
-			timesAnalysis.writeFileForTravelTimesByMode(it,itAux);
+//			SantiagoTravelTimesAnalysis timesAnalysis = new SantiagoTravelTimesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
+//			timesAnalysis.writeFileForTravelTimesByMode(it,itAux);
+		
+			SantiagoTrafficVolumesAnalysis trafficAnalysis = new SantiagoTrafficVolumesAnalysis(CASE_NAME,STEP_NAME);
+			trafficAnalysis.writeFileForLinkVolumes(it, itAux);
 			
 //			SantiagoTravelDistancesAnalysis distancesAnalysis = new SantiagoTravelDistancesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
 //			distancesAnalysis.writeFileForTravelDistancesByMode(it,itAux);
