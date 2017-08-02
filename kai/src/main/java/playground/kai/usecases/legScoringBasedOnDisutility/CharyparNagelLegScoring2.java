@@ -80,7 +80,7 @@ public class CharyparNagelLegScoring2 implements org.matsim.core.scoring.SumScor
 		NetworkRoute networkRoute = (NetworkRoute) leg.getRoute() ;
 		for ( Id<Link> linkID : networkRoute.getLinkIds() ) {
 			Link link = network.getLinks().get( linkID ) ;
-			disutility.getLinkTravelDisutility(link, time, null, null) ;
+//			disutility.getLinkTravelDisutility(link, time, null, null) ;
 		}
 		
 		if ( true ) {
