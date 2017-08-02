@@ -74,10 +74,35 @@ public final class GeometryUtils {
 		return p;
 	}
 
-	public static boolean isLinkInsideGeometries(final Collection<Geometry> features, final Link link) {
+	public static Point getRandomPointsInsideGeometries (final List<Geometry> geometries) {
+		Point p = null;
+		double minX = Double.POSITIVE_INFINITY;
+		double minY = Double.POSITIVE_INFINITY;
+		double maxX = Double.NEGATIVE_INFINITY;
+		double maxY = Double.NEGATIVE_INFINITY;
+
+		for(  Geometry geometry : geometries ) {
+			Envelope bounds = geometry.getEnvelopeInternal();
+			minX = Math.min(minX, bounds.getMinX());
+			minY = Math.min(minY, bounds.getMinY());
+			maxX = Math.max(maxX, bounds.getMaxX());
+			maxY = Math.max(maxY, bounds.getMaxY());
+		}
+
+		double x,y;
+		do {
+			x = minX +RAND.nextDouble()*(maxX- minX);
+			y = minY +RAND.nextDouble()*(maxY- minY);
+			p= MGC.xy2Point(x, y);
+		} while ( ! isPointInsideAllGeometries(geometries, p) );
+		return p;
+	}
+
+
+	public static boolean isLinkInsideGeometries(final Collection<Geometry> geometries, final Link link) {
 		Coord coord = link.getCoord();
 		Geometry linkGeo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		for(Geometry  geo: features){
+		for(Geometry  geo: geometries){
 			if ( geo.contains(linkGeo) ) {
 				return true;
 			}
@@ -85,14 +110,9 @@ public final class GeometryUtils {
 		return false;
 	}
 	
-	public static boolean isCoordInsideFeatures(final Collection<Geometry> features, final Coord coord) {
-		Geometry point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		for(Geometry  geo: features){
-			if ( geo.contains(point) ) {
-				return true;
-			}
-		}
-		return false;
+	public static boolean isCoordInsideGeometries(final Collection<Geometry> geometries, final Coord coord) {
+		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
+		return isPointInsideGeometries(geometries, point);
 	}
 	
 	public static boolean isLinkInsideFeatures(final Collection<SimpleFeature> features, final Link link) {
@@ -106,8 +126,29 @@ public final class GeometryUtils {
 		return false;
 	}
 
+	public static boolean isPointInsideAllGeometries(final Collection<Geometry> features, final Point point) {
+		if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
+		for(Geometry sf : features){
+			if ( ! sf.contains(point) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean isPointInsideGeometries(final Collection<Geometry> features, final Point point) {
+		if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
+		for(Geometry sf : features){
+			if ( sf.contains(point) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static boolean isPointInsideFeatures(final Collection<SimpleFeature> features, final Point point) {
 		Geometry geo = GF.createPoint( new Coordinate( point.getCoordinate() ) );
+		if (features.isEmpty()) throw new RuntimeException("Colleciton of features is empty.");
 		for(SimpleFeature sf : features){
 			if ( ( getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
 				return true;
