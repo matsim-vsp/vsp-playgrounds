@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-
 import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
@@ -32,8 +32,6 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 import org.opengis.geometry.BoundingBox;
 
 /**
@@ -46,6 +44,9 @@ public final class GeometryUtils {
 	private static final Random RAND = MatsimRandom.getRandom(); // matsim random will return same coord.
 	private static final GeometryFactory GF = new GeometryFactory();
 
+	/**
+	 * @return a random point inside given feature
+	 */
 	public static Point getRandomPointsInsideFeature (final SimpleFeature feature) {
 		Point p = null;
 		BoundingBox bounds = feature.getBounds();
@@ -60,6 +61,9 @@ public final class GeometryUtils {
 		return p;
 	}
 
+	/**
+	 * @return a random point inside given geometry
+	 */
 	public static Point getRandomPointsInsideGeometry (final Geometry geometry) {
 		Point p = null;
 		Envelope bounds = geometry.getEnvelopeInternal();
@@ -74,6 +78,9 @@ public final class GeometryUtils {
 		return p;
 	}
 
+	/**
+	 * @return a random point which is covered by all the geometries
+	 */
 	public static Point getRandomPointsInsideGeometries (final List<Geometry> geometries) {
 		Point p = null;
 		double minX = Double.POSITIVE_INFINITY;
@@ -98,34 +105,35 @@ public final class GeometryUtils {
 		return p;
 	}
 
-
+	/**
+	 * @return true if centroid of the link is covered by any of the geometry
+	 */
 	public static boolean isLinkInsideGeometries(final Collection<Geometry> geometries, final Link link) {
 		Coord coord = link.getCoord();
-		Geometry linkGeo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		for(Geometry  geo: geometries){
-			if ( geo.contains(linkGeo) ) {
-				return true;
-			}
-		}
-		return false;
+		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
+		return isPointInsideGeometries(geometries, point);
 	}
-	
+
+	/**
+	 * @return true if coord is covered by any of the geometry
+	 */
 	public static boolean isCoordInsideGeometries(final Collection<Geometry> geometries, final Coord coord) {
 		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
 		return isPointInsideGeometries(geometries, point);
 	}
-	
+
+	/**
+	 * @return true if centroid of the link is covered by any of the geometry
+	 */
 	public static boolean isLinkInsideFeatures(final Collection<SimpleFeature> features, final Link link) {
 		Coord coord = link.getCoord();
-		Geometry geo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		for(SimpleFeature sf : features){
-			if ( ( getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
-				return true;
-			}
-		}
-		return false;
+		Point geo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
+		return isPointInsideFeatures(features, geo);
 	}
 
+	/**
+	 * @return true ONLY if point is covered by ALL geometries
+	 */
 	public static boolean isPointInsideAllGeometries(final Collection<Geometry> features, final Point point) {
 		if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
 		for(Geometry sf : features){
@@ -136,6 +144,9 @@ public final class GeometryUtils {
 		return true;
 	}
 
+	/**
+	 * @return true if point is covered by ANY of the geometry
+	 */
 	public static boolean isPointInsideGeometries(final Collection<Geometry> features, final Point point) {
 		if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
 		for(Geometry sf : features){
@@ -146,9 +157,12 @@ public final class GeometryUtils {
 		return false;
 	}
 
+	/**
+	 * @return true if point is covered by ANY of the geometry
+	 */
 	public static boolean isPointInsideFeatures(final Collection<SimpleFeature> features, final Point point) {
 		Geometry geo = GF.createPoint( new Coordinate( point.getCoordinate() ) );
-		if (features.isEmpty()) throw new RuntimeException("Colleciton of features is empty.");
+		if (features.isEmpty()) throw new RuntimeException("Collection of features is empty.");
 		for(SimpleFeature sf : features){
 			if ( ( getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
 				return true;
@@ -167,7 +181,7 @@ public final class GeometryUtils {
 
 	/**
 	 * @param geom
-	 * @return A simplified geometry by increasing tolerance until number of vertices are less than 1000.
+	 * @return a simplified geometry by increasing tolerance until number of vertices are less than 1000.
 	 */
 	public static Geometry getSimplifiedGeom(final Geometry geom){
 		Geometry outGeom = geom;
@@ -181,6 +195,9 @@ public final class GeometryUtils {
 		return outGeom;
 	}
 
+	/**
+	 * simplify the geometry based on given tolerance
+	 */
 
 	public static Geometry getSimplifiedGeom(final Geometry geom, final double distanceTolerance){
 		return TopologyPreservingSimplifier.simplify(geom, distanceTolerance);
@@ -190,18 +207,14 @@ public final class GeometryUtils {
 		return geom.getNumPoints();
 	}
 
+	/**
+	 * Create one geometry from given list of features and then find a random point side the geoemtry.
+	 */
 	public static Point getRandomPointsInsideFeatures (final List<SimpleFeature> features) {
 		Tuple<Double,Double> xs = getMaxMinXFromFeatures(features);
 		Tuple<Double,Double> ys = getMaxMinYFromFeatures(features);
 		Geometry combinedGeometry = getGeometryFromListOfFeatures(features);
-		Point p = null;
-		double x,y;
-		do {
-			x = xs.getFirst()+RAND.nextDouble()*(xs.getSecond() - xs.getFirst());
-			y = ys.getFirst()+RAND.nextDouble()*(ys.getSecond() - ys.getFirst());
-			p= MGC.xy2Point(x, y);
-		} while (! (combinedGeometry).contains(p) );
-		return p;
+		return getRandomPointsInsideGeometry(combinedGeometry);
 	}
 
 	public static Tuple<Double,Double> getMaxMinXFromFeatures (final List<SimpleFeature> features){
@@ -240,6 +253,9 @@ public final class GeometryUtils {
 		return combine(geoms);
 	}
 
+	/**
+	 * It perform "union" for each geometry and return one geometry.
+	 */
 	public static Geometry combine(final List<Geometry> geoms){
 		Geometry geom = null;
 		for(Geometry g : geoms){
@@ -251,6 +267,11 @@ public final class GeometryUtils {
 		return geom;
 	}
 
+	/**
+	 *
+	 * @param shapeFile
+	 * @return bounding
+	 */
 	public static ReferencedEnvelope getBoundingBox(final String shapeFile){
 		ShapeFileReader shapeFileReader = new ShapeFileReader();
 		shapeFileReader.readFileAndInitialize(shapeFile);
