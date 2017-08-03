@@ -120,9 +120,9 @@ private static final String OUTPUT_DIR = "C:/Users/Nico/Dropbox/MA-Arbeit/Ergebn
 
         CombinedSignalsModule signalsModule = new CombinedSignalsModule();
         LaemmerConfig laemmerConfig = new LaemmerConfig();
-        laemmerConfig.setDESIRED_PERIOD(90);
-        laemmerConfig.setMAX_PERIOD(135);
-        laemmerConfig.setMinG(5);
+        laemmerConfig.setDesiredCycleTime(90);
+        laemmerConfig.setMaxCycleTime(135);
+        laemmerConfig.setMinGreenTime(5);
         signalsModule.setLaemmerConfig(laemmerConfig);
         controler.addOverridingModule(signalsModule);
         if(vis) {
