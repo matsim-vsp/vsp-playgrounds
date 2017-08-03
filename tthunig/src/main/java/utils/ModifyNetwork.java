@@ -101,9 +101,13 @@ public class ModifyNetwork {
 				}
 				// maximal lane length, should be >0
 				double maxLaneLength = Math.max(link.getLength()-5, 1);
-				// when link is long enough, set lane length such that agents travel on the lane for 10 seconds 
-				// (also see MA Nico Kuehnel, 2017. He used slightly different values but the same logic)
-				lane.setStartsAtMeterFromLinkEnd(Math.min(maxLaneLength, link.getFreespeed() * 10));
+				// laemmer signal control needs to look up to 10 seconds into the future
+				double desiredLaneLength = link.getFreespeed() * 10;
+				if (lane.getStartsAtMeterFromLinkEnd() < desiredLaneLength) {
+					// when link is long enough, set lane length such that agents travel on the lane for 10 seconds
+					// (also see MA Nico Kuehnel, 2017. He used slightly different values but the same logic)
+					lane.setStartsAtMeterFromLinkEnd(Math.min(maxLaneLength, desiredLaneLength));
+				}
 			}
 		}
 	}
