@@ -25,9 +25,12 @@ import java.util.TreeMap;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.utils.collections.Tuple;
 
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballStrings;
 
@@ -35,7 +38,7 @@ import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballS
  * @author dgrether
  * 
  */
-public class CottbusFootballTraveltimeHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler {
+public class CottbusFootballTraveltimeHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler, PersonStuckEventHandler {
 
 	private Map<Id<Person>, Double> arrivaltimesSPN2FB;
 	private Map<Id<Person>, Double> arrivaltimesCB2FB;
@@ -43,6 +46,8 @@ public class CottbusFootballTraveltimeHandler implements PersonDepartureEventHan
 	private Map<Id<Person>, Double> arrivaltimesFB2CB;
 	
 	private Map<Id<Person>, Double> travelTimesPerPerson;
+	
+	private int numberOfStuckedPersons;
 
 	public CottbusFootballTraveltimeHandler(){
 		this.reset(0);
@@ -55,29 +60,43 @@ public class CottbusFootballTraveltimeHandler implements PersonDepartureEventHan
 		this.arrivaltimesFB2SPN = new TreeMap<>();
 		this.arrivaltimesCB2FB = new TreeMap<>();
 		this.arrivaltimesSPN2FB = new TreeMap<>();
+		this.numberOfStuckedPersons = 0;
 	}
 
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
-		double previousTT = travelTimesPerPerson.get(event.getPersonId());
-		travelTimesPerPerson.put(event.getPersonId(), previousTT + event.getTime());
+		handleArrival(event.getPersonId(), event.getTime());
+	}
+
+	@Override
+	public void handleEvent(PersonStuckEvent event) {
+		numberOfStuckedPersons++;
+//		if (travelTimesPerPerson.containsKey(event.getPersonId())){
+			// handle as arrival if already departured
+			handleArrival(event.getPersonId(), event.getTime());
+//		}
+	}
+
+	private void handleArrival(Id<Person> personId, double time) {
+		double previousTT = travelTimesPerPerson.get(personId);
+		travelTimesPerPerson.put(personId, previousTT + time);
 		
-		if (event.getPersonId().toString().endsWith(CottbusFootballStrings.SPN2FB)) {
-			Double tr = this.arrivaltimesSPN2FB.get(event.getPersonId());
+		if (personId.toString().endsWith(CottbusFootballStrings.SPN2FB)) {
+			Double tr = this.arrivaltimesSPN2FB.get(personId);
 			if (tr == null) {
-				this.arrivaltimesSPN2FB.put(event.getPersonId(), event.getTime());
+				this.arrivaltimesSPN2FB.put(personId, time);
 			}
 			else {
-				this.arrivaltimesFB2SPN.put(event.getPersonId(), event.getTime());
+				this.arrivaltimesFB2SPN.put(personId, time);
 			}
 		}
-		if (event.getPersonId().toString().endsWith(CottbusFootballStrings.CB2FB)) {
-			Double tr = this.arrivaltimesCB2FB.get(event.getPersonId());
+		if (personId.toString().endsWith(CottbusFootballStrings.CB2FB)) {
+			Double tr = this.arrivaltimesCB2FB.get(personId);
 			if (tr == null) {
-				this.arrivaltimesCB2FB.put(event.getPersonId(), event.getTime());
+				this.arrivaltimesCB2FB.put(personId, time);
 			}
 			else {
-				this.arrivaltimesFB2CB.put(event.getPersonId(), event.getTime());
+				this.arrivaltimesFB2CB.put(personId, time);
 			}
 		}
 	}
@@ -90,13 +109,13 @@ public class CottbusFootballTraveltimeHandler implements PersonDepartureEventHan
 		travelTimesPerPerson.put(event.getPersonId(), previousTT - event.getTime());
 	}
 
-	public double getAverageTravelTime() {
-		Double att = 0.0;
+	public Tuple<Double,Double> getTotalAndAverageTravelTime() {
+		Double totalTT = 0.0;
 		for (Double travelTime : travelTimesPerPerson.values()) {
-			att += travelTime;
+			totalTT += travelTime;
 		}
-		att = att / travelTimesPerPerson.size();
-		return att;
+		Double att = totalTT / travelTimesPerPerson.size();
+		return new Tuple<Double, Double>(totalTT, att);
 	}
 
 	public Map<Id<Person>, Double> getArrivalTimesCB2FB() {
@@ -114,5 +133,8 @@ public class CottbusFootballTraveltimeHandler implements PersonDepartureEventHan
 	public Map<Id<Person>, Double> getArrivalTimesFB2SPN() {
 		return this.arrivaltimesFB2SPN;
 	}
-
+	
+	public int getNumberOfStuckedPersons() {
+		return this.numberOfStuckedPersons;
+	}
 }
