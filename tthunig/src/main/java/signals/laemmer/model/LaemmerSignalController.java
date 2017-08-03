@@ -39,6 +39,7 @@ import com.google.inject.Provider;
 
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
+import signals.downstreamSensor.DownstreamSensor;
 import signals.sensor.LinkSensorManager;
 
 
@@ -63,6 +64,8 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
     private Request activeRequest = null;
     private LinkSensorManager sensorManager;
+    
+    private DownstreamSensor downstreamSensor;
 
     private Network network;
     private Lanes lanes;
@@ -81,32 +84,35 @@ public class LaemmerSignalController extends AbstractSignalController implements
         private final Network network;
         private final TtTotalDelay delayCalculator;
         private final Lanes lanes;
+		private final DownstreamSensor downstreamSensor;
 
-        public SignalControlProvider(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Network network, Lanes lanes, TtTotalDelay delayCalculator) {
+        public SignalControlProvider(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Network network, Lanes lanes, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
             this.laemmerConfig = laemmerConfig;
             this.sensorManager = sensorManager;
             this.network = network;
             this.lanes = lanes;
             this.delayCalculator = delayCalculator;
+            this.downstreamSensor = downstreamSensor;
         }
 
         @Override
         public SignalController get() {
-            return new LaemmerSignalController(laemmerConfig, sensorManager, network, lanes, delayCalculator);
+            return new LaemmerSignalController(laemmerConfig, sensorManager, network, lanes, delayCalculator, downstreamSensor);
         }
     }
 
 
-    private LaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Network network, Lanes lanes, TtTotalDelay delayCalculator) {
+    private LaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Network network, Lanes lanes, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
         this.laemmerConfig = laemmerConfig;
         this.sensorManager = sensorManager;
         this.network = network;
         this.lanes = lanes;
         this.delayCalculator = delayCalculator;
-        desiredPeriod = laemmerConfig.getDESIRED_PERIOD();
-        maxPeriod = laemmerConfig.getMAX_PERIOD();
-        this.MIN_G = laemmerConfig.getMinG();
-        DEFAULT_INTERGREEN = laemmerConfig.getDEFAULT_INTERGREEN();
+        desiredPeriod = laemmerConfig.getDesiredCycleTime();
+        maxPeriod = laemmerConfig.getMaxCycleTime();
+        this.MIN_G = laemmerConfig.getMinGreenTime();
+        DEFAULT_INTERGREEN = laemmerConfig.getDefaultIntergreenTime();
+        this.downstreamSensor = downstreamSensor;
     }
 
     @Override
@@ -163,16 +169,17 @@ public class LaemmerSignalController extends AbstractSignalController implements
         LaemmerSignal max = null;
         if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
             max = regulationQueue.peek();
-            if (max == null) {
-            }
         }
         if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
             if (max == null) {
                 double index = 0;
                 for (LaemmerSignal signal : laemmerSignals) {
                     if (signal.index > index) {
-                        max = signal;
-                        index = signal.index;
+                    	// if downstream check enabled, only select signals that do not lead to occupied links
+                    	if (!laemmerConfig.isCheckDownstream() || downstreamSensor.allDownstreamLinksEmpty(system.getId(), signal.group.getId())){
+                    		max = signal;
+                        	index = signal.index;
+                    	}
                     }
                 }
             }
@@ -202,9 +209,10 @@ public class LaemmerSignalController extends AbstractSignalController implements
     private void updateSignals(double now) {
         for (LaemmerSignal signal : laemmerSignals) {
             signal.update(now);
-            if (signal.stabilize && !regulationQueue.contains(signal)) {
-                regulationQueue.add(signal);
-            }
+            // this is already done in updateStabilization in LaemmerSignal called by the above, theresa jul'17
+//            if (signal.stabilize && !regulationQueue.contains(signal)) {
+//                regulationQueue.add(signal);
+//            }
         }
     }
 
@@ -269,6 +277,9 @@ public class LaemmerSignalController extends AbstractSignalController implements
                 this.sensorManager.registerNumberOfCarsInDistanceMonitoring(signal.getLinkId(), 0.);
                 this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
             }
+        }
+        if (laemmerConfig.isCheckDownstream()){
+			downstreamSensor.registerDownstreamSensors(system);
         }
     }
 
@@ -508,10 +519,16 @@ public class LaemmerSignalController extends AbstractSignalController implements
                     / (maxPeriod - desiredPeriod));
 
             if (n >= nCrit) {
-                regulationQueue.add(this);
-//                signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" + tIdle);
-                this.regulationTime = Math.max(Math.rint(determiningLoad * desiredPeriod + (outflowSum / flowSum) * Math.max(tIdle, 0)), MIN_G);
-                this.stabilize = true;
+            	/* TODO actually, this is the wrong place to check downstream conditions, since situation can change until the group has moved up to the queue front. 
+            	 * a better moment would be while polling from the queue: poll the first element with downstream empty. but we would need a linked list instead of queue for this
+            	 * and could no longer check for empty regulationQueue to decide for stabilization vs optimization... I would prefer to have some tests before! theresa, jul'17 */
+				if (!laemmerConfig.isCheckDownstream() || downstreamSensor.allDownstreamLinksEmpty(system.getId(), group.getId())) {
+					regulationQueue.add(this);
+					// signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" +
+					// tIdle);
+					this.regulationTime = Math.max(Math.rint(determiningLoad * desiredPeriod + (outflowSum / flowSum) * Math.max(tIdle, 0)), MIN_G);
+					this.stabilize = true;
+				}
             }
         }
 
