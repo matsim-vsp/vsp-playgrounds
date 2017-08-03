@@ -29,7 +29,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
@@ -43,6 +42,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.vehicles.Vehicle;
 
@@ -86,11 +86,11 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 	// in 100 s steps
 	private Map<Double, Integer> numberOfArrivalsPerTimeInterval = new TreeMap<>();
 	
-	private Scenario scenario;
+	private Network network;
 	
 	@Inject
-	public TtGeneralAnalysis(Scenario scenario) {
-		this.scenario = scenario;
+	public TtGeneralAnalysis(Network network) {
+		this.network = network;
 	}
 	
 	@Override
@@ -146,7 +146,7 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
-		Link currentLink = scenario.getNetwork().getLinks().get(event.getLinkId());
+		Link currentLink = network.getLinks().get(event.getLinkId());
 		
 		// remove the distance of the last trip temporarily from the list
 		double previousDistance = distancePerVehiclePerTrip.get(event.getVehicleId()).pollLast();
@@ -179,7 +179,7 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 	@Override
 	public void handleEvent(LinkEnterEvent event) {
 		// calculate earliest link exit time
-		Link currentLink = scenario.getNetwork().getLinks().get(event.getLinkId());
+		Link currentLink = network.getLinks().get(event.getLinkId());
 		double freespeedTt = currentLink.getLength() / currentLink.getFreespeed();
 		// this is the earliest time where matsim sets the agent to the next link
 		double matsimFreespeedTT = Math.floor(freespeedTt + 1);	
