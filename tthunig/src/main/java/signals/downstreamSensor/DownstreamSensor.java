@@ -22,6 +22,7 @@
 package signals.downstreamSensor;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +37,8 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.mobsim.jdeqsim.JDEQSimConfigGroup;
+import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.data.Lanes;
 
 import com.google.inject.Inject;
 
@@ -49,6 +52,7 @@ public final class DownstreamSensor {
 
 	private final LinkSensorManager sensorManager;
 	private final Network network;
+	private final Lanes lanes;
 	private final JDEQSimConfigGroup jdeQSim;
 	private final SignalsData signalsData;
 	
@@ -65,6 +69,7 @@ public final class DownstreamSensor {
 	public DownstreamSensor(LinkSensorManager sensorManager, Scenario scenario) {
 		this.sensorManager = sensorManager;
 		this.network = scenario.getNetwork();
+		this.lanes = scenario.getLanes();
 		this.jdeQSim = scenario.getConfig().jdeqSim();
 		this.signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		init();
@@ -129,11 +134,18 @@ public final class DownstreamSensor {
 	public boolean allDownstreamLinksEmpty(SignalData signal){
 		if (signal.getTurningMoveRestrictions() != null) {
 			return allLinksEmpty(signal.getTurningMoveRestrictions());
-		} else {
-			// if no turning move restrictions are set, turning is allowed to all outgoing links
-			Node systemNode = this.network.getLinks().get(signal.getLinkId()).getToNode();
-			return allLinksEmpty(systemNode.getOutLinks().keySet());
-		}
+		} // else:
+		if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
+			Set<Id<Link>> toLinks = new HashSet<>();
+			for (Id<Lane> laneId : signal.getLaneIds()) {
+				Lane lane = lanes.getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId);
+				toLinks.addAll(lane.getToLinkIds());
+			}
+			return allLinksEmpty(toLinks);
+		} // else:
+		// if no turning move restrictions and no lanes with to links are set, turning is allowed to all outgoing links
+		Node systemNode = this.network.getLinks().get(signal.getLinkId()).getToNode();
+		return allLinksEmpty(systemNode.getOutLinks().keySet());
 	}
 	
 	public boolean allDownstreamLinksEmpty(Id<SignalSystem> signalSystemId, Id<SignalGroup> signalGroupId){
