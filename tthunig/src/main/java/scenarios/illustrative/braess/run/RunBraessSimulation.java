@@ -332,9 +332,9 @@ public final class RunBraessSimulation {
 			signalsModule.setSylviaConfig(sylviaConfig);
 			LaemmerConfig laemmerConfig = new LaemmerConfig();
 			// TODO modify laemmer config parameter here if you like
-			laemmerConfig.setMAX_PERIOD(90);
-			laemmerConfig.setDESIRED_PERIOD(60);
-			laemmerConfig.setDEFAULT_INTERGREEN(0);
+			laemmerConfig.setMaxCycleTime(90);
+			laemmerConfig.setDesiredCycleTime(60);
+			laemmerConfig.setDefaultIntergreenTime(0);
 			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 			break;

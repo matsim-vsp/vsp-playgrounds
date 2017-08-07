@@ -32,6 +32,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.jfree.base.config.ModifiableConfiguration;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -50,7 +51,9 @@ import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreato
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballStrings;
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 import signals.CombinedSignalsModule;
+import signals.laemmer.model.LaemmerConfig;
 import signals.sylvia.controler.DgSylviaConfig;
+import utils.ModifyNetwork;
 
 /**
  * @author tthunig, copied from dgrether CottbusFootballBatch
@@ -58,6 +61,12 @@ import signals.sylvia.controler.DgSylviaConfig;
  */
 public class RunCottbusFootball {
 	private static final Logger log = Logger.getLogger(RunCottbusFootball.class);
+	
+	private enum SignalControl {FIXED, SYLVIA, LAEMMER, NONE};
+	private static final SignalControl controlType = SignalControl.LAEMMER;
+	private static final boolean checkDownstream = false;
+	
+	private static final boolean longLanes = true;
 	
 	/**
 	 * @param args
@@ -69,30 +78,80 @@ public class RunCottbusFootball {
 		if (args != null && args.length != 0){
 			baseConfig = ConfigUtils.loadConfig(args[0]);
 		} else {
-			String configFileName = "../../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/config_cap1.0.xml";
+			String configFileName = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/config_cap1.0.xml";
 			baseConfig = ConfigUtils.loadConfig(configFileName);
+			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/run1200/");
+			baseConfig.controler().setRunId("1200");
 		}
 		baseConfig.controler().setLastIteration(0);
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
-//		signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13.xml"); // TODO comment in for sylvia
+		switch (controlType){
+		case SYLVIA:
+			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13.xml");
+			break;
+		case LAEMMER:
+			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
+//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer.xml");
+//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer_6.xml"); //2
+//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased.xml"); //1
+			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased_6.xml");
+//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer2phases_6.xml");
+//			baseConfig.network().setLaneDefinitionsFile("lanes_long.xml");
+			break;
+		case NONE:
+			signalsConfigGroup.setUseSignalSystems(false);
+			signalsConfigGroup.setSignalControlFile(null);
+			signalsConfigGroup.setSignalGroupsFile(null);
+			signalsConfigGroup.setSignalSystemFile(null);
+			break;
+		default:
+			break;
+		}
 		
 		Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
+		if (longLanes){
+			// extend short lanes (needed for laemmer)
+			ModifyNetwork.lengthenAllLanes(baseScenario);
+		}
+		
 		// add missing scenario elements
-		baseScenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(baseConfig).loadSignalsData());
+		if (!controlType.equals(SignalControl.NONE))
+			baseScenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(baseConfig).loadSignalsData());
 		//create the output directoy
 		String baseOutputDirectory = baseConfig.controler().getOutputDirectory();
 		if (! baseOutputDirectory.endsWith("/")){
 			baseOutputDirectory = baseOutputDirectory.concat("/");
 		}
-		baseOutputDirectory+= "footballFixedTime/"; // TODO adapt
+		switch (controlType){
+		case FIXED:
+			baseOutputDirectory+= "footballFixedTime"; 
+			break;
+		case SYLVIA:
+			baseOutputDirectory+= "footballSylvia_fixedCycle";
+			break;
+		case LAEMMER:
+			baseOutputDirectory+= "footballLaemmer_LinkBased_6";
+			break;
+		case NONE:
+			baseOutputDirectory+= "footballNoSignals";
+			break;
+		}
+		if (checkDownstream){
+			baseOutputDirectory+= "_bp";
+		}
+		if (longLanes){
+			baseOutputDirectory+= "_LongLanes";
+		}
+		baseOutputDirectory+= "/";
 		log.info("using base output directory: " + baseOutputDirectory);
-//		createOutputDirectory(baseOutputDirectory); // TODO 
 		Population fanPop = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
 		//initialize variables needed in the loop
 		String runId = baseConfig.controler().getRunId();
-		Map<Integer, Double> percentageOfFans2AverageTTMap = new HashMap<Integer, Double>();
+		Map<Integer, Double> percentageOfFans2AverageTTMap = new HashMap<>();
+		Map<Integer, Double> percentageOfFans2TotalTTMap = new HashMap<>();
+		Map<Integer, Double> percentageOfFans2noStuckedAgents = new HashMap<>();
 		//fan creator
-		String kreisShapeFile = "../../../shared-svn/studies/countries/de/brandenburg_gemeinde_kreisgrenzen/kreise/dlm_kreis.shp";
+		String kreisShapeFile = "../../shared-svn/studies/countries/de/brandenburg_gemeinde_kreisgrenzen/kreise/dlm_kreis.shp";
 		CottbusFanCreator fanCreator = new SimpleCottbusFanCreator(kreisShapeFile);
 		//start the runs
 		int increment = 5;
@@ -113,17 +172,28 @@ public class RunCottbusFootball {
 			CottbusFootballAnalysisControllerListener cbfbControllerListener = new CottbusFootballAnalysisControllerListener();
 			controler.addControlerListener(cbfbControllerListener);
 			//add the signals module
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-			sylviaConfig.setSignalGroupMaxGreenScale(2);
-//			sylviaConfig.setCheckDownstream(true);
-			signalsModule.setSylviaConfig(sylviaConfig);
-			controler.addOverridingModule(signalsModule);
+			if (!controlType.equals(SignalControl.NONE)) {
+				CombinedSignalsModule signalsModule = new CombinedSignalsModule();
+				DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+//				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+				sylviaConfig.setSignalGroupMaxGreenScale(2);
+				sylviaConfig.setCheckDownstream(checkDownstream);
+				signalsModule.setSylviaConfig(sylviaConfig);
+				LaemmerConfig laemmerConfig = new LaemmerConfig();
+				laemmerConfig.setDesiredCycleTime(90);
+		        laemmerConfig.setMaxCycleTime(135);
+				laemmerConfig.setMinGreenTime(5);
+//				laemmerConfig.setAnalysisEnabled(true);
+				laemmerConfig.setCheckDownstream(checkDownstream);
+				signalsModule.setLaemmerConfig(laemmerConfig);
+				controler.addOverridingModule(signalsModule);
+			}
 			
 			controler.run();
 			if (cbfbControllerListener.getAverageTraveltime() != null){
 				percentageOfFans2AverageTTMap.put(numberOfFootballFans, cbfbControllerListener.getAverageTraveltime());
+				percentageOfFans2TotalTTMap.put(numberOfFootballFans, cbfbControllerListener.getTotalTraveltime());
+				percentageOfFans2noStuckedAgents.put(numberOfFootballFans, cbfbControllerListener.getNumberOfStuckedPersons() + 0.);
 			}
 		}
 		
@@ -133,15 +203,16 @@ public class RunCottbusFootball {
 //			e.printStackTrace();
 //		}
 		
-		writeAverageTT(percentageOfFans2AverageTTMap, baseOutputDirectory + "average_traveltimes_last_iteration.csv");
-		
+		writeAnalysis(percentageOfFans2AverageTTMap, baseOutputDirectory + "average_traveltimes_last_iteration.csv", "Average travel time");
+		writeAnalysis(percentageOfFans2TotalTTMap, baseOutputDirectory + "total_traveltimes_last_iteration.csv", "Total travel time");
+		writeAnalysis(percentageOfFans2noStuckedAgents, baseOutputDirectory + "numberOfStuckedAgents_last_iteration.csv", "Number of stucked agents");
 	}
 		
-	private static void writeAverageTT(Map<Integer, Double> map, String filename) throws FileNotFoundException, IOException{
-		SortedMap<Integer, Double> sorted = new TreeMap<Integer, Double>();
+	private static void writeAnalysis(Map<Integer, Double> map, String filename, String headerColumn2) throws FileNotFoundException, IOException{
+		SortedMap<Integer, Double> sorted = new TreeMap<>();
 		sorted.putAll(map);
 		BufferedWriter writer = IOUtils.getBufferedWriter(filename);
-		writer.write("Football fans %" + CottbusFootballStrings.SEPARATOR + "Average travel time");
+		writer.write("Football fans %" + CottbusFootballStrings.SEPARATOR + headerColumn2);
 		writer.newLine();
 		for (Entry<Integer, Double> e : sorted.entrySet()){
 			writer.write(e.getKey().toString() + CottbusFootballStrings.SEPARATOR + e.getValue().toString());

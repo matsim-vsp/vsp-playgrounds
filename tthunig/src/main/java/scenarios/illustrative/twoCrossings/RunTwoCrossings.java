@@ -124,9 +124,9 @@ public class RunTwoCrossings {
 			signalsModule.setSylviaConfig(sylviaConfig);
 			
 			LaemmerConfig laemmerConfig = new LaemmerConfig();
-	        laemmerConfig.setDEFAULT_INTERGREEN(5);
-	        laemmerConfig.setDESIRED_PERIOD(60);
-	        laemmerConfig.setMAX_PERIOD(90);
+	        laemmerConfig.setDefaultIntergreenTime(5);
+	        laemmerConfig.setDesiredCycleTime(60);
+	        laemmerConfig.setMaxCycleTime(90);
 	        signalsModule.setLaemmerConfig(laemmerConfig);
 //	        LaemmerSignalController.log.setLevel(Level.OFF);
 //	        LaemmerSignalController.signalLog.setLevel(Level.OFF);

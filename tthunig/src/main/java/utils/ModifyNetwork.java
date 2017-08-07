@@ -37,6 +37,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.data.LanesToLinkAssignment;
 import org.matsim.lanes.data.LanesWriter;
 
 /**
@@ -63,7 +64,14 @@ public class ModifyNetwork {
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
+	
+		doubleFlowCapOfSignalizedLinksAndLanes(scenario);
 		
+		new NetworkWriter(scenario.getNetwork()).write(INPUT_BASE_DIR + "network_wgs84_utm33n_v3.xml");
+		new LanesWriter(scenario.getLanes()).write(INPUT_BASE_DIR + "lanes_v3.xml");
+	}
+	
+	public static void doubleFlowCapOfSignalizedLinksAndLanes(Scenario scenario){
 		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
 		
@@ -81,9 +89,27 @@ public class ModifyNetwork {
 				}
 			}
 		}
-		
-		new NetworkWriter(scenario.getNetwork()).write(INPUT_BASE_DIR + "network_wgs84_utm33n_v3.xml");
-		new LanesWriter(scenario.getLanes()).write(INPUT_BASE_DIR + "lanes_v3.xml");
+	}
+	
+	public static void lengthenAllLanes(Scenario scenario){
+		for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()){
+			Link link = scenario.getNetwork().getLinks().get(l2l.getLinkId());
+			for (Lane lane : l2l.getLanes().values()){
+				if (lane.getStartsAtMeterFromLinkEnd() == link.getLength()){
+					// original lane does not have to be extended
+					continue;
+				}
+				// maximal lane length, should be >0
+				double maxLaneLength = Math.max(link.getLength()-5, 1);
+				// laemmer signal control needs to look up to 10 seconds into the future
+				double desiredLaneLength = link.getFreespeed() * 10;
+				if (lane.getStartsAtMeterFromLinkEnd() < desiredLaneLength) {
+					// when link is long enough, set lane length such that agents travel on the lane for 10 seconds
+					// (also see MA Nico Kuehnel, 2017. He used slightly different values but the same logic)
+					lane.setStartsAtMeterFromLinkEnd(Math.min(maxLaneLength, desiredLaneLength));
+				}
+			}
+		}
 	}
 
 }

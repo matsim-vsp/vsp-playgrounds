@@ -103,16 +103,16 @@ public class LaemmerBasicExample {
 
         CombinedSignalsModule module = new CombinedSignalsModule();
         LaemmerConfig laemmerConfig = new LaemmerConfig();
-        laemmerConfig.setDEFAULT_INTERGREEN(5);
+        laemmerConfig.setDefaultIntergreenTime(5);
 
         if(grouped) {
-            laemmerConfig.setDESIRED_PERIOD(60);
-            laemmerConfig.setMAX_PERIOD(90);
+            laemmerConfig.setDesiredCycleTime(60);
+            laemmerConfig.setMaxCycleTime(90);
         } else {
-            laemmerConfig.setDESIRED_PERIOD(120);
-            laemmerConfig.setMAX_PERIOD(180);
+            laemmerConfig.setDesiredCycleTime(120);
+            laemmerConfig.setMaxCycleTime(180);
         }
-        laemmerConfig.setMinG(minG);
+        laemmerConfig.setMinGreenTime(minG);
         laemmerConfig.setActiveRegime(regime);
         module.setLaemmerConfig(laemmerConfig);
 

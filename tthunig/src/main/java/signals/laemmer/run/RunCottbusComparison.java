@@ -104,9 +104,9 @@ private static final String OUTPUT_DIR = "C:/Users/Nico/Dropbox/MA-Arbeit/Ergebn
         PlanCalcScoreConfigGroup.ActivityParams home = new PlanCalcScoreConfigGroup.ActivityParams("home");
         home.setTypicalDuration(16 * 3600);
         config.planCalcScore().addActivityParams(home);
-        PlanCalcScoreConfigGroup.ActivityParams fb = new PlanCalcScoreConfigGroup.ActivityParams("fb");
-        work.setTypicalDuration(2 * 3600);
-        config.planCalcScore().addActivityParams(work);
+//        PlanCalcScoreConfigGroup.ActivityParams fb = new PlanCalcScoreConfigGroup.ActivityParams("fb");
+//        fb.setTypicalDuration(2 * 3600);
+//        config.planCalcScore().addActivityParams(fb);
 
         config.plans().setInputFile(PLANS_PATH);
 
@@ -120,9 +120,9 @@ private static final String OUTPUT_DIR = "C:/Users/Nico/Dropbox/MA-Arbeit/Ergebn
 
         CombinedSignalsModule signalsModule = new CombinedSignalsModule();
         LaemmerConfig laemmerConfig = new LaemmerConfig();
-        laemmerConfig.setDESIRED_PERIOD(90);
-        laemmerConfig.setMAX_PERIOD(135);
-        laemmerConfig.setMinG(5);
+        laemmerConfig.setDesiredCycleTime(90);
+        laemmerConfig.setMaxCycleTime(135);
+        laemmerConfig.setMinGreenTime(5);
         signalsModule.setLaemmerConfig(laemmerConfig);
         controler.addOverridingModule(signalsModule);
         if(vis) {

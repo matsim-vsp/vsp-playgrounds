@@ -44,7 +44,7 @@ import org.matsim.pt.PtConstants;
  */
 public class CharyparNagelLegScoring2 implements org.matsim.core.scoring.SumScoringFunction.LegScoring, org.matsim.core.scoring.SumScoringFunction.ArbitraryEventScoring {
 
-	protected double score;
+	private double score;
 
 	private final ScoringParameters params;
 	private boolean nextEnterVehicleIsFirstOfTrip = true ;
@@ -52,9 +52,9 @@ public class CharyparNagelLegScoring2 implements org.matsim.core.scoring.SumScor
 	private boolean currentLegIsPtLeg = false;
 	private double lastActivityEndTime = Time.UNDEFINED_TIME ;
 	
-	Network network ;
+	private Network network ;
 	
-	TravelDisutility disutility ;
+	private TravelDisutility disutility ;
 	
 	public CharyparNagelLegScoring2(final ScoringParameters params) {
 		this.params = params;
@@ -75,12 +75,12 @@ public class CharyparNagelLegScoring2 implements org.matsim.core.scoring.SumScor
 
 	private static int ccc=0 ;
 	
-	protected double calcLegScore(final double departureTime, final double arrivalTime, final Leg leg) {
+	private double calcLegScore(final double departureTime, final double arrivalTime, final Leg leg) {
 		
 		NetworkRoute networkRoute = (NetworkRoute) leg.getRoute() ;
 		for ( Id<Link> linkID : networkRoute.getLinkIds() ) {
 			Link link = network.getLinks().get( linkID ) ;
-//			disutility.getLinkTravelDisutility(link, time, person, vehicle) ;
+//			disutility.getLinkTravelDisutility(link, time, null, null) ;
 		}
 		
 		if ( true ) {

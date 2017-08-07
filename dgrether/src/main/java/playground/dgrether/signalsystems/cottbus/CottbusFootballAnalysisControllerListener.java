@@ -30,6 +30,7 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.controler.listener.StartupListener;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballStrings;
@@ -45,6 +46,8 @@ public class CottbusFootballAnalysisControllerListener implements StartupListene
 	private CottbusFootballTraveltimeHandler traveltimeHandler;
 
 	private Double averageTravelTime = null;
+	private Double totalTravelTime = null;
+	private int numberOfStuckedPersons = 0;
 
 	@Override
 	public void notifyStartup(StartupEvent e) {
@@ -84,7 +87,7 @@ public class CottbusFootballAnalysisControllerListener implements StartupListene
  			filename = e.getServices().getControlerIO().getOutputFilename("average_travel_time.csv");
  			try {
  				BufferedWriter writer = IOUtils.getAppendingBufferedWriter(filename);
- 				writer.append(e.getIteration() + CottbusFootballStrings.SEPARATOR + this.traveltimeHandler.getAverageTravelTime());
+ 				writer.append(e.getIteration() + CottbusFootballStrings.SEPARATOR + this.traveltimeHandler.getTotalAndAverageTravelTime());
  				writer.newLine();
  				writer.close();
  			} catch (FileNotFoundException e1) {
@@ -92,7 +95,10 @@ public class CottbusFootballAnalysisControllerListener implements StartupListene
  			} catch (IOException e1) {
  				e1.printStackTrace();
  			}
- 			this.averageTravelTime = this.traveltimeHandler.getAverageTravelTime();
+ 			Tuple<Double, Double> totalAndAverageTT = this.traveltimeHandler.getTotalAndAverageTravelTime();
+ 			this.averageTravelTime = totalAndAverageTT.getSecond();
+ 			this.totalTravelTime = totalAndAverageTT.getFirst();
+ 			this.numberOfStuckedPersons = this.traveltimeHandler.getNumberOfStuckedPersons();
  			controler.getEvents().removeHandler(this.traveltimeHandler);
  			this.traveltimeHandler = null;
  		}
@@ -102,5 +108,11 @@ public class CottbusFootballAnalysisControllerListener implements StartupListene
 		return this.averageTravelTime;
 	}
 
+	public Double getTotalTraveltime() {
+		return this.totalTravelTime;
+	}
 	
+	public int getNumberOfStuckedPersons() {
+		return this.numberOfStuckedPersons;
+	}
 }

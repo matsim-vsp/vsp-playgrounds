@@ -13,19 +13,24 @@ import java.util.Map;
  * Created by nkuehnel on 03.04.2017.
  */
 public class LaemmerConfig {
+	
+    public enum Regime {COMBINED, OPTIMIZING, STABILIZING};
+    private Regime activeRegime = Regime.COMBINED;
 
-    private double MAX_PERIOD = 120;
-    private double DESIRED_PERIOD = 70;
+    private double maxCycleTime = 120;
+    private double desiredCycleTime = 70;
+
+    private double defaultIntergreenTime = 5;
+    private double minGreenTime = 0;
 
     private Map<Id<Link>, Double> linkArrivalRates = new HashMap<>();
     private Map<Id<Link>, Map<Id<Lane>,Double>> laneArrivalRates = new HashMap<>();
 
     private boolean useBasicIntergreenTime = true;
-
-    private double DEFAULT_INTERGREEN = 5;
-
-    private boolean analysisEnabled = true;
-    private double MIN_G = 0;
+    private boolean analysisEnabled = false;
+    
+	/** activate the phase only if downstream links are empty. */
+	private boolean checkDownstream = false;
 
     //    @Nullable
     public Double getLaneArrivalRate(Id<Link> linkId, Id<Lane> laneId) {
@@ -36,15 +41,13 @@ public class LaemmerConfig {
         }
     }
 
-    public double getMinG() {
-        return MIN_G;
+    public double getMinGreenTime() {
+        return minGreenTime;
     }
 
-    public void setMinG(double minG) {
-        MIN_G = minG;
+    public void setMinGreenTime(double minGreenTime) {
+        this.minGreenTime = minGreenTime;
     }
-
-    public enum Regime {COMBINED, OPTIMIZING, STABILIZING};
 
     public Regime getActiveRegime() {
         return activeRegime;
@@ -54,10 +57,8 @@ public class LaemmerConfig {
         this.activeRegime = activeRegime;
     }
 
-    private Regime activeRegime = Regime.COMBINED;
-
     public void addArrivalRateForLink(Id<Link> linkId, double arrivalRate) {
-        linkArrivalRates.put(linkId, arrivalRate);
+        this.linkArrivalRates.put(linkId, arrivalRate);
     }
 
 //    @Nullable
@@ -72,20 +73,20 @@ public class LaemmerConfig {
         this.laneArrivalRates.get(linkId).put(laneId, arrivalRate);
     }
 
-    public double getMAX_PERIOD() {
-        return MAX_PERIOD;
+    public double getMaxCycleTime() {
+        return maxCycleTime;
     }
 
-    public void setMAX_PERIOD(double MAX_PERIOD) {
-        this.MAX_PERIOD = MAX_PERIOD;
+    public void setMaxCycleTime(double maxCycleTime) {
+        this.maxCycleTime = maxCycleTime;
     }
 
-    public double getDESIRED_PERIOD() {
-        return DESIRED_PERIOD;
+    public double getDesiredCycleTime() {
+        return desiredCycleTime;
     }
 
-    public void setDESIRED_PERIOD(double DESIRED_PERIOD) {
-        this.DESIRED_PERIOD = DESIRED_PERIOD;
+    public void setDesiredCycleTime(double desiredCycleTime) {
+        this.desiredCycleTime = desiredCycleTime;
     }
 
     public boolean isUseBasicIntergreenTime() {
@@ -96,18 +97,28 @@ public class LaemmerConfig {
         this.useBasicIntergreenTime = useBasicIntergreenTime;
     }
 
-    public double getDEFAULT_INTERGREEN() {
-        return DEFAULT_INTERGREEN;
+    public double getDefaultIntergreenTime() {
+        return defaultIntergreenTime;
     }
 
-    public void setDEFAULT_INTERGREEN(double DEFAULZT_INTERGREEN) {
-        this.DEFAULT_INTERGREEN = DEFAULZT_INTERGREEN;
+    public void setDefaultIntergreenTime(double intergreen) {
+        this.defaultIntergreenTime = intergreen;
     }
 
 
     public boolean analysisEnabled() {
         return analysisEnabled;
     }
-
-
+    
+    public void setAnalysisEnabled(boolean enabled){
+    	this.analysisEnabled = enabled;
+    }
+	
+	public void setCheckDownstream(boolean checkDownstream) {
+		this.checkDownstream = checkDownstream;
+	}
+	
+	public boolean isCheckDownstream() {
+		return checkDownstream;
+	}
 }
