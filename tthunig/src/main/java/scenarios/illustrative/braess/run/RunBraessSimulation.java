@@ -57,12 +57,16 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.data.LanesWriter;
 
+import com.google.inject.Binder;
+
 import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
 import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.ikaddoura.decongestion.DecongestionControlerListener;
+import playground.ikaddoura.decongestion.DecongestionModule;
+import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import playground.ikaddoura.decongestion.data.DecongestionInfo;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 import playground.ikaddoura.decongestion.handler.IntervalBasedTolling;
@@ -128,7 +132,7 @@ public final class RunBraessSimulation {
 	private static final LaneType LANE_TYPE = LaneType.NONE;
 	
 	// defines which kind of pricing should be used
-	private static final PricingType PRICING_TYPE = PricingType.NONE;
+	private static final PricingType PRICING_TYPE = PricingType.INTERVALBASED;
 	public enum PricingType{
 		NONE, V3, V4, V7, V8, V9, V10, FLOWBASED, GREGOR, INTERVALBASED
 	}
@@ -139,7 +143,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../../runs-svn/braess/btuOverloadScenario/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/intervalBased/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -186,7 +190,7 @@ public final class RunBraessSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize(10);
+		config.travelTimeCalculator().setTraveltimeBinSize(60);
 //		config.travelTimeCalculator().setMaxTime((int) (3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 2)));
 		config.travelTimeCalculator().setMaxTime(3600 * 24);
 
@@ -197,11 +201,12 @@ public final class RunBraessSimulation {
 		config.timeAllocationMutator().setMutationRange(60);
 
 		// define strategies:
+//		config.strategy().setFractionOfIterationsToDisableInnovation(.7);
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
 			strat.setWeight(0.1);
-			strat.setDisableAfter(config.controler().getLastIteration() - 50);
+			strat.setDisableAfter(config.controler().getLastIteration() - 20);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -274,10 +279,21 @@ public final class RunBraessSimulation {
 		// decongestion relevant parameters
 		DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
 		decongestionSettings.setWRITE_OUTPUT_ITERATION(1);
-		decongestionSettings.setTOLL_ADJUSTMENT(0.1);
 		decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
 		decongestionSettings.setTOLL_BLEND_FACTOR(1.0);
+		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.05);
 		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
+		decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(2);
+		decongestionSettings.setWRITE_LINK_INFO_CHARTS(true);
+		decongestionSettings.setMsa(true);
+		
+		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
+		decongestionSettings.setTOLL_ADJUSTMENT(1);
+//		decongestionSettings.setINITIAL_TOLL(1);
+		decongestionSettings.setKp(0.1);
+		decongestionSettings.setKi(0.);
+		decongestionSettings.setKd(0.);
+		
 		config.addModule(decongestionSettings);
 		
 		return config;
@@ -423,27 +439,7 @@ public final class RunBraessSimulation {
 			
 		} else if (PRICING_TYPE.equals(PricingType.INTERVALBASED)) {
 			
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					
-					this.bind(DecongestionInfo.class).asEagerSingleton();
-					
-					this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
-					this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingAll.class);
-					
-					this.bind(IntervalBasedTollingAll.class).asEagerSingleton();
-					this.bind(DelayAnalysis.class).asEagerSingleton();
-					this.bind(PersonVehicleTracker.class).asEagerSingleton();
-									
-					this.addEventHandlerBinding().to(IntervalBasedTollingAll.class);
-					this.addEventHandlerBinding().to(DelayAnalysis.class);
-					this.addEventHandlerBinding().to(PersonVehicleTracker.class);
-					
-					this.addControlerListenerBinding().to(DecongestionControlerListener.class);
-
-				}
-			});
+			controler.addOverridingModule(new DecongestionModule(scenario));
 			
 			// toll-adjusted routing
 			
