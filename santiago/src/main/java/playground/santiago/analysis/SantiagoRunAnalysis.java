@@ -5,6 +5,7 @@ import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 
+import playground.santiago.analysis.others.SantiagoCarLegsAnalysis;
 import playground.santiago.analysis.others.SantiagoStuckAgentsAnalysis;
 import playground.santiago.analysis.trafficVolumes.SantiagoTrafficVolumesAnalysis;
 import playground.santiago.analysis.travelDistances.SantiagoTravelDistancesAnalysis;
@@ -33,8 +34,11 @@ public class SantiagoRunAnalysis {
 //			SantiagoTravelTimesAnalysis timesAnalysis = new SantiagoTravelTimesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
 //			timesAnalysis.writeFileForTravelTimesByMode(it,itAux);
 		
-			SantiagoTrafficVolumesAnalysis trafficAnalysis = new SantiagoTrafficVolumesAnalysis(CASE_NAME,STEP_NAME);
-			trafficAnalysis.writeFileForLinkVolumes(it, itAux);
+//			SantiagoTrafficVolumesAnalysis trafficAnalysis = new SantiagoTrafficVolumesAnalysis(CASE_NAME,STEP_NAME);
+//			trafficAnalysis.writeFileForLinkVolumes(it, itAux);
+		
+			SantiagoCarLegsAnalysis carLegAnalysis = new SantiagoCarLegsAnalysis(CASE_NAME, STEP_NAME);
+			carLegAnalysis.writeCarLegs(it, itAux);
 			
 //			SantiagoTravelDistancesAnalysis distancesAnalysis = new SantiagoTravelDistancesAnalysis(CASE_NAME, STEP_NAME, stuckAgents);
 //			distancesAnalysis.writeFileForTravelDistancesByMode(it,itAux);
