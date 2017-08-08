@@ -144,7 +144,7 @@ public class SantiagoTrafficVolumesAnalysis {
 
 		String eventsFile = this.outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".events.xml.gz";
 //		String outputFile = analysisDir + String.valueOf(itAux) + ".linksVolumes.txt";
-		String outputFile = analysisDir + String.valueOf(itAux) + ".linksVolumesPerHalfHour.txt";
+		String outputFile = this.analysisDir + String.valueOf(itAux) + ".linksVolumesPerHalfHour.txt";
 		
 //		SantiagoLinkVolumeHandler handler = new SantiagoLinkVolumeHandler();
 		SantiagoLinkVolumePerHalfHourHandler handler = new SantiagoLinkVolumePerHalfHourHandler();
