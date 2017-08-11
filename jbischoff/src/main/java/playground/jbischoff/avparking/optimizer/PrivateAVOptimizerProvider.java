@@ -21,23 +21,25 @@ package playground.jbischoff.avparking.optimizer;
 
 import javax.inject.Inject;
 
-import org.apache.commons.configuration.*;
-import org.apache.log4j.Logger;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.router.TimeAsTravelDisutility;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
-import org.matsim.contrib.taxi.optimizer.*;
+import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
+import org.matsim.contrib.taxi.optimizer.TaxiOptimizerContext;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.scheduler.*;
+import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
+import org.matsim.contrib.taxi.scheduler.TaxiSchedulerParams;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
-import playground.jbischoff.taxi.inclusion.optimizer.*;
 import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizerParams;
 
 public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
@@ -64,7 +66,7 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 		
 		TaxiSchedulerParams schedulerParams = new TaxiSchedulerParams(taxiCfg);
 		TravelDisutility travelDisutility = new TimeAsTravelDisutility(travelTime);
-		TaxiScheduler scheduler = new TaxiScheduler(taxiCfg, network, fleet, qSim.getSimTimer(), schedulerParams,
+		PrivateAVScheduler scheduler = new PrivateAVScheduler(taxiCfg, network, fleet, qSim.getSimTimer(), schedulerParams,
 				travelTime, travelDisutility);
 
 		TaxiOptimizerContext optimContext = new TaxiOptimizerContext(fleet, network, qSim.getSimTimer(), travelTime,

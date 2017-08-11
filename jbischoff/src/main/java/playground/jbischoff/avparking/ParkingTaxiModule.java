@@ -19,7 +19,6 @@
 
 package playground.jbischoff.avparking;
 
-import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
