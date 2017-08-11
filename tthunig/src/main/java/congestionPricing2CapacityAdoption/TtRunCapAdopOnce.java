@@ -100,7 +100,11 @@ public class TtRunCapAdopOnce {
 	 */
 	public static void main(String[] args) {
 //		createInputFilesBasicPricing();
-		compareBasicPricingCreateCapRedNet();
+		
+		String eventsFileBasic = OUTPUT_BASE_DIR + "2017-08-6_be_218_500it_BASIC_m/be_218.output_events.xml.gz";
+		String eventsFilePricing = OUTPUT_BASE_DIR + "2017-08-7_be_218_500it_PRICING_LP_toleranz10_m/be_218.output_events.xml.gz";
+		compareBasicPricingCreateCapRedNet(eventsFileBasic, eventsFilePricing);
+		
 //		runOnThisMachine();
 	}
 
@@ -120,7 +124,7 @@ public class TtRunCapAdopOnce {
 		new ConfigWriter(config).write(outputDir + "config.xml");
 	}
 
-	private static void compareBasicPricingCreateCapRedNet() {
+	private static void compareBasicPricingCreateCapRedNet(String eventsFileBasic, String eventsFilePricing) {
 		// TODO try whether log from TtRunCapAdopOnce is now included in run-log-files
 		Config config = createConfig(CapRedType.CAP_RED);
 		// idea 1:
@@ -138,14 +142,14 @@ public class TtRunCapAdopOnce {
 		TtStaticLinkFlowValuesPerHour flowValuesBasic = new TtStaticLinkFlowValuesPerHour();
 		managerBasic.addHandler(flowValuesBasic);
 		MatsimEventsReader readerBasic = new MatsimEventsReader(managerBasic);
-		readerBasic.readFile(OUTPUT_BASE_DIR + "2017-08-6_be_218_500it_BASIC_m/be_218.output_events.xml.gz");
+		readerBasic.readFile(eventsFileBasic);
 		
 		LOG.info("read in events from pricing run");
 		EventsManager managerPricing = new EventsManagerImpl();
 		TtStaticLinkFlowValuesPerHour flowValuesPricing = new TtStaticLinkFlowValuesPerHour();
 		managerPricing.addHandler(flowValuesPricing);
 		MatsimEventsReader readerPricing = new MatsimEventsReader(managerPricing);
-		readerPricing.readFile(OUTPUT_BASE_DIR + "2017-08-6_be_218_500it_PRICING_V9_m/be_218.output_events.xml.gz");
+		readerPricing.readFile(eventsFilePricing);
 		
 		LOG.warn("Prepare capacity reduction controler");
 //		Config config = createConfig(CapRedType.CAP_RED);

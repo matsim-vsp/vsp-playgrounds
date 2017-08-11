@@ -132,7 +132,7 @@ public final class RunBraessSimulation {
 	private static final LaneType LANE_TYPE = LaneType.NONE;
 	
 	// defines which kind of pricing should be used
-	private static final PricingType PRICING_TYPE = PricingType.INTERVALBASED;
+	private static final PricingType PRICING_TYPE = PricingType.NONE;
 	public enum PricingType{
 		NONE, V3, V4, V7, V8, V9, V10, FLOWBASED, GREGOR, INTERVALBASED
 	}
@@ -170,7 +170,7 @@ public final class RunBraessSimulation {
 		Config config = ConfigUtils.createConfig();
 
 		// set number of iterations
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(200);
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
@@ -201,26 +201,26 @@ public final class RunBraessSimulation {
 		config.timeAllocationMutator().setMutationRange(60);
 
 		// define strategies:
-//		config.strategy().setFractionOfIterationsToDisableInnovation(.7);
+		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
 			strat.setWeight(0.1);
-			strat.setDisableAfter(config.controler().getLastIteration() - 20);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 20);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.TimeAllocationMutator.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 25);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 25);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.SelectRandom.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 50);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 50);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -234,7 +234,7 @@ public final class RunBraessSimulation {
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.BestScore.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 50);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 50);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -289,7 +289,7 @@ public final class RunBraessSimulation {
 		
 		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
 		decongestionSettings.setTOLL_ADJUSTMENT(1);
-//		decongestionSettings.setINITIAL_TOLL(1);
+		decongestionSettings.setINITIAL_TOLL(1);
 		decongestionSettings.setKp(0.1);
 		decongestionSettings.setKi(0.);
 		decongestionSettings.setKd(0.);
@@ -749,11 +749,15 @@ public final class RunBraessSimulation {
 		
 		// write network and lanes
 		new NetworkWriter(scenario.getNetwork()).write(outputDir + "network.xml");
-		if (!LANE_TYPE.equals(LaneType.NONE)) 
+		scenario.getConfig().network().setInputFile("network.xml");
+		if (!LANE_TYPE.equals(LaneType.NONE)) {
 			new LanesWriter(scenario.getLanes()).write(outputDir + "lanes.xml");
+			scenario.getConfig().network().setLaneDefinitionsFile("lanes.xml");
+		}
 		
 		// write population
 		new PopulationWriter(scenario.getPopulation()).write(outputDir + "plans.xml");
+		scenario.getConfig().plans().setInputFile("plans.xml");
 		
 		// write signal files
 		if (!SIGNAL_LOGIC.equals(SignalControlLogic.NONE)) {
@@ -761,6 +765,10 @@ public final class RunBraessSimulation {
 			new SignalSystemsWriter20(signalsData.getSignalSystemsData()).write(outputDir + "signalSystems.xml");
 			new SignalControlWriter20(signalsData.getSignalControlData()).write(outputDir + "signalControl.xml");
 			new SignalGroupsWriter20(signalsData.getSignalGroupsData()).write(outputDir + "signalGroups.xml");
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			signalConfigGroup.setSignalSystemFile("signalSystems.xml");
+			signalConfigGroup.setSignalControlFile("signalControl.xml");
+			signalConfigGroup.setSignalGroupsFile("signalGroups.xml");
 		}
 		
 		// write config
