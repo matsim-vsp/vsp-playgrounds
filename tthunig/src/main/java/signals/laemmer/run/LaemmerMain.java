@@ -29,6 +29,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 
+import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
 import signals.CombinedSignalsModule;
 
 
@@ -45,20 +46,19 @@ public class LaemmerMain {
 	public static void main(String[] args) {
 		log.info("Running Laemmer main method...");
 		if (args == null || args.length == 0){
-			log.info("No args given, running local config...");
-			args = new String[1];
-			args[0] = "../../playgrounds/tthunig/examples/laemmer/config.xml";
+			log.info("No args given, running example scenario...");
+			SingleCrossingScenario exampleSc = new SingleCrossingScenario();
+			exampleSc.setUseLaemmer(true);
+			exampleSc.defineControler().run();
+		} else {
+			Config config = ConfigUtils.loadConfig(args[0]);
+			Scenario scenario = ScenarioUtils.loadScenario(config);
+			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
+
+			Controler controler = new Controler(scenario);
+			controler.addOverridingModule(new CombinedSignalsModule());
+			controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+			controler.run();
 		}
-
-		Config config = ConfigUtils.loadConfig(args[0]);
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
-		
-		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(new CombinedSignalsModule());
-		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-		controler.run();
-
 	}
-
 }

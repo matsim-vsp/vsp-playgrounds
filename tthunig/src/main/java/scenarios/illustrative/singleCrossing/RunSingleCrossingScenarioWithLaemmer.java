@@ -11,7 +11,7 @@ import signals.laemmer.run.LaemmerMain;
 public class RunSingleCrossingScenarioWithLaemmer {
     private static final Logger log = Logger.getLogger(LaemmerMain.class);
 
-    private static final boolean USE_LAEMMER = false;
+    private static final boolean USE_LAEMMER = true;
     private static final Regime LAEMMER_REGIME = Regime.COMBINED;
     
     private static final boolean VIS = false;
