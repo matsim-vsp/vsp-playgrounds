@@ -24,8 +24,6 @@ package scenarios.cottbus.run;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,19 +42,15 @@ import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsWriter20;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsWriter20;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup.TravelTimeCalculatorType;
 import org.matsim.core.controler.AbstractModule;
@@ -71,7 +65,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.data.LanesWriter;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingModule;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
@@ -87,8 +80,10 @@ import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
 import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.laemmer.model.LaemmerConfig;
 import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.model.SylviaSignalController;
+import utils.ModifyNetwork;
+import utils.OutputUtils;
 import utils.SignalizeScenario;
 
 /**
@@ -111,16 +106,18 @@ public class TtRunCottbusSimulation {
 		V21, // add missing lanes
 		V3 // double flow capacities of all signalized links and lanes
 	}
-	private final static PopulationType POP_TYPE = PopulationType.WoMines;
+	private final static boolean LONG_LANES = true;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
 		BTU_POP_BTU_ROUTES,
 		WMines, // with mines as working places. causes an oversized number of working places in the south west of Cottbus.
-		WoMines // without mines as working places
+		WoMines, // without mines as working places
+		WoMines100itcap1 // without mines. iterated for 100it with capacity 1.0
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -129,7 +126,8 @@ public class TtRunCottbusSimulation {
 		ALL_MS_AS_DOWNSTREAM_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with MS basis, rest all green
 		ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_MS, // all MS systems as downstream with MS basis, rest downstream with green basis
 		ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_GREEN, // all systems inside envelope downstream with green basis
-		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN // all MS systems as downstream with green basis, rest all green
+		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with green basis, rest all green
+		LAEMMER
 	}
 	
 	// defines which kind of pricing should be used
@@ -142,9 +140,9 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static final String OUTPUT_BASE_DIR = "../../../runs-svn/cottbus/baseCase/";
-	private static final String INPUT_BASE_DIR = "../../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
-	private static final String BTU_BASE_DIR = "../../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/laemmer/";
+	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
+	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
@@ -214,6 +212,9 @@ public class TtRunCottbusSimulation {
 			// BaseCase plans, no links for acitivties, no routes
 //			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_woLinks.xml.gz");
 			break;
+		case WoMines100itcap1:
+			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap1.0.xml.gz");
+			break;
 		case GRID_LOCK_BTU:
 			// take these as initial plans
 			if (SIGNAL_TYPE.equals(SignalType.MS) || SIGNAL_TYPE.equals(SignalType.DOWNSTREAM_MS)){
@@ -233,7 +234,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(0);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
@@ -302,6 +303,13 @@ public class TtRunCottbusSimulation {
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
+				break;
+			case LAEMMER:
+				// overwrite signal groups
+//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases.xml"); // TODO
+//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases_6.xml");
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer.xml");
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
 				break;
 			}
 		}
@@ -462,6 +470,11 @@ public class TtRunCottbusSimulation {
 	private static Scenario prepareScenario(Config config) {
 		Scenario scenario = ScenarioUtils.loadScenario(config);	
 	
+		if (LONG_LANES){
+			// lengthen all lanes
+			ModifyNetwork.lengthenAllLanes(scenario);
+		}
+		
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
 				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
@@ -616,6 +629,11 @@ public class TtRunCottbusSimulation {
 			sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
+			LaemmerConfig laemmerConfig = new LaemmerConfig();
+			// TODO change for laemmer
+			laemmerConfig.setAnalysisEnabled(false);
+			laemmerConfig.setDesiredCycleTime(90);
+			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 		}
 		
@@ -718,18 +736,7 @@ public class TtRunCottbusSimulation {
 
 		Config config = scenario.getConfig();
 		
-		// get the current date in format "yyyy-mm-dd"
-		Calendar cal = Calendar.getInstance ();
-		// this class counts months from 0, but days from 1
-		int month = cal.get(Calendar.MONTH) + 1;
-		String monthStr = month + "";
-		if (month < 10)
-			monthStr = "0" + month;
-		String date = cal.get(Calendar.YEAR) + "-" 
-				+ monthStr + "-" + cal.get(Calendar.DAY_OF_MONTH);
-		
-		String runName = date;
-
+		String runName = OutputUtils.getCurrentDate();
 		runName += "_" + config.controler().getLastIteration() + "it";
 		
 		// create info about capacities
@@ -742,6 +749,10 @@ public class TtRunCottbusSimulation {
 				runName += "_storeCap" + storeCap;
 			if (flowCap != 1.0)
 				runName += "_flowCap" + flowCap;
+		}
+		
+		if (LONG_LANES){
+			runName += "_longLanes";
 		}
 		
 		StrategySettings[] strategies = config.strategy().getStrategySettings()
@@ -819,7 +830,8 @@ public class TtRunCottbusSimulation {
 		runName += "_" + POP_TYPE;
 		runName += "_" + NETWORK_TYPE;
 		
-		String outputDir = OUTPUT_BASE_DIR + "run" + RUN_ID + "/"; 
+		String outputDir = OUTPUT_BASE_DIR + OutputUtils.getCurrentDateIncludingTime() + "/";
+//		String outputDir = OUTPUT_BASE_DIR + "run" + RUN_ID + "/"; 
 //		String outputDir = OUTPUT_BASE_DIR + runName + "/"; 
 		// create directory
 		new File(outputDir).mkdirs();
