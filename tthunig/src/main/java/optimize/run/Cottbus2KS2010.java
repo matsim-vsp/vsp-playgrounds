@@ -20,6 +20,7 @@
 package optimize.run;
 
 import optimize.convert.TtMatsim2KS2015;
+import utils.OutputUtils;
 
 /**
  * Class to convert the Cottbus scenario into KS format.
@@ -35,7 +36,8 @@ public class Cottbus2KS2010 {
 		// input files
 		String signalSystemsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_systems_no_13.xml";
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13.xml";
-		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmerLinkBased.xml";
+//		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmerLinkBased.xml";
+		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmer2phases_6.xml";
 //		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_no_13.xml";
 		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_laemmer.xml";
 		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n.xml.gz";
@@ -47,7 +49,7 @@ public class Cottbus2KS2010 {
 
 		// output files
 		String outputDirectory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/";
-		String dateFormat = "2017-07-24";
+		String dateFormat = OutputUtils.getCurrentDate();
 
 		/* parameters for the time interval */
 		double startTime = 5.5 * 3600.0;
@@ -72,7 +74,7 @@ public class Cottbus2KS2010 {
 		int cellsX = 5; // = default value
 		int cellsY = 5; // = default value
 		/* other parameters */
-		String scenarioDescription = "run 100it 0.7cap output plans with flexible signals between 05:30 and 09:30";
+		String scenarioDescription = "run 100it 0.7cap output plans with flexible signals and 2 phases per signal system between 05:30 and 09:30";
 		// String scenarioDescription =
 		// "run run1728 output plans between 13:30 and 18:30";
 
@@ -84,7 +86,6 @@ public class Cottbus2KS2010 {
 				matsimPopSampleSize, ksModelCommoditySampleSize,
 				minCommodityFlow, simplifyNetwork, cellsX, cellsY, scenarioDescription,
 				dateFormat, outputDirectory);
-
 	}
 
 }
