@@ -22,7 +22,12 @@
  */
 package playground.jbischoff.avparking;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -38,8 +43,10 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import com.google.inject.Binder;
+import com.google.inject.name.Names;
 
 import playground.jbischoff.avparking.optimizer.PrivateAVOptimizerProvider;
+import playground.jbischoff.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
 
 /**
  * @author jbischoff An example how to use parking search in MATSim.
@@ -89,10 +96,15 @@ public class RunAvParking {
 			controler.addOverridingModule(new OTFVisLiveModule());
 		}
 		PrivateAVFleetGenerator fleet = new PrivateAVFleetGenerator(scenario);  
+		List<Id<Link>> avParkings = new ArrayList<>();
+		avParkings.add(Id.createLinkId(113));
+		avParkings.add(Id.createLinkId(151));
+		AvParkingContext context = new AvParkingContext(avParkings, AVParkBehavior.randombehavior);
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
 				bind(Fleet.class).toInstance(fleet);
+				bind(AvParkingContext.class).toInstance(context);
 				addControlerListenerBinding().toInstance(fleet);				
 			}
 		});

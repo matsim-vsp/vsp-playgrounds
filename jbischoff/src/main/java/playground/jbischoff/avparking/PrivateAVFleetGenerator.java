@@ -27,6 +27,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -40,6 +41,7 @@ import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.VehicleImpl;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.events.IterationStartsEvent;
@@ -63,6 +65,7 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 	private Network network;
 	
 	@Inject
+	ParkingSearchManager manager;
 	/**
 	 * 
 	 */
@@ -70,6 +73,8 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 		mode = DvrpConfigGroup.get(scenario.getConfig()).getMode();
 		this.population= scenario.getPopulation();
 		this.network = scenario.getNetwork();
+//		this.manager = manager;
+		vehiclesForIteration = new HashMap<>();
 	}
 	
 	
@@ -83,7 +88,9 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 	 */
 	@Override
 	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-		vehiclesForIteration = new HashMap<>();
+		Map<Id<Vehicle>,Vehicle> lastIterationVehicles = new HashMap<>();
+		lastIterationVehicles.putAll(vehiclesForIteration);
+		vehiclesForIteration.clear();
 		for (Person p : population.getPersons().values()){
 			
 			Id<Link> vehicleStartLink = null;
@@ -97,11 +104,26 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 				}
 			}
 			if (vehicleStartLink!=null){
-				Vehicle veh = new VehicleImpl(Id.create(p.getId().toString()+"_av", Vehicle.class), network.getLinks().get(vehicleStartLink), 4, 0, 30*3600);
+				Id<Vehicle> vehicleId = Id.create(p.getId().toString()+"_av", Vehicle.class);
+				if (lastIterationVehicles.containsKey(vehicleId)){
+					Id<Link> lastParkingPosition = manager.getVehicleParkingLocation(Id.createVehicleId(vehicleId));
+					if (lastParkingPosition!=null){
+						vehicleStartLink = lastParkingPosition;
+						lastIterationVehicles.remove(vehicleId);
+					}
+				}
+				Vehicle veh = new VehicleImpl(vehicleId, network.getLinks().get(vehicleStartLink), 4, 0, 30*3600);
 				vehiclesForIteration.put(veh.getId(), veh);
 			}
 		}
-		
+		for (Id<Vehicle> vid : lastIterationVehicles.keySet()){
+			Id<org.matsim.vehicles.Vehicle> vehicleId = Id.createVehicleId(vid);
+			Id<Link> parkLink = manager.getVehicleParkingLocation(vehicleId);
+			if (parkLink!=null){
+				manager.unParkVehicleHere(vehicleId, parkLink, 30*3600);
+				Logger.getLogger(getClass()).info("Removing AV: "+vid);
+			}
+		}
 	}
 
 

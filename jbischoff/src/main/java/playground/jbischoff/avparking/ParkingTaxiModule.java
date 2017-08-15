@@ -61,7 +61,6 @@ public final class ParkingTaxiModule extends AbstractModule {
 
 	@Override
 	public void install() {
-		
 		install(dvrpModule);
 	}
 
