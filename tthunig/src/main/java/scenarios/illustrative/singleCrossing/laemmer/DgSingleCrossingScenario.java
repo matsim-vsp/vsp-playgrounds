@@ -50,9 +50,9 @@ import signals.laemmer.model.LaemmerSignalController;
  * @author dgrether
  * @author tthunig
  */
-public class SingleCrossingScenario {
+public class DgSingleCrossingScenario {
 
-	private static final Logger log = Logger.getLogger(SingleCrossingScenario.class);
+	private static final Logger log = Logger.getLogger(DgSingleCrossingScenario.class);
 
 	private static final Id<Link> linkN2N3Id = Id.create("N2N3", Link.class);
 	private static final Id<Link> linkN3CId = Id.create("N3C", Link.class);
@@ -256,9 +256,9 @@ public class SingleCrossingScenario {
 	}
 
 	private Config createConfig() {
-		String network = "../../../shared-svn/studies/dgrether/laemmer/isolatedcrossingtest/network.xml";
+		String network = "../../shared-svn/studies/dgrether/laemmer/isolatedcrossingtest/network.xml";
 		Config config = ConfigUtils.createConfig();
-		config.controler().setOutputDirectory("../../../runs-svn/laemmer/isolatedcrossingtest/");
+		config.controler().setOutputDirectory("../../runs-svn/laemmer/isolatedcrossingtest/");
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setLastIteration(0);
 		config.network().setInputFile(network);

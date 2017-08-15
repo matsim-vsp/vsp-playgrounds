@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Calendar;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -57,24 +56,14 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.data.LanesWriter;
 
-import com.google.inject.Binder;
-
 import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
 import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionControlerListener;
-import playground.ikaddoura.decongestion.DecongestionModule;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
-import playground.ikaddoura.decongestion.data.DecongestionInfo;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTolling;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTollingAll;
-import playground.ikaddoura.decongestion.handler.PersonVehicleTracker;
+import playground.ikaddoura.decongestion.DecongestionModule;
 import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.decongestion.tollSetting.DecongestionTollSetting;
-import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingPID;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -99,6 +88,7 @@ import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSigna
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
 import signals.sylvia.controler.DgSylviaConfig;
+import utils.OutputUtils;
 
 /**
  * Class to run a simulation of the braess scenario with or without signals. 
@@ -534,24 +524,11 @@ public final class RunBraessSimulation {
 
 	private static void createRunNameAndOutputDir(Scenario scenario) {
 
-		Config config = scenario.getConfig();
-		
-		// get the current date in format "yyyy-mm-dd-hh-mm-ss"
-		Calendar cal = Calendar.getInstance ();
-		// this class counts months from 0, but days from 1
-		int month = cal.get(Calendar.MONTH) + 1;
-		String monthStr = month + "";
-		if (month < 10)
-			monthStr = "0" + month;
-		String date = cal.get(Calendar.YEAR) + "-" 
-				+ monthStr + "-" + cal.get(Calendar.DAY_OF_MONTH) 
-				+ "-" + cal.get(Calendar.HOUR_OF_DAY) + "-" + cal.get(Calendar.MINUTE) + "-" + cal.get(Calendar.SECOND);
-		
-		String outputDir = OUTPUT_BASE_DIR + date + "/"; 
+		String outputDir = OUTPUT_BASE_DIR + OutputUtils.getCurrentDateIncludingTime() + "/"; 
 		// create directory
 		new File(outputDir).mkdirs();
 
-		config.controler().setOutputDirectory(outputDir);
+		scenario.getConfig().controler().setOutputDirectory(outputDir);
 		log.info("The output will be written to " + outputDir);
 		
 		writeRunDescription(outputDir, createRunName(scenario));

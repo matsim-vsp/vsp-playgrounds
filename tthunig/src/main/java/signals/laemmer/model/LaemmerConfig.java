@@ -106,7 +106,7 @@ public class LaemmerConfig {
     }
 
 
-    public boolean analysisEnabled() {
+    public boolean isAnalysisEnabled() {
         return analysisEnabled;
     }
     

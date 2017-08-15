@@ -30,7 +30,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import signals.CombinedSignalsModule;
-import signals.laemmer.model.LaemmerSignalsModule;
 
 
 /**
@@ -56,8 +55,7 @@ public class LaemmerMain {
 		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 		
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(new LaemmerSignalsModule());
-		//controler.addOverridingModule(new CombinedSignalsModule());
+		controler.addOverridingModule(new CombinedSignalsModule());
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		controler.run();
 

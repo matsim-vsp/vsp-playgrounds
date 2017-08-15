@@ -24,7 +24,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 
 import signals.CombinedSignalsModule;
-import signals.laemmer.model.LaemmerSignalsModule;
 
 
 /**
@@ -33,23 +32,23 @@ import signals.laemmer.model.LaemmerSignalsModule;
  *
  */
 public class SingleCrossingLaemmerMain {
-
-	private final static double lambdaMax = 0.1;
 	
+	/**
+	 * @param args first entry gives the demand in west-east direction in percentage terms between 0 and the maximum flow value (flow capacity).
+	 * If nothing is set here, a value of 0.5 (50%) is used.
+	 */
 	public static void main(String[] args) {
-		
-//		for (double lambdaWestEast = 0.0; lambdaWestEast <= lambdaMax; lambdaWestEast += 0.1){
-//			
-//		}
 		double lambdaWestEast = 0.5;
-		Scenario scenario = new SingleCrossingScenario().createScenario(lambdaWestEast, false);
+		if (args != null && args.length != 0){
+			lambdaWestEast = Double.parseDouble(args[0]);
+		}
+		
+		Scenario scenario = new DgSingleCrossingScenario().createScenario(lambdaWestEast, false);
 		
 		Controler controler = new Controler(scenario);
-//		controler.addOverridingModule(new LaemmerSignalsModule());
 		controler.addOverridingModule(new CombinedSignalsModule());
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		controler.run();
-
 	}
 
 }
