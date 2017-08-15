@@ -25,7 +25,7 @@ import playground.dgrether.utils.zones.DgZones;
  * 
  * @author tthunig
  */
-public class TtMatsim2KS2015 {
+public final class TtMatsim2KS2015 {
 
 	private static final Logger log = Logger.getLogger(Cottbus2KS2010.class);
 
