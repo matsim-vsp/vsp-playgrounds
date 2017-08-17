@@ -86,11 +86,11 @@ public class SingleCrossingScenario {
 
 	private String OUTPUT_BASE_DIR = "../../runs-svn/singleCrossingScenario/";
     private static final int LANE_CAPACITY = 1800;
-	private static final Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-	private static final Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-	private static final Id<SignalGroup> signalGroupId3 = Id.create("SignalGroup3", SignalGroup.class);
-	private static final Id<SignalGroup> signalGroupId4 = Id.create("SignalGroup4", SignalGroup.class);
-	private static final Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+	public static final Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
+	public static final Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
+	public static final Id<SignalGroup> signalGroupId3 = Id.create("SignalGroup3", SignalGroup.class);
+	public static final Id<SignalGroup> signalGroupId4 = Id.create("SignalGroup4", SignalGroup.class);
+	public static final Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
 
 	private double flowNS = 360;
 	private double flowWE = 0.5 * 2520;
@@ -287,24 +287,24 @@ public class SingleCrossingScenario {
     
     /**
      * creates a network like this:
-     * <p>
-     * 6
-     * ^
-     * |
-     * v
-     * 7
-     * ^
-     * |
-     * v
-     * 1 <===> 2 <===> 3 <===> 4 <===> 5
-     * ^
-     * |
-     * v
-     * 8
-     * ^
-     * |
-     * v
-     * 9
+     * 
+     * 					6
+     * 					^
+     * 					|
+     * 					v
+     * 					7
+     * 					^
+     * 					|
+     * 					v
+     *  1 <===> 2 <===> 3 <===> 4 <===> 5
+     * 					^
+     * 					|
+     * 					v
+     * 					8
+     * 					^
+     * 					|
+     * 					v
+     * 					9
      */
     private static void createNetwork(Network net) {
         NetworkFactory fac = net.getFactory();
