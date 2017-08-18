@@ -19,6 +19,7 @@
 
 package playground.agarwalamit.nemo.demand;
 
+import java.util.Arrays;
 import playground.agarwalamit.utils.FileUtils;
 import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
 
@@ -40,24 +41,26 @@ public class CempdapInputGenerator {
         String commuterFileOutgoing5 = baseDir + "/pendlerstatistik/059NRW2009Ga.txt";
 
         String censusFile = baseDir + "/zensus_2011/Zensus11_Datensatz_Bevoelkerung_NRW.csv";
-        String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
-        String outputBase = baseDir + "/_2/";
+//        String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
+        String outputBase = baseDir ;
 
         // Parameters
         int numberOfPlansPerPerson = 5;
-        String planningAreaId = ""; // no specific planning Area Id
+//        String planningAreaId = ""; // no specific planning Area Id
         double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
         double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
         boolean writeMatsimPlanFiles = true;
         boolean includeChildren = false;
-        String LORAttributeKey = "KN";
+//        String LORAttributeKey = "KN";
 
         String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4, commuterFileOutgoing5};
 
         {// person and plans file which contains only attributes; these will be required to generate matsim plans files
-            new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
-                    defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren,
-                    LORAttributeKey);
+            DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
+                    Arrays.asList("05"), defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
+            demandGeneratorCensus.setWriteMatsimPlanFiles(writeMatsimPlanFiles);
+            demandGeneratorCensus.setIncludeChildren(includeChildren);
+            demandGeneratorCensus.generateDemand();
         }
         { // zones and lor files
 //            new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFileLors, outputBase);
