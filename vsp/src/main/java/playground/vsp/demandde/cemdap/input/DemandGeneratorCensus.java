@@ -53,7 +53,23 @@ public class DemandGeneratorCensus {
 	private Map<Id<Household>, Household> households;
 	private ObjectAttributes municipalities;
 	private Map<String, Map<String, CommuterRelationV2>> relationsMap;
-	private List<String> lors;
+	
+	// Optionally used storage objects
+	private List<String> spatialRefinementZoneIds;
+	
+	// Parameters
+	private String outputBase;
+	private List<String> idsOfFederalStatesIncluded;
+	private int numberOfPlansPerPerson;
+	private double defaultAdultsToEmployeesRatio;
+	private double defaultEmployeesToCommutersRatio;
+	boolean includeChildren = false;
+	boolean writeMatsimPlanFiles = false;
+	
+	// Optionally used parameters
+	private String shapeFileForSpatialRefinement;
+	private String idOfMunicipailityForSpatialRefinement;
+	private String featureKeyInShapeFile;
 
 	// Counters
 	private int counterMissingComRel = 0;
@@ -63,9 +79,6 @@ public class DemandGeneratorCensus {
 	private int allPersons = 0;
 	private int allStudents = 0;
 	
-	// Other
-	private String outputBase;
-	
 
 	public static void main(String[] args) {
 		// Input and output files
@@ -73,102 +86,105 @@ public class DemandGeneratorCensus {
 		String commuterFileOutgoing2 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
 		String commuterFileOutgoing3 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil2BR2009Ga.txt";
 		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
-//		String commuterFileOutgoingTest = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga_Test.txt";
-//		String censusFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung.csv";
+		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
 		String censusFile = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String shapeFileLors = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp";
 		String outputBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/syn_pop/100_test/";
 		
 		// Parameters
 		int numberOfPlansPerPerson = 5;
-		String planningAreaId = "11000000"; // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
+		List<String> idsOfFederalStatesIncluded = Arrays.asList("12");
 		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
 		double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
-		boolean writeMatsimPlanFiles = true;
-		boolean includeChildren = false;
-		String LORAttributeKey = "SCHLUESSEL";
 
-		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
-
-		new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
-				defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren,
-				LORAttributeKey);
+		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
+				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
+		
+		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
+		
+		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp");
+		demandGeneratorCensus.setIdOfMunicipailityForSpatialRefinement("11000000"); // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
+		demandGeneratorCensus.setFeatureKeyInShapeFile("SCHLUESSEL");
+		
+		demandGeneratorCensus.generateDemand();
 	}
 
 	
-	public DemandGeneratorCensus(String[] commuterFilesOutgoing, String censusFile, String shapeFileLors, String outputBase,
-								 int numberOfPlansPerPerson, String planningAreaId, double defaultAdultsToEmployeesRatio, double defaultEmployeesToCommutersRatio,
-								 boolean writeMatsimPlanFiles, boolean includeChildren, String lorAttributeKey) {
+	public DemandGeneratorCensus(String[] commuterFilesOutgoing, String censusFile, String outputBase, int numberOfPlansPerPerson, 
+			List<String> idsOfFederalStatesIncluded, double defaultAdultsToEmployeesRatio, double defaultEmployeesToCommutersRatio) {
 		LogToOutputSaver.setOutputDirectory(outputBase);
 		
 		this.outputBase = outputBase;
-
-		population = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
-		households = new HashMap<>();
+		this.numberOfPlansPerPerson = numberOfPlansPerPerson;
+		
+		this.idsOfFederalStatesIncluded = idsOfFederalStatesIncluded;
+		this.defaultAdultsToEmployeesRatio = defaultAdultsToEmployeesRatio;
+		this.defaultEmployeesToCommutersRatio = defaultEmployeesToCommutersRatio;
+		
+		this.population = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+		this.households = new HashMap<>();
 
 		// Read census
 		CensusReader censusReader = new CensusReader(censusFile, ";");
 		municipalities = censusReader.getMunicipalities();
 
 		// Read commuter relations
-		relationsMap = new HashMap<>();
+		this.relationsMap = new HashMap<>();
 		for (String commuterFileOutgoing : commuterFilesOutgoing) {
 			CommuterFileReaderV2 commuterFileReader = new CommuterFileReaderV2(commuterFileOutgoing, "\t");
 			Map<String, Map<String, CommuterRelationV2>> currentRelationMap = commuterFileReader.getRelationsMap();
-			relationsMap.putAll(currentRelationMap);
+			this.relationsMap.putAll(currentRelationMap);
 		}
-
-		// Read LORs
-		lors = readShape(shapeFileLors, lorAttributeKey);
-		
-		generateDemand(numberOfPlansPerPerson, planningAreaId, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio,
-				writeMatsimPlanFiles, includeChildren);
 	}
-
 	
-	public void generateDemand(int numberOfPlansPerPerson, String planningAreaId, double defaultAdultsToEmployeesRatio,
-			double defaultEmployeesToCommutersRatio, boolean writeMatsimPlanFiles, boolean includeChildren) {
+	
+	public void generateDemand() {
+		if (this.shapeFileForSpatialRefinement != null && this.featureKeyInShapeFile != null) {
+			this.spatialRefinementZoneIds = readShape(this.shapeFileForSpatialRefinement, this.featureKeyInShapeFile);
+		} else {
+			LOG.info("A shape file and/or and the attribute that contains the keys has not ben provided.");
+		}
+				
 		int counter = 1;
 		
 		for (String munId : relationsMap.keySet()) { // Loop over municipalities from commuter file
 			Map<String, CommuterRelationV2> relationsFromMunicipality = relationsMap.get(munId);
 
 			// Employees from Zensus seems to be all employees, not only socially-secured employees
-			if ( municipalities.getAttribute(munId, "employedMale")==null || municipalities.getAttribute(munId, "employedFemale")==null  ){
+			if (this.municipalities.getAttribute(munId, "employedMale") == null || this.municipalities.getAttribute(munId, "employedFemale") == null) {
 				LOG.warn("Employed male (and possibly other) information is not available in the census data for munId "+ munId + ". Skippting this municipality.");
 				continue;
 			}
 
-			int employeesMale = (int) municipalities.getAttribute(munId, "employedMale");
-			int employeesFemale = (int) municipalities.getAttribute(munId, "employedFemale");
+			int employeesMale = (int) this.municipalities.getAttribute(munId, "employedMale");
+			int employeesFemale = (int) this.municipalities.getAttribute(munId, "employedFemale");
 
 			scaleRelations(relationsFromMunicipality, employeesMale, employeesFemale, defaultEmployeesToCommutersRatio);
 			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, "male");
 			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, "female");
 
-			int pop0_2Male = (int) municipalities.getAttribute(munId, "pop0_2Male");
-			int pop3_5Male = (int) municipalities.getAttribute(munId, "pop3_5Male");
-			int pop6_14Male = (int) municipalities.getAttribute(munId, "pop6_14Male");
-			int pop15_17Male = (int) municipalities.getAttribute(munId, "pop15_17Male");
-			int pop18_24Male = (int) municipalities.getAttribute(munId, "pop18_24Male");
-			int pop25_29Male = (int) municipalities.getAttribute(munId, "pop25_29Male");
-			int pop30_39Male = (int) municipalities.getAttribute(munId, "pop30_39Male");
-			int pop40_49Male = (int) municipalities.getAttribute(munId, "pop40_49Male");
-			int pop50_64Male = (int) municipalities.getAttribute(munId, "pop50_64Male");
-			int pop65_74Male = (int) municipalities.getAttribute(munId, "pop65_74Male");
-			int pop75PlusMale = (int) municipalities.getAttribute(munId, "pop75PlusMale");
+			int pop0_2Male = (int) this.municipalities.getAttribute(munId, "pop0_2Male");
+			int pop3_5Male = (int) this.municipalities.getAttribute(munId, "pop3_5Male");
+			int pop6_14Male = (int) this.municipalities.getAttribute(munId, "pop6_14Male");
+			int pop15_17Male = (int) this.municipalities.getAttribute(munId, "pop15_17Male");
+			int pop18_24Male = (int) this.municipalities.getAttribute(munId, "pop18_24Male");
+			int pop25_29Male = (int) this.municipalities.getAttribute(munId, "pop25_29Male");
+			int pop30_39Male = (int) this.municipalities.getAttribute(munId, "pop30_39Male");
+			int pop40_49Male = (int) this.municipalities.getAttribute(munId, "pop40_49Male");
+			int pop50_64Male = (int) this.municipalities.getAttribute(munId, "pop50_64Male");
+			int pop65_74Male = (int) this.municipalities.getAttribute(munId, "pop65_74Male");
+			int pop75PlusMale = (int) this.municipalities.getAttribute(munId, "pop75PlusMale");
 
-			int pop0_2Female = (int) municipalities.getAttribute(munId, "pop0_2Female");
-			int pop3_5Female = (int) municipalities.getAttribute(munId, "pop3_5Female");
-			int pop6_14Female = (int) municipalities.getAttribute(munId, "pop6_14Female");
-			int pop15_17Female = (int) municipalities.getAttribute(munId, "pop15_17Female");
-			int pop18_24Female = (int) municipalities.getAttribute(munId, "pop18_24Female");
-			int pop25_29Female = (int) municipalities.getAttribute(munId, "pop25_29Female");
-			int pop30_39Female = (int) municipalities.getAttribute(munId, "pop30_39Female");
-			int pop40_49Female = (int) municipalities.getAttribute(munId, "pop40_49Female");
-			int pop50_64Female = (int) municipalities.getAttribute(munId, "pop50_64Female");
-			int pop65_74Female = (int) municipalities.getAttribute(munId, "pop65_74Female");
-			int pop75PlusFemale = (int) municipalities.getAttribute(munId, "pop75PlusFemale");
+			int pop0_2Female = (int) this.municipalities.getAttribute(munId, "pop0_2Female");
+			int pop3_5Female = (int) this.municipalities.getAttribute(munId, "pop3_5Female");
+			int pop6_14Female = (int) this.municipalities.getAttribute(munId, "pop6_14Female");
+			int pop15_17Female = (int) this.municipalities.getAttribute(munId, "pop15_17Female");
+			int pop18_24Female = (int) this.municipalities.getAttribute(munId, "pop18_24Female");
+			int pop25_29Female = (int) this.municipalities.getAttribute(munId, "pop25_29Female");
+			int pop30_39Female = (int) this.municipalities.getAttribute(munId, "pop30_39Female");
+			int pop40_49Female = (int) this.municipalities.getAttribute(munId, "pop40_49Female");
+			int pop50_64Female = (int) this.municipalities.getAttribute(munId, "pop50_64Female");
+			int pop65_74Female = (int) this.municipalities.getAttribute(munId, "pop65_74Female");
+			int pop75PlusFemale = (int) this.municipalities.getAttribute(munId, "pop75PlusFemale");
 
 			int adultsMale = pop18_24Male + pop25_29Male + pop30_39Male + pop40_49Male + pop50_64Male;
 			int adultsFemale = pop18_24Female + pop25_29Female + pop30_39Female + pop40_49Female + pop50_64Female;
@@ -179,212 +195,70 @@ public class DemandGeneratorCensus {
 			if (employeesMale != 0) { // Avoid dividing by zero
 				adultsToEmployeesMaleRatio = (double) adultsMale / (double) employeesMale;
 			} else {
-				adultsToEmployeesMaleRatio = defaultAdultsToEmployeesRatio;
+				adultsToEmployeesMaleRatio = this.defaultAdultsToEmployeesRatio;
 			}
 			if (employeesFemale != 0) { // Avoid dividing by zero
 				adultsToEmployeesFemaleRatio = (double) adultsFemale / (double) employeesFemale;
 			} else {
-				adultsToEmployeesFemaleRatio = defaultAdultsToEmployeesRatio;
+				adultsToEmployeesFemaleRatio = this.defaultAdultsToEmployeesRatio;
 			}
 
 			if (includeChildren) {
-				// 0-2
-				{
-					int gender = 0;
-					int lowerAgeBound = 0;
-					int upperAgeBound = 2;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop0_2Male,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-					counter += pop0_2Male;
-				}
-				{
-					int gender = 1;
-					int lowerAgeBound = 0;
-					int upperAgeBound = 2;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop0_2Female,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-					counter += pop0_2Female;
-				}
-				// 3-5
-				{
-					int gender = 0;
-					int lowerAgeBound = 3;
-					int upperAgeBound = 5;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop3_5Male,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-					counter += pop3_5Male;
-				}
-				{
-					int gender = 1;
-					int lowerAgeBound = 3;
-					int upperAgeBound = 5;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop3_5Female,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-					counter += pop3_5Female;
-				}
-				// 6-14
-				{
-					int gender = 0;
-					int lowerAgeBound = 6;
-					int upperAgeBound = 14;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop6_14Male,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-					counter += pop6_14Male;
-				}
-				{
-					int gender = 1;
-					int lowerAgeBound = 6;
-					int upperAgeBound = 14;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop6_14Female,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-					counter += pop6_14Female;
-				}
-				// 15-17
-				{
-					int gender = 0;
-					int lowerAgeBound = 15;
-					int upperAgeBound = 17;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop15_17Male,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-					counter += pop15_17Male;
-				}
-				{
-					int gender = 1;
-					int lowerAgeBound = 15;
-					int upperAgeBound = 17;
-					createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop15_17Female,
-							gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-					counter += pop15_17Female;
-				}
+				createHouseholdsAndPersons(counter, munId, pop0_2Male, 0, 0, 2, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				counter += pop0_2Male;
+				createHouseholdsAndPersons(counter, munId, pop0_2Female, 1, 0, 2, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				counter += pop0_2Female;
+				createHouseholdsAndPersons(counter, munId, pop3_5Male, 0, 3, 5, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				counter += pop3_5Male;
+				createHouseholdsAndPersons(counter, munId, pop3_5Female, 1, 3, 5, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				counter += pop3_5Female;
+				createHouseholdsAndPersons(counter, munId, pop6_14Male, 0, 6, 14, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				counter += pop6_14Male;
+				createHouseholdsAndPersons(counter, munId, pop6_14Female, 1, 6, 14, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				counter += pop6_14Female;
+				createHouseholdsAndPersons(counter, munId, pop15_17Male, 0, 15, 17, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				counter += pop15_17Male;
+				createHouseholdsAndPersons(counter, munId, pop15_17Female, 1, 15, 17, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				counter += pop15_17Female;
 			}
-			// 18-24
-			{
-				int gender = 0;
-				int lowerAgeBound = 18;
-				int upperAgeBound = 24;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop18_24Male,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-				counter += pop18_24Male;
-			}
-			{
-				int gender = 1;
-				int lowerAgeBound = 18;
-				int upperAgeBound = 24;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop18_24Female,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-				counter += pop18_24Female;
-			}
-			// 25-29
-			{
-				int gender = 0;
-				int lowerAgeBound = 25;
-				int upperAgeBound = 29;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop25_29Male,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-				counter += pop25_29Male;
-			}
-			{
-				int gender = 1;
-				int lowerAgeBound = 25;
-				int upperAgeBound = 29;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop25_29Female,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-				counter += pop25_29Female;
-			}
-			// 30-39
-			{
-				int gender = 0;
-				int lowerAgeBound = 30;
-				int upperAgeBound = 39;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop30_39Male,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-				counter += pop30_39Male;
-			}
-			{
-				int gender = 1;
-				int lowerAgeBound = 30;
-				int upperAgeBound = 39;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop30_39Female,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-				counter += pop30_39Female;
-			}
-			// 40-49
-			{
-				int gender = 0;
-				int lowerAgeBound = 40;
-				int upperAgeBound = 49;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop40_49Male,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-				counter += pop40_49Male;
-			}
-			{
-				int gender = 1;
-				int lowerAgeBound = 40;
-				int upperAgeBound = 49;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop40_49Female,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-				counter += pop40_49Female;
-			}
-			// 50-64
-			{
-				int gender = 0;
-				int lowerAgeBound = 50;
-				int upperAgeBound = 64;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop50_64Male,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-				counter += pop50_64Male;
-			}
-			{
-				int gender = 1;
-				int lowerAgeBound = 50;
-				int upperAgeBound = 64;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop50_64Female,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-				counter += pop50_64Female;
-			}
-			// 65-74
-			{
-				int gender = 0;
-				int lowerAgeBound = 65;
-				int upperAgeBound = 74;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop65_74Male,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-				counter += pop65_74Male;
-			}
-			{
-				int gender = 1;
-				int lowerAgeBound = 65;
-				int upperAgeBound = 74;
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop65_74Female,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-				counter += pop65_74Female;
-			}
-			// 75+
-			{
-				int gender = 0;
-				int lowerAgeBound = 75;
-				int upperAgeBound = 90; // Assumption!
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop75PlusMale,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesMaleRatio, commuterRelationListMale);
-				counter += pop75PlusMale;
-			}
-			{
-				int gender = 1;
-				int lowerAgeBound = 75;
-				int upperAgeBound = 90; // Assumption!
-				createHouseholdsAndPersons(population, households, counter, munId, planningAreaId, lors, pop75PlusFemale,
-						gender, lowerAgeBound, upperAgeBound, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
-				counter += pop75PlusFemale;
-			}
-
+			createHouseholdsAndPersons(counter, munId, pop18_24Male, 0, 18, 24, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			counter += pop18_24Male;
+			createHouseholdsAndPersons(counter, munId, pop18_24Female, 1, 18, 24, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			counter += pop18_24Female;
+			createHouseholdsAndPersons(counter, munId, pop25_29Male, 0, 25, 29, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			counter += pop25_29Male;
+			createHouseholdsAndPersons(counter, munId, pop25_29Female, 1, 25, 29, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			counter += pop25_29Female;
+			createHouseholdsAndPersons(counter, munId, pop30_39Male, 0, 30, 39, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			counter += pop30_39Male;
+			createHouseholdsAndPersons(counter, munId, pop30_39Female, 1, 30, 39, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			counter += pop30_39Female;
+			createHouseholdsAndPersons(counter, munId, pop40_49Male, 0, 40, 49, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			counter += pop40_49Male;
+			createHouseholdsAndPersons(counter, munId, pop40_49Female, 1, 40, 49, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			counter += pop40_49Female;
+			createHouseholdsAndPersons(counter, munId, pop50_64Male, 0, 50, 64, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			counter += pop50_64Male;
+			createHouseholdsAndPersons(counter, munId, pop50_64Female, 1, 50, 64, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			counter += pop50_64Female;
+			createHouseholdsAndPersons(counter, munId, pop65_74Male, 0, 65, 74, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			counter += pop65_74Male;
+			createHouseholdsAndPersons(counter, munId, pop65_74Female, 1, 65, 74, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			counter += pop65_74Female;
+			// 90 years as the upper bound is a simplifying assumption!
+			createHouseholdsAndPersons(counter, munId, pop75PlusMale, 0, 75, 90, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			counter += pop75PlusMale;
+			// 90 years as the upper bound is a simplifying assumption!
+			createHouseholdsAndPersons(counter, munId, pop75PlusFemale, 1, 75, 90, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			counter += pop75PlusFemale;
 
 			// Information on unassigned commuter relations
-			counterComRelUnassigned += commuterRelationListMale.size();
+			this.counterComRelUnassigned += commuterRelationListMale.size();
 			if (commuterRelationListMale.size() > 100) {
 				LOG.info(commuterRelationListMale.size() + " male commuter relations from " + munId +
 						" remain unassigned; based on census, there are " + employeesMale + " male employees.");
 			}
-			counterComRelUnassigned += commuterRelationListFemale.size();
+			this.counterComRelUnassigned += commuterRelationListFemale.size();
 			if (commuterRelationListFemale.size() > 100) {
 				LOG.info(commuterRelationListFemale.size() + " female commuter relations from " + munId +
 						" remain unassigned; based on census, there are " + employeesFemale + " female employees.");
@@ -392,35 +266,35 @@ public class DemandGeneratorCensus {
 		}
 		
 		
-		// Write some relavant information on console
-		LOG.warn("There are " + counterMissingComRel + " employees who have been set to unemployed since no commuter relation could be assigned to them.");
-		LOG.warn("Share of employees that had to be set to unemployed due to lack of commuter relations: " + ((double) counterMissingComRel / (double) allEmployees));
-		LOG.warn("Altogether " + counterComRelUnassigned + " commuter relations remain unassigned.");
-		LOG.warn("There are " + counterExternalCommuters + " people who commute outside of Berlin and Brandenburg.");
-		LOG.warn("Total number of employees: " + allEmployees);
-		LOG.warn("Total population: " + allPersons);
-		LOG.warn("Total number of students: " + allStudents);
+		// Write some relevant information on console
+		LOG.warn("There are " + this.counterMissingComRel + " employees who have been set to unemployed since no commuter relation could be assigned to them.");
+		LOG.warn("Share of employees that had to be set to unemployed due to lack of commuter relations: " + ((double) this.counterMissingComRel / (double) this.allEmployees));
+		LOG.warn("Altogether " + this.counterComRelUnassigned + " commuter relations remain unassigned.");
+		LOG.warn("There are " + this.counterExternalCommuters + " people who commute outside of Berlin and Brandenburg.");
+		LOG.warn("Total number of employees: " + this.allEmployees);
+		LOG.warn("Total population: " + this.allPersons);
+		LOG.warn("Total number of students: " + this.allStudents);
 		
 		// Write output files
-		writeHouseholdsFile(households, outputBase + "households.dat");
-		writePersonsFile(population, outputBase + "persons.dat");
-		if (writeMatsimPlanFiles) {
-			writeMatsimPlansFile(population, outputBase + "plans.xml.gz");
+		writeHouseholdsFile(this.households, this.outputBase + "households.dat");
+		writePersonsFile(this.population, this.outputBase + "persons.dat");
+		if (this.writeMatsimPlanFiles) {
+			writeMatsimPlansFile(this.population, this.outputBase + "plans.xml.gz");
 		}
 
 		// Create copies of population, but with different work locations
 		for (int i = 1; i < numberOfPlansPerPerson; i++) { // "less than" because the plan consists already in the original
 			Population population2 = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
 
-			for (Person person : population.getPersons().values()) {
+			for (Person person : this.population.getPersons().values()) {
 				// Choose new location of work, if applicable
 				if ((boolean) person.getAttributes().getAttribute("employed")) {
 					String locationOfWork = (String) person.getAttributes().getAttribute("locationOfWork");
 					if (locationOfWork.equals("-99")) {
 						throw new RuntimeException("This combination of attribute values is implaubible.");
 					} else {
-						if (locationOfWork.length() == 6) { // An LOR, i.e. a location inside Berlin
-							person.getAttributes().putAttribute("locationOfWork", getRandomLor(lors));
+						if (locationOfWork.length() == 6) { // An LOR, i.e. a location inside Berlin // TODO generalize
+							person.getAttributes().putAttribute("locationOfWork", getSpatiallyRefinedZone());
 						} else if (locationOfWork.length() == 8) { // An "Amtliche Gemeindeschlüssel (AGS)", i.e. a location outside Berlin
 							// Do nothing; leave it as it is
 						} else {
@@ -434,8 +308,8 @@ public class DemandGeneratorCensus {
 					if (locationOfSchool.equals("-99")) {
 						throw new RuntimeException("This combination of attribute values is implaubible.");
 					} else {
-						if (locationOfSchool.length() == 6) { // An LOR, i.e. a location inside Berlin
-							person.getAttributes().putAttribute("locationOfWork", getRandomLor(lors));
+						if (locationOfSchool.length() == 6) { // An LOR, i.e. a location inside Berlin // TODO generalize
+							person.getAttributes().putAttribute("locationOfSchool", getSpatiallyRefinedZone());
 						} else if (locationOfSchool.length() == 8) { // An "Amtliche Gemeindeschlüssel (AGS)", i.e. a location outside Berlin
 							// Do nothing; leave it as it is
 						} else {
@@ -445,31 +319,29 @@ public class DemandGeneratorCensus {
 				}
 				population2.addPerson(person);
 			}
-			writePersonsFile(population2, outputBase + "persons" + (i+1) + ".dat");
-			if (writeMatsimPlanFiles) {
-				writeMatsimPlansFile(population2, outputBase + "plans" + (i+1) + ".xml.gz");
+			writePersonsFile(population2, this.outputBase + "persons" + (i+1) + ".dat");
+			if (this.writeMatsimPlanFiles) {
+				writeMatsimPlansFile(population2, this.outputBase + "plans" + (i+1) + ".xml.gz");
 			}
 		}
 	}
 
 
-	private void createHouseholdsAndPersons(Population population, Map<Id<Household>, Household> households, int counter,
-			String municipalityId, String planningAreaId, List<String> lors, int numberOfPersons, int gender,
-			int lowerAgeBound, int upperAgeBound, double adultsToEmployeesRatio, List<String> commuterRelationList) {
+	private void createHouseholdsAndPersons(int counter, String municipalityId, int numberOfPersons, int gender, int lowerAgeBound, int upperAgeBound, 
+			double adultsToEmployeesRatio, List<String> commuterRelationList) {
 		
 		for (int i = 0; i < numberOfPersons; i++) {
-			allPersons++;
-//			Id<Household> householdId = Id.create(municipalityId + (counter + i), Household.class);
+			this.allPersons++;
 			Id<Household> householdId = Id.create((counter + i), Household.class);
 			HouseholdImpl household = new HouseholdImpl(householdId); // TODO Or use factory?
-			household.getAttributes().putAttribute("numberOfAdults", 1); // always 1; no household structure
+			household.getAttributes().putAttribute("numberOfAdults", 1); // Always 1; no household structure
 			household.getAttributes().putAttribute("totalNumberOfHouseholdVehicles", 1);
-			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId, planningAreaId, lors));
-			household.getAttributes().putAttribute("numberOfChildren", 0); // none, ignore them in this version
+			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId));
+			household.getAttributes().putAttribute("numberOfChildren", 0); // None, ignore them in this version
 			household.getAttributes().putAttribute("householdStructure", 1); // 1 = single, no children
 			
 			Id<Person> personId = Id.create(householdId + "01", Person.class);
-			Person person = population.getFactory().createPerson(personId);
+			Person person = this.population.getFactory().createPerson(personId);
 			// Following attribute names inspired by "PersonUtils.java": "sex", "hasLicense", "carAvail", "employed", "age", "travelcards"
 			person.getAttributes().putAttribute("householdId", householdId);
 			boolean employed = false;
@@ -492,8 +364,8 @@ public class DemandGeneratorCensus {
 					person.getAttributes().putAttribute("locationOfWork", "-99");
 					person.getAttributes().putAttribute("employed", false);
 				} else {
-					String locationOfWork = getRandomWorkLocation(commuterRelationList, planningAreaId, lors);
-					if (locationOfWork.length() == 8 && (!locationOfWork.startsWith("12"))) { // TODO external commuter are currently treated as non workers
+					String locationOfWork = getRandomWorkLocation(commuterRelationList);
+					if (locationOfWork.length() == 8 && !this.idsOfFederalStatesIncluded.contains(locationOfWork)) { // TODO external commuter are currently treated as non workers
 						counterExternalCommuters++;
 						person.getAttributes().putAttribute("locationOfWork", "-99");
 						person.getAttributes().putAttribute("employed", false);
@@ -506,7 +378,8 @@ public class DemandGeneratorCensus {
 			}
 
 			if (student) {
-				person.getAttributes().putAttribute("locationOfSchool", getLocation(municipalityId, planningAreaId, lors)); // TODO quite simple assumption, which may be improved later
+				// TODO quite simple assumption, which may be improved later
+				person.getAttributes().putAttribute("locationOfSchool", getLocation(municipalityId));
 			} else {
 				person.getAttributes().putAttribute("locationOfSchool", "-99");
 			}
@@ -516,12 +389,12 @@ public class DemandGeneratorCensus {
 			person.getAttributes().putAttribute("age", getAgeInBounds(lowerAgeBound, upperAgeBound));
 			person.getAttributes().putAttribute("parent", false);
 			
-			population.addPerson(person);
+			this.population.addPerson(person);
 			
 			List<Id<Person>> personIds = new ArrayList<>(); // does in current implementation (only 1 p/hh) not make much sense
 			personIds.add(personId);
 			household.setMemberIds(personIds);
-			households.put(householdId, household);
+			this.households.put(householdId, household);
 		}
 	}	
 	
@@ -598,19 +471,19 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private static String getRandomWorkLocation(List<String> commuterRelationList, String planningAreaId, List<String> lors) {
+	private String getRandomWorkLocation(List<String> commuterRelationList) {
 		Random random = new Random();
 		int position = random.nextInt(commuterRelationList.size());
 		String workMunicipalityId = commuterRelationList.get(position);
 		commuterRelationList.remove(position);
-		return getLocation(workMunicipalityId, planningAreaId, lors);
+		return getLocation(workMunicipalityId);
 	}
 
 
-	private static String getLocation(String municipalityId, String planningAreaId, List<String> lors) {
+	private String getLocation(String municipalityId) {
 		String locationId;
-		if (municipalityId.equals(planningAreaId)){ // Berlin
-			locationId = getRandomLor(lors);
+		if (municipalityId.equals(this.idOfMunicipailityForSpatialRefinement)){ // Berlin
+			locationId = getSpatiallyRefinedZone();
 		} else { // Other municipalities
 			locationId = municipalityId;
 		}
@@ -618,9 +491,9 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private static String getRandomLor(List<String> lors) {
+	private String getSpatiallyRefinedZone() {
 		Random random = new Random();
-		return lors.get(random.nextInt(lors.size()));
+		return this.spatialRefinementZoneIds.get(random.nextInt(this.spatialRefinementZoneIds.size()));
 	}
 
 
@@ -771,6 +644,31 @@ public class DemandGeneratorCensus {
 	
 
     public Population getPopulation() {
-    	return population;
+    	return this.population;
 	}
+    
+    
+    public void setShapeFileForSpatialRefinement(String shapeFileForSpatialRefinement) {
+    	this.shapeFileForSpatialRefinement = shapeFileForSpatialRefinement;
+    }
+    
+    
+    public void setIdOfMunicipailityForSpatialRefinement(String idOfMunicipailityForSpatialRefinement) {
+    	this.idOfMunicipailityForSpatialRefinement = idOfMunicipailityForSpatialRefinement;
+    }
+    
+    
+    public void setFeatureKeyInShapeFile(String featureKeyInShapeFile) {
+    	this.featureKeyInShapeFile = featureKeyInShapeFile;
+    }
+    
+    
+    public void setWriteMatsimPlanFiles(boolean writeMatsimPlanFiles) {
+    	this.writeMatsimPlanFiles = writeMatsimPlanFiles;
+    }
+    
+    
+    public void setIncludeChildren(boolean includeChildren) {
+    	this.includeChildren = includeChildren;
+    }    
 }
