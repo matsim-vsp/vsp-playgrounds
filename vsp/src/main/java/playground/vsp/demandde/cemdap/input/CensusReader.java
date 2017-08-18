@@ -409,7 +409,7 @@ public class CensusReader {
 
 					Integer pop75Plus;
 					if (!row[102].equals("-")) {
-						pop75Plus = simplifyAndParseInteger(row[102]);
+						pop75Plus = simplifyAndParseInteger(row[102]); // This is column "DEM_4_34"
 					} else {
 						pop75Plus = 0;
 					}
@@ -418,7 +418,7 @@ public class CensusReader {
 
 					Integer pop75PlusMale;
 					if (!row[103].equals("-")) {
-						pop75PlusMale = simplifyAndParseInteger(row[103]);
+						pop75PlusMale = simplifyAndParseInteger(row[103]); // This is column "DEM_4_35"
 					} else {
 						pop75PlusMale = 0;
 					}
@@ -427,7 +427,7 @@ public class CensusReader {
 
 					Integer pop75PlusFemale;
 					if (!row[104].equals("-")) {
-						pop75PlusFemale = simplifyAndParseInteger(row[104]);
+						pop75PlusFemale = simplifyAndParseInteger(row[104]); // This is column "DEM_4_36"
 					} else {
 						pop75PlusFemale = 0;
 					}
@@ -528,7 +528,7 @@ public class CensusReader {
 
         			Integer employedMale;
         			if (row.length > 123) { // Note: Length of row has to be considered here
-        				employedMale = simplifyAndParseInteger(row[154]);
+        				employedMale = simplifyAndParseInteger(row[154]); // This is column "ERW_1.8"
         			} else {
         				employedMale = 0;
         			}
@@ -537,7 +537,7 @@ public class CensusReader {
 
         			Integer employedFemale;
         			if (row.length > 123) { // Note: Length of row has to be considered here
-        				employedFemale = simplifyAndParseInteger(row[155]);
+        				employedFemale = simplifyAndParseInteger(row[155]); // This is column "ERW_1.9"
         			} else {
         				employedFemale = 0;
         			}

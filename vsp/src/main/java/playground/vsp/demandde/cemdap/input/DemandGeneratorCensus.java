@@ -69,15 +69,15 @@ public class DemandGeneratorCensus {
 
 	public static void main(String[] args) {
 		// Input and output files
-		String commuterFileOutgoing1 = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Berlin_2009/B2009Ga.txt";
-		String commuterFileOutgoing2 = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
-		String commuterFileOutgoing3 = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil2BR2009Ga.txt";
-		String commuterFileOutgoing4 = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
+		String commuterFileOutgoing1 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Berlin_2009/B2009Ga.txt";
+		String commuterFileOutgoing2 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
+		String commuterFileOutgoing3 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil2BR2009Ga.txt";
+		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
 //		String commuterFileOutgoingTest = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga_Test.txt";
 //		String censusFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung.csv";
-		String censusFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String shapeFileLors = "../../../shared-svn/projects/cemdapMatsimCadyts/scenario/shapefiles/Bezirksregion_EPSG_25833.shp";
-		String outputBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/syn_pop/100/";
+		String censusFile = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
+		String shapeFileLors = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp";
+		String outputBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/syn_pop/100_test/";
 		
 		// Parameters
 		int numberOfPlansPerPerson = 5;
@@ -396,7 +396,7 @@ public class DemandGeneratorCensus {
 		LOG.warn("There are " + counterMissingComRel + " employees who have been set to unemployed since no commuter relation could be assigned to them.");
 		LOG.warn("Share of employees that had to be set to unemployed due to lack of commuter relations: " + ((double) counterMissingComRel / (double) allEmployees));
 		LOG.warn("Altogether " + counterComRelUnassigned + " commuter relations remain unassigned.");
-		LOG.warn("The are " + counterExternalCommuters + " people who commute outside of Berlin and Brandenburg.");
+		LOG.warn("There are " + counterExternalCommuters + " people who commute outside of Berlin and Brandenburg.");
 		LOG.warn("Total number of employees: " + allEmployees);
 		LOG.warn("Total population: " + allPersons);
 		LOG.warn("Total number of students: " + allStudents);

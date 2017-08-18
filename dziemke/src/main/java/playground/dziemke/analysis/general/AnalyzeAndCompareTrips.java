@@ -20,7 +20,7 @@ public class AnalyzeAndCompareTrips {
 	public static final Logger log = Logger.getLogger(AnalyzeAndCompareTrips.class);
 
 	// Parameters
-	private static final String RUN_ID = "be_204"; // <----------
+	private static final String RUN_ID = "be_203"; // <----------
 	private static final String ITERATION_FOR_ANALYSIS = ""; // use empty string is not used
 //	private static final String CEMDAP_PERSONS_INPUT_FILE_ID = "21"; // Check if this number corresponds correctly to the RUN_ID
 
@@ -54,7 +54,7 @@ public class AnalyzeAndCompareTrips {
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
 //		matsimTripFilter.activateModeChoice(TransportMode.car);
 //		matsimTripFilter.activateModeChoice("pt", "ptSlow");
-		matsimTripFilter.activateModeChoice(TransportMode.pt);
+//		matsimTripFilter.activateModeChoice(TransportMode.pt);
 //		matsimTripFilter.activateModeChoice("ptSlow");
 //		matsimTripFilter.activateModeChoice("bicycle");
 //		matsimTripFilter.activateModeChoice(TransportMode.walk);
@@ -85,7 +85,7 @@ public class AnalyzeAndCompareTrips {
 
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
 //		srvTripFilter.activateModeChoice(TransportMode.car);
-		srvTripFilter.activateModeChoice(TransportMode.pt);
+//		srvTripFilter.activateModeChoice(TransportMode.pt);
 //		srvTripFilter.activateModeChoice(TransportMode.bike);
 //		srvTripFilter.activateModeChoice(TransportMode.walk);
 		srvTripFilter.activateDist(0, 100);
