@@ -1,17 +1,15 @@
 package playground.vsp.demandde.cemdapMatsimCadyts;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Objects;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.testcases.MatsimTestUtils;
-
 import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * @author GabrielT on 15.11.2016.
@@ -41,7 +39,8 @@ public class DemandGeneratorCensusTest {
 
 		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile,
 				shapeFileLors, utils.getOutputDirectory(), 	numberOfPlansPerPerson, planningAreaId,
-				defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren);
+				defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren,
+                "SCHLUESSEL");
 
 		String municipal = "Breydin";
 		ArrayList<String> possibleLocationsOfWork = readPossibleLocationsOfWork(commuterFileOutgoingTest, municipal);

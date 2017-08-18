@@ -18,6 +18,11 @@
  * *********************************************************************** */
 package playground.vsp.demandde.cemdap.input;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
@@ -31,11 +36,7 @@ import org.matsim.households.Household;
 import org.matsim.households.HouseholdImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
-
-import java.io.*;
-import java.util.*;
 
 /**
  * This class is derived from "playground.dziemke.cemdapMatsimCadyts.oneperson.DemandGeneratorOnePersonV2.java"
@@ -85,17 +86,19 @@ public class DemandGeneratorCensus {
 		double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
 		boolean writeMatsimPlanFiles = true;
 		boolean includeChildren = false;
+		String LORAttributeKey = "SCHLUESSEL";
 
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
 
 		new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
-				defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren);
+				defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren,
+				LORAttributeKey);
 	}
 
 	
 	public DemandGeneratorCensus(String[] commuterFilesOutgoing, String censusFile, String shapeFileLors, String outputBase,
-			int numberOfPlansPerPerson, String planningAreaId, double defaultAdultsToEmployeesRatio, double defaultEmployeesToCommutersRatio,
-			boolean writeMatsimPlanFiles, boolean includeChildren) {
+								 int numberOfPlansPerPerson, String planningAreaId, double defaultAdultsToEmployeesRatio, double defaultEmployeesToCommutersRatio,
+								 boolean writeMatsimPlanFiles, boolean includeChildren, String lorAttributeKey) {
 		LogToOutputSaver.setOutputDirectory(outputBase);
 		
 		this.outputBase = outputBase;
@@ -116,7 +119,7 @@ public class DemandGeneratorCensus {
 		}
 
 		// Read LORs
-		lors = readShape(shapeFileLors, "SCHLUESSEL");
+		lors = readShape(shapeFileLors, lorAttributeKey);
 		
 		generateDemand(numberOfPlansPerPerson, planningAreaId, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio,
 				writeMatsimPlanFiles, includeChildren);
@@ -131,6 +134,11 @@ public class DemandGeneratorCensus {
 			Map<String, CommuterRelationV2> relationsFromMunicipality = relationsMap.get(munId);
 
 			// Employees from Zensus seems to be all employees, not only socially-secured employees
+			if ( municipalities.getAttribute(munId, "employedMale")==null || municipalities.getAttribute(munId, "employedFemale")==null  ){
+				LOG.warn("Employed male (and possibly other) information is not available in the census data for munId "+ munId + ". Skippting this municipality.");
+				continue;
+			}
+
 			int employeesMale = (int) municipalities.getAttribute(munId, "employedMale");
 			int employeesFemale = (int) municipalities.getAttribute(munId, "employedFemale");
 

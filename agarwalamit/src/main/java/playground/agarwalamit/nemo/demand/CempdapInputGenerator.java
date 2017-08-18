@@ -20,7 +20,7 @@
 package playground.agarwalamit.nemo.demand;
 
 import playground.agarwalamit.utils.FileUtils;
-import playground.vsp.demandde.cemdap.input.ZoneAndLOSGeneratorV2;
+import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
 
 /**
  * Created by amit on 22.06.17.
@@ -41,7 +41,7 @@ public class CempdapInputGenerator {
 
         String censusFile = baseDir + "/zensus_2011/Zensus11_Datensatz_Bevoelkerung_NRW.csv";
         String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
-        String outputBase = baseDir ;
+        String outputBase = baseDir + "/_2/";
 
         // Parameters
         int numberOfPlansPerPerson = 5;
@@ -50,15 +50,17 @@ public class CempdapInputGenerator {
         double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
         boolean writeMatsimPlanFiles = true;
         boolean includeChildren = false;
+        String LORAttributeKey = "KN";
 
         String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4, commuterFileOutgoing5};
 
-//        {// person and plans file which contains only attributes; these will be required to generate matsim plans files
-//            new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
-//                    defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren);
-//        }
+        {// person and plans file which contains only attributes; these will be required to generate matsim plans files
+            new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
+                    defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren,
+                    LORAttributeKey);
+        }
         { // zones and lor files
-            new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFileLors, outputBase);
+//            new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFileLors, outputBase);
         }
     }
 }
