@@ -47,7 +47,7 @@ public final class VisualizeCottbusScenarioOTFVis {
 		config.qsim().setNodeOffset(100);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
-		OTFVisWithSignals.playScenario(scenario);
+		OTFVisWithSignals.playScenario(scenario, true);
 	}
 
 	public static void main(String[] args) {
