@@ -51,7 +51,7 @@ public final class VisualizeCottbusScenarioOTFVis {
 	}
 
 	public static void main(String[] args) {
-		new VisualizeCottbusScenarioOTFVis().run(ConfigUtils.loadConfig(INPUT_DIR + "config_tt.xml"));
+		new VisualizeCottbusScenarioOTFVis().run(ConfigUtils.loadConfig(INPUT_DIR + "config.xml"));
 	}
 
 }
