@@ -84,10 +84,10 @@ public class ZoneAndLOSGeneratorV2 {
 		String shapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
 		String outputBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
 
-		new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase);
+		new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase, "NR");
 	}
 
-	public ZoneAndLOSGeneratorV2( String[] commuterFilesOutgoing, String shapeFile, String outputBase ) {
+	public ZoneAndLOSGeneratorV2(String[] commuterFilesOutgoing, String shapeFile, String outputBase, String featureKeyInShapeFile) {
 
 		this.commuterFilesOutgoing = commuterFilesOutgoing;
 		this.shapeFile = shapeFile;
@@ -101,7 +101,7 @@ public class ZoneAndLOSGeneratorV2 {
 
 		LogToOutputSaver.setOutputDirectory(outputBase);
 		readMunicipalities();
-		readShape();
+		readShape(featureKeyInShapeFile);
 		compareIdsInShapefileAndCommuterFiles();
 		computeAndStoreZone2ZoneDistances();
 		writeZone2ZoneFile();
@@ -120,10 +120,10 @@ public class ZoneAndLOSGeneratorV2 {
 	}
 
 	
-	private void readShape() {
+	private void readShape(String featureKeyInShapeFile) {
 		Collection <SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
 		for (SimpleFeature feature : features) {
-			Integer id = Integer.parseInt((String) feature.getAttribute("NR"));
+			Integer id = Integer.parseInt((String) feature.getAttribute(featureKeyInShapeFile));
 			Geometry geometry = (Geometry) feature.getDefaultGeometry();
 			zones.add(id);
 			zoneMap.put(id, geometry);
