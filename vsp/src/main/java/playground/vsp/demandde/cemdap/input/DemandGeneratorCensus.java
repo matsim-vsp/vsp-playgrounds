@@ -117,6 +117,11 @@ public class DemandGeneratorCensus {
 		this.numberOfPlansPerPerson = numberOfPlansPerPerson;
 		
 		this.idsOfFederalStatesIncluded = idsOfFederalStatesIncluded;
+		// adding a check for each id (length==2); since, that's what we are using in the end. Amit Aug'17
+		this.idsOfFederalStatesIncluded.stream().forEach(e -> {
+			if (e.length()!=2) throw new RuntimeException("Length of the id for each Federal State must be equal to 2. This is not the case for "+ e);
+		});
+
 		this.defaultAdultsToEmployeesRatio = defaultAdultsToEmployeesRatio;
 		this.defaultEmployeesToCommutersRatio = defaultEmployeesToCommutersRatio;
 		
@@ -365,12 +370,12 @@ public class DemandGeneratorCensus {
 					person.getAttributes().putAttribute("employed", false);
 				} else {
 					String locationOfWork = getRandomWorkLocation(commuterRelationList);
-					if (locationOfWork.length() == 8 && !this.idsOfFederalStatesIncluded.contains(locationOfWork)) { // TODO external commuter are currently treated as non workers
+					if (locationOfWork.length() == 8 && ! this.idsOfFederalStatesIncluded.contains(locationOfWork.substring(0,2))) { // TODO external commuter are currently treated as non workers
 						counterExternalCommuters++;
 						person.getAttributes().putAttribute("locationOfWork", "-99");
 						person.getAttributes().putAttribute("employed", false);
 					} else {
-					person.getAttributes().putAttribute("locationOfWork", locationOfWork);
+						person.getAttributes().putAttribute("locationOfWork", locationOfWork);
 					}
 				}
 			} else {

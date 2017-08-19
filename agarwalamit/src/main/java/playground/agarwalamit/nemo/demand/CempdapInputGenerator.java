@@ -33,7 +33,7 @@ public class CempdapInputGenerator {
 
         String sharedSVNDir = FileUtils.SHARED_SVN; // "../../../shared-svn";
 
-        String baseDir = sharedSVNDir + "/projects/nemo_mercator/30_Scenario/cemdap_input";
+        String baseDir = sharedSVNDir + "/projects/nemo_mercator/30_Scenario/cemdap_input/";
         String commuterFileOutgoing1 = baseDir + "/pendlerstatistik/051NRW2009Ga.txt";
         String commuterFileOutgoing2 = baseDir + "/pendlerstatistik/053NRW2009Ga.txt";
         String commuterFileOutgoing3 = baseDir + "/pendlerstatistik/055NRW2009Ga.txt";
@@ -42,7 +42,7 @@ public class CempdapInputGenerator {
 
         String censusFile = baseDir + "/zensus_2011/Zensus11_Datensatz_Bevoelkerung_NRW.csv";
 //        String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
-        String outputBase = baseDir ;
+        String outputBase = baseDir + "/100/" ;
 
         // Parameters
         int numberOfPlansPerPerson = 5;
