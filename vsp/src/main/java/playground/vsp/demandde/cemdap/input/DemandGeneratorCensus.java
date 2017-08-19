@@ -93,11 +93,14 @@ public class DemandGeneratorCensus {
 		// Parameters
 		int numberOfPlansPerPerson = 5;
 		List<String> idsOfFederalStatesIncluded = Arrays.asList("12");
+		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
 		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
-		double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
+		double defaultCensusEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
+		// Choosing this too high effects that too many commuter relations are created, which is uncritical as relative shares will still be correct.
+		// Choosing this too low effects that employed people (according to the census) are left without workplace. Minimize this number!
 
 		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
-				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
+				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio);
 		
 		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
 		
@@ -253,7 +256,6 @@ public class DemandGeneratorCensus {
 			// 90 years as the upper bound is a simplifying assumption!
 			createHouseholdsAndPersons(counter, munId, pop75PlusMale, 0, 75, 90, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop75PlusMale;
-			// 90 years as the upper bound is a simplifying assumption!
 			createHouseholdsAndPersons(counter, munId, pop75PlusFemale, 1, 75, 90, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop75PlusFemale;
 
@@ -347,7 +349,7 @@ public class DemandGeneratorCensus {
 			
 			Id<Person> personId = Id.create(householdId + "01", Person.class);
 			Person person = this.population.getFactory().createPerson(personId);
-			// Following attribute names inspired by "PersonUtils.java": "sex", "hasLicense", "carAvail", "employed", "age", "travelcards"
+			// The following attribute names inspired by "PersonUtils.java": "sex", "hasLicense", "carAvail", "employed", "age", "travelcards"
 			person.getAttributes().putAttribute("householdId", householdId);
 			boolean employed = false;
 			if (lowerAgeBound < 65 && upperAgeBound > 17) { // younger and older people are never employed
