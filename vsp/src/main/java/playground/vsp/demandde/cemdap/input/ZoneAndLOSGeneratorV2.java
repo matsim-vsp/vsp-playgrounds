@@ -64,18 +64,32 @@ public class ZoneAndLOSGeneratorV2 {
 
 	
 	public static void main(String[] args) {
+//		// Input and output
+//		String commuterFileBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
+//		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
+//		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
+//		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
+//		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
+//		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
+//		String shapeFile = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+//		String outputBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
+//
+//		// Parameters
+//		String featureKeyInShapeFile = "NR";
+		
 		// Input and output
-		String commuterFileBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
-		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
-		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
-		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
-		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
-		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
-		String shapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
-		String outputBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
+		String commuterFileBase = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/";
+		String commuterFileOutgoing1 = commuterFileBase + "051NRW2009Ga.txt";
+		String commuterFileOutgoing2 = commuterFileBase + "053NRW2009Ga.txt";
+		String commuterFileOutgoing3 = commuterFileBase + "055NRW2009Ga.txt";
+		String commuterFileOutgoing4 = commuterFileBase + "057NRW2009Ga.txt";
+		String commuterFileOutgoing5 = commuterFileBase + "059NRW2009Ga.txt";
+		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4, commuterFileOutgoing5};
+		String shapeFile = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.shp";
+		String outputBase = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/100_neu/";
 
 		// Parameters
-		String featureKeyInShapeFile = "NR";
+		String featureKeyInShapeFile = "KN";
 		
 		ZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase, featureKeyInShapeFile);
 		zoneAndLOSGeneratorV2.generateSupply();
@@ -131,7 +145,7 @@ public class ZoneAndLOSGeneratorV2 {
 			}
 		}
 		for (String key : municipalities) {
-			if (!this.zones.contains(Integer.parseInt(key))) {
+			if (!this.zones.contains(key)) {
 				LOG.warn("Zone from commuter relations not in shapes; zone = " + key);
 			}
 		}
