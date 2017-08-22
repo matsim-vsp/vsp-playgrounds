@@ -53,12 +53,12 @@ public class DemandGeneratorCensus {
 	private Map<Id<Household>, Household> households;
 	private ObjectAttributes municipalities;
 	private Map<String, Map<String, CommuterRelationV2>> relationsMap;
+	private String outputBase;
 	
 	// Optionally used storage objects
 	private List<String> spatialRefinementZoneIds;
 	
 	// Parameters
-	private String outputBase;
 	private List<String> idsOfFederalStatesIncluded;
 	private int numberOfPlansPerPerson;
 	private double defaultAdultsToEmployeesRatio;
@@ -133,7 +133,7 @@ public class DemandGeneratorCensus {
 
 		// Read census
 		CensusReader censusReader = new CensusReader(censusFile, ";");
-		municipalities = censusReader.getMunicipalities();
+		this.municipalities = censusReader.getMunicipalities();
 
 		// Read commuter relations
 		this.relationsMap = new HashMap<>();
@@ -157,16 +157,16 @@ public class DemandGeneratorCensus {
 		for (String munId : relationsMap.keySet()) { // Loop over municipalities from commuter file
 			Map<String, CommuterRelationV2> relationsFromMunicipality = relationsMap.get(munId);
 
-			// Employees from Zensus seems to be all employees, not only socially-secured employees
+			// Employees in census are all employees, not only socially-secured employees
 			if (this.municipalities.getAttribute(munId, "employedMale") == null || this.municipalities.getAttribute(munId, "employedFemale") == null) {
-				LOG.warn("Employed male (and possibly other) information is not available in the census data for munId "+ munId + ". Skippting this municipality.");
+				LOG.warn("Employed male (and possibly other) information is not available in the census data for munId "+ munId + ". Skipping this municipality.");
 				continue;
 			}
 
 			int employeesMale = (int) this.municipalities.getAttribute(munId, "employedMale");
 			int employeesFemale = (int) this.municipalities.getAttribute(munId, "employedFemale");
 
-			scaleRelations(relationsFromMunicipality, employeesMale, employeesFemale, defaultEmployeesToCommutersRatio);
+			scaleRelations(relationsFromMunicipality, employeesMale, employeesFemale, this.defaultEmployeesToCommutersRatio);
 			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, "male");
 			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, "female");
 
@@ -489,9 +489,9 @@ public class DemandGeneratorCensus {
 
 	private String getLocation(String municipalityId) {
 		String locationId;
-		if (municipalityId.equals(this.idOfMunicipailityForSpatialRefinement)){ // Berlin
+		if (municipalityId.equals(this.idOfMunicipailityForSpatialRefinement)){
 			locationId = getSpatiallyRefinedZone();
-		} else { // Other municipalities
+		} else {
 			locationId = municipalityId;
 		}
 		return locationId;
