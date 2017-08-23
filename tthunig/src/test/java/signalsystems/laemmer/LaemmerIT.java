@@ -29,11 +29,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.contrib.locationchoice.utils.PlanUtils;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.controler.AbstractModule;
@@ -42,10 +37,10 @@ import org.matsim.testcases.MatsimTestUtils;
 
 import analysis.TtGeneralAnalysis;
 import analysis.signals.TtSignalAnalysisTool;
-import contrib.baseline.lib.PopulationUtils;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
 import signals.laemmer.model.LaemmerConfig.Regime;
 import signalsystems.sylvia.SylviaIT;
+import utils.ModifyPopulation;
 
 /**
  * @author tthunig
@@ -413,7 +408,7 @@ public class LaemmerIT {
 		
 		Controler controler = singleCrossingScenario.defineControler();
 		if (doublePersons){
-			doubleEachPerson(controler.getScenario().getPopulation());
+			ModifyPopulation.doubleEachPerson(controler.getScenario().getPopulation());
 		}
 		controler.getConfig().qsim().setFlowCapFactor(flowCapFactor);
 		controler.getConfig().controler().setOutputDirectory(testUtils.getOutputDirectory());
@@ -445,24 +440,5 @@ public class LaemmerIT {
 	// TODO test grouping
 	// TODO test lanes
 	// ...
-	
-	private static void doubleEachPerson(Population population){
-		Population doubledPersons = PopulationUtils.getEmptyPopulation();
-		PopulationFactory fac = doubledPersons.getFactory();
-		
-		// create a copy of each person into another population object
-		for (Person person : population.getPersons().values()){
-			Person doubledPerson = fac.createPerson(Id.createPersonId(person.getId()+"_2"));
-			for (Plan plan : person.getPlans()){
-				doubledPerson.addPlan(PlanUtils.createCopy(plan));
-			}
-			doubledPersons.addPerson(doubledPerson);
-		}
-		
-		// add all the copied persons to the original population object
-		for (Person doubledPerson : doubledPersons.getPersons().values()){
-			population.addPerson(doubledPerson);
-		}
-	}
 
 }
