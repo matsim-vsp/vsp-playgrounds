@@ -35,9 +35,7 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.testcases.MatsimTestUtils;
 
-import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
-import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.signals.TtSignalAnalysisTool;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
 import signals.laemmer.model.LaemmerConfig.Regime;
@@ -54,13 +52,16 @@ public class LaemmerIT {
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 	
+	private final int maxCycleTime = 90;
+	private final int cycleIntergreenTime = 10;
+	
 	/**
 	 * single intersection with demand (equals flow capacity) only in NS-direction. signals should show green only for the NS-direction.
 	 */
 	@Test
 	public void testSingleCrossingScenarioDemandNS() {
 		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(1800, 0, true, signalAnalyzer);
+		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(1800, 0, true, signalAnalyzer, Regime.COMBINED);
 
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // NS should show a lot more green than WE
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle(); // WE should be almost 0
@@ -89,7 +90,7 @@ public class LaemmerIT {
 	@Test
 	public void testSingleCrossingScenarioLowVsHighDemandWithMinG(){
 		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(90, 1800, true, signalAnalyzer);
+		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(90, 1800, true, signalAnalyzer, Regime.COMBINED);
 		
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); 
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle(); 
@@ -118,7 +119,7 @@ public class LaemmerIT {
 	@Test
 	public void testSingleCrossingScenarioLowVsHighDemandWoMinG(){
 		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(90, 1800, false, signalAnalyzer);
+		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(90, 1800, false, signalAnalyzer, Regime.COMBINED);
 		
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); 
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle(); 
@@ -146,7 +147,7 @@ public class LaemmerIT {
 	@Test
 	public void testSingleCrossingScenarioEqualDemandCapacityRatio(){
 		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(900, 1800, false, signalAnalyzer);
+		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(900, 1800, false, signalAnalyzer, Regime.COMBINED);
 		
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); 
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle(); 
@@ -166,8 +167,175 @@ public class LaemmerIT {
 		Assert.assertEquals("avg delay per vehicle per link should not differ more than 1%", 1, avgDelayWE/avgDelayNS, 0.01);
 	}
 
-	private TtGeneralAnalysis runSingleCrossingScenario(double flowNS, double flowWE, boolean minG, TtSignalAnalysisTool signalAnalyzer) {
-		SingleCrossingScenario singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, true, Regime.COMBINED, false, false, false, false, true, true, 0, false);
+	/**
+	 * compare different regimes for laemmer: stabilizing, optimizing and combination of both (combined)
+	 * for low demand, i.e. an occupancy rate of 0.5 in the example of nico kuehnel's master thesis, the optimizing regime should be better than the stabilizing regime.
+	 */
+	@Test
+	public void testSingleCrossingScenarioStabilizingVsOptimizingRegimeLowDemand(){
+		TtSignalAnalysisTool signalAnalyzerStab = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerStab = runSingleCrossingScenario(360, 1440, false, signalAnalyzerStab, Regime.STABILIZING);
+		
+		TtSignalAnalysisTool signalAnalyzerOpt = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerOpt = runSingleCrossingScenario(360, 1440, false, signalAnalyzerOpt, Regime.OPTIMIZING);
+		
+		TtSignalAnalysisTool signalAnalyzerComb = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerComb = runSingleCrossingScenario(360, 1440, false, signalAnalyzerComb, Regime.COMBINED);
+		
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleStab = signalAnalyzerStab.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemStab = signalAnalyzerStab.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkStab = generalAnalyzerStab.getAvgDelayPerLink();
+		
+		log.info("demand 360,1440 (i.e. 0.5) -- results for the stabilizing regime:");
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemStab.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkStab.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkStab.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerStab.getTotalTt() + ", total delay: " + generalAnalyzerStab.getTotalDelay());
+		
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleOpt = signalAnalyzerOpt.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemOpt = signalAnalyzerOpt.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkOpt = generalAnalyzerOpt.getAvgDelayPerLink();
+		
+		log.info("demand 360,1440 (i.e. 0.5) -- results for the optimizing regime:");
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleOpt.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleOpt.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemOpt.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkOpt.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkOpt.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerOpt.getTotalTt() + ", total delay: " + generalAnalyzerOpt.getTotalDelay());
+		
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleComb = signalAnalyzerComb.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemComb = signalAnalyzerComb.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkComb = generalAnalyzerComb.getAvgDelayPerLink();
+		
+		log.info("demand 360,1440 (i.e. 0.5) -- results for the combined regime:");
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemComb.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkComb.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkComb.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerComb.getTotalTt() + ", total delay: " + generalAnalyzerComb.getTotalDelay());
+		
+		// Test Stabilizing Regime:
+		for (Id<Link> linkId : avgDelayPerLinkStab.keySet()) {
+			Assert.assertTrue("stab: avg delay per link should be below a threshold (i.e. still stable)", avgDelayPerLinkStab.get(linkId) < maxCycleTime);
+		}
+		Assert.assertTrue("stab: total delay should be higher than for the other regimes", generalAnalyzerStab.getTotalDelay() > generalAnalyzerOpt.getTotalDelay());
+		Assert.assertTrue("stab: total delay should be higher than for the other regimes", generalAnalyzerStab.getTotalDelay() > generalAnalyzerComb.getTotalDelay());
+		Assert.assertTrue("stab: total travel time should be higher than for the other regimes", generalAnalyzerStab.getTotalTt() > generalAnalyzerOpt.getTotalTt());
+		Assert.assertTrue("stab: total travel time should be higher than for the other regimes", generalAnalyzerStab.getTotalTt() > generalAnalyzerComb.getTotalTt());
+		Assert.assertTrue("the stabilizing regime should satisfy the maximum cycle time", avgCycleTimePerSystemStab.get(SingleCrossingScenario.signalSystemId) < maxCycleTime);
+		// stabilizing regime only shows green when number of vehicles beyond a critical number, i.e. some of the cycle time is given away (all signals show red)
+		Assert.assertTrue("stab: sum of green times per cycle plus 10 seconds intergreen time should be more than 10 seconds less than the avg cycle time", 
+				avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId1) + avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId2) + cycleIntergreenTime 
+				< avgCycleTimePerSystemStab.get(SingleCrossingScenario.signalSystemId) - 10);
+		
+		// Test Optimizing Regime:
+		for (Id<Link> linkId : avgDelayPerLinkOpt.keySet()) {
+			Assert.assertTrue("opt: avg delay per link should be below a threshold (i.e. still stable)", avgDelayPerLinkOpt.get(linkId) < maxCycleTime);
+		}
+		Assert.assertEquals("sum of green times per cycle plus 10 seconds intergreen time should be more or less equal to the avg cycle time", 
+				avgCycleTimePerSystemOpt.get(SingleCrossingScenario.signalSystemId), 
+				avgSignalGreenTimePerCycleOpt.get(SingleCrossingScenario.signalGroupId1) + avgSignalGreenTimePerCycleOpt.get(SingleCrossingScenario.signalGroupId2) + cycleIntergreenTime, 
+				2);
+		Assert.assertTrue("for this demand, the cycle time of the optimizing regime should be still reasonable, i.e. below a threshold", 
+				avgCycleTimePerSystemOpt.get(SingleCrossingScenario.signalSystemId) < maxCycleTime);
+		
+		// Test Combined Regime:
+		for (Id<Link> linkId : avgDelayPerLinkComb.keySet()) {
+			Assert.assertTrue("avg delay per link should be below a threshold (i.e. still stable)", avgDelayPerLinkComb.get(linkId) < maxCycleTime);
+		}
+		Assert.assertEquals("comb: sum of green times per cycle plus 10 seconds intergreen time should be more or less equal to the avg cycle time", 
+				avgCycleTimePerSystemComb.get(SingleCrossingScenario.signalSystemId), 
+				avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId1) + avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId2) + cycleIntergreenTime, 
+				2);
+		Assert.assertTrue("the combined regime should satisfy the maximum cycle time", avgCycleTimePerSystemComb.get(SingleCrossingScenario.signalSystemId) < maxCycleTime);
+		Assert.assertTrue("total delay with the combined regime should be the lowest", generalAnalyzerOpt.getTotalDelay() > generalAnalyzerComb.getTotalDelay());
+		Assert.assertTrue("total travel time with the combined regime should be the lowest", generalAnalyzerOpt.getTotalTt() > generalAnalyzerComb.getTotalTt());
+	}
+	
+	/**
+	 * compare different regimes for laemmer: stabilizing, optimizing and combination of both (combined)
+	 * for high demand, i.e. an occupancy rate of 0.6 in the example of nico kuehnel's master thesis, the optimizing regime should no longer be stable (high delays, high travel time, 
+	 * no standard cycle pattern). The stabilizing regime should still be stable, the combined regime should be the best.
+	 */
+	@Test
+	public void testSingleCrossingScenarioStabilizingVsOptimizingRegimeHighDemand(){
+		TtSignalAnalysisTool signalAnalyzerStab = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerStab = runSingleCrossingScenario(360, 1800, false, signalAnalyzerStab, Regime.STABILIZING);
+		
+		TtSignalAnalysisTool signalAnalyzerOpt = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerOpt = runSingleCrossingScenario(360, 1800, false, signalAnalyzerOpt, Regime.OPTIMIZING);
+		
+		TtSignalAnalysisTool signalAnalyzerComb = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerComb = runSingleCrossingScenario(360, 1800, false, signalAnalyzerComb, Regime.COMBINED);
+		
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleStab = signalAnalyzerStab.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemStab = signalAnalyzerStab.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkStab = generalAnalyzerStab.getAvgDelayPerLink();
+		
+		log.info("demand 360,1800 (i.e. 0.6) -- results for the stabilizing regime:");
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemStab.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkStab.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkStab.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerStab.getTotalTt() + ", total delay: " + generalAnalyzerStab.getTotalDelay());
+		
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleOpt = signalAnalyzerOpt.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemOpt = signalAnalyzerOpt.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkOpt = generalAnalyzerOpt.getAvgDelayPerLink();
+		
+		log.info("demand 360,1800 (i.e. 0.6) -- results for the optimizing regime:");
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleOpt.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleOpt.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemOpt.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkOpt.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkOpt.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerOpt.getTotalTt() + ", total delay: " + generalAnalyzerOpt.getTotalDelay());
+		
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleComb = signalAnalyzerComb.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemComb = signalAnalyzerComb.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkComb = generalAnalyzerComb.getAvgDelayPerLink();
+		
+		log.info("demand 360,1800 (i.e. 0.6) -- results for the combined regime:");
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemComb.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkComb.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkComb.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerComb.getTotalTt() + ", total delay: " + generalAnalyzerComb.getTotalDelay());
+		
+		// Test Stabilizing Regime:
+		for (Id<Link> linkId : avgDelayPerLinkStab.keySet()) {
+			Assert.assertTrue("stab: avg delay per link should be below a threshold (i.e. still stable)", avgDelayPerLinkStab.get(linkId) < maxCycleTime);
+		}
+		Assert.assertTrue("the stabilizing regime should satisfy the maximum cycle time", avgCycleTimePerSystemStab.get(SingleCrossingScenario.signalSystemId) < maxCycleTime);
+		// stabilizing regime only shows green when number of vehicles beyond a critical number, i.e. some of the cycle time is given away (all signals show red)
+		Assert.assertTrue("stab: sum of green times per cycle plus 10 seconds intergreen time should be more than 10 seconds less than the avg cycle time", 
+				avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId1) + avgSignalGreenTimePerCycleStab.get(SingleCrossingScenario.signalGroupId2) + cycleIntergreenTime 
+				< avgCycleTimePerSystemStab.get(SingleCrossingScenario.signalSystemId) - 10);
+		
+		// Test Optimizing Regime:
+		Assert.assertTrue("avg delay for NS-direction should be very high for the optimizing regime with high demand", avgDelayPerLinkOpt.get(Id.createLinkId("7_3")) > maxCycleTime);
+		Assert.assertTrue("total delay of optimizing regime should be the highest", generalAnalyzerStab.getTotalDelay() < generalAnalyzerOpt.getTotalDelay());
+		Assert.assertTrue("total travel time of optimizing regime should be the highest", generalAnalyzerStab.getTotalTt() < generalAnalyzerOpt.getTotalTt());
+		Assert.assertTrue("for this demand, the cycle time of the optimizing regime should be very high, i.e. not stable anymore", 
+				avgCycleTimePerSystemOpt.get(SingleCrossingScenario.signalSystemId) > 10*maxCycleTime);
+		
+		// Test Combined Regime:
+		for (Id<Link> linkId : avgDelayPerLinkComb.keySet()) {
+			Assert.assertTrue("avg delay per link should be below a threshold (i.e. still stable)", avgDelayPerLinkComb.get(linkId) < maxCycleTime);
+		}
+		Assert.assertEquals("comb: sum of green times per cycle plus 10 seconds intergreen time should be more or less equal to the avg cycle time", 
+				avgCycleTimePerSystemComb.get(SingleCrossingScenario.signalSystemId), 
+				avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId1) + avgSignalGreenTimePerCycleComb.get(SingleCrossingScenario.signalGroupId2) + cycleIntergreenTime, 
+				2);
+		Assert.assertTrue("the combined regime should satisfy the maximum cycle time", avgCycleTimePerSystemComb.get(SingleCrossingScenario.signalSystemId) < maxCycleTime);
+		Assert.assertTrue("total delay with the combined regime should be the lowest", generalAnalyzerOpt.getTotalDelay() > generalAnalyzerComb.getTotalDelay());
+		Assert.assertTrue("total travel time with the combined regime should be the lowest", generalAnalyzerOpt.getTotalTt() > generalAnalyzerComb.getTotalTt());
+		Assert.assertTrue("total delay with the combined regime should be the lowest", generalAnalyzerStab.getTotalDelay() > generalAnalyzerComb.getTotalDelay());
+		Assert.assertTrue("total travel time with the combined regime should be the lowest", generalAnalyzerStab.getTotalTt() > generalAnalyzerComb.getTotalTt());
+	}
+
+	private TtGeneralAnalysis runSingleCrossingScenario(double flowNS, double flowWE, boolean minG, TtSignalAnalysisTool signalAnalyzer, Regime regime) {
+		SingleCrossingScenario singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, true, regime, false, false, false, false, true, true, 0, false);
 		if (minG){
 			singleCrossingScenario.setMinG(5);
 		}
@@ -190,20 +358,16 @@ public class LaemmerIT {
 				this.addEventHandlerBinding().toInstance(generalAnalysis);
 			}
 		});
-
+	
 		controler.run();
 		
 		return generalAnalysis;
 	}
-
-	// TODO test stabilizing regime: only very few agents on NS-direction - what happens?!
-	// TODO test combined regime: only very few agents on NS-direction, have to wait not longer than maximum cycle time
-	// TODO test optimizing regime: only very few agents on NS-direction, have to wait longer than maximum cycle time
 	
-	// TODO somehow test stochasticity (besser als fixed?!; reagiert auf nachfrage - anders als constant)
-	// TODO somehow test temporarily overcrowded situations (no exeption, stau löst sich wieder auf)
-	// TODO somehow test liveArrivalRate vs. exact data (letzteres erzeugt bessere ergebnisse; liveArrivalRates werden korrekt bestimmt)
-	// TODO somehow test grouping
+	// TODO test stochasticity (laemmer better than fixed-time; different than for constant demand)
+	// TODO test temporarily overcrowded situations (no exeption; signal is able to resolve congestion; like fixed-time schedule)
+	// TODO test liveArrivalRate vs. exact data (the second results in more precise green times?!; liveArrivalRates are determined correctly)
+	// TODO test grouping
 	// TODO test lanes
 	// ...
 
