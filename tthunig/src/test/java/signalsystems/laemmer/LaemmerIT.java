@@ -29,6 +29,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.locationchoice.utils.PlanUtils;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.controler.AbstractModule;
@@ -37,6 +42,7 @@ import org.matsim.testcases.MatsimTestUtils;
 
 import analysis.TtGeneralAnalysis;
 import analysis.signals.TtSignalAnalysisTool;
+import contrib.baseline.lib.PopulationUtils;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
 import signals.laemmer.model.LaemmerConfig.Regime;
 import signalsystems.sylvia.SylviaIT;
@@ -147,7 +153,7 @@ public class LaemmerIT {
 	@Test
 	public void testSingleCrossingScenarioEqualDemandCapacityRatio(){
 		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(900, 1800, false, signalAnalyzer, Regime.COMBINED);
+		TtGeneralAnalysis generalAnalyzer = runSingleCrossingScenario(900, 1800, signalAnalyzer, Regime.COMBINED);
 		
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); 
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle(); 
@@ -174,13 +180,13 @@ public class LaemmerIT {
 	@Test
 	public void testSingleCrossingScenarioStabilizingVsOptimizingRegimeLowDemand(){
 		TtSignalAnalysisTool signalAnalyzerStab = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzerStab = runSingleCrossingScenario(360, 1440, false, signalAnalyzerStab, Regime.STABILIZING);
+		TtGeneralAnalysis generalAnalyzerStab = runSingleCrossingScenario(360, 1440, signalAnalyzerStab, Regime.STABILIZING);
 		
 		TtSignalAnalysisTool signalAnalyzerOpt = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzerOpt = runSingleCrossingScenario(360, 1440, false, signalAnalyzerOpt, Regime.OPTIMIZING);
+		TtGeneralAnalysis generalAnalyzerOpt = runSingleCrossingScenario(360, 1440, signalAnalyzerOpt, Regime.OPTIMIZING);
 		
 		TtSignalAnalysisTool signalAnalyzerComb = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzerComb = runSingleCrossingScenario(360, 1440, false, signalAnalyzerComb, Regime.COMBINED);
+		TtGeneralAnalysis generalAnalyzerComb = runSingleCrossingScenario(360, 1440, signalAnalyzerComb, Regime.COMBINED);
 		
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleStab = signalAnalyzerStab.calculateAvgSignalGreenTimePerFlexibleCycle(); 
 		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemStab = signalAnalyzerStab.calculateAvgFlexibleCycleTimePerSignalSystem(); 
@@ -261,13 +267,13 @@ public class LaemmerIT {
 	@Test
 	public void testSingleCrossingScenarioStabilizingVsOptimizingRegimeHighDemand(){
 		TtSignalAnalysisTool signalAnalyzerStab = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzerStab = runSingleCrossingScenario(360, 1800, false, signalAnalyzerStab, Regime.STABILIZING);
+		TtGeneralAnalysis generalAnalyzerStab = runSingleCrossingScenario(360, 1800, signalAnalyzerStab, Regime.STABILIZING);
 		
 		TtSignalAnalysisTool signalAnalyzerOpt = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzerOpt = runSingleCrossingScenario(360, 1800, false, signalAnalyzerOpt, Regime.OPTIMIZING);
+		TtGeneralAnalysis generalAnalyzerOpt = runSingleCrossingScenario(360, 1800, signalAnalyzerOpt, Regime.OPTIMIZING);
 		
 		TtSignalAnalysisTool signalAnalyzerComb = new TtSignalAnalysisTool();
-		TtGeneralAnalysis generalAnalyzerComb = runSingleCrossingScenario(360, 1800, false, signalAnalyzerComb, Regime.COMBINED);
+		TtGeneralAnalysis generalAnalyzerComb = runSingleCrossingScenario(360, 1800, signalAnalyzerComb, Regime.COMBINED);
 		
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleStab = signalAnalyzerStab.calculateAvgSignalGreenTimePerFlexibleCycle(); 
 		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemStab = signalAnalyzerStab.calculateAvgFlexibleCycleTimePerSignalSystem(); 
@@ -334,13 +340,82 @@ public class LaemmerIT {
 		Assert.assertTrue("total travel time with the combined regime should be the lowest", generalAnalyzerStab.getTotalTt() > generalAnalyzerComb.getTotalTt());
 	}
 
+	/**
+	 * test laemmer for different flow capacity factors: a factor of 0.5 should result in the same signal settings as a factor of 1.0 when the demand is exactly doubled (same departure times).
+	 */
+	@Test
+	public void testSingleCrossingScenarioWithDifferentFlowCapacityFactors(){
+		TtSignalAnalysisTool signalAnalyzerFlowCap5 = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerFlowCap5 = runSingleCrossingScenario(180, 900, 0.5, false, signalAnalyzerFlowCap5, Regime.COMBINED);
+		
+		TtSignalAnalysisTool signalAnalyzerFlowCap1 = new TtSignalAnalysisTool();
+		TtGeneralAnalysis generalAnalyzerFlowCap1 = runSingleCrossingScenario(180, 900, 1.0, true, signalAnalyzerFlowCap1, Regime.COMBINED);
+		
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimesFlowCap1 = signalAnalyzerFlowCap1.getTotalSignalGreenTime(); 
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleFlowCap1 = signalAnalyzerFlowCap1.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemFlowCap1 = signalAnalyzerFlowCap1.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkFlowCap1 = generalAnalyzerFlowCap1.getAvgDelayPerLink();
+		
+		log.info("total signal green times: " + totalSignalGreenTimesFlowCap1.get(SingleCrossingScenario.signalGroupId1) + ", " + totalSignalGreenTimesFlowCap1.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleFlowCap1.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleFlowCap1.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemFlowCap1.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkFlowCap1.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkFlowCap1.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerFlowCap1.getTotalTt() + ", total delay: " + generalAnalyzerFlowCap1.getTotalDelay());
+		
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimesFlowCap5 = signalAnalyzerFlowCap5.getTotalSignalGreenTime(); 
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleFlowCap5 = signalAnalyzerFlowCap5.calculateAvgSignalGreenTimePerFlexibleCycle(); 
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemFlowCap5 = signalAnalyzerFlowCap5.calculateAvgFlexibleCycleTimePerSignalSystem(); 
+		Map<Id<Link>, Double> avgDelayPerLinkFlowCap5 = generalAnalyzerFlowCap5.getAvgDelayPerLink();
+		
+		log.info("total signal green times: " + totalSignalGreenTimesFlowCap5.get(SingleCrossingScenario.signalGroupId1) + ", " + totalSignalGreenTimesFlowCap5.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleFlowCap5.get(SingleCrossingScenario.signalGroupId1) + ", "
+				+ avgSignalGreenTimePerCycleFlowCap5.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemFlowCap5.get(SingleCrossingScenario.signalSystemId));
+		log.info("avg delay per link: " + avgDelayPerLinkFlowCap5.get(Id.createLinkId("2_3")) + ", " + avgDelayPerLinkFlowCap5.get(Id.createLinkId("7_3")));
+		log.info("Total travel time: " + generalAnalyzerFlowCap5.getTotalTt() + ", total delay: " + generalAnalyzerFlowCap5.getTotalDelay());
+		
+		Assert.assertEquals("total signal green times should not differ", 1, 
+				totalSignalGreenTimesFlowCap5.get(SingleCrossingScenario.signalGroupId1)/totalSignalGreenTimesFlowCap1.get(SingleCrossingScenario.signalGroupId1), 0.01);
+		Assert.assertEquals("total signal green times should not differ", 1, 
+				totalSignalGreenTimesFlowCap5.get(SingleCrossingScenario.signalGroupId2)/totalSignalGreenTimesFlowCap1.get(SingleCrossingScenario.signalGroupId2), 0.01);
+		Assert.assertEquals("avg signal green times per cycle should not differ", avgSignalGreenTimePerCycleFlowCap5.get(SingleCrossingScenario.signalGroupId1), 
+				avgSignalGreenTimePerCycleFlowCap1.get(SingleCrossingScenario.signalGroupId1), 0.1);
+		Assert.assertEquals("avg signal green times per cycle should not differ", avgSignalGreenTimePerCycleFlowCap5.get(SingleCrossingScenario.signalGroupId2),
+				avgSignalGreenTimePerCycleFlowCap1.get(SingleCrossingScenario.signalGroupId2), 0.1);
+		Assert.assertEquals("avg cycle time should not differ", avgCycleTimePerSystemFlowCap5.get(SingleCrossingScenario.signalSystemId),
+				avgCycleTimePerSystemFlowCap1.get(SingleCrossingScenario.signalSystemId), 0.1);
+		Assert.assertEquals("avg delay per vehicle per link should not differ", avgDelayPerLinkFlowCap5.get(Id.createLinkId("2_3")),
+				avgDelayPerLinkFlowCap1.get(Id.createLinkId("2_3")), 0.1);
+		Assert.assertEquals("avg delay per vehicle per link should not differ", avgDelayPerLinkFlowCap5.get(Id.createLinkId("7_3")),
+				avgDelayPerLinkFlowCap1.get(Id.createLinkId("7_3")), 2);
+		Assert.assertEquals("total delay for doubled demand should be doubled", 2, generalAnalyzerFlowCap1.getTotalDelay()/generalAnalyzerFlowCap5.getTotalDelay(), 0.1);
+		Assert.assertEquals("total travel time for doubled demand should be doubled", 2, generalAnalyzerFlowCap1.getTotalTt()/generalAnalyzerFlowCap5.getTotalTt(), 0.1);
+	}
+
+	private TtGeneralAnalysis runSingleCrossingScenario(double flowNS, double flowWE, TtSignalAnalysisTool signalAnalyzer, Regime regime) {
+		return runSingleCrossingScenario(flowNS, flowWE, false, 1.0, false, signalAnalyzer, regime);
+	}
+	
 	private TtGeneralAnalysis runSingleCrossingScenario(double flowNS, double flowWE, boolean minG, TtSignalAnalysisTool signalAnalyzer, Regime regime) {
+		return runSingleCrossingScenario(flowNS, flowWE, minG, 1.0, false, signalAnalyzer, regime);
+	}
+	
+	private TtGeneralAnalysis runSingleCrossingScenario(double flowNS, double flowWE, double flowCapFactor, boolean doublePersons, TtSignalAnalysisTool signalAnalyzer, Regime regime) {
+		return runSingleCrossingScenario(flowNS, flowWE, false, flowCapFactor, doublePersons, signalAnalyzer, regime);
+	}
+	
+	private TtGeneralAnalysis runSingleCrossingScenario(double flowNS, double flowWE, boolean minG, double flowCapFactor, boolean doublePersons, TtSignalAnalysisTool signalAnalyzer, Regime regime) {
 		SingleCrossingScenario singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, true, regime, false, false, false, false, true, true, 0, false);
 		if (minG){
 			singleCrossingScenario.setMinG(5);
 		}
 		
 		Controler controler = singleCrossingScenario.defineControler();
+		if (doublePersons){
+			doubleEachPerson(controler.getScenario().getPopulation());
+		}
+		controler.getConfig().qsim().setFlowCapFactor(flowCapFactor);
 		controler.getConfig().controler().setOutputDirectory(testUtils.getOutputDirectory());
 		// add signal analysis tool
 		controler.addOverridingModule(new AbstractModule() {
@@ -370,5 +445,24 @@ public class LaemmerIT {
 	// TODO test grouping
 	// TODO test lanes
 	// ...
+	
+	private static void doubleEachPerson(Population population){
+		Population doubledPersons = PopulationUtils.getEmptyPopulation();
+		PopulationFactory fac = doubledPersons.getFactory();
+		
+		// create a copy of each person into another population object
+		for (Person person : population.getPersons().values()){
+			Person doubledPerson = fac.createPerson(Id.createPersonId(person.getId()+"_2"));
+			for (Plan plan : person.getPlans()){
+				doubledPerson.addPlan(PlanUtils.createCopy(plan));
+			}
+			doubledPersons.addPerson(doubledPerson);
+		}
+		
+		// add all the copied persons to the original population object
+		for (Person doubledPerson : doubledPersons.getPersons().values()){
+			population.addPerson(doubledPerson);
+		}
+	}
 
 }
