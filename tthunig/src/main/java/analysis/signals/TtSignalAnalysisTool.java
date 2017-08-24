@@ -96,7 +96,7 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 			lastSwitchesToRed.put(event.getSignalGroupId(), event.getTime());
 			
 			Double lastSwitchToGreen = lastSwitchesToGreen.remove(event.getSignalGroupId());
-			doBygoneGreenTimeAnalysis(event, lastSwitchToGreen, 1);
+			doBygoneGreenTimeAnalysis(event, lastSwitchToGreen);
 			break;
 		case GREEN:
 			// remember green switch
@@ -105,7 +105,7 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 			doCycleAnalysis(event);
 			
 			Double lastSwitchToRed = lastSwitchesToRed.remove(event.getSignalGroupId());
-			doBygoneGreenTimeAnalysis(event, lastSwitchToRed, 0);
+			doBygoneGreenTimeAnalysis(event, lastSwitchToRed);
 			break;
 		default:
 			break;
@@ -116,20 +116,23 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 	public void notifyAfterMobsim(AfterMobsimEvent event) {
 		// take the last activity start time as end time of the simulation
 		double simEndTime = lastActStartTime;
-		// imitate a last switch for all signals to fill total green time and summed bygone green time correctly
+		// fill total green time and summed bygone green time correctly for all last signal phases
 		for (Id<SignalGroup> signalGroupId : lastSwitchesToGreen.keySet()){
-			SignalGroupStateChangedEvent imitatedRedSwitch = new SignalGroupStateChangedEvent(simEndTime, signalGroup2signalSystemId.get(signalGroupId), signalGroupId, SignalGroupState.RED);
-			doBygoneGreenTimeAnalysis(imitatedRedSwitch, lastSwitchesToGreen.get(signalGroupId), 1);
+			calculateLastGreenTimeOfTheGroupAndAddToTotalGreen(signalGroupId, simEndTime, lastSwitchesToGreen.get(signalGroupId));
+			fillBygoneGreenTimeMapForEverySecondSinceLastSwitch(signalGroupId, simEndTime, lastSwitchesToGreen.get(signalGroupId), 1);
 		}
 		lastSwitchesToGreen.clear();
 		for (Id<SignalGroup> signalGroupId : lastSwitchesToRed.keySet()){
-			SignalGroupStateChangedEvent imitatedGreenSwitch = new SignalGroupStateChangedEvent(simEndTime, signalGroup2signalSystemId.get(signalGroupId), signalGroupId, SignalGroupState.GREEN);
-			doBygoneGreenTimeAnalysis(imitatedGreenSwitch, lastSwitchesToRed.get(signalGroupId), 0);
+			fillBygoneGreenTimeMapForEverySecondSinceLastSwitch(signalGroupId, simEndTime, lastSwitchesToRed.get(signalGroupId), 0);
 		}
 		lastSwitchesToRed.clear();
+		// add last cycle time for all systems
+		for (Id<SignalSystem> signalSystemId : lastCycleStartPerSystem.keySet()){
+			addLastSystemCycleTime(signalSystemId, simEndTime);
+		}
 	}
 
-	private void doBygoneGreenTimeAnalysis(SignalGroupStateChangedEvent event, Double lastSwitch, int increment) {
+	private void doBygoneGreenTimeAnalysis(SignalGroupStateChangedEvent event, Double lastSwitch) {
 		if (lastSwitch == null){
 			// this is the first switch of the signal group. only initialize it
 			if (!summedBygoneSignalGreenTimesPerSecond.containsKey(event.getTime())){
@@ -140,27 +143,34 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 		else {
 			// this is at least the second switch of the signal group.
 			
+			int increment = 0; // 0 for green switch (bygone red time)
 			if (event.getNewState().equals(SignalGroupState.RED)){
-				// calculate last green time and add it to the total green time
-				if (!totalSignalGreenTime.containsKey(event.getSignalGroupId())){
-					totalSignalGreenTime.put(event.getSignalGroupId(), 0.);
-				}
-				double greenTime = event.getTime() - lastSwitch;
-				totalSignalGreenTime.put(event.getSignalGroupId(), totalSignalGreenTime.get(event.getSignalGroupId()) + greenTime);
+				increment = 1; // 1 for red switch (bygone green time)
+				calculateLastGreenTimeOfTheGroupAndAddToTotalGreen(event.getSignalGroupId(), event.getTime(), lastSwitch);
 			}
-
-			// fill summedBygoneSignalGreenTimesPerSecond for every second since the last switch
-			double lastBygoneSignalGreenTimeInsideMap = summedBygoneSignalGreenTimesPerSecond.get(lastSwitch).get(event.getSignalGroupId());
-			double time = lastSwitch + 1;
-			while (time <= event.getTime()){
-				if (!summedBygoneSignalGreenTimesPerSecond.containsKey(time)) {
-					summedBygoneSignalGreenTimesPerSecond.put(time, new HashMap<>());
-				}
-				lastBygoneSignalGreenTimeInsideMap += increment;
-				summedBygoneSignalGreenTimesPerSecond.get(time).put(event.getSignalGroupId(), lastBygoneSignalGreenTimeInsideMap);
-				time++;
-			}
+			fillBygoneGreenTimeMapForEverySecondSinceLastSwitch(event.getSignalGroupId(), event.getTime(), lastSwitch, increment);
 		}
+	}
+
+	private void fillBygoneGreenTimeMapForEverySecondSinceLastSwitch(Id<SignalGroup> signalGroupId, double thisSwitch, double lastSwitch, int increment) {
+		double lastBygoneSignalGreenTimeInsideMap = summedBygoneSignalGreenTimesPerSecond.get(lastSwitch).get(signalGroupId);
+		double time = lastSwitch + 1;
+		while (time <= thisSwitch){
+			if (!summedBygoneSignalGreenTimesPerSecond.containsKey(time)) {
+				summedBygoneSignalGreenTimesPerSecond.put(time, new HashMap<>());
+			}
+			lastBygoneSignalGreenTimeInsideMap += increment;
+			summedBygoneSignalGreenTimesPerSecond.get(time).put(signalGroupId, lastBygoneSignalGreenTimeInsideMap);
+			time++;
+		}
+	}
+
+	private void calculateLastGreenTimeOfTheGroupAndAddToTotalGreen(Id<SignalGroup> signalGroupId, double redSwitch, double lastGreenSwitch) {
+		if (!totalSignalGreenTime.containsKey(signalGroupId)){
+			totalSignalGreenTime.put(signalGroupId, 0.);
+		}
+		double greenTime = redSwitch - lastGreenSwitch;
+		totalSignalGreenTime.put(signalGroupId, totalSignalGreenTime.get(signalGroupId) + greenTime);
 	}
 
 	private void doCycleAnalysis(SignalGroupStateChangedEvent event) {
@@ -169,24 +179,28 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 			// remember first signal group of the system
 			firstSignalGroupOfSignalSystem.put(event.getSignalSystemId(), event.getSignalGroupId());
 			// initialize cycle counter
-			numberOfCyclesPerSystem.put(event.getSignalSystemId(), -1);
+			numberOfCyclesPerSystem.put(event.getSignalSystemId(), 0);
 		}
 		// count number of cycles per system
 		if (event.getSignalGroupId().equals(firstSignalGroupOfSignalSystem.get(event.getSignalSystemId()))){
 			// increase counter if first signal group of the system gets green
 			numberOfCyclesPerSystem.put(event.getSignalSystemId(), numberOfCyclesPerSystem.get(event.getSignalSystemId()) + 1);
 			
-			// sum up cycle times of the system
-			if (lastCycleStartPerSystem.containsKey(event.getSignalSystemId())){
-				// add last cycle time except for the first green switch where no last cycle exists
-				if (!sumOfSystemCycleTimes.containsKey(event.getSignalSystemId())){
-					sumOfSystemCycleTimes.put(event.getSignalSystemId(), 0.);
-				}
-				double lastCycleTime = event.getTime() - lastCycleStartPerSystem.get(event.getSignalSystemId());
-				sumOfSystemCycleTimes.put(event.getSignalSystemId(), sumOfSystemCycleTimes.get(event.getSignalSystemId()) + lastCycleTime);
+			// add last cycle time except for the first green switch where no last cycle exists
+			if (lastCycleStartPerSystem.containsKey(event.getSignalSystemId())) {
+				addLastSystemCycleTime(event.getSignalSystemId(), event.getTime());
 			}
 			lastCycleStartPerSystem.put(event.getSignalSystemId(), event.getTime());
 		}
+	}
+
+	/* has to be called again at the end of the simulation such that the cycle time of the last cycle can also be added */
+	private void addLastSystemCycleTime(Id<SignalSystem> signalSystemId, double cycleStartTime) {
+		if (!sumOfSystemCycleTimes.containsKey(signalSystemId)) {
+			sumOfSystemCycleTimes.put(signalSystemId, 0.);
+		}
+		double lastCycleTime = cycleStartTime - lastCycleStartPerSystem.get(signalSystemId);
+		sumOfSystemCycleTimes.put(signalSystemId, sumOfSystemCycleTimes.get(signalSystemId) + lastCycleTime);
 	}
 
 	public Map<Id<SignalGroup>, Double> getTotalSignalGreenTime() {

@@ -52,10 +52,10 @@ import playground.jbischoff.utils.JbUtils;
  */
 public class RunSharedTaxiAnalysis {
 public static void main(String[] args) {
-	String eventsFile = "D:/runs-svn/sharedTaxi/parameterizedRuns/c_3_a_1.7_b_120/c_3_a_1.7_b_120.output_events.xml.gz";
-	String outFile = "D:/runs-svn/sharedTaxi/parameterizedRuns/c_3_a_1.7_b_120/c_3_a_1.7_b_120.output_linkOccupancy.csv";
+	String eventsFile = "D:/runs-svn/bvg_sharedTaxi/demand02_withStops/c4/v150c4/v150c4.output_events.xml.gz";
+	String outFile ="D:/runs-svn/bvg_sharedTaxi/demand02_withStops/c4/v150c4/v150c4.output_linkOccupancy.csv";
 	EventsManager events = EventsUtils.createEventsManager();
-	DrtVehicleOccupancyWithLinkOccupancyEvaluator vehicleOccupancyEvaluator = new DrtVehicleOccupancyWithLinkOccupancyEvaluator(0*3600, 30*3600, 8);
+	DrtVehicleOccupancyWithLinkOccupancyEvaluator vehicleOccupancyEvaluator = new DrtVehicleOccupancyWithLinkOccupancyEvaluator(17*3600, 36*3600, 8);
 	events.addHandler(vehicleOccupancyEvaluator);
 	new MatsimEventsReader(events).readFile(eventsFile);
 	BufferedWriter bw = IOUtils.getBufferedWriter(outFile);

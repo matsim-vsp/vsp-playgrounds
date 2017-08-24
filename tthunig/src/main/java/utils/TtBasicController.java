@@ -45,11 +45,11 @@ public class TtBasicController {
 	 * @param args the config file
 	 */
 	public static void main(String[] args) {
-		prepareBasicControler(args).run();
+		prepareBasicControler(args[0]).run();
 	}
 
-	static Controler prepareBasicControler(String[] args) {
-		Config config = ConfigUtils.loadConfig( args[0]) ;
+	static Controler prepareBasicControler(String configFileName) {
+		Config config = ConfigUtils.loadConfig(configFileName) ;
 		
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		

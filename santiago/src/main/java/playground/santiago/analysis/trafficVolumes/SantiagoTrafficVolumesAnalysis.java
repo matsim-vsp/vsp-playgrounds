@@ -26,6 +26,7 @@ import org.matsim.counts.algorithms.CountSimComparisonTableWriter;
 import org.matsim.counts.algorithms.CountsComparisonAlgorithm;
 
 import playground.santiago.analysis.eventHandlers.trafficVolumes.SantiagoLinkVolumeHandler;
+import playground.santiago.analysis.eventHandlers.trafficVolumes.SantiagoLinkVolumePerHalfHourHandler;
 
 
 
@@ -37,7 +38,7 @@ public class SantiagoTrafficVolumesAnalysis {
 	private String analysisDir;
 //	private List<Id<Person>> stuckAgents;
 	
-	public SantiagoTrafficVolumesAnalysis (String caseName, String stepName, List<Id<Person>> stuckAgents){
+	public SantiagoTrafficVolumesAnalysis (String caseName, String stepName/*, List<Id<Person>> stuckAgents*/){
 
 		this.runDir = "../../../runs-svn/santiago/" + caseName + "/";
 		this.outputDir = runDir + "outputOf" + stepName + "/";
@@ -142,20 +143,23 @@ public class SantiagoTrafficVolumesAnalysis {
 		if(!analysisDir.exists()) createDir(analysisDir);
 
 		String eventsFile = this.outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".events.xml.gz";
-		String outputFile = analysisDir + String.valueOf(itAux) + ".linksVolumes.txt";
-
-		SantiagoLinkVolumeHandler handler = new SantiagoLinkVolumeHandler();
+//		String outputFile = analysisDir + String.valueOf(itAux) + ".linksVolumes.txt";
+		String outputFile = this.analysisDir + String.valueOf(itAux) + ".linksVolumesPerHalfHour.txt";
+		
+//		SantiagoLinkVolumeHandler handler = new SantiagoLinkVolumeHandler();
+		SantiagoLinkVolumePerHalfHourHandler handler = new SantiagoLinkVolumePerHalfHourHandler();
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(handler);
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
-		Map<Id<Link>, Map<Integer, Double>> linksVolumes = handler.getLinksVolumes();
-
+//		Map<Id<Link>, Map<Integer, Double>> linksVolumes = handler.getLinksVolumes();
+		Map<Id<Link>, Map<Double, Double>> linksVolumes = handler.getLinksVolumes();
 
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)) {
 			writer.write("linkId\tTimeSlot\tVolume\n");
 			for(Id<Link> l : linksVolumes.keySet()){				
-				for (int timeSlot: linksVolumes.get(l).keySet()){
+//				for (int timeSlot: linksVolumes.get(l).keySet()){
+				for (double timeSlot: linksVolumes.get(l).keySet()){
 					writer.write(l+"\t"+  timeSlot + "\t" + linksVolumes.get(l).get(timeSlot) + "\n" );
 				}
 			}

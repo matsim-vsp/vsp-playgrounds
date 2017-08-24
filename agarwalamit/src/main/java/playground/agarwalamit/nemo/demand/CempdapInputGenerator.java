@@ -19,8 +19,10 @@
 
 package playground.agarwalamit.nemo.demand;
 
+import java.util.Arrays;
 import playground.agarwalamit.utils.FileUtils;
-import playground.vsp.demandde.cemdapMATSimCadyts.ZoneAndLOSGeneratorV2;
+import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
+import playground.vsp.demandde.cemdap.input.ZoneAndLOSGeneratorV2;
 
 /**
  * Created by amit on 22.06.17.
@@ -29,10 +31,15 @@ import playground.vsp.demandde.cemdapMATSimCadyts.ZoneAndLOSGeneratorV2;
 public class CempdapInputGenerator {
 
     public static void main(String[] args) {
+        String sharedSVNDir;
 
-        String sharedSVNDir = FileUtils.SHARED_SVN; // "../../../shared-svn";
+        if (args.length > 0) {
+            sharedSVNDir = args[0];
+        } else {
+            sharedSVNDir = FileUtils.SHARED_SVN; // "../../../shared-svn";
+        }
 
-        String baseDir = sharedSVNDir + "/projects/nemo_mercator/30_Scenario/cemdap_input";
+        String baseDir = sharedSVNDir + "/projects/nemo_mercator/30_Scenario/cemdap_input/";
         String commuterFileOutgoing1 = baseDir + "/pendlerstatistik/051NRW2009Ga.txt";
         String commuterFileOutgoing2 = baseDir + "/pendlerstatistik/053NRW2009Ga.txt";
         String commuterFileOutgoing3 = baseDir + "/pendlerstatistik/055NRW2009Ga.txt";
@@ -40,25 +47,30 @@ public class CempdapInputGenerator {
         String commuterFileOutgoing5 = baseDir + "/pendlerstatistik/059NRW2009Ga.txt";
 
         String censusFile = baseDir + "/zensus_2011/Zensus11_Datensatz_Bevoelkerung_NRW.csv";
-        String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
-        String outputBase = baseDir ;
+        String outputBase = baseDir + "/100/" ;
 
         // Parameters
         int numberOfPlansPerPerson = 5;
-        String planningAreaId = ""; // no specific planning Area Id
         double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
         double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
         boolean writeMatsimPlanFiles = true;
         boolean includeChildren = false;
 
+
         String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4, commuterFileOutgoing5};
 
-//        {// person and plans file which contains only attributes; these will be required to generate matsim plans files
-//            new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, shapeFileLors, outputBase,	numberOfPlansPerPerson, planningAreaId,
-//                    defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren);
-//        }
+        {// person and plans file which contains only attributes; these will be required to generate matsim plans files
+            DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
+                    Arrays.asList("05"), defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
+            demandGeneratorCensus.setWriteMatsimPlanFiles(writeMatsimPlanFiles);
+            demandGeneratorCensus.setIncludeChildren(includeChildren);
+            demandGeneratorCensus.generateDemand();
+        }
         { // zones and lor files
-            new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFileLors, outputBase);
+
+            String LORAttributeKey = "KN";
+            String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
+            new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFileLors, outputBase, LORAttributeKey);
         }
     }
 }

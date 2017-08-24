@@ -22,8 +22,6 @@
 package congestionPricing2CapacityAdoption;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -33,13 +31,8 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsWriter20;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsWriter20;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -51,18 +44,18 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.events.EventsManagerImpl;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.LanesWriter;
 
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.TtStaticLinkFlowValuesPerHour;
 import congestionPricing2CapacityAdoption.TtRunCapAdopForBraessIterative.PricingType;
-import contrib.baseline.lib.PopulationUtils;
 import playground.dziemke.utils.LogToOutputSaver;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
@@ -73,8 +66,6 @@ import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
 import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
-import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes.LaneType;
-import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalControlLogic;
 
 /**
  * @author tthunig
@@ -84,7 +75,7 @@ public class TtRunCapAdopOnce {
 
 	private static final Logger LOG = Logger.getLogger(TtRunCapAdopOnce.class);
 	
-	private static final String RUN_ID = "be_251";
+	private static final String RUN_ID = "be_218";
 	private static final String INPUT_BASE_DIR = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/";	
 	private static final String OUTPUT_BASE_DIR = "../../runs-svn/berlin_capacityReduction/";
 
@@ -108,6 +99,32 @@ public class TtRunCapAdopOnce {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+//		createInputFilesBasicPricing();
+		
+		String eventsFileBasic = OUTPUT_BASE_DIR + "2017-08-6_be_218_500it_BASIC_m/be_218.output_events.xml.gz";
+		String eventsFilePricing = OUTPUT_BASE_DIR + "2017-08-7_be_218_500it_PRICING_LP_toleranz10_m/be_218.output_events.xml.gz";
+		compareBasicPricingCreateCapRedNet(eventsFileBasic, eventsFilePricing);
+		
+//		runOnThisMachine();
+	}
+
+	private static void createInputFilesBasicPricing() {
+		Config config = createConfig(CapRedType.PRICING);
+		String outputDir = config.controler().getOutputDirectory() + "initialFiles/";
+		// create directory
+		new File(outputDir).mkdirs();
+		// write config
+		new ConfigWriter(config).write(outputDir + "config.xml");
+		
+		config = createConfig(CapRedType.BASIC);
+		outputDir = config.controler().getOutputDirectory() + "initialFiles/";
+		// create directory
+		new File(outputDir).mkdirs();
+		// write config
+		new ConfigWriter(config).write(outputDir + "config.xml");
+	}
+
+	private static void compareBasicPricingCreateCapRedNet(String eventsFileBasic, String eventsFilePricing) {
 		// TODO try whether log from TtRunCapAdopOnce is now included in run-log-files
 		Config config = createConfig(CapRedType.CAP_RED);
 		// idea 1:
@@ -120,76 +137,46 @@ public class TtRunCapAdopOnce {
 //		}
 		// idea 3: the log4j.xml in my classes directory - where is tthunig.log written to?
 		
-		LOG.warn("Prepare simulation with pricing " + PRICING_TYPE);
-		Controler controlerPricing = createControler(createConfig(CapRedType.PRICING), true);
-		TtStaticLinkFlowValuesPerHour flowValuesPricing = new TtStaticLinkFlowValuesPerHour();
-		TtGeneralAnalysis generalAnalysisPricing = new TtGeneralAnalysis(controlerPricing.getScenario());
-//		// output does not exist yet:
-//		controlerPricing.addOverridingModule(new AbstractModule() {
-//			@Override
-//			public void install() {
-//				this.addEventHandlerBinding().toInstance(flowValuesPricing);
-//				this.bind(TtGeneralAnalysis.class).toInstance(generalAnalysisPricing);
-//				this.addEventHandlerBinding().toInstance(generalAnalysisPricing);
-//			}
-//		});
-//		writeInitFiles(controlerPricing.getScenario());
-//		LOG.warn("Start simulation with pricing " + PRICING_TYPE);
-//		controlerPricing.run();
-		// output exists already:
-		EventsManager managerPricing = new EventsManagerImpl();
-		managerPricing.addHandler(flowValuesPricing);
-		managerPricing.addHandler(generalAnalysisPricing);
-		MatsimEventsReader readerPricing = new MatsimEventsReader(managerPricing);
-		readerPricing.readFile(OUTPUT_BASE_DIR + "2017-07-22_be_251_500it_PRICING_V9/be_251.output_events.xml.gz");
-		
-		LOG.warn("Prepare simulation without pricing");
-		Controler controlerBasic = createControler(createConfig(CapRedType.BASIC), false);
-		TtStaticLinkFlowValuesPerHour flowValuesBasic = new TtStaticLinkFlowValuesPerHour();
-		TtGeneralAnalysis generalAnalysisBasic = new TtGeneralAnalysis(controlerBasic.getScenario());
-//		// output does not exist yet:
-//		controlerBasic.addOverridingModule(new AbstractModule() {
-//			@Override
-//			public void install() {
-//				this.addEventHandlerBinding().toInstance(flowValuesBasic);
-//				this.bind(TtGeneralAnalysis.class).toInstance(generalAnalysisBasic);
-//				this.addEventHandlerBinding().toInstance(generalAnalysisBasic);
-//			}
-//		});
-//		writeInitFiles(controlerBasic.getScenario());
-//		LOG.warn("Start simulation without pricing");
-//		controlerBasic.run();
-		// output exists already:
+		LOG.info("read in events from basic run");
 		EventsManager managerBasic = new EventsManagerImpl();
-		managerBasic.addHandler(flowValuesPricing);
-		managerBasic.addHandler(generalAnalysisPricing);
+		TtStaticLinkFlowValuesPerHour flowValuesBasic = new TtStaticLinkFlowValuesPerHour();
+		managerBasic.addHandler(flowValuesBasic);
 		MatsimEventsReader readerBasic = new MatsimEventsReader(managerBasic);
-		readerBasic.readFile(OUTPUT_BASE_DIR + "2017-07-22_be_251_500it_BASIC/be_251.output_events.xml.gz");
+		readerBasic.readFile(eventsFileBasic);
+		
+		LOG.info("read in events from pricing run");
+		EventsManager managerPricing = new EventsManagerImpl();
+		TtStaticLinkFlowValuesPerHour flowValuesPricing = new TtStaticLinkFlowValuesPerHour();
+		managerPricing.addHandler(flowValuesPricing);
+		MatsimEventsReader readerPricing = new MatsimEventsReader(managerPricing);
+		readerPricing.readFile(eventsFilePricing);
 		
 		LOG.warn("Prepare capacity reduction controler");
 //		Config config = createConfig(CapRedType.CAP_RED);
 		Controler controlerCapRed = createControler(config, false);
-		TtStaticLinkFlowValuesPerHour flowValuesCapRed = new TtStaticLinkFlowValuesPerHour();
-		TtGeneralAnalysis generalAnalysisCapRed= new TtGeneralAnalysis(controlerCapRed.getScenario());
-		controlerCapRed.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				this.addEventHandlerBinding().toInstance(flowValuesCapRed);
-				this.bind(TtGeneralAnalysis.class).toInstance(generalAnalysisCapRed);
-				this.addEventHandlerBinding().toInstance(generalAnalysisCapRed);
-			}
-		});
+//		TtStaticLinkFlowValuesPerHour flowValuesCapRed = new TtStaticLinkFlowValuesPerHour();
+//		TtGeneralAnalysis generalAnalysisCapRed= new TtGeneralAnalysis(controlerCapRed.getScenario().getNetwork());
+//		controlerCapRed.addOverridingModule(new AbstractModule() {
+//			@Override
+//			public void install() {
+//				this.addEventHandlerBinding().toInstance(flowValuesCapRed);
+//				this.bind(TtGeneralAnalysis.class).toInstance(generalAnalysisCapRed);
+//				this.addEventHandlerBinding().toInstance(generalAnalysisCapRed);
+//			}
+//		});
 		
 		LOG.warn("Compare static flow values of the pricing and non-pricing run. potentially reduce flow capacity.");
 		List<Id<Link>> reducedLinks = new ArrayList<>();
 		for (Link link : controlerCapRed.getScenario().getNetwork().getLinks().values()){
+			// look for maximal flow values per hour of both runs
 			int basicFlowValue = maxValue(flowValuesBasic.getStaticLinkFlows(link.getId()));
 			int pricingFlowValue = maxValue(flowValuesPricing.getStaticLinkFlows(link.getId()));
-			// check if pricingFlowValue is at most 10% of basicFlowValue and less than link flow capacity
-			if (pricingFlowValue * 10 < basicFlowValue &&
-					pricingFlowValue * 10 < link.getCapacity()*config.qsim().getFlowCapFactor()){
+			// check if pricingFlowValue is at most 1/3 of basicFlowValue and less than link flow capacity
+			pricingFlowValue = Math.max(1, pricingFlowValue); //otherwise a change to 0 would always be enough
+			if (pricingFlowValue * 3 < basicFlowValue &&
+					pricingFlowValue < link.getCapacity()*config.qsim().getFlowCapFactor()){
 				LOG.warn("Reduce capacity of link " + link.getId() + " from " + link.getCapacity()*config.qsim().getFlowCapFactor() + " to " + pricingFlowValue);
-				link.setCapacity( Math.min( pricingFlowValue/config.qsim().getFlowCapFactor(), MIN_CAP ));
+				link.setCapacity( Math.max( pricingFlowValue/config.qsim().getFlowCapFactor(), MIN_CAP ));
 				reducedLinks.add(link.getId());
 			}
 		}
@@ -204,10 +191,45 @@ public class TtRunCapAdopOnce {
 		for (Id<Link> reducedLinkId : reducedLinks){
 			LOG.info("Link " + reducedLinkId + " max flow values. Basic: " + maxValue(flowValuesBasic.getStaticLinkFlows(reducedLinkId))
 					+ ", Pricing: " + maxValue(flowValuesPricing.getStaticLinkFlows(reducedLinkId)) 
-					+ ", CapRed: " + maxValue(flowValuesCapRed.getStaticLinkFlows(reducedLinkId)));
+//					+ ", CapRed: " + maxValue(flowValuesCapRed.getStaticLinkFlows(reducedLinkId))
+					);
 		}
 		LOG.info("Number of reduced link capacities = " + reducedLinks.size() + ".");
 //		LOG.info("Travel time basic = " + generalAnalysisBasic.getTotalTt() + "; pricing = " + generalAnalysisPricing.getTotalTt() + "; capRed = " + generalAnalysisCapRed.getTotalTt());
+	}
+
+	private static void runBasicPricingOnThisMachine() {
+		LOG.warn("Prepare simulation with pricing " + PRICING_TYPE);
+		Controler controlerPricing = createControler(createConfig(CapRedType.PRICING), true);
+		TtStaticLinkFlowValuesPerHour flowValuesPricing = new TtStaticLinkFlowValuesPerHour();
+		TtGeneralAnalysis generalAnalysisPricing = new TtGeneralAnalysis(controlerPricing.getScenario().getNetwork());
+		controlerPricing.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				this.addEventHandlerBinding().toInstance(flowValuesPricing);
+				this.bind(TtGeneralAnalysis.class).toInstance(generalAnalysisPricing);
+				this.addEventHandlerBinding().toInstance(generalAnalysisPricing);
+			}
+		});
+		writeInitFiles(controlerPricing.getScenario());
+		LOG.warn("Start simulation with pricing " + PRICING_TYPE);
+		controlerPricing.run();
+		
+		LOG.warn("Prepare simulation without pricing");
+		Controler controlerBasic = createControler(createConfig(CapRedType.BASIC), false);
+		TtStaticLinkFlowValuesPerHour flowValuesBasic = new TtStaticLinkFlowValuesPerHour();
+		TtGeneralAnalysis generalAnalysisBasic = new TtGeneralAnalysis(controlerBasic.getScenario().getNetwork());
+		controlerBasic.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				this.addEventHandlerBinding().toInstance(flowValuesBasic);
+				this.bind(TtGeneralAnalysis.class).toInstance(generalAnalysisBasic);
+				this.addEventHandlerBinding().toInstance(generalAnalysisBasic);
+			}
+		});
+		writeInitFiles(controlerBasic.getScenario());
+		LOG.warn("Start simulation without pricing");
+		controlerBasic.run();
 	}
 
 	private static int maxValue(int[] staticLinkFlows) {
@@ -286,7 +308,7 @@ public class TtRunCapAdopOnce {
 	}
 
 	private static Config createConfig(CapRedType type) {
-		Config config = ConfigUtils.loadConfig(INPUT_BASE_DIR + RUN_ID + ".output_config.xml");
+		Config config = ConfigUtils.loadConfig(INPUT_BASE_DIR + RUN_ID + ".output_config.xml.gz");
 		config.controler().setOutputDirectory(OUTPUT_BASE_DIR + createOutputName(type) + "/");
 		config.network().setInputFile(RUN_ID + ".output_network.xml.gz");
 		config.plans().setInputFile(RUN_ID + ".output_plans.xml.gz");
@@ -297,8 +319,8 @@ public class TtRunCapAdopOnce {
 		config.qsim().setStuckTime(3600);
 		config.qsim().setRemoveStuckVehicles(false);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-		config.controler().setWriteEventsInterval(50);
-		config.controler().setWritePlansInterval(50);
+		config.controler().setWriteEventsInterval(100);
+		config.controler().setWritePlansInterval(100);
 		config.vspExperimental().setWritingOutputEvents(true);
 		return config;
 	}

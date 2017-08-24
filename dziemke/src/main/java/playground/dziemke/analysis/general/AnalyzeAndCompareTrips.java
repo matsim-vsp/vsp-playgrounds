@@ -20,7 +20,7 @@ public class AnalyzeAndCompareTrips {
 	public static final Logger log = Logger.getLogger(AnalyzeAndCompareTrips.class);
 
 	// Parameters
-	private static final String RUN_ID = "be_255"; // <----------
+	private static final String RUN_ID = "be_203"; // <----------
 	private static final String ITERATION_FOR_ANALYSIS = ""; // use empty string is not used
 //	private static final String CEMDAP_PERSONS_INPUT_FILE_ID = "21"; // Check if this number corresponds correctly to the RUN_ID
 
@@ -54,8 +54,10 @@ public class AnalyzeAndCompareTrips {
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
 //		matsimTripFilter.activateModeChoice(TransportMode.car);
 //		matsimTripFilter.activateModeChoice("pt", "ptSlow");
+//		matsimTripFilter.activateModeChoice(TransportMode.pt);
 //		matsimTripFilter.activateModeChoice("ptSlow");
 //		matsimTripFilter.activateModeChoice("bicycle");
+//		matsimTripFilter.activateModeChoice(TransportMode.walk);
 		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
 		matsimTripFilter.activateDist(0, 100);
 //		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
@@ -82,7 +84,10 @@ public class AnalyzeAndCompareTrips {
 		List<FromSrvTrip> fromSrvTrips = srv2MATSimPopulation.getTrips();
 
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
+//		srvTripFilter.activateModeChoice(TransportMode.car);
+//		srvTripFilter.activateModeChoice(TransportMode.pt);
 //		srvTripFilter.activateModeChoice(TransportMode.bike);
+//		srvTripFilter.activateModeChoice(TransportMode.walk);
 		srvTripFilter.activateDist(0, 100);
 //		srvTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);

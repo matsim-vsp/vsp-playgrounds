@@ -33,9 +33,10 @@ import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
+import playground.ikaddoura.decongestion.DecongestionConfigGroup;
+import playground.ikaddoura.decongestion.DecongestionModule;
+import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
+import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -45,10 +46,6 @@ import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
 import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
-import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
-import scenarios.illustrative.analysis.TtAnalyzedResultsWriter;
-import scenarios.illustrative.analysis.TtListenerToBindAndWriteAnalysis;
-import scenarios.illustrative.braess.analysis.TtAnalyzeBraess;
 
 /**
  * @author tthunig
@@ -56,23 +53,26 @@ import scenarios.illustrative.braess.analysis.TtAnalyzeBraess;
  */
 public class TtPricingController {
 
-	enum PricingType {
-		V3, V4, V7, V8, V9, V10
-	}
-	private static final PricingType PRICING_TYPE = PricingType.V9;
-
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
+	
+	private static final String availablePricingTypes = "Please use V3, V4, V7, V8, V9, V10 or LP.";
 
 	/**
-	 * @param args the config file
+	 * @param args 
+	 * 	0 - the config file
+	 *  1 - the pricing version
 	 */
 	public static void main(String[] args) {
-		Controler controler = TtBasicController.prepareBasicControler(args);
+		Controler controler = TtBasicController.prepareBasicControler(args[0]);
 		Scenario scenario = controler.getScenario();
 		Config config = controler.getConfig();
 
+		if (args.length < 2){
+			throw new IllegalArgumentException("Pricing type is missing as second argument. " + availablePricingTypes);
+		}
+		if (!args[1].equals("LP")){
 		// add tolling
 		TollHandler tollHandler = new TollHandler(scenario);
 
@@ -96,29 +96,45 @@ public class TtPricingController {
 
 		// choose the correct congestion handler and add it
 		EventHandler congestionHandler = null;
-		switch (PRICING_TYPE) {
-		case V3:
+		switch (args[1]) {
+		case "V3":
 			congestionHandler = new CongestionHandlerImplV3(controler.getEvents(), scenario);
 			break;
-		case V4:
+		case "V4":
 			congestionHandler = new CongestionHandlerImplV4(controler.getEvents(), scenario);
 			break;
-		case V7:
+		case "V7":
 			congestionHandler = new CongestionHandlerImplV7(controler.getEvents(), scenario);
 			break;
-		case V8:
+		case "V8":
 			congestionHandler = new CongestionHandlerImplV8(controler.getEvents(), scenario);
 			break;
-		case V9:
+		case "V9":
 			congestionHandler = new CongestionHandlerImplV9(controler.getEvents(), scenario);
 			break;
-		case V10:
+		case "V10":
 			congestionHandler = new CongestionHandlerImplV10(controler.getEvents(), scenario);
 			break;
 		default:
-			break;
+			throw new IllegalArgumentException("Pricing type not known. " + availablePricingTypes);
 		}
 		controler.addControlerListener(new MarginalCongestionPricingContolerListener(scenario, tollHandler, congestionHandler));
+		
+		} else {
+			ConfigUtils.addOrGetModule(config, DecongestionConfigGroup.GROUP_NAME, DecongestionConfigGroup.class);
+			
+			controler.addOverridingModule(new DecongestionModule(scenario));
+			
+			// toll-adjusted routing
+			final TollTimeDistanceTravelDisutilityFactory travelDisutilityFactory = new TollTimeDistanceTravelDisutilityFactory();
+			travelDisutilityFactory.setSigma(0.);
+			controler.addOverridingModule(new AbstractModule(){
+				@Override
+				public void install() {
+					this.bindCarTravelDisutilityFactory().toInstance( travelDisutilityFactory );
+				}
+			});
+		}
 		
 		controler.run();
 	}
