@@ -65,9 +65,7 @@ public class LaemmerOTFStarter {
 				install(new ControlerDefaultCoreListenersModule());
 				install(new ControlerDefaultsModule());
 				install(new ScenarioByInstanceModule(scenario));
-				
 				// signal specific module
-//				install(new LaemmerSignalsModule());
 				install(new CombinedSignalsModule());
 			}
 		});

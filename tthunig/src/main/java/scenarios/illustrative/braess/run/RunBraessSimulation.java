@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Calendar;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -62,15 +61,9 @@ import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
 import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionControlerListener;
-import playground.ikaddoura.decongestion.data.DecongestionInfo;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTolling;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTollingAll;
-import playground.ikaddoura.decongestion.handler.PersonVehicleTracker;
+import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
+import playground.ikaddoura.decongestion.DecongestionModule;
 import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.decongestion.tollSetting.DecongestionTollSetting;
-import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingPID;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -95,6 +88,7 @@ import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSigna
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
 import signals.sylvia.controler.DgSylviaConfig;
+import utils.OutputUtils;
 
 /**
  * Class to run a simulation of the braess scenario with or without signals. 
@@ -139,7 +133,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../../runs-svn/braess/btuOverloadScenario/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/intervalBased/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -166,7 +160,7 @@ public final class RunBraessSimulation {
 		Config config = ConfigUtils.createConfig();
 
 		// set number of iterations
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(200);
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
@@ -186,7 +180,7 @@ public final class RunBraessSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize(10);
+		config.travelTimeCalculator().setTraveltimeBinSize(60);
 //		config.travelTimeCalculator().setMaxTime((int) (3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 2)));
 		config.travelTimeCalculator().setMaxTime(3600 * 24);
 
@@ -197,25 +191,26 @@ public final class RunBraessSimulation {
 		config.timeAllocationMutator().setMutationRange(60);
 
 		// define strategies:
+		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
 			strat.setWeight(0.1);
-			strat.setDisableAfter(config.controler().getLastIteration() - 50);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 20);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.TimeAllocationMutator.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 25);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 25);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.SelectRandom.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 50);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 50);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -229,7 +224,7 @@ public final class RunBraessSimulation {
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.BestScore.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 50);
+//			strat.setDisableAfter(config.controler().getLastIteration() - 50);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -274,10 +269,21 @@ public final class RunBraessSimulation {
 		// decongestion relevant parameters
 		DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
 		decongestionSettings.setWRITE_OUTPUT_ITERATION(1);
-		decongestionSettings.setTOLL_ADJUSTMENT(0.1);
 		decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
 		decongestionSettings.setTOLL_BLEND_FACTOR(1.0);
+		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.05);
 		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
+		decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(2);
+		decongestionSettings.setWRITE_LINK_INFO_CHARTS(true);
+		decongestionSettings.setMsa(true);
+		
+		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
+		decongestionSettings.setTOLL_ADJUSTMENT(1);
+		decongestionSettings.setINITIAL_TOLL(1);
+		decongestionSettings.setKp(0.1);
+		decongestionSettings.setKi(0.);
+		decongestionSettings.setKd(0.);
+		
 		config.addModule(decongestionSettings);
 		
 		return config;
@@ -423,27 +429,7 @@ public final class RunBraessSimulation {
 			
 		} else if (PRICING_TYPE.equals(PricingType.INTERVALBASED)) {
 			
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					
-					this.bind(DecongestionInfo.class).asEagerSingleton();
-					
-					this.bind(DecongestionTollSetting.class).to(DecongestionTollingPID.class);
-					this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingAll.class);
-					
-					this.bind(IntervalBasedTollingAll.class).asEagerSingleton();
-					this.bind(DelayAnalysis.class).asEagerSingleton();
-					this.bind(PersonVehicleTracker.class).asEagerSingleton();
-									
-					this.addEventHandlerBinding().to(IntervalBasedTollingAll.class);
-					this.addEventHandlerBinding().to(DelayAnalysis.class);
-					this.addEventHandlerBinding().to(PersonVehicleTracker.class);
-					
-					this.addControlerListenerBinding().to(DecongestionControlerListener.class);
-
-				}
-			});
+			controler.addOverridingModule(new DecongestionModule(scenario));
 			
 			// toll-adjusted routing
 			
@@ -538,24 +524,11 @@ public final class RunBraessSimulation {
 
 	private static void createRunNameAndOutputDir(Scenario scenario) {
 
-		Config config = scenario.getConfig();
-		
-		// get the current date in format "yyyy-mm-dd-hh-mm-ss"
-		Calendar cal = Calendar.getInstance ();
-		// this class counts months from 0, but days from 1
-		int month = cal.get(Calendar.MONTH) + 1;
-		String monthStr = month + "";
-		if (month < 10)
-			monthStr = "0" + month;
-		String date = cal.get(Calendar.YEAR) + "-" 
-				+ monthStr + "-" + cal.get(Calendar.DAY_OF_MONTH) 
-				+ "-" + cal.get(Calendar.HOUR_OF_DAY) + "-" + cal.get(Calendar.MINUTE) + "-" + cal.get(Calendar.SECOND);
-		
-		String outputDir = OUTPUT_BASE_DIR + date + "/"; 
+		String outputDir = OUTPUT_BASE_DIR + OutputUtils.getCurrentDateIncludingTime() + "/"; 
 		// create directory
 		new File(outputDir).mkdirs();
 
-		config.controler().setOutputDirectory(outputDir);
+		scenario.getConfig().controler().setOutputDirectory(outputDir);
 		log.info("The output will be written to " + outputDir);
 		
 		writeRunDescription(outputDir, createRunName(scenario));
@@ -753,11 +726,15 @@ public final class RunBraessSimulation {
 		
 		// write network and lanes
 		new NetworkWriter(scenario.getNetwork()).write(outputDir + "network.xml");
-		if (!LANE_TYPE.equals(LaneType.NONE)) 
+		scenario.getConfig().network().setInputFile("network.xml");
+		if (!LANE_TYPE.equals(LaneType.NONE)) {
 			new LanesWriter(scenario.getLanes()).write(outputDir + "lanes.xml");
+			scenario.getConfig().network().setLaneDefinitionsFile("lanes.xml");
+		}
 		
 		// write population
 		new PopulationWriter(scenario.getPopulation()).write(outputDir + "plans.xml");
+		scenario.getConfig().plans().setInputFile("plans.xml");
 		
 		// write signal files
 		if (!SIGNAL_LOGIC.equals(SignalControlLogic.NONE)) {
@@ -765,6 +742,10 @@ public final class RunBraessSimulation {
 			new SignalSystemsWriter20(signalsData.getSignalSystemsData()).write(outputDir + "signalSystems.xml");
 			new SignalControlWriter20(signalsData.getSignalControlData()).write(outputDir + "signalControl.xml");
 			new SignalGroupsWriter20(signalsData.getSignalGroupsData()).write(outputDir + "signalGroups.xml");
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			signalConfigGroup.setSignalSystemFile("signalSystems.xml");
+			signalConfigGroup.setSignalControlFile("signalControl.xml");
+			signalConfigGroup.setSignalGroupsFile("signalGroups.xml");
 		}
 		
 		// write config

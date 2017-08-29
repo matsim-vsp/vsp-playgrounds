@@ -19,39 +19,35 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package scenarios.cottbus.run;
+package utils;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.SignalsDataLoader;
-import org.matsim.contrib.signals.otfvis.OTFVisWithSignals;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import java.util.Calendar;
 
 /**
  * @author tthunig
  *
  */
-public final class VisualizeCottbusScenarioOTFVis {
+public class OutputUtils {
 
-	private static final String INPUT_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
-
-	public void run(Config config) {
-//		OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class ) ;
-//		otfvisConfig.setDrawTime(true);
-//		otfvisConfig.setAgentSize(80f);
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-		config.qsim().setNodeOffset(100);
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
-		OTFVisWithSignals.playScenario(scenario, true);
+	/**
+	 * @return the current date in format "yyyy-mm-dd"
+	 */
+	public static String getCurrentDate() {
+		Calendar cal = Calendar.getInstance();
+		// this class counts months from 0, but days from 1
+		int month = cal.get(Calendar.MONTH) + 1;
+		String monthStr = month + "";
+		if (month < 10)
+			monthStr = "0" + month;
+		return cal.get(Calendar.YEAR) + "-" + monthStr + "-" + cal.get(Calendar.DAY_OF_MONTH);
 	}
-
-	public static void main(String[] args) {
-		new VisualizeCottbusScenarioOTFVis().run(ConfigUtils.loadConfig(INPUT_DIR + "config.xml"));
+	
+	/**
+	 * @return the current date in format "yyyy-mm-dd-hh-mm-ss"
+	 */
+	public static String getCurrentDateIncludingTime(){
+		Calendar cal = Calendar.getInstance ();
+		return getCurrentDate() + "-" + cal.get(Calendar.HOUR_OF_DAY) + "-" + cal.get(Calendar.MINUTE) + "-" + cal.get(Calendar.SECOND);
 	}
-
+	
 }

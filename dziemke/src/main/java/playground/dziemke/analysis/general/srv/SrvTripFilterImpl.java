@@ -1,6 +1,9 @@
 package playground.dziemke.analysis.general.srv;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.population.PersonUtils;
 import playground.dziemke.analysis.general.Trip;
 import playground.dziemke.analysis.general.TripFilter;
 
@@ -32,6 +35,7 @@ public class SrvTripFilterImpl implements TripFilter {
     private String activityTypeAfterTrip;
 
     private boolean onlyAnalyzeTripsDoneByPeopleInAgeRange; // "age"; this requires setting a CEMDAP file
+    private Population population;
     private int minAge = -1; // typically "x0"
     private int maxAge = -1; // typically "x9"; highest number usually chosen is 119
     
@@ -70,8 +74,9 @@ public class SrvTripFilterImpl implements TripFilter {
         this.activityTypeAfterTrip = activityTypeAfterTrip;
     }
 
-    public void activateAge(int minAge, int maxAge) {
+    public void activateAge(Population population, int minAge, int maxAge) {
         onlyAnalyzeTripsDoneByPeopleInAgeRange = true;
+        this.population = population;
         this.minAge = minAge;
         this.maxAge = maxAge;
     }
@@ -138,7 +143,14 @@ public class SrvTripFilterImpl implements TripFilter {
                     continue;
                 }
             }
-            
+
+            if (onlyAnalyzeTripsDoneByPeopleInAgeRange) {
+                Person person = population.getPersons().get(trip.getPersonId());
+                int age = PersonUtils.getAge(person);
+                if (age < minAge || age > maxAge)
+                    continue;
+            }
+
             if (onlyAnalyzeTripsInDepartureTimeWindow && (trip.getDepartureTime_s()) > maxDepartureTime_s) {
                 continue;
             }

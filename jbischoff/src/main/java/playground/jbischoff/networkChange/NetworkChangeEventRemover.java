@@ -20,26 +20,22 @@
 /**
  * 
  */
-package playground.jbischoff.sharedTaxiBerlin.analysis;
+package playground.jbischoff.networkChange;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.drt.analysis.*;
-import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.network.io.NetworkChangeEventsParser;
+import org.matsim.core.network.io.NetworkChangeEventsWriter;
+import org.matsim.core.utils.geometry.geotools.MGC;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 import playground.jbischoff.utils.JbUtils;
 
@@ -50,28 +46,40 @@ import playground.jbischoff.utils.JbUtils;
 /**
  *
  */
-public class RunSharedTaxiAnalysis {
+public class NetworkChangeEventRemover {
+	
+	Network network;
+	Geometry geo;
+	private List<NetworkChangeEvent> networkChangeEvents;
+	private List<NetworkChangeEvent> newNetworkChangeEvents = new ArrayList<>();
+
+	private final String NETWORKFILE = "../../../shared-svn/projects/bmw_carsharing/data/network.xml.gz";
+	private final String CHANGEFILE = "../../../shared-svn/projects/bmw_carsharing/data/changeEvents.xml.gz";
+	private final String CHANGEOUTFILE = "../../../shared-svn/projects/bmw_carsharing/data/changeEvents.xml.gz";
+
+	private final String SHAPEFILE = "../../../shared-svn/projects/bmw_carsharing/data/gis/untersuchungsraum.shp";
+
 public static void main(String[] args) {
-	String eventsFile = "D:/runs-svn/bvg_sharedTaxi/demand02_withStops/c4/v150c4/v150c4.output_events.xml.gz";
-	String outFile ="D:/runs-svn/bvg_sharedTaxi/demand02_withStops/c4/v150c4/v150c4.output_linkOccupancy.csv";
-	EventsManager events = EventsUtils.createEventsManager();
-	DrtVehicleOccupancyWithLinkOccupancyEvaluator vehicleOccupancyEvaluator = new DrtVehicleOccupancyWithLinkOccupancyEvaluator(17*3600, 36*3600, 8);
-	events.addHandler(vehicleOccupancyEvaluator);
-	new MatsimEventsReader(events).readFile(eventsFile);
-	BufferedWriter bw = IOUtils.getBufferedWriter(outFile);
-	try {
-		bw.write("LinkId;vehicles;AvOccupancy");
-		for (Entry<Id<Link>,DescriptiveStatistics> e : vehicleOccupancyEvaluator.getLinkOccupancy().entrySet()){
-			bw.newLine();
-			bw.write(e.getKey().toString()+";"+e.getValue().getN()+";"+e.getValue().getMean());
+	new NetworkChangeEventRemover().run();
+}
+
+/**
+ * 
+ */
+private void run() {
+	network = NetworkUtils.createNetwork();
+	new MatsimNetworkReader(network).readFile(NETWORKFILE);
+	geo = JbUtils.readShapeFileAndExtractGeometry(SHAPEFILE, "ID").get(0);
+	new NetworkChangeEventsParser(network, networkChangeEvents).readFile(CHANGEFILE);
+	for (NetworkChangeEvent e : networkChangeEvents){
+		for (Link l : e.getLinks()){
+			Point p = MGC.coord2Point(l.getCoord());
+			if (!geo.contains(p)){
+				newNetworkChangeEvents.add(e);
+			}
 			
 		}
-		bw.flush();
-		bw.close();
-	} catch (IOException e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
 	}
-
+	new NetworkChangeEventsWriter().write(CHANGEOUTFILE, newNetworkChangeEvents);
 }
 }

@@ -27,7 +27,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.builder.DefaultSignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
@@ -35,7 +34,6 @@ import org.matsim.contrib.signals.model.DatabasedSignalPlan;
 import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.lanes.data.Lanes;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -67,19 +65,13 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 
 	private Map<String, Provider<SignalController>> signalControlProvider = new HashMap<>();
 	
-	private Scenario scenario;
-
 	@Inject
 	public CombinedSignalModelFactory(Scenario scenario, LaemmerConfig laemmerConfig, DgSylviaConfig sylviaConfig, 
 			LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, TtTotalDelay delayCalculator) {
-		this.scenario = scenario;
-//		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-		Network network = scenario.getNetwork();
-		Lanes lanes = scenario.getLanes();
 		// prepare signal controller provider
 		signalControlProvider.put(SylviaSignalController.IDENTIFIER, new SylviaSignalController.SignalControlProvider(sylviaConfig, sensorManager, downstreamSensor));
 		signalControlProvider.put(DownstreamPlanbasedSignalController.IDENTIFIER, new DownstreamPlanbasedSignalController.SignalControlProvider(downstreamSensor));
-		signalControlProvider.put(LaemmerSignalController.IDENTIFIER, new LaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, network, lanes, delayCalculator, downstreamSensor));
+		signalControlProvider.put(LaemmerSignalController.IDENTIFIER, new LaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
 		signalControlProvider.put(DgRoederGershensonSignalController.IDENTIFIER, new DgRoederGershensonSignalController.SignalControlProvider(sensorManager, scenario));
 		signalControlProvider.put(AdvancedPlanBasedSignalSystemController.IDENTIFIER, new AdvancedPlanBasedSignalSystemController.SignalControlProvider(sensorManager, delayCalculator));
 	}
@@ -92,9 +84,6 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 	@Override
 	public SignalController createSignalSystemController(String controllerIdentifier, SignalSystem signalSystem) {
 		if (signalControlProvider.containsKey(controllerIdentifier)) {
-			if (controllerIdentifier.equals(LaemmerSignalController.IDENTIFIER) && scenario.getConfig().qsim().getFlowCapFactor() != 1.0){
-				throw new RuntimeException("Laemmer signal control does not support flow capacity factors different from 1.0");
-			}
 			log.info("Creating " + controllerIdentifier);
 			SignalController signalControl = signalControlProvider.get(controllerIdentifier).get();
 			signalControl.setSignalSystem(signalSystem);

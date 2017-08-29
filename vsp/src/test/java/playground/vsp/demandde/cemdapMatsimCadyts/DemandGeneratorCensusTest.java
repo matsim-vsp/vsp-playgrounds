@@ -1,17 +1,17 @@
 package playground.vsp.demandde.cemdapMatsimCadyts;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.testcases.MatsimTestUtils;
-
 import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * @author GabrielT on 15.11.2016.
@@ -27,21 +27,24 @@ public class DemandGeneratorCensusTest {
 		// Input and output files
 		String commuterFileOutgoingTest = utils.getInputDirectory() + "Teil1BR2009Ga_Test_kurz.txt";
 		String censusFile = utils.getInputDirectory() + "Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String shapeFileLors = utils.getInputDirectory() + "Bezirksregion_EPSG_25833.shp";
 
 		String[] commuterFilesOutgoing = {commuterFileOutgoingTest};
 
 		// Parameters
 		int numberOfPlansPerPerson = 1;
-		String planningAreaId = "11000000"; // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
+		List<String> idsOfFederalStatesIncluded = Arrays.asList("12");
 		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
 		double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
-		boolean writeMatsimPlanFiles = false;
-		boolean includeChildren = false;
 
-		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile,
-				shapeFileLors, utils.getOutputDirectory(), 	numberOfPlansPerPerson, planningAreaId,
-				defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio, writeMatsimPlanFiles, includeChildren);
+		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, utils.getOutputDirectory(),
+				numberOfPlansPerPerson, idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
+		
+		demandGeneratorCensus.setShapeFileForSpatialRefinement(utils.getInputDirectory() + "Bezirksregion_EPSG_25833.shp");
+		demandGeneratorCensus.setIdOfMunicipailityForSpatialRefinement("11000000");
+		demandGeneratorCensus.setFeatureKeyInShapeFile("SCHLUESSEL");
+		
+		demandGeneratorCensus.generateDemand();
+		
 
 		String municipal = "Breydin";
 		ArrayList<String> possibleLocationsOfWork = readPossibleLocationsOfWork(commuterFileOutgoingTest, municipal);
@@ -168,5 +171,4 @@ public class DemandGeneratorCensusTest {
 		}
 		return line;
 	}
-
 }

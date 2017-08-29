@@ -22,10 +22,8 @@ package signals.laemmer.model;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.builder.DefaultSignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
-import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalPlan;
@@ -33,7 +31,6 @@ import org.matsim.contrib.signals.model.SignalSystem;
 
 import com.google.inject.Inject;
 
-import org.matsim.lanes.data.Lanes;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.laemmer.model.LaemmerSignalController.SignalControlProvider;
@@ -55,10 +52,7 @@ public final class LaemmerSignalModelFactory implements SignalModelFactory {
 	
 	@Inject
 	public LaemmerSignalModelFactory(LaemmerConfig config, LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor, TtTotalDelay delayCalculator) {
-		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-		Network network = scenario.getNetwork();
-		Lanes lanes = scenario.getLanes();
-		this.provider = new LaemmerSignalController.SignalControlProvider(config, sensorManager,  network, lanes, delayCalculator, downstreamSensor);
+		this.provider = new LaemmerSignalController.SignalControlProvider(config, sensorManager, scenario, delayCalculator, downstreamSensor);
 	}
 
 	@Override

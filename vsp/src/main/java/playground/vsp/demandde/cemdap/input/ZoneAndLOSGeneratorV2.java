@@ -47,61 +47,66 @@ import playground.vsp.demandde.cemdap.LogToOutputSaver;
 public class ZoneAndLOSGeneratorV2 {
 	private static final Logger LOG = Logger.getLogger(ZoneAndLOSGeneratorV2.class);
 
-	private final String shapeFile;
-	
-	private final String outputBase ;
-	private final String outputFileZone2Zone ;
-	private final String outputFileZones;
-	private final String outputFileLosOffPkAM ;
-	private final String outputFileLosPeakAM ;
+	// Storage objects
+	private final Set<String> municipalities = new HashSet<>();
+	private final List<String> zones = new LinkedList<>();
+	private final Map<String, Geometry> zoneMap = new HashMap<>();
+	private final Map<String, Map<String, Double>> zone2ZoneDistanceMap = new HashMap<>();
+	private final Map<String, Map<String, Integer>> zone2ZoneAdjacencyMap = new HashMap<>();
+	private final String outputBase;
 	
 	// Parameters
-	private static final double defaultIntraZoneDistance = 1.72; // in miles; equals 2.76km.
-	private static final double beelineDistanceFactor = 1.3;
-	private static final double durantionDistanceOffPeakRatio_min_mile = 1.6; // based on computations in sample dataset; equals ca. 60km/h
-	private static final double durantionDistancePeakRatio_min_mile = 1.9; // based on computations in sample dataset; equals ca. 50km/h
-	private static final double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
-	
-	// Storage objects
-	private final String[] commuterFilesOutgoing ;
-	private final Set<String> municipalities = new HashSet<>();
-	private final List<Integer> zones = new LinkedList<>();
-	private final Map<Integer, Geometry> zoneMap = new HashMap<>();
-	private final Map<Integer, Map<Integer, Double>> zone2ZoneDistanceMap = new HashMap<>();
-	private final Map<Integer, Map<Integer, Integer>> zone2ZoneAdjacencyMap = new HashMap<>();
+	private double defaultIntraZoneDistance = 1.72; // in miles; equals 2.76km.
+	private double beelineDistanceFactor = 1.3;
+	private double durantionDistanceOffPeakRatio_min_mile = 1.6; // based on computations in sample dataset; equals ca. 60km/h
+	private double durantionDistancePeakRatio_min_mile = 1.9; // based on computations in sample dataset; equals ca. 50km/h
+	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
 
 	
 	public static void main(String[] args) {
+//		// Input and output
+//		String commuterFileBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
+//		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
+//		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
+//		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
+//		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
+//		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
+//		String shapeFile = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+//		String outputBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
+//
+//		// Parameters
+//		String featureKeyInShapeFile = "NR";
+		
 		// Input and output
-		String commuterFileBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
-		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
-		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
-		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
-		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
+		String commuterFileBase = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/";
+		String commuterFileOutgoing1 = commuterFileBase + "051NRW2009Ga.txt";
+		String commuterFileOutgoing2 = commuterFileBase + "053NRW2009Ga.txt";
+		String commuterFileOutgoing3 = commuterFileBase + "055NRW2009Ga.txt";
+		String commuterFileOutgoing4 = commuterFileBase + "057NRW2009Ga.txt";
+		String commuterFileOutgoing5 = commuterFileBase + "059NRW2009Ga.txt";
+		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4, commuterFileOutgoing5};
+		String shapeFile = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.shp";
+		String outputBase = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/100_neu/";
 
-		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
-
-		String shapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
-		String outputBase = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
-
-		new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase);
+		// Parameters
+		String featureKeyInShapeFile = "KN";
+		
+		ZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase, featureKeyInShapeFile);
+		zoneAndLOSGeneratorV2.generateSupply();
 	}
 
-	public ZoneAndLOSGeneratorV2( String[] commuterFilesOutgoing, String shapeFile, String outputBase ) {
+	
+	public ZoneAndLOSGeneratorV2(String[] commuterFilesOutgoing, String shapeFile, String outputBase, String featureKeyInShapeFile) {
+		LogToOutputSaver.setOutputDirectory(outputBase);
 
-		this.commuterFilesOutgoing = commuterFilesOutgoing;
-		this.shapeFile = shapeFile;
 		this.outputBase = outputBase;
 
-		outputFileZone2Zone = outputBase + "zone2zone.dat";
-		outputFileZones = outputBase + "zones.dat";
-		outputFileLosOffPkAM = outputBase + "losoffpkam.dat";
-		outputFileLosPeakAM = outputBase + "lospeakam.dat";
-
-
-		LogToOutputSaver.setOutputDirectory(outputBase);
-		readMunicipalities();
-		readShape();
+		readMunicipalities(commuterFilesOutgoing);
+		readShape(shapeFile, featureKeyInShapeFile);
+	}
+	
+	
+	public void generateSupply() {
 		compareIdsInShapefileAndCommuterFiles();
 		computeAndStoreZone2ZoneDistances();
 		writeZone2ZoneFile();
@@ -111,22 +116,22 @@ public class ZoneAndLOSGeneratorV2 {
 	}
 	
 	
-	private void readMunicipalities() {
+	private void readMunicipalities(String[] commuterFilesOutgoing) {
 		for (String commuterFileOutgoing : commuterFilesOutgoing) {
 			CommuterFileReaderV2 commuterFileReader = new CommuterFileReaderV2(commuterFileOutgoing, "\t");
 			Set<String> currentMunicipalities = commuterFileReader.getMunicipalities();
-			municipalities.addAll(currentMunicipalities);
+			this.municipalities.addAll(currentMunicipalities);
 		}
 	}
 
 	
-	private void readShape() {
+	private void readShape(String shapeFile, String featureKeyInShapeFile) {
 		Collection <SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
 		for (SimpleFeature feature : features) {
-			Integer id = Integer.parseInt((String) feature.getAttribute("NR"));
+			String id = (String) feature.getAttribute(featureKeyInShapeFile);
 			Geometry geometry = (Geometry) feature.getDefaultGeometry();
-			zones.add(id);
-			zoneMap.put(id, geometry);
+			this.zones.add(id);
+			this.zoneMap.put(id, geometry);
 		}
 	}
 	
@@ -134,14 +139,14 @@ public class ZoneAndLOSGeneratorV2 {
 	private void compareIdsInShapefileAndCommuterFiles() {
 		LOG.info("Municipality set has " + municipalities.size() + " elements.");
 		LOG.info("Zones set has " + zones.size() + " elements.");
-		for (Integer key : zones) {
-			if (!this.municipalities.contains(key.toString())) {
-				LOG.info("Zone from shapefile not in commuter relations; zone = " + key);
+		for (String key : zones) {
+			if (!this.municipalities.contains(key)) {
+				LOG.warn("Zone from shapefile not in commuter relations; zone = " + key);
 			}
 		}
 		for (String key : municipalities) {
-			if (!zones.contains(Integer.parseInt(key))) {
-				LOG.info("Zone from commuter relations not in shapes; zone = " + key);
+			if (!this.zones.contains(key)) {
+				LOG.warn("Zone from commuter relations not in shapes; zone = " + key);
 			}
 		}
 	}
@@ -149,12 +154,12 @@ public class ZoneAndLOSGeneratorV2 {
 	
 	private void computeAndStoreZone2ZoneDistances() {
 		LOG.info("Start distance and adjacency computations.");
-		LOG.info(zones.size() * zones.size() + " computations will be performed.");
+		LOG.info(this.zones.size() * this.zones.size() + " computations will be performed.");
 		int counter = 0;
-		for (int originId : zones) {
-			Map<Integer,Double> toZoneDistanceMap = new HashMap<>();
-			Map<Integer,Integer> toZoneAdjacencyMap = new HashMap<>();
-			for (int destinationId : zones) {
+		for (String originId : this.zones) {
+			Map<String,Double> toZoneDistanceMap = new HashMap<>();
+			Map<String,Integer> toZoneAdjacencyMap = new HashMap<>();
+			for (String destinationId : this.zones) {
 				counter++;
 				if (counter%1000 == 0) {
 					LOG.info(counter + " relations computed.");
@@ -163,22 +168,21 @@ public class ZoneAndLOSGeneratorV2 {
 				double distance_mi;
 				double temp = 0.;
 				
-				if (originId == destinationId) { // internal traffic inside zone
+				if (originId.equals(destinationId)) { // internal traffic inside zone
 					distance_mi = defaultIntraZoneDistance * beelineDistanceFactor;
 					adjacent = 0;
 				} else {
-					Geometry originGeometry = zoneMap.get(originId);
+					Geometry originGeometry = this.zoneMap.get(originId);
 					Coord originCoord = new Coord(originGeometry.getCentroid().getCoordinate().x, originGeometry.getCentroid().getCoordinate().y);
 							
-					Geometry destinationGeometry = zoneMap.get(destinationId);
+					Geometry destinationGeometry = this.zoneMap.get(destinationId);
 					Coord destinationCoord = new Coord(destinationGeometry.getCentroid().getCoordinate().x, destinationGeometry.getCentroid().getCoordinate().y);
 					
 					double distanceX_m = Math.abs(originCoord.getX() - destinationCoord.getX());
 					double distanceY_m = Math.abs(originCoord.getY() - destinationCoord.getY());
 					double distance_m = Math.sqrt(distanceX_m * distanceX_m + distanceY_m * distanceY_m);
 					
-					// Convert from meters to miles
-					distance_mi = distance_m / 1609.344 * beelineDistanceFactor;
+					distance_mi = distance_m / 1609.344 * beelineDistanceFactor; // Convert from meters to miles
     				
     				if (originGeometry.touches(destinationGeometry)) {
     					adjacent = 1;
@@ -191,25 +195,24 @@ public class ZoneAndLOSGeneratorV2 {
 				toZoneDistanceMap.put(destinationId, distanceRounded_mi);
 				toZoneAdjacencyMap.put(destinationId, adjacent);
     		}
-			zone2ZoneDistanceMap.put(originId, toZoneDistanceMap);
-			zone2ZoneAdjacencyMap.put(originId, toZoneAdjacencyMap);
+			this.zone2ZoneDistanceMap.put(originId, toZoneDistanceMap);
+			this.zone2ZoneAdjacencyMap.put(originId, toZoneAdjacencyMap);
 		}
 		LOG.info("Finised distance and adjacency computations.");
 	}
 		
 	
-	public void writeZone2ZoneFile() {
+	private void writeZone2ZoneFile() {
 		BufferedWriter bufferedWriterZone2Zone = null;
-		
 		try {
-            File zone2ZoneFile = new File(outputFileZone2Zone);
+            File zone2ZoneFile = new File(this.outputBase + "zone2zone.dat");
     		FileWriter fileWriterZone2Zone = new FileWriter(zone2ZoneFile);
     		bufferedWriterZone2Zone = new BufferedWriter(fileWriterZone2Zone);
     		
-    		for (int originId : zones) {
-    			for (int destinationId : zones) {
-    				double distance_mi = zone2ZoneDistanceMap.get(originId).get(destinationId);
-    				int adjacent = zone2ZoneAdjacencyMap.get(originId).get(destinationId);
+    		for (String originId : this.zones) {
+    			for (String destinationId : this.zones) {
+    				double distance_mi = this.zone2ZoneDistanceMap.get(originId).get(destinationId);
+    				int adjacent = this.zone2ZoneAdjacencyMap.get(originId).get(destinationId);
     				
     				// 4 columns
     				bufferedWriterZone2Zone.write(originId + "\t" + destinationId + "\t" + adjacent + "\t" + distance_mi);
@@ -234,22 +237,21 @@ public class ZoneAndLOSGeneratorV2 {
     }
 	
 	
-	public void writeZonesFile() {
+	private void writeZonesFile() {
 		BufferedWriter bufferedWriterZones = null;
-		
 		try {
-            File zonesFile = new File(outputFileZones);
+            File zonesFile = new File(this.outputBase + "zones.dat");
     		FileWriter fileWriterZones = new FileWriter(zonesFile);
     		bufferedWriterZones = new BufferedWriter(fileWriterZones);
     		
-    		for (int zoneId : zones) {
+    		for (String zoneId : this.zones) {
     			// 45 columns
-    			bufferedWriterZones.write(zoneId + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0 + "\t" + 0
+    			bufferedWriterZones.write(Integer.parseInt(zoneId) + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0
     					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
     					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 
     					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
     					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
+    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
     			bufferedWriterZones.newLine();
     		}
         } catch (FileNotFoundException ex) {
@@ -270,26 +272,25 @@ public class ZoneAndLOSGeneratorV2 {
     }
 	
 	
-	public void writeLOSOffPkAMFile() {
+	private void writeLOSOffPkAMFile() {
 		BufferedWriter bufferedWriterLos = null;
-		
 		try {
-            File losFile = new File(outputFileLosOffPkAM);
+            File losFile = new File(this.outputBase + "losoffpkam.dat");
             FileWriter fileWriterLos = new FileWriter(losFile);
     		bufferedWriterLos = new BufferedWriter(fileWriterLos);
     		
     		double temp = 0.0;
     		
-    		for (int originId : zones) {
-    			for (int destinationId : zones) {
+    		for (String originId : this.zones) {
+    			for (String destinationId : this.zones) {
     				
     				int inSameZone = 0;
-    				if (originId == destinationId) {
+    				if (originId.equals(destinationId)) {
     					inSameZone = 1;
     				}
     				
-    				double distance_mi = zone2ZoneDistanceMap.get(originId).get(destinationId);
-    				int adjacent = zone2ZoneAdjacencyMap.get(originId).get(destinationId);
+    				double distance_mi = this.zone2ZoneDistanceMap.get(originId).get(destinationId);
+    				int adjacent = this.zone2ZoneAdjacencyMap.get(originId).get(destinationId);
     				
     				double driveAloneIVTT_min = distance_mi * durantionDistanceOffPeakRatio_min_mile;
     				temp = Math.round(driveAloneIVTT_min * 100); // Round to two decimal places
@@ -300,9 +301,9 @@ public class ZoneAndLOSGeneratorV2 {
     				driveAloneCost_USD = temp / 100;
     				
     				// 14 columns
-    				bufferedWriterLos.write(originId + "\t" + destinationId + "\t" + inSameZone  + "\t" + adjacent
-    						+ "\t" + distance_mi + "\t" + driveAloneIVTT_min + "\t" + 3.1
-    						+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + driveAloneCost_USD
+    				bufferedWriterLos.write(Integer.parseInt(originId) + "\t" + Integer.parseInt(destinationId) + 
+    						"\t" + inSameZone  + "\t" + adjacent + "\t" + distance_mi + "\t" + driveAloneIVTT_min
+    						+ "\t" + 3.1 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + driveAloneCost_USD
     						+ "\t" + driveAloneIVTT_min + "\t" + driveAloneCost_USD);
         			bufferedWriterLos.newLine();
         		}
@@ -325,26 +326,25 @@ public class ZoneAndLOSGeneratorV2 {
 	}
 	
 	
-	public void writeLOSPeakAMFile() {
+	private void writeLOSPeakAMFile() {
 		BufferedWriter bufferedWriterLos = null;
-		
 		try {
-            File losFile = new File(outputFileLosPeakAM);
+            File losFile = new File(this.outputBase + "lospeakam.dat");
             FileWriter fileWriterLos = new FileWriter(losFile);
     		bufferedWriterLos = new BufferedWriter(fileWriterLos);
     		
     		double temp = 0.0;
     		
-    		for (int originId : zones) {
-    			for (int destinationId : zones) {
+    		for (String originId : this.zones) {
+    			for (String destinationId : this.zones) {
     				
     				int inSameZone = 0;
-    				if (originId == destinationId) {
+    				if (originId.equals(destinationId)) {
     					inSameZone = 1;
     				}
     				
-    				double distance_mi = zone2ZoneDistanceMap.get(originId).get(destinationId);
-    				int adjacent = zone2ZoneAdjacencyMap.get(originId).get(destinationId);
+    				double distance_mi = this.zone2ZoneDistanceMap.get(originId).get(destinationId);
+    				int adjacent = this.zone2ZoneAdjacencyMap.get(originId).get(destinationId);
     				
     				double driveAloneIVTT_min = distance_mi * durantionDistancePeakRatio_min_mile;
     				temp = Math.round(driveAloneIVTT_min * 100); // Round to two decimal places
@@ -355,8 +355,8 @@ public class ZoneAndLOSGeneratorV2 {
     				driveAloneCost_USD = temp / 100;
     				
     				// 14 columns
-    				bufferedWriterLos.write(originId + "\t" + destinationId + "\t" + inSameZone  + "\t" + adjacent
-    						+ "\t" + distance_mi + "\t" + driveAloneIVTT_min + "\t" + 3.1
+    				bufferedWriterLos.write(Integer.parseInt(originId) + "\t" + destinationId + "\t" + inSameZone
+    						+ "\t" + adjacent + "\t" + distance_mi + "\t" + driveAloneIVTT_min + "\t" + 3.1
     						+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + driveAloneCost_USD
     						+ "\t" + driveAloneIVTT_min + "\t" + driveAloneCost_USD);
         			bufferedWriterLos.newLine();
@@ -378,4 +378,29 @@ public class ZoneAndLOSGeneratorV2 {
         }
 		System.out.println("LOSPeakAM file written.");
 	}
+	
+	
+	public void setDefaultIntraZoneDistance(double defaultIntraZoneDistance) {
+    	this.defaultIntraZoneDistance = defaultIntraZoneDistance;
+    }
+	
+	
+	public void setBeelineDistanceFactor(double beelineDistanceFactor) {
+    	this.beelineDistanceFactor = beelineDistanceFactor;
+    }
+	
+	
+	public void setDurantionDistanceOffPeakRatio_min_mile(double durantionDistanceOffPeakRatio_min_mile) {
+    	this.durantionDistanceOffPeakRatio_min_mile = durantionDistanceOffPeakRatio_min_mile;
+    }
+	
+	
+	public void setDurantionDistancePeakRatio_min_mile(double durantionDistancePeakRatio_min_mile) {
+    	this.durantionDistancePeakRatio_min_mile = durantionDistancePeakRatio_min_mile;
+    }
+	
+	
+	public void setCostDistanceRatio_USD_mile(double costDistanceRatio_USD_mile) {
+    	this.costDistanceRatio_USD_mile = costDistanceRatio_USD_mile;
+    }
 }

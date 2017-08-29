@@ -1,10 +1,9 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * RunOTFVis
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,23 +16,50 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package scenarios.illustrative.singleCrossing.laemmer;
-
-import org.matsim.api.core.v01.Scenario;
-
-import signals.laemmer.run.LaemmerOTFStarter;
-
 
 /**
- * @author dgrether
+ * 
+ */
+package playground.jbischoff.avparking;
+
+import java.util.List;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+
+import playground.jbischoff.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
+
+/**
+ * @author  jbischoff
  *
  */
-public class SingleCrossingRunOTFVis {
+/**
+ *
+ */
+public class AvParkingContext {
 
-	public static void main(String[] args) {
-		double lambdaWestEast = 0.5;
-		Scenario scenario = new DgSingleCrossingScenario().createScenario(lambdaWestEast, false);
-		new LaemmerOTFStarter().playScenario(scenario);
+	private List<Id<Link>> avParkings;
+	private AVParkBehavior behavior;
+
+	/**
+	 * 
+	 */
+	public AvParkingContext(List<Id<Link>> avParkings, AVParkBehavior behavior ) {
+		this.avParkings = avParkings;
+		this.behavior = behavior;
+		
 	}
-
+	
+	/**
+	 * @return the avParkings
+	 */
+	public List<Id<Link>> getAvParkings() {
+		return avParkings;
+	}
+	/**
+	 * @return the behavior
+	 */
+	public AVParkBehavior getBehavior() {
+		return behavior;
+	}
 }
