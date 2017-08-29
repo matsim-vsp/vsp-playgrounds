@@ -40,6 +40,7 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
+import playground.ikaddoura.optAV.OptAVConfigGroup;
 import playground.ikaddoura.optAV.SAVPassengerTracker;
 
 
@@ -57,6 +58,9 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	
 	@Inject
 	private NoiseContext noiseContext;
+	
+	@Inject
+	private OptAVConfigGroup optAVParams;
 	
 	@Inject
 	private SAVPassengerTracker savPassengerTracker;
@@ -80,51 +84,81 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 		double amount = this.noiseContext.getNoiseParams().getNoiseTollFactor() * event.getAmount() * (-1);
 		this.amountSum = this.amountSum + amount;
 		
-		// charge the driver
-		
-		PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount);
-		this.events.processEvent(moneyEvent);
-		
-		PersonLinkMoneyEvent linkMoneyEvent = new PersonLinkMoneyEvent(event.getTime(), event.getCausingAgentId(), event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
-		this.events.processEvent(linkMoneyEvent);
-		
 		if (this.savPassengerTracker.getTaxiVehicles().contains(event.getCausingVehicleId())) {
 			
-			// a taxi vehicle, charge the passenger
+			// a taxi vehicle
 			
-			Id<Person> passenger = this.savPassengerTracker.getVehicle2passenger().get(event.getCausingVehicleId());
-			
-			if (passenger == null) {
-				log.info("No passenger identified for " + event.getCausingVehicleId() + " at " + event.getTime() + " on link " + event.getLinkId() +". Amount: " + amount);
+			if (optAVParams.isChargeTollsFromSAVDriver()) {
+				// charge the driver
 				
-				if (chargeNextPassenger) {
-					if (vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()) == null) {
-						vehicle2tollToBeChargedFromNextPassenger.put(event.getCausingVehicleId(), amount);
-					} else {
-						double newToll = vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()) + amount;
-						vehicle2tollToBeChargedFromNextPassenger.put(event.getCausingVehicleId(), newToll);
-					}
+				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount);
+				this.events.processEvent(moneyEvent);
+				
+				PersonLinkMoneyEvent linkMoneyEvent = new PersonLinkMoneyEvent(event.getTime(), event.getCausingAgentId(), event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
+				this.events.processEvent(linkMoneyEvent);
+			}
+			
+			if (optAVParams.isChargeSAVTollsFromPassengers()) {
+			
+				// charge the passenger
+				
+				Id<Person> passenger = this.savPassengerTracker.getVehicle2passenger().get(event.getCausingVehicleId());
+				
+				if (passenger == null) {
+					log.info("No passenger identified for " + event.getCausingVehicleId() + " at " + event.getTime() + " on link " + event.getLinkId() +". Amount: " + amount);
 					
-					log.info("Toll payments to be charged from next passenger: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()));
-				
-				} else {
-					log.info("Charging last passenger...");
-					Id<Person> lastPassenger = this.savPassengerTracker.getVehicle2lastPassenger().get(event.getCausingVehicleId());
-					if (lastPassenger == null) {
-						amountNotChargedFromPassengers = amountNotChargedFromPassengers + amount;
-						log.warn("Cumulative amount not passed to the passangers: " + amountNotChargedFromPassengers);
+					if (chargeNextPassenger) {
+						if (vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()) == null) {
+							vehicle2tollToBeChargedFromNextPassenger.put(event.getCausingVehicleId(), amount);
+						} else {
+							double newToll = vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()) + amount;
+							vehicle2tollToBeChargedFromNextPassenger.put(event.getCausingVehicleId(), newToll);
+						}
+						
+						log.info("Toll payments to be charged from next passenger: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()));
+					
 					} else {
-						this.events.processEvent(new PersonMoneyEvent(event.getTime(), lastPassenger, amount));
+						log.info("Charging the last passenger...");
+						Id<Person> lastPassenger = this.savPassengerTracker.getVehicle2lastPassenger().get(event.getCausingVehicleId());
+						if (lastPassenger == null) {
+							amountNotChargedFromPassengers = amountNotChargedFromPassengers + amount;
+							log.warn("Cumulative amount not passed to the passengers: " + amountNotChargedFromPassengers);
+						} else {
+							this.events.processEvent(new PersonMoneyEvent(event.getTime(), lastPassenger, amount));
+						}
 					}
+				
+				} else {	
+					
+					PersonMoneyEvent moneyEventPassenger = new PersonMoneyEvent(event.getTime(), passenger, amount);
+					this.events.processEvent(moneyEventPassenger);
+					
+					PersonLinkMoneyEvent linkMoneyEventPassenger = new PersonLinkMoneyEvent(event.getTime(), passenger, event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
+					this.events.processEvent(linkMoneyEventPassenger);
 				}
 			
 			} else {	
+				// do not charge the passenger
+			}
+
+		} else {
+			
+			// a car user
+			
+			if (optAVParams.isChargeTollsFromCarUsers()) {
 				
-				PersonMoneyEvent moneyEventPassenger = new PersonMoneyEvent(event.getTime(), passenger, amount);
-				this.events.processEvent(moneyEventPassenger);
+				// charge the car user
 				
-				PersonLinkMoneyEvent linkMoneyEventPassenger = new PersonLinkMoneyEvent(event.getTime(), passenger, event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
-				this.events.processEvent(linkMoneyEventPassenger);
+//				log.warn("the causing agent should be the car driver: " + event.getCausingAgentId());
+				
+				PersonMoneyEvent moneyEvent = new PersonMoneyEvent(event.getTime(), event.getCausingAgentId(), amount);
+				this.events.processEvent(moneyEvent);
+				
+				PersonLinkMoneyEvent linkMoneyEvent = new PersonLinkMoneyEvent(event.getTime(), event.getCausingAgentId(), event.getLinkId(), amount, event.getLinkEnteringTime(), "noise");
+				this.events.processEvent(linkMoneyEvent);
+			
+			} else {
+				// do not charge the passenger
 			}
 		}
 	}

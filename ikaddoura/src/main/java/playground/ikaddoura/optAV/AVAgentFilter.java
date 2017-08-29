@@ -19,6 +19,7 @@
 
 package playground.ikaddoura.optAV;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 
@@ -29,14 +30,29 @@ import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 */
 
 public class AVAgentFilter implements AgentFilter {
+	private static final Logger log = Logger.getLogger(AVAgentFilter.class);
+	private int wrnCnt = 0;
 
 	@Override
 	public String getAgentTypeFromId(Id<Person> id) {
-				
+			
 		if (id == null) {
+			if (wrnCnt < 5) {
+				log.warn("Person id is null. Assuming this person to be a taxi driver.");
+				if (wrnCnt == 4) log.warn("Further warnings of this type are not printed out.");
+				wrnCnt++;
+			}
 			return "taxi";
+		}
+		
+		if (id.toString().startsWith("taxi")
+				|| id.toString().startsWith("av")
+				|| id.toString().startsWith("sav")
+				|| id.toString().startsWith("rt")) {
+			return "taxi";
+		
 		} else {
-			return "ohter";
+			return "other";
 		}
 	}
 
