@@ -1,9 +1,13 @@
 package playground.tschlenther;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +26,11 @@ public class DummyTests {
 //		testListIndex();
 //		testDecimalFormat();
 //		testDateFormat();
-		testCollectionModification();
+//		testCollectionModification();
+//		testGregorianCalendar();
+//		System.out.println(" ü ü ü");
+//		testLocalDate();
+		testStringSplit();
 	}
 	
 	private static void testDateFormat(){
@@ -70,7 +78,6 @@ public class DummyTests {
 		
 		
 	}
-
 
 	private static void testArray(){
 		double[] arr1 = new double[3];
@@ -170,5 +177,58 @@ public class DummyTests {
 		}
 		
 	}
+	
+	private static void testGregorianCalendar(){
+		SimpleDateFormat f  = new SimpleDateFormat("yyMMdd");
+		String tag = "170805";
+		
+		Calendar cl = Calendar.getInstance();
+		cl.clear();
+		try {
+			cl.setTime(f.parse(tag));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		cl.set(Calendar.DAY_OF_WEEK, cl.getFirstDayOfWeek());
+		
+		System.out.println("Jahr: " + cl.get(Calendar.YEAR));
+		System.out.println("Monat: " + cl.get(Calendar.MONTH));
+		System.out.println("Tag: " + cl.get(Calendar.DAY_OF_MONTH));
+		System.out.println("Wochentag: " + cl.get(Calendar.DAY_OF_WEEK));
+		System.out.println("Monatszahl Januar: " + cl.get(Calendar.JANUARY));
+		System.out.println("first weekday: " + cl.get(cl.getFirstDayOfWeek()));
+		System.out.println("Montags zahl: " + Calendar.MONDAY);
+	}
+	
+	private static void testLocalDate(){
+		System.out.println(" -- testing LocalDate -- ");
+		
+		LocalDate date = LocalDate.of(2014, 01, 06);
+		System.out.println("Datum: " + date.toString());
+		System.out.println("Wochentag: " + date.getDayOfWeek().getValue());
+		System.out.println("Jahr: " + date.getYear());
+	}
+			
 
+	private static void testStringSplit(){
+		String str = "141101i01:00  285-   37-   76-    0-   97-    0-  344-   22-    0-  239-    9-    0-    0-    4-    8-   25-    0-    0-   72-    3-    0-    0-    0-    0-    0-    1-    0-   94-    3-    0-    0-    0-    0-    0-    0-    0-  300-   17-    1-    1-    2-    7-   12-    4-";
+		System.out.println("char at index 6: " + str.charAt(6));
+		if(str.charAt(6) == 'i'){
+			System.out.println("statuskennung ist i");
+		} else{
+			System.out.println("statuskennung ist cool");
+		}
+		String[] tokens = str.split("\\s+");
+	
+		String str2 = "141101 15:00  833-   22-  960-    7-  603-    1-  381-    0- 1131-    8- 1290-   13-    3-  752-   48-    6-    3-   11-    2-    6-    2-    6-  911-   31-    3-    3-    4-    0-    0-    2-    1-  557-   30-    1-    0-    1-    0-    0-   13-    3-  373-    1-    0-    0-    0-    0-    0-    4-    8- 1077-   33-    3-    1-    5-    0-    2-    2-   15- 1213-   42-    5-    0-    8-    0-    5-    2-";
+		String[] tokens2 = str.split("\\s+");
+		int i = 0;
+		for(String s : tokens){
+			System.out.println("" + i + ": " + s);
+			i++;
+		}
+		
+	}
 }

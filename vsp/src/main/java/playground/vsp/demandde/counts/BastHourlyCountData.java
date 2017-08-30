@@ -20,7 +20,7 @@ public class BastHourlyCountData{
 	private HashMap<Integer,Double> R2VolumesPerHour;
 
 	
-	BastHourlyCountData(String id, Day representedDay){
+	public BastHourlyCountData(String id, Day representedDay){
 		this.id = id;
 		this.representedDay = representedDay;
 		this.R1VolumesPerHour = new HashMap<Integer, Double>();
