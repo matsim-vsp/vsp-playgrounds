@@ -19,11 +19,8 @@
  * *********************************************************************** */
 package playground.dgrether.lanes;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -57,87 +54,103 @@ public class LanesConsistencyChecker {
 	
 	public void checkConsistency() {
 		log.info("checking consistency...");
-		List<Id> malformedLinkIds = new ArrayList<Id>();
+		List<Id<Link>> linksWithMalformedLanes = new LinkedList<>();
 		for (LanesToLinkAssignment l2l : this.lanes.getLanesToLinkAssignments().values()){
-			//check if link exists for each assignment of one or more lanes to a link
-			if (this.network.getLinks().get(l2l.getLinkId()) == null) {
-				log.error("No link found for lanesToLinkAssignment on link Id(linkIdRef): "  + l2l.getLinkId());
-				malformedLinkIds.add(l2l.getLinkId());
+			if (isLaneOnLinkConsistent(l2l)){
+				linksWithMalformedLanes.add(l2l.getLinkId());
 			}
-			//check length
-			else {
-				Link link = this.network.getLinks().get(l2l.getLinkId());
-				for (Lane l : l2l.getLanes().values()){
-					if (link.getLength() < l.getStartsAtMeterFromLinkEnd()) {
-						log.error("Link Id " + link.getId() + " is shorter than an assigned lane with id " + l.getId());
-						malformedLinkIds.add(l2l.getLinkId());
-					}
-				}
-			}
-			
-			//check toLinks or toLanes specified in the lanes 
-			for (Lane lane : l2l.getLanes().values()) {
-				if (lane.getToLaneIds() != null) {
-					for (Id toLaneId : lane.getToLaneIds()){
-						if (! l2l.getLanes().containsKey(toLaneId)){
-							log.error("Error: toLane not existing:");
-							log.error("  Lane Id: " + lane.getId() + " on Link Id: " + l2l.getLinkId() + 
-									" leads to Lane Id: " + toLaneId + " that is not existing!");
-						}
-					}
-				}
-				//check availability of toLink in network
-				else if (lane.getToLinkIds() != null){
-					for (Id toLinkId : lane.getToLinkIds()) {
-						if (this.network.getLinks().get(toLinkId) == null){
-							log.error("No link found in network for toLinkId " + toLinkId + " of laneId " + lane.getId() + " of link id " + l2l.getLinkId());
-							malformedLinkIds.add(l2l.getLinkId());
-						}
-					}
-				}
-			}
-			
-			//second check matching of link's outlinks and lane's toLinks
-			Link link = this.network.getLinks().get(l2l.getLinkId());
-			log.info("Link id: " + l2l.getLinkId());
-			Map<Id<Link>, ? extends Link> outLinksMap = link.getToNode().getOutLinks();
-			Set<Id> linkLanes2LinkIdSet = new HashSet<Id>();
-			for (Lane lane : l2l.getLanes().values()){
-				if (lane.getToLinkIds() != null){
-					linkLanes2LinkIdSet.addAll(lane.getToLinkIds());
-				}
-			}
-			
-			for (Link outLink : outLinksMap.values()){
-				log.info("\t\thas outlink: " + outLink.getId());
-				if (!linkLanes2LinkIdSet.contains(outLink.getId())){
-					malformedLinkIds.add(l2l.getLinkId());
-					log.error("Error: Lane Outlink: ");
-					log.error("\t\tThe lanes of link " + link.getId() + " do not lead to all of the outlinks of the links toNode " + link.getToNode().getId() + " . The outlink " + outLink.getId()
-					+ " is not reachable from the lanes of this link. ");
-					for (Lane lane : l2l.getLanes().values()){
-						log.error("\t\tLane id: " + lane.getId());
-						if (lane.getToLinkIds() != null){
-							for (Id id : lane.getToLinkIds()){
-								log.error("\t\t\t\thas toLinkId: " + id);
-							}
-						}
-						log.error("End: Lane Outlink Error Message");
-					}
-				}
-			}
-		}
-		
-		
+		}		
 		
 		if (this.removeMalformed){
-			for (Id id : malformedLinkIds) {
-				this.lanes.getLanesToLinkAssignments().remove(id);
+			for (Id<Link> linkId : linksWithMalformedLanes) {
+				this.lanes.getLanesToLinkAssignments().remove(linkId);
+				log.info("remove lanes on link " + linkId);
 			}
 		}
-		log.info("checked consistency.");
+		log.info("checked consistency. Lanes on " + linksWithMalformedLanes.size() + " links have been removed.");
 	}
 	
+	private boolean isLaneOnLinkConsistent(LanesToLinkAssignment l2l) {
+		//check if link exists for each assignment of one or more lanes to a link
+		if (!this.network.getLinks().containsKey(l2l.getLinkId())) {
+			log.error("No link found for lanesToLinkAssignment on link Id(linkIdRef): "  + l2l.getLinkId());
+			return false;
+		}
+		//check length
+		else {
+			Link link = this.network.getLinks().get(l2l.getLinkId());
+			for (Lane l : l2l.getLanes().values()){
+				if (link.getLength() < l.getStartsAtMeterFromLinkEnd()) {
+					log.error("Link Id " + link.getId() + " is shorter than an assigned lane with id " + l.getId());
+					return false;
+				}
+			}
+		}
+		
+		//check toLinks or toLanes specified in the lanes 
+		for (Lane lane : l2l.getLanes().values()) {
+			if (lane.getToLaneIds() != null) {
+				for (Id<Lane> toLaneId : lane.getToLaneIds()){
+					if (! l2l.getLanes().containsKey(toLaneId)){
+						log.error("Error: toLane not existing:");
+						log.error("  Lane Id: " + lane.getId() + " on Link Id: " + l2l.getLinkId() + 
+								" leads to Lane Id: " + toLaneId + " that is not existing!");
+						return false;
+						// TODO just delete this toLane?
+					}
+				}
+			}
+			//check availability of toLink in network
+			else if (lane.getToLinkIds() != null){
+				for (Id<Link> toLinkId : lane.getToLinkIds()) {
+					if (! this.network.getLinks().containsKey(toLinkId)){
+						log.error("No link found in network for toLinkId " + toLinkId + " of laneId " + lane.getId() + " of link id " + l2l.getLinkId());
+						return false;
+						// TODO just delete this toLink?
+					} else {
+						Link link = this.network.getLinks().get(l2l.getLinkId());
+						if (! link.getToNode().getOutLinks().containsKey(toLinkId)){
+							log.error("The given toLink " + toLinkId + " is not reachable from lane " + lane.getId() + " on link " + link.getId());
+							return false;
+							// TODO just delete this toLink?
+						}
+					}
+				}
+			}
+		}
+		
+		// comment this out, because not every out-link of a node has to be reached by every in-link. theresa, aug'17
+//		//second check matching of link's outlinks and lane's toLinks
+//		Link link = this.network.getLinks().get(l2l.getLinkId());
+//		log.info("Link id: " + l2l.getLinkId());
+//		Set<Id<Link>> toLinksFromLanes = new HashSet<>();
+//		for (Lane lane : l2l.getLanes().values()){
+//			if (lane.getToLinkIds() != null){
+//				toLinksFromLanes.addAll(lane.getToLinkIds());
+//			}
+//		}
+//		
+//		for (Link nodeOutLink : link.getToNode().getOutLinks().values()){
+//			log.info("\t\thas outlink: " + nodeOutLink.getId());
+//			if (!toLinksFromLanes.contains(nodeOutLink.getId())){
+//				log.error("Error: Lane Outlink: ");
+//				log.error("\t\tThe lanes of link " + link.getId() + " do not lead to all of the outlinks of the links toNode " + link.getToNode().getId() + " . The outlink " + nodeOutLink.getId()
+//				+ " is not reachable from the lanes of this link. ");
+//				for (Lane lane : l2l.getLanes().values()){
+//					log.error("\t\tLane id: " + lane.getId());
+//					if (lane.getToLinkIds() != null){
+//						for (Id<Link> id : lane.getToLinkIds()){
+//							log.error("\t\t\t\thas toLinkId: " + id);
+//						}
+//					}
+//					log.error("End: Lane Outlink Error Message");
+//				}
+//				return false;
+//			}
+//		}
+		return true;
+	}
+
 	public boolean isRemoveMalformed() {
 		return removeMalformed;
 	}

@@ -38,6 +38,7 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 
 	private boolean chargeOperatingCostsFromPassengers = true;
 	
+	private boolean chargeTollsFromSAVDriver = true;
 	private boolean chargeSAVTollsFromPassengers = true;
 	private boolean chargeTollsFromCarUsers = true;
 	
@@ -140,6 +141,16 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter( "chargeTollsFromCarUsers" )
 	public void setChargeTollsFromCarUsers(boolean chargeTollsFromCarUsers) {
 		this.chargeTollsFromCarUsers = chargeTollsFromCarUsers;
+	}
+
+	@StringGetter( "chargeTollsFromSAVDriver" )
+	public boolean isChargeTollsFromSAVDriver() {
+		return chargeTollsFromSAVDriver;
+	}
+
+	@StringSetter( "chargeTollsFromSAVDriver" )
+	public void setChargeTollsFromSAVDriver(boolean chargeTollsFromSAVDriver) {
+		this.chargeTollsFromSAVDriver = chargeTollsFromSAVDriver;
 	}
 	
 	

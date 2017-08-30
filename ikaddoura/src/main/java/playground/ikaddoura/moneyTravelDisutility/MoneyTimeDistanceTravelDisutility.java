@@ -126,6 +126,9 @@ public class MoneyTimeDistanceTravelDisutility implements TravelDisutility {
 					Id<Person> personId = null;
 					if (person != null) {
 						personId = person.getId();
+					} else {
+						// person Id is null
+						System.out.println();
 					}
 					String agentType = vehicleFilter.getAgentTypeFromId(personId);
 					Double avgMoneyAmountVehicleType = timeBin.getAgentTypeId2avgAmount().get(agentType);

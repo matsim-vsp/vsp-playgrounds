@@ -154,21 +154,11 @@ public class OptAVModule extends AbstractModule {
         // #############################
 		
 		if (optAVParams.isAccountForNoise()) {
-			
-			if (optAVParams.isChargeSAVTollsFromPassengers()) {
-				install(new NoiseComputationModuleSAV(scenario));
-			} else {
-				install(new NoiseComputationModule(scenario));
-			}
+			install(new NoiseComputationModuleSAV(scenario));
 		}
 				
 		if (optAVParams.isAccountForCongestion()) {
-			
-			if (optAVParams.isChargeSAVTollsFromPassengers()) {
-				install(new DecongestionModuleSAV(scenario));
-			} else {
-				install(new DecongestionModule(scenario));
-			}
+			install(new DecongestionModuleSAV(scenario));
 		}
 		
 		if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.ExternalCost.toString()) ||
@@ -201,44 +191,55 @@ public class OptAVModule extends AbstractModule {
 		               
 		// taxi_optimizer
 		
-		if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
-			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);     
-        	
-    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
-        	
-        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
-        	MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()));
-       
-    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
-        	
-        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.NoPricing.toString())) {
-        	RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
-        	
-        	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);        	
-        }
+		if (optAVParams.isChargeTollsFromSAVDriver()) {
+			if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
+				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);
+	    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
+	        	
+	        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
+	        	MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
+					new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()));
+	    		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
+	        	
+	        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.NoPricing.toString())) {
+	        	RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
+	        	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);        	
+	        }
+			
+		} else {
+			RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
+        	this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);
+        	// alternatively, use the default travel disutility
+		}
 		
-		// car
+		// car user
 		
 		if (optAVParams.isChargeTollsFromCarUsers()) {
 			if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
 				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(null);     
-	        	
 	    		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
 	        	
 	        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
 	        	MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory = new MoneyTimeDistanceTravelDisutilityFactory(
 					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()));
-	       
 	    		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
 	        	
 	        } else if (optAVParams.getOptAVApproach().toString().equals(TollingApproach.NoPricing.toString())) {
 	        	RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()); 
-	        	
 	        	this.addTravelDisutilityFactoryBinding(TransportMode.car).toInstance(defaultTravelDisutilityFactory);        	
 	        }
 			
-		} else {
+		} else {		
+			RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory = new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()); 
+        	this.addTravelDisutilityFactoryBinding(TransportMode.car).toInstance(defaultTravelDisutilityFactory);
+        	// alternatively, use the default travel disutility
+		}
+		
+		// account for vehicle type (taxi vs. car user)
+		if ((optAVParams.isChargeTollsFromCarUsers() == false && optAVParams.isChargeTollsFromSAVDriver() == true) 
+				|| (optAVParams.isChargeTollsFromCarUsers() == true && optAVParams.isChargeTollsFromSAVDriver() == false))  {
+			
+			log.info("Using an agent filter which differentiates between taxi and other vehicles...");
 			
 			this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
 		}
