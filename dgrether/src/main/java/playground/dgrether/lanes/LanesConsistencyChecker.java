@@ -56,7 +56,7 @@ public class LanesConsistencyChecker {
 		log.info("checking consistency...");
 		List<Id<Link>> linksWithMalformedLanes = new LinkedList<>();
 		for (LanesToLinkAssignment l2l : this.lanes.getLanesToLinkAssignments().values()){
-			if (isLaneOnLinkConsistent(l2l)){
+			if (!isLaneOnLinkConsistent(l2l)){
 				linksWithMalformedLanes.add(l2l.getLinkId());
 			}
 		}		
