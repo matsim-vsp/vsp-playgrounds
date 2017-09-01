@@ -35,7 +35,9 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PolygonFeatureFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.gis.ShapeFileWriter;
@@ -64,18 +66,25 @@ public class TollGISAnalyzer {
 	private static final Logger log = Logger.getLogger(TollGISAnalyzer.class);
 	private Map<Integer, SimpleFeature> features = new HashMap<>();
 	private Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
-	private String crs;
-	
+	private String zonesCRS;
+	private String fileName;
+	private CoordinateTransformation ct;
+
 	public TollGISAnalyzer(
 			String shapeFileZones,
 			int scalingFactor,
 			String homeActivity,
-			String crs) {
+			String zonesCRS,
+			String scenarioCRS,
+			String fileName) {
 		
 		this.scalingFactor = scalingFactor;
 		this.homeActivity = homeActivity;
-		this.crs = crs;
+		this.fileName = fileName;
 		
+		this.zonesCRS = zonesCRS;
+		this.ct = TransformationFactory.getCoordinateTransformation(scenarioCRS, zonesCRS);
+
 		log.info("Reading zone shapefile...");
 		int featureCounter = 0;
 		for (SimpleFeature feature : ShapeFileReader.getAllFeatures(shapeFileZones)) {
@@ -86,7 +95,11 @@ public class TollGISAnalyzer {
 		log.info("Reading zone shapefile... Done. Number of zones: " + featureCounter);
 	}
 	
-	public void analyzeZoneTollsUserBenefits(Scenario scenario, String runDirectory, Map<Id<Person>, Double> personId2userBenefits, Map<Id<Person>, Double> personId2tollPayments) {
+	public void analyzeZoneTollsUserBenefits(Scenario scenario, String runDirectory, Map<Id<Person>, Double> personId2userBenefits,
+			Map<Id<Person>, Double> personId2tollPayments,
+			Map<Id<Person>, Double> personId2congestionPayments,
+			Map<Id<Person>, Double> personId2noisePayments,
+			Map<Id<Person>, Double> personId2airPollutionPayments) {
 		String outputPath = runDirectory + "spatial_analysis/tolls_userBenefits_zones/";
 		
 		File file = new File(outputPath);
@@ -105,18 +118,26 @@ public class TollGISAnalyzer {
 		// absolute numbers mapped back to home location
 		log.info("Mapping absolute toll payments and user benefits to home location...");
 		Map<Integer,Double> zoneNr2tollPayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2tollPayments, this.zoneId2geometry, this.scalingFactor);
+		
+		Map<Integer,Double> zoneNr2congestionPayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2congestionPayments, this.zoneId2geometry, this.scalingFactor);
+		Map<Integer,Double> zoneNr2noisePayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2noisePayments, this.zoneId2geometry, this.scalingFactor);
+		Map<Integer,Double> zoneNr2airPollutionPayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2airPollutionPayments, this.zoneId2geometry, this.scalingFactor);
+
 		Map<Integer,Double> zoneNr2userBenefits = getZoneNr2totalAmount(scenario.getPopulation(), personId2userBenefits, this.zoneId2geometry, this.scalingFactor);
 		log.info("Mapping absolute toll payments and user benefits to home location... Done.");
 		
 		log.info("Writing shape file...");
 		
 		PolygonFeatureFactory featureFactory = new PolygonFeatureFactory.Builder().
-				setCrs(MGC.getCRS(crs)).
+				setCrs(MGC.getCRS(zonesCRS)).
 				setName("zone").
 				addAttribute("ID", Integer.class).
 				addAttribute("HomeAct", Integer.class).
 				addAttribute("AllAct", Integer.class).
 				addAttribute("Tolls", Double.class).
+				addAttribute("C", Double.class).
+				addAttribute("N", Double.class).
+				addAttribute("A", Double.class).
 				addAttribute("Scores", Double.class).
 				create();
 		
@@ -127,7 +148,10 @@ public class TollGISAnalyzer {
 			attributeValues.put("ID", id);
 			attributeValues.put("HomeAct", zoneNr2homeActivities.get(id));
 			attributeValues.put("AllAct", zoneNr2activities.get(id));		
-			attributeValues.put("Tolls", zoneNr2tollPayments.get(id));		
+			attributeValues.put("Tolls", zoneNr2tollPayments.get(id));
+			attributeValues.put("C", zoneNr2congestionPayments.get(id));
+			attributeValues.put("N", zoneNr2noisePayments.get(id));
+			attributeValues.put("A", zoneNr2airPollutionPayments.get(id));
 			attributeValues.put("Scores", zoneNr2userBenefits.get(id));		
 
 			Geometry geometry = (Geometry) features.get(id).getDefaultGeometry();
@@ -137,7 +161,7 @@ public class TollGISAnalyzer {
 			featuresToWriteOut.add(feature);
 		}
 		
-		ShapeFileWriter.writeGeometries(featuresToWriteOut, outputPath + scenario.getConfig().controler().getLastIteration() + ".tolls_userBenefits.shp");
+		ShapeFileWriter.writeGeometries(featuresToWriteOut, outputPath + scenario.getConfig().controler().getLastIteration() + "." + fileName);
 
 		log.info("Writing shape file... Done.");
 		
@@ -157,7 +181,7 @@ public class TollGISAnalyzer {
 			if (personId2homeCoord.containsKey(personId)){
 				for (Integer zoneId : zoneId2geometry.keySet()) {
 					Geometry geometry = zoneId2geometry.get(zoneId);
-					Point p = MGC.coord2Point(personId2homeCoord.get(personId)); 
+					Point p = MGC.coord2Point(ct.transform(personId2homeCoord.get(personId))); 
 					
 					if (p.within(geometry)){
 						if (zoneNr2totalAmount.get(zoneId) == null){
@@ -188,7 +212,7 @@ public class TollGISAnalyzer {
 		for (Coord coord : personId2activityCoord.values()) {
 			for (Integer nr : zoneNr2zoneGeometry.keySet()) {
 				Geometry geometry = zoneNr2zoneGeometry.get(nr);
-				Point p = MGC.coord2Point(coord); 
+				Point p = MGC.coord2Point(ct.transform(coord)); 
 				
 				if (p.within(geometry)){
 					if (zoneNr2activity.get(nr) == null){

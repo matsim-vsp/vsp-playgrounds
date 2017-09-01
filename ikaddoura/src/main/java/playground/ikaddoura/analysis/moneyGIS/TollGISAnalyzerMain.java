@@ -42,10 +42,17 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 public class TollGISAnalyzerMain {
 	
 	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run4_bln_cne_DecongestionPID/";
-	private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_1500/berlin_grid_1500.shp";
-		
+	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+	
+	// private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_1500/berlin_grid_1500.shp";
+	// private final String crs = TransformationFactory.DHDN_GK4;
+
+	private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
+	private final String zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
+	
+	private final String outputFileName = "tolls_CNA_userBenefits_bezirke.shp";
+	
 	private final String homeActivity = "home";
-	private final String crs = TransformationFactory.DHDN_GK4;
 	private final int scalingFactor = 100;
 	
 	private static final Logger log = Logger.getLogger(TollGISAnalyzerMain.class);
@@ -71,9 +78,7 @@ public class TollGISAnalyzerMain {
 		String eventsFile1 = runDirectory + "/ITERS/it." + scenario.getConfig().controler().getLastIteration() + "/" + scenario.getConfig().controler().getLastIteration() + ".events.xml.gz";
 		reader.readFile(eventsFile1);
 		log.info("Reading events file... Done.");
-		
-		Map<Id<Person>, Double> personId2Toll = moneyHandler.getPersonId2toll();
-		
+				
 		Map<Id<Person>, Double> personId2userBenefits = new HashMap<>();
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			double score = 0.0;
@@ -86,8 +91,8 @@ public class TollGISAnalyzerMain {
 		}
 		
 		log.info("Analyzing zones...");
-		TollGISAnalyzer gisAnalysis = new TollGISAnalyzer(shapeFileZones, scalingFactor, homeActivity, crs);
-		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, personId2userBenefits, personId2Toll);
+		TollGISAnalyzer gisAnalysis = new TollGISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS, outputFileName);
+		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll() );
 		log.info("Analyzing zones... Done.");
 	}
 	
