@@ -118,7 +118,7 @@ VehicleAbortsEventHandler {
 
 	@Override 
 	public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
-		return previous.getLinkTravelTime(link.getId(), time) ;
+		return previous.getLinkTravelTime(link, time) ;
 	}
 
 }
