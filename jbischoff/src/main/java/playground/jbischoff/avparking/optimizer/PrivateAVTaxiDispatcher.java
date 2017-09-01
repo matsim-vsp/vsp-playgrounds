@@ -98,7 +98,15 @@ public class PrivateAVTaxiDispatcher
 				if (veh.getSchedule().getStatus().equals(ScheduleStatus.STARTED)){
 
 				if (isWaitStay((TaxiTask) veh.getSchedule().getCurrentTask())&& manager.getVehicleParkingLocation(Id.createVehicleId(veh.getId())) == null) {
-
+					
+					//check if current location allows for parking and park here
+		    	Link lastLink = Schedules.getLastLinkInSchedule(veh);
+		    	if (manager.reserveSpaceIfVehicleCanParkHere(Id.createVehicleId(veh.getId()), lastLink.getId()))
+		    			{
+		    		manager.parkVehicleHere(Id.createVehicleId(Id.createVehicleId(veh.getId())), lastLink.getId(), e.getSimulationTime());
+		    	}else {
+					
+					
 				AVParkBehavior vehParkBehavior = parkBehavior;
 				if (vehParkBehavior == AVParkBehavior.randombehavior) {
 					int i = random.nextInt(3);
@@ -127,6 +135,7 @@ public class PrivateAVTaxiDispatcher
 				}
 
 			}
+				}
 
 		}
 			}
