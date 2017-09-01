@@ -1,39 +1,19 @@
 package playground.jmolloy.nodeModel;
 
-import java.io.PrintStream;
-import java.lang.invoke.LambdaMetafactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.BasicPlan;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.api.core.v01.population.Route;
-import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup;
-import org.matsim.core.config.groups.NetworkConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -48,7 +28,6 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
-import org.matsim.vehicles.Vehicle;
 
 public abstract class AbstractNodeSimulation {
     protected final int timesteps;
@@ -155,7 +134,7 @@ public abstract class AbstractNodeSimulation {
                 double capacity = link.getCapacity();
                 double reduction_factor = link_volumes[i] / inflow;
                 double cap_red_factor = link_volumes[i] / capacity;
-                double tt_h = (this.travelTimeCalculator.getLinkTravelTime(linkid, (double)(i * 3600)) - tt_freeflow) / 3600.0;
+                double tt_h = (this.travelTimeCalculator.getLinkTravelTime(link, (double)(i * 3600)) - tt_freeflow) / 3600.0;
                 System.out.println(String.format("%3s (%2dh):\t%5.0f\t%5.0f\t%2.2f\t%5.0f\t%2.2f\t%3.2f", new Object[]{linkid, i, link_volumes[i], inflow, reduction_factor, capacity, cap_red_factor, tt_h}));
             }
             System.out.println();
