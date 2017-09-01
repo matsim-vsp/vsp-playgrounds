@@ -191,9 +191,9 @@ public class CreateMonthlyTravelTimes {
 				break;
 			}
 			log.info("bin no:" + currentTimeBin + "day: " + currentDay + " time: " + Time.writeTime(time));
-			for (Id<Link> linkId : network.getLinks().keySet()) {
-				double tt = ttc.getLinkTravelTime(linkId, time);
-				this.traveltimes.get(linkId)[currentTimeBin] = tt;
+			for (Link link : network.getLinks().values()) {
+				double tt = ttc.getLinkTravelTime(link, time);
+				this.traveltimes.get(link.getId())[currentTimeBin] = tt;
 			}
 
 		}
