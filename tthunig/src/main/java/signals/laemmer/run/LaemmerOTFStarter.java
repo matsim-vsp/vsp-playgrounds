@@ -20,10 +20,13 @@
 package signals.laemmer.run;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
+import org.matsim.contrib.signals.controler.SignalsModule;
 import org.matsim.contrib.signals.otfvis.OTFClientLiveWithSignals;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignals;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.ControlerDefaultsModule;
@@ -57,7 +60,7 @@ public class LaemmerOTFStarter {
 
 	public void playScenario(Scenario scenario) {
 
-		com.google.inject.Injector injector = Injector.createInjector(scenario.getConfig(), new AbstractModule() {
+		com.google.inject.Injector injector = Injector.createInjector(scenario.getConfig(), AbstractModule.override(Collections.singleton(new AbstractModule() {
 			@Override
 			public void install() {
 				// defaults
@@ -65,10 +68,8 @@ public class LaemmerOTFStarter {
 				install(new ControlerDefaultCoreListenersModule());
 				install(new ControlerDefaultsModule());
 				install(new ScenarioByInstanceModule(scenario));
-				// signal specific module
-				install(new CombinedSignalsModule());
 			}
-		});
+		}), new CombinedSignalsModule()));
 
 		EventsManager events = injector.getInstance(EventsManager.class);
 		events.initProcessing();
@@ -83,7 +84,6 @@ public class LaemmerOTFStarter {
 		OTFClientLiveWithSignals.run(scenario.getConfig(), server);
 		
 		otfVisQSim.run();
-
 	}
 
 }
