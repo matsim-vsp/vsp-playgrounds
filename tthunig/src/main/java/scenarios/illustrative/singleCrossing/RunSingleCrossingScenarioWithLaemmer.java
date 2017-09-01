@@ -1,6 +1,7 @@
 package scenarios.illustrative.singleCrossing;
 
 import org.apache.log4j.Logger;
+import org.matsim.core.controler.Controler;
 
 import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.laemmer.run.LaemmerMain;
@@ -14,7 +15,7 @@ public class RunSingleCrossingScenarioWithLaemmer {
     private static final boolean USE_LAEMMER = true;
     private static final Regime LAEMMER_REGIME = Regime.COMBINED;
     
-    private static final boolean VIS = false;
+    private static final boolean VISUALIZE_WITH_OTFVIS = true;
     private static final boolean LOG_ENABLED = false;
     private static final boolean LIVE_ARRIVAL_RATES = true;
     private static final boolean STOCHASTIC_DEMAND = false;
@@ -35,7 +36,8 @@ public class RunSingleCrossingScenarioWithLaemmer {
         double flowWE = 1800;
 //        for (int i = 0; i <= 2520; i += 120) {
 //        	flowWE = i;
-            new SingleCrossingScenario(flowNS, flowWE, USE_LAEMMER, LAEMMER_REGIME, VIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD).defineControler().run();
+            Controler singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD).defineControler();
+            singleCrossingScenario.run();
 //        }
     }
 
