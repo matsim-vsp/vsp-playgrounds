@@ -26,7 +26,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.pt.router.FakeFacility;
 import org.matsim.pt.router.TransitRouter;
 import org.matsim.pt.router.TransitRouterConfig;
-import org.matsim.pt.router.TransitRouterImpl;
 import org.matsim.pt.router.TransitRouterImplFactory;
 import org.matsim.pt.transitSchedule.TransitScheduleReaderV1;
 
@@ -383,7 +382,7 @@ public class MainEventAnalyzer {
 					if(leg.getRoute() instanceof NetworkRoute)
 						for(Id<Link> linkId:((NetworkRoute)leg.getRoute()).getLinkIds()) {
 							distancePT+=scenario.getNetwork().getLinks().get(linkId).getLength();
-							timePT += ttc.getLinkTravelTime(linkId, new Double(parts[6]));
+							timePT += ttc.getLinkTravelTime(scenario.getNetwork().getLinks().get(linkId), new Double(parts[6]));
 						}
 					else {
 						timePT += leg.getTravelTime();

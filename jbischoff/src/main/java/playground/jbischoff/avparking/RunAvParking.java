@@ -40,10 +40,10 @@ import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.QSimConfigGroup.StarttimeInterpretation;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import com.google.inject.Binder;
-import com.google.inject.name.Names;
+
 
 import playground.jbischoff.avparking.optimizer.PrivateAVOptimizerProvider;
 import playground.jbischoff.avparking.optimizer.PrivateAVTaxiDispatcher.AVParkBehavior;
@@ -60,17 +60,27 @@ public class RunAvParking {
 
 	public static void main(String[] args) {
 		
-		Config config = ConfigUtils.loadConfig("C:/Users/Joschka/Desktop/parkingsearch/config.xml", new DvrpConfigGroup(), new TaxiConfigGroup());
-		//all further input files are set in the config.
-		
-		// set to false, if you don't require visualisation, then the example will run for 11 iterations, with OTFVis, only one iteration is performed. 
-		boolean otfvis = false;
-		if (otfvis) {
-			config.controler().setLastIteration(0);
-		} else {
-			config.controler().setLastIteration(10);
+		Config config = ConfigUtils.loadConfig(args[0], new DvrpConfigGroup(), new TaxiConfigGroup());
+		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		AVParkBehavior b ;
+		switch (args[1]){
+			case "0":
+				b = AVParkBehavior.findfreeSlot;
+				break;
+			case "1":
+				b= AVParkBehavior.garage;
+				break;
+			case "2":
+				b= AVParkBehavior.cruise;
+				break;
+			case "3":
+				b= AVParkBehavior.randombehavior;
+				break;
+			default:
+				throw new RuntimeException();
+				
 		}
-		new RunAvParking().run(config,otfvis);
+		new RunAvParking().run(config,b);
 
 	}
 
@@ -80,26 +90,21 @@ public class RunAvParking {
 	 * @param otfvis
 	 *            turns otfvis visualisation on or off
 	 */
-	public void run(Config config, boolean otfvis) {
+	public void run(Config config, AVParkBehavior b) {
+		config.controler().setOutputDirectory(config.controler().getOutputDirectory()+"/"+b.toString());
 		config.qsim().setStartTime(0);
 		config.qsim().setSimStarttimeInterpretation(StarttimeInterpretation.onlyUseStarttime);
 		config.qsim().setSnapshotStyle(SnapshotStyle.withHoles);
 		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		config.checkConsistency();
+		config.global().setNumberOfThreads(8);
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 
-		
-		
-		
-		if (otfvis) {
-			controler.addOverridingModule(new OTFVisLiveModule());
-		}
 		PrivateAVFleetGenerator fleet = new PrivateAVFleetGenerator(scenario);  
 		List<Id<Link>> avParkings = new ArrayList<>();
-		avParkings.add(Id.createLinkId(113));
-		avParkings.add(Id.createLinkId(151));
-		AvParkingContext context = new AvParkingContext(avParkings, AVParkBehavior.randombehavior);
+		avParkings.add(Id.createLinkId(35464));
+		AvParkingContext context = new AvParkingContext(avParkings, b);
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {

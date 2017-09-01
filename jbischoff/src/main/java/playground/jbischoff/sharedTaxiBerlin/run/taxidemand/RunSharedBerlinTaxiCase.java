@@ -53,7 +53,6 @@ public class RunSharedBerlinTaxiCase {
 			String configFile = "../../../shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt/config0.1.xml";
 			Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
 					new OTFVisConfigGroup(), new TaxiFareConfigGroup());
-			config.plans().setInputFile("dummyplans.xml");
 			config.controler().setWriteEventsInterval(1);
 			DrtConfigGroup drt = (DrtConfigGroup) config.getModules().get(DrtConfigGroup.GROUP_NAME);
 		

@@ -42,7 +42,7 @@ import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 
 /**
- * @author Work
+ * @author tschlenther
  *
  */
 public class CreateNetFromOSMKeepingCountLinks {
@@ -105,7 +105,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 	 * <i>COUNT-ID {@linkplain delimiter} OSM_FROMNODE_ID {@linkplain delimiter} OSM_TONODE_ID </i><br><br>
 	 * 
 	 * It is assumed that the csv file contains a header line.
-	 * returns a set of all mentioned osm-node-ids.
+	 * Returns a set of all mentioned osm-node-ids.
 	 * 
 	 * @param pathToCSVFile
 	 * @return
@@ -127,7 +127,6 @@ public class CreateNetFromOSMKeepingCountLinks {
 				header = false;				
 			}
 		});
-
 	    return allNodeIDs;
 		
 	}

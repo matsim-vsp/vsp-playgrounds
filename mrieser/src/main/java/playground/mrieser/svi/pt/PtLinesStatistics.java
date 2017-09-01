@@ -50,7 +50,7 @@ public class PtLinesStatistics {
 					double depTime = i * ttc.getTimeSlice();
 					double ttime = 0;
 					for (Link link : line.links) {
-						ttime += ttc.getLinkTravelTime(link.getId(), depTime + ttime);
+						ttime += ttc.getLinkTravelTime(link, depTime + ttime);
 					}
 					writer.write(line.name);
 					writer.write("\t");

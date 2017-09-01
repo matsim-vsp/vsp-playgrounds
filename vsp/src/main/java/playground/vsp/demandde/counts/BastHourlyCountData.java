@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * @author Tilmann Schlenther
  */
-class BastHourlyCountData{
+public class BastHourlyCountData{
 	
 	private String id;
 	private Day representedDay;
@@ -20,7 +20,7 @@ class BastHourlyCountData{
 	private HashMap<Integer,Double> R2VolumesPerHour;
 
 	
-	BastHourlyCountData(String id, Day representedDay){
+	public BastHourlyCountData(String id, Day representedDay){
 		this.id = id;
 		this.representedDay = representedDay;
 		this.R1VolumesPerHour = new HashMap<Integer, Double>();

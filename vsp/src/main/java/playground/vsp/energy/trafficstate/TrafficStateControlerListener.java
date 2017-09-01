@@ -80,7 +80,7 @@ public class TrafficStateControlerListener implements StartupListener, Iteration
     	ts.addEdgeInfo(info);
     	for (int i = 0; i < numSlots; i++){
     		double time_sec = i * binSize;
-    		double tt = this.ttcalc.getLinkTravelTime(link.getId(), time_sec);
+    		double tt = this.ttcalc.getLinkTravelTime(link, time_sec);
     		TimeBin bin = new TimeBin(time_sec, (i+1)*binSize, link.getLength()/tt);
     		info.getTimeBins().add(bin);
     	}

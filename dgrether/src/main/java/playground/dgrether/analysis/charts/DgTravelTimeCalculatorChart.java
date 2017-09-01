@@ -100,7 +100,8 @@ public class DgTravelTimeCalculatorChart implements DgChart {
       for (double i = startSecond; i < endSecond; i++) {
         tt = 0;
         for (Id<Link> id : e.getKey()){
-          tt += this.calculator.getLinkTravelTime(id, i);
+//          tt += this.calculator.getLinkTravelTime(id, i);
+        	throw new RuntimeException("You need the full link instead of just the id here! See TravelTimeCalculator.getLinkTravelTime()... ");
         }
 //        log.error("time: " + i + " tt " + tt);
         e.getValue().add(i, tt);
