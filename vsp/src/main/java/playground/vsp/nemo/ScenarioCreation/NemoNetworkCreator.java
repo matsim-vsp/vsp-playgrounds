@@ -83,7 +83,7 @@ public class NemoNetworkCreator {
 	public Network createAndWriteNetwork(boolean doSimplify, boolean doCleaning, String outputPath){
 		
 		CoordinateTransformation ct = 
-			 TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, TransformationFactory.WGS84_UTM33N);
+			 TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, "EPSG:32632");
 		
 		Set<Long> nodeIDsToKeep = readNodeIDs(INPUT_COUNT_NODES);
 		

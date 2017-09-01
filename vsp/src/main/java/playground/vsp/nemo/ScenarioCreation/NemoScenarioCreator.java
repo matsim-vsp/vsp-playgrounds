@@ -48,10 +48,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 	private final static String INPUT_COUNT_DATA_ROOT_DIR = "C:/Users/Work/svn/shared-svn/projects/nemo_mercator/40_Data/counts/LandesbetriebStrassenbauNRW_Verkehrszentrale";
 	
 	private final static String INPUT_NETWORK = "C:/Users/Work/VSP/Nemo/completeRun/Nemo_Network_keepPaths_NotEVENCleaned.xml.gz";
-	private final static String OUTPUT_NETWORK = "C:/Users/Work/VSP/Nemo/completeRun/Nemo_Network_countsCompletelyCreated_onlyCleanedNetwork.xml.gz";
+	private final static String OUTPUT_NETWORK = "C:/Users/Work/VSP/Nemo/completeRun/Nemo_Network_noSimpl_noClean_UTM32N.xml.gz";
 //	private final static String OUTPUT_NETWORK = "C:/Users/Work/VSP/OSM/Reinickendorf_testScenarioCreation_POSINF_beidseitig.xml";
 	
-	private final static String OUTPUT_COUNTS_DIR = "C:/Users/Work/VSP/Nemo/CompleteRun/counts/Nemo_NotEvenCleanedNetwork_";
+	private final static String OUTPUT_COUNTS_DIR = "C:/Users/Work/VSP/Nemo/CompleteRun/counts/Nemo_XX";
 	
 	//	dates are included in aggregation									year, month, dayOfMonth
 	private final static LocalDate firstDayOfDataAggregation = LocalDate.of(2014, 1, 1);
@@ -71,7 +71,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 		
 //		NemoNetworkCreator netCreator = new NemoNetworkCreator(INPUT_OSMFILE,INPUT_COUNT_NODES_MAPPING_CSV,OUTPUT_NETWORK);
 		NemoNetworkCreator netCreator = new NemoNetworkCreator(network,INPUT_COUNT_NODES_MAPPING_CSV);
-		network = netCreator.createAndWriteNetwork(false,true,OUTPUT_NETWORK);
+		network = netCreator.createAndWriteNetwork(false,false,OUTPUT_NETWORK);
 		
 //		NemoCountsCreator countCreator = new NemoCountsCreator(network, INPUT_COUNT_DATA_ROOT_DIR, INPUT_COUNT_NODES_MAPPING_CSV, OUTPUT_COUNTS_DIR);
 //		countCreator.setFirstDayOfAnalysis(firstDayOfDataAggregation);
