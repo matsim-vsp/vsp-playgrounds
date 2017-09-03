@@ -46,7 +46,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -105,7 +105,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 		act.setEndTime( 10 );
 		act.setFacilityId( Id.create( "h" , ActivityFacility.class ) );
 		Leg l = PopulationUtils.createAndAddLeg( plan, TransportMode.car );
-		NetworkRoute nRoute = new LinkNetworkRouteImpl( Id.create( 12 , Link.class ) , Id.create( 23 , Link.class ) );
+		NetworkRoute nRoute = RouteUtils.createLinkNetworkRouteImpl(Id.create( 12 , Link.class ), Id.create( 23 , Link.class ));
 		l.setRoute( nRoute );
 		l.setDepartureTime( 123 );
 		l.setTravelTime( 456 );
@@ -115,7 +115,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 		act.setEndTime( 294 );
 		act.setFacilityId( Id.create( "w" , ActivityFacility.class ) );
 		l = PopulationUtils.createAndAddLeg( plan, TransportMode.car );
-		nRoute = new LinkNetworkRouteImpl( Id.create( 43 , Link.class ) , Id.create( 23 , Link.class ) );
+		nRoute = RouteUtils.createLinkNetworkRouteImpl(Id.create( 43 , Link.class ), Id.create( 23 , Link.class ));
 		nRoute.setLinkIds(
 				Id.create( 43 , Link.class ) ,
 				Arrays.asList( Id.create(34, Link.class) , Id.create( 42, Link.class ) , Id.create( 23, Link.class ) , Id.create( 34, Link.class ) , Id.create( 42, Link.class ) ) ,

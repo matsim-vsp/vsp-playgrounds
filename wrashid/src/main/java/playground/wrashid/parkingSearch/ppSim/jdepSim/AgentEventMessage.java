@@ -39,7 +39,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.parking.parkingchoice.lib.DebugLib;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.vehicles.Vehicle;
 
@@ -78,7 +78,7 @@ public class AgentEventMessage extends Message {
 
 		if (leg.getMode().equalsIgnoreCase(TransportMode.car)) {
 
-			List<Id<Link>> linkIds = ((LinkNetworkRouteImpl) leg.getRoute()).getLinkIds();
+			List<Id<Link>> linkIds = ((NetworkRoute) leg.getRoute()).getLinkIds();
 
 			boolean endOfLegReached = getCurrentLinkIndex() == linkIds.size() - 1;
 
@@ -141,10 +141,10 @@ public class AgentEventMessage extends Message {
 	public void processEndOfLegCarMode_processEvents(Leg leg, Activity nextAct) {
 		Event event;
 
-		List<Id<Link>> linkIds = ((LinkNetworkRouteImpl) leg.getRoute()).getLinkIds();
+		List<Id<Link>> linkIds = ((NetworkRoute) leg.getRoute()).getLinkIds();
 		Id<Link> currentLinkId = null;
 		if (getCurrentLinkIndex() == -1) {
-			currentLinkId = ((LinkNetworkRouteImpl) leg.getRoute()).getStartLinkId();
+			currentLinkId = ((NetworkRoute) leg.getRoute()).getStartLinkId();
 		} else {
 			currentLinkId = linkIds.get(getCurrentLinkIndex());
 		}

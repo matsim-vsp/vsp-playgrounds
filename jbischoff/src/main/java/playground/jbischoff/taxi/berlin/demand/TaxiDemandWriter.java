@@ -32,7 +32,8 @@ import org.matsim.contrib.zone.Zone;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.*;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
@@ -378,7 +379,7 @@ public class TaxiDemandWriter
     {
         Leg leg = population.getFactory().createLeg(mode);
         leg.setDepartureTime(departure);
-        leg.setRoute(new LinkNetworkRouteImpl(fromLink.getId(), toLink.getId()));
+        leg.setRoute(RouteUtils.createLinkNetworkRouteImpl(fromLink.getId(), toLink.getId()));
         return leg;
     }
 

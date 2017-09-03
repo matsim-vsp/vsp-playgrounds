@@ -10,8 +10,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.Dijkstra;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.*;
@@ -235,7 +236,7 @@ public class SocialDecisionMaker2 implements StartTimeDecisionMaker, EndTimeDeci
 		return Arrays.asList(leg);
 	}
 	private NetworkRoute getFullNetworkRoute(List<Link> bestPath, Id<Link> startLinkId, Id<Link> endLinkId, double time) {
-		NetworkRoute networkRoute = new LinkNetworkRouteImpl(startLinkId, endLinkId);
+		NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(startLinkId, endLinkId);
 		List<Id<Link>> links = new ArrayList<Id<Link>>();
 		Link startLink = scenario.getNetwork().getLinks().get(startLinkId);
 		Link endLink = scenario.getNetwork().getLinks().get(endLinkId);

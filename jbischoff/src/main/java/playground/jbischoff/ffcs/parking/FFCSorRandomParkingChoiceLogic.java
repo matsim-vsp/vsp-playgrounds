@@ -33,7 +33,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.vehicles.Vehicle;
 
@@ -52,7 +52,7 @@ public class FFCSorRandomParkingChoiceLogic implements ParkingSearchLogic {
 	private FreefloatingCarsharingManager ffmanager;
 	private final ParkingRouter pr; 
 	private boolean lookedForRoute = false;
-	private LinkNetworkRouteImpl route = null;
+	private NetworkRoute route = null;
 	private int routeIdx = 0;
 	
 	/**
@@ -77,7 +77,7 @@ public class FFCSorRandomParkingChoiceLogic implements ParkingSearchLogic {
 				ActivityFacility parking = pmanager.findNearestFreeCarsharingParkingFacility(currentLinkId);
 				lookedForRoute = true;
 				if (parking!=null){
-					route = (LinkNetworkRouteImpl) pr.getRouteFromParkingToDestination(parking.getLinkId(), 0.0, currentLinkId);
+					route = (NetworkRoute) pr.getRouteFromParkingToDestination(parking.getLinkId(), 0.0, currentLinkId);
 				} 
 			}
 			if (route!=null){

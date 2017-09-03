@@ -16,14 +16,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
-import playground.jmolloy.nodeModel.AbstractNodeSimulation;
+import org.matsim.core.population.routes.RouteUtils;
 
 public class SimpleNodeSimulation
 extends AbstractNodeSimulation {
@@ -38,10 +35,10 @@ extends AbstractNodeSimulation {
         List<Id<Link>> links14 = Arrays.asList(Id.createLinkId("1"), Id.createLinkId("4"));
         List<Id<Link>> links23 = Arrays.asList(Id.createLinkId("2"), Id.createLinkId("3"));
         List<Id<Link>> links24 = Arrays.asList(Id.createLinkId("2"), Id.createLinkId("4"));
-        LinkNetworkRouteImpl route13 = new LinkNetworkRouteImpl(Id.createLinkId("x_1"), links13, Id.createLinkId("x_3"));
-        LinkNetworkRouteImpl route14 = new LinkNetworkRouteImpl(Id.createLinkId("x_1"), links14, Id.createLinkId("x_4"));
-        LinkNetworkRouteImpl route23 = new LinkNetworkRouteImpl(Id.createLinkId("x_2"), links23, Id.createLinkId("x_3"));
-        LinkNetworkRouteImpl route24 = new LinkNetworkRouteImpl(Id.createLinkId("x_2"), links24, Id.createLinkId("x_4"));
+        NetworkRoute route13 = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("x_1"), links13, Id.createLinkId("x_3"));
+        NetworkRoute route14 = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("x_1"), links14, Id.createLinkId("x_4"));
+        NetworkRoute route23 = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("x_2"), links23, Id.createLinkId("x_3"));
+        NetworkRoute route24 = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("x_2"), links24, Id.createLinkId("x_4"));
         HashMap<NetworkRoute, Integer> flows = new HashMap<NetworkRoute, Integer>();
         int[] route_flows = new int[]{1000, 0, 4000, 0};
         flows.put((NetworkRoute)route13, route_flows[0]);

@@ -19,8 +19,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
@@ -419,7 +419,7 @@ public class StopFacilityGenerator {
 		System.out.println();
 
 		/*Create transitRoute*/
-		NetworkRoute networkRoute = new LinkNetworkRouteImpl(newRouteLinkIds.get(0), newRouteLinkIds.subList(1, links.size()-1), newRouteLinkIds.get(links.size()-1));				
+		NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(newRouteLinkIds.get(0), newRouteLinkIds.subList(1, links.size()-1), newRouteLinkIds.get(links.size()-1));				
 		String routeName = transitRouteStops.get(0).getStopFacility().getLinkId().toString()+"to"+transitRouteStops.get(transitRouteStops.size()-1).getStopFacility().getLinkId().toString();
 		TransitRoute transitRoute = transitScheduleFactory.createTransitRoute(Id.create(routeName, TransitRoute.class), networkRoute, transitRouteStops, "bus");
 		transitRoute.setTransportMode(mode);

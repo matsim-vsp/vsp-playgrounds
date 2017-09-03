@@ -13,7 +13,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
 import org.matsim.core.population.*;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 
 public class RemovePlansNotRelatedToStudyArea {
 
@@ -55,7 +55,7 @@ public class RemovePlansNotRelatedToStudyArea {
 					if (pe instanceof Leg) {
 						Leg leg = (Leg) pe;
 						if (leg.getMode().equalsIgnoreCase("car")) {
-							LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) leg
+							NetworkRoute route = (NetworkRoute) leg
 									.getRoute();
 
 							for (Id linkId : route.getLinkIds()) {

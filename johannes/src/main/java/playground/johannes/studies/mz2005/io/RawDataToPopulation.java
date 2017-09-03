@@ -19,27 +19,35 @@
  * *********************************************************************** */
 package playground.johannes.studies.mz2005.io;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.*;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.PersonUtils;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
+
 import playground.johannes.studies.mz2005.validate.ActLegSequence;
 import playground.johannes.studies.mz2005.validate.PlanValidator;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * @author illenberger
@@ -146,7 +154,7 @@ public class RawDataToPopulation {
 			/*
 			 * create route
 			 */
-			LinkNetworkRouteImpl route = new LinkNetworkRouteImpl(null, null);
+			NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(null, null);
 			if(trip.distance != -99)
 				route.setDistance(trip.distance * 1000);
 			

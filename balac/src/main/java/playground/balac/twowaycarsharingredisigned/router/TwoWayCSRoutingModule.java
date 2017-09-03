@@ -11,7 +11,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.EmptyStageActivityTypes;
 import org.matsim.core.router.RoutingModule;
@@ -158,7 +158,7 @@ public class TwoWayCSRoutingModule implements RoutingModule {
 	private Leg createCarLeg(Facility fromFacility,
 			Facility toFacility) {
 		final Leg leg1 = PopulationUtils.createLeg("twowaycarsharing");
-		LinkNetworkRouteImpl route1 = new LinkNetworkRouteImpl(fromFacility.getLinkId(), toFacility.getLinkId());
+		NetworkRoute route1 = RouteUtils.createLinkNetworkRouteImpl(fromFacility.getLinkId(), toFacility.getLinkId());
 		leg1.setRoute(route1);
 		
 		return leg1;

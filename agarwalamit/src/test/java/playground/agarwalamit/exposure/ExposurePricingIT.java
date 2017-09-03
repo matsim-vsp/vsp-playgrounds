@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -49,10 +50,11 @@ import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
+
 import playground.agarwalamit.analysis.emission.AirPollutionExposureAnalysisControlerListener;
 import playground.agarwalamit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
@@ -133,7 +135,7 @@ public class ExposurePricingIT {
 		Plan selectedPlan = activeAgent.getSelectedPlan();
 
 		// check with the first leg
-		LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) ( (Leg) selectedPlan.getPlanElements().get(3) ).getRoute() ;
+		NetworkRoute route = (NetworkRoute) ( (Leg) selectedPlan.getPlanElements().get(3) ).getRoute() ;
 		// Agent should take longer route to avoid exposure toll
 		Assert.assertTrue("Wrong route is selected. Agent should have used route with shorter link (i.e. 39) instead.", route.getLinkIds().contains(Id.create("39", Link.class)));
 	}
@@ -195,7 +197,7 @@ public class ExposurePricingIT {
 		Plan selectedPlan = activeAgent.getSelectedPlan();
 
 		// check with the first leg
-		LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) ( (Leg) selectedPlan.getPlanElements().get(3) ).getRoute() ;
+		NetworkRoute route = (NetworkRoute) ( (Leg) selectedPlan.getPlanElements().get(3) ).getRoute() ;
 		// Agent should take longer route to avoid exposure toll
 		Assert.assertTrue("Wrong route is selected. Agent should have used route with link 38 (longer) instead.", route.getLinkIds().contains(Id.create("38", Link.class)));
 	}

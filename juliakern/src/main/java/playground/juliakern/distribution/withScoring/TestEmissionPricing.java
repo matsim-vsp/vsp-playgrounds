@@ -42,7 +42,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PersonUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 
 
 /**
@@ -222,7 +222,7 @@ public class TestEmissionPricing {
 		for(PlanElement pe: selectedPlan.getPlanElements()){
 				if(pe instanceof Leg){
 					Leg leg = (Leg)pe;
-					LinkNetworkRouteImpl lnri = (LinkNetworkRouteImpl) leg.getRoute();
+					NetworkRoute lnri = (NetworkRoute) leg.getRoute();
 					if(lnri.getLinkIds().contains(Id.create("39", Link.class))){
 						logger.info("Selected route should not use link 39."); //System.out.println("39 contained");
 					}else{
@@ -242,7 +242,7 @@ public class TestEmissionPricing {
 				for(PlanElement pe: p.getPlanElements()){
 					if(pe instanceof Leg){
 						Leg leg = (Leg)pe;
-						LinkNetworkRouteImpl lnri = (LinkNetworkRouteImpl) leg.getRoute();
+						NetworkRoute lnri = (NetworkRoute) leg.getRoute();
 						if(lnri.getLinkIds().contains(Id.create("39", Link.class))){
 							plan9ex = true;
 							if(scoreOfSelectedPlan<p.getScore()){

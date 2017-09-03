@@ -36,7 +36,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -346,7 +345,7 @@ public class Plansgenerator {
 			a.setEndTime(homeEndtime);
 			//leg to work
 			Leg leg = PopulationUtils.createAndAddLeg( plan, (String) TransportMode.car );
-			NetworkRoute route = new LinkNetworkRouteImpl(start.getId(), target.getId());
+			NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(start.getId(), target.getId());
 			route.setLinkIds(start.getId(), NetworkUtils.getLinkIds(RouteUtils.getLinksFromNodes(NetworkUtils.getNodes(network, ROUTE))), target.getId());
 			leg.setRoute(route);
 			//work

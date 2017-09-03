@@ -36,8 +36,8 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
@@ -414,7 +414,7 @@ public class SfCottbusPtSchedule {
 		int length=links.length;
 		Id<Link> origin = Id.create(links[0], Link.class);
 		Id<Link> destination = Id.create(links[length-1], Link.class);
-		NetworkRoute netRoute = new LinkNetworkRouteImpl(origin, destination);
+		NetworkRoute netRoute = RouteUtils.createLinkNetworkRouteImpl(origin, destination);
 		List<Id<Link>> linkList = new ArrayList<Id<Link>>();
 		for(int index = 1; index<length-1; index++) {
 				linkList.add(Id.create(links[index], Link.class));

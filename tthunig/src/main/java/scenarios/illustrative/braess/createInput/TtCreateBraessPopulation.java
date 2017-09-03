@@ -35,7 +35,8 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.api.core.v01.population.Route;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 
 /**
  * Class to create a population for the braess scenario.
@@ -243,8 +244,7 @@ public final class TtCreateBraessPopulation {
 			pathZ.add(Id.createLinkId("45_5"));
 		}
 		
-		Route routeZ = new LinkNetworkRouteImpl(
-				Id.createLinkId("0_1"), pathZ, Id.createLinkId("5_6"));
+		Route routeZ = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("0_1"), pathZ, Id.createLinkId("5_6"));
 		
 		legZ.setRoute(routeZ);
 		return legZ;
@@ -268,8 +268,7 @@ public final class TtCreateBraessPopulation {
 		}
 		pathUp.add(Id.createLinkId("3_5"));
 		
-		Route routeUp = new LinkNetworkRouteImpl(
-				Id.createLinkId("0_1"), pathUp, Id.createLinkId("5_6"));
+		Route routeUp = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("0_1"), pathUp, Id.createLinkId("5_6"));
 		
 		legUp.setRoute(routeUp);
 		return legUp;
@@ -297,9 +296,7 @@ public final class TtCreateBraessPopulation {
 			pathDown.add(Id.createLinkId("45_5"));
 		}
 		
-		Route routeDown = new LinkNetworkRouteImpl(
-				Id.createLinkId("0_1"), pathDown,
-				Id.createLinkId("5_6"));
+		Route routeDown = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("0_1"), pathDown, Id.createLinkId("5_6"));
 		
 		legDown.setRoute(routeDown);
 		return legDown;

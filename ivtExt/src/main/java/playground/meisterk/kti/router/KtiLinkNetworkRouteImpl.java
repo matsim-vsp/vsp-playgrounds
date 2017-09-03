@@ -20,17 +20,18 @@
 
 package playground.meisterk.kti.router;
 
+import java.util.List;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.vehicles.Vehicle;
+
 import playground.meisterk.org.matsim.config.PlanomatConfigGroup;
 import playground.meisterk.org.matsim.config.PlanomatConfigGroup.SimLegInterpretation;
-
-import java.util.List;
 
 /**
  * Temporary solution to calculate the route distance as it is simulated in the JEDQSim.
@@ -42,14 +43,14 @@ import java.util.List;
 public class KtiLinkNetworkRouteImpl implements NetworkRoute, Cloneable {
 	/*package*/ final static String ROUTE_TYPE = "links";
 	
-	LinkNetworkRouteImpl delegate ;
+	NetworkRoute delegate ;
 	
 	final private PlanomatConfigGroup.SimLegInterpretation simLegInterpretation;
 	final private Network network;
 
 	public KtiLinkNetworkRouteImpl(Id fromLinkId, Id toLinkId, Network network, SimLegInterpretation simLegInterpretation) {
 //		super(fromLinkId, toLinkId);
-		delegate = new LinkNetworkRouteImpl( fromLinkId, toLinkId ) ;
+		delegate = RouteUtils.createLinkNetworkRouteImpl(fromLinkId, toLinkId) ;
 		this.network = network;
 		this.simLegInterpretation = simLegInterpretation;
 	}
@@ -114,8 +115,8 @@ public class KtiLinkNetworkRouteImpl implements NetworkRoute, Cloneable {
 	}
 
 	@Override
-	public LinkNetworkRouteImpl clone() {
-		return this.delegate.clone();
+	public KtiLinkNetworkRouteImpl clone() {
+		return (KtiLinkNetworkRouteImpl) this.delegate.clone();
 	}
 
 	@Override

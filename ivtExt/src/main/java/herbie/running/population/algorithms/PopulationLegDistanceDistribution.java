@@ -32,7 +32,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
 
 import herbie.running.pt.DistanceCalculations;
@@ -109,7 +109,7 @@ public class PopulationLegDistanceDistribution extends AbstractClassifiedFrequen
 					distance = DistanceCalculations.getWalkDistance(leg.getRoute(), network);
 				}
 				else{
-					if(leg instanceof Leg && leg.getRoute() == null && !(leg.getRoute() instanceof LinkNetworkRouteImpl) && !(leg.getRoute() instanceof ExperimentalTransitRoute)){
+					if(leg instanceof Leg && leg.getRoute() == null && !(leg.getRoute() instanceof NetworkRoute) && !(leg.getRoute() instanceof ExperimentalTransitRoute)){
 						log.warn("Not enough information on leg-object. Distance is set to 0.0 for this leg. Therefore no distance contribution....");
 					}
 					else{						

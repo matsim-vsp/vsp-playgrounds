@@ -16,7 +16,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
@@ -88,7 +89,7 @@ public class TransitSheduleToNetwork {
 						link.setNumberOfLanes(link.getNumberOfLanes()+1);
 					length = 0;
 				}
-				route.setRoute(new LinkNetworkRouteImpl(sId, ids, Id.create(route.getStops().get(route.getStops().size()-1).getStopFacility().getId(), Link.class)));
+				route.setRoute(RouteUtils.createLinkNetworkRouteImpl(sId, ids, Id.create(route.getStops().get(route.getStops().size()-1).getStopFacility().getId(), Link.class)));
 			}
 		for(TransitStopFacility stop:scenario.getTransitSchedule().getFacilities().values())
 			stop.setLinkId(Id.create(stop.getId().toString(), Link.class));

@@ -35,7 +35,6 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -310,7 +309,7 @@ public class KMLPersonPlanWriter {
 			if (leg.getMode() == TransportMode.car) {
 
 				if (leg.getRoute() != null) {
-					LinkNetworkRouteImpl tempRoute = (LinkNetworkRouteImpl) leg.getRoute();
+					NetworkRoute tempRoute = (NetworkRoute) leg.getRoute();
 					for (Id linkId : tempRoute.getLinkIds()) {
 						linkIds.add(linkId);
 					}

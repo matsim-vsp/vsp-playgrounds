@@ -28,7 +28,7 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 
 import playground.wrashid.parkingSearch.ppSim.jdepSim.AgentWithParking;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.RandomParkingSearch;
@@ -121,7 +121,7 @@ public class ParkAgent extends RandomParkingSearch {
 
 					String filterParkingType = getParkingFilterType(personId);
 					Id parkingId = getParkingLinkId(aem, filterParkingType);
-					LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) leg.getRoute();
+					NetworkRoute route = (NetworkRoute) leg.getRoute();
 
 					if (parkingAttr.timeWhenDestinationReached == -1) {
 						parkingAttr.timeWhenDestinationReached = aem.getMessageArrivalTime();
@@ -221,7 +221,7 @@ public class ParkAgent extends RandomParkingSearch {
 
 		Leg leg = (Leg) aem.getPerson().getSelectedPlan().getPlanElements().get(aem.getPlanElementIndex());
 
-		List<Id<Link>> linkIds = ((LinkNetworkRouteImpl) leg.getRoute()).getLinkIds();
+		List<Id<Link>> linkIds = ((NetworkRoute) leg.getRoute()).getLinkIds();
 		Link nextLink = getNextLink(aem);
 
 		boolean countCapacity = false;
@@ -242,7 +242,7 @@ public class ParkAgent extends RandomParkingSearch {
 
 		if (countCapacity) {
 			Id streetParkingOnLink = AgentWithParking.parkingManager.getFreeParkingFacilityOnLink(
-					((LinkNetworkRouteImpl) leg.getRoute()).getEndLinkId(), "streetParking");
+					((NetworkRoute) leg.getRoute()).getEndLinkId(), "streetParking");
 
 			if (streetParkingOnLink != null) {
 				parkingAttr.capacitiesOfAllParkingTillDestination += AgentWithParking.parkingManager.getParkingsHashMap()

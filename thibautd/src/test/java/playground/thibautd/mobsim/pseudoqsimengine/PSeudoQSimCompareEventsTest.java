@@ -31,8 +31,9 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.Dijkstra;
 import org.matsim.core.router.PlanRouter;
 import org.matsim.core.router.TripRouter;
@@ -270,10 +271,7 @@ public class PSeudoQSimCompareEventsTest {
 			final List<Id<Link>> ids = new ArrayList<Id<Link>>();
 			for ( Link l : path.links ) ids.add( l.getId() );
 			final NetworkRoute route =
-					new LinkNetworkRouteImpl(
-							originLinkId,
-							ids,
-							destinationLinkId );
+					RouteUtils.createLinkNetworkRouteImpl(originLinkId, ids, destinationLinkId);
 
 			final TransitLine line = factory.createTransitLine( Id.create( "line-"+i , TransitLine.class ) );
 			final List<TransitRouteStop> stops = new ArrayList<TransitRouteStop>();

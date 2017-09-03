@@ -11,7 +11,7 @@ import org.matsim.core.api.internal.MatsimReader;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
@@ -42,14 +42,14 @@ final BufferedWriter outLink = IOUtils.getBufferedWriter("C:/Users/balacm/Docume
 					if (!ind) {
 						time1 += ((Leg) pe).getTravelTime();
 										
-						routeDistance1 += ((LinkNetworkRouteImpl) ((Leg) pe).getRoute()).getDistance();
+						routeDistance1 += ((NetworkRoute) ((Leg) pe).getRoute()).getDistance();
 						
 						ind = true;
 					}
 					else {
 						time2 += ((Leg) pe).getTravelTime();
 						
-						routeDistance2 += ((LinkNetworkRouteImpl) ((Leg) pe).getRoute()).getDistance();
+						routeDistance2 += ((NetworkRoute) ((Leg) pe).getRoute()).getDistance();
 						
 					}
 				}

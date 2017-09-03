@@ -46,8 +46,9 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
@@ -179,7 +180,7 @@ public class VisualizeTransitPlans {
 		TransitStopFacility accessStop = this.realScenario.getTransitSchedule().getFacilities().get(route.getAccessStopId());
 		TransitStopFacility egressStop = this.realScenario.getTransitSchedule().getFacilities().get(route.getEgressStopId());
 
-		NetworkRoute netRoute = new LinkNetworkRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
+		NetworkRoute netRoute = RouteUtils.createLinkNetworkRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
 		List<Link> links = new ArrayList<Link>();
 		boolean include = false;
 		TransitStopFacility prevStop = null;

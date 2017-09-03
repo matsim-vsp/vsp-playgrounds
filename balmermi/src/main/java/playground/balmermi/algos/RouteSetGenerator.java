@@ -28,12 +28,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.config.Config;
-import org.matsim.core.gbl.Gbl;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.AStarLandmarks;
@@ -132,7 +129,7 @@ public class RouteSetGenerator {
 			Path path = this.router.calcLeastCostPath(o,d,time, null, null);
 			NetworkRoute route = null;
 			if (path != null) {
-				route = new LinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
+				route = RouteUtils.createLinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
 				route.setLinkIds(path.links.get(0).getId(), NetworkUtils.getLinkIds(path.links), path.links.get(path.links.size()-1).getId());
 			}
 
@@ -214,7 +211,7 @@ public class RouteSetGenerator {
 			nonLocalRoutes.remove(MatsimRandom.getRandom().nextInt(nonLocalRoutes.size()));
 		}
 		// add the least cost path at the beginning of the route
-		NetworkRoute route = new LinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
 		route.setLinkIds(path.links.get(0).getId(), NetworkUtils.getLinkIds(path.links), path.links.get(path.links.size()-1).getId());
 		routes.addFirst(route);
 

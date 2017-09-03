@@ -21,7 +21,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.utils.misc.Time;
 
 // TODO: make parallel!
@@ -112,7 +112,7 @@ public class PPSim implements Mobsim {
 			Event event = new PersonDepartureEvent(time, personId, leg.getRoute().getStartLinkId() , leg.getMode());
 			eventsManager.processEvent(event);
 			
-			List<Id<Link>> linkIds = ((LinkNetworkRouteImpl)leg.getRoute()).getLinkIds();
+			List<Id<Link>> linkIds = ((NetworkRoute)leg.getRoute()).getLinkIds();
 			
 			if (linkIds.size()>2){
 				event=new VehicleEntersTrafficEvent(time,personId,leg.getRoute().getStartLinkId(),personId, leg.getMode(), 1.0);

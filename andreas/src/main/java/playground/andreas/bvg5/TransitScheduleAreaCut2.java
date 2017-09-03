@@ -34,8 +34,8 @@ import org.matsim.contrib.minibus.stats.abtractPAnalysisModules.BVGLines2PtModes
 import org.matsim.contrib.minibus.stats.abtractPAnalysisModules.LineId2PtMode;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -57,12 +57,12 @@ import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
 import org.opengis.feature.simple.SimpleFeature;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import playground.andreas.utils.pt.transitSchedule2shape.DaShapeWriter;
 import playground.andreas.utils.pt.transitSchedule2shape.TransitSchedule2Shape;
 import playground.vsp.analysis.VspAnalyzer;
 import playground.vsp.analysis.modules.transitSchedule2Shp.TransitSchedule2Shp;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author droeder
@@ -280,7 +280,7 @@ public class TransitScheduleAreaCut2 {
 				linkIds.add(tempId);
 			}
 			// create the network Route
-			networkRoute = new LinkNetworkRouteImpl(startLinkId, linkIds, endLinkId);
+			networkRoute = RouteUtils.createLinkNetworkRouteImpl(startLinkId, linkIds, endLinkId);
 			stops = new ArrayList<TransitRouteStop>();
 			// copy and process the necessary stops. Thus, keep the, the facilities and awaitDeparture but shift the departureOffsets
 			stops.addAll(copyStops(s, factory, departureOffset));

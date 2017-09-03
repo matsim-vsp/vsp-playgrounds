@@ -37,7 +37,8 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -87,7 +88,7 @@ public class BkIncomeTestScenarioCreator {
 			plan.addActivity(act1);
 
 			Leg leg1Car = builder.createLeg(TransportMode.car);
-			LinkNetworkRouteImpl routeCar = new LinkNetworkRouteImpl(id1, id4);
+			NetworkRoute routeCar = RouteUtils.createLinkNetworkRouteImpl(id1, id4);
 			//this would be so nice
 			List<Id<Link>> linkidsCar = new ArrayList<Id<Link>>();
 			linkidsCar.add(id2);
@@ -103,7 +104,7 @@ public class BkIncomeTestScenarioCreator {
 			plan.addActivity(act2);
 
 			Leg leg2Car = builder.createLeg(TransportMode.car);
-			routeCar = new LinkNetworkRouteImpl(id4, id1);
+			routeCar = RouteUtils.createLinkNetworkRouteImpl(id4, id1);
 			//in a beautiful world we would do...
 			linkidsCar = new ArrayList<Id<Link>>();
 			linkidsCar.add(id5);

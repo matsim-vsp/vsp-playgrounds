@@ -12,8 +12,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PopulationFactory;
@@ -21,9 +19,8 @@ import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
-import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
@@ -145,7 +142,7 @@ public class MinTravelCostsModel extends RetailerModelImpl
       path = routeAlgo.calcLeastCostPath(startNode, endNode, depTime, null, null);
       if (path == null) throw new RuntimeException("No route found from node " + startNode.getId() + " to node " + endNode.getId() + ".");
 
-      route = new LinkNetworkRouteImpl(fromLink.getId(), toLink.getId());
+      route = RouteUtils.createLinkNetworkRouteImpl(fromLink.getId(), toLink.getId());
       route.setLinkIds(fromLink.getId(), NetworkUtils.getLinkIds(path.links), toLink.getId());
       route.setTravelTime((int)path.travelTime);
       route.setTravelCost(path.travelCost);
@@ -154,7 +151,7 @@ public class MinTravelCostsModel extends RetailerModelImpl
       travTime = (int)path.travelTime;
     }
     else {
-      route = new LinkNetworkRouteImpl( fromLink.getId(), toLink.getId());
+      route = RouteUtils.createLinkNetworkRouteImpl(fromLink.getId(), toLink.getId());
       route.setTravelTime(0.0D);
       route.setDistance(0.0D);
       leg.setRoute(route);

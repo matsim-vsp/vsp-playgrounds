@@ -32,8 +32,9 @@ import org.matsim.core.network.filter.NetworkFilterManager;
 import org.matsim.core.network.filter.NetworkLinkFilter;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
@@ -378,7 +379,7 @@ private Map<String, String> readShapeFileAndExtractFare(String filename) {
 
 private void addTransitRoute(String routeName, List<Link> route, Double intervall) {
 	
-	NetworkRoute nr = new LinkNetworkRouteImpl(route.get(0).getId(),route.get(route.size()-1).getId());
+	NetworkRoute nr = RouteUtils.createLinkNetworkRouteImpl(route.get(0).getId(), route.get(route.size()-1).getId());
 	List<Id<Link>> linkIds = new ArrayList<>();
 	for (int i = 1; i<route.size()-1;i++){
 		linkIds.add(route.get(i).getId());

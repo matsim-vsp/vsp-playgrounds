@@ -20,7 +20,7 @@ package playground.wrashid.parkingSearch.ppSim.jdepSim.routing.threads;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 
 import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.EditRoute;
 
@@ -48,7 +48,7 @@ public class RerouteTaskAddLastPartToRoute implements RerouteTask {
 	private Leg leg;
 	
 	public void perform(EditRoute editRoute) {
-		LinkNetworkRouteImpl route = editRoute.addLastPartToRoute(time, leg, newEndLinkId);
+		NetworkRoute route = editRoute.addLastPartToRoute(time, leg, newEndLinkId);
 		
 		synchronized (this) {
 			leg.setRoute(route);

@@ -32,8 +32,9 @@ import org.matsim.core.network.LinkFactory;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -399,7 +400,7 @@ public class GTFS2MATSimTransitSchedule {
 							if(trip.getValue().getService().equals(services[publicSystemNumber].get(serviceId)))
 								isService = true;
 						if(isService) {
-							NetworkRoute networkRoute = new LinkNetworkRouteImpl(trip.getValue().getLinks().get(0).getId(), trip.getValue().getLinks().get(trip.getValue().getLinks().size()-1).getId());
+							NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(trip.getValue().getLinks().get(0).getId(), trip.getValue().getLinks().get(trip.getValue().getLinks().size()-1).getId());
 							List<Id<Link>> intermediate = new ArrayList<Id<Link>>();
 							for(Link link:trip.getValue().getLinks())
 								intermediate.add(link.getId());

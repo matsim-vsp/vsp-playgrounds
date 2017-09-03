@@ -27,7 +27,7 @@ import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimUtils;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.Dijkstra;
@@ -454,7 +454,7 @@ public class Example1_BasicExample {
             Node endNode = network.getLinks().get(toLinkId).getFromNode();
             Path path = pathCalculator.calcLeastCostPath(startNode, endNode, 0.0, null, null);
             
-            NetworkRoute route = new LinkNetworkRouteImpl(fromLinkId, NetworkUtils.getLinkIds(path.links), toLinkId);
+            NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(fromLinkId, NetworkUtils.getLinkIds(path.links), toLinkId);
             route.setTravelTime(path.travelTime);
             route.setTravelCost(path.travelCost);
             route.setDistance(RouteUtils.calcDistance(route, 0.0, 0.0, network));

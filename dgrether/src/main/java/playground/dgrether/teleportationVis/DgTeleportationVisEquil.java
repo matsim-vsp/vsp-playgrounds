@@ -28,7 +28,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
@@ -41,7 +40,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
@@ -96,7 +95,7 @@ public class DgTeleportationVisEquil {
 			Leg leg = fac.createLeg(TransportMode.walk);
 			leg.setTravelTime(600.0 - id1);
 
-			leg.setRoute(new LinkNetworkRouteImpl(link1.getId(), link6.getId()));
+			leg.setRoute(RouteUtils.createLinkNetworkRouteImpl(link1.getId(), link6.getId()));
 			Plan plan = fac.createPlan();
 			pers.addPlan(plan);
 			plan.addActivity(act1);

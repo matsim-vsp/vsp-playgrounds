@@ -27,7 +27,9 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 
 public class UTurnCleaner implements BeforeMobsimListener {
     private static void handlePlan(Plan pl, Scenario sc) {
@@ -39,7 +41,7 @@ public class UTurnCleaner implements BeforeMobsimListener {
         Id<Link> frst = a0.getLinkId();
         Link frstL = sc.getNetwork().getLinks().get(frst);
 
-        LinkNetworkRouteImpl route = ((LinkNetworkRouteImpl) leg.getRoute());
+        NetworkRoute route = ((NetworkRoute) leg.getRoute());
 
         if (route.getLinkIds().size() == 0) {
             return;
@@ -51,7 +53,7 @@ public class UTurnCleaner implements BeforeMobsimListener {
 
         if (frstL.getFromNode() == scndL.getToNode()) {//&& frstL.getToNode().getOutLinks().size() == 1) { //U-turn in dead end street
             a0.setLinkId(scnd);
-            LinkNetworkRouteImpl newRoute = new LinkNetworkRouteImpl(route.getLinkIds().get(0), route.getLinkIds().subList(1, route.getLinkIds().size()), route.getEndLinkId());
+            NetworkRoute newRoute = RouteUtils.createLinkNetworkRouteImpl(route.getLinkIds().get(0), route.getLinkIds().subList(1, route.getLinkIds().size()), route.getEndLinkId());
 //            newRoute.setRouteDescription(route.getRouteDescription());
             newRoute.setTravelCost(route.getTravelCost());
             newRoute.setVehicleId(route.getVehicleId());

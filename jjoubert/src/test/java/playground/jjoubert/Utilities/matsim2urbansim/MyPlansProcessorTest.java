@@ -46,8 +46,9 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
@@ -153,7 +154,7 @@ public class MyPlansProcessorTest{
 		Link workLink = n.getLinks().get(Id.create("43", Link.class));
 		List<Id<Link>> hwLinks = new ArrayList<Id<Link>>();
 		hwLinks.add(n.getLinks().get(Id.create("24", Link.class)).getId());
-		NetworkRoute nr1 = new LinkNetworkRouteImpl(homeLink.getId(), workLink.getId());
+		NetworkRoute nr1 = RouteUtils.createLinkNetworkRouteImpl(homeLink.getId(), workLink.getId());
 		nr1.setLinkIds(homeLink.getId(), hwLinks, workLink.getId());
 		l1.setRoute(nr1);
 		l1.setTravelTime(30.0*60.0);
@@ -166,7 +167,7 @@ public class MyPlansProcessorTest{
 		plan.addActivity(a2);
 		// Work -> home.
 		Leg l2 = PopulationUtils.createLeg(TransportMode.car);
-		NetworkRoute nr2 = new LinkNetworkRouteImpl(workLink.getId(), homeLink.getId());
+		NetworkRoute nr2 = RouteUtils.createLinkNetworkRouteImpl(workLink.getId(), homeLink.getId());
 		l2.setRoute(nr2);
 		l2.setTravelTime(10.0*60.0);
 		plan.addLeg(l2);
@@ -192,7 +193,7 @@ public class MyPlansProcessorTest{
 		workLink = n.getLinks().get(Id.create("43", Link.class));
 		hwLinks = new ArrayList<Id<Link>>();
 		hwLinks.add(n.getLinks().get(Id.create("24", Link.class)).getId());
-		nr1 = new LinkNetworkRouteImpl(homeLink.getId(), workLink.getId());
+		nr1 = RouteUtils.createLinkNetworkRouteImpl(homeLink.getId(), workLink.getId());
 		nr1.setLinkIds(homeLink.getId(), hwLinks, workLink.getId());
 		l1.setRoute(nr1);
 		l1.setTravelTime(40.0*60.0);
@@ -205,7 +206,7 @@ public class MyPlansProcessorTest{
 		plan.addActivity(a2);
 		// Work -> home.
 		l2 = PopulationUtils.createLeg(TransportMode.car);
-		nr2 = new LinkNetworkRouteImpl(workLink.getId(), homeLink.getId());
+		nr2 = RouteUtils.createLinkNetworkRouteImpl(workLink.getId(), homeLink.getId());
 		l2.setRoute(nr2);
 		l2.setTravelTime(20.0*60.0);
 		plan.addLeg(l2);
