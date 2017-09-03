@@ -26,7 +26,6 @@ import java.util.List;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
@@ -40,8 +39,6 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
-import org.matsim.core.config.groups.ExternalMobimConfigGroup;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimUtils;
@@ -49,7 +46,6 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.MutableScenario;
@@ -131,13 +127,13 @@ public class VisualizeTransitPlans {
 						fromLink = toLink;
 						toLink = this.visScenario.getNetwork().getLinks().get(((Activity) pe).getLinkId());
 						if (route != null) {
-							if (route instanceof GenericRouteImpl) {
-								((GenericRouteImpl) route).setStartLinkId(fromLink.getId());
-								((GenericRouteImpl) route).setEndLinkId(toLink.getId());
-							} else if (route instanceof NetworkRoute) {
-								((NetworkRoute) route).setStartLinkId(fromLink.getId());
-								((NetworkRoute) route).setEndLinkId(toLink.getId());
-							}
+//							if (route instanceof GenericRouteImpl) {
+								( route).setStartLinkId(fromLink.getId());
+								( route).setEndLinkId(toLink.getId());
+//							} else if (route instanceof NetworkRoute) {
+//								((NetworkRoute) route).setStartLinkId(fromLink.getId());
+//								((NetworkRoute) route).setEndLinkId(toLink.getId());
+//							}
 						}
 					}
 					if (pe instanceof Leg) {

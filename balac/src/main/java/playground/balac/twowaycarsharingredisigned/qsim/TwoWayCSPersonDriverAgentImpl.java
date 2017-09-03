@@ -18,7 +18,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
@@ -39,8 +38,8 @@ import org.matsim.core.mobsim.qsim.agents.PersonDriverAgentImpl;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.mobsim.qsim.interfaces.Netsim;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.misc.Time;
@@ -338,7 +337,7 @@ public class TwoWayCSPersonDriverAgentImpl implements MobsimDriverAgent, MobsimP
 		
 		Leg walkLeg = PopulationUtils.createLeg("walk_rb");
 		
-		GenericRouteImpl walkRoute = new GenericRouteImpl(route.getStartLinkId(), startLink.getId());
+		Route walkRoute = RouteUtils.createGenericRouteImpl(route.getStartLinkId(), startLink.getId());
 		final double dist = CoordUtils.calcEuclideanDistance(scenario.getNetwork().getLinks().get(route.getStartLinkId()).getCoord(), startLink.getCoord());
 		final double estimatedNetworkDistance = dist * this.beelineFactor;
 
@@ -520,7 +519,7 @@ public class TwoWayCSPersonDriverAgentImpl implements MobsimDriverAgent, MobsimP
 		
 		Link link = map.get(scenario.getNetwork().getLinks().get(leg.getRoute().getEndLinkId()));
 		map.remove(scenario.getNetwork().getLinks().get(leg.getRoute().getEndLinkId()));
-		GenericRouteImpl walkRoute = new GenericRouteImpl(link.getId(), route.getEndLinkId());
+		Route walkRoute = RouteUtils.createGenericRouteImpl(link.getId(), route.getEndLinkId());
 		final double dist = CoordUtils.calcEuclideanDistance(link.getCoord(), scenario.getNetwork().getLinks().get(route.getEndLinkId()).getCoord());
 		final double estimatedNetworkDistance = dist * this.beelineFactor;
 

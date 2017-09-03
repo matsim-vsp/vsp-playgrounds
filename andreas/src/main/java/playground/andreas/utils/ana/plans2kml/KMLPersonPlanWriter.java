@@ -24,15 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import net.opengis.kml._2.AbstractFeatureType;
-import net.opengis.kml._2.DocumentType;
-import net.opengis.kml._2.FolderType;
-import net.opengis.kml._2.KmlType;
-import net.opengis.kml._2.ObjectFactory;
-import net.opengis.kml._2.PlacemarkType;
-import net.opengis.kml._2.ScreenOverlayType;
-import net.opengis.kml._2.StyleType;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -40,13 +31,10 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
@@ -55,6 +43,15 @@ import org.matsim.core.utils.geometry.transformations.IdentityTransformation;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.vis.kml.KMZWriter;
 import org.matsim.vis.kml.MatsimKMLLogo;
+
+import net.opengis.kml._2.AbstractFeatureType;
+import net.opengis.kml._2.DocumentType;
+import net.opengis.kml._2.FolderType;
+import net.opengis.kml._2.KmlType;
+import net.opengis.kml._2.ObjectFactory;
+import net.opengis.kml._2.PlacemarkType;
+import net.opengis.kml._2.ScreenOverlayType;
+import net.opengis.kml._2.StyleType;
 
 public class KMLPersonPlanWriter {
 
@@ -225,21 +222,21 @@ public class KMLPersonPlanWriter {
 						AbstractFeatureType abstractFeature;
 
 						if(leg.getRoute() != null){
-							if(((GenericRouteImpl) leg.getRoute()).getRouteDescription().contains("===R")){
+							if(( leg.getRoute()).getRouteDescription().contains("===R")){
 								abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createDBNetworkLinkStyle());
-							} else if (((GenericRouteImpl) leg.getRoute()).getRouteDescription().contains("===S")){
+							} else if (( leg.getRoute()).getRouteDescription().contains("===S")){
 								abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createSBAHNNetworkLinkStyle());
-							} else if (((GenericRouteImpl) leg.getRoute()).getRouteDescription().contains("----M")){
+							} else if (( leg.getRoute()).getRouteDescription().contains("----M")){
 								abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createMetroBusTramNetworkLinkStyle());
-							} else if (((GenericRouteImpl) leg.getRoute()).getRouteDescription().contains("BVU----")){
+							} else if (( leg.getRoute()).getRouteDescription().contains("BVU----")){
 								abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createSubWayNetworkLinkStyle());
-							} else if (((GenericRouteImpl) leg.getRoute()).getRouteDescription().contains("BVT----")){
+							} else if (( leg.getRoute()).getRouteDescription().contains("BVT----")){
 								abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createTramNetworkLinkStyle());
-							} else if (((GenericRouteImpl) leg.getRoute()).getRouteDescription().contains("BVB----")){
+							} else if (( leg.getRoute()).getRouteDescription().contains("BVB----")){
 								abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createBusNetworkLinkStyle());
 							} else {
 								abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createDefaultNetworkLinkStyle());
-								abstractFeature.setDescription(((GenericRouteImpl) leg.getRoute()).getRouteDescription());
+								abstractFeature.setDescription(( leg.getRoute()).getRouteDescription());
 							}
 						} else {
 							abstractFeature = this.networkFeatureFactory.createPTLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createDefaultNetworkLinkStyle());
@@ -263,7 +260,7 @@ public class KMLPersonPlanWriter {
 							}
 
 							AbstractFeatureType abstractFeature = this.networkFeatureFactory.createWalkLinkFeature(fromCoords, toCoords, leg, this.styleFactory.createWalkNetworkLinkStyle());
-//							abstractFeature.setDescription(((GenericRouteImpl) leg.getRoute()).getRouteDescription());
+//							abstractFeature.setDescription(( leg.getRoute()).getRouteDescription());
 							linkFolder.getAbstractFeatureGroup().add(this.kmlObjectFactory.createPlacemark((PlacemarkType) abstractFeature));
 						}
 					} else {

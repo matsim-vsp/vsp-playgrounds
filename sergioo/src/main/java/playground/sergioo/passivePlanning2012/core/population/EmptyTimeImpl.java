@@ -5,8 +5,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
-
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 import playground.sergioo.passivePlanning2012.api.population.EmptyTime;
 
@@ -15,12 +14,12 @@ public class EmptyTimeImpl implements Leg,EmptyTime {
 	public EmptyTimeImpl(Id<Link> startLinkId, double duration) {
 		delegate = PopulationUtils.createLeg("empty") ;
 		delegate.setTravelTime(duration);
-		delegate.setRoute(new GenericRouteImpl(startLinkId, startLinkId));
+		delegate.setRoute(RouteUtils.createGenericRouteImpl(startLinkId, startLinkId));
 	}
 	public EmptyTimeImpl(EmptyTime emptyTime) {
 		delegate = PopulationUtils.createLeg("empty") ;
 		delegate.setTravelTime(emptyTime.getTravelTime());
-		delegate.setRoute(new GenericRouteImpl(emptyTime.getRoute().getStartLinkId(), emptyTime.getRoute().getEndLinkId()));
+		delegate.setRoute(RouteUtils.createGenericRouteImpl(emptyTime.getRoute().getStartLinkId(), emptyTime.getRoute().getEndLinkId()));
 	}
 	@Override
 	public String getMode() {

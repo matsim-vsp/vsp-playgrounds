@@ -27,7 +27,7 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.contrib.util.CSVReaders;
 import org.matsim.core.config.*;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 public class MielecTaxiPassengerPopulationCreator {
@@ -66,7 +66,7 @@ public class MielecTaxiPassengerPopulationCreator {
 			act.setEndTime(departureTime);
 			plan.addActivity(act);
 			Leg leg = pf.createLeg(TaxiModule.TAXI_MODE);
-			leg.setRoute(new GenericRouteImpl(fromLinkId, toLinkId));
+			leg.setRoute(RouteUtils.createGenericRouteImpl(fromLinkId, toLinkId));
 			plan.addLeg(leg);
 			plan.addActivity(pf.createActivityFromLinkId("dummy", toLinkId));
 

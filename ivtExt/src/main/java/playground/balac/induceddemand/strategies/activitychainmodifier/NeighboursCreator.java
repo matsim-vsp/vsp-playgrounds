@@ -1,6 +1,5 @@
 package playground.balac.induceddemand.strategies.activitychainmodifier;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,9 +24,6 @@ import org.matsim.api.core.v01.population.Route;
 import org.matsim.contrib.locationchoice.utils.PlanUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
-import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.router.ActivityWrapperFacility;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.TripRouter;

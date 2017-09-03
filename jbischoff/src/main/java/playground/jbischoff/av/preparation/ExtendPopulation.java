@@ -19,7 +19,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -79,7 +79,7 @@ private void run() {
 					newA1.setEndTime(a1.getEndTime());
 					plan2.addActivity(newA1);
 					Leg newLeg = scenario2.getPopulation().getFactory().createLeg("taxi");
-					newLeg.setRoute(new GenericRouteImpl(newA1.getLinkId(),a2.getLinkId()));
+					newLeg.setRoute(RouteUtils.createGenericRouteImpl(newA1.getLinkId(), a2.getLinkId()));
 					plan2.addLeg(newLeg);
 					plan2.addActivity(a2);
 					scenario2.getPopulation().addPerson(p2);
@@ -90,7 +90,7 @@ private void run() {
 					Activity newA2 = scenario2.getPopulation().getFactory().createActivityFromLinkId("hub", newDest);
 					newA2.setStartTime(a2.getStartTime());
 					Leg newLeg = scenario2.getPopulation().getFactory().createLeg("taxi");
-					newLeg.setRoute(new GenericRouteImpl(a1.getLinkId(),newA2.getLinkId()));
+					newLeg.setRoute(RouteUtils.createGenericRouteImpl(a1.getLinkId(), newA2.getLinkId()));
 					plan2.addActivity(a1);
 					plan2.addLeg(newLeg);
 					plan2.addActivity(newA2);

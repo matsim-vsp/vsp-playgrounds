@@ -33,7 +33,7 @@ import org.matsim.contrib.taxi.run.*;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 /**
@@ -77,7 +77,7 @@ public class WobPlansFilter {
 						Id<Link> start = ((Leg) pe).getRoute().getStartLinkId();
 						Id<Link> end = ((Leg) pe).getRoute().getStartLinkId();
 						((Leg) pe).setMode(TransportMode.ride);
-						((Leg) pe).setRoute(new GenericRouteImpl(start, end));
+						((Leg) pe).setRoute(RouteUtils.createGenericRouteImpl(start, end));
 					}
 				}
 			}

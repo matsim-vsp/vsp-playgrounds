@@ -17,7 +17,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
@@ -118,7 +117,7 @@ public class IncomeCarSharing {
 								if (((Leg) pe).getMode().equals("cs_fix_gas")) {
 									
 									Route r = ((Leg) pe).getRoute();
-									GenericRouteImpl rg = (GenericRouteImpl) r;
+									Route rg = (Route) r;
 									String grr = rg.getRouteDescription();
 									
 									String[] arr1 = grr.split("\\s");

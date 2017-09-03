@@ -27,7 +27,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -132,7 +132,7 @@ public class HerbieTransitRouter implements TransitRouter {
 		if (directWalkCost < pathCost) {
 			List<Leg> legs = new ArrayList<Leg>();
 			Leg leg = PopulationUtils.createLeg(TransportMode.transit_walk);
-			Route walkRoute = new GenericRouteImpl(null, null);
+			Route walkRoute = RouteUtils.createGenericRouteImpl(null, null);
 			leg.setRoute(walkRoute);
 			leg.setTravelTime(directWalkTime);
 			legs.add(leg);
@@ -187,7 +187,8 @@ public class HerbieTransitRouter implements TransitRouter {
 							if (accessStop != null) {
 								leg = PopulationUtils.createLeg(TransportMode.transit_walk);
 								double walkTime = CoordUtils.calcEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()) / this.config.getBeelineWalkSpeed();
-								Route walkRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
+								Route walkRoute = RouteUtils.createGenericRouteImpl(accessStop.getLinkId(),
+										egressStop.getLinkId());
 								leg.setRoute(walkRoute);
 								leg.setTravelTime(walkTime);
 								time += walkTime;

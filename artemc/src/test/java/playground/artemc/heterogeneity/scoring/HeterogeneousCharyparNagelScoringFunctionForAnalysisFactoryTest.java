@@ -38,7 +38,6 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
@@ -687,7 +686,7 @@ public class HeterogeneousCharyparNagelScoringFunctionForAnalysisFactoryTest {
 		Leg leg1 = PopulationUtils.createAndAddLeg( plan1, (String) TransportMode.car );//, 7*3600, 100, 7*3600+100);
 		leg1.setDepartureTime(f.secondLegStartTime);
 		leg1.setTravelTime(f.secondLegTravelTime);
-		Route route2 = new GenericRouteImpl(null, null);
+		Route route2 = RouteUtils.createGenericRouteImpl(null, null);
 		leg1.setRoute(route2);
 		route2.setDistance(20000.0);
 		Activity act1b = PopulationUtils.createAndAddActivityFromLinkId(plan1, (String) "work", (Id<Link>) null);//, 7.0*3600+100, Time.UNDEFINED_TIME, Time.UNDEFINED_TIME, false);
@@ -854,7 +853,7 @@ public class HeterogeneousCharyparNagelScoringFunctionForAnalysisFactoryTest {
 			leg = PopulationUtils.createAndAddLeg( this.plan, (String) TransportMode.pt );
 			leg.setDepartureTime(secondLegStartTime);
 			leg.setTravelTime(secondLegTravelTime);
-			Route route2 = new GenericRouteImpl(link3.getId(), link5.getId());
+			Route route2 = RouteUtils.createGenericRouteImpl(link3.getId(), link5.getId());
 			route2.setTravelTime(secondLegTravelTime);
 			route2.setDistance(20000.0);
 			leg.setRoute(route2);
@@ -865,7 +864,7 @@ public class HeterogeneousCharyparNagelScoringFunctionForAnalysisFactoryTest {
 			leg = PopulationUtils.createAndAddLeg( this.plan, (String) TransportMode.walk );
 			leg.setDepartureTime(thirdLegStartTime);
 			leg.setTravelTime(thirdLegTravelTime);
-			Route route3 = new GenericRouteImpl(link5.getId(), link7.getId());
+			Route route3 = RouteUtils.createGenericRouteImpl(link5.getId(), link7.getId());
 			route3.setTravelTime(thirdLegTravelTime);
 			route3.setDistance(CoordUtils.calcEuclideanDistance(link5.getCoord(), link7.getCoord()));
 			leg.setRoute(route3);
@@ -876,7 +875,7 @@ public class HeterogeneousCharyparNagelScoringFunctionForAnalysisFactoryTest {
 			leg = PopulationUtils.createAndAddLeg( this.plan, (String) TransportMode.bike );
 			leg.setDepartureTime(fourthLegStartTime);
 			leg.setTravelTime(fourthLegTravelTime);
-			Route route4 = new GenericRouteImpl(link7.getId(), link9.getId());
+			Route route4 = RouteUtils.createGenericRouteImpl(link7.getId(), link9.getId());
 			route4.setTravelTime(fourthLegTravelTime);
 			route4.setDistance(CoordUtils.calcEuclideanDistance(link7.getCoord(), link9.getCoord()));
 			leg.setRoute(route4);

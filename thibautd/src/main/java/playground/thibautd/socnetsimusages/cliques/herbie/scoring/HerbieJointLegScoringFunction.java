@@ -19,9 +19,8 @@
  * *********************************************************************** */
 package playground.thibautd.socnetsimusages.cliques.herbie.scoring;
 
-import herbie.running.config.HerbieConfigGroup;
-import herbie.running.pt.DistanceCalculations;
-import herbie.running.scoring.TravelScoringFunction;
+import java.util.TreeSet;
+
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Leg;
@@ -30,12 +29,13 @@ import org.matsim.api.core.v01.population.Route;
 import org.matsim.contrib.socnetsim.jointtrips.population.JointActingTypes;
 import org.matsim.core.config.Config;
 import org.matsim.core.population.PersonUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.deprecated.scoring.functions.CharyparNagelLegScoring;
-import playground.thibautd.hitchiking.HitchHikingConstants;
 
-import java.util.TreeSet;
+import herbie.running.config.HerbieConfigGroup;
+import herbie.running.pt.DistanceCalculations;
+import herbie.running.scoring.TravelScoringFunction;
+import playground.thibautd.hitchiking.HitchHikingConstants;
 
 /**
  * @author thibautd
@@ -105,7 +105,7 @@ public class HerbieJointLegScoringFunction extends CharyparNagelLegScoring {
 		}
 		else if (TransportMode.walk.equals(leg.getMode())) {
 			
-			double distance =  DistanceCalculations.getWalkDistance((GenericRouteImpl) leg.getRoute(), network)
+			double distance =  DistanceCalculations.getWalkDistance( leg.getRoute(), network)
 								* this.config.plansCalcRoute().getModeRoutingParams().get( TransportMode.walk ).getBeelineDistanceFactor();
 			
 			travelTime = distance / this.config.plansCalcRoute().getTeleportedModeSpeeds().get(TransportMode.walk);
@@ -116,7 +116,7 @@ public class HerbieJointLegScoringFunction extends CharyparNagelLegScoring {
 			
 			double distance = 0.0;
 			if (this.params.modeParams.get(TransportMode.walk).marginalUtilityOfDistance_m != 0.0) {
-				distance = DistanceCalculations.getWalkDistance((GenericRouteImpl) leg.getRoute(), network)
+				distance = DistanceCalculations.getWalkDistance( leg.getRoute(), network)
 					* this.config.plansCalcRoute().getModeRoutingParams().get( TransportMode.walk ).getBeelineDistanceFactor();
 			}
 			
@@ -124,7 +124,7 @@ public class HerbieJointLegScoringFunction extends CharyparNagelLegScoring {
 			
 		}
 		else if (TransportMode.bike.equals(leg.getMode())) {
-			double distance = DistanceCalculations.getWalkDistance((GenericRouteImpl) leg.getRoute(), network)
+			double distance = DistanceCalculations.getWalkDistance( leg.getRoute(), network)
 				* this.config.plansCalcRoute().getModeRoutingParams().get( TransportMode.bike ).getBeelineDistanceFactor();
 			tmpScore += travelScoring.getBikeScore(distance, travelTime);
 			

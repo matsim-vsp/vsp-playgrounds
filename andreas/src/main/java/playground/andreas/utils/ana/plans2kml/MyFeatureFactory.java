@@ -1,5 +1,16 @@
 package playground.andreas.utils.ana.plans2kml;
 
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.misc.Time;
+import org.matsim.vis.kml.NetworkFeatureFactory;
+
 import net.opengis.kml._2.AbstractFeatureType;
 import net.opengis.kml._2.FolderType;
 import net.opengis.kml._2.LineStringType;
@@ -7,18 +18,6 @@ import net.opengis.kml._2.ObjectFactory;
 import net.opengis.kml._2.PlacemarkType;
 import net.opengis.kml._2.PointType;
 import net.opengis.kml._2.StyleType;
-
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.core.population.routes.GenericRouteImpl;
-import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.misc.Time;
-import org.matsim.vis.kml.NetworkFeatureFactory;
 
 public class MyFeatureFactory extends NetworkFeatureFactory{
 
@@ -61,7 +60,7 @@ public class MyFeatureFactory extends NetworkFeatureFactory{
 
 		PlacemarkType p = this.kmlObjectFactory.createPlacemarkType();
 		if(leg.getRoute() != null){
-			p.setName(((GenericRouteImpl) leg.getRoute()).getRouteDescription());
+			p.setName(( leg.getRoute()).getRouteDescription());
 		}
 
 		Coord centerCoord = this.coordTransform.transform((new Coord(from.getX() + (to.getX() - from.getX()) / 2, from.getY() + (to.getY() - from.getY()) / 2)));
@@ -74,7 +73,7 @@ public class MyFeatureFactory extends NetworkFeatureFactory{
 		p.setAbstractGeometryGroup(this.kmlObjectFactory.createLineString(line));
 		p.setStyleUrl(networkStyle.getId());
 		if(leg.getRoute() != null){
-			p.setDescription(((GenericRouteImpl) leg.getRoute()).getRouteDescription());
+			p.setDescription(( leg.getRoute()).getRouteDescription());
 		}
 
 		PlacemarkType pointPlacemark = this.kmlObjectFactory.createPlacemarkType();
@@ -83,7 +82,7 @@ public class MyFeatureFactory extends NetworkFeatureFactory{
 		pointPlacemark.setAbstractGeometryGroup(this.kmlObjectFactory.createPoint(point));
 		pointPlacemark.setStyleUrl(networkStyle.getId());
 		if(leg.getRoute() != null){
-			pointPlacemark.setDescription(((GenericRouteImpl) leg.getRoute()).getRouteDescription());
+			pointPlacemark.setDescription(( leg.getRoute()).getRouteDescription());
 		}
 			
 		folder.getAbstractFeatureGroup().add(this.kmlObjectFactory.createPlacemark(pointPlacemark));
@@ -129,10 +128,10 @@ public class MyFeatureFactory extends NetworkFeatureFactory{
 		p.setName(leg.getMode() + " mode, dur: " + Time.writeTime(leg.getTravelTime()) + ", dist: " + dist);
 
 		if(leg.getRoute() != null){
-			if(((GenericRouteImpl) leg.getRoute()).getRouteDescription().equalsIgnoreCase("")){
+			if(( leg.getRoute()).getRouteDescription().equalsIgnoreCase("")){
 				p.setDescription("sorry no route, made a beeline to the destination");
 			} else {
-				p.setDescription(((GenericRouteImpl) leg.getRoute()).getRouteDescription());
+				p.setDescription(( leg.getRoute()).getRouteDescription());
 			}
 		}
 

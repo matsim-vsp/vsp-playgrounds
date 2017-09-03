@@ -13,7 +13,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.contrib.parking.parkingChoice.carsharing.ParkingLinkInfo;
 import org.matsim.contrib.parking.parkingChoice.carsharing.ParkingModuleWithFreeFloatingCarSharing;
@@ -31,9 +30,9 @@ import org.matsim.core.mobsim.qsim.interfaces.Netsim;
 import org.matsim.core.mobsim.qsim.pt.PTPassengerAgent;
 import org.matsim.core.mobsim.qsim.pt.TransitVehicle;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
-import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteFactories;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.NetworkRoutingInclAccessEgressModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.LeastCostPathCalculator;
@@ -155,7 +154,7 @@ public class FreeFloatingParkingPersonDriverAgentImplNew implements MobsimDriver
 		vehID = parkingSpotStart.getVehicleId();
 		Link endLink = scenario.getNetwork().getLinks().get(parkingSpotStart.getLinkId());
 		
-		GenericRouteImpl walkRoute = new GenericRouteImpl(route.getStartLinkId(), endLink.getId());
+		Route walkRoute = RouteUtils.createGenericRouteImpl(route.getStartLinkId(), endLink.getId());
 		final double dist = CoordUtils.calcEuclideanDistance(scenario.getNetwork().getLinks().get(route.getStartLinkId()).getCoord(), endLink.getCoord());
 		final double estimatedNetworkDistance = dist * this.beelineFactor;
 
@@ -244,7 +243,7 @@ public class FreeFloatingParkingPersonDriverAgentImplNew implements MobsimDriver
 		Network network = scenario.getNetwork();
 		Link startLink = network.getLinks().get(parkingSpotEnd.getLinkId());
 		Link destinationLink = network.getLinks().get(route.getEndLinkId());
-		GenericRouteImpl walkRoute = new GenericRouteImpl(startLink.getId(), destinationLink.getId());
+		Route walkRoute = RouteUtils.createGenericRouteImpl(startLink.getId(), destinationLink.getId());
 		final double dist = CoordUtils.calcEuclideanDistance(startLink.getCoord(), destinationLink.getCoord());
 		final double estimatedNetworkDistance = dist * this.beelineFactor;
 

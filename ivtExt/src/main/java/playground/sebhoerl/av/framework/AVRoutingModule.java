@@ -7,7 +7,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Route;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.EmptyStageActivityTypes;
 import org.matsim.core.router.RoutingModule;
 import org.matsim.core.router.StageActivityTypes;
@@ -20,7 +20,7 @@ public class AVRoutingModule implements RoutingModule {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
 	public List<? extends PlanElement> calcRoute(Facility fromFacility, Facility toFacility, double departureTime, Person person) {
-		Route route = new GenericRouteImpl(fromFacility.getLinkId(), toFacility.getLinkId());
+		Route route = RouteUtils.createGenericRouteImpl(fromFacility.getLinkId(), toFacility.getLinkId());
 		
 		route.setDistance(0.0);
 		route.setTravelTime(0.0);

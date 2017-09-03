@@ -11,7 +11,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.facilities.ActivityFacility;
 
@@ -101,7 +101,7 @@ public class AddParkingsToPlans {
 		Leg leg = PopulationUtils.createLeg(TransportMode.walk);
 
 		leg.setTravelTime(walkDuration);
-		leg.setRoute(new GenericRouteImpl(link.getId(), link.getId()));
+		leg.setRoute(RouteUtils.createGenericRouteImpl(link.getId(), link.getId()));
 		leg.getRoute().setTravelTime(walkDuration);
 
 		return leg;

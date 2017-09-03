@@ -5,11 +5,12 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.api.internal.MatsimReader;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -39,7 +40,7 @@ public class RideToPTChange {
 						double distance = CoordUtils.calcEuclideanDistance(network.getLinks().get(((Leg) pe).getRoute().getStartLinkId()).getCoord(), network.getLinks().get(((Leg) pe).getRoute().getEndLinkId()).getCoord());
 						
 						((Leg) pe).setMode("pt");
-						GenericRouteImpl route = new GenericRouteImpl(((Leg) pe).getRoute().getStartLinkId(), ((Leg) pe).getRoute().getEndLinkId());
+						Route route = RouteUtils.createGenericRouteImpl(((Leg) pe).getRoute().getStartLinkId(), ((Leg) pe).getRoute().getEndLinkId());
 						route.setDistance(distance);
 						route.setTravelTime(distance * 1.3 / 4.36);
 						((Leg) pe).setRoute(route);
