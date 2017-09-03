@@ -24,6 +24,7 @@ import org.matsim.contrib.socnetgen.sna.gis.Zone;
 import org.matsim.contrib.socnetgen.sna.gis.ZoneLayer;
 import org.matsim.contrib.socnetgen.sna.gis.io.ZoneLayerSHP;
 import org.matsim.core.config.ConfigGroup;
+
 import playground.johannes.synpop.gis.DataLoader;
 
 import java.io.IOException;

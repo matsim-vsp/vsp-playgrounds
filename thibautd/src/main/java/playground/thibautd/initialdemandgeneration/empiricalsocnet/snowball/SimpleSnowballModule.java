@@ -22,6 +22,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
+
 import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.CliquesFiller;
 import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.EgoCharacteristicsDistribution;
 import playground.thibautd.initialdemandgeneration.empiricalsocnet.framework.EgoLocator;
