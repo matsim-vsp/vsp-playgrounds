@@ -29,11 +29,9 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.pt.PtConstants;
 
@@ -94,7 +92,7 @@ public class TransitActsRemover implements PlanAlgorithm {
 							break DISTANCE_CALC;
 					}
 					leg.setTravelTime(travelTime);
-					Route route = new GenericRouteImpl(leg.getRoute()==null?null:leg.getRoute().getStartLinkId(), endLinkId);
+					Route route = RouteUtils.createGenericRouteImpl(leg.getRoute()==null?null:leg.getRoute().getStartLinkId(), endLinkId);
 					route.setTravelTime(travelTime);
 					route.setDistance(distance);
 					leg.setRoute(route);

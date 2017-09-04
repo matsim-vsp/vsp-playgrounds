@@ -11,7 +11,6 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.utils.misc.Time;
@@ -95,7 +94,7 @@ public abstract class SinglePlannerAgentImpl implements SinglePlannerAgent {
 					if(!((Activity)planElement).getType().equals(previous.getType()) && !(plan.getPlanElements().get(index-1) instanceof Leg)) {
 						Leg leg = PopulationUtils.createLeg(TransportMode.transit_walk);
 						leg.setTravelTime(0);
-						leg.setRoute(new GenericRouteImpl(previous.getLinkId(), ((Activity)planElement).getLinkId()));
+						leg.setRoute(RouteUtils.createGenericRouteImpl(previous.getLinkId(), ((Activity)planElement).getLinkId()));
 						plan.getPlanElements().add(index++, leg);
 					}
 				}
@@ -125,7 +124,7 @@ public abstract class SinglePlannerAgentImpl implements SinglePlannerAgent {
 				else if(((Activity)nextElement).getCoord().equals(((Activity)prevElement).getCoord())) {
 					Leg leg = PopulationUtils.createLeg(TransportMode.transit_walk);
 					leg.setTravelTime(0);
-					leg.setRoute(new GenericRouteImpl(previous.getLinkId(), previous.getLinkId()));
+					leg.setRoute(RouteUtils.createGenericRouteImpl(previous.getLinkId(), previous.getLinkId()));
 					plan.getPlanElements().add(currentElementIndex.get()+1, leg);
 				}
 				else
