@@ -76,11 +76,11 @@
 		<artifactId>matsim-gtfs</artifactId>
 		<version>0.8.0</version>
 	</dependency>
-	<dependency>
+<!--	<dependency>
 		<groupId>playground</groupId>
 		<artifactId>mrieser</artifactId>
 		<version>0.10.0-SNAPSHOT</version>
-	</dependency>
+	</dependency>-->
 	<dependency>
 		<groupId>de.grundid.osmtools</groupId>
 		<artifactId>osm-tools-process</artifactId>
