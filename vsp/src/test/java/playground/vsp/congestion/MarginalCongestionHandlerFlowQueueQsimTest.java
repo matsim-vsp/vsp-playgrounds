@@ -121,7 +121,7 @@ public class MarginalCongestionHandlerFlowQueueQsimTest {
 		
 		events.addHandler(congestionHandler);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 					
@@ -160,7 +160,7 @@ public class MarginalCongestionHandlerFlowQueueQsimTest {
 		
 		events.addHandler(congestionHandler);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 			
@@ -211,7 +211,7 @@ public class MarginalCongestionHandlerFlowQueueQsimTest {
 		
 		events.addHandler(congestionHandler);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 			

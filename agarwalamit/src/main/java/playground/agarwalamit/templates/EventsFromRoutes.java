@@ -80,7 +80,7 @@ public class EventsFromRoutes {
 		EventWriterXML eventWriterXML = new EventWriterXML(OUTPUT_FOLDER+"/events.xml");
 		manager.addHandler(eventWriterXML);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(net,manager).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(net).run();
 		QSim qSim = QSimUtils.createDefaultQSim(net,manager);
 		qSim.run();
 		eventWriterXML.closeFile();

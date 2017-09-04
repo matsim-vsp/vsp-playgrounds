@@ -251,7 +251,7 @@ public class CarPassingBusTest {
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(eventHandler);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(scenario,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
 		QSim qSim = QSimUtils.createDefaultQSim(this.scenario,events);
 
 		if (isUsingOTFVis) {

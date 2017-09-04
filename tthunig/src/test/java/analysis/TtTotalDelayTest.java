@@ -76,7 +76,7 @@ public class TtTotalDelayTest {
 			}
 		});
 
-		PrepareForSimUtils.createDefaultPrepareForSim(scenario, events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
 		QSim QSim = QSimUtils.createDefaultQSim(scenario, events);
 		QSim.run();
 
@@ -105,7 +105,7 @@ public class TtTotalDelayTest {
 			}
 		});
 
-		PrepareForSimUtils.createDefaultPrepareForSim(scenario, events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
 		QSim QSim = QSimUtils.createDefaultQSim(scenario, events);
 		QSim.run();
 

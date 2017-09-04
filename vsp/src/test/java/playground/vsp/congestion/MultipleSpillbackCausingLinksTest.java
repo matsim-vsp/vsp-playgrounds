@@ -157,7 +157,7 @@ public class MultipleSpillbackCausingLinksTest {
 
 		events.addHandler(new CongestionHandlerImplV4(events, sc));
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = QSimUtils.createDefaultQSim(sc,events);
 		sim.run();
 

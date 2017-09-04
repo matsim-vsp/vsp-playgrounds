@@ -91,7 +91,7 @@ class TestNetworkExperiment {
 		EventWriterXML writer = new EventWriterXML(outputDir+"/events.xml.gz");
 		events.addHandler(writer);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim qSim = QSimUtils.createDefaultQSim(sc,events);
 
 		qSim.run();
@@ -175,7 +175,7 @@ class TestNetworkExperiment {
 		else if(congestionPricingImpl.equalsIgnoreCase("v4")) events.addHandler(new CongestionHandlerImplV4(events, sc));
 //		else if(congestionPricingImpl.equalsIgnoreCase("v6")) events.addHandler(new CongestionHandlerImplV6(events, sc));
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = QSimUtils.createDefaultQSim(sc,events);
 		sim.run();
 

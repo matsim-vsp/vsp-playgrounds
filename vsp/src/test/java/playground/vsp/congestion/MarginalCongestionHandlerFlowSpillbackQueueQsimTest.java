@@ -185,7 +185,7 @@ public class MarginalCongestionHandlerFlowSpillbackQueueQsimTest {
 
 		events.addHandler(new CongestionHandlerImplV9(events, (MutableScenario) sc));
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 
@@ -226,7 +226,7 @@ public class MarginalCongestionHandlerFlowSpillbackQueueQsimTest {
 
 		events.addHandler(new CongestionHandlerImplV8(events, (MutableScenario) sc));
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 

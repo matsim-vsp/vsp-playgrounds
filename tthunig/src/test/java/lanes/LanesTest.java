@@ -77,7 +77,7 @@ public class LanesTest {
 		LaneTestEventHandler handler = new LaneTestEventHandler();
 		events.addHandler(handler);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(scenario, events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
 		QSim qsim = QSimUtils.createDefaultQSim(scenario, events);
 		qsim.run();
 		

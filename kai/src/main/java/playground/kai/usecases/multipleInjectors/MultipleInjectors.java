@@ -18,7 +18,7 @@ class MultipleInjectors {
 		Scenario scenario = ScenarioUtils.createScenario(config) ;
 		EventsManager events = new EventsManagerImpl() ;
 
-		PrepareForSim pfs = PrepareForSimUtils.createDefaultPrepareForSim(scenario, events);
+		PrepareForSim pfs = PrepareForSimUtils.createDefaultPrepareForSim(scenario);
 		
 
 		QSim qsim = QSimUtils.createDefaultQSim(scenario, events);

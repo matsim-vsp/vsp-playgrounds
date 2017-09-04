@@ -92,7 +92,7 @@ public class CompareEventsUtils {
 		events.addHandler( travelTime );
 
 
-		PrepareForSimUtils.createDefaultPrepareForSim(scenario,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
 		new PersonPrepareForSim(
 				planRouter,
 				scenario).run( scenario.getPopulation() );
