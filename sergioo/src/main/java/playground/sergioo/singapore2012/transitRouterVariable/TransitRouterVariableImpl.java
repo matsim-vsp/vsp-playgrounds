@@ -34,6 +34,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -109,7 +110,7 @@ public class TransitRouterVariableImpl implements TransitRouter {
 			List<Leg> legs = new ArrayList<Leg>();
 			Leg leg = PopulationUtils.createLeg(TransportMode.transit_walk);
 			double walkDistance = CoordUtils.calcEuclideanDistance(fromFacility.getCoord(), toFacility.getCoord());
-			Route walkRoute = RouteUtils.createGenericRouteImpl(null, null);
+			Route walkRoute = new GenericRouteImpl(null, null);
 			walkRoute.setDistance(walkDistance);
 			leg.setRoute(walkRoute);
 			leg.setTravelTime(walkDistance/this.config.getBeelineWalkSpeed());
@@ -171,7 +172,7 @@ public class TransitRouterVariableImpl implements TransitRouter {
 				leg = PopulationUtils.createLeg(TransportMode.transit_walk);
 				walkDistance = CoordUtils.calcEuclideanDistance(coord, l.toNode.stop.getStopFacility().getCoord()); 
 				walkWaitTime = walkDistance/this.config.getBeelineWalkSpeed()/*+ttCalculator.getLinkTravelTime(l, time+walkDistance/this.config.getBeelineWalkSpeed(), person, null)*/;
-				walkRoute = RouteUtils.createGenericRouteImpl(stop==null?null:stop.getStopFacility().getLinkId(), l.toNode.stop.getStopFacility().getLinkId());
+				walkRoute = new GenericRouteImpl(stop==null?null:stop.getStopFacility().getLinkId(), l.toNode.stop.getStopFacility().getLinkId());
 				walkRoute.setDistance(walkDistance);
 				leg.setRoute(walkRoute);
 				leg.setTravelTime(walkWaitTime);
@@ -184,7 +185,7 @@ public class TransitRouterVariableImpl implements TransitRouter {
 		leg = PopulationUtils.createLeg(TransportMode.transit_walk);
 		walkDistance = CoordUtils.calcEuclideanDistance(coord, toCoord); 
 		walkWaitTime = walkDistance/this.config.getBeelineWalkSpeed();
-		walkRoute = RouteUtils.createGenericRouteImpl(stop==null?null:stop.getStopFacility().getLinkId(), null);
+		walkRoute = new GenericRouteImpl(stop==null?null:stop.getStopFacility().getLinkId(), null);
 		walkRoute.setDistance(walkDistance);
 		leg.setRoute(walkRoute);
 		leg.setTravelTime(walkWaitTime);

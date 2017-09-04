@@ -32,6 +32,7 @@ import org.matsim.core.network.LinkFactory;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
+import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
@@ -113,7 +114,7 @@ public class GTFS2MATSimTransitSchedule {
 	
 	//Methods
 	/**
-	 * @param root
+	 * @param roots
 	 * @param network
 	 */
 	public GTFS2MATSimTransitSchedule(File[] roots, String[] modes, Network network, String[] serviceIds, String outCoordinateSystem) {
@@ -323,7 +324,6 @@ public class GTFS2MATSimTransitSchedule {
 	}
 	/**
 	 * Modifies the network avoiding big distances between stops and the end of the related links
-	 * @param maxDistanceStopLink
 	 */
 	private void splitStopLinks(byte publicTransportSystem) {
 		Map<String,LinkStops> linksStops = new HashMap<String,LinkStops>();
@@ -350,13 +350,13 @@ public class GTFS2MATSimTransitSchedule {
 			}
 		}	
 	}
-	private void changeTrips(Link link, Link split, boolean last, byte publicTransporSystem) {
-		for(Route route:routes[publicTransporSystem].values())
+	private void changeTrips(Link link, Link split, boolean last, byte publicTransportSystem) {
+		for(Route route:routes[publicTransportSystem].values())
 			for(Trip trip:route.getTrips().values())
 				for(int i=0; i<trip.getLinks().size(); i++)
 					if(trip.getLinks().get(i).equals(link)) {
 						String firstStopId = trip.getStopTimes().get(trip.getStopTimes().firstKey()).getStopId();
-						if(i>0 || (i==0 && stops[publicTransporSystem].get(firstStopId).getLinkId().equals(split.getId().toString()))) {
+						if(i>0 || (i==0 && stops[publicTransportSystem].get(firstStopId).getLinkId().equals(split.getId().toString()))) {
 							trip.getLinks().add(i, split);
 							i++;
 							if(last && i==trip.getLinks().size()-1)
@@ -365,7 +365,6 @@ public class GTFS2MATSimTransitSchedule {
 					}
 	}
 	/**
-	 * @param outCoordinateSystem the desired output coordinate system of the network nodes and the transit schedule stops
 	 * @return the MATSim transit schedule
 	 */
 	public TransitSchedule getTransitSchedule() {
@@ -400,7 +399,7 @@ public class GTFS2MATSimTransitSchedule {
 							if(trip.getValue().getService().equals(services[publicSystemNumber].get(serviceId)))
 								isService = true;
 						if(isService) {
-							NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(trip.getValue().getLinks().get(0).getId(), trip.getValue().getLinks().get(trip.getValue().getLinks().size()-1).getId());
+							NetworkRoute networkRoute = new LinkNetworkRouteImpl(trip.getValue().getLinks().get(0).getId(), trip.getValue().getLinks().get(trip.getValue().getLinks().size()-1).getId());
 							List<Id<Link>> intermediate = new ArrayList<Id<Link>>();
 							for(Link link:trip.getValue().getLinks())
 								intermediate.add(link.getId());
