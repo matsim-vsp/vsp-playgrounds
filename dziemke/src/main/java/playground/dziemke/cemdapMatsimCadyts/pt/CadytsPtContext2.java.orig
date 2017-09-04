@@ -276,11 +276,24 @@ CadytsContextI<TransitStopFacility> {
 //					null, ccaOccupancy.getComparison(), coordTransform, null, null, 
 //					this.occupCounts);
 
+<<<<<<< HEAD
+			// TODO CountSimComparisonKMLWriter does not seem to accept Counts<TransitStopFacility> anymore, dz, sep'17
+//			CountSimComparisonKMLWriter kmlWriter = new CountSimComparisonKMLWriter(ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
+//
+//			kmlWriter.setIterationNumber(iter);
+//			kmlWriter.writeFile(filename);
+||||||| merged common ancestors
+			CountSimComparisonKMLWriter kmlWriter = new CountSimComparisonKMLWriter(ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
+
+			kmlWriter.setIterationNumber(iter);
+			kmlWriter.writeFile(filename);
+=======
 			CountSimComparisonKMLWriter<TransitStopFacility> kmlWriter = new CountSimComparisonKMLWriter<>(
 					ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
 
 			kmlWriter.setIterationNumber(iter);
 			kmlWriter.writeFile(filename);
+>>>>>>> fix compile error in playground by (hopefully more correctly) generifying in the core
 		}
 
 		if (outputFormat.contains("txt") || outputFormat.contains("all")) {
