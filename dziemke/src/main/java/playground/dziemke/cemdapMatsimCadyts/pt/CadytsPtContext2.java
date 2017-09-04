@@ -276,10 +276,11 @@ CadytsContextI<TransitStopFacility> {
 //					null, ccaOccupancy.getComparison(), coordTransform, null, null, 
 //					this.occupCounts);
 
-			CountSimComparisonKMLWriter kmlWriter = new CountSimComparisonKMLWriter(ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
-
-			kmlWriter.setIterationNumber(iter);
-			kmlWriter.writeFile(filename);
+			// TODO CountSimComparisonKMLWriter does not seem to accept Counts<TransitStopFacility> anymore, dz, sep'17
+//			CountSimComparisonKMLWriter kmlWriter = new CountSimComparisonKMLWriter(ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
+//
+//			kmlWriter.setIterationNumber(iter);
+//			kmlWriter.writeFile(filename);
 		}
 
 		if (outputFormat.contains("txt") || outputFormat.contains("all")) {
