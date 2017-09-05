@@ -278,7 +278,6 @@ CadytsContextI<TransitStopFacility> {
 
 			CountSimComparisonKMLWriter<TransitStopFacility> kmlWriter = new CountSimComparisonKMLWriter<>(
 					ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
-
 			kmlWriter.setIterationNumber(iter);
 			kmlWriter.writeFile(filename);
 		}
