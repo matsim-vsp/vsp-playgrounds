@@ -107,11 +107,11 @@ public class TransitFareTravelDisutility implements TransitTravelDisutility {
 	}
 	
 	public double getTravelDisutility(Person person, Coord coord, Coord toCoord) {
-		return disutility.getTravelDisutility(person, coord, toCoord);
+		return disutility.getWalkTravelDisutility(person, coord, toCoord);
 	}
 
 	public double getTravelTime(Person person, Coord coord, Coord toCoord) {
-		return disutility.getTravelTime(person, coord, toCoord);
+		return disutility.getWalkTravelTime(person, coord, toCoord);
 	}
 	
 //	private static Double FARELINE1 = 0.;

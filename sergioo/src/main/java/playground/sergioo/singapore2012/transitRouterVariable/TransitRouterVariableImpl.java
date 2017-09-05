@@ -83,11 +83,11 @@ public class TransitRouterVariableImpl implements TransitRouter {
 	}
 	
 	private double getWalkTime(Person person, Coord coord, Coord toCoord) {
-		return this.ttCalculator.getTravelTime(person, coord, toCoord);
+		return this.ttCalculator.getWalkTravelTime(person, coord, toCoord);
 	}
 	
 	private double getWalkDisutility(Person person, Coord coord, Coord toCoord) {
-		return this.ttCalculator.getTravelDisutility(person, coord, toCoord);
+		return this.ttCalculator.getWalkTravelDisutility(person, coord, toCoord);
 	}
 	    @Override
 	public List<Leg> calcRoute(final Facility<?> fromFacility, final Facility<?> toFacility, final double departureTime, final Person person) {

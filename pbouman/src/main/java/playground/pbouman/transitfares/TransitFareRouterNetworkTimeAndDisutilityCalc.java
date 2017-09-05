@@ -142,11 +142,11 @@ public class TransitFareRouterNetworkTimeAndDisutilityCalc implements TravelTime
 	}
 
 	public double getTravelDisutility(Person person, Coord coord, Coord toCoord) {
-		return calc.getTravelDisutility(person, coord, toCoord);
+		return calc.getWalkTravelDisutility(person, coord, toCoord);
 	}
 
 	public double getTravelTime(Person person, Coord coord, Coord toCoord) {
-		return calc.getTravelTime(person, coord, toCoord);
+		return calc.getWalkTravelTime(person, coord, toCoord);
 	}
 
 //	@Override

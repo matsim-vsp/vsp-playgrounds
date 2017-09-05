@@ -104,14 +104,14 @@ public class IterativeTransitTimeAndDisutility implements TravelTime, TransitTra
 	//----------------------------------------------------------------------
 	
 	@Override
-	public double getTravelDisutility(Person person, Coord coord, Coord toCoord) {
+	public double getWalkTravelDisutility(Person person, Coord coord, Coord toCoord) {
 		//  getMarginalUtilityOfTravelTimeWalk INCLUDES the opportunity cost of time.  kai, dec'12
-		double initialCost = - (getTravelTime(person, coord, toCoord) * config.getMarginalUtilityOfTravelTimeWalk_utl_s());
+		double initialCost = - (getWalkTravelTime(person, coord, toCoord) * config.getMarginalUtilityOfTravelTimeWalk_utl_s());
 		return initialCost;
 	}
 	
 	@Override
-	public double getTravelTime(Person person, Coord coord, Coord toCoord) {
+	public double getWalkTravelTime(Person person, Coord coord, Coord toCoord) {
 		double distance = CoordUtils.calcEuclideanDistance(coord, toCoord);
 		double initialTime = distance / config.getBeelineWalkSpeed();
 		return initialTime;

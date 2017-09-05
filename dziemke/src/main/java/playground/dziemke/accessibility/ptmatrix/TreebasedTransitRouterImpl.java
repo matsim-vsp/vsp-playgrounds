@@ -107,11 +107,11 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
     }
 
     private double getWalkTime(Person person, Coord coord, Coord toCoord) {
-        return travelDisutility.getTravelTime(person, coord, toCoord);
+        return travelDisutility.getWalkTravelTime(person, coord, toCoord);
     }
 
     private double getWalkDisutility(Person person, Coord coord, Coord toCoord) {
-        return travelDisutility.getTravelDisutility(person, coord, toCoord);
+        return travelDisutility.getWalkTravelDisutility(person, coord, toCoord);
     }
 
     @Override

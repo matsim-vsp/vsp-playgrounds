@@ -362,7 +362,7 @@ public class TransitMultiModalAccessRoutingModule implements RoutingModule {
 			final Person person,
 			final Coord coord,
 			final Coord toCoord) {
-		return travelDisutility.getTravelTime(person, coord, toCoord);
+		return travelDisutility.getWalkTravelTime(person, coord, toCoord);
 	}
 
 	private List<Leg> convertPathToLegList(
