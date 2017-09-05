@@ -105,12 +105,14 @@ public class TransitFareTravelDisutility implements TransitTravelDisutility {
 		log.debug(debugger.toString());
 		return disutilityOfTravelling + disutilityOfFare;
 	}
-	
-	public double getTravelDisutility(Person person, Coord coord, Coord toCoord) {
+
+	@Override
+	public double getWalkTravelDisutility(Person person, Coord coord, Coord toCoord) {
 		return disutility.getWalkTravelDisutility(person, coord, toCoord);
 	}
 
-	public double getTravelTime(Person person, Coord coord, Coord toCoord) {
+	@Override
+	public double getWalkTravelTime(Person person, Coord coord, Coord toCoord) {
 		return disutility.getWalkTravelTime(person, coord, toCoord);
 	}
 	

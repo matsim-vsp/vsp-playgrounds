@@ -63,7 +63,8 @@ public class TransitDisutilityWithMinimum implements TravelTime, TransitTravelDi
 		return delegate.getLinkTravelDisutility( link, time, person, vehicle, dataManager );
 	}
 
-	public double getTravelTime( Person person,
+	@Override
+	public double getWalkTravelTime( Person person,
 			final Coord coord,
 			final Coord toCoord ) {
 		return delegate.getWalkTravelTime( person, coord, toCoord );
@@ -73,7 +74,8 @@ public class TransitDisutilityWithMinimum implements TravelTime, TransitTravelDi
 		return delegate.getVehArrivalTime( link, now );
 	}
 
-	public double getTravelDisutility(
+	@Override
+	public double getWalkTravelDisutility(
 			final Person person,
 			final Coord coord,
 			final Coord toCoord ) {
