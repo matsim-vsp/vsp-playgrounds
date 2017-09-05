@@ -78,10 +78,9 @@ public class Main {
         TravelDisutility disutility = TravelDisutilityUtils.createFreespeedTravelTimeAndDisutility(new PlanCalcScoreConfigGroup());
 
         DijkstraFactory dijkstraFactory = new DijkstraFactory();
-        AStarEuclideanFactory aStarFactory = new AStarEuclideanFactory(network, disutility);
         dijkstraCalculator = new Dijkstra(network, disutility, new FreeSpeedTravelTime());
         dijkstraFactory.createPathCalculator(network, disutility, new FreeSpeedTravelTime());
-        aStarCalculator = aStarFactory.createPathCalculator(network, disutility, new FreeSpeedTravelTime());
+        aStarCalculator = new AStarEuclideanFactory().createPathCalculator(network, disutility, new FreeSpeedTravelTime());
 
         setBounds();
 

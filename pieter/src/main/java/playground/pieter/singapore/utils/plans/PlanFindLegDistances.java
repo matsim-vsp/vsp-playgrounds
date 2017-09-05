@@ -20,17 +20,17 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.RouteFactories;
-import org.matsim.core.router.FastAStarLandmarks;
 import org.matsim.core.router.util.FastAStarLandmarksFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.vehicles.Vehicle;
 
-import others.sergioo.util.dataBase.*;
+import others.sergioo.util.dataBase.DataBaseAdmin;
+import others.sergioo.util.dataBase.NoConnectionException;
 
 class PlanFindLegDistances {
 	private final MutableScenario scenario;
@@ -38,7 +38,7 @@ class PlanFindLegDistances {
 	private final Network network;
 	private final RouteFactories routeFactory;
 	private final DataBaseAdmin dba;
-	private final FastAStarLandmarks leastCostPathCalculator;
+	private final LeastCostPathCalculator leastCostPathCalculator;
 
 	public PlanFindLegDistances(Scenario scenario, DataBaseAdmin dba) {
 		super();
@@ -69,11 +69,9 @@ class PlanFindLegDistances {
 			}
 		};
 
-		LeastCostPathCalculatorFactory routerFactory = new FastAStarLandmarksFactory(network, travelMinCost);
-		leastCostPathCalculator = (FastAStarLandmarks) routerFactory.createPathCalculator(network, travelMinCost, timeFunction);
+		leastCostPathCalculator = new FastAStarLandmarksFactory().createPathCalculator(network, travelMinCost, timeFunction);
 		this.dba = dba;
-		routeFactory = ((PopulationFactory) scenario.getPopulation()
-				.getFactory()).getRouteFactories();
+		routeFactory = ((PopulationFactory) scenario.getPopulation().getFactory()).getRouteFactories();
 	}
 
 	public double getShortestPathDistance(Coord startCoord, Coord endCoord) {

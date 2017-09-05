@@ -89,7 +89,7 @@ public class FacilityRelocator {
 		};
 		TravelTime travelTimes = new FreeSpeedTravelTime();
 
-		AStarLandmarksFactory asl = new AStarLandmarksFactory(this.network, travelCosts);
+		AStarLandmarksFactory asl = new AStarLandmarksFactory();
 		this.router = asl.createPathCalculator(network, travelCosts, travelTimes );
 	}
 	

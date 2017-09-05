@@ -19,6 +19,13 @@
  * *********************************************************************** */
 package playground.johannes.studies.coopsim;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+
 import org.apache.commons.math.FunctionEvaluationException;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.log4j.Logger;
@@ -56,25 +63,68 @@ import org.matsim.core.scenario.ScenarioUtils.ScenarioBuilder;
 import org.matsim.facilities.ActivityFacilities;
 import org.matsim.facilities.MatsimFacilitiesReader;
 import org.matsim.vehicles.Vehicle;
+
 import playground.johannes.coopsim.Profiler;
 import playground.johannes.coopsim.SimEngine;
-import playground.johannes.coopsim.analysis.*;
-import playground.johannes.coopsim.eval.*;
+import playground.johannes.coopsim.analysis.ActTypeShareTask;
+import playground.johannes.coopsim.analysis.ActivityDurationTask;
+import playground.johannes.coopsim.analysis.ActivityLoadTask;
+import playground.johannes.coopsim.analysis.ArrivalTimeTask;
+import playground.johannes.coopsim.analysis.CoordinationComplexityTask;
+import playground.johannes.coopsim.analysis.DepartureLoadTask;
+import playground.johannes.coopsim.analysis.DesiredTimeDiffTask;
+import playground.johannes.coopsim.analysis.DistanceArrivalTimeTask;
+import playground.johannes.coopsim.analysis.DistanceVisitorsTask;
+import playground.johannes.coopsim.analysis.DurationArrivalTimeTask;
+import playground.johannes.coopsim.analysis.InfiniteScoresTask;
+import playground.johannes.coopsim.analysis.JointActivityTask;
+import playground.johannes.coopsim.analysis.LegLoadTask;
+import playground.johannes.coopsim.analysis.PlansWriterTask;
+import playground.johannes.coopsim.analysis.ScoreTask;
+import playground.johannes.coopsim.analysis.TrajectoryAnalyzerTask;
+import playground.johannes.coopsim.analysis.TrajectoryAnalyzerTaskComposite;
+import playground.johannes.coopsim.analysis.TransitionProbaAnalyzer;
+import playground.johannes.coopsim.analysis.TripDistanceMean;
+import playground.johannes.coopsim.analysis.TripDurationArrivalTime;
+import playground.johannes.coopsim.analysis.TripDurationTask;
+import playground.johannes.coopsim.analysis.TripGeoDistanceTask;
+import playground.johannes.coopsim.analysis.TripPurposeShareTask;
+import playground.johannes.coopsim.eval.ActivityEvaluator2;
+import playground.johannes.coopsim.eval.ActivityTypeEvaluator;
+import playground.johannes.coopsim.eval.EvalEngine;
+import playground.johannes.coopsim.eval.EvaluatorComposite;
+import playground.johannes.coopsim.eval.JointActivityEvaluator2;
+import playground.johannes.coopsim.eval.LegEvaluator;
 import playground.johannes.coopsim.mental.ActivityDesires;
 import playground.johannes.coopsim.mental.MentalEngine;
-import playground.johannes.coopsim.mental.choice.*;
-import playground.johannes.coopsim.mental.planmod.*;
+import playground.johannes.coopsim.mental.choice.ActTypeTimeSelector;
+import playground.johannes.coopsim.mental.choice.ActivityFacilitySelector;
+import playground.johannes.coopsim.mental.choice.ActivityGroupGenerator;
+import playground.johannes.coopsim.mental.choice.ActivityGroupSelector;
+import playground.johannes.coopsim.mental.choice.AltersHome;
+import playground.johannes.coopsim.mental.choice.ArrivalTimeSelector;
+import playground.johannes.coopsim.mental.choice.ChoiceSelector;
+import playground.johannes.coopsim.mental.choice.ChoiceSelectorComposite;
+import playground.johannes.coopsim.mental.choice.DurationSelector;
+import playground.johannes.coopsim.mental.choice.EgoSelector;
+import playground.johannes.coopsim.mental.choice.EgosFacilities;
+import playground.johannes.coopsim.mental.choice.EgosHome;
+import playground.johannes.coopsim.mental.choice.FixedActivityTypeSelector;
+import playground.johannes.coopsim.mental.choice.OnlyEgo;
+import playground.johannes.coopsim.mental.choice.PlanIndexSelector;
+import playground.johannes.coopsim.mental.choice.RandomAlter;
+import playground.johannes.coopsim.mental.choice.RandomAlters3;
+import playground.johannes.coopsim.mental.planmod.ActivityDurationModAdaptor;
+import playground.johannes.coopsim.mental.planmod.ActivityFacilityModAdaptor;
+import playground.johannes.coopsim.mental.planmod.ActivityTypeModAdaptor;
+import playground.johannes.coopsim.mental.planmod.ArrivalTimeModAdaptor;
+import playground.johannes.coopsim.mental.planmod.Choice2ModAdaptor;
+import playground.johannes.coopsim.mental.planmod.Choice2ModAdaptorComposite;
+import playground.johannes.coopsim.mental.planmod.Choice2ModAdaptorFactory;
 import playground.johannes.coopsim.mental.planmod.concurrent.ConcurrentPlanModEngine;
 import playground.johannes.coopsim.pysical.PhysicalEngine;
 import playground.johannes.coopsim.utils.NetworkLegRouter;
 import playground.johannes.studies.sbsurvey.io.SocialSparseGraphMLReader;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
 
 /**
  * @author illenberger
@@ -280,21 +330,7 @@ public class Simulator {
 			}
 		};
 		
-		TravelDisutility travelMinCost = new TravelDisutility() {
-			
-			@Override
-			public double getLinkTravelDisutility(final Link link, final double time, final Person person, final Vehicle vehicle) {
-				return travelTime.getLinkTravelTime(link, time, person, vehicle);
-			}
-			
-			@Override
-			public double getLinkMinimumTravelDisutility(Link link) {
-				return travelTime.getLinkTravelTime(link, 0, null, null);
-			}
-		};
-		
-		AStarLandmarksFactory factory = new AStarLandmarksFactory(network, travelMinCost, MultiThreading.getNumAllowedThreads());
-		LeastCostPathCalculator router = factory.createPathCalculator(network, travelCost, travelTime);
+		LeastCostPathCalculator router = new AStarLandmarksFactory().createPathCalculator(network, travelCost, travelTime);
 		NetworkLegRouter legRouter = new NetworkLegRouter(network, router, new RouteFactories());
 		
 		return legRouter;

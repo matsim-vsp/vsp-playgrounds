@@ -35,11 +35,10 @@ import org.matsim.core.network.LinkFactory;
 import org.matsim.core.router.FastDijkstra;
 import org.matsim.core.router.util.FastDijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
-import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.PreProcessDijkstra;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.vehicles.Vehicle;
 
 import playground.sergioo.passivePlanning2012.core.router.util.PathV2;
@@ -75,8 +74,7 @@ public class ComposedLinkFactory implements LinkFactory {
 				return link.getLength()/link.getFreespeed();
 			}
 		};
-		LeastCostPathCalculatorFactory routerFactory = new FastDijkstraFactory(preProcessData);
-		leastCostPathCalculator = (FastDijkstra) routerFactory.createPathCalculator(baseNetwork, travelMinCost, timeFunction);
+		leastCostPathCalculator = (FastDijkstra) new FastDijkstraFactory().createPathCalculator(baseNetwork, travelMinCost, timeFunction);
 		Set<String> modes = new HashSet<String>();
 		modes.add(mode);
 		leastCostPathCalculator.setModeRestriction(modes);

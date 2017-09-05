@@ -19,19 +19,20 @@ package playground.gregor.casim.run;
  *                                                                         *
  * *********************************************************************** */
 
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.router.DefaultRoutingModules;
 import org.matsim.core.router.RoutingModule;
-import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.AStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelTime;
-import playground.gregor.TransportMode;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import java.util.Map;
+import playground.gregor.TransportMode;
 
 /**
  * Created by laemmel on 21/10/15.
@@ -56,10 +57,7 @@ public class CARoutingModule implements Provider<RoutingModule> {
 	}
 
 	private LeastCostPathCalculator createRoutingAlgo() {
-		return new AStarLandmarksFactory(
-				scenario.getNetwork(),
-				new FreespeedTravelTimeAndDisutility(scenario.getConfig().planCalcScore()),
-				scenario.getConfig().global().getNumberOfThreads()).createPathCalculator(scenario.getNetwork(),
+		return new AStarLandmarksFactory().createPathCalculator(scenario.getNetwork(),
 				travelDisutilities.get("car").createTravelDisutility(travelTimes.get("car")),
 				travelTimes.get("car"));
 	}

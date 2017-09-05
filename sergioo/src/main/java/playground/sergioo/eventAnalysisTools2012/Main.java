@@ -15,10 +15,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.router.util.FastDijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.FastDijkstraFactory;
-import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.router.util.PreProcessDijkstra;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -81,8 +80,7 @@ public class Main {
 				return link.getLength()/link.getFreespeed();
 			}
 		};
-		LeastCostPathCalculatorFactory routerFactory = new FastDijkstraFactory(preProcessData);
-		LeastCostPathCalculator leastCostPathCalculator = routerFactory.createPathCalculator(scenario.getNetwork(), travelMinCost, timeFunction);
+		LeastCostPathCalculator leastCostPathCalculator = new FastDijkstraFactory().createPathCalculator(scenario.getNetwork(), travelMinCost, timeFunction);
 		BufferedReader reader = new BufferedReader(new FileReader(new File("./data/MTZ_Shortest_Path_Yanding.txt")));
 		PrintWriter writer = new PrintWriter(new File("./data/MTZ_Shortest_Path_Yanding_Full.txt"));
 		String line=reader.readLine();

@@ -86,7 +86,7 @@ public class RouteLegs {
         logger.info("Prerocess routing...");
         int nThreads = Executor.getFreePoolSize();
 
-        LeastCostPathCalculatorFactory factory = new AStarLandmarksFactory(scenario.getNetwork(), new ConcurrentFreeSpeedRouter.TravelTimes());
+        LeastCostPathCalculatorFactory factory = new AStarLandmarksFactory();
         ConcurrentFreeSpeedRouter router = new ConcurrentFreeSpeedRouter(scenario.getNetwork(), factory, nThreads);
 
         logger.info("Connect facilities to network...");

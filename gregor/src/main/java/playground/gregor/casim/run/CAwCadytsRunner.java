@@ -19,7 +19,11 @@
 
 package playground.gregor.casim.run;
 
-import com.google.inject.Provider;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import javax.inject.Inject;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
@@ -36,8 +40,11 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.util.AStarLandmarksFactory;
+import org.matsim.core.router.util.DijkstraFactory;
+import org.matsim.core.router.util.FastAStarLandmarksFactory;
+import org.matsim.core.router.util.FastDijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
@@ -46,15 +53,14 @@ import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
 import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
 import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
+
+import com.google.inject.Provider;
+
 import playground.gregor.casim.proto.CALinkInfos.CALinInfos;
 import playground.gregor.casim.simulation.CAMobsimFactory;
 import playground.gregor.casim.simulation.physics.AbstractCANetwork;
 import playground.gregor.casim.simulation.physics.CASingleLaneNetworkFactory;
 import playground.gregor.sim2d_v4.debugger.eventsbaseddebugger.QSimDensityDrawer;
-
-import javax.inject.Inject;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 public class CAwCadytsRunner implements IterationStartsListener {
 
@@ -216,10 +222,7 @@ public class CAwCadytsRunner implements IterationStartsListener {
 				.controler()
 				.getRoutingAlgorithmType()
 				.equals(ControlerConfigGroup.RoutingAlgorithmType.AStarLandmarks)) {
-			return new AStarLandmarksFactory(
-					scenario.getNetwork(),
-					new FreespeedTravelTimeAndDisutility(config.planCalcScore()),
-					config.global().getNumberOfThreads());
+			return new AStarLandmarksFactory();
 		} else if (config.controler().getRoutingAlgorithmType()
 				.equals(ControlerConfigGroup.RoutingAlgorithmType.FastDijkstra)) {
 			return new FastDijkstraFactory();
@@ -227,9 +230,7 @@ public class CAwCadytsRunner implements IterationStartsListener {
 				.controler()
 				.getRoutingAlgorithmType()
 				.equals(ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks)) {
-			return new FastAStarLandmarksFactory(
-					scenario.getNetwork(),
-					new FreespeedTravelTimeAndDisutility(config.planCalcScore()));
+			return new FastAStarLandmarksFactory();
 		} else {
 			throw new IllegalStateException(
 					"Enumeration Type RoutingAlgorithmType was extended without adaptation of Controler!");

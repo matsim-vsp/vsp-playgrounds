@@ -19,9 +19,10 @@
  * *********************************************************************** */
 package playground.johannes.studies.coopsim;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import gnu.trove.map.hash.TDoubleDoubleHashMap;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -44,12 +45,12 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 import org.matsim.vehicles.Vehicle;
-import playground.johannes.coopsim.utils.MatsimCoordUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+
+import gnu.trove.map.hash.TDoubleDoubleHashMap;
+import playground.johannes.coopsim.utils.MatsimCoordUtils;
 
 /**
  * @author illenberger
@@ -101,8 +102,7 @@ public class TimeOverDist {
 
 		// LeastCostPathCalculator router = new Dijkstra(network, travelCost,
 		// travelTime);
-		AStarLandmarksFactory factory = new AStarLandmarksFactory(network, travelMinCost);
-		LeastCostPathCalculator router = factory.createPathCalculator(network, travelCost, travelTime);
+		LeastCostPathCalculator router = new AStarLandmarksFactory().createPathCalculator(network, travelCost, travelTime);
 		Geometry g = (Geometry) EsriShapeIO.readFeatures("/Users/jillenberger/Work/socialnets/data/schweiz/complete/zones/G1L08.shp").iterator().next().getDefaultGeometry();
 
 		TDoubleDoubleHashMap hist = new TDoubleDoubleHashMap();

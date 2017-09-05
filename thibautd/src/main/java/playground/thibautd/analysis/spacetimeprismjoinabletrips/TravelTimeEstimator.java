@@ -19,6 +19,10 @@
  * *********************************************************************** */
 package playground.thibautd.analysis.spacetimeprismjoinabletrips;
 
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -27,10 +31,6 @@ import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.FastAStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelTime;
-
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @author thibautd
@@ -53,7 +53,7 @@ public class TravelTimeEstimator {
 			final TravelTime travelTime,
 			final Network network) {
 		FreespeedTravelTimeAndDisutility dis = new FreespeedTravelTimeAndDisutility( -1 , 0 , -1 );
-		shortPathAlgo = new FastAStarLandmarksFactory( network, dis).createPathCalculator( network , dis , dis );
+		shortPathAlgo = new FastAStarLandmarksFactory().createPathCalculator( network , dis , dis );
 		this.departureIsOnStartOfLink = departureIsOnStartOfLink;
 		this.arrivalIsOnStartOfLink = arrivalIsOnStartOfLink;
 		this.travelTime = travelTime;

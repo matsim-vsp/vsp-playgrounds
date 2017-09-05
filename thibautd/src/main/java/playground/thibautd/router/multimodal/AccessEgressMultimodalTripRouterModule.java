@@ -19,7 +19,15 @@
  * *********************************************************************** */
 package playground.thibautd.router.multimodal;
 
-import com.google.inject.Inject;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import javax.inject.Provider;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -43,15 +51,10 @@ import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.collections.MapUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.vehicles.Vehicle;
-import playground.ivt.utils.SoftCache;
 
-import javax.inject.Provider;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import com.google.inject.Inject;
+
+import playground.ivt.utils.SoftCache;
 
 /**
  * @author thibautd
@@ -201,10 +204,7 @@ public class AccessEgressMultimodalTripRouterModule extends AbstractModule {
 		if ( multimodalFactories.containsKey( mode ) ) return multimodalFactories.get( mode );
 
 		// TODO: make implementation configurable
-		final LeastCostPathCalculatorFactory factory =
-			new FastAStarLandmarksFactory(
-					subNetwork,
-					travelDisutility );
+		final LeastCostPathCalculatorFactory factory = new FastAStarLandmarksFactory();
 
 		multimodalFactories.put( mode , factory );
 		return factory;

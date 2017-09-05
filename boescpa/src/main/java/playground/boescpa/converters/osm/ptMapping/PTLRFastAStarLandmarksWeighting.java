@@ -21,6 +21,13 @@
 
 package playground.boescpa.converters.osm.ptMapping;
 
+import static playground.boescpa.converters.osm.scheduleCreator.hafasCreator.PtRouteFPLAN.BUS;
+import static playground.boescpa.converters.osm.scheduleCreator.hafasCreator.PtRouteFPLAN.TRAM;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
@@ -28,16 +35,10 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.router.Dijkstra;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.util.FastAStarLandmarksFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.vehicles.Vehicle;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import static playground.boescpa.converters.osm.scheduleCreator.hafasCreator.PtRouteFPLAN.BUS;
-import static playground.boescpa.converters.osm.scheduleCreator.hafasCreator.PtRouteFPLAN.TRAM;
 
 /**
  * Based on the line, mode, and link type, the traveling on links is assigned different costs.
@@ -78,8 +79,7 @@ public class PTLRFastAStarLandmarksWeighting implements PTLRouter {
 	}
 
     public PTLRFastAStarLandmarksWeighting(Network network) {
-        LeastCostPathCalculatorFactory factory = new FastAStarLandmarksFactory(network, this);
-        this.pathCalculator = (Dijkstra) factory.createPathCalculator(network, this, this);
+        this.pathCalculator = (Dijkstra) new FastAStarLandmarksFactory().createPathCalculator(network, this, this);
 		// Suppress "no route found" statements...
 		Logger.getLogger( org.matsim.core.router.Dijkstra.class ).setLevel( Level.ERROR );
     }
