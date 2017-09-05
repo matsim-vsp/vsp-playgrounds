@@ -33,7 +33,7 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.network.LinkFactory;
 import org.matsim.core.router.FastDijkstra;
-import org.matsim.core.router.util.FastDijkstraFactory;
+import org.matsim.core.router.FastDijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.PreProcessDijkstra;

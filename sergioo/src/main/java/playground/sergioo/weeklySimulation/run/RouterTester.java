@@ -9,8 +9,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.PreProcessDijkstra;
 import org.matsim.core.router.util.TravelDisutility;
@@ -31,7 +32,7 @@ public class RouterTester {
 		TravelDisutility disutilityFunction = (new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore() )).createTravelDisutility(travelTimeCalculator.getLinkTravelTimes());
 		PreProcessDijkstra preProcessDijkstra = new PreProcessDijkstra();
 		preProcessDijkstra.run(scenario.getNetwork());
-		Dijkstra dijkstra = new Dijkstra(scenario.getNetwork(), disutilityFunction, travelTimeCalculator.getLinkTravelTimes());
+		LeastCostPathCalculator dijkstra = new DijkstraFactory().createPathCalculator(scenario.getNetwork(), disutilityFunction, travelTimeCalculator.getLinkTravelTimes());
 		for(int i=0; i<6*24*3600; i+=1800) {
 			Path path = dijkstra.calcLeastCostPath(scenario.getNetwork().getNodes().get(Id.createNodeId(1380035722)), scenario.getNetwork().getNodes().get(Id.createNodeId(1380024014)), i, null, null);
 			if(path==null)

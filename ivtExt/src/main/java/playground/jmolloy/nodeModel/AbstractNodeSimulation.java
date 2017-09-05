@@ -5,12 +5,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
 import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -20,7 +25,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
@@ -84,7 +89,7 @@ public abstract class AbstractNodeSimulation {
         if (calculateRoute) {
             FreeSpeedTravelTime travelTime = new FreeSpeedTravelTime();
             OnlyTimeDependentTravelDisutility travelDisutility = new OnlyTimeDependentTravelDisutility((TravelTime)travelTime);
-            Dijkstra leastCostPathCalculator = new Dijkstra(this.getNetwork(), (TravelDisutility)travelDisutility, (TravelTime)travelTime);
+            LeastCostPathCalculator leastCostPathCalculator = new DijkstraFactory().createPathCalculator(this.getNetwork(), (TravelDisutility)travelDisutility, (TravelTime)travelTime);
             Link inLink = (Link)this.getNetwork().getLinks().get(route.getStartLinkId());
             Link outLink = (Link)this.getNetwork().getLinks().get(route.getEndLinkId());
             LeastCostPathCalculator.Path links = leastCostPathCalculator.calcLeastCostPath(inLink.getToNode(), outLink.getFromNode(), 0.0, null, null);

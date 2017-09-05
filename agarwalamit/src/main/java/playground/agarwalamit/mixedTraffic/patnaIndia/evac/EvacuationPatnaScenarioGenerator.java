@@ -50,7 +50,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.router.ActivityWrapperFacility;
 import org.matsim.core.router.DefaultRoutingModules;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -242,7 +242,7 @@ public class EvacuationPatnaScenarioGenerator {
 								leg.getMode(), 
 								popFact, 
 								scenario.getNetwork(), 
-								new Dijkstra( scenario.getNetwork(), 
+								new DijkstraFactory().createPathCalculator(scenario.getNetwork(), 
 										new OnlyTimeDependentTravelDisutility(new FreeSpeedTravelTime()), 
 										new FreeSpeedTravelTime())
 								)

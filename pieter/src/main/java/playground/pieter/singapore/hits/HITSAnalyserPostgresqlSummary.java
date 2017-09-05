@@ -58,10 +58,10 @@ import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.algorithms.XY2Links;
 import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.PreProcessDijkstra;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -111,7 +111,6 @@ public class HITSAnalyserPostgresqlSummary {
 
 	private static ArrayList<Integer> DGPs;
 
-	private static PreProcessDijkstra preProcessData;
 	private static LeastCostPathCalculator shortestCarNetworkPathCalculator;
 	private static XY2Links xY2Links;
 	static Map<Id, Link> links;
@@ -208,7 +207,7 @@ public class HITSAnalyserPostgresqlSummary {
 
 		TravelDisutility travelDisutility = new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, scenario.getConfig().planCalcScore() )
 				.createTravelDisutility(travelTimeCalculator.getLinkTravelTimes());
-		carCongestedDijkstra = new Dijkstra(scenario.getNetwork(), travelDisutility,
+		carCongestedDijkstra = (Dijkstra) new DijkstraFactory().createPathCalculator(scenario.getNetwork(), travelDisutility,
 				travelTimeCalculator.getLinkTravelTimes());
 		HashSet<String> modeSet = new HashSet<>();
 		modeSet.add("car");
@@ -233,8 +232,6 @@ public class HITSAnalyserPostgresqlSummary {
 				return link.getLength() / link.getFreespeed();
 			}
 		};
-		preProcessData = new PreProcessDijkstra();
-		preProcessData.run(carFreeSpeedNetwork);
 		TravelTime timeFunction = new TravelTime() {
 
 			@Override
@@ -243,8 +240,7 @@ public class HITSAnalyserPostgresqlSummary {
 			}
 		};
 
-		shortestCarNetworkPathCalculator = new Dijkstra(carFreeSpeedNetwork, travelMinCost, timeFunction,
-				preProcessData);
+		shortestCarNetworkPathCalculator = new DijkstraFactory(true).createPathCalculator(carFreeSpeedNetwork, travelMinCost, timeFunction);
 		xY2Links = new XY2Links(carFreeSpeedNetwork, null);
 	}
 

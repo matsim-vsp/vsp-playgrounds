@@ -42,11 +42,11 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.PreProcessDijkstra;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 import org.matsim.core.utils.io.IOUtils;
@@ -76,13 +76,12 @@ public class MyZoneToZoneRouter {
 	private final List<MyZone> zones;
 	private Map<Id, Integer> mapZoneIdToListEntry;
 	private Map<Integer, Id> mapListEntryToZoneId;
-	private Dijkstra router;
+	private LeastCostPathCalculator router;
 	private DenseDoubleMatrix2D odMatrix;
 	
 	public MyZoneToZoneRouter(final Scenario scenario, final List<MyZone> zones) {
 		this.scenario = scenario;
 		this.zones = zones;
-		this.router = null;	
 		mapZoneIdToListEntry = new HashMap<Id, Integer>(zones.size());
 		mapListEntryToZoneId = new HashMap<Integer, Id>(zones.size());
 		int index = 0;
@@ -103,11 +102,7 @@ public class MyZoneToZoneRouter {
 		em.addHandler(travelTimeCalculator);
 		new MatsimEventsReader(em).readFile(eventsFilename);
 		
-		log.info("Preprocessing the network for zone-to-zone travel time calculation.");
-		PreProcessDijkstra pp = new PreProcessDijkstra();
-		pp.run(this.scenario.getNetwork());
-		
-		router = new Dijkstra(scenario.getNetwork(), travelCost, travelTimeCalculator.getLinkTravelTimes(),pp);
+		router = new DijkstraFactory(true).createPathCalculator(scenario.getNetwork(), travelCost, travelTimeCalculator.getLinkTravelTimes());
 		
 		log.info("Zone to zone router prepared.");
 	}

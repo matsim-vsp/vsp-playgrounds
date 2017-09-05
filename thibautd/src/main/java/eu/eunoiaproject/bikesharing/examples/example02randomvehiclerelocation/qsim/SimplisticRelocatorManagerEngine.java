@@ -19,8 +19,13 @@
  * *********************************************************************** */
 package eu.eunoiaproject.bikesharing.examples.example02randomvehiclerelocation.qsim;
 
-import eu.eunoiaproject.bikesharing.framework.qsim.BikeSharingManager;
-import eu.eunoiaproject.bikesharing.framework.qsim.StatefulBikeSharingFacility;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.WeakHashMap;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -33,7 +38,7 @@ import org.matsim.core.mobsim.qsim.InternalInterface;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.interfaces.ActivityHandler;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimEngine;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -42,12 +47,8 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.WeakHashMap;
+import eu.eunoiaproject.bikesharing.framework.qsim.BikeSharingManager;
+import eu.eunoiaproject.bikesharing.framework.qsim.StatefulBikeSharingFacility;
 
 /**
  * Must be added as first activity handler!
@@ -97,7 +98,7 @@ public class SimplisticRelocatorManagerEngine implements MobsimEngine, ActivityH
 		this.network = network;
 		final FreespeedTravelTimeAndDisutility tt = new FreespeedTravelTimeAndDisutility(-1.0, 0.0, 0.0);
 		this.dijkstra =
-			new Dijkstra(
+			new DijkstraFactory().createPathCalculator(
 					network,
 					tt,
 					tt);

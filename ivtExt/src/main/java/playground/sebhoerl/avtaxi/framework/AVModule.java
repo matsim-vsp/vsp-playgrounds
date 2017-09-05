@@ -1,8 +1,13 @@
 package playground.sebhoerl.avtaxi.framework;
 
-import com.google.inject.*;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.name.Names;
+import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Named;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
@@ -10,18 +15,28 @@ import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.population.routes.RouteFactories;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scoring.ScoringFunctionFactory;
-
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
-import org.opengis.filter.capability.Operator;
-import playground.sebhoerl.avtaxi.config.*;
-import playground.sebhoerl.avtaxi.data.*;
-import playground.sebhoerl.avtaxi.dispatcher.AVDispatcher;
+
+import com.google.inject.Key;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
+
+import playground.sebhoerl.avtaxi.config.AVConfig;
+import playground.sebhoerl.avtaxi.config.AVConfigReader;
+import playground.sebhoerl.avtaxi.config.AVGeneratorConfig;
+import playground.sebhoerl.avtaxi.config.AVOperatorConfig;
+import playground.sebhoerl.avtaxi.data.AVData;
+import playground.sebhoerl.avtaxi.data.AVLoader;
+import playground.sebhoerl.avtaxi.data.AVOperator;
+import playground.sebhoerl.avtaxi.data.AVOperatorFactory;
+import playground.sebhoerl.avtaxi.data.AVVehicle;
 import playground.sebhoerl.avtaxi.dispatcher.multi_od_heuristic.MultiODHeuristic;
 import playground.sebhoerl.avtaxi.dispatcher.single_fifo.SingleFIFODispatcher;
 import playground.sebhoerl.avtaxi.dispatcher.single_heuristic.SingleHeuristicDispatcher;
@@ -34,14 +49,6 @@ import playground.sebhoerl.avtaxi.routing.AVRouteFactory;
 import playground.sebhoerl.avtaxi.routing.AVRoutingModule;
 import playground.sebhoerl.avtaxi.scoring.AVScoringFunctionFactory;
 import playground.sebhoerl.plcpc.ParallelLeastCostPathCalculator;
-import playground.sebhoerl.plcpc.ParallelLeastCostPathCalculatorFactory;
-
-import javax.inject.Named;
-import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 public class AVModule extends AbstractModule {
     final static public String AV_MODE = "av";
@@ -102,7 +109,7 @@ public class AVModule extends AbstractModule {
 
 	@Provides @Named(AVModule.AV_MODE)
     LeastCostPathCalculator provideLeastCostPathCalculator(Network network, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime) {
-        return new Dijkstra(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
+        return new DijkstraFactory().createPathCalculator(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
     }
 
 	@Provides @Singleton

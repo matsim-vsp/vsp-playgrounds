@@ -25,10 +25,10 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.DefaultRoutingModules;
 import org.matsim.core.router.RoutingModule;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
-import org.matsim.core.router.util.AStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelTime;
 

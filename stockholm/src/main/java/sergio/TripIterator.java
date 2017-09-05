@@ -9,7 +9,8 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -36,7 +37,7 @@ class TripIterator implements Iterator<Trip> {
 
 	private final Random rnd;
 
-	private final Dijkstra dijkstra;
+	private final LeastCostPathCalculator dijkstra;
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -52,7 +53,7 @@ class TripIterator implements Iterator<Trip> {
 		}
 		this.zonePairIterator = new TupleIteratorWithExclusions<>(allZones,
 				excludedOdPairs);
-		this.dijkstra = new Dijkstra(network, new TravelDisutility() {
+		this.dijkstra = new DijkstraFactory().createPathCalculator(network, new TravelDisutility() {
 			@Override
 			public double getLinkTravelDisutility(Link link, double time,
 					Person person, Vehicle vehicle) {

@@ -51,7 +51,7 @@ import org.matsim.contrib.util.distance.DistanceUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.router.util.DijkstraFactory;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 

@@ -22,8 +22,8 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.router.AStarLandmarks;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.PreProcessLandmarks;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.collections.Tuple;
@@ -33,10 +33,10 @@ import org.matsim.vehicles.Vehicle;
 import others.sergioo.util.geometry.Functions2D;
 import playground.sergioo.networksMatcher2012.kernel.core.ComposedLink;
 import playground.sergioo.networksMatcher2012.kernel.core.ComposedNode;
+import playground.sergioo.networksMatcher2012.kernel.core.ComposedNode.Types;
 import playground.sergioo.networksMatcher2012.kernel.core.MatchingStep;
 import playground.sergioo.networksMatcher2012.kernel.core.NodesMatching;
 import playground.sergioo.networksMatcher2012.kernel.core.Region;
-import playground.sergioo.networksMatcher2012.kernel.core.ComposedNode.Types;
 
 public class CrossingMatchingStep extends MatchingStep {
 
@@ -231,21 +231,15 @@ public class CrossingMatchingStep extends MatchingStep {
 			}
 		};
 		TravelTime timeFunction = new TravelTime() {	
-
-
 			@Override
 			public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
 				return link.getLength();
 			}
 		};
-		PreProcessLandmarks preProcessData = new PreProcessLandmarks(travelMinCost);
-		preProcessData.run(networkB);
-		AStarLandmarks aStarLandmarks = new AStarLandmarks(networkB, preProcessData, timeFunction);
+		AStarLandmarks aStarLandmarks = (AStarLandmarks) new AStarLandmarksFactory().createPathCalculator(networkB, travelMinCost, timeFunction);
 		applyCapacitiesASimple(aStarLandmarks);
 		JOptionPane.showMessageDialog(null,"SimplesA done!");
-		preProcessData = new PreProcessLandmarks(travelMinCost);
-		preProcessData.run(networkA);
-		aStarLandmarks = new AStarLandmarks(networkA, preProcessData, timeFunction);
+		aStarLandmarks = (AStarLandmarks) new AStarLandmarksFactory().createPathCalculator(networkA, travelMinCost, timeFunction);
 		applyCapacitiesBSimple(aStarLandmarks);
 		JOptionPane.showMessageDialog(null,"SimplesB done!");
 		try {

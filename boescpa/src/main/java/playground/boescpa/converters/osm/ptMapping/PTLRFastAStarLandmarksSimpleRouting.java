@@ -31,7 +31,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.router.Dijkstra;
-import org.matsim.core.router.util.FastAStarLandmarksFactory;
+import org.matsim.core.router.FastAStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.vehicles.Vehicle;

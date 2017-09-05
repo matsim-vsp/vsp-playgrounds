@@ -32,9 +32,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
 import org.matsim.core.mobsim.jdeqsim.util.Timer;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
@@ -53,7 +52,7 @@ public class EditRoute {
 		this.network=network;
 		TravelDisutility travelCost=new DummyTravelDisutility();
 		TravelTime travelTime=new TTMatrixBasedTravelTime(ttMatrix);
-		routingAlgo = new Dijkstra(network, travelCost,travelTime);
+		routingAlgo = new DijkstraFactory().createPathCalculator(network, travelCost,travelTime);
 	}
 	
 	public EditRoute(TTMatrix ttMatrix,Network network, LeastCostPathCalculator routingAlgo){
@@ -138,7 +137,7 @@ public class EditRoute {
 	//	preProcessData.run(network);
 	//	LeastCostPathCalculator routingAlgo= new AStarEuclidean(network, preProcessData, travelTime);
 		
-		LeastCostPathCalculator routingAlgo = new Dijkstra(network, travelCost,travelTime);
+		LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(network, travelCost,travelTime);
 		
 		for (Person person:scenario.getPopulation().getPersons().values()){
 			Activity activityImpl=(Activity) person.getSelectedPlan().getPlanElements().get(0);

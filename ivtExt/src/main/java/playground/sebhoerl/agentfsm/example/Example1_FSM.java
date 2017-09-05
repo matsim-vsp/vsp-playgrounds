@@ -29,9 +29,8 @@ import org.matsim.core.mobsim.qsim.AbstractQSimPlugin;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -507,7 +506,7 @@ public class Example1_FSM {
             this.network = network;
             
             TravelTime travelTime = new FreeSpeedTravelTime();
-            pathCalculator = new Dijkstra(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
+            pathCalculator = new DijkstraFactory().createPathCalculator(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
         }
         
         public NetworkRoute getRoute(Id<Link> fromLinkId, Id<Link> toLinkId) {

@@ -30,8 +30,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
@@ -127,7 +128,7 @@ public class Stitcher {
 		}
 		List<Id<Link>> links = new ArrayList<Id<Link>>();
 		FreespeedTravelTimeAndDisutility cost = new FreespeedTravelTimeAndDisutility(-1, 0, 0);
-		Dijkstra router = new Dijkstra(networkForThisRoute, cost, cost);
+		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(networkForThisRoute, cost, cost);
 		Iterator<Id<Node>> i = stopNodes.iterator();
 		Node previous = network.getNodes().get(i.next());
 		while (i.hasNext()) {

@@ -26,23 +26,23 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.router.AStarLandmarks;
-import org.matsim.core.router.util.PreProcessLandmarks;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
 
 public class DigicoreNetworkRouterFactory {
 	private final Logger LOG = Logger.getLogger(DigicoreNetworkRouterFactory.class);
-	private Scenario sc;
-	private TravelTime travelTime;
-	private PreProcessLandmarks preprocessor;
+	private final Scenario sc;
+	private final TravelTime travelTime;
+	private final TravelDisutility travelCost;
 	
 	public DigicoreNetworkRouterFactory(Scenario scenario) {
 		LOG.info("Setting up the router...");
 		this.sc = scenario;
 		
 		LOG.info("Processing the network file for travel time calculation");
-		TravelDisutility travelCost = new TravelDisutility() {
+		this.travelCost = new TravelDisutility() {
 			@Override
 			public double getLinkTravelDisutility(Link link, double time,
 					Person person, Vehicle vehicle) {
@@ -54,10 +54,6 @@ public class DigicoreNetworkRouterFactory {
 				return link.getLength();
 			}
 		};
-		
-		LOG.info("Preprocessing the network for travel time calculation.");
-		this.preprocessor = new PreProcessLandmarks(travelCost);
-		this.preprocessor.run(this.sc.getNetwork());
 		
 		this.travelTime = new TravelTime() {
 			
@@ -75,7 +71,7 @@ public class DigicoreNetworkRouterFactory {
 	 * @return
 	 */
 	public AStarLandmarks createRouter(){
-		return new AStarLandmarks(sc.getNetwork(), preprocessor, travelTime);
+		return (AStarLandmarks) new AStarLandmarksFactory().createPathCalculator(sc.getNetwork(), travelCost, travelTime);
 	}
 	
 	

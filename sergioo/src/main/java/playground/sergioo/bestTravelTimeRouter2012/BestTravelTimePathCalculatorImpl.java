@@ -33,8 +33,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.router.Dijkstra;
-import org.matsim.core.router.util.PreProcessDijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.collections.Tuple;
@@ -57,7 +56,6 @@ public class BestTravelTimePathCalculatorImpl implements IntermodalBestTravelTim
 	final TravelTime timeFunction;
 	private Set<String> modeRestriction;
 	private boolean uTurn = true;
-	private PreProcessDijkstra preProcessDijkstra;
 	
 	//Constructors
 	/**
@@ -76,12 +74,6 @@ public class BestTravelTimePathCalculatorImpl implements IntermodalBestTravelTim
 		this.network = network;
 		this.timeFunction = timeFunction;
 		this.uTurn = uTurn;
-	}
-	public BestTravelTimePathCalculatorImpl(final Network network, final TravelTime timeFunction, boolean uTurn, PreProcessDijkstra preProcessDijkstra) {
-		this.network = network;
-		this.timeFunction = timeFunction;
-		this.uTurn = uTurn;
-		this.preProcessDijkstra = preProcessDijkstra;
 	}
 	//Methods
 	@Override
@@ -112,11 +104,7 @@ public class BestTravelTimePathCalculatorImpl implements IntermodalBestTravelTim
 				return link.getLength()/link.getFreespeed();
 			}
 		};
-		if(preProcessDijkstra == null) {
-			preProcessDijkstra = new PreProcessDijkstra();
-			preProcessDijkstra.run(network);
-		}
-		org.matsim.core.router.util.LeastCostPathCalculator.Path path = new Dijkstra(network, travelDisutility, timeFunction, preProcessDijkstra).calcLeastCostPath(fromNode, toNode, startTime, null, null);
+		org.matsim.core.router.util.LeastCostPathCalculator.Path path = new DijkstraFactory(true).createPathCalculator(network, travelDisutility, timeFunction).calcLeastCostPath(fromNode, toNode, startTime, null, null);
 		Map<Link, Link> nextLinks = new HashMap<Link, Link>();
 		Link[] firstLink = new Link[1];
 		double bestTravelTime = calcBestTravelTime(fromNode, toNode, travelTime, startTime, new ArrayList<Link>(), 0, new ArrayList<Tuple<Double,Double>>(), travelTime, path.travelTime, nextLinks, firstLink, null);

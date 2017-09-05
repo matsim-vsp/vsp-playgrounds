@@ -31,8 +31,9 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -44,7 +45,7 @@ public class RouterFilter implements TripFlowSink {
 
 	private Network network;
 
-	private Dijkstra dijkstra;
+	private LeastCostPathCalculator dijkstra;
 
 	private TripFlowSink sink;
 
@@ -59,7 +60,7 @@ public class RouterFilter implements TripFlowSink {
 	public RouterFilter(Network network) {
 		this.network = network;
 		FreespeedTravelTimeAndDisutility fttc = new FreespeedTravelTimeAndDisutility(new PlanCalcScoreConfigGroup());
-		dijkstra = new Dijkstra(network, fttc, fttc);
+		dijkstra = new DijkstraFactory().createPathCalculator(network, fttc, fttc);
 		this.sc = ScenarioUtils.createScenario(ConfigUtils.createConfig()) ;
 	}
 

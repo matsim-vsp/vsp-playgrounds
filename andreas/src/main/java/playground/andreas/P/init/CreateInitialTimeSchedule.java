@@ -33,7 +33,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -138,7 +138,7 @@ public class CreateInitialTimeSchedule {
 	private TransitRoute createRoute(Id<TransitRoute> routeID, TransitStopFacility startStop, TransitStopFacility endStop){
 		
 		FreespeedTravelTimeAndDisutility tC = new FreespeedTravelTimeAndDisutility(-6.0, 0.0, 0.0);
-		LeastCostPathCalculator routingAlgo = new Dijkstra(this.net, tC, tC);
+		LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(this.net, tC, tC);
 		
 		Node startNode = this.net.getLinks().get(startStop.getLinkId()).getToNode();
 		Node endNode = this.net.getLinks().get(endStop.getLinkId()).getFromNode();

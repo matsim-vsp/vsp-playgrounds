@@ -46,7 +46,8 @@ import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.MutableScenario;
@@ -395,7 +396,7 @@ public class MainPPSimZurich30km {
 
 			TravelDisutility travelCost = new TollAreaTravelDisutility();
 			TravelTime travelTime = new TTMatrixBasedTravelTime(Message.ttMatrix);
-			Dijkstra routingAlgo = new Dijkstra(scenario.getNetwork(), travelCost, travelTime);
+			LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(scenario.getNetwork(), travelCost, travelTime);
 
 			EditRoute.globalEditRoute = new EditRoute(Message.ttMatrix, scenario.getNetwork(), routingAlgo);
 		} else {

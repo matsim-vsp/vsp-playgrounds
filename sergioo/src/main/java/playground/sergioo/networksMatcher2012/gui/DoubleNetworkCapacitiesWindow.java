@@ -47,9 +47,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.router.AStarLandmarks;
+import org.matsim.core.router.AStarLandmarksFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.PreProcessLandmarks;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.collections.Tuple;
@@ -128,7 +128,7 @@ public class DoubleNetworkCapacitiesWindow extends LayersWindow implements Actio
 	private Map<Link, Tuple<Link,Double>> linksChanged;
 	private Map<Link, Tuple<Link,Double>> undoLinksChanged;
 	private Node firstNode;
-	private AStarLandmarks aStarLandmarksB;
+	private LeastCostPathCalculator aStarLandmarksB;
 
 	//Methods
 	private DoubleNetworkCapacitiesWindow(String title) {
@@ -214,9 +214,7 @@ public class DoubleNetworkCapacitiesWindow extends LayersWindow implements Actio
 				return link.getLength();
 			}
 		};
-		PreProcessLandmarks preProcessData = new PreProcessLandmarks(travelMinCost);
-		preProcessData.run(networkB);
-		aStarLandmarksB = new AStarLandmarks(networkB, preProcessData, timeFunction);
+		aStarLandmarksB = new AStarLandmarksFactory().createPathCalculator(networkB, travelMinCost, timeFunction);
 	}
 	public void cameraChange(Camera camera) {
 		if(networksSeparated) {

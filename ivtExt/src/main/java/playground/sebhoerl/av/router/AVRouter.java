@@ -6,9 +6,8 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -21,7 +20,7 @@ public class AVRouter {
     
     public AVRouter(Network network, AVTravelTime travelTime) {
         this.network = network;
-        pathCalculator = new Dijkstra(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
+        pathCalculator = new DijkstraFactory().createPathCalculator(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
     }
     
     private NetworkRoute createRoute(Id<Link> fromLinkId, Id<Link> toLinkId, double startTime) {

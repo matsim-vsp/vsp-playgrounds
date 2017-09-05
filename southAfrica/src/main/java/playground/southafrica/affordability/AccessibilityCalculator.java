@@ -19,7 +19,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -32,6 +31,8 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.router.AStarEuclidean;
+import org.matsim.core.router.AStarEuclideanFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.PreProcessLandmarks;
 import org.matsim.core.router.util.TravelDisutility;
@@ -83,8 +84,8 @@ public class AccessibilityCalculator {
 	private QuadTree<Coord> taxiStops;
 	
 	private Map<Integer, String> classDescription = new TreeMap<Integer, String>();
-	private AStarEuclidean routerDrive;
-	private AStarEuclidean routerWalk;
+	private LeastCostPathCalculator routerDrive;
+	private LeastCostPathCalculator routerWalk;
 	private static Map<String, Integer> activityOptions = new TreeMap<String, Integer>();
 	
 	/*TODO Remove after validation. */
@@ -313,7 +314,7 @@ public class AccessibilityCalculator {
 				return travelTime;
 			}
 		};
-		routerWalk = new AStarEuclidean(sc.getNetwork(), pp, travelTimeWalk);
+		routerWalk = new AStarEuclideanFactory().createPathCalculator(sc.getNetwork(), pp.getCostFunction(), travelTimeWalk);
 	}
 
 
@@ -334,7 +335,7 @@ public class AccessibilityCalculator {
 				return travelTime;
 			}
 		};
-		routerDrive = new AStarEuclidean(sc.getNetwork(), pp, travelTimeDrive);
+		routerDrive = new AStarEuclideanFactory().createPathCalculator(sc.getNetwork(), pp.getCostFunction(), travelTimeDrive);
 	}
 	
 	

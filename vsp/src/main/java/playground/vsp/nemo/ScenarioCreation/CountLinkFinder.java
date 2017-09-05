@@ -23,7 +23,6 @@ package playground.vsp.nemo.ScenarioCreation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -33,7 +32,8 @@ import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -47,14 +47,14 @@ public class CountLinkFinder {
 
 	private Network network;
 	private List<Path> allFoundPaths = new ArrayList<Path>();
-	private Dijkstra dijkstra;
+	private LeastCostPathCalculator dijkstra;
 	/**
 	 * 
 	 */
 	public CountLinkFinder(Network net) {
 		this.network = net;
 		SimpleTravelDistanceDisutility travelDistance = new SimpleTravelDistanceDisutility();
-		dijkstra = new Dijkstra(network, travelDistance, travelDistance);
+		dijkstra = new DijkstraFactory().createPathCalculator(network, travelDistance, travelDistance);
 	}
 	
 	

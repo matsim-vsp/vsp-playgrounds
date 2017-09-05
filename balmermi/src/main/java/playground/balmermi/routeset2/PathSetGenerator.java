@@ -34,15 +34,13 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.router.AStarLandmarks;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.PreProcessLandmarks;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
 
@@ -89,9 +87,7 @@ public class PathSetGenerator {
 		if (network == null) { throw new RuntimeException("Network must exist."); }
 		this.network = network;
 		this.frespeedCost = new FreespeedTravelTimeAndDisutility(new PlanCalcScoreConfigGroup());
-		PreProcessLandmarks preProcessLandmarks = new PreProcessLandmarks(this.frespeedCost);
-		preProcessLandmarks.run(network);
-		this.router = new AStarLandmarks(this.network,preProcessLandmarks,this.frespeedCost);
+		this.router = new AStarLandmarksFactory().createPathCalculator(this.network,this.frespeedCost,this.frespeedCost);
 		this.initStreetSegments();
 
 		// calc network densities
