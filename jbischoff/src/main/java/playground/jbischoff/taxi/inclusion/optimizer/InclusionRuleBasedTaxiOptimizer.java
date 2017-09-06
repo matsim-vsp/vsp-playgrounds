@@ -58,7 +58,7 @@ public class InclusionRuleBasedTaxiOptimizer
 
         this.params = params;
 
-        if (optimContext.scheduler.getParams().vehicleDiversion) {
+        if (optimContext.taxiCfg.isVehicleDiversion()) {
             throw new RuntimeException("Diversion is not supported by RuleBasedTaxiOptimizer");
         }
 

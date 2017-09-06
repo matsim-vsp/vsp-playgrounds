@@ -22,6 +22,7 @@ package playground.michalm.taxi.optimizer;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizerContext;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.*;
 
@@ -31,9 +32,9 @@ import playground.michalm.taxi.scheduler.ETaxiScheduler;
 public class ETaxiOptimizerContext extends TaxiOptimizerContext {
 	public final EvData evData;
 
-	public ETaxiOptimizerContext(Fleet fleet, Network network, MobsimTimer timer, TravelTime travelTime,
-			TravelDisutility travelDisutility, ETaxiScheduler scheduler, EvData evData) {
-		super(fleet, network, timer, travelTime, travelDisutility, scheduler);
+	public ETaxiOptimizerContext(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
+			TravelTime travelTime, TravelDisutility travelDisutility, ETaxiScheduler scheduler, EvData evData) {
+		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility, scheduler);
 		this.evData = evData;
 	}
 }

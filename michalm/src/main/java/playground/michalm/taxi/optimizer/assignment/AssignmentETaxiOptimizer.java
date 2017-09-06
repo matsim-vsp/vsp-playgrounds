@@ -72,8 +72,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		evData = optimContext.evData;
 		eScheduler = (ETaxiScheduler)optimContext.scheduler;
 
-		if (optimContext.scheduler.getParams().vehicleDiversion
-				&& optimContext.scheduler.getParams().destinationKnown) {
+		if (optimContext.taxiCfg.isVehicleDiversion() && optimContext.taxiCfg.isDestinationKnown()) {
 			throw new IllegalArgumentException("Unsupported");
 		}
 

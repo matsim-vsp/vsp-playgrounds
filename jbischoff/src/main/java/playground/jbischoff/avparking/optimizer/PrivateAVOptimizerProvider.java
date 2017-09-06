@@ -37,7 +37,6 @@ import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizerContext;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
-import org.matsim.contrib.taxi.scheduler.TaxiSchedulerParams;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -78,12 +77,11 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	@Override
 	public TaxiOptimizer get() {
 		
-		TaxiSchedulerParams schedulerParams = new TaxiSchedulerParams(taxiCfg);
 		TravelDisutility travelDisutility = new TimeAsTravelDisutility(travelTime);
-		PrivateAVScheduler scheduler = new PrivateAVScheduler(taxiCfg, network, fleet, qSim.getSimTimer(), schedulerParams,
+		PrivateAVScheduler scheduler = new PrivateAVScheduler(taxiCfg, network, fleet, qSim.getSimTimer(),
 				travelTime, travelDisutility);
 
-		TaxiOptimizerContext optimContext = new TaxiOptimizerContext(fleet, network, qSim.getSimTimer(), travelTime,
+		TaxiOptimizerContext optimContext = new TaxiOptimizerContext(taxiCfg, fleet, network, qSim.getSimTimer(), travelTime,
 				travelDisutility, scheduler);
 		
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());

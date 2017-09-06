@@ -35,7 +35,6 @@ import org.matsim.contrib.dvrp.util.LinkTimePair;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiEmptyDriveTask;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
-import org.matsim.contrib.taxi.scheduler.TaxiSchedulerParams;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -59,8 +58,8 @@ public class PrivateAVScheduler extends TaxiScheduler {
 	 * @param travelDisutility
 	 */
 	public PrivateAVScheduler(TaxiConfigGroup taxiCfg, Network network, Fleet fleet, MobsimTimer timer,
-			TaxiSchedulerParams params, TravelTime travelTime, TravelDisutility travelDisutility) {
-		super(taxiCfg, network, fleet, timer, params, travelTime, travelDisutility);
+			 TravelTime travelTime, TravelDisutility travelDisutility) {
+		super(taxiCfg, network, fleet, timer, travelTime, travelDisutility);
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -74,7 +73,7 @@ public class PrivateAVScheduler extends TaxiScheduler {
 	}
 	
 	public void stopCruisingVehicle(Vehicle vehicle) {
-		if (!params.vehicleDiversion) {
+		if (!taxiCfg.isVehicleDiversion()) {
 			throw new RuntimeException("Diversion must be on");
 		}
 

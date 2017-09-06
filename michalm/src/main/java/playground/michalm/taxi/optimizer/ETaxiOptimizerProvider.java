@@ -27,7 +27,6 @@ import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.taxi.optimizer.*;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.scheduler.TaxiSchedulerParams;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.*;
@@ -70,16 +69,14 @@ public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 
 	@Override
 	public TaxiOptimizer get() {
-		TaxiSchedulerParams schedulerParams = new TaxiSchedulerParams(taxiCfg);
-
 		TravelDisutility travelDisutility = travelDisutilityFactory == null ? new TimeAsTravelDisutility(travelTime)
 				: travelDisutilityFactory.createTravelDisutility(travelTime);
 
-		ETaxiScheduler scheduler = new ETaxiScheduler(taxiCfg, network, fleet, qSim.getSimTimer(), schedulerParams,
-				travelTime, travelDisutility);
+		ETaxiScheduler scheduler = new ETaxiScheduler(taxiCfg, network, fleet, qSim.getSimTimer(), travelTime,
+				travelDisutility);
 
-		ETaxiOptimizerContext optimContext = new ETaxiOptimizerContext(fleet, network, qSim.getSimTimer(), travelTime,
-				travelDisutility, scheduler, evData);
+		ETaxiOptimizerContext optimContext = new ETaxiOptimizerContext(taxiCfg, fleet, network, qSim.getSimTimer(),
+				travelTime, travelDisutility, scheduler, evData);
 
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
 
