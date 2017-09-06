@@ -27,6 +27,7 @@ import java.util.List;
 import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
@@ -220,16 +221,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 									try {
 										Files.copy(new File(sourceFile), new File(sinkFile));
 									} catch (IOException e) {
-										throw new RuntimeException("Data is not copied. Reason : " + e);
-									}
-								}
-								{
-									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt");
-									String sinkFile =  outDir+"/"+itr+".stateVector_teleportationModes.txt";
-									try {
-										Files.copy(new File(sourceFile), new File(sinkFile));
-									} catch (IOException e) {
-										throw new RuntimeException("Data is not copied. Reason : " + e);
+										Logger.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
 									}
 								}
 							}
