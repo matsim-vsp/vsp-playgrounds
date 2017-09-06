@@ -20,7 +20,9 @@
 package playground.agarwalamit;
 
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.google.inject.Inject;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -139,6 +141,9 @@ public class EquilMixedTrafficIT {
 
         config.qsim().setUsePersonIdForMissingVehicleId(true);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
+//        config.plans().setInputFile(EQUIL_DIR+"/plans2000.xml.gz");
+
+        config.planCalcScore().getOrCreateModeParams("bicycle").setMarginalUtilityOfTraveling(0.);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Vehicles vehs = scenario.getVehicles();
@@ -176,6 +181,9 @@ public class EquilMixedTrafficIT {
         StrategyConfigGroup.StrategySettings ss = new StrategyConfigGroup.StrategySettings();
         ss.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode.name());
         ss.setWeight(0.2);
+
+        scenario.getConfig().strategy().addStrategySettings(ss);
+        scenario.getConfig().changeMode().setModes(new String [] {"car","bicycle"});
 
         scenario.getConfig().strategy().setFractionOfIterationsToDisableInnovation(0.8);
 
