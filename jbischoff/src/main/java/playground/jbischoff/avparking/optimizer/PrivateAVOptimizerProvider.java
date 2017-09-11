@@ -33,7 +33,6 @@ import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
@@ -51,7 +50,7 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final Network network;
 	private final MobsimTimer timer;
 	private final TravelTime travelTime;
-	private final TravelDisutilityFactory travelDisutilityFactory;
+	private final TravelDisutility travelDisutility;
 	private final TaxiScheduler scheduler;
 
 	private final ParkingSearchManager manager;
@@ -61,14 +60,14 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	public PrivateAVOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet,
 			@Named(DvrpModule.DVRP_ROUTING) Network network, MobsimTimer timer,
 			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
-			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutilityFactory travelDisutilityFactory,
+			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility,
 			TaxiScheduler scheduler, ParkingSearchManager manager, AvParkingContext context) {
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
 		this.network = network;
 		this.timer = timer;
 		this.travelTime = travelTime;
-		this.travelDisutilityFactory = travelDisutilityFactory;
+		this.travelDisutility = travelDisutility;
 		this.scheduler = scheduler;
 		this.manager = manager;
 		this.context = context;
@@ -77,10 +76,8 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 
 	@Override
 	public TaxiOptimizer get() {
-		TravelDisutility travelDisutility = travelDisutilityFactory.createTravelDisutility(travelTime);
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
-		return new PrivateAVTaxiDispatcher( taxiCfg, fleet, network, timer,
-				travelTime, travelDisutility, scheduler, new RuleBasedETaxiOptimizerParams(optimizerConfig), manager,
-				context);
+		return new PrivateAVTaxiDispatcher(taxiCfg, fleet, network, timer, travelTime, travelDisutility, scheduler,
+				new RuleBasedETaxiOptimizerParams(optimizerConfig), manager, context);
 	}
 }

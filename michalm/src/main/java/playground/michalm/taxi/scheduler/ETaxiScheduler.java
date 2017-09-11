@@ -39,7 +39,7 @@ import org.matsim.contrib.taxi.schedule.TaxiStayTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
 import com.google.inject.Inject;
@@ -56,8 +56,8 @@ public class ETaxiScheduler extends TaxiScheduler {
 	@Inject
 	public ETaxiScheduler(TaxiConfigGroup taxiCfg, Fleet fleet, @Named(DvrpModule.DVRP_ROUTING) Network network,
 			MobsimTimer timer, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
-			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutilityFactory travelDisutilityFactory) {
-		super(taxiCfg, fleet, network, timer, travelTime, travelDisutilityFactory);
+			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility) {
+		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility);
 	}
 
 	@Override

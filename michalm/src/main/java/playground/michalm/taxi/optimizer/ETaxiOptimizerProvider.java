@@ -29,7 +29,6 @@ import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.mobsim.framework.MobsimTimer;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
@@ -56,28 +55,27 @@ public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final Fleet fleet;
 	private final MobsimTimer timer;
 	private final TravelTime travelTime;
-	private final TravelDisutilityFactory travelDisutilityFactory;
+	private final TravelDisutility travelDisutility;
 	private final ETaxiScheduler eScheduler;
 	private final EvData evData;
 
 	@Inject
 	public ETaxiOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet, @Named(DvrpModule.DVRP_ROUTING) Network network,
 			MobsimTimer timer, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
-			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutilityFactory travelDisutilityFactory,
+			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility,
 			ETaxiScheduler eScheduler, EvData evData) {
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
 		this.network = network;
 		this.timer = timer;
 		this.travelTime = travelTime;
-		this.travelDisutilityFactory = travelDisutilityFactory;
+		this.travelDisutility = travelDisutility;
 		this.eScheduler = eScheduler;
 		this.evData = evData;
 	}
 
 	@Override
 	public TaxiOptimizer get() {
-		TravelDisutility travelDisutility = travelDisutilityFactory.createTravelDisutility(travelTime);
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
 		EOptimizerType type = EOptimizerType.valueOf(optimizerConfig.getString(TYPE));
 
