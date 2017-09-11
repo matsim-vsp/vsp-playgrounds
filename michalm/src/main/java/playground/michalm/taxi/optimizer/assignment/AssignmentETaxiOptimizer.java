@@ -129,7 +129,8 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 
 	// if socCheckTimeStep is too small --> small number of idle plugs --> poorer assignments
 	protected void scheduleCharging() {
-		AssignmentChargerPlugData pData = new AssignmentChargerPlugData(getTimer(), evData.getChargers().values());
+		AssignmentChargerPlugData pData = new AssignmentChargerPlugData(getTimer().getTimeOfDay(),
+				evData.getChargers().values());
 		if (pData.getSize() == 0) {
 			return;
 		}
@@ -171,7 +172,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		// XXX if chargers are heavily used then shorten the planning horizon;
 		// (like with undersupply of taxis)
 		double chargingPlanningHorizon = 10 * 60;// 10 minutes (should be longer than socCheckTimeStep)
-		VehicleData vData = new VehicleData(getTimer(), getScheduler(), vehiclesBelowMinSocLevel,
+		VehicleData vData = new VehicleData(getTimer().getTimeOfDay(), getScheduler(), vehiclesBelowMinSocLevel,
 				chargingPlanningHorizon);
 
 		// filter least charged vehicles
