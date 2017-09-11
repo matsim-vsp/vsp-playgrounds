@@ -25,119 +25,131 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Requests;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelDataImpl;
 import org.matsim.contrib.dvrp.path.VrpPaths;
+import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.dvrp.schedule.Schedules;
-import org.matsim.contrib.parking.parkingsearch.DynAgent.agentLogic.ParkingAgentLogic;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.contrib.parking.parkingsearch.search.RandomParkingSearchLogic;
-import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.taxi.data.TaxiRequest;
 import org.matsim.contrib.taxi.optimizer.AbstractTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.AbstractTaxiOptimizerParams;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizerContext;
-import org.matsim.contrib.taxi.schedule.TaxiStayTask;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
+import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.contrib.util.distance.DistanceUtils;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
-import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-
-import com.google.common.collect.Iterables;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 
 import playground.jbischoff.avparking.AvParkingContext;
 
-
-public class PrivateAVTaxiDispatcher
-    extends AbstractTaxiOptimizer
-{
+public class PrivateAVTaxiDispatcher extends AbstractTaxiOptimizer {
 	private final LeastCostPathCalculator router;
+
+	public enum AVParkBehavior {
+		findfreeSlot, garage, cruise, randombehavior
+	}
 	
-	public enum AVParkBehavior {findfreeSlot, garage, cruise, randombehavior}
-   
+	private final Network network;
+	private final MobsimTimer timer;
+	private final TravelTime travelTime;
+
 	private AVParkBehavior parkBehavior;
 	private Random random = MatsimRandom.getRandom();
 	private final ParkingSearchManager manager;
 	private final ParkingSearchLogic parkingLogic;
 	private final List<Link> avParkings;
+
 	/**
 	 * @param optimContext
 	 * @param params
-	 * @param avParkings 
+	 * @param avParkings
 	 * @param unplannedRequests
 	 * @param doUnscheduleAwaitingRequests
 	 * @param doUpdateTimelines
 	 */
-	public PrivateAVTaxiDispatcher(TaxiOptimizerContext optimContext, AbstractTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
-		super(optimContext, params, new PriorityQueue<TaxiRequest>(100, Requests.T0_COMPARATOR), false, true);
+	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
+			TravelTime travelTime, TravelDisutility travelDisutility, TaxiScheduler scheduler,
+			AbstractTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
+		super(taxiCfg, fleet, scheduler, params, new PriorityQueue<TaxiRequest>(100, Requests.T0_COMPARATOR), false,
+				true);
 		
+		this.network = network;
+		this.timer = timer;
+		this.travelTime = travelTime;
+
 		DijkstraFactory f = new DijkstraFactory();
-		router = f.createPathCalculator(optimContext.network, getOptimContext().travelDisutility, getOptimContext().travelTime);
+		router = f.createPathCalculator(network, travelDisutility, travelTime);
 		parkBehavior = context.getBehavior();
 		manager = parkingManger;
-		parkingLogic = new RandomParkingSearchLogic(optimContext.network);
-		this.avParkings =	NetworkUtils.getLinks(optimContext.network, context.getAvParkings());
+		parkingLogic = new RandomParkingSearchLogic(network);
+		this.avParkings = NetworkUtils.getLinks(network, context.getAvParkings());
 	}
-	
+
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, 60)) {
-			for (Vehicle veh : getOptimContext().fleet.getVehicles().values()) {
-				if (veh.getSchedule().getStatus().equals(ScheduleStatus.STARTED)){
+			for (Vehicle veh : getFleet().getVehicles().values()) {
+				if (veh.getSchedule().getStatus().equals(ScheduleStatus.STARTED)) {
 
-				if (isWaitStay((TaxiTask) veh.getSchedule().getCurrentTask())&& manager.getVehicleParkingLocation(Id.createVehicleId(veh.getId())) == null) {
-					
-					//check if current location allows for parking and park here
-		    	Link lastLink = Schedules.getLastLinkInSchedule(veh);
-		    	if (manager.reserveSpaceIfVehicleCanParkHere(Id.createVehicleId(veh.getId()), lastLink.getId()))
-		    			{
-		    		manager.parkVehicleHere(Id.createVehicleId(Id.createVehicleId(veh.getId())), lastLink.getId(), e.getSimulationTime());
-		    	}else {
-					
-					
-				AVParkBehavior vehParkBehavior = parkBehavior;
-				if (vehParkBehavior == AVParkBehavior.randombehavior) {
-					int i = random.nextInt(3);
-					if (i == 0)
-						vehParkBehavior = AVParkBehavior.cruise;
-					else if (i == 1)
-						vehParkBehavior = AVParkBehavior.findfreeSlot;
-					else if (i == 2)
-						vehParkBehavior = AVParkBehavior.garage;
-				}
-				switch (vehParkBehavior) {
-				case cruise:
-//					Logger.getLogger(getClass()).info(veh.getId()+" --> cruise");
-					sendVehicleToCruise(veh);
-					break;
-				case findfreeSlot:
-//					Logger.getLogger(getClass()).info(veh.getId()+" --> parking");
-					findFreeSlotAndParkVehicle(veh);
-					break;
-				case garage:
-//					Logger.getLogger(getClass()).info(veh.getId()+" --> garage");
-					sendVehicleToGarage(veh);
-					break;
-				case randombehavior:
-					throw new IllegalStateException();
-				}
+					if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())
+							&& manager.getVehicleParkingLocation(Id.createVehicleId(veh.getId())) == null) {
 
-			}
-				}
+						// check if current location allows for parking and park here
+						Link lastLink = Schedules.getLastLinkInSchedule(veh);
+						if (manager.reserveSpaceIfVehicleCanParkHere(Id.createVehicleId(veh.getId()),
+								lastLink.getId())) {
+							manager.parkVehicleHere(Id.createVehicleId(Id.createVehicleId(veh.getId())),
+									lastLink.getId(), e.getSimulationTime());
+						} else {
 
-		}
+							AVParkBehavior vehParkBehavior = parkBehavior;
+							if (vehParkBehavior == AVParkBehavior.randombehavior) {
+								int i = random.nextInt(3);
+								if (i == 0)
+									vehParkBehavior = AVParkBehavior.cruise;
+								else if (i == 1)
+									vehParkBehavior = AVParkBehavior.findfreeSlot;
+								else if (i == 2)
+									vehParkBehavior = AVParkBehavior.garage;
+							}
+							switch (vehParkBehavior) {
+								case cruise:
+									// Logger.getLogger(getClass()).info(veh.getId()+" --> cruise");
+									sendVehicleToCruise(veh);
+									break;
+								case findfreeSlot:
+									// Logger.getLogger(getClass()).info(veh.getId()+" --> parking");
+									findFreeSlotAndParkVehicle(veh);
+									break;
+								case garage:
+									// Logger.getLogger(getClass()).info(veh.getId()+" --> garage");
+									sendVehicleToGarage(veh);
+									break;
+								case randombehavior:
+									throw new IllegalStateException();
+							}
+
+						}
+					}
+
+				}
 			}
 		}
 
@@ -148,44 +160,39 @@ public class PrivateAVTaxiDispatcher
 	 * @param veh
 	 */
 	private void findFreeSlotAndParkVehicle(Vehicle veh) {
-		    if (isWaitStay((TaxiTask) veh.getSchedule().getCurrentTask())){
-		    	Link lastLink = Schedules.getLastLinkInSchedule(veh);
-		    	//AV is not parked
-		    	
-		    		Id<org.matsim.vehicles.Vehicle> vehicleId = Id.createVehicleId(veh.getId());
-		    		Id<Link> parkingLinkId = lastLink.getId();
-		    		while (!this.manager.reserveSpaceIfVehicleCanParkHere(vehicleId, parkingLinkId)){
-		    			parkingLinkId = parkingLogic.getNextLink(parkingLinkId,vehicleId);
-		    		}
-		    		VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(lastLink,getOptimContext().network.getLinks().get(parkingLinkId) , getOptimContext().timer.getTimeOfDay(),router , getOptimContext().travelTime);
+		if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())) {
+			Link lastLink = Schedules.getLastLinkInSchedule(veh);
+			// AV is not parked
 
-			    	((PrivateAVScheduler)getOptimContext().scheduler).moveIdleVehicle(veh, path);
-		    		manager.parkVehicleHere(vehicleId, parkingLinkId, getOptimContext().timer.getTimeOfDay());
-		    		
-		    			    
-		    	}
+			Id<org.matsim.vehicles.Vehicle> vehicleId = Id.createVehicleId(veh.getId());
+			Id<Link> parkingLinkId = lastLink.getId();
+			while (!this.manager.reserveSpaceIfVehicleCanParkHere(vehicleId, parkingLinkId)) {
+				parkingLinkId = parkingLogic.getNextLink(parkingLinkId, vehicleId);
+			}
+			VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(lastLink, network.getLinks().get(parkingLinkId),
+					timer.getTimeOfDay(), router, travelTime);
 
-		
-		
+			((PrivateAVScheduler)getScheduler()).moveIdleVehicle(veh, path);
+			manager.parkVehicleHere(vehicleId, parkingLinkId, timer.getTimeOfDay());
+
+		}
+
 	}
 
 	private void sendVehicleToGarage(Vehicle veh) {
-				if (isWaitStay((TaxiTask) veh.getSchedule().getCurrentTask())) {
-					Link lastLink = Schedules.getLastLinkInSchedule(veh);
-					Link garageLink = findClosestAVParking(lastLink);
-					if (!lastLink.getId().equals(garageLink)) {
-						VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(lastLink,
-								garageLink,
-								getOptimContext().timer.getTimeOfDay(), router, getOptimContext().travelTime);
+		if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())) {
+			Link lastLink = Schedules.getLastLinkInSchedule(veh);
+			Link garageLink = findClosestAVParking(lastLink);
+			if (!lastLink.getId().equals(garageLink.getId())) {
+				VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(lastLink, garageLink, timer.getTimeOfDay(),
+						router, travelTime);
 
-						((PrivateAVScheduler) getOptimContext().scheduler).moveIdleVehicle(veh, path);
-						manager.parkVehicleHere(Id.createVehicleId(veh.getId()), garageLink.getId(), path.getArrivalTime());
-					}
-				}
-
-			
+				((PrivateAVScheduler)getScheduler()).moveIdleVehicle(veh, path);
+				manager.parkVehicleHere(Id.createVehicleId(veh.getId()), garageLink.getId(), path.getArrivalTime());
+			}
 		}
-	
+
+	}
 
 	/**
 	 * @param lastLink
@@ -194,9 +201,9 @@ public class PrivateAVTaxiDispatcher
 	private Link findClosestAVParking(Link lastLink) {
 		double closestDistance = Double.MAX_VALUE;
 		Link closestLink = null;
-		for (Link p : avParkings){
+		for (Link p : avParkings) {
 			double distance = DistanceUtils.calculateSquaredDistance(lastLink.getCoord(), p.getCoord());
-			if (distance<closestDistance){
+			if (distance < closestDistance) {
 				closestDistance = distance;
 				closestLink = p;
 			}
@@ -205,115 +212,109 @@ public class PrivateAVTaxiDispatcher
 	}
 
 	private void sendVehicleToCruise(Vehicle veh) {
-			if (isWaitStay((TaxiTask) veh.getSchedule().getCurrentTask())) {
-					Link lastLink = Schedules.getLastLinkInSchedule(veh);
-					Coord firstCircleCoord = new Coord(lastLink.getCoord().getX()-500-random.nextInt(1500),lastLink.getCoord().getY()-1000+random.nextInt(2000));
-					Link firstCircleLink = NetworkUtils.getNearestLink(getOptimContext().network, firstCircleCoord);
-					Coord secondCircleCoord = new Coord(lastLink.getCoord().getX()+500+random.nextInt(1500),lastLink.getCoord().getY()-1000+random.nextInt(2000));
-					Link secondCircleLink = NetworkUtils.getNearestLink(getOptimContext().network, secondCircleCoord);
-					double lastDepartureTime = getOptimContext().timer.getTimeOfDay();
-					List<Double> linkTTs = new ArrayList<>();
-					List<Link> links = new ArrayList<>();
-					for (int i = 0; i < 1000; i++) {
-						VrpPathWithTravelData outpath = VrpPaths.calcAndCreatePath(lastLink,
-								firstCircleLink, lastDepartureTime,
-								router, getOptimContext().travelTime);
-						lastDepartureTime = outpath.getArrivalTime();
-						for (int z = 0; z < outpath.getLinkCount() - 1; z++) {
-							linkTTs.add(outpath.getLinkTravelTime(z));
-							links.add(outpath.getLink(z));
-						}
-
-						VrpPathWithTravelData nextpath = VrpPaths.calcAndCreatePath(
-								firstCircleLink,
-								secondCircleLink, lastDepartureTime,
-								router, getOptimContext().travelTime);
-
-						for (int z = 0; z < nextpath.getLinkCount() - 1; z++) {
-							linkTTs.add(nextpath.getLinkTravelTime(z));
-							links.add(nextpath.getLink(z));
-						}
-
-						lastDepartureTime = nextpath.getArrivalTime();
-						VrpPathWithTravelData lastPath = VrpPaths.calcAndCreatePath(
-								secondCircleLink, lastLink,
-								lastDepartureTime, router, getOptimContext().travelTime);
-						for (int z = 0; z < lastPath.getLinkCount() - 1; z++) {
-							linkTTs.add(lastPath.getLinkTravelTime(z));
-							links.add(lastPath.getLink(z));
-						}
-
-						lastDepartureTime = lastPath.getArrivalTime();
-
-					}
-					double[] linkTTA = new double[linkTTs.size()];
-					int i = 0;
-					for (Double d : linkTTs) {
-						linkTTA[i] = d;
-						i++;
-					}
-
-					VrpPathWithTravelData path = new VrpPathWithTravelDataImpl(getOptimContext().timer.getTimeOfDay(),
-							lastDepartureTime - getOptimContext().timer.getTimeOfDay(),
-							links.toArray(new Link[links.size()]), linkTTA);
-					((PrivateAVScheduler) getOptimContext().scheduler).moveIdleVehicle(veh, path);
-
+		if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())) {
+			Link lastLink = Schedules.getLastLinkInSchedule(veh);
+			Coord firstCircleCoord = new Coord(lastLink.getCoord().getX() - 500 - random.nextInt(1500),
+					lastLink.getCoord().getY() - 1000 + random.nextInt(2000));
+			Link firstCircleLink = NetworkUtils.getNearestLink(network, firstCircleCoord);
+			Coord secondCircleCoord = new Coord(lastLink.getCoord().getX() + 500 + random.nextInt(1500),
+					lastLink.getCoord().getY() - 1000 + random.nextInt(2000));
+			Link secondCircleLink = NetworkUtils.getNearestLink(network, secondCircleCoord);
+			double lastDepartureTime = timer.getTimeOfDay();
+			List<Double> linkTTs = new ArrayList<>();
+			List<Link> links = new ArrayList<>();
+			for (int i = 0; i < 1000; i++) {
+				VrpPathWithTravelData outpath = VrpPaths.calcAndCreatePath(lastLink, firstCircleLink, lastDepartureTime,
+						router, travelTime);
+				lastDepartureTime = outpath.getArrivalTime();
+				for (int z = 0; z < outpath.getLinkCount() - 1; z++) {
+					linkTTs.add(outpath.getLinkTravelTime(z));
+					links.add(outpath.getLink(z));
 				}
 
-			
-		
+				VrpPathWithTravelData nextpath = VrpPaths.calcAndCreatePath(firstCircleLink, secondCircleLink,
+						lastDepartureTime, router, travelTime);
+
+				for (int z = 0; z < nextpath.getLinkCount() - 1; z++) {
+					linkTTs.add(nextpath.getLinkTravelTime(z));
+					links.add(nextpath.getLink(z));
+				}
+
+				lastDepartureTime = nextpath.getArrivalTime();
+				VrpPathWithTravelData lastPath = VrpPaths.calcAndCreatePath(secondCircleLink, lastLink,
+						lastDepartureTime, router, travelTime);
+				for (int z = 0; z < lastPath.getLinkCount() - 1; z++) {
+					linkTTs.add(lastPath.getLinkTravelTime(z));
+					links.add(lastPath.getLink(z));
+				}
+
+				lastDepartureTime = lastPath.getArrivalTime();
+
+			}
+			double[] linkTTA = new double[linkTTs.size()];
+			int i = 0;
+			for (Double d : linkTTs) {
+				linkTTA[i] = d;
+				i++;
+			}
+
+			VrpPathWithTravelData path = new VrpPathWithTravelDataImpl(timer.getTimeOfDay(),
+					lastDepartureTime - timer.getTimeOfDay(), links.toArray(new Link[links.size()]), linkTTA);
+			((PrivateAVScheduler)getScheduler()).moveIdleVehicle(veh, path);
+
+		}
+
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.matsim.contrib.taxi.optimizer.AbstractTaxiOptimizer#scheduleUnplannedRequests()
 	 */
 	@Override
 	protected void scheduleUnplannedRequests() {
-        Iterator<TaxiRequest> reqIter = getUnplannedRequests().iterator();
-        while (reqIter.hasNext()) {
-            TaxiRequest req = reqIter.next();
-            Id<Vehicle> personalAV = Id.create(req.getPassenger().getId().toString()+"_av",Vehicle.class);
-            Vehicle veh = getOptimContext().fleet.getVehicles().get(personalAV);
-            if (veh==null){
-            	throw new RuntimeException("Vehicle "+personalAV.toString()+ "does not exist.");
-            }
-            if (!isWaitStayOrEmptyDrive((TaxiTask) veh.getSchedule().getCurrentTask())){
-            	throw new RuntimeException("Vehicle "+personalAV.toString()+ "is not idle.");
+		Iterator<TaxiRequest> reqIter = getUnplannedRequests().iterator();
+		while (reqIter.hasNext()) {
+			TaxiRequest req = reqIter.next();
+			Id<Vehicle> personalAV = Id.create(req.getPassenger().getId().toString() + "_av", Vehicle.class);
+			Vehicle veh = getFleet().getVehicles().get(personalAV);
+			if (veh == null) {
+				throw new RuntimeException("Vehicle " + personalAV.toString() + "does not exist.");
+			}
+			if (!isWaitStayOrEmptyDrive((TaxiTask)veh.getSchedule().getCurrentTask())) {
+				throw new RuntimeException("Vehicle " + personalAV.toString() + "is not idle.");
 
-            }
-            if ( ((TaxiTask)veh.getSchedule().getCurrentTask()).getTaxiTaskType()==TaxiTaskType.EMPTY_DRIVE){
-            	((PrivateAVScheduler)getOptimContext().scheduler).stopCruisingVehicle(veh);;
-            }
-            
-            VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(Schedules.getLastLinkInSchedule(veh), req.getFromLink(), getOptimContext().timer.getTimeOfDay(),router , getOptimContext().travelTime);
-            getOptimContext().scheduler.scheduleRequest(veh, req, path);
-            Id<Link> parkLinkId = manager.getVehicleParkingLocation(Id.createVehicleId(personalAV));
-            if (parkLinkId!=null){
-            	manager.unParkVehicleHere(Id.createVehicleId(personalAV), parkLinkId, path.getDepartureTime());
-            }
-            reqIter.remove();
-        
-            }
-        }
-	
+			}
+			if (((TaxiTask)veh.getSchedule().getCurrentTask()).getTaxiTaskType() == TaxiTaskType.EMPTY_DRIVE) {
+				((PrivateAVScheduler)getScheduler()).stopCruisingVehicle(veh);;
+			}
 
-    @Override
-    protected boolean doReoptimizeAfterNextTask(TaxiTask newCurrentTask)
-    {
-        return isWaitStay(newCurrentTask);
-    }
+			VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(Schedules.getLastLinkInSchedule(veh),
+					req.getFromLink(), timer.getTimeOfDay(), router, travelTime);
+			getScheduler().scheduleRequest(veh, req, path);
+			Id<Link> parkLinkId = manager.getVehicleParkingLocation(Id.createVehicleId(personalAV));
+			if (parkLinkId != null) {
+				manager.unParkVehicleHere(Id.createVehicleId(personalAV), parkLinkId, path.getDepartureTime());
+			}
+			reqIter.remove();
 
+		}
+	}
 
-    protected boolean isWaitStay(TaxiTask task)
-    {
-        return task.getTaxiTaskType() == TaxiTaskType.STAY;
-    }
-    protected boolean isWaitStayOrEmptyDrive(TaxiTask task)
-    {
-    	if ((task.getTaxiTaskType()== TaxiTaskType.STAY)|(task.getTaxiTaskType()== TaxiTaskType.EMPTY_DRIVE)) 
-        return true;
-    	else return false;
-    }
+	@Override
+	protected boolean doReoptimizeAfterNextTask(TaxiTask newCurrentTask) {
+		return isWaitStay(newCurrentTask);
+	}
 
+	protected boolean isWaitStay(TaxiTask task) {
+		return task.getTaxiTaskType() == TaxiTaskType.STAY;
+	}
+
+	protected boolean isWaitStayOrEmptyDrive(TaxiTask task) {
+		if ((task.getTaxiTaskType() == TaxiTaskType.STAY) | (task.getTaxiTaskType() == TaxiTaskType.EMPTY_DRIVE))
+			return true;
+		else
+			return false;
+	}
 
 }

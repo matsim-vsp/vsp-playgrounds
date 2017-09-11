@@ -180,9 +180,6 @@ public class OptAVModule extends AbstractModule {
 		this.getConfig().addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		this.getConfig().checkConsistency();
         
-		install(new TaxiOutputModule());
-		install(new TaxiModule());
-		
 		if (optAVParams.isChargeOperatingCostsFromPassengers()) addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 		
         // #############################

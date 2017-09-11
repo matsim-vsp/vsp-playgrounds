@@ -19,8 +19,8 @@
 
 package playground.michalm.taxi.optimizer.assignment;
 
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizerContext;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
+import org.matsim.core.mobsim.framework.MobsimTimer;
 
 import playground.michalm.ev.data.Charger;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
@@ -37,8 +37,8 @@ class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
 		}
 	}
 
-	AssignmentChargerPlugData(TaxiOptimizerContext optimContext, Iterable<Charger> chargers) {
-		double currTime = optimContext.timer.getTimeOfDay();
+	AssignmentChargerPlugData(MobsimTimer timer, Iterable<Charger> chargers) {
+		double currTime = timer.getTimeOfDay();
 
 		int idx = 0;
 		for (Charger c : chargers) {

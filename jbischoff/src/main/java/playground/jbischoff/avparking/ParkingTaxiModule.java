@@ -21,14 +21,19 @@ package playground.jbischoff.avparking;
 
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
+import org.matsim.contrib.dvrp.router.TimeAsTravelDisutility;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
 import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
 import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 
 import com.google.inject.Provider;
+import com.google.inject.name.Names;
+
+import playground.jbischoff.avparking.optimizer.PrivateAVScheduler;
 
 /**
  * @author michalm
@@ -53,6 +58,7 @@ public final class ParkingTaxiModule extends AbstractModule {
 			protected void configure() {
 				bind(TaxiOptimizer.class).toProvider(providerClass).asEagerSingleton();
 				bind(VrpOptimizer.class).to(TaxiOptimizer.class);
+				bind(PrivateAVScheduler.class).asEagerSingleton();
 				bind(DynActionCreator.class).to(TaxiActionCreator.class).asEagerSingleton();
 				bind(PassengerRequestCreator.class).to(TaxiRequestCreator.class).asEagerSingleton();
 			}
@@ -63,6 +69,4 @@ public final class ParkingTaxiModule extends AbstractModule {
 	public void install() {
 		install(dvrpModule);
 	}
-
-	
 }

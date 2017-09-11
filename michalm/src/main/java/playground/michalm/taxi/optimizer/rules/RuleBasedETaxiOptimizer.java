@@ -21,18 +21,26 @@ package playground.michalm.taxi.optimizer.rules;
 
 import java.util.Collections;
 
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizer;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
+import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 
 import com.google.common.collect.Iterables;
 
-import playground.michalm.ev.data.*;
+import playground.michalm.ev.data.Battery;
+import playground.michalm.ev.data.Charger;
+import playground.michalm.ev.data.EvData;
 import playground.michalm.taxi.data.EvrpVehicle;
-import playground.michalm.taxi.optimizer.*;
+import playground.michalm.taxi.optimizer.BestChargerFinder;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 import playground.michalm.taxi.scheduler.ETaxiScheduler;
 
@@ -43,11 +51,13 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	private final BestChargerFinder eDispatchFinder;
 	private final ETaxiScheduler eScheduler;
 
-	public RuleBasedETaxiOptimizer(ETaxiOptimizerContext optimContext, RuleBasedETaxiOptimizerParams params) {
-		super(optimContext, params);
+	public RuleBasedETaxiOptimizer(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
+			TravelTime travelTime, TravelDisutility travelDisutility, ETaxiScheduler eScheduler, EvData evData,
+			RuleBasedETaxiOptimizerParams params) {
+		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility, eScheduler, params);
 		this.params = params;
-		evData = optimContext.evData;
-		eScheduler = (ETaxiScheduler)optimContext.scheduler;
+		this.evData = evData;
+		this.eScheduler = eScheduler;
 		eDispatchFinder = new BestChargerFinder(getDispatchFinder());
 	}
 
@@ -71,7 +81,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public void nextTask(Vehicle vehicle) {
 		super.nextTask(vehicle);
 
-		if (getOptimContext().scheduler.isIdle(vehicle) && isUndercharged(vehicle)) {
+		if (getScheduler().isIdle(vehicle) && isUndercharged(vehicle)) {
 			chargeIdleUnderchargedVehicles(Collections.singleton(vehicle));
 		}
 	}
