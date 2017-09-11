@@ -14,7 +14,7 @@ import playground.santiago.analysis.travelTimes.SantiagoTravelTimesAnalysis;
 public class SantiagoRunAnalysis {
 	//Fields related to the scenario and its steps - they must be changed depending on the step
 	private static final String CASE_NAME = "policyRuns/10pct";
-	private static final String STEP_NAME = "StepTriangle0";
+	private static final String STEP_NAME = "StepOuter0";
 	private static final int IT_TO_EVALUATE = 200; //From the local counter
 	private static final int REFERENCE_IT = 600; //Reference iteration (same as first iteration of the step)
 //	private static final int LAST_IT = 600;
