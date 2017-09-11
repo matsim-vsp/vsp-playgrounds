@@ -15,7 +15,7 @@ public class SantiagoModalSplitAnalysis {
 	private String analysisDir;
 //	private List<Id<Person>> stuckAgents;
 	
-	public SantiagoModalSplitAnalysis(String caseName, String stepName, List<Id<Person>> stuckAgents){
+	public SantiagoModalSplitAnalysis(String caseName, String stepName/*, List<Id<Person>> stuckAgents*/){
 		this.runDir = "../../../runs-svn/santiago/" + caseName + "/";
 		this.outputDir = runDir + "outputOf" + stepName + "/";
 		this.analysisDir = outputDir + "analysis/";	
@@ -38,7 +38,7 @@ public class SantiagoModalSplitAnalysis {
 		String eventsFile = outputDir + "ITERS/it." + String.valueOf(it) + "/" + String.valueOf(it) + ".events.xml.gz";
 		ModalShareFromEvents msc = new ModalShareFromEvents(eventsFile);
 		msc.run();
-		String outputFile = analysisDir + String.valueOf(itAux) + ".modalSplit.txt";
+		String outputFile = this.analysisDir + String.valueOf(itAux) + ".modalSplit.txt";
 		msc.writeResults(outputFile);
 
 
