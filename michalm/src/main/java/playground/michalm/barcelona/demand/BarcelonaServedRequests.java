@@ -19,11 +19,13 @@
 
 package playground.michalm.barcelona.demand;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import com.google.common.base.*;
 import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.prep.PreparedPolygon;
 
 import playground.michalm.barcelona.BarcelonaZones;
 import playground.michalm.demand.taxi.ServedRequests;
@@ -41,16 +43,15 @@ public class BarcelonaServedRequests {
 	public static Iterable<BarcelonaServedRequest> filterRequestsWithinAgglomeration(
 			Iterable<BarcelonaServedRequest> requests) {
 		MultiPolygon area = BarcelonaZones.readAgglomerationArea();
-		return Iterables.filter(requests, ServedRequests.createWithinAreaPredicate(area));
+		final PreparedPolygon preparedPolygon = new PreparedPolygon(area);
+		return Iterables.filter(requests, r -> ServedRequests.isWithinArea(r, preparedPolygon));
 	}
 
 	public static Iterable<BarcelonaServedRequest> filterFromMar2011(Iterable<BarcelonaServedRequest> requests) {
-		// 01/03-1/11/2011
-		@SuppressWarnings("unchecked")
-		Predicate<BarcelonaServedRequest> orPredicate = Predicates
-				.or(ServedRequests.createBetweenDatesPredicate(midnight("01/03/2011"), midnight("1/12/2014")));
-
-		return Iterables.filter(requests, orPredicate);
+		// 01/03-1/12/2011
+		Date fromDate = midnight("01/03/2011");
+		Date toDate = midnight("1/12/2014");
+		return Iterables.filter(requests, r -> ServedRequests.isBetweenDates(r, fromDate, toDate));
 	}
 
 	private static Date midnight(String date) {

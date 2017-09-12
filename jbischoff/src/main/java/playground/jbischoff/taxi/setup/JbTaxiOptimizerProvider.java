@@ -29,8 +29,14 @@ import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
+import org.matsim.contrib.taxi.optimizer.rules.IdleTaxiZonalRegistry;
+import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizer;
+import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
+import org.matsim.contrib.taxi.optimizer.rules.UnplannedRequestZonalRegistry;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
+import org.matsim.contrib.zone.SquareGridSystem;
+import org.matsim.contrib.zone.ZonalSystem;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -38,8 +44,7 @@ import org.matsim.core.router.util.TravelTime;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
-import playground.jbischoff.taxi.inclusion.optimizer.InclusionRuleBasedTaxiOptimizer;
-import playground.jbischoff.taxi.inclusion.optimizer.InclusionRuleBasedTaxiOptimizerParams;
+import playground.jbischoff.taxi.inclusion.optimizer.InclusionRuleBasedRequestInserter;
 
 public class JbTaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	public static final String TYPE = "type";
@@ -70,7 +75,15 @@ public class JbTaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	@Override
 	public TaxiOptimizer get() {
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
-		return new InclusionRuleBasedTaxiOptimizer(taxiCfg, fleet, network, timer, travelTime, travelDisutility,
-				scheduler, new InclusionRuleBasedTaxiOptimizerParams(optimizerConfig));
+		RuleBasedTaxiOptimizerParams params = new RuleBasedTaxiOptimizerParams(optimizerConfig);
+
+		ZonalSystem zonalSystem = new SquareGridSystem(network, params.cellSize);
+		IdleTaxiZonalRegistry idleTaxiRegistry = new IdleTaxiZonalRegistry(zonalSystem, scheduler);
+		UnplannedRequestZonalRegistry unplannedRequestRegistry = new UnplannedRequestZonalRegistry(zonalSystem);
+		InclusionRuleBasedRequestInserter requestInserter = new InclusionRuleBasedRequestInserter(scheduler, timer,
+				network, travelTime, travelDisutility, params, idleTaxiRegistry, unplannedRequestRegistry);
+
+		return new RuleBasedTaxiOptimizer(taxiCfg, fleet, scheduler, params, idleTaxiRegistry, unplannedRequestRegistry,
+				requestInserter);
 	}
 }

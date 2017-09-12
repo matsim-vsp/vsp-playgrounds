@@ -81,11 +81,11 @@ public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 
 		switch (type) {
 			case E_RULE_BASED:
-				return new RuleBasedETaxiOptimizer(taxiCfg, fleet, network, timer, travelTime, travelDisutility,
-						eScheduler, evData, new RuleBasedETaxiOptimizerParams(optimizerConfig));
+				return RuleBasedETaxiOptimizer.create(taxiCfg, fleet, eScheduler, network, timer, travelTime,
+						travelDisutility, new RuleBasedETaxiOptimizerParams(optimizerConfig), evData);
 
 			case E_ASSIGNMENT:
-				return new AssignmentETaxiOptimizer(taxiCfg, fleet, network, timer, travelTime, travelDisutility,
+				return AssignmentETaxiOptimizer.create(taxiCfg, fleet, network, timer, travelTime, travelDisutility,
 						eScheduler, evData, new AssignmentETaxiOptimizerParams(optimizerConfig));
 
 			default:

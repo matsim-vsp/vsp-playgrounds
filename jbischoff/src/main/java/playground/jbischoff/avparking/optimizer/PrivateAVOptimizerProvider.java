@@ -77,7 +77,7 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	@Override
 	public TaxiOptimizer get() {
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
-		return new PrivateAVTaxiDispatcher(taxiCfg, fleet, network, timer, travelTime, travelDisutility, scheduler,
+		return PrivateAVTaxiDispatcher.create(taxiCfg, fleet, network, timer, travelTime, travelDisutility, scheduler,
 				new RuleBasedETaxiOptimizerParams(optimizerConfig), manager, context);
 	}
 }

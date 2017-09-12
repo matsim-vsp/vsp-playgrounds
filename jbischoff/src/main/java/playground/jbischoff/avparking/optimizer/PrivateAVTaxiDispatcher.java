@@ -20,7 +20,6 @@
 package playground.jbischoff.avparking.optimizer;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -41,8 +40,8 @@ import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.contrib.parking.parkingsearch.search.RandomParkingSearchLogic;
 import org.matsim.contrib.taxi.data.TaxiRequest;
-import org.matsim.contrib.taxi.optimizer.AbstractTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.AbstractTaxiOptimizerParams;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
@@ -59,16 +58,28 @@ import org.matsim.core.router.util.TravelTime;
 
 import playground.jbischoff.avparking.AvParkingContext;
 
-public class PrivateAVTaxiDispatcher extends AbstractTaxiOptimizer {
-	private final LeastCostPathCalculator router;
+public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
+	public static PrivateAVTaxiDispatcher create(TaxiConfigGroup taxiCfg, Fleet fleet, Network network,
+			MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility, TaxiScheduler scheduler,
+			AbstractTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
+		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, travelDisutility,
+				travelTime);
+		PrivateAVRequestInserter requestInserter = new PrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
+				parkingManger, router);
+		return new PrivateAVTaxiDispatcher(taxiCfg, fleet, network, timer, travelTime, scheduler, params, parkingManger,
+				context, router, requestInserter);
+	}
 
 	public enum AVParkBehavior {
 		findfreeSlot, garage, cruise, randombehavior
 	}
-	
+
+	private final Fleet fleet;
+	private final TaxiScheduler scheduler;
 	private final Network network;
 	private final MobsimTimer timer;
 	private final TravelTime travelTime;
+	private final LeastCostPathCalculator router;
 
 	private AVParkBehavior parkBehavior;
 	private Random random = MatsimRandom.getRandom();
@@ -85,27 +96,29 @@ public class PrivateAVTaxiDispatcher extends AbstractTaxiOptimizer {
 	 * @param doUpdateTimelines
 	 */
 	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
-			TravelTime travelTime, TravelDisutility travelDisutility, TaxiScheduler scheduler,
-			AbstractTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
-		super(taxiCfg, fleet, scheduler, params, new PriorityQueue<TaxiRequest>(100, Requests.T0_COMPARATOR), false,
-				true);
-		
+			TravelTime travelTime, TaxiScheduler scheduler, AbstractTaxiOptimizerParams params,
+			ParkingSearchManager parkingManger, AvParkingContext context, LeastCostPathCalculator router,
+			PrivateAVRequestInserter requestInserter) {
+		super(taxiCfg, fleet, scheduler, params, requestInserter,
+				new PriorityQueue<TaxiRequest>(100, Requests.T0_COMPARATOR), false, true);
+		this.fleet = fleet;
+		this.scheduler = scheduler;
 		this.network = network;
 		this.timer = timer;
 		this.travelTime = travelTime;
+		this.router = router;
 
-		DijkstraFactory f = new DijkstraFactory();
-		router = f.createPathCalculator(network, travelDisutility, travelTime);
 		parkBehavior = context.getBehavior();
 		manager = parkingManger;
 		parkingLogic = new RandomParkingSearchLogic(network);
 		this.avParkings = NetworkUtils.getLinks(network, context.getAvParkings());
+
 	}
 
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, 60)) {
-			for (Vehicle veh : getFleet().getVehicles().values()) {
+			for (Vehicle veh : fleet.getVehicles().values()) {
 				if (veh.getSchedule().getStatus().equals(ScheduleStatus.STARTED)) {
 
 					if (isWaitStay((TaxiTask)veh.getSchedule().getCurrentTask())
@@ -172,7 +185,7 @@ public class PrivateAVTaxiDispatcher extends AbstractTaxiOptimizer {
 			VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(lastLink, network.getLinks().get(parkingLinkId),
 					timer.getTimeOfDay(), router, travelTime);
 
-			((PrivateAVScheduler)getScheduler()).moveIdleVehicle(veh, path);
+			((PrivateAVScheduler)scheduler).moveIdleVehicle(veh, path);
 			manager.parkVehicleHere(vehicleId, parkingLinkId, timer.getTimeOfDay());
 
 		}
@@ -187,7 +200,7 @@ public class PrivateAVTaxiDispatcher extends AbstractTaxiOptimizer {
 				VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(lastLink, garageLink, timer.getTimeOfDay(),
 						router, travelTime);
 
-				((PrivateAVScheduler)getScheduler()).moveIdleVehicle(veh, path);
+				((PrivateAVScheduler)scheduler).moveIdleVehicle(veh, path);
 				manager.parkVehicleHere(Id.createVehicleId(veh.getId()), garageLink.getId(), path.getArrivalTime());
 			}
 		}
@@ -260,44 +273,7 @@ public class PrivateAVTaxiDispatcher extends AbstractTaxiOptimizer {
 
 			VrpPathWithTravelData path = new VrpPathWithTravelDataImpl(timer.getTimeOfDay(),
 					lastDepartureTime - timer.getTimeOfDay(), links.toArray(new Link[links.size()]), linkTTA);
-			((PrivateAVScheduler)getScheduler()).moveIdleVehicle(veh, path);
-
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.matsim.contrib.taxi.optimizer.AbstractTaxiOptimizer#scheduleUnplannedRequests()
-	 */
-	@Override
-	protected void scheduleUnplannedRequests() {
-		Iterator<TaxiRequest> reqIter = getUnplannedRequests().iterator();
-		while (reqIter.hasNext()) {
-			TaxiRequest req = reqIter.next();
-			Id<Vehicle> personalAV = Id.create(req.getPassenger().getId().toString() + "_av", Vehicle.class);
-			Vehicle veh = getFleet().getVehicles().get(personalAV);
-			if (veh == null) {
-				throw new RuntimeException("Vehicle " + personalAV.toString() + "does not exist.");
-			}
-			if (!isWaitStayOrEmptyDrive((TaxiTask)veh.getSchedule().getCurrentTask())) {
-				throw new RuntimeException("Vehicle " + personalAV.toString() + "is not idle.");
-
-			}
-			if (((TaxiTask)veh.getSchedule().getCurrentTask()).getTaxiTaskType() == TaxiTaskType.EMPTY_DRIVE) {
-				((PrivateAVScheduler)getScheduler()).stopCruisingVehicle(veh);;
-			}
-
-			VrpPathWithTravelData path = VrpPaths.calcAndCreatePath(Schedules.getLastLinkInSchedule(veh),
-					req.getFromLink(), timer.getTimeOfDay(), router, travelTime);
-			getScheduler().scheduleRequest(veh, req, path);
-			Id<Link> parkLinkId = manager.getVehicleParkingLocation(Id.createVehicleId(personalAV));
-			if (parkLinkId != null) {
-				manager.unParkVehicleHere(Id.createVehicleId(personalAV), parkLinkId, path.getDepartureTime());
-			}
-			reqIter.remove();
-
+			((PrivateAVScheduler)scheduler).moveIdleVehicle(veh, path);
 		}
 	}
 
@@ -306,15 +282,7 @@ public class PrivateAVTaxiDispatcher extends AbstractTaxiOptimizer {
 		return isWaitStay(newCurrentTask);
 	}
 
-	protected boolean isWaitStay(TaxiTask task) {
+	private boolean isWaitStay(TaxiTask task) {
 		return task.getTaxiTaskType() == TaxiTaskType.STAY;
 	}
-
-	protected boolean isWaitStayOrEmptyDrive(TaxiTask task) {
-		if ((task.getTaxiTaskType() == TaxiTaskType.STAY) | (task.getTaxiTaskType() == TaxiTaskType.EMPTY_DRIVE))
-			return true;
-		else
-			return false;
-	}
-
 }
