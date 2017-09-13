@@ -21,7 +21,6 @@ package playground.jbischoff.avparking.optimizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Random;
 
 import org.matsim.api.core.v01.Coord;
@@ -29,7 +28,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.Requests;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelDataImpl;
@@ -39,9 +37,8 @@ import org.matsim.contrib.dvrp.schedule.Schedules;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.contrib.parking.parkingsearch.search.RandomParkingSearchLogic;
-import org.matsim.contrib.taxi.data.TaxiRequest;
-import org.matsim.contrib.taxi.optimizer.AbstractTaxiOptimizerParams;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizer;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
@@ -61,7 +58,7 @@ import playground.jbischoff.avparking.AvParkingContext;
 public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	public static PrivateAVTaxiDispatcher create(TaxiConfigGroup taxiCfg, Fleet fleet, Network network,
 			MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility, TaxiScheduler scheduler,
-			AbstractTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
+			DefaultTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
 		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
 		PrivateAVRequestInserter requestInserter = new PrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
@@ -96,11 +93,10 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	 * @param doUpdateTimelines
 	 */
 	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
-			TravelTime travelTime, TaxiScheduler scheduler, AbstractTaxiOptimizerParams params,
+			TravelTime travelTime, TaxiScheduler scheduler, DefaultTaxiOptimizerParams params,
 			ParkingSearchManager parkingManger, AvParkingContext context, LeastCostPathCalculator router,
 			PrivateAVRequestInserter requestInserter) {
-		super(taxiCfg, fleet, scheduler, params, requestInserter,
-				new PriorityQueue<TaxiRequest>(100, Requests.T0_COMPARATOR), false, true);
+		super(taxiCfg, fleet, scheduler, params, requestInserter);
 		this.fleet = fleet;
 		this.scheduler = scheduler;
 		this.network = network;

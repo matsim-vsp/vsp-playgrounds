@@ -30,6 +30,7 @@ import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
+import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
@@ -40,7 +41,6 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import playground.jbischoff.avparking.AvParkingContext;
-import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizerParams;
 
 public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	public static final String TYPE = "type";
@@ -78,6 +78,6 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	public TaxiOptimizer get() {
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
 		return PrivateAVTaxiDispatcher.create(taxiCfg, fleet, network, timer, travelTime, travelDisutility, scheduler,
-				new RuleBasedETaxiOptimizerParams(optimizerConfig), manager, context);
+				new RuleBasedTaxiOptimizerParams(optimizerConfig), manager, context);
 	}
 }
