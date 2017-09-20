@@ -31,9 +31,10 @@ import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
@@ -48,7 +49,6 @@ import playground.agarwalamit.InternalizationEmissionAndCongestion.EmissionConge
 import playground.agarwalamit.InternalizationEmissionAndCongestion.InternalizeEmissionsCongestionControlerListener;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.joint.JointCalibrationControler;
-import playground.agarwalamit.munich.controlerListener.MyEmissionCongestionMoneyEventControlerListener;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.agarwalamit.utils.FileUtils;
@@ -76,28 +76,25 @@ public class SubPopMunichControler {
 					"false",
 					"false",
 					"false",
-					FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/diss/input/config_wrappedSubActivities_usrGrp_baseCase.xml",
-					"1.0",
-					FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/diss/output/baseCase2/",
-					"false"
+					FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/input/config_wrappedSubActivities_subPop_baseCaseCtd.xml",
+					FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/output/bau/",
 			};
 		}
 
 		boolean internalizeEmission = Boolean.valueOf(args [0]); 
 		boolean internalizeCongestion = Boolean.valueOf(args [1]);
 		boolean internalizeBoth = Boolean.valueOf(args [2]);
-
 		String configFile = args[3];
+		String outputDir = args[4];
 
-		String emissionEfficiencyFactor ="1.0";
-		String considerCO2Costs = "true";
-		String emissionCostFactor = args[4];
-
-		String outputDir = args[5];
-		boolean writeInfoForEachPersonInEachIteration = Boolean.valueOf(args [6]);
-
-		Config config = ConfigUtils.loadConfig(configFile);
+		Config config = ConfigUtils.loadConfig(configFile, new EmissionsConfigGroup());
 		config.controler().setOutputDirectory(outputDir);
+		config.planCalcScore().getActivityParams().stream().forEach(act->act.setTypicalDurationScoreComputation(
+				PlanCalcScoreConfigGroup.TypicalDurationScoreComputation.uniform));
+
+		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+		config.controler().setCreateGraphs(true);
+		config.controler().setDumpDataAtEnd(true);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
@@ -107,7 +104,7 @@ public class SubPopMunichControler {
 			@Override
 			public void install() {
 				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
-				String ug = MunichUserGroup.Rev_Commuter.toString();
+				String ug = "COMMUTER_REV_COMMUTER";
 				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.name().concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "pt_".concat(ug)};
 					final String[] chainBasedModes = {"car", "bike"};
@@ -125,21 +122,6 @@ public class SubPopMunichControler {
 			}
 		});
 
-		EmissionsConfigGroup ecg = new EmissionsConfigGroup();
-		controler.getConfig().addModule(ecg);
-
-		ecg.setAverageColdEmissionFactorsFile("../../matsimHBEFAStandardsFiles/EFA_ColdStart_vehcat_2005average.txt");
-		ecg.setAverageWarmEmissionFactorsFile("../../matsimHBEFAStandardsFiles/EFA_HOT_vehcat_2005average.txt");
-		ecg.setDetailedColdEmissionFactorsFile("../../matsimHBEFAStandardsFiles/EFA_ColdStart_SubSegm_2005detailed.txt");
-		ecg.setDetailedWarmEmissionFactorsFile("../../matsimHBEFAStandardsFiles/EFA_HOT_SubSegm_2005detailed.txt");
-		ecg.setEmissionRoadTypeMappingFile("../../munich/input/roadTypeMapping.txt");
-
-		ecg.setUsingDetailedEmissionCalculation(true);
-		//===only emission events genertaion; used with all runs for comparisons
-		ecg.setEmissionEfficiencyFactor(Double.parseDouble(emissionEfficiencyFactor));
-		ecg.setConsideringCO2Costs(Boolean.parseBoolean(considerCO2Costs));
-		ecg.setEmissionCostMultiplicationFactor(Double.parseDouble(emissionCostFactor));
-
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
@@ -149,8 +131,6 @@ public class SubPopMunichControler {
 		});
 
 		if(internalizeEmission){
-			// this is needed by *both* following modules:
-
 			// this affects the router by overwriting its generalized cost function (TravelDisutility):
 			final EmissionTravelDisutilityCalculatorFactory emissionTducf = new EmissionTravelDisutilityCalculatorFactory(
             );
@@ -158,7 +138,6 @@ public class SubPopMunichControler {
 				@Override
 				public void install() {
 					addControlerListenerBinding().to(InternalizeEmissionsControlerListener.class);
-
 					bindCarTravelDisutilityFactory().toInstance(emissionTducf);
 				}
 			});
@@ -207,21 +186,6 @@ public class SubPopMunichControler {
 				addTravelDisutilityFactoryBinding("ride").to(carTravelDisutilityFactoryKey());
 			}
 		});
-
-		controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-		controler.getConfig().controler().setCreateGraphs(true);
-		controler.getConfig().controler().setDumpDataAtEnd(true);
-
-		// if EmissionModule is binded (necessary step), EmissionControlerListener is not required.
-		// It's sole purpose was to write the emission events if emission costs are not internalized. Amit Apr'17
-//		if(!internalizeEmission && !internalizeBoth){
-//			controler.addControlerListener(new EmissionControlerListener());
-//		}
-
-		if(writeInfoForEachPersonInEachIteration){
-			// not sure for true functionality yet
-			controler.addControlerListener(new MyEmissionCongestionMoneyEventControlerListener());
-		}
 
 		controler.run();
 
