@@ -95,12 +95,15 @@ public class TollGISAnalyzer {
 		log.info("Reading zone shapefile... Done. Number of zones: " + featureCounter);
 	}
 	
-	public void analyzeZoneTollsUserBenefits(Scenario scenario, String runDirectory, Map<Id<Person>, Double> personId2userBenefits,
+	public void analyzeZoneTollsUserBenefits(Scenario scenario, String runDirectory,
+			Map<Id<Person>, Double> personId2userBenefits,
 			Map<Id<Person>, Double> personId2tollPayments,
 			Map<Id<Person>, Double> personId2congestionPayments,
 			Map<Id<Person>, Double> personId2noisePayments,
-			Map<Id<Person>, Double> personId2airPollutionPayments) {
-		String outputPath = runDirectory + "spatial_analysis/tolls_userBenefits_zones/";
+			Map<Id<Person>, Double> personId2airPollutionPayments,
+			Map<Id<Person>, Double> personId2travelTime,
+			Map<String, Map<Id<Person>, Double>> mode2personId2trips) {
+		String outputPath = runDirectory + "spatial_analysis/tolls_userBenefits_travelTime_modes_zones/";
 		
 		File file = new File(outputPath);
 		file.mkdirs();
@@ -124,6 +127,16 @@ public class TollGISAnalyzer {
 		Map<Integer,Double> zoneNr2airPollutionPayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2airPollutionPayments, this.zoneId2geometry, this.scalingFactor);
 
 		Map<Integer,Double> zoneNr2userBenefits = getZoneNr2totalAmount(scenario.getPopulation(), personId2userBenefits, this.zoneId2geometry, this.scalingFactor);
+		
+		Map<Integer, Double> zoneNr2travelTime = getZoneNr2totalAmount(scenario.getPopulation(), personId2travelTime, zoneId2geometry, scalingFactor);
+		
+		Map<Integer, Double> zoneNr2carTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("car"), zoneId2geometry, scalingFactor);
+		Map<Integer, Double> zoneNr2ptSlowTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("ptSlow"), zoneId2geometry, scalingFactor);
+		Map<Integer, Double> zoneNr2ptTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("pt"), zoneId2geometry, scalingFactor);
+		Map<Integer, Double> zoneNr2taxiTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("taxi"), zoneId2geometry, scalingFactor);
+		Map<Integer, Double> zoneNr2bicycleTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("bicycle"), zoneId2geometry, scalingFactor);
+		Map<Integer, Double> zoneNr2walkTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("walk"), zoneId2geometry, scalingFactor);
+		
 		log.info("Mapping absolute toll payments and user benefits to home location... Done.");
 		
 		log.info("Writing shape file...");
@@ -139,6 +152,13 @@ public class TollGISAnalyzer {
 				addAttribute("N", Double.class).
 				addAttribute("A", Double.class).
 				addAttribute("Scores", Double.class).
+				addAttribute("TT", Double.class).
+				addAttribute("car", Double.class).
+				addAttribute("taxi", Double.class).
+				addAttribute("ptSlow", Double.class).
+				addAttribute("pt", Double.class).
+				addAttribute("walk", Double.class).
+				addAttribute("bicycle", Double.class).
 				create();
 		
 		Collection<SimpleFeature> featuresToWriteOut = new ArrayList<SimpleFeature>();
@@ -152,7 +172,14 @@ public class TollGISAnalyzer {
 			attributeValues.put("C", zoneNr2congestionPayments.get(id));
 			attributeValues.put("N", zoneNr2noisePayments.get(id));
 			attributeValues.put("A", zoneNr2airPollutionPayments.get(id));
-			attributeValues.put("Scores", zoneNr2userBenefits.get(id));		
+			attributeValues.put("Scores", zoneNr2userBenefits.get(id));
+			attributeValues.put("TT", zoneNr2travelTime.get(id));
+			attributeValues.put("car", zoneNr2carTrips.get(id));
+			attributeValues.put("taxi", zoneNr2taxiTrips.get(id));
+			attributeValues.put("ptSlow", zoneNr2ptSlowTrips.get(id));
+			attributeValues.put("pt", zoneNr2ptTrips.get(id));
+			attributeValues.put("walk", zoneNr2walkTrips.get(id));
+			attributeValues.put("bicycle", zoneNr2bicycleTrips.get(id));
 
 			Geometry geometry = (Geometry) features.get(id).getDefaultGeometry();
 			Coordinate[] coordinates = geometry.getCoordinates();
@@ -169,6 +196,7 @@ public class TollGISAnalyzer {
 
 	private Map<Integer, Double> getZoneNr2totalAmount(Population population, Map<Id<Person>, Double> personId2amountSum, Map<Integer, Geometry> zoneId2geometry, int scalingFactor) {
 
+		log.info(".");
 		Map<Integer, Double> zoneNr2totalAmount = new HashMap<Integer, Double>();	
 		
 		for (Integer zoneId : zoneId2geometry.keySet()) {
@@ -177,23 +205,25 @@ public class TollGISAnalyzer {
 		
 		SortedMap<Id<Person>,Coord> personId2homeCoord = getPersonId2Coordinates(population, homeActivity);
 		
-		for (Id<Person> personId : personId2amountSum.keySet()) {
-			if (personId2homeCoord.containsKey(personId)){
-				for (Integer zoneId : zoneId2geometry.keySet()) {
-					Geometry geometry = zoneId2geometry.get(zoneId);
-					Point p = MGC.coord2Point(ct.transform(personId2homeCoord.get(personId))); 
-					
-					if (p.within(geometry)){
-						if (zoneNr2totalAmount.get(zoneId) == null){
-							zoneNr2totalAmount.put(zoneId, personId2amountSum.get(personId) * scalingFactor);
-						} else {
-							double tollPayments = zoneNr2totalAmount.get(zoneId);
-							zoneNr2totalAmount.put(zoneId, tollPayments + (personId2amountSum.get(personId) * scalingFactor) );
+		if (personId2amountSum != null) {
+			for (Id<Person> personId : personId2amountSum.keySet()) {
+				if (personId2homeCoord.containsKey(personId)){
+					for (Integer zoneId : zoneId2geometry.keySet()) {
+						Geometry geometry = zoneId2geometry.get(zoneId);
+						Point p = MGC.coord2Point(ct.transform(personId2homeCoord.get(personId))); 
+						
+						if (p.within(geometry)){
+							if (zoneNr2totalAmount.get(zoneId) == null){
+								zoneNr2totalAmount.put(zoneId, personId2amountSum.get(personId) * scalingFactor);
+							} else {
+								double tollPayments = zoneNr2totalAmount.get(zoneId);
+								zoneNr2totalAmount.put(zoneId, tollPayments + (personId2amountSum.get(personId) * scalingFactor) );
+							}
 						}
 					}
+				} else {
+					// person doesn't have a home activity
 				}
-			} else {
-				// person doesn't have a home activity
 			}
 		}
 		

@@ -34,6 +34,8 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
+import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
+
 /**
  * 
  * @author ikaddoura
@@ -41,19 +43,46 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
  */
 public class TollGISAnalyzerMain {
 	
-	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run4_bln_cne_DecongestionPID/";
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run0";
+	
+	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
 	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+	private final String runId = "run1";
 	
-	// private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_1500/berlin_grid_1500.shp";
-	// private final String crs = TransformationFactory.DHDN_GK4;
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run2";
+	
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingT_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run3";
+	
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingF/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run4";
+	
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingT/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run5";
+	
+	// ####
+	
+	private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
+	private final String zonesCRS = TransformationFactory.DHDN_GK4;
+	private final String outputFileName = "tolls_userBenefits_travelTime_modes_zones_2500.shp";
 
-	private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
-	private final String zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
-	
-	private final String outputFileName = "tolls_CNA_userBenefits_bezirke.shp";
-	
+//	private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_1500/berlin_grid_1500.shp";
+//	private final String zonesCRS = TransformationFactory.DHDN_GK4;
+//	private final String outputFileName = "tolls_userBenefits_travelTime_modes_zones_1500.shp";
+
+//	private final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
+//	private final String zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
+//	private final String outputFileName = "tolls_userBenefits_travelTime_modes_zones_LOR.shp";
+
 	private final String homeActivity = "home";
-	private final int scalingFactor = 100;
+	private final int scalingFactor = 10;
 	
 	private static final Logger log = Logger.getLogger(TollGISAnalyzerMain.class);
 	
@@ -73,9 +102,13 @@ public class TollGISAnalyzerMain {
 		MoneyExtCostHandler moneyHandler = new MoneyExtCostHandler();
 		eventsManager.addHandler(moneyHandler);
 		
+		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler();
+		basicHandler.setScenario(scenario);
+		eventsManager.addHandler(basicHandler);
+		
 		log.info("Reading events file...");
 		CombinedPersonLinkMoneyEventsReader reader = new CombinedPersonLinkMoneyEventsReader(eventsManager);
-		String eventsFile1 = runDirectory + "/ITERS/it." + scenario.getConfig().controler().getLastIteration() + "/" + scenario.getConfig().controler().getLastIteration() + ".events.xml.gz";
+		String eventsFile1 = runDirectory + "/ITERS/it." + scenario.getConfig().controler().getLastIteration() + "/" + runId + "." + scenario.getConfig().controler().getLastIteration() + ".events.xml.gz";
 		reader.readFile(eventsFile1);
 		log.info("Reading events file... Done.");
 				
@@ -90,16 +123,46 @@ public class TollGISAnalyzerMain {
 			personId2userBenefits.put(person.getId(), score);
 		}
 		
+		Map<Id<Person>, Double> personId2travelTime = new HashMap<>();
+		for (Id<Person> personId : basicHandler.getPersonId2tripNumber2travelTime().keySet()) {
+			double tt = 0.;
+			for (Integer tripNr : basicHandler.getPersonId2tripNumber2travelTime().get(personId).keySet()) {
+				tt = tt + basicHandler.getPersonId2tripNumber2travelTime().get(personId).get(tripNr); 
+			}
+			personId2travelTime.put(personId, tt);
+		}
+
+		Map<String, Map<Id<Person>, Double>> mode2personId2trips = new HashMap<>();
+		
+		for (Id<Person> personId : basicHandler.getPersonId2tripNumber2legMode().keySet()) {
+			for (Integer tripNr : basicHandler.getPersonId2tripNumber2legMode().get(personId).keySet()) {
+				String mode = basicHandler.getPersonId2tripNumber2legMode().get(personId).get(tripNr);
+				if(mode2personId2trips.get(mode) == null) {
+					Map<Id<Person>, Double> personId2trips = new HashMap<>();
+					personId2trips.put(personId, 1.0);
+					mode2personId2trips.put(mode, personId2trips);
+				} else {
+					if(mode2personId2trips.get(mode).get(personId) == null) {
+						mode2personId2trips.get(mode).put(personId, 1.0);
+					} else {
+						double tripsSoFar = mode2personId2trips.get(mode).get(personId);
+						mode2personId2trips.get(mode).put(personId, tripsSoFar + 1.0);
+					}
+				}
+			}
+		}
+		
 		log.info("Analyzing zones...");
-		TollGISAnalyzer gisAnalysis = new TollGISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS, outputFileName);
-		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll() );
+		TollGISAnalyzer gisAnalysis = new TollGISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS, runId + "." + outputFileName);
+		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll(), personId2travelTime, mode2personId2trips );
 		log.info("Analyzing zones... Done.");
 	}
 	
 	private Scenario loadScenario() {
-		Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml.gz");
-		config.network().setInputFile(runDirectory + "output_network.xml.gz");
-		config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
+		Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml.gz");
+		config.network().setInputFile(runDirectory + runId + ".output_network.xml.gz");
+		config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
+		config.plans().setInputPersonAttributeFile(null);
 		config.vehicles().setVehiclesFile(null);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		return scenario;

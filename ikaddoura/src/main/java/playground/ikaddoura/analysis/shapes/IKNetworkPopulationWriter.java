@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.noise.handler.PersonActivityTracker;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.NetworkReaderMatsimV1;
@@ -63,10 +64,10 @@ public class IKNetworkPopulationWriter {
 //	private final String populationFile = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run0_muc_bc/output_plans.xml.gz";
 //	private final String outputPath = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/";
 	
-	private final String networkFile = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/r_output_run0_bln_bc/output_network.xml.gz";
-	private final String populationFile = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/r_output_run0_bln_bc/output_plans.xml.gz";
-	private final String outputPath = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/";
-
+	private final String networkFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/be_251.output_network.xml.gz";
+	private final String populationFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/be_251.output_plans_selected_taggedCarUsers.xml.gz";
+	private final String personAttributesFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/be_251.personAttributes_potentialSAVusers.xml.gz";
+	private final String outputPath = "/Users/ihab/Documents/workspace/runs-svn/optAV/analysis/";
 	
 //	private final String crs = TransformationFactory.WGS84_UTM33N;
 	private final String crs = TransformationFactory.DHDN_GK4;
@@ -94,17 +95,22 @@ public class IKNetworkPopulationWriter {
 		file.mkdirs();
 		
 		// network
-		exportNetwork2Shp1();
-		exportNetwork2Shp2();
+//		exportNetwork2Shp1();
+//		exportNetwork2Shp2();
 		
 		// population
-		exportActivities2Shp();
+//		exportActivities2Shp();
+		exportActivities2ShpWithAttributes("CarOwnerInBaseCase", "subpopulation");
 		
 	}
 
 	private void loadScenario() {
 		Config config = ConfigUtils.createConfig();
-		scenario = ScenarioUtils.createScenario(config);
+		config.network().setInputFile(networkFile);
+		config.plans().setInputFile(populationFile);
+		config.plans().setInputPersonAttributeFile(personAttributesFile);
+		
+		scenario = ScenarioUtils.loadScenario(config);
 	}
 	
 	private void exportNetwork2Shp1(){
@@ -164,7 +170,9 @@ public class IKNetworkPopulationWriter {
 	
 	private void exportActivities2Shp(){
 		
-		new PopulationReader(scenario).readFile(populationFile);
+		if (scenario.getPopulation().getPersons() == null) {
+			new PopulationReader(scenario).readFile(populationFile);
+		}
 		
 		PointFeatureFactory factory = new PointFeatureFactory.Builder()
 		.setCrs(MGC.getCRS(crs))
@@ -191,6 +199,41 @@ public class IKNetworkPopulationWriter {
 		
 		log.info("Writing out activity points shapefile... ");
 		ShapeFileWriter.writeGeometries(features, outputPath + "activities.shp");
+		log.info("Writing out activity points shapefile... Done.");		
+	}
+	
+	private void exportActivities2ShpWithAttributes(String attributeFromPlansFile, String customAttributeFromPersonAttributeFile){
+		
+		if (scenario.getPopulation().getPersons() == null) {
+			new PopulationReader(scenario).readFile(populationFile);
+		}
+		
+		PointFeatureFactory factory = new PointFeatureFactory.Builder()
+		.setCrs(MGC.getCRS(crs))
+		.setName("Activity")
+		.addAttribute("actType", String.class)
+		.addAttribute("Person Id", String.class)
+		.addAttribute("carUser", Boolean.class)
+		.addAttribute("userType", String.class)
+		.create();
+		
+		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
+		
+		for (Person p : scenario.getPopulation().getPersons().values()){
+						
+			for (PlanElement pe : p.getSelectedPlan().getPlanElements()){
+
+				if (pe instanceof Activity){
+					
+					Activity act = (Activity) pe;
+					SimpleFeature feature = factory.createPoint(MGC.coord2Coordinate(act.getCoord()), new Object[] {act.getType(), p.getId().toString(), p.getAttributes().getAttribute(attributeFromPlansFile), scenario.getPopulation().getPersonAttributes().getAttribute(p.getId().toString(), customAttributeFromPersonAttributeFile)}, null);
+					features.add(feature);
+				}
+			}
+		}
+		
+		log.info("Writing out activity points shapefile... ");
+		ShapeFileWriter.writeGeometries(features, outputPath + "activities-with-attributes.shp");
 		log.info("Writing out activity points shapefile... Done.");		
 	}
 }

@@ -598,7 +598,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	public Scenario getScenario() {
 		return scenario;
 	}
-
+	
 	public Map<Id<Person>, Map<Integer, Double>> getPersonId2tripNumber2enterVehicleTime() {
 		return personId2tripNumber2enterVehicleTime;
 	}
@@ -640,5 +640,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	public Map<Id<Vehicle>, Double> getCarVehicleId2totalDistance() {
 		return carVehicleId2totalDistance;
 	}
+	
+	
 
 }
