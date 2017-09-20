@@ -33,8 +33,9 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -63,7 +64,7 @@ public class ParkingRouterDemo {
 		
 		ParkingRouter parkingRouter = new ParkingRouter(scenario.getNetwork(), travelTime, travelDisutility, 3);
 		
-		NetworkRoute route = new LinkNetworkRouteImpl(Id.create("l0", Link.class), Id.create("l4", Link.class));
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(Id.create("l0", Link.class), Id.create("l4", Link.class));
 		List<Id<Link>> routeLinkIds = new ArrayList<Id<Link>>();
 		routeLinkIds.add(Id.create("l1", Link.class));
 		routeLinkIds.add(Id.create("l2", Link.class));
@@ -172,12 +173,12 @@ public class ParkingRouterDemo {
 		}
 
 		@Override
-		public double getTravelDisutility(Person person, Coord coord, Coord toCoord) {
+		public double getWalkTravelDisutility(Person person, Coord coord, Coord toCoord) {
 			return 0.0;
 		}
 
 		@Override
-		public double getTravelTime(Person person, Coord coord, Coord toCoord) {
+		public double getWalkTravelTime(Person person, Coord coord, Coord toCoord) {
 			return 0.0;
 		}
 

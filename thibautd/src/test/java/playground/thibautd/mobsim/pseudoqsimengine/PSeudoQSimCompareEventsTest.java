@@ -19,6 +19,10 @@
  * *********************************************************************** */
 package playground.thibautd.mobsim.pseudoqsimengine;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -31,14 +35,15 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.PlanRouter;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -55,14 +60,11 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
+
 import playground.thibautd.mobsim.CompareEventsUtils;
 import playground.thibautd.pseudoqsim.PseudoSimConfigGroup;
 import playground.thibautd.pseudoqsim.pseudoqsimengine.QSimWithPseudoEngineFactory;
 import playground.thibautd.scripts.scenariohandling.CreateGridNetworkWithDimensions;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * @author thibautd
@@ -252,7 +254,7 @@ public class PSeudoQSimCompareEventsTest {
 				vehicleType );
 
 		final FreespeedTravelTimeAndDisutility tt = new FreespeedTravelTimeAndDisutility( sc.getConfig().planCalcScore() );
-		final Dijkstra dijkstra = new Dijkstra( sc.getNetwork() , tt , tt );
+		final LeastCostPathCalculator dijkstra = new DijkstraFactory().createPathCalculator( sc.getNetwork() , tt , tt );
 
 		final List<Id> linkIds = new ArrayList<Id>( sc.getNetwork().getLinks().keySet() );
 		final Random random = new Random( 987 );
@@ -270,10 +272,7 @@ public class PSeudoQSimCompareEventsTest {
 			final List<Id<Link>> ids = new ArrayList<Id<Link>>();
 			for ( Link l : path.links ) ids.add( l.getId() );
 			final NetworkRoute route =
-					new LinkNetworkRouteImpl(
-							originLinkId,
-							ids,
-							destinationLinkId );
+					RouteUtils.createLinkNetworkRouteImpl(originLinkId, ids, destinationLinkId);
 
 			final TransitLine line = factory.createTransitLine( Id.create( "line-"+i , TransitLine.class ) );
 			final List<TransitRouteStop> stops = new ArrayList<TransitRouteStop>();

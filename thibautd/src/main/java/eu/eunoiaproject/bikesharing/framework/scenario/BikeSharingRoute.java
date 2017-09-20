@@ -22,8 +22,9 @@ package eu.eunoiaproject.bikesharing.framework.scenario;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Route;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
 
@@ -42,9 +43,7 @@ public class BikeSharingRoute implements Route, NetworkRoute {
 	public BikeSharingRoute(
 			final Id<Link> oLink,
 			final Id<Link> dLink) {
-		this( new LinkNetworkRouteImpl(
-					oLink,
-					dLink ) ,
+		this( RouteUtils.createLinkNetworkRouteImpl(oLink, dLink) ,
 				null,
 				null );
 	}
@@ -52,9 +51,7 @@ public class BikeSharingRoute implements Route, NetworkRoute {
 	public BikeSharingRoute(
 			final Facility originStation,
 			final Facility destinationStation) {
-		this( new LinkNetworkRouteImpl(
-					originStation.getLinkId(),
-					destinationStation.getLinkId() ) ,
+		this( RouteUtils.createLinkNetworkRouteImpl(originStation.getLinkId(), destinationStation.getLinkId()) ,
 				originStation.getId(),
 				destinationStation.getId() );
 	}

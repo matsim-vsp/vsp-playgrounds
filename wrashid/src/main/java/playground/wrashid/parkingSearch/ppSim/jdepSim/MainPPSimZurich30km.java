@@ -18,6 +18,10 @@
  * *********************************************************************** */
 package playground.wrashid.parkingSearch.ppSim.jdepSim;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.analysis.LegHistogram;
 import org.matsim.analysis.LegHistogramChart;
@@ -25,7 +29,12 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.parking.parkingchoice.lib.DebugLib;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
 import org.matsim.contrib.parking.parkingchoice.lib.obj.IntegerValueHashMap;
@@ -36,11 +45,13 @@ import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.population.PersonUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.MutableScenario;
+
 import playground.wrashid.lib.obj.TwoHashMapsConcatenated;
 import playground.wrashid.parkingChoice.infrastructure.ActInfo;
 import playground.wrashid.parkingChoice.infrastructure.PrivateParking;
@@ -54,13 +65,14 @@ import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.ParkingSe
 import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.manager.ParkingStrategyManager;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.random.RandomNumbers;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.score.ParkingScoreEvaluator;
-import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.*;
+import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.HouseHoldIncomeZH;
+import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.ParkingCostCalculatorZH;
+import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.ParkingLoader;
+import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.ParkingManagerZH;
+import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.ParkingStrategyScenarios;
+import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.ZHScenarioGlobal;
 import playground.wrashid.parkingSearch.ppSim.ttmatrix.TTMatrixFromStoredTable;
 import playground.wrashid.parkingSearch.withindayFW.utility.ParkingPersonalBetas;
-
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 public class MainPPSimZurich30km {
 
@@ -384,7 +396,7 @@ public class MainPPSimZurich30km {
 
 			TravelDisutility travelCost = new TollAreaTravelDisutility();
 			TravelTime travelTime = new TTMatrixBasedTravelTime(Message.ttMatrix);
-			Dijkstra routingAlgo = new Dijkstra(scenario.getNetwork(), travelCost, travelTime);
+			LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(scenario.getNetwork(), travelCost, travelTime);
 
 			EditRoute.globalEditRoute = new EditRoute(Message.ttMatrix, scenario.getNetwork(), routingAlgo);
 		} else {
@@ -393,7 +405,7 @@ public class MainPPSimZurich30km {
 	}
 
 	private static void resetRoutes(Scenario scenario) {
-		TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl> initialRoutes = ZHScenarioGlobal.initialRoutes;
+		TwoHashMapsConcatenated<Id, Integer, NetworkRoute> initialRoutes = ZHScenarioGlobal.initialRoutes;
 
 		for (Person p : scenario.getPopulation().getPersons().values()) {
 			Plan selectedPlan = p.getSelectedPlan();
@@ -415,8 +427,8 @@ public class MainPPSimZurich30km {
 	}
 
 	// personId, legIndex, route
-	private static TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl> getInitialRoutes(Scenario scenario) {
-		TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl> result = new TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl>();
+	private static TwoHashMapsConcatenated<Id, Integer, NetworkRoute> getInitialRoutes(Scenario scenario) {
+		TwoHashMapsConcatenated<Id, Integer, NetworkRoute> result = new TwoHashMapsConcatenated<>();
 
 		for (Person p : scenario.getPopulation().getPersons().values()) {
 			Plan selectedPlan = p.getSelectedPlan();
@@ -428,7 +440,7 @@ public class MainPPSimZurich30km {
 					Leg leg = (Leg) planElements.get(i);
 
 					if (leg.getMode().equalsIgnoreCase(TransportMode.car)) {
-						LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) leg.getRoute();
+						NetworkRoute route = (NetworkRoute) leg.getRoute();
 						result.put(p.getId(), i, route.clone());
 					}
 

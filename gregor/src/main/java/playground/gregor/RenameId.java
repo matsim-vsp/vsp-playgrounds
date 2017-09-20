@@ -40,7 +40,7 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -95,7 +95,7 @@ public class RenameId {
 							Leg leg2 = fac.createLeg(leg.getMode());
 							leg2.setDepartureTime(leg.getDepartureTime());
 							leg2.setTravelTime(leg.getTravelTime());
-							LinkNetworkRouteImpl r = (LinkNetworkRouteImpl) leg.getRoute();
+							NetworkRoute r = (NetworkRoute) leg.getRoute();
 							List<Id<Link>>ids = new ArrayList<Id<Link>>();
 							ids.add(Id.create("car"+r.getStartLinkId().toString(), Link.class));
 							for (Id<Link> id : r.getLinkIds()) {
@@ -103,7 +103,7 @@ public class RenameId {
 							}
 //							
 							ids.add(Id.create("car"+r.getEndLinkId().toString(), Link.class));
-							LinkNetworkRouteImpl r2 = (LinkNetworkRouteImpl) RouteUtils.createNetworkRoute(ids, sc2.getNetwork());
+							NetworkRoute r2 = (NetworkRoute) RouteUtils.createNetworkRoute(ids, sc2.getNetwork());
 							
 							r2.setDistance(r.getDistance());
 							r2.setTravelCost(r.getTravelCost());

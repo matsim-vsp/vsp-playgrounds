@@ -25,7 +25,7 @@ import org.matsim.api.core.v01.*;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.util.random.*;
 import org.matsim.contrib.zone.Zone;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.matrices.*;
 
 import playground.michalm.util.matrices.MatrixUtils;
@@ -78,7 +78,7 @@ public class ODDemandGenerator {
 				// leg
 				Leg leg = pf.createLeg(mode);
 				if (addEmptyRoute) {
-					leg.setRoute(new GenericRouteImpl(startAct.getLinkId(), endAct.getLinkId()));
+					leg.setRoute(RouteUtils.createGenericRouteImpl(startAct.getLinkId(), endAct.getLinkId()));
 				}
 				leg.setDepartureTime(startAct.getEndTime());
 

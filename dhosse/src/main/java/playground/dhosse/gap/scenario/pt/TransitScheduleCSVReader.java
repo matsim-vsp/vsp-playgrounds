@@ -18,7 +18,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -62,7 +62,7 @@ public class TransitScheduleCSVReader {
 		this.scenario = scenario;
 		this.schedule = scenario.getTransitSchedule();
 		
-		this.router = new Dijkstra(this.scenario.getNetwork(), new FreespeedTravelTimeAndDisutility(-6., 0., 0), new FreespeedTravelTimeAndDisutility(-6., 0., 0));
+		this.router = new DijkstraFactory().createPathCalculator(this.scenario.getNetwork(), new FreespeedTravelTimeAndDisutility(-6., 0., 0), new FreespeedTravelTimeAndDisutility(-6., 0., 0));
 		
 		log.info("Initializing vehicle types...");
 		

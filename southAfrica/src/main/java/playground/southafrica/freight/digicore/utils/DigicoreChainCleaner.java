@@ -152,6 +152,10 @@ public class DigicoreChainCleaner {
 				}
 			}
 			
+			/* Since activities have been merged within chains, we have to 
+			 * consolidate the 'major' activities BETWEEN consecutive chains. */
+			consolidateBetweenChains();
+			
 			counter.incCounter();
 
 			/* Write the vehicle to file, if it has at least one chain. */
@@ -194,6 +198,12 @@ public class DigicoreChainCleaner {
 					chain.remove( activityIndex + 1 ); /* Remove the trace. */
 					chain.remove( activityIndex + 1 ); /* Remove the subsequent activity. */
 					
+					/* If one of the two activities is a 'major' type, then the 
+					 * joint, merged activity should be major too. */
+					if(thisActivity.getType().equalsIgnoreCase("major") ||
+							nextActivity.getType().equalsIgnoreCase("major")){
+						thisActivity.setType("major");
+					}
 				} else{
 					/* Step over the current activity and the subsequent trace. */
 					activityIndex += 2;
@@ -201,9 +211,32 @@ public class DigicoreChainCleaner {
 			}
 			return chain;
 		}
-
+		
+		public void consolidateBetweenChains(){
+			for(int i=0; i < this.vehicle.getChains().size()-1; i++){
+				/* Get the two chains. */
+				DigicoreChain thisChain = this.vehicle.getChains().get(i);
+				DigicoreChain nextChain = this.vehicle.getChains().get(i+1);
+				
+				/* Get their respective 'major' activities to be compared. */
+				DigicoreActivity thisLastMajor = thisChain.getLastMajorActivity();
+				DigicoreActivity nextFirstMajor = nextChain.getFirstMajorActivity();
+				
+				/* Get the maximum extent. */
+				double earliestStart = Math.min(
+						thisLastMajor.getStartTime(), 
+						nextFirstMajor.getStartTime());
+				double latestEnd = Math.min(
+						thisLastMajor.getEndTime(),
+						nextFirstMajor.getEndTime());
+				
+				/* Adjust the timing. */
+				thisLastMajor.setStartTime(earliestStart);
+				nextFirstMajor.setStartTime(earliestStart);
+				thisLastMajor.setEndTime(latestEnd);
+				nextFirstMajor.setEndTime(latestEnd);
+			}
+		}
 	} 
-	
-	
 
 }

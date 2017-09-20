@@ -19,9 +19,8 @@
 
 package playground.michalm.util.sim;
 
-import java.util.Arrays;
-
-import org.matsim.core.controler.*;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 
 public class SimLauncher {
 	public static void main(String[] args) {

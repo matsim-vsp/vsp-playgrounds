@@ -39,7 +39,6 @@ import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
@@ -190,7 +189,7 @@ public class CMCFScenarioGeneratorNoReroute {
 			act1.setEndTime(homeEndTime);
 			// leg to home
 			Leg leg = PopulationUtils.createAndAddLeg( plan, (String) TransportMode.car );
-			NetworkRoute route = new LinkNetworkRouteImpl(l1.getId(), l6.getId());
+			NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(l1.getId(), l6.getId());
 			if (!isAlternativeRouteEnabled) {
 				route.setLinkIds(l1.getId(), NetworkUtils.getLinkIds(RouteUtils.getLinksFromNodes(NetworkUtils.getNodes(this.network, "2 3 5 6"))), l6.getId());
 			}

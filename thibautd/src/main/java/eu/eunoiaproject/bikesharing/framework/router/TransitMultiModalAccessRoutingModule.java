@@ -32,7 +32,6 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.CompositeStageActivityTypes;
 import org.matsim.core.router.RoutingModule;
@@ -363,7 +362,7 @@ public class TransitMultiModalAccessRoutingModule implements RoutingModule {
 			final Person person,
 			final Coord coord,
 			final Coord toCoord) {
-		return travelDisutility.getTravelTime(person, coord, toCoord);
+		return travelDisutility.getWalkTravelTime(person, coord, toCoord);
 	}
 
 	private List<Leg> convertPathToLegList(
@@ -419,7 +418,8 @@ public class TransitMultiModalAccessRoutingModule implements RoutingModule {
 							if (accessStop != null) {
 								final Leg leg = PopulationUtils.createLeg(TransportMode.transit_walk);
 								double walkTime = getWalkTime(person, accessStop.getCoord(), egressStop.getCoord());
-								Route walkRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
+								Route walkRoute = RouteUtils.createGenericRouteImpl(accessStop.getLinkId(),
+										egressStop.getLinkId());
 								leg.setRoute(walkRoute);
 								leg.setTravelTime(walkTime);
 								time += walkTime;
@@ -438,9 +438,8 @@ public class TransitMultiModalAccessRoutingModule implements RoutingModule {
 												depStop.getCoord(),
 												egressStop.getCoord());
 									final Route walkRoute =
-										new GenericRouteImpl(
-												depStop.getLinkId(),
-												egressStop.getLinkId());
+										RouteUtils.createGenericRouteImpl(
+											depStop.getLinkId(), egressStop.getLinkId());
 									leg.setRoute( walkRoute );
 									walkRoute.setTravelTime( walkTime );
 									leg.setTravelTime( walkTime );
@@ -482,9 +481,7 @@ public class TransitMultiModalAccessRoutingModule implements RoutingModule {
 			double walkTime = getWalkTime(person, fromFacility.getCoord(), toFacility.getCoord());
 
 			final Route walkRoute =
-				new GenericRouteImpl(
-						fromFacility.getLinkId(),
-						toFacility.getLinkId());
+				RouteUtils.createGenericRouteImpl(fromFacility.getLinkId(), toFacility.getLinkId());
 			walkRoute.setTravelTime( walkTime );
 
 			leg.setRoute( walkRoute );

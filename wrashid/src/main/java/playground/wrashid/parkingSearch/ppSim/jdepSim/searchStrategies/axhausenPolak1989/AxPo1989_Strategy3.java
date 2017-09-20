@@ -27,7 +27,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
 import org.matsim.contrib.parking.parkingchoice.lib.obj.DoubleValueHashMap;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import playground.wrashid.parkingChoice.infrastructure.api.PParking;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.AgentWithParking;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.Message;
@@ -184,7 +184,7 @@ public class AxPo1989_Strategy3 extends RandomParkingSearch {
 				.getLinkId();
 		Leg leg = (Leg) aem.getPerson().getSelectedPlan().getPlanElements().get(aem.getPlanElementIndex());
 
-		List<Id<Link>> linkIds = ((LinkNetworkRouteImpl) leg.getRoute()).getLinkIds();
+		List<Id<Link>> linkIds = ((NetworkRoute) leg.getRoute()).getLinkIds();
 
 		double travelTime = 0;
 		boolean routeStarted = false;

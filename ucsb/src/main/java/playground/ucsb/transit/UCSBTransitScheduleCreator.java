@@ -35,8 +35,9 @@ import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.algorithms.NetworkWriteAsTable;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -167,7 +168,7 @@ public class UCSBTransitScheduleCreator {
 					prevPtPoint = ptPoint;
 				}
 				linkIds.remove(linkIds.size()-1); // remove the end link
-				NetworkRoute networkRoute = new LinkNetworkRouteImpl(startLink.getId(),endLink.getId());
+				NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(startLink.getId(), endLink.getId());
 				networkRoute.setLinkIds(startLink.getId(),linkIds,endLink.getId());
 				TransitRoute transitRoute = factory.createTransitRoute(Id.create(transitLine.getId()+"."+ptRouteNr, TransitRoute.class), networkRoute, transitRouteStops,ptRoute.modeType);
 				transitLine.addRoute(transitRoute);

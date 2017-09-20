@@ -19,18 +19,17 @@
 
 package herbie.running.pt;
 
+import java.util.List;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Route;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
-
-import java.util.List;
 
 public class DistanceCalculations {
 
@@ -54,7 +53,7 @@ public class DistanceCalculations {
 		return distance;
 	}
 	
-	public static double getLegDistance(GenericRouteImpl route, Network network){
+	private static double getTheLegDistance(Route route, Network network){
 		
 		double distance = 0.0;
 		
@@ -108,7 +107,7 @@ public class DistanceCalculations {
 			return getLegDistance((ExperimentalTransitRoute) route, network);
 		}
 		else {
-			return getLegDistance((GenericRouteImpl) route, network);
+			return getTheLegDistance(route, network);
 		}
 	}
 	

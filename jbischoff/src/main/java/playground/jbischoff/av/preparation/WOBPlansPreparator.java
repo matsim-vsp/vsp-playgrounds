@@ -33,7 +33,7 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.population.algorithms.PersonPrepareForSim;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.PlanRouter;
 import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
@@ -69,7 +69,7 @@ public static void main(String[] args) {
 				 (leg.getMode().equals("pt")){
 					Activity pr = (Activity) plan.getPlanElements().get(i-1);
 					Activity next = (Activity) plan.getPlanElements().get(i+1);
-					Route route = new GenericRouteImpl(pr.getLinkId(), next.getLinkId());
+					Route route = RouteUtils.createGenericRouteImpl(pr.getLinkId(), next.getLinkId());
 					route.setDistance(CoordUtils.calcEuclideanDistance(pr.getCoord(), next.getCoord()));
 					route.setTravelTime(route.getDistance()/6);
 					leg.setRoute(route);
@@ -77,7 +77,7 @@ public static void main(String[] args) {
 				 (leg.getMode().equals("walk")){
 					Activity pr = (Activity) plan.getPlanElements().get(i-1);
 					Activity next = (Activity) plan.getPlanElements().get(i+1);
-					Route route = new GenericRouteImpl(pr.getLinkId(), next.getLinkId());
+					Route route = RouteUtils.createGenericRouteImpl(pr.getLinkId(), next.getLinkId());
 					route.setDistance(CoordUtils.calcEuclideanDistance(pr.getCoord(), next.getCoord()));
 					route.setTravelTime(route.getDistance()/1.38);
 					leg.setRoute(route);
@@ -87,7 +87,7 @@ public static void main(String[] args) {
 					
 					Activity pr = (Activity) plan.getPlanElements().get(i-1);
 					Activity next = (Activity) plan.getPlanElements().get(i+1);
-					Route route = new GenericRouteImpl(pr.getLinkId(), next.getLinkId());
+					Route route = RouteUtils.createGenericRouteImpl(pr.getLinkId(), next.getLinkId());
 					route.setDistance(CoordUtils.calcEuclideanDistance(pr.getCoord(), next.getCoord()));
 					route.setTravelTime(route.getDistance()/4.00);
 					leg.setRoute(route);

@@ -18,10 +18,10 @@
  * *********************************************************************** */
 package playground.johannes.synpop.gis;
 
-import org.matsim.core.config.ConfigGroup;
-
 import java.io.IOException;
 import java.util.Collection;
+
+import org.matsim.core.config.ConfigGroup;
 
 /**
  * @author jillenberger

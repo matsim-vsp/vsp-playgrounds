@@ -80,7 +80,7 @@ public class RunETaxiScenario {
 
 	public static void main(String[] args) {
 		// String configFile = "./src/main/resources/one_etaxi/one_etaxi_config.xml";
-		String configFile = "../../../shared-svn/projects/maciejewski/Mielec/2014_02_base_scenario/mielec_etaxi_config.xml";
+		String configFile = "../../shared-svn/projects/maciejewski/Mielec/2014_02_base_scenario/mielec_etaxi_config.xml";
 		RunETaxiScenario.run(configFile, false);
 	}
 }

@@ -24,12 +24,12 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
-import playground.nmviljoen.gridExperiments.NmvLink;
-import playground.nmviljoen.gridExperiments.NmvNode;
-import playground.nmviljoen.network.salience.SampleNetworkBuilder;
 import playground.southafrica.projects.complexNetworks.pathDependence.DigicorePathDependentNetworkReader_v2;
 import playground.southafrica.projects.complexNetworks.pathDependence.PathDependentNetwork;
 import playground.southafrica.projects.complexNetworks.utils.ComplexNetworkUtils;
+import playground.southafrica.sandboxes.nmviljoen.gridExamples.NmvLink;
+import playground.southafrica.sandboxes.nmviljoen.gridExamples.NmvNode;
+import playground.southafrica.sandboxes.nmviljoen.network.salience.SampleNetworkBuilder;
 import playground.southafrica.utilities.Header;
 
 /**

@@ -83,7 +83,7 @@ public class MatsimFreeSpeedTravelTimeTest {
 		TravelTimeHandler tth = new TravelTimeHandler();
 		manager.addHandler(tth);
 
-		PrepareForSimUtils.createDefaultPrepareForSim(net.scenario,manager).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(net.scenario).run();
 		QSim qsim = QSimUtils.createDefaultQSim(net.scenario, manager);
 		qsim.run();
 		return tth.travelTime;

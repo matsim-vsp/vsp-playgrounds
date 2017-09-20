@@ -19,11 +19,15 @@
 
 package playground.michalm.poznan.demand.taxi;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
-import com.google.common.base.*;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.prep.PreparedPolygon;
 
 import playground.michalm.demand.taxi.ServedRequests;
 import playground.michalm.poznan.zone.PoznanZones;
@@ -46,7 +50,8 @@ public class PoznanServedRequests {
 	public static Iterable<PoznanServedRequest> filterRequestsWithinAgglomeration(
 			Iterable<PoznanServedRequest> requests) {
 		MultiPolygon area = PoznanZones.readAgglomerationArea();
-		return Iterables.filter(requests, ServedRequests.createWithinAreaPredicate(area));
+		final PreparedPolygon preparedPolygon = new PreparedPolygon(area);
+		return Iterables.filter(requests, r -> ServedRequests.isWithinArea(r, preparedPolygon));
 	}
 
 	public static Iterable<PoznanServedRequest> filterNormalPeriods(Iterable<PoznanServedRequest> requests) {
@@ -54,12 +59,24 @@ public class PoznanServedRequests {
 		// March - 2-29 (4 full weeks) - exclude: 1, 30-31 (daylight saving time shift)
 		// April - 1-14 + 23-29 (3 full weeks), exclude: 15-22, 30 (Easter and May's long weekend)
 
+		Date fromDate1 = midnight("01-03");
+		Date toDate1 = midnight("02-03");
+
+		Date fromDate2 = midnight("30-03");
+		Date toDate2 = midnight("01-04");
+
+		Date fromDate3 = midnight("15-04");
+		Date toDate3 = midnight("23-04");
+
+		Date fromDate4 = midnight("30-04");
+		Date toDate4 = midnight("01-05");
+
 		@SuppressWarnings("unchecked")
 		Predicate<PoznanServedRequest> orPredicate = Predicates.or(
-				ServedRequests.createBetweenDatesPredicate(midnight("01-03"), midnight("02-03")),
-				ServedRequests.createBetweenDatesPredicate(midnight("30-03"), midnight("01-04")),
-				ServedRequests.createBetweenDatesPredicate(midnight("15-04"), midnight("23-04")),
-				ServedRequests.createBetweenDatesPredicate(midnight("30-04"), midnight("01-05")));
+				r -> ServedRequests.isBetweenDates(r, fromDate1, toDate1),
+				r -> ServedRequests.isBetweenDates(r, fromDate2, toDate2),
+				r -> ServedRequests.isBetweenDates(r, fromDate3, toDate3),
+				r -> ServedRequests.isBetweenDates(r, fromDate4, toDate4));
 
 		return Iterables.filter(requests, Predicates.not(orPredicate));
 	}
@@ -72,6 +89,6 @@ public class PoznanServedRequests {
 	public static Iterable<PoznanServedRequest> filterNext24Hours(Iterable<PoznanServedRequest> requests,
 			Date fromDate) {
 		Date toDate = new Date(fromDate.getTime() + 24 * 3600 * 1000);
-		return Iterables.filter(requests, ServedRequests.createBetweenDatesPredicate(fromDate, toDate));
+		return Iterables.filter(requests, r -> ServedRequests.isBetweenDates(r, fromDate, toDate));
 	}
 }

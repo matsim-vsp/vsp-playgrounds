@@ -18,24 +18,34 @@
  * *********************************************************************** */
 package playground.droeder.ptSubModes.routing;
 
-import com.google.inject.Provider;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.population.routes.RouteFactories;
-import org.matsim.core.router.*;
+import org.matsim.core.router.AStarLandmarksFactory;
+import org.matsim.core.router.DefaultRoutingModules;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.FastAStarLandmarksFactory;
+import org.matsim.core.router.FastDijkstraFactory;
+import org.matsim.core.router.TransitRouterWrapper;
+import org.matsim.core.router.TripRouter;
+import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.util.LeastCostPathCalculator;
+import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.pt.router.TransitRouter;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
+
+import com.google.inject.Provider;
 
 /**
  * @author droeder
@@ -174,13 +184,11 @@ public class PtSubModeTripRouterFactory implements javax.inject.Provider<TripRou
 		if (config.controler().getRoutingAlgorithmType().equals(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra)) {
             return new DijkstraFactory();
         } else if (config.controler().getRoutingAlgorithmType().equals(ControlerConfigGroup.RoutingAlgorithmType.AStarLandmarks)) {
-            return new AStarLandmarksFactory(
-                    scenario.getNetwork(), new FreespeedTravelTimeAndDisutility(config.planCalcScore()), config.global().getNumberOfThreads());
+            return new AStarLandmarksFactory();
         } else if (config.controler().getRoutingAlgorithmType().equals(ControlerConfigGroup.RoutingAlgorithmType.FastDijkstra)) {
             return new FastDijkstraFactory();
         } else if (config.controler().getRoutingAlgorithmType().equals(ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks)) {
-            return new FastAStarLandmarksFactory(
-                    scenario.getNetwork(), new FreespeedTravelTimeAndDisutility(config.planCalcScore()));
+            return new FastAStarLandmarksFactory();
         } else {
             throw new IllegalStateException("Enumeration Type RoutingAlgorithmType was extended without adaptation of Controler!");
         }

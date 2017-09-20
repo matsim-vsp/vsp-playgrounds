@@ -26,7 +26,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 
 import playground.wrashid.parkingSearch.ppSim.jdepSim.AgentEventMessage;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.AgentWithParking;
@@ -51,8 +51,8 @@ public class RandomStreetParkingSearchWithWaiting extends RandomParkingSearch {
 		Id personId = aem.getPerson().getId();
 		Leg leg = (Leg) aem.getPerson().getSelectedPlan().getPlanElements().get(aem.getPlanElementIndex());
 
-		List<Id<Link>> linkIds = ((LinkNetworkRouteImpl) leg.getRoute()).getLinkIds();
-		LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) leg.getRoute();
+		List<Id<Link>> linkIds = ((NetworkRoute) leg.getRoute()).getLinkIds();
+		NetworkRoute route = (NetworkRoute) leg.getRoute();
 
 		boolean endOfLegReached = aem.getCurrentLinkIndex() == linkIds.size() - 1;
 

@@ -20,13 +20,24 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.Node;
+import org.matsim.contrib.eventsBasedPTRouter.SerializableLinkTravelTimes;
+import org.matsim.contrib.eventsBasedPTRouter.TransitRouterEventsWSFactory;
+import org.matsim.contrib.eventsBasedPTRouter.TransitRouterVariableImpl;
+import org.matsim.contrib.eventsBasedPTRouter.stopStopTimes.StopStopTimeCalculatorSerializable;
+import org.matsim.contrib.eventsBasedPTRouter.waitTimes.WaitTimeCalculatorSerializable;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutilityFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.PreProcessDijkstra;
 import org.matsim.core.router.util.TravelDisutility;
@@ -44,17 +55,6 @@ import playground.sergioo.hits2012.Person;
 import playground.sergioo.hits2012.Trip;
 import playground.sergioo.hits2012.Trip.Purpose;
 import playground.sergioo.hits2012Scheduling.IncomeEstimation;
-
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.Node;
-import org.matsim.contrib.eventsBasedPTRouter.SerializableLinkTravelTimes;
-import org.matsim.contrib.eventsBasedPTRouter.TransitRouterEventsWSFactory;
-import org.matsim.contrib.eventsBasedPTRouter.TransitRouterVariableImpl;
-import org.matsim.contrib.eventsBasedPTRouter.stopStopTimes.StopStopTimeCalculatorSerializable;
-import org.matsim.contrib.eventsBasedPTRouter.waitTimes.WaitTimeCalculatorSerializable;
 
 public class AccessibilityCalculation extends Thread {
 	
@@ -490,7 +490,7 @@ public class AccessibilityCalculation extends Thread {
 		TransitRouterVariableImpl transitRouter = (TransitRouterVariableImpl) factory.get();
 		PreProcessDijkstra preProcessDijkstra = new PreProcessDijkstra();
 		preProcessDijkstra.run(scenario.getNetwork());
-		Dijkstra dijkstra = new Dijkstra(network, disutilityFunction, times, preProcessDijkstra);
+		LeastCostPathCalculator dijkstra = new DijkstraFactory(true).createPathCalculator(network, disutilityFunction, times);
 		Map<SimpleCategory, Map<String, ContinuousRealDistribution>> distributions = new HashMap<>();
 		for(Household household:households.values())
 			for(Person person:household.getPersons().values()) {

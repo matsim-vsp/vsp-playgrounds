@@ -31,9 +31,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -138,7 +138,7 @@ public class CreateInitialTimeSchedule {
 	private TransitRoute createRoute(Id<TransitRoute> routeID, TransitStopFacility startStop, TransitStopFacility endStop){
 		
 		FreespeedTravelTimeAndDisutility tC = new FreespeedTravelTimeAndDisutility(-6.0, 0.0, 0.0);
-		LeastCostPathCalculator routingAlgo = new Dijkstra(this.net, tC, tC);
+		LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(this.net, tC, tC);
 		
 		Node startNode = this.net.getLinks().get(startStop.getLinkId()).getToNode();
 		Node endNode = this.net.getLinks().get(endStop.getLinkId()).getFromNode();
@@ -147,7 +147,7 @@ public class CreateInitialTimeSchedule {
 		
 		// get Route
 		Path path = routingAlgo.calcLeastCostPath(startNode, endNode, startTime, null, null);
-		NetworkRoute route = new LinkNetworkRouteImpl(startStop.getLinkId(), endStop.getLinkId());
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(startStop.getLinkId(), endStop.getLinkId());
 		route.setLinkIds(startStop.getLinkId(), NetworkUtils.getLinkIds(path.links), endStop.getLinkId());
 		
 		

@@ -17,8 +17,9 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
@@ -214,7 +215,7 @@ public class RouteAdderRemover {
 		if(transitstopsfornewroute.size()<2){//If a single stop route 
 			return null;
 		}
-		NetworkRoute networkRoute = new LinkNetworkRouteImpl(linksfornewroute.get(0),linksfornewroute.subList
+		NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(linksfornewroute.get(0), linksfornewroute.subList
 				(1, linksfornewroute.size()-1), linksfornewroute.get(linksfornewroute.size()-1));//Creates networkroute based on the list of links to traverse
 		Id<TransitRoute> id = Id.create(origin.getStopFacility().getId().toString()+"to"+transitstopsfornewroute.get
 				(transitstopsfornewroute.size()-1).getStopFacility().getId()+"added"+(100000*Math.random()), TransitRoute.class);
@@ -265,7 +266,7 @@ public class RouteAdderRemover {
 			previouslink=linkid;
 			
 		}
-		NetworkRoute networkRoute = new LinkNetworkRouteImpl(originlink,linksfornewroute, destlink);
+		NetworkRoute networkRoute = RouteUtils.createLinkNetworkRouteImpl(originlink, linksfornewroute, destlink);
 		Id<TransitRoute> id = Id.create(transitstopsfornewroute.get(0).getStopFacility().getId().toString()+"to"+transitstopsfornewroute.get
 				(transitstopsfornewroute.size()-1).getStopFacility().getId()+"addedrev"+(100000*Math.random()), TransitRoute.class);
 		TransitRoute route = tschedulefact.createTransitRoute(id, networkRoute, transitstopsfornewroute, "pt");

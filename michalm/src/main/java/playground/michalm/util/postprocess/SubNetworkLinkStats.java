@@ -19,17 +19,20 @@
 
 package playground.michalm.util.postprocess;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import org.matsim.api.core.v01.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
-import com.google.common.base.Predicate;
 import com.vividsolutions.jts.geom.Geometry;
 
 import playground.michalm.util.gis.PolygonBasedFilter;
@@ -44,8 +47,6 @@ public class SubNetworkLinkStats {
 		String filteredLinkStats = dir + "40.linkstats-filtered.txt.gz";
 
 		Geometry polygonGeometry = PolygonBasedFilter.readPolygonGeometry(polygonFile);
-		Predicate<Link> linkInsidePolygonPredicate = PolygonBasedFilter
-				.createLinkInsidePolygonPredicate(polygonGeometry, includeBorderLinks);
 
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		MatsimNetworkReader nr = new MatsimNetworkReader(scenario.getNetwork());
@@ -63,7 +64,7 @@ public class SubNetworkLinkStats {
 				String linkId = new StringTokenizer(line).nextToken();// linkId - first column
 				Link link = linkMap.get(Id.create(linkId, Link.class));
 
-				if (linkInsidePolygonPredicate.apply(link)) {
+				if (PolygonBasedFilter.isLinkInsidePolygon(link, polygonGeometry, includeBorderLinks)) {
 					pw.println(line);
 				}
 			}

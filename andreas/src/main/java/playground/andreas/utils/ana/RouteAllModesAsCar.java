@@ -44,7 +44,9 @@ import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.population.io.StreamingDeprecated;
 import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -68,7 +70,7 @@ public class RouteAllModesAsCar extends AbstractPersonFilter {
 	private final static Logger log = Logger.getLogger(RouteAllModesAsCar.class);
 
 	private final Scenario sc;
-	private final Dijkstra routingAlgo;
+	private final LeastCostPathCalculator routingAlgo;
 
 	private HashMap<Link, Integer> link2totals = new HashMap<Link, Integer>();
 	private HashMap<String, HashMap<Link, Integer>> mode2link2totals = new HashMap<String, HashMap<Link,Integer>>();
@@ -83,7 +85,7 @@ public class RouteAllModesAsCar extends AbstractPersonFilter {
 		ScenarioUtils.loadScenario(this.sc);
 		
 		FreespeedTravelTimeAndDisutility tC = new FreespeedTravelTimeAndDisutility(-6.0, 0.0, 0.0);
-		this.routingAlgo = new Dijkstra(this.sc.getNetwork(), tC, tC);
+		this.routingAlgo = new DijkstraFactory().createPathCalculator(this.sc.getNetwork(), tC, tC);
 		@SuppressWarnings("serial")
 		Set<String> modes =  new HashSet<String>(){{
 			// this is the networkmode and explicitly not the transportmode

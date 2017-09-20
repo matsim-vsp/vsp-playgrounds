@@ -28,23 +28,25 @@ import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelDataImpl;
+import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedules;
 import org.matsim.contrib.dvrp.tracker.OnlineDriveTaskTracker;
+import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.dvrp.util.LinkTimePair;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiEmptyDriveTask;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
-import org.matsim.contrib.taxi.scheduler.TaxiSchedulerParams;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
- * @author  jbischoff
- *
- */
-/**
+ * @author jbischoff
  *
  */
 public class PrivateAVScheduler extends TaxiScheduler {
@@ -58,28 +60,26 @@ public class PrivateAVScheduler extends TaxiScheduler {
 	 * @param travelTime
 	 * @param travelDisutility
 	 */
-	public PrivateAVScheduler(TaxiConfigGroup taxiCfg, Network network, Fleet fleet, MobsimTimer timer,
-			TaxiSchedulerParams params, TravelTime travelTime, TravelDisutility travelDisutility) {
-		super(taxiCfg, network, fleet, timer, params, travelTime, travelDisutility);
-		// TODO Auto-generated constructor stub
+	@Inject
+	public PrivateAVScheduler(TaxiConfigGroup taxiCfg, Fleet fleet, @Named(DvrpModule.DVRP_ROUTING) Network network,
+			MobsimTimer timer, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
+			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility) {
+		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility);
 	}
-	
-	public void moveIdleVehicle(Vehicle vehicle, VrpPathWithTravelData vrpPath){
+
+	public void moveIdleVehicle(Vehicle vehicle, VrpPathWithTravelData vrpPath) {
 		Schedule schedule = vehicle.getSchedule();
 		divertOrAppendDrive(schedule, vrpPath);
 		appendStayTask(vehicle);
-		
-		
-
 	}
-	
+
 	public void stopCruisingVehicle(Vehicle vehicle) {
-		if (!params.vehicleDiversion) {
+		if (!taxiCfg.isVehicleDiversion()) {
 			throw new RuntimeException("Diversion must be on");
 		}
 
 		Schedule schedule = vehicle.getSchedule();
-		TaxiEmptyDriveTask driveTask = (TaxiEmptyDriveTask) Schedules.getNextToLastTask(schedule);
+		TaxiEmptyDriveTask driveTask = (TaxiEmptyDriveTask)Schedules.getNextToLastTask(schedule);
 		schedule.removeLastTask();
 		OnlineDriveTaskTracker tracker = (OnlineDriveTaskTracker)driveTask.getTaskTracker();
 		LinkTimePair stopPoint = tracker.getDiversionPoint();
@@ -88,5 +88,4 @@ public class PrivateAVScheduler extends TaxiScheduler {
 
 		appendStayTask(vehicle);
 	}
-
 }

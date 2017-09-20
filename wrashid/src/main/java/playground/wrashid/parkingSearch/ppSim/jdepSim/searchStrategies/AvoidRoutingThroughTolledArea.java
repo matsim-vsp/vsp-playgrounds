@@ -29,26 +29,21 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.parking.parkingchoice.lib.DebugLib;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
 
 import playground.wrashid.lib.obj.TwoHashMapsConcatenated;
 import playground.wrashid.parkingChoice.trb2011.ParkingHerbieControler;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.AgentWithParking;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.Message;
-import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.EditRoute;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.threads.RerouteTask;
-import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.threads.RerouteTaskAddLastPartToRoute;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.threads.RerouteTaskWholeRoute;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.threads.RerouteThreadPool;
-import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.axhausenPolak1989.AxPo1989_Strategy3;
-import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.manager.EvaluationContainer;
-import playground.wrashid.parkingSearch.ppSim.jdepSim.searchStrategies.manager.StrategyEvaluation;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.ZHScenarioGlobal;
 
 // this can be thought as street parking search, but with consideration for tolled
@@ -58,7 +53,7 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 
 	protected HashSet<Id> changedRoute;
 	// person, legIndex
-	public static TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl> routes;
+	public static TwoHashMapsConcatenated<Id, Integer, NetworkRoute> routes;
 
 	public AvoidRoutingThroughTolledArea(double maxDistance, Network network, String name) {
 		super(maxDistance, network, name);
@@ -67,7 +62,7 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 	}
 
 	public static void initRoutes() {
-		routes = new TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl>();
+		routes = new TwoHashMapsConcatenated<>();
 
 		log.info("starting preparing routes");
 		RerouteThreadPool rtPool = new RerouteThreadPool(ZHScenarioGlobal.numberOfRoutingThreadsAtBeginning, Message.ttMatrix,
@@ -83,7 +78,7 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 					Activity prevAct = (Activity) planElements.get(i - 3);
 					Leg leg = (Leg) planElements.get(i);
 					if (leg.getMode().equalsIgnoreCase(TransportMode.car)) {
-						LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) leg.getRoute();
+						NetworkRoute route = (NetworkRoute) leg.getRoute();
 						
 						if (p.getId().toString().equalsIgnoreCase("504")) {
 							DebugLib.emptyFunctionForSettingBreakPoint();
@@ -105,7 +100,7 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 
 		for (RerouteTask rt : rtPool.rerouteTasks) {
 			RerouteTaskWholeRoute rtwr = (RerouteTaskWholeRoute) rt;
-			LinkNetworkRouteImpl route = rtwr.route;
+			NetworkRoute route = rtwr.route;
 
 			if (route == null) {
 				DebugLib.emptyFunctionForSettingBreakPoint();
@@ -133,7 +128,7 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 			if (!changedRoute.contains(personId)) {
 				changedRoute.add(personId);
 				Leg leg = (Leg) aem.getPerson().getSelectedPlan().getPlanElements().get(aem.getPlanElementIndex());
-				LinkNetworkRouteImpl route = (LinkNetworkRouteImpl) leg.getRoute();
+				NetworkRoute route = (NetworkRoute) leg.getRoute();
 
 				if (startAndEndLinkNotInTolledArea(route)) {
 					if (anyRouteLinkInTolledArea(route)) {
@@ -141,8 +136,8 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 						// route.getStartLinkId(),
 						// route.getEndLinkId());
 
-						LinkNetworkRouteImpl newRoute = routes.get(aem.getPerson().getId(), aem.getPlanElementIndex());
-						TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl> routes2 = routes;
+						NetworkRoute newRoute = routes.get(aem.getPerson().getId(), aem.getPlanElementIndex());
+						TwoHashMapsConcatenated<Id, Integer, NetworkRoute> routes2 = routes;
 						if (newRoute == null) {
 							DebugLib.emptyFunctionForSettingBreakPoint();
 						}
@@ -155,7 +150,7 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 		super.handleAgentLeg(aem);
 	}
 
-	private static boolean anyRouteLinkInTolledArea(LinkNetworkRouteImpl route) {
+	private static boolean anyRouteLinkInTolledArea(NetworkRoute route) {
 		Coord coordinatesLindenhofZH = ParkingHerbieControler.getCoordinatesLindenhofZH();
 		for (Id linkId : route.getLinkIds()) {
 			Link link = ZHScenarioGlobal.scenario.getNetwork().getLinks().get(linkId);
@@ -167,7 +162,7 @@ public class AvoidRoutingThroughTolledArea extends RandomParkingSearch {
 		return false;
 	}
 
-	private static boolean startAndEndLinkNotInTolledArea(LinkNetworkRouteImpl route) {
+	private static boolean startAndEndLinkNotInTolledArea(NetworkRoute route) {
 		Coord coordinatesLindenhofZH = ParkingHerbieControler.getCoordinatesLindenhofZH();
 		Link startLink = ZHScenarioGlobal.scenario.getNetwork().getLinks().get(route.getStartLinkId());
 		Link endLink = ZHScenarioGlobal.scenario.getNetwork().getLinks().get(route.getEndLinkId());

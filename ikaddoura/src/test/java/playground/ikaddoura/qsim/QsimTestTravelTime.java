@@ -114,7 +114,7 @@ public class QsimTestTravelTime {
 			}	
 		});
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc, events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = createQSim(sc, events);
 		sim.run();
 		

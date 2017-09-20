@@ -19,7 +19,6 @@
 
 package playground.michalm.taxi.optimizer.assignment;
 
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizerContext;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 
 import playground.michalm.ev.data.Charger;
@@ -37,9 +36,7 @@ class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
 		}
 	}
 
-	AssignmentChargerPlugData(TaxiOptimizerContext optimContext, Iterable<Charger> chargers) {
-		double currTime = optimContext.timer.getTimeOfDay();
-
+	AssignmentChargerPlugData(double currentTime, Iterable<Charger> chargers) {
 		int idx = 0;
 		for (Charger c : chargers) {
 			ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
@@ -58,7 +55,7 @@ class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
 			int unassignedPlugs = Math.max(c.getPlugs() - assignedVehicles, 0);
 			for (int p = 0; p < unassignedPlugs; p++) {
 				ChargerPlug plug = new ChargerPlug(c, p);
-				entries.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), currTime));
+				entries.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), currentTime));
 			}
 
 			// we do not want to have long queues at chargers: 1 awaiting veh per plug is the limit
@@ -69,7 +66,7 @@ class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
 				continue;
 			}
 
-			double chargeStart = currTime + logic.estimateAssignedWorkload() / (c.getPlugs() - unassignedPlugs);
+			double chargeStart = currentTime + logic.estimateAssignedWorkload() / (c.getPlugs() - unassignedPlugs);
 			for (int p = unassignedPlugs; p < assignableVehicles; p++) {
 				ChargerPlug plug = new ChargerPlug(c, p);
 				entries.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), chargeStart));

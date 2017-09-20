@@ -69,7 +69,8 @@ import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
@@ -285,7 +286,7 @@ public class RunTwoCrossings {
 				path.add(Id.createLinkId("7_3"));
 				path.add(Id.createLinkId("3_9"));
 			}
-			leg.setRoute(new LinkNetworkRouteImpl(fromLinkId, path, toLinkId));
+			leg.setRoute(RouteUtils.createLinkNetworkRouteImpl(fromLinkId, path, toLinkId));
 			plan.addLeg(leg);
 			
 			// create a drain activity at the to link

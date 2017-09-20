@@ -19,25 +19,28 @@
 
 package playground.michalm.taxi.optimizer;
 
-import org.apache.commons.configuration.*;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.router.TimeAsTravelDisutility;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
-import org.matsim.contrib.taxi.optimizer.*;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
+import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.scheduler.TaxiSchedulerParams;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
-import org.matsim.core.router.util.*;
+import org.matsim.core.mobsim.framework.MobsimTimer;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 
-import com.google.inject.*;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import playground.michalm.ev.data.EvData;
-import playground.michalm.taxi.optimizer.assignment.*;
-import playground.michalm.taxi.optimizer.rules.*;
+import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizer;
+import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizerParams;
+import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizer;
+import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizerParams;
 import playground.michalm.taxi.scheduler.ETaxiScheduler;
 
 public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
@@ -50,46 +53,40 @@ public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final TaxiConfigGroup taxiCfg;
 	private final Network network;
 	private final Fleet fleet;
+	private final MobsimTimer timer;
 	private final TravelTime travelTime;
-	private final QSim qSim;
+	private final TravelDisutility travelDisutility;
+	private final ETaxiScheduler eScheduler;
 	private final EvData evData;
 
-	@Inject(optional = true)
-	private @Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutilityFactory travelDisutilityFactory;
-
 	@Inject
-	public ETaxiOptimizerProvider(TaxiConfigGroup taxiCfg, @Named(DvrpModule.DVRP_ROUTING) Network network, Fleet fleet,
-			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime, QSim qSim, EvData evData) {
+	public ETaxiOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet, @Named(DvrpModule.DVRP_ROUTING) Network network,
+			MobsimTimer timer, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
+			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility,
+			ETaxiScheduler eScheduler, EvData evData) {
 		this.taxiCfg = taxiCfg;
-		this.network = network;
 		this.fleet = fleet;
+		this.network = network;
+		this.timer = timer;
 		this.travelTime = travelTime;
-		this.qSim = qSim;
+		this.travelDisutility = travelDisutility;
+		this.eScheduler = eScheduler;
 		this.evData = evData;
 	}
 
 	@Override
 	public TaxiOptimizer get() {
-		TaxiSchedulerParams schedulerParams = new TaxiSchedulerParams(taxiCfg);
-
-		TravelDisutility travelDisutility = travelDisutilityFactory == null ? new TimeAsTravelDisutility(travelTime)
-				: travelDisutilityFactory.createTravelDisutility(travelTime);
-
-		ETaxiScheduler scheduler = new ETaxiScheduler(taxiCfg, network, fleet, qSim.getSimTimer(), schedulerParams,
-				travelTime, travelDisutility);
-
-		ETaxiOptimizerContext optimContext = new ETaxiOptimizerContext(fleet, network, qSim.getSimTimer(), travelTime,
-				travelDisutility, scheduler, evData);
-
 		Configuration optimizerConfig = new MapConfiguration(taxiCfg.getOptimizerConfigGroup().getParams());
-
 		EOptimizerType type = EOptimizerType.valueOf(optimizerConfig.getString(TYPE));
+
 		switch (type) {
 			case E_RULE_BASED:
-				return new RuleBasedETaxiOptimizer(optimContext, new RuleBasedETaxiOptimizerParams(optimizerConfig));
+				return RuleBasedETaxiOptimizer.create(taxiCfg, fleet, eScheduler, network, timer, travelTime,
+						travelDisutility, new RuleBasedETaxiOptimizerParams(optimizerConfig), evData);
 
 			case E_ASSIGNMENT:
-				return new AssignmentETaxiOptimizer(optimContext, new AssignmentETaxiOptimizerParams(optimizerConfig));
+				return AssignmentETaxiOptimizer.create(taxiCfg, fleet, network, timer, travelTime, travelDisutility,
+						eScheduler, evData, new AssignmentETaxiOptimizerParams(optimizerConfig));
 
 			default:
 				throw new RuntimeException();

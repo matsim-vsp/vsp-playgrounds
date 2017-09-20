@@ -35,7 +35,8 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -124,7 +125,7 @@ public class Daganzo2012ScenarioGenerator {
     plan.addActivity(act1);
     // leg to home
     Leg leg = (Leg) factory.createLeg(TransportMode.car);
-    LinkNetworkRouteImpl route = new LinkNetworkRouteImpl(Id.create(1, Link.class), Id.create(7, Link.class));
+    NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(Id.create(1, Link.class), Id.create(7, Link.class));
     if (useAlternativeRoute) {
       route.setLinkIds(Id.create(1, Link.class), NetworkUtils.getLinkIds("2 3 5 6"), Id.create(7, Link.class));
     }

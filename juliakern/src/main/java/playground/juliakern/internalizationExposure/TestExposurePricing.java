@@ -48,7 +48,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PersonUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import playground.benjamin.scenarios.munich.exposure.EmissionResponsibilityTravelDisutilityCalculatorFactory;
 import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
 import playground.vsp.airPollution.exposure.GridTools;
@@ -283,7 +283,7 @@ public class TestExposurePricing {
 		for(PlanElement pe: selectedPlan.getPlanElements()){
 				if(pe instanceof Leg){
 					Leg leg = (Leg)pe;
-					LinkNetworkRouteImpl lnri = (LinkNetworkRouteImpl) leg.getRoute();
+					NetworkRoute lnri = (NetworkRoute) leg.getRoute();
 					if(lnri.getLinkIds().contains(Id.create("39", Link.class))){
 						logger.info("Selected route should not use link 39."); //System.out.println("39 contained");
 					}else{
@@ -301,7 +301,7 @@ public class TestExposurePricing {
 				for(PlanElement pe: p.getPlanElements()){
 					if(pe instanceof Leg){
 						Leg leg = (Leg)pe;
-						LinkNetworkRouteImpl lnri = (LinkNetworkRouteImpl) leg.getRoute();
+						NetworkRoute lnri = (NetworkRoute) leg.getRoute();
 						if(lnri.getLinkIds().contains(Id.create("39", Link.class))){
 							logger.info("This plan uses node 9 and has score " + p.getScore()+ ". Selected = " + PersonUtils.isSelected(p));
 						}

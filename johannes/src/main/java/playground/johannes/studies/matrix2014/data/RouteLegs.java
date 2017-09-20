@@ -26,7 +26,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.router.util.AStarLandmarksFactory;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.ActivityFacilitiesImpl;
@@ -86,7 +86,7 @@ public class RouteLegs {
         logger.info("Prerocess routing...");
         int nThreads = Executor.getFreePoolSize();
 
-        LeastCostPathCalculatorFactory factory = new AStarLandmarksFactory(scenario.getNetwork(), new ConcurrentFreeSpeedRouter.TravelTimes());
+        LeastCostPathCalculatorFactory factory = new AStarLandmarksFactory();
         ConcurrentFreeSpeedRouter router = new ConcurrentFreeSpeedRouter(scenario.getNetwork(), factory, nThreads);
 
         logger.info("Connect facilities to network...");

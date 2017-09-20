@@ -2,6 +2,16 @@ package playground.johannes.osm.osrm; /**
  * Created by NicoKuehnel on 03.08.2016.
  */
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -21,20 +31,17 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.router.Dijkstra;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.AStarEuclideanFactory;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelDisutilityUtils;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleUtils;
-
-import java.net.URI;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 
 public class Main {
@@ -78,10 +85,9 @@ public class Main {
         TravelDisutility disutility = TravelDisutilityUtils.createFreespeedTravelTimeAndDisutility(new PlanCalcScoreConfigGroup());
 
         DijkstraFactory dijkstraFactory = new DijkstraFactory();
-        AStarEuclideanFactory aStarFactory = new AStarEuclideanFactory(network, disutility);
-        dijkstraCalculator = new Dijkstra(network, disutility, new FreeSpeedTravelTime());
+        dijkstraCalculator = new DijkstraFactory().createPathCalculator(network, disutility, new FreeSpeedTravelTime());
         dijkstraFactory.createPathCalculator(network, disutility, new FreeSpeedTravelTime());
-        aStarCalculator = aStarFactory.createPathCalculator(network, disutility, new FreeSpeedTravelTime());
+        aStarCalculator = new AStarEuclideanFactory().createPathCalculator(network, disutility, new FreeSpeedTravelTime());
 
         setBounds();
 

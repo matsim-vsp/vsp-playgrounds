@@ -26,60 +26,49 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import com.google.common.base.*;
 import com.google.common.collect.Iterables;
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 public class PolygonBasedFilter {
-	public static Predicate<Link> createLinkInsidePolygonPredicate(final Geometry polygonGeometry,
-			final boolean includeBorderLinks) {
-		return new Predicate<Link>() {
-			public boolean apply(Link link) {
-				Point fromPoint = MGC.coord2Point(link.getFromNode().getCoord());
-				boolean fromPointInside = polygonGeometry.contains(fromPoint);
+	public static boolean isLinkInsidePolygon(Link link, Geometry polygonGeometry, boolean includeBorderLinks) {
+		Point fromPoint = MGC.coord2Point(link.getFromNode().getCoord());
+		boolean fromPointInside = polygonGeometry.contains(fromPoint);
 
-				if (fromPointInside && includeBorderLinks) {
-					return true;// inclusion of only 1 point is enough
-				} else if (!fromPointInside && !includeBorderLinks) {
-					return false;// both points must be within
-				}
+		if (fromPointInside && includeBorderLinks) {
+			return true;// inclusion of only 1 point is enough
+		} else if (!fromPointInside && !includeBorderLinks) {
+			return false;// both points must be within
+		}
 
-				// now the result depends on the inclusion of "toPoint"
-				Point toPoint = MGC.coord2Point(link.getToNode().getCoord());
-				return polygonGeometry.contains(toPoint);
-			};
-		};
+		// now the result depends on the inclusion of "toPoint"
+		Point toPoint = MGC.coord2Point(link.getToNode().getCoord());
+		return polygonGeometry.contains(toPoint);
 	}
 
 	public static Iterable<? extends Link> filterLinksInsidePolygon(Iterable<? extends Link> links,
 			Geometry polygonGeometry, boolean includeBorderLinks) {
-		return Iterables.filter(links, createLinkInsidePolygonPredicate(polygonGeometry, includeBorderLinks));
+		return Iterables.filter(links, link -> isLinkInsidePolygon(link, polygonGeometry, includeBorderLinks));
 	}
 
 	public static Iterable<? extends Link> filterLinksOutsidePolygon(Iterable<? extends Link> links,
 			Geometry polygonGeometry, boolean includeBorderLinks) {
-		return Iterables.filter(links,
-				Predicates.not(createLinkInsidePolygonPredicate(polygonGeometry, !includeBorderLinks)));// includeBorderLinks
-																										// must be
-																										// negated
+		// includeBorderLinks must be negated
+		return Iterables.filter(links, link -> !isLinkInsidePolygon(link, polygonGeometry, !includeBorderLinks));
 	}
 
-	public static Predicate<SimpleFeature> createFeatureInsidePolygonPredicate(final Geometry polygonGeometry) {
-		return new Predicate<SimpleFeature>() {
-			public boolean apply(SimpleFeature feature) {
-				return polygonGeometry.contains((Geometry)feature.getDefaultGeometry());
-			}
-		};
+	public static boolean isFeatureInsidePolygon(SimpleFeature feature, final Geometry polygonGeometry) {
+		return polygonGeometry.contains((Geometry)feature.getDefaultGeometry());
 	}
 
 	public static Iterable<? extends SimpleFeature> filterFeaturesInsidePolygon(
 			Iterable<? extends SimpleFeature> features, Geometry polygonGeometry) {
-		return Iterables.filter(features, createFeatureInsidePolygonPredicate(polygonGeometry));
+		return Iterables.filter(features, f -> isFeatureInsidePolygon(f, polygonGeometry));
 	}
 
 	public static Iterable<? extends SimpleFeature> filterFeaturesOutsidePolygon(
 			Iterable<? extends SimpleFeature> features, Geometry polygonGeometry) {
-		return Iterables.filter(features, Predicates.not(createFeatureInsidePolygonPredicate(polygonGeometry)));
+		return Iterables.filter(features, f -> !isFeatureInsidePolygon(f, polygonGeometry));
 	}
 
 	public static Geometry readPolygonGeometry(String file) {
@@ -87,7 +76,6 @@ public class PolygonBasedFilter {
 		if (ftColl.size() != 1) {
 			throw new RuntimeException("No. of features: " + ftColl.size() + "; should be 1");
 		}
-
 		return (Geometry)ftColl.iterator().next().getDefaultGeometry();
 	}
 }

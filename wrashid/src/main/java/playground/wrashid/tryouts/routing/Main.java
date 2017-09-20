@@ -26,7 +26,6 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PopulationFactory;
@@ -36,7 +35,7 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.RouteFactories;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -77,7 +76,7 @@ public class Main {
 		
 		RouteFactories routeFactory = ((PopulationFactory) f.s.getPopulation().getFactory()).getRouteFactories();
 		FreespeedTravelTimeAndDisutility freespeed = new FreespeedTravelTimeAndDisutility(-6.0 / 3600, +6.0 / 3600, 0.0);
-		LeastCostPathCalculator routeAlgo = new Dijkstra(network, freespeed, freespeed);
+		LeastCostPathCalculator routeAlgo = new DijkstraFactory().createPathCalculator(network, freespeed, freespeed);
 
 		
 		Person person = PopulationUtils.getFactory().createPerson(Id.create(1, Person.class));

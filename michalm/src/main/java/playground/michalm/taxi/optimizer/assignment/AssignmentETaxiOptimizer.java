@@ -19,25 +19,41 @@
 
 package playground.michalm.taxi.optimizer.assignment;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.contrib.locationchoice.router.BackwardFastMultiNodeDijkstraFactory;
+import org.matsim.contrib.locationchoice.router.BackwardMultiNodePathCalculator;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
 import org.matsim.contrib.taxi.optimizer.VehicleData;
 import org.matsim.contrib.taxi.optimizer.VehicleData.Entry;
-import org.matsim.contrib.taxi.optimizer.assignment.*;
+import org.matsim.contrib.taxi.optimizer.assignment.AssignmentRequestInserter;
+import org.matsim.contrib.taxi.optimizer.assignment.AssignmentTaxiOptimizer;
+import org.matsim.contrib.taxi.optimizer.assignment.VehicleAssignmentProblem;
 import org.matsim.contrib.taxi.optimizer.assignment.VehicleAssignmentProblem.AssignmentCost;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.util.PartialSort;
+import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
+import org.matsim.core.router.FastAStarEuclideanFactory;
+import org.matsim.core.router.FastMultiNodeDijkstraFactory;
+import org.matsim.core.router.MultiNodePathCalculator;
+import org.matsim.core.router.util.LeastCostPathCalculator;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 
-import com.google.common.collect.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 
-import playground.michalm.ev.data.*;
+import playground.michalm.ev.data.Battery;
+import playground.michalm.ev.data.EvData;
 import playground.michalm.taxi.data.EvrpVehicle;
-import playground.michalm.taxi.optimizer.ETaxiOptimizerContext;
 import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 import playground.michalm.taxi.scheduler.ETaxiScheduler;
@@ -58,22 +74,42 @@ import playground.michalm.taxi.scheduler.ETaxiScheduler;
  * </ul>
  */
 public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
+	public static AssignmentETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, Network network,
+			MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility, ETaxiScheduler eScheduler,
+			EvData evData, AssignmentETaxiOptimizerParams params) {
+		MultiNodePathCalculator multiNodeRouter = (MultiNodePathCalculator)new FastMultiNodeDijkstraFactory(true)
+				.createPathCalculator(network, travelDisutility, travelTime);
+		BackwardMultiNodePathCalculator backwardMultiNodeRouter = (BackwardMultiNodePathCalculator)new BackwardFastMultiNodeDijkstraFactory(
+				true).createPathCalculator(network, travelDisutility, travelTime);
+		LeastCostPathCalculator router = new FastAStarEuclideanFactory().createPathCalculator(network, travelDisutility,
+				travelTime);
+		return new AssignmentETaxiOptimizer(taxiCfg, fleet, timer, travelTime, eScheduler, evData, params,
+				multiNodeRouter, backwardMultiNodeRouter, router);
+	}
+
 	private final AssignmentETaxiOptimizerParams params;
 	private final EvData evData;
 	private final ETaxiToPlugAssignmentCostProvider eAssignmentCostProvider;
 	private final VehicleAssignmentProblem<ChargerPlug> eAssignmentProblem;
 	private final ETaxiScheduler eScheduler;
+	private final Fleet fleet;
+	private final MobsimTimer timer;
 
 	private final Map<Id<Vehicle>, Vehicle> scheduledForCharging;
 
-	public AssignmentETaxiOptimizer(ETaxiOptimizerContext optimContext, AssignmentETaxiOptimizerParams params) {
-		super(optimContext, params);
+	public AssignmentETaxiOptimizer(TaxiConfigGroup taxiCfg, Fleet fleet, MobsimTimer timer, TravelTime travelTime,
+			ETaxiScheduler eScheduler, EvData evData, AssignmentETaxiOptimizerParams params,
+			MultiNodePathCalculator multiNodeRouter, BackwardMultiNodePathCalculator backwardMultiNodeRouter,
+			LeastCostPathCalculator router) {
+		super(taxiCfg, fleet, eScheduler, params, new AssignmentRequestInserter(fleet, timer, travelTime, eScheduler,
+				params, multiNodeRouter, backwardMultiNodeRouter, router));
 		this.params = params;
-		evData = optimContext.evData;
-		eScheduler = (ETaxiScheduler)optimContext.scheduler;
+		this.evData = evData;
+		this.eScheduler = eScheduler;
+		this.fleet = fleet;
+		this.timer = timer;
 
-		if (optimContext.scheduler.getParams().vehicleDiversion
-				&& optimContext.scheduler.getParams().destinationKnown) {
+		if (taxiCfg.isVehicleDiversion() && taxiCfg.isDestinationKnown()) {
 			throw new IllegalArgumentException("Unsupported");
 		}
 
@@ -81,7 +117,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 			throw new RuntimeException("charge-scheduling must be followed up by req-scheduling");
 		}
 
-		eAssignmentProblem = new VehicleAssignmentProblem<>(optimContext.travelTime, getRouter(), getBackwardRouter());
+		eAssignmentProblem = new VehicleAssignmentProblem<>(travelTime, multiNodeRouter, backwardMultiNodeRouter);
 
 		eAssignmentCostProvider = new ETaxiToPlugAssignmentCostProvider(params);
 
@@ -119,7 +155,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 
 	// if socCheckTimeStep is too small --> small number of idle plugs --> poorer assignments
 	protected void scheduleCharging() {
-		AssignmentChargerPlugData pData = new AssignmentChargerPlugData(getOptimContext(),
+		AssignmentChargerPlugData pData = new AssignmentChargerPlugData(timer.getTimeOfDay(),
 				evData.getChargers().values());
 		if (pData.getSize() == 0) {
 			return;
@@ -156,13 +192,14 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 	}
 
 	private VehicleData initVehicleDataForCharging(AssignmentChargerPlugData pData) {
-		Iterable<? extends Vehicle> vehiclesBelowMinSocLevel = Iterables
-				.filter(getOptimContext().fleet.getVehicles().values(), this::doNeedChargingScheduling);
+		Iterable<? extends Vehicle> vehiclesBelowMinSocLevel = Iterables.filter(fleet.getVehicles().values(),
+				this::doNeedChargingScheduling);
 
 		// XXX if chargers are heavily used then shorten the planning horizon;
 		// (like with undersupply of taxis)
 		double chargingPlanningHorizon = 10 * 60;// 10 minutes (should be longer than socCheckTimeStep)
-		VehicleData vData = new VehicleData(getOptimContext(), vehiclesBelowMinSocLevel, chargingPlanningHorizon);
+		VehicleData vData = new VehicleData(timer.getTimeOfDay(), eScheduler, vehiclesBelowMinSocLevel,
+				chargingPlanningHorizon);
 
 		// filter least charged vehicles
 		PartialSort<Entry> leastChargedSort = new PartialSort<>(pData.getSize());

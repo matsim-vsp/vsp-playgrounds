@@ -33,8 +33,8 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.*;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.EventsToScore;
 import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
@@ -304,7 +304,7 @@ public class OptimalWalkPlanFinderTest {
 			Leg leg = PopulationUtils.createAndAddLeg( this.plan, (String) TransportMode.walk );
 			leg.setDepartureTime(firstLegStartTime);
 			leg.setTravelTime(firstLegTravelTime);
-			Route route1 = new GenericRouteImpl(link1.getId(), link1.getId());
+			Route route1 = RouteUtils.createGenericRouteImpl(link1.getId(), link1.getId());
 			route1.setTravelTime(firstLegTravelTime);
 			route1.setDistance(CoordUtils.calcEuclideanDistance(homeLocation, workLocation));
 			leg.setRoute(route1);
@@ -317,7 +317,7 @@ public class OptimalWalkPlanFinderTest {
 			leg = PopulationUtils.createAndAddLeg( this.plan, (String) TransportMode.walk );
 			leg.setDepartureTime(secondLegStartTime);
 			leg.setTravelTime(secondLegTravelTime);
-			Route route2 = new GenericRouteImpl(link1.getId(), link1.getId());
+			Route route2 = RouteUtils.createGenericRouteImpl(link1.getId(), link1.getId());
 			route2.setTravelTime(secondLegTravelTime);
 			route2.setDistance(CoordUtils.calcEuclideanDistance(homeLocation, workLocation));
 			leg.setRoute(route2);

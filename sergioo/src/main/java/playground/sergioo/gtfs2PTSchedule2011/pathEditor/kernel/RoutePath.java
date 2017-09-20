@@ -37,10 +37,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.router.AStarEuclidean;
+import org.matsim.core.router.AStarEuclideanFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.PreProcessEuclidean;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.collections.Tuple;
@@ -613,7 +612,6 @@ public class RoutePath {
 	public void setWithShapeCost() {
 		withShapeCost = !withShapeCost;
 		TravelDisutility travelMinCost = null;
-		PreProcessEuclidean preProcessData = null;
 		if(!withShapeCost || trip.getShape()==null) {
 			travelMinCost = new TravelDisutility() {
 				@Override
@@ -639,8 +637,6 @@ public class RoutePath {
 				}
 			};
 		}
-		preProcessData = new PreProcessEuclidean(travelMinCost);
-		preProcessData.run(network);
 		TravelTime timeFunction = new TravelTime() {	
 
 			@Override
@@ -648,7 +644,7 @@ public class RoutePath {
 				return link.getLength()/link.getFreespeed();
 			}
 		};
-		leastCostPathCalculator = new AStarEuclidean(network, preProcessData, timeFunction);
+		leastCostPathCalculator = new AStarEuclideanFactory().createPathCalculator(network, travelMinCost, timeFunction);
 	}
 	
 }

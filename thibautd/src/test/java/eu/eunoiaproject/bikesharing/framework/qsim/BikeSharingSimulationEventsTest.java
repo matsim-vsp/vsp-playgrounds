@@ -48,7 +48,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 /**
@@ -106,7 +106,7 @@ public class BikeSharingSimulationEventsTest {
 
 		/* scope of leg */ {
 			final Leg leg = scenario.getPopulation().getFactory().createLeg( TransportMode.walk );
-			leg.setRoute( new GenericRouteImpl( linkId , linkId ) );
+			leg.setRoute( RouteUtils.createGenericRouteImpl(linkId, linkId) );
 			leg.setTravelTime( 10 );
 			plan.addLeg( leg );
 		}
@@ -139,7 +139,7 @@ public class BikeSharingSimulationEventsTest {
 
 		/* scope of leg */ {
 			final Leg leg = scenario.getPopulation().getFactory().createLeg( TransportMode.walk );
-			leg.setRoute( new GenericRouteImpl( linkId , linkId ) );
+			leg.setRoute( RouteUtils.createGenericRouteImpl(linkId, linkId) );
 			leg.setTravelTime( 10 );
 			plan.addLeg( leg );
 		}

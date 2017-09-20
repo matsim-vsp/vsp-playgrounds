@@ -25,7 +25,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.*;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 
 public class TaxiDemandUtils {
 	public static void preprocessPlansBasedOnCoordsOnly(Scenario scenario) {
@@ -42,7 +42,7 @@ public class TaxiDemandUtils {
 			toActivity.setLinkId(toLink.getId());
 
 			Leg leg = (Leg)p.getSelectedPlan().getPlanElements().get(1);
-			leg.setRoute(new GenericRouteImpl(fromLink.getId(), toLink.getId()));
+			leg.setRoute(RouteUtils.createGenericRouteImpl(fromLink.getId(), toLink.getId()));
 		}
 	}
 }

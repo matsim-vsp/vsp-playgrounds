@@ -46,7 +46,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.CalcBoundingBox;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.router.util.DijkstraFactory;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;

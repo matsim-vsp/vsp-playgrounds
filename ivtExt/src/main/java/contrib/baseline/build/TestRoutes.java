@@ -10,7 +10,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.NetworkReaderMatsimV1;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.MainModeIdentifierImpl;
 import org.matsim.core.router.NetworkRoutingModule;
@@ -19,7 +19,6 @@ import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
-import org.matsim.core.router.util.PreProcessDijkstra;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -45,10 +44,7 @@ public class TestRoutes {
 		TravelTime travelTime = new FreeSpeedTravelTime();
 		TravelDisutility travelDisutility = new OnlyTimeDependentTravelDisutility(travelTime);
 		
-		PreProcessDijkstra preprocessDijkstra = new PreProcessDijkstra();
-		preprocessDijkstra.run(scenario.getNetwork());
-		
-		LeastCostPathCalculator leastCostPathCalculator = new Dijkstra(scenario.getNetwork(), travelDisutility, travelTime, preprocessDijkstra);
+		LeastCostPathCalculator leastCostPathCalculator = new DijkstraFactory(true).createPathCalculator(scenario.getNetwork(), travelDisutility, travelTime);
 		RoutingModule routingModule = new NetworkRoutingModule("car", scenario.getPopulation().getFactory(), scenario.getNetwork(), leastCostPathCalculator);
 		
 		MainModeIdentifier mainModeIdentifier = new MainModeIdentifierImpl();

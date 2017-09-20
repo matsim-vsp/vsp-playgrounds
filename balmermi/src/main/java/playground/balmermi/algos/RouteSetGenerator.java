@@ -28,18 +28,16 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.config.Config;
-import org.matsim.core.gbl.Gbl;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.AStarLandmarks;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
-import org.matsim.core.router.util.PreProcessLandmarks;
+import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 
@@ -51,8 +49,7 @@ public class RouteSetGenerator {
 
 	private final Network network;
 	private final TravelTime timeFunction;
-	private final PreProcessLandmarks preProcessData;
-	private final AStarLandmarks router;
+	private final LeastCostPathCalculator router;
 
 	//////////////////////////////////////////////////////////////////////
 	// constructors
@@ -61,9 +58,8 @@ public class RouteSetGenerator {
 	public RouteSetGenerator(Network network, Config config) {
 		this.network = network;
 		this.timeFunction = new TravelTimeCalculator(network, config.travelTimeCalculator()).getLinkTravelTimes();
-		this.preProcessData = new PreProcessLandmarks(new FreespeedTravelTimeAndDisutility(config.planCalcScore()));
-		this.preProcessData.run(network);
-		this.router = new AStarLandmarks(this.network,this.preProcessData,this.timeFunction);
+		TravelDisutility travelCost = new FreespeedTravelTimeAndDisutility(config.planCalcScore());
+		this.router = new AStarLandmarksFactory().createPathCalculator(this.network,travelCost,this.timeFunction);
 	}
 
 	//////////////////////////////////////////////////////////////////////
@@ -132,7 +128,7 @@ public class RouteSetGenerator {
 			Path path = this.router.calcLeastCostPath(o,d,time, null, null);
 			NetworkRoute route = null;
 			if (path != null) {
-				route = new LinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
+				route = RouteUtils.createLinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
 				route.setLinkIds(path.links.get(0).getId(), NetworkUtils.getLinkIds(path.links), path.links.get(path.links.size()-1).getId());
 			}
 
@@ -214,7 +210,7 @@ public class RouteSetGenerator {
 			nonLocalRoutes.remove(MatsimRandom.getRandom().nextInt(nonLocalRoutes.size()));
 		}
 		// add the least cost path at the beginning of the route
-		NetworkRoute route = new LinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(path.links.get(0).getId(), path.links.get(path.links.size()-1).getId());
 		route.setLinkIds(path.links.get(0).getId(), NetworkUtils.getLinkIds(path.links), path.links.get(path.links.size()-1).getId());
 		routes.addFirst(route);
 

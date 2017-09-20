@@ -47,7 +47,7 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -179,7 +179,7 @@ class ConverterEventHandler implements PersonDepartureEventHandler, PersonArriva
 		home.setEndTime(departureTime);
 		plan.addActivity(home);
 		Leg leg = population.getFactory().createLeg(mode);
-		if(mode == "taxi") leg.setRoute(new GenericRouteImpl(fromLinkId, toLinkId));
+		if(mode == "taxi") leg.setRoute(RouteUtils.createGenericRouteImpl(fromLinkId, toLinkId));
 		plan.addLeg(leg);
 		Activity work = population.getFactory().createActivityFromLinkId("work", toLinkId);
 		work.setStartTime(arrivalTime);

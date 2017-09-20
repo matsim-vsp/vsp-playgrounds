@@ -20,15 +20,15 @@
 package playground.agarwalamit.opdyts.equil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
@@ -41,8 +41,8 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
@@ -50,6 +50,8 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.core.utils.io.IOUtils;
+import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
+import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.opdyts.*;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
@@ -62,40 +64,40 @@ import playground.agarwalamit.utils.FileUtils;
 
 public class MatsimOpdytsEquilMixedTrafficIntegration {
 
-	private static String EQUIL_DIR = "./examples/scenarios/equil-mixedTraffic/";
+	private static String EQUIL_DIR = "../matsim-git/examples/scenarios/equil-mixedTraffic/";
 	private static final OpdytsScenario EQUIL_MIXEDTRAFFIC = OpdytsScenario.EQUIL_MIXEDTRAFFIC;
 
-	private static boolean isPlansRelaxed = false;
-	private static double startingASCforBicycle = 2.0;
-
 	public static void main(String[] args) {
-		Config config = ConfigUtils.createConfig();
-		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME,OpdytsConfigGroup.class);
+		String configFile;
 		String OUT_DIR ;
+		String relaxedPlans;
+		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
 
 		if (args.length > 0) {
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(Double.valueOf(args[0]));
-			opdytsConfigGroup.setNumberOfIterationsForConvergence(Integer.valueOf(args[1]));
-			opdytsConfigGroup.setNumberOfIterationsForAveraging(Integer.valueOf(args[4]));
-			opdytsConfigGroup.setSelfTuningWeight(Double.valueOf(args[5]));
-			opdytsConfigGroup.setRandomSeedToRandomizeDecisionVariable(Integer.valueOf(args[7]));
-			opdytsConfigGroup.setPopulationSize(Integer.valueOf(args[9]));
-
-			EQUIL_DIR = args[2];
-			OUT_DIR = args[3]+"/equil_car,bicycle_holes_variance"+ opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() +"_"+opdytsConfigGroup.getNumberOfIterationsForConvergence()+"its/";
-			isPlansRelaxed = Boolean.valueOf(args[6]);
-			startingASCforBicycle = Double.valueOf(args[8]);
+			EQUIL_DIR = args[0];
+			OUT_DIR = args[1];
+			relaxedPlans = args[2];
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.valueOf(args[3]);
 		} else {
-			OUT_DIR = "./playgrounds/agarwalamit/output/equil_car,bicycle_holes_KWM_variance"+ opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() +"_"+opdytsConfigGroup.getNumberOfIterationsForConvergence()+"its/";
+			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
+			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
 		}
 
-		List<String> modes2consider = Arrays.asList("car","bicycle");
+		configFile = EQUIL_DIR+"/config-with-mode-vehicles.xml";
+		if (! new File(configFile).exists()) configFile = EQUIL_DIR+"/config.xml";
 
-		//see an example with detailed explanations -- package opdytsintegration.example.networkparameters.RunNetworkParameters 
-		String configFile = EQUIL_DIR+"/config.xml";
-		ConfigUtils.loadConfig(config,configFile);
-		config.setContext(IOUtils.getUrlFromFileOrResource(configFile));
-		config.plans().setInputFile("plans2000.xml.gz");
+		OUT_DIR += ascRandomizeStyle+"/";
+
+		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
+		config.plans().setInputFile(relaxedPlans);
+		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
+		config.controler().setOutputDirectory(OUT_DIR);
+
+		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
+		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
+
+		List<String> modes2consider = Arrays.asList("car","bicycle");
 
 		//== default config has limited inputs
 		StrategyConfigGroup strategies = config.strategy();
@@ -127,7 +129,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		PlanCalcScoreConfigGroup.ModeParams mpCar = new PlanCalcScoreConfigGroup.ModeParams("car");
 		PlanCalcScoreConfigGroup.ModeParams mpBike = new PlanCalcScoreConfigGroup.ModeParams("bicycle");
 		mpBike.setMarginalUtilityOfTraveling(0.);
-		mpBike.setConstant(startingASCforBicycle);
+		mpBike.setConstant(0.);
 
 		planCalcScoreConfigGroup.addModeParams(mpCar);
 		planCalcScoreConfigGroup.addModeParams(mpBike);
@@ -140,43 +142,40 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		//==
 
-		//
-		config.controler().setOutputDirectory(OUT_DIR+"/relaxingPlans_"+startingASCforBicycle+"asc/");
+//		if(! isPlansRelaxed) {
+//			config.controler().setLastIteration(50);
+//			config.strategy().setFractionOfIterationsToDisableInnovation(1.0);
+//
+//			Scenario scenarioPlansRelaxor = ScenarioUtils.loadScenario(config);
+//			// following is taken from KNBerlinControler.prepareScenario(...);
+//			// modify equil plans:
+//			double time = 6*3600. ;
+//			for ( Person person : scenarioPlansRelaxor.getPopulation().getPersons().values() ) {
+//				Plan plan = person.getSelectedPlan() ;
+//				Activity activity = (Activity) plan.getPlanElements().get(0) ;
+//				activity.setEndTime(time);
+//				time++ ;
+//			}
+//
+//			Controler controler = new Controler(scenarioPlansRelaxor);
+//			controler.addOverridingModule(new AbstractModule() {
+//				@Override
+//				public void install() {
+//					addControlerListenerBinding().toInstance(new OpdytsModalStatsControlerListener(modes2consider, new EquilDistanceDistribution(EQUIL_MIXEDTRAFFIC)));
+//				}
+//			});
+//			controler.run();
+//
+//			FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),controler.getConfig().controler().getFirstIteration(), controler.getConfig().controler().getLastIteration());
+//		}
 
-		if(! isPlansRelaxed) {
-			config.controler().setLastIteration(50);
-			config.strategy().setFractionOfIterationsToDisableInnovation(1.0);
-
-			Scenario scenarioPlansRelaxor = ScenarioUtils.loadScenario(config);
-			// following is taken from KNBerlinControler.prepareScenario(...);
-			// modify equil plans:
-			double time = 6*3600. ;
-			for ( Person person : scenarioPlansRelaxor.getPopulation().getPersons().values() ) {
-				Plan plan = person.getSelectedPlan() ;
-				Activity activity = (Activity) plan.getPlanElements().get(0) ;
-				activity.setEndTime(time);
-				time++ ;
-			}
-
-			Controler controler = new Controler(scenarioPlansRelaxor);
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					addControlerListenerBinding().toInstance(new OpdytsModalStatsControlerListener(modes2consider, new EquilDistanceDistribution(EQUIL_MIXEDTRAFFIC)));
-				}
-			});
-			controler.run();
-
-			FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),controler.getConfig().controler().getFirstIteration(), controler.getConfig().controler().getLastIteration());
-		}
-
-		// set back settings for opdyts
-		File file = new File(config.controler().getOutputDirectory()+"/output_plans.xml.gz");
-		config.plans().setInputFile(file.getAbsoluteFile().getAbsolutePath());
-		OUT_DIR = OUT_DIR+"/calibration_"+ opdytsConfigGroup.getNumberOfIterationsForAveraging() +"Its_"+opdytsConfigGroup.getSelfTuningWeight()+"weight_"+startingASCforBicycle+"asc/";
-
-		config.controler().setOutputDirectory(OUT_DIR);
-		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
+//		// set back settings for opdyts
+//		File file = new File(config.controler().getOutputDirectory()+"/output_plans.xml.gz");
+//		config.plans().setInputFile(file.getAbsoluteFile().getAbsolutePath());
+//		OUT_DIR = OUT_DIR+"/calibration_"+ opdytsConfigGroup.getNumberOfIterationsForAveraging() +"Its_"+opdytsConfigGroup.getSelfTuningWeight()+"weight_"+startingASCforBicycle+"asc/";
+//
+//		config.controler().setOutputDirectory(OUT_DIR);
+//		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
 		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -188,26 +187,61 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
+
+		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
 			public void install() {
-				// add here whatever should be attached to matsim controler
-//				addTravelTimeBinding("bicycle").to(networkTravelTime());
-//				addTravelDisutilityFactoryBinding("bicycle").to(carTravelDisutilityFactoryKey());
-
 				// some stats
 				addControlerListenerBinding().to(KaiAnalysisListener.class);
 				addControlerListenerBinding().toInstance(stasControlerListner);
+
+				this.bind(ModalShareEventHandler.class);
+				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
 
 				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
 
 				addControlerListenerBinding().toInstance(new ShutdownListener() {
 					@Override
 					public void notifyShutdown(ShutdownEvent event) {
+						// copy the state vector elements files before removing ITERS dir
+						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizeFiles/";
+						new File(outDir).mkdirs();
+
+						int firstIt = event.getServices().getConfig().controler().getFirstIteration();
+						int lastIt = event.getServices().getConfig().controler().getLastIteration();
+						int plotEveryItr = 50;
+
+						for (int itr = firstIt+1; itr <=lastIt; itr++) {
+							if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(event.getServices().getControlerIO().getIterationPath(itr)).exists() ) {
+								{
+									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt");
+									String sinkFile =  outDir+"/"+itr+".stateVector_networkModes.txt";
+									try {
+										Files.copy(new File(sourceFile), new File(sinkFile));
+									} catch (IOException e) {
+										Logger.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
+									}
+								}
+							}
+						}
+
 						// remove the unused iterations
 						String dir2remove = event.getServices().getControlerIO().getOutputPath()+"/ITERS/";
 						IOUtils.deleteDirectoryRecursively(new File(dir2remove).toPath());
+
+						// post-process
+						String opdytsConvergencefile = finalOUT_DIR +"/opdyts.con";
+						if (new File(opdytsConvergencefile).exists()) {
+							OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
+							opdytsConvergencePlotter.readFile(finalOUT_DIR +"/opdyts.con");
+							opdytsConvergencePlotter.plotData(finalOUT_DIR +"/convergence.png");
+						}
+
+						BestSolutionVsDecisionVariableChart bestSolutionVsDecisionVariableChart = new BestSolutionVsDecisionVariableChart(new ArrayList<>(modes2consider));
+						bestSolutionVsDecisionVariableChart.readFile(finalOUT_DIR +"/opdyts.log");
+						bestSolutionVsDecisionVariableChart.plotData(finalOUT_DIR +"/decisionVariableVsASC.png");
 					}
 				});
 			}
@@ -227,15 +261,5 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
 		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
 		opdytsControler.run(simulator, decisionVariableRandomizer,  initialDecisionVariable, objectiveFunction);
-
-
-
-		OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
-		opdytsConvergencePlotter.readFile(OUT_DIR+"/opdyts.con");
-		opdytsConvergencePlotter.plotData(OUT_DIR+"/convergence_"+ opdytsConfigGroup.getNumberOfIterationsForAveraging() +"Its_"+opdytsConfigGroup.getSelfTuningWeight()+"weight_"+startingASCforBicycle+"asc.png");
-
-		BestSolutionVsDecisionVariableChart bestSolutionVsDecisionVariableChart = new BestSolutionVsDecisionVariableChart(new ArrayList<>(modes2consider));
-		bestSolutionVsDecisionVariableChart.readFile(OUT_DIR+"/opdyts.log");
-		bestSolutionVsDecisionVariableChart.plotData(OUT_DIR+"/decisionVariableVsASC_"+ opdytsConfigGroup.getNumberOfIterationsForAveraging() +"Its_"+opdytsConfigGroup.getSelfTuningWeight()+"weight_"+startingASCforBicycle+"asc.png");
 	}
 }

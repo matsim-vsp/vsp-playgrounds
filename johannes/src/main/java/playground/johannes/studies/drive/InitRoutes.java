@@ -19,11 +19,24 @@
 
 package playground.johannes.studies.drive;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import javax.inject.Provider;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.common.collections.CollectionUtils;
 import org.matsim.contrib.common.util.ProgressLogger;
 import org.matsim.core.config.Config;
@@ -31,20 +44,11 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.PlanRouter;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
-import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
-import org.matsim.core.router.util.AStarLandmarksFactory;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import javax.inject.Provider;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * @author johannes
@@ -102,7 +106,7 @@ public class InitRoutes {
 		logger.info("Routing...");
 		for(int i = 0; i < segments.length; i++) {
 			if(wrappers[i] == null) {
-				wrappers[i] = new RunThread(scenario, config, segments[i]);
+				wrappers[i] = new RunThread(scenario, segments[i]);
 			}
 			futures[i] = executor.submit(wrappers[i]);
 		}
@@ -132,26 +136,18 @@ public class InitRoutes {
 
 		private Scenario scenario;
 		
-		private Config config;
-		
 		private Collection<Person> persons;
 		
-		public RunThread(Scenario scenario, Config config, Collection<Person> persons) {
+		public RunThread(Scenario scenario, Collection<Person> persons) {
 			this.scenario = scenario;
-			this.config = config;
 			this.persons = persons;
 		}
 		
 		@Override
 		public void run() {
 			
-			Network network = scenario.getNetwork();
-			
-			final FreespeedTravelTimeAndDisutility timeCostCalc = new FreespeedTravelTimeAndDisutility(config.planCalcScore());
-			
 			Provider<TripRouter> tripRouterFact = TripRouterFactoryBuilderWithDefaults.createTripRouterProvider(
-					scenario, new AStarLandmarksFactory(network,
-							timeCostCalc, 1), null);
+					scenario, new AStarLandmarksFactory(), null);
 			
 			PlanRouter router = new PlanRouter( tripRouterFact.get() , null ) ;
 		

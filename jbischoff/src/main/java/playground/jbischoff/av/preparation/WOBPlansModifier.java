@@ -42,7 +42,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
@@ -110,7 +110,7 @@ public static void main(String[] args) throws IOException {
 						
 						starts.add(previousCoord.getX()+";"+previousCoord.getY()+";"+Time.writeTime(leg.getDepartureTime()));
 						ends.add(currentCoord.getX()+";"+currentCoord.getY()+";"+Time.writeTime(currentAct.getStartTime()));
-						leg.setRoute(new GenericRouteImpl(start, end));
+						leg.setRoute(RouteUtils.createGenericRouteImpl(start, end));
 					}
 				}
 				previousActInArea = currentActInArea;

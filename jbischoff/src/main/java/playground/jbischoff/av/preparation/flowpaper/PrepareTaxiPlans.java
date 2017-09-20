@@ -37,7 +37,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 /**
@@ -72,7 +72,7 @@ public class PrepareTaxiPlans {
 				l.setMode("taxi");
 				Id<Link> start = l.getRoute().getStartLinkId();
 				Id<Link> end = l.getRoute().getEndLinkId();
-				l.setRoute(new GenericRouteImpl(start, end));
+				l.setRoute(RouteUtils.createGenericRouteImpl(start, end));
 			}
 			Locale.setDefault(Locale.US);
 			DecimalFormat df = new DecimalFormat("####0.00");

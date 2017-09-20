@@ -19,18 +19,31 @@
 
 package playground.michalm.taxi.scheduler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.matsim.api.core.v01.network.*;
-import org.matsim.contrib.dvrp.data.*;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
-import org.matsim.contrib.dvrp.schedule.*;
+import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.contrib.dvrp.schedule.Schedules;
+import org.matsim.contrib.dvrp.schedule.Task;
+import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.schedule.*;
-import org.matsim.contrib.taxi.scheduler.*;
+import org.matsim.contrib.taxi.schedule.TaxiStayTask;
+import org.matsim.contrib.taxi.schedule.TaxiTask;
+import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import playground.michalm.ev.data.Charger;
 import playground.michalm.taxi.data.EvrpVehicle;
@@ -39,9 +52,12 @@ import playground.michalm.taxi.ev.ETaxiChargingLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 public class ETaxiScheduler extends TaxiScheduler {
-	public ETaxiScheduler(TaxiConfigGroup taxiCfg, Network network, Fleet fleet, MobsimTimer timer,
-			TaxiSchedulerParams params, TravelTime travelTime, TravelDisutility travelDisutility) {
-		super(taxiCfg, network, fleet, timer, params, travelTime, travelDisutility);
+
+	@Inject
+	public ETaxiScheduler(TaxiConfigGroup taxiCfg, Fleet fleet, @Named(DvrpModule.DVRP_ROUTING) Network network,
+			MobsimTimer timer, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
+			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility) {
+		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility);
 	}
 
 	@Override
@@ -98,7 +114,7 @@ public class ETaxiScheduler extends TaxiScheduler {
 					return super.countUnremovablePlannedTasks(schedule);
 				}
 
-				if (params.vehicleDiversion) {
+				if (taxiCfg.isVehicleDiversion()) {
 					return 0;// though questionable
 				}
 

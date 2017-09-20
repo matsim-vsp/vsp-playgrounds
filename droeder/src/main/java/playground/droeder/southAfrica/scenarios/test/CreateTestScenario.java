@@ -33,7 +33,6 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
@@ -43,8 +42,8 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
@@ -260,7 +259,7 @@ class CreateTestScenario {
 		vType.setCapacity(cap);
 		//create Line and Route
 		TransitLine l = f.createTransitLine(Id.create(mode, TransitLine.class));
-		NetworkRoute route = new LinkNetworkRouteImpl(Id.create("A-A", Link.class), Id.create("A-A", Link.class));
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(Id.create("A-A", Link.class), Id.create("A-A", Link.class));
 		
 		@SuppressWarnings("serial")
 		List<Id<Link>> linkIds = new ArrayList<Id<Link>>(){{
@@ -348,7 +347,7 @@ class CreateTestScenario {
 		vType.setCapacity(cap);
 		//create Line and Route
 		TransitLine l = f.createTransitLine(Id.create(mode, TransitLine.class));
-		NetworkRoute route = new LinkNetworkRouteImpl(Id.create("B2-A", Link.class), Id.create("B2-A", Link.class));
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(Id.create("B2-A", Link.class), Id.create("B2-A", Link.class));
 		
 		@SuppressWarnings("serial")
 		List<Id<Link>> linkIds = new ArrayList<Id<Link>>(){{

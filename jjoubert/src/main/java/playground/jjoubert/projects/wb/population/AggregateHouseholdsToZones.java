@@ -100,7 +100,7 @@ public class AggregateHouseholdsToZones {
 		int ignoredHouseholds = 0;
 		Counter counter = new Counter("  households # ");
 		try{
-			bw.write("hhId,hhLon,hhLat,hhX,hhY,zoneId,income,members");
+			bw.write("hhId,hhLon,hhLat,hhX,hhY,zoneId,zoneLon,zoneLat,income,members");
 			bw.newLine();
 			
 			for(Id<Household> hid : sc.getHouseholds().getHouseholds().keySet()){
@@ -117,11 +117,12 @@ public class AggregateHouseholdsToZones {
 				if(cell.covers(p)){
 					/* The household is in the cell. */
 					String cellId = idQT.getClosest(p.getX(), p.getY());
-					bw.write(String.format("%s,%.6f,%.6f,%.0f,%.0f,%s,%.0f,%d\n",
+					bw.write(String.format("%s,%.6f,%.6f,%.0f,%.0f,%s,%.6f,%.6f,%.0f,%d\n",
 							hid.toString(),
 							homeCoordWgs.getX(), homeCoordWgs.getY(),
 							homeCoord.getX(), homeCoord.getY(),
-							cellId, householdIncome2017, numberOfHouseholdMembers
+							cellId,  cell.getCentroid().getX(), cell.getCentroid().getY(),
+							householdIncome2017, numberOfHouseholdMembers
 							));
 				} else{
 					/* Ignore the household. */

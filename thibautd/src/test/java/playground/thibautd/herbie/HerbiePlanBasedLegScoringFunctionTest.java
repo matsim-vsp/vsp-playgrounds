@@ -46,9 +46,9 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.functions.ScoringParameters;
@@ -105,7 +105,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 		act.setEndTime( 10 );
 		act.setFacilityId( Id.create( "h" , ActivityFacility.class ) );
 		Leg l = PopulationUtils.createAndAddLeg( plan, TransportMode.car );
-		NetworkRoute nRoute = new LinkNetworkRouteImpl( Id.create( 12 , Link.class ) , Id.create( 23 , Link.class ) );
+		NetworkRoute nRoute = RouteUtils.createLinkNetworkRouteImpl(Id.create( 12 , Link.class ), Id.create( 23 , Link.class ));
 		l.setRoute( nRoute );
 		l.setDepartureTime( 123 );
 		l.setTravelTime( 456 );
@@ -115,7 +115,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 		act.setEndTime( 294 );
 		act.setFacilityId( Id.create( "w" , ActivityFacility.class ) );
 		l = PopulationUtils.createAndAddLeg( plan, TransportMode.car );
-		nRoute = new LinkNetworkRouteImpl( Id.create( 43 , Link.class ) , Id.create( 23 , Link.class ) );
+		nRoute = RouteUtils.createLinkNetworkRouteImpl(Id.create( 43 , Link.class ), Id.create( 23 , Link.class ));
 		nRoute.setLinkIds(
 				Id.create( 43 , Link.class ) ,
 				Arrays.asList( Id.create(34, Link.class) , Id.create( 42, Link.class ) , Id.create( 23, Link.class ) , Id.create( 34, Link.class ) , Id.create( 42, Link.class ) ) ,
@@ -177,7 +177,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 		act.setEndTime( 100 );
 		act.setFacilityId( Id.create( "h", ActivityFacility.class ) );
 		Leg l = PopulationUtils.createAndAddLeg( plan, TransportMode.transit_walk );
-		Route route = new GenericRouteImpl( Id.create( 12 , Link.class ) , Id.create( 23 , Link.class ) );
+		Route route = RouteUtils.createGenericRouteImpl(Id.create( 12 , Link.class ), Id.create( 23 , Link.class ));
 		l.setRoute( route );
 		l.setDepartureTime( 123 );
 		l.setTravelTime( 456 );
@@ -196,7 +196,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 		act.setStartTime( 0 );
 		act.setEndTime( 0 );
 		l = PopulationUtils.createAndAddLeg( plan, TransportMode.transit_walk );
-		l.setRoute( new GenericRouteImpl( Id.create( 23 , Link.class ) , Id.create( 43 , Link.class ) ) );
+		l.setRoute( RouteUtils.createGenericRouteImpl(Id.create( 23 , Link.class ), Id.create( 43 , Link.class )) );
 		l.setDepartureTime( 1123 );
 		l.setTravelTime( 3456 );
 
@@ -205,7 +205,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 		act.setEndTime( 3000 );
 		act.setFacilityId( Id.create( "w" , ActivityFacility.class ) );
 		l = PopulationUtils.createAndAddLeg( plan, TransportMode.transit_walk );
-		l.setRoute( new GenericRouteImpl( Id.create( 34 , Link.class ) , Id.create( 43 , Link.class ) ) );
+		l.setRoute( RouteUtils.createGenericRouteImpl(Id.create( 34 , Link.class ), Id.create( 43 , Link.class )) );
 		l.setDepartureTime( 1123 );
 		l.setTravelTime( 346 );
 
@@ -229,7 +229,7 @@ public class HerbiePlanBasedLegScoringFunctionTest {
 			act.setEndTime( 3000 );
 			act.setFacilityId( Id.create( "w" , ActivityFacility.class ) );
 			Leg l = PopulationUtils.createAndAddLeg( plan, TransportMode.walk );
-			l.setRoute( new GenericRouteImpl( Id.create( 12 , Link.class ) , Id.create( 13 , Link.class ) ) );
+			l.setRoute( RouteUtils.createGenericRouteImpl(Id.create( 12 , Link.class ), Id.create( 13 , Link.class )) );
 			l.setDepartureTime( 1123 );
 			l.setTravelTime( tt );
 		}

@@ -18,21 +18,16 @@
  * *********************************************************************** */
 package playground.wrashid.parkingSearch.ppSim.jdepSim.routing.threads;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.PriorityQueue;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.parking.parkingchoice.lib.obj.SortableMapObject;
-import org.matsim.contrib.transEnergySim.visualization.charging.inductiveAtRoads.LinkEvent;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
-import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.DummyTravelDisutility;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.EditRoute;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.TTMatrixBasedTravelTime;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.routing.TollAreaTravelDisutility;
@@ -56,7 +51,7 @@ public class RerouteThreadDuringSim extends Thread {
 			
 			TravelDisutility travelCost=new TollAreaTravelDisutility();
 			TravelTime travelTime=new TTMatrixBasedTravelTime(ttMatrix);
-			Dijkstra routingAlgo = new Dijkstra(network, travelCost,travelTime);
+			LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(network, travelCost,travelTime);
 			
 			this.editRoute = new EditRoute(ttMatrix, network,routingAlgo);
 		} else {

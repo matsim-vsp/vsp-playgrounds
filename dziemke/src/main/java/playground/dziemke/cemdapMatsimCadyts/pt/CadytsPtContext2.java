@@ -276,8 +276,8 @@ CadytsContextI<TransitStopFacility> {
 //					null, ccaOccupancy.getComparison(), coordTransform, null, null, 
 //					this.occupCounts);
 
-			CountSimComparisonKMLWriter kmlWriter = new CountSimComparisonKMLWriter(ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
-
+			CountSimComparisonKMLWriter<TransitStopFacility> kmlWriter = new CountSimComparisonKMLWriter<>(
+					ccaOccupancy.getComparison(), this.occupCounts, coordTransform, "ptCountsOccup") ;
 			kmlWriter.setIterationNumber(iter);
 			kmlWriter.writeFile(filename);
 		}

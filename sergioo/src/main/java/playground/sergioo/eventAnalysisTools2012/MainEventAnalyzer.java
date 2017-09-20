@@ -325,8 +325,9 @@ public class MainEventAnalyzer {
 				for(Leg leg:legs) {
 					if(leg.getRoute() instanceof NetworkRoute)
 						for(Id<Link> linkId:((NetworkRoute)leg.getRoute()).getLinkIds()) {
-							distancePT+=scenario.getNetwork().getLinks().get(linkId).getLength();
-							timePT += ttc.getLinkTravelTime(linkId, new Double(parts[6]));
+							final Link link = scenario.getNetwork().getLinks().get(linkId);
+							distancePT+=link.getLength();
+							timePT += ttc.getLinkTravelTime(link, new Double(parts[6]));
 						}
 					else {
 						timePT += leg.getTravelTime();

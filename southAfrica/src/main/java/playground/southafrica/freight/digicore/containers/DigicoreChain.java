@@ -161,7 +161,7 @@ public class DigicoreChain extends ArrayList<DigicoreChainElement>{
 	 */
 	public DigicoreActivity getLastMajorActivity(){
 		List<DigicoreActivity> activities = getAllActivities();
-		return activities.size() > 0 ? activities.get(this.size()-1) : null;
+		return activities.size() > 0 ? activities.get(activities.size()-1) : null;
 	}
 	
 	

@@ -1,6 +1,11 @@
 package playground.pieter.router;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -10,13 +15,13 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.io.NetworkReaderMatsimV2;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.vehicles.Vehicle;
+
 import playground.pieter.singapore.utils.Sample;
 
 public class StochasticRouter implements LeastCostPathCalculator {
@@ -176,7 +181,7 @@ public class StochasticRouter implements LeastCostPathCalculator {
         currentTimeMillis += System.currentTimeMillis();
         System.out.println(currentTimeMillis);
 
-        Dijkstra dijkstra = new Dijkstra(network,
+        LeastCostPathCalculator dijkstra = new DijkstraFactory().createPathCalculator(network,
                 new TravelDisutility() {
 
                     @Override
@@ -195,7 +200,7 @@ public class StochasticRouter implements LeastCostPathCalculator {
             public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
                 return link.getLength() / link.getFreespeed();
             }
-        }, null);
+        });
         currentTimeMillis = -System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) {
             int[] ints = Sample.sampleMfromN(2, nodesArray.length);

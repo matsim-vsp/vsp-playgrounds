@@ -102,7 +102,7 @@ public class MarginalCongestionPricingTest {
 
 		events.addHandler(new CongestionHandlerImplV4(events, (MutableScenario) sc));
 
-		PrepareForSimUtils.createDefaultPrepareForSim(sc,events).run();
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim sim = QSimUtils.createDefaultQSim(sc,events);
 		sim.run();
 

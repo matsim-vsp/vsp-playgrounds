@@ -20,7 +20,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -136,23 +136,23 @@ public class MapMatching {
 				OnlyTimeDependentTravelDisutility disutilityCalc = new OnlyTimeDependentTravelDisutility(freespeedCalc);
 				
 				if (route.mode == "train"){					
-					pather = new Dijkstra(TrainNetwork, disutilityCalc, freespeedCalc);
+					pather = new DijkstraFactory().createPathCalculator(TrainNetwork, disutilityCalc, freespeedCalc);
 					// line#   mode   veh   hdwy   speed   descr   ut1   ut2   ut3
 					EMMESequence += " r 1 5 99";
 					subNetwork = TrainNetwork;
 				}
 				else if (route.mode == "subway"){
-					pather = new Dijkstra(SubwayNetwork,disutilityCalc,freespeedCalc);
+					pather = new DijkstraFactory().createPathCalculator(SubwayNetwork,disutilityCalc,freespeedCalc);
 					EMMESequence += " m 2 5 99";
 					subNetwork = SubwayNetwork;
 				}
 				else if (route.mode == "streetcar"){
-					pather = new Dijkstra(StreetcarNetwork, disutilityCalc, freespeedCalc);
+					pather = new DijkstraFactory().createPathCalculator(StreetcarNetwork, disutilityCalc, freespeedCalc);
 					EMMESequence += " l 5 5 99";
 					subNetwork = StreetcarNetwork;
 				}
 				else { //default mode is bus
-					pather = new Dijkstra(BusNetwork,disutilityCalc, freespeedCalc);
+					pather = new DijkstraFactory().createPathCalculator(BusNetwork,disutilityCalc, freespeedCalc);
 					EMMESequence += " b 7 5 99";
 					subNetwork = BusNetwork;
 				}

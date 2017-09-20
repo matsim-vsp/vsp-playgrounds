@@ -40,7 +40,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.router.util.AStarLandmarksFactory;
+import org.matsim.core.router.AStarLandmarksFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
@@ -89,7 +89,7 @@ public class FacilityRelocator {
 		};
 		TravelTime travelTimes = new FreeSpeedTravelTime();
 
-		AStarLandmarksFactory asl = new AStarLandmarksFactory(this.network, travelCosts);
+		AStarLandmarksFactory asl = new AStarLandmarksFactory();
 		this.router = asl.createPathCalculator(network, travelCosts, travelTimes );
 	}
 	

@@ -70,7 +70,8 @@ import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.LanesUtils;
@@ -345,7 +346,7 @@ public class RunGridLock {
 					path.add(Id.createLinkId("3_2"));
 					path.add(Id.createLinkId("2_3"));
 				}
-				leg.setRoute(new LinkNetworkRouteImpl(fromLinkId, path, toLinkId));
+				leg.setRoute(RouteUtils.createLinkNetworkRouteImpl(fromLinkId, path, toLinkId));
 			}
 			plan.addLeg(leg);
 

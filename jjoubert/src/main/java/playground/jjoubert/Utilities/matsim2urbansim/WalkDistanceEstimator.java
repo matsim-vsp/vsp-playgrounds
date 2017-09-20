@@ -46,9 +46,10 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -139,7 +140,7 @@ public class WalkDistanceEstimator {
 		EventsManager em = EventsUtils.createEventsManager();
 		em.addHandler(ttc);
 		new MatsimEventsReader(em).readFile(sb.getIterationEventsFile("100"));
-		Dijkstra router = new Dijkstra(sAll.getNetwork(),tc,ttc.getLinkTravelTimes());
+		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(sAll.getNetwork(),tc,ttc.getLinkTravelTimes());
 		Set<String> ptSet = new TreeSet<String>();
 		ptSet.add(TransportMode.pt);
 		

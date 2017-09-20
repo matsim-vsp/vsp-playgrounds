@@ -1,6 +1,10 @@
 package playground.pieter.router;
 
-import org.matsim.api.core.v01.Id;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -13,17 +17,16 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.network.io.NetworkReaderMatsimV2;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.vehicles.Vehicle;
+
 import playground.pieter.network.SimpleNetworkPainter;
 import playground.pieter.singapore.utils.Sample;
-
-import java.util.*;
 
 public class DrunkDudePathfinder implements LeastCostPathCalculator {
     private final Network network;
@@ -176,7 +179,7 @@ public class DrunkDudePathfinder implements LeastCostPathCalculator {
         currentTimeMillis += System.currentTimeMillis();
         System.out.println(currentTimeMillis);
 
-        Dijkstra dijkstra = new Dijkstra(net,
+        LeastCostPathCalculator dijkstra = new DijkstraFactory().createPathCalculator(net,
                 new TravelDisutility() {
 
                     @Override
@@ -195,7 +198,7 @@ public class DrunkDudePathfinder implements LeastCostPathCalculator {
             public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
                 return link.getLength() / link.getFreespeed();
             }
-        }, null);
+        });
         currentTimeMillis = -System.currentTimeMillis();
         for (int i = 0; i < 1e3; i++) {
             int[] ints = Sample.sampleMfromN(2, nodesArray.length);

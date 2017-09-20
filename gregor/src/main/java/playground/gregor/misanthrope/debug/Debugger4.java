@@ -19,14 +19,21 @@ package playground.gregor.misanthrope.debug;
  *                                                                         *
  * *********************************************************************** */
 
-import com.google.inject.Provider;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -37,18 +44,21 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.AStarLandmarksFactory;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.FastAStarLandmarksFactory;
+import org.matsim.core.router.FastDijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
+
+import com.google.inject.Provider;
+
 import playground.gregor.misanthrope.router.CTRoutingModule;
 import playground.gregor.misanthrope.run.CTRunner;
 import playground.gregor.misanthrope.simulation.CTMobsimFactory;
 import playground.gregor.sim2d_v4.debugger.eventsbaseddebugger.EventBasedVisDebuggerEngine;
 import playground.gregor.sim2d_v4.debugger.eventsbaseddebugger.InfoBox;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Created by laemmel on 20/10/15.
@@ -267,10 +277,7 @@ public class Debugger4 {
 					.controler()
 					.getRoutingAlgorithmType()
 					.equals(ControlerConfigGroup.RoutingAlgorithmType.AStarLandmarks)) {
-				return new AStarLandmarksFactory(
-						scenario.getNetwork(),
-						new FreespeedTravelTimeAndDisutility(config.planCalcScore()),
-						config.global().getNumberOfThreads());
+				return new AStarLandmarksFactory();
 			}
 			else {
 				if (config.controler().getRoutingAlgorithmType()
@@ -282,9 +289,7 @@ public class Debugger4 {
 							.controler()
 							.getRoutingAlgorithmType()
 							.equals(ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks)) {
-						return new FastAStarLandmarksFactory(
-								scenario.getNetwork(),
-								new FreespeedTravelTimeAndDisutility(config.planCalcScore()));
+						return new FastAStarLandmarksFactory();
 					}
 					else {
 						throw new IllegalStateException(

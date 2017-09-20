@@ -22,7 +22,8 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
@@ -187,7 +188,7 @@ public class TrackMatchingConverter {
 
 			linkList.remove(0);
 			linkList.remove(linkList.size()-1);
-			theRoute = new LinkNetworkRouteImpl(first, linkList, last);
+			theRoute = RouteUtils.createLinkNetworkRouteImpl(first, linkList, last);
 		} else{
 			LOG.warn("Found a route that has fewer than 2 links. Route will be ignored. Returning NULL");
 		}

@@ -5,10 +5,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -21,7 +20,7 @@ public class AVRouter {
     
     public AVRouter(Network network, AVTravelTime travelTime) {
         this.network = network;
-        pathCalculator = new Dijkstra(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
+        pathCalculator = new DijkstraFactory().createPathCalculator(network, new OnlyTimeDependentTravelDisutility(travelTime), travelTime);
     }
     
     private NetworkRoute createRoute(Id<Link> fromLinkId, Id<Link> toLinkId, double startTime) {
@@ -31,7 +30,7 @@ public class AVRouter {
         Node endNode = network.getLinks().get(toLinkId).getFromNode();
         Path path = pathCalculator.calcLeastCostPath(startNode, endNode, startTime, null, null);
         
-        NetworkRoute route = new LinkNetworkRouteImpl(fromLinkId, NetworkUtils.getLinkIds(path.links), toLinkId);
+        NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(fromLinkId, NetworkUtils.getLinkIds(path.links), toLinkId);
         route.setTravelTime(path.travelTime);
         route.setTravelCost(path.travelCost);
         route.setDistance(RouteUtils.calcDistance(route, 0.0, 0.0, network));

@@ -19,7 +19,11 @@ package playground.gregor.misanthrope.integration;
  *                                                                         *
  * *********************************************************************** */
 
-import com.google.inject.Provider;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -36,7 +40,12 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -47,20 +56,21 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.AStarLandmarksFactory;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.FastAStarLandmarksFactory;
+import org.matsim.core.router.FastDijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.testcases.MatsimTestCase;
+
+import com.google.inject.Provider;
+
 import playground.gregor.misanthrope.router.CTRoutingModule;
 import playground.gregor.misanthrope.simulation.CTMobsimFactory;
 import playground.gregor.misanthrope.simulation.physics.CTCell;
 import playground.gregor.utils.Variance;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -81,10 +91,7 @@ public class TravelTimeIT extends MatsimTestCase {
 					.controler()
 					.getRoutingAlgorithmType()
 					.equals(ControlerConfigGroup.RoutingAlgorithmType.AStarLandmarks)) {
-				return new AStarLandmarksFactory(
-						scenario.getNetwork(),
-						new FreespeedTravelTimeAndDisutility(config.planCalcScore()),
-						config.global().getNumberOfThreads());
+				return new AStarLandmarksFactory();
 			}
 			else {
 				if (config.controler().getRoutingAlgorithmType()
@@ -96,9 +103,7 @@ public class TravelTimeIT extends MatsimTestCase {
 							.controler()
 							.getRoutingAlgorithmType()
 							.equals(ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks)) {
-						return new FastAStarLandmarksFactory(
-								scenario.getNetwork(),
-								new FreespeedTravelTimeAndDisutility(config.planCalcScore()));
+						return new FastAStarLandmarksFactory();
 					}
 					else {
 						throw new IllegalStateException(

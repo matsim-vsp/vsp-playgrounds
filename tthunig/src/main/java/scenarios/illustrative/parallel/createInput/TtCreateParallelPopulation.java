@@ -27,7 +27,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.*;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,7 +161,7 @@ public final class TtCreateParallelPopulation {
 
 		path.add(Id.createLinkId("5_6"));
 
-		Route route = new LinkNetworkRouteImpl(Id.createLinkId("a_1"), path, Id.createLinkId("6_b"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("a_1"), path, Id.createLinkId("6_b"));
 
 		leg.setRoute(route);
 		return leg;
@@ -222,7 +223,7 @@ public final class TtCreateParallelPopulation {
 		}
 		path.add(Id.createLinkId("2_1"));
 
-		Route route = new LinkNetworkRouteImpl(Id.createLinkId("b_6"), path, Id.createLinkId("1_a"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("b_6"), path, Id.createLinkId("1_a"));
 
 		leg.setRoute(route);
 		return leg;
@@ -284,7 +285,7 @@ public final class TtCreateParallelPopulation {
 		}
 		path.add(Id.createLinkId("11_12"));
 
-		Route route = new LinkNetworkRouteImpl(Id.createLinkId("c_9"), path, Id.createLinkId("12_d"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("c_9"), path, Id.createLinkId("12_d"));
 
 		leg.setRoute(route);
 		return leg;
@@ -346,7 +347,7 @@ public final class TtCreateParallelPopulation {
 		}
 		path.add(Id.createLinkId("10_9"));
 
-		Route route = new LinkNetworkRouteImpl(Id.createLinkId("d_12"), path, Id.createLinkId("9_c"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("d_12"), path, Id.createLinkId("9_c"));
 
 		leg.setRoute(route);
 		return leg;

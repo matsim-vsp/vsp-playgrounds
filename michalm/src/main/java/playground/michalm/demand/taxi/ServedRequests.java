@@ -19,13 +19,13 @@
 
 package playground.michalm.demand.taxi;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
 
 import org.matsim.core.utils.geometry.geotools.MGC;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.prep.PreparedPolygon;
 
 public class ServedRequests {
@@ -54,60 +54,30 @@ public class ServedRequests {
 		return Arrays.asList(weekDays).contains(wd);
 	}
 
-	public static Predicate<ServedRequest> createWithinAreaPredicate(MultiPolygon area) {
-		final PreparedPolygon preparedPolygon = new PreparedPolygon(area);
-		return new Predicate<ServedRequest>() {
-			public boolean apply(ServedRequest request) {
-				return isWithinArea(request, preparedPolygon);
-			}
-		};
-	}
-
-	public static Predicate<ServedRequest> createBetweenDatesPredicate(final Date fromDate, final Date toDate) {
-		return new Predicate<ServedRequest>() {
-			public boolean apply(ServedRequest request) {
-				return ServedRequests.isBetweenDates(request, fromDate, toDate);
-			}
-		};
-	}
-
-	public static Predicate<ServedRequest> createOnWeekDaysPredicate(final WeekDay... weekDays) {
-		return new Predicate<ServedRequest>() {
-			public boolean apply(ServedRequest request) {
-				return ServedRequests.isOnWeekDays(request, weekDays);
-			}
-		};
-	}
-
+	@SuppressWarnings("deprecation")
 	public static <T extends ServedRequest> Iterable<T> filterWorkDaysPeriods(Iterable<T> requests,
 			final int zeroHour) {
-		Predicate<ServedRequest> predicate = new Predicate<ServedRequest>() {
-			@SuppressWarnings("deprecation")
-			public boolean apply(ServedRequest request) {
-				WeekDay wd = WeekDay.getWeekDay(request.getStartTime());
+		return Iterables.filter(requests, request -> {
+			WeekDay wd = WeekDay.getWeekDay(request.getStartTime());
+			switch (wd) {
+				case MON:
+					return request.getStartTime().getHours() >= zeroHour;
 
-				switch (wd) {
-					case MON:
-						return request.getStartTime().getHours() >= zeroHour;
+				case TUE:
+				case WED:
+				case THU:
+					return true;
 
-					case TUE:
-					case WED:
-					case THU:
-						return true;
+				case SAT:
+				case SUN:
+					return false;
 
-					case SAT:
-					case SUN:
-						return false;
+				case FRI:
+					return request.getStartTime().getHours() < zeroHour;
 
-					case FRI:
-						return request.getStartTime().getHours() < zeroHour;
-
-					default:
-						throw new IllegalArgumentException();
-				}
+				default:
+					throw new IllegalArgumentException();
 			}
-		};
-
-		return Iterables.filter(requests, predicate);
+		});
 	}
 }

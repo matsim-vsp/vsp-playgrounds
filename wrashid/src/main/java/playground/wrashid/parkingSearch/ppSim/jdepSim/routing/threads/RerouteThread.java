@@ -22,10 +22,9 @@ import java.util.LinkedList;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
@@ -54,7 +53,7 @@ public class RerouteThread extends Thread {
 			
 			TravelDisutility travelCost=new TollAreaTravelDisutility();
 			TravelTime travelTime=new TTMatrixBasedTravelTime(ttMatrix);
-			Dijkstra routingAlgo = new Dijkstra(network, travelCost,travelTime);
+			LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(network, travelCost,travelTime);
 			
 			this.editRoute = new EditRoute(ttMatrix, network,routingAlgo);
 		} else {

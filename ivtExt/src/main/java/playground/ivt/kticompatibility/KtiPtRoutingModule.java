@@ -28,7 +28,7 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.RoutingModule;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
@@ -89,7 +89,7 @@ public class KtiPtRoutingModule implements RoutingModule {
 		final double travelTimeLeg1 = distanceLeg1 * config.getTeleportedModeSpeeds().get(TransportMode.walk);
 
 		final Leg walk1 = PopulationUtils.createLeg(TransportMode.transit_walk);
-		final Route route1 = new GenericRouteImpl( fromFacility.getLinkId() , linkStartPt.getId() );
+		final Route route1 = RouteUtils.createGenericRouteImpl(fromFacility.getLinkId(), linkStartPt.getId());
 		walk1.setTravelTime( travelTimeLeg1 );
 		route1.setTravelTime( travelTimeLeg1 );
 		route1.setDistance( distanceLeg1 );

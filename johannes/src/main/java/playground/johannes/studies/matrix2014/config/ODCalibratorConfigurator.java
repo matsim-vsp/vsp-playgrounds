@@ -18,13 +18,14 @@
  * *********************************************************************** */
 package playground.johannes.studies.matrix2014.config;
 
-import org.matsim.core.config.ConfigGroup;
 import playground.johannes.studies.matrix2014.sim.ODCalibrator;
 import playground.johannes.synpop.gis.*;
 import playground.johannes.synpop.matrix.NumericMatrix;
 import playground.johannes.synpop.matrix.NumericMatrixTxtIO;
 
 import java.io.IOException;
+
+import org.matsim.core.config.ConfigGroup;
 
 /**
  * @author jillenberger

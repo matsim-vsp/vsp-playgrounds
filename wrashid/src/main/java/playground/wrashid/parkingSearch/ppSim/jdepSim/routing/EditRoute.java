@@ -31,8 +31,9 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
 import org.matsim.core.mobsim.jdeqsim.util.Timer;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
@@ -51,7 +52,7 @@ public class EditRoute {
 		this.network=network;
 		TravelDisutility travelCost=new DummyTravelDisutility();
 		TravelTime travelTime=new TTMatrixBasedTravelTime(ttMatrix);
-		routingAlgo = new Dijkstra(network, travelCost,travelTime);
+		routingAlgo = new DijkstraFactory().createPathCalculator(network, travelCost,travelTime);
 	}
 	
 	public EditRoute(TTMatrix ttMatrix,Network network, LeastCostPathCalculator routingAlgo){
@@ -59,7 +60,7 @@ public class EditRoute {
 		this.routingAlgo = routingAlgo;
 	}
 	
-	public LinkNetworkRouteImpl getRoute(double time, Id startLinkId, Id endLinkId){
+	public NetworkRoute getRoute(double time, Id startLinkId, Id endLinkId){
 		Path calcLeastCostPath = routingAlgo.calcLeastCostPath(network.getLinks().get(startLinkId).getToNode(), network.getLinks().get(endLinkId).getToNode(), time, null, null);
 		List<Link> links=calcLeastCostPath.links;
 		
@@ -68,11 +69,11 @@ public class EditRoute {
 			linkIds.add(link.getId());
 		}
 		
-		return new LinkNetworkRouteImpl(startLinkId, linkIds, endLinkId);
+		return RouteUtils.createLinkNetworkRouteImpl(startLinkId, linkIds, endLinkId);
 	}
 	
-	public LinkNetworkRouteImpl addInitialPartToRoute(double time, Id startLinkId,Leg leg){
-		LinkNetworkRouteImpl lastPartOfRoute=(LinkNetworkRouteImpl) leg.getRoute();
+	public NetworkRoute addInitialPartToRoute(double time, Id startLinkId,Leg leg){
+		NetworkRoute lastPartOfRoute=(NetworkRoute) leg.getRoute();
 		Node middleNode = network.getLinks().get(lastPartOfRoute.getStartLinkId()).getFromNode();
 		Path calcLeastCostPath = routingAlgo.calcLeastCostPath(network.getLinks().get(startLinkId).getToNode(), middleNode, time, null, null);
 		List<Link> links=calcLeastCostPath.links;
@@ -86,13 +87,13 @@ public class EditRoute {
 			linkIds.add(linkId);
 		}
 		
-		return  new LinkNetworkRouteImpl(startLinkId, linkIds, lastPartOfRoute.getEndLinkId());
+		return  RouteUtils.createLinkNetworkRouteImpl(startLinkId, linkIds, lastPartOfRoute.getEndLinkId());
 	}
 	
 	
 	
-	public LinkNetworkRouteImpl addLastPartToRoute(double time, Leg leg, Id newTargetLinkId){
-		LinkNetworkRouteImpl firstPartOfRoute=(LinkNetworkRouteImpl) leg.getRoute();
+	public NetworkRoute addLastPartToRoute(double time, Leg leg, Id newTargetLinkId){
+		NetworkRoute firstPartOfRoute=(NetworkRoute) leg.getRoute();
 		Node middleNode = network.getLinks().get(firstPartOfRoute.getEndLinkId()).getToNode();
 		Path calcLeastCostPath = routingAlgo.calcLeastCostPath(middleNode, network.getLinks().get(newTargetLinkId).getFromNode(), time, null, null);
 		
@@ -107,7 +108,7 @@ public class EditRoute {
 			linkIds.add(link.getId());
 		}
 		
-		return  new LinkNetworkRouteImpl(firstPartOfRoute.getStartLinkId(), linkIds, newTargetLinkId);
+		return  RouteUtils.createLinkNetworkRouteImpl(firstPartOfRoute.getStartLinkId(), linkIds, newTargetLinkId);
 	}
 	
 	
@@ -136,7 +137,7 @@ public class EditRoute {
 	//	preProcessData.run(network);
 	//	LeastCostPathCalculator routingAlgo= new AStarEuclidean(network, preProcessData, travelTime);
 		
-		LeastCostPathCalculator routingAlgo = new Dijkstra(network, travelCost,travelTime);
+		LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(network, travelCost,travelTime);
 		
 		for (Person person:scenario.getPopulation().getPersons().values()){
 			Activity activityImpl=(Activity) person.getSelectedPlan().getPlanElements().get(0);

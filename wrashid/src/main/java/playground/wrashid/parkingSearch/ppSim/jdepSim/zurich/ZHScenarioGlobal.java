@@ -33,7 +33,7 @@ import org.matsim.contrib.parking.parkingchoice.lib.DebugLib;
 import org.matsim.contrib.parking.parkingchoice.lib.GeneralLib;
 import org.matsim.contrib.parking.parkingchoice.lib.obj.IntegerValueHashMap;
 import org.matsim.core.config.Config;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 
@@ -66,7 +66,7 @@ public class ZHScenarioGlobal {
 	public static IntegerValueHashMap<Id> privateParkingCalibrationOriginalCapacities;
 
 	// personId, legIndex, route
-	public static TwoHashMapsConcatenated<Id, Integer, LinkNetworkRouteImpl> initialRoutes;
+	public static TwoHashMapsConcatenated<Id, Integer, NetworkRoute> initialRoutes;
 	public static String plansFile;
 	public static RerouteThreadDuringSim[] rerouteThreadsDuringSim;
 	public static Scenario scenario;

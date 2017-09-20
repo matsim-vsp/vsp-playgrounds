@@ -19,7 +19,13 @@
 
 package playground.michalm.stockholm;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.util.CompactCSVWriter;
@@ -37,7 +43,7 @@ public class TaxiTracesAnalyser {
 		return (date.getTime() - TIME_ZERO.getTime()) / 1000;
 	}
 
-	private TaxiTracesAnalyser(List<TaxiTrace> taxiTraces) {
+	TaxiTracesAnalyser(List<TaxiTrace> taxiTraces) {
 		this.taxiTraces = taxiTraces;
 		Map<String, List<TaxiTrace>> currentHiredTraces = new HashMap<>();
 
@@ -60,6 +66,10 @@ public class TaxiTracesAnalyser {
 				}
 			}
 		}
+	}
+
+	List<StockholmServedRequest> getServedRequests() {
+		return servedRequests;
 	}
 
 	private void analyseRequests() {

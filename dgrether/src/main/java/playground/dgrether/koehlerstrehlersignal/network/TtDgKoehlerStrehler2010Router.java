@@ -19,6 +19,11 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.network;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -26,20 +31,17 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodities;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodity;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -184,11 +186,11 @@ public class TtDgKoehlerStrehler2010Router {
 	public List<Id> routeCommodities(Network network, DgCommodities commodities) {
 		SimpleTravelTimeDisutility travelTime = new SimpleTravelTimeDisutility();
 		SimpleTravelDistanceDisutility travelDistance = new SimpleTravelDistanceDisutility();
-		Dijkstra dijkstra = null;
+		LeastCostPathCalculator dijkstra = null;
 		if (this.useFreeSpeedTravelTime)	
-			dijkstra = new Dijkstra(network, travelTime, travelTime);
+			dijkstra = new DijkstraFactory().createPathCalculator(network, travelTime, travelTime);
 		else
-			dijkstra = new Dijkstra(network, travelDistance, travelDistance);
+			dijkstra = new DijkstraFactory().createPathCalculator(network, travelDistance, travelDistance);
 		
 		List<Id> invalidCommodities = new ArrayList<Id>();
 		for (DgCommodity commodity : commodities.getCommodities().values()){

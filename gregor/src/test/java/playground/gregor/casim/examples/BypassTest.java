@@ -19,7 +19,9 @@
 
 package playground.gregor.casim.examples;
 
-import com.google.inject.Provider;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jfree.util.Log;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
@@ -29,7 +31,12 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -39,19 +46,22 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
-import org.matsim.core.router.util.*;
+import org.matsim.core.router.AStarLandmarksFactory;
+import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.FastAStarLandmarksFactory;
+import org.matsim.core.router.FastDijkstraFactory;
+import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestCase;
 import org.matsim.utils.eventsfilecomparison.EventsFileComparator;
+
+import com.google.inject.Provider;
+
 import playground.gregor.TransportMode;
 import playground.gregor.casim.run.CARoutingModule;
 import playground.gregor.casim.simulation.CAMobsimFactory;
 import playground.gregor.casim.simulation.physics.AbstractCANetwork;
 import playground.gregor.casim.simulation.physics.CASingleLaneNetworkFactory;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class BypassTest extends MatsimTestCase {
 
@@ -342,10 +352,7 @@ public class BypassTest extends MatsimTestCase {
 					.controler()
 					.getRoutingAlgorithmType()
 					.equals(ControlerConfigGroup.RoutingAlgorithmType.AStarLandmarks)) {
-				return new AStarLandmarksFactory(
-						scenario.getNetwork(),
-						new FreespeedTravelTimeAndDisutility(config.planCalcScore()),
-						config.global().getNumberOfThreads());
+				return new AStarLandmarksFactory();
 			}
 			else {
 				if (config.controler().getRoutingAlgorithmType()
@@ -357,9 +364,7 @@ public class BypassTest extends MatsimTestCase {
 							.controler()
 							.getRoutingAlgorithmType()
 							.equals(ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks)) {
-						return new FastAStarLandmarksFactory(
-								scenario.getNetwork(),
-								new FreespeedTravelTimeAndDisutility(config.planCalcScore()));
+						return new FastAStarLandmarksFactory();
 					}
 					else {
 						throw new IllegalStateException(

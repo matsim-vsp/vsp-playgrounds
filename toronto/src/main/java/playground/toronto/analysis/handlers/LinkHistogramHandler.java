@@ -20,8 +20,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.utils.misc.Time;
 
 public class LinkHistogramHandler implements LinkEnterEventHandler,
@@ -34,7 +35,7 @@ public class LinkHistogramHandler implements LinkEnterEventHandler,
 		String reportFile;
 		double startTime;
 		double endTime;
-		HashSet<NetworkRoute> routeSet = new HashSet<NetworkRoute>();
+		HashSet<NetworkRoute> routeSet = new HashSet<>();
 		
 		//Try parsing the arguments
 		try{
@@ -54,7 +55,7 @@ public class LinkHistogramHandler implements LinkEnterEventHandler,
 					inIds[j] = Id.create(idStr[j + 2], Link.class);
 				}
 				
-				LinkNetworkRouteImpl nr = new LinkNetworkRouteImpl(startId, inIds, endId);
+				NetworkRoute nr = RouteUtils.createLinkNetworkRouteImpl(startId, inIds, endId);
 				routeSet.add(nr);
 			}
 		

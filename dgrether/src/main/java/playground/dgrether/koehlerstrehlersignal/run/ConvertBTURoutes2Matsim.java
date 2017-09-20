@@ -26,7 +26,7 @@ import org.matsim.core.api.internal.MatsimWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 
@@ -326,8 +326,7 @@ public class ConvertBTURoutes2Matsim {
 			}
 
 			// create leg with this route
-			Route route = new LinkNetworkRouteImpl(matsimStartLinkId,
-					matsimLinks, matsimEndLinkId);
+			Route route = RouteUtils.createLinkNetworkRouteImpl(matsimStartLinkId, matsimLinks, matsimEndLinkId);
 			Leg leg = this.population.getFactory().createLeg(
 					TransportMode.car);
 			leg.setRoute(route);

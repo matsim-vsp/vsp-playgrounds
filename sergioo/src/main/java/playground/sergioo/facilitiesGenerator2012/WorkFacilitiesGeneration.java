@@ -61,8 +61,8 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.router.AStarLandmarks;
-import org.matsim.core.router.util.PreProcessLandmarks;
+import org.matsim.core.router.AStarLandmarksFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -571,9 +571,7 @@ public class WorkFacilitiesGeneration {
 				return link.getLength();
 			}
 		};
-		PreProcessLandmarks preProcessData = new PreProcessLandmarks(travelMinCost);
-		preProcessData.run(network);
-		AStarLandmarks aStarLandmarks = new AStarLandmarks(network, preProcessData, timeFunction);
+		LeastCostPathCalculator aStarLandmarks = new AStarLandmarksFactory().createPathCalculator(network, travelMinCost, timeFunction);
 		DataBaseAdmin dataBaseAuxiliar  = new DataBaseAdmin(new File("./data/facilities/DataBaseAuxiliar.properties"));
 		ResultSet mPAreasR = dataBaseAuxiliar.executeQuery("SELECT * FROM buildings WHERE use_for_generation = 1");
 		while(mPAreasR.next()) {

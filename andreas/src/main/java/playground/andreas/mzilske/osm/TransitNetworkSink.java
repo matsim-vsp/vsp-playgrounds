@@ -32,8 +32,8 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
@@ -365,7 +365,7 @@ public class TransitNetworkSink implements Sink {
 
 	private NetworkRoute createNetworkRoute(List<Id<Link>> plinkIds) {
 		LinkedList<Id<Link>> linkIds = new LinkedList<Id<Link>>(plinkIds);
-		NetworkRoute networkRouteH = new LinkNetworkRouteImpl(linkIds.getFirst(), linkIds.getLast());
+		NetworkRoute networkRouteH = RouteUtils.createLinkNetworkRouteImpl(linkIds.getFirst(), linkIds.getLast());
 		Id<Link> first = linkIds.removeFirst();
 		Id<Link> last = linkIds.removeLast();
 		networkRouteH.setLinkIds(first, linkIds, last);

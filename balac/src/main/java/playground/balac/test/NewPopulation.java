@@ -8,11 +8,12 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.api.internal.MatsimReader;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -47,7 +48,7 @@ public class NewPopulation {
 					if (!((Activity) pe).getType().equals("pt interaction")) {
 						if (addingPT) {
 							Leg newLeg = scenario2.getPopulation().getFactory().createLeg("pt");
-							GenericRouteImpl route = new GenericRouteImpl(startLink.getId(), endLink.getId());
+							Route route = RouteUtils.createGenericRouteImpl(startLink.getId(), endLink.getId());
 							double distance = CoordUtils.calcEuclideanDistance(startLink.getCoord(), endLink.getCoord());
 							distance *= 1.3;
 							route.setDistance(distance);

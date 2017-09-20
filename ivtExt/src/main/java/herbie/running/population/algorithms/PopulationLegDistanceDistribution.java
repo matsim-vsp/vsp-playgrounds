@@ -20,18 +20,22 @@
 
 package herbie.running.population.algorithms;
 
-import herbie.running.pt.DistanceCalculations;
+import java.io.PrintStream;
+
 import org.apache.commons.math.stat.Frequency;
 import org.apache.commons.math.util.ResizableDoubleArray;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
-import org.matsim.core.population.routes.GenericRouteImpl;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
 
-import java.io.PrintStream;
+import herbie.running.pt.DistanceCalculations;
 
 /**
  * Generates a crosstab of the absolute number of legs in a population, by leg mode and route distance.
@@ -102,10 +106,10 @@ public class PopulationLegDistanceDistribution extends AbstractClassifiedFrequen
 				
 				double distance = 0.0;
 				if(leg.getMode().equals("transit_walk")){
-					distance = DistanceCalculations.getWalkDistance((GenericRouteImpl)leg.getRoute(), network);
+					distance = DistanceCalculations.getWalkDistance(leg.getRoute(), network);
 				}
 				else{
-					if(leg instanceof Leg && leg.getRoute() == null && !(leg.getRoute() instanceof LinkNetworkRouteImpl) && !(leg.getRoute() instanceof ExperimentalTransitRoute)){
+					if(leg instanceof Leg && leg.getRoute() == null && !(leg.getRoute() instanceof NetworkRoute) && !(leg.getRoute() instanceof ExperimentalTransitRoute)){
 						log.warn("Not enough information on leg-object. Distance is set to 0.0 for this leg. Therefore no distance contribution....");
 					}
 					else{						

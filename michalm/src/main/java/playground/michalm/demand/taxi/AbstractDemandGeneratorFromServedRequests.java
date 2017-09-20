@@ -24,7 +24,7 @@ import org.matsim.api.core.v01.network.*;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.GenericRouteImpl;
+import org.matsim.core.population.routes.RouteUtils;
 
 public abstract class AbstractDemandGeneratorFromServedRequests {
 	private final Scenario scenario;
@@ -49,7 +49,7 @@ public abstract class AbstractDemandGeneratorFromServedRequests {
 
 		// trip
 		Leg leg = pf.createLeg(TaxiModule.TAXI_MODE);
-		leg.setRoute(new GenericRouteImpl(startAct.getLinkId(), endAct.getLinkId()));
+		leg.setRoute(RouteUtils.createGenericRouteImpl(startAct.getLinkId(), endAct.getLinkId()));
 
 		plan.addActivity(startAct);
 		plan.addLeg(leg);

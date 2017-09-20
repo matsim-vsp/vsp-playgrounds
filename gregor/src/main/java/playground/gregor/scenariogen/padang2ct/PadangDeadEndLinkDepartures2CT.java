@@ -48,7 +48,7 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.population.io.PopulationWriter;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 
 /**
@@ -151,7 +151,7 @@ public class PadangDeadEndLinkDepartures2CT {
 				for (PlanElement pe : plan.getPlanElements()) {
 					if (pe instanceof Leg) {
 						Leg leg = ((Leg) pe);
-						LinkNetworkRouteImpl r = (LinkNetworkRouteImpl) leg.getRoute();
+						NetworkRoute r = (NetworkRoute) leg.getRoute();
 						Id<Link> firstId = r.getStartLinkId();
 						if (r.getLinkIds().size() == 0) {
 							rm.add(pers);
@@ -259,7 +259,7 @@ public class PadangDeadEndLinkDepartures2CT {
 				for (PlanElement pe : plan.getPlanElements()) {
 					if (pe instanceof Leg) {
 						Leg leg = ((Leg) pe);
-						LinkNetworkRouteImpl r = (LinkNetworkRouteImpl) leg.getRoute();
+						NetworkRoute r = (NetworkRoute) leg.getRoute();
 						validLinks.add(r.getEndLinkId());
 						validLinks.add(r.getStartLinkId());
 						for (Id<Link> l : r.getLinkIds()) {

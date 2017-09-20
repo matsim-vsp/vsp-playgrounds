@@ -36,7 +36,6 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.core.mobsim.jdeqsim.JDEQSimConfigGroup;
 import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 
@@ -53,16 +52,17 @@ public final class DownstreamSensor {
 	private final LinkSensorManager sensorManager;
 	private final Network network;
 	private final Lanes lanes;
-	private final JDEQSimConfigGroup jdeQSim;
+	private final double carSize;
+	private final double storageCapacityFactor;
 	private final SignalsData signalsData;
 	
 	private Map<Id<Link>, Integer> linkMaxNoCarsForStorage = new HashMap<>();
 	private Map<Id<Link>, Integer> linkMaxNoCarsForFreeSpeed = new HashMap<>();
 	
 	/* the controller will allow a delay of at most this factor times the free speed travel time */
-	private double delayFactor = 1;
+	private final double maxDelayFactor = 1;
 	/* the controller will allow a link occupation of at most this factor times the maximum number of vehicles regarding to the storage capacity */
-	private double storageFactor = 0.75;
+	private final double maxStorageFactor = 0.75;
 	// TODO make this adjustable per downstream config?! (add config to constructor parameter)
 	
 	@Inject
@@ -70,7 +70,8 @@ public final class DownstreamSensor {
 		this.sensorManager = sensorManager;
 		this.network = scenario.getNetwork();
 		this.lanes = scenario.getLanes();
-		this.jdeQSim = scenario.getConfig().jdeqSim();
+		this.carSize = scenario.getConfig().jdeqSim().getCarSize();
+		this.storageCapacityFactor = scenario.getConfig().qsim().getStorageCapFactor();
 		this.signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		init();
 	}
@@ -81,10 +82,10 @@ public final class DownstreamSensor {
 		linkMaxNoCarsForFreeSpeed = new HashMap<>();
 		for (Link link : network.getLinks().values()) {
 			// maximum number = storage capacity * factor
-			linkMaxNoCarsForStorage.put(link.getId(), (int) ((link.getLength() / jdeQSim.getCarSize()) * storageFactor));
+			linkMaxNoCarsForStorage.put(link.getId(), (int) ((link.getLength() / carSize) * maxStorageFactor * storageCapacityFactor));
 
 			// maximum number such that (free speed travel time * factor) can be reached (when vehicles are distributed uniformly over time)
-			int maxNoCarsForFreeSpeedTT = (int) Math.ceil((link.getLength() / link.getFreespeed()) * delayFactor * (link.getCapacity() / 3600));
+			int maxNoCarsForFreeSpeedTT = (int) Math.ceil((link.getLength() / link.getFreespeed()) * maxDelayFactor * (link.getCapacity() / 3600));
 			linkMaxNoCarsForFreeSpeed.put(link.getId(), maxNoCarsForFreeSpeedTT);
 //			log.info("setting max number of cars for free speed travel time to " + maxNoCarsForFreeSpeedTT);
 		}

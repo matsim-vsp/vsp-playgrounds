@@ -63,8 +63,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.router.AStarLandmarks;
-import org.matsim.core.router.util.PreProcessLandmarks;
+import org.matsim.core.router.AStarLandmarksFactory;
+import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.MutableScenario;
@@ -88,6 +88,11 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
 import org.opengis.feature.simple.SimpleFeature;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
+
 import others.sergioo.util.algebra.Matrix1DImpl;
 import others.sergioo.util.algebra.Matrix2DImpl;
 import others.sergioo.util.algebra.Matrix3DImpl;
@@ -105,11 +110,6 @@ import playground.sergioo.workplaceCapacities2012.gui.WorkersBSPainter;
 import playground.sergioo.workplaceCapacities2012.hits.PersonSchedule;
 import playground.sergioo.workplaceCapacities2012.hits.PointPerson;
 import playground.sergioo.workplaceCapacities2012.hits.Trip;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class MainWorkplaceCapacities {
 
@@ -680,9 +680,7 @@ public class MainWorkplaceCapacities {
 				return link.getLength()/WALKING_SPEED;
 			}
 		};
-		PreProcessLandmarks preProcessData = new PreProcessLandmarks(travelMinCost);
-		preProcessData.run(network);
-		AStarLandmarks aStarLandmarks = new AStarLandmarks(network, preProcessData, timeFunction);
+		LeastCostPathCalculator aStarLandmarks = new AStarLandmarksFactory().createPathCalculator(network, travelMinCost, timeFunction);
 		Map<Tuple<Id<TransitStopFacility>, Id<ActivityFacility>>,Tuple<Boolean,Double>> weights = new HashMap<Tuple<Id<TransitStopFacility>, Id<ActivityFacility>>, Tuple<Boolean,Double>>();
 		Collection<Tuple<Id<TransitStopFacility>, Integer>> removeStops = new ArrayList<Tuple<Id<TransitStopFacility>, Integer>>();
 		travelTimes = new ArrayList<List<Double>>();
