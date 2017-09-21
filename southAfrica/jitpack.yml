@@ -1,2 +1,2 @@
 install:
-   - mvn --project ./southAfrica --also-make clean install -DskipTests=true
+   - mvn --project ../southAfrica --also-make clean install -DskipTests=true
