@@ -20,18 +20,12 @@ package playground.agarwalamit.analysis.emission;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
+import java.util.*;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.types.ColdPollutant;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.contrib.emissions.utils.EmissionUtils;
@@ -39,15 +33,12 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.agarwalamit.analysis.emission.filtering.FilteredColdEmissionHandler;
 import playground.agarwalamit.analysis.emission.filtering.FilteredWarmEmissionHandler;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
-import playground.agarwalamit.utils.AreaFilter;
-import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.agarwalamit.utils.MapUtils;
-import playground.agarwalamit.utils.PersonFilter;
+import playground.agarwalamit.utils.*;
+import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
@@ -98,51 +89,27 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 		this(simulationEndTime,emissionEventFile,noOfTimeBins,null,null);
 	}
 
-//		public static void main(String[] args) {
-//			String dir = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/hEART/output/";
-//			String [] runCases =  {"bau","ei","5ei","10ei","15ei","20ei","25ei"};
-//			String shapeFileCity = "../../../../repos/shared-svn/projects/detailedEval/Net/shapeFromVISUM/urbanSuburban/cityArea.shp";
-//			String shapeFileMMA = "../../../../repos/shared-svn/projects/detailedEval/Net/boundaryArea/munichMetroArea_correctedCRS_simplified.shp";
-//			
-//			Scenario sc = LoadMyScenarios.loadScenarioFromNetwork(dir+"/bau/output_network.xml.gz");
-//			BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/totalEmissionCosts_metroArea.txt");
-//			try{
-//				writer.write("scenario \t totalCostEUR \n");
-//				for(String str : runCases){
-//					String emissionEventFile = dir+str+"/ITERS/it.1500/1500.emission.events.xml.gz";
-//	
-////					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileCity, sc.getNetwork());
-//					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileMMA, sc.getNetwork());
-//					ela.preProcessData();
-//					ela.postProcessData();
-//					ela.writeTotalEmissions(dir+str+"/analysis/","MMA");
-//					writer.write(str+"\t"+ela.getTotalEmissionsCosts()+"\n");
-//				}
-//				writer.close();
-//			} catch (IOException e){
-//				throw new RuntimeException("Data is not written in the file. Reason - "+e);
-//			}
-//		}
-
 	public static void main(String[] args) {
-		String dir = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/hEART/output/";
-		String [] runCases =  {"bau","ei","5ei","10ei","15ei","20ei","25ei"};
-//		String shapeFileCity = "../../../../repos/shared-svn/projects/detailedEval/Net/shapeFromVISUM/urbanSuburban/cityArea.shp";
-		String shapeFileMMA = "../../../../repos/shared-svn/projects/detailedEval/Net/boundaryArea/munichMetroArea_correctedCRS_simplified.shp";
+		String dir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/output/";
+		String [] runCases =  {"bau"};
+		String shapeFileCity = FileUtils.SHARED_SVN+"/projects/detailedEval/Net/shapeFromVISUM/urbanSuburban/cityArea.shp";
+		String shapeFileMMA = FileUtils.SHARED_SVN+"/projects/detailedEval/Net/boundaryArea/munichMetroArea_correctedCRS_simplified.shp";
 
 		Scenario sc = LoadMyScenarios.loadScenarioFromNetwork(dir+"/bau/output_network.xml.gz");
 		BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/totalEmissionCosts_metroArea_userGroup.txt");
+//		BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/totalEmissionCosts_cityArea_userGroup.txt");
 		try{
 			writer.write("scenario \t userGroup \t totalCostEUR \n");
 			for(String str : runCases){
 				for(MunichUserGroup ug :MunichUserGroup.values()) {
-					String emissionEventFile = dir+str+"/ITERS/it.1500/1500.emission.events.xml.gz";
+					String emissionEventFile = dir+str+"/ITERS/it.1500/1500.events.xml.gz";
 					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileMMA, sc.getNetwork(), ug.toString(), new MunichPersonFilter());
-//					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileCity, sc.getNetwork(), ug.toString());
+//					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileCity, sc.getNetwork(), ug.toString(), new MunichPersonFilter());
 					ela.preProcessData();
 					ela.postProcessData();
 					ela.writeTotalEmissions(dir+str+"/analysis/","MMA_"+ug.toString());
 					writer.write(str+"\t"+ug.toString()+"\t"+ela.getTotalEmissionsCosts()+"\n");
+					writer.flush();
 				}
 			}
 			writer.close();
@@ -159,10 +126,10 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 	@Override
 	public void preProcessData() {
 		EventsManager eventsManager = EventsUtils.createEventsManager();
-		EmissionEventsReader emissionReader = new EmissionEventsReader(eventsManager);
+		CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(eventsManager);
 		eventsManager.addHandler(this.warmHandler);
 		eventsManager.addHandler(this.coldHandler);
-		emissionReader.readFile(this.emissionEventsFile);
+		reader.readFile(this.emissionEventsFile);
 	}
 
 	@Override
