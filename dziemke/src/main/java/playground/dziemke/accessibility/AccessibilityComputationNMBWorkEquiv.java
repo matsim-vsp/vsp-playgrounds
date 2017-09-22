@@ -145,7 +145,7 @@ public class AccessibilityComputationNMBWorkEquiv {
 			for ( Modes4Accessibility modeOld : Modes4Accessibility.values()) {
 				String mode = modeOld.toString();
 //				VisualizationUtils.createQGisOutput(typeWEQ, mode, mapViewExtent, workingDirectory, crs, includeDensityLayer);
-				VisualizationUtils.createQGisOutputGraduated(typeWEQ, mode, envelope, workingDirectory, crs, includeDensityLayer,
+				VisualizationUtils.createQGisOutputGraduatedStandardColorRange(typeWEQ, mode, envelope, workingDirectory, crs, includeDensityLayer,
 						lowerBound, upperBound, range, symbolSize, populationThreshold);
 				VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode, osName);
 			}

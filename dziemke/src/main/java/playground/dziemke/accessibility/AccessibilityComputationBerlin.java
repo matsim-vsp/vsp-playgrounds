@@ -210,7 +210,7 @@ public class AccessibilityComputationBerlin {
 			for (String actType : activityTypes) {
 				String actSpecificWorkingDirectory = workingDirectory + actType + "/";
 				for (String mode : modes) {
-					VisualizationUtils.createQGisOutputGraduated(actType, mode, envelope, workingDirectory, crs, includeDensityLayer,
+					VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode, envelope, workingDirectory, crs, includeDensityLayer,
 							lowerBound, upperBound, range, symbolSize, populationThreshold);
 					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode, osName);
 				}
