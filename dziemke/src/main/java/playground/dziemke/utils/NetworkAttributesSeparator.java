@@ -45,10 +45,10 @@ public class NetworkAttributesSeparator {
 
 
 	public static void main(String[] args) {
-		String networkFile = "../../shared-svn/studies/countries/de/berlin-bike/input/network/equil/case-b.xml";
-		String networkSeparatedFile = "../../shared-svn/studies/countries/de/berlin-bike/input/network/equil/case-b_separated.xml";
-		String linkAttributesFile = "../../shared-svn/studies/countries/de/berlin-bike/input/network/equil/case-b_attributes.xml";
-		List<String> attributesToSeparate = Arrays.asList(new String[]{"type", "surface"});
+		String networkFile = "../../shared-svn/studies/countries/de/berlin-bike/equil/network-f.xml";
+		String networkSeparatedFile = "../../shared-svn/studies/countries/de/berlin-bike/equil/network-f_separated.xml";
+		String linkAttributesFile = "../../shared-svn/studies/countries/de/berlin-bike/equil/network-f_attributes.xml";
+		List<String> attributesToSeparate = Arrays.asList(new String[]{"type", "surface", "cycleway"});
 		
 		NetworkAttributesSeparator networkAttributesSeparator = new NetworkAttributesSeparator(
 				networkFile, networkSeparatedFile, linkAttributesFile, attributesToSeparate);
