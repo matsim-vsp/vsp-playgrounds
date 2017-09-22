@@ -50,8 +50,17 @@ public class MATSimVideoUtils {
 		}
 		String outputFile = outputDirectory + pngFileName + ".mp4";
 		SequenceEncoder enc = new SequenceEncoder(new File(outputFile));
-						
-		final Config config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml.gz");
+			
+		Config config = null;
+		if (new File(outputDirectory + "output_config.xml.gz").exists()) {
+			config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml.gz");
+		} else {
+			if (new File(outputDirectory + "output_config.xml").exists()) {
+				config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
+			} else {
+				throw new RuntimeException("No (output) config file. Aborting...");
+			}
+		}
 
 		int counter = 0;
 		for (int i = config.controler().getFirstIteration(); i<= config.controler().getLastIteration(); i++) {
