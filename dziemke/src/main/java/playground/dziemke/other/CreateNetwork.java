@@ -18,19 +18,20 @@
  * *********************************************************************** */
 package playground.dziemke.other;
 
+import java.io.IOException;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.OsmNetworkReader;
-
-//import playground.dziemke.utils.LogToOutputSaver;
 
 /**
  * @author dziemke
@@ -39,50 +40,31 @@ public class CreateNetwork {
 	final private static Logger LOG = Logger.getLogger(CreateNetwork.class);
 
 	public static void main(String[] args) {
-		// Input and output
-//		String osmFile = "/Users/dominik/Accessibility/Data/OSM/2015-10-15_nairobi.osm.xml";
-//		String osmFile = "/Users/dominik/Accessibility/Data/OSM/2015-11-05_kibera.osm.xml";
-//		String osmFile = "../../../shared-svn/projects/maxess/data/kibera/osm/2016-12-18_kibera.osm";
-		String osmFile = "../../../shared-svn/projects/maxess/data/nairobi/osm/2017-04-25_nairobi_central_and_kibera";
-//		String osmFile = "../../../../Workspace/data/accessibility/osm/2015-10-15_capetown_central.osm.xml";
-//		String osmFile = "../../../shared-svn/projects/accessibility_berlin/osm/berlin/2015-05-26_berlin.osm";
-		
-//		String osmFile = "../../../../SVN/shared-svn/projects/tum-with-moeckel/data/mstm/siloMatsim/network/md_dc.osm";
-//		String osmFile = "../../../../LandUseTransport/Data/OSM/md_and_surroundings.osm";
-//		String osmFile = "../../../shared-svn/projects/maxess/data/kenya/osm/kenya-latest.osm";
-		
-//		String networkFile = "/Users/dominik/Accessibility/Data/Networks/Kenya/2015-10-15_nairobi_paths.xml";
-//		String networkFile = "/Users/dominik/Accessibility/Data/Networks/Kenya/2015-11-05_kibera_paths_detailed.xml";
-//		String outputBase = "../../../../Workspace/data/accessibility/capetown/network/2015-10-15/";
-		
-//		String outputBase = "../../../shared-svn/projects/accessibility_berlin/network/2015-05-26/";
-		
-//		String outputBase = "../../../../SVN/shared-svn/projects/tum-with-moeckel/data/mstm/siloMatsim/network/";
-//		String outputBase = "../../../../LandUseTransport/Data/OSM/network_04";
-//		String outputBase = "../../../shared-svn/projects/maxess/data/kenya/network";
-//		String outputBase = "../../../shared-svn/projects/maxess/data/kibera/network/2016-12-18/";
-		String outputBase = "../../../shared-svn/projects/maxess/data/nairobi/network/";
-		
-//		String networkFile = outputBase + "/2016-10-19_network_detailed.xml";
-//		String networkFile = outputBase + "2016-12-18_kibera_paths_detailed.xml";
-		String networkFile = outputBase + "2017-04-25_nairobi_central_and_kibera_no_paths.xml";
-//		String networkFile = outputBase + "network.xml";
+		// Input and output		
+		String osmFile = "../../nemo/data/input/counts/verkehrszaehlung_2015/network/allWaysNRW.osm";
+		String outputBase = "../../nemo/data/input/network/coarse/";
+		String networkFile = outputBase + "network_coarse.xml.gz";
 
-		
 		// Parameters
-		String inputCRS = "EPSG:4326"; // EPSG:4326 = WGS84
+		// EPSG:4326 = WGS84
 		// EPSG:31468 = DHDN GK4, for Berlin; DE
 		// EPSG:26918 = NAD83 / UTM zone 18N, for Maryland, US
-		String outputCRS = "EPSG:21037"; // EPSG:21037 = Arc 1960 / UTM zone 37S, for Nairobi, KE
-//		String outputCRS = TransformationFactory.WGS84_SA_Albers;
+		// EPSG:25832 = ETRS89 / UTM zone 32N, for Nordrhein-Westfalen
+		String inputCRS = "EPSG:4326"; 
+		String outputCRS = "EPSG:25832";
 		
 		createNetwork(osmFile, outputBase, networkFile, inputCRS, outputCRS);
 	}
-		
-		
+
 	public static void createNetwork(String osmFile, String outputBase, String networkFile, String inputCRS, String outputCRS) {
-//		LogToOutputSaver.setOutputDirectory(outputBase);
+		try {
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(outputBase);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		LOG.info("Input CRS is " + inputCRS + "; output CRS is " + outputCRS);
+		
 		
 		boolean keepPaths = false;
 		boolean includeLowHierarchyWays = true;
@@ -112,18 +94,13 @@ public class CreateNetwork {
 		// This block is for the low hierarchy roads
 		if (includeLowHierarchyWays == true) {
 			LOG.info("Low hierarchy ways are included.");
-			// defaults already set for motorway, motorway_link, trunk, trunk_link, primary,
-			// primary_link, secondary, tertiary, minor, unclassified, residential, living_street
-			// minor does not seem to exist on the website anymore
+			// By defaults set for motorway, motorway_link, trunk, trunk_link, primary, primary_link, secondary, secondary_link,
+			// tertiary, tertiary_link, minor, unclassified, residential, living_street; minor does not exist on the website anymore
+			// Parameters for living_street: (6, "living_street", 1,  15.0/3.6, 1.0,  300);
+			// (hierarchy, highwayType, lanes, freespeed, freespeedFactor, laneCapacity_vehPerHour)
 			//
-			// other types in osm, see: http://wiki.openstreetmap.org/wiki/Key:highway
-			// secondary_link, tertiary_link, pedestrian, track, bus_guideway, raceway, road,
-			// footway, bridleway, steps, path
-			//
-			// onr.setHighwayDefaults(hierarchy, highwayType, lanes, freespeed, freespeedFactor, laneCapacity_vehPerHour);
-			//
-			// lowest hierarchy contained in defaults: 6, "living_street", 1,  15.0/3.6, 1.0,  300);
-			//
+			// Other types in osm, see: http://wiki.openstreetmap.org/wiki/Key:highway
+			// pedestrian, track, bus_guideway, raceway, road, footway, bridleway, steps, path
 			osmNetworkReader.setHighwayDefaults(7, "pedestrian", 1, 15/3.6, 1.0, 0);
 			osmNetworkReader.setHighwayDefaults(7, "track", 1, 15/3.6, 1.0, 0);
 			osmNetworkReader.setHighwayDefaults(7, "road", 1, 15/3.6, 1.0, 300); // like "living_street"
@@ -133,8 +110,7 @@ public class CreateNetwork {
 			osmNetworkReader.setHighwayDefaults(7, "path", 1, 15/3.6, 1.0, 0);
 		}		
 				
-		// This block is to use only bigger roads
-		// This makes the file (for the Maryland case) only a 14th as big (77.8MB vs. 1.04GB)
+		// This block is to use only bigger roads; makes file (for the Maryland case) only a 14th as big (77.8MB vs. 1.04GB)
 		if (onlyBiggerRoads == true) {
 			LOG.info("Only bigger roads are included.");
 			if (includeLowHierarchyWays == true) {
