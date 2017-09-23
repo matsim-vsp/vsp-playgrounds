@@ -22,10 +22,7 @@ package playground.agarwalamit.nemo.demand;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
-import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.*;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -38,8 +35,15 @@ public class NRWControler {
 
     public static void main(String[] args) {
 
-        String plansFile = "/Users/amit/Documents/gitlab/nemo/data/matsim_initial/nrw_plans_1pct.xml.gz";
-        String networkFile = "";
+        String plansFile = "/Users/amit/Documents/gitlab/nemo/data/input/matsim_initial_plans/nrw_plans_1pct.xml.gz";
+        String networkFile = "/Users/amit/Documents/gitlab/nemo/data/input/network/motorway-tertiary/network_motorway-tertiary.xml.gz";
+        String outputDir = "/Users/amit/Documents/gitlab/nemo/data/output/";
+
+        if (args.length>0){
+            plansFile = args[0];
+            networkFile = args[1];
+            outputDir = args[2];
+        }
 
         Config config = ConfigUtils.createConfig();
 
@@ -86,7 +90,7 @@ public class NRWControler {
         StrategyConfigGroup strategyConfigGroup = config.strategy();
         StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
-        reRoute.setWeight(0.2);
+        reRoute.setWeight(0.15);
         strategyConfigGroup.addStrategySettings(reRoute);
 
         StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
@@ -97,8 +101,17 @@ public class NRWControler {
 
         StrategyConfigGroup.StrategySettings timeChoice = new StrategyConfigGroup.StrategySettings();
         timeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator.name());
-        timeChoice.setWeight(0.1);
+        timeChoice.setWeight(0.05);
         strategyConfigGroup.addStrategySettings(timeChoice);
+
+        TimeAllocationMutatorConfigGroup timeAllocationMutatorConfigGroup = config.timeAllocationMutator();
+        timeAllocationMutatorConfigGroup.setMutationRange(7200.);
+        timeAllocationMutatorConfigGroup.setAffectingDuration(false);
+
+        StrategyConfigGroup.StrategySettings changeExpBeta = new StrategyConfigGroup.StrategySettings();
+        changeExpBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
+        changeExpBeta.setWeight(0.7);
+        strategyConfigGroup.addStrategySettings(changeExpBeta);
 
         PlansCalcRouteConfigGroup plansCalcRouteConfigGroup = config.plansCalcRoute();
         PlansCalcRouteConfigGroup.ModeRoutingParams pt = new PlansCalcRouteConfigGroup.ModeRoutingParams("pt");
