@@ -90,21 +90,22 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 	}
 
 	public static void main(String[] args) {
-		String dir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/output/";
-		String [] runCases =  {"bau"};
+		String dir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/output_halfUtilMoney/";
+//		String dir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/output_doubleUtilMoney/";
+		String [] runCases =  {"bau","ei","ei5","ei10"};
 		String shapeFileCity = FileUtils.SHARED_SVN+"/projects/detailedEval/Net/shapeFromVISUM/urbanSuburban/cityArea.shp";
-		String shapeFileMMA = FileUtils.SHARED_SVN+"/projects/detailedEval/Net/boundaryArea/munichMetroArea_correctedCRS_simplified.shp";
+//		String shapeFileMMA = FileUtils.SHARED_SVN+"/projects/detailedEval/Net/boundaryArea/munichMetroArea_correctedCRS_simplified.shp";
 
 		Scenario sc = LoadMyScenarios.loadScenarioFromNetwork(dir+"/bau/output_network.xml.gz");
-		BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/totalEmissionCosts_metroArea_userGroup.txt");
-//		BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/totalEmissionCosts_cityArea_userGroup.txt");
+//		BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/totalEmissionCosts_metroArea_userGroup.txt");
+		BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/totalEmissionCosts_cityArea_userGroup.txt");
 		try{
 			writer.write("scenario \t userGroup \t totalCostEUR \n");
 			for(String str : runCases){
 				for(MunichUserGroup ug :MunichUserGroup.values()) {
 					String emissionEventFile = dir+str+"/ITERS/it.1500/1500.events.xml.gz";
-					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileMMA, sc.getNetwork(), ug.toString(), new MunichPersonFilter());
-//					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileCity, sc.getNetwork(), ug.toString(), new MunichPersonFilter());
+//					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileMMA, sc.getNetwork(), ug.toString(), new MunichPersonFilter());
+					EmissionLinkAnalyzer ela = new EmissionLinkAnalyzer(30*3600, emissionEventFile, 1, shapeFileCity, sc.getNetwork(), ug.toString(), new MunichPersonFilter());
 					ela.preProcessData();
 					ela.postProcessData();
 					ela.writeTotalEmissions(dir+str+"/analysis/","MMA_"+ug.toString());
