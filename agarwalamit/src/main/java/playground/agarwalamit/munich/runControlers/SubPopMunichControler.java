@@ -77,7 +77,7 @@ public class SubPopMunichControler {
 					"false",
 					"false",
 					FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/input/config_wrappedSubActivities_subPop_baseCaseCtd.xml",
-					FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/output/bau/",
+					FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/ijst/outputTest/bau/",
 			};
 		}
 
@@ -103,13 +103,33 @@ public class SubPopMunichControler {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
+				String ug = "COMMUTER_REV_COMMUTER";
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name().concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
+					@Inject
+					Scenario sc;
+					@Inject
+					Provider<TripRouter> tripRouterProvider;
+					@Override
+					public PlanStrategy get() {
+						final Builder builder = new Builder(new RandomPlanSelector<>());
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
+						return builder.build();
+					}
+				});
+			}
+		});
+
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
 				String ug = "COMMUTER_REV_COMMUTER";
 				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.name().concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "pt_".concat(ug)};
 					final String[] chainBasedModes = {"car", "bike"};
 					@Inject
 					Scenario sc;
+					@Inject
+					Provider<TripRouter> tripRouterProvider;
 
 					@Override
 					public PlanStrategy get() {
