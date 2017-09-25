@@ -18,12 +18,14 @@
  * *********************************************************************** */
 package playground.dziemke.accessibility;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
+import org.matsim.contrib.accessibility.AccessibilityModule;
 import org.matsim.contrib.accessibility.FacilityTypes;
+import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
@@ -32,12 +34,9 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.facilities.ActivityFacilities;
 
 import com.vividsolutions.jts.geom.Envelope;
-
-import playground.dziemke.utils.LogToOutputSaver;
 
 /**
  * @author dziemke
@@ -46,113 +45,81 @@ public class AccessibilityComputationCottbus {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationCottbus.class);
 	
 	public static void main(String[] args) {
-		// Input and output	
-		String runOutputFolder = "../../../public-svn/matsim/scenarios/countries/de/cottbus/commuter-population-only-car-traffic-only-100pct-2016-03-18/";
+		Double cellSize = 2000.;
+		boolean push2Geoserver = false;
+		boolean createQGisOutput = true;
+		
+		String runOutputFolder = "../../public-svn/matsim/scenarios/countries/de/cottbus/commuter-population-only-car-traffic-only-100pct-2016-03-18/";
 		String accessibilityOutputDirectory = runOutputFolder + "accessibilities/";
 		String networkFile = "network_wgs84_utm33n.xml.gz";
 		String plansFile = "commuter_population_wgs84_utm33n_car_only.xml.gz";
 		
-		// Parameters
-		final Double cellSize = 200.;
-		String crs = TransformationFactory.WGS84_UTM33N; // EPSG:32633 -- UTM33N
-		Envelope envelope = new Envelope(447000,461000,5729000,5740000);
-		final String runId = "de_cottbus_" + "2106-11-10" + "_" + cellSize.toString().split("\\.")[0];
-		final boolean push2Geoserver = false;
-
-		// QGis parameters
-		boolean createQGisOutput = true;
-		boolean includeDensityLayer = true;
-		Double lowerBound = .0;
-		Double upperBound = 3.5;
-		Integer range = 9;
-		int symbolSize = 210;
-		int populationThreshold = (int) (200 / (1000/cellSize * 1000/cellSize));
-		
-		// Storage objects
-		final List<String> modes = new ArrayList<>();
-		
-		// Config and scenario
 		Config config = ConfigUtils.loadConfig(runOutputFolder + "config.xml", new AccessibilityConfigGroup());
+		Envelope envelope = new Envelope(447000,461000,5729000,5740000);
+		String scenarioCRS = "EPSG:32633"; // EPSG:32633 = WGS 84 / UTM zone 33N, for Eastern half of Germany
+		
 		config.network().setInputFile(networkFile);
 		config.plans().setInputFile(plansFile);
+		
+//		config.global().setCoordinateSystem(scenarioCRS);
+		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setOutputDirectory(accessibilityOutputDirectory);
 		config.controler().setLastIteration(0);
-		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
+		config.controler().setRunId("de_cottbus_" + "2106-11-10" + "_" + cellSize.toString().split("\\.")[0]);
+		
 //		config.transit().setTransitScheduleFile(runOutputFolder + "output_transitSchedule.xml.gz");
 //		config.transit().setVehiclesFile(runOutputFolder + "output_transitVehicles.xml.gz");
+		
+		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
+		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setEnvelope(envelope);
+		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
+		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, true);
+		acg.setComputingAccessibilityForMode(Modes4Accessibility.car, true);
+		acg.setOutputCrs(scenarioCRS);
+		
+		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		
 		// Create facilities from plans
 		ActivityFacilities activityFacilities = AccessibilityUtils.createFacilitiesFromPlans(scenario.getPopulation());
 		scenario.setActivityFacilities(activityFacilities);
-		
-		// Infrastructure
-		LogToOutputSaver.setOutputDirectory(accessibilityOutputDirectory);
 
-		// Collect activity types
-//		final List<String> activityTypes = AccessibilityRunUtils.collectAllFacilityOptionTypes(scenario);
-		List<String> activityTypes = new ArrayList<String>();
-		activityTypes.add(FacilityTypes.WORK); // manually setting computation only for work
+		// Activity types
+		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.WORK});
 
 		// Collect homes for density layer
-		String activityFacilityType = FacilityTypes.HOME;
-		final ActivityFacilities densityFacilities = AccessibilityUtils.collectActivityFacilitiesWithOptionOfType(scenario, activityFacilityType);
+		final ActivityFacilities densityFacilities = AccessibilityUtils.collectActivityFacilitiesWithOptionOfType(scenario, FacilityTypes.HOME);
 
-		// Controller
 		final Controler controler = new Controler(scenario);
-//		controler.addControlerListener(new AccessibilityStartupListener(activityTypes, densityFacilities, crs, runId, envelope, cellSize, push2Geoserver));
-		if ( true ) {
-			throw new RuntimeException("AccessibilityStartupListener is no longer supported; please switch to GridBasedAccessibilityModule. kai, dec'16") ;
-		}
 
-		if ( true ) {
-			throw new RuntimeException("The now following execution path is no longer supported; please set the modes in the config (as it was earlier). kai, dec'16" ) ;
+		for (String activityType : activityTypes) {
+			AccessibilityModule module = new AccessibilityModule();
+			module.setConsideredActivityType(activityType);
+			module.addAdditionalFacilityData(densityFacilities);
+			module.setPushing2Geoserver(push2Geoserver);
+			controler.addOverridingModule(module);
 		}
-//		// Add calculators
-//		controler.addOverridingModule(new AbstractModule() {
-//			@Override
-//			public void install() {
-//				MapBinder<String,AccessibilityContributionCalculator> accBinder = MapBinder.newMapBinder(this.binder(), String.class, AccessibilityContributionCalculator.class);
-//				{
-//					String mode = "freeSpeed";
-//					this.binder().bind(AccessibilityContributionCalculator.class).annotatedWith(Names.named(mode)).toProvider(new FreeSpeedNetworkModeProvider(TransportMode.car));
-//					accBinder.addBinding(mode).to(Key.get(AccessibilityContributionCalculator.class, Names.named(mode)));
-//					if (!modes.contains(mode)) modes.add(mode); // This install method is called four times, but each new mode should only be added once
-//				}
-//				{
-//					String mode = TransportMode.car;
-//					this.binder().bind(AccessibilityContributionCalculator.class).annotatedWith(Names.named(mode)).toProvider(new NetworkModeProvider(mode));
-//					accBinder.addBinding(mode).to(Key.get(AccessibilityContributionCalculator.class, Names.named(mode)));
-//					if (!modes.contains(mode)) modes.add(mode); // This install method is called four times, but each new mode should only be added once
-//				}
-//				{ 
-//					String mode = TransportMode.bike;
-//					this.binder().bind(AccessibilityContributionCalculator.class).annotatedWith(Names.named(mode)).toProvider(new ConstantSpeedModeProvider(mode));
-//					accBinder.addBinding(mode).to(Key.get(AccessibilityContributionCalculator.class, Names.named(mode)));
-//					if (!modes.contains(mode)) modes.add(mode); // This install method is called four times, but each new mode should only be added once
-//				}
-//				{
-//					final String mode = TransportMode.walk;
-//					this.binder().bind(AccessibilityContributionCalculator.class).annotatedWith(Names.named(mode)).toProvider(new ConstantSpeedModeProvider(mode));
-//					accBinder.addBinding(mode).to(Key.get(AccessibilityContributionCalculator.class, Names.named(mode)));
-//					if (!modes.contains(mode)) modes.add(mode); // This install method is called four times, but each new mode should only be added once
-//				}
-//			}
-//		});
 		controler.run();
-
+		
 		// QGis
 		if (createQGisOutput == true) {
+			final boolean includeDensityLayer = false;
+			final Integer range = 9; // In the current implementation, this must always be 9
+			final Double lowerBound = 0.; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+			final Double upperBound = 3.5;
+			final int populationThreshold = (int) (50 / (1000/cellSize * 1000/cellSize));
+
 			String osName = System.getProperty("os.name");
 			String workingDirectory = config.controler().getOutputDirectory();
 			for (String actType : activityTypes) {
 				String actSpecificWorkingDirectory = workingDirectory + actType + "/";
-				for (String mode : modes) {
-					VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode, envelope, workingDirectory, crs, includeDensityLayer,
-							lowerBound, upperBound, range, symbolSize, populationThreshold);
-					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode, osName);
+				for (Modes4Accessibility mode : acg.getIsComputingMode()) {
+					VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode.toString(), envelope, workingDirectory,
+							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, cellSize.intValue(), populationThreshold);
+					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode.toString(), osName);
 				}
-			}  
+			}
 		}
 	}
 }
