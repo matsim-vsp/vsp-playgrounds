@@ -21,9 +21,7 @@ package playground.dziemke.other;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.network.algorithms.NetworkCleaner;
@@ -36,56 +34,70 @@ import org.matsim.core.utils.io.OsmNetworkReader;
 /**
  * @author dziemke
  */
-public class CreateNetwork {
-	final private static Logger LOG = Logger.getLogger(CreateNetwork.class);
+public class OsmNetworkCreatorDZ {
+	final private static Logger LOG = Logger.getLogger(OsmNetworkCreatorDZ.class);
+	
+	private final String osmFileName;
+	private final String outputRoot;
+	private final String networkFileName;
+	private final String outputCRS;
+	private String inputCRS = "EPSG:4326"; // EPSG:4326 = WGS84, OSM input is always in this CRS
+	private boolean keepPaths = false; 
+	private boolean includeLowHierarchyWays = false;
+	private boolean onlyMotorwayToTertiary = false; // "Thinner" network down to tertiary; do not use this together with "includeLowHierarchyWays"
+	private boolean onlyMotorwayToSecondary = false; // "Thinner" network down to tertiary; do not use this together with "includeLowHierarchyWays"
+	
 
 	public static void main(String[] args) {
 		// Input and output		
-		String osmFile = "../../nemo/data/input/counts/verkehrszaehlung_2015/network/allWaysNRW.osm";
-		String outputBase = "../../nemo/data/input/network/coarse/";
-		String networkFile = outputBase + "network_coarse.xml.gz";
+		String osmFileName = "../../nemo/data/input/counts/verkehrszaehlung_2015/network/allWaysNRW.osm";
+		String outputRoot = "../../nemo/data/input/network/motorway-tertiary/";
+		String networkFileName = outputRoot + "network_motorway-tertiary.xml.gz";
 
 		// Parameters
 		// EPSG:4326 = WGS84
 		// EPSG:31468 = DHDN GK4, for Berlin; DE
 		// EPSG:26918 = NAD83 / UTM zone 18N, for Maryland, US
 		// EPSG:25832 = ETRS89 / UTM zone 32N, for Nordrhein-Westfalen
-		String inputCRS = "EPSG:4326"; 
 		String outputCRS = "EPSG:25832";
 		
-		createNetwork(osmFile, outputBase, networkFile, inputCRS, outputCRS);
+		OsmNetworkCreatorDZ osmNetworkCreatorDZ = new OsmNetworkCreatorDZ(osmFileName, outputRoot, networkFileName, outputCRS);
+		osmNetworkCreatorDZ.setOnlyMotorwayToTertiary(true);
+		osmNetworkCreatorDZ.createNetwork();
+	}
+	
+	public OsmNetworkCreatorDZ(String osmFileName, String outputRoot, String networkFileName, String outputCRS) {
+		this.osmFileName = osmFileName;
+		this.outputRoot = outputRoot;
+		this.networkFileName = networkFileName;
+		this.outputCRS = outputCRS;
 	}
 
-	public static void createNetwork(String osmFile, String outputBase, String networkFile, String inputCRS, String outputCRS) {
+	public void createNetwork() {
 		try {
-			OutputDirectoryLogging.initLoggingWithOutputDirectory(outputBase);
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(outputRoot);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 		LOG.info("Input CRS is " + inputCRS + "; output CRS is " + outputCRS);
-		
-		
-		boolean keepPaths = false;
-		boolean includeLowHierarchyWays = true;
-		boolean onlyBiggerRoads = false; // "thinner" network; do not use this together with "includeLowHierarchyWays"
-		LOG.info("Settings: includeLowHierarchyWays = " + includeLowHierarchyWays + "; keepPaths = " + keepPaths);
-		
+		LOG.info("Setting \"keepPaths\" = " + keepPaths);
+		LOG.info("Setting \"includeLowHierarchyWays\" = " + includeLowHierarchyWays);
+		LOG.info("Setting \"onlyMotorwayToTertiary\" = " + onlyMotorwayToTertiary);
+		LOG.info("Setting \"onlyMotorwayToSecondary\" = " + onlyMotorwayToSecondary);
+
 		// Infrastructure
-		Config config = ConfigUtils.createConfig();
-		Scenario scenario = ScenarioUtils.createScenario(config);
-		Network network = scenario.getNetwork();
+		Network network = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getNetwork();
 		CoordinateTransformation coordinateTransformation = TransformationFactory.getCoordinateTransformation(inputCRS, outputCRS);
-		OsmNetworkReader osmNetworkReader = null;
-		if (onlyBiggerRoads == true) {
+		OsmNetworkReader osmNetworkReader;
+		if (onlyMotorwayToTertiary == true || onlyMotorwayToSecondary == true) {
 			osmNetworkReader = new OsmNetworkReader(network, coordinateTransformation, false);
 		} else {
 			osmNetworkReader = new OsmNetworkReader(network, coordinateTransformation, true);
 		}
 		NetworkWriter networkWriter = new NetworkWriter(network);
 		
-		// Keeping the path means that links are not straightened between intersection nodes, but that also pure geometry-describing
-		// nodes are kept. This makes the file (for the Nairobi case) three times as big (22.4MB vs. 8.7MB)
+		// Setting this to true means that pure geometry-describing nodes (i.e. nodes which are not intersections etc.) are kept.
+		// This makes the file (for the Nairobi case) three times as big (22.4MB vs. 8.7MB)
 		if (keepPaths == true) {
 			LOG.info("Detailed geometry of paths is kept.");
 			osmNetworkReader.setKeepPaths(true);
@@ -99,23 +111,22 @@ public class CreateNetwork {
 			// Parameters for living_street: (6, "living_street", 1,  15.0/3.6, 1.0,  300);
 			// (hierarchy, highwayType, lanes, freespeed, freespeedFactor, laneCapacity_vehPerHour)
 			//
-			// Other types in osm, see: http://wiki.openstreetmap.org/wiki/Key:highway
-			// pedestrian, track, bus_guideway, raceway, road, footway, bridleway, steps, path
+			// Other types on OSM, see: http://wiki.openstreetmap.org/wiki/Key:highway
+			osmNetworkReader.setHighwayDefaults(7, "cycleway", 1, 30/3.6, 1.0, 0);
 			osmNetworkReader.setHighwayDefaults(7, "pedestrian", 1, 15/3.6, 1.0, 0);
-			osmNetworkReader.setHighwayDefaults(7, "track", 1, 15/3.6, 1.0, 0);
 			osmNetworkReader.setHighwayDefaults(7, "road", 1, 15/3.6, 1.0, 300); // like "living_street"
-			osmNetworkReader.setHighwayDefaults(7, "footway", 1, 15/3.6, 1.0, 0);
-			osmNetworkReader.setHighwayDefaults(7, "bridleway", 1, 15/3.6, 1.0, 0);
-			osmNetworkReader.setHighwayDefaults(7, "steps", 1, 15/3.6, 1.0, 0);
-			osmNetworkReader.setHighwayDefaults(7, "path", 1, 15/3.6, 1.0, 0);
+			osmNetworkReader.setHighwayDefaults(8, "track", 1, 15/3.6, 1.0, 0);
+			osmNetworkReader.setHighwayDefaults(8, "footway", 1, 15/3.6, 1.0, 0);
+			osmNetworkReader.setHighwayDefaults(8, "steps", 1, 5/3.6, 1.0, 0);
+			osmNetworkReader.setHighwayDefaults(8, "path", 1, 15/3.6, 1.0, 0);
 		}		
 				
-		// This block is to use only bigger roads; makes file (for the Maryland case) only a 14th as big (77.8MB vs. 1.04GB)
-		if (onlyBiggerRoads == true) {
+		// For a coarser network ("onlyMotorwayToTertiaryMotorways" leads to a network only a 14th as big (77.8MB vs. 1.04GB) for Maryland)
+		if (onlyMotorwayToSecondary == true || onlyMotorwayToTertiary == true) {
 			LOG.info("Only bigger roads are included.");
 			if (includeLowHierarchyWays == true) {
 				throw new RuntimeException("It does not make sense to set both \"includeLowHierarchyWays\""
-						+ " and \"onlyBiggerRoads\" to true");
+						+ " and \"onlyMotorwayToSecondary\" or \"onlyMotorwayToTertiary\" to true");
 			}
 			osmNetworkReader.setHighwayDefaults(1, "motorway",      2, 120.0/3.6, 1.0, 2000, true);
 			osmNetworkReader.setHighwayDefaults(1, "motorway_link", 1,  80.0/3.6, 1.0, 1500, true);
@@ -125,13 +136,38 @@ public class CreateNetwork {
 			osmNetworkReader.setHighwayDefaults(3, "primary_link",  1,  60.0/3.6, 1.0, 1500);
 			osmNetworkReader.setHighwayDefaults(4, "secondary",     1,  30.0/3.6, 1.0, 1000);
 			osmNetworkReader.setHighwayDefaults(4, "secondary_link",     1,  30.0/3.6, 1.0, 1000);
-			osmNetworkReader.setHighwayDefaults(5, "tertiary",      1,  25.0/3.6, 1.0,  600);
-			osmNetworkReader.setHighwayDefaults(5, "tertiary_link",      1,  25.0/3.6, 1.0,  600);
+			if (onlyMotorwayToTertiary == true) {
+				osmNetworkReader.setHighwayDefaults(5, "tertiary",      1,  25.0/3.6, 1.0,  600);
+				osmNetworkReader.setHighwayDefaults(5, "tertiary_link",      1,  25.0/3.6, 1.0,  600);
+			}
 		}
 
-		osmNetworkReader.parse(osmFile); 
+		osmNetworkReader.parse(osmFileName); 
 		new NetworkCleaner().run(network);
-		networkWriter.write(networkFile);
-		LOG.info("Network file written to " + networkFile);
+		networkWriter.write(networkFileName);
+		LOG.info("Network file written to " + networkFileName);
+	}
+	
+	/**
+	 * The input CRS for data from OSM should in almost all cases be EPSG:4326 = WGS84, which is used here as default.
+	 */
+	public void setInputCRS(String inputCRS) {
+		this.inputCRS = inputCRS;
+	}
+
+	public void setKeepPaths(boolean keepPaths) {
+		this.keepPaths = keepPaths;
+	}
+	
+	public void setIincludeLowHierarchyWays(boolean includeLowHierarchyWays) {
+		this.includeLowHierarchyWays = includeLowHierarchyWays;
+	}
+
+	public void setOnlyMotorwayToTertiary(boolean onlyMotorwayToTertiary) {
+		this.onlyMotorwayToTertiary = onlyMotorwayToTertiary;
+	}
+
+	public void setOnlyMotorwayToSecondary(boolean onlyMotorwayToSecondary) {
+		this.onlyMotorwayToSecondary = onlyMotorwayToSecondary;
 	}
 }
