@@ -133,12 +133,9 @@
 		<module>balac</module>
 		<module>balmermi</module>
 		<module>benjamin</module>
-		<module>bvitins</module>
 		<module>cottbus</module>
 		<module>dgrether</module>
-		<module>droeder</module>
 		<module>dziemke</module>
-		<module>farzadalemi</module>
 		<module>gregor</module>
 		<module>gunnar</module>
 		<module>hbecker</module>
@@ -151,13 +148,11 @@
 		<module>kai</module>
 		<module>kairuns</module>
 		<module>kturner</module>
-		<module>lkroeger</module>
 		<module>michalm</module>
 		<module>muelleki</module>
 		<module>pbouman</module>
 		<module>pieter</module>
 		<module>boescpa</module>
-		<module>run</module>
 		<module>sschroeder</module>
 		<module>santiago</module>
 		<module>sergioo</module>
@@ -174,7 +169,6 @@
 		<module>vsptelematics</module>
 		<module>vsp</module>
 		<module>vspshk</module>
-		<module>vbmh</module>
 	</modules>
 
 	<dependencies>
