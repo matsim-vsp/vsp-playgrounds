@@ -40,18 +40,6 @@
         <scope>compile</scope>
       </dependency>
   	<dependency>
-		<groupId>playground</groupId>
-		<artifactId>andreas</artifactId>
-		<version>0.10.0-SNAPSHOT</version>
-		<scope>compile</scope>
-		<exclusions>
-			<exclusion>
-				<artifactId>google-collections</artifactId>
-				<groupId>com.google.collections</groupId>
-			</exclusion>
-		</exclusions>
-  	</dependency>
-  	<dependency>
   		<groupId>playground</groupId>
   		<artifactId>agarwalamit</artifactId>
   		<version>0.10.0-SNAPSHOT</version>
