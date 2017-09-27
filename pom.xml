@@ -128,7 +128,6 @@
 
 	<modules>
 		<module>agarwalamit</module>
-		<module>andreas</module>
 		<module>artemc</module>
 		<module>balac</module>
 		<module>balmermi</module>
@@ -157,13 +156,11 @@
 		<module>santiago</module>
 		<module>sergioo</module>
 		<module>singapore</module>
-		<module>smetzler</module>
 		<module>southAfrica</module>
 		<module>stockholm</module>
 		<module>telaviv</module>
 		<module>thibautd</module>
 		<module>tthunig</module>
-		<module>toronto</module>
 		<module>wrashid</module>
 		<module>ucsb</module>
 		<module>vsptelematics</module>
