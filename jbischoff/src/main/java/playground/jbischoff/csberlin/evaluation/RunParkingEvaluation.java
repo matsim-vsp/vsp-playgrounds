@@ -67,7 +67,7 @@ public static void main(String[] args) {
 	events.addHandler(wlp);
 	events.addHandler(mierendorffEval);
 	events.addHandler(klausEval);
-	String dir = "D:/runs-svn/bmw_carsharing/avparking/randombehavior/";
+	String dir = "D:/runs-svn/bmw_carsharing/avparking/02/randombehavior/";
 	new ParkingSearchEventsReader(events).readFile(dir+"output_events.xml.gz");
 	pwde.writeEgressWalkStatistics(dir);
 	mierendorffEval.writeStats(dir+"mierendorffParkAndEgressStats.csv");

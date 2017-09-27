@@ -56,18 +56,12 @@
 			<artifactId>michalm</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
-				<dependency>
+		<dependency>
 			<groupId>playground</groupId>
-			<artifactId>andreas</artifactId>
+			<artifactId>vsp</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
-		
-				<dependency>
-			<groupId>org.matsim.contrib</groupId>
-			<artifactId>signals</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
+			
 				<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>cadytsIntegration</artifactId>

@@ -40,8 +40,8 @@ import org.matsim.core.network.io.MatsimNetworkReader;
  *
  */
 public class SimpleVKTCalculator {
-	final static String EVENTSFILE = "D:/runs-svn/bmw_carsharing/avparking/randombehavior/output_events.xml.gz";
-	final static String NETWORKFILE = "D:/runs-svn/bmw_carsharing/avparking/randombehavior/output_network.xml.gz";
+	final static String EVENTSFILE = "D:/runs-svn/bmw_carsharing/avparking/02/findFreeSlot/output_events.xml.gz";
+	final static String NETWORKFILE = "D:/runs-svn/bmw_carsharing/avparking/02/findFreeSlot/output_network.xml.gz";
 
 	
 	// according to http://www.co2online.de/klima-schuetzen/mobilitaet/auto-co2-ausstoss/
