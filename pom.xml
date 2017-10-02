@@ -132,6 +132,7 @@
 		<module>balac</module>
 		<module>balmermi</module>
 		<module>benjamin</module>
+		<module>boescpa</module>
 		<module>cottbus</module>
 		<module>dgrether</module>
 		<module>dziemke</module>
@@ -148,23 +149,22 @@
 		<module>kturner</module>
 		<module>michalm</module>
 		<module>muelleki</module>
+		<module>paschke</module>
 		<module>pbouman</module>
 		<module>pieter</module>
-		<module>boescpa</module>
-		<module>sschroeder</module>
 		<module>santiago</module>
 		<module>sergioo</module>
 		<module>singapore</module>
 		<module>southAfrica</module>
+		<module>sschroeder</module>
 		<module>stockholm</module>
-		<module>telaviv</module>
 		<module>thibautd</module>
 		<module>tthunig</module>
-		<module>wrashid</module>
 		<module>ucsb</module>
-		<module>vsptelematics</module>
 		<module>vsp</module>
 		<module>vspshk</module>
+		<module>vsptelematics</module>
+		<module>wrashid</module>
 	</modules>
 
 	<dependencies>
