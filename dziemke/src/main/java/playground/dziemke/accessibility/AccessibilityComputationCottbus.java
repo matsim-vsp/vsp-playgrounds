@@ -51,22 +51,20 @@ public class AccessibilityComputationCottbus {
 		
 		String runOutputFolder = "../../public-svn/matsim/scenarios/countries/de/cottbus/commuter-population-only-car-traffic-only-100pct-2016-03-18/";
 		String accessibilityOutputDirectory = runOutputFolder + "accessibilities/";
-		String networkFile = "network_wgs84_utm33n.xml.gz";
-		String plansFile = "commuter_population_wgs84_utm33n_car_only.xml.gz";
 		
 		Config config = ConfigUtils.loadConfig(runOutputFolder + "config.xml", new AccessibilityConfigGroup());
 		Envelope envelope = new Envelope(447000,461000,5729000,5740000);
 		String scenarioCRS = "EPSG:32633"; // EPSG:32633 = WGS 84 / UTM zone 33N, for Eastern half of Germany
 		
-		config.network().setInputFile(networkFile);
-		config.plans().setInputFile(plansFile);
+		config.network().setInputFile("network_wgs84_utm33n.xml.gz");
+		config.plans().setInputFile("commuter_population_wgs84_utm33n_car_only.xml.gz");
 		
 //		config.global().setCoordinateSystem(scenarioCRS);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setOutputDirectory(accessibilityOutputDirectory);
 		config.controler().setLastIteration(0);
-		config.controler().setRunId("de_cottbus_" + "2106-11-10" + "_" + cellSize.toString().split("\\.")[0]);
+		config.controler().setRunId("de_cottbus_" + cellSize.toString().split("\\.")[0]);
 		
 //		config.transit().setTransitScheduleFile(runOutputFolder + "output_transitSchedule.xml.gz");
 //		config.transit().setVehiclesFile(runOutputFolder + "output_transitVehicles.xml.gz");
