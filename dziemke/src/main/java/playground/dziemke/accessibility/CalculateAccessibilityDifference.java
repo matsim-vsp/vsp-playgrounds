@@ -50,17 +50,22 @@ public class CalculateAccessibilityDifference {
 	public static void main(String[] args) {
 //		String directoryRootBase = "../../../shared-svn/projects/maxess/data/nmb/output/17compRestricted500/";
 //		String directoryRootPolicy = "../../../shared-svn/projects/maxess/data/nmb/output/nwChange8hRestricted/";
-		String directoryRootBase = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus/runAccessibilityComputation/";
-		String directoryRootPolicy = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus_pt-only/runAccessibilityComputation/";
+//		String directoryRootBase = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus/runAccessibilityComputation/";
+//		String directoryRootPolicy = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus_pt-only/runAccessibilityComputation/";
+		String directoryRoot = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/";
+		String directoryRootBase = directoryRoot + "BT-b/accessibilities_50_-5.25-0.0/";
+		String directoryRootPolicy = directoryRoot + "BT-mb/accessibilities_50_-5.25-0.0/";
+		String identifier = "BT-b-BT-mb_50_-5.25-0.0/";
+		
 //		String directoryRoot = "../../../shared-svn/projects/maxess/data/nmb/output/17compRestricted500/";
-//		String activityType = FacilityTypes.EDUCATION;
-		String activityType = FacilityTypes.WORK;
+		String activityType = FacilityTypes.EDUCATION;
+//		String activityType = FacilityTypes.WORK;
 //		String[] activityTypes = {FacilityTypes.SHOPPING, FacilityTypes.LEISURE, FacilityTypes.OTHER, FacilityTypes.EDUCATION};
 
 		setHeader(directoryRootBase, activityType);
 		collectData(directoryRootBase, activityType, "base");
 		collectData(directoryRootPolicy, activityType, "policy");
-		writeFile(directoryRootPolicy, activityType);
+		writeFile(directoryRoot + identifier, activityType);
 //		setHeader(directoryRootBase, activityTypes);
 //		collectData(directoryRootPolicy, activityTypes);
 //		writeFile(directoryRootPolicy, activityTypes);
@@ -165,12 +170,11 @@ public class CalculateAccessibilityDifference {
 	}
 	
 	
-	private static void writeFile(String directoryRoot, String activityType) {
+	private static void writeFile(String directory, String activityType) {
 //	private static void writeFile(String directoryRoot, String[] activityTypes) {
-		String directory = directoryRoot + "difference/";
-//		String directory = directoryRoot + "composite/";
-		new File(directory).mkdir();
-		CSVWriter writer = new CSVWriter(directory + "accessibilities.csv");
+		String outputDirectory = directory + "/" + activityType + "/";
+		new File(outputDirectory).mkdirs();
+		CSVWriter writer = new CSVWriter(outputDirectory + "accessibilities.csv");
 		LOG.info("Start writing output file.");
 
 		for (int i = 0; i < header.length; i++) {

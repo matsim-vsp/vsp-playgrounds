@@ -19,30 +19,23 @@
 package playground.dziemke.accessibility;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.AccessibilityModule;
 import org.matsim.contrib.accessibility.FacilityTypes;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
-import org.matsim.contrib.accessibility.utils.AccessibilityFacilityUtils;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.facilities.ActivityFacilities;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -54,51 +47,48 @@ public class AccessibilityComputationPatna {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationPatna.class);
 	
 	public static void main(String[] args) throws IOException {
-		Double cellSize = 1000.;
-		boolean push2Geoserver = false; // set true for run on server
-		boolean createQGisOutput = true; // set false for run on server
-		String scenarioCRS = "EPSG:24345"; // says Amit
-		Envelope envelope = new Envelope(306000,326000,2829000,2837000); // Notation: minX, maxX, minY, maxY
+		Double cellSize = 50.;
+		boolean push2Geoserver = false;
+		boolean createQGisOutput = true;
+		
+		// TODO
+		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
+//		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+//		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-mb/";
+		String accessibilityOutputDirectory = runOutputFolder + "accessibilities/";
 		
 		final Config config = ConfigUtils.createConfig(new AccessibilityConfigGroup());
+//		Config config = ConfigUtils.loadConfig(runOutputFolder + "output_config.xml.gz", new AccessibilityConfigGroup());
+		Envelope envelope = new Envelope(307000,324000,2829000,2837000); // Notation: minX, maxX, minY, maxY
+		String scenarioCRS = "EPSG:24345"; // EPSG:24345 = Kalianpur 1975 / UTM zone 45N
+		
+		config.network().setInputFile(runOutputFolder + "output_network.xml.gz");
+		
+		config.facilities().setInputFile("/Users/dominik/Downloads/patna/2017-09-26_facilities.xml");
+		
+//		config.global().setCoordinateSystem(scenarioCRS);
 
-		// Network (stored locally)
-		String networkFile = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_network.xml.gz";
-		
-		// Facilities (directly from OSM)
-		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(scenarioCRS, "EPSG:4326");
-		Coord southwest = transformation.transform(new Coord(envelope.getMinX(), envelope.getMinY()));
-		Coord northeast = transformation.transform(new Coord(envelope.getMaxX(), envelope.getMaxY()));
-		URL osm = new URL("http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=" + southwest.getX() + "," + southwest.getY() + "," + northeast.getX() + "," + northeast.getY() +"]");
-		HttpURLConnection connection = (HttpURLConnection) osm.openConnection(); // TODO There might be more elegant option without creating this twice
-		double buildingTypeFromVicinityRange = 0.;
-		ActivityFacilities facilities = AccessibilityFacilityUtils.createFacilites(connection.getInputStream(), scenarioCRS, buildingTypeFromVicinityRange);
-		
-		config.controler().setOutputDirectory("../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/accessibiliities/");
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setOutputDirectory(accessibilityOutputDirectory);
+		config.controler().setFirstIteration(0); // new
 		config.controler().setLastIteration(0);
 		config.controler().setRunId("in_patna_" + cellSize.toString().split("\\.")[0]);
 		
-		config.global().setCoordinateSystem(scenarioCRS);
-	
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
 		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
+		acg.setEnvelope(envelope);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, true);
+		acg.setComputingAccessibilityForMode(Modes4Accessibility.car, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.bike, true);
 		acg.setOutputCrs(scenarioCRS);
 		
-		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromNetwork);
-		
-		ConfigUtils.setVspDefaults(config);
-		
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
-		MatsimNetworkReader networkReader = new MatsimNetworkReader(scenario.getNetwork());
-		networkReader.readFile(networkFile);
-		scenario.setActivityFacilities(facilities);
 
 		// Activity types
-		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
+		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION}); // TODO
 		
+		// Create densities from network
 		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork());
 		
 		final Controler controler = new Controler(scenario);
@@ -117,9 +107,9 @@ public class AccessibilityComputationPatna {
 		if (createQGisOutput) {
 			final boolean includeDensityLayer = false;
 			final Integer range = 9; // In the current implementation, this must always be 9
-			final Double lowerBound = -13.0; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
-			final Double upperBound = 1.0;
-			final int populationThreshold = (int) (0 / (1000/cellSize * 1000/cellSize));
+			final Double lowerBound = -5.25; // (upperBound - lowerBound) ideally nicely divisible by (range - 2) // TODO
+			final Double upperBound = 0.0;
+			final int populationThreshold = (int) (0 / (1000/cellSize * 1000/cellSize)); // TODO
 			
 			String osName = System.getProperty("os.name");
 			String workingDirectory = config.controler().getOutputDirectory();
@@ -131,7 +121,7 @@ public class AccessibilityComputationPatna {
 							populationThreshold);
 					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode.toString(), osName);
 				}
-			}  
+			}
 		}
 	}
 }
