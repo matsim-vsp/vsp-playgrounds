@@ -11,6 +11,7 @@ import org.matsim.contrib.carsharing.events.handlers.PersonArrivalDepartureHandl
 import org.matsim.contrib.carsharing.manager.CarsharingManagerInterface;
 import org.matsim.contrib.carsharing.manager.CarsharingManagerNew;
 import org.matsim.contrib.carsharing.manager.demand.CurrentTotalDemand;
+import org.matsim.contrib.carsharing.manager.demand.CurrentTotalDemandImpl;
 import org.matsim.contrib.carsharing.manager.demand.DemandHandler;
 import org.matsim.contrib.carsharing.manager.demand.membership.MembershipContainer;
 import org.matsim.contrib.carsharing.manager.demand.membership.MembershipReader;
@@ -82,7 +83,7 @@ public class ServiceAreasControler {
 		final ChooseTheCompany chooseCompany = new ChooseTheCompanyExample();
 		final ChooseVehicleType chooseCehicleType = new ChooseVehicleTypeExample();
 		final RouterProvider routerProvider = new RouterProviderImpl();
-		final CurrentTotalDemand currentTotalDemand = new CurrentTotalDemand(controler.getScenario().getNetwork());
+		final CurrentTotalDemand currentTotalDemand = new CurrentTotalDemandImpl(controler.getScenario().getNetwork());
 		final CarsharingManagerInterface carsharingManager = new CarsharingManagerNew();
 		final RouteCarsharingTrip routeCarsharingTrip = new RouteCarsharingTripImpl();
 
