@@ -49,20 +49,21 @@ public class OsmNetworkCreatorDZ {
 	
 
 	public static void main(String[] args) {
-		// Input and output		
-		String osmFileName = "../../nemo/data/input/counts/verkehrszaehlung_2015/network/allWaysNRW.osm";
-		String outputRoot = "../../nemo/data/input/network/motorway-tertiary/";
-		String networkFileName = outputRoot + "network_motorway-tertiary.xml.gz";
+		// String osmFileName = "../../nemo/data/input/counts/verkehrszaehlung_2015/network/allWaysNRW.osm";
+		// String outputRoot = "../../nemo/data/input/network/motorway-tertiary/";
+		// String networkFileName = outputRoot + "network_motorway-tertiary.xml.gz";
+		String osmFileName = "../../upretoria/data/capetown/osm/2017-10-03";
+		String outputRoot = "../../upretoria/data/capetown/network/";
+		String networkFileName = outputRoot + "2017-10-03_network.xml.gz";
 
-		// Parameters
 		// EPSG:4326 = WGS84
 		// EPSG:31468 = DHDN GK4, for Berlin; DE
 		// EPSG:26918 = NAD83 / UTM zone 18N, for Maryland, US
 		// EPSG:25832 = ETRS89 / UTM zone 32N, for Nordrhein-Westfalen
-		String outputCRS = "EPSG:25832";
+		// EPSG:22235 = Cape / UTM zone 35S, for South Africa
+		String outputCRS = "EPSG:22235";
 		
 		OsmNetworkCreatorDZ osmNetworkCreatorDZ = new OsmNetworkCreatorDZ(osmFileName, outputRoot, networkFileName, outputCRS);
-		osmNetworkCreatorDZ.setOnlyMotorwayToTertiary(true);
 		osmNetworkCreatorDZ.createNetwork();
 	}
 	
