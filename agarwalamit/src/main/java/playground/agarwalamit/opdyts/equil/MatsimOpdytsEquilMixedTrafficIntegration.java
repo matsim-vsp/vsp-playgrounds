@@ -64,7 +64,7 @@ import playground.agarwalamit.utils.FileUtils;
 
 public class MatsimOpdytsEquilMixedTrafficIntegration {
 
-	private static String EQUIL_DIR = "../matsim-git/examples/scenarios/equil-mixedTraffic/";
+	private static String EQUIL_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/inputs/";
 	private static final OpdytsScenario EQUIL_MIXEDTRAFFIC = OpdytsScenario.EQUIL_MIXEDTRAFFIC;
 
 	public static void main(String[] args) {
