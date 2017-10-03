@@ -73,57 +73,47 @@ import javax.inject.Provider;
 
 /**
  * @author benjamin
- * (I think) CadytsCarModule and AgentSpecificActivitySchedulingModule should not be used at the same time, as both use different scoring functions.
  */
+
 public class SantiagoScenarioRunnerWithDepChoice {
 		
 	/**GENERAL**/
 	private static String configFile;
 	private static String gantriesFile;
-	private static int policy;
 	private static int sigma;	
 	private static boolean doModeChoice; 
 	private static boolean mapActs2Links;
-	private static boolean cadyts;
 	private static boolean departureTimeChoice;
 	/***/
-
-	private static String simulationStep = "Step2.A";
 	private static String caseName = "baseCase1pct";
+	private static String simulationStep = "Step2.A";
+	private static String pricingName = "gantries";
 	private static String inputPath = "../../../runs-svn/santiago/"+caseName+"/";
 
 	
 	
 	public static void main(String args[]){		
 
-		if (args.length==8){ //ONLY FOR CMD CASES
+		if (args.length>0){ //ONLY FOR CMD CASES
 
 			configFile = args[0]; //COMPLETE PATH TO CONFIG.
 			gantriesFile = args[1]; //COMPLETE PATH TO TOLL LINKS FILE
-			policy = Integer.parseInt(args[2]) ; //POLICY? - 0: BASE CASE, 1: CORDON.
-			sigma = Integer.parseInt(args[3]); //SIGMA. 
-			doModeChoice = Boolean.parseBoolean(args[4]); //DOMODECHOICE?
-			mapActs2Links = Boolean.parseBoolean(args[5]); //MAPACTS2LINKS?
-			cadyts = Boolean.parseBoolean(args[6]); //CADYTS?
-			departureTimeChoice=Boolean.parseBoolean(args[7]); //DEPARTURETIMECHOICE?
+			sigma = Integer.parseInt(args[2]); //SIGMA. 
+			doModeChoice = Boolean.parseBoolean(args[3]); //DOMODECHOICE?
+			mapActs2Links = Boolean.parseBoolean(args[4]); //MAPACTS2LINKS?
+			departureTimeChoice=Boolean.parseBoolean(args[5]); //DEPARTURETIMECHOICE?
 			
 		} else {
 		
-//			configFile=inputPath + "config_" + caseName + ".xml" ;
 			configFile = inputPath + "config" + simulationStep + ".xml";
-			gantriesFile = inputPath + "inputFor" + simulationStep + "/gantries.xml";
-			policy=0;    
-			sigma=3 ;    
-			doModeChoice=true; //TODO:BE AWARE OF THIS!
+			gantriesFile = inputPath + "inputFor" + simulationStep + "/" + pricingName +"xml";
+			sigma=3;    
+			doModeChoice=true;
 			mapActs2Links=false;
-			cadyts=false; //TODO:BE AWARE OF THIS!
 			departureTimeChoice=false; //TODO: BE AWARE OF THIS!
 		
 		}	
-			
-			if(policy == 1){
-				//TODO: CHANGE THE TollLinksFile IN THE CONFIG.
-			}
+
 			
 			Config config = ConfigUtils.loadConfig(configFile);
 			Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -152,33 +142,7 @@ public class SantiagoScenarioRunnerWithDepChoice {
 			//Adding randomness to the router, sigma = 3
 			config.plansCalcRoute().setRoutingRandomness(sigma); 
 
-			controler.addOverridingModule(new RoadPricingModule());			
-
-			if (cadyts){
-				controler.addOverridingModule(new CadytsCarModule());
-				// include cadyts into the plan scoring (this will add the cadyts corrections to the scores)
-				controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
-					@Inject CadytsContext cadytsContext;
-					@Inject ScoringParametersForPerson parameters;
-					@Override
-					public ScoringFunction createNewScoringFunction(Person person) {
-						final ScoringParameters params = parameters.getScoringParameters(person);
-						
-						SumScoringFunction scoringFunctionAccumulator = new SumScoringFunction();
-						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelLegScoring(params, controler.getScenario().getNetwork()));
-						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
-						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
-	
-						final CadytsScoring<Link> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
-						scoringFunction.setWeightOfCadytsCorrection(30. * config.planCalcScore().getBrainExpBeta()) ;
-						scoringFunctionAccumulator.addScoringFunction(scoringFunction );
-	
-						return scoringFunctionAccumulator;
-					}
-				}) ;
-				
-				
-			}
+			controler.addOverridingModule(new RoadPricingModule());	
 
 			if(departureTimeChoice){
 				
