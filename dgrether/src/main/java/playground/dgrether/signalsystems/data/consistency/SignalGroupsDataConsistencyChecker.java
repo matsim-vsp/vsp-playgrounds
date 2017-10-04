@@ -32,8 +32,6 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 
-import playground.dgrether.designdrafts.consistency.ConsistencyChecker;
-
 
 /**
  * @author dgrether
@@ -52,7 +50,7 @@ public class SignalGroupsDataConsistencyChecker implements ConsistencyChecker {
 	}
 	
 	/**
-	 * @see playground.dgrether.designdrafts.consistency.ConsistencyChecker#checkConsistency()
+	 * @see ConsistencyChecker#checkConsistency()
 	 */
 	@Override
 	public void checkConsistency() {

@@ -1,6 +1,6 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * ConsistencyCheckerManager
+ * ConsistencyChecker
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
@@ -17,23 +17,17 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dgrether.designdrafts.consistency;
+package playground.dgrether.signalsystems.data.consistency;
 
-import java.util.List;
+
 
 
 /**
- * Classes implementing this interface are responsible to store 
- * several instances ConsistencyChecker type.
- * Furthermore it has to provide a method to call all registered consistencyCheckers
+ * A marker interface for ConsistencyCheckers.
  * @author dgrether
- * @deprecated just a draft to be discussed, don't implement this interface yet.
  */
-@Deprecated
-public interface ConsistencyCheckerManager {
+public interface ConsistencyChecker {
 
-	public List<ConsistencyChecker> getConsistencyCheckers();
-		
 	public void checkConsistency();
-
+	
 }
