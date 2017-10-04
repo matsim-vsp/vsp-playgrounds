@@ -62,11 +62,12 @@ public class ParametricRunsEquilnet {
     }
 
     public static void main(String[] args) {
+        int runCounter= 1;
         String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/output/";
         StringBuilder buffer = new StringBuilder();
-        ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(1);
+        ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(runCounter);
 
-        String ascStyles [] = {"axial_fixed","axial_random"};
+        String ascStyles [] = {"axial_fixed","axial_randomVariation"};
         double [] stepSizes = {0.25, 0.5, 0.75, 1.0};
         Integer [] convIterations = {500, 300};
         double [] selfTuningWts = {1.0, 2.0};
@@ -74,6 +75,7 @@ public class ParametricRunsEquilnet {
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+newLine);
 
+        int cnt = runCounter;
         for (String ascStyle : ascStyles ) {
             for(double stepSize :stepSizes){
                 for (int conIts : convIterations) {
@@ -81,7 +83,7 @@ public class ParametricRunsEquilnet {
                         for (int warmUpIt : warmUpIts) {
                             String arg = ascStyle + " "+ stepSize + " " + conIts + " " + selfTunWt + " " + warmUpIt;
                             parametricRuns.run(arg, baseDir);
-                            buffer.append(arg+newLine);
+                            buffer.append("run"+String.valueOf(cnt++)+"\t" + arg.replace(' ','\t') + newLine);
                         }
                     }
                 }
