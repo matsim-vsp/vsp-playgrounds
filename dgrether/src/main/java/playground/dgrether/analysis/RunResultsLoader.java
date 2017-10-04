@@ -19,14 +19,15 @@
  * *********************************************************************** */
 package playground.dgrether.analysis;
 
-import java.io.File;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.SignalsDataLoader;
+import org.matsim.contrib.signals.data.SignalsScenarioWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.io.MatsimNetworkReader;
@@ -34,10 +35,8 @@ import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.data.Lanes;
 import org.matsim.lanes.data.LanesReader;
-import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.SignalsDataLoader;
 
-import playground.dgrether.DgPaths;
+import java.io.File;
 
 
 /**
@@ -68,8 +67,7 @@ public class RunResultsLoader {
 		}
 		this.outputDir = new OutputDirectoryHierarchy(
 				this.directory,
-				this.runId,
-						false ? OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles : OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists,
+				this.runId, OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists,
 				false);
 		String configFilename = outputDir.getOutputFilename(Controler.FILENAME_CONFIG);
 	}
@@ -130,14 +128,9 @@ public class RunResultsLoader {
 	
 	public SignalsData getSignals() {
 		if (this.signals == null) {
-			//The next 3 lines should work with recent matsim revisions
-//			String systemsfile = this.outputDir.getOutputFilename(SignalsScenarioWriter.FILENAME_SIGNAL_SYSTEMS );
-//			String groupsfile = this.outputDir.getOutputFilename(SignalsScenarioWriter.FILENAME_SIGNAL_GROUPS);
-//			String controlfile = this.outputDir.getOutputFilename(SignalsScenarioWriter.FILENAME_SIGNAL_CONTROL);
-			//The next 3 lines are only required by old matsim revisions that do not write the full scenario to the output folder
-			String systemsfile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_systems_no_13.xml";
-			String groupsfile =  DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_groups_no_13.xml";
-			String controlfile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13.xml";
+			String systemsfile = this.outputDir.getOutputFilename(SignalsScenarioWriter.FILENAME_SIGNAL_SYSTEMS);
+			String groupsfile =  this.outputDir.getOutputFilename(SignalsScenarioWriter.FILENAME_SIGNAL_GROUPS);
+			String controlfile = this.outputDir.getOutputFilename(SignalsScenarioWriter.FILENAME_SIGNAL_CONTROL);
 			this.signals = loadSignals(systemsfile, groupsfile, controlfile);
 		}
 		return this.signals;
@@ -145,9 +138,10 @@ public class RunResultsLoader {
 
 	private SignalsData loadSignals(String systemspath, String groupspath, String controlpath) {
 		Config c = ConfigUtils.createConfig();
-		ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(systemspath);
-		ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(groupspath);
-		ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(controlpath);
+		SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		signalSystemsConfigGroup.setSignalSystemFile(systemspath);
+		signalSystemsConfigGroup.setSignalGroupsFile(groupspath);
+		signalSystemsConfigGroup.setSignalControlFile(controlpath);
 		SignalsDataLoader loader = new SignalsDataLoader(c);
 		return loader.loadSignalsData();
 	}

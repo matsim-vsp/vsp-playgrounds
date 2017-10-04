@@ -43,9 +43,6 @@ import playground.dgrether.koehlerstrehlersignal.network.DgNetworkUtils;
  */
 public class DgCreateCottbusCityNetwork {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		String boundingBoxShape = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/shape_files/signal_systems/cottbus_city_bounding_box.shp";
 		ShapeFileReader shapeReader = new ShapeFileReader();
@@ -62,10 +59,6 @@ public class DgCreateCottbusCityNetwork {
 		Network network = sc.getNetwork();
 		
 		CoordinateReferenceSystem netcrs = MGC.getCRS(TransformationFactory.WGS84_UTM33N);
-		
-//		NetworkFilterManager filterManager = new NetworkFilterManager(network);
-//		filterManager.addLinkFilter(new FeatureNetworkLinkStartOrEndCoordFilter(netcrs, env, shapeReader.getCoordinateSystem() ));
-//		Network cottbusCityNet = filterManager.applyFilters();
 		
 		DgNetShrinkImproved netShrink = new DgNetShrinkImproved();
 		Network cottbusCityNet = netShrink.createSmallNetwork(sc.getNetwork(), env);
