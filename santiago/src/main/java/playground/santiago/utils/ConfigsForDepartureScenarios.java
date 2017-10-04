@@ -12,7 +12,7 @@ import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.pt.config.TransitConfigGroup;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
-
+//TODO: no longer needed.
 public class ConfigsForDepartureScenarios {
 
 	private static final String INPUT_CONFIG = "../../../shared-svn/projects/santiago/scenario/inputForMATSim/expanded_config_0.xml";
