@@ -154,37 +154,9 @@ public class LanesConsistencyChecker {
 	public boolean isRemoveMalformed() {
 		return removeMalformed;
 	}
-
 	
 	public void setRemoveMalformed(boolean removeMalformed) {
 		this.removeMalformed = removeMalformed;
 	}
 
-	
-	
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-//		String netFile = DgPaths.IVTCHBASE + "baseCase/network/ivtch-osm.xml";
-//		String lanesFile = DgPaths.STUDIESDG + "signalSystemsZh/laneDefinitions.xml";
-		String netFile = "/media/data/work/repos/shared-svn/studies/dgrether/cottbus/Cottbus-BA/network_wo_junctions.xml";
-		String lanesFile = "/media/data/work/repos/shared-svn/studies/dgrether/cottbus/Cottbus-BA/lanes_cottbus_v20_jbol_c_wo_junctions.xml";
-
-		MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		Network net = scenario.getNetwork();
-		new MatsimNetworkReader(scenario.getNetwork()).readFile(netFile);
-	  log.info("read network");
-	  
-		LanesReader laneReader = new LanesReader(scenario);
-	  laneReader.readFile(lanesFile);
-	  
-	  LanesConsistencyChecker lcc = new LanesConsistencyChecker(net, (Lanes) scenario.getScenarioElement(Lanes.ELEMENT_NAME));
-		lcc.setRemoveMalformed(false);
-		lcc.checkConsistency();
-		
-//		MatsimLaneDefinitionsWriter laneWriter = new MatsimLaneDefinitionsWriter(laneDefs);
-//		laneWriter.writeFile(lanesFile + ".new.xml");
-	}
 }

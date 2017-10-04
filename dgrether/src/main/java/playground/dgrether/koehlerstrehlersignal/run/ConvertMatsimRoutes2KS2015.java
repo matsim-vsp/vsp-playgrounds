@@ -1,6 +1,22 @@
-/**
- * 
- */
+/* *********************************************************************** *
+ * project: org.matsim.*
+ * ConvertCottbusSolution2Matsim
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ *                   LICENSE and WARRANTY file.                            *
+ * email           : info at matsim dot org                                *
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *   See also COPYING, LICENSE and WARRANTY file                           *
+ *                                                                         *
+ * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.run;
 
 import java.util.ArrayList;
@@ -16,7 +32,6 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.MatsimEventsReader;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.analysis.RunResultsLoader;
 import playground.dgrether.events.EventsFilterManager;
 import playground.dgrether.events.EventsFilterManagerImpl;
@@ -77,7 +92,7 @@ public class ConvertMatsimRoutes2KS2015 {
 			String outputFile, String description) {
 
 		// init
-		String runsDirectory = DgPaths.REPOS + "runs-svn/cottbus/run"
+		String runsDirectory = "../../runs-svn/cottbus/run"
 				+ runNumber + "/";
 		RunResultsLoader runDir = new RunResultsLoader(runsDirectory, runNumber);
 		String eventsFilename = runDir.getEventsFilename(lastIteration);
@@ -240,8 +255,7 @@ public class ConvertMatsimRoutes2KS2015 {
 		Integer lastIteration = 1400;
 		String BTUsignalControl = "new_optimum";
 		
-		String ksModelDirectory = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
+		String ksModelDirectory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
 				+ "2015-02-06_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 		String ksModelFile = "ks2010_model_50.0_19800.0_50.0.xml";
 		String ksOptFile = "btu/" + BTUsignalControl + ".xml";

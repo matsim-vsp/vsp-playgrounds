@@ -60,7 +60,6 @@ import org.matsim.lanes.data.v11.LaneDefinitionsFactory11;
 import org.matsim.lanes.data.v11.LaneDefinitionsV11ToV20Conversion;
 import org.matsim.lanes.data.v11.LanesToLinkAssignment11;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.DgPlaygroundJobfileCreator;
 
 /**
@@ -72,25 +71,25 @@ public class DaganzoScenarioGenerator {
 	private static final Logger log = Logger
 			.getLogger(DaganzoScenarioGenerator.class);
 
-	public static String DAGANZO_SVN_DIR = "shared-svn/studies/dgrether/daganzo2012/";
+	private static String DAGANZO_SVN_DIR = "shared-svn/studies/dgrether/daganzo2012/";
 
-	public static String DAGANZOBASEDIR = DgPaths.REPOS + DAGANZO_SVN_DIR;
+	static String DAGANZOBASEDIR = "../../" + DAGANZO_SVN_DIR;
 
-	public static final String DAGANZO_NETWORK = "daganzoNetwork2.xml";
+	private static final String DAGANZO_NETWORK = "daganzoNetwork2.xml";
 
-	public static final String DAGANZONETWORKFILE = DAGANZOBASEDIR
+	private static final String DAGANZONETWORKFILE = DAGANZOBASEDIR
 			+DAGANZO_NETWORK;
 
-	public static final String CONFIG_MODULE = "daganzoSignal";
+	private static final String CONFIG_MODULE = "daganzoSignal";
 
-	public static final String PSIGNAL_CONFIG_PARAMETER = "psignal";
+	private static final String PSIGNAL_CONFIG_PARAMETER = "psignal";
 
-	public static final String SPLITSG1LINK4_CONFIG_PARAMETER = "splitSg1Link4";
+	private static final String SPLITSG1LINK4_CONFIG_PARAMETER = "splitSg1Link4";
 
-	public static final String INTIAL_RED_NORMAL_ROUTE_CONFIG_PARAMETER = "initialRedNormalRoute";
+	private static final String INTIAL_RED_NORMAL_ROUTE_CONFIG_PARAMETER = "initialRedNormalRoute";
 
 	//	public static final String NETWORKFILE =  DAGANZOBASEDIR + "daganzoNetworkNoLanes.xml";//DAGANZONETWORKFILE;
-	public static final String NETWORKFILE =  DAGANZONETWORKFILE;
+	private static final String NETWORKFILE =  DAGANZONETWORKFILE;
 
 	private static final String PLANS1OUT = DAGANZOBASEDIR
 			+ "daganzo2PlansNormalRoute.xml";
@@ -104,23 +103,23 @@ public class DaganzoScenarioGenerator {
 	private static final String CONFIG2OUT = DAGANZOBASEDIR
 			+ "daganzoConfigAlternativeRoutePlansOnly.xml";
 
-	public static final String DAGANZO_LANES = "daganzoLaneDefinitions.xml";
+	private static final String DAGANZO_LANES = "daganzoLaneDefinitions.xml";
 
-	public static final String LANESOUTPUTFILE = DAGANZOBASEDIR
+	private static final String LANESOUTPUTFILE = DAGANZOBASEDIR
 		+ DAGANZO_LANES;
 
-	public static final String DAGANZO_SIGNALS = "daganzoSignalSystems.xml";
+	private static final String DAGANZO_SIGNALS = "daganzoSignalSystems.xml";
 
-	public static final String SIGNALSYSTEMSOUTPUTFILE = DAGANZOBASEDIR
+	private static final String SIGNALSYSTEMSOUTPUTFILE = DAGANZOBASEDIR
 		+ DAGANZO_SIGNALS;
 
-	public static final String DAGANZO_SIGNALS_CONFIG = "daganzoSignalSystemsConfigs6.xml";
+	private static final String DAGANZO_SIGNALS_CONFIG = "daganzoSignalSystemsConfigs6.xml";
 
-	public static final String SIGNALSYSTEMCONFIGURATIONSOUTPUTFILE = DAGANZOBASEDIR
+	private static final String SIGNALSYSTEMCONFIGURATIONSOUTPUTFILE = DAGANZOBASEDIR
 		+ DAGANZO_SIGNALS_CONFIG;
 
 
-	public String configOut, plansOut, outputDirectory;
+	private String configOut, plansOut, outputDirectory;
 
 
 	private static final boolean isUsePlansOnly = true;
@@ -129,7 +128,7 @@ public class DaganzoScenarioGenerator {
 
 	private static final boolean isUseSignalSystems = true;
 
-	public static int iterations = 4000;
+	private static int iterations = 4000;
 
 	private static final int agents = 5000;
 
@@ -139,7 +138,7 @@ public class DaganzoScenarioGenerator {
 
 	private final static Double splitSgLink4 = null;
 
-	public static boolean isAlternativeRouteEnabled = false;
+	private static boolean isAlternativeRouteEnabled = false;
 
 	private Double initialRedNormalRoute = 1500.0;
 
@@ -147,7 +146,7 @@ public class DaganzoScenarioGenerator {
 
 //	private static final String controllerClass = AdaptiveController6.class.getCanonicalName();
 
-	public static final String runId = "1190";//"";
+	private static final String runId = "1190";//"";
 
 	private static final boolean writerClusterFiles = false;
 
@@ -201,12 +200,13 @@ public class DaganzoScenarioGenerator {
 		if (writerClusterFiles){
 			configOut = DAGANZOBASEDIR + runId + "_config.xml";
 			plansOut = DAGANZOBASEDIR  + runId + "_plans.xml.gz";
-			outputDirectory = DgPaths.CLUSTER_MATSIM_OUTPUT + "run" +  runId;
-			networkInputFile = DgPaths.CLUSTERSVN + DAGANZO_SVN_DIR + DAGANZO_NETWORK;
-			lanesInputFile = DgPaths.CLUSTERSVN + DAGANZO_SVN_DIR + DAGANZO_LANES;
-			signalInputFile = DgPaths.CLUSTERSVN + DAGANZO_SVN_DIR + DAGANZO_SIGNALS;
-			signalConfigInputFile = DgPaths.CLUSTERSVN + DAGANZO_SVN_DIR + DAGANZO_SIGNALS_CONFIG;
-			plansInputFile = DgPaths.CLUSTERSVN + DAGANZO_SVN_DIR + runId + "_plans.xml.gz";
+			String clusterBaseDir = "/homes/extern/grether/netils/";
+			outputDirectory = clusterBaseDir + "matsimOutput/run" +  runId;
+			networkInputFile = clusterBaseDir + DAGANZO_SVN_DIR + DAGANZO_NETWORK;
+			lanesInputFile = clusterBaseDir + DAGANZO_SVN_DIR + DAGANZO_LANES;
+			signalInputFile = clusterBaseDir + DAGANZO_SVN_DIR + DAGANZO_SIGNALS;
+			signalConfigInputFile = clusterBaseDir + DAGANZO_SVN_DIR + DAGANZO_SIGNALS_CONFIG;
+			plansInputFile = clusterBaseDir + DAGANZO_SVN_DIR + runId + "_plans.xml.gz";
 		}
 		else {
 			plansOut = DAGANZOBASEDIR + "plans_" + baseString + ".xml";
@@ -264,7 +264,7 @@ public class DaganzoScenarioGenerator {
 		new ConfigWriter(config).write(configOut);
 
 		DgPlaygroundJobfileCreator.createJobfile(DAGANZOBASEDIR + runId + "jobfile",
-				DgPaths.CLUSTERBASE + DAGANZO_SVN_DIR + runId + "_config.xml", runId);
+				"/homes/extern/grether/netils/" + DAGANZO_SVN_DIR + runId + "_config.xml", runId);
 
 		log.info("scenario written!");
 	}
@@ -274,13 +274,12 @@ public class DaganzoScenarioGenerator {
 	private void createPlans(MutableScenario scenario) {
 		Network network = scenario.getNetwork();
 		Population population = scenario.getPopulation();
-		double firstHomeEndTime =  600.0;
-		double homeEndTime = firstHomeEndTime;
+		double homeEndTime = 600.0;
 //		Link l1 = network.getLinks().get(scenario.createId("1"));
 //		Link l7 = network.getLinks().get(scenario.createId("7"));
 		PopulationFactory factory = population.getFactory();
 
-		for (int i = 1; i <= this.agents; i++) {
+		for (int i = 1; i <= agents; i++) {
 			Person p = factory.createPerson(Id.create(i, Person.class));
 			// home
 			// homeEndTime = homeEndTime + ((i - 1) % 3);
@@ -352,7 +351,7 @@ public class DaganzoScenarioGenerator {
 		config.network().setInputFile(networkInputFile);
 		if (isAlternativeRouteEnabled){
 			if (writerClusterFiles){
-				config.plans().setInputFile(DgPaths.CLUSTERBASE  + DAGANZO_SVN_DIR + "alternate_plans.xml");
+				config.plans().setInputFile("/homes/extern/grether/netils/"  + DAGANZO_SVN_DIR + "alternate_plans.xml");
 			}
 			else {
 				config.plans().setInputFile( DAGANZOBASEDIR + "alternate_plans.xml");
@@ -360,7 +359,7 @@ public class DaganzoScenarioGenerator {
 		}
 		else {
 			if (writerClusterFiles){
-				config.plans().setInputFile(DgPaths.CLUSTERBASE + DAGANZO_SVN_DIR + "normal_plans.xml");
+				config.plans().setInputFile("/homes/extern/grether/netils/" + DAGANZO_SVN_DIR + "normal_plans.xml");
 			}
 			else{
 				config.plans().setInputFile(DAGANZOBASEDIR + "normal_plans.xml");

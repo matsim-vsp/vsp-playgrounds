@@ -32,8 +32,6 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalPlan;
 
-import playground.dgrether.DgPaths;
-
 
 /**
  * @author dgrether
@@ -42,8 +40,8 @@ import playground.dgrether.DgPaths;
 public class OffsetRandomizer {
 
 	private static final Logger log = Logger.getLogger(OffsetRandomizer.class);
-	public 	static final String SIGNAL_CONTROL_FILENAME = DgPaths.REPOS +  "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13.xml";
-	public 	static final String RANDOM_OFFSET_SIGNAL_CONTROL_FILENAME = DgPaths.REPOS +  "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13_random_offsets.xml";
+	private static final String SIGNAL_CONTROL_FILENAME = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13.xml";
+	private	static final String RANDOM_OFFSET_SIGNAL_CONTROL_FILENAME = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13_random_offsets.xml";
 	
 	public static void main(String[] args) {
 

@@ -58,8 +58,6 @@ import org.matsim.lanes.data.v11.LaneDefinitionsFactory11;
 import org.matsim.lanes.data.v11.LaneDefinitionsV11ToV20Conversion;
 import org.matsim.lanes.data.v11.LanesToLinkAssignment11;
 
-import playground.dgrether.DgPaths;
-
 /**
  * Class to create the parallel scenario (former figure9 scenario) with one direction.
  * This class doesn't create a population.
@@ -101,8 +99,7 @@ public class TtCreateParallelScenario {
 		this.capacity = capacity;
 
 		// define output filenames
-		this.baseDir = DgPaths.SHAREDSVN
-				+ "projects/cottbus/data/scenarios/parallel_scenario/AB/";
+		this.baseDir = "../../shared-svn/projects/cottbus/data/scenarios/parallel_scenario/AB/";
 		this.networkOutfile = baseDir + "network" + capacity + ".xml";
 		this.lanesOutfile = baseDir + "lanes.xml";
 
@@ -601,7 +598,7 @@ public class TtCreateParallelScenario {
 			throw new IllegalStateException();
 		}
 		
-		((Network) net).setEffectiveLaneWidth(1.0);
+		net.setEffectiveLaneWidth(1.0);
 		NetworkFactory fac = net.getFactory();
 		net.addNode(fac.createNode(idN1, new Coord(-500, 0)));
 		net.addNode(fac.createNode(idN2, new Coord(-300, 0)));

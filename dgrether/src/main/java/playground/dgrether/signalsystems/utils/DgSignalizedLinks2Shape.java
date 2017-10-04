@@ -36,7 +36,6 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.utils.DgNet2Shape;
 
 
@@ -51,7 +50,7 @@ public class DgSignalizedLinks2Shape {
 	
 	private CoordinateReferenceSystem crs = MGC.getCRS(TransformationFactory.WGS84_UTM33N);
 	
-	public Network getSignalizedLinks(SignalSystemsData ssd, Network net) {
+	private Network getSignalizedLinks(SignalSystemsData ssd, Network net) {
 		Config c2 = ConfigUtils.createConfig();
 		Scenario sc2 = ScenarioUtils.createScenario(c2);
 		Network net2 = sc2.getNetwork();
@@ -91,8 +90,8 @@ public class DgSignalizedLinks2Shape {
 	
 	
 	public static void main(String[] args) {
-		String configFilename = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/config.xml";
-		String shapeFilename = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_small/signalized_links.shp";
+		String configFilename = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/config.xml";
+		String shapeFilename = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_small/signalized_links.shp";
 		Config config = ConfigUtils.loadConfig(configFilename);
 		Scenario sc = ScenarioUtils.loadScenario(config);
 		new DgSignalizedLinks2Shape().getSignalizedLinksAndWrite2Shape(sc, shapeFilename);

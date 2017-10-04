@@ -32,7 +32,6 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import playground.dgrether.DgPaths;
 import playground.dgrether.events.DgNetShrinkImproved;
 import playground.dgrether.koehlerstrehlersignal.network.DgNetworkUtils;
 
@@ -44,7 +43,7 @@ import playground.dgrether.koehlerstrehlersignal.network.DgNetworkUtils;
 public class DgCreateCottbusCityNetwork {
 
 	public static void main(String[] args) {
-		String boundingBoxShape = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/shape_files/signal_systems/cottbus_city_bounding_box.shp";
+		String boundingBoxShape = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/shape_files/signal_systems/cottbus_city_bounding_box.shp";
 		ShapeFileReader shapeReader = new ShapeFileReader();
 		shapeReader.readFileAndInitialize(boundingBoxShape);
 		SimpleFeature f = shapeReader.getFeatureSet().iterator().next();
@@ -52,7 +51,7 @@ public class DgCreateCottbusCityNetwork {
 		Envelope env = new Envelope(bb.getMinX(), bb.getMaxX(), bb.getMinY(), bb.getMaxY());
 //		Envelope env = shapeReader.getBounds();
 		
-		String fullNetworkFilename = DgPaths.REPOS  + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_wgs84_utm33n.xml.gz";
+		String fullNetworkFilename = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_wgs84_utm33n.xml.gz";
 		Scenario sc = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		MatsimNetworkReader netReader = new MatsimNetworkReader(sc.getNetwork());
 		netReader.readFile(fullNetworkFilename);
@@ -63,7 +62,7 @@ public class DgCreateCottbusCityNetwork {
 		DgNetShrinkImproved netShrink = new DgNetShrinkImproved();
 		Network cottbusCityNet = netShrink.createSmallNetwork(sc.getNetwork(), env);
 	
-		String cityNetwork = DgPaths.REPOS  + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/cottbus_city_network/network_city_wgs84_utm33n";
+		String cityNetwork = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/cottbus_city_network/network_city_wgs84_utm33n";
 		NetworkWriter netWriter = new NetworkWriter(cottbusCityNet);
 		netWriter.write(cityNetwork + ".xml.gz");
 		

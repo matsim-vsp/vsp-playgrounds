@@ -34,7 +34,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.events.handlers.DgGeoFilteredLegHistogram;
 import playground.dgrether.signalsystems.cottbus.CottbusUtils;
 
@@ -50,14 +49,13 @@ public class DgCottbusLegHistogram {
 	public static void main(String[] args) {
 		String runNumber = "1732";
 		String iterationNumber = "1000";
-		String runDirectory = DgPaths.RUNSSVN + "run" + runNumber + "/";
+		String runDirectory = "../../runs-svn/run" + runNumber + "/";
 		String networkFile = runDirectory + "" + runNumber + ".output_network.xml.gz";
 		String outputDirectory = runDirectory + "ITERS/it." + iterationNumber + "/";
 		String eventsFile = outputDirectory + "" + runNumber + "." + iterationNumber + ".events.xml.gz";
 		String histoFile = outputDirectory + "" + runNumber + "." + iterationNumber + ".cottbus_leg_histogram.txt";
 		String histoGraphicFile = outputDirectory + "" + runNumber + "." + iterationNumber + ".cottbus_leg_histogram_all.png";
-		String cottbusFeatureFile = DgPaths.REPOS
-				+ "shared-svn/studies/countries/de/brandenburg_gemeinde_kreisgrenzen/kreise/dlm_kreis.shp";
+		String cottbusFeatureFile = "../../shared-svn/studies/countries/de/brandenburg_gemeinde_kreisgrenzen/kreise/dlm_kreis.shp";
 		CoordinateReferenceSystem netCrs = MGC.getCRS(TransformationFactory.WGS84_UTM33N);
 		Tuple<CoordinateReferenceSystem, SimpleFeature> cottbusFeatureTuple = CottbusUtils.loadCottbusFeature(cottbusFeatureFile);
 		

@@ -51,7 +51,6 @@ import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.xml.sax.SAXException;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.signalsystems.utils.DgSignalGroupSettingsDataOnsetComparator;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
 import signals.sylvia.model.SylviaSignalController;
@@ -105,10 +104,10 @@ public class DgSylviaPreprocessData {
 				log.warn("More than one plan, check if this tool is doing the correct work!");
 			}
 			for (SignalPlanData signalPlan : controllerData.getSignalPlanData().values()){
-				Map<Integer, List<SignalGroupSettingsData>> onsetGroupSettingsMap = new HashMap<Integer, List<SignalGroupSettingsData>>();
+				Map<Integer, List<SignalGroupSettingsData>> onsetGroupSettingsMap = new HashMap<>();
 				for (SignalGroupSettingsData signalGroupSettings : signalPlan.getSignalGroupSettingsDataByGroupId().values()){
 					if (!onsetGroupSettingsMap.containsKey(signalGroupSettings.getOnset())){
-						onsetGroupSettingsMap.put(signalGroupSettings.getOnset(), new ArrayList<SignalGroupSettingsData>());
+						onsetGroupSettingsMap.put(signalGroupSettings.getOnset(), new ArrayList<>());
 					}
 					onsetGroupSettingsMap.get(signalGroupSettings.getOnset()).add(signalGroupSettings);
 				}
@@ -118,7 +117,7 @@ public class DgSylviaPreprocessData {
 	}
 	
 	
-	public static void convertFixedTimePlansToSylviaBasePlans(String signalControlInputFile, String signalControlOutputFile) 
+	private static void convertFixedTimePlansToSylviaBasePlans(String signalControlInputFile, String signalControlOutputFile)
 			throws JAXBException, SAXException, ParserConfigurationException, IOException{
 		SignalControlData signalControl = new SignalControlDataImpl();
 		SignalControlReader20 reader = new SignalControlReader20(signalControl);
@@ -158,9 +157,9 @@ public class DgSylviaPreprocessData {
 	private static DgPhase createSylviaPhase(final DgPhase phase, final SignalControlDataFactory factory){
 		log.info("creating sylvia phase...");
 		final int on = phase.getPhaseStartSecond();
-		List<SignalGroupSettingsData> alltimeGreenSettings = new ArrayList<SignalGroupSettingsData>();
-		List<SignalGroupSettingsData> shorterSettingsSortedByOnset  = new ArrayList<SignalGroupSettingsData>();
-		List<SignalGroupSettingsData> newSettings = new ArrayList<SignalGroupSettingsData>();
+		List<SignalGroupSettingsData> alltimeGreenSettings = new ArrayList<>();
+		List<SignalGroupSettingsData> shorterSettingsSortedByOnset  = new ArrayList<>();
+		List<SignalGroupSettingsData> newSettings = new ArrayList<>();
 		//get all group settings that are shorter than the phase
 		for (SignalGroupSettingsData settings : phase.getSignalGroupSettingsByGroupId().values()){
 			if (settings.getOnset() == phase.getPhaseStartSecond() && settings.getDropping() == phase.getPhaseEndSecond()){
@@ -215,12 +214,12 @@ public class DgSylviaPreprocessData {
 	
 	private static SignalPlanData convertSignalPlanData(final SignalPlanData fixedTimePlan, SignalControlDataFactory factory) {
 		SignalPlanData newPlan = DgSignalsUtils.copySignalPlanData(fixedTimePlan, Id.create(SYLVIA_PREFIX + fixedTimePlan.getId().toString(), SignalPlan.class), factory);
-		List<SignalGroupSettingsData> groupSettingsList = new ArrayList<SignalGroupSettingsData>();
+		List<SignalGroupSettingsData> groupSettingsList = new ArrayList<>();
 		groupSettingsList.addAll(newPlan.getSignalGroupSettingsDataByGroupId().values());
 		//filter allGreenSettings
 		Set<SignalGroupSettingsData> allGreenSettings = removeAllGreenSignalGroupSettings(groupSettingsList, fixedTimePlan.getCycleTime());
 		List<DgPhase> phases = calculateSortedPhases(groupSettingsList);
-		List<DgPhase> sylviaPhases = new ArrayList<DgPhase>();
+		List<DgPhase> sylviaPhases = new ArrayList<>();
 		
 		int phaseStart  = 0;
 		int lastPhaseOff = 0;
@@ -311,16 +310,14 @@ public class DgSylviaPreprocessData {
 	 * @return 
 	 */
 	private static Collection<IntergreenConstraint> calculateIntergreenConstraints(DgPhase lastPhase, DgPhase phase) {
-		Map<SignalGroupSettingsData, IntergreenConstraint> map = new HashMap<SignalGroupSettingsData, IntergreenConstraint>();
-		IntergreenConstraint ic = null;
-		int intergreen; 
+		Map<SignalGroupSettingsData, IntergreenConstraint> map = new HashMap<>();
 		for (SignalGroupSettingsData settings : phase.getSignalGroupSettingsByGroupId().values()){
 			for (SignalGroupSettingsData lastSettings : lastPhase.getSignalGroupSettingsByGroupId().values()){
-				intergreen = settings.getOnset() - lastSettings.getDropping();
+				int intergreen = settings.getOnset() - lastSettings.getDropping();
 				log.info("intergreen: " + intergreen);
 				if (intergreen >= 0){
 					if ((! map.containsKey(settings)) || map.get(settings).intergreen > intergreen){
-						ic = new IntergreenConstraint();
+						IntergreenConstraint ic = new IntergreenConstraint();
 						ic.onSettingsId = settings.getSignalGroupId();
 						ic.droppingSettingsId = lastSettings.getSignalGroupId();
 						ic.intergreen = intergreen;
@@ -335,7 +332,7 @@ public class DgSylviaPreprocessData {
 	
 
 	private static List<SignalGroupSettingsData> calculateSettingsShorterThanPhase(DgPhase phase){
-		List<SignalGroupSettingsData> settingsList  = new ArrayList<SignalGroupSettingsData>();
+		List<SignalGroupSettingsData> settingsList  = new ArrayList<>();
 		//get all group settings that are shorter than the phase
 		for (SignalGroupSettingsData settings : phase.getSignalGroupSettingsByGroupId().values()){
 			if (settings.getOnset() == phase.getPhaseStartSecond() && settings.getDropping() == phase.getPhaseEndSecond()){
@@ -360,28 +357,28 @@ public class DgSylviaPreprocessData {
 	 *   - starts after t but ends at the same time as the groups starting at t
 	 */
 	private static List<DgPhase> calculateSortedPhases(final List<SignalGroupSettingsData> groupSettingsList) {
-		List<DgPhase> phases = new ArrayList<DgPhase>();
+		List<DgPhase> phases = new ArrayList<>();
 		//make a copy
-		ArrayList<SignalGroupSettingsData> settingsList = new ArrayList<SignalGroupSettingsData>();
+		ArrayList<SignalGroupSettingsData> settingsList = new ArrayList<>();
 		settingsList.addAll(groupSettingsList);
 		//sort the copy
 		Collections.sort(settingsList, new DgSignalGroupSettingsDataOnsetComparator());
 		//preprocess
-		Map<Integer, Set<SignalGroupSettingsData>> onsetSettingsMap = new HashMap<Integer, Set<SignalGroupSettingsData>>();
-		Map<Integer, Set<SignalGroupSettingsData>> droppingSettingsMap = new HashMap<Integer, Set<SignalGroupSettingsData>>();
+		Map<Integer, Set<SignalGroupSettingsData>> onsetSettingsMap = new HashMap<>();
+		Map<Integer, Set<SignalGroupSettingsData>> droppingSettingsMap = new HashMap<>();
 		for (SignalGroupSettingsData settings : groupSettingsList){
 			if (!onsetSettingsMap.containsKey(settings.getOnset())){
-				onsetSettingsMap.put(settings.getOnset(), new HashSet<SignalGroupSettingsData>());
+				onsetSettingsMap.put(settings.getOnset(), new HashSet<>());
 			}
 			onsetSettingsMap.get(settings.getOnset()).add(settings);
 			if (!droppingSettingsMap.containsKey(settings.getDropping())){
-				droppingSettingsMap.put(settings.getDropping(), new HashSet<SignalGroupSettingsData>());
+				droppingSettingsMap.put(settings.getDropping(), new HashSet<>());
 			}
 			droppingSettingsMap.get(settings.getDropping()).add(settings);
 		}
 		
 		//create the phases
-		Set<SignalGroupSettingsData> handledSettings = new HashSet<SignalGroupSettingsData>();
+		Set<SignalGroupSettingsData> handledSettings = new HashSet<>();
 		//loop through the settings sorted by onset
 		for (SignalGroupSettingsData settings : settingsList){
 			if (handledSettings.contains(settings)){
@@ -438,7 +435,7 @@ public class DgSylviaPreprocessData {
 
 
 	private static Set<SignalGroupSettingsData> removeAllGreenSignalGroupSettings(List<SignalGroupSettingsData> groupSettingsList, Integer cycleTime){
-		Set<SignalGroupSettingsData> allGreenSettings = new HashSet<SignalGroupSettingsData>();
+		Set<SignalGroupSettingsData> allGreenSettings = new HashSet<>();
 		ListIterator<SignalGroupSettingsData> it = groupSettingsList.listIterator();
 		while (it.hasNext()){
 			SignalGroupSettingsData settings = it.next();
@@ -450,33 +447,7 @@ public class DgSylviaPreprocessData {
 		return allGreenSettings;
 	}
 	
-	
-	
-	
-
-	/**
-	 * @param args
-	 * @throws IOException 
-	 * @throws ParserConfigurationException 
-	 * @throws SAXException 
-	 * @throws JAXBException 
-	 */
 	public static void main(String[] args) throws JAXBException, SAXException, ParserConfigurationException, IOException {
-//		String signalControlFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/Cottbus-BA/scenario-lsa/signalControlCottbusT90_v2.0_jb_ba_removed.xml";
-//		String signalControlOutFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/sylvia/signal_control_sylvia.xml";
-//		String signalGroupsFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/Cottbus-BA/signalGroupsCottbusByNodes_v2.0.xml";
-//		String signalGroupsOutFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/sylvia/signal_groups_sylvia.xml";
-//		String signalControlFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control.xml";
-//		String signalControlOutFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_sylvia.xml";
-//		String signalGroupsFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_groups.xml";
-//		String signalGroupsOutFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_groups_sylvia.xml";
-		
-//		String signalControlFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13_random_offsets.xml";
-//		String signalControlOutFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_sylvia_no_13_random_offsets.xml";
-//		String signalGroupsFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_groups_no_13.xml";
-//		String signalGroupsOutFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_groups_sylvia_no_13_random_offsets.xml";
-//		DgSylviaPreprocessData.simplifySignalGroupsAndConvertFixedTimePlansToSylviaBasePlans(signalControlFile, signalControlOutFile, signalGroupsFile, signalGroupsOutFile);
-		
 		String signalControlFile = "../../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13_random_offsets.xml";
 		String signalControlOutFile = "../../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_sylvia_no_13_random_offsets.xml";
 		DgSylviaPreprocessData.convertFixedTimePlansToSylviaBasePlans(signalControlFile, signalControlOutFile);

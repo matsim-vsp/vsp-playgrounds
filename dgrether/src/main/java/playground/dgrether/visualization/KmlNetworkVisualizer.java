@@ -41,8 +41,6 @@ import org.matsim.vis.kml.KMZWriter;
 import org.matsim.vis.kml.MatsimKMLLogo;
 import org.matsim.vis.kml.NetworkKmlStyleFactory;
 
-import playground.dgrether.DgPaths;
-
 /**
  * @author dgrether
  *
@@ -110,20 +108,6 @@ public class KmlNetworkVisualizer {
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
 		return scenario.getNetwork();
-	}
-
-
-	public static void main(final String[] args) {
-		if (false && args.length != 2) {
-			printHelp();
-		}
-		else {
-			//			Network net = loadNetwork("../../cvsRep/vsp-cvs/studies/berlin-wip/network/wip_net.xml");
-			Network net = loadNetwork(DgPaths.BERLIN_NET);
-//			new KmlNetworkVisualizer("./examples/equil/network.xml", "./output/equil.kmz");
-			new KmlNetworkVisualizer(net).write(DgPaths.BERLIN_SCENARIO + "net/miv_big/m44_344_big.kmz");
-
-		}
 	}
 
 	public static void printHelp() {

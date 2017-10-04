@@ -65,8 +65,6 @@ import org.matsim.lanes.data.v11.LaneDefinitionsFactory11;
 import org.matsim.lanes.data.v11.LaneDefinitionsV11ToV20Conversion;
 import org.matsim.lanes.data.v11.LanesToLinkAssignment11;
 
-import playground.dgrether.DgPaths;
-
 
 /**
  * @author dgrether
@@ -76,7 +74,7 @@ public class DgFigure9ScenarioGenerator {
 	
 	private static final Logger log = Logger.getLogger(DgFigure9ScenarioGenerator.class);
 	
-	private String baseDir = DgPaths.STUDIESDG + "koehlerStrehler2010/scenario5/";
+	private String baseDir = "../../shared-svn/studies/dgrether/koehlerStrehler2010/scenario5/";
 	
 	private String networkOutfile = baseDir +  "network.xml";
 
@@ -406,8 +404,7 @@ public class DgFigure9ScenarioGenerator {
 		link65lane2.setStartsAtMeterFromLinkEnd(laneLenght);
 		
 		//convert to 2.0 format and return
-		Lanes lanesv2 = LaneDefinitionsV11ToV20Conversion.convertTo20(lanes, scenario.getNetwork());
-		return lanesv2;
+		return LaneDefinitionsV11ToV20Conversion.convertTo20(lanes, scenario.getNetwork());
 	}
 
 	
@@ -420,7 +417,7 @@ public class DgFigure9ScenarioGenerator {
 		if (net.getCapacityPeriod() != 3600.0){
 			throw new IllegalStateException();
 		}
-		((Network)net).setEffectiveLaneWidth(1.0);
+		net.setEffectiveLaneWidth(1.0);
 		NetworkFactory fac = net.getFactory();
 		double scale = 300.0;
 		Node n1, n2, n3, n4, n5, n6, n7, n8;

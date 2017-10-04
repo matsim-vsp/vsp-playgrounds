@@ -40,8 +40,6 @@ import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.dgrether.DgPaths;
-
 /**
  * @author dgrether
  *

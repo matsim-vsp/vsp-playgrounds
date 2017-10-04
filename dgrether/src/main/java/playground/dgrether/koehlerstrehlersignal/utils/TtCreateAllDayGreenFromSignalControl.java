@@ -7,7 +7,6 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.signalsystems.utils.DgScenarioUtils;
 
 /**
@@ -20,10 +19,8 @@ public class TtCreateAllDayGreenFromSignalControl {
 
 	public static void main(String[] args) {
 		
-		String signalControlInputFile = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/data/scenarios/parallel_scenario/AB/signalControlBC.xml";
-		String signalControlOutputFile = DgPaths.SHAREDSVN + 
-				"projects/cottbus/data/scenarios/parallel_scenario/AB/signalControlGreen.xml";
+		String signalControlInputFile = "../../shared-svn/projects/cottbus/data/scenarios/parallel_scenario/AB/signalControlBC.xml";
+		String signalControlOutputFile = "../../shared-svn/projects/cottbus/data/scenarios/parallel_scenario/AB/signalControlGreen.xml";
 		
 		convertAndWriteSignalControl(signalControlOutputFile, signalControlInputFile);
 	}

@@ -34,7 +34,6 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.signalsystems.cottbus.DgCottbusSubPopAverageTravelTimeHandler;
 
 /**
@@ -44,16 +43,14 @@ import playground.dgrether.signalsystems.cottbus.DgCottbusSubPopAverageTravelTim
 public class DgCottbusFootballSubPopAnalysis {
 	
 	private static final Logger log = Logger.getLogger(DgCottbusFootballSubPopAnalysis.class);
-	/**
-	 * @param args
-	 */
+
 	public static void main(String[] args) throws Exception {
 		
 		String runId = "1251";
-		String runDirName = DgPaths.REPOS + "runs-svn/run" + runId;
+		String runDirName = "../../runs-svn/run" + runId;
 		
-		Map<Integer, Map<Integer, Double>> fbAvgTTMap = new HashMap<Integer, Map<Integer, Double>>();
-		Map<Integer, Map<Integer, Double>> commuterAvgTTMap = new HashMap<Integer, Map<Integer, Double>>();
+		Map<Integer, Map<Integer, Double>> fbAvgTTMap = new HashMap<>();
+		Map<Integer, Map<Integer, Double>> commuterAvgTTMap = new HashMap<>();
 		
 		File runDir = new File(runDirName);
 		for (File fbdir : runDir.listFiles()){
@@ -77,14 +74,14 @@ public class DgCottbusFootballSubPopAnalysis {
 								MatsimEventsReader eventsReader = new MatsimEventsReader(events);
 								eventsReader.readFile(itFile.getAbsolutePath());
 								if (! fbAvgTTMap.containsKey(scale)){
-									fbAvgTTMap.put(scale, new HashMap<Integer, Double>());
+									fbAvgTTMap.put(scale, new HashMap<>());
 								}
 								double avgtt = avgtthandler.getFootballAvgTT();
 								log.debug("    avg tt for football is " + avgtt);
 								fbAvgTTMap.get(scale).put(iteration, avgtt);
 								
 								if (! commuterAvgTTMap.containsKey(scale)){
-									commuterAvgTTMap.put(scale, new HashMap<Integer, Double>());
+									commuterAvgTTMap.put(scale, new HashMap<>());
 								}
 								avgtt = avgtthandler.getCommuterAvgTT();
 								log.debug("    avg tt for commuter is " + avgtt);
@@ -103,16 +100,16 @@ public class DgCottbusFootballSubPopAnalysis {
 	}
 
 	private static void writeTTMap(Map<Integer, Map<Integer, Double>> map, String outfile) throws Exception{
-		List<Integer> scaleList = new ArrayList<Integer>();
+		List<Integer> scaleList = new ArrayList<>();
 		scaleList.addAll(map.keySet());
 		Collections.sort(scaleList);
-		List<Integer> itList = new ArrayList<Integer>();
+		List<Integer> itList = new ArrayList<>();
 		Set<Integer> its = map.get(scaleList.get(0)).keySet();
 		itList.addAll(its);
 		Collections.sort(itList);
 		String header = "scale";
 		for (Integer i : itList){
-			header = header + "\t iteration " + Integer.toString(i);
+			header +=  "\t iteration " + Integer.toString(i);
 		}
 		BufferedWriter writer = IOUtils.getBufferedWriter(outfile);
 		writer.write(header);

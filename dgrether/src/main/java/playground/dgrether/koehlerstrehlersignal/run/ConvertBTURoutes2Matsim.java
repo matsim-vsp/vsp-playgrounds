@@ -1,6 +1,22 @@
-/**
- * 
- */
+/* *********************************************************************** *
+ * project: org.matsim.*
+ * ConvertCottbusSolution2Matsim
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ *                   LICENSE and WARRANTY file.                            *
+ * email           : info at matsim dot org                                *
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *   See also COPYING, LICENSE and WARRANTY file                           *
+ *                                                                         *
+ * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.run;
 
 import java.util.ArrayList;
@@ -30,7 +46,6 @@ import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodities;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodity;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossingNode;
@@ -407,8 +422,7 @@ public class ConvertBTURoutes2Matsim {
 	 */
 	public static void main(String[] args) {
 
-		String directory = DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
+		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
 				+ "2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 
 		String btuRoutesFilename = "routeComparison/paths.xml";

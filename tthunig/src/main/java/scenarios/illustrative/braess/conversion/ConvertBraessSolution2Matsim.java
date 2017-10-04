@@ -32,7 +32,6 @@ import org.matsim.contrib.signals.data.SignalsScenarioWriter;
 import org.matsim.contrib.signals.data.SignalsData;
 
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import playground.dgrether.DgPaths;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
 import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010CrossingSolution;
 import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010Solution2Matsim;
@@ -78,8 +77,7 @@ public class ConvertBraessSolution2Matsim {
 		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(
 				directory + "output_signal_control_v2.0.xml.gz");
 		SignalsDataLoader signalsLoader = new SignalsDataLoader(config);
-		SignalsData signals = signalsLoader.loadSignalsData();
-		return signals;
+		return signalsLoader.loadSignalsData();
 	}
 	
 	private void writeBraessOffsetsSignalControl(String directoryPath, String inputFilename,

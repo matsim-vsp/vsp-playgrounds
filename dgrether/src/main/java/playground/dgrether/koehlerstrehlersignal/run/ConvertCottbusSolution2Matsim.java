@@ -33,7 +33,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.utils.collections.Tuple;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
 import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010CrossingSolution;
 import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010Solution2Matsim;
@@ -124,8 +123,7 @@ public class ConvertCottbusSolution2Matsim {
 		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(
 				directory + "output_signal_control_v2.0.xml.gz");
 		SignalsDataLoader signalsLoader = new SignalsDataLoader(config);
-		SignalsData signals = signalsLoader.loadSignalsData();
-		return signals;
+		return signalsLoader.loadSignalsData();
 	}
 
 	private void writeOptimizedSignalControl(String directoryPath, String inputFilename,
@@ -180,53 +178,12 @@ public class ConvertCottbusSolution2Matsim {
 		writer.writeSignalControlData(signalsData.getSignalControlData());
 	}
 	
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		List<Tuple<String, String>> input = new ArrayList<Tuple<String, String>>();
-		// input.add(new Tuple<String, String>(
-		// DgPaths.REPOS +
-		// "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_50_evening_peak/",
-		// "ksm_50a_sol.txt"
-		// ));
-		// input.add(new Tuple<String, String>(
-		// DgPaths.REPOS +
-		// "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_50_morning_peak/",
-		// "ksm_50m_sol.txt"
-		// ));
-		// input.add(new Tuple<String, String>(
-		// DgPaths.REPOS +
-		// "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_10_evening_peak/",
-		// "ksm_10a_sol.txt"
-		// ));
-		// input.add(new Tuple<String, String>(
-		// DgPaths.REPOS +
-		// "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_10_morning_peak/",
-		// "ksm_10m_sol.txt"
-		// ));
-
-//		 input.add(new Tuple<String, String>(
-//		 DgPaths.REPOS +
-//		 "shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10_evening_peak/",
-//		 "ksm_10a_sol.txt"
-//		 ));
-//		 input.add(new Tuple<String, String>(
-//		 DgPaths.REPOS +
-//		 "shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10_morning_peak/",
-//		 "ksm_10m_sol.txt"
-//		 ));
-//
-//		for (Tuple<String, String> i : input) {
-//			new ConvertCottbusSolution2Matsim().convertOptimalSolution(
-//					i.getFirst(), i.getSecond());
-//		}
+		List<Tuple<String, String>> input = new ArrayList<>();
 		
-		new ConvertCottbusSolution2Matsim().convertOptimalSolution( DgPaths.REPOS
-				+ "shared-svn/projects/cottbus/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/", 
+		new ConvertCottbusSolution2Matsim().convertOptimalSolution("../../shared-svn/projects/cottbus/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
 				"btu/opt.xml");
-//		new ConvertCottbusSolution2Matsim().convertRandomSolution(DgPaths.REPOS
-//				+ "shared-svn/projects/cottbus/cb2ks2010/2015-02-06_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/", 
+//		new ConvertCottbusSolution2Matsim().convertRandomSolution("../../shared-svn/projects/cottbus/cb2ks2010/2015-02-06_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
 //				"btu/random_coordinations.xml");
 		
 	}

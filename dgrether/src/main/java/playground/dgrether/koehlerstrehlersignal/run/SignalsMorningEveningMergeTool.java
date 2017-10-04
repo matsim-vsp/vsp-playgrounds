@@ -39,7 +39,6 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalPlan;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
 
 
@@ -61,9 +60,8 @@ public class SignalsMorningEveningMergeTool {
 
 	
 	private void writeSignalControl(String outputDirectory, SignalControlData merged) {
-        File result;
         try {
-            result = Files.createDirectories(Paths.get(outputDirectory)).toFile();
+            Files.createDirectories(Paths.get(outputDirectory)).toFile();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +76,7 @@ public class SignalsMorningEveningMergeTool {
 	 */
 	private SignalControlData mergeData(SignalControlData morningControl, SignalControlData eveningControl){
 		for (SignalSystemControllerData morningController : morningControl.getSignalSystemControllerDataBySystemId().values()) {
-			List<SignalPlanData> morningPlans = new ArrayList<SignalPlanData>(morningController.getSignalPlanData().values());
+			List<SignalPlanData> morningPlans = new ArrayList<>(morningController.getSignalPlanData().values());
 			morningController.getSignalPlanData().clear();
 			for (SignalPlanData morningPlan : morningPlans) {
 				Id<SignalPlan> newId = Id.create(morningPlan.getId().toString() + "_m", SignalPlan.class);
@@ -131,12 +129,9 @@ public class SignalsMorningEveningMergeTool {
 
 
 	public static void main(String[] args) {
-//		String morningFolder =DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_10_morning_peak/";
-//		String eveningFolder = DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_10_evening_peak/";
-//		String outputDirectory = DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_10/";
-		String morningFolder =DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10_morning_peak/";
-		String eveningFolder = DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10_evening_peak/";
-		String outputDirectory = DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10/";
+		String morningFolder = "../../shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10_morning_peak/";
+		String eveningFolder = "../../shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10_evening_peak/";
+		String outputDirectory = "../../shared-svn/projects/cottbus/cb2ks2010/2013-08-12_minflow_10/";
 
 		new SignalsMorningEveningMergeTool().merge(morningFolder, eveningFolder, outputDirectory);
 	}

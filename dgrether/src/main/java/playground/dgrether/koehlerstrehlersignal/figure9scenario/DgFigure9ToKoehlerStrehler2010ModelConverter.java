@@ -29,7 +29,6 @@ import org.matsim.lanes.data.Lanes;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.xml.sax.SAXException;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010NetworkConverter;
 import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010SimpleDemandConverter;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodities;
@@ -44,12 +43,6 @@ public class DgFigure9ToKoehlerStrehler2010ModelConverter {
 	private static final Logger log = Logger
 			.getLogger(DgFigure9ToKoehlerStrehler2010ModelConverter.class);
 	
-	/**
-	 * @param args
-	 * @throws SAXException 
-	 * @throws IOException 
-	 * @throws TransformerConfigurationException 
-	 */
 	public static void main(String[] args) throws SAXException, TransformerConfigurationException, IOException {
 		MutableScenario sc = new DgFigure9ScenarioGenerator().loadScenario();
 		DgIdPool idPool = new DgIdPool();
@@ -66,7 +59,7 @@ public class DgFigure9ToKoehlerStrehler2010ModelConverter {
 		DgCommodities coms = demandConverter.convert(sc, net);
 		
 		KS2010ModelWriter writer = new KS2010ModelWriter();
-		writer.write(net, coms, "Figure9Scenario", "", DgPaths.STUDIESDG + "koehlerStrehler2010/cplex_scenario_population_800_agents.xml");
+		writer.write(net, coms, "Figure9Scenario", "", "../../shared-svn/studies/dgrether/koehlerStrehler2010/cplex_scenario_population_800_agents.xml");
 
 		log.warn("Id conversions are not written, yet!");
 		

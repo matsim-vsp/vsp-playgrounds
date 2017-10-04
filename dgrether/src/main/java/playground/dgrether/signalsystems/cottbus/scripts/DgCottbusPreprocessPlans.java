@@ -32,8 +32,6 @@ import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.dgrether.DgPaths;
-
 
 /**
  * @author dgrether
@@ -41,12 +39,9 @@ import playground.dgrether.DgPaths;
  */
 public class DgCottbusPreprocessPlans {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		String conf = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/sylvia/cottbus_sylvia_config.xml";
-		String popOutFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/Cottbus-BA/cb-plans_usual_0.2_routed.xml.gz";
+		String conf = "../../shared-svn/studies/dgrether/cottbus/sylvia/cottbus_sylvia_config.xml";
+		String popOutFile = "../../shared-svn/studies/dgrether/cottbus/Cottbus-BA/cb-plans_usual_0.2_routed.xml.gz";
 		
 		Config config = ConfigUtils.loadConfig(conf);
 		MatsimRandom.reset(config.global().getRandomSeed());
@@ -54,13 +49,13 @@ public class DgCottbusPreprocessPlans {
 		ScenarioUtils.loadScenario(scenario);
 		
 		
-		StreamingDeprecated.addAlgorithm(((Population) scenario.getPopulation()), new XY2Links(scenario.getNetwork(), null));
+		StreamingDeprecated.addAlgorithm((scenario.getPopulation()), new XY2Links(scenario.getNetwork(), null));
 		FreespeedTravelTimeAndDisutility timeCostCalc = new FreespeedTravelTimeAndDisutility(scenario.getConfig().planCalcScore());
-		StreamingDeprecated.addAlgorithm(((Population) scenario.getPopulation()), new PlanRouter(
+		StreamingDeprecated.addAlgorithm((scenario.getPopulation()), new PlanRouter(
 		new TripRouterFactoryBuilderWithDefaults().build(
 				scenario ).get(
 		) ));
-		StreamingDeprecated.runAlgorithms(((Population) scenario.getPopulation()));
+		StreamingDeprecated.runAlgorithms((scenario.getPopulation()));
 		PopulationWriter writer = new PopulationWriter(scenario.getPopulation(), scenario.getNetwork());
 		writer.write(popOutFile);
 	}

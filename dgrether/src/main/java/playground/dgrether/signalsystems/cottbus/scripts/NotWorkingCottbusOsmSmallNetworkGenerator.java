@@ -32,24 +32,20 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.OsmNetworkReader;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.signalsystems.utils.DgSignalizedLinks2Shape;
 import playground.dgrether.utils.DgNet2Shape;
 
 
 public class NotWorkingCottbusOsmSmallNetworkGenerator {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		Network network = NetworkUtils.createNetwork();
 		OsmNetworkReader osmReader = new OsmNetworkReader(network,
 				TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84,TransformationFactory.WGS84_UTM33N),  false);
 		osmReader.setKeepPaths(false);
 		osmReader.setScaleMaxSpeed(true);
-		String osmFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/Cottbus-BA/brandenburg_tagged.osm";
-		String output = DgPaths.REPOS +  "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_small/network";
+		String osmFile = "../../shared-svn/studies/dgrether/cottbus/Cottbus-BA/brandenburg_tagged.osm";
+		String output = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_small/network";
 
 //		 set osmReader useHighwayDefaults false
 //		 Autobahn
@@ -92,7 +88,7 @@ public class NotWorkingCottbusOsmSmallNetworkGenerator {
 //		
 		//postprocess junctions in the network
 		String networkWoJunctionsFile = output + "_cl_wo_junctions.xml.gz";
-		String lanesFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/lanes.xml";
+		String lanesFile = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/lanes.xml";
 		String lanesOutFile = output + "_cl_wo_junctions.xml";
 //		new DgOsmJunctionsPostprocessing().postprocessJunctions(osmFile, networkCleanedFile, networkWoJunctionsFile, lanesFile, lanesOutFile);
 		
@@ -100,7 +96,7 @@ public class NotWorkingCottbusOsmSmallNetworkGenerator {
 		//write output 
 		Config c1 = ConfigUtils.createConfig();
 		c1.network().setInputFile(networkWoJunctionsFile);
-		String signalsSystems = DgPaths.REPOS +  "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_systems.xml";
+		String signalsSystems = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_systems.xml";
 		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
 		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalsSystems);
 		Scenario scenario = ScenarioUtils.loadScenario(c1);
@@ -108,7 +104,7 @@ public class NotWorkingCottbusOsmSmallNetworkGenerator {
 		CoordinateReferenceSystem crs = MGC.getCRS(TransformationFactory.WGS84_UTM33N);
 		new DgNet2Shape().write(scenario.getNetwork(), output + ".shp", crs);
 
-		String signalsShapeFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_small/signalized_links.shp";
+		String signalsShapeFile = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_small/signalized_links.shp";
 		new DgSignalizedLinks2Shape().getSignalizedLinksAndWrite2Shape(scenario, signalsShapeFile);
 		
 

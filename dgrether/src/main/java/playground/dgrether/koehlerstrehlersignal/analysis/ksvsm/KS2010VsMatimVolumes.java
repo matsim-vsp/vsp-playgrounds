@@ -40,7 +40,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
@@ -66,9 +65,8 @@ public class KS2010VsMatimVolumes {
 		Map<Id<DgStreet>, Double> ks2010StreetIdFlow = solutionParser
 				.getStreetFlow();
 
-		Map<Id<Link>, Double> ks2010volumes = convertKS2010Volumes(idPool,
+		return convertKS2010Volumes(idPool,
 				dgIdConverter, ks2010StreetIdFlow);
-		return ks2010volumes;
 	}
 
 	private static Map<Id<Link>, Double> convertKS2010Volumes(DgIdPool idPool,
@@ -142,15 +140,12 @@ public class KS2010VsMatimVolumes {
 				outputFile, ks2010Volumes, matsimVolumes, scalingFactor);
 	}
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
-		List<Tuple<String, String>> input = new ArrayList<Tuple<String, String>>();
-		input.add(new Tuple<String, String>("50", "morning"));
-		input.add(new Tuple<String, String>("50", "evening"));
-		input.add(new Tuple<String, String>("10", "morning"));
-		input.add(new Tuple<String, String>("10", "evening"));
+		List<Tuple<String, String>> input = new ArrayList<>();
+		input.add(new Tuple<>("50", "morning"));
+		input.add(new Tuple<>("50", "evening"));
+		input.add(new Tuple<>("10", "morning"));
+		input.add(new Tuple<>("10", "evening"));
 
 		for (Tuple<String, String> i : input) {
 
@@ -183,9 +178,9 @@ public class KS2010VsMatimVolumes {
 				runNumber = "1911"; //TODO
 			}
 			
-			String ksSolutionDirectory = DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_"
+			String ksSolutionDirectory = "../../shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_"
 					+ i.getFirst() + "_" + i.getSecond() + "_peak/";
-			String matsimRunDirectory = DgPaths.REPOS + "runs-svn/cottbus/before2015/run" + runNumber + "/";
+			String matsimRunDirectory = "../../runs-svn/cottbus/before2015/run" + runNumber + "/";
 			
 			// unsimplified networks
 			String matsimNetworkFile = matsimRunDirectory + runNumber + ".output_network.xml.gz";

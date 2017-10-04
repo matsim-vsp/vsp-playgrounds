@@ -35,24 +35,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * @author dgrether
  */
 public class CottbusUtils {
-
-	public static MutableScenario loadCottbusScenrio(boolean fixedTimeSignals){
-		Config c2 = ConfigUtils.createConfig();
-		c2.qsim().setUseLanes(true);
-		ConfigUtils.addOrGetModule(c2, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
-		c2.network().setInputFile(DgCottbusScenarioPaths.NETWORK_FILENAME);
-		c2.network().setLaneDefinitionsFile(DgCottbusScenarioPaths.LANES_FILENAME);
-		ConfigUtils.addOrGetModule(c2, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(DgCottbusScenarioPaths.SIGNALS_FILENAME);
-		ConfigUtils.addOrGetModule(c2, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(DgCottbusScenarioPaths.SIGNAL_GROUPS_FILENAME);
-		if (fixedTimeSignals){
-			ConfigUtils.addOrGetModule(c2, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(DgCottbusScenarioPaths.SIGNAL_CONTROL_FIXEDTIME_FILENAME);
-		}
-		else {
-			ConfigUtils.addOrGetModule(c2, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(DgCottbusScenarioPaths.SIGNAL_CONTROL_SYLVIA_FILENAME);
-		}
-		MutableScenario sc = (MutableScenario) ScenarioUtils.loadScenario(c2);
-		return sc;
-	}
 	
 	public static Tuple<CoordinateReferenceSystem, SimpleFeature> loadCottbusFeature(String shapeFile) {
 		ShapeFileReader shapeReader = new ShapeFileReader();
@@ -60,7 +42,7 @@ public class CottbusUtils {
 		CoordinateReferenceSystem crs = shapeReader.getCoordinateSystem();
 		for (SimpleFeature feature : features) {
 			if (feature.getAttribute("NAME").equals("Cottbus")){
-				return new Tuple<CoordinateReferenceSystem, SimpleFeature>(crs, feature);
+				return new Tuple<>(crs, feature);
 			}
 		}
 		return null;
@@ -71,7 +53,7 @@ public class CottbusUtils {
 		Collection<SimpleFeature> features = shapeReader.readFileAndInitialize(shapeFile);
 		CoordinateReferenceSystem crs = shapeReader.getCoordinateSystem();
 		SimpleFeature feature = features.iterator().next();
-		return new Tuple<CoordinateReferenceSystem, SimpleFeature>(crs, feature);
+		return new Tuple<>(crs, feature);
 	}
 
 	

@@ -33,24 +33,20 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.run.NetworkCleaner;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.signalsystems.utils.DgSignalizedLinks2Shape;
 import playground.dgrether.utils.DgNet2Shape;
 
 
 public class CottbusOsmNetworkGenerator {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		Network network = NetworkUtils.createNetwork();
 		OsmNetworkReader osmReader = new OsmNetworkReader(network,
 				TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84,TransformationFactory.WGS84_UTM33N),  false);
 		osmReader.setKeepPaths(false);
 		osmReader.setScaleMaxSpeed(true);
-		String input = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/Cottbus-BA/brandenburg_tagged.osm.gz";
-		String output = DgPaths.REPOS +  "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_from_osm/brandenburg_tagged.osm_network";
+		String input = "../../shared-svn/studies/dgrether/cottbus/Cottbus-BA/brandenburg_tagged.osm.gz";
+		String output = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_from_osm/brandenburg_tagged.osm_network";
 
 //		 set osmReader useHighwayDefaults false
 //		 Autobahn
@@ -101,12 +97,12 @@ public class CottbusOsmNetworkGenerator {
 		//write signalized links to shape
 		Config c1 = ConfigUtils.createConfig();
 		c1.network().setInputFile(cleanedNetworkFile);
-		String signalsSystems = DgPaths.REPOS +  "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_systems.xml";
+		String signalsSystems = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_systems.xml";
 		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
 		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalsSystems);
 		Scenario scenario = ScenarioUtils.loadScenario(c1);
 		
-		String signalsShapeFile = DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_from_osm/signalized_links.shp";
+		String signalsShapeFile = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/network_from_osm/signalized_links.shp";
 		new DgSignalizedLinks2Shape().getSignalizedLinksAndWrite2Shape(scenario, signalsShapeFile);
 
 

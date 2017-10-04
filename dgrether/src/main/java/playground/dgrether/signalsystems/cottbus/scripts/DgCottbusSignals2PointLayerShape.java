@@ -19,30 +19,29 @@
  * *********************************************************************** */
 package playground.dgrether.signalsystems.cottbus.scripts;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.MultiPoint;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Node;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.ShapeFileWriter;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import playground.dgrether.signalsystems.utils.DgSignalsUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.scenario.MutableScenario;
-import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.core.utils.gis.ShapeFileWriter;
-import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.model.SignalSystem;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import playground.dgrether.DgPaths;
-import playground.dgrether.signalsystems.cottbus.CottbusUtils;
-import playground.dgrether.signalsystems.utils.DgSignalsUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.MultiPoint;
 
 
 /**
@@ -54,12 +53,13 @@ import com.vividsolutions.jts.geom.MultiPoint;
 public class DgCottbusSignals2PointLayerShape {
 
 	public static void main(String[] args) throws Exception {
-		MutableScenario sc = CottbusUtils.loadCottbusScenrio(true);
+		Config config = ConfigUtils.loadConfig(""); // TODO type in the config file of the cottbus run when you want to use this class
+		Scenario sc = ScenarioUtils.loadScenario(config);
 		Map<Id<SignalSystem>, Set<Id<Node>>> systemId2NodeIdsMap = DgSignalsUtils.calculateSignalizedNodesPerSystem(((SignalsData) sc.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData(), sc.getNetwork());
 		String srsId = TransformationFactory.WGS84_UTM33N;
 		CoordinateReferenceSystem networkSrs = MGC.getCRS(srsId);
 		SimpleFeatureBuilder builder = createMultiPointSignalSystemFeatureBuilder(networkSrs);
-		List<SimpleFeature> multiPointFeatures = new ArrayList<SimpleFeature>();
+		List<SimpleFeature> multiPointFeatures = new ArrayList<>();
 		for (Id<SignalSystem> systemId : systemId2NodeIdsMap.keySet()){
 			Set<Id<Node>> nodeIds = systemId2NodeIdsMap.get(systemId);
 			Coordinate[] nodeCoords = new Coordinate[nodeIds.size()];
@@ -73,7 +73,7 @@ public class DgCottbusSignals2PointLayerShape {
 			SimpleFeature feature = builder.buildFeature(null, new Object[]{multiPoint, systemId.toString()});
 			multiPointFeatures.add(feature);
 		}
-		ShapeFileWriter.writeGeometries(multiPointFeatures, DgPaths.REPOS + "shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/shape_files/signal_systems/signal_systems_no_13.shp");
+		ShapeFileWriter.writeGeometries(multiPointFeatures, "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/shape_files/signal_systems/signal_systems_no_13.shp");
 	}
 
 	private static SimpleFeatureBuilder createMultiPointSignalSystemFeatureBuilder(CoordinateReferenceSystem crs) {

@@ -35,7 +35,6 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.analysis.charts.DgTravelTimeCalculatorChart;
 import playground.dgrether.analysis.charts.utils.DgChartWriter;
 import playground.dgrether.koehlerstrehlersignal.analysis.DgMfd;
@@ -48,40 +47,20 @@ import playground.dgrether.linkanalysis.TTInOutflowEventHandler;
  *
  */
 public class DgFigure9Runner {
-
-	public static final String defaultConfigFile = DgPaths.STUDIESDG + "koehlerStrehler2010/config.xml";
-
-	public static final String lanesConfigFile = DgPaths.STUDIESDG + "koehlerStrehler2010/config_lanes.xml";
-
-	public static final String signalsConfigFile = DgPaths.STUDIESDG + "koehlerStrehler2010/config_signals.xml";
-
-	public static final String signalsConfigFileGershenson = DgPaths.STUDIESDG + "koehlerStrehler2010/config_signals_gershenson.xml";
-
-	public static final String signalsConfigSol8005050 = DgPaths.STUDIESDG + "koehlerStrehler2010/config_signals_signal_control_solution_figure9_from_matsim_population_800_50_50.xml";
-
-	public static final String signalsConfigSol800 = DgPaths.STUDIESDG + "koehlerStrehler2010/config_signals_signal_control_solution_figure9_from_matsim_population_800.xml";
-
-//	private String configFile = DgPaths.STUDIESDG + "koehlerStrehler2010/scenario5/config_signals_coordinated.xml";
+//	private String configFile = "../../shared-svn/studies/dgrether/koehlerStrehler2010/scenario5/config_signals_coordinated.xml";
 	
-	private String configFile = DgPaths.STUDIESDG + "koehlerStrehler2010/scenario5/config_testing.xml";
+	private String configFile = "../../shared-svn/studies/dgrether/koehlerStrehler2010/scenario5/config_testing.xml";
 
 	private TTInOutflowEventHandler handler23, handler27, handler54, handler58;
 
 	private DgMfd mfdHandler;
 	
 	private void runFromConfig(String conf) {
-		String c = null;
 		if (conf == null){
-			c = configFile;
+			conf = configFile;
 		}
-		else {
-			c = conf;
-		}
-		Controler controler = new Controler(c);
-		controler.getConfig().controler().setOverwriteFileSetting(
-				true ?
-						OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles :
-						OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+		Controler controler = new Controler(conf);
+		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
 		this.addControlerListener(controler);
 
 		controler.run();

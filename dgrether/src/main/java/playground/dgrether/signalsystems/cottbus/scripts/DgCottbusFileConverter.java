@@ -20,7 +20,6 @@
 package playground.dgrether.signalsystems.cottbus.scripts;
 
 
-import playground.dgrether.DgPaths;
 import playground.dgrether.signalsystems.data.conversion.SignalConfig11ToControl20Converter;
 import playground.dgrether.signalsystems.data.conversion.SignalSystems11To20Converter;
 
@@ -31,12 +30,9 @@ import playground.dgrether.signalsystems.data.conversion.SignalSystems11To20Conv
  */
 public class DgCottbusFileConverter {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 
-		String inputDir = DgPaths.STUDIESDG + "cottbus/";
+		String inputDir = "../../shared-svn/studies/dgrether/cottbus/";
 		
 		String laneDefinitions = inputDir + "lanes_cottbus_v1.1.xml";
 		
@@ -53,7 +49,7 @@ public class DgCottbusFileConverter {
 		new SignalConfig11ToControl20Converter().convert(signalSystemConfigurations, signalControl20, amberTimes10);
 
 
-		inputDir = DgPaths.STUDIESDG + "cottbus/originaldaten/";
+		inputDir += "originaldaten/";
 		
 		String network = inputDir + "network.xml";
 		String lanes = inputDir + "laneDefinitions.xml";
