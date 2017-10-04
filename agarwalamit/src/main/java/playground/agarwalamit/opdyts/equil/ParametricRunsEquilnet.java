@@ -171,13 +171,16 @@ public class ParametricRunsEquilnet {
         // location of file must be locale and then can be copied to remote.
         String jobScriptFileName = locationOfOutput+"/testScriptCommandLine.sh";
 
+        String matsimDir = "r_0d0d339d49c0a6ef1d8ec835f10924a92107b2c1_opdyts";
+
+
         String [] additionalLines = {
                 "echo \"========================\"",
-                "echo \"r_6fcba9f631fedc82ecc01a48bbc43abfefac78c1_opdyts\"",
+                "echo \" "+matsimDir+" \" ",
                 "echo \"========================\"",
                 newLine,
 
-                "cd /net/ils4/agarwal/matsim/r_6fcba9f631fedc82ecc01a48bbc43abfefac78c1_opdyts/",
+                "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
                 newLine,
 
                 "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
@@ -185,7 +188,7 @@ public class ParametricRunsEquilnet {
                         "/net/ils4/agarwal/equilOpdyts/carBicycle/inputs/ " +
                         "/net/ils4/agarwal/equilOpdyts/carBicycle/output/"+jobName+"/ " +
                         "/net/ils4/agarwal/equilOpdyts/carBicycle/relaxedPlans/output_plans.xml.gz "+
-                        argument
+                        argument+" "
         };
 
         JobScriptWriter scriptWriter = new JobScriptWriter();

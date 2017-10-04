@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
@@ -89,7 +90,6 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 			iterations2Convergence = Integer.valueOf(args[5]);
 			selfTuningWt = Double.valueOf(args[6]);
 			warmUpItrs = Integer.valueOf(args[7]);
-
 		} else {
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
@@ -105,6 +105,10 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		config.plans().setInputFile(relaxedPlans);
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
 		config.controler().setOutputDirectory(OUT_DIR);
+
+		// from GF, every run should have a different random seed.
+		int randomSeed = new Random().nextInt(9999);
+		config.global().setRandomSeed(randomSeed);
 
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
