@@ -253,7 +253,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
-				RandomizedUtilityParametersChoser.ONLY_ASC, EQUIL_MIXEDTRAFFIC, null, modes2consider);
+				RandomizedUtilityParametersChoser.ONLY_ASC, EQUIL_MIXEDTRAFFIC, null, modes2consider, ascRandomizeStyle);
 
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, EQUIL_MIXEDTRAFFIC);
