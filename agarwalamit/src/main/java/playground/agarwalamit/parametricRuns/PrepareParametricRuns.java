@@ -115,10 +115,20 @@ public class PrepareParametricRuns {
         String locationOfOutput = baseDir+"/output/"+jobName+"/";
 
         // create dir: if dir exits, an exception will be thrown.
+        boolean isExists = false;
         try {
-            sftp.mkdir(locationOfOutput);
+            sftp.lstat(locationOfOutput);
+            isExists = true;
         } catch (SftpException e) {
-            throw new RuntimeException("Data is not written/read. Reason : " + e);
+            isExists = false;
+        }
+
+        if (! isExists) {
+            try {
+                sftp.mkdir(locationOfOutput);
+            } catch (SftpException e) {
+                throw new RuntimeException("Data is not written/read. Reason : " + e);
+            }
         }
 
         // location of file must be locale and then can be copied to remote.
