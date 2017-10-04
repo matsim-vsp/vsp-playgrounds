@@ -149,7 +149,8 @@ public class ParametricRunsEquilnet {
     private String [] prepareCommands(final String argument, final String baseDir){
 
         String jobName = "run"+String.valueOf(jobCounter++);
-        String locationOfOutput = baseDir.endsWith("/") ? baseDir: baseDir+"/" +jobName+"/";
+        String locationOfOutput = baseDir.endsWith("/") ? baseDir: baseDir+"/" ;
+        locationOfOutput +=  jobName+"/";
 
         // create dir: if dir exits, an exception will be thrown.
         boolean isExists = false;
@@ -171,7 +172,7 @@ public class ParametricRunsEquilnet {
         // location of file must be locale and then can be copied to remote.
         String jobScriptFileName = locationOfOutput+"/testScriptCommandLine.sh";
 
-        String matsimDir = "r_0d0d339d49c0a6ef1d8ec835f10924a92107b2c1_opdyts";
+        String matsimDir = "r_796d7ac22d056a3063078b86398fc2d353f89b2f_opdyts";
 
 
         String [] additionalLines = {
