@@ -1,9 +1,14 @@
 package playground.kai.run;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.Event;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -53,6 +58,16 @@ class MyControler {
 		
 		// prepare the scenario
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
+		
+		Random rnd = new Random(4711) ;
+		final Map<Id<Person>, ? extends Person> pop = scenario.getPopulation().getPersons();
+		Iterator<Id<Person>> it = pop.keySet().iterator() ;
+		while ( it.hasNext() ) {
+			it.next() ;
+			if ( rnd.nextDouble() < 0.9 ) {
+				it.remove();
+			}
+		}
 
 		// prepare the control(l)er:
 		Controler controler = new Controler( scenario ) ;
