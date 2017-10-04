@@ -72,12 +72,24 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		String OUT_DIR ;
 		String relaxedPlans;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
+		double stepSize = 0.5;
+		int iterations2Convergence = 500;
+		double selfTuningWt = 1.0;
+		int warmUpItrs = 1;
 
 		if (args.length > 0) {
+			int length = args.length;
 			EQUIL_DIR = args[0];
 			OUT_DIR = args[1];
 			relaxedPlans = args[2];
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.valueOf(args[3]);
+
+			// opdyts params
+			stepSize = Double.valueOf(args[4]);
+			iterations2Convergence = Integer.valueOf(args[5]);
+			selfTuningWt = Double.valueOf(args[6]);
+			warmUpItrs = Integer.valueOf(args[7]);
+
 		} else {
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
@@ -96,6 +108,10 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
+		opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
+		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
+		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
 
 		List<String> modes2consider = Arrays.asList("car","bicycle");
 
