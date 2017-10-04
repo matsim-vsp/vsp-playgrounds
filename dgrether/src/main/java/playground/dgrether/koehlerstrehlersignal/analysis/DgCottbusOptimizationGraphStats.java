@@ -32,7 +32,7 @@ import playground.dgrether.DgPaths;
 public class DgCottbusOptimizationGraphStats {
 
 	public static void main(String[] args) {
-		String signalsBBNet = DgPaths.REPOS + "shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_10_evening_peak/network_small.xml.gz";
+		String signalsBBNet = "../../shared-svn/projects/cottbus/cb2ks2010/2013-07-31_minflow_10_evening_peak/network_small.xml.gz";
 		Scenario scSignalsBoundingBox = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		MatsimNetworkReader netReader = new MatsimNetworkReader(scSignalsBoundingBox.getNetwork());
 		netReader.readFile(signalsBBNet);

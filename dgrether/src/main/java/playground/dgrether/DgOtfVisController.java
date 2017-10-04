@@ -35,10 +35,7 @@ public class DgOtfVisController {
 	public static void main(String[] args) {
 		Controler c = new Controler(args);
 		c.addOverridingModule(new OTFVisFileWriterModule());
-		c.getConfig().controler().setOverwriteFileSetting(
-				true ?
-						OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles :
-						OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
+		c.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
 		c.run();
 	}
 

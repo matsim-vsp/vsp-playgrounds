@@ -51,12 +51,9 @@ public class Daganzo2012ScenarioGenerator {
 	private static final Logger log = Logger
 			.getLogger(Daganzo2012ScenarioGenerator.class);
 
-	public static String DAGANZO_SVN_DIR = "shared-svn/studies/dgrether/daganzo2012/scenario_2/";
+	private static String DAGANZOBASEDIR = "../../shared-svn/studies/dgrether/daganzo2012/scenario_2/";
 
-	public static String DAGANZOBASEDIR = DgPaths.REPOS + DAGANZO_SVN_DIR;
-
-	public static final String NETWORK_INPUTFILE = DAGANZOBASEDIR
-			+"network22.xml";
+	private static final String NETWORK_INPUTFILE = DAGANZOBASEDIR +"network22.xml";
 
 	private static final String PLANS_OUTPUTFILE = DAGANZOBASEDIR
 			+ "plans_long_route_selected.xml";
@@ -88,8 +85,7 @@ public class Daganzo2012ScenarioGenerator {
 	private void createPlans(MutableScenario scenario) {
 		Network network = scenario.getNetwork();
 		Population population = scenario.getPopulation();
-		double firstHomeEndTime =  120.0;
-		double homeEndTime = firstHomeEndTime;
+        double homeEndTime = 120.0;
 //		Link l1 = network.getLinks().get(scenario.createId("1"));
 //		Link l7 = network.getLinks().get(scenario.createId("7"));
 		PopulationFactory factory = population.getFactory();
@@ -99,17 +95,12 @@ public class Daganzo2012ScenarioGenerator {
 			if ((i +1) % 2 == 0){
 				homeEndTime += 1;
 			}
-			Plan plan = null;
-			Plan plan2 = null;
-			if (! this.isUseReplanning){
-			  plan = this.createPlan(true, factory, homeEndTime, network);
-			  p.addPlan(plan);
-        plan2 = this.createPlan(false, factory, homeEndTime, network);
-        p.addPlan(plan2);
+            if (! this.isUseReplanning){
+                p.addPlan(this.createPlan(true, factory, homeEndTime, network));
+                p.addPlan(this.createPlan(false, factory, homeEndTime, network));
 			}
 			else {
-			  plan = this.createPlan(false, factory, homeEndTime, network);
-			  p.addPlan(plan);
+                p.addPlan(this.createPlan(false, factory, homeEndTime, network));
 			}
 
 			population.addPerson(p);
@@ -120,11 +111,11 @@ public class Daganzo2012ScenarioGenerator {
 	    double homeEndTime, Network network){
     Plan plan = factory.createPlan();
     homeEndTime+= 1;
-    Activity act1 = (Activity) factory.createActivityFromLinkId("h", Id.create(1, Link.class));
+    Activity act1 = factory.createActivityFromLinkId("h", Id.create(1, Link.class));
     act1.setEndTime(homeEndTime);
     plan.addActivity(act1);
     // leg to home
-    Leg leg = (Leg) factory.createLeg(TransportMode.car);
+    Leg leg = factory.createLeg(TransportMode.car);
     NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(Id.create(1, Link.class), Id.create(7, Link.class));
     if (useAlternativeRoute) {
       route.setLinkIds(Id.create(1, Link.class), NetworkUtils.getLinkIds("2 3 5 6"), Id.create(7, Link.class));
@@ -136,16 +127,12 @@ public class Daganzo2012ScenarioGenerator {
 
     plan.addLeg(leg);
 
-    Activity act2 = (Activity) factory.createActivityFromLinkId("h", Id.create(7, Link.class));
-    act2.setLinkId(Id.create(7, Link.class));
+    Activity act2 = factory.createActivityFromLinkId("h", Id.create(7, Link.class));
     plan.addActivity(act2);
     return plan;
 	}
 
 
-	/**
-	 * @param args
-	 */
 	public static void main(final String[] args) {
 		try {
 			new Daganzo2012ScenarioGenerator().createScenario();
