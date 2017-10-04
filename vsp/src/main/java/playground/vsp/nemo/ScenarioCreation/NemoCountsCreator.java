@@ -47,6 +47,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
@@ -62,11 +63,12 @@ import playground.vsp.demandde.counts.BastHourlyCountData;
  */
 public class NemoCountsCreator {
 
-	private Logger log = Logger.getLogger("NemoCountsCreatorLogger");
+	protected Logger log = Logger.getLogger(this.getClass().getName());
 
-	private String outputPath;
-	private String pathToCountData;
-	private String pathToOSMMappingFile;
+	protected String outputPath;
+	protected String pathToCountData;
+	protected String pathToOSMMappingFile;
+	protected Network network;
 	
 	private LocalDate firstDayOfAnalysis = null;
 	private LocalDate lastDayOfAnalysis = null;
@@ -75,19 +77,18 @@ public class NemoCountsCreator {
 	private int monthRange_min = 1;
 	private int monthRange_max = 12;
 	
-	private int weekRange_min = 1;
-	private int weekRange_max = 5;
+	protected int weekRange_min = 1;
+	protected int weekRange_max = 5;
 	
-	private Map<String,BastHourlyCountData> kfzCountingStationsData = new HashMap<String,BastHourlyCountData>();
-	private Map<String,BastHourlyCountData> svCountingStationsData = new HashMap<String,BastHourlyCountData>();
+	protected Map<String,BastHourlyCountData> kfzCountingStationsData = new HashMap<String,BastHourlyCountData>();
+	protected Map<String,BastHourlyCountData> svCountingStationsData = new HashMap<String,BastHourlyCountData>();
 	
 	private Map<String,String> countingStationNames = new HashMap<String,String>();
 	private Map<String,String> problemsPerCountingStation = new HashMap<String,String>();
 	private List<String> notLocatedCountingStations = new ArrayList<String>();
 	
-	private Map<String,Id<Link>> linkIDsOfCountingStations = new HashMap<String,Id<Link>>();
-	private List<Long> countingStationsToOmit = new ArrayList<Long>();
-	private Network network;
+	protected Map<String,Id<Link>> linkIDsOfCountingStations = new HashMap<String,Id<Link>>();
+	protected List<Long> countingStationsToOmit = new ArrayList<Long>();
 
 	private final String kfzColumnHeader = "KFZ";
 	private final String svColumnHeader = "SV";
@@ -109,18 +110,26 @@ public class NemoCountsCreator {
 	 */
 	public void run(){
 		
-		//list counting stations that might lead to some calibration problems or where data/localization is not clear
-		countingStationsToOmit.add(5002l);
-		countingStationsToOmit.add(5025l);		//not clear where exactly the counting station is located (hauptfahrbahn?)
-		
-		File outPutDir = new File(this.outputPath.substring(0, this.outputPath.lastIndexOf("/")));
-		if (!outPutDir.exists()){
-			outPutDir.mkdirs();
+		init();
+		readData();
+		  
+		writeOutListOfAnalyzedCountStations();
+		if(network!=null){
+			readNodeIDsOfCountingStationsAndGetLinkIDs();
 		}
-		initializeLogger();
-		
-		 File rootDirecoty = new File(this.pathToCountData);
-		 File[] filesInRoot = rootDirecoty.listFiles();
+		  
+		String description = "--Nemo long period count data-- start date: " + this.firstDayOfAnalysis.toString() + " end date:" + this.lastDayOfAnalysis.toString();
+		SimpleDateFormat format = new SimpleDateFormat("YY_MM_dd_HHmmss");
+		String now = format.format(Calendar.getInstance().getTime());
+	  	description += "\n created: " + now;
+	  	createAndWriteMatsimCounts(description,"Nemo_LongTermCounts_"+now);
+	  
+	  	finish();
+	}
+
+	protected void readData() {
+		File rootDirectory = new File(this.pathToCountData);
+		 File[] filesInRoot = rootDirectory.listFiles();
 		  if (filesInRoot != null) {
 		    for (File fileInRootDir : filesInRoot) {
 		    	if(fileInRootDir.isDirectory()){
@@ -134,24 +143,26 @@ public class NemoCountsCreator {
 			  log.severe("the given root directory of input count data could not be accessed... aborting");
 			  this.finish();
 		  }
-		  
-		  writeOutListOfAnalyzedCountStations();
-		  if(network!=null) readNodeIDsOfCountingStationsAndGetLinkIDs();
-		  createAndWriteMatsimCounts();
-		  finish();
+	}
+
+	protected void init() {
+		//list counting stations that might lead to some calibration problems or where data/localization is not clear
+		countingStationsToOmit.add(5002l);
+		countingStationsToOmit.add(5025l);		//not clear where exactly the counting station is located (hauptfahrbahn?)
+		
+		File outPutDir = new File(this.outputPath.substring(0, this.outputPath.lastIndexOf("/")));
+		if (!outPutDir.exists()){
+			outPutDir.mkdirs();
+		}
+		initializeLogger();
 	}
 	
-	private void createAndWriteMatsimCounts() {
+	protected void createAndWriteMatsimCounts(String countsDescription, String countFilesName) {
 		Counts svCountContainer = new Counts();
 		Counts kfzCountContainer = new Counts();
-		SimpleDateFormat format = new SimpleDateFormat("YY_MM_dd_HHmmss");
 		
-		String description = "--Nemo count data-- start date: " + this.firstDayOfAnalysis.toString() + " end date:" + this.lastDayOfAnalysis.toString();
-		String now = format.format(Calendar.getInstance().getTime());
-		
-		description += "\n created: " + now;
-		svCountContainer.setDescription(description);
-		kfzCountContainer.setDescription(description);
+		svCountContainer.setDescription(countsDescription);
+		kfzCountContainer.setDescription(countsDescription);
 
 		svCountContainer.setYear(this.lastDayOfAnalysis.getYear());
 		kfzCountContainer.setYear(this.lastDayOfAnalysis.getYear());
@@ -165,13 +176,13 @@ public class NemoCountsCreator {
 		log.info("...finished with conversion of kfz data");
 		
 		String out = "NemoCounts_data_";
-		log.info("writing sv counts to " + this.outputPath + out + "SV" + now);
+		log.info("writing sv counts to " + this.outputPath + out + "SV" + countFilesName);
 		CountsWriter svWriter = new CountsWriter(svCountContainer);
-		svWriter.write(this.outputPath + out + "SV_" + now + ".xml");
+		svWriter.write(this.outputPath + out + countFilesName + "_SV.xml");
 		
-		log.info("writing sv counts to " + this.outputPath + out + "KFZ" + now);
+		log.info("writing sv counts to " + this.outputPath + out + "KFZ" + countFilesName);
 		CountsWriter kfzWriter = new CountsWriter(kfzCountContainer);
-		kfzWriter.write(this.outputPath + out + "KFZ_" + now + ".xml");
+		kfzWriter.write(this.outputPath + out + countFilesName + "_KFZ.xml");
 		
 		log.info("...finished writing...");
 	}
@@ -182,7 +193,7 @@ public class NemoCountsCreator {
 		for(String countNrString : dataMap.keySet()){
 			String stationID = "NW_" + countNrString;
 			cnt ++;
-			if(cnt % 10 == 0){
+			if(cnt % 50 == 0){
 				log.info("converting station nr " + cnt);
 			}
 			BastHourlyCountData data = dataMap.get(countNrString);
@@ -213,9 +224,8 @@ public class NemoCountsCreator {
 				Count<Link> countDirOne = null;
 				Count<Link> countDirTwo = null;
 			try{
-				String name = data.getId().substring(0,5);
-				countDirOne = container.createAndAddCount(linkIDDirectionOne, name + "R1_" + data.getId().substring(5));
-				countDirTwo = container.createAndAddCount(linkIDDirectionTwo, name + "R2_" + data.getId().substring(5));
+				countDirOne = container.createAndAddCount(linkIDDirectionOne, data.getId() + "R1" );
+				countDirTwo = container.createAndAddCount(linkIDDirectionTwo, data.getId() + "R2" );
 			} catch(Exception e){
 				String str = "\n current station = " + stationID + ". the other station that is already on the link is station " + container.getCount(linkIDDirectionTwo) + " for R1 or station " + container.getCount(linkIDDirectionOne) + " for R2";
 				System.out.println(e.getMessage() + str);
@@ -253,7 +263,7 @@ public class NemoCountsCreator {
 		}
 	}
 
-	private void readNodeIDsOfCountingStationsAndGetLinkIDs() {		
+	protected void readNodeIDsOfCountingStationsAndGetLinkIDs() {		
 		log.info("...start reading OSM-nodeID's from " + this.pathToOSMMappingFile);
 		
 		Map<String,Id<Link>> linkIDsOfCounts = new HashMap<String,Id<Link>>();
@@ -332,13 +342,11 @@ public class NemoCountsCreator {
         if(linkFinder.getNrOfFoundPaths() >= 1){
         	log.info("writing out a network file for visualisation that contains all reconstructed paths between the corresponding OSM-fromNodes and OSM-toNodes. The first link of a path has capacity of 0, the second capacity of 1 ....");
     		SimpleDateFormat format = new SimpleDateFormat("YY_MM_dd_HH_mm");
-        	linkFinder.writeNetworkThatShowsAllFoundPaths(outputPath + "visualisationNetworkOfReconstrucetPaths_" + format.format(Calendar.getInstance().getTime()) + ".xml");
+        	linkFinder.writeNetworkThatShowsAllFoundPaths(outputPath + "visNetOfReconstructedPaths_" + format.format(Calendar.getInstance().getTime()) + ".xml");
         }
 	}
 
-
-
-	private void analyzeYearDir(File rootDirOfYear, int currentYear) {
+	protected void analyzeYearDir(File rootDirOfYear, int currentYear) {
 		log.info("Start analysis of directory " + rootDirOfYear.getPath());
 		
 		 File[] filesInRoot = rootDirOfYear.listFiles();
@@ -356,7 +364,7 @@ public class NemoCountsCreator {
 	}
 
 	/**
-	 * goes through the input data file that contains traffic data of one counting station for one month and aggregates the data in the previously defined way.
+	 * goes through the input data file that contains traffic data of one (long-period!) counting station for one month and aggregates the data in the previously defined way.
 	 * the first three rows of the input file define the layout of the file, for more information see the documentation file at
 	 * shared-svn\projects\nemo_mercator\40_Data\counts\LandesbetriebStrassenbauNRW_Verkehrszentrale\BASt-Bestandsbandformat_Version2004.pdf
 	 * 
@@ -439,54 +447,21 @@ public class NemoCountsCreator {
 								break;
 							}
 							if( currentDate.isAfter(firstDayOfAnalysis.minusDays(1))
-									&& currentDay >= this.weekRange_min && currentDay <= this.weekRange_max
+									&& currentDate.getDayOfWeek().getValue() >= this.weekRange_min && currentDate.getDayOfWeek().getValue() <= this.weekRange_max
 									&& !this.datesToIgnore.contains(currentDate) ){
 								
 								int hour = Integer.parseInt(rowData[1].substring(0, 2));
-								double svValueOfDirection = 0;
-								double kfzValueOfDirection = 0;
 								
-								//direction1
-								for(int lane = 1; lane <= nrOfLanesDir1; lane ++){
-									String svValueOfLaneString = rowData[svBaseColumn + (lane-1) * nrOfVehicleGroups];
-									String kfzValueOfLaneString = rowData[kfzBaseColumn + (lane-1) * nrOfVehicleGroups];
-									double svValueOfLane = 0;
-									if(svValueOfLaneString.endsWith("-")){
-										svValueOfLane = Double.parseDouble(svValueOfLaneString.substring(0, svValueOfLaneString.length() - 1)); 
-										svValueOfDirection += svValueOfLane;
-									}
-									if(kfzValueOfLaneString.endsWith("-")){
-										//in the underlying data the kfz volume includes all heavy traffic (sv)... so we need to calculate the difference
-										double kfzSvDifferenceOfLane = Double.parseDouble(kfzValueOfLaneString.substring(0, kfzValueOfLaneString.length() - 1)) - svValueOfLane; 
-										kfzValueOfDirection += kfzSvDifferenceOfLane;
-									}
-								}
+								Tuple<Double,Double> tuple = readTrafficVolumes(rowData, nrOfLanesDir1, svBaseColumn, kfzBaseColumn, nrOfVehicleGroups);
 								
-								kfzData.computeAndSetVolume(true, hour, kfzValueOfDirection);
-								svData.computeAndSetVolume(true, hour, svValueOfDirection);
+								kfzData.computeAndSetVolume(true, hour, tuple.getFirst());
+								svData.computeAndSetVolume(true, hour, tuple.getSecond());
 								
-								//direction 2
-								int svBaseCloumnDir2 = svBaseColumn + nrOfLanesDir1 * nrOfVehicleGroups;
-								int kfzBaseColumnDir2 = kfzBaseColumn + nrOfLanesDir1 * nrOfVehicleGroups;
-								svValueOfDirection = 0;
-								kfzValueOfDirection = 0;
-								
-								for(int lane = 1; lane <= nrOfLanesDir2; lane ++){
-									String svValueOfLaneString = rowData[svBaseCloumnDir2 + (lane-1) * nrOfVehicleGroups];
-									String kfzValueOfLaneString = rowData[kfzBaseColumnDir2 + (lane-1) * nrOfVehicleGroups];
-									double svValueOfLane = 0;
-									if(svValueOfLaneString.endsWith("-")){
-										svValueOfLane = Double.parseDouble(svValueOfLaneString.substring(0, svValueOfLaneString.length() - 1)); 
-										svValueOfDirection += svValueOfLane;
-									}
-									if(kfzValueOfLaneString.endsWith("-")){
-										//in the underlying data the kfz volume includes all heavy traffic (sv)... so we need to calculate the difference
-										double kfzSvDifferenceOfLane = Double.parseDouble(kfzValueOfLaneString.substring(0, kfzValueOfLaneString.length() - 1)) - svValueOfLane; 
-										kfzValueOfDirection += kfzSvDifferenceOfLane;
-									}
-								}
-								kfzData.computeAndSetVolume(false, hour, kfzValueOfDirection);
-								svData.computeAndSetVolume(false, hour, svValueOfDirection);
+								tuple = readTrafficVolumes(rowData, nrOfLanesDir2, svBaseColumn+ nrOfLanesDir1*nrOfVehicleGroups,
+										kfzBaseColumn + nrOfLanesDir1*nrOfVehicleGroups, nrOfVehicleGroups);
+							
+								kfzData.computeAndSetVolume(false, hour, tuple.getFirst());
+								svData.computeAndSetVolume(false, hour, tuple.getSecond());
 							}
 						}
 					}
@@ -511,31 +486,54 @@ public class NemoCountsCreator {
 			  this.finish();
 		  }
 	}
+	
+	private Tuple<Double,Double> readTrafficVolumes(String[] rowData, int nrOfLanes, int svBaseColumn, int kfzBaseColumn, int nrOfVehicleGroups){
+		double svValueOfDirection = 0;
+		double kfzValueOfDirection = 0;
+		
+		//direction1
+		for(int lane = 1; lane <= nrOfLanes; lane ++){
+			String svValueOfLaneString = rowData[svBaseColumn + (lane-1) * nrOfVehicleGroups];
+			String kfzValueOfLaneString = rowData[kfzBaseColumn + (lane-1) * nrOfVehicleGroups];
+			double svValueOfLane = 0;
+			if(svValueOfLaneString.endsWith("-")){
+				svValueOfLane = Double.parseDouble(svValueOfLaneString.substring(0, svValueOfLaneString.length() - 1)); 
+				svValueOfDirection += svValueOfLane;
+			}
+			if(kfzValueOfLaneString.endsWith("-")){
+				//in the underlying data the kfz volume includes all heavy traffic (sv)... so we need to calculate the difference
+				double kfzSvDifferenceOfLane = Double.parseDouble(kfzValueOfLaneString.substring(0, kfzValueOfLaneString.length() - 1)) - svValueOfLane; 
+				kfzValueOfDirection += kfzSvDifferenceOfLane;
+			}
+		}
+		return new Tuple<Double, Double>(kfzValueOfDirection,svValueOfDirection);
+	}
 
 	private boolean checkIfMonthIsToBeAnalyzed(String name) {
 		int month = Integer.parseInt(name.substring(name.length() - 2));
 		return (month >= this.monthRange_min && month <= monthRange_max && (month <= lastDayOfAnalysis.getMonthValue()) );
 	}
 
-	private boolean checkIfYearIsToBeAnalyzed(Integer dirYear) {
+	protected boolean checkIfYearIsToBeAnalyzed(Integer dirYear) {
 		int startYear = this.firstDayOfAnalysis.getYear();
 		int endYear = this.lastDayOfAnalysis.getYear();
 		return (dirYear >= startYear && dirYear <= endYear);
 	}
 
-	private void finish() {
+	protected void finish() {
 			log.info("Aggregated data sets: \n kfz-data : " + this.kfzCountingStationsData.size() + "\n sv-data: " + this.svCountingStationsData.size());
 			log.info("number of problems that occured while creating matsim counts: " + this.problemsPerCountingStation.size());
 			String allProblems = "";
 			List<String> keySet = new ArrayList<String>();
 			keySet.addAll(this.problemsPerCountingStation.keySet());
-			Collections.sort(keySet);
-			for(String station : keySet){
-				allProblems += "\n" + station + ": \t" + this.problemsPerCountingStation.get(station);
+			if(!keySet.isEmpty()){
+				Collections.sort(keySet);
+				for(String station : keySet){
+					allProblems += "\n" + station + ": \t" + this.problemsPerCountingStation.get(station);
+				}
+				log.info("list of these problems per station: \n" + allProblems);
+				log.info("-----------------");
 			}
-			log.info("list of these problems per station: \n" + allProblems);
-			
-			log.info("-----------------");
 			if(!this.notLocatedCountingStations.isEmpty()){
 				log.info("List of not located counting stations: \n");
 				String list = "~ ";
@@ -544,7 +542,7 @@ public class NemoCountsCreator {
 				}
 				log.info(list);
 			}
-			log.info("...closing NemoCountsCreator...");
+			log.info("...closing " + this.getClass().getName() + "...");
 	}
 
 	
@@ -568,7 +566,7 @@ public class NemoCountsCreator {
 		}
 	}	
 	
-	private void initializeLogger(){
+	protected void initializeLogger(){
 		 SimpleDateFormat format = new SimpleDateFormat("YY_MM_dd_HHmmss");
 		 FileHandler fh = null;
 		 ConsoleHandler ch = null;

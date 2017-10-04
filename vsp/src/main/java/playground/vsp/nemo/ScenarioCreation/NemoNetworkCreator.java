@@ -121,13 +121,12 @@ public class NemoNetworkCreator {
 				}
 			}
 		}
-		
-		
 		if(doCleaning){
 				/*
 				 * Clean the Network. Cleaning means removing disconnected components, so that afterwards there is a route from every link
 				 * to every other link. This may not be the case in the initial network converted from OpenStreetMap.
 				 */
+			log.info("attempt to clean the network");
 			new NetworkCleaner().run(network);
 		}
 		
