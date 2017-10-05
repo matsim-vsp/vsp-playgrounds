@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.matsim</groupId>
-	<artifactId>playgrounds</artifactId>
+	<artifactId>vsp-playgrounds</artifactId>
 	<packaging>pom</packaging>
 	<version>0.10.0-SNAPSHOT</version>
-	<name>MATSim-Playgrounds</name>
+	<name>VSP-Playgrounds</name>
 
 	<scm>
 		<url>https://github.com/matsim-org/matsim</url>
@@ -127,29 +127,21 @@
 	</build>
 
 	<modules>
-		<module>artemc</module>
-		<module>balac</module>
-		<module>balmermi</module>
-		<module>boescpa</module>
-		<module>cottbus</module>
-		<module>gregor</module>
-		<module>gunnar</module>
-		<module>hbecker</module>
-		<module>ivtExt</module>
-		<module>jjoubert</module>
-		<module>johannes</module>
-		<module>muelleki</module>
-		<module>paschke</module>
-		<module>pbouman</module>
-		<module>pieter</module>
-		<module>sergioo</module>
-		<module>singapore</module>
-		<module>southAfrica</module>
-		<module>sschroeder</module>
-		<module>stockholm</module>
-		<module>thibautd</module>
-		<module>ucsb</module>
-		<module>wrashid</module>
+		<module>agarwalamit</module>
+		<module>benjamin</module>
+		<module>dgrether</module>
+		<module>dziemke</module>
+		<module>ikaddoura</module>
+		<module>jbischoff</module>
+		<module>kai</module>
+		<module>kairuns</module>
+		<module>kturner</module>
+		<module>michalm</module>
+		<module>santiago</module>
+		<module>tthunig</module>
+		<module>vsp</module>
+		<module>vspshk</module>
+		<module>vsptelematics</module>
 	</modules>
 
 	<dependencies>
