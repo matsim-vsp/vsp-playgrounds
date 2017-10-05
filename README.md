@@ -1,4 +1,7 @@
-# MATSim playgrounds
+# MATSim VSP playgrounds
 
-Please note that playgrounds are slowly being outphased and re-factorings for changes in the core may not always happen. 
-Playgrounds where the owner has no commits within a year will be removed in a regular interval.
+This repository contains MATSim related code of the VSP group at TU Berlin.
+
+Please note, that this code is not designated stable.
+
+For the main MATSim project, see https://github.com/matsim-org
