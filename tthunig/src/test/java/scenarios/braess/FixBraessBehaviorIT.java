@@ -38,7 +38,6 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
-import playground.artemc.socialCost.SocialCostController.Initializer;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
@@ -102,7 +101,7 @@ public final class FixBraessBehaviorIT{
 		
 		Controler controler = new Controler(scenario);
 		
-		if (!pricingType.equals(PricingType.NONE) && !pricingType.equals(PricingType.FLOWBASED)) {
+		if (!pricingType.equals(PricingType.NONE)) {
 			// add tolling
 			TollHandler tollHandler = new TollHandler(scenario);
 			// choose the correct congestion handler and add it
@@ -124,9 +123,6 @@ public final class FixBraessBehaviorIT{
 				break;
 			}
 			controler.addControlerListener(new MarginalCongestionPricingContolerListener(controler.getScenario(), tollHandler, congestionHandler));
-		} else if (pricingType.equals(PricingType.FLOWBASED)) {
-			Initializer initializer = new Initializer();
-			controler.addControlerListener(initializer);
 		}
 					
 		TtAbstractAnalysisTool handler = new TtAnalyzeBraess();
@@ -169,7 +165,7 @@ public final class FixBraessBehaviorIT{
 		// define strategies:
 		{
 			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
+			strat.setStrategyName(DefaultSelector.ChangeExpBeta);
 			strat.setWeight(1.0);
 			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);
