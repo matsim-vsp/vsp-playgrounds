@@ -30,8 +30,8 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import playground.sebhoerl.mexec.ssh.utils.SSHFile;
-import playground.sebhoerl.mexec.ssh.utils.SSHUtils;
+//import playground.sebhoerl.mexec.ssh.utils.SSHFile;
+//import playground.sebhoerl.mexec.ssh.utils.SSHUtils;
 
 /**
  * Created by amit on 28/03/2017.
@@ -130,23 +130,24 @@ public class RunSSHScript {
 
             try {
                 session.connect();
-
-                SSHUtils sshUtils = new SSHUtils(session);
-                String script = "/net/ils4/agarwal/patnaOpdyts/script_allModes.sh";
-
-                sshUtils.mkdirs(new SSHFile("/net/ils4/agarwal/testDir/"));
-
-                SSHUtils.RunResult runResult = sshUtils.execute("qstat -u agarwal");
-                System.out.println(runResult.output); // TODO idk, how to see the output on the console.
-
-                sshUtils.execute("qsub "+script);
+//FIXME: sebhoerl playground is no longer available
+                //
+//                SSHUtils sshUtils = new SSHUtils(session);
+//                String script = "/net/ils4/agarwal/patnaOpdyts/script_allModes.sh";
+//
+//                sshUtils.mkdirs(new SSHFile("/net/ils4/agarwal/testDir/"));
+//
+//                SSHUtils.RunResult runResult = sshUtils.execute("qstat -u agarwal");
+//                System.out.println(runResult.output); // TODO idk, how to see the output on the console.
+//
+//                sshUtils.execute("qsub "+script);
             } finally {
                 session.disconnect();
             }
         } catch (JSchException e) {
             throw new RuntimeException("Aborting. Reason : " + e);
-        } catch (IOException exx) {
-            throw new RuntimeException("Data is not written/read. Reason : " + exx);
+//        } catch (IOException exx) {
+//            throw new RuntimeException("Data is not written/read. Reason : " + exx);
         }
     }
 }

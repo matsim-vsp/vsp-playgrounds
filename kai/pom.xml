@@ -2,11 +2,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.matsim</groupId>
-		<artifactId>playgrounds</artifactId>
+		<artifactId>vsp-playgrounds</artifactId>
 		<version>0.10.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>playground</groupId>
+	  <groupId>vsp-playground</groupId>
 	<artifactId>kai</artifactId>
 	<name>kai</name>
 
@@ -89,6 +89,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
+			<artifactId>opdytsIntegration</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
 			<artifactId>noise</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
@@ -98,7 +103,7 @@
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>playground</groupId>
+			  <groupId>vsp-playground</groupId>
 			<artifactId>kairuns</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
@@ -113,11 +118,13 @@
 			<artifactId>signals</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
+		 <!-- 
 		<dependency>
-			<groupId>playground</groupId>
+			  <groupId>vsp-playground</groupId>
 			<artifactId>gunnar</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>emissions</artifactId>
@@ -128,11 +135,13 @@
 			<artifactId>minibus</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
+		<!-- 
 		<dependency>
-			<groupId>playground</groupId>
+			  <groupId>vsp-playground</groupId>
 			<artifactId>ivtExt</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
+		 -->
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>dvrp</artifactId>

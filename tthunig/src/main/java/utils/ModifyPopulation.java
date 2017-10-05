@@ -35,9 +35,9 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.locationchoice.utils.PlanUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import contrib.baseline.lib.PopulationUtils;
 
 /**
  * Class to modify a population file.
@@ -63,7 +63,7 @@ public class ModifyPopulation {
 	}
 	
 	public static Population onlyKeepSelectedPlanAndCarUsers(Population population){
-		Population carPop = PopulationUtils.getEmptyPopulation();
+		Population carPop = PopulationUtils.createPopulation(ConfigUtils.createConfig());
 		for (Person p : population.getPersons().values()){
 			Plan plan = p.getSelectedPlan();
 			for (PlanElement pe : plan.getPlanElements()){
@@ -118,7 +118,7 @@ public class ModifyPopulation {
 	}
 	
 	public static void doubleEachPerson(Population population){
-		Population doubledPersons = PopulationUtils.getEmptyPopulation();
+		Population doubledPersons = PopulationUtils.createPopulation(ConfigUtils.createConfig());
 		PopulationFactory fac = doubledPersons.getFactory();
 		
 		// create a copy of each person into another population object

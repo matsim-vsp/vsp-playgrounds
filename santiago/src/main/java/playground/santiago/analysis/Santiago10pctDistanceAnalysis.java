@@ -16,11 +16,12 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
-import contrib.baseline.lib.NetworkUtils;
 import playground.santiago.analysis.eventHandlers.others.SantiagoStuckAndAbortEventHandler;
 import playground.santiago.analysis.eventHandlers.travelDistances.SantiagoModeTripTravelDistanceHandler;
 import playground.santiago.analysis.travelDistances.SantiagoPTDistanceFromPlans;
@@ -98,7 +99,8 @@ public class Santiago10pctDistanceAnalysis {
 		String configFile = OUTPUT_DIR + "output_config.xml.gz";
 		Config config = ConfigUtils.loadConfig(configFile);
 		String netFile = OUTPUT_DIR + "output_network.xml.gz";
-		Network network = NetworkUtils.readNetwork(netFile);
+		Network network = NetworkUtils.createNetwork();
+		new MatsimNetworkReader(network).readFile(netFile);
 		String eventsFile = OUTPUT_DIR + "ITERS/it." + it + "/" + it + ".events.xml.gz";
 
 

@@ -2,11 +2,11 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<groupId>org.matsim</groupId>
-		<artifactId>playgrounds</artifactId>
+		<artifactId>vsp-playgrounds</artifactId>
 		<version>0.10.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>playground</groupId>
+	<groupId>vsp-playground</groupId>
 	<artifactId>agarwalamit</artifactId>
 	<name>agarwalamit</name>
 	<repositories>
@@ -22,17 +22,19 @@
 	</repositories>
 	<dependencies>
 		<dependency>
-			<groupId>playground</groupId>
+			<groupId>vsp-playground</groupId>
 			<artifactId>benjamin</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
+		<!-- 
 		<dependency>
 			<groupId>playground</groupId>
 			<artifactId>gunnar</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
+		 -->
 		<dependency>
-			<groupId>playground</groupId>
+			<groupId>vsp-playground</groupId>
 			<artifactId>kai</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
@@ -46,11 +48,24 @@
 			<artifactId>jts</artifactId>
 			<version>1.13</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>cadytsIntegration</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
+			<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>opdytsIntegration</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
+<dependency>
+    <groupId>com.jcraft</groupId>
+    <artifactId>jsch</artifactId>
+    <version>0.1.54</version>
+</dependency>
+		
 		<!--<dependency>-->
 		<!--<groupId>com.github.gunnarfloetteroed</groupId>-->
 		<!--<artifactId>java</artifactId>-->
