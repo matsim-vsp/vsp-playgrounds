@@ -33,7 +33,7 @@ import org.matsim.contrib.accessibility.AccessibilityModule;
 import org.matsim.contrib.accessibility.FacilityTypes;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.AccessibilityFacilityUtils;
-import org.matsim.contrib.accessibility.utils.AccessibilityNetworkUtils;
+import org.matsim.contrib.accessibility.utils.AccessibilityOsmNetworkReader;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
@@ -54,7 +54,7 @@ import com.vividsolutions.jts.geom.Envelope;
 public class AccessibilityComputationBerlin_V2 {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationBerlin_V2.class);
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		Double cellSize = 100.;
 		boolean push2Geoserver = false; // set true for run on server
 		boolean createQGisOutput = true; // set false for run on server
@@ -65,46 +65,45 @@ public class AccessibilityComputationBerlin_V2 {
 		
 		final Config config = ConfigUtils.createConfig(new AccessibilityConfigGroup());
 		
-		// Input (directly from OSM)
 		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(scenarioCRS, "EPSG:4326");
 		Coord southwest = transformation.transform(new Coord(envelope.getMinX(), envelope.getMinY()));
 		Coord northeast = transformation.transform(new Coord(envelope.getMaxX(), envelope.getMaxY()));
-		URL osm = new URL("http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=" + southwest.getX() + "," + southwest.getY() + "," + northeast.getX() + "," + northeast.getY() +"]");
-		HttpURLConnection connection = (HttpURLConnection) osm.openConnection();
-		HttpURLConnection connection2 = (HttpURLConnection) osm.openConnection(); // TODO There might be more elegant option without creating this twice
-		
-	    Network network = AccessibilityNetworkUtils.createNetwork(connection.getInputStream(), scenarioCRS, true, true, false);
-	    
-	    double buildingTypeFromVicinityRange = 0.;
-		ActivityFacilities facilities = AccessibilityFacilityUtils.createFacilites(connection2.getInputStream(), scenarioCRS, buildingTypeFromVicinityRange);
-		
-		config.global().setCoordinateSystem(scenarioCRS);
+		Network network = null;
+		ActivityFacilities facilities = null;
+		try {
+			URL osm = new URL("http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=" + southwest.getX() + "," + southwest.getY() + "," + northeast.getX() + "," + northeast.getY() +"]");
+		    AccessibilityOsmNetworkReader networkReader = new AccessibilityOsmNetworkReader(((HttpURLConnection) osm.openConnection()).getInputStream(), scenarioCRS);
+			networkReader.setKeepPaths(true);
+			networkReader.setIincludeLowHierarchyWays(true);
+			networkReader.createNetwork();
+			network = networkReader.getNetwork();
+			facilities = AccessibilityFacilityUtils.createFacilites(((HttpURLConnection) osm.openConnection()).getInputStream(), scenarioCRS, 0.);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/neu/");
+		config.controler().setRunId("de_berlin_" + cellSize.toString().split("\\.")[0]);
+		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setLastIteration(0);
-		config.controler().setRunId("de_berlin_" + cellSize.toString().split("\\.")[0]);
+		config.global().setCoordinateSystem(scenarioCRS);
 	
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
-		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
 		acg.setEnvelope(envelope);
+		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, false);
 		acg.setOutputCrs(scenarioCRS);
 		
-		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
-
 		ConfigUtils.setVspDefaults(config);
 		
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		scenario.setNetwork(network);
 		scenario.setActivityFacilities(facilities);
 
-		// Activity types
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.SHOPPING});
-		LOG.info("Using activity types: " + activityTypes);
-		
-		// Network density points (as proxy for population density)
 		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork()); // will be aggregated in downstream code!
 		
 		final Controler controler = new Controler(scenario);
@@ -119,7 +118,6 @@ public class AccessibilityComputationBerlin_V2 {
 		
 		controler.run();
 		
-		// QGis
 		if (createQGisOutput) {
 			final boolean includeDensityLayer = false;
 			final Integer range = 9; // In the current implementation, this must always be 9
@@ -133,11 +131,10 @@ public class AccessibilityComputationBerlin_V2 {
 				String actSpecificWorkingDirectory = workingDirectory + actType + "/";
 				for (Modes4Accessibility mode : acg.getIsComputingMode()) {
 					VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode.toString(), envelope, workingDirectory,
-							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, cellSize.intValue(),
-							populationThreshold);
+							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, cellSize.intValue(), populationThreshold);
 					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode.toString(), osName);
 				}
-			}  
+			}
 		}
 	}
 }
