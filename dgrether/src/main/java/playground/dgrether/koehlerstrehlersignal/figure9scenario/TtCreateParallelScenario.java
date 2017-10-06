@@ -23,40 +23,20 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.NetworkFactory;
-import org.matsim.api.core.v01.network.NetworkWriter;
-import org.matsim.api.core.v01.network.Node;
+import org.matsim.api.core.v01.network.*;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
+import org.matsim.contrib.signals.data.signalgroups.v20.*;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.model.Signal;
-import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.contrib.signals.model.SignalPlan;
-import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.model.*;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.LanesWriter;
-import org.matsim.lanes.data.v11.LaneData11;
-import org.matsim.lanes.data.v11.LaneDefinitions11;
-import org.matsim.lanes.data.v11.LaneDefinitions11Impl;
-import org.matsim.lanes.data.v11.LaneDefinitionsFactory11;
-import org.matsim.lanes.data.v11.LaneDefinitionsV11ToV20Conversion;
-import org.matsim.lanes.data.v11.LanesToLinkAssignment11;
+import org.matsim.lanes.data.*;
 
 /**
  * Class to create the parallel scenario (former figure9 scenario) with one direction.
@@ -121,7 +101,7 @@ public class TtCreateParallelScenario {
 		this.writeMatsimNetwork(net, networkOutfile);
 		log.info("network written to " + networkOutfile);
 		// lanes
-		createLanes((MutableScenario) scenario);
+		createLanes(scenario);
 		LanesWriter laneWriter = new LanesWriter(scenario.getLanes());
 		laneWriter.write(lanesOutfile);
 		log.info("lanes written to " + lanesOutfile);
@@ -138,7 +118,7 @@ public class TtCreateParallelScenario {
 		signalsWriter.writeSignalsData(scenario);
 	}
 
-	private SignalControlData createSignalControl(SignalsData sd) {
+	private void createSignalControl(SignalsData sd) {
 		SignalControlData control = sd.getSignalControlData();
 
 		createSignalControlFor2LightCrossing(idS3, control);
@@ -206,7 +186,6 @@ public class TtCreateParallelScenario {
 //			settings2.setOnset(this.onset1);
 //			settings2.setDropping(this.dropping1);
 //		}
-		return control;
 	}
 
 	/**
@@ -483,7 +462,7 @@ public class TtCreateParallelScenario {
 //		group4signal.addSignalId(Id.create(id4, Signal.class));
 //	}
 
-	private SignalSystemsData createSignalSystemsAndGroups(SignalsData sd) {
+	private void createSignalSystemsAndGroups(SignalsData sd) {
 		SignalSystemsData systems = sd.getSignalSystemsData();
 		SignalGroupsData groups = sd.getSignalGroupsData();
 
@@ -496,8 +475,6 @@ public class TtCreateParallelScenario {
 				idL42, systems, groups);
 		createSignalSystem4Lights(idS7, idL87, idL87L1, idL87L2, idL67, 
 				idL57, systems, groups);
-		
-		return systems;
 	}
 
 	private void createSignalSystem4Lights(Id<SignalSystem> signalSystemId,
@@ -555,41 +532,41 @@ public class TtCreateParallelScenario {
 	
 	
 
-	private void createLanes(MutableScenario scenario) {
-		double laneLenght = 50.0;
-		LaneDefinitions11 lanes11 = new LaneDefinitions11Impl();
-		LaneDefinitionsFactory11 factory = lanes11.getFactory();
+	private void createLanes(Scenario scenario) {
+		double laneLength = 50.0;
+		Lanes lanes11 = scenario.getLanes();
+		LanesFactory factory = lanes11.getFactory();
 		// lanes for link 12
-		LanesToLinkAssignment11 lanesForLink12 = factory
+		LanesToLinkAssignment lanesForLink12 = factory
 				.createLanesToLinkAssignment(idL12);
 		lanes11.addLanesToLinkAssignment(lanesForLink12);
-		LaneData11 link12lane1 = factory.createLane(idL12L1);
+
+		Lane link12lane1 = factory.createLane(idL12L1);
 		lanesForLink12.addLane(link12lane1);
 		link12lane1.addToLinkId(idL23);
-		link12lane1.setStartsAtMeterFromLinkEnd(laneLenght);
+		link12lane1.setStartsAtMeterFromLinkEnd(laneLength);
 
-		LaneData11 link12lane2 = factory.createLane(idL12L2);
+		Lane link12lane2 = factory.createLane(idL12L2);
 		lanesForLink12.addLane(link12lane2);
 		link12lane2.addToLinkId(idL24);
-		link12lane2.setStartsAtMeterFromLinkEnd(laneLenght);
+		link12lane2.setStartsAtMeterFromLinkEnd(laneLength);
 
 		// lanes for link 87
-		LanesToLinkAssignment11 lanesForLink87 = factory
+		LanesToLinkAssignment lanesForLink87 = factory
 				.createLanesToLinkAssignment(idL87);
 		lanes11.addLanesToLinkAssignment(lanesForLink87);
-		LaneData11 link87lane1 = factory.createLane(idL87L1);
+
+		Lane link87lane1 = factory.createLane(idL87L1);
 		lanesForLink87.addLane(link87lane1);
 		link87lane1.addToLinkId(idL76);
-		link87lane1.setStartsAtMeterFromLinkEnd(laneLenght);
+		link87lane1.setStartsAtMeterFromLinkEnd(laneLength);
 
-		LaneData11 link87lane2 = factory.createLane(idL87L2);
+		Lane link87lane2 = factory.createLane(idL87L2);
 		lanesForLink87.addLane(link87lane2);
 		link87lane2.addToLinkId(idL75);
-		link87lane2.setStartsAtMeterFromLinkEnd(laneLenght);
+		link87lane2.setStartsAtMeterFromLinkEnd(laneLength);
 
-		// convert to 2.0 format and save in scenario
-		LaneDefinitionsV11ToV20Conversion.convertTo20(lanes11,
-				scenario.getLanes(), scenario.getNetwork());
+		LanesUtils.createOriginalLanesAndSetLaneCapacities(scenario);
 	}
 
 	private Network createNetwork(Scenario sc) {

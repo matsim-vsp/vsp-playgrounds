@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -50,15 +51,7 @@ import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesWriter;
-import org.matsim.lanes.data.v11.LaneData11;
-import org.matsim.lanes.data.v11.LaneDefinitions11;
-import org.matsim.lanes.data.v11.LaneDefinitions11Impl;
-import org.matsim.lanes.data.v11.LaneDefinitionsFactory11;
-import org.matsim.lanes.data.v11.LaneDefinitionsV11ToV20Conversion;
-import org.matsim.lanes.data.v11.LanesToLinkAssignment11;
+import org.matsim.lanes.data.*;
 
 import playground.dgrether.DgPlaygroundJobfileCreator;
 
@@ -228,7 +221,7 @@ public class DaganzoScenarioGenerator {
 		//set the network input file to the config and load it
 		config.network().setInputFile(NETWORKFILE);
 		
-		MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(NETWORKFILE);
 		
@@ -240,8 +233,8 @@ public class DaganzoScenarioGenerator {
 			config.qsim().setUseLanes(true);
 			config.network().setLaneDefinitionsFile(LANESOUTPUTFILE);
 			//create the lanes and write them
-			Lanes lanes = createLanes(scenario);
-			LanesWriter laneWriter = new LanesWriter(lanes);
+			createLanes(scenario);
+			LanesWriter laneWriter = new LanesWriter(scenario.getLanes());
 			laneWriter.write(LANESOUTPUTFILE);
 		}
 		if (isUseSignalSystems) {
@@ -441,27 +434,29 @@ public class DaganzoScenarioGenerator {
 	}
 
 
-	private Lanes createLanes(MutableScenario scenario) {
-		LaneDefinitions11 lanes = new LaneDefinitions11Impl();
-		LaneDefinitionsFactory11 factory = lanes.getFactory();
+	private void createLanes(Scenario scenario) {
+		Lanes lanes = scenario.getLanes();
+		LanesFactory factory = lanes.getFactory();
 		//lanes for link 4
-		LanesToLinkAssignment11 lanesForLink4 = factory.createLanesToLinkAssignment(Id.create(4, Link.class));
-		LaneData11 link4lane1 = factory.createLane(Id.create(1, Lane.class));
+		Link link4 = scenario.getNetwork().getLinks().get(Id.create(4, Link.class));
+		LanesToLinkAssignment lanesForLink4 = factory.createLanesToLinkAssignment(link4.getId());
+		Lane link4lane1 = factory.createLane(Id.create(1, Lane.class));
 		link4lane1.addToLinkId(Id.create(6, Link.class));
 		link4lane1.setNumberOfRepresentedLanes(numberOfLanes);
-		link4lane1.setStartsAtMeterFromLinkEnd(100.0);
+		link4lane1.setStartsAtMeterFromLinkEnd(link4.getLength());
 		lanesForLink4.addLane(link4lane1);
 		lanes.addLanesToLinkAssignment(lanesForLink4);
+		LanesUtils.calculateAndSetCapacity(link4lane1, true, link4, scenario.getNetwork());
 		//lanes for link 5
-		LanesToLinkAssignment11 lanesForLink5 = factory.createLanesToLinkAssignment(Id.create(5, Link.class));
-		LaneData11 link5lane1 = factory.createLane(Id.create(1, Lane.class));
+		Link link5 = scenario.getNetwork().getLinks().get(Id.create(5, Link.class));
+		LanesToLinkAssignment lanesForLink5 = factory.createLanesToLinkAssignment(link5.getId());
+		Lane link5lane1 = factory.createLane(Id.create(1, Lane.class));
 		link5lane1.setNumberOfRepresentedLanes(numberOfLanes);
 		link5lane1.addToLinkId(Id.create(6, Link.class));
-		link5lane1.setStartsAtMeterFromLinkEnd(7.5);
+		link5lane1.setStartsAtMeterFromLinkEnd(link5.getLength());
 		lanesForLink5.addLane(link5lane1);
 		lanes.addLanesToLinkAssignment(lanesForLink5);
-		Lanes lanesv2 = LaneDefinitionsV11ToV20Conversion.convertTo20(lanes, scenario.getNetwork());
-		return lanesv2;
+		LanesUtils.calculateAndSetCapacity(link5lane1, true, link5, scenario.getNetwork());
 	}
 
 
