@@ -67,11 +67,11 @@ public class ParametricRunsEquilnet {
         StringBuilder buffer = new StringBuilder();
         ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(runCounter);
 
-        String ascStyles [] = {"axial_fixed","axial_randomVariation"};
-        double [] stepSizes = {0.25, 0.5, 0.75, 1.0};
+        String ascStyles [] = {"axial_randomVariation","axial_fixed"};
+        double [] stepSizes = {1.0,0.75,0.5,0.25};
         Integer [] convIterations = {500, 300};
         double [] selfTuningWts = {1.0, 2.0};
-        Integer [] warmUpIts = {1,5,10};
+        Integer [] warmUpIts = {10,5,1};
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+newLine);
 
@@ -172,9 +172,9 @@ public class ParametricRunsEquilnet {
         }
 
         // location of file must be locale and then can be copied to remote.
-        String jobScriptFileName = locationOfOutput+"/testScriptCommandLine.sh";
+        String jobScriptFileName = locationOfOutput+"/script_"+jobName+".sh";
 
-        String matsimDir = "r_796d7ac22d056a3063078b86398fc2d353f89b2f_opdyts";
+        String matsimDir = "r_82abe81b33467700f4e61a41ada1e6d7cfcc96f9_opdyts";
 
 
         String [] additionalLines = {
