@@ -38,16 +38,11 @@ import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.core.utils.io.IOUtils;
@@ -74,12 +69,11 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		String relaxedPlans;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
 		double stepSize = 0.5;
-		int iterations2Convergence = 500;
+		int iterations2Convergence = 5;
 		double selfTuningWt = 1.0;
 		int warmUpItrs = 1;
 
 		if (args.length > 0) {
-			int length = args.length;
 			EQUIL_DIR = args[0];
 			OUT_DIR = args[1];
 			relaxedPlans = args[2];
@@ -119,83 +113,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		List<String> modes2consider = Arrays.asList("car","bicycle");
 
-		//== default config has limited inputs
-		StrategyConfigGroup strategies = config.strategy();
-		strategies.clearStrategySettings();
-
-		config.changeMode().setModes( modes2consider.toArray(new String [modes2consider.size()]));
-		StrategySettings modeChoice = new StrategySettings();
-		modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.name());
-		modeChoice.setWeight(0.1);
-		config.strategy().addStrategySettings(modeChoice);
-
-		StrategySettings expChangeBeta = new StrategySettings();
-		expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
-		expChangeBeta.setWeight(0.9);
-		config.strategy().addStrategySettings(expChangeBeta);
-		//==
-
-		//== planCalcScore params (initialize will all defaults).
-		for ( PlanCalcScoreConfigGroup.ActivityParams params : config.planCalcScore().getActivityParams() ) {
-			params.setTypicalDurationScoreComputation( PlanCalcScoreConfigGroup.TypicalDurationScoreComputation.relative );
-		}
-
-		// remove other mode params
-		PlanCalcScoreConfigGroup planCalcScoreConfigGroup = config.planCalcScore();
-		for ( PlanCalcScoreConfigGroup.ModeParams params : planCalcScoreConfigGroup.getModes().values() ) {
-			planCalcScoreConfigGroup.removeParameterSet(params);
-		}
-
-		PlanCalcScoreConfigGroup.ModeParams mpCar = new PlanCalcScoreConfigGroup.ModeParams("car");
-		PlanCalcScoreConfigGroup.ModeParams mpBike = new PlanCalcScoreConfigGroup.ModeParams("bicycle");
-		mpBike.setMarginalUtilityOfTraveling(0.);
-		mpBike.setConstant(0.);
-
-		planCalcScoreConfigGroup.addModeParams(mpCar);
-		planCalcScoreConfigGroup.addModeParams(mpBike);
-		//==
-
-		//==
-		config.qsim().setTrafficDynamics( QSimConfigGroup.TrafficDynamics.withHoles );
-		config.qsim().setUsingFastCapacityUpdate(true);
-
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		//==
-
-//		if(! isPlansRelaxed) {
-//			config.controler().setLastIteration(50);
-//			config.strategy().setFractionOfIterationsToDisableInnovation(1.0);
-//
-//			Scenario scenarioPlansRelaxor = ScenarioUtils.loadScenario(config);
-//			// following is taken from KNBerlinControler.prepareScenario(...);
-//			// modify equil plans:
-//			double time = 6*3600. ;
-//			for ( Person person : scenarioPlansRelaxor.getPopulation().getPersons().values() ) {
-//				Plan plan = person.getSelectedPlan() ;
-//				Activity activity = (Activity) plan.getPlanElements().get(0) ;
-//				activity.setEndTime(time);
-//				time++ ;
-//			}
-//
-//			Controler controler = new Controler(scenarioPlansRelaxor);
-//			controler.addOverridingModule(new AbstractModule() {
-//				@Override
-//				public void install() {
-//					addControlerListenerBinding().toInstance(new OpdytsModalStatsControlerListener(modes2consider, new EquilDistanceDistribution(EQUIL_MIXEDTRAFFIC)));
-//				}
-//			});
-//			controler.run();
-//
-//			FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),controler.getConfig().controler().getFirstIteration(), controler.getConfig().controler().getLastIteration());
-//		}
-
-//		// set back settings for opdyts
-//		File file = new File(config.controler().getOutputDirectory()+"/output_plans.xml.gz");
-//		config.plans().setInputFile(file.getAbsoluteFile().getAbsolutePath());
-//		OUT_DIR = OUT_DIR+"/calibration_"+ opdytsConfigGroup.getNumberOfIterationsForAveraging() +"Its_"+opdytsConfigGroup.getSelfTuningWeight()+"weight_"+startingASCforBicycle+"asc/";
-//
-//		config.controler().setOutputDirectory(OUT_DIR);
-//		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
 		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
