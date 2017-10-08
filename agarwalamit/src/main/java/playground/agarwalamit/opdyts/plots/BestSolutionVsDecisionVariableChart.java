@@ -19,9 +19,11 @@
 
 package playground.agarwalamit.opdyts.plots;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.collections.Tuple;
@@ -57,11 +59,20 @@ public class BestSolutionVsDecisionVariableChart {
     //BEGIN_EXAMPLE
     public static void main(String[] args) {
 
-        String filesDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calibration_variationSize0.1_AvgIts20/";
+        for (int i=1; i < 49; i++) {
+            String filesDir = FileUtils.RUNS_SVN + "/opdyts/equil/car,bicycle/output/run" + i + "/axial_randomVariation/";
+//            String filesDir = FileUtils.RUNS_SVN + "/opdyts/equil/car,bicycle/output/run" + i + "/axial_fixed/";
 
-        BestSolutionVsDecisionVariableChart opdytsLogReader = new BestSolutionVsDecisionVariableChart(Arrays.asList("car","bike","motorbike","pt","walk"));
-        opdytsLogReader.readFile(filesDir+"/opdyts.log");
-        opdytsLogReader.plotData(filesDir+"/decisionVariableVsASC.png");
+            BestSolutionVsDecisionVariableChart opdytsLogReader = new BestSolutionVsDecisionVariableChart(Arrays.asList(
+                    "car",
+                    "bicycle"
+//                    ,"motorbike",
+//                    "pt",
+//                    "walk"
+            ));
+            opdytsLogReader.readFile(filesDir + "/opdyts.log");
+            opdytsLogReader.plotData(filesDir + "/decisionVariableVsASC.png");
+        }
     }
     //END_EXAMPLE
 
@@ -116,6 +127,8 @@ public class BestSolutionVsDecisionVariableChart {
     public void plotData(final String outFile){
         LOGGER.info("Plotting file "+outFile);
         XYScatterChart chart = new XYScatterChart( bestOverallSolution + " & "+bestOverallDecisionVariable,"Iteration","value of objection function / asc ");
+        chart.getChart().getPlot().setBackgroundPaint(Color.white);
+
         for (String mode : this.modesToGetASC) {
             double[] xs = new double[ currentBestDecisionVariables.get(mode).size()];
             double[] ys = new double[ currentBestDecisionVariables.get(mode).size()];

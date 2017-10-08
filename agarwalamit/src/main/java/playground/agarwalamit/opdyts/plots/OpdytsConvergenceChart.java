@@ -19,12 +19,16 @@
 
 package playground.agarwalamit.opdyts.plots;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.log4j.Logger;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.Range;
 import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
@@ -50,11 +54,15 @@ public class OpdytsConvergenceChart {
     //BEGIN_EXAMPLE
     public static void main(String[] args) {
 
-        String filesDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calibration_variationSize0.1_AvgIts20/";
+        for (int i=49; i < 97; i++){
+            String filesDir = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/output/run"+i+"/axial_fixed/";
 
-        OpdytsConvergenceChart opdytsLogReader = new OpdytsConvergenceChart();
-        opdytsLogReader.readFile(filesDir+"/opdyts.con");
-        opdytsLogReader.plotData(filesDir+"/convergence.png");
+            OpdytsConvergenceChart opdytsLogReader = new OpdytsConvergenceChart();
+            opdytsLogReader.readFile(filesDir+"/opdyts.con");
+            opdytsLogReader.plotData(filesDir+"/convergence.png");
+        }
+
+
     }
     //END_EXAMPLE
 
@@ -93,7 +101,13 @@ public class OpdytsConvergenceChart {
 
     public void plotData(final String outFile){
         LOGGER.info("Plotting file "+outFile);
+        NumberAxis range = new NumberAxis("value of objection function");
+        range.setRange(new Range(0.0,1.0));
+
         XYScatterChart chart = new XYScatterChart(rawVale+" & "+avgValue,"Iteration","value of objection function");
+        chart.getChart().getPlot().setBackgroundPaint(Color.white);
+        ((XYPlot)chart.getChart().getPlot()).setRangeAxis(range);
+
         {
             double[] xs = new double[ avgValueList.size()];
             double[] ys = new double[ avgValueList.size()];
