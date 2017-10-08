@@ -19,6 +19,7 @@
 package playground.dziemke.utils;
 
 import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -34,6 +35,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.IdentityTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 /**
  * @author dziemke
@@ -45,19 +49,33 @@ public class PlanFileModifier {
 	private final static Logger LOG = Logger.getLogger(PlanFileModifier.class);
 	
 	public static void main(String[] args) {
+		// Check if args has an interpretable length
+		if (args.length != 0 && args.length != 9 && args.length != 11) {
+			throw new IllegalArgumentException("Arguments array must have a length of 0, 9, or 11!");
+		}
+		
 		// Local use
-		String inputPlansFile = "../../runs-svn/berlin_scenario_2016/be_118/be_118.output_plans.xml.gz";
-		String outputPlansFile = "../../runs-svn/berlin_scenario_2016/be_118/be_118.output_plans_no_links_routes_2.xml.gz";
+		String inputPlansFile = "../../upretoria/data/capetown/scenario_2017/original/population.xml.gz";
+		String outputPlansFile = "../../upretoria/data/capetown/scenario_2017/population_32734.xml.gz";
 		double selectionProbability = 1.;
 		boolean onlyTransferSelectedPlan = false;
 		boolean considerHomeStayingAgents = true;
 		boolean includeStayHomePlans = true;
 		boolean onlyConsiderPeopleAlwaysGoingByCar = false;
 		int maxNumberOfAgentsConsidered = 10000000;
-		boolean removeLinksAndRoutes = true;
+		boolean removeLinksAndRoutes = false;
+		String inputCRS = TransformationFactory.HARTEBEESTHOEK94_LO19;
+		String outputCRS = "EPSG:32734";
 		
-		// Server use
-		if (args.length != 0) {
+		CoordinateTransformation ct;
+		if (inputCRS == null && outputCRS == null) {
+			ct = new IdentityTransformation();
+		} else {
+			ct = TransformationFactory.getCoordinateTransformation(inputCRS, outputCRS);
+		}
+		
+		// Server use, version without CRS transformation
+		if (args.length == 9) {
 			inputPlansFile = args[0];
 			outputPlansFile = args[1];
 			selectionProbability = Double.parseDouble(args[2]);
@@ -67,21 +85,36 @@ public class PlanFileModifier {
 			onlyConsiderPeopleAlwaysGoingByCar = Boolean.parseBoolean(args[6]);
 			maxNumberOfAgentsConsidered = Integer.parseInt(args[7]);
 			removeLinksAndRoutes = Boolean.parseBoolean(args[8]);
+			inputCRS = null;
+			outputCRS = null;
+		}
+		
+		// Server use, newer version with CRS transformation
+		if (args.length == 11) {
+			inputPlansFile = args[0];
+			outputPlansFile = args[1];
+			selectionProbability = Double.parseDouble(args[2]);
+			onlyTransferSelectedPlan = Boolean.parseBoolean(args[3]);
+			considerHomeStayingAgents = Boolean.parseBoolean(args[4]);
+			includeStayHomePlans = Boolean.parseBoolean(args[5]);
+			onlyConsiderPeopleAlwaysGoingByCar = Boolean.parseBoolean(args[6]);
+			maxNumberOfAgentsConsidered = Integer.parseInt(args[7]);
+			removeLinksAndRoutes = Boolean.parseBoolean(args[8]);
+			inputCRS = args[9];
+			outputCRS = args[10];
 		}
 		
 		modifyPlans(inputPlansFile, outputPlansFile, selectionProbability, onlyTransferSelectedPlan,
 				considerHomeStayingAgents, includeStayHomePlans, onlyConsiderPeopleAlwaysGoingByCar,
-				maxNumberOfAgentsConsidered, removeLinksAndRoutes);
+				maxNumberOfAgentsConsidered, removeLinksAndRoutes, ct);
 	}
 		
-	
 	public static void modifyPlans (String inputPlansFile, String outputPlansFile, double selectionProbability, boolean onlyTransferSelectedPlan,
 			boolean considerHomeStayingAgents, boolean includeStayHomePlans, boolean onlyConsiderPeopleAlwaysGoingByCar,
-			int maxNumberOfAgentsConsidered, boolean removeLinksAndRoutes) {
+			int maxNumberOfAgentsConsidered, boolean removeLinksAndRoutes, CoordinateTransformation ct) {
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		PopulationReader reader = new PopulationReader(scenario);
-		reader.readFile(inputPlansFile);
+		new PopulationReader(scenario).readFile(inputPlansFile);
 		Population population = scenario.getPopulation();
 
 		Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -100,7 +133,7 @@ public class PlanFileModifier {
 				// If selected according to all criteria, create a copy of the person and add it to new population
 				if (copyPerson) {
 					createPersonAndAddToPopulation(onlyTransferSelectedPlan, includeStayHomePlans,
-							removeLinksAndRoutes, population2, person, selectedPlan);
+							removeLinksAndRoutes, population2, person, selectedPlan, ct);
 				}
 			}
 			agentCounter ++;
@@ -112,17 +145,14 @@ public class PlanFileModifier {
 		LOG.info("Modified plans file has been written to " + outputPlansFile);
 	}
 
-
 	private static boolean decideIfPersonWillBeCopied(double selectionProbability, boolean considerHomeStayingAgents,
 			boolean onlyConsiderPeopleAlwaysGoingByCar, Person person, Random random, Plan selectedPlan) {
 		boolean copyPerson = true;
-		
 		if (!considerHomeStayingAgents) {
 			if (selectedPlan.getPlanElements().size() <= 1) {
 				copyPerson = false;
 			}
 		}
-		
 		int numberOfPlans = person.getPlans().size();
 		if (onlyConsiderPeopleAlwaysGoingByCar) {
 			for (int i=0; i < numberOfPlans; i++) {
@@ -138,20 +168,19 @@ public class PlanFileModifier {
 				}
 			}
 		}
-		
 		if (random.nextDouble() > selectionProbability) {
 			copyPerson = false;
 		}
 		return copyPerson;
 	}
 
-
 	private static void createPersonAndAddToPopulation(boolean onlyTransferSelectedPlan, boolean includeStayHomePlans,
-			boolean removeLinksAndRoutes, Population population, Person person, Plan selectedPlan) {
+			boolean removeLinksAndRoutes, Population population, Person person, Plan selectedPlan, CoordinateTransformation ct) {
 		Id<Person> id = person.getId();
 		Person person2 = population.getFactory().createPerson(id);
 		
 		if (onlyTransferSelectedPlan) {
+			transformCoordinates(selectedPlan, ct);
 			if (removeLinksAndRoutes) {
 				removeLinksAndRoutes(selectedPlan);
 			}
@@ -171,6 +200,7 @@ public class PlanFileModifier {
 				}
 				
 				if (considerPlan) {
+					transformCoordinates(plan, ct);
 					if (removeLinksAndRoutes) {
 						removeLinksAndRoutes(plan);
 					}
@@ -181,7 +211,6 @@ public class PlanFileModifier {
 		}
 	}
 	
-	
 	private static void removeLinksAndRoutes(Plan plan) {
 		for (PlanElement pe : plan.getPlanElements()) {
 			if (pe instanceof Activity) {
@@ -189,6 +218,14 @@ public class PlanFileModifier {
 			}
 			if (pe instanceof Leg) {
 				((Leg) pe).setRoute(null); // Remove route
+			}
+		}
+	}
+	
+	private static void transformCoordinates(Plan plan, CoordinateTransformation ct) {
+		for (PlanElement pe : plan.getPlanElements()) {
+			if (pe instanceof Activity) {
+				((Activity) pe).setCoord(ct.transform(((Activity) pe).getCoord()));
 			}
 		}
 	}
