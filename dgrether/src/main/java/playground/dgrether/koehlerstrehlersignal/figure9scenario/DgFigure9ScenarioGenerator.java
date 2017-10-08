@@ -19,51 +19,29 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.figure9scenario;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.NetworkFactory;
-import org.matsim.api.core.v01.network.NetworkWriter;
-import org.matsim.api.core.v01.network.Node;
+import org.matsim.api.core.v01.network.*;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
+import org.matsim.contrib.signals.data.signalgroups.v20.*;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.model.Signal;
-import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.contrib.signals.model.SignalPlan;
-import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.model.*;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesWriter;
-import org.matsim.lanes.data.v11.LaneData11;
-import org.matsim.lanes.data.v11.LaneDefinitions11;
-import org.matsim.lanes.data.v11.LaneDefinitions11Impl;
-import org.matsim.lanes.data.v11.LaneDefinitionsFactory11;
-import org.matsim.lanes.data.v11.LaneDefinitionsV11ToV20Conversion;
-import org.matsim.lanes.data.v11.LanesToLinkAssignment11;
+import org.matsim.lanes.data.*;
+
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -118,8 +96,8 @@ public class DgFigure9ScenarioGenerator {
 		this.writeMatsimNetwork(net, networkOutfile);
 		log.info("network written to " + networkOutfile);
 		//lanes
-		Lanes lanes = createLanes((MutableScenario)scenario);
-		LanesWriter laneWriter = new LanesWriter(lanes);
+		createLanes(scenario);
+		LanesWriter laneWriter = new LanesWriter(scenario.getLanes());
 		laneWriter.write(lanesOutfile);
 		log.info("lanes written to " + lanesOutfile);
 		//signals
@@ -137,7 +115,7 @@ public class DgFigure9ScenarioGenerator {
 	
 	
 
-	private SignalControlData createSignalControl(SignalsData sd) {
+	private void createSignalControl(SignalsData sd) {
 		SignalControlData control = sd.getSignalControlData();
 		
 		this.createSystem2Control(control);
@@ -184,7 +162,6 @@ public class DgFigure9ScenarioGenerator {
 			settings2.setOnset(this.onset1);
 			settings2.setDropping(this.dropping1);
 		}
-		return control;
 	}
 
 	
@@ -320,7 +297,7 @@ public class DgFigure9ScenarioGenerator {
 	/**
 	 * Node Id == SignalSystem Id
 	 */
-	private SignalSystemsData createSignalSystemsAndGroups(SignalsData sd) {
+	private void createSignalSystemsAndGroups(SignalsData sd) {
 		SignalSystemsData systems = sd.getSignalSystemsData();
 		SignalGroupsData groups = sd.getSignalGroupsData();
 		this.createGroupsAndSystem2(systems, groups);
@@ -369,42 +346,43 @@ public class DgFigure9ScenarioGenerator {
 		sys.addSignalData(signal);
 		signal.setLinkId(id58);
 		SignalUtils.createAndAddSignalGroups4Signals(groups, sys);
-
-		return systems;
 	}
 
-	private Lanes createLanes(MutableScenario scenario) {
-		double laneLenght = 50.0;
-		LaneDefinitions11 lanes = new LaneDefinitions11Impl();
-		LaneDefinitionsFactory11 factory = lanes.getFactory();
+	private void createLanes(Scenario scenario) {
+		double laneLength = 50.0;
+		Lanes lanes = scenario.getLanes();
+		LanesFactory factory = lanes.getFactory();
 		//lanes for link 12
-		LanesToLinkAssignment11 lanesForLink12 = factory.createLanesToLinkAssignment(id12);
+		LanesToLinkAssignment lanesForLink12 = factory.createLanesToLinkAssignment(id12);
 		lanes.addLanesToLinkAssignment(lanesForLink12);
-		LaneData11 link12lane1 = factory.createLane(Id.create(id1, Lane.class));
+		Link link12 = scenario.getNetwork().getLinks().get(id12);
+
+		Lane link12lane1 = factory.createLane(Id.create(id1, Lane.class));
 		lanesForLink12.addLane(link12lane1);
 		link12lane1.addToLinkId(id23);
-		link12lane1.setStartsAtMeterFromLinkEnd(laneLenght);
+		link12lane1.setStartsAtMeterFromLinkEnd(laneLength);
 
-		LaneData11 link12lane2 = factory.createLane(Id.create(id2, Lane.class));
+		Lane link12lane2 = factory.createLane(Id.create(id2, Lane.class));
 		lanesForLink12.addLane(link12lane2);
 		link12lane2.addToLinkId(id27);
-		link12lane2.setStartsAtMeterFromLinkEnd(laneLenght);
+		link12lane2.setStartsAtMeterFromLinkEnd(laneLength);
 		
 		//lanes for link 65
-		LanesToLinkAssignment11 lanesForLink65 = factory.createLanesToLinkAssignment(id65);
+		LanesToLinkAssignment lanesForLink65 = factory.createLanesToLinkAssignment(id65);
 		lanes.addLanesToLinkAssignment(lanesForLink65);
-		LaneData11 link65lane1 = factory.createLane(Id.create(id1, Lane.class));
+		Link link65 = scenario.getNetwork().getLinks().get(id65);
+
+		Lane link65lane1 = factory.createLane(Id.create(id1, Lane.class));
 		lanesForLink65.addLane(link65lane1);
 		link65lane1.addToLinkId(id54);
-		link65lane1.setStartsAtMeterFromLinkEnd(laneLenght);
+		link65lane1.setStartsAtMeterFromLinkEnd(laneLength);
 
-		LaneData11 link65lane2 = factory.createLane(Id.create(id2, Lane.class));
+		Lane link65lane2 = factory.createLane(Id.create(id2, Lane.class));
 		lanesForLink65.addLane(link65lane2);
 		link65lane2.addToLinkId(id58);
-		link65lane2.setStartsAtMeterFromLinkEnd(laneLenght);
-		
-		//convert to 2.0 format and return
-		return LaneDefinitionsV11ToV20Conversion.convertTo20(lanes, scenario.getNetwork());
+		link65lane2.setStartsAtMeterFromLinkEnd(laneLength);
+
+		LanesUtils.createOriginalLanesAndSetLaneCapacities(scenario);
 	}
 
 	

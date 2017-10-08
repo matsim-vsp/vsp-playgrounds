@@ -30,7 +30,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.data.LanesUtils;
 import org.matsim.lanes.data.*;
 
 import java.util.Arrays;
@@ -120,7 +120,7 @@ public final class TtCreateParallelNetworkAndLanes {
 		if (net.getCapacityPeriod() != 3600.0){
 			throw new IllegalStateException();
 		}
-		((Network)net).setEffectiveLaneWidth(1.0);
+		net.setEffectiveLaneWidth(1.0);
 		NetworkFactory fac = net.getFactory();
 
 		// create nodes

@@ -61,7 +61,6 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -70,16 +69,14 @@ import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.data.LanesUtils;
 import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 import org.matsim.lanes.data.LanesFactory;
 import org.matsim.lanes.data.LanesToLinkAssignment;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
@@ -97,17 +94,17 @@ public class RunGridLock {
 
 	private static final Logger log = Logger.getLogger(RunGridLock.class);
 	
-	private enum SignalType { NONE, PLANBASED, DOWNSTREAM, SYLVIA};
+	private enum SignalType { NONE, PLANBASED, DOWNSTREAM, SYLVIA}
 	private static final SignalType SIGNALTYPE = SignalType.PLANBASED;
 	
-	private enum SignalBasis { GREEN, CONFLICTING, TWO_ALTERNATING };
+	private enum SignalBasis { GREEN, CONFLICTING, TWO_ALTERNATING }
 	private static final SignalBasis SIGNALBASIS = SignalBasis.CONFLICTING;
 	
 	private static final double MIDDLE_LINK_CAP = 1800;
 	// no grid lock for 3600 and planbased signals: they let only 1800 vehicles enter the system
 	
 	private static final int DEMAND_START_TIME_OFFSET  = 0; // choose 0 if both streams should start at the same time
-	private enum DemandIntensity { CONSTANT, INCREASING, PERIODIC};
+	private enum DemandIntensity { CONSTANT, INCREASING, PERIODIC}
 	private static final DemandIntensity DEMAND_INTENSITY  = DemandIntensity.INCREASING;
 
 	public static void main(String[] args) {
@@ -157,7 +154,7 @@ public class RunGridLock {
 	
 	private static Config defineConfig() {
 		Config config = ConfigUtils.createConfig();
-		config.controler().setOutputDirectory("../../runs-svn/gridlock/twoStream/"+SIGNALTYPE+"_basis"+SIGNALBASIS+MIDDLE_LINK_CAP+"_demand"+DEMAND_INTENSITY+"_offset"+(int)DEMAND_START_TIME_OFFSET+"/");
+		config.controler().setOutputDirectory("../../runs-svn/gridlock/twoStream/"+SIGNALTYPE+"_basis"+SIGNALBASIS+MIDDLE_LINK_CAP+"_demand"+DEMAND_INTENSITY+"_offset"+DEMAND_START_TIME_OFFSET+"/");
 
 		// set number of iterations
 		config.controler().setLastIteration(0);
@@ -196,7 +193,7 @@ public class RunGridLock {
 		// }
 		{
 			StrategySettings strat = new StrategySettings();
-			strat.setStrategyName(DefaultSelector.KeepLastSelected.toString());
+			strat.setStrategyName(DefaultSelector.KeepLastSelected);
 			strat.setWeight(0.9);
 			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);

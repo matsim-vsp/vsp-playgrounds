@@ -82,11 +82,11 @@
 			<artifactId>connection-scan</artifactId>
 			<version>master-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>org.opentripplanner</groupId>
-			<artifactId>otp</artifactId>
-			<version>0.19.0</version>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.opentripplanner</groupId>-->
+			<!--<artifactId>otp</artifactId>-->
+			<!--<version>0.19.0</version>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>se.walkercrou</groupId>
 			<artifactId>google-places-api-java</artifactId>
