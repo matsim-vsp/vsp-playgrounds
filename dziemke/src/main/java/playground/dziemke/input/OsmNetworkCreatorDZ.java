@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dziemke.other;
+package playground.dziemke.input;
 
 import org.matsim.contrib.accessibility.utils.AccessibilityOsmNetworkReader;
 

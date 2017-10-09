@@ -1,4 +1,4 @@
-package playground.dziemke.other;
+package playground.dziemke.examples;
 
 public class WriteSystemPorpertiesOnConsole {
 
