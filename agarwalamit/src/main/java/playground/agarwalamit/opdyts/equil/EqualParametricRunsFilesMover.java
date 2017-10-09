@@ -28,6 +28,8 @@ import java.io.IOException;
 
 public class EqualParametricRunsFilesMover {
 
+    private static boolean ignoreIfExists = true;
+
     public static void main(String[] args) {
 
         EqualParametricRunsFilesMover.moveFiles();
@@ -49,12 +51,19 @@ public class EqualParametricRunsFilesMover {
                     throw new RuntimeException("Data is not copied. Reason : " + e);
                 }
             } else {
+
+                boolean added = new File(destinationDir+"/"+dir+"/").mkdir();
+                if (!added && ignoreIfExists) continue; // dont do anything if dir already exists
+
                 for (String childDir : new File(srcDir+"/"+dir).list()) {
                     if ( new File(srcDir+"/"+dir+"/"+childDir+"/").isFile() || childDir.contains(".DS_Store")) {
                         continue;
                     }
                     String dirsToAdd = destinationDir+"/"+dir+"/"+childDir+"/";
-                    new File(dirsToAdd).mkdirs();
+
+                    added = new File(dirsToAdd).mkdir();
+                    if (!added && ignoreIfExists) continue; // dont do anything if dir already exists
+
                     try {
                         org.apache.commons.io.FileUtils.copyFile(new File(srcDir+"/"+dir+"/"+childDir+"/"+"convergence.png"),new File (dirsToAdd+"convergence.png"));
                         org.apache.commons.io.FileUtils.copyFile(new File(srcDir+"/"+dir+"/"+childDir+"/"+"decisionVariableVsASC.png"),new File (dirsToAdd+"decisionVariableVsASC.png"));
