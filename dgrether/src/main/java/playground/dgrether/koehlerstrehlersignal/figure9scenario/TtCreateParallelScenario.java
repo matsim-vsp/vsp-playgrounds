@@ -34,7 +34,6 @@ import org.matsim.contrib.signals.model.*;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.data.*;
 
@@ -566,7 +565,7 @@ public class TtCreateParallelScenario {
 		link87lane2.addToLinkId(idL75);
 		link87lane2.setStartsAtMeterFromLinkEnd(laneLength);
 
-		LanesUtils.createOriginalLanesAndSetLaneCapacities(scenario);
+		LanesUtils.createOriginalLanesAndSetLaneCapacities(scenario.getNetwork(), scenario.getLanes());
 	}
 
 	private Network createNetwork(Scenario sc) {

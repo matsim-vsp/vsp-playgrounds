@@ -382,7 +382,7 @@ public class DgFigure9ScenarioGenerator {
 		link65lane2.addToLinkId(id58);
 		link65lane2.setStartsAtMeterFromLinkEnd(laneLength);
 
-		LanesUtils.createOriginalLanesAndSetLaneCapacities(scenario);
+		LanesUtils.createOriginalLanesAndSetLaneCapacities(scenario.getNetwork(), scenario.getLanes());
 	}
 
 	
