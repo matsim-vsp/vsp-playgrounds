@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,8 +30,6 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.filter.NetworkFilterManager;
 import org.matsim.core.network.filter.NetworkLinkFilter;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.DijkstraFactory;
@@ -65,9 +62,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-
-import tutorial.programming.example21tutorialTUBclass.transit.TransitScheduleModifier;
-
 
 
 public class ReadColectivoShape {
