@@ -50,7 +50,7 @@ public class LandCoverUtils {
             landCoverIds.add(124); //Airports
             landCoverIds.add(133); //Construction sites
             landCoverIds.add(142); //Sport and leisure facilities
-            activityType2LandCoverId.put("others", landCoverIds);
+            activityType2LandCoverId.put("other", landCoverIds);
         }
         return activityType2LandCoverId;
     }
