@@ -85,17 +85,12 @@ private final static Logger LOG = Logger.getLogger(PlanFileModifier.class);
 		ObjectAttributesXmlReader householdAttributesReader = new ObjectAttributesXmlReader(householdAttributes);
 		householdAttributesReader.putAttributeConverter(Coord.class, new CoordConverter());
 		householdAttributesReader.readFile(inputHouseholdAttributesFileName);
-		
-		int noCoordCounter = 0;
-				
+						
 		for (Id<Household> householdId : scenario.getHouseholds().getHouseholds().keySet()) {
 			Coord coord = (Coord) householdAttributes.getAttribute(householdId.toString(), coordIdentifier);
-			System.out.println("coord = " + coord);
 			householdAttributes.putAttribute(householdId.toString(), coordIdentifier, ct.transform(coord));
 		}
-		
-		LOG.info(noCoordCounter + " households do not have coordinates.");
-		
+			
 		HouseholdsWriterV10 householdsWriter = new HouseholdsWriterV10(scenario.getHouseholds());
 		householdsWriter.writeFile(outputHouseholdFileName);
 		LOG.info("Done writing the households file.");
