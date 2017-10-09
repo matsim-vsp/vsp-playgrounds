@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.dziemke.utils;
+package playground.dziemke.input;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

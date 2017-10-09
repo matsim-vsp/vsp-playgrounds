@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dziemke.utils;
+package playground.dziemke.input;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
