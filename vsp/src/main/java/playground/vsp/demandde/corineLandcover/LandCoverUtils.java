@@ -55,10 +55,6 @@ public class LandCoverUtils {
         return activityType2LandCoverId;
     }
 
-    public static List<Integer> getLandCoverIds(final String activityTypeFromLandCover){
-        return LandCoverUtils.getActivityTypeToLandCoverIds().get(activityTypeFromLandCover);
-    }
-
     public static List<String> getActivitiesTypeFromZone(final int landCoverId){
         Map<String, List<Integer>> activityTypesToLandCoverIds = LandCoverUtils.getActivityTypeToLandCoverIds();
         List<String> output = new ArrayList<>();

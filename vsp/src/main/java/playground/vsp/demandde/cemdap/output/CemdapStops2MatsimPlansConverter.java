@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -39,8 +38,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
+import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
 
 /**
  * @author dziemke
@@ -73,7 +72,7 @@ public class CemdapStops2MatsimPlansConverter {
 			addStayHomePlan = Boolean.parseBoolean(args[3]);
 			outputDirectory = args[4];
 			zonalShapeFile = args[5];
-			useLandCoverData = Boolean.parseBoolean(args[7]);
+			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
 			landCoverFile = args[8];
 		}
 		
@@ -86,6 +85,13 @@ public class CemdapStops2MatsimPlansConverter {
 	public static void convert(String cemdapDataRoot, int numberOfFirstCemdapOutputFile, int numberOfPlans, String outputDirectory,
 			String zonalShapeFile, String zoneIdTag, boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
 			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile) throws IOException {
+
+		CorineLandCoverData corineLandCoverData = null;
+		// CORINE landcover
+		if (landCoverFile!=null && useLandCoverData) {
+			corineLandCoverData = new CorineLandCoverData(landCoverFile);
+		}
+
 		LogToOutputSaver.setOutputDirectory(outputDirectory);
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -157,12 +163,14 @@ public class CemdapStops2MatsimPlansConverter {
 		// Assign home coordinates
 		Feature2Coord feature2Coord = new Feature2Coord();
 		// TODO consideration of CORINE land cover probably in this step
-		feature2Coord.assignHomeCoords(population, personZoneAttributesMap.get(0), zones, homeZones);
+		//Done. Amit Oct'17
+		feature2Coord.assignHomeCoords(population, personZoneAttributesMap.get(0), zones, homeZones, corineLandCoverData);
 		
 		// Assign coordinates to all other activities
 		for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
-			feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations);
+			feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, corineLandCoverData);
 			// TODO consideration of CORINE land cover probably in this step
+			//Done. Amit Oct'17
 		}
 				
 		// If applicable, add a stay-home plan for everybody

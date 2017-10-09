@@ -31,6 +31,8 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
+import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
+import playground.vsp.demandde.corineLandcover.LandCoverUtils;
 
 /**
  * @author dziemke
@@ -42,7 +44,7 @@ public class Feature2Coord {
 	}
 
 	public final void assignCoords(Population population, int planNumber, ObjectAttributes personZoneAttributes, Map<String, SimpleFeature> zones,
-			Map<Id<Person>, Coord> homeZones, boolean allowVariousWorkAndEducationLocations) {
+			Map<Id<Person>, Coord> homeZones, boolean allowVariousWorkAndEducationLocations,  CorineLandCoverData corineLandCoverData ) {
 		int counter = 0;
 		LOG.info("Start assigning (non-home) coordinates. Plan number is " + planNumber +".");
 		for (Person person : population.getPersons().values()) {
@@ -71,7 +73,7 @@ public class Feature2Coord {
 						if (activity.getType().equals(ActivityTypes.HOME)) {
 							((Activity)activity).setCoord(homeZones.get(person.getId()));
 						} else {
-							Coord coord = Cemdap2MatsimUtils.getRandomCoordinate(zone);
+							Coord coord = getCoord(corineLandCoverData, zone, "other");
 							((Activity)activity).setCoord(coord);
 						}
 					} else {
@@ -79,16 +81,16 @@ public class Feature2Coord {
 							((Activity)activity).setCoord(homeZones.get(person.getId()));
 						} else if (activity.getType().equals(ActivityTypes.WORK)) {
 							if (workCoord == null) {
-								workCoord = Cemdap2MatsimUtils.getRandomCoordinate(zone);
+								workCoord = getCoord(corineLandCoverData, zone, "other");
 							}
 							((Activity)activity).setCoord(workCoord);
 						} else if (activity.getType().equals(ActivityTypes.EDUCATION)) {
 							if (educCoord == null) {
-								educCoord = Cemdap2MatsimUtils.getRandomCoordinate(zone);
+								educCoord = getCoord(corineLandCoverData, zone, "other");
 							}
 							((Activity)activity).setCoord(educCoord);
 						} else {
-							Coord coord = Cemdap2MatsimUtils.getRandomCoordinate(zone);
+							Coord coord = getCoord(corineLandCoverData, zone, "other");
 							((Activity)activity).setCoord(coord);
 						}
 					}
@@ -98,9 +100,19 @@ public class Feature2Coord {
 		}
 		LOG.info("Finished assigning non-home coordinates.");
 	}
+
+	private Coord getCoord (CorineLandCoverData corineLandCoverData, SimpleFeature feature, String activityType) {
+		Coord coord ;
+		if (corineLandCoverData==null) {
+			coord = Cemdap2MatsimUtils.getRandomCoordinate(feature);
+		} else {
+			coord = corineLandCoverData.getRandomCoord(feature,activityType);
+		}
+		return coord;
+	}
+
 	
-	
-	public final void assignHomeCoords(Population population, ObjectAttributes personZoneAttributes, Map<String, SimpleFeature> zones, Map<Id<Person>, Coord> homeZones) {
+	public final void assignHomeCoords(Population population, ObjectAttributes personZoneAttributes, Map<String, SimpleFeature> zones, Map<Id<Person>, Coord> homeZones, CorineLandCoverData corineLandCoverData) {
 		int counter = 0;
 		LOG.info("Start assigning home coordinates.");
 		for (Person person : population.getPersons().values()) {
@@ -124,7 +136,7 @@ public class Feature2Coord {
 						throw new RuntimeException("Zone with id " + zoneId + " not found.");
 					}
 					if (activity.getType().equals(ActivityTypes.HOME)) {
-						Coord homeCoord = Cemdap2MatsimUtils.getRandomCoordinate(zone);
+						Coord homeCoord = getCoord(corineLandCoverData, zone, "home");
 						homeZones.put(personId, homeCoord);
 					}
 					activityIndex++;

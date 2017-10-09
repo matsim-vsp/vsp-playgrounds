@@ -28,6 +28,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -37,12 +39,13 @@ import org.opengis.feature.simple.SimpleFeature;
  * Created by amit on 31.07.17.
  */
 
-public class LandCoverInformer {
+public class CorineLandCoverData {
 
-    public static final Logger LOGGER = Logger.getLogger(LandCoverInformer.class);
+    public static final Logger LOGGER = Logger.getLogger(CorineLandCoverData.class);
     private final Map<String, Geometry> activityType2LandcoverZone = new HashMap<>();
+    private int warnCnt = 0;
 
-    public LandCoverInformer(final String corineLandCoverShapeFile) {
+    public CorineLandCoverData(final String corineLandCoverShapeFile) {
         LOGGER.info("Reading CORINE landcover shape file . . .");
         Collection<SimpleFeature> landCoverFeatures = ShapeFileReader.getAllFeatures(corineLandCoverShapeFile);
 
@@ -68,21 +71,48 @@ public class LandCoverInformer {
         }
     }
 
+    // An example
     public static void main(String[] args) {
         String landcoverFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
         String zoneFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
-        LandCoverInformer landCoverInformer = new LandCoverInformer(landcoverFile);
+        CorineLandCoverData landCoverInformer = new CorineLandCoverData(landcoverFile);
+//        landCoverInformer.getRandomPoint(...);
     }
 
-
+    /**
+     * @param feature simpleFeature (zone)
+     * @param activityType classified as 'home' and 'other' activity types.
+     * @return
+     */
     public Point getRandomPoint (final SimpleFeature feature, final String activityType) {
         List<Geometry> geoms = new ArrayList<>();
         geoms.add(  (Geometry) feature.getDefaultGeometry() );
-        geoms.add( this.activityType2LandcoverZone.get(activityType) );
+
+        if (activityType.equalsIgnoreCase("home") ) {
+            geoms.add( this.activityType2LandcoverZone.get(activityType) );
+        } else {
+           if (warnCnt < 1) {
+               LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
+               LOGGER.warn(Gbl.ONLYONCE);
+               warnCnt++;
+           }
+            geoms.add( this.activityType2LandcoverZone.get("other") );
+        }
+
         return getRandomPointCommonToAllGeometries( geoms  );
     }
 
-    private Geometry combine(final List<Geometry> geoms){
+    /**
+     * @param feature simpleFeature (zone)
+     * @param activityType classified as 'home' and 'other' activity types.
+     * @return
+     */
+    public Coord getRandomCoord (final SimpleFeature feature, final String activityType) {
+        Point p = getRandomPoint(feature, activityType);
+        return new Coord(p.getX(), p.getY());
+    }
+
+    private static Geometry combine(final List<Geometry> geoms){
         Geometry geom = null;
         for(Geometry g : geoms){
             if(geom==null) geom = g;
@@ -93,7 +123,7 @@ public class LandCoverInformer {
         return geom;
     }
 
-    public static Point getRandomPointCommonToAllGeometries(final List<Geometry> geometries) {
+    private static Point getRandomPointCommonToAllGeometries(final List<Geometry> geometries) {
         Point p = null;
         double minX = Double.POSITIVE_INFINITY;
         double minY = Double.POSITIVE_INFINITY;
@@ -117,7 +147,7 @@ public class LandCoverInformer {
         return p;
     }
 
-    public static boolean isPointInsideAllGeometries(final Collection<Geometry> features, final Point point) {
+    private static boolean isPointInsideAllGeometries(final Collection<Geometry> features, final Point point) {
         if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
         for(Geometry sf : features){
             if ( ! sf.contains(point) ) {
@@ -126,5 +156,4 @@ public class LandCoverInformer {
         }
         return true;
     }
-
 }
