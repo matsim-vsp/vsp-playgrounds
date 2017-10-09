@@ -32,7 +32,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 /**
  * @author dziemke
  */
-public class NetworkFileConverter {
+public class NetworkFileModifier {
 
 private final static Logger LOG = Logger.getLogger(PlanFileModifier.class);
 	
