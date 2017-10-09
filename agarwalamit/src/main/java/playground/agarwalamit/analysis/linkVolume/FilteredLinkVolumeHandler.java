@@ -56,7 +56,7 @@ public class FilteredLinkVolumeHandler implements LinkLeaveEventHandler, Vehicle
 
         this.delegate = new LinkVolumeHandler(vehiclesFile);
 
-        if ((this.ug == null && this.pf != null) || this.ug != null && this.pf == null) {
+        if ((this.ug == null && this.pf != null) || (this.ug != null && this.pf == null)) {
             throw new RuntimeException("Either of person filter or user group is null.");
         } else if (this.ug != null) {
             LOGGER.info("User group filtering is used, result will include all links but persons from " + this.ug + " user group only.");

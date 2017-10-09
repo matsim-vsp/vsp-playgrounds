@@ -37,7 +37,7 @@ public enum VehicleProjectedAreaRatio {
     tractor (3.02), // 16.28
     cycleRickshaw (0.48) ;// 2.56
 
-    private double projectedAreaRatio;
+    private final double projectedAreaRatio;
 
     public double getProjectedAreaRatio() {
         return this.projectedAreaRatio;

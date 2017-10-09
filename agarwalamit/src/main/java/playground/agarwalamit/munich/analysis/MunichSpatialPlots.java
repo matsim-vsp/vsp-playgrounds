@@ -433,7 +433,7 @@ public class MunichSpatialPlots {
 		return paymentsAnalzer.getPersonId2amount();
 	}
 
-	private class EmissionTimebinDataWriter{
+	private static class EmissionTimebinDataWriter{
 
 		BufferedWriter writer;
 		public void openWriter (final String outputFile){

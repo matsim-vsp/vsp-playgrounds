@@ -199,7 +199,7 @@ public class Person2ActivityPerformingWriter {
 		return act2TotalUtilPerforming;
 	}
 
-	public class Person2ActivityScoringFunction implements ScoringFunction{
+	public static class Person2ActivityScoringFunction implements ScoringFunction{
 		private final CharyparNagelActivityScoring delegate;
 		public Person2ActivityScoringFunction(final CharyparNagelActivityScoring delegate) {
 			this.delegate = delegate;

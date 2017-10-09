@@ -144,7 +144,7 @@ public class PatnaSpatialPlots {
         writer.closeWriter();
     }
 
-    private class EmissionTimebinDataWriter{
+    private static class EmissionTimebinDataWriter{
         BufferedWriter writer;
         public void openWriter (final String outputFile){
             writer = IOUtils.getBufferedWriter(outputFile);

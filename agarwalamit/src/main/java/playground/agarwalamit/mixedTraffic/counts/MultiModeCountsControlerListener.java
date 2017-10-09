@@ -64,7 +64,7 @@ public class MultiModeCountsControlerListener implements StartupListener, Iterat
 	private final OutputDirectoryHierarchy controlerIO;
 
 	@com.google.inject.Inject(optional=true)
-	private final Counts<Link> counts = null;
+	private /*final*/ Counts<Link> counts = null; //Although Guice allows injecting final fields, doing so is disallowed because the injected value may not be visible to other threads.
 
 	private final Map<Id<Link>, Map<String,double[]>> linkStats = new HashMap<>();
 	private int iterationsUsed = 0;

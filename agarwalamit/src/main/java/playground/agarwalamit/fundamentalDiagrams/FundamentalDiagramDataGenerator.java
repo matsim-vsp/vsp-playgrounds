@@ -233,7 +233,7 @@ public class FundamentalDiagramDataGenerator {
 			//heavy vehicles
 			if ( (pcu>1) && (minSteps.get(i)%pcu != 0) ){
 				double lcm = getLCM((int) pcu, minSteps.get(i));
-				commonMultiplier *= lcm/minSteps.get(i);
+				commonMultiplier = (int) (commonMultiplier * lcm/minSteps.get(i) );
 			}
 		}
 		for (int i=0; i<travelModes.length; i++){

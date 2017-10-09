@@ -136,7 +136,7 @@ public class PatnaExperienceDelayAnalyzer {
 
 	//=== handler
 
-	 class PersonIdModeHandler implements PersonDepartureEventHandler {
+	 static class PersonIdModeHandler implements PersonDepartureEventHandler {
 
 		private final Map<Id<Person>, String> personId2Mode = new HashMap<>();
 

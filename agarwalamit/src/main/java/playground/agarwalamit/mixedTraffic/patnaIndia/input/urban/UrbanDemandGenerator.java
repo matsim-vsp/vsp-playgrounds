@@ -19,7 +19,6 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.input.urban;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
+import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -43,11 +42,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Point;
-
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.urban.scenarioSetup.PatnaCalibrationUtils.PatnaDemandLabels;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils.PatnaUrbanActivityTypes;
@@ -119,7 +116,7 @@ public class UrbanDemandGenerator {
 		Iterator<SimpleFeature> iterator = features.iterator();
 
 		String line;
-		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(planFile)) ) {
+		try (BufferedReader bufferedReader = IOUtils.getBufferedReader(planFile) ){
 			line = bufferedReader.readLine();
 			List<String> labels = new ArrayList<>();
 

@@ -128,7 +128,7 @@ public class RoadTypeInfoAnalyzer {
 		return rth.userGrp2roadType2Count.get(ug);
 	}
 	
-	private class RoadTypeHandler implements LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+	private static class RoadTypeHandler implements LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 
 		private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 

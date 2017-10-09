@@ -99,7 +99,7 @@ public class EventsFilterAndWriter {
 		eventsWriter.closeFile();
 	}
 
-	private class EventsAsListHandler implements LinkEnterEventHandler,
+	private static class EventsAsListHandler implements LinkEnterEventHandler,
 	LinkLeaveEventHandler,
 	TransitDriverStartsEventHandler,
 	PersonDepartureEventHandler, 

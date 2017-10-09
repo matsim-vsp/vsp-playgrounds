@@ -328,7 +328,7 @@ public class EquilMixedTrafficEmissionIT {
 		config.addModule(ecg);
 	}
 
-	private class MyPersonMoneyEventHandler implements PersonMoneyEventHandler {
+	private static class MyPersonMoneyEventHandler implements PersonMoneyEventHandler {
 
 		final List<PersonMoneyEvent> events = new ArrayList<>();
 
@@ -343,7 +343,7 @@ public class EquilMixedTrafficEmissionIT {
 		}
 	}
 
-	private class MyEmissionEventHandler implements WarmEmissionEventHandler, ColdEmissionEventHandler {
+	private static class MyEmissionEventHandler implements WarmEmissionEventHandler, ColdEmissionEventHandler {
 
 		final List<WarmEmissionEvent> warmEvents = new ArrayList<>();
 		final List<ColdEmissionEvent> coldEvents = new ArrayList<>();
@@ -365,7 +365,7 @@ public class EquilMixedTrafficEmissionIT {
 		}
 	}
 
-	private class VehicleLinkEnterLeaveTimeEventHandler implements LinkEnterEventHandler, LinkLeaveEventHandler {
+	private static class VehicleLinkEnterLeaveTimeEventHandler implements LinkEnterEventHandler, LinkLeaveEventHandler {
 
 		private final Map<Id<Vehicle>, Tuple<Double,Double>> vehicle_link23_enterLeaveTimes = new HashMap<>();
 		private final Id<Link> linkId ;

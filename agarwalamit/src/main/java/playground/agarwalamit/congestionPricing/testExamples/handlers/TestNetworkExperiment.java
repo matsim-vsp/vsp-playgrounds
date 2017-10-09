@@ -206,7 +206,7 @@ class TestNetworkExperiment {
 	 *<p>				  |
 	 *<p>				  o----5----o
 	 */
-	private class createPseudoInputs {
+	private static class createPseudoInputs {
 		final Scenario scenario;
 		final Config config;
 		final Network network;

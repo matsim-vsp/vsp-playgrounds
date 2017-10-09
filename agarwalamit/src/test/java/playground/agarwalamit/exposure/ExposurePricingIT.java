@@ -164,7 +164,7 @@ public class ExposurePricingIT {
 		 */
 
 		GridTools gt = new GridTools(sc.getNetwork().getLinks(), xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
-		Double timeBinSize = new Double (controler.getScenario().getConfig().qsim().getEndTime() / this.noOfTimeBins );
+		Double timeBinSize = controler.getScenario().getConfig().qsim().getEndTime() / this.noOfTimeBins ;
 
 		ResponsibilityGridTools rgt = new ResponsibilityGridTools(timeBinSize, noOfTimeBins, gt);
 
@@ -227,7 +227,7 @@ public class ExposurePricingIT {
 		 */
 
 		GridTools gt = new GridTools(sc.getNetwork().getLinks(), xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
-		Double timeBinSize = new Double (controler.getScenario().getConfig().qsim().getEndTime() / this.noOfTimeBins );
+		Double timeBinSize = controler.getScenario().getConfig().qsim().getEndTime() / this.noOfTimeBins ;
 
 		ResponsibilityGridTools rgt = new ResponsibilityGridTools(timeBinSize, noOfTimeBins, gt);
 //		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(emissionModule, emissionCostModule, sc.getConfig().planCalcScore());
@@ -382,7 +382,7 @@ public class ExposurePricingIT {
 		scg.addStrategySettings(strategySettingsR);
 	}
 
-	class MyPersonMoneyEventHandler implements PersonMoneyEventHandler, LinkLeaveEventHandler  {
+	static class MyPersonMoneyEventHandler implements PersonMoneyEventHandler, LinkLeaveEventHandler  {
 
 		List<PersonMoneyEvent> events = new ArrayList<PersonMoneyEvent>();
 		double link39LeaveTime = Double.POSITIVE_INFINITY;

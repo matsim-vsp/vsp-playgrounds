@@ -102,7 +102,7 @@ public class StuckAgentsFilter extends AbstractAnalysisModule {
 	}
 
 	//==========EventHandler=============
-	public class StuckEventsHandler implements PersonStuckEventHandler{
+	public static class StuckEventsHandler implements PersonStuckEventHandler{
 
 		private final Set<Id<Person>> stuckPersons = new HashSet<>();
 		private final Set<PersonStuckEvent> stuckEvents = new HashSet<>();

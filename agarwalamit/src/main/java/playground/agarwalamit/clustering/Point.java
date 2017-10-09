@@ -62,7 +62,7 @@ public class Point {
         this.weight = weight;
     }
 
-    public void setCluster(final Id<Cluster> id) {
+    public void setCluster(final Id<Cluster> clusterId) {
         this.clusterId = clusterId;
     }
 

@@ -163,7 +163,7 @@ public class PatnaEmissionsWriter {
         emissionModule.writeEmissionInformation();
     }
 
-    class PatnaEmissionVehicleCreator implements PersonDepartureEventHandler {
+    static class PatnaEmissionVehicleCreator implements PersonDepartureEventHandler {
 
         private final Scenario scenario;
 

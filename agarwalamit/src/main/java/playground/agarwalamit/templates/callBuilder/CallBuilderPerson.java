@@ -17,62 +17,27 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.clustering;
+package playground.agarwalamit.templates.callBuilder;
 
 import java.util.ArrayList;
-import java.util.List;
-import org.matsim.api.core.v01.Id;
+import javax.annotation.Nullable;
+import com.google.callbuilder.BuilderField;
+import com.google.callbuilder.CallBuilder;
+import com.google.callbuilder.style.ArrayListAdding;
 
 /**
- * Created by amit on 15.07.17.
+ * Created by amit on 09.10.17.
  */
 
-public class Cluster {
+public class CallBuilderPerson {
 
-    public List<Point> points;
-    public Point centroid;
-    public Id<Cluster> id;
-
-    public Cluster(final int id) {
-        this.id = Id.create(id,Cluster.class);
-        this.points = new ArrayList<>();
-        this.centroid = null;
+    @CallBuilder
+    CallBuilderPerson(
+            String familyName,
+            String givenName,
+            @BuilderField(style = ArrayListAdding.class) ArrayList<String> addressLines,
+            @Nullable Integer age) {
+        // ...
     }
 
-    public List<Point> getPoints() {
-        return points;
-    }
-
-    public void addPoint(Point point) {
-        points.add(point);
-    }
-
-    public Point getCentroid() {
-        return centroid;
-    }
-
-    public void setCentroid(Point centroid) {
-        this.centroid = centroid;
-    }
-
-    public Id<Cluster> getId() {
-        return id;
-    }
-
-    public void clear() {
-        points.clear();
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[Cluster: " + id.toString()+"]\n");
-        stringBuilder.append("[Centroid: " + centroid + "]\n");
-        stringBuilder.append("[Points: \n");
-        for(Point p : points) {
-            stringBuilder.append(p.toString()+"\t");
-        }
-        stringBuilder.append("]");
-        return stringBuilder.toString();
-    }
 }

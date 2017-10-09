@@ -71,7 +71,7 @@ public class TravelDistanceHandler implements LinkLeaveEventHandler, VehicleEnte
 		this.pf = pf;
 		this.ug=userGroup;
 
-		if( (this.ug==null && this.pf!=null) || this.ug!=null && this.pf==null ) {
+		if( (this.ug==null && this.pf!=null) || (this.ug!=null && this.pf==null) ) {
 			throw new RuntimeException("Either of person filter or user group is null.");
 		} else if( this.ug!=null && this.af !=null) {
 			LOGGER.info("Area and user group filtering is used, links fall inside the given shape and belongs to the "+this.ug+" user group will be considered.");

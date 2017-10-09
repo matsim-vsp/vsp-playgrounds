@@ -130,13 +130,13 @@ final class TravelModesFlowDynamicsUpdator {
 			} else {
 				flowTableReset();
 			}
-			this.flowTime = new Double(nowTime);
+			this.flowTime = nowTime;
 		}
 		updateLastXFlows900();
 	}
 
 	private void updateLastXFlows900(){
-		Double nowFlow = new Double(this.getCurrentHourlyFlow());
+		Double nowFlow = this.getCurrentHourlyFlow();
 		for (int i=NUMBER_OF_MEMORIZED_FLOWS-2; i>=0; i--){
 			this.lastXHourlyFlows.set(i+1, this.lastXHourlyFlows.get(i).doubleValue());
 		}

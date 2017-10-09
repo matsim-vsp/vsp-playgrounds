@@ -21,6 +21,7 @@ package playground.agarwalamit.templates;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import com.google.common.base.Charsets;
 
 /**
  * Created by amit on 02.07.17.
@@ -44,7 +45,7 @@ public class RCommandExecutor {
             p = Runtime.getRuntime().exec(command);
             p.waitFor();
             BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    new BufferedReader(new InputStreamReader(p.getInputStream(), Charsets.UTF_8));
 
             String line = "";
             while ((line = reader.readLine())!= null) {

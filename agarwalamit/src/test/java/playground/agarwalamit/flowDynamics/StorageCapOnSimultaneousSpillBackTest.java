@@ -161,7 +161,7 @@ public class StorageCapOnSimultaneousSpillBackTest {
 		return vehicle2LinkEnterTime;
 	}
 
-	private class VehicleLinkEnterLeaveTime implements LinkEnterEventHandler, LinkLeaveEventHandler{
+	private static class VehicleLinkEnterLeaveTime implements LinkEnterEventHandler, LinkLeaveEventHandler{
 
 		final Map<Id<Vehicle>, Tuple<Double,Double>> vehicle2linkleaveEnterTime;
 
@@ -190,7 +190,7 @@ public class StorageCapOnSimultaneousSpillBackTest {
 		}
 	}
 
-	private class MergingNetworkAndPlans {
+	private static class MergingNetworkAndPlans {
 		/**
 		 * generates network with 3 links. 
 		 *<p>			

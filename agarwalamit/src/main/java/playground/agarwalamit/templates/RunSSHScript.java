@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Properties;
 
+import com.google.common.base.Charsets;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
@@ -100,7 +101,7 @@ public class RunSSHScript {
             channel.setCommand(command);
             InputStream stdout = channel.getInputStream();
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout, Charsets.UTF_8));
             channel.connect();
             String line = bufferedReader.readLine();
             while ( line != null) {

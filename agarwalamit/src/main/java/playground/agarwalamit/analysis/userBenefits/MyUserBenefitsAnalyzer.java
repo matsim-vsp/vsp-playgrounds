@@ -20,19 +20,16 @@ package playground.agarwalamit.analysis.userBenefits;
 
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.scenario.MutableScenario;
-
+import org.matsim.core.utils.io.IOUtils;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 import playground.vsp.analysis.modules.userBenefits.UserBenefitsAnalyzer;
 import playground.vsp.analysis.modules.userBenefits.UserBenefitsCalculator;
@@ -96,10 +93,9 @@ public class MyUserBenefitsAnalyzer extends AbstractAnalysisModule{
 	@Override
 	public void writeResults(final String outputFolder) {
 		String fileName = outputFolder + "userBenefits"+this.welfareMeasure+".txt";
-		File file = new File(fileName);
-				
+
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			BufferedWriter bw = IOUtils.getBufferedWriter(fileName);
 			bw.write("monetary user benefits (all users logsum): " + this.allUsersLogSum);
 			bw.newLine();
 			bw.write("users with no valid plan (all scores ``== null'' or ``<= 0.0''): " + this.personWithNoValidPlanCnt);

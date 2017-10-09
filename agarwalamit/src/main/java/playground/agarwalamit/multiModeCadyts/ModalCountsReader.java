@@ -20,12 +20,11 @@
 package playground.agarwalamit.multiModeCadyts;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.StringUtils;
 
 /**
@@ -44,9 +43,8 @@ public class ModalCountsReader {
 
 	private void readValues() {
 		try {
-			FileReader fileReader = new FileReader(this.countsTextFile);
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
-			String row = bufferedReader.readLine(); // read first line and do nothing			
+			BufferedReader bufferedReader = IOUtils.getBufferedReader(this.countsTextFile);
+			String row = bufferedReader.readLine(); // read first line and do nothing
 
 			while (row != null) {
 				row = bufferedReader.readLine();
@@ -66,7 +64,6 @@ public class ModalCountsReader {
 				}
 			}
 			bufferedReader.close();
-			fileReader.close();
 		} catch (Exception e) {
 			throw new RuntimeException("Data is not read. Reason "+ e);
 		}

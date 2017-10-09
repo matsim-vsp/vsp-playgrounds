@@ -22,6 +22,7 @@ package playground.agarwalamit.opdyts.equil;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Properties;
+import com.google.common.base.Charsets;
 import com.jcraft.jsch.*;
 import playground.agarwalamit.parametricRuns.JobScriptWriter;
 
@@ -133,7 +134,7 @@ public class ParametricRunsEquilnet {
             channel.setCommand(command);
             InputStream stdout = channel.getInputStream();
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout, Charsets.UTF_8));
             channel.connect();
             String line = bufferedReader.readLine();
             while ( line != null) {

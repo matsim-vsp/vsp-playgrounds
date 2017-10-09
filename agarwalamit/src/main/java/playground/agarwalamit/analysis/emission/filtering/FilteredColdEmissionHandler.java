@@ -57,7 +57,7 @@ public class FilteredColdEmissionHandler implements VehicleEntersTrafficEventHan
 	/**
 	 * Area and user group filtering will be used, links fall inside the given shape and persons belongs to the given user group will be considered.
 	 */
-	public FilteredColdEmissionHandler (final double simulationEndTime, final int noOfTimeBins, final String userGroup, final PersonFilter personFilter, 
+	public FilteredColdEmissionHandler (final double simulationEndTime, final int noOfTimeBins, final String userGroup, final PersonFilter personFilter,
 			final Network network, final AreaFilter areaFilter){
 		this.delegate = new EmissionsPerLinkColdEventHandler(simulationEndTime,noOfTimeBins);
 
@@ -66,7 +66,7 @@ public class FilteredColdEmissionHandler implements VehicleEntersTrafficEventHan
 		this.ug=userGroup;
 		this.pf = personFilter;
 
-		if( (this.ug==null && this.pf!=null) || this.ug!=null && this.pf==null ) {
+		if( (this.ug==null && this.pf!=null) || (this.ug!=null && this.pf==null) ) {
 			throw new RuntimeException("Either of person filter or user group is null.");
 		} else if( this.ug!=null && this.af !=null) {
 			LOGGER.info("Area and user group filtering is used, links fall inside the given shape and belongs to the "+this.ug+" user group will be considered.");

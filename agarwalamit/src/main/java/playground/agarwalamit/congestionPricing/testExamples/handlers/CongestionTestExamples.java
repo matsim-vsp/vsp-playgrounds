@@ -165,7 +165,7 @@ public class CongestionTestExamples {
 		return congestionEvents;
 	}
 
-	private class printAllEvents implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler {
+	private static class printAllEvents implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler {
 
 		@Override
 		public void reset(int iteration) {

@@ -201,8 +201,8 @@ public class GeneralGrid{
 	 * 		  on the coordinate points of the centroids.  
 	 */
 	public void writeGrid(final String folder, final String originalCRS){
-		//ZZ_TODO : more arguments are passed than than actually needed (wants 4 but 5 are passed)
-		String filename = String.format("%s%s%s_%.0f.csv", folder, (folder.endsWith("/") ? "" : "/"), this.type, this.width, ".csv");
+		String filename = String.format("%s%s%s%s_%.0f.csv",
+				new Object[]{folder, (folder.endsWith("/") ? "" : "/"), this.type, this.width, ".csv"});
 		LOG.info("Writing grid to file: " + filename);
 
 		CoordinateTransformation ct = null;
@@ -220,7 +220,7 @@ public class GeneralGrid{
 			bw.newLine();
 			Collection<Point> list = qt.getRectangle(qt.getMinEasting(), qt.getMinNorthing(), qt.getMaxEasting(), qt.getMaxNorthing(), new ArrayList<>());
 			for(Point p : list){
-				Coord original = new Coord(new Double(p.getX()), new Double(p.getY()));
+				Coord original = new Coord(p.getX(), p.getY()); //BoxedPrimitiveConstructor
 				Coord wgs84 = null;
 				if(ct != null){
 					wgs84 = ct.transform(original);

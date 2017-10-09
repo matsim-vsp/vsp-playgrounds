@@ -83,7 +83,7 @@ public class LinkTravelTimeCalculator extends AbstractAnalysisModule {
 		return this.ltth.getLink2PersonTravelTime();
 	}
 
-	public class LinkTravelTimeHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+	public static class LinkTravelTimeHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 		private final  Map<Id<Link>,Map<Id<Person>,Double>> link2PersonEnterTime = new HashMap<>();
 		private final Map<Id<Link>,Map<Id<Person>,List<Double>>> link2PersonTravelTime = new HashMap<>();
 		private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();

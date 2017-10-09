@@ -19,12 +19,10 @@
 package playground.agarwalamit.siouxFalls.analysis;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -35,7 +33,6 @@ import org.matsim.contrib.emissions.types.ColdPollutant;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.agarwalamit.analysis.emission.EmissionLinkAnalyzer;
 import playground.agarwalamit.analysis.emission.EmissionUtilsExtended;
 import playground.agarwalamit.utils.LoadMyScenarios;
@@ -133,8 +130,7 @@ public class PerLinkEmissionData {
 			Network network,
 			String outFile){
 		try{
-			FileWriter fstream = new FileWriter(outFile);			
-			BufferedWriter out = new BufferedWriter(fstream);
+			BufferedWriter out = IOUtils.getBufferedWriter(outFile);
 			out.append("linkId\txLink\tyLink\t");
 			for (String pollutant : this.emissionUtils.getListOfPollutants()){
 				out.append(pollutant + "[g]\t");

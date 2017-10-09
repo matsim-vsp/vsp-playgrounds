@@ -17,62 +17,21 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.clustering;
-
-import java.util.ArrayList;
-import java.util.List;
-import org.matsim.api.core.v01.Id;
+package playground.agarwalamit.templates.callBuilder;
 
 /**
- * Created by amit on 15.07.17.
+ * Created by amit on 09.10.17.
  */
 
-public class Cluster {
+public class CallBuilderExample {
 
-    public List<Point> points;
-    public Point centroid;
-    public Id<Cluster> id;
-
-    public Cluster(final int id) {
-        this.id = Id.create(id,Cluster.class);
-        this.points = new ArrayList<>();
-        this.centroid = null;
-    }
-
-    public List<Point> getPoints() {
-        return points;
-    }
-
-    public void addPoint(Point point) {
-        points.add(point);
-    }
-
-    public Point getCentroid() {
-        return centroid;
-    }
-
-    public void setCentroid(Point centroid) {
-        this.centroid = centroid;
-    }
-
-    public Id<Cluster> getId() {
-        return id;
-    }
-
-    public void clear() {
-        points.clear();
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[Cluster: " + id.toString()+"]\n");
-        stringBuilder.append("[Centroid: " + centroid + "]\n");
-        stringBuilder.append("[Points: \n");
-        for(Point p : points) {
-            stringBuilder.append(p.toString()+"\t");
-        }
-        stringBuilder.append("]");
-        return stringBuilder.toString();
+    public void main(String[] args) {
+        CallBuilderPerson friend = new CallBuilderPersonBuilder()
+                .addToAddressLines("1123 Easy Street")
+                .addToAddressLines("Townplace, XZ")
+                .setAge(22)
+                .setGivenName("John")
+                .setFamilyName("Doe")
+                .build();
     }
 }

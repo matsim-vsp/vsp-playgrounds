@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Properties;
+import com.google.common.base.Charsets;
 import com.jcraft.jsch.*;
 
 /**
@@ -94,7 +95,7 @@ public class PrepareParametricRuns {
             channel.setCommand(command);
             InputStream stdout = channel.getInputStream();
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(stdout, Charsets.UTF_8));
             channel.connect();
             String line = bufferedReader.readLine();
             while ( line != null) {

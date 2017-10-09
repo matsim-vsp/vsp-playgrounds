@@ -119,7 +119,7 @@ public class LegModeTimeOfDayDistribution extends AbstractAnalysisModule{
 		return outMap;
 	}
 
-	public class LegModeTimeOfDayHandler implements PersonDepartureEventHandler {
+	public static class LegModeTimeOfDayHandler implements PersonDepartureEventHandler {
 		private final double timeBinSize;
 		private final MunichPersonFilter pf = new MunichPersonFilter();
 		private final SortedMap<Double, SortedMap<String, Integer>> timeBin2Mode2Count = new TreeMap<>();

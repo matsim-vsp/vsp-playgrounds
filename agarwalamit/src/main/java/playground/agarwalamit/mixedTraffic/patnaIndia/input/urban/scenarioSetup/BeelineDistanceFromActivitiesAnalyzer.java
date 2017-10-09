@@ -106,7 +106,7 @@ public class BeelineDistanceFromActivitiesAnalyzer {
 				if (pe instanceof Activity) {
 					Coord cord = ((Activity) pe ).getCoord();
 					if (startCoord == null ) startCoord = cord;
-					else if (startCoord == cord) LOG.warn("The current activity and previous activity locations are same. "
+					else if (startCoord.equals(cord)) LOG.warn("The current activity and previous activity locations are same. "
 							+ "Assuming this as a separate trip with zero beeline distance.");
 					else {
 						dist = CoordUtils.calcEuclideanDistance(startCoord, cord);

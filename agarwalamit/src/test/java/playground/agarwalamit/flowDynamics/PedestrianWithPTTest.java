@@ -133,7 +133,7 @@ public class PedestrianWithPTTest {
 		LinkEnterLeaveTimeEventHandler lelteh = new LinkEnterLeaveTimeEventHandler();
 		
 	//  since, PrepareForSimUtils bind trip router, it doesn't matter is using controler or not, the problem appears. Amit July'17
-		if ( this.walkModeName.equals(TransportMode.walk) & ! letTheTestFail) {
+		if ( this.walkModeName.equals(TransportMode.walk) && ! letTheTestFail) {
 			try {
 				runSim(lelteh);
 				Assert.assertTrue("Expected CreationException does not occur.", false);
