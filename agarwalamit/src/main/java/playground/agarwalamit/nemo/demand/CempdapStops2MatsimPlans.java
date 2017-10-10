@@ -41,7 +41,7 @@ public class CempdapStops2MatsimPlans {
         boolean addStayHomePlan = true;
         boolean useLandCoverData = true;
         String landCoverFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
-        String stopFile = "Stops_sample.out";
+        String stopFile = "Stops.out";
         String activityFile = "Activity.out";
         boolean simplifyGeometries = false;
 
