@@ -19,7 +19,6 @@
 
 package playground.vsp.demandde.corineLandcover;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -94,12 +93,12 @@ public class GeometryUtils {
 
         Point commonPoint = null;
         do {
-            Coordinate coordinate = getRandomInteriorPoints(landuseGeom,1)[0];
+            //assuming that zoneGeom is a subset of landuseGeom, it would be better to first find a point in a subset and then look if it's inside landuseGeom
+            Coordinate coordinate = getRandomInteriorPoints(zoneGeom,1)[0];
             commonPoint = geometryFactory.createPoint(coordinate);
-            if (zoneGeom.contains(commonPoint)) return commonPoint;
+            if (landuseGeom.contains(commonPoint)) return commonPoint;
         } while(true);
     }
-
 
     /**
      * Return a random Coordinate in the geometry or null if
@@ -116,18 +115,4 @@ public class GeometryUtils {
         rnd.setExtent(g);
         return rnd.getGeometry().getCoordinates();
     }
-
-    /**
-     * @return true ONLY if point is covered by ALL geometries
-     */
-    public static boolean isPointInsideAllGeometries(final Collection<Geometry> features, final Point point) {
-        if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
-        for(Geometry sf : features){
-            if ( ! sf.contains(point) ) {
-                return false;
-            }
-        }
-        return true;
-    }
-
 }

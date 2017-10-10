@@ -22,20 +22,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.geometry.BoundingBox;
 
 /**
  * @author amit
@@ -51,42 +49,24 @@ public final class GeometryUtils {
 	 * @return a random point inside given feature
 	 */
 	public static Point getRandomPointsInsideFeature (final SimpleFeature feature) {
-		Point p = null;
-		BoundingBox bounds = feature.getBounds();
-		double x,y;
-		do {
-			double minX = bounds.getMinX();
-			double minY = bounds.getMinY();
-			x = minX +RAND.nextDouble()*(bounds.getMaxX()- minX);
-			y = minY +RAND.nextDouble()*(bounds.getMaxY()- minY);
-			p= MGC.xy2Point(x, y);
-		} while ( ! ( (Geometry) feature.getDefaultGeometry() ).contains(p) );
-		return p;
+		return getRandomPointsInsideGeometry( (Geometry) feature.getDefaultGeometry() );
 	}
 
 	/**
 	 * @return a random point inside given geometry
 	 */
 	public static Point getRandomPointsInsideGeometry (final Geometry geometry) {
-		Point p ;
-		Envelope bounds = geometry.getEnvelopeInternal();
-		double x,y;
-		do {
-			double minX = bounds.getMinX();
-			double minY = bounds.getMinY();
-			x = minX +RAND.nextDouble()*(bounds.getMaxX()- minX);
-			y = minY +RAND.nextDouble()*(bounds.getMaxY()- minY);
-			p= MGC.xy2Point(x, y);
-		} while ( ! (geometry).contains(p) );
-		return p;
+		RandomPointsBuilder rnd = new RandomPointsBuilder(GF);
+		rnd.setNumPoints(1);
+		rnd.setExtent(geometry);
+		Coordinate coordinate = rnd.getGeometry().getCoordinates()[0];
+		return GF.createPoint(coordinate);
 	}
 
 	/**
 	 * Create one geometry from given list of features and then find a random point side the geoemtry.
 	 */
 	public static Point getRandomPointsInsideFeatures (final List<SimpleFeature> features) {
-		Tuple<Double,Double> xs = getMaxMinXFromFeatures(features);
-		Tuple<Double,Double> ys = getMaxMinYFromFeatures(features);
 		Geometry combinedGeometry = getGeometryFromListOfFeatures(features);
 		return getRandomPointsInsideGeometry(combinedGeometry);
 	}
@@ -120,10 +100,10 @@ public final class GeometryUtils {
 	/**
 	 * @return true if point is covered by ANY of the geometry
 	 */
-	public static boolean isPointInsideGeometries(final Collection<Geometry> features, final Point point) {
-		if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
-		for(Geometry sf : features){
-			if ( sf.contains(point) ) {
+	public static boolean isPointInsideGeometries(final Collection<Geometry> geometries, final Point point) {
+		if (geometries.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
+		for(Geometry geom : geometries){
+			if ( geom.contains(point) ) {
 				return true;
 			}
 		}
@@ -134,10 +114,9 @@ public final class GeometryUtils {
 	 * @return true if point is covered by ANY of the geometry
 	 */
 	public static boolean isPointInsideFeatures(final Collection<SimpleFeature> features, final Point point) {
-		Geometry geo = GF.createPoint( new Coordinate( point.getCoordinate() ) );
 		if (features.isEmpty()) throw new RuntimeException("Collection of features is empty.");
 		for(SimpleFeature sf : features){
-			if ( (playground.vsp.demandde.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
+			if ( (playground.vsp.demandde.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(point) ) {
 				return true;
 			}
 		}
@@ -152,44 +131,40 @@ public final class GeometryUtils {
 		return geoms;
 	}
 
-	public static Tuple<Double,Double> getMaxMinXFromFeatures (final List<SimpleFeature> features){
-		double minX = Double.POSITIVE_INFINITY;
-		double maxX = Double.NEGATIVE_INFINITY;
-
-		for (SimpleFeature f : features){
-			BoundingBox bounds = f.getBounds();
-			double localMinX = bounds.getMinX();
-			double localMaxX = bounds.getMaxX();
-			if (minX > localMinX) minX = localMinX;
-			if (maxX < localMaxX) maxX = localMaxX;
-		}
-		return new Tuple<>(minX, maxX);
-	}
-
-	public static Tuple<Double,Double> getMaxMinYFromFeatures (final List<SimpleFeature> features){
-		double minY = Double.POSITIVE_INFINITY;
-		double maxY = Double.NEGATIVE_INFINITY;
-
-		for (SimpleFeature f : features){
-			BoundingBox bounds = f.getBounds();
-			double localMinY = bounds.getMinY();
-			double localMaxY = bounds.getMaxY();
-			if (minY > localMinY) minY = localMinY;
-			if (maxY < localMaxY) maxY = localMaxY;
-		}
-		return new Tuple<>(minY, maxY);
-	}
+//	public static Tuple<Double,Double> getMaxMinXFromFeatures (final List<SimpleFeature> features){
+//		double minX = Double.POSITIVE_INFINITY;
+//		double maxX = Double.NEGATIVE_INFINITY;
+//
+//		for (SimpleFeature f : features){
+//			BoundingBox bounds = f.getBounds();
+//			double localMinX = bounds.getMinX();
+//			double localMaxX = bounds.getMaxX();
+//			if (minX > localMinX) minX = localMinX;
+//			if (maxX < localMaxX) maxX = localMaxX;
+//		}
+//		return new Tuple<>(minX, maxX);
+//	}
+//
+//	public static Tuple<Double,Double> getMaxMinYFromFeatures (final List<SimpleFeature> features){
+//		double minY = Double.POSITIVE_INFINITY;
+//		double maxY = Double.NEGATIVE_INFINITY;
+//
+//		for (SimpleFeature f : features){
+//			BoundingBox bounds = f.getBounds();
+//			double localMinY = bounds.getMinY();
+//			double localMaxY = bounds.getMaxY();
+//			if (minY > localMinY) minY = localMinY;
+//			if (maxY < localMaxY) maxY = localMaxY;
+//		}
+//		return new Tuple<>(minY, maxY);
+//	}
 
 	public static Geometry getGeometryFromListOfFeatures(final List<SimpleFeature> features) {
-		List<Geometry> geoms = new ArrayList<>();
-		for(SimpleFeature sf : features){
-			geoms.add( (Geometry) sf.getDefaultGeometry() );
-		}
+		List<Geometry> geoms = features.stream().map(f -> (Geometry)f.getDefaultGeometry()).collect(Collectors.toList());
 		return playground.vsp.demandde.corineLandcover.GeometryUtils.combine(geoms);
 	}
 
 	/**
-	 *
 	 * @param shapeFile
 	 * @return bounding
 	 */
@@ -197,6 +172,19 @@ public final class GeometryUtils {
 		ShapeFileReader shapeFileReader = new ShapeFileReader();
 		shapeFileReader.readFileAndInitialize(shapeFile);
 		return shapeFileReader.getBounds();
+	}
+
+	/**
+	 * @return true ONLY if point is covered by ALL geometries
+	 */
+	public static boolean isPointInsideAllGeometries(final Collection<Geometry> features, final Point point) {
+		if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
+		for(Geometry sf : features){
+			if ( ! sf.contains(point) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	// rest of the methods are moved to playground.vsp.demandde.corineLandcover.GeometryUtils. Amit Oct'17

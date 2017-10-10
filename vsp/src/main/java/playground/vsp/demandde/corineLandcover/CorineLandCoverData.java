@@ -75,7 +75,7 @@ public class CorineLandCoverData {
         // combined geoms of the same activity types
         // Not sure, Out of two options --simplify and merge OR merge and simplify-- I think, the former would be somewhat better. Amit Oct'17
         for (String activityTypeFromLandCover : activityTypes2ListOfGeometries.keySet()) {
-            LOGGER.info("Merging the geometries of the same activity types ...");
+            LOGGER.info("Merging the geometries of the activity types "+activityTypeFromLandCover+".");
             Geometry combinedGeom = GeometryUtils.combine(activityTypes2ListOfGeometries.get(activityTypeFromLandCover));
             activityType2LandcoverZone.put(activityTypeFromLandCover, combinedGeom);
         }
