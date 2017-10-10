@@ -43,6 +43,7 @@ public class CempdapStops2MatsimPlans {
         String landCoverFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
         String stopFile = "Stops_sample.out";
         String activityFile = "Activity.out";
+        boolean simplifyGeometries = false;
 
         // Server use
         if (args.length != 0) {
@@ -55,11 +56,12 @@ public class CempdapStops2MatsimPlans {
             cemdapDataRoot = args[6];
             useLandCoverData = Boolean.parseBoolean(args[7]);
             landCoverFile = args[8];
+            simplifyGeometries = Boolean.valueOf(args[9]);
         }
 
         CemdapStops2MatsimPlansConverter.convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory,
                 zonalShapeFile, zoneIdTag, allowVariousWorkAndEducationLocations, addStayHomePlan,
-                useLandCoverData, landCoverFile, stopFile, activityFile);
+                useLandCoverData, landCoverFile, stopFile, activityFile,simplifyGeometries);
     }
 
 
