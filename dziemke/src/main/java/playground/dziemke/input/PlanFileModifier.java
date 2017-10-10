@@ -55,17 +55,22 @@ public class PlanFileModifier {
 		}
 		
 		// Local use
-		String inputPlansFile = "../../upretoria/data/capetown/scenario_2017/original/population.xml.gz";
-		String outputPlansFile = "../../upretoria/data/capetown/scenario_2017/population_32734.xml.gz";
-		double selectionProbability = 1.;
+//		String inputPlansFile = "../../upretoria/data/capetown/scenario_2017/original/population.xml.gz";
+//		String outputPlansFile = "../../upretoria/data/capetown/scenario_2017/population_32734.xml.gz";
+		String inputPlansFile = "../../capetown/data/scenario_2017/population_32734.xml.gz";
+		String outputPlansFile = "../../capetown/data/scenario_2017/population_32734_1pct.xml.gz";
+//		double selectionProbability = 1.;
+		double selectionProbability = 0.1;
 		boolean onlyTransferSelectedPlan = false;
 		boolean considerHomeStayingAgents = true;
 		boolean includeStayHomePlans = true;
 		boolean onlyConsiderPeopleAlwaysGoingByCar = false;
 		int maxNumberOfAgentsConsidered = 10000000;
 		boolean removeLinksAndRoutes = false;
-		String inputCRS = TransformationFactory.HARTEBEESTHOEK94_LO19;
-		String outputCRS = "EPSG:32734";
+//		String inputCRS = TransformationFactory.HARTEBEESTHOEK94_LO19;
+//		String outputCRS = "EPSG:32734";
+		String inputCRS = null;
+		String outputCRS = null;
 		
 		CoordinateTransformation ct;
 		if (inputCRS == null && outputCRS == null) {
