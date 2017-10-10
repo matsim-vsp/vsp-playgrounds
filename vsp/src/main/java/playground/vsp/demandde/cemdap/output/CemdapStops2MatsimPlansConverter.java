@@ -46,7 +46,7 @@ import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
  */
 public class CemdapStops2MatsimPlansConverter {
 	private static final Logger LOG = Logger.getLogger(CemdapStops2MatsimPlansConverter.class);
-	
+
 	public static void main(String[] args) throws IOException {
 		// Local use
 		String cemdapDataRoot = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_output/";
@@ -62,6 +62,7 @@ public class CemdapStops2MatsimPlansConverter {
 		String landCoverFile = "CURRENTLY_JUST_A_PLACEHOLDER";
 		String stopFile = "Stops.out";
 		String activityFile = "Activity.out";
+		boolean simplifyGeometries = false;
 		
 		// Server use
 		if (args.length != 0) {
@@ -74,22 +75,23 @@ public class CemdapStops2MatsimPlansConverter {
 			zonalShapeFile = args[5];
 			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
 			landCoverFile = args[8];
+			simplifyGeometries = Boolean.valueOf(args[9]);
 		}
 		
 		convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory, 
 				zonalShapeFile, zoneIdTag, allowVariousWorkAndEducationLocations, addStayHomePlan, 
-				useLandCoverData, landCoverFile, stopFile, activityFile);
+				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries);
 	}
 
 	
 	public static void convert(String cemdapDataRoot, int numberOfFirstCemdapOutputFile, int numberOfPlans, String outputDirectory,
 			String zonalShapeFile, String zoneIdTag, boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
-			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile) throws IOException {
+			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries) throws IOException {
 
 		CorineLandCoverData corineLandCoverData = null;
 		// CORINE landcover
 		if (landCoverFile!=null && useLandCoverData) {
-			corineLandCoverData = new CorineLandCoverData(landCoverFile);
+			corineLandCoverData = new CorineLandCoverData(landCoverFile, simplifyGeometries);
 		}
 
 		LogToOutputSaver.setOutputDirectory(outputDirectory);

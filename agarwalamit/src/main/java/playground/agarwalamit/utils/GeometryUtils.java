@@ -22,8 +22,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
@@ -41,7 +44,7 @@ import org.opengis.geometry.BoundingBox;
 public final class GeometryUtils {
 
 	private GeometryUtils(){}
-	private static final Random RAND = MatsimRandom.getRandom(); // matsim random will return same coord.
+	private static final Random RAND = MatsimRandom.getRandom();
 	private static final GeometryFactory GF = new GeometryFactory();
 
 	/**
@@ -65,7 +68,7 @@ public final class GeometryUtils {
 	 * @return a random point inside given geometry
 	 */
 	public static Point getRandomPointsInsideGeometry (final Geometry geometry) {
-		Point p = null;
+		Point p ;
 		Envelope bounds = geometry.getEnvelopeInternal();
 		double x,y;
 		do {
@@ -75,33 +78,6 @@ public final class GeometryUtils {
 			y = minY +RAND.nextDouble()*(bounds.getMaxY()- minY);
 			p= MGC.xy2Point(x, y);
 		} while ( ! (geometry).contains(p) );
-		return p;
-	}
-
-	/**
-	 * @return a random point which is covered by all the geometries
-	 */
-	public static Point getRandomPointCommonToAllGeometries(final List<Geometry> geometries) {
-		Point p = null;
-		double minX = Double.POSITIVE_INFINITY;
-		double minY = Double.POSITIVE_INFINITY;
-		double maxX = Double.NEGATIVE_INFINITY;
-		double maxY = Double.NEGATIVE_INFINITY;
-
-		for(  Geometry geometry : geometries ) {
-			Envelope bounds = geometry.getEnvelopeInternal();
-			minX = Math.min(minX, bounds.getMinX());
-			minY = Math.min(minY, bounds.getMinY());
-			maxX = Math.max(maxX, bounds.getMaxX());
-			maxY = Math.max(maxY, bounds.getMaxY());
-		}
-
-		double x,y;
-		do {
-			x = minX +RAND.nextDouble()*(maxX- minX);
-			y = minY +RAND.nextDouble()*(maxY- minY);
-			p= MGC.xy2Point(x, y);
-		} while ( ! isPointInsideAllGeometries(geometries, p) );
 		return p;
 	}
 
@@ -142,19 +118,6 @@ public final class GeometryUtils {
 	}
 
 	/**
-	 * @return true ONLY if point is covered by ALL geometries
-	 */
-	public static boolean isPointInsideAllGeometries(final Collection<Geometry> features, final Point point) {
-		if (features.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
-		for(Geometry sf : features){
-			if ( ! sf.contains(point) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * @return true if point is covered by ANY of the geometry
 	 */
 	public static boolean isPointInsideGeometries(final Collection<Geometry> features, final Point point) {
@@ -174,7 +137,7 @@ public final class GeometryUtils {
 		Geometry geo = GF.createPoint( new Coordinate( point.getCoordinate() ) );
 		if (features.isEmpty()) throw new RuntimeException("Collection of features is empty.");
 		for(SimpleFeature sf : features){
-			if ( ( getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
+			if ( (playground.vsp.demandde.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(geo) ) {
 				return true;
 			}
 		}
@@ -184,37 +147,9 @@ public final class GeometryUtils {
 	public static Collection<Geometry> getSimplifiedGeometries(final Collection<SimpleFeature> features){
 		Collection<Geometry> geoms = new ArrayList<>();
 		for(SimpleFeature sf:features){
-			geoms.add(getSimplifiedGeom( (Geometry) sf.getDefaultGeometry()));
+			geoms.add(playground.vsp.demandde.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry()));
 		}
 		return geoms;
-	}
-
-	/**
-	 * @param geom
-	 * @return a simplified geometry by increasing tolerance until number of vertices are less than 1000.
-	 */
-	public static Geometry getSimplifiedGeom(final Geometry geom){
-		Geometry outGeom = geom;
-		double distanceTolerance = 1;
-		int numberOfVertices = getNumberOfVertices(geom);
-		while (numberOfVertices > 1000){
-			outGeom = getSimplifiedGeom(outGeom, distanceTolerance);
-			numberOfVertices = getNumberOfVertices(outGeom);
-			distanceTolerance *= 10;
-		}
-		return outGeom;
-	}
-
-	/**
-	 * simplify the geometry based on given tolerance
-	 */
-
-	public static Geometry getSimplifiedGeom(final Geometry geom, final double distanceTolerance){
-		return TopologyPreservingSimplifier.simplify(geom, distanceTolerance);
-	}
-
-	public static int getNumberOfVertices(final Geometry geom){
-		return geom.getNumPoints();
 	}
 
 	public static Tuple<Double,Double> getMaxMinXFromFeatures (final List<SimpleFeature> features){
@@ -250,21 +185,7 @@ public final class GeometryUtils {
 		for(SimpleFeature sf : features){
 			geoms.add( (Geometry) sf.getDefaultGeometry() );
 		}
-		return combine(geoms);
-	}
-
-	/**
-	 * It perform "union" for each geometry and return one geometry.
-	 */
-	public static Geometry combine(final List<Geometry> geoms){
-		Geometry geom = null;
-		for(Geometry g : geoms){
-			if(geom==null) geom = g;
-			else {
-				geom.union(g);
-			}
-		}
-		return geom;
+		return playground.vsp.demandde.corineLandcover.GeometryUtils.combine(geoms);
 	}
 
 	/**
@@ -277,4 +198,6 @@ public final class GeometryUtils {
 		shapeFileReader.readFileAndInitialize(shapeFile);
 		return shapeFileReader.getBounds();
 	}
+
+	// rest of the methods are moved to playground.vsp.demandde.corineLandcover.GeometryUtils. Amit Oct'17
 }

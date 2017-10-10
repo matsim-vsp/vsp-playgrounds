@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Based on the classification of the CORINE land cover data, zones are categorized in two parts: one for home activities and other for rest of the activities.
  * Created by amit on 31.07.17.
  */
 
@@ -32,9 +33,9 @@ public class LandCoverUtils {
 
     public static final String CORINE_LANDCOVER_TAG_ID = "CODE_12";
 
-    private static Map<String, List<Integer>> getActivityTypeToLandCoverIds(){
+    private final Map<String, List<Integer>> activityType2LandCoverId = new HashMap<>();
 
-        Map<String, List<Integer>> activityType2LandCoverId = new HashMap<>();
+    LandCoverUtils() {
         {
             List<Integer> landCoverIds = new ArrayList<>();
             landCoverIds.add(111); // continuous urban fabric
@@ -52,14 +53,12 @@ public class LandCoverUtils {
             landCoverIds.add(142); //Sport and leisure facilities
             activityType2LandCoverId.put("other", landCoverIds);
         }
-        return activityType2LandCoverId;
     }
 
-    public static List<String> getActivitiesTypeFromZone(final int landCoverId){
-        Map<String, List<Integer>> activityTypesToLandCoverIds = LandCoverUtils.getActivityTypeToLandCoverIds();
+    public List<String> getActivityTypesFromZone(final int landCoverId){
         List<String> output = new ArrayList<>();
-        for(String activityTypeFromLandCover : activityTypesToLandCoverIds.keySet() ) {
-            if (activityTypesToLandCoverIds.get(activityTypeFromLandCover).contains(landCoverId)) {
+        for(String activityTypeFromLandCover : activityType2LandCoverId.keySet() ) {
+            if (activityType2LandCoverId.get(activityTypeFromLandCover).contains(landCoverId)) {
                 output.add(activityTypeFromLandCover);
             }
         }
