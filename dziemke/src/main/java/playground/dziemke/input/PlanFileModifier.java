@@ -127,9 +127,10 @@ public class PlanFileModifier {
 		
 		int agentCounter = 0;
 		
+		Random random = MatsimRandom.getLocalInstance();
+		
 		for (Person person : population.getPersons().values()) {
 			if (agentCounter < maxNumberOfAgentsConsidered) {
-				Random random = MatsimRandom.getLocalInstance();
 				
 				Plan selectedPlan = person.getSelectedPlan();
 				boolean copyPerson = decideIfPersonWillBeCopied(selectionProbability, considerHomeStayingAgents,
