@@ -50,7 +50,7 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
  * 
  * @author nagel
  */
-class AssignmentEmulatingQLane extends QLaneI {
+class AssignmentEmulatingQLane implements QLaneI {
 	@SuppressWarnings("unused")
 	private static Logger log = Logger.getLogger(AssignmentEmulatingQLane.class ) ;
 	
@@ -495,24 +495,21 @@ class AssignmentEmulatingQLane extends QLaneI {
 	}
 
 	@Override
-	double getSimulatedFlowCapacityPerTimeStep() {
+	public double getSimulatedFlowCapacityPerTimeStep() {
 		throw new RuntimeException("not implemented") ;
 	}
 	@Override
-	double getStorageCapacity() {
+	public double getStorageCapacity() {
 		return Double.POSITIVE_INFINITY ;
 	}
-	@Override boolean hasGreenForToLink(Id<Link> toLinkId) {
-		return true ;
-	}
-	@Override void changeSpeedMetersPerSecond( double val ) {
+	@Override public void changeSpeedMetersPerSecond( double val ) {
 		throw new RuntimeException("not implemented") ;
 	}
-	@Override double getLoadIndicator() {
+	@Override public double getLoadIndicator() {
 		throw new RuntimeException("not implemented") ;
 	}
 
 	@Override
-	void initBeforeSimStep() {
+	public void initBeforeSimStep() {
 	}
 }
