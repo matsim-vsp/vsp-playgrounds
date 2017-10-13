@@ -29,6 +29,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
 import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
+import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
+import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.opdyts.DistanceDistribution;
 import playground.agarwalamit.opdyts.OpdytsScenario;
@@ -46,32 +48,41 @@ public class EquilRelaxedPlans {
 
         String relaxedPlans = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
 
-        String outputDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/testCalib/run121_4/";
+        String outputDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/testCalib/relaxedPlans_defaultTravelTime/";
+
+        boolean usingBicycleTravelTime = false;
 
         double ascBicycle = 2;
 
-        EquilRelaxedPlans.runWithRelaxedPlans(configFile, relaxedPlans, outputDir, ascBicycle);
-//        EquilRelaxedPlans.runConfig(configFile);
+//        EquilRelaxedPlans.runWithRelaxedPlans(configFile, relaxedPlans, outputDir, ascBicycle, usingBicycleTravelTime);
+        EquilRelaxedPlans.runConfig(configFile, outputDir, usingBicycleTravelTime);
 
     }
 
-    private static void runConfig(String configFile){
+    private static void runConfig(String configFile, String outputDir, boolean usingBicycleTravelTime){
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
         scenario.getConfig().controler().setDumpDataAtEnd(true);
         scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        scenario.getConfig().controler().setOutputDirectory(outputDir);
+        scenario.getConfig().controler().setLastIteration(50);
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                addTravelTimeBinding("bicycle").to(FreeSpeedTravelTimeForBike.class);
-                addTravelDisutilityFactoryBinding("bicycle").to(carTravelDisutilityFactoryKey());
+                if (usingBicycleTravelTime)  addTravelTimeBinding("bicycle").to(FreeSpeedTravelTimeForBike.class);
+                this.bind(ModalShareEventHandler.class);
+                this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+
+                this.bind(ModalTripTravelTimeHandler.class);
+                this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+
             }
         });
         controler.run();
     }
 
-    private static void runWithRelaxedPlans(String configFile, String relaxedPlans, String outputDir, double ascBicycle){
+    private static void runWithRelaxedPlans(String configFile, String relaxedPlans, String outputDir, double ascBicycle, boolean usingBicycleTravelTime){
         Config config = ConfigUtils.loadConfig(configFile);
         config.plans().setInputFile(relaxedPlans);
         config.planCalcScore().getOrCreateModeParams("bicycle").setConstant(ascBicycle);
@@ -94,11 +105,13 @@ public class EquilRelaxedPlans {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                addTravelTimeBinding("bicycle").to(FreeSpeedTravelTimeForBike.class);
-                addTravelDisutilityFactoryBinding("bicycle").to(carTravelDisutilityFactoryKey());
+                if (usingBicycleTravelTime)  addTravelTimeBinding("bicycle").to(FreeSpeedTravelTimeForBike.class);
 
                 this.bind(ModalShareEventHandler.class);
                 this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+
+                this.bind(ModalTripTravelTimeHandler.class);
+                this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
 
                 this.addControlerListenerBinding().toInstance(stasControlerListner);
 
