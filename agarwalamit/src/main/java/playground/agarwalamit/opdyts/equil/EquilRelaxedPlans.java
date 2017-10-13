@@ -48,7 +48,7 @@ public class EquilRelaxedPlans {
 
         String relaxedPlans = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
 
-        String outputDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/testCalib/relaxedPlans_defaultTravelTime/";
+        String outputDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/relaxedPlans_defaultTravelTimeForBicycle/";
 
         boolean usingBicycleTravelTime = false;
 
@@ -64,7 +64,6 @@ public class EquilRelaxedPlans {
         scenario.getConfig().controler().setDumpDataAtEnd(true);
         scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         scenario.getConfig().controler().setOutputDirectory(outputDir);
-        scenario.getConfig().controler().setLastIteration(50);
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new AbstractModule() {

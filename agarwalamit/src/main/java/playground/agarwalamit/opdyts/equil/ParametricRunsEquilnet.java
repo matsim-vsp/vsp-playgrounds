@@ -71,7 +71,7 @@ public class ParametricRunsEquilnet {
         String ascStyles [] = {"axial_randomVariation","axial_fixed"};
         double [] stepSizes = {1.0,0.75,0.5,0.25};
         Integer [] convIterations = {500, 300};
-        double [] selfTuningWts = {1.0, 2.0};
+        double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {10,5,1};
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+newLine);
@@ -191,7 +191,7 @@ public class ParametricRunsEquilnet {
                         "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilMixedTrafficIntegration " +
                         "/net/ils4/agarwal/equilOpdyts/carBicycle/inputs/ " +
                         "/net/ils4/agarwal/equilOpdyts/carBicycle/output/"+jobName+"/ " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/relaxedPlans/output_plans.xml.gz "+
+                        "/net/ils4/agarwal/equilOpdyts/carBicycle/relaxedPlans_defaultTravelTimeForBicycle/output_plans.xml.gz "+
                         argument+" "
         };
 
