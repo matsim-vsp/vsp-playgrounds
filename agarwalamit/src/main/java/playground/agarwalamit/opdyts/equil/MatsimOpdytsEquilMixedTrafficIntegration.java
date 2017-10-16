@@ -71,7 +71,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		double stepSize = 0.5;
 		int iterations2Convergence = 5;
 		double selfTuningWt = 1.0;
-		int warmUpItrs = 1;
+		int warmUpItrs = 5;
 
 		if (args.length > 0) {
 			EQUIL_DIR = args[0];
@@ -86,7 +86,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 			warmUpItrs = Integer.valueOf(args[7]);
 		} else {
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
-			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
+			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans_defaultTravelTimeForBicycle/output_plans.xml.gz";
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
 		}
 

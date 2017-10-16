@@ -20,13 +20,28 @@
 package playground.agarwalamit.analysis.tripDistance;
 
 import java.io.BufferedWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -283,5 +298,14 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 			mode2PersonId2TotalRouteDist.put(str, personIdeRouteDist);
 		}
 		return mode2PersonId2TotalRouteDist;
+	}
+
+	public Map<String,Double> getModeToShare(){
+		Map<String, Double> mode2legCount = mode2DistanceClass2LegCount.entrySet().parallelStream().collect(
+				Collectors.toMap(
+						e -> e.getKey(),
+						e-> e.getValue().values().parallelStream().mapToDouble(Number::doubleValue).sum()));
+		double sumShare = mode2legCount.values().stream().mapToDouble(Number::doubleValue).sum();
+		return mode2legCount.entrySet().stream().collect(Collectors.toMap(entry-> entry.getKey(), entry -> entry.getValue() / sumShare ));
 	}
 }
