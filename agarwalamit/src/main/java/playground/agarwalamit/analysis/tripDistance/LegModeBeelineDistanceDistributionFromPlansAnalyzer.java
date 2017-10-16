@@ -170,10 +170,8 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 					Leg leg = (Leg)pe;
 
 					String legMode = leg.getMode();
-					final Leg leg2 = leg;
-					Coord from = PopulationUtils.getPreviousActivity(plan, leg2).getCoord();
-					final Leg leg1 = leg;
-					Coord to = PopulationUtils.getNextActivity(plan, leg1).getCoord();
+					Coord from = PopulationUtils.getPreviousActivity(plan, leg).getCoord();
+					Coord to = PopulationUtils.getNextActivity(plan, leg).getCoord();
 					Double legBeelineDist = CoordUtils.calcEuclideanDistance(from, to);
 
 					// making it 0+, 2km+, 10km+ etc. Amit June'17
@@ -185,6 +183,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 							int oldLeg = distanceClass2NoOfLegs.get(this.distanceClasses.get(i));
 							distanceClass2NoOfLegs.put(this.distanceClasses.get(i), oldLeg+1);
 							this.mode2DistanceClass2LegCount.put(leg.getMode(), distanceClass2NoOfLegs);
+							break;
 						}
 
 					}
