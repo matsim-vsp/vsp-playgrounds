@@ -107,7 +107,7 @@ public class JobScriptWriter {
         buffer.append(newLine);
         buffer.append(newLine);
 
-        buffer.append("=========================== Job start ===========================");
+        buffer.append("echo \"=========================== Job start ===========================\"");
         buffer.append(newLine);
         buffer.append(newLine);
 
@@ -121,7 +121,7 @@ public class JobScriptWriter {
         buffer.append("date");
         buffer.append(newLine);
 
-        buffer.append("=========================== Job end ===========================");
+        buffer.append("echo \"=========================== Job end ===========================\"");
         buffer.append(newLine);
     }
 
