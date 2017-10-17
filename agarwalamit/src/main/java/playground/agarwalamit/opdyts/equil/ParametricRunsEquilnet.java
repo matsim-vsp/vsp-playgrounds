@@ -63,16 +63,16 @@ public class ParametricRunsEquilnet {
     }
 
     public static void main(String[] args) {
-        int runCounter= 1;
-        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/output/";
+        int runCounter= 25;
+        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/outputTest/";
         StringBuilder buffer = new StringBuilder();
         ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(runCounter);
 
         String ascStyles [] = {"axial_randomVariation","axial_fixed"};
         double [] stepSizes = {1.0,0.75,0.5,0.25};
-        Integer [] convIterations = {500, 300};
+        Integer [] convIterations = {500};
         double [] selfTuningWts = {1.0};
-        Integer [] warmUpIts = {10,5,1};
+        Integer [] warmUpIts = {1,5,10};
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+newLine);
 
@@ -91,18 +91,18 @@ public class ParametricRunsEquilnet {
             }
         }
 
-        parametricRuns.writeRemoteFile(buffer, baseDir+"/runInfo.txt");
+        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseDir+"/runInfo.txt");
         parametricRuns.close();
     }
 
-    public void writeRemoteFile(final StringBuilder buffer, final String file) {
+    public void writeNewOrAppendRemoteFile(final StringBuilder buffer, final String file) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream w = new DataOutputStream(baos);
             w.writeBytes(buffer.toString());
             w.flush();
 
-            sftp.put(new ByteArrayInputStream(baos.toByteArray()), file);
+            sftp.put(new ByteArrayInputStream(baos.toByteArray()), file, ChannelSftp.APPEND);
 
             w.close();
             baos.close();
@@ -200,8 +200,8 @@ public class ParametricRunsEquilnet {
         scriptWriter.writeRemoteLocation(sftp, jobScriptFileName);
 
         return new String [] {
-                "qstat -u agarwal",
-                "qsub "+scriptWriter.getJobScript(),
+//                "qstat -u agarwal",
+//                "qsub "+scriptWriter.getJobScript(),
                 "qstat -u agarwal" };
     }
 }

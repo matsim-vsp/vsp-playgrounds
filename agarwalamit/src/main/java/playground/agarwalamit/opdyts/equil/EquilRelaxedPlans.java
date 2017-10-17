@@ -46,16 +46,16 @@ public class EquilRelaxedPlans {
 
         String configFile = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/inputs/config-with-mode-vehicles.xml";
 
-        String relaxedPlans = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
+        String relaxedPlans = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/relaxedPlans_defaultTravelTimeForBicycle/output_plans.xml.gz";
 
-        String outputDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/relaxedPlans_defaultTravelTimeForBicycle/";
+        String outputDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/objFunSensitivity/asc1";
 
         boolean usingBicycleTravelTime = false;
 
-        double ascBicycle = 2;
+        double ascBicycle = 1;
 
-//        EquilRelaxedPlans.runWithRelaxedPlans(configFile, relaxedPlans, outputDir, ascBicycle, usingBicycleTravelTime);
-        EquilRelaxedPlans.runConfig(configFile, outputDir, usingBicycleTravelTime);
+        EquilRelaxedPlans.runWithRelaxedPlans(configFile, relaxedPlans, outputDir, ascBicycle, usingBicycleTravelTime);
+//        EquilRelaxedPlans.runConfig(configFile, outputDir, usingBicycleTravelTime);
 
     }
 
