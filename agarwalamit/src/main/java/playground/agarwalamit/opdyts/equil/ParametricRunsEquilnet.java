@@ -64,7 +64,7 @@ public class ParametricRunsEquilnet {
 
     public static void main(String[] args) {
         int runCounter= 25;
-        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/outputTest/";
+        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/output/";
         StringBuilder buffer = new StringBuilder();
         ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(runCounter);
 
@@ -175,7 +175,7 @@ public class ParametricRunsEquilnet {
         // location of file must be locale and then can be copied to remote.
         String jobScriptFileName = locationOfOutput+"/script_"+jobName+".sh";
 
-        String matsimDir = "r_82abe81b33467700f4e61a41ada1e6d7cfcc96f9_opdyts";
+        String matsimDir = "r_f1f77f20aea75bccab6847349d4cdb4b56bccece_opdyts";
 
 
         String [] additionalLines = {
@@ -200,8 +200,8 @@ public class ParametricRunsEquilnet {
         scriptWriter.writeRemoteLocation(sftp, jobScriptFileName);
 
         return new String [] {
-//                "qstat -u agarwal",
-//                "qsub "+scriptWriter.getJobScript(),
+                "qstat -u agarwal",
+                "qsub "+scriptWriter.getJobScript(),
                 "qstat -u agarwal" };
     }
 }
