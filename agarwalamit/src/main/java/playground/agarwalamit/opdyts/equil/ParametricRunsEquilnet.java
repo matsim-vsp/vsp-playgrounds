@@ -64,12 +64,12 @@ public class ParametricRunsEquilnet {
 
     public static void main(String[] args) {
         int runCounter= 1;
-        String baseDir = "/net/ils4/agarwal/toyScenarioOpdyts/carBicycle/output/";
+        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/output/";
         StringBuilder buffer = new StringBuilder();
         ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(runCounter);
 
-        String ascStyles [] = {"axial_randomVariation","axial_fixedVariation"};
-        double [] stepSizes = {1.0,0.75,0.5,0.25};
+        String ascStyles [] = {"axial_randomVariation","axial_fixedVariation","diagonal_randomVariation","axial_randomVariation"};
+        double [] stepSizes = {0.5};
         Integer [] convIterations = {500,300};
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1,5,10};
@@ -175,7 +175,7 @@ public class ParametricRunsEquilnet {
         // location of file must be locale and then can be copied to remote.
         String jobScriptFileName = locationOfOutput+"/script_"+jobName+".sh";
 
-        String matsimDir = "r_f1f77f20aea75bccab6847349d4cdb4b56bccece_opdyts";
+        String matsimDir = "r_c0c3bf01bcb5d41f2a1012c9b3fa4a0628c976a4_opdyts_18Oct";
 
 
         String [] additionalLines = {
