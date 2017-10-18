@@ -35,6 +35,7 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTime
 import playground.agarwalamit.opdyts.DistanceDistribution;
 import playground.agarwalamit.opdyts.OpdytsScenario;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
+import playground.agarwalamit.utils.FileUtils;
 
 /**
  * Created by amit on 11.10.17.
@@ -44,15 +45,15 @@ public class EquilRelaxedPlans {
 
     public static void main(String[] args) {
 
-        String configFile = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/inputs/config-with-mode-vehicles.xml";
+        String configFile = FileUtils.RUNS_SVN+"/opdyts/toyScenario/carBicycle/inputs/config-with-mode-vehicles.xml";
 
-        String relaxedPlans = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/relaxedPlans_defaultTravelTimeForBicycle/output_plans.xml.gz";
+        String relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/toyScenario/carBicycle/relaxedPlans_defaultTravelTimeForBicycle_0.25f/output_plans.xml.gz";
 
-        String outputDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/objFunSensitivity/asc1";
+        String outputDir = FileUtils.RUNS_SVN+"/opdyts/toyScenario/carBicycle/objFunctionTesting_0.25f/asc4/";
 
         boolean usingBicycleTravelTime = false;
 
-        double ascBicycle = 1;
+        double ascBicycle = 4.0;
 
         EquilRelaxedPlans.runWithRelaxedPlans(configFile, relaxedPlans, outputDir, ascBicycle, usingBicycleTravelTime);
 //        EquilRelaxedPlans.runConfig(configFile, outputDir, usingBicycleTravelTime);

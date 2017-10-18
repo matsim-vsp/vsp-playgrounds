@@ -87,7 +87,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		} else {
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
 			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans_defaultTravelTimeForBicycle/output_plans.xml.gz";
-			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixed;
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation;
 		}
 
 		configFile = EQUIL_DIR+"/config-with-mode-vehicles.xml";

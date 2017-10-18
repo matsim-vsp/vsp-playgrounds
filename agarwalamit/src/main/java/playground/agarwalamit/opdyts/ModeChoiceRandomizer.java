@@ -42,8 +42,8 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
     public enum ASCRandomizerStyle {
         axial_randomVariation, // combinations like (0,+), (0,-), (+,0), (-,0)
         diagonal_randomVariation, // combinations like (+,+), (+,-), (-,+), (-,-)
-        axial_fixed,
-        diagonal_fixed
+        axial_fixedVariation,
+        diagonal_fixedVariation
     }
 
     private final Scenario scenario;
@@ -77,6 +77,9 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         this.opdytsScenario = opdytsScenario;
         this.considerdModes = considerdModes;
         this.ascRandomizerStyle = ascRandomizerStyle;
+
+        // a higher population size would matter for fixed variation styles even if they start with same simulation state,
+        // however, matsim random is sequential and thus, they can end up in a different traffic pattern. Amit Oct'17
     }
 
     public ModeChoiceRandomizer(final Scenario scenario, final RandomizedUtilityParametersChoser randomizedUtilityParametersChoser,
@@ -107,13 +110,13 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
             case axial_randomVariation:
                 allCombinations  = createAxialCombinations(oldParameterSet, randomVariationOfStepSize);
                 break;
-            case axial_fixed:
+            case axial_fixedVariation:
                 allCombinations  = createAxialCombinations(oldParameterSet, 1);
                 break;
             case diagonal_randomVariation:
                 createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
                 break;
-            case diagonal_fixed:
+            case diagonal_fixedVariation:
                 createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, 1);
                 break;
             default:
@@ -164,9 +167,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
 
         final List<PlanCalcScoreConfigGroup> allCombinations = new ArrayList<>();
         for(String mode : this.considerdModes) {
-            if ( mode.equals(TransportMode.car)) {
-                throw new RuntimeException("The parameters of the car remain unchanged. Therefore, car mode should not end up here, it should have been removed in the previous step. ");
-            }
+            if ( mode.equals(TransportMode.car)) continue;
             { // positive
                 PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
                 PlanCalcScoreConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);

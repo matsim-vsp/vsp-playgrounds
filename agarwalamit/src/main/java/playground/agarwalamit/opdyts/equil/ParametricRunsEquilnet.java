@@ -63,14 +63,14 @@ public class ParametricRunsEquilnet {
     }
 
     public static void main(String[] args) {
-        int runCounter= 25;
-        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/output/";
+        int runCounter= 1;
+        String baseDir = "/net/ils4/agarwal/toyScenarioOpdyts/carBicycle/output/";
         StringBuilder buffer = new StringBuilder();
         ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(runCounter);
 
-        String ascStyles [] = {"axial_randomVariation","axial_fixed"};
+        String ascStyles [] = {"axial_randomVariation","axial_fixedVariation"};
         double [] stepSizes = {1.0,0.75,0.5,0.25};
-        Integer [] convIterations = {500};
+        Integer [] convIterations = {500,300};
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1,5,10};
 
@@ -189,9 +189,9 @@ public class ParametricRunsEquilnet {
 
                 "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
                         "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilMixedTrafficIntegration " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/inputs/ " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/output/"+jobName+"/ " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/relaxedPlans_defaultTravelTimeForBicycle/output_plans.xml.gz "+
+                        "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/inputs/ " +
+                        "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/output/"+jobName+"/ " +
+                        "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/relaxedPlans/output_plans.xml.gz "+
                         argument+" "
         };
 
