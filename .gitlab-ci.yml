@@ -2,7 +2,7 @@ image: maven:3-jdk-8
 
 # see: https://gitlab.com/gitlab-com/support-forum/issues/537
 before_script:
- " apt-get update && apt-get install -y openjfx"
+ "apt-get update && apt-get install -y openjfx"
 
 build:
   script: "mvn install -B --fail-at-end -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true"
