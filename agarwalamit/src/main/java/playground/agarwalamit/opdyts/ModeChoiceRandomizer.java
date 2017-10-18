@@ -105,10 +105,10 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         log.warn("creating randomVariation combinations of decision variable as "+ this.ascRandomizerStyle);
         switch (this.ascRandomizerStyle) {
             case axial_randomVariation:
-                allCombinations  = createAxialCombinations(oldParameterSet, remainingModes, randomVariationOfStepSize);
+                allCombinations  = createAxialCombinations(oldParameterSet, randomVariationOfStepSize);
                 break;
             case axial_fixed:
-                allCombinations  = createAxialCombinations(oldParameterSet, remainingModes, 1);
+                allCombinations  = createAxialCombinations(oldParameterSet, 1);
                 break;
             case diagonal_randomVariation:
                 createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
@@ -160,7 +160,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         }
     }
 
-    private List<PlanCalcScoreConfigGroup> createAxialCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<String> remainingModes, final double randomVariationOfStepSize) {
+    private List<PlanCalcScoreConfigGroup> createAxialCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final double randomVariationOfStepSize) {
 
         final List<PlanCalcScoreConfigGroup> allCombinations = new ArrayList<>();
         for(String mode : this.considerdModes) {
