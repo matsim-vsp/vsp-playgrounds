@@ -1,5 +1,7 @@
 # see: https://gitlab.com/gitlab-com/support-forum/issues/537
-before_script: "apt-get update && apt-get install -y openjfx"
+before_script: 
+    - "apt-get update"
+    - "apt-get install -y openjfx"
 
 image: maven:3-jdk-8
 
