@@ -36,8 +36,8 @@ public class EqualParametricRunsFilesMover {
     }
 
     public static void moveFiles(){
-        String srcDir = "/Users/amit/Documents/cluster/tub/agarwal/equilOpdyts/carBicycle/output/";
-        String destinationDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/output/";
+        String srcDir = "/Users/amit/Documents/cluster/tub/agarwal/equilOpdyts/carBicycle/hEART/output/";
+        String destinationDir = "/Users/amit/Documents/repos/runs-svn/opdyts/equil/car,bicycle/hEART/output/";
 
         for (String dir : new File(srcDir).list()) {
             if (dir.contains(".DS_Store")) {
@@ -70,6 +70,12 @@ public class EqualParametricRunsFilesMover {
                         org.apache.commons.io.FileUtils.copyFile(new File(srcDir+"/"+dir+"/"+childDir+"/"+"opdyts.log"),new File (dirsToAdd+"opdyts.log"));
                         org.apache.commons.io.FileUtils.copyFile(new File(srcDir+"/"+dir+"/"+childDir+"/"+"opdyts.con"),new File (dirsToAdd+"opdyts.con"));
                         org.apache.commons.io.FileUtils.copyFile(new File(srcDir+"/"+dir+"/"+childDir+"/"+"opdyts.sum"),new File (dirsToAdd+"opdyts.sum"));
+
+                        for( int f =0; f<10; f++){
+                            new File (dirsToAdd+"_"+f+"/").mkdir();
+                            org.apache.commons.io.FileUtils.copyFile(new File(srcDir+"/"+dir+"/"+childDir+"/_"+f+"/modalShare.png"), new File (dirsToAdd+"_"+f+"/modalShare.png"));
+                            org.apache.commons.io.FileUtils.copyFile(new File(srcDir+"/"+dir+"/"+childDir+"/_"+f+"/opdyts_modalStats.txt"), new File (dirsToAdd+"_"+f+"/opdyts_modalStats.txt"));
+                        }
                     } catch (IOException e) {
                         throw new RuntimeException("Data is not copied. Reason : " + e);
                     }
