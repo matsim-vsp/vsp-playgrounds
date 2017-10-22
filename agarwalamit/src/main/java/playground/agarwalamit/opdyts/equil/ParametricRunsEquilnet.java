@@ -63,16 +63,16 @@ public class ParametricRunsEquilnet {
     }
 
     public static void main(String[] args) {
-        int runCounter= 1;
-        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/output/";
+        int runCounter= 100;
+        String baseDir = "/net/ils4/agarwal/equilOpdyts/carPt/output/";
         StringBuilder buffer = new StringBuilder();
         ParametricRunsEquilnet parametricRuns = new ParametricRunsEquilnet(runCounter);
 
-        String ascStyles [] = {"axial_randomVariation","axial_fixedVariation","diagonal_randomVariation","axial_randomVariation"};
-        double [] stepSizes = {0.5};
-        Integer [] convIterations = {500,300};
+        String ascStyles [] = {"axial_fixedVariation","axial_randomVariation"};
+        double [] stepSizes = {0.25, 0.5, 1.0};
+        Integer [] convIterations = {300};
         double [] selfTuningWts = {1.0};
-        Integer [] warmUpIts = {1,5,10};
+        Integer [] warmUpIts = {1, 5, 10};
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+newLine);
 
@@ -175,7 +175,7 @@ public class ParametricRunsEquilnet {
         // location of file must be locale and then can be copied to remote.
         String jobScriptFileName = locationOfOutput+"/script_"+jobName+".sh";
 
-        String matsimDir = "r_c0c3bf01bcb5d41f2a1012c9b3fa4a0628c976a4_opdyts_18Oct";
+        String matsimDir = "r_d24e170ecef8172430381b23c72f39e3f9e79ea1_opdyts_22Oct";
 
 
         String [] additionalLines = {
@@ -188,10 +188,10 @@ public class ParametricRunsEquilnet {
                 newLine,
 
                 "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
-                        "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilMixedTrafficIntegration " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/inputs/ " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/output/"+jobName+"/ " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/hEART/relaxedPlans/output_plans.xml.gz "+
+                        "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilIntegration " +
+                        "/net/ils4/agarwal/equilOpdyts/carPt/inputs/ " +
+                        "/net/ils4/agarwal/equilOpdyts/carPt/output/"+jobName+"/ " +
+                        "/net/ils4/agarwal/equilOpdyts/carPt/relaxedPlans/output_plans.xml.gz "+
                         argument+" "
         };
 
