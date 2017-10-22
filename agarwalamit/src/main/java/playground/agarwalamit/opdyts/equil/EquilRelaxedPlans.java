@@ -45,19 +45,19 @@ public class EquilRelaxedPlans {
 
     public static void main(String[] args) {
 
-        String configFile = FileUtils.RUNS_SVN+"/opdyts/toyScenario/carBicycle/inputs/config-with-mode-vehicles.xml";
+        String configFile = FileUtils.RUNS_SVN+"/opdyts/equil/carPt/inputs/config.xml";
 
-        String relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/toyScenario/carBicycle/relaxedPlans_defaultTravelTimeForBicycle_0.25f/output_plans.xml.gz";
+        String relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/carPt/relaxedPlans/output_plans.xml.gz";
 
-        String outputDir = FileUtils.RUNS_SVN+"/opdyts/toyScenario/carBicycle/objFunctionTesting_0.25f/asc4/";
+        String outputDir = FileUtils.RUNS_SVN+"/opdyts/equil/carPt/objFunSensitivity/asc2.5/";
 
         boolean usingBicycleTravelTime = false;
 
-        double ascBicycle = 4.0;
+        String mode = "pt";
+        double ascMode = 2.5;
 
-        EquilRelaxedPlans.runWithRelaxedPlans(configFile, relaxedPlans, outputDir, ascBicycle, usingBicycleTravelTime);
+        EquilRelaxedPlans.runWithRelaxedPlans(configFile, relaxedPlans, outputDir, mode, ascMode, usingBicycleTravelTime);
 //        EquilRelaxedPlans.runConfig(configFile, outputDir, usingBicycleTravelTime);
-
     }
 
     private static void runConfig(String configFile, String outputDir, boolean usingBicycleTravelTime){
@@ -82,10 +82,12 @@ public class EquilRelaxedPlans {
         controler.run();
     }
 
-    private static void runWithRelaxedPlans(String configFile, String relaxedPlans, String outputDir, double ascBicycle, boolean usingBicycleTravelTime){
+    private static void runWithRelaxedPlans(String configFile, String relaxedPlans, String outputDir, String mode, double ascBicycle, boolean usingBicycleTravelTime){
+        if (! mode.equals("bicycle")) usingBicycleTravelTime = false;
+
         Config config = ConfigUtils.loadConfig(configFile);
         config.plans().setInputFile(relaxedPlans);
-        config.planCalcScore().getOrCreateModeParams("bicycle").setConstant(ascBicycle);
+        config.planCalcScore().getOrCreateModeParams(mode).setConstant(ascBicycle);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
@@ -96,16 +98,17 @@ public class EquilRelaxedPlans {
         scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
 
-        OpdytsScenario EQUIL_MIXEDTRAFFIC = OpdytsScenario.EQUIL_MIXEDTRAFFIC;
-        DistanceDistribution distanceDistribution = new EquilDistanceDistribution(EQUIL_MIXEDTRAFFIC);
-        OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(Arrays.asList("car","bicycle"),distanceDistribution);
+        OpdytsScenario EQUIL_MIXEDTRAFFIC = mode.equals("bicycle") ? OpdytsScenario.EQUIL_MIXEDTRAFFIC :OpdytsScenario.EQUIL;
 
+        DistanceDistribution distanceDistribution = new EquilDistanceDistribution(EQUIL_MIXEDTRAFFIC);
+        OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(Arrays.asList("car",mode), distanceDistribution);
 
         Controler controler = new Controler(scenario);
+        boolean finalUsingBicycleTravelTime = usingBicycleTravelTime;
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                if (usingBicycleTravelTime)  addTravelTimeBinding("bicycle").to(FreeSpeedTravelTimeForBike.class);
+                if (finalUsingBicycleTravelTime)  addTravelTimeBinding("bicycle").to(FreeSpeedTravelTimeForBike.class);
 
                 this.bind(ModalShareEventHandler.class);
                 this.addControlerListenerBinding().to(ModalShareControlerListener.class);
@@ -119,5 +122,4 @@ public class EquilRelaxedPlans {
         });
         controler.run();
     }
-
 }
