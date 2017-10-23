@@ -53,5 +53,14 @@
 			<artifactId>matsim-gtfs</artifactId>
 			<version>0.8.0</version>
 		</dependency>
+
+	<dependency>
+		<groupId>com.bmw.hmm_lib</groupId>
+		<artifactId>hmm-lib</artifactId>
+		<version>0.2.0</version>
+	</dependency>
+		
+		
+		
 	</dependencies>
 </project>
