@@ -38,13 +38,18 @@ public class SampledPlansMerger {
 
         int numberOfFirstCemdapOutputFile = 100;
         int numberOfPlans = 5;
-
         String plansBaseDir = "/Users/amit/Documents/gitlab/nemo/data/input/matsim_initial_plans/";
+        String outPlans = plansBaseDir+"/plans_1pct_fullChoiceSet.xml.gz";
+
+        if(args.length>0) {
+            numberOfFirstCemdapOutputFile = Integer.valueOf(args[0]);
+            numberOfPlans = Integer.valueOf(args[1]);
+            plansBaseDir = args[2];
+            outPlans = args[3];
+        }
 
         String sampledPlans = plansBaseDir+"/"+numberOfFirstCemdapOutputFile+"/sampling/plans_1pct.xml.gz";
         Population sampledPop = LoadMyScenarios.loadScenarioFromPlans(sampledPlans).getPopulation();
-
-        String outPlans = plansBaseDir+"/plans_1pct_fullChoiceSet.xml.gz";
 
         for (int planNumber = 1; planNumber < numberOfPlans; planNumber++) {
             int planDir = 100+planNumber;
