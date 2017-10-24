@@ -183,6 +183,7 @@ public class CemdapStops2MatsimPlansConverter {
 				//Done. Amit Oct'17
 			}
 		} else {
+			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");
 			// for EXTRA LARGE scenario, one can assign coordinates after sampling which would be at least '1/sampleSize' times faster. Amit Oct'17
 			for (Person person : population.getPersons().values()) {
 				for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
