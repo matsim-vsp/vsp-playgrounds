@@ -20,9 +20,12 @@
 package playground.agarwalamit.nemo.demand;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
@@ -83,16 +86,23 @@ public class PlansFilterForCORINELandCover {
         boolean sameHomeActivity = true;
         String outPlans = "/Users/amit/Documents/gitlab/nemo/data/matsim_initial/matsim_initial_plans_1pct_filteredForCorineLandCover.xml.gz";
 
+        if(args.length > 0){
+            corineLandCoverFile = args[0];
+            zoneFile = args[1];
+            matsimPlans = args[2];
+            simplifyGeom = Boolean.valueOf(args[3]);
+            sameHomeActivity = Boolean.valueOf(args[4]);
+            outPlans = args[5];
+        }
+
         PlansFilterForCORINELandCover plansFilterForCORINELandCover = new PlansFilterForCORINELandCover(matsimPlans, zoneFile, corineLandCoverFile, simplifyGeom, sameHomeActivity);
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
     }
 
     public void process() {
+        Map<Id<Person>, Coord> person2HomeCoord = new HashMap<>();
         for(Person person : population.getPersons().values()) {
-
-            Coord homeCoord = null;
-
             for (Plan plan : person.getPlans()){
                 for (PlanElement planElement : plan.getPlanElements()){
                     if (planElement instanceof Activity) {
@@ -100,30 +110,46 @@ public class PlansFilterForCORINELandCover {
                         String activityType = activity.getType();
                         Coord coord = activity.getCoord();
 
-                        if (coord==null) {
-                            reassignCoord(activityType, activityType.split("_")[1]);
-                        } else {
-                            boolean reassignCoord = false;
-                            Point point = MGC.coord2Point(coord);
+                        if (activityType.equals("home") && sameHomeActivity) {
+                            if (coord==null) {
+                                coord = getRandomCoord(activityType, activityType.split("_")[1]);
+                                activity.setCoord(coord);
+                                person2HomeCoord.put(person.getId(),coord);
+                            } else {
+                                boolean reassignCoord = false;
+                                Point point = MGC.coord2Point(coord);
 
-                            if ( activity.equals("home") ) {
-                                if (homeCoord==null || ! sameHomeActivity) {
-                                    homeCoord = coord;
+                                if (! person2HomeCoord.containsKey(person.getId())) {
                                     reassignCoord = ! corineLandCoverData.isPointInsideLandCover(activityType, point);
                                 } else {
-                                    if (! homeCoord.toString().equals(coord.toString())) {
+                                    if (! person2HomeCoord.get(person.getId()).toString().equals(coord.toString())) {
                                         throw new RuntimeException("Home location for person "+person.getId().toString()+ " is different in plans." +
                                                 " If this is possible, then use another construction and set \'sameHomeActivity\' to false.");
                                     }
-                                    // dont have to check for reassignment because home activities in all plans are same for a person
                                 }
+                                if ( reassignCoord ) {
+                                    Coord newCoord = reassignCoord(point,activityType);
+                                    activity.setCoord(newCoord);
+                                    person2HomeCoord.put(person.getId(),newCoord);
+                                }
+                            }
+                        } else {
+                            if (coord ==null) {
+                                coord = getRandomCoord(activityType, activityType.split("_")[1]);
+                                activity.setCoord(coord);
+                                person2HomeCoord.put(person.getId(),coord);
                             } else {
-                                reassignCoord = ! corineLandCoverData.isPointInsideLandCover(activityType, point);
+                                Point point = MGC.coord2Point(coord);
+
+                                if (! corineLandCoverData.isPointInsideLandCover(activityType, point) ){
+                                    activity.setCoord(reassignCoord(point,activityType));
+                                }
                             }
-                            if ( reassignCoord ) {
-                                activity.setCoord(reassignCoord(point,activityType));
-                            }
+                            // get a coord if it is null
+                            // assign new coord if it is not null and not in the given feature
+
                         }
+                        activity.setType(activityType.split("_")[0]);
                     }
                 }
             }
@@ -140,7 +166,7 @@ public class PlansFilterForCORINELandCover {
      * @param zoneId
      * @return a random coord if there was no coordinate assigned to activity already.
      */
-    private Coord reassignCoord(String activityType, String zoneId){
+    private Coord getRandomCoord(String activityType, String zoneId){
         SimpleFeature zone =null;
         for (SimpleFeature feature : this.zoneFeatures) {
             String featureId = (String) feature.getAttribute(zoneIdTag);
