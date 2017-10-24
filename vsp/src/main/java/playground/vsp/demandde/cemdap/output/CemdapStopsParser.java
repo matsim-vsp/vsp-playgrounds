@@ -19,6 +19,10 @@
 
 package playground.vsp.demandde.cemdap.output;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -30,11 +34,6 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.utils.objectattributes.ObjectAttributes;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author dziemke
@@ -89,7 +88,7 @@ public class CemdapStopsParser {
 				Person person = population.getPersons().get(personId);
 				if (person == null) {
 					if (planNumber != 0) {
-						throw new RuntimeException("Person must not be null here since even home-staying personsn should have been added by now.");
+						throw new RuntimeException("Person "+personId.toString()+" must not be null here since even home-staying personsn should have been added by now.");
 					}
 					person = population.getFactory().createPerson(personId);
 					population.addPerson(person);

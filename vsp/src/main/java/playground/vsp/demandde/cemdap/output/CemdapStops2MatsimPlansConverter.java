@@ -132,8 +132,8 @@ public class CemdapStops2MatsimPlansConverter {
 //		CemdapPersonParser cemdapPersonParser = new CemdapPersonParser();
 //		cemdapPersonParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + cemdapAdultsFilename, personsIds);
 //		cemdapPersonParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + cemdapChildrenFilename, personsIds);
-//		CemdapActivityParser cemdapActivityParser = new CemdapActivityParser();
-//		cemdapActivityParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + activityFile, personHomeMap);
+		CemdapActivityParser cemdapActivityParser = new CemdapActivityParser();
+		cemdapActivityParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + activityFile, personHomeMap);
 		
 		Population population = scenario.getPopulation();
 		
@@ -142,24 +142,25 @@ public class CemdapStops2MatsimPlansConverter {
 			
 			// Commenting this for the time being; it does not do anything if the activity file is not considered on top of the stops file, dz,aa, sep'17
 			// Add a stay-home plan for those people who have no stops (i.e. no travel) in current stop file
-//			LOG.info("Start assigning stay-home plans to persons who are not in stops file.");
-//			LOG.info("Size of personHomeMap = " + personHomeMap.size() + ".");
-//			int counter = 0;
-//			for (Id<Person> personId : personHomeMap.keySet()) {
-//				Person person = population.getPersons().get(personId);
-//				if (person == null) {
-//					person = population.getFactory().createPerson(personId);
-//					population.addPerson(person);
-//				}
-//				if (person.getPlans().size() <= planNumber) {
-//					Plan stayHomePlan = population.getFactory().createPlan();
-//					stayHomePlan.addActivity(population.getFactory().createActivityFromCoord(ActivityTypes.HOME, new Coord(-1.0, -1.0))); // TODO maybe improve later
-//					person.addPlan(stayHomePlan);
-//					personZoneAttributesMap.get(planNumber).putAttribute(personId.toString(), "zone" + "0", personHomeMap.get(personId)); // TODO maybe improve later
-//					counter++;
-//				}
-//			}
-//			LOG.info("For " + counter + " persons, stay-home plans have been added. Plan number is " + planNumber + ".");
+			// Following is required to add persons who just stays at home. Such persons does not appear in the Stops.out file. dz, aa Oct'17
+			LOG.info("Start assigning stay-home plans to persons who are not in stops file.");
+			LOG.info("Size of personHomeMap = " + personHomeMap.size() + ".");
+			int counter = 0;
+			for (Id<Person> personId : personHomeMap.keySet()) {
+				Person person = population.getPersons().get(personId);
+				if (person == null) {
+					person = population.getFactory().createPerson(personId);
+					population.addPerson(person);
+				}
+				if (person.getPlans().size() <= planNumber) {
+					Plan stayHomePlan = population.getFactory().createPlan();
+					stayHomePlan.addActivity(population.getFactory().createActivityFromCoord(ActivityTypes.HOME, new Coord(-1.0, -1.0))); // TODO maybe improve later
+					person.addPlan(stayHomePlan);
+					personZoneAttributesMap.get(planNumber).putAttribute(personId.toString(), "zone" + "0", personHomeMap.get(personId)); // TODO maybe improve later
+					counter++;
+				}
+			}
+			LOG.info("For " + counter + " persons, stay-home plans have been added. Plan number is " + planNumber + ".");
 		}
 		
 		// Assign home coordinates

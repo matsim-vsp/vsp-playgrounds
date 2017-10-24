@@ -47,7 +47,7 @@ public class CempdapStops2MatsimPlans {
         String zoneIdTag = "KN";
         boolean allowVariousWorkAndEducationLocations = true;
         boolean addStayHomePlan = true;
-        boolean useLandCoverData = true;
+        boolean useLandCoverData = false;
         String landCoverFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
         String stopFile = "Stops.out";
         String activityFile = "Activity.out";
