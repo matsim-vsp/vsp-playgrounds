@@ -130,4 +130,15 @@ public class CorineLandCoverData {
         Point p = getRandomPoint(feature, activityType);
         return new Coord(p.getX(), p.getY());
     }
+
+    /**
+     *
+     * @param activityType
+     * @param point
+     * @return if point falls inside the geom of given activity type
+     */
+    public boolean isPointInsideLandCover(String activityType, Point point){
+        Geometry geometry = this.activityType2LandcoverZone.get(activityType);
+        return geometry.contains(point);
+    }
 }
