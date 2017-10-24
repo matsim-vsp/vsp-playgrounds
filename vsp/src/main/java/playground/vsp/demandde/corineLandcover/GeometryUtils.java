@@ -20,7 +20,6 @@
 package playground.vsp.demandde.corineLandcover;
 
 import java.util.List;
-import java.util.Random;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -28,7 +27,6 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygonal;
 import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
-import org.matsim.core.gbl.MatsimRandom;
 
 /**
  * Created by amit on 10.10.17.
@@ -37,7 +35,6 @@ import org.matsim.core.gbl.MatsimRandom;
 public class GeometryUtils {
 
     private GeometryUtils(){}
-    private static final Random RAND = MatsimRandom.getRandom();
     private static final GeometryFactory geometryFactory = new GeometryFactory();
 
     /**
@@ -84,19 +81,19 @@ public class GeometryUtils {
     /**
      * @return a random point which is covered by all the geometries
      */
-    public static Point getPointInteriorToGeometries(final Geometry landuseGeom, final Geometry zoneGeom) {
-        if (landuseGeom.isEmpty() || zoneGeom.isEmpty() ) throw new RuntimeException("No geometries.");
+    public static Point getPointInteriorToGeometries(final Geometry landUseGeom, final Geometry zoneGeom) {
+        if (landUseGeom.isEmpty() || zoneGeom.isEmpty() ) throw new RuntimeException("No geometries.");
 
-        if (landuseGeom.intersection(zoneGeom).getArea()==0) {
+        if (landUseGeom.intersection(zoneGeom).getArea()==0) {
             throw new RuntimeException("There is no common area for the given geoms.");
         }
 
         Point commonPoint = null;
         do {
-            //assuming that zoneGeom is a subset of landuseGeom, it would be better to first find a point in a subset and then look if it's inside landuseGeom
+            //assuming that zoneGeom is a subset of landUseGeom, it would be better to first find a point in a subset and then look if it's inside landUseGeom
             Coordinate coordinate = getRandomInteriorPoints(zoneGeom,1)[0];
             commonPoint = geometryFactory.createPoint(coordinate);
-            if (landuseGeom.contains(commonPoint)) return commonPoint;
+            if (landUseGeom.contains(commonPoint)) return commonPoint;
         } while(true);
     }
 

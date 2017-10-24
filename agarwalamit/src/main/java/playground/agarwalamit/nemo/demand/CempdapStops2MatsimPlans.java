@@ -28,11 +28,19 @@ import playground.vsp.demandde.cemdap.output.CemdapStops2MatsimPlansConverter;
 
 public class CempdapStops2MatsimPlans {
 
+
+    /**
+     * The plan is now:
+     * - generate the matsim_plans without CORINE land cover data
+     * - sample them
+     * - fix the incorrect acitivity locations based on CORINE land cover data
+     */
+
     public static void main(String[] args) throws IOException {
         // Local use
         String cemdapDataRoot = "/Users/amit/Documents/gitlab/nemo/data/cemdap_output/";
         int numberOfFirstCemdapOutputFile = 100;
-        int numberOfPlans = 1;
+        int numberOfPlans = 5;
         int numberOfPlansFile = 100;
         String outputDirectory = "/Users/amit/Documents/gitlab/nemo/data/matsim_initial/" + numberOfPlansFile + "/";
         String zonalShapeFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
