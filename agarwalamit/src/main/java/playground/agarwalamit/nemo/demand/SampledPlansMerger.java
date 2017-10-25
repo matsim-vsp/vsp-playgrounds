@@ -20,6 +20,7 @@
 package playground.agarwalamit.nemo.demand;
 
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import playground.agarwalamit.utils.LoadMyScenarios;
@@ -65,12 +66,28 @@ public class SampledPlansMerger {
             int planDir = 100+planNumber;
             String unsampledPlans = plansBaseDir+"/"+planDir+"/plans.xml.gz";
             Population unsampledPop = LoadMyScenarios.loadScenarioFromPlans(unsampledPlans).getPopulation();
+
             for (Person sampledPerson : sampledPop.getPersons().values()) {
                 Person person = unsampledPop.getPersons().get(sampledPerson.getId());
-                if (person==null) throw new RuntimeException("Sampled person "+ sampledPerson.getId() + " is not found in unsample plans "+unsampledPlans+".");
-                else if (person.getPlans().size()!=1) throw new RuntimeException("Unsampled person "+ sampledPerson.getId() + " should have exactly one plan in choice set. It has "+person.getPlans().size()+" in his choice set.");
+                if (person==null ) throw new RuntimeException("Sampled person "+ sampledPerson.getId() + " is not found in unsample plans "+unsampledPlans+".");
+                else if (person.getPlans().size()==0) throw new RuntimeException("Sampled person "+ sampledPerson.getId() + " does not have any plan in his choice set.");
+                else if ( person.getPlans().size()==1 ) {
+                    sampledPerson.addPlan(person.getPlans().get(0));
+                } else if ( person.getPlans().size()==2 ) {
+                    Plan firstPlan = person.getPlans().get(0);
+                    // first plan should be added (could be stay home or a regular plan)
+                    sampledPerson.addPlan(firstPlan);
 
-                sampledPerson.addPlan(person.getPlans().get(0));
+
+                    if (person.getPlans().get(0).getPlanElements().size()<=1) { //TODO : exactly one??
+                        // second plan must be stayHomePlan which is already there in the sampled plans.
+                    } else {
+                        throw new RuntimeException("Second plan of the unsampled person "+person.getId() + " must be stay home plan.");
+                    }
+
+                } else{
+                    throw new RuntimeException("Unsampled person "+ sampledPerson.getId() + " should have less than 3 plans in choice set. It has "+person.getPlans().size()+" in his choice set.");
+                }
             }
         }
 
