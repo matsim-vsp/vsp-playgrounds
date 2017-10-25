@@ -30,16 +30,16 @@ import playground.agarwalamit.opdyts.PreapareParametricRuns;
 public class ParametricRunsPatnaNetworkModes {
 
     public static void main(String[] args) {
-        int runCounter= 100;
+        int runCounter= 201;
 
-        String baseOutDir = "/net/ils4/agarwal/equilOpdyts/carPt/output/";
-        String matsimDir = "r_d24e170ecef8172430381b23c72f39e3f9e79ea1_opdyts_22Oct";
+        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/";
+        String matsimDir = "r_87b4237ac664bb1068965f2e8797e6bd3cfa7e1f_patnaOpdyts_25Oct";
 
         StringBuilder buffer = new StringBuilder();
         PreapareParametricRuns parametricRuns = new PreapareParametricRuns();
 
-        String ascStyles [] = {"axial_randomVariation","diagonal_random"};
-        double [] stepSizes = {0.5, 0.75};
+        String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixed","diagonal_fixed"};
+        double [] stepSizes = {0.5, 0.75, 1.0};
         Integer [] convIterations = {600};
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1, 5, 10};
@@ -64,9 +64,9 @@ public class ParametricRunsPatnaNetworkModes {
                                     "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
                                     PreapareParametricRuns.newLine,
 
-                                    "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
-                                            "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilIntegration " +
-                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/inputs/ " +
+                                    "java -Djava.awt.headless=true -Xmx58G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
+                                            "playground/agarwalamit/opdyts/patna/networkModesOnly/PatnaNetworkModesOpdytsCalibrator " +
+                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/inputs/config_networkModesOnly.xml " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/"+jobName+"/ " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/relaxedPlans/output/output_plans.xml.gz "+
                                             params+" "
