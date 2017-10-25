@@ -196,7 +196,6 @@ public class CemdapStops2MatsimPlansConverter {
 							Activity activity = (Activity)planElement;
 							String activityType = activity.getType();
 							String zoneId = (String) personZoneAttributesMap.get(planNumber).getAttribute(person.getId().toString(), CemdapStopsParser.ZONE + activityIndex);
-							Id<Person> personId = person.getId();
 							if (zoneId == null) {
 								throw new RuntimeException("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 							}

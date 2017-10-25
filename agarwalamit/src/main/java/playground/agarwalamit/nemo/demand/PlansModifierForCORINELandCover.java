@@ -73,7 +73,7 @@ public class PlansModifierForCORINELandCover {
     }
 
     public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity) {
-        this.corineLandCoverData = null;//new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms);
+        this.corineLandCoverData = new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms);
         LOG.info("Loading population from plans file "+ matsimPlans);
         this.population = LoadMyScenarios.loadScenarioFromPlans(matsimPlans).getPopulation();
         LOG.info("Processing zone file "+ zoneFile);
@@ -85,8 +85,7 @@ public class PlansModifierForCORINELandCover {
     public static void main(String[] args) {
 
         String corineLandCoverFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
-        String zoneFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.prj.shp";
-        int numberOfPlansFile = 100;
+        String zoneFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.shp";
         String matsimPlans = "/Users/amit/Documents/gitlab/nemo/data/input/matsim_initial_plans/plans_1pct_fullChoiceSet.xml.gz";
         boolean simplifyGeom = true;
         boolean combiningGeoms = true;
@@ -119,7 +118,11 @@ public class PlansModifierForCORINELandCover {
                         String activityType = activity.getType();
                         Coord coord = activity.getCoord();
 
-                        if (activityType.equals("home") && sameHomeActivity) {
+                        // during matsim plans generation, for home activities following fake coordinate is assigned.
+                        Coord fakeCoord = new Coord(-1,-1);
+                        if (coord.equals(fakeCoord)) coord=null;
+
+                        if (activityType.startsWith("home") && sameHomeActivity) {
                             if (coord==null) {
                                 coord = getRandomCoord(activityType, activityType.split("_")[1]);
                                 activity.setCoord(coord);
