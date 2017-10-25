@@ -66,7 +66,7 @@ import playground.agarwalamit.utils.FileUtils;
  * @author amit
  */
 
-public class PatnaUrbanOpdytsCalibrator {
+public class PatnaAllModesOpdytsCalibrator {
 
 	public enum PatnaTeleportationModesZonesType {
 		wardFile,

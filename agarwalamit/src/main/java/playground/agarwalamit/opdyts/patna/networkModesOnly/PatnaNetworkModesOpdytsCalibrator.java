@@ -55,7 +55,7 @@ import playground.agarwalamit.utils.FileUtils;
  * @author amit
  */
 
-public class PatnaNetworkModesCalibrator {
+public class PatnaNetworkModesOpdytsCalibrator {
 
 	private static final OpdytsScenario PATNA_1_PCT = OpdytsScenario.PATNA_1Pct;
 

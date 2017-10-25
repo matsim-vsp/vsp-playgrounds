@@ -44,7 +44,7 @@ import playground.agarwalamit.utils.FileUtils;
  * @author amit
  */
 
-class PatnaPlansRelaxor {
+class PatnaAllModesPlansRelaxor {
 
 	public void run (Config config) {
 
