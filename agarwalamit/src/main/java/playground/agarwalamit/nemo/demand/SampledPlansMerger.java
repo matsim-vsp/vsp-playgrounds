@@ -68,7 +68,7 @@ public class SampledPlansMerger {
             for (Person sampledPerson : sampledPop.getPersons().values()) {
                 Person person = unsampledPop.getPersons().get(sampledPerson.getId());
                 if (person==null) throw new RuntimeException("Sampled person "+ sampledPerson.getId() + " is not found in unsample plans "+unsampledPlans+".");
-                else if (person.getPlans().size()!=0) throw new RuntimeException("Unsampled person "+ sampledPerson.getId() + " should have exactly one plan in choice set. It has "+person.getPlans().size()+" in his choice set.");
+                else if (person.getPlans().size()!=1) throw new RuntimeException("Unsampled person "+ sampledPerson.getId() + " should have exactly one plan in choice set. It has "+person.getPlans().size()+" in his choice set.");
 
                 sampledPerson.addPlan(person.getPlans().get(0));
             }
