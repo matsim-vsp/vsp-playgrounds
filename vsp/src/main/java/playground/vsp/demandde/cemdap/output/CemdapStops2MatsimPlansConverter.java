@@ -65,6 +65,7 @@ public class CemdapStops2MatsimPlansConverter {
 		String activityFile = "Activity.out";
 		boolean simplifyGeometries = false;
 		boolean assignCoordinatesToActivities = true; // if set to false, the zone id will be attached to activity types and a fake coordinate will be given.
+		boolean combiningGeoms = true;
 		
 		// Server use
 		if (args.length != 0) {
@@ -78,22 +79,24 @@ public class CemdapStops2MatsimPlansConverter {
 			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
 			landCoverFile = args[8];
 			simplifyGeometries = Boolean.valueOf(args[9]);
+			combiningGeoms = Boolean.valueOf(args[10]);
+			assignCoordinatesToActivities = Boolean.valueOf(args[11]);
 		}
 		
 		convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory, 
 				zonalShapeFile, zoneIdTag, allowVariousWorkAndEducationLocations, addStayHomePlan, 
-				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries, assignCoordinatesToActivities);
+				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
 	}
 
 	
 	public static void convert(String cemdapDataRoot, int numberOfFirstCemdapOutputFile, int numberOfPlans, String outputDirectory,
 			String zonalShapeFile, String zoneIdTag, boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
-			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean assignCoordinatesToActivities) throws IOException {
+			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms, boolean assignCoordinatesToActivities) throws IOException {
 
 		CorineLandCoverData corineLandCoverData = null;
 		// CORINE landcover
 		if (landCoverFile!=null && useLandCoverData) {
-			corineLandCoverData = new CorineLandCoverData(landCoverFile, simplifyGeometries);
+			corineLandCoverData = new CorineLandCoverData(landCoverFile, simplifyGeometries, combiningGeoms);
 		}
 
 		LogToOutputSaver.setOutputDirectory(outputDirectory);

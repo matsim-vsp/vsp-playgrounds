@@ -68,12 +68,12 @@ public class PlansModifierForCORINELandCover {
      *
      * For this, it is assumed that home activity location is same in all plans of a person. If this is not the case, use other constructor.
      */
-    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms) {
-        this(matsimPlans, zoneFile, CORINELandCoverFile, simplifyGeoms, true);
+    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean combiningGeoms) {
+        this(matsimPlans, zoneFile, CORINELandCoverFile, simplifyGeoms, combiningGeoms, true);
     }
 
-    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean sameHomeActivity) {
-        this.corineLandCoverData = new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms);
+    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity) {
+        this.corineLandCoverData = null;//new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms);
         LOG.info("Loading population from plans file "+ matsimPlans);
         this.population = LoadMyScenarios.loadScenarioFromPlans(matsimPlans).getPopulation();
         LOG.info("Processing zone file "+ zoneFile);
@@ -87,21 +87,23 @@ public class PlansModifierForCORINELandCover {
         String corineLandCoverFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
         String zoneFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.prj.shp";
         int numberOfPlansFile = 100;
-        String matsimPlans = "/Users/amit/Documents/gitlab/nemo/data/matsim_initial/" + numberOfPlansFile + "/matsim_initial_plans_1pct.xml.gz";
+        String matsimPlans = "/Users/amit/Documents/gitlab/nemo/data/input/matsim_initial_plans/plans_1pct_fullChoiceSet.xml.gz";
         boolean simplifyGeom = true;
+        boolean combiningGeoms = true;
         boolean sameHomeActivity = true;
-        String outPlans = "/Users/amit/Documents/gitlab/nemo/data/matsim_initial/matsim_initial_plans_1pct_filteredForCorineLandCover.xml.gz";
+        String outPlans = "/Users/amit/Documents/gitlab/nemo/data/input/matsim_initial_plans/plans_1pct_fullChoiceSet_filteredForCorineLandCover.xml.gz";
 
         if(args.length > 0){
             corineLandCoverFile = args[0];
             zoneFile = args[1];
             matsimPlans = args[2];
             simplifyGeom = Boolean.valueOf(args[3]);
-            sameHomeActivity = Boolean.valueOf(args[4]);
-            outPlans = args[5];
+            combiningGeoms = Boolean.valueOf(args[4]);
+            sameHomeActivity = Boolean.valueOf(args[5]);
+            outPlans = args[6];
         }
 
-        PlansModifierForCORINELandCover plansFilterForCORINELandCover = new PlansModifierForCORINELandCover(matsimPlans, zoneFile, corineLandCoverFile, simplifyGeom, sameHomeActivity);
+        PlansModifierForCORINELandCover plansFilterForCORINELandCover = new PlansModifierForCORINELandCover(matsimPlans, zoneFile, corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity);
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
     }

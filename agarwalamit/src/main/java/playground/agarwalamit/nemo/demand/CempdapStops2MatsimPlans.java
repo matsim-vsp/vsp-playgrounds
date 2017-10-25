@@ -55,6 +55,7 @@ public class CempdapStops2MatsimPlans {
         String activityFile = "Activity.out";
         boolean simplifyGeometries = false;
         boolean assignCoordinatesToActivities = false;
+        boolean combiningGeoms = false;
 
         // Server use
         if (args.length != 0) {
@@ -68,11 +69,12 @@ public class CempdapStops2MatsimPlans {
             useLandCoverData = Boolean.parseBoolean(args[7]);
             landCoverFile = args[8];
             simplifyGeometries = Boolean.valueOf(args[9]);
-            assignCoordinatesToActivities = Boolean.valueOf(args[10]);
+            combiningGeoms = Boolean.valueOf(args[10]);
+            assignCoordinatesToActivities = Boolean.valueOf(args[11]);
         }
 
         CemdapStops2MatsimPlansConverter.convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory,
                 zonalShapeFile, zoneIdTag, allowVariousWorkAndEducationLocations, addStayHomePlan,
-                useLandCoverData, landCoverFile, stopFile, activityFile,simplifyGeometries,assignCoordinatesToActivities);
+                useLandCoverData, landCoverFile, stopFile, activityFile,simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
     }
 }
