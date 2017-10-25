@@ -78,11 +78,11 @@ public class SampledPlansMerger {
                     // first plan should be added (could be stay home or a regular plan)
                     sampledPerson.addPlan(firstPlan);
 
-
-                    if (person.getPlans().get(0).getPlanElements().size()<=1) { //TODO : exactly one??
+                    int lengthOfPlanElement = person.getPlans().get(1).getPlanElements().size();
+                    if (lengthOfPlanElement<=1) { //TODO : exactly one??
                         // second plan must be stayHomePlan which is already there in the sampled plans.
                     } else {
-                        throw new RuntimeException("Second plan of the unsampled person "+person.getId() + " must be stay home plan.");
+                        throw new RuntimeException("Second plan of the unsampled person "+person.getId() + " must be stay home plan. Numer of plan elements are "+ lengthOfPlanElement +"." );
                     }
 
                 } else{

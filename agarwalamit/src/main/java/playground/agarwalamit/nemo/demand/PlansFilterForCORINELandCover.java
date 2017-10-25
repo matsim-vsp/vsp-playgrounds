@@ -137,7 +137,6 @@ public class PlansFilterForCORINELandCover {
                             if (coord ==null) {
                                 coord = getRandomCoord(activityType, activityType.split("_")[1]);
                                 activity.setCoord(coord);
-                                person2HomeCoord.put(person.getId(),coord);
                             } else {
                                 Point point = MGC.coord2Point(coord);
 
@@ -147,7 +146,6 @@ public class PlansFilterForCORINELandCover {
                             }
                             // get a coord if it is null
                             // assign new coord if it is not null and not in the given feature
-
                         }
                         activity.setType(activityType.split("_")[0]);
                     }
