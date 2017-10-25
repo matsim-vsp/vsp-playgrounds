@@ -51,6 +51,16 @@ public class SampledPlansMerger {
         String sampledPlans = plansBaseDir+"/"+numberOfFirstCemdapOutputFile+"/sampling/plans_1pct.xml.gz";
         Population sampledPop = LoadMyScenarios.loadScenarioFromPlans(sampledPlans).getPopulation();
 
+        // some output
+//        Map<Integer, Integer> plans2Count = new HashMap<>();
+//        for (Person person : sampledPop.getPersons().values()){
+//            int noOfPlans = person.getPlans().size();
+//            if (plans2Count.containsKey(noOfPlans)) plans2Count.put(noOfPlans, plans2Count.get(noOfPlans)+1);
+//            else plans2Count.put(noOfPlans, 1);
+//        }
+//
+//        plans2Count.entrySet().stream().forEach(e->System.out.println(" There are "+ e.getValue() +" persons who have "+ e.getKey()+" plans in their choice set."));
+
         for (int planNumber = 1; planNumber < numberOfPlans; planNumber++) {
             int planDir = 100+planNumber;
             String unsampledPlans = plansBaseDir+"/"+planDir+"/plans.xml.gz";
