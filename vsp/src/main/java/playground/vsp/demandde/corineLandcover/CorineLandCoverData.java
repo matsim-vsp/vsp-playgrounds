@@ -128,7 +128,7 @@ public class CorineLandCoverData {
            }
 
            landUseGeom =  this.activityType2CombinedLandcoverZone.get("other") ;
-           landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
+           landUseGeoms = this.activityTypes2ListOfLandCoverZones.get("other");
         }
 
         if (this.combiningGeom) return GeometryUtils.getPointInteriorToGeometries( landUseGeom, zoneGeom );

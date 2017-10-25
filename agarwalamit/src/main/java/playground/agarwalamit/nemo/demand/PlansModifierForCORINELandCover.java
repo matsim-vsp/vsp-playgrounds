@@ -68,16 +68,17 @@ public class PlansModifierForCORINELandCover {
      *
      * For this, it is assumed that home activity location is same in all plans of a person. If this is not the case, use other constructor.
      */
-    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean combiningGeoms) {
-        this(matsimPlans, zoneFile, CORINELandCoverFile, simplifyGeoms, combiningGeoms, true);
+    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String zoneIdTag, String CORINELandCoverFile, boolean simplifyGeoms, boolean combiningGeoms) {
+        this(matsimPlans, zoneFile, zoneIdTag, CORINELandCoverFile, simplifyGeoms, combiningGeoms, true);
     }
 
-    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity) {
+    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String zoneIdTag, String CORINELandCoverFile, boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity) {
         this.corineLandCoverData = new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms);
         LOG.info("Loading population from plans file "+ matsimPlans);
         this.population = LoadMyScenarios.loadScenarioFromPlans(matsimPlans).getPopulation();
         LOG.info("Processing zone file "+ zoneFile);
         this.zoneFeatures = ShapeFileReader.getAllFeatures(zoneFile);
+        this.zoneIdTag = zoneIdTag;
         this.sameHomeActivity = sameHomeActivity;
         if (this.sameHomeActivity) LOG.info("Home activities for a person will be at the same location.");
     }
@@ -86,23 +87,25 @@ public class PlansModifierForCORINELandCover {
 
         String corineLandCoverFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
         String zoneFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.shp";
+        String zoneIdTag = "KN";
         String matsimPlans = "/Users/amit/Documents/gitlab/nemo/data/input/matsim_initial_plans/plans_1pct_fullChoiceSet.xml.gz";
         boolean simplifyGeom = true;
-        boolean combiningGeoms = true;
+        boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
         String outPlans = "/Users/amit/Documents/gitlab/nemo/data/input/matsim_initial_plans/plans_1pct_fullChoiceSet_filteredForCorineLandCover.xml.gz";
 
         if(args.length > 0){
             corineLandCoverFile = args[0];
             zoneFile = args[1];
-            matsimPlans = args[2];
-            simplifyGeom = Boolean.valueOf(args[3]);
-            combiningGeoms = Boolean.valueOf(args[4]);
-            sameHomeActivity = Boolean.valueOf(args[5]);
-            outPlans = args[6];
+            zoneIdTag = args[2];
+            matsimPlans = args[3];
+            simplifyGeom = Boolean.valueOf(args[4]);
+            combiningGeoms = Boolean.valueOf(args[5]);
+            sameHomeActivity = Boolean.valueOf(args[6]);
+            outPlans = args[7];
         }
 
-        PlansModifierForCORINELandCover plansFilterForCORINELandCover = new PlansModifierForCORINELandCover(matsimPlans, zoneFile, corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity);
+        PlansModifierForCORINELandCover plansFilterForCORINELandCover = new PlansModifierForCORINELandCover(matsimPlans, zoneFile,zoneIdTag, corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity);
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
     }
@@ -115,16 +118,17 @@ public class PlansModifierForCORINELandCover {
                 for (PlanElement planElement : plan.getPlanElements()){
                     if (planElement instanceof Activity) {
                         Activity activity = (Activity) planElement;
-                        String activityType = activity.getType();
+                        String activityType = activity.getType().split("_")[0];
+                        String zoneId = activity.getType().split("_")[1];
                         Coord coord = activity.getCoord();
 
                         // during matsim plans generation, for home activities following fake coordinate is assigned.
                         Coord fakeCoord = new Coord(-1,-1);
                         if (coord.equals(fakeCoord)) coord=null;
 
-                        if (activityType.startsWith("home") && sameHomeActivity) {
+                        if (activityType.equals("home") && sameHomeActivity) {
                             if (coord==null) {
-                                coord = getRandomCoord(activityType, activityType.split("_")[1]);
+                                coord = getRandomCoord(activityType, zoneId);
                                 activity.setCoord(coord);
                                 person2HomeCoord.put(person.getId(),coord);
                             } else {
@@ -147,7 +151,7 @@ public class PlansModifierForCORINELandCover {
                             }
                         } else {
                             if (coord ==null) {
-                                coord = getRandomCoord(activityType, activityType.split("_")[1]);
+                                coord = getRandomCoord(activityType, zoneId);
                                 activity.setCoord(coord);
                             } else {
                                 Point point = MGC.coord2Point(coord);
@@ -159,7 +163,7 @@ public class PlansModifierForCORINELandCover {
                             // get a coord if it is null
                             // assign new coord if it is not null and not in the given feature
                         }
-                        activity.setType(activityType.split("_")[0]);
+                        activity.setType(activityType);
                     }
                 }
             }
@@ -183,7 +187,7 @@ public class PlansModifierForCORINELandCover {
         for (SimpleFeature feature : this.zoneFeatures) {
             String featureId = (String) feature.getAttribute(zoneIdTag);
             String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString(featureId);
-            if (shapeId==zoneId) {
+            if (shapeId.equals(zoneId)) {
                 zone = feature;
                 break;
             }
