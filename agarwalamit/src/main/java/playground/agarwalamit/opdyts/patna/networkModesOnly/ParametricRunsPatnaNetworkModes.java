@@ -19,7 +19,7 @@
 
 package playground.agarwalamit.opdyts.patna.networkModesOnly;
 
-import playground.agarwalamit.opdyts.PreapareParametricRuns;
+import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
 
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
@@ -36,7 +36,7 @@ public class ParametricRunsPatnaNetworkModes {
         String matsimDir = "r_87b4237ac664bb1068965f2e8797e6bd3cfa7e1f_patnaOpdyts_25Oct";
 
         StringBuilder buffer = new StringBuilder();
-        PreapareParametricRuns parametricRuns = new PreapareParametricRuns();
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
 
         String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixed","diagonal_fixed"};
         double [] stepSizes = {0.5, 0.75, 1.0};
@@ -44,7 +44,7 @@ public class ParametricRunsPatnaNetworkModes {
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1, 5, 10};
 
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+ PreapareParametricRuns.newLine);
+        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+ PrepareParametricRuns.newLine);
 
         for (String ascStyle : ascStyles ) {
             for(double stepSize :stepSizes){
@@ -59,10 +59,10 @@ public class ParametricRunsPatnaNetworkModes {
                                     "echo \"========================\"",
                                     "echo \" "+matsimDir+" \" ",
                                     "echo \"========================\"",
-                                    PreapareParametricRuns.newLine,
+                                    PrepareParametricRuns.newLine,
 
                                     "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
-                                    PreapareParametricRuns.newLine,
+                                    PrepareParametricRuns.newLine,
 
                                     "java -Djava.awt.headless=true -Xmx58G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
                                             "playground/agarwalamit/opdyts/patna/networkModesOnly/PatnaNetworkModesOpdytsCalibrator " +
@@ -73,7 +73,7 @@ public class ParametricRunsPatnaNetworkModes {
                             };
 
                             parametricRuns.run(additionalLines, baseOutDir, jobName);
-                            buffer.append(jobName+"\t" + params.replace(' ','\t') + PreapareParametricRuns.newLine);
+                            buffer.append(jobName+"\t" + params.replace(' ','\t') + PrepareParametricRuns.newLine);
                         }
                     }
                 }
