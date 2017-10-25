@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Activity;
@@ -47,7 +48,9 @@ import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
  * - if not, reassign the coordinate.
  */
 
-public class PlansFilterForCORINELandCover {
+public class PlansModifierForCORINELandCover {
+
+    private static final Logger LOG = Logger.getLogger(PlansModifierForCORINELandCover.class);
 
     private final CorineLandCoverData corineLandCoverData;
     private final Population population;
@@ -65,15 +68,18 @@ public class PlansFilterForCORINELandCover {
      *
      * For this, it is assumed that home activity location is same in all plans of a person. If this is not the case, use other constructor.
      */
-    public PlansFilterForCORINELandCover (String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms) {
+    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms) {
         this(matsimPlans, zoneFile, CORINELandCoverFile, simplifyGeoms, true);
     }
 
-    public PlansFilterForCORINELandCover (String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean sameHomeActivity) {
+    public PlansModifierForCORINELandCover(String matsimPlans, String zoneFile, String CORINELandCoverFile, boolean simplifyGeoms, boolean sameHomeActivity) {
         this.corineLandCoverData = new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms);
+        LOG.info("Loading population from plans file "+ matsimPlans);
         this.population = LoadMyScenarios.loadScenarioFromPlans(matsimPlans).getPopulation();
+        LOG.info("Processing zone file "+ zoneFile);
         this.zoneFeatures = ShapeFileReader.getAllFeatures(zoneFile);
         this.sameHomeActivity = sameHomeActivity;
+        if (this.sameHomeActivity) LOG.info("Home activities for a person will be at the same location.");
     }
 
     public static void main(String[] args) {
@@ -95,12 +101,13 @@ public class PlansFilterForCORINELandCover {
             outPlans = args[5];
         }
 
-        PlansFilterForCORINELandCover plansFilterForCORINELandCover = new PlansFilterForCORINELandCover(matsimPlans, zoneFile, corineLandCoverFile, simplifyGeom, sameHomeActivity);
+        PlansModifierForCORINELandCover plansFilterForCORINELandCover = new PlansModifierForCORINELandCover(matsimPlans, zoneFile, corineLandCoverFile, simplifyGeom, sameHomeActivity);
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
     }
 
     public void process() {
+        LOG.info("Start processing, this may take a while ... ");
         Map<Id<Person>, Coord> person2HomeCoord = new HashMap<>();
         for(Person person : population.getPersons().values()) {
             for (Plan plan : person.getPlans()){
@@ -152,9 +159,11 @@ public class PlansFilterForCORINELandCover {
                 }
             }
         }
+        LOG.info("Finished processing.");
     }
 
     public void writePlans(String outFile){
+        LOG.info("Writing resulting plans to "+outFile);
         new PopulationWriter(population).write(outFile);
     }
 

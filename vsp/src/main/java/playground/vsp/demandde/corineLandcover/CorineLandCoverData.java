@@ -50,7 +50,8 @@ public class CorineLandCoverData {
         Collection<SimpleFeature> landCoverFeatures = ShapeFileReader.getAllFeatures(corineLandCoverShapeFile);
 
         this.simplifyGeometries = simplifyGeometries;
-        if (this.simplifyGeometries) LOGGER.warn("Geometries will be simplified such that number of vertices in each geometry is less than 1000. This is likely to speed up the process.");
+        if (this.simplifyGeometries) LOGGER.warn("Geometries will be simplified such that number of vertices in each geometry is less than 1000. " +
+                "This is likely to speed up the process.");
 
         Map<String, List<Geometry>> activityTypes2ListOfGeometries = new HashMap<>();
 
@@ -72,7 +73,7 @@ public class CorineLandCoverData {
             }
         }
 
-        // combined geoms of the same activity types
+        // combine geoms of the same activity types
         // Not sure, Out of two options --simplify and merge OR merge and simplify-- I think, the former would be somewhat better. Amit Oct'17
         for (String activityTypeFromLandCover : activityTypes2ListOfGeometries.keySet()) {
             LOGGER.info("Merging the geometries of the activity types "+activityTypeFromLandCover+".");
@@ -110,12 +111,13 @@ public class CorineLandCoverData {
         if (activityType.equalsIgnoreCase("home") ) {
             landUseGeom =  this.activityType2LandcoverZone.get(activityType) ;
         } else {
-           if (warnCnt < 1) {
+           if (! activityType.equalsIgnoreCase("other") && warnCnt < 1) {
                LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
                LOGGER.warn(Gbl.ONLYONCE);
                warnCnt++;
            }
-            landUseGeom =  this.activityType2LandcoverZone.get("other") ;
+
+           landUseGeom =  this.activityType2LandcoverZone.get("other") ;
         }
 
         return GeometryUtils.getPointInteriorToGeometries( landUseGeom, zoneGeom );
