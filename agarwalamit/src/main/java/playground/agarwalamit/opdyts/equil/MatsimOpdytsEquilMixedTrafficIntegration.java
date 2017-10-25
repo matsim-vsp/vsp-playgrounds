@@ -60,7 +60,7 @@ import playground.agarwalamit.utils.FileUtils;
 
 public class MatsimOpdytsEquilMixedTrafficIntegration {
 
-	private static String EQUIL_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/inputs/";
+	private static String EQUIL_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/carBicycle/inputs/";
 	private static final OpdytsScenario EQUIL_MIXEDTRAFFIC = OpdytsScenario.EQUIL_MIXEDTRAFFIC;
 
 	public static void main(String[] args) {
@@ -85,8 +85,8 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 			selfTuningWt = Double.valueOf(args[6]);
 			warmUpItrs = Integer.valueOf(args[7]);
 		} else {
-			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
-			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans_defaultTravelTimeForBicycle/output_plans.xml.gz";
+			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/carBicycle/testCalib/";
+			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/carBicycle/relaxedPlans/output_plans.xml.gz";
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation;
 		}
 
