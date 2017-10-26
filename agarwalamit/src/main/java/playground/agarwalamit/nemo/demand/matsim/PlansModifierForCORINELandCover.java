@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.nemo.demand;
+package playground.agarwalamit.nemo.demand.matsim;
 
 import java.util.Collection;
 import java.util.HashMap;

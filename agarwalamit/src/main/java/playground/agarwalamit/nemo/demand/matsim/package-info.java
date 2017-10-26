@@ -34,4 +34,4 @@
  * </ul>
  *
  */
-package playground.agarwalamit.nemo.demand;
+package playground.agarwalamit.nemo.demand.matsim;

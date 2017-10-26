@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.nemo.demand;
+package playground.agarwalamit.nemo.demand.cempdap;
 
 import java.io.IOException;
 import playground.vsp.demandde.cemdap.output.CemdapStops2MatsimPlansConverter;
