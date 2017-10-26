@@ -51,8 +51,8 @@ class PatnaNetworkModesPlansRelaxor {
 			configFile = args[0];
 			outDir = args[1];
 		} else {
-			configFile = "/Users/amit/Documents/repos/runs-svn/opdyts/patna/networkModes/relaxedPlans/inputs/config_networkModesOnly.xml";
-			outDir = "/Users/amit/Documents/repos/runs-svn/opdyts/patna/networkModes/relaxedPlans/output/";
+			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/inputs/config_networkModesOnly.xml";
+			outDir = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output/";
 		}
 
 		Config config= ConfigUtils.loadConfig(configFile);

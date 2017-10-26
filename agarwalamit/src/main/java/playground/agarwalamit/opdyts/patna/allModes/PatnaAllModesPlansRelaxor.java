@@ -54,8 +54,8 @@ class PatnaAllModesPlansRelaxor {
 			configFile = args[0];
 			outDir = args[1];
 		} else {
-			configFile = "/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/relaxedPlans/inputs/config_allModes.xml";
-			outDir = "/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/relaxedPlans/output/";
+			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/allModes/relaxedPlans/inputs/config_allModes.xml";
+			outDir = FileUtils.RUNS_SVN+"/opdyts/patna/allModes/relaxedPlans/output/";
 		}
 
 		Config config= ConfigUtils.loadConfig(configFile);
