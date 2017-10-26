@@ -22,7 +22,6 @@ package playground.agarwalamit.opdyts.patna.allModes;
 import java.util.Arrays;
 import java.util.List;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -46,6 +45,26 @@ import playground.agarwalamit.utils.FileUtils;
 
 class PatnaAllModesPlansRelaxor {
 
+	public static void main (String[] args) {
+
+		String configFile = "";
+		String outDir = "";
+
+		if ( args.length >0 ){
+			configFile = args[0];
+			outDir = args[1];
+		} else {
+			configFile = "/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/relaxedPlans/inputs/config_allModes.xml";
+			outDir = "/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/relaxedPlans/output/";
+		}
+
+		Config config= ConfigUtils.loadConfig(configFile);
+		config.controler().setOutputDirectory(outDir);
+
+		new PatnaAllModesPlansRelaxor().run(config);
+	}
+
+
 	public void run (Config config) {
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -57,11 +76,6 @@ class PatnaAllModesPlansRelaxor {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				// add here whatever should be attached to matsim controler
-
-				// some stats
-				addControlerListenerBinding().to(KaiAnalysisListener.class);
-
 				this.bind(ModalShareEventHandler.class);
 				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
 
@@ -70,16 +84,12 @@ class PatnaAllModesPlansRelaxor {
 
 				this.addControlerListenerBinding().toInstance(new OpdytsModalStatsControlerListener(modes2consider, new PatnaOneBinDistanceDistribution(
 						OpdytsScenario.PATNA_1Pct)));
-			}
-		});
 
-		// adding pt fare system based on distance
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
+				// adding pt fare system based on distance
 				this.addEventHandlerBinding().to(PtFareEventHandler.class);
 			}
 		});
+
 		// for above make sure that util_dist and monetary dist rate for pt are zero.
 		PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
 		mp.setMarginalUtilityOfDistance(0.0);
@@ -91,11 +101,5 @@ class PatnaAllModesPlansRelaxor {
 		int firstIt = controler.getConfig().controler().getFirstIteration();
 		int lastIt = controler.getConfig().controler().getLastIteration();
 		FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),firstIt,lastIt);
-	}
-
-	public void run (String[] args) {
-		Config config= ConfigUtils.loadConfig(args[0]);
-		config.controler().setOutputDirectory(args[1]);
-		run(config);
 	}
 }
