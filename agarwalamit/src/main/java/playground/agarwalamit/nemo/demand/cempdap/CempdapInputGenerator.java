@@ -31,15 +31,14 @@ import playground.vsp.demandde.cemdap.input.ZoneAndLOSGeneratorV2;
 public class CempdapInputGenerator {
 
     public static void main(String[] args) {
-        String sharedSVNDir;
+        String baseDir;
 
         if (args.length > 0) {
-            sharedSVNDir = args[0];
+            baseDir = args[0];
         } else {
-            sharedSVNDir = FileUtils.SHARED_SVN; // "../../../shared-svn";
+            baseDir = FileUtils.SHARED_SVN+ "/projects/nemo_mercator/30_Scenario/cemdap_input/";
         }
 
-        String baseDir = sharedSVNDir + "/projects/nemo_mercator/30_Scenario/cemdap_input/";
         String commuterFileOutgoing1 = baseDir + "/pendlerstatistik/051NRW2009Ga.txt";
         String commuterFileOutgoing2 = baseDir + "/pendlerstatistik/053NRW2009Ga.txt";
         String commuterFileOutgoing3 = baseDir + "/pendlerstatistik/055NRW2009Ga.txt";
@@ -69,7 +68,7 @@ public class CempdapInputGenerator {
         { // zones and lor files
 
             String LORAttributeKey = "KN";
-            String shapeFileLors = baseDir + "/shapeFiles/shapeFile_Ruhrgebiet/dvg2gem_ruhrgebiet.shp";
+            String shapeFileLors = baseDir + "/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.shp";
             new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFileLors, outputBase, LORAttributeKey);
         }
     }
