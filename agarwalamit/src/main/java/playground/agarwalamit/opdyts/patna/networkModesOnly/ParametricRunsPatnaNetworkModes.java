@@ -38,7 +38,7 @@ public class ParametricRunsPatnaNetworkModes {
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
 
-        String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixed","diagonal_fixed"};
+        String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixedVariation","diagonal_fixedVariation"};
         double [] stepSizes = {0.5, 0.75, 1.0};
         Integer [] convIterations = {600};
         double [] selfTuningWts = {1.0};
@@ -64,7 +64,7 @@ public class ParametricRunsPatnaNetworkModes {
                                     "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
                                     PrepareParametricRuns.newLine,
 
-                                    "java -Djava.awt.headless=true -Xmx58G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
+                                    "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
                                             "playground/agarwalamit/opdyts/patna/networkModesOnly/PatnaNetworkModesOpdytsCalibrator " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/inputs/config_networkModesOnly.xml " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/"+jobName+"/ " +
