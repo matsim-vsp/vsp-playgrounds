@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package playground.santiago.publictransport;
+package playground.santiago.matchingpt;
 
 /**
  * Defines temporal metrics between location measurements.
