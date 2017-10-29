@@ -1,4 +1,4 @@
-package playground.santiago.publictransport;
+package playground.santiago.matchingpt;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,7 +54,7 @@ public class MapMatchingSantiago {
 		
 		double measurementErrorSigma = 50.0;
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new MatsimNetworkReader(scenario.getNetwork()).readFile("../../../mapMatching/0_networks/toMATSim/fullNetwork_v3.xml");
+		new MatsimNetworkReader(scenario.getNetwork()).readFile("../../../mapMatching/0_networks/toMATSim/Big/TransformedBigSantiagoDetailed.xml");
 		
 		FreespeedTravelTimeAndDisutility travelCosts = new FreespeedTravelTimeAndDisutility(0.0, 0.0, -1.0);
 		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(scenario.getNetwork(), travelCosts, travelCosts);
