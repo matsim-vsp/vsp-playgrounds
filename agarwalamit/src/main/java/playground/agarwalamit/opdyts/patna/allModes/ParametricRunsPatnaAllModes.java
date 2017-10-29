@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.opdyts.equil;
+package playground.agarwalamit.opdyts.patna.allModes;
 
 import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
 
@@ -27,33 +27,35 @@ import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
  * Created by amit on 04.10.17.
  */
 
-public class ParametricRunsEquilnet {
-
+public class ParametricRunsPatnaAllModes {
 
     public static void main(String[] args) {
-        int runCounter= 100;
-        String baseDir = "/net/ils4/agarwal/equilOpdyts/carPt/output/";
+        int runCounter= 401;
+
+        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/output/";
+        String matsimDir = "r_87b4237ac664bb1068965f2e8797e6bd3cfa7e1f_patnaOpdyts_25Oct";
+
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
 
-        String ascStyles [] = {"axial_fixedVariation","axial_randomVariation"};
-        double [] stepSizes = {0.25, 0.5, 1.0};
-        Integer [] convIterations = {300};
+        String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixedVariation","diagonal_fixedVariation"};
+        double [] stepSizes = {0.5, 0.75, 1.0};
+        Integer [] convIterations = {600};
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1, 5, 10};
 
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+ PrepareParametricRuns.newLine);
+        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts\tteleportationModesZoneType"+ PrepareParametricRuns.newLine);
 
-        int cnt = runCounter;
         for (String ascStyle : ascStyles ) {
             for(double stepSize :stepSizes){
                 for (int conIts : convIterations) {
                     for (double selfTunWt : selfTuningWts) {
                         for (int warmUpIt : warmUpIts) {
-                            String arg = ascStyle + " "+ stepSize + " " + conIts + " " + selfTunWt + " " + warmUpIt;
 
-                            String matsimDir = "r_d24e170ecef8172430381b23c72f39e3f9e79ea1_opdyts_22Oct";
+                            String patnaTeleportationModesZonesType = "clusterAlgoKmeans";
+
                             String jobName = "run"+String.valueOf(runCounter++);
+                            String params= ascStyle + " "+ stepSize + " " + conIts + " " + selfTunWt + " " + warmUpIt + " "+patnaTeleportationModesZonesType;
 
                             String [] additionalLines = {
                                     "echo \"========================\"",
@@ -65,23 +67,23 @@ public class ParametricRunsEquilnet {
                                     PrepareParametricRuns.newLine,
 
                                     "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
-                                            "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilIntegration " +
-                                            "/net/ils4/agarwal/equilOpdyts/carPt/inputs/ " +
-                                            "/net/ils4/agarwal/equilOpdyts/carPt/output/"+jobName+"/ " +
-                                            "/net/ils4/agarwal/equilOpdyts/carPt/relaxedPlans/output_plans.xml.gz "+
-                                            arg+" "
+                                            "playground/agarwalamit/opdyts/patna/allModes/PatnaAllModesOpdytsCalibrator " +
+                                            "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/inputs/config_allModes.xml " +
+                                            "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/output/"+jobName+"/ " +
+                                            "/net/ils4/agarwal/patnaOpdyts/allModes/relaxedPlans/output/output_plans.xml.gz "+
+                                            params+" "
                             };
 
-
-                            parametricRuns.run(additionalLines, baseDir, jobName);
-                            buffer.append(jobName+"\t" + arg.replace(' ','\t') + PrepareParametricRuns.newLine);
+                            parametricRuns.run(additionalLines, baseOutDir, jobName);
+                            buffer.append(jobName+"\t" + params.replace(' ','\t') + PrepareParametricRuns.newLine);
                         }
                     }
                 }
             }
         }
 
-        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseDir+"/runInfo.txt");
+        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseOutDir+"/runInfo.txt");
         parametricRuns.close();
     }
+
 }

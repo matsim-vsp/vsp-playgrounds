@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.nemo.demand;
+package playground.agarwalamit.nemo.calibration;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;

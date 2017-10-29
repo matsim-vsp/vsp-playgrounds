@@ -20,13 +20,21 @@
 package playground.agarwalamit.parametricRuns;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Properties;
 import com.google.common.base.Charsets;
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
@@ -36,14 +44,11 @@ import com.jcraft.jsch.*;
 
 public class PrepareParametricRuns {
 
-    private static final String newLine = System.getProperty("line.separator");
+    public static final String newLine = System.getProperty("line.separator");
     private final Session session;
     private final ChannelSftp sftp;
 
-    private int jobCounter ;
-
-    public PrepareParametricRuns (int jobStartCounter) {
-        this.jobCounter = jobStartCounter;
+    public PrepareParametricRuns() {
         try {
             JSch jSch = new JSch();
             jSch.setKnownHosts("~/.ssh/known_hosts"); // location of the ssh fingerprint (unique host key)
@@ -64,14 +69,78 @@ public class PrepareParametricRuns {
         }
     }
 
-    // An example
     public static void main(String[] args) {
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns(11);
-        String ascStyles [] = {"axial_fixed","axial_random"};
-        for (String arg : ascStyles ) {
-            parametricRuns.run(arg);
+        int runCounter= 100;
+
+        String baseDir = "/net/ils4/agarwal/equilOpdyts/carPt/output/";
+        String matsimDir = "r_d24e170ecef8172430381b23c72f39e3f9e79ea1_opdyts_22Oct";
+
+        StringBuilder buffer = new StringBuilder();
+
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
+
+        String ascStyles [] = {"axial_fixedVariation","axial_randomVariation"};
+        double [] stepSizes = {0.25, 0.5, 1.0};
+        Integer [] convIterations = {300};
+        double [] selfTuningWts = {1.0};
+        Integer [] warmUpIts = {1, 5, 10};
+
+        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+newLine);
+
+        for (String ascStyle : ascStyles ) {
+            for(double stepSize :stepSizes){
+                for (int conIts : convIterations) {
+                    for (double selfTunWt : selfTuningWts) {
+                        for (int warmUpIt : warmUpIts) {
+
+                            String arg = ascStyle + " "+ stepSize + " " + conIts + " " + selfTunWt + " " + warmUpIt;
+                            String jobName = "run"+String.valueOf(runCounter++);
+
+                            String [] additionalLines = {
+                                    "echo \"========================\"",
+                                    "echo \" "+matsimDir+" \" ",
+                                    "echo \"========================\"",
+                                    newLine,
+
+                                    "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
+                                    newLine,
+
+                                    "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
+                                            "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilIntegration " +
+                                            "/net/ils4/agarwal/equilOpdyts/carPt/inputs/ " +
+                                            "/net/ils4/agarwal/equilOpdyts/carPt/output/"+jobName+"/ " +
+                                            "/net/ils4/agarwal/equilOpdyts/carPt/relaxedPlans/output_plans.xml.gz "+
+                                            arg+" "
+                            };
+
+                            parametricRuns.run(additionalLines, baseDir, jobName);
+                            buffer.append(runCounter+"\t" + arg.replace(' ','\t') + newLine);
+                        }
+                    }
+                }
+            }
         }
+
+        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseDir+"/runInfo.txt");
         parametricRuns.close();
+    }
+
+    public void writeNewOrAppendRemoteFile(final StringBuilder buffer, final String file) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream w = new DataOutputStream(baos);
+            w.writeBytes(buffer.toString());
+            w.flush();
+
+            sftp.put(new ByteArrayInputStream(baos.toByteArray()), file, ChannelSftp.APPEND);
+
+            w.close();
+            baos.close();
+        } catch (SftpException e) {
+            throw new RuntimeException("Data is not written/read. Reason : " + e);
+        } catch (IOException e) {
+            throw new RuntimeException("Data is not written/read. Reason : " + e);
+        }
     }
 
     public void close(){
@@ -79,8 +148,8 @@ public class PrepareParametricRuns {
         sftp.disconnect();
     }
 
-    public void run(String argument) {
-        String [] commands = prepareCommands(argument);
+    public void run(final String [] additionalLines, final String baseDir, final String jobName) {
+        String [] commands = prepareCommands(additionalLines, baseDir, jobName);
 
         StringBuilder output = new StringBuilder();
         Arrays.stream(commands).forEach(cmd -> executeCommand(cmd, output));
@@ -110,10 +179,10 @@ public class PrepareParametricRuns {
         }
     }
 
-    private String [] prepareCommands(String argument){
-        String baseDir = "/net/ils4/agarwal/equilOpdyts/carBicycle/";
-        String jobName = "run"+String.valueOf(jobCounter++);
-        String locationOfOutput = baseDir+"/output/"+jobName+"/";
+    private String [] prepareCommands(final String [] additionalLines, final String baseDir, final String jobName){
+
+        String locationOfOutput = baseDir.endsWith("/") ? baseDir: baseDir+"/" ;
+        locationOfOutput +=  jobName+"/";
 
         // create dir: if dir exits, an exception will be thrown.
         boolean isExists = false;
@@ -133,24 +202,7 @@ public class PrepareParametricRuns {
         }
 
         // location of file must be locale and then can be copied to remote.
-        String jobScriptFileName = locationOfOutput+"/testScriptCommandLine.sh";
-
-        String [] additionalLines = {
-                "echo \"========================\"",
-                "echo \"r_6fcba9f631fedc82ecc01a48bbc43abfefac78c1_opdyts\"",
-                "echo \"========================\"",
-                newLine,
-
-                "cd /net/ils4/agarwal/matsim/r_6fcba9f631fedc82ecc01a48bbc43abfefac78c1_opdyts/",
-                newLine,
-
-                "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
-                        "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilMixedTrafficIntegration " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/inputs/ " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/output/"+jobName+"/ " +
-                        "/net/ils4/agarwal/equilOpdyts/carBicycle/relaxedPlans/output_plans.xml.gz "+
-                        argument
-        };
+        String jobScriptFileName = locationOfOutput+"/script_"+jobName+".sh";
 
         JobScriptWriter scriptWriter = new JobScriptWriter();
         scriptWriter.appendCommands( jobName, locationOfOutput, additionalLines);

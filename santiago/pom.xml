@@ -5,20 +5,22 @@
 		<artifactId>vsp-playgrounds</artifactId>
 		<version>0.10.0-SNAPSHOT</version>
 	</parent>
-
 	<modelVersion>4.0.0</modelVersion>
-	  <groupId>vsp-playground</groupId>
-	<artifactId>santiago</artifactId>
+		<groupId>vsp-playground</groupId>
+		<artifactId>santiago</artifactId>
 	<name>santiago</name>
-
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 	<dependencies>
-
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>emissions</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>roadpricing</artifactId>
@@ -53,14 +55,13 @@
 			<artifactId>matsim-gtfs</artifactId>
 			<version>0.8.0</version>
 		</dependency>
-
-	<dependency>
-		<groupId>com.bmw.hmm_lib</groupId>
-		<artifactId>hmm-lib</artifactId>
-		<version>0.2.0</version>
-	</dependency>
-		
-		
-		
+		<dependency>
+			<!-- <groupId>com.bmw.hmm_lib</groupId>
+			<artifactId>hmm-lib</artifactId>
+			<version>0.2.0</version> -->
+			<groupId>com.github.bmwcarit</groupId>
+			<artifactId>hmm-lib</artifactId>
+			<version>master-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>
