@@ -2,12 +2,6 @@ package playground.vsp.andreas.utils.ana;
 
 import java.io.IOException;
 
-import net.opengis.kml._2.DocumentType;
-import net.opengis.kml._2.FolderType;
-import net.opengis.kml._2.KmlType;
-import net.opengis.kml._2.ObjectFactory;
-import net.opengis.kml._2.ScreenOverlayType;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ConfigUtils;
@@ -19,6 +13,12 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.GK4toWGS84;
 import org.matsim.vis.kml.KMZWriter;
 import org.matsim.vis.kml.MatsimKMLLogo;
+
+import net.opengis.kml.v_2_2_0.DocumentType;
+import net.opengis.kml.v_2_2_0.FolderType;
+import net.opengis.kml.v_2_2_0.KmlType;
+import net.opengis.kml.v_2_2_0.ObjectFactory;
+import net.opengis.kml.v_2_2_0.ScreenOverlayType;
 
 /**
  * Convert MATSim network to kml

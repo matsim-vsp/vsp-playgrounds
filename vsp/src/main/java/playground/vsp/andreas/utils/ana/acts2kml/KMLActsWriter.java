@@ -26,15 +26,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.opengis.kml._2.AbstractFeatureType;
-import net.opengis.kml._2.DocumentType;
-import net.opengis.kml._2.FolderType;
-import net.opengis.kml._2.KmlType;
-import net.opengis.kml._2.ObjectFactory;
-import net.opengis.kml._2.PlacemarkType;
-import net.opengis.kml._2.ScreenOverlayType;
-import net.opengis.kml._2.StyleType;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
@@ -46,6 +37,15 @@ import org.matsim.core.utils.geometry.transformations.GK4toWGS84;
 import org.matsim.core.utils.geometry.transformations.IdentityTransformation;
 import org.matsim.vis.kml.KMZWriter;
 import org.matsim.vis.kml.MatsimKMLLogo;
+
+import net.opengis.kml.v_2_2_0.AbstractFeatureType;
+import net.opengis.kml.v_2_2_0.DocumentType;
+import net.opengis.kml.v_2_2_0.FolderType;
+import net.opengis.kml.v_2_2_0.KmlType;
+import net.opengis.kml.v_2_2_0.ObjectFactory;
+import net.opengis.kml.v_2_2_0.PlacemarkType;
+import net.opengis.kml.v_2_2_0.ScreenOverlayType;
+import net.opengis.kml.v_2_2_0.StyleType;
 
 public class KMLActsWriter {
 
