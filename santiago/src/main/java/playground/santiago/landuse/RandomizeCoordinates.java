@@ -41,25 +41,25 @@ public class RandomizeCoordinates {
 
 	private String runsWorkingDir;
 	private String svnWorkingDir;
-	private String landUseShapeDir;
+	private String landUseDir;
 	
 	private String inConfig;
 	private String inPlans;
 	
 	private Collection<SimpleFeature> features;
 	
-	public RandomizeCoordinates(String runsWorkingDir,String svnWorkingDir, String landUseShapeDir){
+	public RandomizeCoordinates(String runsWorkingDir,String svnWorkingDir, String landUseDir){
 		
 		this.runsWorkingDir = runsWorkingDir;
 		this.svnWorkingDir = svnWorkingDir;
-		this.landUseShapeDir = landUseShapeDir;
+		this.landUseDir = landUseDir;
 		
 		this.inConfig = this.svnWorkingDir + "inputForMATSim/expanded_config_1.xml";
 		this.inPlans = this.svnWorkingDir + "inputForMATSim/plans/expanded/expanded_plans_1.xml.gz";
 		
 		
 		ShapeFileReader reader = new ShapeFileReader();		
-		this.features = reader.readFileAndInitialize(this.landUseShapeDir);
+		this.features = reader.readFileAndInitialize(this.landUseDir + "3_ShapeZonasEOD/zonificacion_eod2012.shp");
 		
 	}
 	
@@ -165,31 +165,31 @@ public class RandomizeCoordinates {
 	private Population createNewPlans(Map<Id, Integer> agentCondition, Population originalPlans, Collection<SimpleFeature> features){
 		
 		
-		FacilitiesByZone fbzHome = new FacilitiesByZone(features);
+		FacilitiesByZone fbzHome = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> homeByTAZ = fbzHome.build("home");		
 		
-		FacilitiesByZone fbzWork = new FacilitiesByZone(features);
+		FacilitiesByZone fbzWork = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> workByTAZ = fbzWork.build("work");
 		
-		FacilitiesByZone fbzBusiest = new FacilitiesByZone(features);
+		FacilitiesByZone fbzBusiest = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> busiestByTAZ = fbzBusiest.build("busiest");
 		
-		FacilitiesByZone fbzEducation = new FacilitiesByZone(features);
+		FacilitiesByZone fbzEducation = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> educationByTAZ = fbzEducation.build("education");
 		
-		FacilitiesByZone fbzHealth = new FacilitiesByZone(features);
+		FacilitiesByZone fbzHealth = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> healthByTAZ = fbzHealth.build("health");
 		
-		FacilitiesByZone fbzVisit = new FacilitiesByZone(features);
+		FacilitiesByZone fbzVisit = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> visitByTAZ = fbzVisit.build("visit");
 		
-		FacilitiesByZone fbzShop = new FacilitiesByZone(features);
+		FacilitiesByZone fbzShop = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> shopByTAZ = fbzShop.build("shopping");
 		
-		FacilitiesByZone fbzLeisure = new FacilitiesByZone(features);
+		FacilitiesByZone fbzLeisure = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> leisureByTAZ = fbzLeisure.build("leisure");
 		
-		FacilitiesByZone fbzOther = new FacilitiesByZone(features);
+		FacilitiesByZone fbzOther = new FacilitiesByZone(features, landUseDir);
 		Multimap <Long,ActivityFacility> otherByTAZ = fbzOther.build("other");
 	
 		
@@ -738,7 +738,7 @@ public class RandomizeCoordinates {
 	
 	private void writeNewPopulation (Population population){
 		
-		String outPlansDir = this.svnWorkingDir + "inputForMATSim/plans/2_10pct/";
+		String outPlansDir = this.svnWorkingDir + "inputForMATSim/plans/expanded/";
 		File outPlansDirFile = new File(outPlansDir);
 		if(!outPlansDirFile.exists()) createDir(outPlansDirFile);
 		
