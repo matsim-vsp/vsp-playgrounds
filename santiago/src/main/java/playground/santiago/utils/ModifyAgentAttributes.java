@@ -44,7 +44,7 @@ public class ModifyAgentAttributes {
 	public ModifyAgentAttributes(String svnWorkingDir){
 		this.svnWorkingDir=svnWorkingDir;
 		
-		this.inPlans = this.svnWorkingDir + "inputForMATSim/plans/2_10pct/randomized_expanded_plans.xml.gz";		
+		this.inPlans = this.svnWorkingDir + "inputForMATSim/plans/expanded/randomized_expanded_plans.xml.gz";		
 		this.agentsWithCar = this.svnWorkingDir + "inputForMATSim/plans/1_initial/workDaysOnly/agentsWithCar.txt";
 		
 	}
