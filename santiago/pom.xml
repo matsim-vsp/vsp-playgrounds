@@ -10,14 +10,14 @@
 	<artifactId>santiago</artifactId>
 	<name>santiago</name>
 	<repositories>
-		<repository>
+<!-- 		<repository>
 			<id>hmm-lib-snapshots</id>
 			<url>https://raw.github.com/bmwcarit/hmm-lib/mvn-snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
 			</snapshots>
-		</repository>
+		</repository> -->
 		<repository>
 			<id>conveyal</id>
 			<name>Conveyal Maven Repository</name>
@@ -28,11 +28,11 @@
 		</repository>		
 	</repositories>
 	<dependencies>
-		<dependency>
+<!-- 		<dependency>
 			<groupId>com.bmw.hmm_lib</groupId>
 			<artifactId>hmm-lib</artifactId>
 			<version>0.2.0</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.conveyal</groupId>
 			<artifactId>gtfs-lib</artifactId>
