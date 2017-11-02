@@ -19,14 +19,17 @@
 
 package playground.vsp.demandde.corineLandcover;
 
+import java.util.Collection;
 import java.util.List;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygonal;
 import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
+import org.geotools.geometry.jts.JTSFactoryFinder;
 
 /**
  * Created by amit on 10.10.17.
@@ -68,14 +71,12 @@ public class GeometryUtils {
      * It perform "union" for each geometry and return one geometry.
      */
     public static Geometry combine(final List<Geometry> geoms){
-        Geometry geom = null;
-        for(Geometry g : geoms){
-            if(geom==null) geom = g;
-            else {
-                geom = geom.union(g);
-            }
-        }
-        return geom;
+        GeometryFactory factory = JTSFactoryFinder.getGeometryFactory( null );
+
+        // note the following geometry collection may be invalid (say with overlapping polygons)
+        GeometryCollection geometryCollection =
+                (GeometryCollection) factory.buildGeometry( geoms );
+        return geometryCollection.union();
     }
 
     /**
@@ -98,6 +99,21 @@ public class GeometryUtils {
     }
 
     /**
+     * @return a random point which is covered by list of landUseGeom as well as zoneGeom
+     */
+    public static Point getPointInteriorToGeometries(final Collection<Geometry> landUseGeoms, final Geometry zoneGeom) {
+        if (landUseGeoms.isEmpty() || zoneGeom.isEmpty() ) throw new RuntimeException("No geometries.");
+
+        Point commonPoint = null;
+        do {
+            //assuming that zoneGeom is a subset of landUseGeom, it would be better to first find a point in a subset and then look if it's inside landUseGeom
+            Coordinate coordinate = getRandomInteriorPoints(zoneGeom,1)[0];
+            commonPoint = geometryFactory.createPoint(coordinate);
+            if (isPointInsideGeometries(landUseGeoms,commonPoint)) return commonPoint;
+        } while(true);
+    }
+
+    /**
      * Return a random Coordinate in the geometry or null if
      * ({@link Geometry#isEmpty()} || !(g instanceof {@linkPolygonal})).
      *
@@ -112,4 +128,18 @@ public class GeometryUtils {
         rnd.setExtent(g);
         return rnd.getGeometry().getCoordinates();
     }
+
+    /**
+     * @return true if point is covered by ANY of the geometry
+     */
+    public static boolean isPointInsideGeometries(final Collection<Geometry> geometries, final Point point) {
+        if (geometries.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
+        for(Geometry geom : geometries){
+            if ( geom.contains(point) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

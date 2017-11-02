@@ -15,21 +15,25 @@
  * limitations under the License.
  */
 
-package playground.santiago.publictransport;
+package playground.santiago.matchingpt;
 
-/**
- * Defines temporal metrics between location measurements.
- *
- * @param <O> location measurement type, which corresponds to the HMM observation.
- */
-interface TemporalMetrics<O> {
+import static java.lang.Math.*;
+
+class Distributions {
+
+    static double normalDistribution(double sigma, double x) {
+        return 1.0 / (sqrt(2.0 * PI) * sigma) * exp(-0.5 * pow(x / sigma, 2));
+    }
+
+    static double exponentialDistribution(double beta, double x) {
+        return 1.0 / beta * exp(-x / beta);
+    }
 
     /**
-     * Returns the time difference in seconds between the specified location measurements.
-     * The time difference is positive if m2 is later than m1 and negative if m1 is later than m2.
-     *
-     * This is needed to compute the normalized transition metric defined in
-     * {@link MapMatchingHmmProbabilities#normalizedTransitionMetric(Object, Object, Object, Object)}.
+     * Use this function instead of Math.log(exponentialDistribution(beta, x)) to avoid an
+     * arithmetic underflow for very small probabilities.
      */
-    public double timeDifference(O m1, O m2);
+    static double logExponentialDistribution(double beta, double x) {
+        return log(1.0 / beta) - (x / beta);
+    }
 }

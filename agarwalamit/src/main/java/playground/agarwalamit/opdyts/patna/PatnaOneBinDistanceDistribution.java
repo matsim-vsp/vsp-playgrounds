@@ -30,8 +30,6 @@ import playground.agarwalamit.opdyts.equil.EquilDistanceDistribution;
  * Created by amit on 21/10/16.
  */
 
-
-@SuppressWarnings("DefaultFileTemplate")
 public final class PatnaOneBinDistanceDistribution implements DistanceDistribution {
 
     private final Map<String, double []> mode2legs = new TreeMap<>();

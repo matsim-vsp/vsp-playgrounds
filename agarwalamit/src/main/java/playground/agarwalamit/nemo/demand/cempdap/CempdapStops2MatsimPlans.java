@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.nemo.demand;
+package playground.agarwalamit.nemo.demand.cempdap;
 
 import java.io.IOException;
 import playground.vsp.demandde.cemdap.output.CemdapStops2MatsimPlansConverter;
@@ -31,16 +31,18 @@ public class CempdapStops2MatsimPlans {
 
     /**
      * The plan is now:
-     * - generate the matsim_plans without CORINE land cover data
-     * - sample them
-     * - fix the incorrect acitivity locations based on CORINE land cover data
+     * - generate the matsim_plans without any coordinates for each file of cempdap_output (i.e. same process 5 times)
+     * - the zone information is added to the activity types e.g. home_510
+     * - sample first matsim_plans
+     * - take sampled plans, add other plans of the sampled persons from other matsim_plans file and combine them in a file
+     * - add the acitivity locations based on CORINE land cover data and zone information
      */
 
     public static void main(String[] args) throws IOException {
         // Local use
         String cemdapDataRoot = "/Users/amit/Documents/gitlab/nemo/data/cemdap_output/";
         int numberOfFirstCemdapOutputFile = 100;
-        int numberOfPlans = 5;
+        int numberOfPlans = 1;
         int numberOfPlansFile = 100;
         String outputDirectory = "/Users/amit/Documents/gitlab/nemo/data/matsim_initial/" + numberOfPlansFile + "/";
         String zonalShapeFile = "/Users/amit/Documents/gitlab/nemo/data/cemdap_input/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
@@ -52,6 +54,8 @@ public class CempdapStops2MatsimPlans {
         String stopFile = "Stops.out";
         String activityFile = "Activity.out";
         boolean simplifyGeometries = false;
+        boolean assignCoordinatesToActivities = false;
+        boolean combiningGeoms = false;
 
         // Server use
         if (args.length != 0) {
@@ -65,12 +69,12 @@ public class CempdapStops2MatsimPlans {
             useLandCoverData = Boolean.parseBoolean(args[7]);
             landCoverFile = args[8];
             simplifyGeometries = Boolean.valueOf(args[9]);
+            combiningGeoms = Boolean.valueOf(args[10]);
+            assignCoordinatesToActivities = Boolean.valueOf(args[11]);
         }
 
         CemdapStops2MatsimPlansConverter.convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory,
                 zonalShapeFile, zoneIdTag, allowVariousWorkAndEducationLocations, addStayHomePlan,
-                useLandCoverData, landCoverFile, stopFile, activityFile,simplifyGeometries);
+                useLandCoverData, landCoverFile, stopFile, activityFile,simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
     }
-
-
 }

@@ -5,17 +5,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import net.opengis.kml._2.DocumentType;
-import net.opengis.kml._2.IconStyleType;
-import net.opengis.kml._2.LineStyleType;
-import net.opengis.kml._2.LinkType;
-import net.opengis.kml._2.ObjectFactory;
-import net.opengis.kml._2.StyleType;
-
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.gbl.MatsimResource;
 import org.matsim.vis.kml.KMZWriter;
 import org.matsim.vis.kml.MatsimKmlStyleFactory;
+
+import net.opengis.kml.v_2_2_0.DocumentType;
+import net.opengis.kml.v_2_2_0.IconStyleType;
+import net.opengis.kml.v_2_2_0.LineStyleType;
+import net.opengis.kml.v_2_2_0.LinkType;
+import net.opengis.kml.v_2_2_0.ObjectFactory;
+import net.opengis.kml.v_2_2_0.StyleType;
 
 public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 	

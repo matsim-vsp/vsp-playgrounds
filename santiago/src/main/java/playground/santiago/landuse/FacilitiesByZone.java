@@ -22,11 +22,12 @@ import com.vividsolutions.jts.geom.Point;
 public class FacilitiesByZone {
 
 	
-	Collection <SimpleFeature> features;
+	private Collection <SimpleFeature> features;
+	private String landUseDir;
 	
-	
-	public FacilitiesByZone(Collection<SimpleFeature> features){
+	public FacilitiesByZone(Collection<SimpleFeature> features, String landUseDir){
 		this.features=features;
+		this.landUseDir = landUseDir;
 	}
 	
 	private long getEODZone (Coord coord){
@@ -79,47 +80,47 @@ public class FacilitiesByZone {
 		switch (IDAct){
 		
 		case ("ho"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/hogByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/hogByArea.xml");
 			break;
 			
 		case ("wo"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/admByArea.xml");
-			frAux1.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/indByArea.xml");
-			frAux2.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/minByArea.xml");
-			frAux3.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/ofByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/admByArea.xml");
+			frAux1.readFile(landUseDir+"FacilitiesFile/indByArea.xml");
+			frAux2.readFile(landUseDir+"FacilitiesFile/minByArea.xml");
+			frAux3.readFile(landUseDir+"FacilitiesFile/ofByArea.xml");
 			break;
 			
 		case ("bu"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/admByArea.xml");
-			frAux1.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/indByArea.xml");
-			frAux2.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/minByArea.xml");
-			frAux3.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/ofByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/admByArea.xml");
+			frAux1.readFile(landUseDir+"FacilitiesFile/indByArea.xml");
+			frAux2.readFile(landUseDir+"FacilitiesFile/minByArea.xml");
+			frAux3.readFile(landUseDir+"FacilitiesFile/ofByArea.xml");
 			break;
 			
 		case("ed"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/edByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/edByArea.xml");
 			break;
 			
 		case("he"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/salByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/salByArea.xml");
 			break;
 			
 		case("vi"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/hogByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/hogByArea.xml");
 			break;
 			
 		case("sh"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/comByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/comByArea.xml");
 			break;
 			
 		case("le"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/cultByArea.xml");
-			frAux1.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/depByArea.xml");
-			frAux2.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/hotByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/cultByArea.xml");
+			frAux1.readFile(landUseDir+"FacilitiesFile/depByArea.xml");
+			frAux2.readFile(landUseDir+"FacilitiesFile/hotByArea.xml");
 			break;
 			
 		case("ot"):
-			fr.readFile("../../../shared-svn/projects/santiago/scenario/inputFromElsewhere/landUse/SII/FacilitiesFile/otrByArea.xml");
+			fr.readFile(landUseDir+"FacilitiesFile/otrByArea.xml");
 			break;
 		}
 		/**************/

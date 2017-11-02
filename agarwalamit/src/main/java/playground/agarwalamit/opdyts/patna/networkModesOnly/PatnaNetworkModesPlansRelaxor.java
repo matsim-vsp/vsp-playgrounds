@@ -42,6 +42,25 @@ import playground.agarwalamit.utils.FileUtils;
 
 class PatnaNetworkModesPlansRelaxor {
 
+	public static void main (String[] args) {
+
+		String configFile = "";
+		String outDir = "";
+
+		if ( args.length >0 ){
+			configFile = args[0];
+			outDir = args[1];
+		} else {
+			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/inputs/config_networkModesOnly.xml";
+			outDir = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output/";
+		}
+
+		Config config= ConfigUtils.loadConfig(configFile);
+		config.controler().setOutputDirectory(outDir);
+
+		new PatnaNetworkModesPlansRelaxor().run(config);
+	}
+
 	public void run (Config config) {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
@@ -52,18 +71,14 @@ class PatnaNetworkModesPlansRelaxor {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				// add here whatever should be attached to matsim controler
-
-				// some stats
-//				addControlerListenerBinding().to(KaiAnalysisListener.class);
-
 				this.bind(ModalShareEventHandler.class);
 				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
 
 				this.bind(ModalTripTravelTimeHandler.class);
 				this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
 
-				this.addControlerListenerBinding().toInstance(new OpdytsModalStatsControlerListener(modes2consider, new PatnaNetworkModesOneBinDistanceDistribution(
+				this.addControlerListenerBinding().toInstance(
+						new OpdytsModalStatsControlerListener(modes2consider, new PatnaNetworkModesOneBinDistanceDistribution(
 						OpdytsScenario.PATNA_1Pct)));
 			}
 		});
@@ -74,11 +89,5 @@ class PatnaNetworkModesPlansRelaxor {
 		int firstIt = controler.getConfig().controler().getFirstIteration();
 		int lastIt = controler.getConfig().controler().getLastIteration();
 		FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),firstIt,lastIt);
-	}
-
-	public void run (String[] args) {
-		Config config= ConfigUtils.loadConfig(args[0]);
-		config.controler().setOutputDirectory(args[1]);
-		run(config);
 	}
 }

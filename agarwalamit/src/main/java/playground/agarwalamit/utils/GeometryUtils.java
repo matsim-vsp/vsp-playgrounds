@@ -77,7 +77,7 @@ public final class GeometryUtils {
 	public static boolean isLinkInsideGeometries(final Collection<Geometry> geometries, final Link link) {
 		Coord coord = link.getCoord();
 		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		return isPointInsideGeometries(geometries, point);
+		return playground.vsp.demandde.corineLandcover.GeometryUtils.isPointInsideGeometries(geometries, point);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public final class GeometryUtils {
 	 */
 	public static boolean isCoordInsideGeometries(final Collection<Geometry> geometries, final Coord coord) {
 		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		return isPointInsideGeometries(geometries, point);
+		return playground.vsp.demandde.corineLandcover.GeometryUtils.isPointInsideGeometries(geometries, point);
 	}
 
 	/**
@@ -95,19 +95,6 @@ public final class GeometryUtils {
 		Coord coord = link.getCoord();
 		Point geo = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
 		return isPointInsideFeatures(features, geo);
-	}
-
-	/**
-	 * @return true if point is covered by ANY of the geometry
-	 */
-	public static boolean isPointInsideGeometries(final Collection<Geometry> geometries, final Point point) {
-		if (geometries.isEmpty()) throw new RuntimeException("Collection of geometries is empty.");
-		for(Geometry geom : geometries){
-			if ( geom.contains(point) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
