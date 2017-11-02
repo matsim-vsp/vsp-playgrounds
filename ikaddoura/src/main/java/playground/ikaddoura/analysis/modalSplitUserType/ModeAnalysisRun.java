@@ -39,13 +39,15 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class ModeAnalysisRun {
 	
-	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
-	private final String runId = "run0";
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+//	private final String runId = "run0";
+//	private String subpopulation = "potentialSAVuser";
 	
-	private String subpopulation = "potentialSAVuser";
+	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc/";
+	private final String runId = null;
+	private String subpopulation = null;
 	
-	private final String outputFileName = runId + ".modeAnalysis_" + subpopulation + ".csv";
-	
+	private String outputFileName;
 	private static final Logger log = Logger.getLogger(ModeAnalysisRun.class);
 	
 	public static void main(String[] args) throws IOException {
@@ -54,6 +56,12 @@ public class ModeAnalysisRun {
 	}
 		
 	public void run() throws IOException {
+		
+		if(runId == null) {
+			outputFileName = "tripModeAnalysis_" + subpopulation + "_others.csv";
+		} else {
+			outputFileName = runId + ".tripModeAnalysis_" + subpopulation + "_others.csv";
+		}
 		
 		log.info("Loading scenario...");
 		Scenario scenario = loadScenario();
@@ -65,9 +73,15 @@ public class ModeAnalysisRun {
 		double walkBicycle = 0;
 		double taxi = 0;
 		
+		double allModesOthers = 0;
+		double carOthers = 0;
+		double ptOthers = 0;
+		double walkBicycleOthers = 0;
+		double taxiOthers = 0;
+		
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			
-			if (scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "subpopulation").toString().equals(subpopulation)) {
+			if (subpopulation != null && scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), "subpopulation").toString().equals(subpopulation)) {
 				
 				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
 					if (pE instanceof Leg) {
@@ -79,10 +93,32 @@ public class ModeAnalysisRun {
 							car++;
 						} else if (leg.getMode().equals("taxi")) {
 							taxi++;
-						} else if (leg.getMode().contains("pt")) {
+						} else if (leg.getMode().contains("pt") || leg.getMode().contains("Pt") || leg.getMode().contains("PT")) {
 							pt++;
-						} else if (leg.getMode().equals("bicycle") || leg.getMode().equals("walk")) {
+						} else if (leg.getMode().equals("bicycle") || leg.getMode().equals("walk") || leg.getMode().equals("bike")) {
 							walkBicycle++;
+						} else {
+							log.warn("Unknown mode: " + leg.getMode());
+						}
+					}
+				}
+			} else {
+				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
+					if (pE instanceof Leg) {
+						Leg leg = (Leg) pE;
+						
+						allModesOthers++;
+						
+						if (leg.getMode().equals("car")) {
+							carOthers++;
+						} else if (leg.getMode().equals("taxi")) {
+							taxiOthers++;
+						} else if (leg.getMode().contains("pt") || leg.getMode().contains("Pt") || leg.getMode().contains("PT")) {
+							ptOthers++;
+						} else if (leg.getMode().equals("bicycle") || leg.getMode().equals("walk") || leg.getMode().equals("bike")) {
+							walkBicycleOthers++;
+						} else {
+							log.warn("Unknown mode: " + leg.getMode());
 						}
 					}
 				}
@@ -94,19 +130,22 @@ public class ModeAnalysisRun {
 		
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			bw.write("mode;trip share");
+			bw.write("mode;number of trips (subpopulation: " + subpopulation + " ); number of trips (others)");
 			bw.newLine();
 
-			bw.write("car;" + car / allModes);
+			bw.write("car;" + car + " ; " + carOthers);
 			bw.newLine();
 
-			bw.write("pt;" + pt / allModes);
+			bw.write("pt;" + pt + " ; " + ptOthers);
 			bw.newLine();
 
-			bw.write("SAV;" + taxi / allModes);
+			bw.write("taxi/SAV;" + taxi + " ; " + taxiOthers);
 			bw.newLine();
 
-			bw.write("walk / bicycle;" + walkBicycle / allModes);
+			bw.write("walk/bicycle;" + walkBicycle + " ; " + walkBicycleOthers);
+			bw.newLine();
+			
+			bw.write("all modes;" + allModes + " ; " + allModesOthers);
 			bw.newLine();
 			
 			bw.close();
@@ -118,13 +157,25 @@ public class ModeAnalysisRun {
 	}
 	
 	private Scenario loadScenario() {
-		Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml.gz");
-		config.network().setInputFile(runDirectory + runId + ".output_network.xml.gz");
-		config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
-		config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
-		config.vehicles().setVehiclesFile(null);
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		return scenario;
+		Scenario scenario;
+		if (runId == null) {
+			Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml.gz");
+			config.network().setInputFile(runDirectory + "output_network.xml.gz");
+			config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
+			config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
+			config.vehicles().setVehiclesFile(null);
+			scenario = ScenarioUtils.loadScenario(config);
+			return scenario;
+			
+		} else {
+			Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml.gz");
+			config.network().setInputFile(runDirectory + runId + ".output_network.xml.gz");
+			config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
+			config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
+			config.vehicles().setVehiclesFile(null);
+			scenario = ScenarioUtils.loadScenario(config);
+			return scenario;
+		}
 	}
 		
 }

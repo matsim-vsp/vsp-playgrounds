@@ -52,13 +52,12 @@ import playground.ikaddoura.incidents.io.Incident2SHPWriter;
 public class IncidentDataAnalysis {
 	private final Logger log = Logger.getLogger(IncidentDataAnalysis.class);
 
-	private String networkFile = "../../../shared-svn/studies/ihab/berlin/network.xml";
+	private String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_network.xml.gz";
 	private String crs = TransformationFactory.DHDN_GK4;
 //	private String crs = TransformationFactory.WGS84_UTM33N;
 	
-	private String inputDirectory = "../../../shared-svn/studies/ihab/incidents/server/output-berlin/";
-//	private String outputDirectory = "../../../shared-svn/studies/ihab/incidents/analysis/output-berlin_2016-05-19_a/";
-	private String outputDirectory = "../../../shared-svn/studies/ihab/incidents/analysis/output-berlin_2016-05-19_b/";
+	private String inputDirectory = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/incidents/server/output-berlin/incidentData_berlin_2016-03/";
+	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/incidentData_berlin_2016-03-15/";
 	
 	private boolean writeCSVFileForEachXMLFile = false;
 	
@@ -67,14 +66,14 @@ public class IncidentDataAnalysis {
 	private boolean writeDaySpecificTrafficItems2ShapeFile = true;
 //	private String shpFileStartDateTime = "2016-02-11";
 //	private String shpFileEndDateTime = "2016-03-26";
-	private String shpFileStartDateTime = "2016-03-29";
-	private String shpFileEndDateTime = "2016-05-18";
+	private String shpFileStartDateTime = "2016-03-15";
+	private String shpFileEndDateTime = "2016-03-15";
 	
 	private boolean writeNetworkChangeEventFiles = true;
 //	private String networkChangeEventStartDateTime = "2016-02-11";
 //	private String networkChangeEventEndDateTime = "2016-03-26";
-	private String networkChangeEventStartDateTime = "2016-03-29";
-	private String networkChangeEventEndDateTime = "2016-05-18";
+	private String networkChangeEventStartDateTime = "2016-03-15";
+	private String networkChangeEventEndDateTime = "2016-03-15";
 	
 // ##################################################################
 	
@@ -88,7 +87,7 @@ public class IncidentDataAnalysis {
 	}
 	
 	public IncidentDataAnalysis() {
-		log.warn("Using the default constructor...");
+		log.info("Using the default constructor...");
 	}
 	
 	public IncidentDataAnalysis(
@@ -150,6 +149,7 @@ public class IncidentDataAnalysis {
 			
 			final Set<String> trafficItemsToCheck = networkMapper.getTrafficItemsToCheck();
 			shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_WARNING.shp", trafficItemsToCheck, this.crs);
+			log.info("Writing all traffic items to shape file... Done.");
 		}
 		
 		if (writeDaySpecificTrafficItems2ShapeFile) {
@@ -165,12 +165,18 @@ public class IncidentDataAnalysis {
 			}
 			shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_" + shpFileStartDateTime + "_" + shpFileEndDateTime + ".shp", filteredTrafficItems, crs);
 			shpWriter.writeCongestionInfo2ShapeFile(outputDirectory + "delays_" + shpFileStartDateTime + "_" + shpFileEndDateTime + ".shp", filteredTrafficItems, crs);
+			log.info("Writing filtered traffic items to shape file(s)... Done.");
 		}
 		
 		if (writeNetworkChangeEventFiles) {
 			// write network change events file and network incident shape file for each day
+			
+			log.info("Writing network change events...");
+
 			final Incident2NetworkChangeEventsWriter nceWriter = new Incident2NetworkChangeEventsWriter(this.tmc, this.trafficItems, trafficItemId2path, this.crs);
 			nceWriter.writeIncidentLinksToNetworkChangeEventFile(this.networkChangeEventStartDateTime, this.networkChangeEventEndDateTime, this.outputDirectory);
+			
+			log.info("Writing network change events... Done.");
 		}
 		
 		OutputDirectoryLogging.closeOutputDirLogging();
@@ -189,7 +195,7 @@ public class IncidentDataAnalysis {
 		boolean foundXMLFile = false;
 		
 		for (File f : fileList) {
- 
+			
 			if (f.getName().endsWith(".xml") || f.getName().endsWith(".xml.gz")) {
 				
 				foundXMLFile = true;
