@@ -118,6 +118,7 @@ public class ModeSwitchAnalysis {
 		PersonMoneyLinkHandler moneyHandler0;
 		PersonMoneyLinkHandler moneyHandler1;
 		
+		Scenario scenario0;
 		{
 			log.info("Loading scenario0 and reading events...");
 
@@ -125,10 +126,10 @@ public class ModeSwitchAnalysis {
 			config.plans().setInputFile(dir0populationFile);
 			config.network().setInputFile(dir0networkFile);
 			
-			Scenario scenario = ScenarioUtils.loadScenario(config);
+			scenario0 = ScenarioUtils.loadScenario(config);
 	        
 	        basicHandler0 = new BasicPersonTripAnalysisHandler();
-			basicHandler0.setScenario(scenario);
+			basicHandler0.setScenario(scenario0);
 			
 			moneyHandler0 = new PersonMoneyLinkHandler();
 			moneyHandler0.setBasicHandler(basicHandler0);
@@ -142,16 +143,17 @@ public class ModeSwitchAnalysis {
 			log.info("Loading scenario0 and reading events... Done.");
 		}
 		
+		Scenario scenario1;
 		{
 			log.info("Loading scenario1 and reading events...");
 			Config config = ConfigUtils.createConfig();	
 			config.plans().setInputFile(dir1populationFile);
 			config.network().setInputFile(dir1networkFile);
 			
-			Scenario scenario = ScenarioUtils.loadScenario(config);
+			scenario1 = ScenarioUtils.loadScenario(config);
 	        
 	        basicHandler1 = new BasicPersonTripAnalysisHandler();
-			basicHandler1.setScenario(scenario);
+			basicHandler1.setScenario(scenario1);
 			
 			moneyHandler1 = new PersonMoneyLinkHandler();
 			moneyHandler1.setBasicHandler(basicHandler1);
@@ -166,7 +168,7 @@ public class ModeSwitchAnalysis {
 			log.info("Loading scenario1 and reading events... Done.");
 
 			log.info("Getting home coordinates from plans...");
-			for (Person person : scenario.getPopulation().getPersons().values()) {
+			for (Person person : scenario1.getPopulation().getPersons().values()) {
 				int actCounter = 1;
 				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
 					if (pE instanceof Activity) {
@@ -216,6 +218,11 @@ public class ModeSwitchAnalysis {
 		// mode switch analysis
 		log.info("Comparing the two scenarios for each person... (total number of persons: " + basicHandler1.getPersonId2tripNumber2legMode().size() + ")");
 		
+		Map<Id<Person>, Integer> car2carAgents = new HashMap<>();
+		Map<Id<Person>, Integer> x2carAgents = new HashMap<>();
+		Map<Id<Person>, Integer> car2xAgents = new HashMap<>();
+		Map<Id<Person>, Integer> x2xAgents = new HashMap<>();
+
 		int personCounter = 0;
 		for (Id<Person> personId : basicHandler1.getPersonId2tripNumber2legMode().keySet()) {
 			
@@ -255,6 +262,12 @@ public class ModeSwitchAnalysis {
 				);
 					writerX2Car.newLine();
 					
+					if (x2carAgents.get(personId) == null) {
+						x2carAgents.put(personId, 1);
+					} else {
+						x2carAgents.put(personId, x2carAgents.get(personId) + 1);
+					}
+					
 					x2carOrigin.put(personId + "Trip" + tripNr, personId2actNr2coord.get(personId).get(tripNr));
                 	x2carDestination.put(personId + "Trip" + (tripNr), personId2actNr2coord.get(personId).get(tripNr + 1));
                 	
@@ -274,6 +287,12 @@ public class ModeSwitchAnalysis {
 				);
 					
 					writerCar2X.newLine();
+					
+					if (car2xAgents.get(personId) == null) {
+						car2xAgents.put(personId, 1);
+					} else {
+						car2xAgents.put(personId, car2xAgents.get(personId) + 1);
+					}
 					
 					car2xOrigin.put(personId + "Trip" + tripNr, personId2actNr2coord.get(personId).get(tripNr));
                 	car2xDestination.put(personId + "Trip" + (tripNr), personId2actNr2coord.get(personId).get(tripNr + 1));	
@@ -295,6 +314,12 @@ public class ModeSwitchAnalysis {
 					
 					writerCar2Car.newLine();
 					
+					if (car2carAgents.get(personId) == null) {
+						car2carAgents.put(personId, 1);
+					} else {
+						car2carAgents.put(personId, car2carAgents.get(personId) + 1);
+					}
+					
 					car2carOrigin.put(personId + "Trip" + tripNr, personId2actNr2coord.get(personId).get(tripNr));
 					car2carDestination.put(personId + "Trip" + (tripNr), personId2actNr2coord.get(personId).get(tripNr + 1));		
 					
@@ -314,6 +339,12 @@ public class ModeSwitchAnalysis {
 				);
 								
 					writerX2X.newLine();
+					
+					if (x2xAgents.get(personId) == null) {
+						x2xAgents.put(personId, 1);
+					} else {
+						x2xAgents.put(personId, x2xAgents.get(personId) + 1);
+					}
 								
 					x2xOrigin.put(personId + "Trip" + tripNr, personId2actNr2coord.get(personId).get(tripNr));
 					x2xDestination.put(personId + "Trip" + (tripNr), personId2actNr2coord.get(personId).get(tripNr + 1));		
@@ -339,6 +370,130 @@ public class ModeSwitchAnalysis {
 		
 		log.info("Comparing the two scenarios for each person... Done.");
 		
+		{
+			BufferedWriter writer = IOUtils.getBufferedWriter(directory1 + analysisOutputFolder + "/personAnalysis_car2car.csv");
+	        writer.write("PersonId;totalTrips;car2carTrips;score0;score1");
+	        writer.newLine();
+	       
+	        double score0Sum = 0.;
+	        double score1Sum = 0.;
+	        
+			for (Id<Person> personId : car2carAgents.keySet()) {
+				
+				double score0 = scenario0.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+		        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+				
+	        	writer.write(personId + ";"
+	        + basicHandler1.getPersonId2tripNumber2legMode().get(personId).size() + ";"
+			+ car2carAgents.get(personId) + ";"
+			+ score0 + ";"
+			+ score1
+			);
+	        	writer.newLine();
+	        	
+	        	score0Sum += score0;
+	        	score1Sum += score1;
+	        } 
+	        writer.close();
+	        
+        	writer.newLine();
+        	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) car2carAgents.size() );
+        	log.info("car2car agents: Average score difference: " + (score1Sum - score0Sum) / (double) car2carAgents.size() );
+		}
+		
+		{
+			BufferedWriter writer = IOUtils.getBufferedWriter(directory1 + analysisOutputFolder + "/personAnalysis_x2car.csv");
+	        writer.write("PersonId;totalTrips;x2carTrips;score0;score1");
+	        writer.newLine();
+	       
+	        double score0Sum = 0.;
+	        double score1Sum = 0.;
+	        
+			for (Id<Person> personId : x2carAgents.keySet()) {
+				
+				double score0 = scenario0.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+		        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+				
+	        	writer.write(personId + ";"
+	        + basicHandler1.getPersonId2tripNumber2legMode().get(personId).size() + ";"
+			+ x2carAgents.get(personId) + ";"
+			+ score0 + ";"
+			+ score1
+			);
+	        	writer.newLine();
+	        	
+	        	score0Sum += score0;
+	        	score1Sum += score1;
+	        } 
+	        writer.close();
+	        
+        	writer.newLine();
+        	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) x2carAgents.size() );
+        	log.info("x2car agents: Average score difference: " + (score1Sum - score0Sum) / (double) x2carAgents.size() );
+		}
+		
+		{
+			BufferedWriter writer = IOUtils.getBufferedWriter(directory1 + analysisOutputFolder + "/personAnalysis_car2x.csv");
+	        writer.write("PersonId;totalTrips;car2xTrips;score0;score1");
+	        writer.newLine();
+	       
+	        double score0Sum = 0.;
+	        double score1Sum = 0.;
+	        
+			for (Id<Person> personId : car2xAgents.keySet()) {
+				
+				double score0 = scenario0.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+		        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+				
+	        	writer.write(personId + ";"
+	        + basicHandler1.getPersonId2tripNumber2legMode().get(personId).size() + ";"
+			+ car2xAgents.get(personId) + ";"
+			+ score0 + ";"
+			+ score1 
+			);
+	        	writer.newLine();
+	        	
+	        	score0Sum += score0;
+	        	score1Sum += score1;
+	        } 
+	        writer.close();
+	        
+        	writer.newLine();
+        	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) car2xAgents.size() );
+        	log.info("car2x agents: Average score difference: " + (score1Sum - score0Sum) / (double) car2xAgents.size() );
+		}
+		
+		{
+			BufferedWriter writer = IOUtils.getBufferedWriter(directory1 + analysisOutputFolder + "/personAnalysis_x2x.csv");
+	        writer.write("PersonId;totalTrips;x2xTrips;score0;score1");
+	        writer.newLine();
+	       
+	        double score0Sum = 0.;
+	        double score1Sum = 0.;
+	        
+			for (Id<Person> personId : x2xAgents.keySet()) {
+				
+				double score0 = scenario0.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+		        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+				
+	        	writer.write(personId + ";"
+			+ basicHandler1.getPersonId2tripNumber2legMode().get(personId).size() + ";"
+			+ x2xAgents.get(personId) + ";"
+			+ score0 + ";"
+			+ score1
+			);
+	        	writer.newLine();
+	        	
+	        	score0Sum += score0;
+	        	score1Sum += score1;
+	        } 
+	        writer.close();
+	        
+        	writer.newLine();
+        	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) x2xAgents.size() );
+        	log.info("x2x agents: Average score difference: " + (score1Sum - score0Sum) / (double) x2xAgents.size() );
+		}
+        	
 		printCoordinates(car2carOrigin, directory1 + analysisOutputFolder + "/spatialModeSwitchAnalysis_actCoord_car2car_origin.csv");
         printCoordinates(car2carDestination, directory1 + analysisOutputFolder + "/spatialModeSwitchAnalysis_actCoord_car2car_destination.csv");
         printCoordinates(car2carHomeCoord, directory1 + analysisOutputFolder + "/spatialModeSwitchAnalysis_car2car_homeCoord.csv");
