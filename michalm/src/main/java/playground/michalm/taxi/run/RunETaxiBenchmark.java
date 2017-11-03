@@ -51,6 +51,7 @@ public class RunETaxiBenchmark {
 	}
 
 	public static Controler createControler(Config config, int runs) {
+		DvrpConfigGroup.get(config).setNetworkMode(null);//to switch off network filtering
 		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
 		EvConfigGroup evCfg = EvConfigGroup.get(config);
 		config.controler().setLastIteration(runs - 1);
