@@ -394,11 +394,13 @@ public class ModeSwitchAnalysis {
 	        	score0Sum += score0;
 	        	score1Sum += score1;
 	        } 
-	        writer.close();
-	        
+			
         	writer.newLine();
         	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) car2carAgents.size() );
         	log.info("car2car agents: Average score difference: " + (score1Sum - score0Sum) / (double) car2carAgents.size() );
+		
+	        writer.close();
+
 		}
 		
 		{
@@ -425,11 +427,13 @@ public class ModeSwitchAnalysis {
 	        	score0Sum += score0;
 	        	score1Sum += score1;
 	        } 
-	        writer.close();
 	        
         	writer.newLine();
         	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) x2carAgents.size() );
         	log.info("x2car agents: Average score difference: " + (score1Sum - score0Sum) / (double) x2carAgents.size() );
+		
+	        writer.close();
+
 		}
 		
 		{
@@ -456,11 +460,13 @@ public class ModeSwitchAnalysis {
 	        	score0Sum += score0;
 	        	score1Sum += score1;
 	        } 
-	        writer.close();
 	        
         	writer.newLine();
         	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) car2xAgents.size() );
         	log.info("car2x agents: Average score difference: " + (score1Sum - score0Sum) / (double) car2xAgents.size() );
+		
+	        writer.close();
+
 		}
 		
 		{
@@ -487,11 +493,13 @@ public class ModeSwitchAnalysis {
 	        	score0Sum += score0;
 	        	score1Sum += score1;
 	        } 
-	        writer.close();
-	        
+			
         	writer.newLine();
         	writer.write("Average score difference: " + (score1Sum - score0Sum) / (double) x2xAgents.size() );
         	log.info("x2x agents: Average score difference: " + (score1Sum - score0Sum) / (double) x2xAgents.size() );
+		
+	        writer.close();
+
 		}
         	
 		printCoordinates(car2carOrigin, directory1 + analysisOutputFolder + "/spatialModeSwitchAnalysis_actCoord_car2car_origin.csv");
