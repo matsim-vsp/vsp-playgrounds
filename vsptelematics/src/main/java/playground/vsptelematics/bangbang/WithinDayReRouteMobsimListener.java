@@ -76,9 +76,8 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 		{
 			TravelDisutility travelDisutility = travelDisutilityFactories.get(TransportMode.car).createTravelDisutility( travelTime ) ;
 			LeastCostPathCalculator pathAlgo = pathAlgoFactory.createPathCalculator(scenario.getNetwork(), travelDisutility, travelTime) ;
-			PopulationFactory populationFactory = scenario.getPopulation().getFactory();
-			RouteFactories routeFactory = scenario.getPopulation().getFactory().getRouteFactories() ;
-			this.editRoutes = new EditRoutes( scenario.getNetwork(), pathAlgo, populationFactory ) ;
+			 PopulationFactory pf = scenario.getPopulation().getFactory() ;
+			this.editRoutes = new EditRoutes( scenario.getNetwork(), pathAlgo, pf ) ;
 			this.iterationCounter = ic ;
 		}
 	}
@@ -175,4 +174,3 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 	}
 
 }
-
