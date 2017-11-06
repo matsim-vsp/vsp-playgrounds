@@ -68,7 +68,7 @@ class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListener, It
 	private static final Logger log = Logger.getLogger(IncidentBestRouteMobsimListener.class);
 	
 	private final Scenario scenario;
-	private final int withinDayReplanInterval = 3600;
+	private final int withinDayReplanInterval = 900;
 	
 	private Set<Id<Person>> withinDayReplanningAgents = new HashSet<>();
 	private EditRoutes editRoutes;
@@ -88,6 +88,8 @@ class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListener, It
 		LeastCostPathCalculator pathAlgo = pathAlgoFactory.createPathCalculator(scenario.getNetwork(), travelDisutility, travelTime) ;
 
 		this.editRoutes = new EditRoutes(scenario.getNetwork(), pathAlgo, scenario.getPopulation().getFactory());
+		
+		log.info("within-day replanning intervall: " + withinDayReplanInterval);
 	}
 
 	@Override
@@ -108,8 +110,6 @@ class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListener, It
 		List<MobsimAgent> agentsToReplan = new ArrayList<MobsimAgent>();
 
 		final double now = mobsim.getSimTimer().getTimeOfDay();
-		
-		
 		
 		if ( Math.floor(now) % withinDayReplanInterval == 0 ) {
 

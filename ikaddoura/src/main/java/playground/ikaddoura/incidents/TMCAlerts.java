@@ -28,7 +28,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.ikaddoura.incidents.data.TrafficItem;
@@ -48,8 +47,15 @@ public class TMCAlerts {
 	private final Set<String> loggedCodeAssumedAsMinusOneLane = new HashSet<>();
 	private int warnCnt = 0;
 	
+	private NetworkFactory nf;
+	
 	private final boolean printLogStatements = true;
 	
+	public TMCAlerts() {
+		Network network = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getNetwork();
+		nf = network.getFactory();
+	}
+
 	public static final boolean trafficItemIsAnUpdate(TrafficItem trafficItem) {
 		
 		if (trafficItem.getTMCAlert().getPhraseCode().endsWith("86") ||
@@ -107,9 +113,6 @@ public class TMCAlerts {
 				// skip update traffic items
 				
 			} else {
-				
-				Network network = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getNetwork();
-				NetworkFactory nf = network.getFactory();
 								
 				// closed roads
 				if (containsOrEndsWith(trafficItem, "C1")

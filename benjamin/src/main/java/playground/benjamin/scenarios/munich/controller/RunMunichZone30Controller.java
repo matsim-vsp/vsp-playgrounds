@@ -21,6 +21,7 @@
 package playground.benjamin.scenarios.munich.controller;
 
 
+import javax.inject.Provider;
 import org.apache.log4j.Logger;
 import org.matsim.analysis.CalcLegTimes;
 import org.matsim.analysis.VolumesAnalyzer;
@@ -37,8 +38,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.corelisteners.PlansScoring;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
+import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
@@ -65,8 +66,6 @@ import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 import org.matsim.vis.otfvis.OTFFileWriter;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
 import org.matsim.vis.snapshotwriters.SnapshotWriterManager;
-
-import javax.inject.Provider;
 
 /**
  * @author benjamin after nagel

@@ -67,7 +67,7 @@ public class IKNetworkPopulationWriter {
 	private final String networkFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/be_251.output_network.xml.gz";
 	private final String populationFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/be_251.output_plans_selected_taggedCarUsers.xml.gz";
 	private final String personAttributesFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/be_251.personAttributes_potentialSAVusers.xml.gz";
-	private final String outputPath = "/Users/ihab/Documents/workspace/runs-svn/optAV/analysis/";
+	private final String outputPath = "/Users/ihab/Documents/workspace/accidents/data/input/";
 	
 //	private final String crs = TransformationFactory.WGS84_UTM33N;
 	private final String crs = TransformationFactory.DHDN_GK4;
@@ -95,12 +95,12 @@ public class IKNetworkPopulationWriter {
 		file.mkdirs();
 		
 		// network
-//		exportNetwork2Shp1();
-//		exportNetwork2Shp2();
+		exportNetwork2Shp1();
+		exportNetwork2Shp2();
 		
 		// population
 //		exportActivities2Shp();
-		exportActivities2ShpWithAttributes("CarOwnerInBaseCase", "subpopulation");
+//		exportActivities2ShpWithAttributes("CarOwnerInBaseCase", "subpopulation");
 		
 	}
 

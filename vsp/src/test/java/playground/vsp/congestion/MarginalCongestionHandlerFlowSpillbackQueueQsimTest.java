@@ -54,6 +54,7 @@ import org.matsim.core.controler.listener.ControlerListener;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
+import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;

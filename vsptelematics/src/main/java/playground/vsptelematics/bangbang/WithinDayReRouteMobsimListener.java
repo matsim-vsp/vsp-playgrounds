@@ -174,4 +174,3 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 	}
 
 }
-

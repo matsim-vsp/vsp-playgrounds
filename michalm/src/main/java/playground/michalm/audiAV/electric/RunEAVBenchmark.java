@@ -56,6 +56,7 @@ public class RunEAVBenchmark {
 		// TODO temp
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
+		DvrpConfigGroup.get(config).setNetworkMode(null);//to switch off network filtering
 		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
 		EvConfigGroup evCfg = EvConfigGroup.get(config);
 		config.controler().setLastIteration(runs - 1);
