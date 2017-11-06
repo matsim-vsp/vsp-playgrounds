@@ -14,8 +14,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.framework.MobsimFactory;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
+import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.TeleportationEngine;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
@@ -85,7 +85,7 @@ class KNPatnaControler {
 			qSim.addMobsimEngine(netsimEngine);
 			qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
 
-			TeleportationEngine teleportationEngine = new TeleportationEngine(sc, eventsManager);
+			DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, eventsManager);
 			qSim.addMobsimEngine(teleportationEngine);
 	        
 			AgentFactory agentFactory;
