@@ -46,10 +46,11 @@ public class NemoLocationChoiceCalibration {
 
     public static void main(String[] args) {
 
-        String configFile = "data/locationChoice/run1/input/config.xml";
-        String plansFile = "data/input/matsim_initial_plans/nrw_plans_1pct.xml.gz";
+        String configFile = "data/locationChoice/input/config.xml";
+        String plansFile = "data/input/matsim_initial_plans/plans_1pct_fullChoiceSet_coordsAssigned.xml.gz";
         String networkFile = "data/input/network/allWaysNRW/tertiaryNemo_Network_31102017filteredcleaned_network.xml.gz";
-        String outputDir = "data/locationChoice/run1/output/";
+        String countsFile = "data/input/counts/03112017/NemoCounts_data_allCounts_KFZ.xml";
+        String outputDir = "data/locationChoice/output/testCalib/";
         String runId = "run1";
         double flowCapFactor = 0.01;
         double storageCapFactor = 0.03;
@@ -60,12 +61,13 @@ public class NemoLocationChoiceCalibration {
             configFile = args[0];
             plansFile = args[1];
             networkFile = args[2];
-            outputDir = args[3];
-            runId = args[4];
-            flowCapFactor = Double.valueOf(args[5]);
-            storageCapFactor = Double.valueOf(args[6]);
-            lastIt = Integer.valueOf(args[7]);
-            cadytsWt = Double.valueOf(args[8]);
+            countsFile = args[3];
+            outputDir = args[4];
+            runId = args[5];
+            flowCapFactor = Double.valueOf(args[6]);
+            storageCapFactor = Double.valueOf(args[7]);
+            lastIt = Integer.valueOf(args[8]);
+            cadytsWt = Double.valueOf(args[9]);
         }
 
         Config config = ConfigUtils.loadConfig(configFile);

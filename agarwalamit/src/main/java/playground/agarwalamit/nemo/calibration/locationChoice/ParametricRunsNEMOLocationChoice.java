@@ -31,7 +31,7 @@ public class ParametricRunsNEMOLocationChoice {
         int runCounter= 1;
 
         String baseOutDir = "/net/ils4/agarwal/nemo/locationChoice/output/";
-        String matsimDir = "r_5a207c4ba06fa4017620044f18a82170122eacf4_patnaOpdyts_26Oct";
+        String matsimDir = "r_69bcd4c624da644a7cea7fb1031b7f4bd8c02e2d_nemo_06Nov";
 
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
@@ -49,12 +49,13 @@ public class ParametricRunsNEMOLocationChoice {
                     for (double lastIt : lastIts) {
 
                         String configFile = "/net/ils4/agarwal/nemo/data/locationChoice/input/config.xml";
-                        String plansFile = "/net/ils4/agarwal/nemo/data/input/matsim_initial_plans/nrw_plans_1pct.xml.gz";
+                        String plansFile = "/net/ils4/agarwal/nemo/data/input/matsim_initial_plans/plans_1pct_fullChoiceSet_coordsAssigned.xml.gz";
                         String networkFile = "/net/ils4/agarwal/nemo/data/input/network/allWaysNRW/tertiaryNemo_Network_31102017filteredcleaned_network.xml.gz";
+                        String countsFile = "/net/ils4/agarwal/nemo/data/input/counts/03112017/NemoCounts_data_allCounts_KFZ.xml";
                         String jobName = "run"+String.valueOf(runCounter++);
                         String outputDir = baseOutDir+"/"+jobName+"/";
 
-                        String params = configFile + " "+ plansFile + " " + networkFile + " " + outputDir + " " + jobName + " "+flowCap + " " + storageCap + " "+ lastIt +" " +cadytsWt;
+                        String params = configFile + " "+ plansFile + " " + networkFile + " " +countsFile+ " " + outputDir + " " + jobName + " "+flowCap + " " + storageCap + " "+ lastIt +" " +cadytsWt;
 
                         String [] additionalLines = {
                                 "echo \"========================\"",
@@ -66,7 +67,7 @@ public class ParametricRunsNEMOLocationChoice {
                                 PrepareParametricRuns.newLine,
 
                                 "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
-                                        "org/matsim/scenarioCreation/locationChoice/NemoLocationChoiceCalibration " +
+                                        "playground/agarwalamit/nemo/calibration/locationChoice/NemoLocationChoiceCalibration " +
                                         params+" "
                         };
 
