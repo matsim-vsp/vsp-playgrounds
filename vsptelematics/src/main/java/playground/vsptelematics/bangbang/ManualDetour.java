@@ -143,7 +143,7 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 
 		Plan plan = WithinDayAgentUtils.getModifiablePlan( agent ) ; 
 
-		if ( !WithinDayAgentUtils.isReplannableCarLeg(agent) ) {
+		if ( !WithinDayAgentUtils.isOnReplannableCarLeg(agent) ) {
 			return false ;
 		}
 
