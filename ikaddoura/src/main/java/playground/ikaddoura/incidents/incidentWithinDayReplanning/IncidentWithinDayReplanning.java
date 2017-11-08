@@ -19,13 +19,11 @@
 
 package playground.ikaddoura.incidents.incidentWithinDayReplanning;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -41,7 +39,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.withinday.trafficmonitoring.TravelTimeCollector;
 
 import com.google.inject.name.Names;
 
@@ -62,8 +59,7 @@ public class IncidentWithinDayReplanning {
 	private static String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_network.xml.gz";
 	private static String configFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/config.xml";
 	private static String networkChangeEventsFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/incidentData_berlin_" + day + "/networkChangeEvents_" + day + ".xml.gz";
-//	private static String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output_final/output_";
-	private static String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output_final/output_dvrp_";
+	private static String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output_final/output_final_";
 
 	private static final boolean reducePopulationToAffectedAgents = false;
 	private static final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
@@ -84,15 +80,9 @@ public class IncidentWithinDayReplanning {
 
 	private void run() {
 		
-//		OutputDirectoryLogging.catchLogEntries();
-//		try {
-//			OutputDirectoryLogging.initLoggingWithOutputDirectory(runOutputBaseDirectory);
-//		} catch (IOException e1) {
-//			e1.printStackTrace();
-//		}
-		
-		final Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup());
-//		final Config config = ConfigUtils.loadConfig(configFile);
+		DvrpConfigGroup dvrpConfigGroup = new DvrpConfigGroup();
+		dvrpConfigGroup.setTravelTimeEstimationAlpha(0.5);
+		final Config config = ConfigUtils.loadConfig(configFile, dvrpConfigGroup);
 
 		config.network().setInputFile(networkFile);
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
@@ -146,10 +136,6 @@ public class IncidentWithinDayReplanning {
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
 				@Override public void install() {
-										
-//					this.bind(IncidentBestRouteMobsimListener.class).asEagerSingleton();
-//					this.addMobsimListenerBinding().to(IncidentBestRouteMobsimListener.class);
-//					this.addControlerListenerBinding().to(IncidentBestRouteMobsimListener.class);
 					
 					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
