@@ -57,9 +57,10 @@ import playground.ikaddoura.incidents.incidentWithinDayReplanning.IncidentBestRo
  * 0c: network incident (reduced freespeed travel time after trip has started); no within-day replanning
  * 1: network incident (reduced freespeed travel time before trip has started); with within-day replanning
  * 2: network incident (reduced freespeed travel time directly after trip has started); with within-day replanning
+ * 3: network incident (reduced freespeed travel time long after trip has started); with within-day replanning
  * 
- * 3a: two agents; no network incident; no within-day replanning
- * 3b: two agents; no network incident; with within-day replanning
+ * 4a: two agents; no network incident; no within-day replanning
+ * 4b: two agents; no network incident; with within-day replanning
  * 
 * @author ikaddoura
 * 
