@@ -59,7 +59,7 @@ public class IncidentWithinDayReplanning {
 	private static String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_network.xml.gz";
 	private static String configFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/config.xml";
 	private static String networkChangeEventsFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/incidentData_berlin_" + day + "/networkChangeEvents_" + day + ".xml.gz";
-	private static String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output_final/output_final_";
+	private static String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_";
 
 	private static final boolean reducePopulationToAffectedAgents = false;
 	private static final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
@@ -67,7 +67,7 @@ public class IncidentWithinDayReplanning {
 	private static final boolean applyNetworkChangeEvents = true;
 	private static final boolean applyWithinDayReplanning = true;
 	private static final boolean onlyReplanDirectlyAffectedAgents = true;
-	private static final int withinDayReplanInterval = 900;
+	private static final int withinDayReplanInterval = 300;
 		
 // ############################################################################################################################################
 	
