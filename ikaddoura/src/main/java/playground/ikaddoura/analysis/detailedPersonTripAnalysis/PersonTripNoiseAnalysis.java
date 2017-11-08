@@ -739,9 +739,12 @@ public class PersonTripNoiseAnalysis {
 			bw.write("affected noise damage costs (sample size) [monetary units];" + affectedNoiseCost);
 			bw.newLine();
 
-			double distanceBasedSAVoCost = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
-			bw.write("taxi operating costs (sample size) [monetary units];" + distanceBasedSAVoCost);
-			bw.newLine();
+			double distanceBasedSAVoCost = 0.;
+			if (basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) != null) {
+				distanceBasedSAVoCost = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
+				bw.write("taxi operating costs (sample size) [monetary units];" + distanceBasedSAVoCost);
+				bw.newLine();
+			}
 			
 			double tollAndFarePaymentsByUsers = moneyPaymentsByUsers - paymentsSAVUserFormerCarUser - paymentsSAVUserFormerNonCarUser;
 			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + tollAndFarePaymentsByUsers);

@@ -75,7 +75,12 @@ public class HereMapsTrafficItemXMLReader {
 		}
 		
 		String[] fileNameData = new File(trafficItemXMLFile).getName().split("_");
-		long downloadTime = Long.valueOf(fileNameData[2]);
+		long downloadTime;
+		if (fileNameData.length >= 3) {
+			downloadTime = Long.valueOf(fileNameData[2]);
+		} else {
+			throw new RuntimeException("Unknown file name format. Aborting...");
+		}
 		
 		this.readStream(in, downloadTime);
 	}

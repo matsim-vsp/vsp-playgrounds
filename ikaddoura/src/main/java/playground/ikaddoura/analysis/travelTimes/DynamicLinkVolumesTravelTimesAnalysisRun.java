@@ -18,8 +18,9 @@
 * *
 * *********************************************************************** */ 
 
-package playground.ikaddoura.analysis.linkDemand;
+package playground.ikaddoura.analysis.travelTimes;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -28,18 +29,28 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
-public class LinkDemandAnalysisRun {
+public class DynamicLinkVolumesTravelTimesAnalysisRun {
 	
-	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_2016-03-15_networkChangeEvents-false_withinDayReplanning-false/";
+	private static final Logger log = Logger.getLogger(DynamicLinkVolumesTravelTimesAnalysisRun.class);
+	private static String OUTPUT_BASE_DIR;
 	private String outputDirectory;
 
-	public LinkDemandAnalysisRun(String outputDirectory) {
+	public DynamicLinkVolumesTravelTimesAnalysisRun(String outputDirectory) {
 		this.outputDirectory = outputDirectory;
 	}
 
 	public static void main(String[] args) {
-		LinkDemandAnalysisRun anaMain = new LinkDemandAnalysisRun(OUTPUT_BASE_DIR);
-		anaMain.run();
+		
+		if (args.length > 0) {
+			OUTPUT_BASE_DIR = args[0];
+			log.info("Output base directory: " + OUTPUT_BASE_DIR);
+			
+		} else {
+			OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_2016-03-15_networkChangeEvents-true_withinDayReplanning-true-15minutes/";		
+		}
+
+		DynamicLinkVolumesTravelTimesAnalysisRun analysis = new DynamicLinkVolumesTravelTimesAnalysisRun(OUTPUT_BASE_DIR);
+		analysis.run();
 	}
 
 	public void run() {
@@ -47,25 +58,29 @@ public class LinkDemandAnalysisRun {
 		if (!outputDirectory.endsWith("/")) {
 			outputDirectory = outputDirectory + "/";
 		}
-	
+		
 		Config config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
+		config.households().setInputHouseholdAttributesFile(null);
+		config.transit().setTransitScheduleFile(null);
+		config.transit().setVehiclesFile(null);
 		config.plans().setInputFile(null);
 		config.plans().setInputPersonAttributeFile(null);
 		config.network().setChangeEventsInputFile(null);
 		config.vehicles().setVehiclesFile(null);
 		config.network().setInputFile(outputDirectory + "output_network.xml.gz");
+		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 				
-		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork());
+		DynamicLinkVolumesTravelTimesEventHandler handler = new DynamicLinkVolumesTravelTimesEventHandler(scenario.getNetwork());
 		events.addHandler(handler);
-		
+				
 		String eventsFile = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + config.controler().getLastIteration() + ".events.xml.gz";
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
 		
-		String analysis_output_file = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/link_dailyDemand.csv";
-		handler.printResults(analysis_output_file);
+		String analysis_output_dir = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/";
+		handler.printResults(analysis_output_dir);
 	}
 			 
 }

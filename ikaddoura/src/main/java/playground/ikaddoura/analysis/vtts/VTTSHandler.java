@@ -256,9 +256,12 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		} else if (this.personId2currentTripMode.get(personId).equals("pt")) {
 			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(TransportMode.pt).getMarginalUtilityOfTraveling() * (-1);
 
-		} else if (this.personId2currentTripMode.get(personId).equals("bike")) {
-			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(TransportMode.bike).getMarginalUtilityOfTraveling() * (-1);
-			
+		} else if (this.personId2currentTripMode.get(personId).equals("bicycle")) {
+			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get("bicycle").getMarginalUtilityOfTraveling() * (-1);
+		
+		} else if (this.personId2currentTripMode.get(personId).equals("ptSlow")) {
+			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get("ptSlow").getMarginalUtilityOfTraveling() * (-1);
+		
 		} else {
 			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(TransportMode.other).getMarginalUtilityOfTraveling() * (-1);
 		}

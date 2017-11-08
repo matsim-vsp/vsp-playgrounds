@@ -74,7 +74,7 @@ public class PersonTripNoiseAnalysisRun {
 		
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4b_muc_cne_DecongestionPID";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_2016-02-11_networkChangeEvents-true_withinDayReplanning-true-5minutes";
 			log.info("Run directory " + runDirectory);
 		}
 		
@@ -102,8 +102,7 @@ public class PersonTripNoiseAnalysisRun {
 		
 		String networkFile = runDirectory + "output_network.xml.gz";
 		String populationFile = runDirectory + "output_plans.xml.gz";
-//		String eventsFile = runDirectory + "output_events.xml.gz";
-		String eventsFile = runDirectory + "ITERS/it.1500/1500.events.xml.gz";
+		String eventsFile = runDirectory + "output_events.xml.gz";
 
 		Config config = ConfigUtils.createConfig();	
 		config.plans().setInputFile(populationFile);

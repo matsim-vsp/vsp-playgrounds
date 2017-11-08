@@ -38,15 +38,19 @@ public class VTTSanalysisMain {
 	private static final Logger log = Logger.getLogger(VTTSanalysisMain.class);
 
 	private static String runDirectory;
+	private static String runId;
 	
 	public static void main(String[] args) {
 		
 		if (args.length > 0) {
-			runDirectory = args[0];		
+			runDirectory = args[0];
+			runId = args[1];		
 			log.info("run directory: " + runDirectory);
+			log.info("run Id: " + runId);
 			
 		} else {
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/berlin_equal_vs_different_VTTS/output/baseCase/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+			runId = "run0";
 		}
 		
 		VTTSanalysisMain analysis = new VTTSanalysisMain();
@@ -55,8 +59,12 @@ public class VTTSanalysisMain {
 
 	private void run() {
 		
-//		String configFile = runDirectory + "output_config.xml.gz";
-		String configFile = runDirectory + "output_config_withoutUnknownParameters.xml";
+		String configFile;
+		if (runId == null) {
+			configFile = runDirectory + "output_config.xml";
+		} else {
+			configFile = runDirectory + runId + ".output_config.xml";
+		}
 
 		Config config = ConfigUtils.loadConfig(configFile);	
 		int iteration = config.controler().getLastIteration();
@@ -67,14 +75,20 @@ public class VTTSanalysisMain {
 		
 		config.plans().setInputFile(populationFile);
 		config.network().setInputFile(networkFile);
+		config.plans().setInputPersonAttributeFile(null);
 		
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 		
 		VTTSHandler vttsHandler = new VTTSHandler(scenario);
 		events.addHandler(vttsHandler);
-						
-		String eventsFile = runDirectory + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
+			
+		String eventsFile;
+		if (runId == null) {
+			eventsFile = runDirectory + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
+		} else {
+			eventsFile = runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + ".events.xml.gz";
+		}
 
 		log.info("Reading the events file...");
 		MatsimEventsReader reader = new MatsimEventsReader(events);
