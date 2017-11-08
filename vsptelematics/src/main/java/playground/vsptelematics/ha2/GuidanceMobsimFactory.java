@@ -19,11 +19,9 @@
  * *********************************************************************** */
 package playground.vsptelematics.ha2;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import com.google.inject.Provider;
-
-import playground.vsptelematics.common.TelematicsConfigGroup;
-import playground.vsptelematics.common.TelematicsConfigGroup.Infotype;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -34,15 +32,14 @@ import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
+import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.TeleportationEngine;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
 import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineModule;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import playground.vsptelematics.common.TelematicsConfigGroup;
+import playground.vsptelematics.common.TelematicsConfigGroup.Infotype;
 
 
 /**
@@ -95,7 +92,7 @@ public class GuidanceMobsimFactory implements Provider<Mobsim>, ShutdownListener
 		qSim.addMobsimEngine(activityEngine);
 		qSim.addActivityHandler(activityEngine);
         QNetsimEngineModule.configure(qSim);
-		TeleportationEngine teleportationEngine = new TeleportationEngine(scenario, eventsManager);
+		DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(scenario, eventsManager);
 		qSim.addMobsimEngine(teleportationEngine);
 
 		if (scenario.getConfig().network().isTimeVariantNetwork()) {
