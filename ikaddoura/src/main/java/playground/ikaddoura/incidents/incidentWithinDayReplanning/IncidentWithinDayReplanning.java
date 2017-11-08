@@ -55,38 +55,52 @@ public class IncidentWithinDayReplanning {
 	private static String day = "2016-02-11";
 //	private static String day = "2016-03-15";
 	
-	private static String populationFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_plans_selected.xml.gz";
-	private static String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_network.xml.gz";
 	private static String configFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/config.xml";
-	private static String networkChangeEventsFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/incidentData_berlin_" + day + "/networkChangeEvents_" + day + ".xml.gz";
 	private static String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_";
 
 	private static final boolean reducePopulationToAffectedAgents = false;
 	private static final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
 	
-	private static final boolean applyNetworkChangeEvents = true;
-	private static final boolean applyWithinDayReplanning = true;
-	private static final boolean onlyReplanDirectlyAffectedAgents = true;
-	private static final int withinDayReplanInterval = 300;
+	private static boolean applyNetworkChangeEvents = true;
+	private static boolean applyWithinDayReplanning = true;
+	private static boolean onlyReplanDirectlyAffectedAgents = true;
+	private static int withinDayReplanInterval = 900;
 		
 // ############################################################################################################################################
 	
 	private static final Logger log = Logger.getLogger(IncidentWithinDayReplanning.class);
 	
 	public static void main(String[] args) {
+		
+		if (args.length > 0) {
+			configFile = args[0];		
+			log.info("configFile: "+ configFile);
+			
+			runOutputBaseDirectory = args[1];
+			log.info("runOutputBaseDirectory: "+ runOutputBaseDirectory);
+			
+			applyNetworkChangeEvents = Boolean.parseBoolean(args[2]);
+			log.info("applyNetworkChangeEvents: "+ applyNetworkChangeEvents);
+			
+			applyWithinDayReplanning = Boolean.parseBoolean(args[3]);
+			log.info("applyWithinDayReplanning: "+ applyWithinDayReplanning);
+			
+			onlyReplanDirectlyAffectedAgents = Boolean.parseBoolean(args[4]);
+			log.info("onlyReplanDirectlyAffectedAgents: "+ onlyReplanDirectlyAffectedAgents);
+			
+			withinDayReplanInterval = Integer.parseInt(args[5]);
+			log.info("withinDayReplanInterval: "+ withinDayReplanInterval);
+		}
+		
 		IncidentWithinDayReplanning incidentWithinDayReplanning = new IncidentWithinDayReplanning();
 		incidentWithinDayReplanning.run();
 	}
 
 	private void run() {
 		
-		DvrpConfigGroup dvrpConfigGroup = new DvrpConfigGroup();
-		dvrpConfigGroup.setTravelTimeEstimationAlpha(0.5);
-		final Config config = ConfigUtils.loadConfig(configFile, dvrpConfigGroup);
+		final Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup());
 
-		config.network().setInputFile(networkFile);
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
-		config.plans().setInputFile(populationFile);
 
 		config.controler().setOutputDirectory(runOutputBaseDirectory + day
 				+ "_networkChangeEvents-" + applyNetworkChangeEvents
@@ -96,10 +110,14 @@ public class IncidentWithinDayReplanning {
 				+ "/");
 		
 		if (applyNetworkChangeEvents) {
-			config.network().setChangeEventsInputFile(networkChangeEventsFile);
+			if (config.network().getChangeEventsInputFile() == null) {
+				throw new RuntimeException("No network change events file provided. Aborting...");
+			}
 			config.network().setTimeVariantNetwork(true);			
 		} else {
 			log.info("Not considering any network change events.");
+			config.network().setChangeEventsInputFile(null);
+			config.network().setTimeVariantNetwork(false);			
 		}
 		
 		final Scenario scenario = ScenarioUtils.loadScenario(config);

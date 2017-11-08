@@ -107,7 +107,7 @@ public class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListe
 			doReplanning(ma, (Netsim) event.getQueueSimulation());
 		}		
 
-		if ( modifiedRoutesCounter > 0 || reRouteSameRouteCounter > 0 ) {
+		if ( agentsToReplan.size() > 0 ) {
 			log.info("****** Number of re-routed trips (different transport route) at time " + Time.writeTime(event.getSimulationTime(), Time.TIMEFORMAT_HHMMSS) + ": " + modifiedRoutesCounter);
 			log.info("****** Number of re-routed trips (same transport route) at time " + Time.writeTime(event.getSimulationTime(), Time.TIMEFORMAT_HHMMSS) + ": " + reRouteSameRouteCounter);
 		}
@@ -177,16 +177,16 @@ public class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListe
 			currentLinkIds.add(0, leg.getRoute().getStartLinkId());
 			currentLinkIds.add(currentLinkIds.size(), leg.getRoute().getEndLinkId());
 			
-			double ttOld = 0.;
-			for (int index = currentLinkIndex; index < oldLinkIds.size(); index++) {
-				ttOld += travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(oldLinkIds.get(index)), now, plan.getPerson(), null);
-			}
-			
-			double ttNew = 0.;
-			for (int index = currentLinkIndex; index < currentLinkIds.size(); index++) {
-				ttNew += travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(currentLinkIds.get(index)), now, plan.getPerson(), null);
-			}
-			
+//			double ttOld = 0.;
+//			for (int index = currentLinkIndex; index < oldLinkIds.size(); index++) {
+//				ttOld += travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(oldLinkIds.get(index)), now, plan.getPerson(), null);
+//			}
+//			
+//			double ttNew = 0.;
+//			for (int index = currentLinkIndex; index < currentLinkIds.size(); index++) {
+//				ttNew += travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(currentLinkIds.get(index)), now, plan.getPerson(), null);
+//			}
+//			
 //			log.warn("person: " + plan.getPerson().getId());
 //			log.warn("start Link: " + leg.getRoute().getStartLinkId());
 //			log.warn("end Link: " + leg.getRoute().getEndLinkId());
@@ -199,15 +199,15 @@ public class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListe
 //			log.warn("new route: " + currentLinkIds.toString());
 //			log.warn("new route - travel time: " + ttNew);
 			
-			if (now == (8. * 3600 + 60.)) {
-				log.warn("travel time on link 7_8 at 03:00:00 " + travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 3 * 3600., plan.getPerson(), null));
-				log.warn("travel time on link 7_8 (now): " + travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), now, plan.getPerson(), null));
-				System.out.println();
-			}
+//			if (now == (8. * 3600 + 60.)) {
+//				log.warn("travel time on link 7_8 at 03:00:00 " + travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 3 * 3600., plan.getPerson(), null));
+//				log.warn("travel time on link 7_8 (now): " + travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), now, plan.getPerson(), null));
+//				System.out.println();
+//			}
 						
 			if ( !Arrays.deepEquals(oldLinkIds.toArray(), currentLinkIds.toArray()) ) {
 				modifiedRoutesCounter++;
-				log.warn("Route was modified!");
+//				log.warn("Route was modified!");
 			} else {
 				reRouteSameRouteCounter++;
 			}
