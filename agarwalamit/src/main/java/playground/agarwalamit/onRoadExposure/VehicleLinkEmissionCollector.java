@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.emissions.types.ColdPollutant;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.vehicles.Vehicle;
 
@@ -40,7 +41,7 @@ public class VehicleLinkEmissionCollector {
 
     private double travelTime = 0;
 
-    public VehicleLinkEmissionCollector(Id<Vehicle> vehicleId, Id<Link> linkId, String mode) {
+    VehicleLinkEmissionCollector(Id<Vehicle> vehicleId, Id<Link> linkId, String mode) {
         this.vehicleId = vehicleId;
         this.linkId = linkId;
         this.mode = mode;
@@ -51,25 +52,24 @@ public class VehicleLinkEmissionCollector {
         }
     }
 
-    public void setLinkEnterTime(double time){
+    void setLinkEnterTime(double time){
         travelTime -= time;
     }
 
-    public void setLinkLeaveTime(double time){
+    void setLinkLeaveTime(double time){
         travelTime += time;
     }
 
-    public double getTravelTime() {
-        return travelTime;
+    void addColdEmissions(Map<ColdPollutant, Double> coldEmissions) {
+        coldEmissions.entrySet().stream().forEach(e-> this.emissions.put(e.getKey().getText(), e.getValue() + this.emissions.get(e.getKey()) ));
     }
 
-    public void addEmissions(Map<String, Double> emissions) {
-        emissions.entrySet().stream().forEach(e-> this.emissions.put(e.getKey(), e.getValue() + this.emissions.get(e.getKey()) ));
+    void addWarmEmissions(Map<WarmPollutant, Double> warmEmissions) {
+        warmEmissions.entrySet().stream().forEach(e-> this.emissions.put(e.getKey().getText(), e.getValue() + this.emissions.get(e.getKey()) ));
     }
 
-    public double getInhaledMass(OnRoadExposureConfigGroup config){
-        // calculate values here
-        return OnRoadExposureCalculator.calculate(config, this.mode, emissions, travelTime);
+    Map<String,Double> getInhaledMass(OnRoadExposureConfigGroup config){
+        return new OnRoadExposureCalculator(config).calculate(this.mode, emissions, travelTime);
     }
 
 }

@@ -20,6 +20,9 @@
 package playground.agarwalamit.onRoadExposure;
 
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import playground.agarwalamit.mixedTraffic.patnaIndia.simTime.TravelDistanceForSimTimeExp;
 
 /**
  * Created by amit on 08.11.17.
@@ -27,35 +30,47 @@ import java.util.Map;
 
 public class OnRoadExposureCalculator {
 
+    private final OnRoadExposureConfigGroup config;
+
+    OnRoadExposureCalculator(OnRoadExposureConfigGroup onRoadExposureConfigGroup) {
+        this.config = onRoadExposureConfigGroup;
+    }
+
     /**
-     *
      * @param config
      * @param mode
      * @param emissionRate
      * @param travelTime
      * @return
      */
-    public static double calculate(OnRoadExposureConfigGroup config, String mode,
-                                   Map<String, Double> emissionRate, double travelTime){
-        /**
-         * total inhalation in gm = (b + e / d ) * o * r * p . t
-         * b --> background concentration
-         * e --> emissions in g/m for time bin T
-         * d --> dispersion rate
-         * o --> occupancy rate
-         * r --> breathing rate
-         * p --> penetration rate
-         * t --> travelTime
-         */
-        double value = 0.;
-        for ( String pollutant : config.getPollutantToBackgroundConcentration().keySet() ){
-            value += ( config.getPollutantToBackgroundConcentration().get(pollutant)
-                    + emissionRate.get(pollutant) / config.getDispersionRate() )
-                    * config.getPollutantToPenetrationRate(mode).get(pollutant)
-                    * config.getModeToBreathingRate().get(mode)
-                    * config.getModeToOccupancy().get(mode);
-        }
-
-        return  value * travelTime;
+    public Map<String, Double> calculate(String mode, Map<String, Double> emissionRate, double travelTime) {
+        return emissionRate.entrySet()
+                           .stream()
+                           .collect(Collectors.toMap(e -> e.getKey(),
+                                   e -> calculateForSinglePollutant(e.getKey(), e.getValue(), mode, travelTime)));
     }
+
+    /**
+     * total inhalation in gm = (b * o * r * p * t + e  * o * r * p / d)
+     * b --> background concentration
+     * e --> emissions in g/m for time bin T
+     * d --> dispersion rate
+     * o --> occupancy rate
+     * r --> breathing rate
+     * p --> penetration rate
+     * t --> travelTime
+     */
+    private double calculateForSinglePollutant(String pollutant, double pollutantValue, String mode, double travelTime) {
+
+        return (config.getPollutantToBackgroundConcentration().get(pollutant)
+                * config.getModeToOccupancy().get(mode)
+                * config.getModeToBreathingRate().get(mode)
+                * config.getPollutantToPenetrationRate(mode).get(pollutant)
+                * travelTime)
+                + (pollutantValue / config.getDispersionRate()
+                * config.getModeToOccupancy().get(mode)
+                * config.getModeToBreathingRate().get(mode)
+                * config.getPollutantToPenetrationRate(mode).get(pollutant));
+    }
+
 }
