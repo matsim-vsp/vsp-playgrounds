@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
@@ -38,15 +37,14 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.scoring.functions.ActivityUtilityParameters;
 import org.matsim.core.utils.io.IOUtils;
-
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
+import playground.agarwalamit.utils.PersonFilter;
 
 /**
  * This class checks the initial plans file and check 
  * <p> 1) How many persons do not have same first and last activity?
- * <p> 2) Out of them how many are from urban group (only for munich data) ?
+ * <p> 2) Out of them how many are from urban group
  * <p> 3) Also writes the activity sequence of such inconsistent plans and their frequency.
  * <p> 4) How may activities have zero durations.
  * <p> 5) How many activities have end time higher than simulation end time.
@@ -55,19 +53,29 @@ import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 public class InitialPlansConsistencyCheck {
 	private static final Logger LOG = Logger.getLogger(InitialPlansConsistencyCheck.class);
 	private final Scenario sc;
+
 	private final Map<Person, List<String>> person2ActivityType = new HashMap<>();
 	private final Map<Person, List<String>> person2Legs = new HashMap<>();
-	private final Map<UserGroup, Integer> userGroup2NumberOfPersons = new HashMap<>();
+	private final Map<String, Integer> userGroup2NumberOfPersons = new HashMap<>();
+
 	private PersonFilter pf;
 	private BufferedWriter writer;
-	
+
 	private final String configFile ;
 	private final String outputDir;
 
-	public InitialPlansConsistencyCheck(String initialPlans, String outputDir, String configFile) {
+	public InitialPlansConsistencyCheck(String initialPlans, String configFile, String outputDir, PersonFilter pf) {
 		this.configFile = configFile;
 		this.outputDir = outputDir;
 		this.sc = LoadMyScenarios.loadScenarioFromPlans(initialPlans);
+		this.pf = pf;
+	}
+
+	public InitialPlansConsistencyCheck(String initialPlans, String configFile, String outputDir) {
+		this.configFile = configFile;
+		this.outputDir = outputDir;
+		this.sc = LoadMyScenarios.loadScenarioFromPlans(initialPlans);
+		this.pf = null;
 	}
 
 	public static void main(String[] args) {
@@ -76,7 +84,7 @@ public class InitialPlansConsistencyCheck {
 		String initialConfig = "/Users/amit/Documents/repos/runs-svn/detEval/emissionCongestionInternalization/input/config_munich_1pct_baseCase_modified.xml";
 		String outputFile = "/Users/amit/Documents/repos/runs-svn/detEval/emissionCongestionInternalization/output/1pct/run7/";
 
-		new InitialPlansConsistencyCheck(initialPlansFile, outputFile, initialConfig).run();
+		new InitialPlansConsistencyCheck(initialPlansFile, initialConfig, outputFile, new MunichPersonFilter()).run();
 	}
 
 	public void run(){
@@ -87,18 +95,18 @@ public class InitialPlansConsistencyCheck {
 		checkForActivityStartTimeAndSimulationTime();
 	}
 
+
+
 	private void initializePlansStatsWriter (){
+		if (this.pf!=null ) getUserGrp2NumberOfPersons();
 
-		pf = new PersonFilter();
-
-		getUserGrp2NumberOfPersons();
 		getPersonId2ActivitiesAndLegs();
 
 		writer = IOUtils.getBufferedWriter(this.outputDir+"analysis/plansConsistency_differentFirstAndLastActivities.txt");
 
 		try {
 			writer.write("UserGroup \t numberOfPersons \n");
-			for(UserGroup ug : UserGroup.values()){
+			for(String ug : pf.getUserGroupsAsStrings()){
 				writer.write(ug+"\t"+userGroup2NumberOfPersons.get(ug)+"\n");
 			}
 			writer.write("Total persons \t "+person2ActivityType.size()+"\n");
@@ -107,37 +115,41 @@ public class InitialPlansConsistencyCheck {
 		}
 	}
 
-	private void getPersonId2ActivitiesAndLegs(){
+	/**
+	 * Simply counts the number of persons belongs to each user group.
+	 */
+	private void getUserGrp2NumberOfPersons() {
+		sc.getPopulation()
+		  .getPersons()
+		  .values()
+		  .stream()
+		  .map(p -> pf.getUserGroupAsStringFromPersonId(p.getId()))
+		  .forEach(ug -> {
+			  if (this.userGroup2NumberOfPersons.containsKey(ug)) {
+				  userGroup2NumberOfPersons.put(ug, this.userGroup2NumberOfPersons.get(ug));
+			  } else {
+				  userGroup2NumberOfPersons.put(ug, 1);
+			  }
+		  });
+	}
 
+	/**
+	 * Counting number of activities and legs for selected plan of each person.
+	 * TODO : expand for whole choice set.
+	 */
+	private void getPersonId2ActivitiesAndLegs(){
 		for(Person p : sc.getPopulation().getPersons().values()){
 			for(PlanElement pe : p.getSelectedPlan().getPlanElements()){
 				if (pe instanceof Activity ) {
-					List<String> acts = person2ActivityType.get(p);
+					List<String> acts = person2ActivityType.containsKey(p) ? person2ActivityType.get(p) : new ArrayList<>();
 					acts.add(((Activity) pe).getType());
+					person2ActivityType.put(p, acts);
 				} else if (pe instanceof Leg ) {
-					List<String> legs = person2Legs.get(p);
+					List<String> legs = person2Legs.containsKey(p) ? person2Legs.get(p) : new ArrayList<>();
 					legs.add(((Leg) pe).getMode());
+					person2Legs.put(p, legs);
 				} else {
-					throw new RuntimeException("Following plan elements is not included. "+pe.toString());
-				}
-			}
-		}
-	}
-
-	private void getUserGrp2NumberOfPersons() {
-
-		for(UserGroup ug : UserGroup.values()){
-			userGroup2NumberOfPersons.put(ug, 0);
-		}
-
-		for(Person p : sc.getPopulation().getPersons().values()){
-			person2ActivityType.put(p, new ArrayList<>());
-			person2Legs.put(p, new ArrayList<>());
-			for(UserGroup ug : UserGroup.values()){
-				if(pf.isPersonIdFromUserGroup(p.getId(), ug)) {
-					int countSoFar = userGroup2NumberOfPersons.get(ug);
-					userGroup2NumberOfPersons.put(ug, countSoFar+1);
-					break;
+					throw new RuntimeException("Plan elements "+pe.toString()+ " is not known.");
 				}
 			}
 		}
@@ -270,7 +282,7 @@ public class InitialPlansConsistencyCheck {
 			List<String> acts = person2ActivityType.get(p);
 			if(!acts.get(0).equals(acts.get(acts.size()-1))){
 				warnCount++;
-				if(pf.isPersonIdFromUserGroup(p.getId(),UserGroup.URBAN)) urbanPersons++;
+				if(pf.getUserGroupAsStringFromPersonId(p.getId()).equals(MunichPersonFilter.MunichUserGroup.Urban.toString())) urbanPersons++;
 
 				if(actSeq2Count.containsKey(acts.toString())){
 					int countSoFar = actSeq2Count.get(acts.toString());
