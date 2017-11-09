@@ -64,7 +64,7 @@ public class IncidentWithinDayReplanning {
 	private static boolean applyNetworkChangeEvents = true;
 	private static boolean applyWithinDayReplanning = true;
 	private static boolean onlyReplanDirectlyAffectedAgents = true;
-	private static int withinDayReplanInterval = 900;
+	private static int withinDayReplanInterval = 3600;
 		
 // ############################################################################################################################################
 	
