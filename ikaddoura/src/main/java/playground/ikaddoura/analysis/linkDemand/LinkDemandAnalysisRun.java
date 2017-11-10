@@ -30,7 +30,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class LinkDemandAnalysisRun {
 	
-	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4_muc_cne_DecongestionPID/";
+	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_2016-03-15_networkChangeEvents-false_withinDayReplanning-false/";
 	private String outputDirectory;
 
 	public LinkDemandAnalysisRun(String outputDirectory) {
@@ -48,7 +48,7 @@ public class LinkDemandAnalysisRun {
 			outputDirectory = outputDirectory + "/";
 		}
 	
-		Config config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml.gz");
+		Config config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
 		config.plans().setInputFile(null);
 		config.plans().setInputPersonAttributeFile(null);
 		config.network().setChangeEventsInputFile(null);

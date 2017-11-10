@@ -58,11 +58,6 @@
 
 	<dependencies>
         <dependency>
-            <groupId>org.matsim</groupId>
-            <artifactId>matsim-tutorial</artifactId>
-            <version>0.10.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>otfvis</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
@@ -145,6 +140,11 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>dvrp</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>drt</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

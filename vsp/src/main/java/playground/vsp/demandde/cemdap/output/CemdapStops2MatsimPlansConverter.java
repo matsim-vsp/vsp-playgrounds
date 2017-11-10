@@ -31,6 +31,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
@@ -63,6 +64,8 @@ public class CemdapStops2MatsimPlansConverter {
 		String stopFile = "Stops.out";
 		String activityFile = "Activity.out";
 		boolean simplifyGeometries = false;
+		boolean assignCoordinatesToActivities = true; // if set to false, the zone id will be attached to activity types and a fake coordinate will be given.
+		boolean combiningGeoms = true;
 		
 		// Server use
 		if (args.length != 0) {
@@ -76,22 +79,24 @@ public class CemdapStops2MatsimPlansConverter {
 			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
 			landCoverFile = args[8];
 			simplifyGeometries = Boolean.valueOf(args[9]);
+			combiningGeoms = Boolean.valueOf(args[10]);
+			assignCoordinatesToActivities = Boolean.valueOf(args[11]);
 		}
 		
 		convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory, 
 				zonalShapeFile, zoneIdTag, allowVariousWorkAndEducationLocations, addStayHomePlan, 
-				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries);
+				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
 	}
 
 	
 	public static void convert(String cemdapDataRoot, int numberOfFirstCemdapOutputFile, int numberOfPlans, String outputDirectory,
 			String zonalShapeFile, String zoneIdTag, boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
-			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries) throws IOException {
+			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms, boolean assignCoordinatesToActivities) throws IOException {
 
 		CorineLandCoverData corineLandCoverData = null;
 		// CORINE landcover
 		if (landCoverFile!=null && useLandCoverData) {
-			corineLandCoverData = new CorineLandCoverData(landCoverFile, simplifyGeometries);
+			corineLandCoverData = new CorineLandCoverData(landCoverFile, simplifyGeometries, combiningGeoms);
 		}
 
 		LogToOutputSaver.setOutputDirectory(outputDirectory);
@@ -132,8 +137,8 @@ public class CemdapStops2MatsimPlansConverter {
 //		CemdapPersonParser cemdapPersonParser = new CemdapPersonParser();
 //		cemdapPersonParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + cemdapAdultsFilename, personsIds);
 //		cemdapPersonParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + cemdapChildrenFilename, personsIds);
-//		CemdapActivityParser cemdapActivityParser = new CemdapActivityParser();
-//		cemdapActivityParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + activityFile, personHomeMap);
+		CemdapActivityParser cemdapActivityParser = new CemdapActivityParser();
+		cemdapActivityParser.parse(cemdapDataRoot + numberOfFirstCemdapOutputFile + "/" + activityFile, personHomeMap);
 		
 		Population population = scenario.getPopulation();
 		
@@ -142,38 +147,65 @@ public class CemdapStops2MatsimPlansConverter {
 			
 			// Commenting this for the time being; it does not do anything if the activity file is not considered on top of the stops file, dz,aa, sep'17
 			// Add a stay-home plan for those people who have no stops (i.e. no travel) in current stop file
-//			LOG.info("Start assigning stay-home plans to persons who are not in stops file.");
-//			LOG.info("Size of personHomeMap = " + personHomeMap.size() + ".");
-//			int counter = 0;
-//			for (Id<Person> personId : personHomeMap.keySet()) {
-//				Person person = population.getPersons().get(personId);
-//				if (person == null) {
-//					person = population.getFactory().createPerson(personId);
-//					population.addPerson(person);
-//				}
-//				if (person.getPlans().size() <= planNumber) {
-//					Plan stayHomePlan = population.getFactory().createPlan();
-//					stayHomePlan.addActivity(population.getFactory().createActivityFromCoord(ActivityTypes.HOME, new Coord(-1.0, -1.0))); // TODO maybe improve later
-//					person.addPlan(stayHomePlan);
-//					personZoneAttributesMap.get(planNumber).putAttribute(personId.toString(), "zone" + "0", personHomeMap.get(personId)); // TODO maybe improve later
-//					counter++;
-//				}
-//			}
-//			LOG.info("For " + counter + " persons, stay-home plans have been added. Plan number is " + planNumber + ".");
+			// Following is required to add persons who just stays at home. Such persons does not appear in the Stops.out file. dz, aa Oct'17
+			LOG.info("Start assigning stay-home plans to persons who are not in stops file.");
+			LOG.info("Size of personHomeMap = " + personHomeMap.size() + ".");
+			int counter = 0;
+			for (Id<Person> personId : personHomeMap.keySet()) {
+				Person person = population.getPersons().get(personId);
+				if (person == null) {
+					person = population.getFactory().createPerson(personId);
+					population.addPerson(person);
+				}
+				if (person.getPlans().size() <= planNumber) {
+					Plan stayHomePlan = population.getFactory().createPlan();
+					stayHomePlan.addActivity(population.getFactory().createActivityFromCoord(ActivityTypes.HOME, new Coord(-1.0, -1.0))); // TODO maybe improve later
+					person.addPlan(stayHomePlan);
+					personZoneAttributesMap.get(planNumber).putAttribute(personId.toString(), "zone" + "0", personHomeMap.get(personId)); // TODO maybe improve later
+					counter++;
+				}
+			}
+			LOG.info("For " + counter + " persons, stay-home plans have been added. Plan number is " + planNumber + ".");
 		}
-		
-		// Assign home coordinates
-		Feature2Coord feature2Coord = new Feature2Coord();
-		// TODO consideration of CORINE land cover probably in this step
-		//Done. Amit Oct'17
-		feature2Coord.assignHomeCoords(population, personZoneAttributesMap.get(0), zones, homeZones, corineLandCoverData);
-		
-		// Assign coordinates to all other activities
-		for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
-			feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, corineLandCoverData);
+
+		if (assignCoordinatesToActivities) {
+			// Assign home coordinates
+			Feature2Coord feature2Coord = new Feature2Coord();
 			// TODO consideration of CORINE land cover probably in this step
 			//Done. Amit Oct'17
+			feature2Coord.assignHomeCoords(population,
+					personZoneAttributesMap.get(0),
+					zones,
+					homeZones,
+					corineLandCoverData);
+
+			// Assign coordinates to all other activities
+			for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
+				feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, corineLandCoverData);
+				// TODO consideration of CORINE land cover probably in this step
+				//Done. Amit Oct'17
+			}
+		} else {
+			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");
+			// for EXTRA LARGE scenario, one can assign coordinates after sampling which would be at least '1/sampleSize' times faster. Amit Oct'17
+			for (Person person : population.getPersons().values()) {
+				for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
+					int activityIndex = 0;
+					for (PlanElement planElement : person.getPlans().get(planNumber).getPlanElements()) {
+						if (planElement instanceof Activity) {
+							Activity activity = (Activity)planElement;
+							String activityType = activity.getType();
+							String zoneId = (String) personZoneAttributesMap.get(planNumber).getAttribute(person.getId().toString(), CemdapStopsParser.ZONE + activityIndex);
+							if (zoneId == null) {
+								throw new RuntimeException("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
+							}
+							activity.setType(activityType+"_"+zoneId);
+						}
+					}
+				}
+			}
 		}
+
 				
 		// If applicable, add a stay-home plan for everybody
 		if (addStayHomePlan) {

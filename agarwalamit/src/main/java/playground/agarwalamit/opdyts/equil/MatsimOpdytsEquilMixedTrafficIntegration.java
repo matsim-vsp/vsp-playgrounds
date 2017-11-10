@@ -60,7 +60,7 @@ import playground.agarwalamit.utils.FileUtils;
 
 public class MatsimOpdytsEquilMixedTrafficIntegration {
 
-	private static String EQUIL_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/inputs/";
+	private static String EQUIL_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/carBicycle/inputs/";
 	private static final OpdytsScenario EQUIL_MIXEDTRAFFIC = OpdytsScenario.EQUIL_MIXEDTRAFFIC;
 
 	public static void main(String[] args) {
@@ -68,10 +68,10 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		String OUT_DIR ;
 		String relaxedPlans;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
-		double stepSize = 0.5;
-		int iterations2Convergence = 5;
+		double stepSize = 1.0;
+		int iterations2Convergence = 300;
 		double selfTuningWt = 1.0;
-		int warmUpItrs = 1;
+		int warmUpItrs = 5;
 
 		if (args.length > 0) {
 			EQUIL_DIR = args[0];
@@ -85,9 +85,9 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 			selfTuningWt = Double.valueOf(args[6]);
 			warmUpItrs = Integer.valueOf(args[7]);
 		} else {
-			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
-			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/relaxedPlans/output_plans.xml.gz";
-			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
+			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/equil/carBicycle/testCalib/";
+			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/equil/carBicycle/relaxedPlans/output_plans.xml.gz";
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation;
 		}
 
 		configFile = EQUIL_DIR+"/config-with-mode-vehicles.xml";

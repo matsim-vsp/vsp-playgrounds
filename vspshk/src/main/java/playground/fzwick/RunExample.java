@@ -28,7 +28,7 @@ public class RunExample {
 			
 			Config config = ConfigUtils.createConfig();
 			config.controler().setOutputDirectory("C:/Users/Felix/Documents/VSP/Berlin-Netz/Test3");
-			config.controler().setLastIteration(1);
+			config.controler().setLastIteration(2);
 			
 			Scenario sce = ScenarioUtils.createScenario(config);
 			createPopulation(sce);

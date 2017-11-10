@@ -1,17 +1,17 @@
 package playground.vsp.andreas.utils.ana.acts2kml;
 
-import net.opengis.kml._2.AbstractFeatureType;
-import net.opengis.kml._2.ObjectFactory;
-import net.opengis.kml._2.PlacemarkType;
-import net.opengis.kml._2.PointType;
-import net.opengis.kml._2.StyleType;
-
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.vis.kml.NetworkFeatureFactory;
+
+import net.opengis.kml.v_2_2_0.AbstractFeatureType;
+import net.opengis.kml.v_2_2_0.ObjectFactory;
+import net.opengis.kml.v_2_2_0.PlacemarkType;
+import net.opengis.kml.v_2_2_0.PointType;
+import net.opengis.kml.v_2_2_0.StyleType;
 
 public class MyFeatureFactory extends NetworkFeatureFactory{
 

@@ -43,14 +43,14 @@ import org.matsim.core.utils.misc.Time;
 import org.matsim.vis.kml.KMZWriter;
 import org.matsim.vis.kml.MatsimKMLLogo;
 
-import net.opengis.kml._2.AbstractFeatureType;
-import net.opengis.kml._2.DocumentType;
-import net.opengis.kml._2.FolderType;
-import net.opengis.kml._2.KmlType;
-import net.opengis.kml._2.ObjectFactory;
-import net.opengis.kml._2.PlacemarkType;
-import net.opengis.kml._2.ScreenOverlayType;
-import net.opengis.kml._2.StyleType;
+import net.opengis.kml.v_2_2_0.AbstractFeatureType;
+import net.opengis.kml.v_2_2_0.DocumentType;
+import net.opengis.kml.v_2_2_0.FolderType;
+import net.opengis.kml.v_2_2_0.KmlType;
+import net.opengis.kml.v_2_2_0.ObjectFactory;
+import net.opengis.kml.v_2_2_0.PlacemarkType;
+import net.opengis.kml.v_2_2_0.ScreenOverlayType;
+import net.opengis.kml.v_2_2_0.StyleType;
 
 public class KMLPersonPlanWriter {
 

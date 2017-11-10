@@ -1,5 +1,6 @@
 package playground.santiago.population;
 
+import java.io.File;
 import java.util.Random;
 import java.util.SortedMap;
 
@@ -25,26 +26,35 @@ import org.matsim.pt.PtConstants;
 public class RandomizeEndTimes {
 	
 	private final static Logger log = Logger.getLogger(RandomizeEndTimes.class);
-	final String plansFolder = "../../../shared-svn/projects/santiago/scenario/inputForMATSim/plans/2_10pct/";
-	final String plansFile = plansFolder + "expanded_plans_0.xml.gz";
-	final String configFolder = "../../../shared-svn/projects/santiago/scenario/inputForMATSim/";
-	final String configFile = configFolder + "expanded_config_0.xml";
-	final String runsWorkingDir = "../../../runs-svn/santiago/TMP/input/";
-	final int standardDeviation = 33; //S.D. (in minutes)
 	
-	public static void main(String[] args) {
-
-		RandomizeEndTimes ret = new RandomizeEndTimes();
-		ret.run();
+	private String runsWorkingDir;
+	private String svnWorkingDir;
+	
+	private String inConfig;
+	private String inPlans;
+	
+	private int standardDeviation;
+	
+	public RandomizeEndTimes(String runsWorkingDir, String svnWorkingDir, int standardDeviation){
+		
+		this.runsWorkingDir = runsWorkingDir;
+		this.svnWorkingDir = svnWorkingDir;
+		this.standardDeviation = standardDeviation;
+		
+		this.inConfig = this.svnWorkingDir + "inputForMATSim/expanded_config_0.xml";
+		this.inPlans = this.svnWorkingDir + "inputForMATSim/plans/expanded/expanded_plans_0.xml.gz";
 	}
 	
-	
-	private void run (){
+	private void createDir(File file){
+		log.info("Directory " + file + " created: "+ file.mkdirs());	
+	}
+
+	public void run (){
 		
-		Config config = ConfigUtils.loadConfig(configFile);		
+		Config config = ConfigUtils.loadConfig(inConfig);		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());		
 		PopulationReader pr = new PopulationReader(scenario);
-		pr.readFile(plansFile);		
+		pr.readFile(inPlans);		
 		Population population = scenario.getPopulation();	
 		
 		
@@ -58,8 +68,6 @@ public class RandomizeEndTimes {
 		write(randomAndClassifiedPop, config);
 		
 	}
-	
-	
 	
 	private double createRandomEndTime(Random random, int standardDeviation){
 		//draw two random numbers [0;1] from uniform distribution
@@ -153,19 +161,29 @@ public class RandomizeEndTimes {
 		
 	private void write (Population population, Config config){		
 
+		String outPlansDir = this.svnWorkingDir + "inputForMATSim/plans/expanded/";
 		
-		new PopulationWriter(population).write(plansFolder + "expanded_plans_1.xml.gz");
+		File outPlansDirFile = new File(outPlansDir);
+		if(!outPlansDirFile.exists()) createDir(outPlansDirFile);
+		
+		String outPlans = "expanded_plans_1.xml.gz";
+		
+		new PopulationWriter(population).write(outPlansDir + outPlans);
 		log.info("expanded_plans_1 has the entire population WITH "
 				+ "randomized activity end times & the classification of the activities");
 		
-		
-		
+				
+		String outConfigDir = this.svnWorkingDir + "inputForMATSim/";
+		String outConfig = "expanded_config_1.xml";
+				
 		PlansConfigGroup plans = config.plans();
 		plans.setInputFile(runsWorkingDir + "expanded_plans_1.xml.gz");
-		new ConfigWriter(config).write(configFolder + "expanded_config_1.xml");
+		new ConfigWriter(config).write(outConfigDir + outConfig);
 		
 		
 	}
+	
+
 	
 	
 

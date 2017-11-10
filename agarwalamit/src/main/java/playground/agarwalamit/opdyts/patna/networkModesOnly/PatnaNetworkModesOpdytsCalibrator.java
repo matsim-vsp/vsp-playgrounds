@@ -17,19 +17,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.opdyts.patna.allModes;
+package playground.agarwalamit.opdyts.patna.networkModesOnly;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
 import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
@@ -37,10 +37,9 @@ import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -50,30 +49,23 @@ import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
 import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
 import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
-import playground.agarwalamit.clustering.ClusterAlgorithm;
-import playground.agarwalamit.clustering.ClusterUtils;
-import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
-import playground.agarwalamit.opdyts.*;
+import playground.agarwalamit.opdyts.DistanceDistribution;
+import playground.agarwalamit.opdyts.ModeChoiceDecisionVariable;
+import playground.agarwalamit.opdyts.ModeChoiceObjectiveFunction;
+import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
+import playground.agarwalamit.opdyts.OpdytsScenario;
+import playground.agarwalamit.opdyts.RandomizedUtilityParametersChoser;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
-import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
+import playground.agarwalamit.opdyts.equil.MatsimOpdytsEquilMixedTrafficIntegration;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
-import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
-import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
 
 /**
  * @author amit
  */
 
-public class PatnaUrbanOpdytsCalibrator {
-
-	public enum PatnaTeleportationModesZonesType {
-		wardFile,
-		simpleGrid,
-		clusterAlgoKmeans,
-		clusterAlgoEqualPoints
-	}
+public class PatnaNetworkModesOpdytsCalibrator {
 
 	private static final OpdytsScenario PATNA_1_PCT = OpdytsScenario.PATNA_1Pct;
 
@@ -82,84 +74,69 @@ public class PatnaUrbanOpdytsCalibrator {
 		String OUT_DIR = null;
 		String relaxedPlans ;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
-		PatnaTeleportationModesZonesType patnaTeleportationModesZonesType ;
+
+		double stepSize = 1.0;
+		int iterations2Convergence = 800;
+		double selfTuningWt = 1.0;
+		int warmUpItrs = 5;
 
 		if ( args.length>0 ) {
 			configFile = args[0];
 			OUT_DIR = args[1];
 			relaxedPlans = args[2];
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.valueOf(args[3]);
-			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.valueOf(args[4]);
-		} else {
-			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/input_allModes/"+"/config_allModes.xml";
-			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/";
-			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/initialPlans2RelaxedPlans/output_plans.xml.gz";
-			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation;
-			patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.clusterAlgoKmeans;
-		}
 
-		OUT_DIR += ascRandomizeStyle+"_"+patnaTeleportationModesZonesType+"/";
+			// opdyts params
+			stepSize = Double.valueOf(args[4]);
+			iterations2Convergence = Integer.valueOf(args[5]);
+			selfTuningWt = Double.valueOf(args[6]);
+			warmUpItrs = Integer.valueOf(args[7]);
+		} else {
+			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/input/config_networkModesOnly.xml";
+			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/output/";
+			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output/output_plans.xml.gz";
+			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation;
+		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
 		config.plans().setInputFile(relaxedPlans);
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
 		config.controler().setOutputDirectory(OUT_DIR);
 
+		// from GF, every run should have a different random seed.
+		int randomSeed = new Random().nextInt(9999);
+		config.global().setRandomSeed(randomSeed);
+
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
+		opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
+		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
+		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
+
+		List<String> modes2consider = Arrays.asList("car","bike","motorbike");
+
+		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		// adding pt fare system based on distance
-		// for above make sure that util_dist and monetary dist rate for pt are zero.
-		PlanCalcScoreConfigGroup.ModeParams mp = scenario.getConfig().planCalcScore().getModes().get("pt");
-		mp.setMarginalUtilityOfDistance(0.0);
-		mp.setMonetaryDistanceRate(0.0);
+		//****************************** mainly opdyts settings ******************************
 
-		// == opdyts settings
-		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<ModeChoiceDecisionVariable>(scenario);
-		Set<String> networkModes = new HashSet<>(scenario.getConfig().qsim().getMainModes());
-		Set<String> teleportationModes = new HashSet<>(scenario.getConfig().plansCalcRoute().getModeRoutingParams().keySet());
+		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
 
-		Set<String> allModes = new LinkedHashSet<>(networkModes);
-		allModes.addAll(teleportationModes);
-
-		DistanceDistribution referenceStudyDistri = new PatnaOneBinDistanceDistribution(PATNA_1_PCT);
-		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(allModes, referenceStudyDistri);
+		DistanceDistribution referenceStudyDistri = new PatnaNetworkModesOneBinDistanceDistribution(PATNA_1_PCT);
+		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(modes2consider,referenceStudyDistri);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
-
-		// getting zone info
-		String path = new File(configFile).getParentFile().getAbsolutePath();
-		PatnaZoneIdentifier patnaZoneIdentifier = null ;
-		switch (patnaTeleportationModesZonesType){
-			case wardFile:
-				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), path+"/Wards.shp"); // use plans instead to get the
-				break;
-			case simpleGrid:
-				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), scenario.getNetwork(), 250);
-				break;
-			case clusterAlgoKmeans:
-				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000,
-						ClusterAlgorithm.ClusterType.K_MEANS);
-				break;
-			case clusterAlgoEqualPoints:
-				patnaZoneIdentifier = new PatnaZoneIdentifier(scenario.getPopulation(), ClusterUtils.getBoundingBox(scenario.getNetwork()), 2000, // 18 origins in each cluster.
-						ClusterAlgorithm.ClusterType.EQUAL_POINTS);
-				break;
-				default:throw new RuntimeException("not implemented yet.");
-		}
-		Set<Zone> relevantZones = patnaZoneIdentifier.getZones();
-		simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(opdytsControler.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
+		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>( new MATSimStateFactoryImpl<>(), scenario);
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
 			public void install() {
-				addControlerListenerBinding().to(KaiAnalysisListener.class);
+//				addControlerListenerBinding().to(KaiAnalysisListener.class);
 				addControlerListenerBinding().toInstance(stasControlerListner);
 
 				this.bind(ModalShareEventHandler.class);
@@ -169,9 +146,6 @@ public class PatnaUrbanOpdytsCalibrator {
 				this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
 
 				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
-
-				// adding pt fare system based on distance
-				this.addEventHandlerBinding().to(PtFareEventHandler.class);
 
 				addControlerListenerBinding().toInstance(new ShutdownListener() {
 					@Override
@@ -192,16 +166,7 @@ public class PatnaUrbanOpdytsCalibrator {
 									try {
 										Files.copy(new File(sourceFile), new File(sinkFile));
 									} catch (IOException e) {
-										throw new RuntimeException("Data is not copied. Reason : " + e);
-									}
-								}
-								{
-									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt");
-									String sinkFile =  outDir+"/"+itr+".stateVector_teleportationModes.txt";
-									try {
-										Files.copy(new File(sourceFile), new File(sinkFile));
-									} catch (IOException e) {
-										throw new RuntimeException("Data is not copied. Reason : " + e);
+										Logger.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
 									}
 								}
 							}
@@ -218,8 +183,7 @@ public class PatnaUrbanOpdytsCalibrator {
 							opdytsConvergencePlotter.readFile(finalOUT_DIR +"/opdyts.con");
 							opdytsConvergencePlotter.plotData(finalOUT_DIR +"/convergence.png");
 						}
-
-						BestSolutionVsDecisionVariableChart bestSolutionVsDecisionVariableChart = new BestSolutionVsDecisionVariableChart(new ArrayList<>(allModes));
+						BestSolutionVsDecisionVariableChart bestSolutionVsDecisionVariableChart = new BestSolutionVsDecisionVariableChart(new ArrayList<>(modes2consider));
 						bestSolutionVsDecisionVariableChart.readFile(finalOUT_DIR +"/opdyts.log");
 						bestSolutionVsDecisionVariableChart.plotData(finalOUT_DIR +"/decisionVariableVsASC.png");
 					}
@@ -229,16 +193,18 @@ public class PatnaUrbanOpdytsCalibrator {
 
 		// this is the objective Function which returns the value for given SimulatorState
 		// in my case, this will be the distance based modal split
-		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(referenceStudyDistri); // in this, the method argument (SimulatorStat) is not used.
+		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(referenceStudyDistri);
 
+		//search algorithm
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
-				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, allModes, ascRandomizeStyle);
+				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, modes2consider,ascRandomizeStyle);
 
 		// what would be the decision variables to optimize the objective function.
-		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, allModes, PATNA_1_PCT);
+		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, PATNA_1_PCT);
 
 		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
 		opdytsControler.run(simulator, decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
+
 	}
 }

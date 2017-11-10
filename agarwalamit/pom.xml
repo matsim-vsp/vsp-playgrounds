@@ -60,11 +60,11 @@
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
-<dependency>
-    <groupId>com.jcraft</groupId>
-    <artifactId>jsch</artifactId>
-    <version>0.1.54</version>
-</dependency>
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.54</version>
+		</dependency>
 		
 		<!--<dependency>-->
 		<!--<groupId>com.github.gunnarfloetteroed</groupId>-->
@@ -72,16 +72,10 @@
 		<!--<version>master-SNAPSHOT</version>-->
 		<!--</dependency>-->
 		<!--<dependency>-->
-		<!--dont need this since, I somehow depend on ivtExt-->
-		<!--<groupId>com.jcraft</groupId>-->
-		<!--<artifactId>jsch</artifactId>-->
-		<!--<version>0.1.54</version>-->
+			<!--<groupId>com.github.mobitopp</groupId>-->
+			<!--<artifactId>connection-scan</artifactId>-->
+			<!--<version>master-SNAPSHOT</version>-->
 		<!--</dependency>-->
-		<dependency>
-			<groupId>com.github.mobitopp</groupId>
-			<artifactId>connection-scan</artifactId>
-			<version>master-SNAPSHOT</version>
-		</dependency>
 		<!--<dependency>-->
 			<!--<groupId>org.opentripplanner</groupId>-->
 			<!--<artifactId>otp</artifactId>-->

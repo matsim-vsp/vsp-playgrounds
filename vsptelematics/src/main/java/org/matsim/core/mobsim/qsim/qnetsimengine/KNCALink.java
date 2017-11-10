@@ -87,7 +87,7 @@ public class KNCALink {
 	}
 
 	static class MyQNetworkFactory extends QNetworkFactory {
-		private final class QLaneIExtension extends QLaneI {
+		private final class QLaneIExtension implements QLaneI {
 			private final class VisDataImplementation implements VisData {
 				@Override public Collection<AgentSnapshotInfo> addAgentSnapshotInfo( Collection<AgentSnapshotInfo> positions, double now) {
 					for ( int ii=MAXV ; ii<MAXV+LEN ; ii++ ) {
@@ -241,22 +241,22 @@ public class KNCALink {
 				return Id.create("1", Lane.class ) ;
 			}
 
-			@Override void addFromWait(QVehicle veh) {
+			@Override public void addFromWait(QVehicle veh) {
 			}
 
-			@Override boolean isAcceptingFromWait(QVehicle veh) {
+			@Override public boolean isAcceptingFromWait(QVehicle veh) {
 				return false ;
 			}
 
-			@Override boolean isActive() {
+			@Override public boolean isActive() {
 				return true ;
 			}
 
-			@Override double getSimulatedFlowCapacityPerTimeStep() {
+			@Override public double getSimulatedFlowCapacityPerTimeStep() {
 				return 0.5 ;
 			}
 
-			@Override QVehicle getVehicle(Id<Vehicle> vehicleId) {
+			@Override public QVehicle getVehicle(Id<Vehicle> vehicleId) {
 				for ( int ii=MAXV ; ii<MAXV+LEN ; ii++ ) {
 					if ( array[ii]!=null && array[ii].qVehicle.getId().equals( vehicleId ) ) {
 						return array[ii].qVehicle ;
@@ -265,27 +265,27 @@ public class KNCALink {
 				return null ;
 			}
 
-			@Override double getStorageCapacity() {
+			@Override public double getStorageCapacity() {
 				return LEN ;
 			}
 
-			@Override VisData getVisData() {
+			@Override public VisData getVisData() {
 				return visData ;
 			}
 
-			@Override void addTransitSlightlyUpstreamOfStop(QVehicle veh) {
+			@Override public void addTransitSlightlyUpstreamOfStop(QVehicle veh) {
 				throw new RuntimeException("not implemented") ;
 			}
 
-			@Override void changeUnscaledFlowCapacityPerSecond(double val) {
+			@Override public void changeUnscaledFlowCapacityPerSecond(double val) {
 				throw new RuntimeException("not implemented") ;
 			}
 
-			@Override void changeEffectiveNumberOfLanes(double val) {
+			@Override public void changeEffectiveNumberOfLanes(double val) {
 				throw new RuntimeException("not implemented") ;
 			}
 
-			@Override boolean doSimStep() {
+			@Override public boolean doSimStep() {
 
 				for ( int ii=0 ; ii<MAXV ; ii++ ) {
 					array[ii] = array[LEN+ii] ;
@@ -359,13 +359,13 @@ public class KNCALink {
 				return true ;
 			}
 
-			@Override void clearVehicles() {
+			@Override public void clearVehicles() {
 				for ( int ii=0 ; ii<array.length ; ii++ ) {
 					array[ii] = null ;
 				}
 			}
 
-			@Override Collection<MobsimVehicle> getAllVehicles() {
+			@Override public Collection<MobsimVehicle> getAllVehicles() {
 				List<MobsimVehicle> list = new ArrayList<>() ; 
 				for ( int ii=MAXV ; ii<MAXV+LEN ; ii++ ) {
 					if ( array[ii]!=null ) {
@@ -375,44 +375,40 @@ public class KNCALink {
 				return list ;
 			}
 
-			@Override void addFromUpstream(QVehicle veh) {
+			@Override public void addFromUpstream(QVehicle veh) {
 			}
 
-			@Override boolean isNotOfferingVehicle() {
+			@Override public boolean isNotOfferingVehicle() {
 				return true ;
 			}
 
-			@Override QVehicle popFirstVehicle() {
+			@Override public QVehicle popFirstVehicle() {
 				return null ;
 			}
 
-			@Override QVehicle getFirstVehicle() {
+			@Override public QVehicle getFirstVehicle() {
 				return null ;
 			}
 
 			@Override
-			double getLastMovementTimeOfFirstVehicle() {
+			public double getLastMovementTimeOfFirstVehicle() {
 				return 0. ;
 			}
 
-			@Override boolean hasGreenForToLink(Id<Link> toLinkId) {
-				return true ;
-			}
-
-			@Override boolean isAcceptingFromUpstream() {
+			@Override public boolean isAcceptingFromUpstream() {
 				return false ;
 			}
 
-			@Override void changeSpeedMetersPerSecond(double val) {
+			@Override public void changeSpeedMetersPerSecond(double val) {
 				throw new RuntimeException("not implemented") ;
 			}
 
-			@Override double getLoadIndicator() {
+			@Override public double getLoadIndicator() {
 				return 0.5 ;
 			}
 
             @Override
-            void initBeforeSimStep() {
+            public void initBeforeSimStep() {
             }
 		}
 		@Inject private EventsManager events ;

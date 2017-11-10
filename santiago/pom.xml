@@ -5,45 +5,69 @@
 		<artifactId>vsp-playgrounds</artifactId>
 		<version>0.10.0-SNAPSHOT</version>
 	</parent>
-
 	<modelVersion>4.0.0</modelVersion>
-	  <groupId>vsp-playground</groupId>
+	<groupId>vsp-playground</groupId>
 	<artifactId>santiago</artifactId>
 	<name>santiago</name>
-
+	<repositories>
+<!-- 		<repository>
+			<id>hmm-lib-snapshots</id>
+			<url>https://raw.github.com/bmwcarit/hmm-lib/mvn-snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+			</snapshots>
+		</repository> -->
+		<repository>
+			<id>conveyal</id>
+			<name>Conveyal Maven Repository</name>
+			<url>http://maven.conveyal.com/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>		
+	</repositories>
 	<dependencies>
-
+<!-- 		<dependency>
+			<groupId>com.bmw.hmm_lib</groupId>
+			<artifactId>hmm-lib</artifactId>
+			<version>0.2.0</version>
+		</dependency> -->
+		<dependency>
+			<groupId>com.conveyal</groupId>
+			<artifactId>gtfs-lib</artifactId>
+			<version>1.1.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>emissions</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>roadpricing</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			  <groupId>vsp-playground</groupId>
+			<groupId>vsp-playground</groupId>
 			<artifactId>vsp</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			  <groupId>vsp-playground</groupId>
+			<groupId>vsp-playground</groupId>
 			<artifactId>benjamin</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			  <groupId>vsp-playground</groupId>
+			<groupId>vsp-playground</groupId>
 			<artifactId>agarwalamit</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			  <groupId>vsp-playground</groupId>
+			<groupId>vsp-playground</groupId>
 			<artifactId>ikaddoura</artifactId>
 			<version>0.10.0-SNAPSHOT</version>
 			<scope>compile</scope>
@@ -51,7 +75,7 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>matsim-gtfs</artifactId>
-			<version>0.8.0</version>
+			<version>0.9.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -74,8 +74,8 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
                     PlanCalcScoreConfigGroup.ModeParams mp = allModes.get(mode);
                     if(mp.getMode().equals(TransportMode.other)) continue;
                     str.append(mp.getMode() + ": "+ mp.getConstant() + " + "+
-                            mp.getMarginalUtilityOfTraveling()+ " * ttime " +
-                            mp.getMarginalUtilityOfDistance() + " * tdist " +
+                            mp.getMarginalUtilityOfTraveling()+ " * ttime " + " + "+
+                            mp.getMarginalUtilityOfDistance() + " * tdist " + " + "+
                             mp.getMonetaryDistanceRate() +" * " + this.newScoreConfig.getMarginalUtilityOfMoney() + " * tdist;"
                     );
                 }

@@ -36,6 +36,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
+import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingConfigGroup;
+import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingModule;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 
 /**
@@ -87,7 +89,9 @@ public class RunExampleOptAV {
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup(),
-				new DecongestionConfigGroup());
+				new DecongestionConfigGroup(),
+				new AgentSpecificActivitySchedulingConfigGroup()
+				);
 		
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
@@ -99,6 +103,8 @@ public class RunExampleOptAV {
 		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new OptAVModule(scenario));
 		
+		controler.addOverridingModule(new AgentSpecificActivitySchedulingModule(scenario));
+
 		// #############################
 		// run
 		// #############################

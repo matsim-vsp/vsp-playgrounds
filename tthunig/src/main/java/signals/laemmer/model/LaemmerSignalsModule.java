@@ -21,8 +21,6 @@
  */
 package signals.laemmer.model;
 
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalEvents2ViaCSVWriter;
 import org.matsim.contrib.signals.builder.FromDataBuilder;
@@ -33,9 +31,14 @@ import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.router.NetworkWithSignalsTurnInfoBuilder;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.network.algorithms.NetworkTurnInfoBuilder;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QSignalsNetworkFactory;
 import org.matsim.core.network.algorithms.NetworkTurnInfoBuilderI;
 import org.matsim.core.replanning.ReplanningContext;
+
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.CombinedSignalsModule;
 import signals.sensor.LinkSensorManager;
@@ -71,6 +74,7 @@ public class LaemmerSignalsModule extends AbstractModule{
 			// general signal bindings
 			bind(SignalSystemsModelBuilder.class).to(FromDataBuilder.class);
             addMobsimListenerBinding().to(QSimSignalEngine.class);
+			bind(QNetworkFactory.class).to(QSignalsNetworkFactory.class);
 
             bind(SignalAnalyzer.class);
             addMobsimListenerBinding().to(SignalAnalyzer.class);
