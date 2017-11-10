@@ -25,12 +25,10 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.noise.NoiseComputationModule;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.TaxiOutputModule;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
@@ -41,7 +39,6 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPer
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionModule;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
@@ -177,6 +174,7 @@ public class OptAVModule extends AbstractModule {
 		// #############################
 
 		DvrpConfigGroup.get(this.getConfig()).setMode(TaxiModule.TAXI_MODE);
+		DvrpConfigGroup.get(this.getConfig()).setNetworkMode(TransportMode.car);
 		this.getConfig().addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		this.getConfig().checkConsistency();
         
