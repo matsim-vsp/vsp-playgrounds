@@ -1,4 +1,4 @@
-package playground.sbraun;
+package playground.sbraun.actDurationAnalysis;
 
 public class Test {
 
