@@ -99,6 +99,7 @@ public class PersonTripNoiseAnalysis {
 			bw.write( "person Id;"
 					+ "number of " + mode + " trips;"
 					+ "at least one stuck and abort " + mode + " trip (yes/no);"
+					+ "number of stuck and abort events (day);"
 					+ mode + " total travel time (day) [sec];"
 					+ mode + " total in-vehicle time (day) [sec];"
 					+ mode + " total waiting time (for taxi/pt) (day) [sec];"
@@ -119,6 +120,7 @@ public class PersonTripNoiseAnalysis {
 				}
 				int mode_trips = 0;
 				String mode_stuckAbort = "no";
+				int numberOfStuckAndAbortEvents = 0;
 				double mode_travelTime = 0.;
 				double mode_inVehTime = 0.;
 				double mode_waitingTime = 0.;
@@ -153,6 +155,10 @@ public class PersonTripNoiseAnalysis {
 								}
 							}
 							
+							if (basicHandler.getPersonId2stuckAndAbortEvents().containsKey(id)) {
+								numberOfStuckAndAbortEvents = basicHandler.getPersonId2stuckAndAbortEvents().get(id);
+							}
+							
 							if (basicHandler.getPersonId2tripNumber2travelTime().containsKey(id) && basicHandler.getPersonId2tripNumber2travelTime().get(id).containsKey(trip)) {
 								mode_travelTime = mode_travelTime + basicHandler.getPersonId2tripNumber2travelTime().get(id).get(trip);
 							}
@@ -175,6 +181,7 @@ public class PersonTripNoiseAnalysis {
 				bw.write(id + ";"
 						+ mode_trips + ";"
 						+ mode_stuckAbort + ";"
+						+ numberOfStuckAndAbortEvents + ";"
 						+ mode_travelTime + ";"
 						+ mode_inVehTime + ";"
 						+ mode_waitingTime + ";"
@@ -373,6 +380,7 @@ public class PersonTripNoiseAnalysis {
 			
 			int mode_trips = 0;
 			int mode_StuckAndAbortTrips = 0;
+			int stuckAndAbortEvents = 0;
 			double mode_TravelTime = 0.;
 			double mode_inVehTime = 0.;
 			double mode_waitingTime = 0.;
@@ -399,6 +407,10 @@ public class PersonTripNoiseAnalysis {
 								if (basicHandler.getPersonId2tripNumber2stuckAbort().get(id).get(trip)) {
 									mode_StuckAndAbortTrips++;
 								}
+							}
+							
+							if (basicHandler.getPersonId2stuckAndAbortEvents().containsKey(id)) {
+								stuckAndAbortEvents = basicHandler.getPersonId2stuckAndAbortEvents().get(id);
 							}
 							
 							if (basicHandler.getPersonId2tripNumber2travelTime().containsKey(id) && basicHandler.getPersonId2tripNumber2travelTime().get(id).containsKey(trip)) {
@@ -429,7 +441,10 @@ public class PersonTripNoiseAnalysis {
 			bw.write("number of " + mode + " trips (sample size);" + mode_trips);
 			bw.newLine();
 			
-			bw.write("number of " + mode + " stuck and abort trip (sample size)s;" + mode_StuckAndAbortTrips);
+			bw.write("number of " + mode + " stuck and abort trip (sample size);" + mode_StuckAndAbortTrips);
+			bw.newLine();
+			
+			bw.write("number of stuck and abort events (sample size);" + stuckAndAbortEvents);
 			bw.newLine();
 			
 			bw.newLine();
@@ -673,6 +688,9 @@ public class PersonTripNoiseAnalysis {
 			bw.newLine();
 			
 			bw.write("number of stuck and abort trips (sample size, all modes);" + allStuckAndAbortTrips);
+			bw.newLine();
+			
+			bw.write("number of persons with at least one stuck and abort event (sample size, all modes);" + basicHandler.getPersonId2stuckAndAbortEvents().size());
 			bw.newLine();
 			
 			bw.write("-----------");

@@ -95,7 +95,9 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2payment = new HashMap<>();
 	private final Map<Id<Person>,Map<Integer,Boolean>> personId2tripNumber2stuckAbort = new HashMap<>();
 	
+	private final Map<Id<Person>,Integer> personId2stuckAndAbortEvents = new HashMap<>();	
 	private final Map<Id<Person>, Double> personId2totalpayments = new HashMap<>();
+	
 	private double totalPayments = 0.;
 	
 	private int warnCnt0 = 0;
@@ -525,6 +527,13 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 				
 				tripNr2StuckAbort.put(currentTripNumber, true);
 				this.personId2tripNumber2stuckAbort.put(event.getPersonId(), tripNr2StuckAbort);
+				
+				if (this.personId2stuckAndAbortEvents.get(event.getPersonId()) == null) {
+					this.personId2stuckAndAbortEvents.put(event.getPersonId(), 1);
+				} else {
+					int updatedValue = this.personId2stuckAndAbortEvents.get(event.getPersonId()) + 1;
+					this.personId2stuckAndAbortEvents.put(event.getPersonId(), updatedValue);
+				}
 			
 			} else {
 				// the agent has not yet departed
@@ -640,7 +649,9 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	public Map<Id<Vehicle>, Double> getCarVehicleId2totalDistance() {
 		return carVehicleId2totalDistance;
 	}
-	
-	
 
+	public Map<Id<Person>, Integer> getPersonId2stuckAndAbortEvents() {
+		return personId2stuckAndAbortEvents;
+	}
+	
 }
