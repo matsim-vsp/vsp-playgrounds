@@ -42,9 +42,9 @@ import org.matsim.vehicles.Vehicle;
 
 /**
  * Created by amit on 08.11.17.
- *
+ * <p>
  * The idea is to collect the emissions by all persons on a link between receptor's entry-exit on this link.
- *
+ * <p>
  * Probably, a problem is that (I think), *EmissionEvents are thrown after LinkLeaveEvent.
  */
 
@@ -56,23 +56,29 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
 
     private final OnRoadExposureConfigGroup config;
 
-    private Map<Id<Person>,Map<String,Double>> person2InhaledMass = new HashMap<>(); //TODO throw events instead
+    private Map<Id<Person>, Map<String, Double>> person2InhaledMass = new HashMap<>(); //TODO throw events instead
     private Map<Id<Link>, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> agentsOnLink = new HashMap<>();
     private final Map<Id<Vehicle>, String> vehicleId2Mode = new HashMap<>();
 
     @Inject
-    public OnRoadExposureEventHandler(OnRoadExposureConfigGroup config){
+    public OnRoadExposureEventHandler(OnRoadExposureConfigGroup config) {
         this.config = config;
     }
 
     @Override
     public void handleEvent(ColdEmissionEvent event) {
-        this.agentsOnLink.get(event.getLinkId()).values().stream().forEach(e -> e.addColdEmissions(event.getColdEmissions()));
+        this.agentsOnLink.get(event.getLinkId())
+                         .values()
+                         .stream()
+                         .forEach(e -> e.addColdEmissions(event.getColdEmissions()));
     }
 
     @Override
     public void handleEvent(WarmEmissionEvent event) {
-        this.agentsOnLink.get(event.getLinkId()).values().stream().forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
+        this.agentsOnLink.get(event.getLinkId())
+                         .values()
+                         .stream()
+                         .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
     }
 
     @Override
@@ -89,12 +95,14 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         Id<Link> linkId = event.getLinkId();
         double time = event.getTime();
 
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(event.getVehicleId(), event.getLinkId(), this.vehicleId2Mode.get(event.getVehicleId()));
+        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(event.getVehicleId(),
+                event.getLinkId(),
+                this.vehicleId2Mode.get(event.getVehicleId()));
         vehicleLinkEmissionCollector.setLinkEnterTime(event.getTime());
 
 
-        Map<Id<Vehicle>,VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(event.getLinkId());
-        if (vehicleId2EmissionCollector == null){
+        Map<Id<Vehicle>, VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(event.getLinkId());
+        if (vehicleId2EmissionCollector == null) {
             vehicleId2EmissionCollector = new HashMap<>();
         }
         vehicleId2EmissionCollector.put(event.getVehicleId(), vehicleLinkEmissionCollector);
@@ -112,12 +120,12 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 
         Id<Person> personId = getDriverOfVehicle(vehicleId);
-        Map<String,Double> temp = this.person2InhaledMass.get(personId);
+        Map<String, Double> temp = this.person2InhaledMass.get(personId);
 
-        if (temp==null) temp = inhaledMass;
+        if (temp == null) temp = inhaledMass;
         else {
-            for ( String str : inhaledMass.keySet() ) {
-                temp.put(str, temp.get(str)+ inhaledMass.get(str));
+            for (String str : inhaledMass.keySet()) {
+                temp.put(str, temp.get(str) + inhaledMass.get(str));
             }
         }
 
@@ -130,11 +138,13 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
 
         this.vehicleId2Mode.put(event.getVehicleId(), event.getNetworkMode());
 
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(event.getVehicleId(), event.getLinkId(), event.getNetworkMode());
+        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(event.getVehicleId(),
+                event.getLinkId(),
+                event.getNetworkMode());
         vehicleLinkEmissionCollector.setLinkEnterTime(event.getTime());
 
-        Map<Id<Vehicle>,VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(event.getLinkId());
-        if (vehicleId2EmissionCollector == null){
+        Map<Id<Vehicle>, VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(event.getLinkId());
+        if (vehicleId2EmissionCollector == null) {
             vehicleId2EmissionCollector = new HashMap<>();
         }
         vehicleId2EmissionCollector.put(event.getVehicleId(), vehicleLinkEmissionCollector);
@@ -153,12 +163,12 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 
-        Map<String,Double> temp = this.person2InhaledMass.get(event.getPersonId());
+        Map<String, Double> temp = this.person2InhaledMass.get(event.getPersonId());
 
-        if (temp==null) temp = inhaledMass;
+        if (temp == null) temp = inhaledMass;
         else {
-            for ( String str : inhaledMass.keySet() ) {
-                temp.put(str, temp.get(str)+ inhaledMass.get(str));
+            for (String str : inhaledMass.keySet()) {
+                temp.put(str, temp.get(str) + inhaledMass.get(str));
             }
         }
 
@@ -170,4 +180,24 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         return vehicle2DriverDelegate.getDriverOfVehicle(vehicleId);
     }
 
+    public Map<Id<Person>, Map<String, Double>> getPerson2InhaledMass() {
+        return person2InhaledMass;
+    }
+
+    public Map<String, Double> getTotalInhaledMass() {
+        Map<String, Double> totalMass = new HashMap<>();
+        for (Id<Person> personId : this.person2InhaledMass.keySet()) {
+            this.person2InhaledMass.get(personId)
+                                   .entrySet()
+                                   .stream()
+                                   .forEach(e -> {
+                                       if (totalMass.containsKey(e.getKey())) {
+                                           totalMass.put(e.getKey(), e.getValue() + totalMass.get(e.getKey()));
+                                       } else {
+                                           totalMass.put(e.getKey(), e.getValue());
+                                       }
+                                   });
+        }
+        return totalMass;
+    }
 }

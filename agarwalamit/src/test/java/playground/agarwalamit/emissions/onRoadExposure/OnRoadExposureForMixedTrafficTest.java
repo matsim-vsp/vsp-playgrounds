@@ -37,6 +37,7 @@ import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.utils.EmissionSpecificationMarker;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -177,16 +178,22 @@ public class OnRoadExposureForMixedTrafficTest {
             }
         });
 
+        OnRoadExposureEventHandler onRoadExposureEventHandler = new OnRoadExposureEventHandler(
+                (OnRoadExposureConfigGroup) ConfigUtils.addOrGetModule( sc.getConfig(), OnRoadExposureConfigGroup.class)
+        );
 
         controler.addOverridingModule(new AbstractModule() {
 
             @Override
             public void install() {
-                addEventHandlerBinding().to(OnRoadExposureEventHandler.class);
+                addEventHandlerBinding().toInstance(onRoadExposureEventHandler);
             }
         });
 
         controler.run();
+
+        onRoadExposureEventHandler.getTotalInhaledMass().entrySet().stream().forEach(e-> System.out.print(e.getKey() + " \t" + e.getValue() ));
+
     }
 
     private void emissionSettings(Scenario scenario){
