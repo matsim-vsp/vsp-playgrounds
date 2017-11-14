@@ -21,6 +21,7 @@ package playground.agarwalamit.onRoadExposure;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -59,6 +60,7 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
     private Map<Id<Link>, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> agentsOnLink = new HashMap<>();
     private final Map<Id<Vehicle>, String> vehicleId2Mode = new HashMap<>();
 
+    @Inject
     public OnRoadExposureEventHandler(OnRoadExposureConfigGroup config){
         this.config = config;
     }

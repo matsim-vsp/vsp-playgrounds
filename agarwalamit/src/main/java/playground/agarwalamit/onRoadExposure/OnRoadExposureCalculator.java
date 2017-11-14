@@ -20,9 +20,9 @@
 package playground.agarwalamit.onRoadExposure;
 
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import playground.agarwalamit.mixedTraffic.patnaIndia.simTime.TravelDistanceForSimTimeExp;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
 
 /**
  * Created by amit on 08.11.17.
@@ -30,20 +30,25 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.simTime.TravelDistanceForS
 
 public class OnRoadExposureCalculator {
 
+    private static final Logger LOGGER = Logger.getLogger(OnRoadExposureCalculator.class);
+
     private final OnRoadExposureConfigGroup config;
 
-    OnRoadExposureCalculator(OnRoadExposureConfigGroup onRoadExposureConfigGroup) {
+    @Inject
+    public OnRoadExposureCalculator(OnRoadExposureConfigGroup onRoadExposureConfigGroup) {
         this.config = onRoadExposureConfigGroup;
     }
 
     /**
-     * @param config
      * @param mode
      * @param emissionRate
      * @param travelTime
      * @return
      */
     public Map<String, Double> calculate(String mode, Map<String, Double> emissionRate, double travelTime) {
+        if (mode==null){
+            LOGGER.warn("Mode is null. Using default values of car mode.");
+        }
         return emissionRate.entrySet()
                            .stream()
                            .collect(Collectors.toMap(e -> e.getKey(),
@@ -52,13 +57,13 @@ public class OnRoadExposureCalculator {
 
     /**
      * total inhalation in gm = (b * o * r * p * t + e  * o * r * p / d)
-     * b --> background concentration
-     * e --> emissions in g/m for time bin T
-     * d --> dispersion rate
-     * o --> occupancy rate
-     * r --> breathing rate
-     * p --> penetration rate
-     * t --> travelTime
+     * <p>b --> background concentration</p>
+     * <p>e --> emissions in g/m for time bin T</p>
+     * <p>d --> dispersion rate</p>
+     * <p>o --> occupancy rate</p>
+     * <p>r --> breathing rate</p>
+     * <p>p --> penetration rate</p>
+     * <p>t --> travelTime</p>
      */
     private double calculateForSinglePollutant(String pollutant, double pollutantValue, String mode, double travelTime) {
 
