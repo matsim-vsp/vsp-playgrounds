@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.exposure;
+package playground.agarwalamit.emissions.exposure;
 
 import java.util.HashSet;
 import java.util.Set;

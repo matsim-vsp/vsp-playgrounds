@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.emissions;
+package playground.agarwalamit.emissions.flatEmissions;
 
 import java.util.HashSet;
 import java.util.Set;
