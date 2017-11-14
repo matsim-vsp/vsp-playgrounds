@@ -22,6 +22,7 @@ package playground.agarwalamit.onRoadExposure;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.config.ReflectiveConfigGroup;
 
@@ -51,6 +52,10 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
             pollutantToBackgroundConcentration.put(pollutant.toString(), 0.);
             pollutantToPenetrationRate.put(pollutant.toString(), 1.);
         });
+        //fill data at least for mode car
+        this.modeToBreathingRate.put(TransportMode.car, 0.66/3600.0 );// cubic-meter / s
+        this.modeToOccupancy.put(TransportMode.car, 1.2);
+        this.modeToPollutantToPenetrationRate.put(TransportMode.car, pollutantToPenetrationRate);
     }
 
     public double getDispersionRate() {

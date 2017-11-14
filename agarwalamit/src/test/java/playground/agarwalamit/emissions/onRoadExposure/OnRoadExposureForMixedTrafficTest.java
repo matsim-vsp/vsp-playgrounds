@@ -1,0 +1,220 @@
+/* *********************************************************************** *
+ * project: org.matsim.*
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
+ *                   LICENSE and WARRANTY file.                            *
+ * email           : info at matsim dot org                                *
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *   See also COPYING, LICENSE and WARRANTY file                           *
+ *                                                                         *
+ * *********************************************************************** */
+
+package playground.agarwalamit.emissions.onRoadExposure;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import com.google.inject.name.Names;
+import org.apache.log4j.Logger;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.emissions.EmissionModule;
+import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
+import org.matsim.contrib.emissions.utils.EmissionSpecificationMarker;
+import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.testcases.MatsimTestUtils;
+import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.Vehicles;
+import playground.agarwalamit.emissions.EmissionModalTravelDisutilityCalculatorFactory;
+import playground.agarwalamit.onRoadExposure.OnRoadExposureEventHandler;
+import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
+import playground.vsp.airPollution.flatEmissions.InternalizeEmissionsControlerListener;
+
+/**
+ * Created by amit on 14.11.17.
+ */
+@RunWith(Parameterized.class)
+public class OnRoadExposureForMixedTrafficTest {
+
+    @Rule
+    public final MatsimTestUtils helper = new MatsimTestUtils();
+    private static final Logger logger = Logger.getLogger(OnRoadExposureForMixedTrafficTest.class);
+
+    private final boolean isConsideringCO2Costs = false; // no local exposure for co2
+
+    private final QSimConfigGroup.VehiclesSource vehiclesSource;
+
+    public OnRoadExposureForMixedTrafficTest(QSimConfigGroup.VehiclesSource vehiclesSource) {
+        this.vehiclesSource = vehiclesSource;
+        logger.info("Each parameter will be used in all the tests i.e. all tests will be run while inclusing and excluding CO2 costs.");
+    }
+
+    @Parameterized.Parameters(name = "{index}: vehicleSource == {0}")
+    public static List<Object[]> considerCO2 () {
+        Object[] [] considerCO2 = new Object [] [] {
+                { QSimConfigGroup.VehiclesSource.fromVehiclesData} ,
+                { QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData} ,
+        };
+        return Arrays.asList(considerCO2);
+    }
+
+    @Test
+    public void emissionTollTest() {
+        List<String> mainModes = Arrays.asList("car", "bicycle");
+
+        EquilTestSetUp equilTestSetUp = new EquilTestSetUp();
+
+        Scenario sc = equilTestSetUp.createConfigAndReturnScenario();
+        equilTestSetUp.createNetwork(sc);
+
+        // allow all modes on the links
+        for (Link l : sc.getNetwork().getLinks().values()) {
+            l.setAllowedModes(new HashSet<>(mainModes));
+        }
+
+        String carPersonId = "567417.1#12424";
+        String bikePersonId = "567417.1#12425"; // no emissions
+        String bikeVehicleId = bikePersonId;
+
+        if (this.vehiclesSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData)) {
+            bikeVehicleId = bikePersonId + "_bicycle";
+        }
+
+        Vehicles vehs = sc.getVehicles();
+
+        VehicleType car = vehs.getFactory().createVehicleType(Id.create(TransportMode.car, VehicleType.class));
+        car.setMaximumVelocity(100.0 / 3.6);
+        car.setPcuEquivalents(1.0);
+        car.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS.toString()
+                + HbefaVehicleCategory.PASSENGER_CAR.toString().concat(";petrol (4S);>=2L;PC-P-Euro-0")
+                + EmissionSpecificationMarker.END_EMISSIONS.toString() );
+        // TODO "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
+        // thus, reading from vehicles file and directly passing to vehicles container is not the same.
+        vehs.addVehicleType(car);
+
+        VehicleType bike = vehs.getFactory().createVehicleType(Id.create("bicycle", VehicleType.class));
+        bike.setMaximumVelocity(20. / 3.6);
+        bike.setPcuEquivalents(0.25);
+        bike.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS.toString() +
+                HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;") +
+                EmissionSpecificationMarker.END_EMISSIONS.toString());
+        vehs.addVehicleType(bike);
+
+        if (!this.vehiclesSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData)) {
+            Vehicle carVeh = vehs.getFactory().createVehicle(Id.createVehicleId(carPersonId), car);
+            vehs.addVehicle(carVeh);
+
+            Vehicle bikeVeh = vehs.getFactory().createVehicle(Id.createVehicleId(bikeVehicleId), bike);
+            vehs.addVehicle(bikeVeh);
+        }
+
+        sc.getConfig().qsim().setMainModes(mainModes);
+        sc.getConfig().qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+        sc.getConfig().qsim().setVehiclesSource(this.vehiclesSource);
+        sc.getConfig().qsim().setUsePersonIdForMissingVehicleId(true);
+
+        sc.getConfig()
+          .plansCalcRoute()
+          .getOrCreateModeRoutingParams(TransportMode.pt)
+          .setTeleportedModeFreespeedFactor(1.5);
+        sc.getConfig().plansCalcRoute().setNetworkModes(mainModes);
+        sc.getConfig().planCalcScore().getOrCreateModeParams("bicycle").setConstant(0.0);
+
+        sc.getConfig().travelTimeCalculator().setAnalyzedModes("car,bicycle");
+        sc.getConfig().travelTimeCalculator().setFilterModes(true);
+
+        equilTestSetUp.createActiveAgents(sc, carPersonId, TransportMode.car, 6.0 * 3600.);
+        equilTestSetUp.createActiveAgents(sc, bikePersonId, "bicycle", 6.0 * 3600. - 5.0);
+
+        emissionSettings(sc);
+
+        Controler controler = new Controler(sc);
+        sc.getConfig().controler().setOutputDirectory(helper.getOutputDirectory());
+
+        EmissionsConfigGroup emissionsConfigGroup = ((EmissionsConfigGroup) sc.getConfig()
+                                                                              .getModules()
+                                                                              .get(EmissionsConfigGroup.GROUP_NAME));
+        emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);
+        emissionsConfigGroup.setConsideringCO2Costs(isConsideringCO2Costs);
+        emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
+
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                bind(EmissionModule.class).asEagerSingleton();
+                bind(EmissionCostModule.class).asEagerSingleton();
+                addControlerListenerBinding().to(InternalizeEmissionsControlerListener.class);
+
+                bindCarTravelDisutilityFactory().toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory(
+                        "car",
+                        sc.getConfig().planCalcScore())));
+                bind(TravelDisutilityFactory.class).annotatedWith(Names.named("bicycle"))
+                                                   .toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory(
+                                                           "bicycle",
+                                                           sc.getConfig().planCalcScore())));
+            }
+        });
+
+
+        controler.addOverridingModule(new AbstractModule() {
+
+            @Override
+            public void install() {
+                addEventHandlerBinding().to(OnRoadExposureEventHandler.class);
+            }
+        });
+
+        controler.run();
+    }
+
+    private void emissionSettings(Scenario scenario){
+        String inputFilesDir = "../benjamin/test/input/playground/benjamin/internalization/";
+
+        String roadTypeMappingFile = inputFilesDir + "/roadTypeMapping.txt";
+        String emissionVehicleFile = inputFilesDir + "/equil_emissionVehicles_1pct.xml.gz";
+
+        String averageFleetWarmEmissionFactorsFile = inputFilesDir + "/EFA_HOT_vehcat_2005average.txt";
+        String averageFleetColdEmissionFactorsFile = inputFilesDir + "/EFA_ColdStart_vehcat_2005average.txt";
+
+        boolean isUsingDetailedEmissionCalculation = true;
+        String detailedWarmEmissionFactorsFile = inputFilesDir + "/EFA_HOT_SubSegm_2005detailed.txt";
+        String detailedColdEmissionFactorsFile = inputFilesDir + "/EFA_ColdStart_SubSegm_2005detailed.txt";
+
+        Config config = scenario.getConfig();
+        EmissionsConfigGroup ecg = new EmissionsConfigGroup() ;
+        ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
+
+        scenario.getConfig().vehicles().setVehiclesFile(emissionVehicleFile);
+
+        ecg.setAverageWarmEmissionFactorsFile(averageFleetWarmEmissionFactorsFile);
+        ecg.setAverageColdEmissionFactorsFile(averageFleetColdEmissionFactorsFile);
+
+        ecg.setUsingDetailedEmissionCalculation(isUsingDetailedEmissionCalculation);
+        ecg.setDetailedWarmEmissionFactorsFile(detailedWarmEmissionFactorsFile);
+        ecg.setDetailedColdEmissionFactorsFile(detailedColdEmissionFactorsFile);
+
+        config.addModule(ecg);
+    }
+
+}
