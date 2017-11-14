@@ -66,6 +66,14 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
     }
 
     @Override
+    public void reset(int iteration) {
+        this.vehicle2DriverDelegate.reset(iteration);
+        this.person2InhaledMass.clear();
+        this.agentsOnLink.clear();
+        this.vehicleId2Mode.clear();
+    }
+
+    @Override
     public void handleEvent(ColdEmissionEvent event) {
         this.agentsOnLink.get(event.getLinkId())
                          .values()
@@ -79,14 +87,6 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
                          .values()
                          .stream()
                          .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
-    }
-
-    @Override
-    public void reset(int iteration) {
-        this.vehicle2DriverDelegate.reset(iteration);
-        this.person2InhaledMass.clear();
-        this.agentsOnLink.clear();
-        this.vehicleId2Mode.clear();
     }
 
     @Override

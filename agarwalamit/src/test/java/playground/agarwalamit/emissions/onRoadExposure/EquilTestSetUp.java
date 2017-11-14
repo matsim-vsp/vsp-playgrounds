@@ -203,20 +203,6 @@ class EquilTestSetUp {
 		NetworkUtils.createAndAddLink(network,Id.create("39", Link.class), node3, node9, (double) 5000, 100.00/3.6, (double) 3600, (double) 1, null, "22");
 		NetworkUtils.createAndAddLink(network,Id.create("84", Link.class), node8, node4, (double) 5000, 100.00/3.6, (double) 3600, (double) 1, null, "22");
 		NetworkUtils.createAndAddLink(network,Id.create("94", Link.class), node9, node4, (double) 4999, 100.00/3.6, (double) 3600, (double) 1, null, "22");
-
-		for(Integer i=0; i<5; i++){ // x
-			for(Integer j=0; j<4; j++){
-				String idpart = i.toString()+j.toString();
-
-				double xCoord = 6563. + (i+1)*625;
-				double yCoord = 7188. + (j-1)*625;
-
-				// add a link for each person
-				Node nodeA = NetworkUtils.createAndAddNode(network, Id.create("node_"+idpart+"A", Node.class), new Coord(xCoord, yCoord));
-				Node nodeB = NetworkUtils.createAndAddNode(network, Id.create("node_"+idpart+"B", Node.class), new Coord(xCoord, yCoord + 1.));
-				NetworkUtils.createAndAddLink(network,Id.create("link_p"+idpart, Link.class), nodeA, nodeB, (double) 10, 30.0, (double) 3600, (double) 1 );
-			}
-		}
 	}
 }
 
