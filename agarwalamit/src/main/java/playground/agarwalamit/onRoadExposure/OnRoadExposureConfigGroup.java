@@ -37,7 +37,7 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
         this.initializeMaps();
     }
 
-    private static final String GROUP_NAME = "onRoadExposure";
+    public static final String GROUP_NAME = "onRoadExposure";
     private double dispersionRate = 9.0; //m^2/s; --> BigazziEtc2015OnRoadExposureMotorists
 
     private final Map<String, Double> pollutantToBackgroundConcentration = new HashMap<>();

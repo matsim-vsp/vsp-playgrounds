@@ -77,9 +77,10 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
 
     @Override
     public void reset(int iteration) {
-        vehicle2DriverDelegate.reset(iteration);
+        this.vehicle2DriverDelegate.reset(iteration);
         this.person2InhaledMass.clear();
         this.agentsOnLink.clear();
+        this.vehicleId2Mode.clear();
     }
 
     @Override

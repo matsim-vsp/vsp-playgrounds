@@ -47,6 +47,7 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.emissions.EmissionModalTravelDisutilityCalculatorFactory;
+import playground.agarwalamit.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.onRoadExposure.OnRoadExposureEventHandler;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 import playground.vsp.airPollution.flatEmissions.InternalizeEmissionsControlerListener;
@@ -202,7 +203,7 @@ public class OnRoadExposureForMixedTrafficTest {
         String detailedColdEmissionFactorsFile = inputFilesDir + "/EFA_ColdStart_SubSegm_2005detailed.txt";
 
         Config config = scenario.getConfig();
-        EmissionsConfigGroup ecg = new EmissionsConfigGroup() ;
+        EmissionsConfigGroup ecg = new EmissionsConfigGroup();
         ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
 
         scenario.getConfig().vehicles().setVehiclesFile(emissionVehicleFile);
@@ -213,8 +214,13 @@ public class OnRoadExposureForMixedTrafficTest {
         ecg.setUsingDetailedEmissionCalculation(isUsingDetailedEmissionCalculation);
         ecg.setDetailedWarmEmissionFactorsFile(detailedWarmEmissionFactorsFile);
         ecg.setDetailedColdEmissionFactorsFile(detailedColdEmissionFactorsFile);
-
         config.addModule(ecg);
+
+        OnRoadExposureConfigGroup onRoadExposureConfigGroup = new OnRoadExposureConfigGroup();
+        onRoadExposureConfigGroup.getModeToBreathingRate().put("bicycle",3.06/3600.);
+        onRoadExposureConfigGroup.getModeToOccupancy().put("bicycle",1.0);
+        onRoadExposureConfigGroup.getPollutantToPenetrationRate("bicycle"); // this will set the default values
+        config.addModule(onRoadExposureConfigGroup);
     }
 
 }

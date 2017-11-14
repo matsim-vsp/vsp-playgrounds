@@ -38,7 +38,6 @@ public class VehicleLinkEmissionCollector {
     private final String mode;
 
     private final Map<String, Double> emissions = new HashMap<>();
-
     private double travelTime = 0;
 
     VehicleLinkEmissionCollector(Id<Vehicle> vehicleId, Id<Link> linkId, String mode) {
@@ -47,28 +46,36 @@ public class VehicleLinkEmissionCollector {
         this.mode = mode;
 
         // initialize
-        for(WarmPollutant warmPollutant : WarmPollutant.values()) {
-            emissions.put(warmPollutant.getText(), 0.);
+        for (WarmPollutant warmPollutant : WarmPollutant.values()) {
+            if (warmPollutant.equals(WarmPollutant.CO2_TOTAL)) continue;
+            emissions.put(warmPollutant.toString(), 0.);
         }
     }
 
-    void setLinkEnterTime(double time){
+    void setLinkEnterTime(double time) {
         travelTime -= time;
     }
 
-    void setLinkLeaveTime(double time){
+    void setLinkLeaveTime(double time) {
         travelTime += time;
     }
 
     void addColdEmissions(Map<ColdPollutant, Double> coldEmissions) {
-        coldEmissions.entrySet().stream().forEach(e-> this.emissions.put(e.getKey().getText(), e.getValue() + this.emissions.get(e.getKey()) ));
+        this.emissions.entrySet()
+                      .stream()
+                      .filter(e -> ColdPollutant.getValue(e.getKey())!=null)
+                      .forEach(e -> this.emissions.put(e.getKey(),
+                              e.getValue() + coldEmissions.get(ColdPollutant.valueOf(e.getKey()))));
     }
 
     void addWarmEmissions(Map<WarmPollutant, Double> warmEmissions) {
-        warmEmissions.entrySet().stream().forEach(e-> this.emissions.put(e.getKey().getText(), e.getValue() + this.emissions.get(e.getKey()) ));
+        this.emissions.entrySet()
+                     .stream()
+                     .forEach(e -> this.emissions.put(e.getKey(),
+                             e.getValue() + warmEmissions.get(WarmPollutant.valueOf(e.getKey()))));
     }
 
-    Map<String,Double> getInhaledMass(OnRoadExposureConfigGroup config){
+    Map<String, Double> getInhaledMass(OnRoadExposureConfigGroup config) {
         return new OnRoadExposureCalculator(config).calculate(this.mode, emissions, travelTime);
     }
 
