@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.onRoadExposure;
+package playground.agarwalamit.emissions.onRoadExposure;
 
 import java.util.Map;
 import java.util.stream.Collectors;
