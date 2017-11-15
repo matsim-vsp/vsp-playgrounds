@@ -29,7 +29,6 @@ import com.google.inject.name.Names;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.matsim.api.core.v01.Id;
@@ -97,7 +96,7 @@ public class OnRoadExposureForMixedTrafficTest {
      * TODO : Is car most likely exposed of his own emissions? Cold emission event is thrown before agent leavs, thus, an agent is exposed of its own cold
      * emission event but not for warm emissions because warm emission event is thrown after link leave event.
      */
-    @Test
+//    @Test
     public void emissionTollTest() {
         List<String> mainModes = Arrays.asList("car", "bicycle");
 
