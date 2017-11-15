@@ -44,8 +44,11 @@ public class VehicleLinkEmissionCollector {
         this.vehicleId = vehicleId;
         this.linkId = linkId;
         this.mode = mode;
+        initialize();
+    }
 
-        // initialize
+    private void initialize(){
+        this.emissions.clear();
         for (WarmPollutant warmPollutant : WarmPollutant.values()) {
             if (warmPollutant.equals(WarmPollutant.CO2_TOTAL)) continue;
             emissions.put(warmPollutant.toString(), 0.);
@@ -76,7 +79,9 @@ public class VehicleLinkEmissionCollector {
     }
 
     Map<String, Double> getInhaledMass(OnRoadExposureConfigGroup config) {
-        return new OnRoadExposureCalculator(config).calculate(this.mode, emissions, travelTime);
+        Map<String, Double> emiss= new OnRoadExposureCalculator(config).calculate(this.mode, emissions, travelTime);
+        this.initialize(); // clear the emissions once inhaled mass is calculated to avoid possibility of multiple counts
+        return emiss;
     }
 
 }

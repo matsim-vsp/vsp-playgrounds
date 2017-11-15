@@ -56,8 +56,14 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
 
     private final OnRoadExposureConfigGroup config;
 
-    private Map<Id<Person>, Map<String, Double>> person2InhaledMass = new HashMap<>(); //TODO throw events instead
+    private OnRoadExposureTable onRoadExposureTable = new OnRoadExposureTable(); // this will keep all info in it
     private Map<Id<Link>, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> agentsOnLink = new HashMap<>();
+
+    /**
+     * temporarily store all leaving agents to process them for warm emission events
+     */
+    private Map<Double, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> sameTimeLeftAgent = new HashMap<>(); //
+
     private final Map<Id<Vehicle>, String> vehicleId2Mode = new HashMap<>();
 
     @Inject
@@ -68,9 +74,9 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
     @Override
     public void reset(int iteration) {
         this.vehicle2DriverDelegate.reset(iteration);
-        this.person2InhaledMass.clear();
         this.agentsOnLink.clear();
         this.vehicleId2Mode.clear();
+        this.onRoadExposureTable.clear();
     }
 
     @Override
@@ -83,10 +89,19 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
 
     @Override
     public void handleEvent(WarmEmissionEvent event) {
+        // all persons who are currently on the link are exposed
         this.agentsOnLink.get(event.getLinkId())
                          .values()
                          .stream()
                          .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
+
+        //  all persons who left in this time step are also exposed.
+        if (this.sameTimeLeftAgent.get(new Double(event.getTime())) !=null ) {
+            this.sameTimeLeftAgent.get(new Double(event.getTime()))
+                                  .values()
+                                  .stream()
+                                  .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
+        }
     }
 
     @Override
@@ -95,109 +110,89 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         Id<Link> linkId = event.getLinkId();
         double time = event.getTime();
 
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(event.getVehicleId(),
-                event.getLinkId(),
-                this.vehicleId2Mode.get(event.getVehicleId()));
-        vehicleLinkEmissionCollector.setLinkEnterTime(event.getTime());
-
-
-        Map<Id<Vehicle>, VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(event.getLinkId());
-        if (vehicleId2EmissionCollector == null) {
-            vehicleId2EmissionCollector = new HashMap<>();
-        }
-        vehicleId2EmissionCollector.put(event.getVehicleId(), vehicleLinkEmissionCollector);
-        agentsOnLink.put(event.getLinkId(), vehicleId2EmissionCollector);
+        registerReceptor(vehicleId, linkId, time);
     }
 
     @Override
     public void handleEvent(LinkLeaveEvent event) {
         Id<Vehicle> vehicleId = event.getVehicleId();
         Id<Link> linkId = event.getLinkId();
-        double time = event.getTime();
+        double now = event.getTime();
 
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
-        vehicleLinkEmissionCollector.setLinkLeaveTime(time);
-        Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
+        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = deRegisterReceptor(vehicleId, linkId, now);
+        {
+            // clean previous time steps
+            this.sameTimeLeftAgent.keySet()
+                                  .stream()
+                                  .filter(past -> past < now)
+                                  .forEach(past -> this.sameTimeLeftAgent.remove(past));
 
-        Id<Person> personId = getDriverOfVehicle(vehicleId);
-        Map<String, Double> temp = this.person2InhaledMass.get(personId);
 
-        if (temp == null) temp = inhaledMass;
-        else {
-            for (String str : inhaledMass.keySet()) {
-                temp.put(str, temp.get(str) + inhaledMass.get(str));
+            Map<Id<Vehicle>, VehicleLinkEmissionCollector> tempContainer = this.sameTimeLeftAgent.get(new Double (now));
+            if (tempContainer == null) {
+                tempContainer = new HashMap<>();
             }
+            tempContainer.put(vehicleId, vehicleLinkEmissionCollector);
+            this.sameTimeLeftAgent.put(new Double(now),tempContainer);
         }
-
-        this.person2InhaledMass.put(personId, temp);
     }
 
     @Override
     public void handleEvent(VehicleEntersTrafficEvent event) {
         vehicle2DriverDelegate.handleEvent(event);
 
-        this.vehicleId2Mode.put(event.getVehicleId(), event.getNetworkMode());
+        Id<Vehicle> vehicleId = event.getVehicleId();
+        this.vehicleId2Mode.put(vehicleId, event.getNetworkMode());
 
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(event.getVehicleId(),
-                event.getLinkId(),
-                event.getNetworkMode());
-        vehicleLinkEmissionCollector.setLinkEnterTime(event.getTime());
-
-        Map<Id<Vehicle>, VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(event.getLinkId());
-        if (vehicleId2EmissionCollector == null) {
-            vehicleId2EmissionCollector = new HashMap<>();
-        }
-        vehicleId2EmissionCollector.put(event.getVehicleId(), vehicleLinkEmissionCollector);
-        agentsOnLink.put(event.getLinkId(), vehicleId2EmissionCollector);
+        registerReceptor(vehicleId, event.getLinkId(), event.getTime());
     }
 
     @Override
     public void handleEvent(VehicleLeavesTrafficEvent event) {
-        vehicle2DriverDelegate.handleEvent(event);
+        this.vehicle2DriverDelegate.handleEvent(event);
+        this.vehicleId2Mode.remove(event.getVehicleId());
 
         Id<Vehicle> vehicleId = event.getVehicleId();
         Id<Link> linkId = event.getLinkId();
         double time = event.getTime();
 
+        deRegisterReceptor(vehicleId, linkId, time);
+    }
+
+    // >>>> register - deregister - reregister >>>>
+
+    private VehicleLinkEmissionCollector registerReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
+        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(vehicleId,
+                linkId, this.vehicleId2Mode.get(vehicleId) );
+        vehicleLinkEmissionCollector.setLinkEnterTime(time);
+
+        Map<Id<Vehicle>, VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(linkId);
+        if (vehicleId2EmissionCollector == null) {
+            vehicleId2EmissionCollector = new HashMap<>();
+        }
+        vehicleId2EmissionCollector.put(vehicleId, vehicleLinkEmissionCollector);
+        agentsOnLink.put(linkId, vehicleId2EmissionCollector);
+        return vehicleLinkEmissionCollector;
+    }
+
+
+    private VehicleLinkEmissionCollector deRegisterReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 
-        Map<String, Double> temp = this.person2InhaledMass.get(event.getPersonId());
-
-        if (temp == null) temp = inhaledMass;
-        else {
-            for (String str : inhaledMass.keySet()) {
-                temp.put(str, temp.get(str) + inhaledMass.get(str));
-            }
-        }
-
-        this.person2InhaledMass.put(event.getPersonId(), temp);
-
+        Id<Person> personId = getDriverOfVehicle(vehicleId);
+        this.onRoadExposureTable.addInfoToTable(personId, linkId, this.vehicleId2Mode.get(vehicleId), time, inhaledMass);
+        return vehicleLinkEmissionCollector;
     }
+
+    // <<<< register - deregister - reregister <<<<
 
     public Id<Person> getDriverOfVehicle(Id<Vehicle> vehicleId) {
         return vehicle2DriverDelegate.getDriverOfVehicle(vehicleId);
     }
 
-    public Map<Id<Person>, Map<String, Double>> getPerson2InhaledMass() {
-        return person2InhaledMass;
-    }
-
-    public Map<String, Double> getTotalInhaledMass() {
-        Map<String, Double> totalMass = new HashMap<>();
-        for (Id<Person> personId : this.person2InhaledMass.keySet()) {
-            this.person2InhaledMass.get(personId)
-                                   .entrySet()
-                                   .stream()
-                                   .forEach(e -> {
-                                       if (totalMass.containsKey(e.getKey())) {
-                                           totalMass.put(e.getKey(), e.getValue() + totalMass.get(e.getKey()));
-                                       } else {
-                                           totalMass.put(e.getKey(), e.getValue());
-                                       }
-                                   });
-        }
-        return totalMass;
+    public OnRoadExposureTable getOnRoadExposureTable() {
+        return onRoadExposureTable;
     }
 }

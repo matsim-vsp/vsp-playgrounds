@@ -237,7 +237,7 @@ public class OnRoadExposureForMixedTrafficTest {
             }
         }
 
-        Map<String, Double> totalInhaledMass_sim = onRoadExposureEventHandler.getTotalInhaledMass();
+        Map<String, Double> totalInhaledMass_sim = onRoadExposureEventHandler.getOnRoadExposureTable().getTotalInhaledMass();
         for (String str : totalInhaledMass_sim.keySet()) {
             Assert.assertEquals("Calculation of inhaled mass of "+str+" is wrong.", totalInhaledMass_manual.get(str), totalInhaledMass_sim.get(str), MatsimTestUtils.EPSILON);
         }
