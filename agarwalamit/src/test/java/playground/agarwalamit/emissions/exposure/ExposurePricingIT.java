@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.exposure;
+package playground.agarwalamit.emissions.exposure;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

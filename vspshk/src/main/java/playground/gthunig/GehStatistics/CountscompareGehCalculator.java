@@ -10,12 +10,13 @@ import java.util.List;
  */
 public class CountscompareGehCalculator {
 
-    private static final String GEH_Header = "GEH";
+    private static final String GEH_Header = "GEH2";
 
     private String dataSource;
     private char sourceSeperator;
     private int rowOfRealCountValue;
     private int rowOfSimulatedCountValue;
+    private int rowOfCountHour;
 
     private List<String[]> counts;
     private CSVWriter writer;
@@ -23,24 +24,27 @@ public class CountscompareGehCalculator {
     private double[] aggregatedGeh = new double[24];
 
     public static void main(String[] args) {
-        String dataSource = "C:\\Users\\gthunig\\Desktop\\GEHTest\\be_251.500.countscompare.txt";
+        String dataSource = "C:\\Users\\gthunig\\Desktop\\be_250.300.countscompare.txt";
         char seperator = '\t';
-        int rowOfRealCountValue = 3;
-        int rowOfSimulatedCountValue = 2;
+        int rowOfRealCountValue = 4;
+        int rowOfSimulatedCountValue = 3;
+        int rowOfCountHour = 2;
 
-        String outputFile = "C:\\Users\\gthunig\\Desktop\\GEHTest\\be_251.500.countscompare_withGEH.txt";
+        String outputFile = "C:\\Users\\gthunig\\Desktop\\be_250.300.countscompare_withGEH.txt";
 
         CountscompareGehCalculator calculator = new CountscompareGehCalculator(
-                dataSource, seperator, rowOfRealCountValue, rowOfSimulatedCountValue
+                dataSource, seperator, rowOfRealCountValue, rowOfSimulatedCountValue, rowOfCountHour
         );
         calculator.calculateAndWriteTo(outputFile, String.valueOf(seperator));
     }
 
-    public CountscompareGehCalculator(String dataSource, char seperator, int rowOfRealCountValue, int rowOfSimulatedCountValue) {
+    public CountscompareGehCalculator(String dataSource, char seperator,
+                                      int rowOfRealCountValue, int rowOfSimulatedCountValue, int rowOfCountHour) {
         this.dataSource = dataSource;
         this.sourceSeperator = seperator;
         this.rowOfRealCountValue = rowOfRealCountValue;
-        this. rowOfSimulatedCountValue = rowOfSimulatedCountValue;
+        this.rowOfSimulatedCountValue = rowOfSimulatedCountValue;
+        this.rowOfCountHour = rowOfCountHour;
     }
 
     public void calculateAndWriteTo(String outputFile, String seperator) {
@@ -80,7 +84,7 @@ public class CountscompareGehCalculator {
 
         writer.writeLine(newCount);
 
-        int hour = Integer.valueOf(count[1])-1;
+        int hour = Integer.valueOf(count[rowOfCountHour])-1;
         aggregatedGeh[hour] += gehValue;
     }
 

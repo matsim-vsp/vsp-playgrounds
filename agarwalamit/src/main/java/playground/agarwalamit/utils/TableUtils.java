@@ -17,45 +17,24 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.onRoadExposure;
+package playground.agarwalamit.utils;
 
+import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.Table;
 
 /**
- * Created by amit on 08.11.17.
+ * Created by amit on 16.11.17.
  */
 
-public class OnRoadExposureCalculator {
+public final class TableUtils {
 
-    /**
-     *
-     * @param config
-     * @param mode
-     * @param emissionRate
-     * @param travelTime
-     * @return
-     */
-    public static double calculate(OnRoadExposureConfigGroup config, String mode,
-                                   Map<String, Double> emissionRate, double travelTime){
-        /**
-         * total inhalation in gm = (b + e / d ) * o * r * p . t
-         * b --> background concentration
-         * e --> emissions in g/m for time bin T
-         * d --> dispersion rate
-         * o --> occupancy rate
-         * r --> breathing rate
-         * p --> penetration rate
-         * t --> travelTime
-         */
-        double value = 0.;
-        for ( String pollutant : config.getPollutantToBackgroundConcentration().keySet() ){
-            value += ( config.getPollutantToBackgroundConcentration().get(pollutant)
-                    + emissionRate.get(pollutant) / config.getDispersionRate() )
-                    * config.getPollutantToPenetrationRate(mode).get(pollutant)
-                    * config.getModeToBreathingRate().get(mode)
-                    * config.getModeToOccupancy().get(mode);
+    public static Map<String, Double> sumValues(Table<?, ?, Map<String, Double>> table) {
+        Map<String, Double> outMap = new HashMap<>();
+        for (Map<String, Double> map : table.values()) {
+            outMap = MapUtils.addMaps(outMap, map);
         }
-
-        return  value * travelTime;
+        return outMap;
     }
 }
+
