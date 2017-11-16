@@ -48,7 +48,7 @@ public class OnRoadExposureTable {
      */
     public void addInfoToTable(Id<Person> personId, Id<Link> linkId, String mode, Double time, Map<String, Double> inhaledMass) {
         OnRoadTripExposureInfo tripExposureInfo = this.personInfo.get(personId, mode);
-        if (tripExposureInfo==null) {
+        if (tripExposureInfo == null) {
                 tripExposureInfo = new OnRoadTripExposureInfo(personId, mode);
         }
         tripExposureInfo.addInhaledMass(time, linkId, inhaledMass);
@@ -85,22 +85,32 @@ public class OnRoadExposureTable {
         this.personInfo.clear();
     }
 
-    //TODO :complete following methods.
-
     public Map<String, Double> getTotalInhaledMass(){
         Map<String, Double> out = new HashMap<>();
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
         for (Id<Person> personId : personIds){
             for (String mode : modes) {
-                out = MapUtils.addMaps(out, TableUtils.sumValues( this.personInfo.get(personId,mode).time2link2emissions ) );
+                out = MapUtils.addMaps(out,
+                        TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
             }
         }
         return out;
     }
 
     public Map<String, Map<String,Double>> getModeToInhaledMass(){
-        throw new RuntimeException("not implemented yet.");
+        Map<String, Map<String, Double>> out = new HashMap<>();
+        Set<Id<Person>> personIds = this.personInfo.rowKeySet();
+        Set<String> modes = this.personInfo.columnKeySet();
+        for (String mode : modes) {
+            Map<String, Double> tempOut = new HashMap<>();
+            for (Id<Person> personId : personIds){
+                tempOut = MapUtils.addMaps(tempOut,
+                        TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
+            }
+            out.put(mode, tempOut);
+        }
+        return out;
     }
 
     public Map<Id<Link>,Map<String,Double>> getLinkToInhaledMass(){

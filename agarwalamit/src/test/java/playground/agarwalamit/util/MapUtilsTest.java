@@ -96,4 +96,38 @@ public class MapUtilsTest {
         Assert.assertEquals("Sum is wrong",0.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
     }
 
+    @Test
+    public void testValueMapSum(){
+
+        Map<String, Double> map1 = new HashMap<>();
+        map1.put("A",4.);
+        map1.put("B",8.);
+        map1.put("C",12.);
+        map1.put("D",16.);
+
+        Map<String, Double> map2 = new HashMap<>();
+        map2.put("A",4.);
+        map2.put("B",8.);
+        map2.put("C",12.);
+        map2.put("D",16.);
+
+        Map<Double, Map<String, Double>> inMap = new HashMap<>();
+        inMap.put(3600., map1);
+        inMap.put(7200., map2);
+
+        Map<String, Double> outMap = MapUtils.valueMapSum(inMap);
+        Map<String, Double> manualCheck = new HashMap<>();
+        manualCheck.put("A",8.);
+        manualCheck.put("B",16.);
+        manualCheck.put("C",24.);
+        manualCheck.put("D",32.);
+
+        outMap.entrySet()
+              .forEach(e -> Assert.assertEquals("wrong value",
+                      e.getValue(),
+                      manualCheck.get(e.getKey()),
+                      MatsimTestUtils.EPSILON));
+
+    }
+
 }
