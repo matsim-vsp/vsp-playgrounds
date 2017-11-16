@@ -159,6 +159,10 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         deRegisterReceptor(vehicleId, linkId, time);
     }
 
+    public Id<Person> getDriverOfVehicle(Id<Vehicle> vehicleId) {
+        return vehicle2DriverDelegate.getDriverOfVehicle(vehicleId);
+    }
+
     // >>>> register - deregister - reregister >>>>
 
     private VehicleLinkEmissionCollector registerReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
@@ -187,10 +191,6 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
     }
 
     // <<<< register - deregister - reregister <<<<
-
-    public Id<Person> getDriverOfVehicle(Id<Vehicle> vehicleId) {
-        return vehicle2DriverDelegate.getDriverOfVehicle(vehicleId);
-    }
 
     public OnRoadExposureTable getOnRoadExposureTable() {
         return onRoadExposureTable;

@@ -100,7 +100,7 @@ public class OnRoadExposureForMixedTrafficTest {
     @Test
     public void emissionTollTest() {
 
-        if (true) return;
+//        if (true) return;
 
         List<String> mainModes = Arrays.asList("car", "bicycle");
 

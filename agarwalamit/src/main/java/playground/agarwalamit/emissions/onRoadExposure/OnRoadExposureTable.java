@@ -19,13 +19,17 @@
 
 package playground.agarwalamit.emissions.onRoadExposure;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import playground.agarwalamit.utils.MapUtils;
+import playground.agarwalamit.utils.TableUtils;
 
 /**
  * Created by amit on 15.11.17.
@@ -84,7 +88,15 @@ public class OnRoadExposureTable {
     //TODO :complete following methods.
 
     public Map<String, Double> getTotalInhaledMass(){
-        throw new RuntimeException("not implemented yet.");
+        Map<String, Double> out = new HashMap<>();
+        Set<Id<Person>> personIds = this.personInfo.rowKeySet();
+        Set<String> modes = this.personInfo.columnKeySet();
+        for (Id<Person> personId : personIds){
+            for (String mode : modes) {
+                out = MapUtils.addMaps(out, TableUtils.sumValues( this.personInfo.get(personId,mode).time2link2emissions ) );
+            }
+        }
+        return out;
     }
 
     public Map<String, Map<String,Double>> getModeToInhaledMass(){
