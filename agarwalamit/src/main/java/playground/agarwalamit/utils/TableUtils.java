@@ -30,10 +30,10 @@ import com.google.common.collect.Table;
 public final class TableUtils {
 
     public static Map<String, Double> sumValues(Table<?, ?, Map<String, Double>> table) {
-        Map<String, Double> outMap = new HashMap<>();
-        for (Map<String, Double> map : table.values()) {
-            outMap = MapUtils.addMaps(outMap, map);
-        }
+        final Map<String, Double> outMap = new HashMap<>();
+        table.values().stream().forEach(e->
+                outMap.putAll(MapUtils.addMaps(outMap, e))
+        );
         return outMap;
     }
 }

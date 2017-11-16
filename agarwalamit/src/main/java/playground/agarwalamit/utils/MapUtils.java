@@ -71,10 +71,7 @@ public final class MapUtils {
 	public static SortedMap<String, Double> addMaps (final Map<String, Double> m1, final Map<String, Double> m2) {
 		if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
 		SortedMap<String, Double> outMap = new TreeMap<>(m1);
-		for (String str : m2.keySet()){
-			double existingValue = outMap.containsKey(str) ? outMap.get(str) : 0.;
-			outMap.put(str, m2.get(str)+existingValue);
-		}
+		m2.forEach((k,v) -> outMap.merge(k,v,Double::sum));
 		return outMap;
 	}
 

@@ -19,13 +19,12 @@
 
 package playground.agarwalamit.util;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.testcases.MatsimTestUtils;
 import playground.agarwalamit.utils.MapUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by amit on 19/09/16.
@@ -37,7 +36,7 @@ public class MapUtilsTest {
     private final MatsimTestUtils helper = new MatsimTestUtils();
 
     @Test
-    public void test(){
+    public void testDoubleValueSum(){
 
         Map<String, Integer> str2Int = new HashMap<>();
         str2Int.put("A",4);
@@ -59,6 +58,42 @@ public class MapUtilsTest {
         //value sum
         Assert.assertEquals("Sum is wrong",40.0, MapUtils.doubleValueSum(str2Double),MatsimTestUtils.EPSILON);
 
+    }
+
+    @Test
+    public void testAddMaps(){ //merge
+
+        Map<String, Double> map1 = new HashMap<>();
+        map1.put("A",4.);
+        map1.put("B",8.);
+        map1.put("C",12.);
+        map1.put("D",16.);
+
+        Map<String, Double> map2 = new HashMap<>();
+        map2.put("A",4.);
+        map2.put("B",8.);
+        map2.put("C",12.);
+        map2.put("D",16.);
+
+        //value sum
+        Assert.assertEquals("Sum is wrong",80.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        // remove something from map1
+        map1.remove("A");
+        Assert.assertEquals("Sum is wrong",76.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map2.remove("B");
+        Assert.assertEquals("Sum is wrong",68.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map2.clear();
+        Assert.assertEquals("Sum is wrong",36.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map1.clear();
+        map2.put("B",4.0);
+        Assert.assertEquals("Sum is wrong",4.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map2.clear();
+        Assert.assertEquals("Sum is wrong",0.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
     }
 
 }
