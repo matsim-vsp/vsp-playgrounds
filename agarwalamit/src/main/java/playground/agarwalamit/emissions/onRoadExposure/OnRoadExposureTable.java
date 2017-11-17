@@ -85,6 +85,7 @@ public class OnRoadExposureTable {
         Set<String> modes = this.personInfo.columnKeySet();
         for (Id<Person> personId : personIds){
             for (String mode : modes) {
+                if (! this.personInfo.contains(personId, mode)) continue;
                 out = MapUtils.mergeMaps(out,
                         TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
             }
