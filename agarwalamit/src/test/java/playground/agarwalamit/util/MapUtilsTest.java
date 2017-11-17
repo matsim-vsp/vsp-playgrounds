@@ -71,9 +71,9 @@ public class MapUtilsTest {
 
         Map<String, Double> map2 = new HashMap<>();
         map2.put("A",4.);
-        map2.put("B",8.);
-        map2.put("C",12.);
         map2.put("D",16.);
+        map2.put("C",12.);
+        map2.put("B",8.);
 
         //value sum
         Assert.assertEquals("Sum is wrong",80.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
@@ -128,6 +128,70 @@ public class MapUtilsTest {
                       manualCheck.get(e.getKey()),
                       MatsimTestUtils.EPSILON));
 
+    }
+
+    @Test
+    public void testMergeMultiMap(){
+        Map<Double, Map<String, Double>> outerMap1 = new HashMap<>();
+        {
+            Map<String, Double> map1 = new HashMap<>();
+            map1.put("A",4.);
+            map1.put("B",8.);
+            outerMap1.put(3600., map1);
+        }
+        {
+            Map<String, Double> map1 = new HashMap<>();
+            map1.put("A",6.);
+            map1.put("B",10.);
+            outerMap1.put(7200., map1);
+        }
+
+        Map<Double, Map<String, Double>> outerMap2 = new HashMap<>();
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",9.);
+            map2.put("C",12.);
+            outerMap2.put(3600., map2);
+        }
+
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",2.);
+            map2.put("C",1.5);
+            outerMap2.put(10800., map2);
+        }
+
+
+        Map<Double,Map<String, Double>> outMap = MapUtils.mergeMultiMaps(outerMap1, outerMap2);
+
+        Map<Double, Map<String, Double>> manualCheck = new HashMap<>();
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",13.);
+            map2.put("B",8.);
+            map2.put("C",12.);
+            manualCheck.put(3600.,map2);
+        }
+        {
+            Map<String, Double> map1 = new HashMap<>();
+            map1.put("A",6.);
+            map1.put("B",10.);
+            manualCheck.put(7200.,map1);
+        }
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",2.);
+            map2.put("C",1.5);
+            manualCheck.put(10800., map2);
+        }
+
+        outMap.entrySet()
+                .forEach(t -> t.getValue()
+                               .entrySet()
+                               .forEach(e -> Assert.assertEquals("wrong value at time "+ t.getKey() + " for key "+e.getKey(),
+                                       manualCheck.get(t.getKey()).get(e.getKey()),
+                                       e.getValue(),
+                                       MatsimTestUtils.EPSILON)));
     }
 
 }

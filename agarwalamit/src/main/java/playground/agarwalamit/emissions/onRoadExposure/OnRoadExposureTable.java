@@ -22,7 +22,6 @@ package playground.agarwalamit.emissions.onRoadExposure;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.matsim.api.core.v01.Id;
@@ -71,12 +70,7 @@ public class OnRoadExposureTable {
             if (massSoFar == null) {
                 this.time2link2emissions.put(time, linkId, inhaledMass);
             } else {
-                this.time2link2emissions.put(time, linkId, massSoFar.entrySet()
-                                                                    .stream()
-                                                                    .collect(Collectors.toMap(e -> e.getKey(),
-                                                                            e -> e.getValue() + inhaledMass.get(e.getKey()))));
-
-
+                this.time2link2emissions.put(time, linkId, MapUtils.addMaps(massSoFar, inhaledMass));
             }
         }
     }
@@ -117,7 +111,17 @@ public class OnRoadExposureTable {
         throw new RuntimeException("not implemented yet.");
     }
 
-    public Map<Double,Map<String,Double>> getTimeToInhaledMass(){
-        throw new RuntimeException("not implemented yet.");
+    public Map<Double,Map<String,Double>> getTimeToInhaledMass() {
+        Set<Id<Person>> personIds = this.personInfo.rowKeySet();
+        Set<String> modes = this.personInfo.columnKeySet();
+
+        Map<Double, Map<String,Double>> outMap = new HashMap<>();
+        for (Id<Person> personId : personIds) {
+            for (String mode : modes) {
+                outMap = MapUtils.mergeMultiMaps(outMap,
+                        TableUtils.sumForAllLinks(this.personInfo.get(personId, mode).time2link2emissions));
+            }
+        }
+        return outMap;
     }
 }

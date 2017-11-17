@@ -75,6 +75,13 @@ public final class MapUtils {
 		return outMap;
 	}
 
+	public static <T> Map<T, Map<String, Double>> mergeMultiMaps(final Map<T, Map<String, Double>> m1, final Map<T, Map<String, Double>> m2) {
+		if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
+		Map<T, Map<String, Double>> outMap = new HashMap<>(m1);
+		m2.forEach(  (k,v) ->  outMap.merge( k, v,  MapUtils::addMaps ) );
+		return outMap;
+	}
+
 	public static <T> SortedMap<T, Double> getIntPercentShare(final SortedMap<T, Integer> inMap){
 		SortedMap<T, Double> outMap = new TreeMap<>();
 		double valueSum = (double) MapUtils.intValueSum(inMap);
