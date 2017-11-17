@@ -109,7 +109,17 @@ public class OnRoadExposureTable {
     }
 
     public Map<Id<Link>,Map<String,Double>> getLinkToInhaledMass(){
-        throw new RuntimeException("not implemented yet.");
+        Set<Id<Person>> personIds = this.personInfo.rowKeySet();
+        Set<String> modes = this.personInfo.columnKeySet();
+
+        Map<Id<Link>, Map<String,Double>> outMap = new HashMap<>();
+        for (Id<Person> personId : personIds) {
+            for (String mode : modes) {
+                outMap = MapUtils.mergeMultiMaps(outMap,
+                        TableUtils.getLinkId2InhaledMass(this.personInfo.get(personId, mode).time2link2emissions));
+            }
+        }
+        return outMap;
     }
 
     public Map<Double,Map<String,Double>> getTimeToInhaledMass() {
@@ -120,7 +130,7 @@ public class OnRoadExposureTable {
         for (Id<Person> personId : personIds) {
             for (String mode : modes) {
                 outMap = MapUtils.mergeMultiMaps(outMap,
-                        TableUtils.sumForAllLinks(this.personInfo.get(personId, mode).time2link2emissions));
+                        TableUtils.getTimeBin2InhaledMass(this.personInfo.get(personId, mode).time2link2emissions));
             }
         }
         return outMap;
