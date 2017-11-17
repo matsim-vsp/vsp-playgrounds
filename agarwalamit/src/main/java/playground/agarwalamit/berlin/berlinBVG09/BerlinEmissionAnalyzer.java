@@ -123,13 +123,13 @@ public class BerlinEmissionAnalyzer {
                 Id<Vehicle> transitVehicle = transitDriver2TransitVehicle.get(personId);
                 String userGroup = berlinTransitVehicleTypeIdentifier.getBerlinTransitEmissionVehicleType(transitVehicle).toString();
                 Map<String, Double> emissionsSoFar =  vehicleType2Emissions.get(userGroup);
-                Map<String, Double> totalEmissions = MapUtils.addMaps(emissionsSoFar, vehicleId2EmissionsForAllVehicles.get(vehicleId));
+                Map<String, Double> totalEmissions = MapUtils.mergeMaps(emissionsSoFar, vehicleId2EmissionsForAllVehicles.get(vehicleId));
                 vehicleType2Emissions.put(userGroup, totalEmissions);
             } else {
                 String userGroup = berlinPersonFilter.getUserGroupAsStringFromPersonId(personId);
                 if (vehicleType2Emissions.containsKey(userGroup)) {
                     Map<String, Double> emissionsSoFar =  vehicleType2Emissions.get(userGroup);
-                    Map<String, Double> totalEmissions = MapUtils.addMaps(emissionsSoFar, vehicleId2EmissionsForAllVehicles.get(vehicleId));
+                    Map<String, Double> totalEmissions = MapUtils.mergeMaps(emissionsSoFar, vehicleId2EmissionsForAllVehicles.get(vehicleId));
                     vehicleType2Emissions.put(userGroup, totalEmissions);
                 } else {
                     //skip other user groups

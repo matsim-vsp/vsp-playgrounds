@@ -185,7 +185,7 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 			Map<Id<Link>, SortedMap<String, Double>> totalEmissions = this.emissionUtils.sumUpEmissionsPerId(warmEmissions, coldEmissions);
 			time2totalEmissions.put(endOfTimeInterval, totalEmissions);
 
-			this.totalEmissions = MapUtils.addMaps(this.totalEmissions, this.emissionUtils.getTotalEmissions(totalEmissions));
+			this.totalEmissions = MapUtils.mergeMaps(this.totalEmissions, this.emissionUtils.getTotalEmissions(totalEmissions));
 		}
 		return time2totalEmissions;
 	}

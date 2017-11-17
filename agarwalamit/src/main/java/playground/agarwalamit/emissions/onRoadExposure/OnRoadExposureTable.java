@@ -70,7 +70,7 @@ public class OnRoadExposureTable {
             if (massSoFar == null) {
                 this.time2link2emissions.put(time, linkId, inhaledMass);
             } else {
-                this.time2link2emissions.put(time, linkId, MapUtils.addMaps(massSoFar, inhaledMass));
+                this.time2link2emissions.put(time, linkId, MapUtils.mergeMaps(massSoFar, inhaledMass));
             }
         }
     }
@@ -85,7 +85,7 @@ public class OnRoadExposureTable {
         Set<String> modes = this.personInfo.columnKeySet();
         for (Id<Person> personId : personIds){
             for (String mode : modes) {
-                out = MapUtils.addMaps(out,
+                out = MapUtils.mergeMaps(out,
                         TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
             }
         }
@@ -99,7 +99,7 @@ public class OnRoadExposureTable {
         for (String mode : modes) {
             Map<String, Double> tempOut = new HashMap<>();
             for (Id<Person> personId : personIds){
-                tempOut = MapUtils.addMaps(tempOut,
+                tempOut = MapUtils.mergeMaps(tempOut,
                         TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
             }
             out.put(mode, tempOut);

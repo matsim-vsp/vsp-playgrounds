@@ -68,7 +68,7 @@ public final class MapUtils {
 	 * @return m1+m2
 	 * <p> if key does not exist in either of map, value for that is assumed as <b>zero.
 	 */
-	public static SortedMap<String, Double> addMaps (final Map<String, Double> m1, final Map<String, Double> m2) {
+	public static SortedMap<String, Double> mergeMaps(final Map<String, Double> m1, final Map<String, Double> m2) {
 		if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
 		SortedMap<String, Double> outMap = new TreeMap<>(m1);
 		m2.forEach((k,v) -> outMap.merge(k, v, Double::sum));
@@ -78,7 +78,7 @@ public final class MapUtils {
 	public static <T> Map<T, Map<String, Double>> mergeMultiMaps(final Map<T, Map<String, Double>> m1, final Map<T, Map<String, Double>> m2) {
 		if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
 		Map<T, Map<String, Double>> outMap = new HashMap<>(m1);
-		m2.forEach(  (k,v) ->  outMap.merge( k, v,  MapUtils::addMaps ) );
+		m2.forEach(  (k,v) ->  outMap.merge( k, v,  MapUtils::mergeMaps) );
 		return outMap;
 	}
 

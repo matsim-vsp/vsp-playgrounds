@@ -61,7 +61,7 @@ public class MapUtilsTest {
     }
 
     @Test
-    public void testAddMaps(){ //merge
+    public void testMergeMaps(){ //merge
 
         Map<String, Double> map1 = new HashMap<>();
         map1.put("A",4.);
@@ -76,24 +76,24 @@ public class MapUtilsTest {
         map2.put("B",8.);
 
         //value sum
-        Assert.assertEquals("Sum is wrong",80.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Sum is wrong",80.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
 
         // remove something from map1
         map1.remove("A");
-        Assert.assertEquals("Sum is wrong",76.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Sum is wrong",76.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
 
         map2.remove("B");
-        Assert.assertEquals("Sum is wrong",68.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Sum is wrong",68.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
 
         map2.clear();
-        Assert.assertEquals("Sum is wrong",36.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Sum is wrong",36.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
 
         map1.clear();
         map2.put("B",4.0);
-        Assert.assertEquals("Sum is wrong",4.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Sum is wrong",4.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
 
         map2.clear();
-        Assert.assertEquals("Sum is wrong",0.0, MapUtils.doubleValueSum(MapUtils.addMaps(map1,map2)),MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Sum is wrong",0.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
     }
 
     @Test
