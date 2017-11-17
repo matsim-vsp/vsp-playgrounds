@@ -25,6 +25,8 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import org.junit.Assert;
 import org.junit.Test;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.testcases.MatsimTestUtils;
 import playground.agarwalamit.utils.TableUtils;
 
@@ -36,7 +38,7 @@ import playground.agarwalamit.utils.TableUtils;
 public class TableUtilsTest {
 
     @Test
-    public void test(){
+    public void testSumvalues(){
         Table<String,String, Map<String, Double>> tab = HashBasedTable.create();
         {
             Map<String, Double> emiss = new HashMap<>();
@@ -68,6 +70,59 @@ public class TableUtilsTest {
             Assert.assertEquals("value sum from table is wrong.",manualSum.get(str), sumFromUtils.get(str),
                     MatsimTestUtils.EPSILON);
         }
+    }
+
+    @Test
+    public void testSumForAllLinks(){
+        Table<Double, Id<Link>, Map<String,Double>> time2Link2Emiss = HashBasedTable.create();
+
+        {
+            Map<String,Double> emiss = new HashMap<>();
+            emiss.put("NO2",2.0);
+            emiss.put("NOx",24.0);
+            time2Link2Emiss.put(3600.,Id.createLinkId("AB"),emiss);
+        }
+
+        {
+            Map<String,Double> emiss = new HashMap<>();
+            emiss.put("NO2",4.0);
+            emiss.put("NOx",2.0);
+            time2Link2Emiss.put(7200.,Id.createLinkId("AB"),emiss);
+        }
+
+        {
+            Map<String,Double> emiss = new HashMap<>();
+            emiss.put("NO2",6.0);
+            emiss.put("NOx",3.0);
+            time2Link2Emiss.put(7200.,Id.createLinkId("BA"),emiss);
+        }
+
+        Map<Double, Map<String,Double>> manualChcek = new HashMap<>();
+        {
+            Map<String, Double> timeStep = new HashMap<>();
+            timeStep.put("NO2",2.0);
+            timeStep.put("NOx",24.0);
+            manualChcek.put(3600.,timeStep);
+        }
+
+        {
+            Map<String, Double> timeStep = new HashMap<>();
+            timeStep.put("NO2",10.0);
+            timeStep.put("NOx",5.0);
+            manualChcek.put(7200.,timeStep);
+        }
+
+        Map<Double,Map<String,Double>> utilMethod = TableUtils.sumForAllLinks(time2Link2Emiss);
+
+        utilMethod.entrySet()
+                  .forEach(t -> t.getValue()
+                                 .entrySet()
+                                 .forEach(e -> Assert.assertEquals("wrong value at time "+ t.getKey() + " for key "+e.getKey(),
+                                         manualChcek.get(t.getKey()).get(e.getKey()),
+                                         e.getValue(),
+                                         MatsimTestUtils.EPSILON)));
+
+
     }
 
 }

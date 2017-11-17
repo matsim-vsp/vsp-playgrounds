@@ -79,7 +79,7 @@ public class PatnaEmissionsAnalyzer {
                 PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
         Map<String, Double> warmEmissions = emissionUtilsExtended.getTotalWarmEmissions(emissionPersonEventHandler.getPersonId2WarmEmissions(PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
 
-        Map<String, Double> totalEmissions = MapUtils.addMaps(coldEmissions, warmEmissions);
+        Map<String, Double> totalEmissions = MapUtils.mergeMaps(coldEmissions, warmEmissions);
 
 //        BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
 //        try {

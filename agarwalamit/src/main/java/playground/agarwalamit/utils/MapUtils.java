@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
+import java.util.stream.Collectors;
 import org.matsim.api.core.v01.Id;
 
 /**
@@ -68,13 +68,17 @@ public final class MapUtils {
 	 * @return m1+m2
 	 * <p> if key does not exist in either of map, value for that is assumed as <b>zero.
 	 */
-	public static SortedMap<String, Double> addMaps (final Map<String, Double> m1, final Map<String, Double> m2) {
+	public static SortedMap<String, Double> mergeMaps(final Map<String, Double> m1, final Map<String, Double> m2) {
 		if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
 		SortedMap<String, Double> outMap = new TreeMap<>(m1);
-		for (String str : m2.keySet()){
-			double existingValue = outMap.containsKey(str) ? outMap.get(str) : 0.;
-			outMap.put(str, m2.get(str)+existingValue);
-		}
+		m2.forEach((k,v) -> outMap.merge(k, v, Double::sum));
+		return outMap;
+	}
+
+	public static <T> Map<T, Map<String, Double>> mergeMultiMaps(final Map<T, Map<String, Double>> m1, final Map<T, Map<String, Double>> m2) {
+		if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
+		Map<T, Map<String, Double>> outMap = new HashMap<>(m1);
+		m2.forEach(  (k,v) ->  outMap.merge( k, v,  MapUtils::mergeMaps) );
 		return outMap;
 	}
 
@@ -99,6 +103,14 @@ public final class MapUtils {
 		}
 		return outMap;
 	}
+
+	public static <T> Map<String, Double> valueMapSum(Map<T, Map<String,Double>> inMap) {
+		return inMap.values()
+					.stream()
+					.flatMap(m -> m.entrySet().stream())
+					.collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
+	}
+
 
 //	another useful syntax for sorting by value (also see BikeConnectorControlerListener or intellij suggestion)
 //Comparator<Map.Entry<Id<Link>, Double>> byValue = (entry1, entry2) -> entry1.getValue().compareTo(

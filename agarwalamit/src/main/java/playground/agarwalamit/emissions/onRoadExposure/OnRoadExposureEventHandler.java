@@ -37,7 +37,7 @@ import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.vehicles.Vehicle;
 
 /**
@@ -52,7 +52,7 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler,
         LinkLeaveEventHandler, LinkEnterEventHandler {
 
-    private final Vehicle2DriverEventHandler vehicle2DriverDelegate = new Vehicle2DriverEventHandler();
+    private final Map<Id<Vehicle>, Tuple<Id<Person>,String>> driverAgents = new HashMap<>();
 
     private final OnRoadExposureConfigGroup config;
 
@@ -62,9 +62,7 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
     /**
      * temporarily store all leaving agents to process them for warm emission events
      */
-    private Map<Double, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> sameTimeLeftAgent = new HashMap<>(); //
-
-    private final Map<Id<Vehicle>, String> vehicleId2Mode = new HashMap<>();
+//    private Map<Double, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> sameTimeLeftAgent = new HashMap<>(); //
 
     @Inject
     public OnRoadExposureEventHandler(OnRoadExposureConfigGroup config) {
@@ -73,14 +71,13 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
 
     @Override
     public void reset(int iteration) {
-        this.vehicle2DriverDelegate.reset(iteration);
         this.agentsOnLink.clear();
-        this.vehicleId2Mode.clear();
+        this.driverAgents.clear();
         this.onRoadExposureTable.clear();
     }
 
     @Override
-    public void handleEvent(ColdEmissionEvent event) {
+    public void handleEvent(ColdEmissionEvent event) { //source
         this.agentsOnLink.get(event.getLinkId())
                          .values()
                          .stream()
@@ -88,7 +85,7 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
     }
 
     @Override
-    public void handleEvent(WarmEmissionEvent event) {
+    public void handleEvent(WarmEmissionEvent event) { //source
         // all persons who are currently on the link are exposed
         this.agentsOnLink.get(event.getLinkId())
                          .values()
@@ -96,21 +93,17 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
                          .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
 
         //  all persons who left in this time step are also exposed.
-        if (this.sameTimeLeftAgent.get(new Double(event.getTime())) !=null ) {
-            this.sameTimeLeftAgent.get(new Double(event.getTime()))
-                                  .values()
-                                  .stream()
-                                  .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
-        }
+//        if (this.sameTimeLeftAgent.get(new Double(event.getTime())) !=null ) {
+//            this.sameTimeLeftAgent.get(new Double(event.getTime()))
+//                                  .values()
+//                                  .stream()
+//                                  .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
+//        }
     }
 
     @Override
     public void handleEvent(LinkEnterEvent event) {
-        Id<Vehicle> vehicleId = event.getVehicleId();
-        Id<Link> linkId = event.getLinkId();
-        double time = event.getTime();
-
-        registerReceptor(vehicleId, linkId, time);
+        registerReceptor(event.getVehicleId(), event.getLinkId(), event.getTime());
     }
 
     @Override
@@ -122,52 +115,40 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = deRegisterReceptor(vehicleId, linkId, now);
         {
             // clean previous time steps
-            this.sameTimeLeftAgent.keySet()
-                                  .stream()
-                                  .filter(past -> past < now)
-                                  .forEach(past -> this.sameTimeLeftAgent.remove(past));
+//            this.sameTimeLeftAgent.keySet()
+//                                  .stream()
+//                                  .filter(past -> past < now)
+//                                  .forEach(past -> this.sameTimeLeftAgent.remove(past));
 
 
-            Map<Id<Vehicle>, VehicleLinkEmissionCollector> tempContainer = this.sameTimeLeftAgent.get(new Double (now));
-            if (tempContainer == null) {
-                tempContainer = new HashMap<>();
-            }
-            tempContainer.put(vehicleId, vehicleLinkEmissionCollector);
-            this.sameTimeLeftAgent.put(new Double(now),tempContainer);
+//            Map<Id<Vehicle>, VehicleLinkEmissionCollector> tempContainer = this.sameTimeLeftAgent.get(new Double (now));
+//            if (tempContainer == null) {
+//                tempContainer = new HashMap<>();
+//            }
+//            tempContainer.put(vehicleId, vehicleLinkEmissionCollector);
+//            this.sameTimeLeftAgent.put(new Double(now),tempContainer);
         }
     }
 
     @Override
     public void handleEvent(VehicleEntersTrafficEvent event) {
-        vehicle2DriverDelegate.handleEvent(event);
-
-        Id<Vehicle> vehicleId = event.getVehicleId();
-        this.vehicleId2Mode.put(vehicleId, event.getNetworkMode());
-
-        registerReceptor(vehicleId, event.getLinkId(), event.getTime());
+        driverAgents.put(event.getVehicleId(), new Tuple<>(event.getPersonId(), event.getNetworkMode()));
+        registerReceptor(event.getVehicleId(), event.getLinkId(), event.getTime());
     }
 
     @Override
     public void handleEvent(VehicleLeavesTrafficEvent event) {
-        this.vehicle2DriverDelegate.handleEvent(event);
-        this.vehicleId2Mode.remove(event.getVehicleId());
-
         Id<Vehicle> vehicleId = event.getVehicleId();
-        Id<Link> linkId = event.getLinkId();
-        double time = event.getTime();
 
-        deRegisterReceptor(vehicleId, linkId, time);
-    }
-
-    public Id<Person> getDriverOfVehicle(Id<Vehicle> vehicleId) {
-        return vehicle2DriverDelegate.getDriverOfVehicle(vehicleId);
+        deRegisterReceptor(vehicleId, event.getLinkId(), event.getTime());
+        this.driverAgents.remove(event.getVehicleId());
     }
 
     // >>>> register - deregister - reregister >>>>
 
     private VehicleLinkEmissionCollector registerReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(vehicleId,
-                linkId, this.vehicleId2Mode.get(vehicleId) );
+                linkId, this.driverAgents.get(vehicleId).getSecond() );
         vehicleLinkEmissionCollector.setLinkEnterTime(time);
 
         Map<Id<Vehicle>, VehicleLinkEmissionCollector> vehicleId2EmissionCollector = this.agentsOnLink.get(linkId);
@@ -179,14 +160,12 @@ public class OnRoadExposureEventHandler implements WarmEmissionEventHandler, Col
         return vehicleLinkEmissionCollector;
     }
 
-
     private VehicleLinkEmissionCollector deRegisterReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 
-        Id<Person> personId = getDriverOfVehicle(vehicleId);
-        this.onRoadExposureTable.addInfoToTable(personId, linkId, this.vehicleId2Mode.get(vehicleId), time, inhaledMass);
+        this.onRoadExposureTable.addInfoToTable(driverAgents.get(vehicleId).getFirst(), linkId, driverAgents.get(vehicleId).getSecond(), time, inhaledMass);
         return vehicleLinkEmissionCollector;
     }
 

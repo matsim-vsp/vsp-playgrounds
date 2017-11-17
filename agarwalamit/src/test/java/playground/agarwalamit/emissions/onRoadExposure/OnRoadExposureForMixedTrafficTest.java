@@ -235,8 +235,8 @@ public class OnRoadExposureForMixedTrafficTest {
                 Map<String, Double> inhaledMass_car = onRoadExposureCalculator.calculate("car", coldEmissionFromCar, 0.);
                 Map<String, Double> inhaledMass_bicycle = onRoadExposureCalculator.calculate("bicycle", coldEmissionFromCar, 0.);
 
-                totalInhaledMass_manual = MapUtils.addMaps(totalInhaledMass_manual, inhaledMass_car);
-                totalInhaledMass_manual = MapUtils.addMaps(totalInhaledMass_manual, inhaledMass_bicycle);
+                totalInhaledMass_manual = MapUtils.mergeMaps(totalInhaledMass_manual, inhaledMass_car);
+                totalInhaledMass_manual = MapUtils.mergeMaps(totalInhaledMass_manual, inhaledMass_bicycle);
             }
         }
 
