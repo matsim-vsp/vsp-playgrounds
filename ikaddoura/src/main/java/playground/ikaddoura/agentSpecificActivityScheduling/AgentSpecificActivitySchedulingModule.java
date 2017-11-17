@@ -84,7 +84,7 @@ public class AgentSpecificActivitySchedulingModule extends AbstractModule {
 			
 			} else {
 				log.info("Not adjusting the population."
-						+ " Opening and closing times are expected to be provided as person attributes in the plans file.");
+						+ " In the case of applying the agent-specific activity scoring function: Opening and closing times are expected to be provided as person attributes in the plans file.");
 			}
 			
 		} else {
@@ -138,15 +138,20 @@ public class AgentSpecificActivitySchedulingModule extends AbstractModule {
 	public void install() {
 		
 		if (asasConfigGroup.isUseAgentSpecificActivityScheduling()) {
-			// adjust scoring
-			log.info("Replacing the default activity scoring by an agent-specific opening / closing time consideration...");
-					
-			this.bind(CountActEventHandler.class).asEagerSingleton();
-			this.addEventHandlerBinding().to(CountActEventHandler.class);
 			
-			this.bindScoringFunctionFactory().to(AgentSpecificScoringFunctionFactory.class);	
-			
-			log.info("Replacing the default activity scoring by an agent-specific opening / closing time consideration... Done.");
+			if (asasConfigGroup.isReplaceDefaultScoring()) {
+				// adjust scoring
+				log.info("Replacing the default activity scoring by an agent-specific opening / closing time consideration...");
+						
+				this.bind(CountActEventHandler.class).asEagerSingleton();
+				this.addEventHandlerBinding().to(CountActEventHandler.class);
+				
+				this.bindScoringFunctionFactory().to(AgentSpecificScoringFunctionFactory.class);	
+				
+				log.info("Replacing the default activity scoring by an agent-specific opening / closing time consideration... Done.");
+			} else {
+				log.info("Using the default activity scoring, i.e. not replacing the default activity scoring by an agent-specific opening / closing time consideration.");
+			}
 		
 		} else {
 			log.info("Agent-specific activity scheduling disabled. Using the default scoring.");

@@ -34,6 +34,7 @@ public class AgentSpecificActivitySchedulingConfigGroup extends ReflectiveConfig
 	}
 
 	private boolean useAgentSpecificActivityScheduling = true;
+	private boolean replaceDefaultScoring = true;
 	private double activityDurationBin = 3600.;
 	private double tolerance = 900.;
 	private boolean removeNetworkSpecificInformation = false;
@@ -88,6 +89,18 @@ public class AgentSpecificActivitySchedulingConfigGroup extends ReflectiveConfig
 	public void setUseAgentSpecificActivityScheduling(boolean useAgentSpecificActivityScheduling) {
 		this.useAgentSpecificActivityScheduling = useAgentSpecificActivityScheduling;
 	}
+
+	@StringGetter( "replaceDefaultScoring" )
+	public boolean isReplaceDefaultScoring() {
+		return replaceDefaultScoring;
+	}
+
+	@StringSetter( "replaceDefaultScoring" )
+	public void setReplaceDefaultScoring(boolean replaceDefaultScoring) {
+		this.replaceDefaultScoring = replaceDefaultScoring;
+	}
+	
+	
 	
 }
 
