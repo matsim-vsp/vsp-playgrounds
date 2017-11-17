@@ -62,7 +62,6 @@ public class RunExampleOptAV2 {
 	private static String configFile;
 	private static String outputDirectory;
 	private static String runId;
-	private static Boolean allowPotentialSAVusersToSwitchToTaxiMode;
 		
 	private static boolean otfvis;
 	
@@ -78,16 +77,16 @@ public class RunExampleOptAV2 {
 			runId = args[2];
 			log.info("runId: "+ runId);
 			
-			allowPotentialSAVusersToSwitchToTaxiMode = Boolean.parseBoolean(args[3]);
-			log.info("allowPotentialSAVusersToSwitchToTaxiMode: "+ allowPotentialSAVusersToSwitchToTaxiMode);		
-			
 			otfvis = false;
 			
 		} else {
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config_test.xml";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_test_1agent/";
+//			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config-from-server_1agent.xml";
+//			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_config-from-server_1agent_test1/";
+			
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config-from-server3.xml";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_config-from-server3/";
+			
 			runId = null;
-			allowPotentialSAVusersToSwitchToTaxiMode = true;
 			otfvis = false;
 		}
 		
@@ -109,7 +108,7 @@ public class RunExampleOptAV2 {
 				new AgentSpecificActivitySchedulingConfigGroup()
 				);
 		
-//		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
@@ -123,28 +122,17 @@ public class RunExampleOptAV2 {
 		
 		controler.addOverridingModule(new AgentSpecificActivitySchedulingModule(scenario));
 		
-		final String[] modesWithoutTaxi = {"car", "bicycle", "pt", "ptSlow", "walk"};
-		final String[] modesWithTaxi = {"car", "bicycle", "pt", "ptSlow", "walk", "taxi"};
-		final String[] chainBasedModes = {"car", "bicycle"};
-
 		controler.addOverridingModule(new AbstractModule() {
 							
 			@Override
 			public void install() {
+				
 				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
 				
-				final String[] availableModesForPotentialSAVusers;
-				
-				if (allowPotentialSAVusersToSwitchToTaxiMode) {
-					availableModesForPotentialSAVusers = modesWithTaxi;
-				} else {
-					availableModesForPotentialSAVusers = modesWithoutTaxi;
-				}
-				
-				String subpopPotentialSAVuser = "potentialSAVuser";
-				addPlanStrategyBinding("SubtourModeChoice_" + subpopPotentialSAVuser).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				String subpopulation = "noPotentialSAVuser";
+				addPlanStrategyBinding("SubtourModeChoice_" + subpopulation).toProvider(new javax.inject.Provider<PlanStrategy>() {
 					
-					final String[] availableModes = availableModesForPotentialSAVusers;
+					final String[] availableModes = {"car", "bicycle", "pt", "ptSlow", "walk"};
 					
 					@Inject
 					Scenario sc;
@@ -152,7 +140,8 @@ public class RunExampleOptAV2 {
 					@Override
 					public PlanStrategy get() {
 						
-						log.info("SubtourModeChoice_" + subpopPotentialSAVuser + " - available modes: " + availableModes.toString());
+						log.info("SubtourModeChoice_" + subpopulation + " - available modes: " + availableModes.toString());
+						final String[] chainBasedModes = {"car", "bicycle"};
 
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
@@ -161,28 +150,7 @@ public class RunExampleOptAV2 {
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}
-				});
-				
-				String subpopNoPotentialSAVuser = "noPotentialSAVuser";
-				addPlanStrategyBinding("SubtourModeChoice_" + subpopNoPotentialSAVuser).toProvider(new javax.inject.Provider<PlanStrategy>() {
-					final String[] availableModes = modesWithoutTaxi;
-					
-					@Inject
-					Scenario sc;
-
-					@Override
-					public PlanStrategy get() {
-						
-						log.info("SubtourModeChoice_" + subpopNoPotentialSAVuser + " - available modes: " + availableModes.toString());
-						
-						final Builder builder = new Builder(new RandomPlanSelector<>());
-						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
-								.global()
-								.getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
-						return builder.build();
-					}
-				});
+				});			
 			}
 		});
 
