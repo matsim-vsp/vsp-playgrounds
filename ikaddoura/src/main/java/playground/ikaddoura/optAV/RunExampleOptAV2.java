@@ -37,6 +37,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
@@ -84,7 +85,7 @@ public class RunExampleOptAV2 {
 			
 		} else {
 			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config_test.xml";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_test_2taxiTrips_2/";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/optAV_test_1agent/";
 			runId = null;
 			allowPotentialSAVusersToSwitchToTaxiMode = true;
 			otfvis = false;
@@ -107,6 +108,8 @@ public class RunExampleOptAV2 {
 				new DecongestionConfigGroup(),
 				new AgentSpecificActivitySchedulingConfigGroup()
 				);
+		
+//		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
@@ -148,6 +151,9 @@ public class RunExampleOptAV2 {
 
 					@Override
 					public PlanStrategy get() {
+						
+						log.info("SubtourModeChoice_" + subpopPotentialSAVuser + " - available modes: " + availableModes.toString());
+
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
 								.global()
@@ -166,6 +172,9 @@ public class RunExampleOptAV2 {
 
 					@Override
 					public PlanStrategy get() {
+						
+						log.info("SubtourModeChoice_" + subpopNoPotentialSAVuser + " - available modes: " + availableModes.toString());
+						
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
 								.global()
