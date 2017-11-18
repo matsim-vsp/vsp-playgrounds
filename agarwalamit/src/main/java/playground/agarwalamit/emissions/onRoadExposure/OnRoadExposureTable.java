@@ -100,6 +100,7 @@ public class OnRoadExposureTable {
         for (String mode : modes) {
             Map<String, Double> tempOut = new HashMap<>();
             for (Id<Person> personId : personIds){
+                if (this.personInfo.get(personId, mode)==null) continue;
                 tempOut = MapUtils.mergeMaps(tempOut,
                         TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
             }
@@ -115,6 +116,7 @@ public class OnRoadExposureTable {
         Map<Id<Link>, Map<String,Double>> outMap = new HashMap<>();
         for (Id<Person> personId : personIds) {
             for (String mode : modes) {
+                if (this.personInfo.get(personId, mode)==null) continue;
                 outMap = MapUtils.mergeMultiMaps(outMap,
                         TableUtils.getLinkId2InhaledMass(this.personInfo.get(personId, mode).time2link2emissions));
             }
@@ -129,6 +131,7 @@ public class OnRoadExposureTable {
         Map<Double, Map<String,Double>> outMap = new HashMap<>();
         for (Id<Person> personId : personIds) {
             for (String mode : modes) {
+                if (this.personInfo.get(personId, mode)==null) continue;
                 outMap = MapUtils.mergeMultiMaps(outMap,
                         TableUtils.getTimeBin2InhaledMass(this.personInfo.get(personId, mode).time2link2emissions));
             }

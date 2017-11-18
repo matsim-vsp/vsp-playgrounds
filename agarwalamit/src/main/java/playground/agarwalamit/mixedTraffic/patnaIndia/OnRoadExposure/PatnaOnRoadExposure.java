@@ -80,9 +80,20 @@ public class PatnaOnRoadExposure {
         Map<String, Map<String, Double>> modeToInhaledMass;
 
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = new OnRoadExposureConfigGroup();
-        onRoadExposureConfigGroup.getPollutantToPenetrationRate("bicycle");
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("motorbike");
+        onRoadExposureConfigGroup.getPollutantToPenetrationRate("truck");
+        onRoadExposureConfigGroup.getPollutantToPenetrationRate("bike");
+        onRoadExposureConfigGroup.getPollutantToPenetrationRate("car");
+
         onRoadExposureConfigGroup.getModeToOccupancy().put("motorbike",1.0);
+        onRoadExposureConfigGroup.getModeToOccupancy().put("truck",1.0);
+        onRoadExposureConfigGroup.getModeToOccupancy().put("bike",1.0);
+        onRoadExposureConfigGroup.getModeToOccupancy().put("car",1.2);
+
+        onRoadExposureConfigGroup.getModeToBreathingRate().put("motorbike",0.66/3600.0 );
+        onRoadExposureConfigGroup.getModeToBreathingRate().put("truck",0.66/3600.0 );
+        onRoadExposureConfigGroup.getModeToBreathingRate().put("bike",3.06/3600.0 );
+        onRoadExposureConfigGroup.getModeToBreathingRate().put("car",0.66/3600.0 );
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
         OnRoadExposureEventHandler onRoadExposureEventHandler = new OnRoadExposureEventHandler(onRoadExposureConfigGroup);
