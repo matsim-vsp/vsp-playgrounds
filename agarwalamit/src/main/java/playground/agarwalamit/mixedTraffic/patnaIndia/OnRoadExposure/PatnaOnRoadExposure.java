@@ -22,8 +22,11 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.OnRoadExposure;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Map;
+import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureEventHandler;
@@ -43,14 +46,17 @@ public class PatnaOnRoadExposure {
 
         {
             String eventsFile_bau = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_events.xml.gz";
-//            String configFile = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_config.xml.gz";
+            String emissionEventsFile_bau = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_emissions_events.xml.gz";
+            String outCombinedEventsFile_bau = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_combinedEvents.xml.gz";
+            // need to merge the files to access all events together
+
+            patnaOnRoadExposure.readEventsFile(eventsFile_bau, emissionEventsFile_bau, outCombinedEventsFile_bau);
+
             modeToInhaledMass_bau = patnaOnRoadExposure.run(eventsFile_bau);
-
-
         }
         {
             String eventsFile_BSH_b = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/output_events.xml.gz";
-//            String configFile_BSH_b = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/output_config.xml.gz";
+            String emissionEventsFile_BSH_b = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/output_emissions_events.xml.gz";
             modeToInhaledMass_BSH_b = patnaOnRoadExposure.run(eventsFile_BSH_b);
         }
 
@@ -70,10 +76,7 @@ public class PatnaOnRoadExposure {
             writer.close();
         } catch (IOException e) {
             throw new RuntimeException("Data is not written/read. Reason : " + e);
-
         }
-
-
     }
 
     private static Map<String, Map<String, Double>> run(String eventsFile){
@@ -103,8 +106,21 @@ public class PatnaOnRoadExposure {
         eventsReader.readFile(eventsFile);
 
        return  modeToInhaledMass= onRoadExposureEventHandler.getOnRoadExposureTable().getModeToInhaledMass();
-
     }
 
+    private static void readEventsFile(String eventsFile, String emissionEventsFile, String outCombinedEventsFile){
+        //TODO: this will simply concatenate the events..
+        EventsManager eventsManager = EventsUtils.createEventsManager();
 
+        MatsimEventsReader eventsReader = new MatsimEventsReader(eventsManager);
+        EmissionEventsReader emissionEventsReader = new EmissionEventsReader(eventsManager);
+
+        EventWriterXML writerXML = new EventWriterXML(outCombinedEventsFile);
+        eventsManager.addHandler(writerXML);
+
+        eventsReader.readFile(eventsFile);
+        emissionEventsReader.readFile(emissionEventsFile);
+
+        writerXML.closeFile();
+    }
 }

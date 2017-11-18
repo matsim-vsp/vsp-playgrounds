@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
@@ -36,6 +37,7 @@ import playground.agarwalamit.utils.TableUtils;
 
 public class OnRoadExposureTable {
 
+    private static final Logger LOG = Logger.getLogger(OnRoadExposureTable.class);
     private Table<Id<Person>, String, OnRoadTripExposureInfo> personInfo = HashBasedTable.create();
 
     /**
@@ -80,6 +82,7 @@ public class OnRoadExposureTable {
     }
 
     public Map<String, Double> getTotalInhaledMass(){
+        LOG.info("Computing total inhaled mass ...");
         Map<String, Double> out = new HashMap<>();
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
@@ -94,6 +97,7 @@ public class OnRoadExposureTable {
     }
 
     public Map<String, Map<String,Double>> getModeToInhaledMass(){
+        LOG.info("Computing total inhaled mass for each mode ...");
         Map<String, Map<String, Double>> out = new HashMap<>();
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
@@ -110,6 +114,7 @@ public class OnRoadExposureTable {
     }
 
     public Map<Id<Link>,Map<String,Double>> getLinkToInhaledMass(){
+        LOG.info("Computing total inhaled mass for each link ...");
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
 
@@ -125,6 +130,7 @@ public class OnRoadExposureTable {
     }
 
     public Map<Double,Map<String,Double>> getTimeToInhaledMass() {
+        LOG.info("Computing total inhaled mass in each time bin ...");
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
 
