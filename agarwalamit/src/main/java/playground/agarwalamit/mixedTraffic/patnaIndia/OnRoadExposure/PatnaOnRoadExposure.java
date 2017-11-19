@@ -55,6 +55,9 @@ public class PatnaOnRoadExposure {
         {
             String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
             String outCombinedEventsFile_BSH_b = outputDir+"/output_combinedEvents.xml.gz";
+
+            PatnaEmissionsWriter.main(new String [] {outputDir});
+
             modeToInhaledMass_BSH_b = patnaOnRoadExposure.run(outCombinedEventsFile_BSH_b);
         }
 
