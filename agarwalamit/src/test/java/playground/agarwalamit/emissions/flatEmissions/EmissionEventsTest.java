@@ -260,7 +260,7 @@ public class EmissionEventsTest {
         ecg.setConsideringCO2Costs(true);
         ecg.setEmissionCostMultiplicationFactor(1.0);
 
-        ecg.setIgnoringEmissionsFromEventsFile(isIgnoringEmissionsFromEventsFile);
+        ecg.setWritingEmissionsEvents(isIgnoringEmissionsFromEventsFile);
         config.addModule(ecg);
     }
 }

@@ -60,7 +60,8 @@ public class PatnaEmissionsWriter {
     private final String networkWithRoadTypeMapping = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/input/networkWithRoadTypeMapping.xml.gz";
 
     public static void main(String[] args) {
-        String dir = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
+//        String dir = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
+        String dir = args[0];
         PatnaEmissionsWriter pew = new PatnaEmissionsWriter();
         pew.writeRoadTypeMappingFile(dir+"/output_network.xml.gz");
         pew.writeEmissionEventsFile(dir);
@@ -146,7 +147,7 @@ public class PatnaEmissionsWriter {
 
         PatnaEmissionVehicleCreator emissionVehicleCreatorHandler = new PatnaEmissionVehicleCreator(scenario);
 
-        String emissionEventOutputFile = outputDir + "/output_emissions_events.xml.gz";
+        String emissionEventOutputFile = outputDir + "/output_combinedEvents.xml.gz";
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
         EmissionModule emissionModule = new EmissionModule(scenario, eventsManager);
@@ -170,17 +171,6 @@ public class PatnaEmissionsWriter {
         PatnaEmissionVehicleCreator (final Scenario scenario) {
             this.scenario = scenario;
         }
-
-        // cant use following, because, vehicle is required before the compiler jumps here. Amit Dec 16
-//        @Override
-//        public void handleEvent(VehicleEntersTrafficEvent event) {
-//            VehicleType vt = scenario.getVehicles().getVehicleTypes().get(Id.create(event.getNetworkMode(), VehicleType.class));
-//            Id<Vehicle> vehicleId = event.getVehicleId();
-//            if (! scenario.getVehicles().getVehicles().containsKey(vehicleId)) {
-//                Vehicle vehicle = scenario.getVehicles().getFactory().createVehicle(vehicleId, vt);
-//                scenario.getVehicles().addVehicle(vehicle);
-//            }
-//        }
 
         @Override
         public void reset(int iteration) {
