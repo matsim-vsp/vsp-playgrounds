@@ -24,12 +24,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -38,6 +40,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -66,7 +69,10 @@ public class WOBZoneAndLOSGeneratorV2 {
 	private final Map<String, Geometry> zoneMap = new HashMap<>();
 	private final Map<String, Map<String, Double>> zone2ZoneDistanceMap = new HashMap<>();
 	private final Map<String, Map<String, Integer>> zone2ZoneAdjacencyMap = new HashMap<>();
+	private final Map<String, Integer> convertedZone = new HashMap<>();
 	private final String outputBase;
+	private final Map<String,String> new2oldZones = new HashMap<>();
+	
 	
 	// Parameters
 	private double defaultIntraZoneDistance = 1.72; // in miles; equals 2.76km.
@@ -91,17 +97,17 @@ public class WOBZoneAndLOSGeneratorV2 {
 //		String featureKeyInShapeFile = "NR";
 		
 		// Input and output
-		String commuterFileOutgoing1 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/commuters/031NS2009Ga_adjustedZonesAndSelectedAreas.txt";
-		
-		String[] commuterFilesOutgoing = {commuterFileOutgoing1};
-		String shapeFile1 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/relevantZonesETR.shp";
-		String shapeFile2 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/wvi-zones.shp";
-		
-		String outputBase = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/100_test/";
-
-		
-		WOBZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new WOBZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile1, shapeFile2, outputBase);
-		zoneAndLOSGeneratorV2.generateSupply();
+//		String commuterFileOutgoing1 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/commuters/031NS2009Ga_adjustedZonesAndSelectedAreas.txt";
+//		
+//		String[] commuterFilesOutgoing = {commuterFileOutgoing1};
+//		String shapeFile1 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/relevantZonesETR.shp";
+//		String shapeFile2 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/wvi-zones.shp";
+//		
+//		String outputBase = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/100_test/";
+//
+//		
+//		WOBZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new WOBZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile1, shapeFile2, outputBase);
+//		zoneAndLOSGeneratorV2.generateSupply();
 	}
 
 	
@@ -112,7 +118,7 @@ public class WOBZoneAndLOSGeneratorV2 {
 
 		readMunicipalities(commuterFilesOutgoing);
 		readShape(shapeFile, "AGS");
-		readShape(shapeFile, "RS_ALT");
+//		readShape(shapeFile, "RS_ALT");
 		readShape(shapefile2, "NO");
 		
 		Geometry vwzone = this.zoneMap.get("350");
@@ -131,11 +137,58 @@ public class WOBZoneAndLOSGeneratorV2 {
 		this.zones.add("9999995");
 		this.zones.add("9999996");
 		
-		
-		
+//		this.convertZones();
+//		Map<String, Geometry> newZonesMap = new HashMap<>();
+//		List<String> newZones = new ArrayList<>();
+//		newZones.addAll(zones);
+//		zones.clear();
+//		for (String z : newZones){
+//			String zz = Integer.toString(getConvertedZone(z));
+//			zones.add(zz);
+//		}
+//		
+//		newZonesMap.putAll(zoneMap);
+//		zoneMap.clear();
+//		for (Entry<String, Geometry> e : newZonesMap.entrySet()){
+//			String zz = Integer.toString(getConvertedZone(e.getKey()));
+//
+//			zoneMap.put(zz, e.getValue());
+//		}
 	}
 	
 	
+	/**
+	 * 
+	 */
+	private void convertZones() {
+		BufferedWriter bw = IOUtils.getBufferedWriter(outputBase+"zoneconversion.csv");
+		try {
+			Integer i = 0;
+			for (String zone : zones){
+				convertedZone.put(zone, i);
+				System.out.println(zone);
+				i++;
+				bw.write(zone+";"+i);
+				bw.newLine();
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public String getConvertedZone(String zone0){
+		if (this.zones.contains(zone0)){
+			return zone0;
+		}
+		else if (this.new2oldZones.containsKey(zone0)){
+			return this.new2oldZones.get(zone0);
+		}
+		else throw new RuntimeException(zone0+ " does not exist");
+	}
+
+
 	public void generateSupply() {
 		compareIdsInShapefileAndCommuterFiles();
 		computeAndStoreZone2ZoneDistances();
@@ -160,6 +213,10 @@ public class WOBZoneAndLOSGeneratorV2 {
 		Collection <SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
 		for (SimpleFeature feature : features) {
 			String id =  feature.getAttribute(featureKeyInShapeFile).toString();
+			if (featureKeyInShapeFile.equals("AGS")){
+				String newId = feature.getAttribute("RS_ALT").toString();
+				this.new2oldZones.put(newId, id);
+			}
 			Geometry geometry = (Geometry) feature.getDefaultGeometry();
 			this.zones.add(id);
 			this.zoneMap.put(id, geometry);
@@ -192,7 +249,7 @@ public class WOBZoneAndLOSGeneratorV2 {
 			Map<String,Integer> toZoneAdjacencyMap = new HashMap<>();
 			for (String destinationId : this.zones) {
 				counter++;
-				if (counter%1000 == 0) {
+				if (counter%100000 == 0) {
 					LOG.info(counter + " relations computed.");
 				}
 				int adjacent;

@@ -95,20 +95,31 @@ public class WOBDemandGeneratorCensus {
 	private int allPersons = 0;
 	private int allStudents = 0;
 	private int counter;
+	private WOBZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2;
 	
 
 	public static void main(String[] args) {
-		// Input and output files
+		
 		String commuterFileOutgoing1 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/commuters/031NS2009Ga_adjustedZonesAndSelectedAreas.txt";
-	
+		
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1};
+		String shapeFile1 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/nssa.shp";
+		String shapeFile2 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/wvi-zones.shp";
+		
+		String outputBase = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/100_test/";
+
+		
+		WOBZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new WOBZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile1, shapeFile2, outputBase);
+		zoneAndLOSGeneratorV2.generateSupply();
+		
+		// Input and output files
+	
 		
 		String censusFile = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/Zensus11_Datensatz_Bevoelkerung_Niedersachsen_selected.csv";
-		String outputBase = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/100_test/";
 		
 		// Parameters
 		int numberOfPlansPerPerson = 5;
-		List<String> idsOfFederalStatesIncluded = Arrays.asList("03","15");
+		List<String> idsOfFederalStatesIncluded = Arrays.asList("03");
 		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
 		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
 		double defaultCensusEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
@@ -116,7 +127,7 @@ public class WOBDemandGeneratorCensus {
 		// Choosing this too low effects that employed people (according to the census) are left without workplace. Minimize this number!
 
 		WOBDemandGeneratorCensus demandGeneratorCensus = new WOBDemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
-				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio);
+				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio, zoneAndLOSGeneratorV2);
 		
 		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
 		
@@ -131,8 +142,9 @@ public class WOBDemandGeneratorCensus {
 
 	
 	public WOBDemandGeneratorCensus(String[] commuterFilesOutgoing, String censusFile, String outputBase, int numberOfPlansPerPerson, 
-			List<String> idsOfFederalStatesIncluded, double defaultAdultsToEmployeesRatio, double defaultEmployeesToCommutersRatio) {
+			List<String> idsOfFederalStatesIncluded, double defaultAdultsToEmployeesRatio, double defaultEmployeesToCommutersRatio, WOBZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2) {
 		LogToOutputSaver.setOutputDirectory(outputBase);
+		this.zoneAndLOSGeneratorV2 = zoneAndLOSGeneratorV2;
 		
 		this.outputBase = outputBase;
 		this.numberOfPlansPerPerson = numberOfPlansPerPerson;
@@ -310,7 +322,7 @@ public class WOBDemandGeneratorCensus {
 			for (Person person : this.population.getPersons().values()) {
 				// Choose new location of work, if applicable
 				if ((boolean) person.getAttributes().getAttribute("employed")) {
-					String locationOfWork = (String) person.getAttributes().getAttribute("locationOfWork");
+					String locationOfWork =  person.getAttributes().getAttribute("locationOfWork").toString();
 					if (locationOfWork.equals("-99")) {
 						throw new RuntimeException("This combination of attribute values is implaubible.");
 					} else {
@@ -325,7 +337,7 @@ public class WOBDemandGeneratorCensus {
 				}
 				// Choose new location of school, if applicable
 				if ((boolean) person.getAttributes().getAttribute("student")) {
-					String locationOfSchool = (String) person.getAttributes().getAttribute("locationOfSchool");
+					String locationOfSchool = person.getAttributes().getAttribute("locationOfSchool").toString();
 					if (locationOfSchool.equals("-99")) {
 						throw new RuntimeException("This combination of attribute values is implaubible.");
 					} else {
@@ -359,11 +371,11 @@ public class WOBDemandGeneratorCensus {
 			HouseholdImpl household = new HouseholdImpl(householdId); // TODO Or use factory?
 			household.getAttributes().putAttribute("numberOfAdults", 1); // Always 1; no household structure
 			household.getAttributes().putAttribute("totalNumberOfHouseholdVehicles", 1);
-			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId,gender,age));
+			household.getAttributes().putAttribute("homeTSZLocation",this.zoneAndLOSGeneratorV2.getConvertedZone( getLocation(municipalityId,gender,age)));
 			household.getAttributes().putAttribute("numberOfChildren", 0); // None, ignore them in this version
 			household.getAttributes().putAttribute("householdStructure", 1); // 1 = single, no children
 			
-			Id<Person> personId = Id.create(householdId, Person.class);
+			Id<Person> personId = Id.create(householdId+"01", Person.class);
 			Person person = this.population.getFactory().createPerson(personId);
 			// The following attribute names inspired by "PersonUtils.java": "sex", "hasLicense", "carAvail", "employed", "age", "travelcards"
 			person.getAttributes().putAttribute("householdId", householdId);
@@ -393,7 +405,7 @@ public class WOBDemandGeneratorCensus {
 						person.getAttributes().putAttribute("locationOfWork", "-99");
 						person.getAttributes().putAttribute("employed", false);
 					} else {
-						person.getAttributes().putAttribute("locationOfWork", locationOfWork);
+						person.getAttributes().putAttribute("locationOfWork", this.zoneAndLOSGeneratorV2.getConvertedZone(locationOfWork));
 					}
 				}
 			} else {
@@ -402,7 +414,7 @@ public class WOBDemandGeneratorCensus {
 
 			if (student) {
 				// TODO quite simple assumption, which may be improved later
-				person.getAttributes().putAttribute("locationOfSchool", getWorkLocation(municipalityId));
+				person.getAttributes().putAttribute("locationOfSchool", this.zoneAndLOSGeneratorV2.getConvertedZone(getWorkLocation(municipalityId)));
 			} else {
 				person.getAttributes().putAttribute("locationOfSchool", "-99");
 			}
