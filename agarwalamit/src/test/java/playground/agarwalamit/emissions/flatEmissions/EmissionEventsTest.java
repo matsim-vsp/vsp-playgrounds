@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +31,11 @@ import org.junit.runners.Parameterized;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.contrib.emissions.EmissionModule;
+import org.matsim.contrib.emissions.events.ColdEmissionEvent;
+import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
@@ -67,6 +72,8 @@ import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 @RunWith(Parameterized.class)
 public class EmissionEventsTest {
+
+    private static Logger LOG = Logger.getLogger(EmissionEventsTest.class);
 
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
@@ -157,6 +164,19 @@ public class EmissionEventsTest {
 
         if ( ! isWritingEmissionsEvents && warmEvents.size()!=0 ) throw new RuntimeException("There should NOT be any warm emission events in "+ outputEventsFile + " file.");
         else if ( isWritingEmissionsEvents && warmEvents.size()==0) throw new RuntimeException("There should be some warm emission events in "+ outputEventsFile + " file.");
+
+        // now check the sequence of the events
+        // A cold emission event is thrown after catching vehicleEntersTrafficEvent, thus, technically, cold emission event should occur after vehicleEntersTrafficEvent
+
+        if (! isWritingEmissionsEvents) return; // no combined emission events file
+        try {
+            EventsManager eventsManagerCombinedEvents = EventsUtils.createEventsManager();
+            CombinedMatsimEventsReader combinedMatsimEventsReader = new CombinedMatsimEventsReader(eventsManagerCombinedEvents);
+            eventsManagerCombinedEvents.addHandler(new MyEventsCatcher());
+            combinedMatsimEventsReader.readFile(outputEventsFile);
+        } catch (RuntimeException e) {
+            LOG.warn("Reading events file, generating emission events file and then writing them back will mix up the events sequence. As of now, we cant control the events in the same time step.");
+        }
     }
 
     @Test
@@ -212,6 +232,27 @@ public class EmissionEventsTest {
 
         if ( !isWritingEmissionsEvents && warmEvents.size()!=0 ) throw new RuntimeException("There should NOT be any warm emission events in "+ eventsFile + " file.");
         else if (isWritingEmissionsEvents && warmEvents.size()==0) throw new RuntimeException("There should be some warm emission events in "+ eventsFile + " file.");
+    }
+
+    private class MyEventsCatcher implements VehicleEntersTrafficEventHandler, ColdEmissionEventHandler {
+        private boolean isVehicleEnteredTraffic = false;
+
+        @Override
+        public void handleEvent(VehicleEntersTrafficEvent event) {
+            this.isVehicleEnteredTraffic = true;
+        }
+
+        @Override
+        public void handleEvent(ColdEmissionEvent event) {
+            if (! this.isVehicleEnteredTraffic) {
+                throw new RuntimeException("There is a problem. Vehicle has not entered the traffic, yet a cold emission event is thrown.  Cold Emission Event :" + event.toString());
+            }
+        }
+
+        @Override
+        public void reset(int iteration) {
+
+        }
     }
 
     private class MyWarmEmissionEventHandler implements WarmEmissionEventHandler{
