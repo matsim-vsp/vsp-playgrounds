@@ -44,21 +44,20 @@ public class PatnaOnRoadExposure {
         PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
 
         {
-            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
-            String outCombinedEventsFile_bau = outputDir+"/output_combinedEvents.xml.gz";
-            // need to merge the files to access all events together
+            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
+            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
+            PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir});
 
-            PatnaEmissionsWriter.main(new String [] {outputDir});
-
-            modeToInhaledMass_bau = patnaOnRoadExposure.run(outCombinedEventsFile_bau);
+            modeToInhaledMass_bau = patnaOnRoadExposure.run(outputDir+"/output_events.xml.gz");
         }
-        {
-            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
-            String outCombinedEventsFile_BSH_b = outputDir+"/output_combinedEvents.xml.gz";
+        { // TODO: need a different network...
+            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
+            PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir});
 
             PatnaEmissionsWriter.main(new String [] {outputDir});
 
-            modeToInhaledMass_BSH_b = patnaOnRoadExposure.run(outCombinedEventsFile_BSH_b);
+            modeToInhaledMass_BSH_b = patnaOnRoadExposure.run(outputDir+"/output_events.xml.gz");
         }
 
         // write data
