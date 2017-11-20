@@ -31,7 +31,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
@@ -48,6 +47,7 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
+import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 /**
  *
@@ -75,7 +75,7 @@ public class EmissionEventsTest {
 
     @Parameterized.Parameters(name = "{index}: isWritingEmissionsEvents == {0}")
     public static List<Object> considerCO2 () {
-        Object[] isWritingEmissionsEvents = new Object [] { true , false };
+        Object[] isWritingEmissionsEvents = new Object [] {  false, true };
         return Arrays.asList(isWritingEmissionsEvents);
     }
 
@@ -86,8 +86,8 @@ public class EmissionEventsTest {
     @Test
     public void eventsOfflineTest(){
         String inputEventsFile = helper.getClassInputDirectory()+"/0.events.xml.gz";
-        new File(helper.getOutputDirectory()+"/ignoreingEmissionFromEventsFile="+this.isWritingEmissionsEvents).mkdir();
-        String outputEventsFile = helper.getOutputDirectory()+"/ignoreingEmissionFromEventsFile="+this.isWritingEmissionsEvents +"/outputEvents.xml.gz";
+        new File(helper.getOutputDirectory()+"/isWritingEmissionsEvents="+this.isWritingEmissionsEvents).mkdir();
+        String outputEventsFile = helper.getOutputDirectory()+"/isWritingEmissionsEvents="+this.isWritingEmissionsEvents +"/outputEvents.xml.gz";
 
         // generate emissions
 
@@ -135,35 +135,24 @@ public class EmissionEventsTest {
         EventsManager emissionEventsManager = EventsUtils.createEventsManager();
         EmissionModule emissionModule = new EmissionModule(sc, emissionEventsManager);
 
-        EventWriterXML emissionEventWriter;
+        EventWriterXML emissionEventWriter = new EventWriterXML(outputEventsFile);
 
-        if ( ! this.isWritingEmissionsEvents) { // i.e., ignoring emission events,
-            emissionEventWriter = new EventWriterXML(outputEventsFile);
+        if ( ! this.isWritingEmissionsEvents) { // i.e., ignoring emission events,--> this will create a new events manager just to handle emission events
             emissionModule.getEmissionEventsManager().addHandler(emissionEventWriter);
         } else {
-            return;
+            emissionEventsManager.addHandler(emissionEventWriter);
         }
 
         MatsimEventsReader matsimEventsReader = new MatsimEventsReader(emissionEventsManager);
         matsimEventsReader.readFile(inputEventsFile);
 
-        if ( ! this.isWritingEmissionsEvents) {
-            emissionEventWriter.closeFile();
-        }
+        emissionEventWriter.closeFile();
 
         // check
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
+        CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
-        eventsManager.addHandler(new WarmEmissionEventHandler() {
-            @Override
-            public void handleEvent(WarmEmissionEvent event) {
-                warmEvents.add(event);
-            }
-            @Override
-            public void reset(int iteration) {
-            }
-        });
+        eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(outputEventsFile);
 
         if ( ! isWritingEmissionsEvents && warmEvents.size()!=0 ) throw new RuntimeException("There should NOT be any warm emission events in "+ outputEventsFile + " file.");
@@ -216,21 +205,28 @@ public class EmissionEventsTest {
         String eventsFile = outputDirectory + "/ITERS/it."+lastItr+"/"+lastItr+".events.xml.gz";
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
+        CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
-        eventsManager.addHandler(new WarmEmissionEventHandler() {
-            @Override
-            public void handleEvent(WarmEmissionEvent event) {
-                warmEvents.add(event);
-            }
-            @Override
-            public void reset(int iteration) {
-            }
-        });
+        eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(eventsFile);
 
         if ( !isWritingEmissionsEvents && warmEvents.size()!=0 ) throw new RuntimeException("There should NOT be any warm emission events in "+ eventsFile + " file.");
         else if (isWritingEmissionsEvents && warmEvents.size()==0) throw new RuntimeException("There should be some warm emission events in "+ eventsFile + " file.");
+    }
+
+    private class MyWarmEmissionEventHandler implements WarmEmissionEventHandler{
+        List<WarmEmissionEvent> list = new ArrayList<>();
+        MyWarmEmissionEventHandler (List<WarmEmissionEvent> warmEmissionEventList) {
+            this.list = warmEmissionEventList;
+        }
+        @Override
+        public void handleEvent(WarmEmissionEvent event) {
+            this.list.add(event);
+        }
+        @Override
+        public void reset(int iteration) {
+            this.list.clear();
+        }
     }
 
     private void emissionSettings(final Scenario scenario, final boolean isWritingEmissionsEvents){
