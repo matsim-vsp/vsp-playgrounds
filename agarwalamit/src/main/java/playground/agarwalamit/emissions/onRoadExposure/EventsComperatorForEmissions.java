@@ -64,7 +64,7 @@ public class EventsComperatorForEmissions implements Comparator<Event> {
         int compareValue = new Double(event1.getTime()).compareTo(new Double(event2.getTime()));
         if (compareValue==0) {
             // now check if they belongs to same person/vehicle
-            if ( ! getPersonIdFromEvent(event1).equals(getPersonIdFromEvent(event2))) return 0; // not same persons then return as they
+            if ( ! getPersonIdFromEvent(event1).equals(getPersonIdFromEvent(event2))) return 0; // not same persons then return as they are
             else {
                 return Integer.valueOf(naturalOrderOfEvents.indexOf(event1.getEventType()))
                               .compareTo(Integer.valueOf(naturalOrderOfEvents.indexOf(event2.getEventType())));
@@ -104,6 +104,7 @@ public class EventsComperatorForEmissions implements Comparator<Event> {
     }
 
     private String getPersonFromVehicleId(String vehicleId){
+        if (! vehicleId.contains("_")) return vehicleId;
         int lastIndexOf = vehicleId.lastIndexOf("_");
         return vehicleId.substring(0,lastIndexOf);
     }

@@ -178,7 +178,7 @@ public class OnRoadExposureForMixedTrafficTest {
         });
 
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = (OnRoadExposureConfigGroup) ConfigUtils.addOrGetModule( sc.getConfig(), OnRoadExposureConfigGroup.class);
-        OnRoadExposureEventHandler onRoadExposureEventHandler = new OnRoadExposureEventHandler(onRoadExposureConfigGroup);
+        OnRoadExposureHandler onRoadExposureEventHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup);
 
         EmissionAggregator emissionAggregator = new EmissionAggregator();
 

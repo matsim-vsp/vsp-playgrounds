@@ -19,21 +19,23 @@
 
 package playground.agarwalamit.emissions.onRoadExposure;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
@@ -50,14 +52,18 @@ import org.matsim.vehicles.Vehicle;
  * <p>
  * The idea is to collect the emissions by all persons on a link between receptor's entry-exit on this link.
  * <p>
- * Probably, a problem is that (I think), *EmissionEvents are thrown after LinkLeaveEvent.
+ * Exposure due to its own emissions are considered now (because events are processed in next time step).
+ * <p>
+ * The only thing which is not included is cold emission events which are thrown at a later time step but on a former link. This should be significant anyways.
  */
 
 public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmissionEventHandler,
         VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler,
-        LinkLeaveEventHandler, LinkEnterEventHandler, PersonEntersVehicleEventHandler {
+        LinkLeaveEventHandler, LinkEnterEventHandler {
 
-    private TreeMap<Double, List<Event>> timeToEvents = new TreeMap<>(); // sorted by time: now sort list of events based on events occurrences
+    private boolean processedAllEvents = false; // just to make sure that all events are processed before getting any analysis.
+
+    private TreeMap<Double, List<Event>> time2ListOfEvents = new TreeMap<>();
 
     private final Map<Id<Vehicle>, Tuple<Id<Person>,String>> driverAgents = new HashMap<>();
 
@@ -65,11 +71,6 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
 
     private OnRoadExposureTable onRoadExposureTable = new OnRoadExposureTable(); // this will keep all info in it
     private Map<Id<Link>, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> agentsOnLink = new HashMap<>();
-
-    /**
-     * temporarily store all leaving agents to process them for warm emission events
-     */
-//    private Map<Double, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> sameTimeLeftAgent = new HashMap<>(); //
 
     @Inject
     public OnRoadExposureHandler(OnRoadExposureConfigGroup config) {
@@ -81,90 +82,120 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         this.agentsOnLink.clear();
         this.driverAgents.clear();
         this.onRoadExposureTable.clear();
+        this.time2ListOfEvents.clear();
     }
 
     @Override
     public void handleEvent(ColdEmissionEvent event) { //source
-//        if (tempColdEmissionEvents.containsKey(event.getVehicleId())) {
-//            tempColdEmissionEvents.put(event.getVehicleId(), event);
-//        } else {
-            this.agentsOnLink.get(event.getLinkId())
-                             .values()
-                             .stream()
-                             .forEach(e -> e.addColdEmissions(event.getColdEmissions()));
-//        }
+        this.time2ListOfEvents.get(event.getTime()).add(event);
+        processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(WarmEmissionEvent event) { //source
-        // all persons who are currently on the link are exposed
-        this.agentsOnLink.get(event.getLinkId())
-                         .values()
-                         .stream()
-                         .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
-
-        //  all persons who left in this time step are also exposed.
-//        if (this.sameTimeLeftAgent.get(new Double(event.getTime())) !=null ) {
-//            this.sameTimeLeftAgent.get(new Double(event.getTime()))
-//                                  .values()
-//                                  .stream()
-//                                  .forEach(e -> e.addWarmEmissions(event.getWarmEmissions()));
-//        }
+        this.time2ListOfEvents.get(event.getTime()).add(event);
+        processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(LinkEnterEvent event) {
-        registerReceptor(event.getVehicleId(), event.getLinkId(), event.getTime());
+        this.time2ListOfEvents.get(event.getTime()).add(event);
+        processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(LinkLeaveEvent event) {
-        Id<Vehicle> vehicleId = event.getVehicleId();
-        Id<Link> linkId = event.getLinkId();
-        double now = event.getTime();
-
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = deRegisterReceptor(vehicleId, linkId, now);
-        {
-            // clean previous time steps
-//            this.sameTimeLeftAgent.keySet()
-//                                  .stream()
-//                                  .filter(past -> past < now)
-//                                  .forEach(past -> this.sameTimeLeftAgent.remove(past));
-
-
-//            Map<Id<Vehicle>, VehicleLinkEmissionCollector> tempContainer = this.sameTimeLeftAgent.get(new Double (now));
-//            if (tempContainer == null) {
-//                tempContainer = new HashMap<>();
-//            }
-//            tempContainer.put(vehicleId, vehicleLinkEmissionCollector);
-//            this.sameTimeLeftAgent.put(new Double(now),tempContainer);
+        if ( ! this.time2ListOfEvents.containsKey(event.getTime()) ) {
+            this.time2ListOfEvents.put(event.getTime(), new ArrayList<>());
         }
+        this.time2ListOfEvents.get(event.getTime()).add(event);
+        processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(VehicleEntersTrafficEvent event) {
-        driverAgents.put(event.getVehicleId(), new Tuple<>(event.getPersonId(), event.getNetworkMode()));
-        registerReceptor(event.getVehicleId(), event.getLinkId(), event.getTime());
-//        if (tempColdEmissionEvents.containsKey(event.getVehicleId())){
-//            this.agentsOnLink.get(event.getLinkId())
-//                             .values()
-//                             .stream()
-//                             .forEach(e -> e.addColdEmissions(tempColdEmissionEvents.get(event.getVehicleId()).getColdEmissions()));
-////            tempColdEmissionEvents.remove(event.getVehicleId());
-//        }
+        if (! this.time2ListOfEvents.containsKey(event.getTime())) {
+            this.time2ListOfEvents.put(event.getTime(), new ArrayList<>());
+        }
+
+        this.time2ListOfEvents.get(event.getTime()).add(event);
+        processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(VehicleLeavesTrafficEvent event) {
-        Id<Vehicle> vehicleId = event.getVehicleId();
-
-        deRegisterReceptor(vehicleId, event.getLinkId(), event.getTime());
-        this.driverAgents.remove(event.getVehicleId());
+        if (! this.time2ListOfEvents.containsKey(event.getTime())) {
+            this.time2ListOfEvents.put(event.getTime(), new ArrayList<>());
+        }
+        this.time2ListOfEvents.get(event.getTime()).add(event);
+        processEvents(event.getTime());
     }
 
-    // >>>> register - deregister - reregister >>>>
+    private void processEvents(double time){ // basically delay all concerned events until next time step.
+        // get list and remove previous time steps
+        List<Event> events = this.time2ListOfEvents.entrySet()
+                                                   .stream()
+                                                   .filter(e -> e.getKey() < time)
+                                                   .flatMap(e -> e.getValue().stream())
+                                                   .collect(Collectors.toList());
+        //remove old time steps
+        new HashSet<>(this.time2ListOfEvents.keySet()).stream()
+                                                      .filter(e -> e < time)
+                                                      .forEach(e -> this.time2ListOfEvents.remove(e));
 
-    private VehicleLinkEmissionCollector registerReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
+        Collections.sort(events, new EventsComperatorForEmissions());
+
+        for (Event event : events) {
+            if(event instanceof VehicleEntersTrafficEvent) {
+
+                VehicleEntersTrafficEvent vehicleEntersTrafficEvent = (VehicleEntersTrafficEvent) event;
+                driverAgents.put(vehicleEntersTrafficEvent.getVehicleId(), new Tuple<>(vehicleEntersTrafficEvent.getPersonId(), vehicleEntersTrafficEvent.getNetworkMode()));
+                registerReceptor(vehicleEntersTrafficEvent.getVehicleId(), vehicleEntersTrafficEvent.getLinkId(), vehicleEntersTrafficEvent.getTime());
+
+            } else if(event instanceof LinkLeaveEvent) {
+
+                LinkLeaveEvent linkLeaveEvent = (LinkLeaveEvent) event;
+                deRegisterReceptor(linkLeaveEvent.getVehicleId(), linkLeaveEvent.getLinkId(), linkLeaveEvent.getTime());
+
+            } else if(event instanceof LinkEnterEvent) {
+
+                LinkEnterEvent linkEnterEvent = (LinkEnterEvent) event;
+                registerReceptor(linkEnterEvent.getVehicleId(), linkEnterEvent.getLinkId(), linkEnterEvent.getTime());
+
+            } else if(event instanceof ColdEmissionEvent) {
+
+                final ColdEmissionEvent coldEmissionEvent = (ColdEmissionEvent) event;
+                this.agentsOnLink.get(coldEmissionEvent.getLinkId())
+                                 .values()
+                                 .stream()
+                                 .forEach(e -> e.addColdEmissions(coldEmissionEvent.getColdEmissions()));
+
+            } else if(event instanceof WarmEmissionEvent) {
+
+                final WarmEmissionEvent warmEmissionEvent = (WarmEmissionEvent) event;
+                this.agentsOnLink.get(warmEmissionEvent.getLinkId())
+                                 .values()
+                                 .stream()
+                                 .forEach(e -> e.addWarmEmissions(warmEmissionEvent.getWarmEmissions()));
+
+            } else if(event instanceof VehicleLeavesTrafficEvent) {
+
+                VehicleLeavesTrafficEvent vehicleLeavesTrafficEvent = (VehicleLeavesTrafficEvent) event;
+
+                deRegisterReceptor(vehicleLeavesTrafficEvent.getVehicleId(), vehicleLeavesTrafficEvent.getLinkId(), vehicleLeavesTrafficEvent.getTime());
+                this.driverAgents.remove(vehicleLeavesTrafficEvent.getVehicleId());
+
+            } else {
+
+                throw new RuntimeException("Event "+event+" is not implemented yet.");
+
+            }
+        }
+    }
+
+    // >>>> register - deregister >>>>
+
+    private void registerReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(vehicleId,
                 linkId, this.driverAgents.get(vehicleId).getSecond() );
         vehicleLinkEmissionCollector.setLinkEnterTime(time);
@@ -175,29 +206,22 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         }
         vehicleId2EmissionCollector.put(vehicleId, vehicleLinkEmissionCollector);
         agentsOnLink.put(linkId, vehicleId2EmissionCollector);
-        return vehicleLinkEmissionCollector;
     }
 
-    private VehicleLinkEmissionCollector deRegisterReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
+    private void deRegisterReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 
         this.onRoadExposureTable.addInfoToTable(driverAgents.get(vehicleId).getFirst(), linkId, driverAgents.get(vehicleId).getSecond(), time, inhaledMass);
-        return vehicleLinkEmissionCollector;
     }
 
-    // <<<< register - deregister - reregister <<<<
+    // <<<< register - deregister <<<<
 
+
+    // >>>> get output >>>>
     public OnRoadExposureTable getOnRoadExposureTable() {
+        if (! processedAllEvents) processEvents(Double.POSITIVE_INFINITY);
         return onRoadExposureTable;
     }
-
-//    // the problem is that...reading events file and regenerating emission events writes cold emission events before vehicle enters traffic event ..
-//    private Map<Id<Vehicle>, ColdEmissionEvent> tempColdEmissionEvents = new HashMap<>();
-    @Override
-    public void handleEvent(PersonEntersVehicleEvent event) {
-//        tempColdEmissionEvents.put(event.getVehicleId(), null);
-    }
-
 }
