@@ -42,22 +42,51 @@ import org.matsim.contrib.emissions.events.WarmEmissionEvent;
  * Created by amit on 20.11.17.
  */
 
-public class EventsComperatorForEmissions implements Comparator<Event> {
+public class EventsComparatorForEmissions implements Comparator<Event> {
 
-    private List<String> naturalOrderOfEvents = Arrays.asList( // for a person in same
-            ActivityEndEvent.EVENT_TYPE,
-            PersonDepartureEvent.EVENT_TYPE,
-            PersonEntersVehicleEvent.EVENT_TYPE,
-            VehicleEntersTrafficEvent.EVENT_TYPE,
-            LinkLeaveEvent.EVENT_TYPE,
-            LinkEnterEvent.EVENT_TYPE,
-            VehicleLeavesTrafficEvent.EVENT_TYPE,
-            PersonLeavesVehicleEvent.EVENT_TYPE,
-            PersonArrivalEvent.EVENT_TYPE,
-            ActivityStartEvent.EVENT_TYPE,
-            ColdEmissionEvent.EVENT_TYPE,
-            WarmEmissionEvent.EVENT_TYPE
-    );
+    public enum EventsOrder {
+        NATURAL_ORDER, // this will fix the events which are messed up. e.g., cold emission event before vehicle enters traffic event
+        EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT // to include self exposure
+    }
+
+    public EventsComparatorForEmissions(EventsOrder eventsOrder) {
+        switch (eventsOrder) {
+            case NATURAL_ORDER:
+                this.naturalOrderOfEvents = Arrays.asList(
+                        ActivityEndEvent.EVENT_TYPE,
+                        PersonDepartureEvent.EVENT_TYPE,
+                        PersonEntersVehicleEvent.EVENT_TYPE,
+                        VehicleEntersTrafficEvent.EVENT_TYPE,
+                        LinkLeaveEvent.EVENT_TYPE,
+                        LinkEnterEvent.EVENT_TYPE,
+                        VehicleLeavesTrafficEvent.EVENT_TYPE,
+                        PersonLeavesVehicleEvent.EVENT_TYPE,
+                        PersonArrivalEvent.EVENT_TYPE,
+                        ActivityStartEvent.EVENT_TYPE,
+                        ColdEmissionEvent.EVENT_TYPE,
+                        WarmEmissionEvent.EVENT_TYPE
+                );
+                break;
+            case EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT:
+                this.naturalOrderOfEvents = Arrays.asList( // using only concerned events
+                        VehicleEntersTrafficEvent.EVENT_TYPE,
+                        ColdEmissionEvent.EVENT_TYPE,
+                        WarmEmissionEvent.EVENT_TYPE,
+                        LinkLeaveEvent.EVENT_TYPE,
+                        LinkEnterEvent.EVENT_TYPE,
+                        VehicleLeavesTrafficEvent.EVENT_TYPE
+                );
+                break;
+            default:
+                throw new RuntimeException("not implemented yet.");
+        }
+    }
+
+    public EventsComparatorForEmissions() {
+        this(EventsOrder.NATURAL_ORDER);
+    }
+
+    private final List<String> naturalOrderOfEvents;
 
     @Override
     public int compare(Event event1, Event event2) {

@@ -38,13 +38,13 @@ import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.types.ColdPollutant;
 import org.matsim.vehicles.Vehicle;
-import playground.agarwalamit.emissions.onRoadExposure.EventsComperatorForEmissions;
+import playground.agarwalamit.emissions.onRoadExposure.EventsComparatorForEmissions;
 
 /**
  * Created by amit on 20.11.17.
  */
 
-public class EventsComperatorForEmissionsTest {
+public class EventsComparatorForEmissionsTest {
 
     @Test
     public void test(){
@@ -70,7 +70,7 @@ public class EventsComperatorForEmissionsTest {
         System.out.println("Events before sorting ...");
         eventList.stream().forEach(e -> System.out.println(e.toString()));
 
-        Collections.sort(eventList, new EventsComperatorForEmissions());
+        Collections.sort(eventList, new EventsComparatorForEmissions());
 
         System.out.println("Events after sorting ...");
 
@@ -90,7 +90,7 @@ public class EventsComperatorForEmissionsTest {
         eventList.add(new LinkEnterEvent(151.0, Id.createVehicleId("OC7_X2P_E2I_7937_truck"),Id.createLinkId("2205-220110000-1964-2768-2788-2785-278310000-2792-2742-2841") ));
 
         System.out.println("Events after sorting ...");
-        Collections.sort(eventList, new EventsComperatorForEmissions());
+        Collections.sort(eventList, new EventsComparatorForEmissions());
         eventList.stream().forEach(e -> System.out.println(e.toString()));
 
         event = eventList.stream().filter(e->e.toString().contains(WarmEmissionEvent.EVENT_TYPE)).findFirst().get();

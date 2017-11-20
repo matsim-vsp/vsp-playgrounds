@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -61,6 +60,8 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler,
         LinkLeaveEventHandler, LinkEnterEventHandler {
 
+    private final EventsComparatorForEmissions.EventsOrder eventsOrder;
+
     private boolean processedAllEvents = false; // just to make sure that all events are processed before getting any analysis.
 
     private TreeMap<Double, List<Event>> time2ListOfEvents = new TreeMap<>();
@@ -72,9 +73,13 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     private OnRoadExposureTable onRoadExposureTable = new OnRoadExposureTable(); // this will keep all info in it
     private Map<Id<Link>, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> agentsOnLink = new HashMap<>();
 
-    @Inject
     public OnRoadExposureHandler(OnRoadExposureConfigGroup config) {
+        this(config, EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT);
+    }
+
+    public OnRoadExposureHandler(OnRoadExposureConfigGroup config, EventsComparatorForEmissions.EventsOrder eventsOrder) {
         this.config = config;
+        this.eventsOrder = eventsOrder;
     }
 
     @Override
@@ -143,7 +148,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
                                                       .filter(e -> e < time)
                                                       .forEach(e -> this.time2ListOfEvents.remove(e));
 
-        Collections.sort(events, new EventsComperatorForEmissions());
+        Collections.sort(events, new EventsComparatorForEmissions(eventsOrder));
 
         for (Event event : events) {
             if(event instanceof VehicleEntersTrafficEvent) {
