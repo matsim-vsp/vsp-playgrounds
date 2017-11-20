@@ -33,6 +33,8 @@ import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.contrib.emissions.events.ColdEmissionEvent;
+import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 
 /**
  * Assuming that all events are in same time step, else, sooner be returned.
@@ -40,9 +42,9 @@ import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
  * Created by amit on 20.11.17.
  */
 
-public class EventsComperatorForEmissions implements Comparator<Event>{
+public class EventsComperatorForEmissions implements Comparator<Event> {
 
-    private List<String> narturalOrderOfEvents = Arrays.asList( // for a person in same
+    private List<String> naturalOrderOfEvents = Arrays.asList( // for a person in same
             ActivityEndEvent.EVENT_TYPE,
             PersonDepartureEvent.EVENT_TYPE,
             PersonEntersVehicleEvent.EVENT_TYPE,
@@ -52,21 +54,57 @@ public class EventsComperatorForEmissions implements Comparator<Event>{
             VehicleLeavesTrafficEvent.EVENT_TYPE,
             PersonLeavesVehicleEvent.EVENT_TYPE,
             PersonArrivalEvent.EVENT_TYPE,
-            ActivityStartEvent.EVENT_TYPE
+            ActivityStartEvent.EVENT_TYPE,
+            ColdEmissionEvent.EVENT_TYPE,
+            WarmEmissionEvent.EVENT_TYPE
     );
-
 
     @Override
     public int compare(Event event1, Event event2) {
         int compareValue = new Double(event1.getTime()).compareTo(new Double(event2.getTime()));
         if (compareValue==0) {
             // now check if they belongs to same person/vehicle
-            event1.getAttributes();
-            
-
-
+            if ( ! getPersonIdFromEvent(event1).equals(getPersonIdFromEvent(event2))) return 0; // not same persons then return as they
+            else {
+                return Integer.valueOf(naturalOrderOfEvents.indexOf(event1.getEventType()))
+                              .compareTo(Integer.valueOf(naturalOrderOfEvents.indexOf(event2.getEventType())));
+            }
         } else return compareValue;
+    }
 
-        return 0;
+    private String getPersonIdFromEvent(Event event) {
+
+        if (event instanceof ActivityEndEvent) {
+            return ((ActivityEndEvent) event).getPersonId().toString();
+        } else if (event instanceof PersonDepartureEvent) {
+            return ((PersonDepartureEvent) event).getPersonId().toString();
+        } else if (event instanceof PersonEntersVehicleEvent) {
+            return ((PersonEntersVehicleEvent) event).getPersonId().toString();
+        } else if (event instanceof VehicleEntersTrafficEvent) {
+            return ((VehicleEntersTrafficEvent) event).getPersonId().toString();
+        } else if (event instanceof LinkLeaveEvent) {
+            return getPersonFromVehicleId(((LinkLeaveEvent) event).getVehicleId().toString());
+        } else if (event instanceof LinkEnterEvent) {
+            return getPersonFromVehicleId(((LinkEnterEvent) event).getVehicleId().toString());
+        } else if (event instanceof VehicleLeavesTrafficEvent) {
+            return ((VehicleLeavesTrafficEvent) event).getPersonId().toString();
+        } else if (event instanceof PersonLeavesVehicleEvent) {
+            return ((PersonLeavesVehicleEvent) event).getPersonId().toString();
+        } else if (event instanceof PersonArrivalEvent) {
+            return ((PersonArrivalEvent) event).getPersonId().toString();
+        } else if (event instanceof ActivityStartEvent) {
+            return ((ActivityStartEvent) event).getPersonId().toString();
+        } else if (event instanceof ColdEmissionEvent) {
+            return getPersonFromVehicleId(((ColdEmissionEvent) event).getVehicleId().toString());
+        } else if (event instanceof WarmEmissionEvent) {
+            return getPersonFromVehicleId(((WarmEmissionEvent) event).getVehicleId().toString());
+        } else {
+            throw new RuntimeException("Event "+event.toString()+", is not implemented yet.");
+        }
+    }
+
+    private String getPersonFromVehicleId(String vehicleId){
+        int lastIndexOf = vehicleId.lastIndexOf("_");
+        return vehicleId.substring(0,lastIndexOf);
     }
 }
