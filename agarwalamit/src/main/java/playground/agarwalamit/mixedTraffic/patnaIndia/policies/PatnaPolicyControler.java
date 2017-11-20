@@ -214,7 +214,7 @@ public class PatnaPolicyControler {
 		StatsWriter.run(outputDir);
 	}
 
-	private static void addScoringFunction(final Controler controler){
+	public static void addScoringFunction(final Controler controler){
 		// scoring function
 		controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
 			final ScoringParametersForPerson parameters = new SubpopulationScoringParameters( controler.getScenario() );

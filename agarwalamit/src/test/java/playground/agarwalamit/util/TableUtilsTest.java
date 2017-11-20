@@ -112,7 +112,7 @@ public class TableUtilsTest {
             manualChcek.put(7200.,timeStep);
         }
 
-        Map<Double,Map<String,Double>> utilMethod = TableUtils.sumForAllLinks(time2Link2Emiss);
+        Map<Double,Map<String,Double>> utilMethod = TableUtils.getTimeBin2InhaledMass(time2Link2Emiss);
 
         utilMethod.entrySet()
                   .forEach(t -> t.getValue()

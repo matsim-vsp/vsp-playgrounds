@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,8 +31,11 @@ import org.junit.runners.Parameterized;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.contrib.emissions.events.EmissionEventsReader;
+import org.matsim.contrib.emissions.events.ColdEmissionEvent;
+import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
@@ -44,13 +48,11 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.EventWriterXML;
-import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
-import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
-import playground.vsp.airPollution.flatEmissions.InternalizeEmissionsControlerListener;
+import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 /**
  *
@@ -71,6 +73,8 @@ import playground.vsp.airPollution.flatEmissions.InternalizeEmissionsControlerLi
 @RunWith(Parameterized.class)
 public class EmissionEventsTest {
 
+    private static Logger LOG = Logger.getLogger(EmissionEventsTest.class);
+
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
 
@@ -78,19 +82,19 @@ public class EmissionEventsTest {
 
     @Parameterized.Parameters(name = "{index}: isWritingEmissionsEvents == {0}")
     public static List<Object> considerCO2 () {
-        Object[] isIgnoringEmissionsFromEventsFile = new Object [] { true , false };
-        return Arrays.asList(isIgnoringEmissionsFromEventsFile);
+        Object[] isWritingEmissionsEvents = new Object [] {  false, true };
+        return Arrays.asList(isWritingEmissionsEvents);
     }
 
-    public EmissionEventsTest (final boolean isIgnoringEmissionsFromEventsFile) {
-        this.isWritingEmissionsEvents = isIgnoringEmissionsFromEventsFile;
+    public EmissionEventsTest (final boolean isWritingEmissionsEvents) {
+        this.isWritingEmissionsEvents = isWritingEmissionsEvents;
     }
 
     @Test
     public void eventsOfflineTest(){
         String inputEventsFile = helper.getClassInputDirectory()+"/0.events.xml.gz";
-        new File(helper.getOutputDirectory()+"/ignoreingEmissionFromEventsFile="+this.isWritingEmissionsEvents).mkdir();
-        String outputEventsFile = helper.getOutputDirectory()+"/ignoreingEmissionFromEventsFile="+this.isWritingEmissionsEvents +"/outputEvents.xml.gz";
+        new File(helper.getOutputDirectory()+"/isWritingEmissionsEvents="+this.isWritingEmissionsEvents).mkdir();
+        String outputEventsFile = helper.getOutputDirectory()+"/isWritingEmissionsEvents="+this.isWritingEmissionsEvents +"/outputEvents.xml.gz";
 
         // generate emissions
 
@@ -138,39 +142,41 @@ public class EmissionEventsTest {
         EventsManager emissionEventsManager = EventsUtils.createEventsManager();
         EmissionModule emissionModule = new EmissionModule(sc, emissionEventsManager);
 
-        EventWriterXML emissionEventWriter;
+        EventWriterXML emissionEventWriter = new EventWriterXML(outputEventsFile);
 
-        if ( this.isWritingEmissionsEvents) { // i.e., ignoring emission events,
-            emissionEventWriter = new EventWriterXML(outputEventsFile);
+        if ( ! this.isWritingEmissionsEvents) { // i.e., ignoring emission events,--> this will create a new events manager just to handle emission events
             emissionModule.getEmissionEventsManager().addHandler(emissionEventWriter);
         } else {
-            return;
+            emissionEventsManager.addHandler(emissionEventWriter);
         }
 
         MatsimEventsReader matsimEventsReader = new MatsimEventsReader(emissionEventsManager);
         matsimEventsReader.readFile(inputEventsFile);
 
-        if ( this.isWritingEmissionsEvents) {
-            emissionEventWriter.closeFile();
-        }
+        emissionEventWriter.closeFile();
 
         // check
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
+        CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
-        eventsManager.addHandler(new WarmEmissionEventHandler() {
-            @Override
-            public void handleEvent(WarmEmissionEvent event) {
-                warmEvents.add(event);
-            }
-            @Override
-            public void reset(int iteration) {
-            }
-        });
+        eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(outputEventsFile);
 
         if ( ! isWritingEmissionsEvents && warmEvents.size()!=0 ) throw new RuntimeException("There should NOT be any warm emission events in "+ outputEventsFile + " file.");
         else if ( isWritingEmissionsEvents && warmEvents.size()==0) throw new RuntimeException("There should be some warm emission events in "+ outputEventsFile + " file.");
+
+        // now check the sequence of the events
+        // A cold emission event is thrown after catching vehicleEntersTrafficEvent, thus, technically, cold emission event should occur after vehicleEntersTrafficEvent
+
+        if (! isWritingEmissionsEvents) return; // no combined emission events file
+        try {
+            EventsManager eventsManagerCombinedEvents = EventsUtils.createEventsManager();
+            CombinedMatsimEventsReader combinedMatsimEventsReader = new CombinedMatsimEventsReader(eventsManagerCombinedEvents);
+            eventsManagerCombinedEvents.addHandler(new MyEventsCatcher());
+            combinedMatsimEventsReader.readFile(outputEventsFile);
+        } catch (RuntimeException e) {
+            LOG.warn("Reading events file, generating emission events file and then writing them back will mix up the events sequence. As of now, we cant control the events in the same time step.");
+        }
     }
 
     @Test
@@ -197,6 +203,7 @@ public class EmissionEventsTest {
 
         sc.getConfig().qsim().setUsePersonIdForMissingVehicleId(true);
         sc.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.5);
+        sc.getConfig().controler().setLastIteration(0);
 
         equilTestSetUp.createActiveAgents(sc, carPersonId, TransportMode.car, 6.0 * 3600.);
         emissionSettings(sc, this.isWritingEmissionsEvents);
@@ -210,11 +217,6 @@ public class EmissionEventsTest {
             @Override
             public void install() {
                 bind(EmissionModule.class).asEagerSingleton();
-                bind(EmissionCostModule.class).asEagerSingleton();
-
-                addControlerListenerBinding().to(InternalizeEmissionsControlerListener.class);
-
-                bindCarTravelDisutilityFactory().toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory("car", sc.getConfig().planCalcScore())));
             }
         });
         controler.run();
@@ -223,24 +225,52 @@ public class EmissionEventsTest {
         String eventsFile = outputDirectory + "/ITERS/it."+lastItr+"/"+lastItr+".events.xml.gz";
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        EmissionEventsReader reader = new EmissionEventsReader(eventsManager);
+        CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
-        eventsManager.addHandler(new WarmEmissionEventHandler() {
-            @Override
-            public void handleEvent(WarmEmissionEvent event) {
-                warmEvents.add(event);
-            }
-            @Override
-            public void reset(int iteration) {
-            }
-        });
+        eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(eventsFile);
 
         if ( !isWritingEmissionsEvents && warmEvents.size()!=0 ) throw new RuntimeException("There should NOT be any warm emission events in "+ eventsFile + " file.");
         else if (isWritingEmissionsEvents && warmEvents.size()==0) throw new RuntimeException("There should be some warm emission events in "+ eventsFile + " file.");
     }
 
-    private void emissionSettings(final Scenario scenario, final boolean isIgnoringEmissionsFromEventsFile){
+    private class MyEventsCatcher implements VehicleEntersTrafficEventHandler, ColdEmissionEventHandler {
+        private boolean isVehicleEnteredTraffic = false;
+
+        @Override
+        public void handleEvent(VehicleEntersTrafficEvent event) {
+            this.isVehicleEnteredTraffic = true;
+        }
+
+        @Override
+        public void handleEvent(ColdEmissionEvent event) {
+            if (! this.isVehicleEnteredTraffic) {
+                throw new RuntimeException("There is a problem. Vehicle has not entered the traffic, yet a cold emission event is thrown.  Cold Emission Event :" + event.toString());
+            }
+        }
+
+        @Override
+        public void reset(int iteration) {
+
+        }
+    }
+
+    private class MyWarmEmissionEventHandler implements WarmEmissionEventHandler{
+        List<WarmEmissionEvent> list = new ArrayList<>();
+        MyWarmEmissionEventHandler (List<WarmEmissionEvent> warmEmissionEventList) {
+            this.list = warmEmissionEventList;
+        }
+        @Override
+        public void handleEvent(WarmEmissionEvent event) {
+            this.list.add(event);
+        }
+        @Override
+        public void reset(int iteration) {
+            this.list.clear();
+        }
+    }
+
+    private void emissionSettings(final Scenario scenario, final boolean isWritingEmissionsEvents){
         String inputFilesDir = "../benjamin/test/input/playground/benjamin/internalization/";
 
         Config config = scenario.getConfig();
@@ -260,7 +290,7 @@ public class EmissionEventsTest {
         ecg.setConsideringCO2Costs(true);
         ecg.setEmissionCostMultiplicationFactor(1.0);
 
-        ecg.setIgnoringEmissionsFromEventsFile(isIgnoringEmissionsFromEventsFile);
+        ecg.setWritingEmissionsEvents(isWritingEmissionsEvents);
         config.addModule(ecg);
     }
 }

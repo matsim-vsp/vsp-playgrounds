@@ -43,7 +43,7 @@ public final class TableUtils {
 
     }
 
-    public static Map<Double, Map<String, Double>> sumForAllLinks(Table<Double, Id<Link>, Map<String, Double>> table){
+    public static Map<Double, Map<String, Double>> getTimeBin2InhaledMass(Table<Double, Id<Link>, Map<String, Double>> table){
         Set<Double> times = table.rowKeySet();
         Map<Double, Map<String, Double>> time2Emiss = new HashMap<>();
         for (double d : times) {
@@ -56,6 +56,21 @@ public final class TableUtils {
                                  Collectors.summingDouble(Map.Entry::getValue))));
         }
         return time2Emiss;
+    }
+
+    public static Map<Id<Link>, Map<String, Double>> getLinkId2InhaledMass(Table<Double, Id<Link>, Map<String, Double>> table){
+        Set<Id<Link>> links = table.columnKeySet();
+        Map<Id<Link>, Map<String, Double>> link2Emiss = new HashMap<>();
+        for (Id<Link> linkId : links) {
+            link2Emiss.put(linkId,
+                    table.column(linkId)
+                         .values()
+                         .stream()
+                         .flatMap(m -> m.entrySet().stream())
+                         .collect(Collectors.groupingBy(Map.Entry::getKey,
+                                 Collectors.summingDouble(Map.Entry::getValue))));
+        }
+        return link2Emiss;
     }
 }
 

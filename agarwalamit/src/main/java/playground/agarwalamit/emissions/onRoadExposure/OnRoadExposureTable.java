@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
@@ -36,6 +37,7 @@ import playground.agarwalamit.utils.TableUtils;
 
 public class OnRoadExposureTable {
 
+    private static final Logger LOG = Logger.getLogger(OnRoadExposureTable.class);
     private Table<Id<Person>, String, OnRoadTripExposureInfo> personInfo = HashBasedTable.create();
 
     /**
@@ -80,6 +82,7 @@ public class OnRoadExposureTable {
     }
 
     public Map<String, Double> getTotalInhaledMass(){
+        LOG.info("Computing total inhaled mass ...");
         Map<String, Double> out = new HashMap<>();
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
@@ -94,12 +97,14 @@ public class OnRoadExposureTable {
     }
 
     public Map<String, Map<String,Double>> getModeToInhaledMass(){
+        LOG.info("Computing total inhaled mass for each mode ...");
         Map<String, Map<String, Double>> out = new HashMap<>();
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
         for (String mode : modes) {
             Map<String, Double> tempOut = new HashMap<>();
             for (Id<Person> personId : personIds){
+                if (this.personInfo.get(personId, mode)==null) continue;
                 tempOut = MapUtils.mergeMaps(tempOut,
                         TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
             }
@@ -109,18 +114,32 @@ public class OnRoadExposureTable {
     }
 
     public Map<Id<Link>,Map<String,Double>> getLinkToInhaledMass(){
-        throw new RuntimeException("not implemented yet.");
+        LOG.info("Computing total inhaled mass for each link ...");
+        Set<Id<Person>> personIds = this.personInfo.rowKeySet();
+        Set<String> modes = this.personInfo.columnKeySet();
+
+        Map<Id<Link>, Map<String,Double>> outMap = new HashMap<>();
+        for (Id<Person> personId : personIds) {
+            for (String mode : modes) {
+                if (this.personInfo.get(personId, mode)==null) continue;
+                outMap = MapUtils.mergeMultiMaps(outMap,
+                        TableUtils.getLinkId2InhaledMass(this.personInfo.get(personId, mode).time2link2emissions));
+            }
+        }
+        return outMap;
     }
 
     public Map<Double,Map<String,Double>> getTimeToInhaledMass() {
+        LOG.info("Computing total inhaled mass in each time bin ...");
         Set<Id<Person>> personIds = this.personInfo.rowKeySet();
         Set<String> modes = this.personInfo.columnKeySet();
 
         Map<Double, Map<String,Double>> outMap = new HashMap<>();
         for (Id<Person> personId : personIds) {
             for (String mode : modes) {
+                if (this.personInfo.get(personId, mode)==null) continue;
                 outMap = MapUtils.mergeMultiMaps(outMap,
-                        TableUtils.sumForAllLinks(this.personInfo.get(personId, mode).time2link2emissions));
+                        TableUtils.getTimeBin2InhaledMass(this.personInfo.get(personId, mode).time2link2emissions));
             }
         }
         return outMap;
