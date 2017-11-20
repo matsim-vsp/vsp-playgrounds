@@ -44,13 +44,10 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.EventWriterXML;
-import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
-import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
-import playground.vsp.airPollution.flatEmissions.InternalizeEmissionsControlerListener;
 
 /**
  *
@@ -78,12 +75,12 @@ public class EmissionEventsTest {
 
     @Parameterized.Parameters(name = "{index}: isWritingEmissionsEvents == {0}")
     public static List<Object> considerCO2 () {
-        Object[] isIgnoringEmissionsFromEventsFile = new Object [] { true , false };
-        return Arrays.asList(isIgnoringEmissionsFromEventsFile);
+        Object[] isWritingEmissionsEvents = new Object [] { true , false };
+        return Arrays.asList(isWritingEmissionsEvents);
     }
 
-    public EmissionEventsTest (final boolean isIgnoringEmissionsFromEventsFile) {
-        this.isWritingEmissionsEvents = isIgnoringEmissionsFromEventsFile;
+    public EmissionEventsTest (final boolean isWritingEmissionsEvents) {
+        this.isWritingEmissionsEvents = isWritingEmissionsEvents;
     }
 
     @Test
@@ -140,7 +137,7 @@ public class EmissionEventsTest {
 
         EventWriterXML emissionEventWriter;
 
-        if ( this.isWritingEmissionsEvents) { // i.e., ignoring emission events,
+        if ( ! this.isWritingEmissionsEvents) { // i.e., ignoring emission events,
             emissionEventWriter = new EventWriterXML(outputEventsFile);
             emissionModule.getEmissionEventsManager().addHandler(emissionEventWriter);
         } else {
@@ -150,7 +147,7 @@ public class EmissionEventsTest {
         MatsimEventsReader matsimEventsReader = new MatsimEventsReader(emissionEventsManager);
         matsimEventsReader.readFile(inputEventsFile);
 
-        if ( this.isWritingEmissionsEvents) {
+        if ( ! this.isWritingEmissionsEvents) {
             emissionEventWriter.closeFile();
         }
 
@@ -197,6 +194,7 @@ public class EmissionEventsTest {
 
         sc.getConfig().qsim().setUsePersonIdForMissingVehicleId(true);
         sc.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.5);
+        sc.getConfig().controler().setLastIteration(0);
 
         equilTestSetUp.createActiveAgents(sc, carPersonId, TransportMode.car, 6.0 * 3600.);
         emissionSettings(sc, this.isWritingEmissionsEvents);
@@ -210,11 +208,6 @@ public class EmissionEventsTest {
             @Override
             public void install() {
                 bind(EmissionModule.class).asEagerSingleton();
-                bind(EmissionCostModule.class).asEagerSingleton();
-
-                addControlerListenerBinding().to(InternalizeEmissionsControlerListener.class);
-
-                bindCarTravelDisutilityFactory().toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory("car", sc.getConfig().planCalcScore())));
             }
         });
         controler.run();
@@ -240,7 +233,7 @@ public class EmissionEventsTest {
         else if (isWritingEmissionsEvents && warmEvents.size()==0) throw new RuntimeException("There should be some warm emission events in "+ eventsFile + " file.");
     }
 
-    private void emissionSettings(final Scenario scenario, final boolean isIgnoringEmissionsFromEventsFile){
+    private void emissionSettings(final Scenario scenario, final boolean isWritingEmissionsEvents){
         String inputFilesDir = "../benjamin/test/input/playground/benjamin/internalization/";
 
         Config config = scenario.getConfig();
@@ -260,7 +253,7 @@ public class EmissionEventsTest {
         ecg.setConsideringCO2Costs(true);
         ecg.setEmissionCostMultiplicationFactor(1.0);
 
-        ecg.setWritingEmissionsEvents(isIgnoringEmissionsFromEventsFile);
+        ecg.setWritingEmissionsEvents(isWritingEmissionsEvents);
         config.addModule(ecg);
     }
 }
