@@ -52,13 +52,12 @@ public class PatnaOnlineEmissionsWriter {
     private static final String avgColdEmissFile = FileUtils.SHARED_SVN+"projects/detailedEval/matsim-input-files/hbefa-files/v3.2/EFA_ColdStart_vehcat_2005average.txt";
     private static final String avgWarmEmissFile = FileUtils.SHARED_SVN+"projects/detailedEval/matsim-input-files/hbefa-files/v3.2/EFA_HOT_vehcat_2005average.txt";
 
-    private static final String roadTypeMappingFile = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/input/roadTypeMappingFile.txt";
-    private static final String networkWithRoadTypeMapping = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/input/networkWithRoadTypeMapping.xml.gz";
-
     public static void main(String[] args) {
 //        String dir = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
         String filesDir = args[0];
         String outputDir = args[1];
+        String roadTypeMappingFile = args[2];
+        String networkWithRoadTypeMapping = args[3];
 
         Config config = ConfigUtils.loadConfig(filesDir+"/output_config.xml.gz");
         config.network().setInputFile(networkWithRoadTypeMapping);

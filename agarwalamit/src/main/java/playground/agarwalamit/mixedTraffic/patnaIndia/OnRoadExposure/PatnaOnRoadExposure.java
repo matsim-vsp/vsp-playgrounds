@@ -27,7 +27,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureEventHandler;
-import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsWriter;
+import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
@@ -37,6 +37,8 @@ import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 public class PatnaOnRoadExposure {
 
+    private static final boolean writeEmissionEvntsFirst = false;
+
     public static void main(String[] args) {
         Map<String, Map<String, Double>> modeToInhaledMass_bau;
         Map<String, Map<String, Double>> modeToInhaledMass_BSH_b;
@@ -44,24 +46,35 @@ public class PatnaOnRoadExposure {
         PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
 
         {
-            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
             String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
-            PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir});
 
-            modeToInhaledMass_bau = patnaOnRoadExposure.run(outputDir+"/output_events.xml.gz");
+            if (writeEmissionEvntsFirst) {
+                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
+                String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+                String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
+
+                PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+                PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+            }
+            modeToInhaledMass_bau = patnaOnRoadExposure.run(outputDir+"/output/output_events.xml.gz");
         }
-        { // TODO: need a different network...
-            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+        {
             String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
-            PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir});
 
-            PatnaEmissionsWriter.main(new String [] {outputDir});
+            if (writeEmissionEvntsFirst) {
+                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+                String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+                String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
 
-            modeToInhaledMass_BSH_b = patnaOnRoadExposure.run(outputDir+"/output_events.xml.gz");
+                PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+                PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+            }
+
+            modeToInhaledMass_BSH_b = patnaOnRoadExposure.run(outputDir+"/output/output_events.xml.gz");
         }
 
         // write data
-        String outDir = "/Users/amit/Documents/repos/runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/analysis/onRoadExposure.txt";
+        String outDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/onRoadExposure.txt";
         BufferedWriter writer = IOUtils.getBufferedWriter(outDir);
         try {
             writer.write("mode\tpollutant\tvalue_bau\tvalue_BSH_b\n");
