@@ -21,6 +21,7 @@ package playground.ikaddoura.agentSpecificActivityScheduling;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -34,18 +35,36 @@ import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 * @author ikaddoura
 */
 
-public class RunExample {
+public class ASASRunExample {
+	private static final Logger log = Logger.getLogger(ASASRunExample.class);
 
-	private static String configFile = "../../../runs-svn/berlin-dz-time/input/config.xml";
+	private static String configFile;
+	private static String outputDirectory;
+	private static String runId;
 
 	public static void main(String[] args) throws IOException {
 		
+		if (args.length > 0) {
+			configFile = args[0];		
+			log.info("config file: "+ configFile);
+			
+			outputDirectory = args[1];
+			log.info("output directory: "+ outputDirectory);
+			
+			runId = args[2];
+			log.info("run Id: "+ runId);
+			
+		} else {
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/berlin-dz-time/input/input_0.1sample/config_route_time_test.xml";
+			outputDirectory = "";
+		}
+
 		Config config = ConfigUtils.loadConfig(configFile, new AgentSpecificActivitySchedulingConfigGroup());
+		if (!outputDirectory.isEmpty()) config.controler().setOutputDirectory(outputDirectory);
+		config.controler().setRunId(runId);
+		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
-		
-		AgentSpecificActivitySchedulingConfigGroup asasConfigGroup = (AgentSpecificActivitySchedulingConfigGroup) scenario.getConfig().getModules().get(AgentSpecificActivitySchedulingConfigGroup.GROUP_NAME);
-		asasConfigGroup.setTolerance(0.);
 		
 		controler.addOverridingModule(new AgentSpecificActivitySchedulingModule(scenario));
 		

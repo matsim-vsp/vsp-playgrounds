@@ -28,18 +28,27 @@ import org.matsim.core.config.ReflectiveConfigGroup;
 public class AgentSpecificActivitySchedulingConfigGroup extends ReflectiveConfigGroup {
 	
 	public static final String GROUP_NAME = "agentSpecificActivityScheduling" ;
+	
+	public enum ActivityScoringApproach {
+		Default, AgentSpecific, ActivityGroup
+	}
 
 	public AgentSpecificActivitySchedulingConfigGroup() {
 		super(GROUP_NAME);
 	}
 
 	private boolean useAgentSpecificActivityScheduling = true;
-	private boolean replaceDefaultScoring = true;
+
 	private double activityDurationBin = 3600.;
-	private double tolerance = 900.;
+
 	private boolean removeNetworkSpecificInformation = false;
 	private boolean adjustPopulation = true;
-
+	
+	private double tolerance = 900.;
+	
+	private boolean replaceDefaultScoring = true;
+	private ActivityScoringApproach activityScoringApproach = ActivityScoringApproach.AgentSpecific;
+	
 	@StringGetter( "activityDurationBin" )
 	public double getActivityDurationBin() {
 		return activityDurationBin;
@@ -99,8 +108,16 @@ public class AgentSpecificActivitySchedulingConfigGroup extends ReflectiveConfig
 	public void setReplaceDefaultScoring(boolean replaceDefaultScoring) {
 		this.replaceDefaultScoring = replaceDefaultScoring;
 	}
-	
-	
+
+	@StringGetter( "activityScoringApproach" )
+	public ActivityScoringApproach getActivityScoringApproach() {
+		return activityScoringApproach;
+	}
+
+	@StringSetter( "activityScoringApproach" )
+	public void setActivityScoringApproach(ActivityScoringApproach activityScoringApproach) {
+		this.activityScoringApproach = activityScoringApproach;
+	}
 	
 }
 
