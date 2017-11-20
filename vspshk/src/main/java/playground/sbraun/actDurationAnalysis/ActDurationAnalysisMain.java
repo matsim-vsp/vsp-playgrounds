@@ -10,13 +10,13 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 
 
-public class IKAnalysisMain1 {
+public class ActDurationAnalysisMain {
 
 	static String configFile = "C:\\Users\\braun\\Documents\\VSP\\Skillbuilding\\example1\\Sample\\config.xml";
 	static String eventsFile = "C:\\Users\\braun\\Documents\\VSP\\Skillbuilding\\example1\\Sample\\output\\run01\\output_events.xml.gz";
 				
 	public static void main(String[] args) {
-		IKAnalysisMain1 anaMain = new IKAnalysisMain1();
+		ActDurationAnalysisMain anaMain = new ActDurationAnalysisMain();
 		anaMain.run();
 	}
 

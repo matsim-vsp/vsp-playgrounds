@@ -24,27 +24,27 @@
 package playground.sbraun.actDurationAnalysis;
 
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.api.core.v01.events.ActivityStartEvent;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.ActivityEndEvent;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.io.BufferedWriter;
-import java.io.IOException;
 
 
 /**
  * @author Ihab
  *
  */
-public class IKEventHandler implements ActivityStartEventHandler,ActivityEndEventHandler {
+public class ActDurationHandler implements ActivityStartEventHandler,ActivityEndEventHandler {
 
 	Map<Id<Person>,Double> duration_la = new HashMap<>();
 	Map<Id<Person>,String> Activitys = new HashMap<>();
@@ -55,7 +55,7 @@ public class IKEventHandler implements ActivityStartEventHandler,ActivityEndEven
 
 	
 	
-	public IKEventHandler(Network network) {
+	public ActDurationHandler(Network network) {
 		this.network = network;
 	}
 
