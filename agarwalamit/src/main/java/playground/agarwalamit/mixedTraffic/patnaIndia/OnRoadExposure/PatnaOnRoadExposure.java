@@ -25,8 +25,9 @@ import java.util.Map;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.io.IOUtils;
+import playground.agarwalamit.emissions.onRoadExposure.EventsComparatorForEmissions;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
-import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureEventHandler;
+import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
@@ -112,12 +113,17 @@ public class PatnaOnRoadExposure {
         onRoadExposureConfigGroup.getModeToBreathingRate().put("car",0.66/3600.0 );
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        OnRoadExposureEventHandler onRoadExposureEventHandler = new OnRoadExposureEventHandler(onRoadExposureConfigGroup);
-        eventsManager.addHandler(onRoadExposureEventHandler);
+//        OnRoadExposureEventHandler onRoadExposureEventHandler = new OnRoadExposureEventHandler(onRoadExposureConfigGroup);
+//        eventsManager.addHandler(onRoadExposureEventHandler);
+
+        // this will include exposure to agent which leave in the same time step.
+        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup,
+                EventsComparatorForEmissions.EventsOrder.NATURAL_ORDER);
+        eventsManager.addHandler(onRoadExposureHandler);
 
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
 
-       return  modeToInhaledMass= onRoadExposureEventHandler.getOnRoadExposureTable().getModeToInhaledMass();
+       return  modeToInhaledMass= onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
     }
 }
