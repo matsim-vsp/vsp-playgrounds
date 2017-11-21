@@ -220,7 +220,13 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     }
 
     private void deRegisterReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
+        VehicleLinkEmissionCollector vehicleLinkEmissionCollector ;
+        if (this.agentsOnLink.get(linkId).size()==0) {
+            vehicleLinkEmissionCollector = this.agentsOnLink.remove(linkId).remove(vehicleId);
+        } else {
+            vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
+        }
+
         if (vehicleLinkEmissionCollector == null) {
             System.out.println("Vehicle id "+ vehicleId +" linkId "+ linkId + " time "+ time);
         }

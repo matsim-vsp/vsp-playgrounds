@@ -39,6 +39,7 @@ import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 public class PatnaOnRoadExposure {
 
     private static final boolean writeEmissionEvntsFirst = false;
+    private static final EventsComparatorForEmissions.EventsOrder EVENTS_ORDER = EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT;
 
     public static void main(String[] args) {
         Map<String, Map<String, Double>> modeToInhaledMass_bau;
@@ -75,8 +76,8 @@ public class PatnaOnRoadExposure {
         }
 
         // write data
-        String outDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/onRoadExposure.txt";
-        BufferedWriter writer = IOUtils.getBufferedWriter(outDir);
+        String outFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/onRoadExposure_"+EVENTS_ORDER+".txt";
+        BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
         try {
             writer.write("mode\tpollutant\tvalue_bau\tvalue_BSH_b\n");
             for (String mode : modeToInhaledMass_bau.keySet()) {
@@ -91,6 +92,7 @@ public class PatnaOnRoadExposure {
         } catch (IOException e) {
             throw new RuntimeException("Data is not written/read. Reason : " + e);
         }
+        System.out.println("The data has written to "+outFile);
     }
 
     private static Map<String, Map<String, Double>> run(String eventsFile){
@@ -117,13 +119,14 @@ public class PatnaOnRoadExposure {
 //        eventsManager.addHandler(onRoadExposureEventHandler);
 
         // this will include exposure to agent which leave in the same time step.
-        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup,
-                EventsComparatorForEmissions.EventsOrder.NATURAL_ORDER);
+        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, EVENTS_ORDER);
         eventsManager.addHandler(onRoadExposureHandler);
 
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
 
-       return  modeToInhaledMass= onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
+       modeToInhaledMass= onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
+       onRoadExposureHandler.reset(0);
+       return modeToInhaledMass;
     }
 }
