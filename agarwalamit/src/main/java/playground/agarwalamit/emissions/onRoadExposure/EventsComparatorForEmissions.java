@@ -49,6 +49,10 @@ public class EventsComparatorForEmissions implements Comparator<Event> {
         EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT // to include self exposure
     }
 
+    public EventsComparatorForEmissions(List<String> desiredOrderOfEvents) {
+        this.naturalOrderOfEvents = desiredOrderOfEvents;
+    }
+
     public EventsComparatorForEmissions(EventsOrder eventsOrder) {
         switch (eventsOrder) {
             case NATURAL_ORDER:
