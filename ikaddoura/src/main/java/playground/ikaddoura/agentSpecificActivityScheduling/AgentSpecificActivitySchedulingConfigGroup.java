@@ -30,7 +30,7 @@ public class AgentSpecificActivitySchedulingConfigGroup extends ReflectiveConfig
 	public static final String GROUP_NAME = "agentSpecificActivityScheduling" ;
 	
 	public enum ActivityScoringApproach {
-		Default, AgentSpecific, ActivityGroup
+		Default, AgentSpecific
 	}
 
 	public AgentSpecificActivitySchedulingConfigGroup() {
