@@ -42,6 +42,8 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
  * Assuming that all events are in same time step, else, sooner be returned.
  *
  * Created by amit on 20.11.17.
+ *
+ * It would work better if events list belong to a person only.
  */
 
 public class EventsComparatorForEmissions implements Comparator<Event> {
@@ -97,65 +99,75 @@ public class EventsComparatorForEmissions implements Comparator<Event> {
 
     @Override
     public int compare(Event event1, Event event2) {
-        int compareValue = new Double(event1.getTime()).compareTo(new Double(event2.getTime()));
-        if (compareValue==0) {
-            // now check if they belongs to same person/vehicle
-            if ( ! getPersonIdFromEvent(event1).equals(getPersonIdFromEvent(event2))) return 0; // not same persons then return as they are
-            else if ( eventAsStringExceptType(event1).endsWith(eventAsStringExceptType(event2))) {
-                return 0; // arrival-departure, vehicleLeave-vehicleEnter in same time step.
-            } else  {
-                return Integer.valueOf(naturalOrderOfEvents.indexOf(event1.getEventType()))
-                              .compareTo(Integer.valueOf(naturalOrderOfEvents.indexOf(event2.getEventType())));
-            }
-        } else return compareValue;
-    }
+            // some checks
+        if (event1.toString().equals(event2.toString())) {
+            throw new RuntimeException("Exact same events, should not happen. Here are events: \n "+ event1.toString() + "\n" + event2.toString());
+        } else if (event1.getTime()!=event2.getTime()) { // not same time step
+            return new Double(event1.getTime()).compareTo(new Double(event2.getTime())); // prefer event time over all other conditions
+        }
 
-    private String getPersonIdFromEvent(Event event) {
-
-        if (event instanceof ActivityEndEvent) {
-            return ((ActivityEndEvent) event).getPersonId().toString();
-        } else if (event instanceof PersonDepartureEvent) {
-            return ((PersonDepartureEvent) event).getPersonId().toString();
-        } else if (event instanceof PersonEntersVehicleEvent) {
-            return ((PersonEntersVehicleEvent) event).getPersonId().toString();
-        } else if (event instanceof VehicleEntersTrafficEvent) {
-            return ((VehicleEntersTrafficEvent) event).getPersonId().toString();
-        } else if (event instanceof LinkLeaveEvent) {
-            return getPersonFromVehicleId(((LinkLeaveEvent) event).getVehicleId().toString());
-        } else if (event instanceof LinkEnterEvent) {
-            return getPersonFromVehicleId(((LinkEnterEvent) event).getVehicleId().toString());
-        } else if (event instanceof VehicleLeavesTrafficEvent) {
-            return ((VehicleLeavesTrafficEvent) event).getPersonId().toString();
-        } else if (event instanceof PersonLeavesVehicleEvent) {
-            return ((PersonLeavesVehicleEvent) event).getPersonId().toString();
-        } else if (event instanceof PersonArrivalEvent) {
-            return ((PersonArrivalEvent) event).getPersonId().toString();
-        } else if (event instanceof ActivityStartEvent) {
-            return ((ActivityStartEvent) event).getPersonId().toString();
-        } else if (event instanceof ColdEmissionEvent) {
-            return getPersonFromVehicleId(((ColdEmissionEvent) event).getVehicleId().toString());
-        } else if (event instanceof WarmEmissionEvent) {
-            return getPersonFromVehicleId(((WarmEmissionEvent) event).getVehicleId().toString());
-        } else {
-            throw new RuntimeException("Event "+event.toString()+", is not implemented yet.");
+        int value = Integer.valueOf(naturalOrderOfEvents.indexOf(event1.getEventType()))
+                               .compareTo(Integer.valueOf(naturalOrderOfEvents.indexOf(event2.getEventType())));
+        if (value!=0) { // after event time, prefer events order over all other conditions
+            return value;
+        } else{ // same event types
+            return 0; // return same order as they appear
+//            if (! getPersonIdFromEvent(event1).equals(getPersonIdFromEvent(event2))) {
+//                return 0; // different persons
+//            } else if ( eventAsStringExceptType(event1).equals(eventAsStringExceptType(event2))) {
+//                return 0; // exact same events except type. For e.g., arrival-departure, vehicleLeave-vehicleEnter in same time step.
+//            } else {
+//                return 0;
+//            }
         }
     }
 
-    private String eventAsStringExceptType(Event event){ // pairing--> arrival depart; vehicleLeave vehicleEnter; etc in same time step
-        String temp = event.toString();
-        String type = "type=\"";
-        int index = temp.lastIndexOf(type);
-        int nextIndex = temp.indexOf("\"", index+type.length());
-        return temp.substring(0, index)+temp.substring(nextIndex+1, temp.lastIndexOf(">"));
-    }
-
-    private String getPersonFromVehicleId(String vehicleId){
-        if (! vehicleId.contains("_")) return vehicleId;
-
-        String [] parts = vehicleId.split("_"); // ignore situations like --> nonSlum_24717 and nonSlum_13068
-        if (! possibleModes.contains(parts[parts.length-1])) return vehicleId;
-
-        int lastIndexOf = vehicleId.lastIndexOf("_");
-        return vehicleId.substring(0,lastIndexOf);
-    }
+//    private String getPersonIdFromEvent(Event event) {
+//
+//        if (event instanceof ActivityEndEvent) {
+//            return ((ActivityEndEvent) event).getPersonId().toString();
+//        } else if (event instanceof PersonDepartureEvent) {
+//            return ((PersonDepartureEvent) event).getPersonId().toString();
+//        } else if (event instanceof PersonEntersVehicleEvent) {
+//            return ((PersonEntersVehicleEvent) event).getPersonId().toString();
+//        } else if (event instanceof VehicleEntersTrafficEvent) {
+//            return ((VehicleEntersTrafficEvent) event).getPersonId().toString();
+//        } else if (event instanceof LinkLeaveEvent) {
+//            return getPersonFromVehicleId(((LinkLeaveEvent) event).getVehicleId().toString());
+//        } else if (event instanceof LinkEnterEvent) {
+//            return getPersonFromVehicleId(((LinkEnterEvent) event).getVehicleId().toString());
+//        } else if (event instanceof VehicleLeavesTrafficEvent) {
+//            return ((VehicleLeavesTrafficEvent) event).getPersonId().toString();
+//        } else if (event instanceof PersonLeavesVehicleEvent) {
+//            return ((PersonLeavesVehicleEvent) event).getPersonId().toString();
+//        } else if (event instanceof PersonArrivalEvent) {
+//            return ((PersonArrivalEvent) event).getPersonId().toString();
+//        } else if (event instanceof ActivityStartEvent) {
+//            return ((ActivityStartEvent) event).getPersonId().toString();
+//        } else if (event instanceof ColdEmissionEvent) {
+//            return getPersonFromVehicleId(((ColdEmissionEvent) event).getVehicleId().toString());
+//        } else if (event instanceof WarmEmissionEvent) {
+//            return getPersonFromVehicleId(((WarmEmissionEvent) event).getVehicleId().toString());
+//        } else {
+//            throw new RuntimeException("Event "+event.toString()+", is not implemented yet.");
+//        }
+//    }
+//
+//    private String eventAsStringExceptType(Event event){ // pairing--> arrival depart; vehicleLeave vehicleEnter; etc in same time step
+//        String temp = event.toString();
+//        String type = "type=\"";
+//        int index = temp.lastIndexOf(type);
+//        int nextIndex = temp.indexOf("\"", index+type.length());
+//        return temp.substring(0, index)+temp.substring(nextIndex+1, temp.lastIndexOf(">"));
+//    }
+//
+//    private String getPersonFromVehicleId(String vehicleId){
+//        if (! vehicleId.contains("_")) return vehicleId;
+//
+//        String [] parts = vehicleId.split("_"); // ignore situations like --> nonSlum_24717 and nonSlum_13068
+//        if (! possibleModes.contains(parts[parts.length-1])) return vehicleId;
+//
+//        int lastIndexOf = vehicleId.lastIndexOf("_");
+//        return vehicleId.substring(0,lastIndexOf);
+//    }
 }
