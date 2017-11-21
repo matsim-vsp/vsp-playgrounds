@@ -42,6 +42,7 @@ import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
+import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.vehicles.Vehicle;
 
@@ -59,18 +60,16 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler,
         LinkLeaveEventHandler, LinkEnterEventHandler {
 
-    private final EventsComparatorForEmissions.EventsOrder eventsOrder;
-
     private boolean processedAllEvents = false; // just to make sure that all events are processed before getting any analysis.
 
-    private TreeMap<Double, TreeMap<Id<Person>, List<Event>>> time2ListOfEvents = new TreeMap<>();
-
+    private final TreeMap<Double, TreeMap<Id<Person>, List<Event>>> time2ListOfEvents = new TreeMap<>();
     private final Map<Id<Vehicle>, Tuple<Id<Person>,String>> driverAgents = new HashMap<>();
-
-    private final OnRoadExposureConfigGroup config;
-
     private OnRoadExposureTable onRoadExposureTable = new OnRoadExposureTable(); // this will keep all info in it
     private Map<Id<Link>, Map<Id<Vehicle>, VehicleLinkEmissionCollector>> agentsOnLink = new HashMap<>();
+    private Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
+    
+    private final OnRoadExposureConfigGroup config;
+    private final EventsComparatorForEmissions.EventsOrder eventsOrder;
 
     public OnRoadExposureHandler(OnRoadExposureConfigGroup config) {
         this(config, EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT);
@@ -87,32 +86,33 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         this.driverAgents.clear();
         this.onRoadExposureTable.clear();
         this.time2ListOfEvents.clear();
+        this.delegate.reset(iteration);
     }
 
     @Override
     public void handleEvent(ColdEmissionEvent event) { //source
         TreeMap<Id<Person>, List<Event>> person2Events = this.time2ListOfEvents.get(event.getTime());
-        person2Events.get(this.driverAgents.get(event.getVehicleId()).getFirst()).add(event);
+        person2Events.get( this.delegate.getDriverOfVehicle(event.getVehicleId()) ).add(event);
         processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(WarmEmissionEvent event) { //source
         TreeMap<Id<Person>, List<Event>> person2Events = this.time2ListOfEvents.get(event.getTime());
-        person2Events.get(this.driverAgents.get(event.getVehicleId()).getFirst()).add(event);
+        person2Events.get( this.delegate.getDriverOfVehicle(event.getVehicleId()) ).add(event);
         processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(LinkEnterEvent event) {
         TreeMap<Id<Person>, List<Event>> person2Events = this.time2ListOfEvents.get(event.getTime());
-        person2Events.get(this.driverAgents.get(event.getVehicleId()).getFirst()).add(event);
+        person2Events.get(  this.delegate.getDriverOfVehicle(event.getVehicleId()) ).add(event);
         processEvents(event.getTime());
     }
 
     @Override
     public void handleEvent(LinkLeaveEvent event) {
-        Id<Person> personId = this.driverAgents.get(event.getVehicleId()).getFirst();
+        Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
         TreeMap<Id<Person>, List<Event>> person2Events = this.time2ListOfEvents.get(event.getTime());
 
         if (person2Events==null) {
@@ -130,6 +130,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
 
     @Override
     public void handleEvent(VehicleEntersTrafficEvent event) {
+    		this.delegate.handleEvent(event);
         Id<Person> personId = event.getPersonId();
         TreeMap<Id<Person>, List<Event>> person2Events = this.time2ListOfEvents.get(event.getTime());
 
@@ -148,6 +149,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
 
     @Override
     public void handleEvent(VehicleLeavesTrafficEvent event) {
+    		this.delegate.handleEvent(event);
         Id<Person> personId = event.getPersonId();
         TreeMap<Id<Person>, List<Event>> person2Events = this.time2ListOfEvents.get(event.getTime());
 
@@ -165,8 +167,11 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     }
 
     private void processEvents(double time){ // basically delay all concerned events until next time step.
-        // get list and remove previous time step
-         Map.Entry<Double, TreeMap<Id<Person>, List<Event>>> prevEntry = this.time2ListOfEvents.pollFirstEntry();
+    		if ( this.time2ListOfEvents.firstKey() >= time) { //proceed if currentTimeStep is more than the least time in map 
+    			return;
+    		}
+    		
+    		Map.Entry<Double, TreeMap<Id<Person>, List<Event>>> prevEntry = this.time2ListOfEvents.pollFirstEntry();
 
          List<Event>  events = prevEntry.getValue().entrySet().stream().flatMap(e -> {
              List<Event> tempEventsList = e.getValue();
@@ -215,9 +220,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
                 this.driverAgents.remove(vehicleLeavesTrafficEvent.getVehicleId());
 
             } else {
-
                 throw new RuntimeException("Event "+event+" is not implemented yet.");
-
             }
         }
     }
