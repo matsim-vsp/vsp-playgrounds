@@ -73,7 +73,8 @@ public class DecongestionModule extends AbstractModule {
 		}
 		this.bind(DecongestionInfo.class).asEagerSingleton();
 		
-		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingAll.class).asEagerSingleton();;						
+		this.bind(IntervalBasedTollingAll.class).asEagerSingleton();
+		this.bind(IntervalBasedTolling.class).to(IntervalBasedTollingAll.class);
 		this.addEventHandlerBinding().to(IntervalBasedTollingAll.class);
 		
 		this.bind(DelayAnalysis.class).asEagerSingleton();

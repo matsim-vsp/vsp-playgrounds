@@ -19,13 +19,12 @@
 
 package playground.agarwalamit.util;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.testcases.MatsimTestUtils;
 import playground.agarwalamit.utils.MapUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by amit on 19/09/16.
@@ -37,7 +36,7 @@ public class MapUtilsTest {
     private final MatsimTestUtils helper = new MatsimTestUtils();
 
     @Test
-    public void test(){
+    public void testDoubleValueSum(){
 
         Map<String, Integer> str2Int = new HashMap<>();
         str2Int.put("A",4);
@@ -59,6 +58,140 @@ public class MapUtilsTest {
         //value sum
         Assert.assertEquals("Sum is wrong",40.0, MapUtils.doubleValueSum(str2Double),MatsimTestUtils.EPSILON);
 
+    }
+
+    @Test
+    public void testMergeMaps(){ //merge
+
+        Map<String, Double> map1 = new HashMap<>();
+        map1.put("A",4.);
+        map1.put("B",8.);
+        map1.put("C",12.);
+        map1.put("D",16.);
+
+        Map<String, Double> map2 = new HashMap<>();
+        map2.put("A",4.);
+        map2.put("D",16.);
+        map2.put("C",12.);
+        map2.put("B",8.);
+
+        //value sum
+        Assert.assertEquals("Sum is wrong",80.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        // remove something from map1
+        map1.remove("A");
+        Assert.assertEquals("Sum is wrong",76.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map2.remove("B");
+        Assert.assertEquals("Sum is wrong",68.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map2.clear();
+        Assert.assertEquals("Sum is wrong",36.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map1.clear();
+        map2.put("B",4.0);
+        Assert.assertEquals("Sum is wrong",4.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
+
+        map2.clear();
+        Assert.assertEquals("Sum is wrong",0.0, MapUtils.doubleValueSum(MapUtils.mergeMaps(map1,map2)),MatsimTestUtils.EPSILON);
+    }
+
+    @Test
+    public void testValueMapSum(){
+
+        Map<String, Double> map1 = new HashMap<>();
+        map1.put("A",4.);
+        map1.put("B",8.);
+        map1.put("C",12.);
+        map1.put("D",16.);
+
+        Map<String, Double> map2 = new HashMap<>();
+        map2.put("A",4.);
+        map2.put("B",8.);
+        map2.put("C",12.);
+        map2.put("D",16.);
+
+        Map<Double, Map<String, Double>> inMap = new HashMap<>();
+        inMap.put(3600., map1);
+        inMap.put(7200., map2);
+
+        Map<String, Double> outMap = MapUtils.valueMapSum(inMap);
+        Map<String, Double> manualCheck = new HashMap<>();
+        manualCheck.put("A",8.);
+        manualCheck.put("B",16.);
+        manualCheck.put("C",24.);
+        manualCheck.put("D",32.);
+
+        outMap.entrySet()
+              .forEach(e -> Assert.assertEquals("wrong value",
+                      e.getValue(),
+                      manualCheck.get(e.getKey()),
+                      MatsimTestUtils.EPSILON));
+
+    }
+
+    @Test
+    public void testMergeMultiMap(){
+        Map<Double, Map<String, Double>> outerMap1 = new HashMap<>();
+        {
+            Map<String, Double> map1 = new HashMap<>();
+            map1.put("A",4.);
+            map1.put("B",8.);
+            outerMap1.put(3600., map1);
+        }
+        {
+            Map<String, Double> map1 = new HashMap<>();
+            map1.put("A",6.);
+            map1.put("B",10.);
+            outerMap1.put(7200., map1);
+        }
+
+        Map<Double, Map<String, Double>> outerMap2 = new HashMap<>();
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",9.);
+            map2.put("C",12.);
+            outerMap2.put(3600., map2);
+        }
+
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",2.);
+            map2.put("C",1.5);
+            outerMap2.put(10800., map2);
+        }
+
+
+        Map<Double,Map<String, Double>> outMap = MapUtils.mergeMultiMaps(outerMap1, outerMap2);
+
+        Map<Double, Map<String, Double>> manualCheck = new HashMap<>();
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",13.);
+            map2.put("B",8.);
+            map2.put("C",12.);
+            manualCheck.put(3600.,map2);
+        }
+        {
+            Map<String, Double> map1 = new HashMap<>();
+            map1.put("A",6.);
+            map1.put("B",10.);
+            manualCheck.put(7200.,map1);
+        }
+        {
+            Map<String, Double> map2 = new HashMap<>();
+            map2.put("A",2.);
+            map2.put("C",1.5);
+            manualCheck.put(10800., map2);
+        }
+
+        outMap.entrySet()
+                .forEach(t -> t.getValue()
+                               .entrySet()
+                               .forEach(e -> Assert.assertEquals("wrong value at time "+ t.getKey() + " for key "+e.getKey(),
+                                       manualCheck.get(t.getKey()).get(e.getKey()),
+                                       e.getValue(),
+                                       MatsimTestUtils.EPSILON)));
     }
 
 }

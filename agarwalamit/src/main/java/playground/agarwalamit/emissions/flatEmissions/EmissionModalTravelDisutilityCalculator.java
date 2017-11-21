@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.emissions;
+package playground.agarwalamit.emissions.flatEmissions;
 
 import java.util.Map;
 import java.util.Set;

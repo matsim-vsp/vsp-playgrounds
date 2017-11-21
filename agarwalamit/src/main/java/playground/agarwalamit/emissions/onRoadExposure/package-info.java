@@ -17,45 +17,20 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.onRoadExposure;
 
-import java.util.Map;
 
 /**
- * Created by amit on 08.11.17.
+ * Created by amit on 20.11.17.
+ *
+ * <p>If the events file do not have combined events file, calculation of onRoadExposure may throw an exception or
+ * the calculation will not be accurate.</p>
+ *
+ * <p>The problem is that: reading events file, generating emissions events and then writing them back do not write the events in
+ * correct order (see EmissionEventsTest).</p>
+ *
+ * <p>Calculation of on road exposure is designed assuming a combined events file (in right order); this, this cant be used.</p>
+ *
+ * <p> A simple way is to rerun simulation using last iteration events file for 1 iteration and then write the emissions during simulation. </p>
+ * <p> Alternatively, process all required events for calculation of onRoadExposure in a later time step. </p>
  */
-
-public class OnRoadExposureCalculator {
-
-    /**
-     *
-     * @param config
-     * @param mode
-     * @param emissionRate
-     * @param travelTime
-     * @return
-     */
-    public static double calculate(OnRoadExposureConfigGroup config, String mode,
-                                   Map<String, Double> emissionRate, double travelTime){
-        /**
-         * total inhalation in gm = (b + e / d ) * o * r * p . t
-         * b --> background concentration
-         * e --> emissions in g/m for time bin T
-         * d --> dispersion rate
-         * o --> occupancy rate
-         * r --> breathing rate
-         * p --> penetration rate
-         * t --> travelTime
-         */
-        double value = 0.;
-        for ( String pollutant : config.getPollutantToBackgroundConcentration().keySet() ){
-            value += ( config.getPollutantToBackgroundConcentration().get(pollutant)
-                    + emissionRate.get(pollutant) / config.getDispersionRate() )
-                    * config.getPollutantToPenetrationRate(mode).get(pollutant)
-                    * config.getModeToBreathingRate().get(mode)
-                    * config.getModeToOccupancy().get(mode);
-        }
-
-        return  value * travelTime;
-    }
-}
+package playground.agarwalamit.emissions.onRoadExposure;

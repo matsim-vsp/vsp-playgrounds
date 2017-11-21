@@ -30,6 +30,7 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
 import org.matsim.core.controler.AbstractModule;
 
+import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingConfigGroup.ActivityScoringApproach;
 import playground.ikaddoura.utils.prepare.PopulationTools;
 
 /**
@@ -71,10 +72,14 @@ public class AgentSpecificActivitySchedulingModule extends AbstractModule {
 					
 					PopulationTools.setScoresToZero(population);
 					PopulationTools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(population, asasConfigGroup.getActivityDurationBin());			
-					PopulationTools.addActivityTimesOfSelectedPlanToPersonAttributes(population);
+					if (asasConfigGroup.isReplaceDefaultScoring() && asasConfigGroup.getActivityScoringApproach().toString().equals(ActivityScoringApproach.AgentSpecific.toString())) {
+						PopulationTools.addActivityTimesOfSelectedPlanToPersonAttributes(population);
+					}
 					PopulationTools.analyze(population);
 						
-					if (asasConfigGroup.isRemoveNetworkSpecificInformation()) PopulationTools.removeNetworkSpecificInformation(population);
+					if (asasConfigGroup.isRemoveNetworkSpecificInformation()) {
+						PopulationTools.removeNetworkSpecificInformation(population);
+					}
 
 				} else {
 					throw new RuntimeException("Cannot adjust the population if the population is null. Aborting...");
@@ -83,8 +88,11 @@ public class AgentSpecificActivitySchedulingModule extends AbstractModule {
 				log.info("Adjusting the population... Done.");
 			
 			} else {
-				log.info("Not adjusting the population."
-						+ " Opening and closing times are expected to be provided as person attributes in the plans file.");
+
+				if (asasConfigGroup.isReplaceDefaultScoring() && asasConfigGroup.getActivityScoringApproach().toString().equals(ActivityScoringApproach.AgentSpecific.toString())) {
+					log.info("Not adjusting the population."
+							+ " In the case of applying the agent-specific activity scoring function: Opening and closing times are expected to be provided as person attributes in the plans file.");
+				}
 			}
 			
 		} else {
@@ -138,15 +146,33 @@ public class AgentSpecificActivitySchedulingModule extends AbstractModule {
 	public void install() {
 		
 		if (asasConfigGroup.isUseAgentSpecificActivityScheduling()) {
-			// adjust scoring
-			log.info("Replacing the default activity scoring by an agent-specific opening / closing time consideration...");
+			
+			if (asasConfigGroup.isReplaceDefaultScoring()) {
+				// adjust scoring
+				
+				if (asasConfigGroup.getActivityScoringApproach().toString().equals(ActivityScoringApproach.Default.toString())) {
+					// do nothing
+				} else if (asasConfigGroup.getActivityScoringApproach().toString().equals(ActivityScoringApproach.AgentSpecific.toString())) {
 					
-			this.bind(CountActEventHandler.class).asEagerSingleton();
-			this.addEventHandlerBinding().to(CountActEventHandler.class);
-			
-			this.bindScoringFunctionFactory().to(AgentSpecificScoringFunctionFactory.class);	
-			
-			log.info("Replacing the default activity scoring by an agent-specific opening / closing time consideration... Done.");
+					log.info("Replacing the default activity scoring by an agent-specific opening / closing time consideration...");
+					
+					this.bind(CountActEventHandler.class).asEagerSingleton();
+					this.addEventHandlerBinding().to(CountActEventHandler.class);
+					
+					this.bindScoringFunctionFactory().to(AgentSpecificScoringFunctionFactory.class);	
+										
+				} else if (asasConfigGroup.getActivityScoringApproach().toString().equals(ActivityScoringApproach.ActivityGroup.toString())) {
+					
+					log.info("Replacing the default activity scoring by an activity type group consideration...");
+					this.bindScoringFunctionFactory().to(BasicScoringFunctionFactory.class);	
+										
+				} else {
+					throw new RuntimeException("Unknown activity scoring approach. Aborting...");
+				}
+				
+			} else {
+				log.info("Using the default activity scoring, i.e. not replacing the default activity scoring by an agent-specific opening / closing time consideration.");
+			}
 		
 		} else {
 			log.info("Agent-specific activity scheduling disabled. Using the default scoring.");

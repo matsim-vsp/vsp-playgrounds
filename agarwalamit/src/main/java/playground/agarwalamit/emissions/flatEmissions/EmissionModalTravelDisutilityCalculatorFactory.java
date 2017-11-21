@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.emissions;
+package playground.agarwalamit.emissions.flatEmissions;
 
 import java.util.Set;
 import com.google.inject.Inject;
