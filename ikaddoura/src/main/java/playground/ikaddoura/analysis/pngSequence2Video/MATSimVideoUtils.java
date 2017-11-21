@@ -53,10 +53,10 @@ public class MATSimVideoUtils {
 			
 		Config config = null;
 		if (new File(outputDirectory + "output_config.xml.gz").exists()) {
-			config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml.gz");
+			config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
 		} else {
 			if (new File(outputDirectory + "output_config.xml").exists()) {
-				config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
+				config = ConfigUtils.loadConfig(outputDirectory + "output_config");
 			} else {
 				throw new RuntimeException("No (output) config file. Aborting...");
 			}
