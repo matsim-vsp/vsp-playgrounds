@@ -149,7 +149,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
 
     @Override
     public void handleEvent(VehicleLeavesTrafficEvent event) {
-    		this.delegate.handleEvent(event);
+//    		this.delegate.handleEvent(event); // keep the info such that info can be used in the events later than this time step.
         Id<Person> personId = event.getPersonId();
         TreeMap<Id<Person>, List<Event>> person2Events = this.time2ListOfEvents.get(event.getTime());
 
@@ -236,11 +236,17 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         if (vehicleId2EmissionCollector == null) {
             vehicleId2EmissionCollector = new HashMap<>();
         }
+        
+        if (vehicleId2EmissionCollector.containsKey(vehicleId)) {
+        		System.out.println("Container already has a vehicle with id "+vehicleId+" on link "+ linkId+ " at time "+time+", this is undesirable during registration of source. " +
+                    "It can happen due to wrong sorting of the events.");
+        }
+        
         VehicleLinkEmissionCollector previousValueIfExists = vehicleId2EmissionCollector.put(vehicleId, vehicleLinkEmissionCollector);
 
         if ( previousValueIfExists!=null ) {
-            throw new RuntimeException("Container already has a vehicle with id "+vehicleId+" on link "+ linkId+ " at time "+time+", this is undesirable during registration of source. " +
-                    "It can happen due to wrong sorting of the events.");
+//            throw new RuntimeException("Container already has a vehicle with id "+vehicleId+" on link "+ linkId+ " at time "+time+", this is undesirable during registration of source. " +
+//                    "It can happen due to wrong sorting of the events.");
         }
 
         agentsOnLink.put(linkId, vehicleId2EmissionCollector);
@@ -248,15 +254,9 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
 
     private void deRegisterReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector ;
-        if (this.agentsOnLink.get(linkId).size()==0) {
-            vehicleLinkEmissionCollector = this.agentsOnLink.remove(linkId).remove(vehicleId);
-        } else {
-            vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
-        }
+        
+        vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
 
-        if (vehicleLinkEmissionCollector == null) {
-            System.out.println("Vehicle id "+ vehicleId +" linkId "+ linkId + " time "+ time);
-        }
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 

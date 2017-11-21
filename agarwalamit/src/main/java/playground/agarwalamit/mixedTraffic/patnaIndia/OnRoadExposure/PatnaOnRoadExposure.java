@@ -42,7 +42,7 @@ public class PatnaOnRoadExposure {
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
 
     private static final boolean writeEmissionEvntsFirst = false;
-    private static final EventsComparatorForEmissions.EventsOrder EVENTS_ORDER = EventsComparatorForEmissions.EventsOrder.NATURAL_ORDER;
+    private static final EventsComparatorForEmissions.EventsOrder EVENTS_ORDER = EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT;
 
     public static void main(String[] args) {
         Map<String, Map<String, Double>> modeToInhaledMass_bau;
