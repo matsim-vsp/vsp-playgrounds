@@ -25,8 +25,8 @@ public class ActDurationAnalysisMain {
 		Config config = ConfigUtils.loadConfig(configFile);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
-		
-		IKEventHandler handler1 = new IKEventHandler(scenario.getNetwork());
+
+		ActDurationHandler handler1 = new ActDurationHandler(scenario.getNetwork());
 		events.addHandler(handler1);
 		// add more handlers here
 		
