@@ -209,12 +209,27 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         if (vehicleId2EmissionCollector == null) {
             vehicleId2EmissionCollector = new HashMap<>();
         }
-        vehicleId2EmissionCollector.put(vehicleId, vehicleLinkEmissionCollector);
+        VehicleLinkEmissionCollector previousValueIfExists = vehicleId2EmissionCollector.put(vehicleId, vehicleLinkEmissionCollector);
+
+        if ( previousValueIfExists!=null ) {
+            throw new RuntimeException("Container already has a vehicle with id "+vehicleId+", this is undesirable during registration of source. " +
+                    "It can happen due to wrong sorting of the events.");
+        }
+
         agentsOnLink.put(linkId, vehicleId2EmissionCollector);
     }
 
     private void deRegisterReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
-        VehicleLinkEmissionCollector vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
+        VehicleLinkEmissionCollector vehicleLinkEmissionCollector ;
+        if (this.agentsOnLink.get(linkId).size()==0) {
+            vehicleLinkEmissionCollector = this.agentsOnLink.remove(linkId).remove(vehicleId);
+        } else {
+            vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
+        }
+
+        if (vehicleLinkEmissionCollector == null) {
+            System.out.println("Vehicle id "+ vehicleId +" linkId "+ linkId + " time "+ time);
+        }
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 

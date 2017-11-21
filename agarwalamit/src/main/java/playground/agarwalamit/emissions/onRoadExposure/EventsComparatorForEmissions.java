@@ -20,6 +20,7 @@
 package playground.agarwalamit.emissions.onRoadExposure;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
@@ -35,6 +36,7 @@ import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 /**
  * Assuming that all events are in same time step, else, sooner be returned.
@@ -47,6 +49,13 @@ public class EventsComparatorForEmissions implements Comparator<Event> {
     public enum EventsOrder {
         NATURAL_ORDER, // this will fix the events which are messed up. e.g., cold emission event before vehicle enters traffic event
         EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT // to include self exposure
+    }
+
+    private final List<String> naturalOrderOfEvents;
+    private final Collection<String> possibleModes = PatnaUtils.ALL_MODES; // TODO : make it configurable if required.
+
+    public EventsComparatorForEmissions(List<String> desiredOrderOfEvents) {
+        this.naturalOrderOfEvents = desiredOrderOfEvents;
     }
 
     public EventsComparatorForEmissions(EventsOrder eventsOrder) {
@@ -86,15 +95,15 @@ public class EventsComparatorForEmissions implements Comparator<Event> {
         this(EventsOrder.NATURAL_ORDER);
     }
 
-    private final List<String> naturalOrderOfEvents;
-
     @Override
     public int compare(Event event1, Event event2) {
         int compareValue = new Double(event1.getTime()).compareTo(new Double(event2.getTime()));
         if (compareValue==0) {
             // now check if they belongs to same person/vehicle
             if ( ! getPersonIdFromEvent(event1).equals(getPersonIdFromEvent(event2))) return 0; // not same persons then return as they are
-            else {
+            else if ( eventAsStringExceptType(event1).endsWith(eventAsStringExceptType(event2))) {
+                return 0; // arrival-departure, vehicleLeave-vehicleEnter in same time step.
+            } else  {
                 return Integer.valueOf(naturalOrderOfEvents.indexOf(event1.getEventType()))
                               .compareTo(Integer.valueOf(naturalOrderOfEvents.indexOf(event2.getEventType())));
             }
@@ -132,8 +141,20 @@ public class EventsComparatorForEmissions implements Comparator<Event> {
         }
     }
 
+    private String eventAsStringExceptType(Event event){ // pairing--> arrival depart; vehicleLeave vehicleEnter; etc in same time step
+        String temp = event.toString();
+        String type = "type=\"";
+        int index = temp.lastIndexOf(type);
+        int nextIndex = temp.indexOf("\"", index+type.length());
+        return temp.substring(0, index)+temp.substring(nextIndex+1, temp.lastIndexOf(">"));
+    }
+
     private String getPersonFromVehicleId(String vehicleId){
         if (! vehicleId.contains("_")) return vehicleId;
+
+        String [] parts = vehicleId.split("_"); // ignore situations like --> nonSlum_24717 and nonSlum_13068
+        if (! possibleModes.contains(parts[parts.length-1])) return vehicleId;
+
         int lastIndexOf = vehicleId.lastIndexOf("_");
         return vehicleId.substring(0,lastIndexOf);
     }

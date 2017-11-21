@@ -27,6 +27,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -34,9 +36,11 @@ import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.types.ColdPollutant;
+import org.matsim.facilities.ActivityFacility;
 import org.matsim.vehicles.Vehicle;
 import playground.agarwalamit.emissions.onRoadExposure.EventsComparatorForEmissions;
 
@@ -97,6 +101,23 @@ public class EventsComparatorForEmissionsTest {
 
         Assert.assertEquals("Wrong event position", 2, eventList.indexOf(event));
 
+        //
+        eventList.clear();
+        eventList.add(new VehicleLeavesTrafficEvent(10.0,Id.createPersonId("OC7_X2P_E2I_7942"),Id.createLinkId("1973"),Id.create("OC7_X2P_E2I_7942_truck", Vehicle.class),"truck", 1.0));
+        eventList.add(new PersonArrivalEvent(10.0, Id.createPersonId("OC7_X2P_E2I_7942"),Id.createLinkId("1973"), "truck"));
+        eventList.add(new ActivityStartEvent(10.0, Id.createPersonId("OC7_X2P_E2I_7942"), Id.createLinkId("1973"), Id.create("1973_aaa", ActivityFacility.class),"xxx"));
+        eventList.add(new ActivityEndEvent(10.0, Id.createPersonId("OC7_X2P_E2I_7942"), Id.createLinkId("1973"), Id.create("1973_aaa", ActivityFacility.class),"xxx"));
+        eventList.add(new PersonDepartureEvent(10.0, Id.createPersonId("OC7_X2P_E2I_7942"),Id.createLinkId("1973"), "truck"));
+        eventList.add(new VehicleEntersTrafficEvent(10.0,Id.createPersonId("OC7_X2P_E2I_7942"),Id.createLinkId("1973"),Id.create("OC7_X2P_E2I_7942_truck", Vehicle.class),"truck", 1.0));
 
+        System.out.println("Events before sorting ...");
+        eventList.stream().forEach(e -> System.out.println(e.toString()));
+        Collections.sort(eventList, new EventsComparatorForEmissions());
+        System.out.println("Events after sorting ...");
+
+        eventList.stream().forEach(e -> System.out.println(e.toString()));
+        event = eventList.stream().filter(e->e.toString().contains(VehicleEntersTrafficEvent.EVENT_TYPE)).findFirst().get();
+
+        Assert.assertEquals("Wrong event position", 5, eventList.indexOf(event));
     }
 }

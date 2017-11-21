@@ -22,11 +22,13 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.OnRoadExposure;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.io.IOUtils;
+import playground.agarwalamit.emissions.onRoadExposure.EventsComparatorForEmissions;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
-import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureEventHandler;
+import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
 import playground.agarwalamit.utils.FileUtils;
 import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
@@ -37,12 +39,16 @@ import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 public class PatnaOnRoadExposure {
 
+    private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
+
     private static final boolean writeEmissionEvntsFirst = false;
+    private static final EventsComparatorForEmissions.EventsOrder EVENTS_ORDER = EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT;
 
     public static void main(String[] args) {
         Map<String, Map<String, Double>> modeToInhaledMass_bau;
         Map<String, Map<String, Double>> modeToInhaledMass_BSH_b;
 
+        LOG.info("Using "+ EVENTS_ORDER.toString());
         PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
 
         {
@@ -74,8 +80,8 @@ public class PatnaOnRoadExposure {
         }
 
         // write data
-        String outDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/onRoadExposure.txt";
-        BufferedWriter writer = IOUtils.getBufferedWriter(outDir);
+        String outFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/onRoadExposure_"+EVENTS_ORDER.toString()+".txt";
+        BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
         try {
             writer.write("mode\tpollutant\tvalue_bau\tvalue_BSH_b\n");
             for (String mode : modeToInhaledMass_bau.keySet()) {
@@ -90,6 +96,7 @@ public class PatnaOnRoadExposure {
         } catch (IOException e) {
             throw new RuntimeException("Data is not written/read. Reason : " + e);
         }
+        LOG.info("The data has written to "+outFile);
     }
 
     private static Map<String, Map<String, Double>> run(String eventsFile){
@@ -112,12 +119,18 @@ public class PatnaOnRoadExposure {
         onRoadExposureConfigGroup.getModeToBreathingRate().put("car",0.66/3600.0 );
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        OnRoadExposureEventHandler onRoadExposureEventHandler = new OnRoadExposureEventHandler(onRoadExposureConfigGroup);
-        eventsManager.addHandler(onRoadExposureEventHandler);
+//        OnRoadExposureEventHandler onRoadExposureEventHandler = new OnRoadExposureEventHandler(onRoadExposureConfigGroup);
+//        eventsManager.addHandler(onRoadExposureEventHandler);
+
+        // this will include exposure to agent which leave in the same time step.
+        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, EVENTS_ORDER);
+        eventsManager.addHandler(onRoadExposureHandler);
 
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
 
-       return  modeToInhaledMass= onRoadExposureEventHandler.getOnRoadExposureTable().getModeToInhaledMass();
+       modeToInhaledMass= onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
+       onRoadExposureHandler.reset(0);
+       return modeToInhaledMass;
     }
 }
