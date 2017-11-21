@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<events version="1.0">
+	<event time="56427.0" type="left link" vehicle="nonSlum_2348_bike" link="bikeTrackLink_428413768_link457"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_2348_bike" link="bikeTrackLink_manuallyAdded_link501"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_86421_bike" link="bikeTrackConnectorLink_2805"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_86421_bike" link="bikeTrackLink_428413768_link456"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_73245_bike" link="bikeTrackLink_428413762_link436"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_73245_bike" link="bikeTrackLink_428413762_link438"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_60129_bike" link="bikeTrackConnectorLink_2793"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_60129_bike" link="bikeTrackLink_428413762_link442"  />
+	<event time="56427.0" type="left link" vehicle="OC3_X2P_E2I_1972_motorbike" link="477610000-451710000-4909-490810000"  />
+	<event time="56427.0" type="entered link" vehicle="OC3_X2P_E2I_1972_motorbike" link="491110000"  />
+	<event time="56427.0" type="left link" vehicle="slum_130132_bike" link="bikeTrackConnectorLink_2725"  />
+	<event time="56427.0" type="entered link" vehicle="slum_130132_bike" link="bikeTrackLink_428426151_link466"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_76615_bike" link="bikeTrackConnectorLink_2633"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_76615_bike" link="bikeTrackLink_315604580_link277"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_69752_bike" link="bikeTrackLink_316677246_link348"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_69752_bike" link="bikeTrackLink_316677246_link350"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_76013_bike" link="bikeTrackLink_428413762_link449"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_76013_bike" link="bikeTrackLink_428413762_link447"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_89688" link="1252910000-1263310000-1263410000-1263210000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_89688" link="12635-1253310000-1275110000-1273910000-1275410000-12738-1272810000-12729-1280210000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_32462_bike" link="5250"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_32462_bike" link="5254-5252-525310000-505310000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_71086_bike" link="bikeTrackLink_428413762_link442"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_71086_bike" link="bikeTrackLink_428413762_link444"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428413768_link457" vehicleId="nonSlum_2348_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="coldEmissionEvent" linkId="11372-11378-11345-11430" vehicleId="nonSlum_2348_bike" HC="0.0" NOX="0.0" PM="0.0" NMHC="0.0" FC="0.0" NO2="0.0" CO="0.0"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_65028_bike" link="bikeTrackLink_428426151_link468"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_65028_bike" link="bikeTrackLink_428426151_link470"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_38045_bike" link="bikeTrackLink_129093865_link79"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_38045_bike" link="bikeTrackLink_129093865_link77"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_52673_motorbike" link="319510000-320410000-49310000-799910000-8008-798610000-801510000-795910000-809410000-809110000-809710000-808410000-810310000-810110000-810510000-810410000-809910000-811110000-7796-858110000-853410000-859610000-859210000-859310000-8588"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_52673_motorbike" link="858810000-8593-8592-8596-8534-8581-779610000-8111-8099-8104-8105-8101-8103-8084-8097-8091-8094-7959-8015-7986-800810000-7999-493-3204-3195"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2805" vehicleId="nonSlum_86421_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_79899_bike" link="2813-2812-280310000-2802-274810000-275110000-275610000-1860910000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_79899_bike" link="1861010000-213810000-214210000"  />
+	<event time="56427.0" type="left link" vehicle="OC3_X2P_E2I_1999_truck" link="491010000-491310000-490610000-491510000-4891-491810000-491710000-491610000-492210000-4791-495610000-495710000-494410000-495810000"  />
+	<event time="56427.0" type="entered link" vehicle="OC3_X2P_E2I_1999_truck" link="496310000-496510000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_32807_bike" link="6405-6392-6438-6224-6666-666110000-6662-6667"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_32807_bike" link="6668"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_24145_motorbike" link="284110000-274210000-279210000-2783-278510000-278810000-276810000-196410000-2201-220510000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_24145_motorbike" link="220610000"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428413762_link436" vehicleId="nonSlum_73245_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_70138_bike" link="5128-5131-5130-5085"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_70138_bike" link="507910000-5077-5091"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_102466_bike" link="bikeTrackLink_316677246_link342"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_102466_bike" link="bikeTrackLink_316677246_link344"  />
+	<event time="56427.0" type="left link" vehicle="slum_110030_bike" link="1830110000"  />
+	<event time="56427.0" type="entered link" vehicle="slum_110030_bike" link="18302"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_78472_bike" link="bikeTrackLink_428413762_link450"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_78472_bike" link="bikeTrackLink_315604579_link266"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2793" vehicleId="nonSlum_60129_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_91190_bike" link="bikeTrackLink_256501411_link118"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_91190_bike" link="bikeTrackLink_256501411_link120"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_77435_bike" link="bikeTrackLink_428426151_link480"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_77435_bike" link="bikeTrackLink_428426151_link482"  />
+	<event time="56427.0" type="left link" vehicle="OC3_X2P_E2I_1713_motorbike" link="173810000"  />
+	<event time="56427.0" type="entered link" vehicle="OC3_X2P_E2I_1713_motorbike" link="175310000-664"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_36078_motorbike" link="514210000-514310000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_36078_motorbike" link="5128-5131-5130-5085"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_8473_bike" link="bikeTrackLink_428426151_link466"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_8473_bike" link="bikeTrackLink_428426151_link468"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_91976_bike" link="bikeTrackLink_428426151_link469"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_91976_bike" link="bikeTrackLink_428426151_link467"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_77169_bike" link="bikeTrackLink_428426151_link478"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_77169_bike" link="bikeTrackLink_428426151_link480"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_36728_bike" link="bikeTrackLink_428426151_link470"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_36728_bike" link="bikeTrackLink_428426151_link472"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_91774_bike" link="bikeTrackLink_428426151_link473"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_91774_bike" link="bikeTrackLink_428426151_link471"  />
+	<event time="56427.0" type="left link" vehicle="slum_126131_bike" link="bikeTrackConnectorLink_2409"  />
+	<event time="56427.0" type="entered link" vehicle="slum_126131_bike" link="bikeTrackLink_129093865_link79"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_63265_bike" link="bikeTrackLink_256501411_link120"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_63265_bike" link="bikeTrackLink_256501411_link122"  />
+	<event time="56427.0" type="left link" vehicle="slum_129664_bike" link="bikeTrackLink_256501411_link132"  />
+	<event time="56427.0" type="entered link" vehicle="slum_129664_bike" link="bikeTrackConnectorLink_2524"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_62646_motorbike" link="335410000-3355-3348-3360-3297"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_62646_motorbike" link="339110000-3298-3344-3338-3343-3311-3335-3331-332610000"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="477610000-451710000-4909-490810000" vehicleId="OC3_X2P_E2I_1972_motorbike" NO2="0.0031774199181592703" CO2_TOTAL="54.01486277350517" CO="6.49154646122302" SO2="2.73422468477514E-4" PM="0.0" FC="17.229094351269303" NMHC="1.3413789229307698" HC="1.4854184465225675" NOX="0.06354839735869156"  />
+	<event time="56427.0" type="left link" vehicle="OC4_X2P_E2I_3836" link="557210000-597-3643-343110000-369710000-370410000-370110000-3702-3703-365010000-3657"  />
+	<event time="56427.0" type="entered link" vehicle="OC4_X2P_E2I_3836" link="366010000"  />
+	<event time="56427.0" type="left link" vehicle="slum_109708_bike" link="bikeTrackLink_316677246_link349"  />
+	<event time="56427.0" type="entered link" vehicle="slum_109708_bike" link="bikeTrackLink_316677246_link347"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_83153_bike" link="509810000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_83153_bike" link="509010000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_100925_bike" link="11291-11289-11299-1128110000-1132210000-11283-1107010000-11485"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_100925_bike" link="11487"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2725" vehicleId="slum_130132_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_18431_bike" link="bikeTrackLink_256501411_link108"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_18431_bike" link="bikeTrackLink_256501411_link110"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_24785_bike" link="bikeTrackLink_256501411_link102"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_24785_bike" link="bikeTrackLink_256501411_link104"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_100218_bike" link="15934"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_100218_bike" link="1605510000-16053-16057"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_17560_bike" link="bikeTrackLink_256501411_link136"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_17560_bike" link="bikeTrackLink_256501411_link138"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2633" vehicleId="nonSlum_76615_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="left link" vehicle="slum_128273_motorbike" link="1283010000-1282410000-12839-1284010000-1281010000-1288310000"  />
+	<event time="56427.0" type="entered link" vehicle="slum_128273_motorbike" link="12881-12863-1290210000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_97216_bike" link="10344"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_97216_bike" link="11947-1184810000-11849-11858"  />
+	<event time="56427.0" type="left link" vehicle="slum_125905_bike" link="bikeTrackLink_129093865_link77"  />
+	<event time="56427.0" type="entered link" vehicle="slum_125905_bike" link="bikeTrackLink_129093865_link75"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_96589_bike" link="bikeTrackConnectorLink_2826"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_96589_bike" link="11018-10371-1183210000-1182910000-1183310000-11817-11807-11986-11990-11985-11963"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_316677246_link348" vehicleId="nonSlum_69752_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="left link" vehicle="slum_129091_bike" link="bikeTrackLink_256501411_link92"  />
+	<event time="56427.0" type="entered link" vehicle="slum_129091_bike" link="bikeTrackLink_256501411_link94"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_67786_bike" link="bikeTrackConnectorLink_2696"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_67786_bike" link="5047-625910000-628610000-6284-6289-629210000-629110000-624610000-634110000-634010000-633610000"  />
+	<event time="56427.0" type="left link" vehicle="slum_113248_bike" link="4450-4458-62810000-5232"  />
+	<event time="56427.0" type="entered link" vehicle="slum_113248_bike" link="bikeTrackConnectorLink_2697"  />
+	<event time="56427.0" type="left link" vehicle="slum_108800_bike" link="bikeTrackLink_428413762_link447"  />
+	<event time="56427.0" type="entered link" vehicle="slum_108800_bike" link="bikeTrackLink_428413762_link445"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428413762_link449" vehicleId="nonSlum_76013_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_92026_bike" link="bikeTrackLink_316677246_link357"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_92026_bike" link="bikeTrackLink_316677246_link355"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_96928_bike" link="1262710000-12604-1251710000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_96928_bike" link="1251810000-1264510000-12640-1263810000-12603"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_65305_motorbike" link="11165"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_65305_motorbike" link="1116210000-1118510000-1118210000-1118310000-1109710000-11199-1119810000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_100240_motorbike" link="1761310000-1760410000-1760910000-1760510000-1761010000-17572-17585-1757310000-1757610000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_100240_motorbike" link="16702-1719410000-1719210000-17193"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_72679_bike" link="491110000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_72679_bike" link="491010000-491310000-490610000-491510000-4891-491810000-491710000-491610000-492210000-4791-495610000-495710000-494410000-495810000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_88278_motorbike" link="18784"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_88278_motorbike" link="1088910000-1100610000-11003-11008"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_98425_motorbike" link="13134-1313310000-9391-18620-14991-18621"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_98425_motorbike" link="1494310000-14975"  />
+	<event time="56427.0" type="left link" vehicle="slum_126370_bike" link="1878810000-16851-16852-16786-16841-16783-16833-16827"  />
+	<event time="56427.0" type="entered link" vehicle="slum_126370_bike" link="16825-16829-1683010000-16805-16803-16811-16809-16810-1680810000-16795"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_79221_bike" link="bikeTrackLink_315604580_link274"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_79221_bike" link="bikeTrackLink_315604580_link276"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_70440_bike" link="bikeTrackLink_315604579_link266"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_70440_bike" link="bikeTrackConnectorLink_2622"  />
+	<event time="56427.0" type="left link" vehicle="OC5_X2P_E2I_5114" link="14264-1436410000-14325-14321"  />
+	<event time="56427.0" type="entered link" vehicle="OC5_X2P_E2I_5114" link="1434810000"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1252910000-1263310000-1263410000-1263210000" vehicleId="nonSlum_89688" NO2="0.007868250953971097" CO2_TOTAL="22.081994161882275" CO="0.08512685292850611" SO2="1.1134676674501543E-4" PM="0.0022947280949365103" FC="7.012283625182276" NMHC="0.009521261825370546" HC="0.010081844309455345" NOX="0.047496046704525355"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_15993_bike" link="bikeTrackLink_256501411_link140"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_15993_bike" link="bikeTrackLink_256501411_link142"  />
+	<event time="56427.0" type="left link" vehicle="OC6_X2P_E2I_6685" link="419410000-419310000-4195-419210000-419110000-420010000-420110000-4196"  />
+	<event time="56427.0" type="entered link" vehicle="OC6_X2P_E2I_6685" link="420210000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_52774_motorbike" link="5120"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_52774_motorbike" link="509210000-5093-512710000-5081-5158-516110000-5144-501410000-5481-547210000-547410000-546810000-548010000-538810000-5501-550310000-5496-549710000-5516-5517-5510-5513-5389-5466-5465-5462-546110000-535910000-557810000-555710000-5715-5718-571310000-572210000-572610000-572110000-570610000"  />
+	<event time="56427.0" type="left link" vehicle="OC3_X2P_E2I_1994" link="10455-1042710000-10471-1046810000-10465"  />
+	<event time="56427.0" type="entered link" vehicle="OC3_X2P_E2I_1994" link="1046210000-1049210000-1049610000-1049810000-1049910000-1049110000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_21559_motorbike" link="1840810000-17868"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_21559_motorbike" link="18245"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_47055_bike" link="1443210000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_47055_bike" link="13984-1476310000-14759-14784"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_32187_motorbike" link="10589-1059010000"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_32187_motorbike" link="10559"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_20641_bike" link="bikeTrackLink_256501411_link151"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_20641_bike" link="bikeTrackLink_256501411_link149"  />
+	<event time="56427.0" type="left link" vehicle="slum_126137_bike" link="bikeTrackConnectorLink_2406"  />
+	<event time="56427.0" type="entered link" vehicle="slum_126137_bike" link="10502-10503-1050010000-10506-10398-1061210000"  />
+	<event time="56427.0" type="left link" vehicle="OC7_X2P_E2I_7666" link="572"  />
+	<event time="56427.0" type="entered link" vehicle="OC7_X2P_E2I_7666" link="743010000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_60780_bike" link="3645"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_60780_bike" link="365810000-365910000-341710000-348710000-3558-355410000-3556-353910000-355110000-355310000-354410000-354910000-3492"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_100086_bike" link="bikeTrackLink_256501411_link161"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_100086_bike" link="bikeTrackLink_256501411_link159"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_96757_bike" link="11447"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_96757_bike" link="1144610000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_19407_motorbike" link="1799010000-17989-17993"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_19407_motorbike" link="17994-17991"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_34265_bike" link="bikeTrackConnectorLink_2831"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_34265_bike" link="bikeTrackLink_428426151_link484"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_43546_motorbike" link="5061"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_43546_motorbike" link="507510000"  />
+	<event time="56427.0" type="left link" vehicle="nonSlum_29690_motorbike" link="6350"  />
+	<event time="56427.0" type="entered link" vehicle="nonSlum_29690_motorbike" link="625110000"  />
+	<event time="56427.0" type="left link" vehicle="OC3_X2P_E2I_1979" link="476810000-475210000-477510000"  />
+	<event time="56427.0" type="entered link" vehicle="OC3_X2P_E2I_1979" link="477610000-451710000-4909-490810000"  />
+	<event time="56427.0" type="vehicle enters traffic" person="nonSlum_74860" link="1044910000-58010000-6618-661910000-661710000-660610000-6614-661110000-661310000-6562-6589-658310000-6588-644010000-644310000" vehicle="nonSlum_74860_bike" networkMode="bike" relativePosition="1.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="5250" vehicleId="nonSlum_32462_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="vehicle enters traffic" person="nonSlum_33739" link="11278-11207-11325" vehicle="nonSlum_33739_bike" networkMode="bike" relativePosition="1.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428413762_link442" vehicleId="nonSlum_71086_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428426151_link468" vehicleId="nonSlum_65028_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_129093865_link79" vehicleId="nonSlum_38045_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="319510000-320410000-49310000-799910000-8008-798610000-801510000-795910000-809410000-809110000-809710000-808410000-810310000-810110000-810510000-810410000-809910000-811110000-7796-858110000-853410000-859610000-859210000-859310000-8588" vehicleId="nonSlum_52673_motorbike" NO2="0.016384599822000002" CO2_TOTAL="247.19756870260355" CO="30.548054702275508" SO2="0.00125171686575" PM="0.0" FC="78.84848901272326" NMHC="6.096392782236752" HC="6.791867494680751" NOX="0.3276920090790001"  />
+	<event time="56427.0" type="coldEmissionEvent" linkId="319510000-320410000-49310000-799910000-8008-798610000-801510000-795910000-809410000-809110000-809710000-808410000-810310000-810110000-810510000-810410000-809910000-811110000-7796-858110000-853410000-859610000-859210000-859310000-8588" vehicleId="nonSlum_52673_motorbike" HC="0.0" NOX="0.0" PM="0.0" NMHC="0.0" FC="0.0" NO2="0.0" CO="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="2813-2812-280310000-2802-274810000-275110000-275610000-1860910000" vehicleId="nonSlum_79899_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="491010000-491310000-490610000-491510000-4891-491810000-491710000-491610000-492210000-4791-495610000-495710000-494410000-495810000" vehicleId="OC3_X2P_E2I_1999_truck" NO2="0.3090084445933996" CO2_TOTAL="448.8761619622037" CO="1.1252405480492682" SO2="0.002259178649026551" PM="0.1293084935457751" FC="141.19866167193447" NMHC="0.3557723890605641" HC="0.364520918615888" NOX="4.3998417829552325"  />
+	<event time="56427.0" type="coldEmissionEvent" linkId="476810000-475210000-477510000" vehicleId="OC3_X2P_E2I_1999_truck" HC="0.2918965817000001" NOX="0.22591280930000002" PM="0.013679519299999998" NMHC="0.26811718939999984" FC="32.511693954500004" NO2="0.0046479257" CO="2.5770587922000026"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="6405-6392-6438-6224-6666-666110000-6662-6667" vehicleId="nonSlum_32807_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="coldEmissionEvent" linkId="6405-6392-6438-6224-6666-666110000-6662-6667" vehicleId="nonSlum_32807_bike" HC="0.0" NOX="0.0" PM="0.0" NMHC="0.0" FC="0.0" NO2="0.0" CO="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="284110000-274210000-279210000-2783-278510000-278810000-276810000-196410000-2201-220510000" vehicleId="nonSlum_24145_motorbike" NO2="0.003855581388484025" CO2_TOTAL="67.35562082371747" CO="8.123436788906975" SO2="3.4094550747389515E-4" PM="0.0" FC="21.484390397511277" NMHC="1.6970251515817067" HC="1.8771238083456154" NOX="0.07711162987271271"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="5128-5131-5130-5085" vehicleId="nonSlum_70138_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_316677246_link342" vehicleId="nonSlum_102466_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1830110000" vehicleId="slum_110030_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="vehicle leaves traffic" person="nonSlum_102099" link="1290510000-1249410000-1316910000-13167-1249910000-13037-13035" vehicle="nonSlum_102099_bike" networkMode="bike" relativePosition="1.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428413762_link450" vehicleId="nonSlum_78472_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link118" vehicleId="nonSlum_91190_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428426151_link480" vehicleId="nonSlum_77435_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="173810000" vehicleId="OC3_X2P_E2I_1713_motorbike" NO2="8.541580083299999E-4" CO2_TOTAL="16.09724000702121" CO="1.91928638992442" SO2="8.146907946999999E-5" PM="0.0" FC="5.13452906684725" NMHC="0.40953721405941" HC="0.45153975723054995" NOX="0.017083160521029997"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="514210000-514310000" vehicleId="nonSlum_36078_motorbike" NO2="0.00101711871855" CO2_TOTAL="19.16835523224135" CO="2.2854578361527" SO2="9.701217444999999E-5" PM="0.0" FC="6.11412124442875" NMHC="0.48767085515835" HC="0.53768686211425" NOX="0.02034237479305"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428426151_link466" vehicleId="nonSlum_8473_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428426151_link469" vehicleId="nonSlum_91976_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428426151_link478" vehicleId="nonSlum_77169_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428426151_link470" vehicleId="nonSlum_36728_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428426151_link473" vehicleId="nonSlum_91774_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2409" vehicleId="slum_126131_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link120" vehicleId="nonSlum_63265_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link132" vehicleId="slum_129664_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="335410000-3355-3348-3360-3297" vehicleId="nonSlum_62646_motorbike" NO2="0.00236625602697" CO2_TOTAL="44.593846586614895" CO="5.31695885696778" SO2="2.2569208322999998E-4" PM="0.0" FC="14.224078252025251" NMHC="1.13453236003869" HC="1.2508911249949501" NOX="0.04732512152127"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="557210000-597-3643-343110000-369710000-370410000-370110000-3702-3703-365010000-3657" vehicleId="OC4_X2P_E2I_3836" NO2="0.032677927789410005" CO2_TOTAL="91.2154876007004" CO="0.35109727904565" SO2="4.5994502124E-4" PM="0.00950963591484" FC="28.96541621248392" NMHC="0.03882672418437" HC="0.04111309975851" NOX="0.19694446584605999"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_316677246_link349" vehicleId="slum_109708_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="vehicle enters traffic" person="slum_116139" link="11483" vehicle="slum_116139_bike" networkMode="bike" relativePosition="1.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="509810000" vehicleId="nonSlum_83153_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="11291-11289-11299-1128110000-1132210000-11283-1107010000-11485" vehicleId="nonSlum_100925_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="coldEmissionEvent" linkId="11278-11207-11325" vehicleId="nonSlum_100925_bike" HC="0.0" NOX="0.0" PM="0.0" NMHC="0.0" FC="0.0" NO2="0.0" CO="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link108" vehicleId="nonSlum_18431_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link102" vehicleId="nonSlum_24785_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="15934" vehicleId="nonSlum_100218_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link136" vehicleId="nonSlum_17560_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1283010000-1282410000-12839-1284010000-1281010000-1288310000" vehicleId="slum_128273_motorbike" NO2="0.0027846493563651433" CO2_TOTAL="38.3451051852384" CO="4.695550879891015" SO2="1.9418746980267418E-4" PM="0.0" FC="12.230917742678482" NMHC="0.8964347094950502" HC="1.0039542465908946" NOX="0.05569298268577605"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="10344" vehicleId="nonSlum_97216_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_129093865_link77" vehicleId="slum_125905_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2826" vehicleId="nonSlum_96589_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link92" vehicleId="slum_129091_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2696" vehicleId="nonSlum_67786_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="4450-4458-62810000-5232" vehicleId="slum_113248_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_428413762_link447" vehicleId="slum_108800_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_316677246_link357" vehicleId="nonSlum_92026_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1262710000-12604-1251710000" vehicleId="nonSlum_96928_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="coldEmissionEvent" linkId="12542" vehicleId="nonSlum_96928_bike" HC="0.0" NOX="0.0" PM="0.0" NMHC="0.0" FC="0.0" NO2="0.0" CO="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="11165" vehicleId="nonSlum_65305_motorbike" NO2="7.769839335371343E-4" CO2_TOTAL="12.003927810690334" CO="1.4772816639552147" SO2="6.0779814092022644E-5" PM="0.0" FC="3.8288870697033164" NMHC="0.2971410179971023" HC="0.3306252559535178" NOX="0.015539679243414997"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1761310000-1760410000-1760910000-1760510000-1761010000-17572-17585-1757310000-1757610000" vehicleId="nonSlum_100240_motorbike" NO2="0.0022077892747" CO2_TOTAL="29.214864169303695" CO="3.5545499906560205" SO2="1.4796022353E-4" PM="0.0" FC="9.31865077494323" NMHC="0.68095485028835" HC="0.76374956941741" NOX="0.04415577675636"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="491110000" vehicleId="nonSlum_72679_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="18784" vehicleId="nonSlum_88278_motorbike" NO2="0.0029392536130910473" CO2_TOTAL="35.642172537182894" CO="4.719088138547347" SO2="1.805129124250089E-4" PM="0.0" FC="11.368766189299604" NMHC="0.8353319819408307" HC="0.936207353277384" NOX="0.05878507453062162"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="13134-1313310000-9391-18620-14991-18621" vehicleId="nonSlum_98425_motorbike" NO2="0.0022559126996" CO2_TOTAL="34.0353832626213" CO="4.2060071835509" SO2="1.7234256585E-4" PM="0.0" FC="10.85624974918435" NMHC="0.8393814953436501" HC="0.93513789178285" NOX="0.045118255732200005"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1878810000-16851-16852-16786-16841-16783-16833-16827" vehicleId="slum_126370_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_315604580_link274" vehicleId="nonSlum_79221_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_315604579_link266" vehicleId="nonSlum_70440_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="14264-1436410000-14325-14321" vehicleId="OC5_X2P_E2I_5114" NO2="0.025636839172302438" CO2_TOTAL="71.72602012043731" CO="0.2762619040232703" SO2="3.6167202378230913E-4" PM="0.0074674958605020466" FC="22.776772382190945" NMHC="0.03069951838952009" HC="0.03250718176694394" NOX="0.15461335543702645"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link140" vehicleId="nonSlum_15993_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="419410000-419310000-4195-419210000-419110000-420010000-420110000-4196" vehicleId="OC6_X2P_E2I_6685" NO2="0.022054445440389994" CO2_TOTAL="61.811952674877006" CO="0.2728800228014299" SO2="3.1168917790999997E-4" PM="0.006590614976439999" FC="19.631069404230125" NMHC="0.025685614961929993" HC="0.027298057489339993" NOX="0.13392450101194997"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="5120" vehicleId="nonSlum_52774_motorbike" NO2="1.6361452345795544E-4" CO2_TOTAL="2.6275316035809952" CO="0.32123732421947676" SO2="1.330279625030742E-5" PM="0.0" FC="0.8381024956533332" NMHC="0.065421834101436" HC="0.07265143306003344" NOX="0.003272290580286945"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="10455-1042710000-10471-1046810000-10465" vehicleId="OC3_X2P_E2I_1994" NO2="0.017484181049215976" CO2_TOTAL="49.07617740950568" CO="0.21626512959413632" SO2="2.474687454144005E-4" PM="0.00522592565938101" FC="15.586337601911524" NMHC="0.020480079108540387" HC="0.021763984955328164" NOX="0.10620775663001554"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1840810000-17868" vehicleId="nonSlum_21559_motorbike" NO2="0.0016823886047652792" CO2_TOTAL="23.339679582912854" CO="2.855991214666058" SO2="1.1819490019608556E-4" PM="0.0" FC="7.444645184432826" NMHC="0.5469613864147443" HC="0.612280775471247" NOX="0.03364776948035691"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1443210000" vehicleId="nonSlum_47055_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="10589-1059010000" vehicleId="nonSlum_32187_motorbike" NO2="6.816221683999999E-4" CO2_TOTAL="10.283763084407699" CO="1.2708416142461" SO2="5.2073164649999995E-5" PM="0.0" FC="3.28020694065115" NMHC="0.25361842906085" HC="0.28255114555765" NOX="0.0136324438938"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link151" vehicleId="nonSlum_20641_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2406" vehicleId="slum_126137_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="572" vehicleId="OC7_X2P_E2I_7666" NO2="0.007088354746448719" CO2_TOTAL="19.91718503565384" CO="0.0768076862040801" SO2="1.0043098400961412E-4" PM="0.0020682785463041246" FC="6.32486643969799" NMHC="0.008612239076998327" HC="0.009119282790622725" NOX="0.04280344395152003"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="3645" vehicleId="nonSlum_60780_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackLink_256501411_link161" vehicleId="nonSlum_100086_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="11447" vehicleId="nonSlum_96757_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="1799010000-17989-17993" vehicleId="nonSlum_19407_motorbike" NO2="5.6126879808E-4" CO2_TOTAL="8.46796893310224" CO="1.04645033340432" SO2="4.287865608E-5" PM="0.0" FC="2.70102395782488" NMHC="0.20883726710952003" HC="0.23266136169768" NOX="0.011225376394560001"  />
+	<event time="56427.0" type="warmEmissionEvent" linkId="bikeTrackConnectorLink_2831" vehicleId="nonSlum_34265_bike" NO2="0.0" CO2_TOTAL="0.0" CO="0.0" SO2="0.0" PM="0.0" FC="0.0" NMHC="0.0" HC="0.0" NOX="0.0"  />
+</events>
