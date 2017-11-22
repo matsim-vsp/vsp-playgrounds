@@ -256,7 +256,10 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
 
     // >>>> get output >>>>
     public OnRoadExposureTable getOnRoadExposureTable() {
-        if (! processedAllEvents) processEvents(Double.POSITIVE_INFINITY);
+        if (! processedAllEvents) {
+            processEvents(Double.POSITIVE_INFINITY);
+            processedAllEvents=true;
+        }
         return onRoadExposureTable;
     }
 }
