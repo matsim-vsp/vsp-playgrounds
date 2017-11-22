@@ -20,6 +20,7 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.OnRoadExposure;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -118,6 +119,7 @@ public class PatnaOnRoadExposure {
                                                          .map(e -> e.toString())
                                                          .collect(Collectors.toList()));
 
+        if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {
             Map<String, Map<String, Double>> modeToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
             String outFile = outputFilesDir+"/modeToOnRoadExposure.txt";
