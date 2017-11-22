@@ -20,7 +20,6 @@
 package playground.agarwalamit.emissions.onRoadExposure;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,15 +68,9 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     private Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
     
     private final OnRoadExposureConfigGroup config;
-    private final EventsComparatorForEmissions.EventsOrder eventsOrder;
 
     public OnRoadExposureHandler(OnRoadExposureConfigGroup config) {
-        this(config, EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT);
-    }
-
-    public OnRoadExposureHandler(OnRoadExposureConfigGroup config, EventsComparatorForEmissions.EventsOrder eventsOrder) {
         this.config = config;
-        this.eventsOrder = eventsOrder;
     }
 
     @Override
@@ -167,17 +160,17 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     }
 
     private void processEvents(double time){ // basically delay all concerned events until next time step.
-    		if ( this.time2ListOfEvents.firstKey() >= time) { //proceed if currentTimeStep is more than the least time in map 
-    			return;
-    		}
-    		
-    		Map.Entry<Double, TreeMap<Id<Person>, List<Event>>> prevEntry = this.time2ListOfEvents.pollFirstEntry();
+        if ( this.time2ListOfEvents.firstKey() >= time) { //proceed if currentTimeStep is more than the least time in map
+            return;
+        }
 
-         List<Event>  events = prevEntry.getValue().entrySet().stream().flatMap(e -> {
-             List<Event> tempEventsList = e.getValue();
-             Collections.sort(tempEventsList, new EventsComparatorForEmissions(this.eventsOrder));
-             return tempEventsList.stream();
-        }).collect(Collectors.toList());
+        Map.Entry<Double, TreeMap<Id<Person>, List<Event>>> prevEntry = this.time2ListOfEvents.pollFirstEntry();
+
+        List<Event> events = prevEntry.getValue()
+                                      .entrySet()
+                                      .stream()
+                                      .flatMap(e -> EmissionEventsComparator.sort(e.getValue()).stream())
+                                      .collect(Collectors.toList());
 
         for (Event event : events) {
             if(event instanceof VehicleEntersTrafficEvent) {
@@ -245,8 +238,9 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         VehicleLinkEmissionCollector previousValueIfExists = vehicleId2EmissionCollector.put(vehicleId, vehicleLinkEmissionCollector);
 
         if ( previousValueIfExists!=null ) {
-//            throw new RuntimeException("Container already has a vehicle with id "+vehicleId+" on link "+ linkId+ " at time "+time+", this is undesirable during registration of source. " +
-//                    "It can happen due to wrong sorting of the events.");
+            System.out.println("during Exception");
+            throw new RuntimeException("Container already has a vehicle with id "+vehicleId+" on link "+ linkId+ " at time "+time+", this is undesirable during registration of source. " +
+                    "It can happen due to wrong sorting of the events.");
         }
 
         agentsOnLink.put(linkId, vehicleId2EmissionCollector);
@@ -256,6 +250,10 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector ;
         
         vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
+
+        if (vehicleLinkEmissionCollector==null){
+            System.out.println("null: \t vehicle with id "+vehicleId+" on link "+ linkId+ " at time "+time);
+        }
 
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
         Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);

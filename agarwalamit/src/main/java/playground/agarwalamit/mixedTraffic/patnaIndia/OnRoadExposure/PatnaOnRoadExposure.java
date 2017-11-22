@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.emissions.onRoadExposure.EventsComparatorForEmissions;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
@@ -41,20 +40,18 @@ public class PatnaOnRoadExposure {
 
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
 
-    private static final boolean writeEmissionEvntsFirst = false;
-    private static final EventsComparatorForEmissions.EventsOrder EVENTS_ORDER = EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT;
+    private static final boolean writeEmissionEventsFirst = false;
 
     public static void main(String[] args) {
         Map<String, Map<String, Double>> modeToInhaledMass_bau;
         Map<String, Map<String, Double>> modeToInhaledMass_BSH_b;
 
-        LOG.info("Using "+ EVENTS_ORDER.toString());
         PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
 
         {
             String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
 
-            if (writeEmissionEvntsFirst) {
+            if (writeEmissionEventsFirst) {
                 String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
                 String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
                 String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
@@ -67,7 +64,7 @@ public class PatnaOnRoadExposure {
         {
             String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
 
-            if (writeEmissionEvntsFirst) {
+            if (writeEmissionEventsFirst) {
                 String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
                 String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
                 String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
@@ -80,7 +77,7 @@ public class PatnaOnRoadExposure {
         }
 
         // write data
-        String outFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/onRoadExposure_"+EVENTS_ORDER.toString()+".txt";
+        String outFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/onRoadExposure.txt";
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
         try {
             writer.write("mode\tpollutant\tvalue_bau\tvalue_BSH_b\n");
@@ -123,7 +120,7 @@ public class PatnaOnRoadExposure {
 //        eventsManager.addHandler(onRoadExposureEventHandler);
 
         // this will include exposure to agent which leave in the same time step.
-        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, EVENTS_ORDER);
+        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup);
         eventsManager.addHandler(onRoadExposureHandler);
 
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
