@@ -73,7 +73,7 @@ public class OnRoadExposureForMixedTrafficTest {
         logger.info("Each parameter will be used in all the tests i.e. all tests will be run while inclusing and excluding CO2 costs.");
     }
 
-    @Parameterized.Parameters(name = "{index}: vehicleSource == {0}; EventsOrder == {1};")
+    @Parameterized.Parameters(name = "{index}: vehicleSource == {0};")
     public static List<Object[]> considerCO2 () {
         Object[] [] considerCO2 = new Object [] [] {
                 { QSimConfigGroup.VehiclesSource.fromVehiclesData},
@@ -255,6 +255,7 @@ public class OnRoadExposureForMixedTrafficTest {
         config.addModule(ecg);
 
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = new OnRoadExposureConfigGroup();
+        onRoadExposureConfigGroup.setUsingMicroGramUnits(false);
         onRoadExposureConfigGroup.getModeToBreathingRate().put("bicycle",3.06/3600.);
         onRoadExposureConfigGroup.getModeToOccupancy().put("bicycle",1.0);
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("bicycle"); // this will set the default values
