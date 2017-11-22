@@ -23,21 +23,30 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
+import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
+import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 /**
@@ -145,17 +154,19 @@ public class PatnaOnRoadExposure {
         }
 
         {
+            Map<Id<Person>, Tuple<String, String>> person2homeCoord = getXYForHomeLocationsOfPersons();
             Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
             String outFile = outputFilesDir+"/personToOnRoadExposure.txt";
             BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
             try {
-                writer.write("personId\t");
+                writer.write("personId\tX\tY\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
                 }
                 writer.newLine();
                 for (Id<Person> personId : personToInhaledMass.keySet()) {
-                    writer.write(personId+"\t");
+                    Tuple<String, String> coords = person2homeCoord.get(personId);
+                    writer.write(personId+"\t"+coords.getFirst()+"\t"+coords.getSecond()+"\t");
                     for (String poll : pollutants){
                         writer.write( personToInhaledMass.get(personId).get(poll) + "\t");
                     }
@@ -191,5 +202,22 @@ public class PatnaOnRoadExposure {
             LOG.info("The data has written to "+outFile);
         }
        onRoadExposureHandler.reset(0);
+    }
+
+    private static Map<Id<Person>, Tuple<String, String>> getXYForHomeLocationsOfPersons(){
+        CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
+        String plansFile = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_plans.xml.gz";
+        Population population = LoadMyScenarios.loadScenarioFromPlans(plansFile).getPopulation();
+        Map<Id<Person>, Tuple<String, String>> person2homeCoord = new HashMap<>();
+        for (Person person : population.getPersons().values()) {
+            Coord cord = ((Activity) person.getSelectedPlan().getPlanElements().get(0)).getCoord();
+            if (cord!=null){
+                Coord newCoord = ct.transform(cord);
+                person2homeCoord.put(person.getId(), new Tuple<>(String.valueOf(cord.getX()),String.valueOf(cord.getY())));
+            } else{
+                person2homeCoord.put(person.getId(), new Tuple<>("NA","NA"));
+            }
+        }
+        return person2homeCoord;
     }
 }
