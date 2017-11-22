@@ -47,6 +47,8 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
 
     private final Map<String, Double> pollutantToPenetrationRate = new HashMap<>();
 
+    private boolean usingMicroGramUnits = true;
+
     public void initializeMaps(){
         Arrays.stream(WarmPollutant.values()).forEach(pollutant -> {
             pollutantToBackgroundConcentration.put(pollutant.toString(), 0.);
@@ -81,5 +83,13 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
 
     public Map<String, Double> getModeToOccupancy() {
         return modeToOccupancy;
+    }
+
+    public boolean isUsingMicroGramUnits() {
+        return usingMicroGramUnits;
+    }
+
+    public void setUsingMicroGramUnits(boolean usingMicroGramUnits) {
+        this.usingMicroGramUnits = usingMicroGramUnits;
     }
 }
