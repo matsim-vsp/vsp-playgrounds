@@ -52,7 +52,7 @@ import org.matsim.vehicles.Vehicle;
  * <p>
  * Exposure due to its own emissions are considered now (because events are processed in next time step).
  * <p>
- * The only thing which is not included is cold emission events which are thrown at a later time step but on a former link. This should be significant anyways.
+ * The only thing which is not included is cold emission events which are thrown at a later time step but on a former link. This should not be significant anyways.
  */
 
 public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmissionEventHandler,
@@ -169,7 +169,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         List<Event> events = prevEntry.getValue()
                                       .entrySet()
                                       .stream()
-                                      .flatMap(e -> EmissionEventsComparator.sort(e.getValue()).stream())
+                                      .flatMap(e -> EmissionEventsComparator.sort( e.getValue()).stream())
                                       .collect(Collectors.toList());
 
         for (Event event : events) {
@@ -210,7 +210,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
                 VehicleLeavesTrafficEvent vehicleLeavesTrafficEvent = (VehicleLeavesTrafficEvent) event;
 
                 deRegisterReceptor(vehicleLeavesTrafficEvent.getVehicleId(), vehicleLeavesTrafficEvent.getLinkId(), vehicleLeavesTrafficEvent.getTime());
-                this.driverAgents.remove(vehicleLeavesTrafficEvent.getVehicleId());
+//                this.driverAgents.remove(vehicleLeavesTrafficEvent.getVehicleId());
 
             } else {
                 throw new RuntimeException("Event "+event+" is not implemented yet.");
