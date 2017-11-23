@@ -218,14 +218,12 @@ public class PatnaOnRoadExposure {
     }
 
     private static Map<Id<Person>, Tuple<String, String>> getXYForHomeLocationsOfPersons(){
-        CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
         String plansFile = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_plans.xml.gz";
         Population population = LoadMyScenarios.loadScenarioFromPlans(plansFile).getPopulation();
         Map<Id<Person>, Tuple<String, String>> person2homeCoord = new HashMap<>();
         for (Person person : population.getPersons().values()) {
             Coord cord = ((Activity) person.getSelectedPlan().getPlanElements().get(0)).getCoord();
             if (cord!=null){
-                Coord newCoord = ct.transform(cord);
                 person2homeCoord.put(person.getId(), new Tuple<>(String.valueOf(cord.getX()),String.valueOf(cord.getY())));
             } else{
                 person2homeCoord.put(person.getId(), new Tuple<>("NA","NA"));

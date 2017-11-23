@@ -25,29 +25,20 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.utils.FileUtils;
-import playground.agarwalamit.utils.LoadMyScenarios;
+import playground.agarwalamit.utils.PersonFilter;
 
 /**
  * Created by amit on 22.11.17.
  */
 
-public class PersonCoordChanger {
+public class PatnaDataFiltering {
 
     private static final String wardsFile = FileUtils.SHARED_SVN+"/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
     private static final Collection<SimpleFeature> simpleFeatureCollection = ShapeFileReader.getAllFeatures(wardsFile);
@@ -55,10 +46,7 @@ public class PersonCoordChanger {
     public static void main(String[] args) {
 
         String inputFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/analysis/personToOnRoadExposure.txt";
-        String outputFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/analysis/personToOnRoadExposure_withZoneId.txt";
-        String plansFile = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_plans.xml.gz";
-
-        Population population = LoadMyScenarios.loadScenarioFromPlans(plansFile).getPopulation();
+        String outputFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/analysis/personToOnRoadExposure_urbanPersonOnly.txt";
 
         BufferedReader reader = IOUtils.getBufferedReader(inputFile);
         BufferedWriter writer = IOUtils.getBufferedWriter(outputFile);
@@ -67,25 +55,12 @@ public class PersonCoordChanger {
         try {
             String line = reader.readLine();
             while (line!=null){
-                if (line.startsWith("personId")) writer.write(line+"\tzoneId\n");
+                if (line.startsWith("personId")) writer.write(line+"\n");
                 else {
                     String parts [] = line.split("\t");
-                    String X = parts[1];
-                    String Y = parts[2];
-                    if (X.equals("NA")) {
-                        writer.write(line+"\tNA\n");
-                    } else{
-                        Person person = population.getPersons().get(Id.createPersonId(parts[0]));
-                        Coord homeCoord = ((Activity)person.getSelectedPlan().getPlanElements().get(0)).getCoord();
-                        String zone = getZoneId(homeCoord);
-                        Coord cord = PatnaUtils.COORDINATE_TRANSFORMATION.transform(new Coord(Double.valueOf(X),Double.valueOf(Y)));
-                        parts[1] = String.valueOf(homeCoord.getX());
-                        parts[2] = String.valueOf(homeCoord.getY());
-                        for(String str : parts){
-                            writer.write(str+"\t");
-                        }
-                        writer.write(zone);
-                        writer.newLine();
+                    String personId = parts[0];
+                    if (isConcernedPerson(personId)) {
+                        writer.write(line+"\n");
                     }
                 }
                 line = reader.readLine();
@@ -97,16 +72,9 @@ public class PersonCoordChanger {
         }
     }
 
-    private static String getZoneId (Coord cord){
-        for(SimpleFeature simpleFeature : simpleFeatureCollection){
-            CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
-            cord = ct.transform(cord);
-            Point point = new GeometryFactory().createPoint(new Coordinate(cord.getX(), cord.getY()));
-            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains(point ) ) {
-                return String.valueOf(simpleFeature.getAttribute("ID1"));
-            }
-        }
-        return "NA";
+    private static boolean isConcernedPerson(String personId) {
+        Id<Person> person = Id.createPersonId(personId);
+        PersonFilter patnaPersonFilter = new PatnaPersonFilter();
+        return patnaPersonFilter.getUserGroupAsStringFromPersonId(person).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString());
     }
-
 }
