@@ -23,10 +23,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -40,7 +45,9 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
+import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
@@ -54,6 +61,9 @@ import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
  */
 
 public class PatnaOnRoadExposure {
+
+    private static final String wardsFile = FileUtils.SHARED_SVN+"/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
+    private static final Collection<SimpleFeature> simpleFeatureCollection = ShapeFileReader.getAllFeatures(wardsFile);
 
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
@@ -159,14 +169,17 @@ public class PatnaOnRoadExposure {
             String outFile = outputFilesDir+"/personToOnRoadExposure.txt";
             BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
             try {
-                writer.write("personId\tX\tY\t");
+                writer.write("personId\tzoneId\tX\tY\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
                 }
                 writer.newLine();
                 for (Id<Person> personId : personToInhaledMass.keySet()) {
                     Tuple<String, String> coords = person2homeCoord.get(personId);
-                    writer.write(personId+"\t"+coords.getFirst()+"\t"+coords.getSecond()+"\t");
+                    String zoneId;
+                    if (coords.getFirst().equals("NA")) zoneId = "NA";
+                    else zoneId = getZoneId(new Coord(Double.valueOf(coords.getFirst()), Double.valueOf(coords.getSecond())));
+                    writer.write(personId+"\t"+zoneId+"\t"+coords.getFirst()+"\t"+coords.getSecond()+"\t");
                     for (String poll : pollutants){
                         writer.write( personToInhaledMass.get(personId).get(poll) + "\t");
                     }
@@ -220,4 +233,17 @@ public class PatnaOnRoadExposure {
         }
         return person2homeCoord;
     }
+
+    private static String getZoneId (Coord cord){
+        for(SimpleFeature simpleFeature : simpleFeatureCollection){
+            CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
+            cord = ct.transform(cord);
+            Point point = new GeometryFactory().createPoint(new Coordinate(cord.getX(), cord.getY()));
+            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains(point ) ) {
+                return String.valueOf(simpleFeature.getAttribute("ID1"));
+            }
+        }
+        return "NA";
+    }
+
 }
