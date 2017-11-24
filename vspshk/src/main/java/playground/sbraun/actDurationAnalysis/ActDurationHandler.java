@@ -41,10 +41,10 @@ import java.io.IOException;
 
 
 /**
- * @author Ihab
+ * @author sbraun
  *
  */
-public class IKEventHandler implements ActivityStartEventHandler,ActivityEndEventHandler {
+public class ActDurationHandler implements ActivityStartEventHandler,ActivityEndEventHandler {
 
 	Map<Id<Person>,Double> duration_la = new HashMap<>();
 	Map<Id<Person>,String> Activitys = new HashMap<>();
@@ -55,7 +55,7 @@ public class IKEventHandler implements ActivityStartEventHandler,ActivityEndEven
 
 	
 	
-	public IKEventHandler(Network network) {
+	public ActDurationHandler(Network network) {
 		this.network = network;
 	}
 
