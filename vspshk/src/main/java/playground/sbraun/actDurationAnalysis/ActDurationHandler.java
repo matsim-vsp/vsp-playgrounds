@@ -26,6 +26,7 @@ package playground.sbraun.actDurationAnalysis;
 
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
@@ -40,37 +41,42 @@ import java.io.IOException;
 
 
 /**
- * @author Soehnke
+ * @author Ihab
  *
  */
-public class ActDurationHandler implements ActivityStartEventHandler,ActivityEndEventHandler {
+public class IKEventHandler implements ActivityStartEventHandler,ActivityEndEventHandler {
 
-	Map<Id<Person>,Double> personId2starttime = new HashMap<>();
-	Map<Id<Person>,String> personId2acttype = new HashMap<>();
+	Map<Id<Person>,Double> duration_la = new HashMap<>();
+	Map<Id<Person>,String> Activitys = new HashMap<>();
 	List<String> activityChain = new ArrayList<>();
-	//Network network;
+	String agent_activity;
+	double duration;
+	Network network;
 
+	
+	
+	public IKEventHandler(Network network) {
+		this.network = network;
+	}
 
 
 	@Override
 	public void reset(int iteration) {
-		personId2acttype.clear();
-		personId2starttime.clear();
-		activityChain.clear();
+
 	}
 
 	
 	
 	public void handleEvent(ActivityStartEvent event) {
 		if(!event.getActType().equals("pt interaction")) {
-			personId2starttime.put(event.getPersonId(), event.getTime());
-			personId2acttype.put(event.getPersonId(), event.getActType());
+			duration_la.put(event.getPersonId(), event.getTime());
+			Activitys.put(event.getPersonId(), event.getActType());
 		}
 	}
 	
 	public void handleEvent(ActivityEndEvent event) {
-		if((personId2acttype.get(event.getPersonId())!=null || personId2starttime.get(event.getPersonId())!=null)&& !event.getActType().equals("pt interaction")) {
-			String agent_activity = event.getPersonId() +";"+ personId2acttype.get(event.getPersonId()) + ";" +(event.getTime()-personId2starttime.get(event.getPersonId()))+"sec;";
+		if((Activitys.get(event.getPersonId())!=null || duration_la.get(event.getPersonId())!=null)&& !event.getActType().equals("pt interaction")) {
+			String agent_activity = event.getPersonId() +";"+Activitys.get(event.getPersonId()) + ";" +(event.getTime()-duration_la.get(event.getPersonId()))+"sec;";
 			activityChain.add(agent_activity);
 		}
 	}
@@ -78,7 +84,7 @@ public class ActDurationHandler implements ActivityStartEventHandler,ActivityEnd
 	public void output(String filename){
 		BufferedWriter bw = IOUtils.getBufferedWriter(filename);
 		try {
-			bw.write("AgentId ; Activitytype ; Duration");
+			bw.write("AgentId ; activitytype ; Duration");
 			bw.newLine();
 		
 			for (String line : activityChain){
