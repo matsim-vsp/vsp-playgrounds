@@ -65,7 +65,7 @@ public class WOBZoneAndLOSGeneratorV2 {
 	
 	// Storage objects
 	private final Set<String> municipalities = new HashSet<>();
-	private final List<String> zones = new LinkedList<>();
+	private final Set<String> zones = new HashSet<>();
 	private final Map<String, Geometry> zoneMap = new HashMap<>();
 	private final Map<String, Map<String, Double>> zone2ZoneDistanceMap = new HashMap<>();
 	private final Map<String, Map<String, Integer>> zone2ZoneAdjacencyMap = new HashMap<>();

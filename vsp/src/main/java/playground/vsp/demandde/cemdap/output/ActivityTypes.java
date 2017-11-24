@@ -23,10 +23,10 @@ package playground.vsp.demandde.cemdap.output;
  * @author dziemke
  */
 public class ActivityTypes {
-	static final String HOME = "home";
-	static final String WORK = "work";
-	static final String EDUCATION = "education";
-	static final String SHOPPING = "shopping";
-	static final String LEISURE = "leisure";
-	static final String OTHER = "other";
+	public static final String HOME = "home";
+	public static final String WORK = "work";
+	public static final String EDUCATION = "education";
+	public static final String SHOPPING = "shopping";
+	public static final String LEISURE = "leisure";
+	public static final String OTHER = "other";
 }

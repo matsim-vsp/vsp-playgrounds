@@ -326,8 +326,8 @@ public class WOBDemandGeneratorCensus {
 					if (locationOfWork.equals("-99")) {
 						throw new RuntimeException("This combination of attribute values is implaubible.");
 					} else {
-						if (locationOfWork.length() == 6) { // An LOR, i.e. a location inside Berlin // TODO generalize
-//							person.getAttributes().putAttribute("locationOfWork", getSpatiallyRefinedZone());
+						if (locationOfWork.equals("03103000")||locationOfWork.startsWith("9999")) { // An LOR, i.e. a location inside Berlin // TODO generalize
+							person.getAttributes().putAttribute("locationOfWork", getWorkLocation("03103000"));
 						} else if (locationOfWork.length() == 8) { // An "Amtliche Gemeindeschlüssel (AGS)", i.e. a location outside Berlin
 							// Do nothing; leave it as it is
 						} else {
