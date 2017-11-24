@@ -66,8 +66,7 @@ public class OnRoadExposureCalculator {
      * <p>t --> travelTime</p>
      */
     private double calculateForSinglePollutant(String pollutant, double pollutantValue, String mode, double travelTime) {
-
-        return (config.getPollutantToBackgroundConcentration().get(pollutant)
+        double val = (config.getPollutantToBackgroundConcentration().get(pollutant)
                 * config.getModeToOccupancy().get(mode)
                 * config.getModeToBreathingRate().get(mode)
                 * config.getPollutantToPenetrationRate(mode).get(pollutant)
@@ -76,6 +75,12 @@ public class OnRoadExposureCalculator {
                 * config.getModeToOccupancy().get(mode)
                 * config.getModeToBreathingRate().get(mode)
                 * config.getPollutantToPenetrationRate(mode).get(pollutant));
+
+        if (this.config.isUsingMicroGramUnits()) {
+            return val * Math.pow(10,6);
+        } else {
+            return val;
+        }
     }
 
 }

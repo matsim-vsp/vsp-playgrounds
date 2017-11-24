@@ -17,45 +17,20 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura;
 
-import java.io.IOException;
-
-import org.apache.log4j.Logger;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
 
 /**
-* @author ikaddoura
-*/
-
-public class BerlinControler2 {
-
-	private static final Logger log = Logger.getLogger(BerlinControler2.class);
-	
-	static String configFile;
-			
-	public static void main(String[] args) throws IOException {
-				
-		if (args.length > 0) {
-			configFile = args[0];		
-			log.info("configFile: "+ configFile);
-			
-		} else {
-			configFile = "../../../runs-svn/cne/berlin-dz-1pct/input/config_be_117j_baseCaseCtd_detailedNetwork.xml";
-//			configFile = "../../../runs-svn/cne/berlin-dz-1pct/input/config_be_117j_baseCaseCtd.xml";
-		}
-		
-		BerlinControler2 main = new BerlinControler2();
-		main.run();
-	}
-	
-	private void run() {
-		
-		Controler controler = new Controler(configFile);
-		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
-		
-		controler.run();
-	}
-}
-
+ * Created by amit on 20.11.17.
+ *
+ * <p>If the events file do not have combined events file, calculation of onRoadExposure may throw an exception or
+ * the calculation will not be accurate.</p>
+ *
+ * <p>The problem is that: reading events file, generating emissions events and then writing them back do not write the events in
+ * correct order (see EmissionEventsTest).</p>
+ *
+ * <p>Calculation of on road exposure is designed assuming a combined events file (in right order); this, this cant be used.</p>
+ *
+ * <p> A simple way is to rerun simulation using last iteration events file for 1 iteration and then write the emissions during simulation. </p>
+ * <p> Alternatively, process all required events for calculation of onRoadExposure in a later time step. </p>
+ */
+package playground.agarwalamit.emissions.onRoadExposure;

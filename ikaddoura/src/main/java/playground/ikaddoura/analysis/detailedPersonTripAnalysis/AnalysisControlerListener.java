@@ -187,7 +187,7 @@ public class AnalysisControlerListener implements IterationEndsListener {
 			SortedMap<Integer, Double> iteration2totalNoiseDamages,
 			String outputDirectory) {
 		
-		String fileName = outputDirectory + "welfare-noise-analysis.csv";
+		String fileName = outputDirectory + "systemWelfare_userBenefits_noiseDamages_tollRevenues.csv";
 		File file = new File(fileName);
 		
 		try {

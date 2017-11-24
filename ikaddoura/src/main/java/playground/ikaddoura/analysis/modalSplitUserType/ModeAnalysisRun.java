@@ -41,7 +41,7 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class ModeAnalysisRun {
 	
-	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
+	private final String runDirectory = "/Users/ihab/Desktop/ils4/kaddoura/optAV/output_user-specific-mode-choice/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
 	private final String runId = "run1";
 	private String subpopulation = "potentialSAVuser";
 	
@@ -164,7 +164,7 @@ public class ModeAnalysisRun {
 	private Scenario loadScenario() {
 		Scenario scenario;
 		if (runId == null) {
-			Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml.gz");
+			Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");
 			config.network().setInputFile(runDirectory + "output_network.xml.gz");
 			config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
 			config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
@@ -173,7 +173,7 @@ public class ModeAnalysisRun {
 			return scenario;
 			
 		} else {
-			Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml.gz");
+			Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
 			config.network().setInputFile(runDirectory + runId + ".output_network.xml.gz");
 			config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
 			config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");

@@ -1,10 +1,9 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * TestControler.java
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2011 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -18,48 +17,25 @@
  *                                                                         *
  * *********************************************************************** */
 
-/**
- * 
- */
-package playground.ikaddoura;
+package playground.agarwalamit.mixedTraffic.patnaIndia.OnRoadExposure;
 
-
-import java.io.IOException;
-
-import org.apache.log4j.Logger;
-import org.matsim.contrib.otfvis.OTFVisFileWriterModule;
-import org.matsim.core.controler.Controler;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
+import playground.agarwalamit.utils.FileUtils;
+import playground.agarwalamit.utils.networkProcessing.MatsimNetwork2Shape;
 
 /**
- * @author ikaddoura
- *
+ * Created by amit on 22.11.17.
  */
-public class IKControler {
-	
-	private static final Logger log = Logger.getLogger(IKControler.class);
-	
-	static String configFile;
-			
-	public static void main(String[] args) throws IOException {
-				
-		if (args.length > 0) {
-			configFile = args[0];		
-			log.info("configFile: "+ configFile);
-			
-		} else {
-			configFile = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/cottbus/input/config.xml";
-		}
-		
-		IKControler main = new IKControler();
-		main.run();
-	}
-	
-	private void run() {
-		
-		Controler controler = new Controler(configFile);
-		//		services.addControlerListener(new IKControlerListener(services.getScenario()));
-		controler.addOverridingModule(new OTFVisFileWriterModule());
-		controler.run();
-	}
+
+public class PatnaMatsimNetwork2Shape {
+
+    public static void main(String[] args) {
+
+        String matsimNetwork = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/output_network.xml.gz";
+        String shapeDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/analysis/networkShape/";
+        String epsg = PatnaUtils.EPSG;
+
+        MatsimNetwork2Shape.main(new String[] {matsimNetwork, shapeDir, epsg});
+    }
+
 }
-	
