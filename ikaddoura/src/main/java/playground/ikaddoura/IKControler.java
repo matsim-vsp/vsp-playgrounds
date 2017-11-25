@@ -28,6 +28,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.matsim.contrib.otfvis.OTFVisFileWriterModule;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 
 /**
@@ -57,8 +58,15 @@ public class IKControler {
 	private void run() {
 		
 		Controler controler = new Controler(configFile);
-		//		services.addControlerListener(new IKControlerListener(services.getScenario()));
 		controler.addOverridingModule(new OTFVisFileWriterModule());
+		
+		controler.addOverridingModule(new AbstractModule(){
+			@Override
+			public void install() {
+				this.addControlerListenerBinding().to(IKControlerListener.class);
+			}
+		});	
+		
 		controler.run();
 	}
 }
