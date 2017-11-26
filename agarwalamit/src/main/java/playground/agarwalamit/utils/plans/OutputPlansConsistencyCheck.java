@@ -53,8 +53,8 @@ import playground.agarwalamit.utils.PersonFilter;
  *
  * @author amit
  */
-public class InitialPlansConsistencyCheck {
-    private static final Logger LOG = Logger.getLogger(InitialPlansConsistencyCheck.class);
+public class OutputPlansConsistencyCheck {
+    private static final Logger LOG = Logger.getLogger(OutputPlansConsistencyCheck.class);
     private final Scenario sc;
 
     private final Map<Person, List<List<String>>> person2PlanIndex2ActivityTypes = new HashMap<>();
@@ -66,7 +66,7 @@ public class InitialPlansConsistencyCheck {
     private final Config config;
     private final String outputDir;
 
-    public InitialPlansConsistencyCheck(String initialPlans, String configFile, String outputDir, PersonFilter pf) {
+    public OutputPlansConsistencyCheck(String initialPlans, String configFile, String outputDir, PersonFilter pf) {
         config = new Config();
         config.addCoreModules();
         ConfigReader reader = new ConfigReader(config);
@@ -77,7 +77,7 @@ public class InitialPlansConsistencyCheck {
         this.pf = pf;
     }
 
-    public InitialPlansConsistencyCheck(String initialPlans, String configFile, String outputDir) {
+    public OutputPlansConsistencyCheck(String initialPlans, String configFile, String outputDir) {
         this(initialPlans, configFile, outputDir, null);
     }
 
@@ -91,10 +91,10 @@ public class InitialPlansConsistencyCheck {
 //            new InitialPlansConsistencyCheck(initialPlansFile, initialConfig, outputFile, new MunichPersonFilter()).run();
 //        }
         {
-            String initialPlansFile = "/Users/amit/Documents/cluster/tub/agarwal/nemo/data/locationChoice/run1/output/run1.output_plans.xml.gz";
+            String outputPlansFile = "/Users/amit/Documents/cluster/tub/agarwal/nemo/data/locationChoice/run1/output/run1.output_plans.xml.gz";
             String initialConfig = "/Users/amit/Documents/cluster/tub/agarwal/nemo/data/locationChoice/run1/output/run1.output_config.xml";
             String outputFile = "/Users/amit/Documents/cluster/tub/agarwal/nemo/data/locationChoice/run1/output/";
-            new InitialPlansConsistencyCheck(initialPlansFile, initialConfig, outputFile).run();
+            new OutputPlansConsistencyCheck(outputPlansFile, initialConfig, outputFile).run();
         }
     }
 
@@ -208,7 +208,7 @@ public class InitialPlansConsistencyCheck {
                             Activity act = (Activity) pe;
                             if (act.getType().contains("interaction")) continue;
 
-                            actType2Counter.put(act.getType(),actType2Counter.get(act.getType())+1);
+                            actType2Counter.put(act.getType(), actType2Counter.get(act.getType())+1);
 
                             if (startTime==Double.NEGATIVE_INFINITY){
                                 startTime = act.getEndTime();
@@ -266,9 +266,10 @@ public class InitialPlansConsistencyCheck {
             writer = IOUtils.getBufferedWriter(outFile);
 
             try {
-                writer.write("ActType\ttotalNumberOfActivities\tcountsForZeroDuration\tcountsForZeroUtilDuration\n");
+                writer.write("ActType\tzeroUtilDuration\ttotalNumberOfActivities\tcountsForZeroDuration\tcountsForZeroUtilDuration\n");
                 for (String act : actType2Counter.keySet()) {
-                    writer.write(act + "\t"+ actType2Counter.get(act)+"\t"+ actToZeroDurationCount.get(act) + "\t" + actToZeroUtilDurCount.get(act)+"\n");
+                    writer.write(act + "\t" + actType2ZeroUtilDuration.get(act) + "\t" + actType2Counter.get(act) + "\t" + actToZeroDurationCount
+                            .get(act) + "\t" + actToZeroUtilDurCount.get(act) + "\n");
                 }
                 writer.close();
             } catch (IOException e) {
