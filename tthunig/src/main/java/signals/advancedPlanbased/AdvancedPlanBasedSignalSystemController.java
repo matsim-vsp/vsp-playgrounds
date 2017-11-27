@@ -116,7 +116,7 @@ public class AdvancedPlanBasedSignalSystemController implements SignalController
     }
 
     @Override
-    public boolean analysisEnabled() {
+    public boolean isAnalysisEnabled() {
         return true;
     }
 }

@@ -40,7 +40,7 @@ public class SignalAnalyzer implements MobsimInitializedListener, MobsimAfterSim
     public void notifyMobsimInitialized(MobsimInitializedEvent e) {
         for (SignalSystem system : this.systems) {
             SignalController controller = system.getSignalController();
-            if (controller instanceof Analyzable && ((Analyzable) controller).analysisEnabled()) {
+            if (controller instanceof Analyzable && ((Analyzable) controller).isAnalysisEnabled()) {
                 try {
                     BufferedWriter writer = Files.newBufferedWriter(Paths.get(this.config.controler().getOutputDirectory() + "/analyzer" + system.getId() + ".csv"));
                     writer.write("s;" + ((Analyzable) controller).getStatFields());
@@ -57,7 +57,7 @@ public class SignalAnalyzer implements MobsimInitializedListener, MobsimAfterSim
 
         for (SignalSystem system : this.systems) {
             SignalController controller = system.getSignalController();
-            if (controller instanceof Analyzable && ((Analyzable) controller).analysisEnabled()) {
+            if (controller instanceof Analyzable && ((Analyzable) controller).isAnalysisEnabled()) {
                 try {
                     BufferedWriter writer = writers.get(system.getId());
                     writer.newLine();
