@@ -272,23 +272,26 @@ class LaemmerPhase {
     }
 
 //	TODO decide how state is defined for a phase, pschade Nov 17
-//    public void getStepStats(StringBuilder builder, double now) {
-//        int totalN = 0;
-//        for (Signal signal : phase.getSignals().values()) {
-//            if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
-//                for (Id<Lane> laneId : signal.getLaneIds()) {
-//                    totalN += this.laemmerSignalController2.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), laneId);
-//                }
-//            } else {
-//                totalN += this.laemmerSignalController2.getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId());
-//            }
-//        }
-//        builder.append(this.phase.getState().name()+ ";")
-//                .append(this.index + ";")
-//                .append(this.determiningLoad + ";")
-//                .append(this.intergreenTime_a + ";")
-//                .append(this.abortionPenalty + ";")
-//                .append(this.regulationTime + ";")
-//                .append(totalN + ";");
-//    }
+//	TODO this is an early implementation and is supposed to be reconsidered and has to be tested, pschade Nov 17 
+    public void getStepStats(StringBuilder builder, double now) {
+        int totalN = 0;
+        for(Id<SignalGroup> sg : this.phase.getGreenSignalGroups()) {
+	        for (Signal signal : laemmerSignalController2.getSystem().getSignalGroups().get(sg).getSignals().values()) {
+	            if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
+	                for (Id<Lane> laneId : signal.getLaneIds()) {
+	                    totalN += this.laemmerSignalController2.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), laneId);
+	                }
+	            } else {
+	                totalN += this.laemmerSignalController2.getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId());
+	            }
+	        }
+    	}
+        builder.append(this.phase.getState().name()+ ";")
+                .append(this.index + ";")
+                .append(this.determiningLoad + ";")
+                .append(this.intergreenTime_a + ";")
+                .append(this.abortionPenalty + ";")
+                .append(this.regulationTime + ";")
+                .append(totalN + ";");
+    }
 }

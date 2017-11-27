@@ -36,8 +36,9 @@ public class RunSingleCrossingScenarioWithLaemmer2 {
         double flowWE = 1800;
 //        for (int i = 0; i <= 2520; i += 120) {
 //        	flowWE = i;
-            Controler singleCrossingScenario2 = new SingleCrossingScenario2(flowNS, flowWE, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD).defineControler();
-            singleCrossingScenario2.run();
+            SingleCrossingScenario2 singleCrossingScenario2 = new SingleCrossingScenario2(flowNS, flowWE, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
+			Controler singleCrossingScenario2Controler = singleCrossingScenario2.defineControler();
+            singleCrossingScenario2Controler.run();
 //        }
     }
 

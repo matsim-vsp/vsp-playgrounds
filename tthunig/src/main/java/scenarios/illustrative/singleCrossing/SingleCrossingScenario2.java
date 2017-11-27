@@ -515,20 +515,19 @@ public class SingleCrossingScenario2 {
         	
         	if (!useLanes) {
             	signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId(), Signal.class));
-                signal.setLinkId(inLink.getId());
-
             }
             else {
                 for (Lane lane : scenario.getLanes().getLanesToLinkAssignments().get(inLink.getId()).getLanes().values()) {
                     if(lane.getToLinkIds() != null && !lane.getToLinkIds().isEmpty()) {
                     	signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId() + "_" +lane.getId(), Signal.class));
-                    	signal.setLinkId(inLink.getId());
                     	signal.addLaneId(lane.getId());
+                    	signal.setLinkId(inLink.getId());
                     }
                 }
             }
-            if (signal != null)
+            if (signal != null) {
             	signalSystem1.addSignalData(signal);
+            }
         }
         
         
@@ -537,8 +536,9 @@ public class SingleCrossingScenario2 {
 //		  state. So for now, one signal group for each signal is created. pschade
 
           for (Id<Signal> s : signalSystem1.getSignalData().keySet()) {
-        	  SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
-        	  signalGroup1.addSignalId(s);
+        	  SignalGroupData signalGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("SignalGroup"+s.toString(), SignalGroup.class));
+        	  signalGroup.addSignalId(s);
+        	  signalGroups.addSignalGroupData(signalGroup);
           }
         	
 //        SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
