@@ -41,7 +41,7 @@ import org.matsim.core.utils.io.IOUtils;
 
 
 /**
- * @author Ihab
+ * @author sbraun
  *
  */
 public class ActDurationHandler implements ActivityStartEventHandler,ActivityEndEventHandler {

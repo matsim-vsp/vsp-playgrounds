@@ -96,6 +96,23 @@ public class OnRoadExposureTable {
         return out;
     }
 
+    public Map<Id<Person>, Map<String, Double>> getPersonToInhaledMass(){
+        LOG.info("Computing total inhaled mass for each person ...");
+        Map<Id<Person>, Map<String, Double>> out = new HashMap<>();
+        Set<Id<Person>> personIds = this.personInfo.rowKeySet();
+        Set<String> modes = this.personInfo.columnKeySet();
+        for (Id<Person> personId : personIds){
+            Map<String, Double> tempSum = new HashMap<>();
+            for (String mode : modes) {
+                if (! this.personInfo.contains(personId, mode)) continue;
+                tempSum = MapUtils.mergeMaps(tempSum,
+                        TableUtils.sumValues(this.personInfo.get(personId, mode).time2link2emissions));
+            }
+            out.put(personId, tempSum);
+        }
+        return out;
+    }
+
     public Map<String, Map<String,Double>> getModeToInhaledMass(){
         LOG.info("Computing total inhaled mass for each mode ...");
         Map<String, Map<String, Double>> out = new HashMap<>();

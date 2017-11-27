@@ -128,7 +128,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
     }
 
     @Override
-    public boolean analysisEnabled() {
+    public boolean isAnalysisEnabled() {
         return this.laemmerConfig.isAnalysisEnabled();
     }
 
