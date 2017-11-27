@@ -1,25 +1,22 @@
 package playground.sbraun.analysis;
 
-import static org.junit.Assert.*;
-
-import org.junit.Rule;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.population.PersonUtils;
-import org.matsim.core.population.PopulationUtils;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.core.scoring.ScoringFunction;
-import org.matsim.core.scoring.ScoringFunctionFactory;
-import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
-import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
+import org.matsim.core.population.PersonUtils;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.scoring.ScoringFunction;
+import org.matsim.core.scoring.ScoringFunctionFactory;
+import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
 
 
 /**
@@ -27,9 +24,7 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationSco
 */
 
 public class TestScoringFunction {
-	@Rule
-	public MatsimTestUtils testUtils = new MatsimTestUtils();
-	
+
 	@Test
 	public final void test() {
 		//scoringparam
