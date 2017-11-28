@@ -37,7 +37,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.testcases.MatsimTestUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 
@@ -150,7 +149,7 @@ public class RunEconomics {
 		System.out.println("######################################################");
 
 
-		Assert.assertEquals("VTTS should be the same for both cases.", vtts - ((scenario1.getConfig().planCalcScore().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() - scenario1.getConfig().planCalcScore().getPerforming_utils_hr() ) / scenario1.getConfig().planCalcScore().getMarginalUtilityOfMoney()), 0., MatsimTestUtils.EPSILON);
+		Assert.assertEquals("VTTS should be the same for both cases.", vtts - ((scenario1.getConfig().planCalcScore().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() - scenario1.getConfig().planCalcScore().getPerforming_utils_hr() ) / scenario1.getConfig().planCalcScore().getMarginalUtilityOfMoney()), 0., 0.0001);
 		
 		double csOldUsers = carDemand0 * (avgTravelTime1 - avgTravelTime0) / 3600. * vtts ;
 		double csNewUsers = (carDemand1 - carDemand0) * ((avgTravelTime1 - avgTravelTime0) / 3600.) * vtts / 2;	
@@ -176,9 +175,9 @@ public class RunEconomics {
 		System.out.println("change in user benefits [EUR]: " + totalChangeInUserBenefitsPersonBased);
 		System.out.println("######################################################");
 		
-		Assert.assertEquals("KR/PR approach and person-based approach should result in the same change in user benefits.", totalChangeInUserBenefitsKR - totalChangeInUserBenefitsPersonBased, 0., MatsimTestUtils.EPSILON);
+		Assert.assertEquals("KR/PR approach and person-based approach should result in the same change in user benefits.", totalChangeInUserBenefitsKR - totalChangeInUserBenefitsPersonBased, 0., 0.0001);
 		Assert.assertEquals("Change in user benefits should be larger than zero (improvement).", totalChangeInUserBenefitsKR > 0., true);
-		Assert.assertEquals("Wrong change in user benefits.", 1.5666666666664, totalChangeInUserBenefitsKR, MatsimTestUtils.EPSILON);
+		Assert.assertEquals("Wrong change in user benefits.", 1.5666666666664, totalChangeInUserBenefitsKR, 0.0001);
 		
 	}
 
