@@ -48,7 +48,7 @@ public class GeometryUtils {
         Geometry outGeom = geom;
         double distanceTolerance = 1;
         int numberOfVertices = getNumberOfVertices(geom);
-        while (numberOfVertices > 1000){
+        while (numberOfVertices > 300){
             outGeom = getSimplifiedGeom(outGeom, distanceTolerance);
             numberOfVertices = getNumberOfVertices(outGeom);
             distanceTolerance *= 10;
@@ -82,7 +82,7 @@ public class GeometryUtils {
     /**
      * @return a random point which is covered by all the geometries
      */
-    public static Point getPointInteriorToGeometries(final Geometry landUseGeom, final Geometry zoneGeom) {
+    public static Point getPointInteriorToGeometry(final Geometry landUseGeom, final Geometry zoneGeom) {
         if (landUseGeom.isEmpty() || zoneGeom.isEmpty() ) throw new RuntimeException("No geometries.");
 
         if (landUseGeom.intersection(zoneGeom).getArea()==0) {
@@ -107,9 +107,33 @@ public class GeometryUtils {
         Point commonPoint = null;
         do {
             //assuming that zoneGeom is a subset of landUseGeom, it would be better to first find a point in a subset and then look if it's inside landUseGeom
+        	//this can create infinite loops
             Coordinate coordinate = getRandomInteriorPoints(zoneGeom,1)[0];
             commonPoint = geometryFactory.createPoint(coordinate);
             if (isPointInsideGeometries(landUseGeoms,commonPoint)) return commonPoint;
+           
+        } while(true);
+    }
+    
+    /**
+     * @return a random point which is covered by list of landUseGeom as well as zoneGeom
+     */
+    public static Point getPointInteriorToGeometriesWithFallback(final Collection<Geometry> landUseGeoms, final Geometry zoneGeom) {
+        if (landUseGeoms.isEmpty() || zoneGeom.isEmpty() ) throw new RuntimeException("No geometries.");
+
+        Point commonPoint = null;
+        int counter = 0;
+        do {
+            //assuming that zoneGeom is a subset of landUseGeom, it would be better to first find a point in a subset and then look if it's inside landUseGeom
+        	//this can create infinite loops, I'm changing it to fallback to a random point in case we can't find anything .
+        	counter++;
+            Coordinate coordinate = getRandomInteriorPoints(zoneGeom,1)[0];
+            commonPoint = geometryFactory.createPoint(coordinate);
+            if (isPointInsideGeometries(landUseGeoms,commonPoint)) return commonPoint;
+            counter++;
+            if (counter>100){
+            	return commonPoint;
+            }
         } while(true);
     }
 
