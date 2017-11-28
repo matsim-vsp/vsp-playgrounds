@@ -52,8 +52,8 @@ public class MATSimVideoUtils {
 		SequenceEncoder enc = new SequenceEncoder(new File(outputFile));
 			
 		Config config = null;
-		if (new File(outputDirectory + "output_config.xml.gz").exists()) {
-			config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml.gz");
+		if (new File(outputDirectory + "output_config.xml").exists()) {
+			config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
 		} else {
 			if (new File(outputDirectory + "output_config.xml").exists()) {
 				config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");

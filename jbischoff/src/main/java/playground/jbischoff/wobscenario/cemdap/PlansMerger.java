@@ -17,45 +17,47 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura;
+/**
+ * 
+ */
+package playground.jbischoff.wobscenario.cemdap;
 
-import java.io.IOException;
-
-import org.apache.log4j.Logger;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.population.io.PopulationWriter;
+import org.matsim.core.scenario.ScenarioUtils;
 
 /**
-* @author ikaddoura
-*/
-
-public class BerlinControler2 {
-
-	private static final Logger log = Logger.getLogger(BerlinControler2.class);
-	
-	static String configFile;
-			
-	public static void main(String[] args) throws IOException {
-				
-		if (args.length > 0) {
-			configFile = args[0];		
-			log.info("configFile: "+ configFile);
-			
-		} else {
-			configFile = "../../../runs-svn/cne/berlin-dz-1pct/input/config_be_117j_baseCaseCtd_detailedNetwork.xml";
-//			configFile = "../../../runs-svn/cne/berlin-dz-1pct/input/config_be_117j_baseCaseCtd.xml";
+ * @author  jbischoff
+ *
+ */
+/**
+ *
+ */
+public class PlansMerger {
+	public static void main(String[] args) {
+		
+		Population[] population = new Population[5];
+		for (int i = 1; i<=5; i++){
+		String plansfile = "D:/cemdap-vw/Output/" + i + "/plans.xml.gz";
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		population[i-1] = scenario.getPopulation();
+		new PopulationReader(scenario).readFile(plansfile);
 		}
 		
-		BerlinControler2 main = new BerlinControler2();
-		main.run();
-	}
-	
-	private void run() {
+		for (Person p : population[0].getPersons().values()){
+			for (int i =1;i<5;i++){
+				Plan plan = population[i].getPersons().get(p.getId()).getPlans().get(0);
+				p.addPlan(plan);
+			}
+		}
+		new PopulationWriter(population[0]).write("D:/cemdap-vw/Output/mergedplans.xml.gz");
 		
-		Controler controler = new Controler(configFile);
-		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists );
 		
-		controler.run();
 	}
 }
-

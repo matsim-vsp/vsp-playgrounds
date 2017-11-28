@@ -91,10 +91,10 @@ public class RunExampleOptAV2 {
 		}
 		
 		RunExampleOptAV2 runBerlinOptAV = new RunExampleOptAV2();
-		runBerlinOptAV.run();
+		runBerlinOptAV.run(configFile, outputDirectory, runId);
 	}
 
-	private void run() {
+	public void run(String configFile, String outputDirectory, String runId) {
 		
 		Config config = ConfigUtils.loadConfig(
 				configFile,

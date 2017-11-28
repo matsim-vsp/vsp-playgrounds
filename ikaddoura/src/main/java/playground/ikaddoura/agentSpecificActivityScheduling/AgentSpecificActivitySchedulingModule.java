@@ -159,12 +159,7 @@ public class AgentSpecificActivitySchedulingModule extends AbstractModule {
 					this.bind(CountActEventHandler.class).asEagerSingleton();
 					this.addEventHandlerBinding().to(CountActEventHandler.class);
 					
-					this.bindScoringFunctionFactory().to(AgentSpecificScoringFunctionFactory.class);	
-										
-				} else if (asasConfigGroup.getActivityScoringApproach().toString().equals(ActivityScoringApproach.ActivityGroup.toString())) {
-					
-					log.info("Replacing the default activity scoring by an activity type group consideration...");
-					this.bindScoringFunctionFactory().to(BasicScoringFunctionFactory.class);	
+					this.bindScoringFunctionFactory().to(AgentSpecificScoringFunctionFactory.class);
 										
 				} else {
 					throw new RuntimeException("Unknown activity scoring approach. Aborting...");

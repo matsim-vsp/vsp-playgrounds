@@ -21,7 +21,7 @@
 /**
  * 
  */
-package playground.ikaddoura;
+package playground.ikaddoura.pathsizelogit;
 
 
 import org.apache.log4j.Logger;

@@ -42,10 +42,10 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
 
     private final Collection<String> considerdModes ;
 
-    public ModeChoiceDecisionVariable(final PlanCalcScoreConfigGroup neScoreConfig, final Scenario scenario,
+    public ModeChoiceDecisionVariable(final PlanCalcScoreConfigGroup newScoreConfig, final Scenario scenario,
                                       final OpdytsScenario opdytsScenario, final Collection<String> considerdModes, final String subPopulatioun){
-        delegate = new playground.kai.usecases.opdytsintegration.modechoice.ModeChoiceDecisionVariable(neScoreConfig,scenario);
-        this.newScoreConfig = neScoreConfig;
+        delegate = new playground.kai.usecases.opdytsintegration.modechoice.ModeChoiceDecisionVariable(newScoreConfig,scenario);
+        this.newScoreConfig = newScoreConfig;
         this.opdytsScenario = opdytsScenario;
         this.subPopulation = subPopulatioun;
         this.considerdModes = considerdModes;

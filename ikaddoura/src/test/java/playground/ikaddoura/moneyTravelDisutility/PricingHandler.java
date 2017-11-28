@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura;
+package playground.ikaddoura.moneyTravelDisutility;
 
 import java.util.HashMap;
 import java.util.Map;
