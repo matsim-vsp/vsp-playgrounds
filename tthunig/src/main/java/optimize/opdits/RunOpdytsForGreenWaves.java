@@ -23,7 +23,7 @@ package optimize.opdits;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
+import analysis.TtTotalTravelTime;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -67,11 +67,11 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.events.ShutdownEvent;
+import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import analysis.TtTotalTravelTime;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
 import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
@@ -117,13 +117,18 @@ public class RunOpdytsForGreenWaves {
                 bind(ModalTripTravelTimeHandler.class);
                 addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
                 
-                // post-process analysis
-				String opdytsConvergencefile = OUTPUT_DIR + "/opdyts.con";
-				if (new File(opdytsConvergencefile).exists()) {
-					OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
-					opdytsConvergencePlotter.readFile(OUTPUT_DIR + "/opdyts.con");
-					opdytsConvergencePlotter.plotData(OUTPUT_DIR + "/convergence.png");
-				}
+                addControlerListenerBinding().toInstance(new ShutdownListener() { //plot only after one opdyts transition.
+					@Override
+					public void notifyShutdown(ShutdownEvent event) {
+						// post-process analysis
+						String opdytsConvergenceFile = OUTPUT_DIR + "/opdyts.con";
+						if (new File(opdytsConvergenceFile).exists()) {
+							OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
+							opdytsConvergencePlotter.readFile(OUTPUT_DIR + "/opdyts.con");
+							opdytsConvergencePlotter.plotData(OUTPUT_DIR + "/convergence.png");
+						}
+					}
+				});
             }
         });
         simulator.addOverridingModule(new SignalsModule());
