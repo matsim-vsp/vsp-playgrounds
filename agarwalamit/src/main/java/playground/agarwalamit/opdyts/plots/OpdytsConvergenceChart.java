@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.Range;
 import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
@@ -102,11 +100,11 @@ public class OpdytsConvergenceChart {
     public void plotData(final String outFile){
         LOGGER.info("Plotting file "+outFile);
         NumberAxis range = new NumberAxis("value of objection function");
-        range.setRange(new Range(0.0,1.0));
+//        range.setRange(new Range(0.0,1.0));
 
         XYScatterChart chart = new XYScatterChart(rawVale+" & "+avgValue,"Iteration","value of objection function");
         chart.getChart().getPlot().setBackgroundPaint(Color.white);
-        ((XYPlot)chart.getChart().getPlot()).setRangeAxis(range);
+//        ((XYPlot)chart.getChart().getPlot()).setRangeAxis(range);
 
         {
             double[] xs = new double[ avgValueList.size()];
