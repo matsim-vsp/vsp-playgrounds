@@ -40,7 +40,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import playground.agarwalamit.analysis.spatial.GeneralGrid.GridType;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 
 /**
  * A class to interpolate effect of emissions (or ...) on each link on other parts of study area.
