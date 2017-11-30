@@ -20,8 +20,11 @@
 package playground.jbischoff.wobscenario.cemdap;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
+import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Activity;
@@ -31,6 +34,9 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
+
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
 
 import playground.vsp.demandde.cemdap.output.ActivityTypes;
 import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
@@ -43,7 +49,7 @@ import playground.vsp.demandde.corineLandcover.LandCoverUtils;
  */
 public class WobFeature2Coord {
 	private final static Logger LOG = Logger.getLogger(WobFeature2Coord.class);
-	
+	private int to = 0;
 	public WobFeature2Coord() {
 	}
 
@@ -139,6 +145,9 @@ public class WobFeature2Coord {
 			coord = Cemdap2MatsimUtils.getRandomCoordinate(feature);
 		} else {
 			coord = corineLandCoverData.getRandomCoord(feature,activityType);
+			
+			
+
 		}
 		return coord;
 	}
@@ -153,6 +162,7 @@ public class WobFeature2Coord {
 				LOG.info(counter + " persons assigned with home coordinates so far.");
 				Gbl.printMemoryUsage();
 			}
+					
 			int activityIndex = 0;
 
 			for (PlanElement planElement : person.getPlans().get(0).getPlanElements()) {
@@ -182,7 +192,7 @@ public class WobFeature2Coord {
 					}
 					if (activity.getType().equals(ActivityTypes.HOME)) {
 						if (homeCoord==null){
-						 homeCoord = getCoord(corineLandCoverData, zone, "home");}
+						homeCoord = getCoord(corineLandCoverData, zone, "home");}
 						}
 						homeZones.put(personId, homeCoord);
 					activityIndex++;

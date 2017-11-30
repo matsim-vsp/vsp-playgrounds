@@ -1,7 +1,6 @@
 /*
  *  *********************************************************************** *
  *  * project: org.matsim.*
- *  * DefaultControlerModules.java
  *  *                                                                         *
  *  * *********************************************************************** *
  *  *                                                                         *
@@ -19,54 +18,57 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package analysis;
+package optimize.opdits;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
-import org.matsim.api.core.v01.events.PersonDepartureEvent;
-import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.opdyts.MATSimState;
+
+import com.google.inject.Inject;
+
+import analysis.TtTotalTravelTime;
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.SimulatorState;
 
 /**
- * Sums up travel times of all agents, i.e. the time between person departure and arrival event
+ * total travel time as objective function for opdyts
  * 
  * @author tthunig
  */
-public class TtTotalTravelTime implements PersonDepartureEventHandler, PersonArrivalEventHandler{
+public class TravelTimeObjectiveFunction implements ObjectiveFunction {
 
-	private double totalTt = 0.0;
-	private Map<Id<Person>, Double> pers2lastDepatureTime = new HashMap<>();
-	
-	private double previousTotalTT = 0.0;
+	@Inject private TtTotalTravelTime eventHandlerTT;
 	
 	@Override
-	public void reset(int iteration) {
-		previousTotalTT = totalTt;
-		totalTt = 0.0;
-		pers2lastDepatureTime.clear();
+	public double value(SimulatorState state) {
+		
+		MATSimState matSimState = (MATSimState) state;
+        Set<Id<Person>> persons = matSimState.getPersonIdView();
+        
+        double totalScore = 0.;
+        double totalExpectedTT = 0.;
+
+        for (Id<Person> personId : persons) {
+            Plan plan = matSimState.getSelectedPlan(personId);
+            totalScore += plan.getScore();
+            // tt im leg TODO
+            for (PlanElement pe : plan.getPlanElements()) {
+            		if (pe instanceof Leg) {
+            			totalExpectedTT += ((Leg)pe).getTravelTime();
+            		}
+            }
+        }
+        return -totalScore;
+//        return totalExpectedTT;
+		
+//		return eventHandlerTT.getTotalTt();
+		// we have to use previous total travel time here, because reset(...) is called before opdyts calls value(...)
+//		return eventHandlerTT.getPreviousTotalTT();
 	}
 
-	@Override
-	public void handleEvent(PersonArrivalEvent event) {
-		double tripDuration = event.getTime() - pers2lastDepatureTime.get(event.getPersonId());
-		totalTt += tripDuration;
-	}
-
-	@Override
-	public void handleEvent(PersonDepartureEvent event) {
-		pers2lastDepatureTime.put(event.getPersonId(), event.getTime());
-	}
-
-	public double getTotalTt(){
-		return totalTt;
-	}
-	
-	public double getPreviousTotalTT() {
-		return previousTotalTT;
-	}
-	
 }

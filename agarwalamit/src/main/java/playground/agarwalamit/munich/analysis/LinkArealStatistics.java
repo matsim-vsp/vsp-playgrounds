@@ -36,7 +36,7 @@ import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.agarwalamit.utils.FileUtils;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 import playground.agarwalamit.utils.ListUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 

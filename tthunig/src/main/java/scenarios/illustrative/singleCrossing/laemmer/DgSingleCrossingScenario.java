@@ -39,7 +39,6 @@ import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;

@@ -40,9 +40,11 @@ public class CempdapStops2MatsimPlans {
     public static void main(String[] args) throws IOException {
         // Local use
         String cemdapDataRoot = "D:/cemdap-vw/Output/";
-        int numberOfFirstCemdapOutputFile = 5;
+        for (int i = 1; i<=5;i++){
+        	if (i == 4) continue;
+        int numberOfFirstCemdapOutputFile = i;
         int numberOfPlans = 1;
-        int numberOfPlansFile = 5;
+        int numberOfPlansFile = i;
         String outputDirectory = "D:/cemdap-vw/Output/" + numberOfPlansFile + "/";
         String zonalShapeFile1 = "../../../shared-svn/projects/vw_rufbus/projekt2/data/new_cemdap_scenario/zensus/nssa.shp";
         String zoneIdTag1 = "AGS";
@@ -63,5 +65,7 @@ public class CempdapStops2MatsimPlans {
         CemdapStops2MatsimPlansConverter.convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory,
                 zonalShapeFile1, zoneIdTag1, zonalShapeFile2, zoneIdTag2, allowVariousWorkAndEducationLocations, addStayHomePlan,
                 useLandCoverData, landCoverFile, stopFile, activityFile,simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
+        
+    }
     }
 }
