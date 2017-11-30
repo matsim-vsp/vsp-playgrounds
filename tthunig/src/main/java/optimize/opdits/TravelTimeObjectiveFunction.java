@@ -56,7 +56,6 @@ public class TravelTimeObjectiveFunction implements ObjectiveFunction {
         for (Id<Person> personId : persons) {
             Plan plan = matSimState.getSelectedPlan(personId);
             totalScore += plan.getScore();
-            // tt im leg TODO
             for (PlanElement pe : plan.getPlanElements()) {
             		if (pe instanceof Leg) {
             			totalExpectedTT += ((Leg)pe).getTravelTime();

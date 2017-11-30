@@ -64,6 +64,7 @@ import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -81,7 +82,7 @@ import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
  */
 public class RunOpdytsForGreenWaves {
 
-	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStreamPlanbasedSignals_stepSize10_selfTuning4/" ;
+	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream/PlanbasedSignals_stepSize10_tt/" ;
 	
 	public static void main(String[] args) {
 		 
@@ -302,7 +303,12 @@ public class RunOpdytsForGreenWaves {
 			ActivityParams dummyAct = new ActivityParams("dummy");
 			dummyAct.setTypicalDuration(12 * 3600);
 			config.planCalcScore().addActivityParams(dummyAct);
+			dummyAct.setScoringThisActivityAtAll(false);
 		}
+		
+		// TODO try this out?!
+//		ModeParams carMode = config.planCalcScore().getOrCreateModeParams(TransportMode.car);
+//		carMode.setConstant(0);		
 		
 		return config;
 	}
