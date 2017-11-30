@@ -23,6 +23,7 @@ package optimize.opdits;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -35,6 +36,7 @@ import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.utils.SignalUtils;
 
 import floetteroed.opdyts.DecisionVariableRandomizer;
+import org.matsim.core.gbl.MatsimRandom;
 
 /**
  * Axially vary the offset decision variables.
@@ -49,6 +51,8 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 	private final Scenario scenario;
 	private final Id<SignalSystem> fixedSystemId;
     private final OpdytsConfigGroup opdytsConfigGroup;
+
+    private final Random random = MatsimRandom.getRandom();
 	
 	public OffsetRandomizer(Scenario scenario) {
 		this.scenario = scenario;
@@ -69,10 +73,11 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 			if (systemId.equals(fixedSystemId)) {
 				continue;
 			}
+			double delta = random.nextDouble();
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
-					plan.setOffset(plan.getOffset() + (int)opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable());
+					plan.setOffset(plan.getOffset() + (int) (opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * delta) );
 				}
 				OffsetDecisionVariable variation = new OffsetDecisionVariable(newOffsets, scenario);
 				result.add(variation);
@@ -80,7 +85,7 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
-					plan.setOffset(plan.getOffset() - (int)opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable());
+					plan.setOffset(plan.getOffset() - (int) (opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * delta) );
 				}
 				OffsetDecisionVariable variation = new OffsetDecisionVariable(newOffsets, scenario);
 				result.add(variation);

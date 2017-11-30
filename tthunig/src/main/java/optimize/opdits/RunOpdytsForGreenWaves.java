@@ -113,10 +113,10 @@ public class RunOpdytsForGreenWaves {
                 // TODO why does it work to inject this in TravelTimeObjectiveFunction, although TravelTimeObjectiveFunction is not created by guice??
                 bind(TtTotalTravelTime.class).asEagerSingleton();
                 addEventHandlerBinding().to(TtTotalTravelTime.class);
-                
+
                 bind(ModalTripTravelTimeHandler.class);
                 addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
-                
+
                 addControlerListenerBinding().toInstance(new ShutdownListener() { //plot only after one opdyts transition.
 					@Override
 					public void notifyShutdown(ShutdownEvent event) {
@@ -161,7 +161,7 @@ public class RunOpdytsForGreenWaves {
             signalSystems.addSignalSystemData(signalSystem);
             
             // add the signal (there is only one inLink)
-            for (Link inLink : scenario.getNetwork().getNodes().get(Id.createNodeId(3)).getInLinks().values()) {
+            for (Link inLink : scenario.getNetwork().getNodes().get(Id.createNodeId(i+2)).getInLinks().values()) {
                 SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId(), Signal.class));
                 signal.setLinkId(inLink.getId());
                 signalSystem.addSignalData(signal);
@@ -280,7 +280,7 @@ public class RunOpdytsForGreenWaves {
 		
 		config.travelTimeCalculator().setTraveltimeBinSize(10);
 		
-		config.qsim().setStuckTime(60*10);
+		config.qsim().setStuckTime(360*10);
 		config.qsim().setRemoveStuckVehicles(false);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
