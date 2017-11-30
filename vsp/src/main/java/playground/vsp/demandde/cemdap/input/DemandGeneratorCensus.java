@@ -55,8 +55,8 @@ public class DemandGeneratorCensus {
 	private Map<String, Map<String, CommuterRelationV2>> relationsMap;
 	private String outputBase;
 	
-	// Optionally used storage objects
-	private List<String> spatialRefinementZoneIds;
+	// Optionally used storage objects (municipality id to lors/plz)
+	private final Map<String, List<String>> spatialRefinementZoneIds= new HashMap<>();
 	
 	// Parameters
 	private List<String> idsOfFederalStatesIncluded;
@@ -68,8 +68,9 @@ public class DemandGeneratorCensus {
 	
 	// Optionally used parameters
 	private String shapeFileForSpatialRefinement;
-	private String idOfMunicipailityForSpatialRefinement;
-	private String featureKeyInShapeFile;
+	private List<String> idsOfMunicipalityForSpatialRefinement;
+	private String featureKeyInShapeFileForRefinement;
+	private String municipalityFeatureKeyInShapeFile;
 
 	// Counters
 	private int counterMissingComRel = 0;
@@ -105,9 +106,13 @@ public class DemandGeneratorCensus {
 		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
 		
 		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp");
-		demandGeneratorCensus.setIdOfMunicipailityForSpatialRefinement("11000000"); // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
-		demandGeneratorCensus.setFeatureKeyInShapeFile("SCHLUESSEL");
-		
+		demandGeneratorCensus.setIdsOfMunicipalityForSpatialRefinement(Arrays.asList("11000000")); // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
+		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL"); //e.g., PLZ/LOR
+
+		// municipality id (AGS)
+		String municipalityKeyInShapeFile = "NR";//not available in refinement shape for Berlin --> setting to null. Amit Nov'17
+		demandGeneratorCensus.setMunicipalityFeatureKeyInShapeFile(null);
+
 		demandGeneratorCensus.generateDemand();
 	}
 
@@ -143,11 +148,22 @@ public class DemandGeneratorCensus {
 			this.relationsMap.putAll(currentRelationMap);
 		}
 	}
-	
+
 	
 	public void generateDemand() {
-		if (this.shapeFileForSpatialRefinement != null && this.featureKeyInShapeFile != null) {
-			this.spatialRefinementZoneIds = readShape(this.shapeFileForSpatialRefinement, this.featureKeyInShapeFile);
+		//some checks and initialization
+		if ( this.shapeFileForSpatialRefinement!=null && this.municipalityFeatureKeyInShapeFile ==null && this.idsOfMunicipalityForSpatialRefinement.size()>1 ) {
+			throw new RuntimeException("A shape file for spatial refinement is provided and number of Municipality IDs for spatial refinement is more than 1." +
+					"However, no feature Key is provided to differentiate the Municipalities.");
+		}
+
+		if (this.shapeFileForSpatialRefinement != null && this.featureKeyInShapeFileForRefinement != null ) {
+//			this.spatialRefinementZoneIds = readShape();
+			//initialize with given municipality ids
+			// Technically, one can get the list of municipality IDs for spatial refinement from features in provided shape file.
+			// Howver, it is better to take IDs as argument to exclude some municipality from the given shape. Amit Nov'17
+			this.idsOfMunicipalityForSpatialRefinement.stream().forEach(e->spatialRefinementZoneIds.put(e, new ArrayList<>()));
+			readShape();
 		} else {
 			LOG.info("A shape file and/or and the attribute that contains the keys has not ben provided.");
 		}
@@ -298,14 +314,19 @@ public class DemandGeneratorCensus {
 				if ((boolean) person.getAttributes().getAttribute("employed")) {
 					String locationOfWork = (String) person.getAttributes().getAttribute("locationOfWork");
 					if (locationOfWork.equals("-99")) {
-						throw new RuntimeException("This combination of attribute values is implaubible.");
+						throw new RuntimeException("This combination of attribute values is implausible.");
 					} else {
-						if (locationOfWork.length() == 6) { // An LOR, i.e. a location inside Berlin // TODO generalize
-							person.getAttributes().putAttribute("locationOfWork", getSpatiallyRefinedZone());
+						if (locationOfWork.length() == 6) { // An LOR, i.e. a location inside Berlin
+//							person.getAttributes().putAttribute("locationOfWork", getSpatiallyRefinedZone());
+							// should not happen anymore.
+							throw new RuntimeException("The location of work must be a municipality id and not a lower level zone id (e.g., PLZ/LOR).");
 						} else if (locationOfWork.length() == 8) { // An "Amtliche Gemeindeschlüssel (AGS)", i.e. a location outside Berlin
 							// Do nothing; leave it as it is
+							// getting lor/plz zone id here. Amit Nov'17
+							person.getAttributes().putAttribute("locationOfWork", getLocation(locationOfWork));
 						} else {
-							throw new RuntimeException("The identifier of the work location cannot have a length other than 6 or 8.");
+//							throw new RuntimeException("The identifier of the work location cannot have a length other than 6 or 8.");
+							throw new RuntimeException("The identifier of the work location cannot have a length other than 8.");
 						}
 					}
 				}
@@ -313,12 +334,13 @@ public class DemandGeneratorCensus {
 				if ((boolean) person.getAttributes().getAttribute("student")) {
 					String locationOfSchool = (String) person.getAttributes().getAttribute("locationOfSchool");
 					if (locationOfSchool.equals("-99")) {
-						throw new RuntimeException("This combination of attribute values is implaubible.");
+						throw new RuntimeException("This combination of attribute values is implausible.");
 					} else {
-						if (locationOfSchool.length() == 6) { // An LOR, i.e. a location inside Berlin // TODO generalize
-							person.getAttributes().putAttribute("locationOfSchool", getSpatiallyRefinedZone());
+						if (locationOfSchool.length() == 6) { // An LOR, i.e. a location inside Berlin
+//							person.getAttributes().putAttribute("locationOfSchool", getSpatiallyRefinedZone());
 						} else if (locationOfSchool.length() == 8) { // An "Amtliche Gemeindeschlüssel (AGS)", i.e. a location outside Berlin
 							// Do nothing; leave it as it is
+							person.getAttributes().putAttribute("locationOfSchool", getLocation(locationOfSchool));
 						} else {
 							throw new RuntimeException("The identifier of the work location cannot have a length other than 6 or 8.");
 						}
@@ -343,7 +365,8 @@ public class DemandGeneratorCensus {
 			HouseholdImpl household = new HouseholdImpl(householdId); // TODO Or use factory?
 			household.getAttributes().putAttribute("numberOfAdults", 1); // Always 1; no household structure
 			household.getAttributes().putAttribute("totalNumberOfHouseholdVehicles", 1);
-			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId));
+//			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId));
+			household.getAttributes().putAttribute("homeTSZLocation", municipalityId);
 			household.getAttributes().putAttribute("numberOfChildren", 0); // None, ignore them in this version
 			household.getAttributes().putAttribute("householdStructure", 1); // 1 = single, no children
 			
@@ -371,7 +394,7 @@ public class DemandGeneratorCensus {
 					person.getAttributes().putAttribute("locationOfWork", "-99");
 					person.getAttributes().putAttribute("employed", false);
 				} else {
-					String locationOfWork = getRandomWorkLocation(commuterRelationList);
+					String locationOfWork = getRandomWorkLocation(commuterRelationList);// municipality id
 					if (locationOfWork.length() == 8 && ! this.idsOfFederalStatesIncluded.contains(locationOfWork.substring(0,2))) { // TODO external commuter are currently treated as non workers
 						counterExternalCommuters++;
 						person.getAttributes().putAttribute("locationOfWork", "-99");
@@ -386,7 +409,8 @@ public class DemandGeneratorCensus {
 
 			if (student) {
 				// TODO quite simple assumption, which may be improved later
-				person.getAttributes().putAttribute("locationOfSchool", getLocation(municipalityId));
+//				person.getAttributes().putAttribute("locationOfSchool", getLocation(municipalityId));
+				person.getAttributes().putAttribute("locationOfSchool", municipalityId);
 			} else {
 				person.getAttributes().putAttribute("locationOfSchool", "-99");
 			}
@@ -456,8 +480,8 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private static List<String> createRelationList(Map<String, CommuterRelationV2> relationsFromMunicipality, String gender) {
-		List<String> commuterRealtionsList = new ArrayList<>();
+	private static List<String>  createRelationList(Map<String, CommuterRelationV2> relationsFromMunicipality, String gender) {
+		List<String> commuterRelationsList = new ArrayList<>();
 		for (String destination : relationsFromMunicipality.keySet()) {
 			int trips;
 			switch (gender) {
@@ -471,26 +495,28 @@ public class DemandGeneratorCensus {
 					throw new IllegalArgumentException("Must either be male or female.");
 			}
 			for (int i = 0; i < trips ; i++) {
-				commuterRealtionsList.add(destination);
+				commuterRelationsList.add(destination);
 			}
 		}
-		return commuterRealtionsList;
+		return commuterRelationsList;
 	}
 
 
-	private String getRandomWorkLocation(List<String> commuterRelationList) {
+	private static String getRandomWorkLocation(List<String> commuterRelationList) {
 		Random random = new Random();
 		int position = random.nextInt(commuterRelationList.size());
 		String workMunicipalityId = commuterRelationList.get(position);
 		commuterRelationList.remove(position);
-		return getLocation(workMunicipalityId);
+//		return getLocation(workMunicipalityId);
+		return workMunicipalityId;
 	}
 
 
 	private String getLocation(String municipalityId) {
 		String locationId;
-		if (municipalityId.equals(this.idOfMunicipailityForSpatialRefinement)){
-			locationId = getSpatiallyRefinedZone();
+		if ( this.idsOfMunicipalityForSpatialRefinement !=null
+				&& this.idsOfMunicipalityForSpatialRefinement.contains(municipalityId)) {
+			locationId = getSpatiallyRefinedZone(municipalityId);
 		} else {
 			locationId = municipalityId;
 		}
@@ -498,9 +524,9 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private String getSpatiallyRefinedZone() {
+	private String getSpatiallyRefinedZone(String municipalityId) {
 		Random random = new Random();
-		return this.spatialRefinementZoneIds.get(random.nextInt(this.spatialRefinementZoneIds.size()));
+		return this.spatialRefinementZoneIds.get(municipalityId).get(random.nextInt(this.spatialRefinementZoneIds.size()));
 	}
 
 
@@ -514,19 +540,21 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private static List<String> readShape(String shapeFile, String attributeKey) {
-		List<String> lors = new ArrayList<>();
-		Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
+	private Map<String,List<String>> readShape() {
+		Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(this.shapeFileForSpatialRefinement);
 
 		for (SimpleFeature feature : features) {
-			String key = (String) feature.getAttribute(attributeKey);
-			lors.add(key);
+			String municipality;
+			if (this.municipalityFeatureKeyInShapeFile ==null) municipality = this.idsOfMunicipalityForSpatialRefinement.get(0); // checked already that size must be 1 (e.g., Berlin). Amit Nov'17
+			else municipality = (String) feature.getAttribute(this.municipalityFeatureKeyInShapeFile);
+			String key = (String) feature.getAttribute(this.featureKeyInShapeFileForRefinement); //attributeKey --> SCHLUESSEL
+			spatialRefinementZoneIds.get(municipality).add(key);
 		}
-		return lors;
+		return spatialRefinementZoneIds;
 	}
 	
 	
-	private static void writeHouseholdsFile(Map<Id<Household>, Household> households, String fileName) {
+	private void writeHouseholdsFile(Map<Id<Household>, Household> households, String fileName) {
 		BufferedWriter bufferedWriterHouseholds = null;
 		
 		try {
@@ -538,7 +566,7 @@ public class DemandGeneratorCensus {
     			int householdId = Integer.parseInt(household.getId().toString());
     			int numberOfAdults = (Integer) household.getAttributes().getAttribute("numberOfAdults");
     			int totalNumberOfHouseholdVehicles = (Integer) household.getAttributes().getAttribute("totalNumberOfHouseholdVehicles");
-    			int homeTSZLocation = Integer.parseInt(household.getAttributes().getAttribute("homeTSZLocation").toString());
+				int homeTSZLocation = Integer.valueOf( getLocation(  household.getAttributes().getAttribute("homeTSZLocation").toString() ) );
     			int numberOfChildren = (Integer) household.getAttributes().getAttribute("numberOfChildren");
     			int householdStructure = (Integer) household.getAttributes().getAttribute("householdStructure");
 
@@ -660,17 +688,20 @@ public class DemandGeneratorCensus {
     }
     
     
-    public void setIdOfMunicipailityForSpatialRefinement(String idOfMunicipailityForSpatialRefinement) {
-    	this.idOfMunicipailityForSpatialRefinement = idOfMunicipailityForSpatialRefinement;
+    public void setIdsOfMunicipalityForSpatialRefinement(List<String> idsOfMunicipalityForSpatialRefinement) {
+    	this.idsOfMunicipalityForSpatialRefinement = idsOfMunicipalityForSpatialRefinement;
     }
     
     
-    public void setFeatureKeyInShapeFile(String featureKeyInShapeFile) {
-    	this.featureKeyInShapeFile = featureKeyInShapeFile;
+    public void setFeatureKeyInShapeFileForRefinement(String featureKeyInShapeFileForRefinement) {
+    	this.featureKeyInShapeFileForRefinement = featureKeyInShapeFileForRefinement;
     }
-    
-    
-    public void setWriteMatsimPlanFiles(boolean writeMatsimPlanFiles) {
+
+	public void setMunicipalityFeatureKeyInShapeFile(String municipalityFeatureKeyInShapeFile) {
+		this.municipalityFeatureKeyInShapeFile = municipalityFeatureKeyInShapeFile;
+	}
+
+	public void setWriteMatsimPlanFiles(boolean writeMatsimPlanFiles) {
     	this.writeMatsimPlanFiles = writeMatsimPlanFiles;
     }
     
