@@ -82,15 +82,19 @@ public class CemdapStops2MatsimPlansConverter {
 			combiningGeoms = Boolean.valueOf(args[10]);
 			assignCoordinatesToActivities = Boolean.valueOf(args[11]);
 		}
+
+		Map<String, String> shapeFileToFeatureKey = new HashMap<>();
+		shapeFileToFeatureKey.put(zonalShapeFile, zoneIdTag);
 		
-		convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory, 
-				zonalShapeFile, zoneIdTag, allowVariousWorkAndEducationLocations, addStayHomePlan, 
+		convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory,
+				shapeFileToFeatureKey, allowVariousWorkAndEducationLocations, addStayHomePlan,
 				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
 	}
 
 	
 	public static void convert(String cemdapDataRoot, int numberOfFirstCemdapOutputFile, int numberOfPlans, String outputDirectory,
-			String zonalShapeFile, String zoneIdTag, boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
+			Map<String, String> shapeFileToFeatureKey, // ensures, unique shape files with same or different featureKey. Amit Nov'17
+							   boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
 			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms, boolean assignCoordinatesToActivities) throws IOException {
 
 		CorineLandCoverData corineLandCoverData = null;
@@ -111,7 +115,7 @@ public class CemdapStops2MatsimPlansConverter {
 			cemdapStopsFilesMap.put(planNumber, cemdapStopsFile);
 		}
 	
-		// Create ObjectAttrubutes for each agent and each plan
+		// Create ObjectAttributes for each agent and each plan
 		Map<Integer, ObjectAttributes> personZoneAttributesMap = new HashMap<>();
 		for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
 			ObjectAttributes personZoneAttributes = new ObjectAttributes();
@@ -122,11 +126,14 @@ public class CemdapStops2MatsimPlansConverter {
 		
 		// Write all (geographic) features of planning area to a map
 		Map<String,SimpleFeature> zones = new HashMap<>();
-		for (SimpleFeature feature: ShapeFileReader.getAllFeatures(zonalShapeFile)) {
-			String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(zoneIdTag));
-			// TODO check if removal of leading zero is always valid
-			// It was necessary since code may interpret number incorrectly if leading zero present; dz, jul'17
-			zones.put(shapeId,feature);
+		for (Map.Entry<String, String> entry : shapeFileToFeatureKey.entrySet()) {
+			for (SimpleFeature feature : ShapeFileReader.getAllFeatures(entry.getKey())) {
+				String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(entry.getValue()));
+				// TODO check if removal of leading zero is always valid
+				// It was necessary since code may interpret number incorrectly if leading zero present; dz, jul'17
+				// Can this lead to duplicate keys?? Amit Nov'17
+				zones.put(shapeId, feature);
+			}
 		}
 		
 		// Get all persons from activity file
