@@ -24,13 +24,27 @@ public class WeirdPlanAnalysisTest {
 				
 		analysis.analyze(utils.getInputDirectory() + "plans1.xml");
 		Assert.assertEquals("Wrong number of weird plans. ", 0, analysis.getWeirdPlans(), MatsimTestUtils.EPSILON);
+	}	
+	
+	@Ignore
+	@Test
+	public void test2() throws IOException {
+			
+		WeirdPlanAnalysis analysis = new WeirdPlanAnalysis();
 		
 		analysis.analyze(utils.getInputDirectory() + "plans2.xml");
 		Assert.assertEquals("Wrong number of weird plans. ", 1, analysis.getWeirdPlans(), MatsimTestUtils.EPSILON);
+	}
+	
+	@Ignore
+	@Test
+	public void test3() throws IOException {
+			
+		WeirdPlanAnalysis analysis = new WeirdPlanAnalysis();
 		
 		analysis.analyze(utils.getInputDirectory() + "plans3.xml");
 		Assert.assertEquals("Wrong number of weird plans. ", 1, analysis.getWeirdPlans(), MatsimTestUtils.EPSILON);
-		
 	}
+	
 	
 }
