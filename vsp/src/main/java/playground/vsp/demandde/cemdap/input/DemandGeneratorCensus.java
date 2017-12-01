@@ -19,10 +19,14 @@
 package playground.vsp.demandde.cemdap.input;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
@@ -32,6 +36,7 @@ import org.matsim.core.api.internal.MatsimWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.households.Household;
 import org.matsim.households.HouseholdImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
@@ -299,8 +304,8 @@ public class DemandGeneratorCensus {
 		LOG.warn("Total number of students: " + this.allStudents);
 		
 		// Write output files
-		writeHouseholdsFile(this.households, this.outputBase + "households.dat");
-		writePersonsFile(this.population, this.outputBase + "persons.dat");
+		writeHouseholdsFile(this.households, this.outputBase + "households.dat.gz");
+		writePersonsFile(this.population, this.outputBase + "persons.dat.gz");
 		if (this.writeMatsimPlanFiles) {
 			writeMatsimPlansFile(this.population, this.outputBase + "plans.xml.gz");
 		}
@@ -348,7 +353,7 @@ public class DemandGeneratorCensus {
 				}
 				population2.addPerson(person);
 			}
-			writePersonsFile(population2, this.outputBase + "persons" + (i+1) + ".dat");
+			writePersonsFile(population2, this.outputBase + "persons" + (i+1) + ".dat.gz");
 			if (this.writeMatsimPlanFiles) {
 				writeMatsimPlansFile(population2, this.outputBase + "plans" + (i+1) + ".xml.gz");
 			}
@@ -556,11 +561,12 @@ public class DemandGeneratorCensus {
 	
 	private void writeHouseholdsFile(Map<Id<Household>, Household> households, String fileName) {
 		BufferedWriter bufferedWriterHouseholds = null;
-		
+
 		try {
-            File householdsFile = new File(fileName);
-    		FileWriter fileWriterHouseholds = new FileWriter(householdsFile);
-    		bufferedWriterHouseholds = new BufferedWriter(fileWriterHouseholds);
+//            File householdsFile = new File(fileName);
+//    		FileWriter fileWriterHouseholds = new FileWriter(householdsFile);
+//    		bufferedWriterHouseholds = new BufferedWriter(fileWriterHouseholds);
+			bufferedWriterHouseholds = IOUtils.getBufferedWriter(fileName);
     		
     		for (Household household : households.values()) {
     			int householdId = Integer.parseInt(household.getId().toString());
@@ -599,11 +605,12 @@ public class DemandGeneratorCensus {
 	
 	private static void writePersonsFile(Population population, String fileName) {
 		BufferedWriter bufferedWriterPersons = null;
-		
+
 		try {
-			File personFile = new File(fileName);
-			FileWriter fileWriterPersons = new FileWriter(personFile);
-			bufferedWriterPersons = new BufferedWriter(fileWriterPersons);
+//			File personFile = new File(fileName);
+//			FileWriter fileWriterPersons = new FileWriter(personFile);
+//			bufferedWriterPersons = new BufferedWriter(fileWriterPersons);
+			bufferedWriterPersons = IOUtils.getBufferedWriter(fileName);
 			    		    		
 			for (Person person : population.getPersons().values()) {
 				int householdId = Integer.parseInt(person.getAttributes().getAttribute("householdId").toString());
