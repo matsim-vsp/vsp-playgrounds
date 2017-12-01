@@ -77,11 +77,11 @@
 		<param name="Module_2" value="ReRoute" />
 	</module>
 
-	<!-- <module name="transit">
+	<module name="transit">
 		<param name="useTransit" value="true" />
 		<param name="transitScheduleFile" value="transitschedule.xml" />
 		<param name="vehiclesFile" value="transitVehicles.xml" />
 		<param name="transitModes" value="pt" />
-	</module> -->
+	</module>
 
 </config>
