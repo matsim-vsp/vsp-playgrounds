@@ -515,18 +515,18 @@ public class SingleCrossingScenario2 {
         	
         	if (!useLanes) {
             	signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId(), Signal.class));
-            }
-            else {
+            	signal.setLinkId(inLink.getId());
+            	signalSystem1.addSignalData(signal);
+        }
+        else {
                 for (Lane lane : scenario.getLanes().getLanesToLinkAssignments().get(inLink.getId()).getLanes().values()) {
                     if(lane.getToLinkIds() != null && !lane.getToLinkIds().isEmpty()) {
                     	signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId() + "_" +lane.getId(), Signal.class));
                     	signal.addLaneId(lane.getId());
                     	signal.setLinkId(inLink.getId());
+                    	signalSystem1.addSignalData(signal);
                     }
                 }
-            }
-            if (signal != null) {
-            	signalSystem1.addSignalData(signal);
             }
         }
         
@@ -540,6 +540,8 @@ public class SingleCrossingScenario2 {
         	  signalGroup.addSignalId(s);
         	  signalGroups.addSignalGroupData(signalGroup);
           }
+          // TODO tt: this would do the same:
+//          SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem1);
         	
 //        SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
 //        signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));

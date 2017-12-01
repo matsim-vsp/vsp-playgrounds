@@ -50,7 +50,7 @@ import playground.agarwalamit.analysis.spatial.SpatialDataInputs;
 import playground.agarwalamit.analysis.spatial.SpatialDataInputs.LinkWeightMethod;
 import playground.agarwalamit.analysis.spatial.SpatialInterpolation;
 import playground.agarwalamit.analysis.userBenefits.MyUserBenefitsAnalyzer;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.monetaryTransferPayments.MonetaryPaymentsAnalyzer;
 import playground.vsp.analysis.modules.userBenefits.WelfareMeasure;

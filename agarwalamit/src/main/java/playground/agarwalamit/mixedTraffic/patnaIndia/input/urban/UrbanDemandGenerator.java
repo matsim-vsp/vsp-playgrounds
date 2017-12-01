@@ -48,7 +48,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.urban.scenarioSetup.PatnaCalibrationUtils.PatnaDemandLabels;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils.PatnaUrbanActivityTypes;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 /**
  * The number of trips from trip diaries are 2% (not 1%).
  * @author amit

@@ -47,7 +47,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import com.vividsolutions.jts.geom.Geometry;
 
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.CongestionEventHandler;
 

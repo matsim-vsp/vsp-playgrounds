@@ -96,7 +96,7 @@ public class TtRunCottbusSimulation {
 
 	private static final Logger LOG = Logger.getLogger(TtRunCottbusSimulation.class);
 	
-	private final static String RUN_ID = "1111";
+	private final static String RUN_ID = "1000";
 	
 	private final static NetworkType NETWORK_TYPE = NetworkType.V1;
 	public enum NetworkType {
@@ -107,7 +107,7 @@ public class TtRunCottbusSimulation {
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -117,7 +117,7 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap1 // without mines. iterated for 100it with capacity 1.0
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER;
+	private final static SignalType SIGNAL_TYPE = SignalType.NONE;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -140,13 +140,13 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/laemmer/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/routerTest/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
-	private static final boolean WRITE_INITIAL_FILES = true;
+	private static final boolean WRITE_INITIAL_FILES = false;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = 1.;
+	private static final double SCALING_FACTOR = 0.7;
 	
 	public static void main(String[] args) {		
 		Config config = defineConfig();
@@ -348,8 +348,9 @@ public class TtRunCottbusSimulation {
 				strat.setWeight(0.0); // no ReRoute, fix route choice set
 			else
 				strat.setWeight(0.1);
-			strat.setDisableAfter(config.controler().getLastIteration() - config.controler().getFirstIteration() > 200 ? 
-					config.controler().getLastIteration() - 100 : config.controler().getLastIteration() - 50);
+			// TODO
+//			strat.setDisableAfter(config.controler().getLastIteration() - config.controler().getFirstIteration() > 200 ? 
+//					config.controler().getLastIteration() - 100 : config.controler().getLastIteration() - 50);
 			config.strategy().addStrategySettings(strat);
 		}
 		{

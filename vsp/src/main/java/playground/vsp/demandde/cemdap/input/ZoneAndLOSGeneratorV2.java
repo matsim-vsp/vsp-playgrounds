@@ -31,14 +31,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Geometry;
-
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
 
 /**
@@ -62,6 +59,9 @@ public class ZoneAndLOSGeneratorV2 {
 	private double durantionDistancePeakRatio_min_mile = 1.9; // based on computations in sample dataset; equals ca. 50km/h
 	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
 
+	// spatial refinement. Amit Nov'17
+	private List<String> municipalityIDsForSpatialRefinement;
+	private double defaultIntraZoneDistanceForSpatialRefinement;
 	
 	public static void main(String[] args) {
 //		// Input and output
@@ -169,7 +169,7 @@ public class ZoneAndLOSGeneratorV2 {
 				double temp = 0.;
 				
 				if (originId.equals(destinationId)) { // internal traffic inside zone
-					distance_mi = defaultIntraZoneDistance * beelineDistanceFactor;
+					distance_mi = getIntraZonalDistance(originId) * beelineDistanceFactor;
 					adjacent = 0;
 				} else {
 					Geometry originGeometry = this.zoneMap.get(originId);
@@ -378,13 +378,33 @@ public class ZoneAndLOSGeneratorV2 {
         }
 		System.out.println("LOSPeakAM file written.");
 	}
-	
-	
+
+	private double getIntraZonalDistance(String municipalityId){
+		if (this.municipalityIDsForSpatialRefinement!=null && this.municipalityIDsForSpatialRefinement.contains(municipalityId)) {
+			return this.defaultIntraZoneDistanceForSpatialRefinement;
+		} else {
+			return this.defaultIntraZoneDistance;
+		}
+	}
+
+	/**
+	 * @param defaultIntraZoneDistance will be used for all intra zonal trips. A zone could be Municipality of LOR (for berlin) or Bezirke (PLZ).
+	 */
 	public void setDefaultIntraZoneDistance(double defaultIntraZoneDistance) {
     	this.defaultIntraZoneDistance = defaultIntraZoneDistance;
     }
-	
-	
+
+	/**
+	 * @param defaultIntraZoneDistanceForSpatialRefinement default intra zonal distance for given list of Municipalities.
+	 */
+	public void setDefaultIntraZoneDistanceForSpatialRefinement(double defaultIntraZoneDistanceForSpatialRefinement) {
+		this.defaultIntraZoneDistanceForSpatialRefinement = defaultIntraZoneDistanceForSpatialRefinement;
+	}
+
+	public void setMunicipalityIDsForSpatialRefinement(List<String> municipalityIDsForSpatialRefinement) {
+		this.municipalityIDsForSpatialRefinement = municipalityIDsForSpatialRefinement;
+	}
+
 	public void setBeelineDistanceFactor(double beelineDistanceFactor) {
     	this.beelineDistanceFactor = beelineDistanceFactor;
     }
