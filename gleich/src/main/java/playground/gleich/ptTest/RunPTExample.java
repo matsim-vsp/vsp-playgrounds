@@ -47,7 +47,7 @@ import com.google.inject.Provider;
 
 
 /**
- * @author  jbischoff
+ * @author  gleich
  *
  */
 /**
