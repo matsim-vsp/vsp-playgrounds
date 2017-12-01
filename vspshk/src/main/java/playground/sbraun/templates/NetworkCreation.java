@@ -59,7 +59,8 @@ public class NetworkCreation {
 		Link l6 = netfac.createLink(Id.createLinkId("2_1"),n2,n1);		
 		setattribut(l6,NORMAL,DIST,TRAVTIME);
 		net.addLink(l6);
-	
+
+		
 		new NetworkWriter(net).write("C:/Users/braun/Desktop/Test/input/inputsimple_triangle_network.xml");
 	}
 	
