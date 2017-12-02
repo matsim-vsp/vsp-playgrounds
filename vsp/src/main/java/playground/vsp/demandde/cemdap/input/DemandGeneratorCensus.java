@@ -156,12 +156,6 @@ public class DemandGeneratorCensus {
 
 	
 	public void generateDemand() {
-		//some checks and initialization
-		if ( this.shapeFileForSpatialRefinement!=null && this.municipalityFeatureKeyInShapeFile ==null && this.idsOfMunicipalityForSpatialRefinement.size()>1 ) {
-			throw new RuntimeException("A shape file for spatial refinement is provided and number of Municipality IDs for spatial refinement is more than 1." +
-					"However, no feature Key is provided to differentiate the Municipalities.");
-		}
-
 		if (this.shapeFileForSpatialRefinement != null && this.featureKeyInShapeFileForRefinement != null ) {
 //			this.spatialRefinementZoneIds = readShape();
 			//initialize with given municipality ids
@@ -172,7 +166,13 @@ public class DemandGeneratorCensus {
 		} else {
 			LOG.info("A shape file and/or and the attribute that contains the keys has not ben provided.");
 		}
-				
+
+		//some checks and initialization
+		if ( this.shapeFileForSpatialRefinement!=null && this.municipalityFeatureKeyInShapeFile ==null && this.idsOfMunicipalityForSpatialRefinement.size()>1 ) {
+			throw new RuntimeException("A shape file for spatial refinement is provided and number of Municipality IDs for spatial refinement is more than 1." +
+					"However, no feature Key is provided to differentiate the Municipalities.");
+		}
+
 		int counter = 1;
 		
 		for (String munId : relationsMap.keySet()) { // Loop over municipalities from commuter file
@@ -531,7 +531,8 @@ public class DemandGeneratorCensus {
 
 	private String getSpatiallyRefinedZone(String municipalityId) {
 		Random random = new Random();
-		return this.spatialRefinementZoneIds.get(municipalityId).get(random.nextInt(this.spatialRefinementZoneIds.size()));
+		List<String> spatiallyRefinedZones = this.spatialRefinementZoneIds.get(municipalityId);
+		return spatiallyRefinedZones.get(random.nextInt(spatiallyRefinedZones.size()));
 	}
 
 
