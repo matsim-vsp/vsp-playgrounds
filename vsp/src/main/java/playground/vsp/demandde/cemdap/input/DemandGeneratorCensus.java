@@ -30,10 +30,12 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.api.internal.MatsimWriter;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
@@ -292,8 +294,8 @@ public class DemandGeneratorCensus {
 						" remain unassigned; based on census, there are " + employeesFemale + " female employees.");
 			}
 		}
-		
-		
+
+
 		// Write some relevant information on console
 		LOG.warn("There are " + this.counterMissingComRel + " employees who have been set to unemployed since no commuter relation could be assigned to them.");
 		LOG.warn("Share of employees that had to be set to unemployed due to lack of commuter relations: " + ((double) this.counterMissingComRel / (double) this.allEmployees));
@@ -304,60 +306,69 @@ public class DemandGeneratorCensus {
 		LOG.warn("Total number of students: " + this.allStudents);
 		
 		// Write output files
+		// to make sure that 'this.population' always have municipality IDs corresponding to location of work and location of school. Amit Dec'17
+		Population clonedPop = clonePopulation(this.population);
 		writeHouseholdsFile(this.households, this.outputBase + "households.dat.gz");
-		writePersonsFile(this.population, this.outputBase + "persons.dat.gz");
+		writePersonsFile(clonedPop, this.outputBase + "persons.dat.gz");
 		if (this.writeMatsimPlanFiles) {
-			writeMatsimPlansFile(this.population, this.outputBase + "plans.xml.gz");
+			writeMatsimPlansFile(clonedPop, this.outputBase + "plans.xml.gz");
 		}
 
 		// Create copies of population, but with different work locations
 		for (int i = 1; i < numberOfPlansPerPerson; i++) { // "less than" because the plan consists already in the original
-			Population population2 = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
-
-			for (Person person : this.population.getPersons().values()) {
-				// Choose new location of work, if applicable
-				if ((boolean) person.getAttributes().getAttribute("employed")) {
-					String locationOfWork = (String) person.getAttributes().getAttribute("locationOfWork");
-					if (locationOfWork.equals("-99")) {
-						throw new RuntimeException("This combination of attribute values is implausible.");
-					} else {
-						if (locationOfWork.length() == 6) { // An LOR, i.e. a location inside Berlin
-//							person.getAttributes().putAttribute("locationOfWork", getSpatiallyRefinedZone());
-							// should not happen anymore.
-							throw new RuntimeException("The location of work must be a municipality id and not a lower level zone id (e.g., PLZ/LOR).");
-						} else if (locationOfWork.length() == 8) { // An "Amtliche Gemeindeschlüssel (AGS)", i.e. a location outside Berlin
-							// Do nothing; leave it as it is
-							// getting lor/plz zone id here. Amit Nov'17
-							person.getAttributes().putAttribute("locationOfWork", getLocation(locationOfWork));
-						} else {
-//							throw new RuntimeException("The identifier of the work location cannot have a length other than 6 or 8.");
-							throw new RuntimeException("The identifier of the work location cannot have a length other than 8.");
-						}
-					}
-				}
-				// Choose new location of school, if applicable
-				if ((boolean) person.getAttributes().getAttribute("student")) {
-					String locationOfSchool = (String) person.getAttributes().getAttribute("locationOfSchool");
-					if (locationOfSchool.equals("-99")) {
-						throw new RuntimeException("This combination of attribute values is implausible.");
-					} else {
-						if (locationOfSchool.length() == 6) { // An LOR, i.e. a location inside Berlin
-//							person.getAttributes().putAttribute("locationOfSchool", getSpatiallyRefinedZone());
-						} else if (locationOfSchool.length() == 8) { // An "Amtliche Gemeindeschlüssel (AGS)", i.e. a location outside Berlin
-							// Do nothing; leave it as it is
-							person.getAttributes().putAttribute("locationOfSchool", getLocation(locationOfSchool));
-						} else {
-							throw new RuntimeException("The identifier of the work location cannot have a length other than 6 or 8.");
-						}
-					}					
-				}
-				population2.addPerson(person);
-			}
-			writePersonsFile(population2, this.outputBase + "persons" + (i+1) + ".dat.gz");
+			Population clonedPopulation = clonePopulation(this.population);
+			writePersonsFile(clonedPopulation, this.outputBase + "persons" + (i+1) + ".dat.gz");
 			if (this.writeMatsimPlanFiles) {
-				writeMatsimPlansFile(population2, this.outputBase + "plans" + (i+1) + ".xml.gz");
+				writeMatsimPlansFile(clonedPopulation, this.outputBase + "plans" + (i+1) + ".xml.gz");
 			}
 		}
+	}
+
+	/**
+	 * Cloning all plans of each person in given population. Also copying all person attributes.
+	 * @param inputPopulation
+	 * @return
+	 */
+	private Population clonePopulation(Population inputPopulation){
+		Population clonedPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+		for (Person person : inputPopulation.getPersons().values()) {
+			Person clonedPerson = clonedPopulation.getFactory().createPerson(person.getId());
+			// copy plans
+			for (Plan plan : person.getPlans()) { // though only one plan exists, iterating for all plans
+				Plan clonedPlan = clonedPopulation.getFactory().createPlan();
+				PopulationUtils.copyFromTo(person.getSelectedPlan(), clonedPerson.getSelectedPlan());
+				clonedPerson.addPlan(clonedPlan);
+			}
+			// copy attributes
+			for(CEMDAPPersonAttributes attributeKey : CEMDAPPersonAttributes.values()){
+				clonedPerson.getAttributes().putAttribute(attributeKey.toString(), person.getAttributes().getAttribute(attributeKey.toString()));
+			}
+			// change locations or use spatially refined location
+
+			if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString())) {
+				String locationOfWork = (String) person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString());
+				if (locationOfWork.length()==8) {
+					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), getLocation(locationOfWork));
+				} else if (locationOfWork.equals("-99")) {
+					throw new RuntimeException("This combination of attribute values is implausible.");
+				} else {
+					throw new RuntimeException("The identifier of the work location ("+locationOfWork+") cannot have a length other than 8.");
+				}
+			}
+
+			if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString())) {
+				String locationOfSchool = (String) person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString());
+				if (locationOfSchool.length()==8) {
+					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), getLocation(locationOfSchool));
+				} else if (locationOfSchool.equals("-99")) {
+					throw new RuntimeException("This combination of attribute values is implausible.");
+				} else {
+					throw new RuntimeException("The identifier of the work location ("+locationOfSchool+") cannot have a length other than 8.");
+				}
+			}
+			clonedPopulation.addPerson(clonedPerson);
+		}
+		return clonedPopulation;
 	}
 
 
@@ -370,60 +381,61 @@ public class DemandGeneratorCensus {
 			HouseholdImpl household = new HouseholdImpl(householdId); // TODO Or use factory?
 			household.getAttributes().putAttribute("numberOfAdults", 1); // Always 1; no household structure
 			household.getAttributes().putAttribute("totalNumberOfHouseholdVehicles", 1);
-//			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId));
-			household.getAttributes().putAttribute("homeTSZLocation", municipalityId);
+			// using spatially refined location directly for home locations. Amit Dec'17
+			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId));
 			household.getAttributes().putAttribute("numberOfChildren", 0); // None, ignore them in this version
 			household.getAttributes().putAttribute("householdStructure", 1); // 1 = single, no children
 			
 			Id<Person> personId = Id.create(householdId + "01", Person.class);
 			Person person = this.population.getFactory().createPerson(personId);
 			// The following attribute names inspired by "PersonUtils.java": "sex", "hasLicense", "carAvail", "employed", "age", "travelcards"
-			person.getAttributes().putAttribute("householdId", householdId);
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.householdId.toString(), householdId.toString()); // toString() will enable writing it to person attributes
 			boolean employed = false;
 			if (lowerAgeBound < 65 && upperAgeBound > 17) { // younger and older people are never employed
 				employed = getEmployed(adultsToEmployeesRatio);
 			}
-			person.getAttributes().putAttribute("employed", employed);
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), employed);
 			
 			boolean student = false;
 			if (lowerAgeBound < 30 && upperAgeBound > 17 && !employed) { // younger and older people are never student; employed people neither
 				student = true; // TODO quite simple assumption, which may be improved later
 				allStudents++;
 			}			
-			person.getAttributes().putAttribute("student", student);
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.student.toString(), student);
 			
 			if (employed) {
 				allEmployees++;
 				if (commuterRelationList.size() == 0) { // No relations left in list, which employee could choose from
 					counterMissingComRel++;
-					person.getAttributes().putAttribute("locationOfWork", "-99");
-					person.getAttributes().putAttribute("employed", false);
+					person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
+					person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), false);
 				} else {
 					String locationOfWork = getRandomWorkLocation(commuterRelationList);// municipality id
 					if (locationOfWork.length() == 8 && ! this.idsOfFederalStatesIncluded.contains(locationOfWork.substring(0,2))) { // TODO external commuter are currently treated as non workers
 						counterExternalCommuters++;
-						person.getAttributes().putAttribute("locationOfWork", "-99");
-						person.getAttributes().putAttribute("employed", false);
+						person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
+						person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), false);
 					} else {
-						person.getAttributes().putAttribute("locationOfWork", locationOfWork);
+						// using municipality id in person attributes and loaction is refined spatially afterwards. Amit Dec'17
+						person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), locationOfWork);
 					}
 				}
 			} else {
-				person.getAttributes().putAttribute("locationOfWork", "-99");
+				person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
 			}
 
 			if (student) {
 				// TODO quite simple assumption, which may be improved later
-//				person.getAttributes().putAttribute("locationOfSchool", getLocation(municipalityId));
-				person.getAttributes().putAttribute("locationOfSchool", municipalityId);
+				// using municipality id in person attributes and loaction is refined spatially afterwards. Amit Dec'17
+				person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), municipalityId);
 			} else {
-				person.getAttributes().putAttribute("locationOfSchool", "-99");
+				person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), "-99");
 			}
 			
-			person.getAttributes().putAttribute("hasLicense", true); // for CEMDAP's "driversLicence" variable
-			person.getAttributes().putAttribute("gender", gender); // for CEMDAP's "female" variable
-			person.getAttributes().putAttribute("age", getAgeInBounds(lowerAgeBound, upperAgeBound));
-			person.getAttributes().putAttribute("parent", false);
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.hasLicense.toString(), true); // for CEMDAP's "driversLicence" variable
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.gender.toString(), gender); // for CEMDAP's "female" variable
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.age.toString(), getAgeInBounds(lowerAgeBound, upperAgeBound));
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.parent.toString(), false);
 			
 			this.population.addPerson(person);
 			
@@ -506,13 +518,16 @@ public class DemandGeneratorCensus {
 		return commuterRelationsList;
 	}
 
-
+	/**
+	 * Spatial refinement is not considered here.
+	 * @param commuterRelationList
+	 * @return
+	 */
 	private static String getRandomWorkLocation(List<String> commuterRelationList) {
 		Random random = new Random();
 		int position = random.nextInt(commuterRelationList.size());
 		String workMunicipalityId = commuterRelationList.get(position);
 		commuterRelationList.remove(position);
-//		return getLocation(workMunicipalityId);
 		return workMunicipalityId;
 	}
 
@@ -573,7 +588,7 @@ public class DemandGeneratorCensus {
     			int householdId = Integer.parseInt(household.getId().toString());
     			int numberOfAdults = (Integer) household.getAttributes().getAttribute("numberOfAdults");
     			int totalNumberOfHouseholdVehicles = (Integer) household.getAttributes().getAttribute("totalNumberOfHouseholdVehicles");
-				int homeTSZLocation = Integer.valueOf( getLocation(  household.getAttributes().getAttribute("homeTSZLocation").toString() ) );
+				int homeTSZLocation = Integer.valueOf( household.getAttributes().getAttribute("homeTSZLocation").toString() );
     			int numberOfChildren = (Integer) household.getAttributes().getAttribute("numberOfChildren");
     			int householdStructure = (Integer) household.getAttributes().getAttribute("householdStructure");
 
@@ -614,38 +629,38 @@ public class DemandGeneratorCensus {
 			bufferedWriterPersons = IOUtils.getBufferedWriter(fileName);
 			    		    		
 			for (Person person : population.getPersons().values()) {
-				int householdId = Integer.parseInt(person.getAttributes().getAttribute("householdId").toString());
+				int householdId = Integer.parseInt(person.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()).toString());
 				int personId = Integer.parseInt(person.getId().toString());
 				
 				int employed;
-				if ((boolean) person.getAttributes().getAttribute("employed")) {
+				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString())) {
 					employed = 1;
 				} else {
 					employed = 0;
 				}
 				
 				int student;
-				if ((boolean) person.getAttributes().getAttribute("student")) {
+				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString())) {
 					student = 1;
 				} else {
 					student = 0;
 				}
 				
 				int driversLicence;
-				if ((boolean) person.getAttributes().getAttribute("hasLicense")) {
+				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.hasLicense.toString())) {
 					driversLicence = 1;
 				} else {
 					driversLicence = 0;
 				}
 				
-				int locationOfWork = Integer.parseInt(person.getAttributes().getAttribute("locationOfWork").toString());
-				int locationOfSchool = Integer.parseInt(person.getAttributes().getAttribute("locationOfSchool").toString());
+				int locationOfWork = Integer.parseInt( person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString()).toString() );
+				int locationOfSchool = Integer.parseInt( person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString()).toString() );
 				
-				int female = (Integer) person.getAttributes().getAttribute("gender"); // assumes that female = 1
-				int age = (Integer) person.getAttributes().getAttribute("age");
+				int female = (Integer) person.getAttributes().getAttribute(CEMDAPPersonAttributes.gender.toString()); // assumes that female = 1
+				int age = (Integer) person.getAttributes().getAttribute(CEMDAPPersonAttributes.age.toString());
 				
 				int parent;
-				if ((boolean) person.getAttributes().getAttribute("parent")) {
+				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.parent.toString())) {
 					parent = 1;
 				} else {
 					parent = 0;
