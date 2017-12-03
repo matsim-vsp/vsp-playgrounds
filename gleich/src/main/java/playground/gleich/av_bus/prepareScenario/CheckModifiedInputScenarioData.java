@@ -21,16 +21,16 @@ public class CheckModifiedInputScenarioData {
 	public static void main(String[] args) {
 		Config config = ConfigUtils.createConfig();
 		config.transit().setUseTransit(true);
-		config.transit().setTransitScheduleFile(FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT_WITHOUT_BUSES_IN_STUDY_AREA);
-//		config.transit().setTransitScheduleFile(FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT);
-		config.transit().setVehiclesFile(FilePaths.PATH_TRANSIT_VEHICLES_BERLIN_100PCT);
-		config.network().setInputFile(FilePaths.PATH_NETWORK_BERLIN_100PCT);
-		config.plans().setInputFile(FilePaths.PATH_POPULATION_BERLIN_100PCT_FILTERED);
+		config.transit().setTransitScheduleFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT_WITHOUT_BUSES_IN_STUDY_AREA);
+//		config.transit().setTransitScheduleFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT);
+		config.transit().setVehiclesFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_VEHICLES_BERLIN_100PCT);
+		config.network().setInputFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT);
+		config.plans().setInputFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_POPULATION_BERLIN_100PCT_FILTERED);
 		Scenario scenario = ScenarioUtils.createScenario(config);
-		new MatsimNetworkReader(scenario.getNetwork()).readFile(FilePaths.PATH_NETWORK_BERLIN_100PCT);
-		new TransitScheduleReaderV1(scenario).readFile(FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT_WITHOUT_BUSES_IN_STUDY_AREA);
+		new MatsimNetworkReader(scenario.getNetwork()).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_NETWORK_BERLIN_100PCT);
+		new TransitScheduleReaderV1(scenario).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT_WITHOUT_BUSES_IN_STUDY_AREA);
 //		new TransitScheduleReaderV1(scenario).readFile(FilePaths.PATH_TRANSIT_SCHEDULE_BERLIN_100PCT);
-		new VehicleReaderV1(scenario.getTransitVehicles()).readFile(FilePaths.PATH_TRANSIT_VEHICLES_BERLIN_100PCT_45MPS);
+		new VehicleReaderV1(scenario.getTransitVehicles()).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_TRANSIT_VEHICLES_BERLIN_100PCT_45MPS);
 		TransitScheduleValidator.ValidationResult validationResult = TransitScheduleValidator.validateAll(scenario.getTransitSchedule(), scenario.getNetwork());
 		for(String s: validationResult.getErrors()){
 			System.out.println(s);
@@ -44,10 +44,10 @@ public class CheckModifiedInputScenarioData {
 			System.out.println(s);
 		}
 		
-		new PopulationReader(scenario).readFile(FilePaths.PATH_POPULATION_BERLIN_100PCT_FILTERED);
+		new PopulationReader(scenario).readFile(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_POPULATION_BERLIN_100PCT_FILTERED);
 		config.controler().setFirstIteration(0);
 		config.controler().setLastIteration(1);
-		config.controler().setOutputDirectory(FilePaths.PATH_OUTPUT_BERLIN_100PCT_MODIFIED_TRANSIT_SCHEDULE_TEST);
+		config.controler().setOutputDirectory(FilePaths.PATH_BASE_DIRECTORY + FilePaths.PATH_OUTPUT_BERLIN_100PCT_MODIFIED_TRANSIT_SCHEDULE_TEST);
 		config.controler().setWritePlansInterval(1);
 		config.qsim().setEndTime(50*60*60); // [geloest durch maximum speed in transit_vehicles-datei: bei Stunde 50:00:00 immer noch 492 Veh unterwegs (nur pt veh., keine Agenten), alle pt-fahrten stark verspätet, da pünktlicher start, aber niedrigere Geschwindigkeit als im Fahrplan geplant]
 		config.controler().setWriteEventsInterval(1);	
