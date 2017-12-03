@@ -60,7 +60,7 @@ public class RunPTExample {
 
 	public void run() {
 		Config config = ConfigUtils.loadConfig(
-				"intermodal-example/config_without_taxi.xml");
+				"../vspshk/src/main/resources/intermodal-example/config_without_taxi.xml");
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
