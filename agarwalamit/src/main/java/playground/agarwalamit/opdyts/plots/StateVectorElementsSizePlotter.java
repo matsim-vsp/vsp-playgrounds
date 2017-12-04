@@ -36,14 +36,12 @@ import playground.agarwalamit.utils.FileUtils;
 public class StateVectorElementsSizePlotter {
 
     public static void main(String[] args) {
-//        String inputFile = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/ITERS/it.1/1.stateVector_network modes.txt";
-//        String outputFile = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/ITERS/it.1/1.stateVector_network modes.png";
-//        String identifier = "networkModes";
-//        new StateVectorElementsSizePlotter().run(inputFile,outputFile, identifier);
-
-
         // plot the size of the state vector elements
-        String outDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_5/"+"/vectorElementSizeFiles/";
+        String runsSVN = "../../";
+        if (System.getProperty("user.name").equals("amit")) {
+            runsSVN = FileUtils.RUNS_SVN;
+        }
+        String outDir = runsSVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_5/"+"/vectorElementSizeFiles/";
         new File(outDir+"/plots_log/").mkdir();
         int firstIt = 0;
         int lastIt = 1000;

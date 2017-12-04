@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 
-def plotModalASC(parentDir, regexStr, lastItr, statsFile, numberOfRowsToPrint):
+def plotDecisionVariableParameters(parentDir, regexStr, lastItr, statsFileName, numberOfRowsToPrint):
     opdytsDir = list(range(0, 10, 1))
     for i in opdytsDir:
-        file = parentDir + '/_' + str(i) + statsFile
+        file = parentDir + '/_' + str(i) + '/' + statsFileName
         if Path(file).is_file() :
             data = pd.read_csv(file, sep="\t")
             result = data.filter(regex=regexStr)  # take columns starting with asc
@@ -36,10 +36,13 @@ def plotModalASC(parentDir, regexStr, lastItr, statsFile, numberOfRowsToPrint):
             pass
 
 
-filesDir = '/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/calibration/output/'
+# filesDir = '/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/calibration/output/'
+#
+# for i in list(range(401, 497, 1)):
+#     parentDir = filesDir + 'run' + str(i) + '/'
+#     print("plotting from dir " + parentDir)
+#     plotModalASC(parentDir, "asc", 40, '/opdyts_modalStats.txt', 50)
 
-for i in list(range(401, 497, 1)):
-    parentDir = filesDir + 'run' + str(i) + '/'
-    print("plotting from dir " + parentDir)
-    plotModalASC(parentDir, "asc", 40, '/opdyts_modalStats.txt', 50)
+filesDir = '/Users/amit/Documents/gitlab/runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize7random_30it_score/'
 
+plotDecisionVariableParameters(filesDir, 'offset', 6, 'opdyts_offsetStats.txt', 10)
