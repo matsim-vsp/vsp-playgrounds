@@ -22,8 +22,9 @@ package optimize.opdits;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import analysis.TtTotalTravelTime;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -64,15 +65,23 @@ import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import analysis.TtAnalyzedGeneralResultsWriter;
+import analysis.TtGeneralAnalysis;
+import analysis.TtListenerToBindGeneralAnalysis;
+import analysis.TtTotalTravelTime;
+import analysis.signals.TtSignalAnalysisListener;
+import analysis.signals.TtSignalAnalysisTool;
+import analysis.signals.TtSignalAnalysisWriter;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
 import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
@@ -82,174 +91,232 @@ import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
  */
 public class RunOpdytsForGreenWaves {
 
-	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream/PlanbasedSignals_stepSize10_tt/" ;
-	
+	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOpt_stepSize20random_30it_score/";
+
+	private static final boolean USE_OPDYTS = true;
+
 	public static void main(String[] args) {
-		 
+
 		Config config = createConfig();
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		createNetwork(scenario);
 		createSignals(scenario);
 		createDemand(scenario);
-		
-        OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
-        opdytsConfigGroup.setNumberOfIterationsForAveraging(5); //2
-        opdytsConfigGroup.setNumberOfIterationsForConvergence(20); //5
 
-        opdytsConfigGroup.setMaxIteration(10);
-        opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-//        opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(0.5);
-        opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(10);
-        opdytsConfigGroup.setUseAllWarmUpIterations(false);
-        opdytsConfigGroup.setWarmUpIterations(5); // 1 this should be tested (parametrized).
-        opdytsConfigGroup.setPopulationSize(1);
-        opdytsConfigGroup.setSelfTuningWeight(4);
+		if (USE_OPDYTS) {
+			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
+			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
+			opdytsConfigGroup.setNumberOfIterationsForConvergence(10); // 5
 
-        MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
+			opdytsConfigGroup.setMaxIteration(30);
+			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
+			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(20);
+			opdytsConfigGroup.setUseAllWarmUpIterations(false);
+			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
+			opdytsConfigGroup.setPopulationSize(1);
+			opdytsConfigGroup.setSelfTuningWeight(4);
 
-        MATSimSimulator2<OffsetDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
-        simulator.addOverridingModule(new AbstractModule() {
-            @Override
-            public void install() {
-                // TODO why does it work to inject this in TravelTimeObjectiveFunction, although TravelTimeObjectiveFunction is not created by guice??
-                bind(TtTotalTravelTime.class).asEagerSingleton();
-                addEventHandlerBinding().to(TtTotalTravelTime.class);
+			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
 
-                bind(ModalTripTravelTimeHandler.class);
-                addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+			MATSimSimulator2<OffsetDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
+			simulator.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					// TODO why does it work to inject this in TravelTimeObjectiveFunction, although
+					// TravelTimeObjectiveFunction is not created by guice??
+					bind(TtTotalTravelTime.class).asEagerSingleton();
+					addEventHandlerBinding().to(TtTotalTravelTime.class);
 
-                addControlerListenerBinding().toInstance(new ShutdownListener() { //plot only after one opdyts transition.
-					@Override
-					public void notifyShutdown(ShutdownEvent event) {
-						// post-process analysis
-						String opdytsConvergenceFile = OUTPUT_DIR + "/opdyts.con";
-						if (new File(opdytsConvergenceFile).exists()) {
-							OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
-							opdytsConvergencePlotter.readFile(OUTPUT_DIR + "/opdyts.con");
-							opdytsConvergencePlotter.plotData(OUTPUT_DIR + "/convergence.png");
+					// bind amits analysis
+					bind(ModalTripTravelTimeHandler.class);
+					addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+
+					// bind general analysis
+					this.bind(TtGeneralAnalysis.class);
+					this.bind(TtAnalyzedGeneralResultsWriter.class);
+					this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
+
+					// bind tool to analyze signals
+					this.bind(TtSignalAnalysisTool.class);
+					this.bind(TtSignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+
+					// plot only after one opdyts transition:
+					addControlerListenerBinding().toInstance(new ShutdownListener() { 
+						@Override
+						public void notifyShutdown(ShutdownEvent event) {
+							// post-process analysis
+							String opdytsConvergenceFile = OUTPUT_DIR + "/opdyts.con";
+							if (new File(opdytsConvergenceFile).exists()) {
+								OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
+								opdytsConvergencePlotter.readFile(OUTPUT_DIR + "/opdyts.con");
+								opdytsConvergencePlotter.plotData(OUTPUT_DIR + "/convergence.png");
+							}
 						}
-					}
-				});
-            }
-        });
-        simulator.addOverridingModule(new SignalsModule());
-        runner.addNetworkModeOccupancyAnalyzr(simulator);
+					});
+				}
+			});
+			simulator.addOverridingModule(new SignalsModule());
+			runner.addNetworkModeOccupancyAnalyzr(simulator);
 
-        runner.run(simulator,
-                new OffsetRandomizer(scenario),
-                new OffsetDecisionVariable(((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalControlData(), scenario),
-                new TravelTimeObjectiveFunction());
-        
+			runner.run(simulator, new OffsetRandomizer(scenario), new OffsetDecisionVariable(
+					((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalControlData(),
+					scenario), new TravelTimeObjectiveFunction());
+		} else {
+			// simply start a matsim simulation
+			Controler controler = new Controler(scenario);
+			controler.addOverridingModule(new SignalsModule());
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					// bind amits analysis
+					bind(ModalTripTravelTimeHandler.class);
+					addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+
+					// bind general analysis
+					this.bind(TtGeneralAnalysis.class);
+					this.bind(TtAnalyzedGeneralResultsWriter.class);
+					this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
+
+					// bind tool to analyze signals
+					this.bind(TtSignalAnalysisTool.class);
+					this.bind(TtSignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+				}
+			});
+			controler.run();
+		}
 	}
 
 	private static void createSignals(Scenario scenario) {
 		// add missing scenario elements
-        scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
-        
-        SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-        SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
-        SignalSystemsDataFactory sysFac = signalSystems.getFactory();
-        SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
-        SignalControlData signalControl = signalsData.getSignalControlData();
-        SignalControlDataFactory conFac = signalControl.getFactory();
+		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
 
-        String[] signalizedIntersections = {"2", "3", "4"};
-        
-        for (int i = 0; i < signalizedIntersections.length; i++) {
-        		// create the signal system for the intersection
-        		Id<SignalSystem> signalSystemId = Id.create("SignalSystem" + signalizedIntersections[i], SignalSystem.class);
-            SignalSystemData signalSystem = sysFac.createSignalSystemData(signalSystemId);
-            signalSystems.addSignalSystemData(signalSystem);
-            
-            // add the signal (there is only one inLink)
-            for (Link inLink : scenario.getNetwork().getNodes().get(Id.createNodeId(i+2)).getInLinks().values()) {
-                SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId(), Signal.class));
-                signal.setLinkId(inLink.getId());
-                signalSystem.addSignalData(signal);
-                
-                // create a group for this single signal
-                Id<SignalGroup> signalGroupId = Id.create("SignalGroup" + signal.getId(), SignalGroup.class);
-                SignalGroupData signalGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId);
-                signalGroup.addSignalId(signal.getId());
-                signalGroups.addSignalGroupData(signalGroup);
-            }
-            
-            // create signal control
-            SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
-            signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
-            signalControl.addSignalSystemControllerData(signalSystemControl);
+		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+		SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
+		SignalSystemsDataFactory sysFac = signalSystems.getFactory();
+		SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
+		SignalControlData signalControl = signalsData.getSignalControlData();
+		SignalControlDataFactory conFac = signalControl.getFactory();
 
-            // create a plan for the signal system (with defined cycle time and offset 0)
-            SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 60, 0, Id.create("SignalPlan", SignalPlan.class));
-            signalSystemControl.addSignalPlanData(signalPlan);
-            for (Id<SignalGroup> signalGroupId : signalGroups.getSignalGroupDataBySystemId(signalSystemId).keySet()) {
-            		// there is only one element in this set
-            		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId, 0, 30));
-            }
-        }
-        
+		String[] signalizedIntersections = { "2", "3", "4" };
+
+		for (int i = 0; i < signalizedIntersections.length; i++) {
+			// create the signal system for the intersection
+			Id<SignalSystem> signalSystemId = Id.create("SignalSystem" + signalizedIntersections[i],
+					SignalSystem.class);
+			SignalSystemData signalSystem = sysFac.createSignalSystemData(signalSystemId);
+			signalSystems.addSignalSystemData(signalSystem);
+
+			// add the signal (there is only one inLink)
+			for (Link inLink : scenario.getNetwork().getNodes().get(Id.createNodeId(signalizedIntersections[i]))
+					.getInLinks().values()) {
+				SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId(), Signal.class));
+				signal.setLinkId(inLink.getId());
+				signalSystem.addSignalData(signal);
+
+				// create a group for this single signal
+				Id<SignalGroup> signalGroupId = Id.create("SignalGroup" + signal.getId(), SignalGroup.class);
+				SignalGroupData signalGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId,
+						signalGroupId);
+				signalGroup.addSignalId(signal.getId());
+				signalGroups.addSignalGroupData(signalGroup);
+			}
+
+			// create signal control
+			SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
+			signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
+			signalControl.addSignalSystemControllerData(signalSystemControl);
+
+			// create a plan for the signal system (with defined cycle time and offset 0)
+			 int offset = 11;
+			 if (i==1) offset = 21;
+			 else if (i==2) offset = 31;
+//			 else if (i==2) offset = 231;
+//			 int offset = 211;
+//			 if (i==1) offset = 121;
+//			 else if (i==2) offset = 32;
+//			int offset = 0;
+			SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 300, offset,
+					Id.create("SignalPlan", SignalPlan.class));
+			signalSystemControl.addSignalPlanData(signalPlan);
+			for (Id<SignalGroup> signalGroupId : signalGroups.getSignalGroupDataBySystemId(signalSystemId).keySet()) {
+				// there is only one element in this set
+				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId, 0, 100));
+			}
+		}
+
 	}
 
 	private static void createDemand(Scenario scenario) {
 		Population pop = scenario.getPopulation();
 		PopulationFactory popFac = pop.getFactory();
-		
+
 		int startTime = 0;
+		int pulkInterval = 100;
+		int cycleTime = 300;
 		int endTime = 3600;
-		int interval = 1;
-		
+		int secondsPerPerson = 1;
+
 		Id<Link> fromLinkId = Id.createLinkId("0_1");
 		Id<Link> toLinkId = Id.createLinkId("4_5");
-		
-		for (int i = startTime; i < endTime; i += interval) {
-			// create a person (the i-th person)
-			Person person = popFac.createPerson(Id.createPersonId(fromLinkId + "-" + toLinkId + "-" + i));
-			pop.addPerson(person);
 
-			// create a plan for the person that contains all this information
-			Plan plan = popFac.createPlan();
-			person.addPlan(plan);
+		int departure = startTime;
+		while (departure < endTime) {
+			for (int i = 0; i < pulkInterval; i += secondsPerPerson) {
+				// create a person (the i-th person)
+				Person person = popFac.createPerson(Id.createPersonId(fromLinkId + "-" + toLinkId + "-" + departure));
+				pop.addPerson(person);
 
-			// create a start activity at the from link
-			Activity startAct = popFac.createActivityFromLinkId("dummy", fromLinkId);
-			startAct.setEndTime(i);
-			plan.addActivity(startAct);
-			// create a dummy leg
-			Leg leg = popFac.createLeg(TransportMode.car);
+				// create a plan for the person that contains all this information
+				Plan plan = popFac.createPlan();
+				person.addPlan(plan);
 
-			// create routes for the agents
-			List<Id<Link>> path = new ArrayList<>();
-			path.add(Id.createLinkId("1_2"));
-			path.add(Id.createLinkId("2_3"));
-			path.add(Id.createLinkId("3_4"));
-			leg.setRoute(RouteUtils.createLinkNetworkRouteImpl(fromLinkId, path, toLinkId));
-			plan.addLeg(leg);
+				// create a start activity at the from link
+				Activity startAct = popFac.createActivityFromLinkId("dummy", fromLinkId);
+				startAct.setEndTime(departure);
+				plan.addActivity(startAct);
+				// create a dummy leg
+				Leg leg = popFac.createLeg(TransportMode.car);
 
-			// create a drain activity at the to link
-			Activity drainAct = popFac.createActivityFromLinkId("dummy", toLinkId);
-			plan.addActivity(drainAct);
+				// create routes for the agents
+				List<Id<Link>> path = new ArrayList<>();
+				path.add(Id.createLinkId("1_2"));
+				path.add(Id.createLinkId("2_3"));
+				path.add(Id.createLinkId("3_4"));
+				leg.setRoute(RouteUtils.createLinkNetworkRouteImpl(fromLinkId, path, toLinkId));
+				plan.addLeg(leg);
+
+				// create a drain activity at the to link
+				Activity drainAct = popFac.createActivityFromLinkId("dummy", toLinkId);
+				plan.addActivity(drainAct);
+
+				departure += secondsPerPerson;
+			}
+			departure += cycleTime - pulkInterval;
 		}
 	}
 
 	private static void createNetwork(Scenario scenario) {
 		Network net = scenario.getNetwork();
 		NetworkFactory netFac = net.getFactory();
-		
+
 		net.addNode(netFac.createNode(Id.createNodeId(0), new Coord(0, 0)));
 		net.addNode(netFac.createNode(Id.createNodeId(1), new Coord(1000, 0)));
 		net.addNode(netFac.createNode(Id.createNodeId(2), new Coord(2000, 0)));
 		net.addNode(netFac.createNode(Id.createNodeId(3), new Coord(3000, 0)));
 		net.addNode(netFac.createNode(Id.createNodeId(4), new Coord(4000, 0)));
 		net.addNode(netFac.createNode(Id.createNodeId(5), new Coord(5000, 0)));
-		
-		String[] links = { "0_1", "1_2", "2_3", "3_4", "4_5"};
+
+		String[] links = { "0_1", "1_2", "2_3", "3_4", "4_5" };
 
 		for (String linkId : links) {
 			String fromNodeId = linkId.split("_")[0];
 			String toNodeId = linkId.split("_")[1];
-			Link link = netFac.createLink(Id.createLinkId(linkId), net.getNodes().get(Id.createNodeId(fromNodeId)), net.getNodes().get(Id.createNodeId(toNodeId)));
+			Link link = netFac.createLink(Id.createLinkId(linkId), net.getNodes().get(Id.createNodeId(fromNodeId)),
+					net.getNodes().get(Id.createNodeId(toNodeId)));
 			link.setCapacity(3600);
-			link.setLength(1000);
+			link.setLength(99);
 			link.setFreespeed(10);
 			net.addLink(link);
 		}
@@ -258,19 +325,20 @@ public class RunOpdytsForGreenWaves {
 	private static Config createConfig() {
 		Config config = ConfigUtils.createConfig();
 		config.controler().setOutputDirectory(OUTPUT_DIR);
-		config.controler().setLastIteration(0);
-		
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		config.controler().setLastIteration(1);
+
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config,
+				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
-		
+
 		// define strategies
-//		{
-//			StrategySettings strat = new StrategySettings();
-//			strat.setStrategyName(DefaultSelector.KeepLastSelected);
-//			strat.setWeight(1);
-//			strat.setDisableAfter(config.controler().getLastIteration());
-//			config.strategy().addStrategySettings(strat);
-//		}
+		// {
+		// StrategySettings strat = new StrategySettings();
+		// strat.setStrategyName(DefaultSelector.KeepLastSelected);
+		// strat.setWeight(1);
+		// strat.setDisableAfter(config.controler().getLastIteration());
+		// config.strategy().addStrategySettings(strat);
+		// }
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
@@ -278,12 +346,12 @@ public class RunOpdytsForGreenWaves {
 			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);
 		}
-		
+
 		config.travelTimeCalculator().setTraveltimeBinSize(10);
-		
-		config.qsim().setStuckTime(360*10);
+
+		config.qsim().setStuckTime(3600 * 4);
 		config.qsim().setRemoveStuckVehicles(false);
-		
+
 		config.qsim().setUsingFastCapacityUpdate(false);
 
 		config.qsim().setStartTime(0);
@@ -305,11 +373,11 @@ public class RunOpdytsForGreenWaves {
 			config.planCalcScore().addActivityParams(dummyAct);
 			dummyAct.setScoringThisActivityAtAll(false);
 		}
-		
+
 		// TODO try this out?!
-//		ModeParams carMode = config.planCalcScore().getOrCreateModeParams(TransportMode.car);
-//		carMode.setConstant(0);		
-		
+		// ModeParams carMode = config.planCalcScore().getOrCreateModeParams(TransportMode.car);
+		// carMode.setConstant(0);
+
 		return config;
 	}
 

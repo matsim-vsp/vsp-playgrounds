@@ -27,8 +27,6 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
 
-import com.google.inject.Inject;
-
 import floetteroed.opdyts.DecisionVariable;
 
 /**
@@ -42,9 +40,6 @@ public class OffsetDecisionVariable implements DecisionVariable {
 	 * to be more flexible for extensions of opdyts to more than offset optimization */
 	private final SignalControlData newOffsets;
     private final SignalsData currentSignalsData;
-    
-//    @Inject
-//    private SignalSystemsManager manager; // TODO this does not work!
 	
 	public OffsetDecisionVariable(SignalControlData newSignalControl, Scenario scenario) {
 		currentSignalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
@@ -53,7 +48,6 @@ public class OffsetDecisionVariable implements DecisionVariable {
 	
 	public OffsetDecisionVariable(SignalControlData newSignalControl, Scenario scenario, SignalSystemsManager manager) {
 		this(newSignalControl, scenario);
-//		this.manager = manager;
 	}
 	
 	public SignalControlData getCurrentSignalControlData() {
@@ -70,8 +64,6 @@ public class OffsetDecisionVariable implements DecisionVariable {
 				
 			}
 		}
-		// TODO call reset in signals ?? (is called by SignalsModule, but is this the correct time?)
-//		manager.resetModel(0);
 	}
 	
 	@Override
