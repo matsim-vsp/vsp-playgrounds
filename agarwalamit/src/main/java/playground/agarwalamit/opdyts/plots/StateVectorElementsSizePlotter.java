@@ -91,19 +91,25 @@ public class StateVectorElementsSizePlotter {
 
     public static void gnuHistogramPlot(final String inputFile, final String outputFile, final String identifier) {
         String cmd = "gnuplot -c histogram.gnu ";
-        cmd += " "+inputFile;
-        cmd += " "+outputFile;
+        cmd += " "+new File(inputFile).getAbsolutePath();
+        cmd += " "+new File(outputFile).getAbsolutePath();
         cmd += " "+identifier;
 
-        ExeRunner.run(cmd, FileUtils.GNU_SCRIPT_DIR+"/gnulog.log", 99999 ,FileUtils.GNU_SCRIPT_DIR);
+        ExeRunner.run(cmd,
+                new File(FileUtils.GNU_SCRIPT_DIR + "/gnulog.log").getAbsolutePath(),
+                99999,
+                new File(FileUtils.GNU_SCRIPT_DIR).getAbsolutePath());
     }
 
     public static void gnuHistogramLogScalePlot(final String inputFile, final String outputFile, final String identifier) {
         String cmd = "gnuplot -c histogram_log.gnu ";
-        cmd += " "+inputFile;
-        cmd += " "+outputFile;
+        cmd += " "+new File(inputFile).getAbsolutePath();
+        cmd += " "+new File(outputFile).getAbsolutePath();
         cmd += " "+identifier;
 
-        ExeRunner.run(cmd, FileUtils.GNU_SCRIPT_DIR+"/gnulog.log", 99999 ,FileUtils.GNU_SCRIPT_DIR);
+        ExeRunner.run(cmd,
+                new File(FileUtils.GNU_SCRIPT_DIR + "/gnulog.log").getAbsolutePath(),
+                99999,
+                new File(FileUtils.GNU_SCRIPT_DIR).getAbsolutePath());
     }
 }
