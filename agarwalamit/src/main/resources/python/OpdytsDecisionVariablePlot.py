@@ -6,24 +6,28 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-def plotModalASC(parentDir):
+
+def plotModalASC(parentDir, regexStr, lastItr, statsFile, numberOfRowsToPrint):
     opdytsDir = list(range(0, 10, 1))
     for i in opdytsDir:
-        file = parentDir + '/_' + str(i) + '/opdyts_modalStats.txt'
+        file = parentDir + '/_' + str(i) + statsFile
         if Path(file).is_file() :
             data = pd.read_csv(file, sep="\t")
-            result = data.filter(regex="asc")  #take columns starting with asc
+            result = data.filter(regex=regexStr)  # take columns starting with asc
             x = result.index.values
 
             plt.figure(figsize=(10, 5))
-            outfile = parentDir + '/modalASCs_'+str(i)+'.pdf'
+            outfile = parentDir + '/decisionVariable_for'+str(numberOfRowsToPrint)+'Its'+str(i)+'.pdf'
 
             for colName in list(result):
                 y = result.loc[:, colName]
-                plt.plot(x, y, '.', markersize=0.8)
+                if numberOfRowsToPrint> len(x):
+                    plt.plot(x, y, '-.', markersize=0.8)
+                else:
+                    plt.plot(x[:numberOfRowsToPrint], y[:numberOfRowsToPrint], '-o', markersize=2)  # plt.plot(x[:50], y[:50], '-o', markersize=2)
 
             plt.xlabel('iteration')
-            plt.ylabel('ASC')
+            plt.ylabel('decision variable parameter')
             plt.legend(fontsize=12, loc='upper center', ncol=5, frameon=False)
             plt.savefig(outfile)
             plt.clf()
@@ -32,10 +36,10 @@ def plotModalASC(parentDir):
             pass
 
 
-dir = '/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/calibration/output/'
+filesDir = '/Users/amit/Documents/repos/runs-svn/opdyts/patna/allModes/calibration/output/'
 
-for i in list(range(401,497,1)):
-    parentDir = dir + 'run' + str(i) + '/'
+for i in list(range(401, 497, 1)):
+    parentDir = filesDir + 'run' + str(i) + '/'
     print("plotting from dir " + parentDir)
-    plotModalASC(parentDir)
+    plotModalASC(parentDir, "asc", 40, '/opdyts_modalStats.txt', 50)
 
