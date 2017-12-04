@@ -50,19 +50,20 @@ public class TravelTimeObjectiveFunction implements ObjectiveFunction {
 		MATSimState matSimState = (MATSimState) state;
         Set<Id<Person>> persons = matSimState.getPersonIdView();
         
-        double totalScore = 0.;
-        double totalExpectedTT = 0.;
+        // based on the last iteration where it was selected
+        double totalExpectedScore = 0.;
+        double totalExpectedTT = 0.; 
 
         for (Id<Person> personId : persons) {
             Plan plan = matSimState.getSelectedPlan(personId);
-            totalScore += plan.getScore();
+            totalExpectedScore += plan.getScore();
             for (PlanElement pe : plan.getPlanElements()) {
             		if (pe instanceof Leg) {
             			totalExpectedTT += ((Leg)pe).getTravelTime();
             		}
             }
         }
-        return -totalScore;
+        return -totalExpectedScore;
 //        return totalExpectedTT;
 		
 //		return eventHandlerTT.getTotalTt();
