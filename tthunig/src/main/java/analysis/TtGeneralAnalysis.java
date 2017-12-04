@@ -44,14 +44,17 @@ import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author tthunig
  *
  */
+@Singleton
 public final class TtGeneralAnalysis implements PersonDepartureEventHandler, PersonArrivalEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 
 	private int totalNumberOfTrips = 0;
@@ -88,9 +91,14 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 	
 	private Network network;
 	
-	@Inject
 	public TtGeneralAnalysis(Network network) {
 		this.network = network;
+	}
+	
+	@Inject
+	public TtGeneralAnalysis(Network network, EventsManager em) {
+		this(network);
+		em.addHandler(this);
 	}
 	
 	@Override

@@ -34,14 +34,20 @@ import org.matsim.contrib.signals.events.SignalGroupStateChangedEvent;
 import org.matsim.contrib.signals.events.SignalGroupStateChangedEventHandler;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.controler.ControlerListenerManager;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author tthunig
  *
  */
+@Singleton
 public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler, AfterMobsimListener, ActivityStartEventHandler, ActivityEndEventHandler{
 
 	private Map<Id<SignalGroup>, Double> totalSignalGreenTime;
@@ -57,6 +63,15 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 	private Map<Id<SignalSystem>, Id<SignalGroup>> firstSignalGroupOfSignalSystem;
 	private double lastActStartTime;
 	private Double firstActEndTime;
+	
+	public TtSignalAnalysisTool() {
+	}
+	
+	@Inject
+	public TtSignalAnalysisTool(EventsManager em, ControlerListenerManager clm) {
+		em.addHandler(this);
+		clm.addControlerListener(this);
+	}
 	
 	@Override
 	public void reset(int iteration) {
