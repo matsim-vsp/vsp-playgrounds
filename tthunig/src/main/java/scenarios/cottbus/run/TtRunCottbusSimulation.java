@@ -38,7 +38,12 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.contrib.opdyts.MATSimSimulator2;
+import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
+import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
+import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.controler.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -56,6 +61,8 @@ import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup.TravelTimeC
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.events.ShutdownEvent;
+import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
@@ -69,6 +76,16 @@ import org.matsim.roadpricing.RoadPricingModule;
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
+import analysis.TtTotalTravelTime;
+import analysis.signals.TtSignalAnalysisListener;
+import analysis.signals.TtSignalAnalysisTool;
+import analysis.signals.TtSignalAnalysisWriter;
+import optimize.opdits.OffsetDecisionVariable;
+import optimize.opdits.OffsetRandomizer;
+import optimize.opdits.TravelTimeObjectiveFunction;
+import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
+import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
+import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -136,6 +153,8 @@ public class TtRunCottbusSimulation {
 		NONE, CP_V3, CP_V4, CP_V7, CP_V8, CP_V9, CP_V10, FLOWBASED, CORDON_INNERCITY, CORDON_RING
 	}
 	
+	private static final boolean USE_OPDYTS = false;
+	
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
@@ -156,11 +175,75 @@ public class TtRunCottbusSimulation {
 //		otfvisConfig.setAgentSize(80f);
 		
 		Scenario scenario = prepareScenario( config );
-		Controler controler = prepareController( scenario );
 		
-//		controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
-		
-		controler.run();
+		if (USE_OPDYTS) {
+			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
+			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
+			opdytsConfigGroup.setNumberOfIterationsForConvergence(10); // 5
+
+			opdytsConfigGroup.setMaxIteration(30);
+			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
+			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(20);
+			opdytsConfigGroup.setUseAllWarmUpIterations(false);
+			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
+			opdytsConfigGroup.setPopulationSize(1);
+			opdytsConfigGroup.setSelfTuningWeight(4);
+
+			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
+
+			MATSimSimulator2<OffsetDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
+			simulator.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					// TODO why does it work to inject this in TravelTimeObjectiveFunction, although
+					// TravelTimeObjectiveFunction is not created by guice??
+					bind(TtTotalTravelTime.class).asEagerSingleton();
+					addEventHandlerBinding().to(TtTotalTravelTime.class);
+
+					// bind amits analysis
+					bind(ModalTripTravelTimeHandler.class);
+					addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+
+					// bind general analysis
+					this.bind(TtGeneralAnalysis.class);
+					this.bind(TtAnalyzedGeneralResultsWriter.class);
+					this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
+
+					// bind tool to analyze signals
+					this.bind(TtSignalAnalysisTool.class);
+					this.bind(TtSignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+
+					// plot only after one opdyts transition:
+					addControlerListenerBinding().toInstance(new ShutdownListener() { 
+						@Override
+						public void notifyShutdown(ShutdownEvent event) {
+							// post-process analysis
+							String opdytsConvergenceFile = config.controler().getOutputDirectory() + "/opdyts.con";
+							if (new File(opdytsConvergenceFile).exists()) {
+								OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
+								opdytsConvergencePlotter.readFile(config.controler().getOutputDirectory() + "/opdyts.con");
+								opdytsConvergencePlotter.plotData(config.controler().getOutputDirectory() + "/convergence.png");
+							}
+						}
+					});
+				}
+			});
+			simulator.addOverridingModule(new SignalsModule());
+			runner.addNetworkModeOccupancyAnalyzr(simulator);
+
+			runner.run(simulator, new OffsetRandomizer(scenario), new OffsetDecisionVariable(
+					((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalControlData(),
+					scenario), new TravelTimeObjectiveFunction());
+		} else {
+			// start a normal matsim run without opdyts:
+			Controler controler = prepareController( scenario );
+	
+//			controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
+			
+			controler.run();
+			
+		}
 	}
 
 	private static Config defineConfig() {
