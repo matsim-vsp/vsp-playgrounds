@@ -91,7 +91,7 @@ import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
  */
 public class RunOpdytsForGreenWaves {
 
-	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOpt_stepSize20random_30it_score/";
+	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize7random_30it_score/";
 
 	private static final boolean USE_OPDYTS = true;
 
@@ -106,15 +106,17 @@ public class RunOpdytsForGreenWaves {
 		if (USE_OPDYTS) {
 			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
 			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
-			opdytsConfigGroup.setNumberOfIterationsForConvergence(10); // 5
+			opdytsConfigGroup.setNumberOfIterationsForConvergence(20); // 5
 
 			opdytsConfigGroup.setMaxIteration(30);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(20);
+			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(7);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);
 			opdytsConfigGroup.setSelfTuningWeight(4);
+			
+			opdytsConfigGroup.setBinSize(10);
 
 			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
 
@@ -140,6 +142,8 @@ public class RunOpdytsForGreenWaves {
 					this.bind(TtSignalAnalysisTool.class);
 					this.bind(TtSignalAnalysisWriter.class);
 					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					
+					this.addControlerListenerBinding().to(OpdytsOffsetStatsControlerListener.class);
 
 					// plot only after one opdyts transition:
 					addControlerListenerBinding().toInstance(new ShutdownListener() { 
@@ -229,14 +233,14 @@ public class RunOpdytsForGreenWaves {
 			signalControl.addSignalSystemControllerData(signalSystemControl);
 
 			// create a plan for the signal system (with defined cycle time and offset 0)
-			 int offset = 11;
-			 if (i==1) offset = 21;
-			 else if (i==2) offset = 31;
+//			 int offset = 11;
+//			 if (i==1) offset = 21;
+//			 else if (i==2) offset = 31;
 //			 else if (i==2) offset = 231;
 //			 int offset = 211;
 //			 if (i==1) offset = 121;
 //			 else if (i==2) offset = 32;
-//			int offset = 0;
+			int offset = 0;
 			SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 300, offset,
 					Id.create("SignalPlan", SignalPlan.class));
 			signalSystemControl.addSignalPlanData(signalPlan);
