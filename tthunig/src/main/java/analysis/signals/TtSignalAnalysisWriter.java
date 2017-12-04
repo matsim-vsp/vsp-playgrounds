@@ -64,33 +64,34 @@ public class TtSignalAnalysisWriter {
 
 	private void prepareOverallItWriting() {
 		// create output dir for overall iteration analysis
-		String lastItDir = this.outputDirBase + "ITERS/it." + this.lastIteration + "/";
+		String lastItDir = this.outputDirBase + "/ITERS/it." + this.lastIteration + "/";
 		new File(lastItDir).mkdir();
 		String lastItOutputDir = lastItDir + "analysis/";
 		new File(lastItOutputDir).mkdir();
 		
 		// create writing stream
-		try {	
-			this.totalGreenOverItWritingStream = new PrintStream(
-					new File(lastItOutputDir + "totalGreenOverIt.txt"));
+		try {
+			this.totalGreenOverItWritingStream = new PrintStream(new File(lastItOutputDir + "totalGreenOverIt.txt"));
 			this.avgGreenPerCycOverItWritingStream = new PrintStream(
 					new File(lastItOutputDir + "avgGreenPerCycOverIt.txt"));
+
+			// write header of both streams
+			String headerTotalGreen = "it";
+			String headerAvgGreen = "it";
+			for (Id<SignalSystem> signalSystemId : signalsData.getSignalSystemsData().getSignalSystemData().keySet()) {
+				for (Id<SignalGroup> signalGroupId : signalsData.getSignalGroupsData()
+						.getSignalGroupDataBySystemId(signalSystemId).keySet()) {
+					headerTotalGreen += "\t" + signalGroupId;
+					headerAvgGreen += "\t" + signalGroupId;
+				}
+			}
+			this.totalGreenOverItWritingStream.println(headerTotalGreen);
+			this.avgGreenPerCycOverItWritingStream.println(headerAvgGreen);
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return;
 		}
-		
-		// write header of both streams
-		String headerTotalGreen = "it";
-		String headerAvgGreen = "it";
-		for (Id<SignalSystem> signalSystemId : signalsData.getSignalSystemsData().getSignalSystemData().keySet()){
-			for (Id<SignalGroup> signalGroupId : signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId).keySet()){
-				headerTotalGreen += "\t" + signalGroupId;
-				headerAvgGreen += "\t" + signalGroupId;
-			}
-		}
-		this.totalGreenOverItWritingStream.println(headerTotalGreen);
-		this.avgGreenPerCycOverItWritingStream.println(headerAvgGreen);
 	}
 
 	public void writeIterationResults(int iteration) {	
@@ -111,11 +112,13 @@ public class TtSignalAnalysisWriter {
 				lineAvgTime.append("\t" + avgSignalGreenTimes.get(signalGroupId));
 			}
 		}
-		this.totalGreenOverItWritingStream.println(lineTotalTime.toString());
-		this.avgGreenPerCycOverItWritingStream.println(lineAvgTime.toString());
+		if (this.totalGreenOverItWritingStream != null) 
+			this.totalGreenOverItWritingStream.println(lineTotalTime.toString());
+		if (this.avgGreenPerCycOverItWritingStream != null)
+			this.avgGreenPerCycOverItWritingStream.println(lineAvgTime.toString());
 		
 		// create output dir for this iteration analysis
-		String outputDir = this.outputDirBase + "ITERS/it." + iteration + "/analysis/";
+		String outputDir = this.outputDirBase + "/ITERS/it." + iteration + "/analysis/";
 		new File(outputDir).mkdir();
 
 		// write iteration specific analysis
@@ -157,8 +160,10 @@ public class TtSignalAnalysisWriter {
 	}
 
 	public void closeAllStreams() {
-		this.totalGreenOverItWritingStream.close();
-		this.avgGreenPerCycOverItWritingStream.close();
+		if (this.totalGreenOverItWritingStream != null)
+			this.totalGreenOverItWritingStream.close();
+		if (this.avgGreenPerCycOverItWritingStream != null)
+			this.avgGreenPerCycOverItWritingStream.close();
 	}
 	
 }
