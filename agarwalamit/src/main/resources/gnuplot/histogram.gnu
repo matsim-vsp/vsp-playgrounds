@@ -5,7 +5,7 @@ reset
 print "script name        : ", ARG0
 print "input file     : ", ARG1
 print "output file     : ", ARG2
-print "output file     : ", ARG3
+print "histogram title     : ", ARG3
 
 #set term postscript eps size 6in,6in enhanced color font "Helvetica,18"
 #set term pdf size 6in,6in enhanced color font "Helvetica,16"
