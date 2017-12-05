@@ -37,9 +37,9 @@ public final class FileUtils {
 
     public static final Logger LOGGER = Logger.getLogger(FileUtils.class);
 
-    public static final String RUNS_SVN = System.getProperty("user.name").equals("amit") ? "/Users/amit/Documents/repos/runs-svn/" : "../../";
+    public static final String RUNS_SVN = System.getProperty("user.name").equals("amit") ? "/Users/amit/Documents/repos/runs-svn/" : "../../runs-svn/";
 
-    public static final String SHARED_SVN = System.getProperty("user.name").equals("amit") ? "/Users/amit/Documents/repos/shared-svn/" : "../../";
+    public static final String SHARED_SVN = System.getProperty("user.name").equals("amit") ? "/Users/amit/Documents/repos/shared-svn/" : "../../shared-svn/";
 
     public static final String GNU_SCRIPT_DIR = "../agarwalamit/src/main/resources/gnuplot/";
 
