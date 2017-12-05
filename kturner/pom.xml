@@ -32,11 +32,12 @@
 			<artifactId>jsprit-instances</artifactId>
 			<version>1.4.2</version>
 		</dependency> -->
-		<!-- JSprit 1.5 Dez. 2014 -->
+		
+		<!-- JSprit 1.5 Dez. 2014
 		<dependency>
 			<groupId>jsprit</groupId>
 			<artifactId>jsprit-core</artifactId>
-			<version>1.5</version>
+			<version>1.5.2</version>
 		</dependency>
 		<dependency>
 			<groupId>jsprit</groupId>
@@ -47,7 +48,15 @@
 			<groupId>jsprit</groupId>
 			<artifactId>jsprit-instances</artifactId>
 			<version>1.5</version>
+		</dependency>  -->
+		
+		<!-- https://mvnrepository.com/artifact/com.graphhopper/jsprit-core -->
+		<dependency>
+		    <groupId>com.graphhopper</groupId>
+		    <artifactId>jsprit-core</artifactId>
+		    <version>1.7.2</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
