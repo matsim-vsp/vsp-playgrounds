@@ -1,5 +1,10 @@
 package playground.sbraun.algorithm;
 
+/**
+ * @author sbraun
+ *
+ */
+
 
 //T should implement the interface Comparable
 public class HeapSortGeneric <T extends Comparable<T>> {

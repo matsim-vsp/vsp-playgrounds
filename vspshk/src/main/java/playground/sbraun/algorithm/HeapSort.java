@@ -1,5 +1,11 @@
 package playground.sbraun.algorithm;
 
+/**
+ * @author sbraun
+ *
+ */
+
+
 public class HeapSort {
 	private Integer[] nodes;
 	
