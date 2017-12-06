@@ -8,7 +8,10 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
-
+/**
+ * @author sbraun
+ *
+ */
 
 public class ActDurationAnalysisMain {
 
@@ -21,12 +24,9 @@ public class ActDurationAnalysisMain {
 	}
 
 	private void run() {
-	
-		Config config = ConfigUtils.loadConfig(configFile);
-		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 
-		ActDurationHandler handler1 = new ActDurationHandler(scenario.getNetwork());
+		ActDurationHandler handler1 = new ActDurationHandler();
 		events.addHandler(handler1);
 		// add more handlers here
 		
