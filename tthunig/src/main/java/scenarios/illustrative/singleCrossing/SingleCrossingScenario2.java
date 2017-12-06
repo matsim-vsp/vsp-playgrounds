@@ -21,6 +21,7 @@
  */
 package scenarios.illustrative.singleCrossing;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,7 +76,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.laemmer.model.LaemmerConfig;
-import signals.laemmer.model.LaemmerSignalController;
+import signals.laemmer.model.LaemmerSignalController2;
 import signals.laemmer.model.LaemmerConfig.Regime;
 
 /**
@@ -353,6 +354,7 @@ public class SingleCrossingScenario2 {
         }
     }
     
+//TODO create conflicting lanes attribute from laemmerbasicexample
     private static void createLanes(Lanes lanes) {
         LanesFactory factory = lanes.getFactory();
 
@@ -364,19 +366,37 @@ public class SingleCrossingScenario2 {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink2_3, factory,
                 Id.create("2_3.ol", Lane.class), 3600, 1000, 0, 2,
-                null, Arrays.asList(Id.create("2_3.l", Lane.class), Id.create("2_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("2_3.l", Lane.class), Id.create("2_3.s", Lane.class), Id.create("2_3.r", Lane.class)));
 
-
-        // straight and left turning lane (alignment 1)
+        
+        //left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink2_3, factory,
-                Id.create("2_3.l", Lane.class), LANE_CAPACITY, 500, 1, 1,
-                Arrays.asList(Id.create("3_4", Link.class), Id.create("3_7", Link.class)), null);
+        		Id.create("2_3.l", Lane.class), LANE_CAPACITY, 500, 1, 1,
+        		Arrays.asList(Id.create("3_7", Link.class)), null);
+        
+        lanesForLink2_3.getLanes().get(Id.create("2_3.l", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("4_3.s", Lane.class),
+        		Id.create("4_3.r", Lane.class),
+        		Id.create("7_3.ol", Lane.class),
+        		Id.create("8_3.ol", Lane.class))));
 
+        // straight lane (alignment 0)
+        LanesUtils.createAndAddLane(lanesForLink2_3, factory,
+                Id.create("2_3.s", Lane.class), LANE_CAPACITY, 500, 0, 1,
+                Arrays.asList(Id.create("3_4", Link.class)), null);
+        lanesForLink2_3.getLanes().get(Id.create("2_3.s", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("4_3.l", Lane.class),
+        		Id.create("7_3.ol", Lane.class),
+				Id.create("8_3.ol", Lane.class))));
+        
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink2_3, factory,
                 Id.create("2_3.r", Lane.class), LANE_CAPACITY, 500, -1, 1,
                 Arrays.asList(Id.create("3_4", Link.class), Id.create("3_8", Link.class)), null);
-
+        lanesForLink2_3.getLanes().get(Id.create("2_3.r", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("4_3.l", Lane.class),
+        		Id.create("7_3.ol", Lane.class),
+        		Id.create("8_3.ol", Lane.class))));
 
         // create lanes for link 4_3
         LanesToLinkAssignment lanesForLink4_3 = factory
@@ -386,28 +406,53 @@ public class SingleCrossingScenario2 {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink4_3, factory,
                 Id.create("4_3.ol", Lane.class), 3600, 1000, 0, 2,
-                null, Arrays.asList(Id.create("4_3.l", Lane.class), Id.create("4_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("4_3.l", Lane.class), Id.create("4_3.s", Lane.class), Id.create("4_3.r", Lane.class)));
 
-        // straight and left turning lane (alignment 1)
+        // left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink4_3, factory,
                 Id.create("4_3.l", Lane.class), LANE_CAPACITY, 500, 1, 1,
-                Arrays.asList(Id.create("3_2", Link.class), Id.create("3_8", Link.class)), null);
-
+                Arrays.asList(Id.create("3_8", Link.class)), null);
+        lanesForLink4_3.getLanes().get(Id.create("4_3.l", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("2_3.r", Lane.class),
+        		Id.create("2_3.s", Lane.class),
+        		Id.create("7_3.ol", Lane.class),
+				Id.create("8_3.ol", Lane.class))));
+        
+        // straight lane (alignment 0)
+        LanesUtils.createAndAddLane(lanesForLink4_3, factory,
+                Id.create("4_3.s", Lane.class), LANE_CAPACITY, 500, 0, 1,
+                Arrays.asList(Id.create("3_2", Link.class)), null);
+        lanesForLink4_3.getLanes().get(Id.create("4_3.s", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("2_3.l", Lane.class),
+        		Id.create("7_3.ol", Lane.class),
+				Id.create("8_3.ol", Lane.class))));
+        
+        
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink4_3, factory,
                 Id.create("4_3.r", Lane.class), LANE_CAPACITY, 500, -1, 1,
                 Arrays.asList(Id.create("3_2", Link.class), Id.create("3_7", Link.class)), null);
-
+        lanesForLink4_3.getLanes().get(Id.create("4_3.r", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("2_3.l", Lane.class),
+        		Id.create("7_3.ol", Lane.class),
+        		Id.create("8_3.ol", Lane.class))));
 
         // create lanes for link 7_3
         LanesToLinkAssignment lanesForLink7_3 = factory
                 .createLanesToLinkAssignment(Id.create("7_3", Link.class));
         lanes.addLanesToLinkAssignment(lanesForLink7_3);
-
+        
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink7_3, factory,
                 Id.create("7_3.ol", Lane.class), LANE_CAPACITY, 1000, 0, 1,
                 Arrays.asList(Id.create("3_4", Link.class), Id.create("3_2", Link.class), Id.create("3_8", Link.class)), null);
+        lanesForLink7_3.getLanes().get(Id.create("7_3.ol", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("2_3.r", Lane.class),
+        		Id.create("2_3.s", Lane.class),
+        		Id.create("2_3.l", Lane.class),
+        		Id.create("4_3.r", Lane.class),
+        		Id.create("4_3.s", Lane.class),
+        		Id.create("4_3.l", Lane.class))));
 
         // create lanes for link 8_3
         LanesToLinkAssignment lanesForLink8_3 = factory
@@ -418,6 +463,13 @@ public class SingleCrossingScenario2 {
         LanesUtils.createAndAddLane(lanesForLink8_3, factory,
                 Id.create("8_3.ol", Lane.class), LANE_CAPACITY, 1000, 0, 1,
                 Arrays.asList(Id.create("3_2", Link.class), Id.create("3_7", Link.class), Id.create("3_4", Link.class)), null);
+        lanesForLink8_3.getLanes().get(Id.create("8_3.ol", Lane.class)).getAttributes().putAttribute("conflictingLanes", new ArrayList<>(Arrays.asList(
+        		Id.create("2_3.r", Lane.class),
+        		Id.create("2_3.s", Lane.class),
+        		Id.create("2_3.l", Lane.class),
+        		Id.create("4_3.r", Lane.class),
+        		Id.create("4_3.s", Lane.class),
+        		Id.create("4_3.l", Lane.class))));
     }
     
     private void createPopulation(Population pop) {
@@ -652,7 +704,7 @@ public class SingleCrossingScenario2 {
         }
 
 		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
-        signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+        signalSystemControl.setControllerIdentifier(LaemmerSignalController2.IDENTIFIER);
         signalControl.addSignalSystemControllerData(signalSystemControl);
 	}
 	

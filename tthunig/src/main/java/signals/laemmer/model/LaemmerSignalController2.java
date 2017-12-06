@@ -62,7 +62,7 @@ import signals.sensor.LinkSensorManager;
 
 public class LaemmerSignalController2 extends AbstractSignalController implements SignalController, Analyzable {
 
-    public static final String IDENTIFIER = "LaemmerSignalController";
+    public static final String IDENTIFIER = "LaemmerSignalController2";
 
     Queue<LaemmerPhase> regulationQueue = new LinkedList<>();
 
@@ -116,7 +116,8 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
 
 
     private LaemmerSignalController2(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
-        this.laemmerConfig = laemmerConfig;
+    	System.err.println("HELLO");
+    	this.laemmerConfig = laemmerConfig;
         this.sensorManager = sensorManager;
         this.network = scenario.getNetwork();
         this.lanes = scenario.getLanes();
@@ -137,12 +138,17 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
     	
     	for (LanesToLinkAssignment ltl : lanes.getLanesToLinkAssignments().values())
    			lanemap.putAll(ltl.getLanes());
-    		
+
+    	System.err.println("SIGGROUPS SIZE: "+system.getSignalGroups().size());
+
         //Phasen kombinatorisch erstellen
     	this.signalPhases = PermutateSignalGroups.createPhasesFromSignalGroups(system, lanemap);
         
+    	System.err.println("SIGPHASES SIZE: "+signalPhases.size());
+    	
         for (SignalPhase signalPhase : signalPhases) {
         	LaemmerPhase laemmerPhase = new LaemmerPhase(this, signalPhase);
+        	System.err.println("SIGPHASE: " +signalPhase.getId());
         	for (Id<SignalGroup> group : signalPhase.getGreenSignalGroups()) {
         		this.system.scheduleDropping(simStartTimeSeconds, group);
         	}
@@ -162,7 +168,7 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
             updateActiveRegulation(now);
         }
         updateSignals(now);
-        if(activeRequest != null && activeRequest.signal.phase.getState().equals(SignalGroupState.GREEN)) {
+        if(activeRequest != null && activeRequest.signal.phase.getState(system).equals(SignalGroupState.GREEN)) {
             double remainingMinG = activeRequest.time + MIN_G - now;
 //            double remainingInBetweenTime = Math.max(activeRequest.time - now, 0);
 //            double remainingMinG = Math.max(activeRequest.time - now + MIN_G - remainingInBetweenTime, 0);
@@ -197,16 +203,22 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
         if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
             if (max == null) {
                 double index = 0;
-                for (LaemmerPhase signal : laemmerPhases) {
-                    if (signal.index > index) {
+                for (LaemmerPhase phase : laemmerPhases) {
+                    if (phase.index > index) {
                     	// if downstream check enabled, only select signals that do not lead to occupied links
                     	if (!laemmerConfig.isCheckDownstream()){
 	                    	boolean isAllDownstramLinksEmpty = true;
-	                    	for (Id<SignalGroup> sg : signal.phase.getGreenSignalGroups())
-	                    		isAllDownstramLinksEmpty &= downstreamSensor.allDownstreamLinksEmpty(system.getId(), sg);
+	                    	for (Id<SignalGroup> sg : phase.phase.getGreenSignalGroups()) {
+	                    		try {
+	                    			isAllDownstramLinksEmpty &= downstreamSensor.allDownstreamLinksEmpty(system.getId(), sg);
+	                    		}
+	                    		catch (IllegalStateException e) {
+	                    			System.out.println("error: "+e.toString());
+								}
+	                    	}
                     		if (isAllDownstramLinksEmpty) {
-	                    		max = signal;
-	                        	index = signal.index;
+	                    		max = phase;
+	                        	index = phase.index;
 	                        	}
                     	}
                     }
@@ -236,8 +248,8 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
     }
 
     private void updateSignals(double now) {
-        for (LaemmerPhase signal : laemmerPhases) {
-            signal.update(now);
+        for (LaemmerPhase phase : laemmerPhases) {
+            phase.update(now);
             // this is already done in updateStabilization in LaemmerSignal called by the above, theresa jul'17
 //            if (signal.stabilize && !regulationQueue.contains(signal)) {
 //                regulationQueue.add(signal);
@@ -248,10 +260,10 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
     private void updateRepresentativeDriveways(double now) {
         flowSum = 0;
         tIdle = desiredPeriod;
-        for (LaemmerPhase signal : laemmerPhases) {
-            signal.determineRepresentativeDriveway(now);
-            flowSum += signal.outflowSum;
-            tIdle -= Math.max(signal.determiningLoad * desiredPeriod + DEFAULT_INTERGREEN, MIN_G);
+        for (LaemmerPhase phase : laemmerPhases) {
+            phase.determineRepresentativeDriveway(now);
+            flowSum += phase.outflowSum;
+            tIdle -= Math.max(phase.determiningLoad * desiredPeriod + DEFAULT_INTERGREEN, MIN_G);
         }
         tIdle = Math.max(0, tIdle);
     }
@@ -300,12 +312,17 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
                     for (Id<Lane> laneId : signal.getLaneIds()) {
                         this.sensorManager.registerNumberOfCarsOnLaneInDistanceMonitoring(signal.getLinkId(), laneId, 0.);
                         this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoringOnLane(signal.getLinkId(), laneId);
+                        System.out.println("im here!");
                     }
                 }
                 //always register link in case only one lane is specified (-> no LaneEnter/Leave-Events?)
                 this.sensorManager.registerNumberOfCarsInDistanceMonitoring(signal.getLinkId(), 0.);
                 this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
             }
+        }
+        for (Link link : this.network.getLinks().values()) {
+            this.sensorManager.registerNumberOfCarsInDistanceMonitoring(link.getId(), 0.);
+            this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(link.getId());
         }
         if (laemmerConfig.isCheckDownstream()){
 			downstreamSensor.registerDownstreamSensors(system);

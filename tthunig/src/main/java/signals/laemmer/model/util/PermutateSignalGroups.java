@@ -128,20 +128,23 @@ public class PermutateSignalGroups {
 	
     public static ArrayList<SignalPhase> createPhasesFromSignalGroups(SignalSystem system, Map<Id<Lane>, Lane> lanemap) {
 		ArrayList<SignalGroup> signalGroups = new ArrayList<>(system.getSignalGroups().values());
+		System.err.println("All permuations size w/o duplicates: "+removeDuplicates(permutate(signalGroups, signalGroups.size())).size());
 		ArrayList<ArrayList<SignalGroup>> allSignalGroupPerms = removeDuplicates(permutate(signalGroups, signalGroups.size()));
 		ArrayList<SignalPhase> validPhases = new ArrayList<>();
 		//check for illegal combinations
-		ArrayList<SignalGroup> illegalGroups = new ArrayList<>();
+		ArrayList<ArrayList<SignalGroup>> illegalGroups = new ArrayList<>();
 		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
+			ArrayList<Id<Lane>> lanesOfAllSg = new ArrayList<>();
 			for (SignalGroup sg : sgs) {
-				ArrayList<Id<Lane>> lanesOfCurrSg = new ArrayList<>();
 				for (Signal signal : sg.getSignals().values()) {
-					lanesOfCurrSg.addAll(signal.getLaneIds());
+					lanesOfAllSg.addAll(signal.getLaneIds());
 				}
-				for (Id<Lane> l : lanesOfCurrSg) {
+			}
+			for (SignalGroup sg : sgs) {
+				for (Id<Lane> l : lanesOfAllSg) {
 					for (Id<Lane> illegalLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
-						if (lanesOfCurrSg.contains(illegalLane)) {
-							illegalGroups.add(sg);
+						if (lanesOfAllSg.contains(illegalLane)) {
+							illegalGroups.add(sgs);
 							break;
 						}
 					}
@@ -149,6 +152,7 @@ public class PermutateSignalGroups {
 			}
 		}
 		allSignalGroupPerms.removeAll(illegalGroups);
+		System.err.println("After remove illegal ones: "+allSignalGroupPerms.size());
 		
 		for(ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
 			SignalPhase newPhase = new SignalPhase();
@@ -159,8 +163,9 @@ public class PermutateSignalGroups {
 				}
 				newPhase.addGreenSignalGroupsAndLanes(sg.getId(), lanes);
 			}
+			validPhases.add(newPhase);
+			System.out.println(newPhase.toString());
 		}
-		
 		return validPhases;
 	}
 }
