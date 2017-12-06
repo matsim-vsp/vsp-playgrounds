@@ -99,7 +99,6 @@ public class AVGenerator {
 		String networkFile = dir + "input/network_merged_cl.xml.gz";
 		String taxisFilePrefix = dir + "taxis_";
 
-		// we start at 4:30 with vehicles, and at 5:00 with requests
 		double startTime = 0;
 		double workTime = 30 * 3600;
 
