@@ -315,11 +315,13 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
                         System.out.println("im here!");
                     }
                 }
-                //always register link in case only one lane is specified (-> no LaneEnter/Leave-Events?)
+                //always register link in case only one lane is specified (-> no LaneEnter/Leave-Events?), xy
+                //moved this to next for-loop, unsure, if this is still needed, pschade Nov'17 
                 this.sensorManager.registerNumberOfCarsInDistanceMonitoring(signal.getLinkId(), 0.);
                 this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
             }
         }
+        //moved here from above, pschade Nov'17
         for (Link link : this.network.getLinks().values()) {
             this.sensorManager.registerNumberOfCarsInDistanceMonitoring(link.getId(), 0.);
             this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(link.getId());
