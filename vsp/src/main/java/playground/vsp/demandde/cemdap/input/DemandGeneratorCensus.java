@@ -336,7 +336,7 @@ public class DemandGeneratorCensus {
 			// copy plans
 			for (Plan plan : person.getPlans()) { // though only one plan exists, iterating for all plans
 				Plan clonedPlan = clonedPopulation.getFactory().createPlan();
-				PopulationUtils.copyFromTo(person.getSelectedPlan(), clonedPerson.getSelectedPlan());
+				PopulationUtils.copyFromTo(plan, clonedPlan);
 				clonedPerson.addPlan(clonedPlan);
 			}
 			// copy attributes
