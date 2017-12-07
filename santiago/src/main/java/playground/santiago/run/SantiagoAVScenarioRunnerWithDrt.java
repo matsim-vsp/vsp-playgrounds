@@ -39,17 +39,20 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
+import org.matsim.contrib.drt.analysis.DrtAnalysisModule;
+import org.matsim.contrib.drt.optimizer.DrtOptimizer;
+import org.matsim.contrib.drt.optimizer.insertion.DefaultUnplannedRequestInserter;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.DrtModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.TaxiOutputModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
@@ -79,7 +82,7 @@ import playground.santiago.SantiagoScenarioConstants;
  * @author benjamin
  *
  */
-public class SantiagoAVScenarioRunner {
+public class SantiagoAVScenarioRunnerWithDrt {
 
 	/** GENERAL **/
 	private static String gantriesFile;
@@ -91,7 +94,7 @@ public class SantiagoAVScenarioRunner {
 	/***/
 
 	private static String inputPath = "d:\\matsim-eclipse\\runs-svn\\santiago\\v2a\\";
-	private static String configFile = inputPath + "config_v2a_medium.xml";
+	private static String configFile = inputPath + "config_v2a_medium_DRT.xml";
 
 	public static void main(String args[]) {
 
@@ -120,7 +123,7 @@ public class SantiagoAVScenarioRunner {
 			// TODO: CHANGE THE TollLinksFile IN THE CONFIG.
 		}
 
-		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new TaxiConfigGroup(),
+		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
 				new OTFVisConfigGroup());
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
@@ -128,7 +131,7 @@ public class SantiagoAVScenarioRunner {
 		Controler controler = new Controler(scenario);
 
 		addTaxis(controler);
-		
+
 		// adding other network modes than car requires some router; here, the same values as for car are used
 		setNetworkModeRouting(controler);
 
@@ -136,15 +139,17 @@ public class SantiagoAVScenarioRunner {
 		controler.getEvents().addHandler(new PTFareHandler(controler, doModeChoice, scenario.getPopulation()));
 
 		// adding basic strategies for car and non-car users
-		setBasicStrategiesForSubpopulations(controler);
+		setBasicStrategiesForSubpopulations(config);
 
 		// adding subtour mode choice strategies for car and non-car users
-		if (doModeChoice)
+		if (doModeChoice) {
 			setModeChoiceForSubpopulations(controler);
+		}
 
 		// mapping agents' activities to links on the road network to avoid being stuck on the transit network
-		if (mapActs2Links)
+		if (mapActs2Links) {
 			mapActivities2properLinks(scenario);
+		}
 
 		// Adding the toll links file in the config
 		RoadPricingConfigGroup rpcg = ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME,
@@ -192,15 +197,10 @@ public class SantiagoAVScenarioRunner {
 	}
 
 	private static void addTaxis(Controler controler) {
-		// controler.addOverridingModule(new AbstractModule() {
-		// @Override
-		// public void install() {
-		// addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-		// }
-		// });
-
-		controler.addOverridingModule(new TaxiOutputModule());
-		controler.addOverridingModule(new TaxiModule());
+		controler.addOverridingModule(new DvrpModule(DrtControlerCreator.createModuleForQSimPlugin(),
+				DrtOptimizer.class, DefaultUnplannedRequestInserter.class));
+		controler.addOverridingModule(new DrtModule());
+		controler.addOverridingModule(new DrtAnalysisModule());
 
 		boolean otfvis = false;
 		if (otfvis) {
@@ -268,28 +268,28 @@ public class SantiagoAVScenarioRunner {
 		});
 	}
 
-	private static void setBasicStrategiesForSubpopulations(MatsimServices controler) {
-		setReroute("carAvail", controler);
-		setChangeExp("carAvail", controler);
-		setReroute(null, controler);
-		setChangeExp(null, controler);
+	private static void setBasicStrategiesForSubpopulations(Config config) {
+		setReroute("carAvail", config);
+		setChangeExp("carAvail", config);
+		setReroute(null, config);
+		setChangeExp(null, config);
 	}
 
-	private static void setChangeExp(String subpopName, MatsimServices controler) {
+	private static void setChangeExp(String subpopName, Config config) {
 		StrategySettings changeExpSettings = new StrategySettings();
 		changeExpSettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 		changeExpSettings.setSubpopulation(subpopName);
 		// changeExpSettings.setWeight(0.85);
 		changeExpSettings.setWeight(0.7); // TODO: BE AWARE OF THIS!!!
-		controler.getConfig().strategy().addStrategySettings(changeExpSettings);
+		config.strategy().addStrategySettings(changeExpSettings);
 	}
 
-	private static void setReroute(String subpopName, MatsimServices controler) {
+	private static void setReroute(String subpopName, Config config) {
 		StrategySettings reRouteSettings = new StrategySettings();
 		reRouteSettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.toString());
 		reRouteSettings.setSubpopulation(subpopName);
 		reRouteSettings.setWeight(0.15);
-		controler.getConfig().strategy().addStrategySettings(reRouteSettings);
+		config.strategy().addStrategySettings(reRouteSettings);
 	}
 
 	private static void setModeChoiceForSubpopulations(final Controler controler) {
@@ -300,7 +300,7 @@ public class SantiagoAVScenarioRunner {
 		modeChoiceCarAvail.setWeight(0.15);
 		controler.getConfig().strategy().addStrategySettings(modeChoiceCarAvail);
 
-		final String nameMcNonCarAvail = "SubtourModeChoice_".concat("nonCarAvail");
+		final String nameMcNonCarAvail = "SubtourModeChoice";
 		StrategySettings modeChoiceNonCarAvail = new StrategySettings();
 		modeChoiceNonCarAvail.setStrategyName(nameMcNonCarAvail);
 		modeChoiceNonCarAvail.setSubpopulation(null);
