@@ -35,7 +35,6 @@ import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeEstimator;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -55,41 +54,46 @@ import playground.ikaddoura.incidents.incidentWithinDayReplanning.IncidentBestRo
  * 0a: network incident (reduced freespeed travel time before trip has started); no within-day replanning
  * 0b: network incident (reduced freespeed travel time directly after trip has started); no within-day replanning
  * 0c: network incident (reduced freespeed travel time after trip has started); no within-day replanning
+ * 
  * 1: network incident (reduced freespeed travel time before trip has started); with within-day replanning
  * 2: network incident (reduced freespeed travel time directly after trip has started); with within-day replanning
  * 3: network incident (reduced freespeed travel time long after trip has started); with within-day replanning
+ * (a=dvrp approach; b=dobler approach)
  * 
- * 4a: two agents; no network incident; no within-day replanning
- * 4b: two agents; no network incident; with within-day replanning
+ * 4: two agents; no network incident; no within-day replanning
+ * 5: two agents; no network incident; with within-day replanning
+ * (a=dvrp approach; b=dobler approach)
  * 
 * @author ikaddoura
 * 
 */
 public class IncidentWithinDayReplanningIT {
-
-	LinkDemandEventHandler handler0;
-	LinkDemandEventHandler handler0a;
-	LinkDemandEventHandler handler0b;
-	LinkDemandEventHandler handler0c;
-	LinkDemandEventHandler handler1;
-	LinkDemandEventHandler handler2;
-	LinkDemandEventHandler handler3;
-
-	LinkDemandEventHandler handler4a;
-	LinkDemandEventHandler handler4b;
-
-	final String networkFile = "network-2-routes.xml";	
+	
+	private final String networkFile = "network-2-routes.xml";	
+	private final int withinDayReplanInterval = 1;
 
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
-	private int withinDayReplanInterval = 1;
 
 	// see if the network change events are considered in the travel time computation
 	@Test
 	public final void test1() {
 		
+		LinkDemandEventHandler handler0;
+		LinkDemandEventHandler handler0a;
+		LinkDemandEventHandler handler0b;
+		LinkDemandEventHandler handler0c;
+		
+		LinkDemandEventHandler handler1a;
+		LinkDemandEventHandler handler2a;
+		LinkDemandEventHandler handler3a;
+		
+		LinkDemandEventHandler handler1b;
+		LinkDemandEventHandler handler2b;
+		LinkDemandEventHandler handler3b;
+		
 		{
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_0/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_0/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
 
@@ -109,7 +113,7 @@ public class IncidentWithinDayReplanningIT {
 		
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_7.00.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_0a/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_0a/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
 
@@ -131,7 +135,7 @@ public class IncidentWithinDayReplanningIT {
 		
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_8.05.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_0b/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_0b/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
 
@@ -153,7 +157,7 @@ public class IncidentWithinDayReplanningIT {
 		
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_10.00.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_0c/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_0c/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
 
@@ -175,7 +179,7 @@ public class IncidentWithinDayReplanningIT {
 		
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_7.00.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_1/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_1a/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
 
@@ -214,15 +218,15 @@ public class IncidentWithinDayReplanningIT {
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
 			
-			handler1 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler1);
+			handler1a = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler1a);
 			
 			controler.run();
 		}
 		
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_8.05.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_2/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_2a/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
 
@@ -262,15 +266,15 @@ public class IncidentWithinDayReplanningIT {
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
 			
-			handler2 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler2);
+			handler2a = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler2a);
 			
 			controler.run();
 		}
 		
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_10.00.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_3/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_3a/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
 
@@ -310,8 +314,151 @@ public class IncidentWithinDayReplanningIT {
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
 			
-			handler3 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler3);
+			handler3a = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler3a);
+			
+			controler.run();
+		}
+		
+		{
+			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_7.00.xml";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_1b/";
+			
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
+
+			config.network().setInputFile(networkFile);
+			config.network().setChangeEventsInputFile(networkChangeEventsFile);
+			config.network().setTimeVariantNetwork(true);
+			config.plans().setInputFile("plans.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			
+			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
+			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
+			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+
+			Set<String> analyzedModes = new HashSet<>();
+			analyzedModes.add(TransportMode.car);
+			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			
+			// within-day replanning
+			controler.addOverridingModule( new AbstractModule() {
+				@Override public void install() {
+										
+					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
+					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
+					
+					this.bind(TravelTime.class).toInstance(travelTime);
+					this.addEventHandlerBinding().toInstance(travelTime);
+					this.addMobsimListenerBinding().toInstance(travelTime);
+					
+//					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
+//					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+				}
+			}) ;
+//			controler.addOverridingModule(new DvrpTravelTimeModule());
+			
+			handler1b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler1b);
+			
+			controler.run();
+		}
+		
+		{
+			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_8.05.xml";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_2b/";
+			
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
+
+			config.network().setInputFile(networkFile);
+			config.network().setChangeEventsInputFile(networkChangeEventsFile);
+			config.network().setTimeVariantNetwork(true);
+			config.plans().setInputFile("plans.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			
+			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
+			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
+			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+
+			Set<String> analyzedModes = new HashSet<>();
+			analyzedModes.add(TransportMode.car);
+			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			
+			// within-day replanning
+			controler.addOverridingModule( new AbstractModule() {
+				@Override public void install() {
+										
+					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
+					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
+					
+					this.bind(TravelTime.class).toInstance(travelTime);
+					this.addEventHandlerBinding().toInstance(travelTime);
+					this.addMobsimListenerBinding().toInstance(travelTime);
+					
+//					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
+//					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+//					
+				}
+			}) ;
+//			controler.addOverridingModule(new DvrpTravelTimeModule());
+			
+			handler2b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler2b);
+			
+			controler.run();
+		}
+		
+		{
+			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_10.00.xml";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_3b/";
+			
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
+
+			config.network().setInputFile(networkFile);
+			config.network().setChangeEventsInputFile(networkChangeEventsFile);
+			config.network().setTimeVariantNetwork(true);
+			config.plans().setInputFile("plans.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			
+			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
+			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
+			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+
+			Set<String> analyzedModes = new HashSet<>();
+			analyzedModes.add(TransportMode.car);
+			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			
+			// within-day replanning
+			controler.addOverridingModule( new AbstractModule() {
+				@Override public void install() {
+										
+					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
+					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
+					
+					this.bind(TravelTime.class).toInstance(travelTime);
+					this.addEventHandlerBinding().toInstance(travelTime);
+					this.addMobsimListenerBinding().toInstance(travelTime);
+					
+//					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
+//					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+//					
+				}
+			}) ;
+//			controler.addOverridingModule(new DvrpTravelTimeModule());
+			
+			handler3b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler3b);
 			
 			controler.run();
 		}
@@ -328,14 +475,23 @@ public class IncidentWithinDayReplanningIT {
 		System.out.println("+++++++ 0c: ");
 		printResults(handler0c);
 		
-		System.out.println("+++++++ 1: ");
-		printResults(handler1);
+		System.out.println("+++++++ 1a: ");
+		printResults(handler1a);
 		
-		System.out.println("+++++++ 2: ");
-		printResults(handler2);
+		System.out.println("+++++++ 2a: ");
+		printResults(handler2a);
 		
-		System.out.println("+++++++ 3: ");
-		printResults(handler3);
+		System.out.println("+++++++ 3a: ");
+		printResults(handler3a);
+		
+		System.out.println("+++++++ 1b: ");
+		printResults(handler1b);
+		
+		System.out.println("+++++++ 2b: ");
+		printResults(handler2b);
+		
+		System.out.println("+++++++ 3b: ");
+		printResults(handler3b);
 		
 		System.out.println("-------------");
 	
@@ -345,16 +501,27 @@ public class IncidentWithinDayReplanningIT {
 		Assert.assertEquals(true, getLongRouteDemand(handler0b) == 0 && getShortRouteDemand(handler0b) == 1);
 		Assert.assertEquals(true, getLongRouteDemand(handler0c) == 0 && getShortRouteDemand(handler0c) == 1);
 		
-		Assert.assertEquals(true, getLongRouteDemand(handler1) == 1 && getShortRouteDemand(handler1) == 0);
-		Assert.assertEquals(true, getLongRouteDemand(handler2) == 1 && getShortRouteDemand(handler1) == 0);
-		Assert.assertEquals(true, getLongRouteDemand(handler3) == 0 && getShortRouteDemand(handler3) == 1);
+		// mm approach
+		Assert.assertEquals(true, getLongRouteDemand(handler1a) == 1 && getShortRouteDemand(handler1a) == 0);
+		Assert.assertEquals(true, getLongRouteDemand(handler2a) == 1 && getShortRouteDemand(handler1a) == 0);
+		Assert.assertEquals(true, getLongRouteDemand(handler3a) == 0 && getShortRouteDemand(handler3a) == 1);
+		
+		// dobler approach
+		Assert.assertEquals(true, getLongRouteDemand(handler1b) == 1 && getShortRouteDemand(handler1b) == 0);
+		Assert.assertEquals(true, getLongRouteDemand(handler2b) == 1 && getShortRouteDemand(handler1b) == 0);
+		Assert.assertEquals(true, getLongRouteDemand(handler3b) == 0 && getShortRouteDemand(handler3b) == 1);
 	}
 	
-	// see if the congestion effects are considered in the travel time computation
+	// see if the congestion effects are considered in the travel time computation (2 agents)
+	// dvrp approach
 	@Test
-	public final void test2() {
+	public final void test2a() {
+		
+		LinkDemandEventHandler handler4;
+		LinkDemandEventHandler handler5a;
+		
 		{
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_4a/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_4/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
 
@@ -366,19 +533,17 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			handler4a = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler4a);
+			handler4 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler4);
 			
 			controler.run();
 		}
 		
 		{
-			String outputDirectory = testUtils.getOutputDirectory() + "output-berlin-analysis_4b/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_5a/";
 			
 			DvrpConfigGroup dvrpConfigGroup = new DvrpConfigGroup();
 			dvrpConfigGroup.setTravelTimeEstimationAlpha(1.0);
-//			dvrpConfigGroup.setNetworkMode(TransportMode.car);
-//			dvrpConfigGroup.setMode(TransportMode.car);
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", dvrpConfigGroup);
 			
 			config.network().setInputFile(networkFile);
@@ -392,10 +557,65 @@ public class IncidentWithinDayReplanningIT {
 			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
 			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
 			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+				
+			// within-day replanning
+			controler.addOverridingModule( new AbstractModule() {
+				@Override public void install() {
+										
+					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
+					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
+					
+					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
+					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+				}
+			}) ;
+			controler.addOverridingModule(new DvrpTravelTimeModule());
 			
-//			Set<String> analyzedModes = new HashSet<>();
-//			analyzedModes.add(TransportMode.car);
-//			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			handler5a = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler5a);
+			
+			controler.run();
+		}
+		
+		System.out.println("+++++++ 4: ");
+		printResults(handler4);
+		
+		System.out.println("+++++++ 5a: ");
+		printResults(handler5a);
+		
+		System.out.println("-------------");
+		
+		Assert.assertEquals(true, getLongRouteDemand(handler4) == 0 && getShortRouteDemand(handler4) == 2);
+		Assert.assertEquals(true, getLongRouteDemand(handler5a) == 2 && getShortRouteDemand(handler5a) == 0);
+	}
+
+	// see if the congestion effects are considered in the travel time computation (2 agents)
+	// dobler approach
+	@Ignore
+	@Test
+	public final void test2b() {
+		
+		LinkDemandEventHandler handler5b;
+		
+		{
+			String outputDirectory = testUtils.getOutputDirectory() + "output_5b/";
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
+			
+			config.network().setInputFile(networkFile);
+			config.plans().setInputFile("plans_2agents.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			
+			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
+			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
+			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+			
+			Set<String> analyzedModes = new HashSet<>();
+			analyzedModes.add(TransportMode.car);
+			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
 			
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -404,9 +624,78 @@ public class IncidentWithinDayReplanningIT {
 					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
 					
-//					this.bind(TravelTime.class).toInstance(travelTime);
-//					this.addEventHandlerBinding().toInstance(travelTime);
-//					this.addMobsimListenerBinding().toInstance(travelTime);
+					this.bind(TravelTime.class).toInstance(travelTime);
+					this.addEventHandlerBinding().toInstance(travelTime);
+					this.addMobsimListenerBinding().toInstance(travelTime);
+				}
+			}) ;
+			
+			handler5b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler5b);
+			
+			controler.run();
+		}
+					
+		System.out.println("+++++++ 5b: ");
+		printResults(handler5b);
+		
+		System.out.println("-------------");
+		
+		Assert.assertEquals(true, getLongRouteDemand(handler5b) == 2 && getShortRouteDemand(handler5b) == 0);
+	}
+	
+	// see if the congestion effects are considered in the travel time computation (10 agents)
+	// dvrp approach
+	@Test
+	public final void test3a() {
+		
+		LinkDemandEventHandler handler6;
+		LinkDemandEventHandler handler7a;
+		
+		{
+			String outputDirectory = testUtils.getOutputDirectory() + "output_6/";
+			
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
+
+			config.network().setInputFile(networkFile);
+			config.plans().setInputFile("plans_moreAgents.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			
+			handler6 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler6);
+			
+			controler.run();
+		}
+		
+		{
+			String outputDirectory = testUtils.getOutputDirectory() + "output_7a/";
+			
+			DvrpConfigGroup dvrpConfigGroup = new DvrpConfigGroup();
+			dvrpConfigGroup.setTravelTimeEstimationAlpha(1.0);
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", dvrpConfigGroup);
+			
+			config.network().setInputFile(networkFile);
+			config.plans().setInputFile("plans_moreAgents.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			
+			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
+			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
+			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+				
+			// within-day replanning
+			controler.addOverridingModule( new AbstractModule() {
+				@Override public void install() {
+										
+					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
+					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
 					
 					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
 					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
@@ -414,22 +703,77 @@ public class IncidentWithinDayReplanningIT {
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
 			
-			handler4b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler4b);
+			handler7a = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler7a);
 			
 			controler.run();
 		}
 		
-		System.out.println("+++++++ 4a: ");
-		printResults(handler4a);
+		System.out.println("+++++++ 6: ");
+		printResults(handler6);
 		
-		System.out.println("+++++++ 4b: ");
-		printResults(handler4b);
+		System.out.println("+++++++ 7a: ");
+		printResults(handler7a);
 		
 		System.out.println("-------------");
 		
-		Assert.assertEquals(true, getLongRouteDemand(handler4a) == 0 && getShortRouteDemand(handler4a) == 2);
-		Assert.assertEquals(true, getLongRouteDemand(handler4b) == 2 && getShortRouteDemand(handler4b) == 0);
+		Assert.assertEquals(true, getLongRouteDemand(handler6) == 0 && getShortRouteDemand(handler6) == 10);
+		Assert.assertEquals(true, getLongRouteDemand(handler7a) == 10 && getShortRouteDemand(handler7a) == 0);
+	}
+	
+	// see if the congestion effects are considered in the travel time computation (10 agents)
+	// dobler approach
+	@Ignore
+	@Test
+	public final void test3b() {
+		
+		LinkDemandEventHandler handler7b;
+
+		{
+			String outputDirectory = testUtils.getOutputDirectory() + "output_7b/";
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
+			
+			config.network().setInputFile(networkFile);
+			config.plans().setInputFile("plans_moreAgents.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			
+			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
+			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
+			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+			
+			Set<String> analyzedModes = new HashSet<>();
+			analyzedModes.add(TransportMode.car);
+			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			
+			// within-day replanning
+			controler.addOverridingModule( new AbstractModule() {
+				@Override public void install() {
+										
+					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
+					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
+					
+					this.bind(TravelTime.class).toInstance(travelTime);
+					this.addEventHandlerBinding().toInstance(travelTime);
+					this.addMobsimListenerBinding().toInstance(travelTime);
+					
+				}
+			}) ;
+			
+			handler7b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler7b);
+			
+			controler.run();
+		}
+	
+		System.out.println("+++++++ 7b: ");
+		printResults(handler7b);
+		System.out.println("-------------");		
+		
+		Assert.assertEquals(true, getLongRouteDemand(handler7b) == 10 && getShortRouteDemand(handler7b) == 0);
 	}
 	
 	private void printResults(LinkDemandEventHandler handler) {
