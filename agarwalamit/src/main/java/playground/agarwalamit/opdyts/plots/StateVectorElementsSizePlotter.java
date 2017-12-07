@@ -41,13 +41,15 @@ public class StateVectorElementsSizePlotter {
         if (System.getProperty("user.name").equals("amit")) {
             runsSVN = FileUtils.RUNS_SVN;
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> cemdapDemandGeneratorChanges
         String outDir = runsSVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_5/"+"/vectorElementSizeFiles/";
         new File(outDir+"/plots_log/").mkdir();
         int firstIt = 0;
         int lastIt = 1000;
         int plotEveryItr = 50;
-
-
 
         for (int itr = firstIt+1; itr <=lastIt; itr++) {
             if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(outDir).exists() ) {

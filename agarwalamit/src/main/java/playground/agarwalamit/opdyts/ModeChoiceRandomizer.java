@@ -42,6 +42,10 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
     public enum ASCRandomizerStyle {
         axial_randomVariation, // combinations like (0,+), (0,-), (+,0), (-,0)
         diagonal_randomVariation, // combinations like (+,+), (+,-), (-,+), (-,-)
+        /**
+         * A consequence of fixed variation is that if trial of a decision variable does not improve objective function,
+         * same set of decision variables will be re-created. Amit Dec'17
+         */
         axial_fixedVariation,
         diagonal_fixedVariation
     }
@@ -77,6 +81,12 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         this.opdytsScenario = opdytsScenario;
         this.considerdModes = considerdModes;
         this.ascRandomizerStyle = ascRandomizerStyle;
+
+        if (this.ascRandomizerStyle.equals(ASCRandomizerStyle.axial_fixedVariation) || this.ascRandomizerStyle.equals(ASCRandomizerStyle.diagonal_fixedVariation)) {
+            log.warn("A consequence of the fixed variation: if trial of a decision variable does not improve \n" +
+                    "the overall objective function, the next set of decision variables is likely to be same. \n" +
+                    "This means, eventually, there will not be any improvements afterwards.");
+        }
 
         // a higher population size would matter for fixed variation styles even if they start with same simulation state,
         // however, matsim random is sequential and thus, they can end up in a different traffic pattern. Amit Oct'17
