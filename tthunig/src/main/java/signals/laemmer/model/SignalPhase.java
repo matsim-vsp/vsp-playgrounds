@@ -14,6 +14,8 @@ import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.data.Lane;
 
 public class SignalPhase {
+	// TODO ist doch sinnvoll, dass eine Signalphase ihre Groups kennt. Muss beim Erstellen der Phase gefuellt werden (Konstruktor)! tt, dez'17
+	private List<SignalGroup> signalGroups = new LinkedList<>();
 	private Map<Id<SignalGroup>, List<Id<Lane>>> greenSignalsToLanes = new HashMap<>();
 	private Set<Id<Lane>> lanes = new HashSet<>();
 	private Id<SignalPhase> id;
@@ -54,11 +56,10 @@ public class SignalPhase {
 			return false;
 	}
 
-	//TODO Perhaps anybody has a better idea how to define the state better w/o changing the whole matsim-signal-logic
-	public SignalGroupState getState(SignalSystem system) {
+	public SignalGroupState getState() {
 		boolean allGreen = true;
-		for (Id<SignalGroup> sg : getGreenSignalGroups())
-			allGreen &= (system.getSignalGroups().get(sg).getState().equals(SignalGroupState.GREEN));
+		for (SignalGroup sg : signalGroups)
+			allGreen &= sg.getState().equals(SignalGroupState.GREEN);
 		return (allGreen ? SignalGroupState.GREEN : SignalGroupState.RED);
 	}
 	

@@ -168,7 +168,7 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
             updateActiveRegulation(now);
         }
         updateSignals(now);
-        if(activeRequest != null && activeRequest.signal.phase.getState(system).equals(SignalGroupState.GREEN)) {
+        if(activeRequest != null && activeRequest.signal.phase.getState().equals(SignalGroupState.GREEN)) {
             double remainingMinG = activeRequest.time + MIN_G - now;
 //            double remainingInBetweenTime = Math.max(activeRequest.time - now, 0);
 //            double remainingMinG = Math.max(activeRequest.time - now + MIN_G - remainingInBetweenTime, 0);
