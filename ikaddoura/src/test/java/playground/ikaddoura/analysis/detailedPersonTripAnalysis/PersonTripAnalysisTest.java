@@ -37,8 +37,8 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripBa
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysis;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
-import playground.tschlenther.createNetwork.ForkNetworkCreator;
 import playground.vsp.congestion.events.CongestionEventsReader;
+import playground.vsp.createTestNetworks.ForkNetworkCreator;
 
 
 public class PersonTripAnalysisTest {

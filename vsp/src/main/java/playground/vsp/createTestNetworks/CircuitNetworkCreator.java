@@ -1,4 +1,4 @@
-package playground.tschlenther.createNetwork;
+package playground.vsp.createTestNetworks;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
