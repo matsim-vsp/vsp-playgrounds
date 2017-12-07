@@ -45,4 +45,4 @@ def plotDecisionVariableParameters(parentDir, regexStr, lastItr, statsFileName, 
 
 filesDir = '/Users/amit/Documents/gitlab/runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize7random_30it_score/'
 
-plotDecisionVariableParameters(filesDir, 'offset', 6, 'opdyts_offsetStats.txt', 10)
+plotDecisionVariableParam
