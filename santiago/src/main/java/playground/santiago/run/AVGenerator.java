@@ -43,7 +43,7 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class AVGenerator {
 	private static class AVCreator implements VehicleGenerator.VehicleCreator {
-		private static final int PAX_PER_CAR = 4;
+		private static final int PAX_PER_CAR = 2;
 
 		// 1 : 3 is the proportion in density between bigger and smaller rectangle
 		private static final double DENSITY_RELATION = 1. / 4;
