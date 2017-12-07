@@ -189,6 +189,7 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 	}
 
 	private void doCycleAnalysis(SignalGroupStateChangedEvent event) {
+		// TODO so far, this only works for fixed signals. instead: collect green switches and 'start' a new cycle, when any group switches again to green (empty the list at this moment and start collecting again)
 		if (!firstSignalGroupOfSignalSystem.containsKey(event.getSignalSystemId())){
 			// it is the first time that a signal group of this system switches to green.
 			// remember first signal group of the system
