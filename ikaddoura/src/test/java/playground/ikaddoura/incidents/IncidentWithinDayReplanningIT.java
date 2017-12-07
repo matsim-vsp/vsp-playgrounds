@@ -241,6 +241,7 @@ public class IncidentWithinDayReplanningIT {
 		
 	}
 	
+	// TODO
 	// see if the network change events are considered in the travel time computation
 	// dobler approach
 	@Ignore
@@ -477,6 +478,7 @@ public class IncidentWithinDayReplanningIT {
 
 	// see if the congestion effects are considered in the travel time computation (2 agents)
 	// dobler approach
+	// TODO
 	@Ignore
 	@Test
 	public final void test2b() {
@@ -609,6 +611,7 @@ public class IncidentWithinDayReplanningIT {
 	
 	// see if the congestion effects are considered in the travel time computation (10 agents)
 	// dobler approach
+	// TODO
 	@Ignore
 	@Test
 	public final void test3b() {
