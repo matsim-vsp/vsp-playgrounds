@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -40,15 +41,17 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
+import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
-
-import playground.jbischoff.taxi.berlin.demand.TaxiDemandWriter;
-import playground.jbischoff.utils.JbUtils;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
 /**
  * @author  jbischoff
@@ -80,7 +83,7 @@ public class PopulationBasedTaxiVehicleCreator {
 				
 		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
-		this.geometry = JbUtils.readShapeFileAndExtractGeometry(shapeFile, "SCHLUESSEL");	
+		this.geometry = readShapeFileAndExtractGeometry(shapeFile, "SCHLUESSEL");	
 		this.wrs = new WeightedRandomSelection<>();
 		this.ct = TransformationFactory.getCoordinateTransformation("EPSG:25833", TransformationFactory.DHDN_GK4);
         readPopulationData();
@@ -108,7 +111,7 @@ public class PopulationBasedTaxiVehicleCreator {
 	    
 		for (int i = 0 ; i< amount; i++){
 			Link link ;
-		Point p = TaxiDemandWriter.getRandomPointInFeature(random, geometry.get(wrs.select()));
+		Point p = getRandomPointInFeature(random, geometry.get(wrs.select()));
 		link = NetworkUtils.getNearestLinkExactly(((Network) scenario.getNetwork()),ct.transform( MGC.point2Coord(p)));
 		
         Vehicle v = new VehicleImpl(Id.create("rt"+i, Vehicle.class), link, 5, Math.round(1), Math.round(30*3600));
@@ -116,5 +119,42 @@ public class PopulationBasedTaxiVehicleCreator {
 
 		}
 		new VehicleWriter(vehicles).write(vehiclesFilePrefix+amount+".xml.gz");
+	}
+	
+	private static Point getRandomPointInFeature(Random rnd, Geometry g)
+    {
+        Point p = null;
+        double x, y;
+        do {
+            x = g.getEnvelopeInternal().getMinX() + rnd.nextDouble()
+                    * (g.getEnvelopeInternal().getMaxX() - g.getEnvelopeInternal().getMinX());
+            y = g.getEnvelopeInternal().getMinY() + rnd.nextDouble()
+                    * (g.getEnvelopeInternal().getMaxY() - g.getEnvelopeInternal().getMinY());
+            p = MGC.xy2Point(x, y);
+        }
+        while (!g.contains(p));
+        return p;
+    }
+	
+	private static Map<String,Geometry> readShapeFileAndExtractGeometry(String filename, String key){
+		
+		Map<String,Geometry> geometry = new TreeMap<>();	
+		for (SimpleFeature ft : ShapeFileReader.getAllFeatures(filename)) {
+			
+				GeometryFactory geometryFactory= new GeometryFactory();
+				WKTReader wktReader = new WKTReader(geometryFactory);
+
+				try {
+					Geometry geo = wktReader.read((ft.getAttribute("the_geom")).toString());
+					String lor = ft.getAttribute(key).toString();
+					geometry.put(lor, geo);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			 
+		}	
+		return geometry;
 	}
 }

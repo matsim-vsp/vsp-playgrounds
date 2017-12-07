@@ -140,11 +140,12 @@ public class IncidentDataDownload extends TimerTask {
 		if (downloadXMLFile) {
 			try {
 				FileUtils.copyURLToFile(url, new File(outputPathAndFile));
-				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		
 			log.info("URL content copied to file " + outputPathAndFile);
+				
 		}
 		
 		if (downloadZipFile) {

@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -138,11 +139,9 @@ public class FlowDataDownload extends TimerTask {
 		if (downloadXMLFile) {
 			try {
 				FileUtils.copyURLToFile(url, new File(outputPathAndFile));
-				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			log.info("URL content copied to file " + outputPathAndFile);
 		}
 		
 		if (downloadZipFile) {
