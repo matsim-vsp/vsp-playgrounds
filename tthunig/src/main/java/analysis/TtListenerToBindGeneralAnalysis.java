@@ -75,7 +75,7 @@ public class TtListenerToBindGeneralAnalysis implements IterationEndsListener {
 	 */
 	private void runGnuplotScript(String gnuplotScriptName, int iteration){
 		String pathToSpecificAnalysisDir = scenario.getConfig().controler().getOutputDirectory() + "/ITERS/it." + iteration + "/analysis";		
-		String relativePathToGnuplotScript = "../../../../../../../../shared-svn/studies/tthunig/gnuplotScripts/" + gnuplotScriptName  + ".p";
+		String relativePathToGnuplotScript = "../../../../../../../shared-svn/studies/tthunig/gnuplotScripts/" + gnuplotScriptName  + ".p";
 		
 		GnuplotUtils.runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript);
 //		log.info("execute command: cd " + pathToSpecificAnalysisDir);

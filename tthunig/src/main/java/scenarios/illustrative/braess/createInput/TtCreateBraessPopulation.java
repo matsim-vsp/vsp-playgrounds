@@ -49,6 +49,7 @@ import org.matsim.core.population.routes.RouteUtils;
  */
 public final class TtCreateBraessPopulation {
 	
+	/** ALL means: initialize all 3 routes, select the outer ones */
 	public enum InitRoutes{
 		ALL, ONLY_MIDDLE, ONLY_OUTER, NONE
 	}

@@ -56,6 +56,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.data.LanesWriter;
 
+import analysis.TtAnalyzedGeneralResultsWriter;
+import analysis.TtGeneralAnalysis;
+import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
@@ -113,10 +116,10 @@ public final class RunBraessSimulation {
 	private static final Double INIT_PLAN_SCORE = null;
 	
 	// defines which kind of signals should be used. use 'SIGNAL_LOGIC = SignalControlLogic.NONE' if signals should not be used
-	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.NONE;
+	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.SIGNAL4_X_SECOND_Z_V2Z;
 	// if SignalBasePlan SIGNAL4_X_Seconds_Z.. is used, SECONDS_Z_GREEN gives the green time for Z
 	private static final int SECONDS_Z_GREEN = 30;
-	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.NONE;
+	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.LAEMMER;
 	
 	// defines which kind of lanes should be used
 	private static final LaneType LANE_TYPE = LaneType.NONE;
@@ -133,7 +136,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/intervalBased/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/laemmer/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -160,7 +163,7 @@ public final class RunBraessSimulation {
 		Config config = ConfigUtils.createConfig();
 
 		// set number of iterations
-		config.controler().setLastIteration(200);
+		config.controler().setLastIteration(100);
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
@@ -471,9 +474,7 @@ public final class RunBraessSimulation {
 						SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 				if (signalsConfigGroup.isUseSignalSystems()) {
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class).asEagerSingleton();
-					this.addEventHandlerBinding().to(TtSignalAnalysisTool.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisTool.class);
+					this.bind(TtSignalAnalysisTool.class);
 					this.bind(TtSignalAnalysisWriter.class);
 					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
 				}

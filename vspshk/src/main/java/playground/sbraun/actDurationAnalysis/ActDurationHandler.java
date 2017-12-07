@@ -51,13 +51,9 @@ public class ActDurationHandler implements ActivityStartEventHandler,ActivityEnd
 	List<String> activityChain = new ArrayList<>();
 	String agent_activity;
 	double duration;
-	Network network;
-
+	double totalduration = 0.0;
 	
 	
-	public ActDurationHandler(Network network) {
-		this.network = network;
-	}
 
 
 	@Override
@@ -78,9 +74,15 @@ public class ActDurationHandler implements ActivityStartEventHandler,ActivityEnd
 		if((Activitys.get(event.getPersonId())!=null || duration_la.get(event.getPersonId())!=null)&& !event.getActType().equals("pt interaction")) {
 			String agent_activity = event.getPersonId() +";"+Activitys.get(event.getPersonId()) + ";" +(event.getTime()-duration_la.get(event.getPersonId()))+"sec;";
 			activityChain.add(agent_activity);
+			totalduration = totalduration + (event.getTime()-duration_la.get(event.getPersonId()));
 		}
 	}
 
+	public double getTotalDuration() {
+		return totalduration;
+	}
+		
+		
 	public void output(String filename){
 		BufferedWriter bw = IOUtils.getBufferedWriter(filename);
 		try {
