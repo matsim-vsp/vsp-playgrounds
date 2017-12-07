@@ -90,8 +90,8 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 	private static boolean cadyts;
 	/***/
 
-	private static String inputPath = "d:\\matsim-eclipse\\runs-svn\\santiago\\v2a\\";
-	private static String configFile = inputPath + "config_v2a_medium.xml";
+	private static String inputPath = "D:\\matsim-eclipse\\shared-svn\\projects\\santiago\\scenario\\inputForMATSim\\AV_simulation\\";
+	private static String configFile = inputPath + "config_v2a_full.xml";
 
 	public static void main(String args[]) {
 
@@ -107,7 +107,7 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 
 		} else {
 
-			gantriesFile = inputPath + "input\\" + "gantries.xml";
+			gantriesFile = inputPath + "gantries.xml";
 			policy = 0;
 			sigma = 3;
 			doModeChoice = true; // TODO:BE AWARE OF THIS!
@@ -128,7 +128,7 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		Controler controler = new Controler(scenario);
 
 		addTaxis(controler);
-		
+
 		// adding other network modes than car requires some router; here, the same values as for car are used
 		setNetworkModeRouting(controler);
 
@@ -136,15 +136,17 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		controler.getEvents().addHandler(new PTFareHandler(controler, doModeChoice, scenario.getPopulation()));
 
 		// adding basic strategies for car and non-car users
-		setBasicStrategiesForSubpopulations(controler);
+		setBasicStrategiesForSubpopulations(config);
 
 		// adding subtour mode choice strategies for car and non-car users
-		if (doModeChoice)
+		if (doModeChoice) {
 			setModeChoiceForSubpopulations(controler);
+		}
 
 		// mapping agents' activities to links on the road network to avoid being stuck on the transit network
-		if (mapActs2Links)
+		if (mapActs2Links) {
 			mapActivities2properLinks(scenario);
+		}
 
 		// Adding the toll links file in the config
 		RoadPricingConfigGroup rpcg = ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME,
@@ -268,28 +270,28 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		});
 	}
 
-	private static void setBasicStrategiesForSubpopulations(MatsimServices controler) {
-		setReroute("carAvail", controler);
-		setChangeExp("carAvail", controler);
-		setReroute(null, controler);
-		setChangeExp(null, controler);
+	private static void setBasicStrategiesForSubpopulations(Config config) {
+		setReroute("carAvail", config);
+		setChangeExp("carAvail", config);
+		setReroute(null, config);
+		setChangeExp(null, config);
 	}
 
-	private static void setChangeExp(String subpopName, MatsimServices controler) {
+	private static void setChangeExp(String subpopName, Config config) {
 		StrategySettings changeExpSettings = new StrategySettings();
 		changeExpSettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 		changeExpSettings.setSubpopulation(subpopName);
 		// changeExpSettings.setWeight(0.85);
 		changeExpSettings.setWeight(0.7); // TODO: BE AWARE OF THIS!!!
-		controler.getConfig().strategy().addStrategySettings(changeExpSettings);
+		config.strategy().addStrategySettings(changeExpSettings);
 	}
 
-	private static void setReroute(String subpopName, MatsimServices controler) {
+	private static void setReroute(String subpopName, Config config) {
 		StrategySettings reRouteSettings = new StrategySettings();
 		reRouteSettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.toString());
 		reRouteSettings.setSubpopulation(subpopName);
 		reRouteSettings.setWeight(0.15);
-		controler.getConfig().strategy().addStrategySettings(reRouteSettings);
+		config.strategy().addStrategySettings(reRouteSettings);
 	}
 
 	private static void setModeChoiceForSubpopulations(final Controler controler) {
@@ -300,7 +302,7 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		modeChoiceCarAvail.setWeight(0.15);
 		controler.getConfig().strategy().addStrategySettings(modeChoiceCarAvail);
 
-		final String nameMcNonCarAvail = "SubtourModeChoice_".concat("nonCarAvail");
+		final String nameMcNonCarAvail = "SubtourModeChoice";
 		StrategySettings modeChoiceNonCarAvail = new StrategySettings();
 		modeChoiceNonCarAvail.setStrategyName(nameMcNonCarAvail);
 		modeChoiceNonCarAvail.setSubpopulation(null);

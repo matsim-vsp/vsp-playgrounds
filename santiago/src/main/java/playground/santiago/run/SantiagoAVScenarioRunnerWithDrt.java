@@ -93,7 +93,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 	private static boolean cadyts;
 	/***/
 
-	private static String inputPath = "d:\\matsim-eclipse\\runs-svn\\santiago\\v2a\\";
+	private static String inputPath = "D:\\matsim-eclipse\\shared-svn\\projects\\santiago\\scenario\\inputForMATSim\\AV_simulation\\";
 	private static String configFile = inputPath + "config_v2a_medium_DRT.xml";
 
 	public static void main(String args[]) {
@@ -110,7 +110,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 
 		} else {
 
-			gantriesFile = inputPath + "input\\" + "gantries.xml";
+			gantriesFile = inputPath + "gantries.xml";
 			policy = 0;
 			sigma = 3;
 			doModeChoice = true; // TODO:BE AWARE OF THIS!
