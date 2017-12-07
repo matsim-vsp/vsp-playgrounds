@@ -49,6 +49,7 @@ import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataImpl;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
@@ -83,6 +84,7 @@ import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
 import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.laemmer.model.LaemmerSignalController;
 import signals.sylvia.controler.DgSylviaConfig;
 import signals.sylvia.data.DgSylviaPreprocessData;
 
@@ -94,13 +96,13 @@ public class RunGridLock {
 
 	private static final Logger log = Logger.getLogger(RunGridLock.class);
 	
-	private enum SignalType { NONE, PLANBASED, DOWNSTREAM, SYLVIA}
+	private enum SignalType { NONE, PLANBASED, DOWNSTREAM, SYLVIA, LAEMMER}
 	private static final SignalType SIGNALTYPE = SignalType.PLANBASED;
 	
 	private enum SignalBasis { GREEN, CONFLICTING, TWO_ALTERNATING }
-	private static final SignalBasis SIGNALBASIS = SignalBasis.CONFLICTING;
+	private static final SignalBasis SIGNALBASIS = SignalBasis.TWO_ALTERNATING;
 	
-	private static final double MIDDLE_LINK_CAP = 1800;
+	private static final double MIDDLE_LINK_CAP = 3600;
 	// no grid lock for 3600 and planbased signals: they let only 1800 vehicles enter the system
 	
 	private static final int DEMAND_START_TIME_OFFSET  = 0; // choose 0 if both streams should start at the same time
@@ -132,6 +134,7 @@ public class RunGridLock {
 //			sylviaConfig.setSignalGroupMaxGreenScale(2);
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
+			// TODO add laemmer module to enable/disable downstream sensor etc
 			controler.addOverridingModule(signalsModule);
 
 			controler.addOverridingModule(new AbstractModule() {
@@ -140,9 +143,7 @@ public class RunGridLock {
 					// TODO inflow and outflow analysis so far in TtRunPostAnalysis
 
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class).asEagerSingleton();
-					this.addEventHandlerBinding().to(TtSignalAnalysisTool.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisTool.class);
+					this.bind(TtSignalAnalysisTool.class);
 					this.bind(TtSignalAnalysisWriter.class);
 					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
 				}
@@ -154,7 +155,7 @@ public class RunGridLock {
 	
 	private static Config defineConfig() {
 		Config config = ConfigUtils.createConfig();
-		config.controler().setOutputDirectory("../../runs-svn/gridlock/twoStream/"+SIGNALTYPE+"_basis"+SIGNALBASIS+MIDDLE_LINK_CAP+"_demand"+DEMAND_INTENSITY+"_offset"+DEMAND_START_TIME_OFFSET+"/");
+		config.controler().setOutputDirectory("../../runs-svn/gridlock/laemmer/"+SIGNALTYPE+"_basis"+SIGNALBASIS+MIDDLE_LINK_CAP+"_demand"+DEMAND_INTENSITY+"_offset"+DEMAND_START_TIME_OFFSET+"/");
 
 		// set number of iterations
 		config.controler().setLastIteration(0);
@@ -398,8 +399,12 @@ public class RunGridLock {
 		signalUTurn.addLaneId(Id.create(TwoLaneLinkId + ".l", Lane.class));
 		signalUTurn.addTurningMoveRestriction(incommingToLinkId);
 
-		// create a group for all signals each (one element groups)
-		SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem);
+		if (!SIGNALTYPE.equals(SignalType.LAEMMER)) {
+			// create a group for all signals each (one element groups)
+			SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem);
+		} else {
+			// define groups later while setting signal control
+		}
 
 		// create the signal control
 		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
@@ -452,11 +457,35 @@ public class RunGridLock {
 			}
 			signalControl.addSignalSystemControllerData(signalSystemControl);
 			break;
+		case LAEMMER:
+			signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+			switch (SIGNALBASIS){
+			case GREEN:
+				throw new UnsupportedOperationException("Laemmer can not be combined with basis " + SignalBasis.GREEN + ". It needs information about signal groups.");
+			case CONFLICTING:
+				throw new UnsupportedOperationException("The current implementation of Laemmer signals can not be combined with basis " + SignalBasis.CONFLICTING + ". It needs disjunct signal groups.");
+			case TWO_ALTERNATING:
+				log.info("Create two alternating signal phases");
+				// create disjunct groups
+				SignalGroupData incommingGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("incomming", SignalGroup.class));
+				incommingGroup.addSignalId(signalIncomming.getId());
+				signalGroups.addSignalGroupData(incommingGroup);
+				SignalGroupData outgoingUturnGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("outgoingUturn", SignalGroup.class));
+				outgoingUturnGroup.addSignalId(signalOutgoing.getId());
+				outgoingUturnGroup.addSignalId(signalUTurn.getId());
+				signalGroups.addSignalGroupData(outgoingUturnGroup);
+				// add control
+				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, incommingGroup.getId(), 0, 29));
+				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, outgoingUturnGroup.getId(), 30, 59));
+				break;
+			}
+			signalControl.addSignalSystemControllerData(signalSystemControl);
+			break;
 		case SYLVIA:
 			signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
 			switch (SIGNALBASIS) {
 			case GREEN:
-				throw new UnsupportedOperationException("Sylvia can only be combined with signal basis " + SignalBasis.TWO_ALTERNATING);
+				throw new UnsupportedOperationException("Sylvia can not be combined with basis " + SignalBasis.GREEN);
 			case CONFLICTING:
 				log.info("Create alternating signal phases for conflicting streams");
 				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, Id.create(signalIncomming.getId(), SignalGroup.class), 0, 29));
