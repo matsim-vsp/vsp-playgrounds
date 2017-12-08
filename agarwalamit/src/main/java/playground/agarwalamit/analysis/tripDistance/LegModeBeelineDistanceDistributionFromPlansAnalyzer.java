@@ -215,7 +215,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 			for(PlanElement pe : planElements){
 				if(pe instanceof Leg){
 					Leg leg = (Leg)pe;
-					Route route = ((Route)((Leg)pe).getRoute());
+					Route route = ((Leg)pe).getRoute();
 					double distance = route != null ? route.getDistance() : 0.;
 					Map<Id<Person>, List<Double>> personId2dist = this.mode2PersonId2dist.get(leg.getMode());
 					if(personId2dist.containsKey(person.getId())){
@@ -239,7 +239,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 			List<PlanElement> planElements = plan.getPlanElements();
 			for(PlanElement pe : planElements){
 				if(pe instanceof Leg ){
-					Route route = ((Route)((Leg)pe).getRoute());
+					Route route = ((Leg)pe).getRoute();
 					double distance = route!=null ? route.getDistance() : 0.;
 					if(distance > longestDistance){
 						longestDistance = distance;
@@ -303,9 +303,9 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 	public Map<String,Double> getModeToShare(){
 		Map<String, Double> mode2legCount = mode2DistanceClass2LegCount.entrySet().parallelStream().collect(
 				Collectors.toMap(
-						e -> e.getKey(),
+                        Map.Entry::getKey,
 						e-> e.getValue().values().parallelStream().mapToDouble(Number::doubleValue).sum()));
 		double sumShare = mode2legCount.values().stream().mapToDouble(Number::doubleValue).sum();
-		return mode2legCount.entrySet().stream().collect(Collectors.toMap(entry-> entry.getKey(), entry -> entry.getValue() / sumShare ));
+		return mode2legCount.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() / sumShare ));
 	}
 }

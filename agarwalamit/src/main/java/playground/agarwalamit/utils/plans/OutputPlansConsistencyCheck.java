@@ -293,9 +293,7 @@ public class OutputPlansConsistencyCheck {
                     .entrySet()
                     .stream()
                     .map(e -> e.getValue().get(finalIndex))
-                    .forEach(acts -> {
-                        actSeq2Count.put(acts.toString(), actSeq2Count.containsKey(acts.toString()) ? actSeq2Count.get(acts.toString()) + 1 : 1);
-                    });
+                    .forEach(acts -> actSeq2Count.put(acts.toString(), actSeq2Count.containsKey(acts.toString()) ? actSeq2Count.get(acts.toString()) + 1 : 1));
             try {
                 writer.write("act Sequence \t count \n");
                 for (String str : actSeq2Count.keySet()) {

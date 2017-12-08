@@ -31,8 +31,6 @@ import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-//import playground.sebhoerl.mexec.ssh.utils.SSHFile;
-//import playground.sebhoerl.mexec.ssh.utils.SSHUtils;
 
 /**
  * Created by amit on 28/03/2017.
@@ -48,7 +46,6 @@ public class RunSSHScript {
 
     public static void main(String[] args) {
         new RunSSHScript().runViaChannelDirectly();
-//        new RunSSHScript().runViaSSHUtils();
     }
 
     /*
@@ -105,7 +102,7 @@ public class RunSSHScript {
             channel.connect();
             String line = bufferedReader.readLine();
             while ( line != null) {
-                output.append(line+"\n");
+                output.append(line).append("\n");
                 line = bufferedReader.readLine();
             }
 
@@ -114,41 +111,6 @@ public class RunSSHScript {
             throw new RuntimeException("Aborting. Reason : " + e);
         } catch (IOException exx) {
             throw new RuntimeException("Data is not written/read. Reason : " + exx);
-        }
-    }
-
-    public void runViaSSHUtils() {
-        try {
-            JSch jSch = new JSch();
-            jSch.setKnownHosts("~/.ssh/known_hosts"); // location of the ssh fingerprint (unique host key)
-
-            Properties config = new Properties();
-            config.put("StrictHostKeyChecking", "no"); // so that no question asked, and script run without any problem
-
-            Session session = jSch.getSession("agarwal", "cluster-i.math.tu-berlin.de", 22);
-            session.setConfig(config);
-//            session.setPassword(myPassword);
-
-            try {
-                session.connect();
-//FIXME: sebhoerl playground is no longer available
-                //
-//                SSHUtils sshUtils = new SSHUtils(session);
-//                String script = "/net/ils4/agarwal/patnaOpdyts/script_allModes.sh";
-//
-//                sshUtils.mkdirs(new SSHFile("/net/ils4/agarwal/testDir/"));
-//
-//                SSHUtils.RunResult runResult = sshUtils.execute("qstat -u agarwal");
-//                System.out.println(runResult.output); // TODO idk, how to see the output on the console.
-//
-//                sshUtils.execute("qsub "+script);
-            } finally {
-                session.disconnect();
-            }
-        } catch (JSchException e) {
-            throw new RuntimeException("Aborting. Reason : " + e);
-//        } catch (IOException exx) {
-//            throw new RuntimeException("Data is not written/read. Reason : " + exx);
         }
     }
 }

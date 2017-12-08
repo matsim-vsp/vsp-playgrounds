@@ -104,7 +104,7 @@ class EmissionModalTravelDisutilityCalculator implements TravelDisutility {
                                                                        .parallelStream()
                                                                        .filter(e -> e.toString().startsWith(person.getId().toString()))
                                                                        .collect(Collectors.toSet());
-                    if (vehicleIds.size()==0) {
+                    if (vehicleIds.isEmpty()) {
                         LOGGER.warn("No vehicle id is found for person "+ person.getId()+". Travel disutility for emissions is not estimated in this case.");
                     }
                     else if(vehicleIds.size()==1) emissionVehicle = this.emissionVehicles.getVehicles().get(vehicleIds.iterator().next());

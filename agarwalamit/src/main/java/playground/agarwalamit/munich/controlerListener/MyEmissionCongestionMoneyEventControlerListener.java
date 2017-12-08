@@ -47,7 +47,6 @@ import playground.vsp.analysis.modules.monetaryTransferPayments.MoneyEventHandle
 public class MyEmissionCongestionMoneyEventControlerListener implements StartupListener, IterationEndsListener{
 	public static final Logger log =Logger.getLogger(MyEmissionCongestionMoneyEventControlerListener.class);
 
-	private Map<Id<Person>, Double> pId2ColdEmissionsCosts = new HashMap<>();
 	private Map<Id<Person>, Double> pId2WarmEmissionsCosts= new HashMap<>();
 	private Map<Id<Person>, Double> pId2CongestionCosts= new HashMap<>();
 	private Map<Id<Person>, Double> pId2Tolls= new HashMap<>();
@@ -83,7 +82,7 @@ public class MyEmissionCongestionMoneyEventControlerListener implements StartupL
 
 		this.pId2Tolls = this.moneyHandler.getPersonId2amount();
 		this.pId2CongestionCosts = this.congestionCostHandler.getDelayPerPersonAndTimeInterval().get(event.getServices().getConfig().qsim().getEndTime());
-		this.pId2ColdEmissionsCosts = this.emissCostHandler.getPersonId2ColdEmissionCosts();
+		Map<Id<Person>, Double> pId2ColdEmissionsCosts = this.emissCostHandler.getPersonId2ColdEmissionCosts();
 		this.pId2WarmEmissionsCosts = this.emissCostHandler.getPersonId2WarmEmissionCosts();
 
 		String outputFile = event.getServices().getControlerIO().getIterationFilename(event.getIteration(), "person2VariousCosts.txt");
@@ -103,8 +102,8 @@ public class MyEmissionCongestionMoneyEventControlerListener implements StartupL
 				if(!this.pId2CongestionCosts.containsKey(personId)) delaysCosts =0;
 				else delaysCosts = 	this.pId2CongestionCosts.get(personId) / 3600 * vttsCar;
 
-				if(!this.pId2ColdEmissionsCosts.containsKey(personId)) coldEmissCosts=0;
-				else coldEmissCosts = this.pId2ColdEmissionsCosts.get(personId); // value is positive. Amit Dec 16
+				if(!pId2ColdEmissionsCosts.containsKey(personId)) coldEmissCosts=0;
+				else coldEmissCosts = pId2ColdEmissionsCosts.get(personId); // value is positive. Amit Dec 16
 
 				if(!this.pId2WarmEmissionsCosts.containsKey(personId)) warmEmissCosts =0;
 				else warmEmissCosts  = this.pId2WarmEmissionsCosts.get(personId); // value is positive. Amit Dec 16

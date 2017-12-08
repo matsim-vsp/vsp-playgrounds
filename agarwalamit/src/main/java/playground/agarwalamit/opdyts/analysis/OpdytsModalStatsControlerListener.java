@@ -73,7 +73,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
     /*
      * after every 10/20/50 iterations, distance distribution will be written out.
      */
-    private final int distriEveryItr = 5;
+    private int writeDistanceDistributionEveryIteration = 5;
 
     private double fromStateObjFunValue = 0.; // useful only to check if all decision variables start at the same point.
 
@@ -93,11 +93,11 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
 
         StringBuilder stringBuilder = new StringBuilder(OPDYTS_STATS_LABEL_STARTER + "\t");
         stringBuilder.append("fromStateObjFunValue"+"\t");
-        mode2consider.stream().forEach(mode -> stringBuilder.append("legs_"+mode+ "\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("asc_"+mode+ "\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("util_trav_"+mode+ "\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("util_dist_"+mode+ "\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("money_dist_rate_"+mode+ "\t"));
+        mode2consider.stream().forEach(mode -> stringBuilder.append("legs_").append(mode).append("\t"));
+        mode2consider.stream().forEach(mode -> stringBuilder.append("asc_").append(mode).append("\t"));
+        mode2consider.stream().forEach(mode -> stringBuilder.append("util_trav_").append(mode).append("\t"));
+        mode2consider.stream().forEach(mode -> stringBuilder.append("util_dist_").append(mode).append("\t"));
+        mode2consider.stream().forEach(mode -> stringBuilder.append("money_dist_rate_").append(mode).append("\t"));
         stringBuilder.append("objectiveFunctionValue"+"\t");
         stringBuilder.append("penaltyForObjectiveFunction"+"\t");
         stringBuilder.append("totalObjectiveFunctionValue");
@@ -147,23 +147,25 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
                 Map<String, PlanCalcScoreConfigGroup.ModeParams> mode2Params = config.planCalcScore().getModes();
 
                 StringBuilder stringBuilder = new StringBuilder(iteration + "\t");
-                stringBuilder.append(String.valueOf(fromStateObjFunValue)+"\t"); // useful only to check if all decision variables start at the same point.
+                stringBuilder.append(String.valueOf(fromStateObjFunValue)).append("\t"); // useful only to check if all decision variables start at the same point.
                 mode2consider.stream()
                              .forEach(mode -> stringBuilder.append(mode2Legs.containsKey(mode) ? mode2Legs.get(mode) + "\t" : String
                                      .valueOf(0) + "\t"));
                 mode2consider.stream()
-                             .forEach(mode -> stringBuilder.append(mode2Params.get(mode).getConstant() + "\t"));
+                             .forEach(mode -> stringBuilder.append(mode2Params.get(mode).getConstant()).append("\t"));
                 mode2consider.stream()
                              .forEach(mode -> stringBuilder.append(mode2Params.get(mode)
-                                                                              .getMarginalUtilityOfTraveling() + "\t"));
+                                                                              .getMarginalUtilityOfTraveling())
+                                                           .append("\t"));
                 mode2consider.stream()
                              .forEach(mode -> stringBuilder.append(mode2Params.get(mode)
-                                                                              .getMarginalUtilityOfDistance() + "\t"));
+                                                                              .getMarginalUtilityOfDistance())
+                                                           .append("\t"));
                 mode2consider.stream()
                              .forEach(mode -> stringBuilder.append(mode2Params.get(mode)
-                                                                              .getMonetaryDistanceRate() + "\t"));
-                stringBuilder.append(objectiveFunctionValue + "\t");
-                stringBuilder.append(penalty + "\t");
+                                                                              .getMonetaryDistanceRate()).append("\t"));
+                stringBuilder.append(objectiveFunctionValue).append("\t");
+                stringBuilder.append(penalty).append("\t");
                 stringBuilder.append(String.valueOf(objectiveFunctionValue + penalty));
 
                 writer.write(stringBuilder.toString());
@@ -174,7 +176,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
             }
         }
 
-        if( iteration % distriEveryItr == 0 || iteration == config.controler().getLastIteration() ) {
+        if( iteration % writeDistanceDistributionEveryIteration == 0 || iteration == config.controler().getLastIteration() ) {
             // dist-distribution file
             String distriDir = config.controler().getOutputDirectory() + "/distanceDistri/";
             new File(distriDir).mkdir();
@@ -215,7 +217,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
         Map<String, double[]> simCounts = new TreeMap<>();
 
         // initialize simcounts array for each mode
-        realCounts.entrySet().forEach(entry -> simCounts.put(entry.getKey(), new double[entry.getValue().length]));
+        realCounts.forEach((key, value) -> simCounts.put(key, new double[value.length]));
 
         SortedMap<String, SortedMap<Double, Integer>> simCountsHandler = beelineDistanceDistributionHandler.getMode2DistanceClass2LegCount();
         for (Map.Entry<String, SortedMap<Double, Integer>> e : simCountsHandler.entrySet()) {
@@ -294,5 +296,9 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
         } catch (IOException e) {
             throw new RuntimeException("Data is not written. Reason "+ e);
         }
+    }
+
+    public void setWriteDistanceDistributionEveryIteration(int writeDistanceDistributionEveryIteration) {
+        this.writeDistanceDistributionEveryIteration = writeDistanceDistributionEveryIteration;
     }
 }

@@ -171,9 +171,7 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     private void resetContainers() {
         for ( StatType statType : StatType.values() ) {
             this.simStatsContainer.get(statType).clear() ;
-            if ( this.sumsContainer.get(statType)==null ) {
-                this.sumsContainer.put( statType, new DataMap<>() ) ;
-            }
+            this.sumsContainer.computeIfAbsent(statType, k -> new DataMap<>());
             this.sumsContainer.get(statType).clear() ;
         }
     }

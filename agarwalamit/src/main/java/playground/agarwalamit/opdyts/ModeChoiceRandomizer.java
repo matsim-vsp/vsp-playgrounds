@@ -101,7 +101,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
     public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable) {
         List<ModeChoiceDecisionVariable> result ;
 
-        final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig(); // TODO: is this oldScoringConfigGroup or newScoringConfigGroup
+        final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();
         PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet = oldScoringConfig.getScoringParametersPerSubpopulation().get(this.subPopName);
 
         int totalNumberOfCombination = (int) Math.pow(2, (this.considerdModes.size()-1)); // exclude car
@@ -148,8 +148,9 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
 
     private void createDiagonalCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
         // create combinations with one mode and call createDiagonalCombinations again
-        if (remainingModes.isEmpty()) return;
-        else {
+        if (remainingModes.isEmpty()) {
+            // don't do anything
+        } else {
             String mode = remainingModes.remove(0);
             if (mode.equals(TransportMode.car)) {
                 throw new RuntimeException("The parameters of the car remain unchanged. Therefore, car mode should not end up here, it should have been removed in the previous step. ");
@@ -161,9 +162,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
                 }
                 { // negative: since this mode is already updated above, first copy existing ones, update values and then add them to main collection
                     List<PlanCalcScoreConfigGroup> tempCombinations = new ArrayList<>();
-                    allCombinations.parallelStream().forEach(e -> {
-                        tempCombinations.add(copyOfPlanCalcScore(e.getScoringParameters(this.subPopName)));
-                    });
+                    allCombinations.parallelStream().forEach(e -> tempCombinations.add(copyOfPlanCalcScore(e.getScoringParameters(this.subPopName))));
                     double newASC =  sourceModeParam.getConstant() - opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * randomVariationOfStepSize;
                     tempCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
                     allCombinations.addAll(tempCombinations);

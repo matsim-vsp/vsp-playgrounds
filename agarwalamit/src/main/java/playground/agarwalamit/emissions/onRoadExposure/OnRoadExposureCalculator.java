@@ -51,7 +51,7 @@ public class OnRoadExposureCalculator {
         }
         return emissionRate.entrySet()
                            .stream()
-                           .collect(Collectors.toMap(e -> e.getKey(),
+                           .collect(Collectors.toMap(Map.Entry::getKey,
                                    e -> calculateForSinglePollutant(e.getKey(), e.getValue(), mode, travelTime)));
     }
 

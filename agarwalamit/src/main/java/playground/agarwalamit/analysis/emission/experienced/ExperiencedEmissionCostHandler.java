@@ -274,7 +274,7 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 				double coldCost = 0.;
 
 				if (getTimeBin2VehicleId2ColdEmissionCosts().get(d)!=null && getTimeBin2VehicleId2ColdEmissionCosts().get(d).get(vehicleId)!=null) {
-					warmCost = getTimeBin2PersonId2ColdEmissionCosts().get(d).get(vehicleId);
+					warmCost = getTimeBin2VehicleId2ColdEmissionCosts().get(d).get(vehicleId);
 				}
 
 				if (getTimeBin2VehicleId2WarmEmissionCosts().get(d)!=null && getTimeBin2VehicleId2WarmEmissionCosts().get(d).get(vehicleId)!=null) {
@@ -305,7 +305,7 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 	}
 
 	public Map<Double, Double> getTimeBin2TotalCosts() {
-		return getTimeBin2PersonId2TotalEmissionCosts().entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> MapUtils.doubleValueSum(entry.getValue())));
+		return getTimeBin2PersonId2TotalEmissionCosts().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> MapUtils.doubleValueSum(entry.getValue())));
 	}
 
 	public Map<String, Double> getUserGroup2WarmEmissionCosts(){
@@ -339,7 +339,7 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 	@Override
 	public Map<String, Double> getUserGroup2TotalEmissionCosts(){
 		return getUserGroup2ColdEmissionCosts().entrySet().stream().collect(
-				Collectors.toMap(entry -> entry.getKey(),
+				Collectors.toMap(Map.Entry::getKey,
 						entry -> entry.getValue() + getUserGroup2WarmEmissionCosts().get(entry.getKey()))
 		);
 	}

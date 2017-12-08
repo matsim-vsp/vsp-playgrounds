@@ -20,7 +20,6 @@
 package playground.agarwalamit.emissions.onRoadExposure;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,11 +60,10 @@ public class EmissionEventsComparator {
     }
 
     private static List<Event> sortForSameLink(List<Event> inputList){
-        Collections.sort(inputList, new Comparator<Event>() {
+        inputList.sort(new Comparator<Event>() {
             @Override
             public int compare(Event o1, Event o2) {
-                return Integer.valueOf(eventTypes.indexOf(o1.getEventType()))
-                              .compareTo(Integer.valueOf(eventTypes.indexOf(o2.getEventType())));
+                return Integer.compare(eventTypes.indexOf(o1.getEventType()), eventTypes.indexOf(o2.getEventType()));
             }
         });
         return inputList;

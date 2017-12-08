@@ -81,11 +81,7 @@ public class TeleportationODCoordAnalyzer implements PersonDepartureEventHandler
 
             int tripIndex = 0;
             Id<Person> personId = event.getPersonId();
-            if (this.personId2TripIndex.containsKey(personId)) {
-                tripIndex = this.personId2TripIndex.get(personId);
-            } else {
-                tripIndex = 0;
-            }
+            tripIndex = this.personId2TripIndex.getOrDefault(personId, 0);
 
             Person person = this.population.getPersons().get(personId);
             // TODO probably use TripStructureUtils.getActivities(...). Amit July'17

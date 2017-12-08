@@ -52,10 +52,7 @@ public class IncomeDistributionGenerator {
 			//PatnaUtils.INPUT_FILES_DIR+"/simulationInputs/urban/shpNetwork/";
 	"../../../../repos/runs-svn/patnaIndia/run108/jointDemand/calibration/shpNetwork/multiModalCadytsAndIncome/c7/";
 	private final int iterationNumber = 200;
-		private final String plansFile = dir+"/ITERS/it."+iterationNumber+"/"+iterationNumber+".plans.xml.gz";
-//	private final String plansFile = PatnaUtils.INPUT_FILES_DIR+"/simulationInputs/urban/shpNetwork/initial_urban_plans_1pct.xml.gz";
-		private final String personAttributeFile = dir+ "output_personAttributes.xml.gz";
-//	private final String personAttributeFile = PatnaUtils.INPUT_FILES_DIR+"/simulationInputs/urban/shpNetwork/initial_urban_persionAttributes_1pct.xml.gz";
+	//	private final String personAttributeFile = PatnaUtils.INPUT_FILES_DIR+"/simulationInputs/urban/shpNetwork/initial_urban_persionAttributes_1pct.xml.gz";
 
 	private final SortedMap<Double, SortedMap<String, Integer>> avgInc2mode2Count = new TreeMap<>();
 
@@ -144,7 +141,9 @@ public class IncomeDistributionGenerator {
 
 	private void parseFile(){
 		Config config = ConfigUtils.createConfig();
+		String plansFile = dir + "/ITERS/it." + iterationNumber + "/" + iterationNumber + ".plans.xml.gz";
 		config.plans().setInputFile(plansFile);
+		String personAttributeFile = dir + "output_personAttributes.xml.gz";
 		config.plans().setInputPersonAttributeFile(personAttributeFile);
 
 		Scenario sc = ScenarioUtils.loadScenario(config);

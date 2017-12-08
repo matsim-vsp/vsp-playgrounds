@@ -56,7 +56,7 @@ public class ManualRouteAssignerExample {
 
     private  Scenario scenario;
     private  String initialNetwork;
-    private  Set<String> modes;
+    private  Set<String> modes; //never updated. Check. Amit Dec'17
 
 
     private void reassignRoutes() {

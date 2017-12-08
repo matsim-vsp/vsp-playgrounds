@@ -85,7 +85,7 @@ public class OnRoadExposureForMixedTrafficTest {
     /**
      * See the event handler for the details about the manual exposure calculation.
      *
-     * TODO : should include following situation: (a) cold emissions except departure link is thorwn at later time but on the departure link until distance travelled is more than 1km.
+     * TODO : should include following situation: (a) cold emissions except departure link is thrown at later time but on the departure link until distance travelled is more than 1km.
      */
     @Test
     public void excludeAgentsLeavingInSameTimeStepTest() {
@@ -168,7 +168,7 @@ public class OnRoadExposureForMixedTrafficTest {
         car.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS.toString()
                 + HbefaVehicleCategory.PASSENGER_CAR.toString().concat(";petrol (4S);>=2L;PC-P-Euro-0")
                 + EmissionSpecificationMarker.END_EMISSIONS.toString() );
-        // TODO "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
+        // Info: "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
         // thus, reading from vehicles file and directly passing to vehicles container is not the same.
         vehs.addVehicleType(car);
 

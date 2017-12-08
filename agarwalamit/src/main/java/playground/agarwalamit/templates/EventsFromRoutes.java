@@ -98,11 +98,8 @@ public class EventsFromRoutes {
 		@Override
 		public void handleEvent(LinkEnterEvent event) {
 			Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
-			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(personId);
-			if (travelTimes == null) {
-				travelTimes = new HashMap<>();
-				this.personLinkTravelTimes.put(personId, travelTimes);
-			}
+			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.computeIfAbsent(personId,
+					k -> new HashMap<>());
 			travelTimes.put(event.getLinkId(), Double.valueOf(event.getTime()));
 		}
 

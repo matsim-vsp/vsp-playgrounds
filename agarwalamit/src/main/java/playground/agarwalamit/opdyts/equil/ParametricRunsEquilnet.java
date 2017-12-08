@@ -42,7 +42,8 @@ public class ParametricRunsEquilnet {
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1, 5, 10};
 
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+ PrepareParametricRuns.newLine);
+        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts")
+              .append(PrepareParametricRuns.newLine);
 
         int cnt = runCounter;
         for (String ascStyle : ascStyles ) {
@@ -74,7 +75,10 @@ public class ParametricRunsEquilnet {
 
 
                             parametricRuns.run(additionalLines, baseDir, jobName);
-                            buffer.append(jobName+"\t" + arg.replace(' ','\t') + PrepareParametricRuns.newLine);
+                            buffer.append(jobName)
+                                  .append("\t")
+                                  .append(arg.replace(' ', '\t'))
+                                  .append(PrepareParametricRuns.newLine);
                         }
                     }
                 }

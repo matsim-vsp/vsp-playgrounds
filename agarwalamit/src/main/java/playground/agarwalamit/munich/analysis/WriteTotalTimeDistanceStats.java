@@ -48,14 +48,13 @@ import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
  */
 public class WriteTotalTimeDistanceStats {
 
-	private TripDistanceHandler distHandler;
-	private final String outputDir = "/Users/amit/Documents/repos/runs-svn/detEval/emissionCongestionInternalization/output/1pct/run9/";
 	private final String cases [] = {"baseCaseCtd", "ei","ci","eci"};
 	private final UserGroup ug = UserGroup.REV_COMMUTER;
 
 	private void run(){
 
-		String outputFile = outputDir+"/analysis/"+ug+"/";
+		String outputDir = "/Users/amit/Documents/repos/runs-svn/detEval/emissionCongestionInternalization/output/1pct/run9/";
+		String outputFile = outputDir +"/analysis/"+ug+"/";
 		new File(outputFile).mkdirs();
 
 		BufferedWriter writer = IOUtils.getBufferedWriter(outputFile+ "/score_verification.txt");
@@ -66,9 +65,9 @@ public class WriteTotalTimeDistanceStats {
 			Set<Id<Person>> stuckPersonsListEI = new HashSet<>();
 
 			for(String str:cases){
-				String eventsFile = outputDir+"/"+str+"/ITERS/it.1500/1500.events.xml.gz";
-				String popFile = outputDir+"/"+str+"/output_plans.xml";
-				String networkFile = outputDir+"/"+str+"/output_network.xml.gz";
+				String eventsFile = outputDir +"/"+str+"/ITERS/it.1500/1500.events.xml.gz";
+				String popFile = outputDir +"/"+str+"/output_plans.xml";
+				String networkFile = outputDir +"/"+str+"/output_network.xml.gz";
 				List<String> mainModes = new ArrayList<>(); mainModes.add("car");
 
 				Scenario sc = LoadMyScenarios.loadScenarioFromPlansAndNetwork(popFile, networkFile);
@@ -127,7 +126,7 @@ public class WriteTotalTimeDistanceStats {
 	}
 
 	private SortedMap<String,Map<Id<Person>, Double>> getRouteDistances(String eventsFile, Scenario scenario){
-		distHandler = new TripDistanceHandler(scenario);
+		TripDistanceHandler distHandler = new TripDistanceHandler(scenario);
 		EventsManager events = EventsUtils.createEventsManager();
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		events.addHandler(distHandler);

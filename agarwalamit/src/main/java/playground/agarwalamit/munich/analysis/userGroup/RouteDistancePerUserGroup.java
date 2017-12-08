@@ -49,16 +49,16 @@ public class RouteDistancePerUserGroup {
 
 	public RouteDistancePerUserGroup() {
 		super();
-		this.sc = LoadMyScenarios.loadScenarioFromPlansNetworkAndConfig(plansFile, networkFile, configFile);
+        String plansFile = outputDir + "/output_plans.xml.gz";
+        String networkFile = outputDir + "/output_network.xml.gz";
+        this.sc = LoadMyScenarios.loadScenarioFromPlansNetworkAndConfig(plansFile, networkFile, configFile);
 		this.usrGrpExtended = new UserGroupUtilsExtended();
 		userGrpToBoxPlotData = new TreeMap<>();
 	}
 
 	private final Logger logger = Logger.getLogger(RouteDistancePerUserGroup.class);
 	private final String outputDir = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/otherRuns/output/1pct/run10/policies/backcasting/exposure/25ExI/";
-	private final String networkFile =outputDir+ "/output_network.xml.gz";//"/network.xml";
-	private final String plansFile =outputDir+ "/output_plans.xml.gz";//"/network.xml";
-	private final String configFile = outputDir+"/output_config.xml";
+    private final String configFile = outputDir+"/output_config.xml";
 	private final int lastIteration = LoadMyScenarios.getLastIteration(configFile);
 	private final String eventsFile = outputDir+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";
 	private final Scenario sc;
@@ -67,9 +67,8 @@ public class RouteDistancePerUserGroup {
 	private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MedianDistance = new TreeMap<>();
 	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2RouteDist;
 	private final SortedMap<UserGroup, List<Double>> userGrpToBoxPlotData;
-	private final String mainMode = TransportMode.car;
-	
-	public static void main(String[] args) {
+
+    public static void main(String[] args) {
 		RouteDistancePerUserGroup routeDistUG = new RouteDistancePerUserGroup();
 		routeDistUG.run();
 	}
@@ -84,7 +83,8 @@ public class RouteDistancePerUserGroup {
 		
 		this.mode2PersonId2RouteDist = lmdfed.getMode2PersonId2TravelDistances();
 		getUserGroupDistanceMeanAndMeadian();
-		createBoxPlotData(lmdfed.getLegMode2PersonId2TotalTravelDistance().get(mainMode));
+        String mainMode = TransportMode.car;
+        createBoxPlotData(lmdfed.getLegMode2PersonId2TotalTravelDistance().get(mainMode));
 		writeResults(this.outputDir+"/analysis/");
 	}
 

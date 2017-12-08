@@ -108,7 +108,7 @@ public class OuterCountVolumeAnalyzer {
 			for (int ii = 1; ii<=30;ii++){
 				writer.write(ii+"\t");
 				for(Id<Link> linkId : allCountStationLinks){
-					double count = link2time2volume.get(linkId).containsKey(ii) ? link2time2volume.get(linkId).get(ii) : 0.;
+					double count = link2time2volume.get(linkId).getOrDefault(ii, 0.);
 					writer.write(  count * COUNT_SCALE_FACTOR + "\t" );
 				}	
 				writer.newLine();

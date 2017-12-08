@@ -88,7 +88,7 @@ public class ClusterAlgorithm {
         int iteration = 1;
         while ( ! terminate ) {
             LOGGER.info("Running "+String.valueOf(iteration++)+" iteration");
-            clusters.stream().forEach(c -> c.clear());
+            clusters.stream().forEach(Cluster::clear);
 
             assignCluster(pointsForClustering);
             updateCentroids();
@@ -140,7 +140,7 @@ public class ClusterAlgorithm {
                 Cluster cluster = clusters.get(clusterIndex);
                 if (cluster.getPoints().size() == numberOfPointsPerCluster
                         && this.clusterType.equals(ClusterType.EQUAL_POINTS) ) {
-                    continue;
+                    // nothing to do
                 } else {
                     point.setCluster(cluster.getId());
                     cluster.addPoint(point);
@@ -191,7 +191,7 @@ public class ClusterAlgorithm {
             double sumX = 0;
             double sumY = 0;
             List<Point> list = cluster.getPoints();
-            double sumWeight = list.stream().mapToDouble(site -> site.getWeight()).sum();
+            double sumWeight = list.stream().mapToDouble(Point::getWeight).sum();
 
             // weighted sum: same as kmeans if weight of each point is 1.
             for(Point point : list) {

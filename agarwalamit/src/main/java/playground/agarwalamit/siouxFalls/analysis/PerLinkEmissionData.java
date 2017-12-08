@@ -45,10 +45,7 @@ import playground.agarwalamit.utils.LoadMyScenarios;
 public class PerLinkEmissionData {
 	private final Logger logger = Logger.getLogger(PerLinkEmissionData.class);
 	private final String outputDir = "/Users/aagarwal/Desktop/ils/agarwal/siouxFalls/output/run1/";
-	private final String networkFile =outputDir+ "/output_network.xml.gz";
-	private final String configFile = outputDir+"/output_config.xml";
-	private final String emissionEventFile = outputDir+"/ITERS/it.100/100.emission.events.xml";
-	private EmissionUtils emissionUtils;
+    private EmissionUtils emissionUtils;
 
 	private Network network;
 
@@ -63,11 +60,14 @@ public class PerLinkEmissionData {
 		BufferedWriter writer2 = IOUtils.getBufferedWriter(this.outputDir+"/ITERS/it.100/100.timeLinkIdWarmEmissions.txt");
 		BufferedWriter writer3 = IOUtils.getBufferedWriter(this.outputDir+"/ITERS/it.100/100.timeLinkIdColdEmissions.txt");
 
-		Scenario scenario = LoadMyScenarios.loadScenarioFromNetwork(this.networkFile);
+        String networkFile = outputDir + "/output_network.xml.gz";
+        Scenario scenario = LoadMyScenarios.loadScenarioFromNetwork(networkFile);
 		this.network = scenario.getNetwork();
 		int noOfTimeBin =1;
-		double simulationEndTime = LoadMyScenarios.getSimulationEndTime(this.configFile);
-		EmissionLinkAnalyzer linkAnalyzer = new EmissionLinkAnalyzer(simulationEndTime, this.emissionEventFile,noOfTimeBin);
+        String configFile = outputDir + "/output_config.xml";
+        double simulationEndTime = LoadMyScenarios.getSimulationEndTime(configFile);
+        String emissionEventFile = outputDir + "/ITERS/it.100/100.emission.events.xml";
+        EmissionLinkAnalyzer linkAnalyzer = new EmissionLinkAnalyzer(simulationEndTime, emissionEventFile,noOfTimeBin);
 		linkAnalyzer.preProcessData();
 		linkAnalyzer.postProcessData();
 
@@ -133,7 +133,7 @@ public class PerLinkEmissionData {
 			BufferedWriter out = IOUtils.getBufferedWriter(outFile);
 			out.append("linkId\txLink\tyLink\t");
 			for (String pollutant : this.emissionUtils.getListOfPollutants()){
-				out.append(pollutant + "[g]\t");
+				out.append(pollutant).append("[g]\t");
 			}
 			out.append("\n");
 
@@ -143,11 +143,16 @@ public class PerLinkEmissionData {
 				Double xLink = linkCoord.getX();
 				Double yLink = linkCoord.getY();
 
-				out.append(linkId + "\t" + xLink + "\t" + yLink + "\t");
+				out.append(String.valueOf(linkId))
+				   .append("\t")
+				   .append(String.valueOf(xLink))
+				   .append("\t")
+				   .append(String.valueOf(yLink))
+				   .append("\t");
 
 				Map<String, Double> emissionType2Value = map.get(linkId);
 				for(String pollutant : this.emissionUtils.getListOfPollutants()){
-					out.append(emissionType2Value.get(pollutant) + "\t");
+					out.append(String.valueOf(emissionType2Value.get(pollutant))).append("\t");
 				}
 				out.append("\n");
 			}

@@ -74,7 +74,14 @@ public class ColdWarmEmissionStats {
             Map<String, Double> userGroupToWarmCost  = getUserGroupToEmiss(userGroupToWarmEmiss);
 
             for (String ug : personFilter.getUserGroupsAsStrings()){
-                builder.append(runCase + "\t" + ug + "\t" + userGroupToColdCost.get(ug) + "\t" + userGroupToWarmCost.get(ug) + "\n");
+                builder.append(runCase)
+                       .append("\t")
+                       .append(ug)
+                       .append("\t")
+                       .append(userGroupToColdCost.get(ug))
+                       .append("\t")
+                       .append(userGroupToWarmCost.get(ug))
+                       .append("\n");
             }
         }
 

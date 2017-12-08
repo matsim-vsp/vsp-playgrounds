@@ -83,12 +83,10 @@ public class TollInfoHandler implements PersonMoneyEventHandler {
 	 * @return timeBin to toll values for whole population
 	 */
 	public SortedMap<Double,Double> getTimeBin2Toll(){
-		SortedMap<Double, Double> timebin2Toll = new TreeMap<>();
 
-		timebin2Toll.putAll( this.timeBin2Person2Toll
+		return new TreeMap<>(this.timeBin2Person2Toll
 				.entrySet()
 				.stream()
-				.collect( Collectors.toMap( e -> e.getKey(), e -> MapUtils.doubleValueSum(e.getValue()) ) ) );
-		return timebin2Toll;
+				.collect(Collectors.toMap(e -> e.getKey(), e -> MapUtils.doubleValueSum(e.getValue()))));
 	}
 }

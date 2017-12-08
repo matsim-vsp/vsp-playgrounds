@@ -117,6 +117,6 @@ public class ObjectiveFunctionEvaluator {
 
     public Map<String,Double> getModeToShare(){
         double sumShare = mode2share.values().stream().mapToDouble(Number::doubleValue).sum();
-        return mode2share.entrySet().stream().collect(Collectors.toMap(entry-> entry.getKey(), entry -> entry.getValue() / sumShare ));
+        return mode2share.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() / sumShare ));
     }
 }

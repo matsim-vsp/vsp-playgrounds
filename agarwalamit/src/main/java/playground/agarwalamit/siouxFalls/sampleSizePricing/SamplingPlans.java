@@ -54,16 +54,11 @@ public class SamplingPlans {
 
 	private final Logger log = Logger.getLogger(SamplingPlans.class);
 	final CoordinateReferenceSystem targetCRS =	 MGC.getCRS("EPSG:3459");
-	private final double xMin =	673506.73;
-	private final double xMax = 689857.13;
-	private	final double yMin = 4814378.34;
-	private final double yMax = 4857392.75;
 	private final int noOfXbins = 30;
 	private final int noOfYbins = 30;
 	private final double samplingRatio;
 	private SortedMap<String, Population>  binToPopulation;
 	private final String clusterPath = "/Users/aagarwal/Desktop/ils4/agarwal/flowCapTest/";
-	private final String inputPlans  = clusterPath+"/baseCase/output_plans.xml.gz";
 	//	private final String networkFile = clusterPath+"/input/SiouxFalls_networkWithRoadType.xml.gz";
 	private final String outputPlans;
 	private double totalNoOfPersons ;
@@ -100,8 +95,7 @@ public class SamplingPlans {
 			if(noOfPersons!=0){
 				double requiredPersons = Math.ceil(this.samplingRatio*noOfPersons);
 				double addedPersons =0;
-				List<Person> persons = new ArrayList<>();
-				persons.addAll(this.binToPopulation.get(str).getPersons().values());
+				List<Person> persons = new ArrayList<>(this.binToPopulation.get(str).getPersons().values());
 				do{
 					Person p = persons.get(MatsimRandom.getRandom().nextInt(persons.size()));
 					this.samplePopulation.addPerson(p);
@@ -118,7 +112,8 @@ public class SamplingPlans {
 	private void readInputPlansAndCreateSubPopulation(){
 		this.log.info("Reading input plans and creating sub populations...");
 		Config config = ConfigUtils.createConfig();
-		config.plans().setInputFile(this.inputPlans);
+		String inputPlans = clusterPath + "/baseCase/output_plans.xml.gz";
+		config.plans().setInputFile(inputPlans);
 		Scenario sc= ScenarioUtils.loadScenario(config);
 		this.initialPopulation = sc.getPopulation();
 		this.totalNoOfPersons = this.initialPopulation.getPersons().size();
@@ -155,8 +150,12 @@ public class SamplingPlans {
 	}
 
 	private String getBinIdentificationFromCoord(Coord coord){
-		int relativePositionY = (int) ((coord.getY() - this.yMin) / (this.yMax - this.yMin) * this.noOfYbins);
-		int relativePositionX = (int) ((coord.getX() -this.xMin)/(this.xMax - this.xMin)*this.noOfXbins);
+		double yMax = 4857392.75;
+		double yMin = 4814378.34;
+		int relativePositionY = (int) ((coord.getY() - yMin) / (yMax - yMin) * this.noOfYbins);
+		double xMax = 689857.13;
+		double xMin = 673506.73;
+		int relativePositionX = (int) ((coord.getX() - xMin)/(xMax - xMin)*this.noOfXbins);
 		return "x".concat(String.valueOf(relativePositionX)).concat("y").concat(String.valueOf(relativePositionY));
 	}
 
