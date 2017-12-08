@@ -134,9 +134,8 @@ public class PatnaOnRoadExposure {
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
 
-        TreeSet<String> pollutants = new TreeSet<>(Arrays.stream(WarmPollutant.values())
-                                                         .map(e -> e.toString())
-                                                         .collect(Collectors.toList()));
+        TreeSet<String> pollutants = Arrays.stream(WarmPollutant.values())
+                                           .map(Enum::toString).collect(Collectors.toCollection(TreeSet::new));
 
         if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {

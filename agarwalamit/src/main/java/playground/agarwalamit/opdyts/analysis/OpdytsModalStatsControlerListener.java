@@ -73,7 +73,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
     /*
      * after every 10/20/50 iterations, distance distribution will be written out.
      */
-    private final int distriEveryItr = 5;
+    private int writeDistanceDistributionEveryIteration = 5;
 
     private double fromStateObjFunValue = 0.; // useful only to check if all decision variables start at the same point.
 
@@ -174,7 +174,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
             }
         }
 
-        if( iteration % distriEveryItr == 0 || iteration == config.controler().getLastIteration() ) {
+        if( iteration % writeDistanceDistributionEveryIteration == 0 || iteration == config.controler().getLastIteration() ) {
             // dist-distribution file
             String distriDir = config.controler().getOutputDirectory() + "/distanceDistri/";
             new File(distriDir).mkdir();
@@ -294,5 +294,9 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
         } catch (IOException e) {
             throw new RuntimeException("Data is not written. Reason "+ e);
         }
+    }
+
+    public void setWriteDistanceDistributionEveryIteration(int writeDistanceDistributionEveryIteration) {
+        this.writeDistanceDistributionEveryIteration = writeDistanceDistributionEveryIteration;
     }
 }

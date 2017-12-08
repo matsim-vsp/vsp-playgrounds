@@ -69,9 +69,8 @@ public class EvacProgress {
 		SortedMap<String,SortedMap<Integer, Integer>>  evacProgressNE = arrivalAnalyzer.getTimeBinToNumberOfArrivals();
 
 		String outFile = dir +"/analysis/evacuationProgress"+outputFilePrefix+".txt";
-		
-		SortedSet<Integer> timeBins = new TreeSet<>();
-		timeBins.addAll(evacProgressSP.get(TransportMode.car).keySet());
+
+		SortedSet<Integer> timeBins = new TreeSet<>(evacProgressSP.get(TransportMode.car).keySet());
 
 		try(BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
 			writer.write("hourOfTheDay \t");//\t  \t  \n

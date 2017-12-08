@@ -84,4 +84,11 @@ public class VehicleLinkEmissionCollector {
         return emiss;
     }
 
+    public Id<Vehicle> getVehicleId() {
+        return vehicleId;
+    }
+
+    public Id<Link> getLinkId() {
+        return linkId;
+    }
 }

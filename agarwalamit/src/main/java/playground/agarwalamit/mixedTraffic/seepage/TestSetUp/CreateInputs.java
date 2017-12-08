@@ -109,7 +109,7 @@ class CreateInputs {
 		Node node3 = NetworkUtils.createAndAddNode(network, Id.createNodeId("3"), new Coord(0.0, 1000.0));
 		Node node4 = NetworkUtils.createAndAddNode(network, Id.createNodeId("4"), new Coord(100.0, 1000.0));
 
-		Set<String> allowedModes = new HashSet<>(); allowedModes.addAll(Arrays.asList("car","walk"));
+        Set<String> allowedModes = new HashSet<>(Arrays.asList("car", "walk"));
 		final Node fromNode = node1;
 		final Node toNode = node2;
 

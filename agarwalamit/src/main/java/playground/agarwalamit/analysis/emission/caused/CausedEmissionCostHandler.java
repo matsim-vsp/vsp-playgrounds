@@ -128,20 +128,20 @@ public class CausedEmissionCostHandler implements VehicleEntersTrafficEventHandl
 
 	public Map<Id<Person>, Double> getPersonId2ColdEmissionCosts() {
 		return this.vehicleId2ColdEmissCosts.entrySet().stream().collect(
-				Collectors.toMap(entry -> this.vehicle2Person.get(entry.getKey()), entry -> entry.getValue())
+				Collectors.toMap(entry -> this.vehicle2Person.get(entry.getKey()), Map.Entry::getValue)
 		);
 	}
 
 	public Map<Id<Person>, Double> getPersonId2WarmEmissionCosts() {
 		return this.vehicleId2WarmEmissCosts.entrySet().stream().collect(
-				Collectors.toMap(entry -> this.vehicle2Person.get(entry.getKey()), entry -> entry.getValue())
+				Collectors.toMap(entry -> this.vehicle2Person.get(entry.getKey()), Map.Entry::getValue)
 		);
 	}
 
 	@Override
 	public Map<Id<Person>, Double> getPersonId2TotalEmissionCosts() {
 		return getPersonId2ColdEmissionCosts().entrySet().stream().collect(
-				Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue() + this.getPersonId2WarmEmissionCosts().get(entry.getKey()))
+				Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() + this.getPersonId2WarmEmissionCosts().get(entry.getKey()))
 		);
 	}
 
@@ -158,7 +158,7 @@ public class CausedEmissionCostHandler implements VehicleEntersTrafficEventHandl
 	@Override
 	public Map<Id<Vehicle>, Double> getVehicleId2TotalEmissionCosts(){
 		return this.vehicleId2ColdEmissCosts.entrySet().stream().collect(
-				Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue() + this.vehicleId2WarmEmissCosts.get(entry.getKey()))
+				Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() + this.vehicleId2WarmEmissCosts.get(entry.getKey()))
 		);
 	}
 
@@ -193,7 +193,7 @@ public class CausedEmissionCostHandler implements VehicleEntersTrafficEventHandl
 	@Override
 	public Map<String, Double> getUserGroup2TotalEmissionCosts(){
 		return getUserGroup2ColdEmissionCosts().entrySet().stream().collect(
-				Collectors.toMap(entry -> entry.getKey(),
+				Collectors.toMap(Map.Entry::getKey,
 						entry -> entry.getValue() + getUserGroup2WarmEmissionCosts().get(entry.getKey()))
 		);
 	}

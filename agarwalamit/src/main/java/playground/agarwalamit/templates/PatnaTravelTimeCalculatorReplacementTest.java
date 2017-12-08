@@ -61,13 +61,12 @@ public class PatnaTravelTimeCalculatorReplacementTest {
 
     private static final String configDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/opdyts/input/";
 
-    private static String configFile;
     private static String OUT_DIR = FileUtils.RUNS_SVN+"/patnaIndia/run111/opdyts/outputTravelTime_withoutReplacement/";
 
     private static Map<String, TravelTime> modalTravelTimeForReplacement = new HashMap<>();
 
     public static void main(String[] args) {
-        configFile = configDir+"/config_urban_1pct.xml";
+        String configFile = configDir + "/config_urban_1pct.xml";
 
         //=========== 1 ==================
         // run for 20 itertaions

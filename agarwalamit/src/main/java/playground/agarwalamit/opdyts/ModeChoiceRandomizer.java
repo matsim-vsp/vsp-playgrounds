@@ -148,8 +148,9 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
 
     private void createDiagonalCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
         // create combinations with one mode and call createDiagonalCombinations again
-        if (remainingModes.isEmpty()) return;
-        else {
+        if (remainingModes.isEmpty()) {
+            // don't do anything
+        } else {
             String mode = remainingModes.remove(0);
             if (mode.equals(TransportMode.car)) {
                 throw new RuntimeException("The parameters of the car remain unchanged. Therefore, car mode should not end up here, it should have been removed in the previous step. ");

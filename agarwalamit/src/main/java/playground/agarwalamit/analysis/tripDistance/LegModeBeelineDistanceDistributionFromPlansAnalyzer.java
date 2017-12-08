@@ -303,9 +303,9 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 	public Map<String,Double> getModeToShare(){
 		Map<String, Double> mode2legCount = mode2DistanceClass2LegCount.entrySet().parallelStream().collect(
 				Collectors.toMap(
-						e -> e.getKey(),
+                        Map.Entry::getKey,
 						e-> e.getValue().values().parallelStream().mapToDouble(Number::doubleValue).sum()));
 		double sumShare = mode2legCount.values().stream().mapToDouble(Number::doubleValue).sum();
-		return mode2legCount.entrySet().stream().collect(Collectors.toMap(entry-> entry.getKey(), entry -> entry.getValue() / sumShare ));
+		return mode2legCount.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() / sumShare ));
 	}
 }

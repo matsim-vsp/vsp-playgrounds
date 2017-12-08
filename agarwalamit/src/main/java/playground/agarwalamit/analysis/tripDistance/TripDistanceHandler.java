@@ -170,8 +170,7 @@ public class TripDistanceHandler implements PersonDepartureEventHandler, LinkLea
 	}
 
 	public SortedSet<String> getUsedModes (){
-		SortedSet<String> modes = new TreeSet<>();
-		modes.addAll(mode2PersonId2distances.keySet());
+		SortedSet<String> modes = new TreeSet<>(mode2PersonId2distances.keySet());
 		return modes;
 	}
 

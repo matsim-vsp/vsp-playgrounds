@@ -50,7 +50,6 @@ public class LegModeDistributionForActivityEndTimeAndActivityDuration extends Ab
 	private final Logger logger = Logger.getLogger(LegModeDistributionForActivityEndTimeAndActivityDuration.class);
 	private final LegModeActivityEndTimeAndActDurationHandler actStrEndur;
 	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2ActEndTimes;
-	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2ActDurations;
 	private final List<Integer> timeStepClasses;
 	private List<String> travelModes;
 	private SortedMap<String, Map<Integer, Integer>> mode2ActEndTimeClasses2LegCount;
@@ -104,7 +103,7 @@ public class LegModeDistributionForActivityEndTimeAndActivityDuration extends Ab
 	@Override
 	public void postProcessData() {
 		this.mode2PersonId2ActEndTimes = this.actStrEndur.getLegMode2PesonId2ActEndTimes();
-		this.mode2PersonId2ActDurations = this.actStrEndur.getLegMode2PesonId2ActDurations();
+		SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2ActDurations = this.actStrEndur.getLegMode2PesonId2ActDurations();
 		initializeTimeStepClasses();
 		getTravelModes();
 		this.mode2ActEndTimeClasses2LegCount = calculateMode2ActTimeClases2LegCount(this.mode2PersonId2ActEndTimes);

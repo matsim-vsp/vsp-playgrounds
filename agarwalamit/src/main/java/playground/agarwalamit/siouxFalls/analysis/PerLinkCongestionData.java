@@ -39,13 +39,8 @@ import playground.agarwalamit.utils.LoadMyScenarios;
 public class PerLinkCongestionData {
 	private final Logger logger = Logger.getLogger(PerLinkCongestionData.class);
 	private final String outputDir = "/Users/aagarwal/Desktop/ils/agarwal/siouxFalls/output/run1/";/*"./output/run2/";*/
-	private final String networkFile =outputDir+ "/output_network.xml.gz";//"/network.xml";
-	private final String configFile = outputDir+"/output_config.xml";//"/config.xml";//
-	private final String eventFile = outputDir+"/ITERS/it.100/100.events.xml.gz";//"/events.xml";//
 
-	private Network network;
-
-	public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
 		PerLinkCongestionData data = new PerLinkCongestionData();
 		data.run();
 	}
@@ -54,16 +49,19 @@ public class PerLinkCongestionData {
 		
 		BufferedWriter writer1 = IOUtils.getBufferedWriter(this.outputDir+"/ITERS/it.100/100.timeLinkIdTotalCongestion.txt");//
 
-		Scenario scenario = LoadMyScenarios.loadScenarioFromNetworkAndConfig(this.networkFile,this.configFile);
-		this.network = scenario.getNetwork();
-		ExperiencedDelayAnalyzer linkAnalyzer = new ExperiencedDelayAnalyzer(this.eventFile,scenario,1);
+        String configFile = outputDir + "/output_config.xml";
+        String networkFile = outputDir + "/output_network.xml.gz";
+        Scenario scenario = LoadMyScenarios.loadScenarioFromNetworkAndConfig(networkFile, configFile);
+        Network network = scenario.getNetwork();
+        String eventFile = outputDir + "/ITERS/it.100/100.events.xml.gz";
+        ExperiencedDelayAnalyzer linkAnalyzer = new ExperiencedDelayAnalyzer(eventFile,scenario,1);
 		linkAnalyzer.run();
 		linkAnalyzer.checkTotalDelayUsingAlternativeMethod();
 		Map<Double, Map<Id<Link>, Double>> time2linkIdDelays = linkAnalyzer.getTimeBin2LinkId2Delay();
 		
 		writer1.write("time \t linkId \t delay(in sec) \n");
 		for(double time : time2linkIdDelays.keySet()){
-			for(Link link : this.network.getLinks().values()){
+			for(Link link : network.getLinks().values()){
 				double delay;
 				if(time2linkIdDelays.get(time).get(link.getId())==null) delay = 0.0;
 				else delay = time2linkIdDelays.get(time).get(link.getId());
