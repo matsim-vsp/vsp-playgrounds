@@ -241,16 +241,12 @@ public class IncidentWithinDayReplanningIT {
 		
 	}
 	
-	// TODO
 	// see if the network change events are considered in the travel time computation
 	// dobler approach
-	@Ignore
 	@Test
-	public final void test1b() {
+	public final void test1bNetworkChangeEventBeforeTrip() {
 		
 		LinkDemandEventHandler handler1b;
-		LinkDemandEventHandler handler2b;
-		LinkDemandEventHandler handler3b;
 		
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_7.00.xml";
@@ -296,6 +292,20 @@ public class IncidentWithinDayReplanningIT {
 			controler.run();
 		}
 		
+		System.out.println("+++++++ 1b: ");
+		printResults(handler1b);
+
+		System.out.println("-------------");
+			
+		Assert.assertEquals(true, getLongRouteDemand(handler1b) == 1 && getShortRouteDemand(handler1b) == 0);
+	}
+	
+	// see if the network change events are considered in the travel time computation
+	// dobler approach
+	@Test
+	public final void test1bNetworkChangeEventDuringTrip() {
+		
+		LinkDemandEventHandler handler2b;
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_8.05.xml";
 			String outputDirectory = testUtils.getOutputDirectory() + "output_2b/";
@@ -339,7 +349,23 @@ public class IncidentWithinDayReplanningIT {
 			
 			controler.run();
 		}
+
+		System.out.println("+++++++ 2b: ");
+		printResults(handler2b);
+	
+		System.out.println("-------------");
+			
+		Assert.assertEquals(true, getLongRouteDemand(handler2b) == 1 && getShortRouteDemand(handler2b) == 0);
+	}
 		
+	// see if the network change events are considered in the travel time computation
+	// dobler approach
+	// TODO
+	@Ignore
+	@Test
+	public final void test1bChangeEventAfterTrip() {
+		
+		LinkDemandEventHandler handler3b;
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_10.00.xml";
 			String outputDirectory = testUtils.getOutputDirectory() + "output_3b/";
@@ -383,157 +409,13 @@ public class IncidentWithinDayReplanningIT {
 			controler.run();
 		}
 		
-		System.out.println("+++++++ 1b: ");
-		printResults(handler1b);
-		
-		System.out.println("+++++++ 2b: ");
-		printResults(handler2b);
-		
-		System.out.println("+++++++ 3b: ");
-		printResults(handler3b);
-		
-		System.out.println("-------------");
-			
-		Assert.assertEquals(true, getLongRouteDemand(handler1b) == 1 && getShortRouteDemand(handler1b) == 0);
-		Assert.assertEquals(true, getLongRouteDemand(handler2b) == 1 && getShortRouteDemand(handler1b) == 0);
+		// there is no reason for taking the longer route. The network change event (speed reduction on the faster route) occurs when the trip is over.
 		Assert.assertEquals(true, getLongRouteDemand(handler3b) == 0 && getShortRouteDemand(handler3b) == 1);
-	}
-	
-	// see if the congestion effects are considered in the travel time computation (2 agents)
-	// dvrp approach
-	@Test
-	public final void test2a() {
-		
-		LinkDemandEventHandler handler4;
-		LinkDemandEventHandler handler5a;
-		
-		{
-			String outputDirectory = testUtils.getOutputDirectory() + "output_4/";
-			
-			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
-
-			config.network().setInputFile(networkFile);
-			config.plans().setInputFile("plans_2agents.xml");
-			config.controler().setOutputDirectory(outputDirectory);
-			
-			final Scenario scenario = ScenarioUtils.loadScenario(config);
-			final Controler controler = new Controler(scenario);
-			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-			
-			handler4 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler4);
-			
-			controler.run();
-		}
-		
-		{
-			String outputDirectory = testUtils.getOutputDirectory() + "output_5a/";
-			
-			DvrpConfigGroup dvrpConfigGroup = new DvrpConfigGroup();
-			dvrpConfigGroup.setTravelTimeEstimationAlpha(1.0);
-			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", dvrpConfigGroup);
-			
-			config.network().setInputFile(networkFile);
-			config.plans().setInputFile("plans_2agents.xml");
-			config.controler().setOutputDirectory(outputDirectory);
-			
-			final Scenario scenario = ScenarioUtils.loadScenario(config);
-			final Controler controler = new Controler(scenario);
-			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
-				
-			// within-day replanning
-			controler.addOverridingModule( new AbstractModule() {
-				@Override public void install() {
-										
-					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
-					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
-					
-					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
-				}
-			}) ;
-			controler.addOverridingModule(new DvrpTravelTimeModule());
-			
-			handler5a = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler5a);
-			
-			controler.run();
-		}
-		
-		System.out.println("+++++++ 4: ");
-		printResults(handler4);
-		
-		System.out.println("+++++++ 5a: ");
-		printResults(handler5a);
-		
-		System.out.println("-------------");
-		
-		Assert.assertEquals(true, getLongRouteDemand(handler4) == 0 && getShortRouteDemand(handler4) == 2);
-		Assert.assertEquals(true, getLongRouteDemand(handler5a) == 2 && getShortRouteDemand(handler5a) == 0);
-	}
-
-	// see if the congestion effects are considered in the travel time computation (2 agents)
-	// dobler approach
-	// TODO
-	@Ignore
-	@Test
-	public final void test2b() {
-		
-		LinkDemandEventHandler handler5b;
-		
-		{
-			String outputDirectory = testUtils.getOutputDirectory() + "output_5b/";
-			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
-			
-			config.network().setInputFile(networkFile);
-			config.plans().setInputFile("plans_2agents.xml");
-			config.controler().setOutputDirectory(outputDirectory);
-			
-			final Scenario scenario = ScenarioUtils.loadScenario(config);
-			final Controler controler = new Controler(scenario);
-			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
-			
-			Set<String> analyzedModes = new HashSet<>();
-			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
-			
-			// within-day replanning
-			controler.addOverridingModule( new AbstractModule() {
-				@Override public void install() {
-										
-					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
-					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
-					
-					this.bind(TravelTime.class).toInstance(travelTime);
-					this.addEventHandlerBinding().toInstance(travelTime);
-					this.addMobsimListenerBinding().toInstance(travelTime);
-				}
-			}) ;
-			
-			handler5b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler5b);
-			
-			controler.run();
-		}
-					
-		System.out.println("+++++++ 5b: ");
-		printResults(handler5b);
-		
-		System.out.println("-------------");
-		
-		Assert.assertEquals(true, getLongRouteDemand(handler5b) == 2 && getShortRouteDemand(handler5b) == 0);
 	}
 	
 	// see if the congestion effects are considered in the travel time computation (10 agents)
 	// dvrp approach
+	@Ignore
 	@Test
 	public final void test3a() {
 		
@@ -611,7 +493,6 @@ public class IncidentWithinDayReplanningIT {
 	
 	// see if the congestion effects are considered in the travel time computation (10 agents)
 	// dobler approach
-	// TODO
 	@Ignore
 	@Test
 	public final void test3b() {
@@ -662,7 +543,7 @@ public class IncidentWithinDayReplanningIT {
 		printResults(handler7b);
 		System.out.println("-------------");		
 		
-		Assert.assertEquals(true, getLongRouteDemand(handler7b) == 10 && getShortRouteDemand(handler7b) == 0);
+		Assert.assertEquals(true, getLongRouteDemand(handler7b) == 1 && getShortRouteDemand(handler7b) == 9);
 	}
 	
 	private void printResults(LinkDemandEventHandler handler) {

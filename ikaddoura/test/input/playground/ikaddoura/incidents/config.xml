@@ -23,7 +23,7 @@
 		<param name="storageCapacityFactor" value="1.00" />
 		
 		<param name="startTime" value="undefined" />
-		<param name="endTime" value="12:00:00" />
+		<param name="endTime" value="30:00:00" />
 		
 	</module>
 	

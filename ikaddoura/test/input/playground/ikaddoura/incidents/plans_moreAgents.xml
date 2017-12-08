@@ -148,7 +148,7 @@
 	</person>
 	<person id="person_9">
 		<plan score="143.84663813387084" selected="yes">
-			<activity type="home" link="link_0_3" x="-500.0" y="9000.0" end_time="08:00:09" >
+			<activity type="home" link="link_0_3" x="-500.0" y="9000.0" end_time="08:15:00" >
 			</activity>
 			<leg mode="car" dep_time="08:00:00" trav_time="00:00:26">
 				<route type="links" start_link="link_0_3" end_link="link_6_9" trav_time="00:00:26" distance="27200.0">link_0_3 link_3_7 link_7_8 link_8_6 link_6_9</route>
