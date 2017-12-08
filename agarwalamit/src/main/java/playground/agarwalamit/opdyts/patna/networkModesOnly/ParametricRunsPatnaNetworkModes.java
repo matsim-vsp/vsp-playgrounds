@@ -44,7 +44,8 @@ public class ParametricRunsPatnaNetworkModes {
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1, 5, 10};
 
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+ PrepareParametricRuns.newLine);
+        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts")
+              .append(PrepareParametricRuns.newLine);
 
         for (String ascStyle : ascStyles ) {
             for(double stepSize :stepSizes){
@@ -73,7 +74,10 @@ public class ParametricRunsPatnaNetworkModes {
                             };
 
                             parametricRuns.run(additionalLines, baseOutDir, jobName);
-                            buffer.append(jobName+"\t" + params.replace(' ','\t') + PrepareParametricRuns.newLine);
+                            buffer.append(jobName)
+                                  .append("\t")
+                                  .append(params.replace(' ', '\t'))
+                                  .append(PrepareParametricRuns.newLine);
                         }
                     }
                 }

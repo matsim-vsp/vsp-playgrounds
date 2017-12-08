@@ -100,9 +100,7 @@ public class PatnaDemandImputer {
 				if( row[0].substring(0, 1).matches("[A-Za-z]") // labels 
 						&& !row[0].startsWith("NA") // "NA" could also be inside the data 
 						) {
-					for (String s : strs){ 
-						labels.add(s); 
-					}
+                    labels.addAll(strs);
 				} else { // main data
 
 					String mode = strs.get( labels.indexOf( PatnaDemandLabels.mode.toString() ));

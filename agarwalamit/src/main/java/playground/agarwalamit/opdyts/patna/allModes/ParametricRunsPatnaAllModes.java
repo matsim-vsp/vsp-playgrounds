@@ -51,7 +51,9 @@ public class ParametricRunsPatnaAllModes {
         Integer [] warmUpIts = {5};
 
 //        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts\tteleportationModesZoneType"+ PrepareParametricRuns.newLine);
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts\tteleportationModesZoneType"+"\tinputPlans"+ PrepareParametricRuns.newLine);
+        buffer.append(
+                "runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts\tteleportationModesZoneType" + "\tinputPlans")
+              .append(PrepareParametricRuns.newLine);
 
         for (String ascStyle : ascStyles ) {
             for(double stepSize :stepSizes){
@@ -85,7 +87,11 @@ public class ParametricRunsPatnaAllModes {
 
                             parametricRuns.run(additionalLines, baseOutDir, jobName);
 //                            buffer.append(jobName+"\t" + params.replace(' ','\t') + PrepareParametricRuns.newLine);
-                            buffer.append(jobName+"\t" + params.replace(' ','\t')+"\trun418/_8/output_plans.xml.gz" + PrepareParametricRuns.newLine);
+                            buffer.append(jobName)
+                                  .append("\t")
+                                  .append(params.replace(' ', '\t'))
+                                  .append("\trun418/_8/output_plans.xml.gz")
+                                  .append(PrepareParametricRuns.newLine);
                         }
                     }
                 }

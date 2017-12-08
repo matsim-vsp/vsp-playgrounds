@@ -49,7 +49,7 @@ public class RCommandExecutor {
 
             String line = "";
             while ((line = reader.readLine())!= null) {
-                output.append(line + "\n");
+                output.append(line).append("\n");
             }
 
         } catch (Exception e) {

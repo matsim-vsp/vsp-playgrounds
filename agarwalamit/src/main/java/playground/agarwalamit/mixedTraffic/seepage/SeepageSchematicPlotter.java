@@ -238,11 +238,8 @@ public class SeepageSchematicPlotter {
 		@Override
 		public void handleEvent(LinkEnterEvent event) {
 			System.out.println(event.toString());
-			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(Id.createPersonId(event.getVehicleId()));
-			if (travelTimes == null) {
-				travelTimes = new HashMap<>();
-				this.personLinkTravelTimes.put(Id.createPersonId(event.getVehicleId()), travelTimes);
-			}
+			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.computeIfAbsent(Id.createPersonId(event.getVehicleId()),
+					k -> new HashMap<>());
 			travelTimes.put(event.getLinkId(), Double.valueOf(event.getTime()));
 			if ( event.getLinkId().equals( Id.createLinkId("2") ) ) {
 				log.info( event );

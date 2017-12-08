@@ -133,7 +133,7 @@ public class PerLinkEmissionData {
 			BufferedWriter out = IOUtils.getBufferedWriter(outFile);
 			out.append("linkId\txLink\tyLink\t");
 			for (String pollutant : this.emissionUtils.getListOfPollutants()){
-				out.append(pollutant + "[g]\t");
+				out.append(pollutant).append("[g]\t");
 			}
 			out.append("\n");
 
@@ -143,11 +143,16 @@ public class PerLinkEmissionData {
 				Double xLink = linkCoord.getX();
 				Double yLink = linkCoord.getY();
 
-				out.append(linkId + "\t" + xLink + "\t" + yLink + "\t");
+				out.append(String.valueOf(linkId))
+				   .append("\t")
+				   .append(String.valueOf(xLink))
+				   .append("\t")
+				   .append(String.valueOf(yLink))
+				   .append("\t");
 
 				Map<String, Double> emissionType2Value = map.get(linkId);
 				for(String pollutant : this.emissionUtils.getListOfPollutants()){
-					out.append(emissionType2Value.get(pollutant) + "\t");
+					out.append(String.valueOf(emissionType2Value.get(pollutant))).append("\t");
 				}
 				out.append("\n");
 			}

@@ -143,7 +143,8 @@ public class ExperiencedEmissionCostCalculatorExample {
                     CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(events);
                     reader.readFile(eventsFile);
 
-                    handler.getUserGroup2TotalEmissionCosts().entrySet().forEach(e -> System.out.println(e.getKey()+"\t"+e.getValue()));
+                    handler.getUserGroup2TotalEmissionCosts()
+                           .forEach((key, value) -> System.out.println(key + "\t" + value));
                     writer.write(str+"\t"+itr+"\t"+ MapUtils.doubleValueSum(handler.getUserGroup2TotalEmissionCosts())+"\t");
 
                     writer.write(MapUtils.doubleValueSum(person2toll)+"\n");

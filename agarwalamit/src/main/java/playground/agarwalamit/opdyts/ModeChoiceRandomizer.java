@@ -162,9 +162,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
                 }
                 { // negative: since this mode is already updated above, first copy existing ones, update values and then add them to main collection
                     List<PlanCalcScoreConfigGroup> tempCombinations = new ArrayList<>();
-                    allCombinations.parallelStream().forEach(e -> {
-                        tempCombinations.add(copyOfPlanCalcScore(e.getScoringParameters(this.subPopName)));
-                    });
+                    allCombinations.parallelStream().forEach(e -> tempCombinations.add(copyOfPlanCalcScore(e.getScoringParameters(this.subPopName))));
                     double newASC =  sourceModeParam.getConstant() - opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * randomVariationOfStepSize;
                     tempCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
                     allCombinations.addAll(tempCombinations);

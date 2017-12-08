@@ -80,7 +80,7 @@ public class CausedEmissionCostHandler implements VehicleEntersTrafficEventHandl
 		new EmissionEventsReader(eventsManager).readFile(emissionEventsFile);
 
 		Map<String, Double> usrGrp2Cost = ech.getUserGroup2TotalEmissionCosts();
-		usrGrp2Cost.entrySet().forEach(entry -> System.out.print(entry.getKey()+"\t"+entry.getValue()));
+		usrGrp2Cost.forEach((key, value) -> System.out.print(key + "\t" + value));
 	}
 
 	@Override

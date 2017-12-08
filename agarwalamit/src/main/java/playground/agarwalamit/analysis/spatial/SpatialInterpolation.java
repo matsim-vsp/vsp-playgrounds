@@ -181,9 +181,7 @@ public class SpatialInterpolation {
 		Coordinate actCoordinate = new Coordinate (act.getCoord().getX(),act.getCoord().getY());
 		Point actLocation = gf.createPoint(actCoordinate);
 
-		this.cellWeights.keySet().stream().filter(p -> this.grid.getCellGeometry(p).covers(actLocation)).forEach(p -> {
-			this.cellWeights.put(p, this.cellWeights.get(p) + 1 * countScaleFactor);
-		});
+		this.cellWeights.keySet().stream().filter(p -> this.grid.getCellGeometry(p).covers(actLocation)).forEach(p -> this.cellWeights.put(p, this.cellWeights.get(p) + 1 * countScaleFactor));
 	}
 
 	/**

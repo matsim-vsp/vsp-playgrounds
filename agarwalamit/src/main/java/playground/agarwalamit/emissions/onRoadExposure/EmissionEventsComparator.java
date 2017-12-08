@@ -63,8 +63,7 @@ public class EmissionEventsComparator {
         inputList.sort(new Comparator<Event>() {
             @Override
             public int compare(Event o1, Event o2) {
-                return Integer.valueOf(eventTypes.indexOf(o1.getEventType()))
-                              .compareTo(Integer.valueOf(eventTypes.indexOf(o2.getEventType())));
+                return Integer.compare(eventTypes.indexOf(o1.getEventType()), eventTypes.indexOf(o2.getEventType()));
             }
         });
         return inputList;

@@ -128,7 +128,7 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 				dists.add(0.);
 			} else {//person is not present 
 				personId2TripCount.put(personId, 1);
-				personId2TripDist.put(personId, new ArrayList<>(Arrays.asList(new Double [] {0.0})) );
+				personId2TripDist.put(personId, new ArrayList<>(Arrays.asList(0.0)) );
 			}
 		} else {// timebin is not present
 			Map<Id<Person>,Integer> personId2TripCount = new HashMap<>();
@@ -136,7 +136,7 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 			timeBin2Person2TripsCount.put(time, personId2TripCount);
 			
 			Map<Id<Person>,List<Double>> personId2TripDist = new HashMap<>();
-			personId2TripDist.put(personId, new ArrayList<>(Arrays.asList(new Double [] {0.0})) );
+			personId2TripDist.put(personId, new ArrayList<>(Arrays.asList(0.0)) );
 			timeBin2Person2TripsDistance.put(time, personId2TripDist);
 		}
 	}

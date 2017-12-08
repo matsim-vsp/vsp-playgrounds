@@ -102,7 +102,7 @@ public class RunSSHScript {
             channel.connect();
             String line = bufferedReader.readLine();
             while ( line != null) {
-                output.append(line+"\n");
+                output.append(line).append("\n");
                 line = bufferedReader.readLine();
             }
 

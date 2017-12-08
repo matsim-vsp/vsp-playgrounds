@@ -274,7 +274,7 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 				double coldCost = 0.;
 
 				if (getTimeBin2VehicleId2ColdEmissionCosts().get(d)!=null && getTimeBin2VehicleId2ColdEmissionCosts().get(d).get(vehicleId)!=null) {
-					warmCost = getTimeBin2PersonId2ColdEmissionCosts().get(d).get(vehicleId);
+					warmCost = getTimeBin2VehicleId2ColdEmissionCosts().get(d).get(vehicleId);
 				}
 
 				if (getTimeBin2VehicleId2WarmEmissionCosts().get(d)!=null && getTimeBin2VehicleId2WarmEmissionCosts().get(d).get(vehicleId)!=null) {
