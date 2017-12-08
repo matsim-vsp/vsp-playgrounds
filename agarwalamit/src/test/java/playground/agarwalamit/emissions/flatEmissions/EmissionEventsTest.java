@@ -113,7 +113,7 @@ public class EmissionEventsTest {
         car.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS.toString()
                 + HbefaVehicleCategory.PASSENGER_CAR.toString().concat(";petrol (4S);>=2L;PC-P-Euro-0")
                 + EmissionSpecificationMarker.END_EMISSIONS.toString() );
-        // TODO "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
+        // Info: "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
         // thus, reading from vehicles file and directly passing to vehicles container is not the same.
         vehs.addVehicleType(car);
 

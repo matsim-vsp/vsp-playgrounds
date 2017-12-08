@@ -101,7 +101,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
     public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable) {
         List<ModeChoiceDecisionVariable> result ;
 
-        final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig(); // TODO: is this oldScoringConfigGroup or newScoringConfigGroup
+        final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();
         PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet = oldScoringConfig.getScoringParametersPerSubpopulation().get(this.subPopName);
 
         int totalNumberOfCombination = (int) Math.pow(2, (this.considerdModes.size()-1)); // exclude car

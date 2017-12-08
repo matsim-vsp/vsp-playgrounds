@@ -345,7 +345,7 @@ public class ExposurePricingIT {
 		
 		EquilTestSetUp equilTestSetUp = new EquilTestSetUp();
 		Scenario sc = equilTestSetUp.createConfigAndReturnScenario();
-		// TODO : I have used link speed as 100/3.6 m/s instead of 100 m/s thus check the difference in the result
+		// Info: I have used link speed as 100/3.6 m/s instead of 100 m/s thus check the difference in the result
 		equilTestSetUp.createNetwork(sc);
 		equilTestSetUp.createActiveAgents(sc);
 		equilTestSetUp.createPassiveAgents(sc);
