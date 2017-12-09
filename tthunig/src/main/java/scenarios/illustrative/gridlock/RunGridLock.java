@@ -84,6 +84,7 @@ import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
 import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerSignalController;
 import signals.sylvia.controler.DgSylviaConfig;
 import signals.sylvia.data.DgSylviaPreprocessData;
@@ -97,7 +98,7 @@ public class RunGridLock {
 	private static final Logger log = Logger.getLogger(RunGridLock.class);
 	
 	private enum SignalType { NONE, PLANBASED, DOWNSTREAM, SYLVIA, LAEMMER}
-	private static final SignalType SIGNALTYPE = SignalType.PLANBASED;
+	private static final SignalType SIGNALTYPE = SignalType.LAEMMER;
 	
 	private enum SignalBasis { GREEN, CONFLICTING, TWO_ALTERNATING }
 	private static final SignalBasis SIGNALBASIS = SignalBasis.TWO_ALTERNATING;
@@ -129,12 +130,20 @@ public class RunGridLock {
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
+			
 			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
 //			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 //			sylviaConfig.setSignalGroupMaxGreenScale(2);
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
-			// TODO add laemmer module to enable/disable downstream sensor etc
+			
+			LaemmerConfig laemmerConfig = new LaemmerConfig();
+			laemmerConfig.setDefaultIntergreenTime(1);
+			laemmerConfig.setDesiredCycleTime(60);
+			laemmerConfig.setMaxCycleTime(90);
+			laemmerConfig.setCheckDownstream(false); // TODO try this out
+			signalsModule.setLaemmerConfig(laemmerConfig);
+			
 			controler.addOverridingModule(signalsModule);
 
 			controler.addOverridingModule(new AbstractModule() {
@@ -467,10 +476,10 @@ public class RunGridLock {
 			case TWO_ALTERNATING:
 				log.info("Create two alternating signal phases");
 				// create disjunct groups
-				SignalGroupData incommingGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("incomming", SignalGroup.class));
+				SignalGroupData incommingGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("incomming"+systemNodeId, SignalGroup.class));
 				incommingGroup.addSignalId(signalIncomming.getId());
 				signalGroups.addSignalGroupData(incommingGroup);
-				SignalGroupData outgoingUturnGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("outgoingUturn", SignalGroup.class));
+				SignalGroupData outgoingUturnGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("outgoingUturn"+systemNodeId, SignalGroup.class));
 				outgoingUturnGroup.addSignalId(signalOutgoing.getId());
 				outgoingUturnGroup.addSignalId(signalUTurn.getId());
 				signalGroups.addSignalGroupData(outgoingUturnGroup);
