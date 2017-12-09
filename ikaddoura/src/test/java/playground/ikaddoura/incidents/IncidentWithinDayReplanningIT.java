@@ -39,6 +39,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.mobsim.jdeqsim.Vehicle;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
@@ -359,16 +360,67 @@ public class IncidentWithinDayReplanningIT {
 	}
 		
 	// see if the network change events are considered in the travel time computation
+	// no within-day replanning
 	// dobler approach
 	// TODO
-	@Ignore
+//	@Ignore
 	@Test
-	public final void test1bChangeEventAfterTrip() {
+	public final void test1bChangeEventAfterTripNoReplanning() {
 		
 		LinkDemandEventHandler handler3b;
 		{
 			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_10.00.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output_3b/";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_3b_noReplanning/";
+			
+			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
+
+			config.network().setInputFile(networkFile);
+			config.network().setChangeEventsInputFile(networkChangeEventsFile);
+			config.network().setTimeVariantNetwork(true);
+			config.plans().setInputFile("plans.xml");
+			config.controler().setOutputDirectory(outputDirectory);
+			
+			final Scenario scenario = ScenarioUtils.loadScenario(config);
+			final Controler controler = new Controler(scenario);
+			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+
+			Set<String> analyzedModes = new HashSet<>();
+			analyzedModes.add(TransportMode.car);
+			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			
+			controler.addOverridingModule( new AbstractModule() {
+				@Override public void install() {
+					
+					this.bind(TravelTime.class).toInstance(travelTime);
+					this.addEventHandlerBinding().toInstance(travelTime);
+					this.addMobsimListenerBinding().toInstance(travelTime);
+				}
+			}) ;
+			
+			handler3b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler3b);
+			
+			controler.run();
+			
+			System.out.println();
+			Assert.assertEquals("Should be the freespeed travel time.", 4000., travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 12 * 3600., scenario.getPopulation().getPersons().get(0), scenario.getVehicles().getVehicles().get(0)), testUtils.EPSILON);
+			Assert.assertEquals("Should be the freespeed travel time.", 396., travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 7 * 3600., scenario.getPopulation().getPersons().get(0), scenario.getVehicles().getVehicles().get(0)), testUtils.EPSILON);
+
+		}
+	}
+	
+	// see if the network change events are considered in the travel time computation
+	// with withing-day replanning
+	// dobler approach
+	// TODO
+//	@Ignore
+	@Test
+	public final void test1bChangeEventAfterTripWithReplanning() {
+		
+		LinkDemandEventHandler handler3b;
+		{
+			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_10.00.xml";
+			String outputDirectory = testUtils.getOutputDirectory() + "output_3b_withReplanning/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
 
@@ -409,7 +461,7 @@ public class IncidentWithinDayReplanningIT {
 			controler.run();
 		}
 		
-		// there is no reason for taking the longer route. The network change event (speed reduction on the faster route) occurs when the trip is over.
+		// there is no reason for taking the longer route. The network change event (speed reduction on the short route) occurs when the trip is over.
 		Assert.assertEquals(true, getLongRouteDemand(handler3b) == 0 && getShortRouteDemand(handler3b) == 1);
 	}
 	
