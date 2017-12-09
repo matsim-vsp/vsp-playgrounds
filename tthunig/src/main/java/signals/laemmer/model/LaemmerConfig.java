@@ -26,7 +26,7 @@ public class LaemmerConfig {
     private Map<Id<Link>, Double> linkArrivalRates = new HashMap<>();
     private Map<Id<Link>, Map<Id<Lane>,Double>> laneArrivalRates = new HashMap<>();
 
-    private boolean useBasicIntergreenTime = true;
+    private boolean useDefaultIntergreenTime = true;
     private boolean analysisEnabled = false;
     
 	/** activate the phase only if downstream links are empty. */
@@ -89,12 +89,12 @@ public class LaemmerConfig {
         this.desiredCycleTime = desiredCycleTime;
     }
 
-    public boolean isUseBasicIntergreenTime() {
-        return useBasicIntergreenTime;
+    public boolean isUseDefaultIntergreenTime() {
+        return useDefaultIntergreenTime;
     }
 
-    public void setUseBasicIntergreenTime(boolean useBasicIntergreenTime) {
-        this.useBasicIntergreenTime = useBasicIntergreenTime;
+    public void setUseDefaultIntergreenTime(boolean useDefaulttIntergreenTime) {
+        this.useDefaultIntergreenTime = useDefaulttIntergreenTime;
     }
 
     public double getDefaultIntergreenTime() {
