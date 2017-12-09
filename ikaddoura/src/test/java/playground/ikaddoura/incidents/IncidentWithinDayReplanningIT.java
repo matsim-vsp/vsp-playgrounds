@@ -415,7 +415,6 @@ public class IncidentWithinDayReplanningIT {
 	
 	// see if the congestion effects are considered in the travel time computation (10 agents)
 	// dvrp approach
-	@Ignore
 	@Test
 	public final void test3a() {
 		
@@ -493,7 +492,6 @@ public class IncidentWithinDayReplanningIT {
 	
 	// see if the congestion effects are considered in the travel time computation (10 agents)
 	// dobler approach
-	@Ignore
 	@Test
 	public final void test3b() {
 		
