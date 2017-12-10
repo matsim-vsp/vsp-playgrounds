@@ -386,7 +386,9 @@ public class LaemmerSignalController extends AbstractSignalController implements
             if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
                 updateStabilization(now);
             }
-            calculatePriorityIndex(now);
+			if (!this.stabilize) {
+				calculatePriorityIndex(now);
+			}
         }
 
         private void updateAbortionPenalty(double now) {
