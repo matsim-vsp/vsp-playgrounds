@@ -172,13 +172,13 @@ public class LaemmerSignalController extends AbstractSignalController implements
             if (max == null) {
                 double index = 0;
                 for (LaemmerSignal signal : laemmerSignals) {
-                    if (signal.index > index) {
-                    	// if downstream check enabled, only select signals that do not lead to occupied links
-                    	if (!laemmerConfig.isCheckDownstream() || downstreamSensor.allDownstreamLinksEmpty(system.getId(), signal.group.getId())){
-                    		max = signal;
-                        	index = signal.index;
-                    	}
-                    }
+					if (signal.index > index) {
+						// if downstream check enabled, only select signals that do not lead to occupied links
+						if (!laemmerConfig.isCheckDownstream() || downstreamSensor.allDownstreamLinksEmpty(system.getId(), signal.group.getId())) {
+							max = signal;
+							index = signal.index;
+						}
+					}
                 }
             }
         }
@@ -186,9 +186,14 @@ public class LaemmerSignalController extends AbstractSignalController implements
     }
 
     private void processSelection(double now, LaemmerSignal max) {
-
-        if (activeRequest != null && max != null && !max.equals(activeRequest.signal)) {
-            this.system.scheduleDropping(now, activeRequest.signal.group.getId());
+        if (activeRequest != null && (max == null || !max.equals(activeRequest.signal))) {
+        		/* quit the active request, when the next selection (max) is different from the current (activeRequest)
+        		 * or, when the next selection (max) is null
+        		 */
+        		if (activeRequest.onsetTime < now) {
+        			// do not schedule a dropping when the signal does not yet show green
+        			this.system.scheduleDropping(now, activeRequest.signal.group.getId());
+        		}
             activeRequest = null;
         }
 
