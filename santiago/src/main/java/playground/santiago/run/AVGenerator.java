@@ -95,8 +95,8 @@ public class AVGenerator {
 	}
 
 	public static void main(String[] args) throws ParseException {
-		String dir = "../../runs-svn/santiago/v2a/";
-		String networkFile = dir + "input/network_merged_cl.xml.gz";
+		String dir = "D:\\matsim-eclipse\\runs-svn\\santiago_AT_10pc\\";
+		String networkFile = dir + "network_merged_cl.xml.gz";
 		String taxisFilePrefix = dir + "taxis_";
 
 		double startTime = 0;
@@ -105,7 +105,7 @@ public class AVGenerator {
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
 
-		for (int i = 200; i <= 1600; i += 200) {
+		for (int i = 18000; i <= 24000; i += 2000) {
 			AVCreator avc = new AVCreator(scenario);
 			VehicleGenerator vg = new VehicleGenerator(workTime, workTime, avc);
 			vg.generateVehicles(new double[] { i, i }, startTime, 30 * 3600);
