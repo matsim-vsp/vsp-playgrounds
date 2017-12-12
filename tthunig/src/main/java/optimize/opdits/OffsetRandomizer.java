@@ -86,7 +86,7 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
-					plan.setOffset(plan.getOffset() + delta);
+					plan.setOffset(plan.getOffset() - delta);
 				}
 				OffsetDecisionVariable variation = new OffsetDecisionVariable(newOffsets, scenario);
 				result.add(variation);
