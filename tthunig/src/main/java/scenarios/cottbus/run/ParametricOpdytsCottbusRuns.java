@@ -34,7 +34,7 @@ public class ParametricOpdytsCottbusRuns {
         String matsimDir = "tthunig-0.10.0-SNAPSHOT";
         
         StringBuilder buffer = new StringBuilder();
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub","thunig");
 
 //        boolean[] useMSA = {true, false};
         boolean[] useMSA = {false};
