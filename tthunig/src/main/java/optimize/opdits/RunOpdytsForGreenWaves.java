@@ -91,7 +91,8 @@ import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
  */
 public class RunOpdytsForGreenWaves {
 
-	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize7random_30it_score/";
+	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize10random_10it_expTt/";
+//	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/offsets0-20/";
 
 	private static final boolean USE_OPDYTS = true;
 
@@ -108,9 +109,9 @@ public class RunOpdytsForGreenWaves {
 			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
 			opdytsConfigGroup.setNumberOfIterationsForConvergence(20); // 5
 
-			opdytsConfigGroup.setMaxIteration(30);
+			opdytsConfigGroup.setMaxIteration(10);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(7);
+			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(10);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);
@@ -233,13 +234,17 @@ public class RunOpdytsForGreenWaves {
 			signalControl.addSignalSystemControllerData(signalSystemControl);
 
 			// create a plan for the signal system (with defined cycle time and offset 0)
+			// optimal offsets:
 //			 int offset = 11;
 //			 if (i==1) offset = 21;
 //			 else if (i==2) offset = 31;
+			// worst offset for second system, when first two are optimal:
 //			 else if (i==2) offset = 231;
+			// worst offsets:
 //			 int offset = 211;
 //			 if (i==1) offset = 121;
 //			 else if (i==2) offset = 32;
+			 // zero-offsets:
 			int offset = 0;
 			SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 300, offset,
 					Id.create("SignalPlan", SignalPlan.class));

@@ -302,7 +302,7 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		modeChoiceCarAvail.setWeight(0.15);
 		controler.getConfig().strategy().addStrategySettings(modeChoiceCarAvail);
 
-		final String nameMcNonCarAvail = "SubtourModeChoice";
+		final String nameMcNonCarAvail = "SubtourModeChoice_".concat("nonCarAvail");
 		StrategySettings modeChoiceNonCarAvail = new StrategySettings();
 		modeChoiceNonCarAvail.setStrategyName(nameMcNonCarAvail);
 		modeChoiceNonCarAvail.setSubpopulation(null);

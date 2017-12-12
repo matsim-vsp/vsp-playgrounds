@@ -23,12 +23,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
@@ -39,7 +39,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.mobsim.jdeqsim.Vehicle;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
@@ -403,8 +402,19 @@ public class IncidentWithinDayReplanningIT {
 			controler.run();
 			
 			System.out.println();
-			Assert.assertEquals("Should be the freespeed travel time.", 4000., travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 12 * 3600., scenario.getPopulation().getPersons().get(0), scenario.getVehicles().getVehicles().get(0)), testUtils.EPSILON);
-			Assert.assertEquals("Should be the freespeed travel time.", 396., travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 7 * 3600., scenario.getPopulation().getPersons().get(0), scenario.getVehicles().getVehicles().get(0)), testUtils.EPSILON);
+			final Link link_7_8 = scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8"));
+			Assert.assertEquals("Should be the freespeed travel time.",
+//					4000.,
+					link_7_8.getLength()/1.0 , // speed after change event
+					travelTime.getLinkTravelTime(link_7_8,
+							12 * 3600., null, null),
+					testUtils.EPSILON);
+			Assert.assertEquals("Should be the freespeed travel time.",
+//					396.,
+					link_7_8.getLength()/link_7_8.getFreespeed(),
+					travelTime.getLinkTravelTime(link_7_8,
+							7 * 3600., null, null),
+					testUtils.EPSILON);
 
 		}
 	}
