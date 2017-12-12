@@ -34,7 +34,7 @@ public class ParametricRunsEquilnet {
         int runCounter= 100;
         String baseDir = "/net/ils4/agarwal/equilOpdyts/carPt/output/";
         StringBuilder buffer = new StringBuilder();
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
 
         String ascStyles [] = {"axial_fixedVariation","axial_randomVariation"};
         double [] stepSizes = {0.25, 0.5, 1.0};

@@ -39,6 +39,11 @@ import com.jcraft.jsch.SftpException;
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
  *
+ * (a) create a public-private key pair as
+ *          'ssh-keygen -t rsa -b 4096 -f $HOME/.ssh/nameOfTheKey'
+ * (b) copy public key ('nameOfTheKey.pub') to cluster as
+ *          'ssh-copy-id -i nameOfTheKey.pub agarwal@cluster-i.math.tu-berlin.de'
+ *
  * Created by amit on 04.10.17.
  */
 
@@ -48,16 +53,16 @@ public class PrepareParametricRuns {
     private final Session session;
     private final ChannelSftp sftp;
 
-    public PrepareParametricRuns() {
+    public PrepareParametricRuns(String pathToKnownHosts, String pathToPrivateKey, String userName) {
         try {
             JSch jSch = new JSch();
-            jSch.setKnownHosts("~/.ssh/known_hosts"); // location of the ssh fingerprint (unique host key)
-            jSch.addIdentity("~/.ssh/id_rsa_tub_math"); // this is the private key required.
+            jSch.setKnownHosts(pathToKnownHosts); // location of the ssh fingerprint (unique host key)
+            jSch.addIdentity(pathToPrivateKey); // this is the private key required.
 
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no"); // so that no question asked, and script run without any problem
 
-            session = jSch.getSession("agarwal", "cluster-i.math.tu-berlin.de", 22);
+            session = jSch.getSession(userName, "cluster-i.math.tu-berlin.de", 22);
             session.setConfig(config);
 
             session.connect();
@@ -77,7 +82,7 @@ public class PrepareParametricRuns {
 
         StringBuilder buffer = new StringBuilder();
 
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tubMath","agarwal");
 
         String ascStyles [] = {"axial_fixedVariation","axial_randomVariation"};
         double [] stepSizes = {0.25, 0.5, 1.0};
@@ -113,7 +118,7 @@ public class PrepareParametricRuns {
                                             arg+" "
                             };
 
-                            parametricRuns.run(additionalLines, baseDir, jobName);
+                            parametricRuns.run(new String [2], baseDir, jobName);
                             buffer.append(runCounter+"\t" + arg.replace(' ','\t') + newLine);
                         }
                     }
@@ -210,7 +215,7 @@ public class PrepareParametricRuns {
 
         return new String [] {
                 "qstat -u agarwal",
-                "qsub "+scriptWriter.getJobScript(),
+//                "qsub "+scriptWriter.getJobScript(),
                 "qstat -u agarwal" };
     }
 }
