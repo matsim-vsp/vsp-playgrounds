@@ -108,8 +108,8 @@ public class RunOpdytsForGreenWaves {
 
 		if (USE_OPDYTS) {
 			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
-			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
-			opdytsConfigGroup.setNumberOfIterationsForConvergence(20); // 5
+			opdytsConfigGroup.setNumberOfIterationsForAveraging(2); // 2
+			opdytsConfigGroup.setNumberOfIterationsForConvergence(5); // 5
 
 			opdytsConfigGroup.setMaxIteration(30);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
