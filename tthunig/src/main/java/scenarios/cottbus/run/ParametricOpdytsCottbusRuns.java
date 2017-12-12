@@ -30,21 +30,21 @@ public class ParametricOpdytsCottbusRuns {
 	public static void main(String[] args) {
 		int runCounter= 485;
 		
-		String baseOutDir = "/net/ils4/thunig/runs-svn/cottbus/opdyts/calibration/";
-        String matsimDir = "tthunig-0.10.0-SNAPSHOT";
+		String baseOutDir = "/net/ils3/thunig/runs-svn/cottbus/opdyts/calibration/";
+        String matsimDir = "tthunig-0.10.0-SNAPSHOT_4";
         
         StringBuilder buffer = new StringBuilder();
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub","thunig");
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","thunig");
 
 //        boolean[] useMSA = {true, false};
         boolean[] useMSA = {false};
-//        int[] opdytsIterations = {30,50,100};
-        int[] opdytsIterations = {30};
-//        int [] stepSizes = {5, 10, 20};
-        int [] stepSizes = {10};
-//        double [] selfTuningWts = {1.0, 4.0};
-        double [] selfTuningWts = {1.0};
-        int [] warmUpIts = {5};
+        int[] opdytsIterations = {30,50,100};
+//        int[] opdytsIterations = {30};
+        int [] stepSizes = {5, 10, 20};
+//        int [] stepSizes = {10};
+        double [] selfTuningWts = {1.0, 4.0};
+//        double [] selfTuningWts = {1.0};
+        int [] warmUpIts = {5, 10};
 		
         buffer.append(
                 "runNr\tuseMSA\topdytsIts\tstepSize\tselfTunerWt\twarmUpIts")
@@ -65,7 +65,7 @@ public class ParametricOpdytsCottbusRuns {
                                     "echo \"========================\"",
                                     PrepareParametricRuns.newLine,
 
-                                    "cd /net/ils4/thunig/matsim/"+matsimDir+"/",
+                                    "cd /net/ils3/thunig/matsim/"+matsimDir+"/",
                                     PrepareParametricRuns.newLine,
 
                                     "java -Djava.awt.headless=true -Xmx29G -cp tthunig-0.10.0-SNAPSHOT.jar " +

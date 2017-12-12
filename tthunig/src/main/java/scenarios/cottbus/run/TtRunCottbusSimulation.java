@@ -137,7 +137,7 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap07MSRand // same as prev, but with signals MS_RANDOM_OFFSETS
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.BTU_OPT;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
