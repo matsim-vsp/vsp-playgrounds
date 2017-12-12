@@ -82,6 +82,7 @@ import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
 import optimize.opdits.OffsetDecisionVariable;
 import optimize.opdits.OffsetRandomizer;
+import optimize.opdits.OpdytsOffsetStatsControlerListener;
 import optimize.opdits.TravelTimeObjectiveFunction;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
 import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
@@ -134,7 +135,7 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap1 // without mines. iterated for 100it with capacity 1.0
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.NONE;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS_RANDOM_OFFSETS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -159,11 +160,11 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/routerTest/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/opdyts/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
-	private static final boolean WRITE_INITIAL_FILES = false;
+	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
 	private static final double SCALING_FACTOR = 0.7;
 	
@@ -195,8 +196,7 @@ public class TtRunCottbusSimulation {
 			simulator.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
-					// TODO why does it work to inject this in TravelTimeObjectiveFunction, although
-					// TravelTimeObjectiveFunction is not created by guice??
+					// this can later be accessed by TravelTimeObjectiveFunction, because it is bind inside MATSimSimulator2
 					bind(TtTotalTravelTime.class).asEagerSingleton();
 					addEventHandlerBinding().to(TtTotalTravelTime.class);
 
@@ -214,6 +214,8 @@ public class TtRunCottbusSimulation {
 					this.bind(TtSignalAnalysisWriter.class);
 					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
 
+					this.addControlerListenerBinding().to(OpdytsOffsetStatsControlerListener.class);
+					
 					// plot only after one opdyts transition:
 					addControlerListenerBinding().toInstance(new ShutdownListener() { 
 						@Override
@@ -317,7 +319,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(0);
+		config.controler().setLastIteration(100);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
@@ -424,6 +426,7 @@ public class TtRunCottbusSimulation {
 		// for small time bins and sparse values hash map is better. theresa, may'15
 
 		// define strategies:
+		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
@@ -431,16 +434,12 @@ public class TtRunCottbusSimulation {
 				strat.setWeight(0.0); // no ReRoute, fix route choice set
 			else
 				strat.setWeight(0.1);
-			// TODO
-//			strat.setDisableAfter(config.controler().getLastIteration() - config.controler().getFirstIteration() > 200 ? 
-//					config.controler().getLastIteration() - 100 : config.controler().getLastIteration() - 50);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.TimeAllocationMutator.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 100);
 			config.strategy().addStrategySettings(strat);
 			config.timeAllocationMutator().setMutationRange(1800); // 1800 is default
 		}
@@ -448,21 +447,18 @@ public class TtRunCottbusSimulation {
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
 			strat.setWeight(0.9);
-			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.BestScore.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration() - 50);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.KeepLastSelected.toString());
 			strat.setWeight(0.0);
-			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);
 		}
 
@@ -476,7 +472,7 @@ public class TtRunCottbusSimulation {
 		config.qsim().setRemoveStuckVehicles(false);
 		config.qsim().setStartTime(3600 * 5); 
 		// TODO change to a higher value for congested scenarios
-		config.qsim().setEndTime(24.*3600.);
+		config.qsim().setEndTime(30.*3600.);
 		config.qsim().setInsertingWaitingVehiclesBeforeDrivingVehicles(false); // false is default
 //		config.qsim().setTrafficDynamics(TrafficDynamics.withHoles); // queue is default
 		
@@ -806,10 +802,16 @@ public class TtRunCottbusSimulation {
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
-				this.bind(TtGeneralAnalysis.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(TtGeneralAnalysis.class);
+				this.bind(TtGeneralAnalysis.class);
 				this.bind(TtAnalyzedGeneralResultsWriter.class);
 				this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
+				
+				if (signalsConfigGroup.isUseSignalSystems()) {
+					// bind tool to analyze signals
+					this.bind(TtSignalAnalysisTool.class);
+					this.bind(TtSignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+				}
 			}
 		});
 		
