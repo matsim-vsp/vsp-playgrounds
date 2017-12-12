@@ -62,7 +62,7 @@ import org.matsim.withinday.trafficmonitoring.TravelTimeCollector;
 * @author ikaddoura
 * 
 */
-public class TravelTimeCalculatorTest {
+public class TravelTimeCollectorWithNetworkChangeEventsTest {
 
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
