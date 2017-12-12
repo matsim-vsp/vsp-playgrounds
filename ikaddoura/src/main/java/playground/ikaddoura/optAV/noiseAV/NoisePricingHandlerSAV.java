@@ -66,9 +66,11 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	private SAVPassengerTracker savPassengerTracker;
 
 	private double amountSum = 0.;
-	private boolean chargeNextPassenger = false;
+	private final boolean chargeNextPassenger = false;
 	private final Map<Id<Vehicle>, Double> vehicle2tollToBeChargedFromNextPassenger = new HashMap<>();
 	private double amountNotChargedFromPassengers = 0.;
+	
+	private int counterWarn = 0;
 
 	@Override
 	public void reset(int iteration) {
@@ -105,7 +107,15 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 				Id<Person> passenger = this.savPassengerTracker.getVehicle2passenger().get(event.getCausingVehicleId());
 				
 				if (passenger == null) {
-					log.info("No passenger identified for " + event.getCausingVehicleId() + " at " + event.getTime() + " on link " + event.getLinkId() +". Amount: " + amount);
+
+					if (counterWarn <= 5) {
+						log.info("No passenger identified for " + event.getCausingVehicleId() + " at " + event.getTime() + " on link " + event.getLinkId() +". Amount: " + amount);
+
+						if (counterWarn == 5) {
+							log.info("Furhter info statements of this type (or related warnings) will not be written out.");
+						}
+						counterWarn++;
+					}
 					
 					if (chargeNextPassenger) {
 						if (vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()) == null) {
@@ -115,10 +125,10 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 							vehicle2tollToBeChargedFromNextPassenger.put(event.getCausingVehicleId(), newToll);
 						}
 						
-						log.info("Toll payments to be charged from next passenger: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()));
+						if (counterWarn <= 5) log.info("Toll payments to be charged from next passenger: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getCausingVehicleId()));
 					
 					} else {
-						log.info("Charging the last passenger...");
+						if (counterWarn <= 5) log.info("Charging the last passenger...");
 						Id<Person> lastPassenger = this.savPassengerTracker.getVehicle2lastPassenger().get(event.getCausingVehicleId());
 						if (lastPassenger == null) {
 							amountNotChargedFromPassengers = amountNotChargedFromPassengers + amount;
