@@ -22,13 +22,9 @@ package signals.laemmer.model;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
-
-import org.hsqldb.lib.HashMap;
+import com.google.inject.Provider;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -42,10 +38,6 @@ import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 import org.matsim.lanes.data.LanesToLinkAssignment;
-
-import com.google.inject.Provider;
-
-import jogamp.graph.font.typecast.ot.table.LtshTable;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
