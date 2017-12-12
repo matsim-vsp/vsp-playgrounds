@@ -92,7 +92,8 @@ import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
  */
 public class RunOpdytsForGreenWaves {
 
-	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOptForFirst_0ForTwoOthers_stepSize10random_30it_tt";
+	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOptForFirst_WorstForTwoOthers_stepSize30random_30it_tt";
+//	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOptForFirst_0ForTwoOthers_stepSize10random_20it_tt";
 //	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/offsets0-20/";
 
 	private static final boolean USE_OPDYTS = true;
@@ -112,7 +113,7 @@ public class RunOpdytsForGreenWaves {
 
 			opdytsConfigGroup.setMaxIteration(30);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(10);
+			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(30);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);
@@ -244,9 +245,13 @@ public class RunOpdytsForGreenWaves {
 //			 int offset = 211;
 //			 if (i==1) offset = 121;
 //			 else if (i==2) offset = 32;
+			 // first opt, second+third worst:
+			 int offset = 11;
+			 if (i==1) offset = 221;
+			 else if (i==2) offset = 131;
 			 // zero-offsets:
-			int offset = 0;
-			if (i==1) offset = 11;
+//			int offset = 0;
+//			if (i==0) offset = 11;
 			SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 300, offset,
 					Id.create("SignalPlan", SignalPlan.class));
 			signalSystemControl.addSignalPlanData(signalPlan);

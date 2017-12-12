@@ -125,17 +125,19 @@ public class TtRunCottbusSimulation {
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
-	private final static PopulationType POP_TYPE = PopulationType.WoMines;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MS;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
 		BTU_POP_BTU_ROUTES,
 		WMines, // with mines as working places. causes an oversized number of working places in the south west of Cottbus.
 		WoMines, // without mines as working places
-		WoMines100itcap1 // without mines. iterated for 100it with capacity 1.0
+		WoMines100itcap1, // without mines. iterated for 100it with capacity 1.0
+		WoMines100itcap07MS, // without mines. iterated for 100it with capacity 0.7 and signals MS
+		WoMines100itcap07MSRand // same as prev, but with signals MS_RANDOM_OFFSETS
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS_RANDOM_OFFSETS;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -154,7 +156,7 @@ public class TtRunCottbusSimulation {
 		NONE, CP_V3, CP_V4, CP_V7, CP_V8, CP_V9, CP_V10, FLOWBASED, CORDON_INNERCITY, CORDON_RING
 	}
 	
-	private static final boolean USE_OPDYTS = false;
+	private static final boolean USE_OPDYTS = true;
 	
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
@@ -164,7 +166,7 @@ public class TtRunCottbusSimulation {
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
-	private static final boolean WRITE_INITIAL_FILES = true;
+	private static final boolean WRITE_INITIAL_FILES = false;
 	private static final boolean USE_COUNTS = false;
 	private static final double SCALING_FACTOR = 0.7;
 	
@@ -300,6 +302,12 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap1:
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap1.0.xml.gz");
 			break;
+		case WoMines100itcap07MS:
+			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-5-55_100it_cap07_MS/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MSRand:
+			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
+			break;	
 		case GRID_LOCK_BTU:
 			// take these as initial plans
 			if (SIGNAL_TYPE.equals(SignalType.MS) || SIGNAL_TYPE.equals(SignalType.DOWNSTREAM_MS)){
@@ -319,7 +327,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(0);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
