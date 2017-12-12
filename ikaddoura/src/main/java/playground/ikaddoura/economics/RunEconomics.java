@@ -65,8 +65,8 @@ public class RunEconomics {
 	 */
 	private void run1() {
 		
-		String basicDirectoryInput = "/Users/ihab/Documents/workspace/playgrounds/ikaddoura/test/input/playground/ikaddoura/economics/";
-		String basicDirectoryOutput = "/Users/ihab/Documents/workspace/playgrounds/ikaddoura/test/output/playground/ikaddoura/economics/";
+		String basicDirectoryInput = "./test/input/playground/ikaddoura/economics/";
+		String basicDirectoryOutput = "./test/output/playground/ikaddoura/economics/";
 
 		BasicPersonTripAnalysisHandler analysis0 = new BasicPersonTripAnalysisHandler();
 		Scenario scenario0 = null;
