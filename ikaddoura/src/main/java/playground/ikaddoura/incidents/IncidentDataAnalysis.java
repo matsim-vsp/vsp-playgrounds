@@ -56,7 +56,7 @@ public class IncidentDataAnalysis {
 	private String crs = TransformationFactory.DHDN_GK4;
 	
 	private String inputDirectory = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/incidents/server/output-berlin/incidentData_berlin_2016-02/";
-	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/NEW_XXX_incidentData_berlin_2016-02/";
+	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/LongtermVsShortterm_incidentData_berlin_2016-02/";
 	
 	private boolean writeCSVFileForEachXMLFile = false;
 	
