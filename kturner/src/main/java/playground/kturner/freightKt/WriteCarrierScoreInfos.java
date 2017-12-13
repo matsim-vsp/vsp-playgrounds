@@ -3,6 +3,7 @@ package playground.kturner.freightKt;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -47,6 +48,9 @@ class WriteCarrierScoreInfos {
 	}
 
 	
+
+
+
 	void werteBestimmen() {
 		for (Carrier carrier : carriers){
 			if (carrier.getSelectedPlan() == null) {
@@ -64,7 +68,7 @@ class WriteCarrierScoreInfos {
 			
 		try {
 			writer = new FileWriter(file);  //Neuer File (überschreibt im Zweifel den alten - der jedoch nicht existieren dürfte!
-
+			writer.write("System date and time writing this file: " + LocalDateTime.now() + System.getProperty("line.separator") + System.getProperty("line.separator"));
 			writer.write("Carrierbasierte Auswertung der einzelnen Runs." +System.getProperty("line.separator"));
 			writer.write("Hier der Scores für die einzelnen Carrier." +System.getProperty("line.separator"));
 			writer.write("Run-Nr: \t Anz Carrier \t TotalScore \t");
@@ -116,4 +120,22 @@ class WriteCarrierScoreInfos {
 		}
 		System.out.println("Datei: " + file + " geschrieben.");
 	}
+	
+	//one last line including informations of date and time 
+	private void writeLocalDateAndTime(File file) {
+		FileWriter writer;
+		
+		try {
+			writer = new FileWriter(file, true);  //true ---> wird ans Ende und nicht an den Anfang geschrieben
+			
+			writer.write("System date and time writing this file: " + LocalDateTime.now() + System.getProperty("line.separator"));
+
+			// Schließt den Stream
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Datei: " + file + " geschrieben.");
+	}
+		
 }
