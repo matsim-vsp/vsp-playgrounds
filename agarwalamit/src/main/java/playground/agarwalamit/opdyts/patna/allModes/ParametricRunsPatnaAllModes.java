@@ -98,7 +98,7 @@ public class ParametricRunsPatnaAllModes {
             }
         }
 
-        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseOutDir+"/runInfo.txt");
+        parametricRuns.writeNewOrAppendToRemoteFile(buffer, baseOutDir+"/runInfo.txt");
         parametricRuns.close();
     }
 

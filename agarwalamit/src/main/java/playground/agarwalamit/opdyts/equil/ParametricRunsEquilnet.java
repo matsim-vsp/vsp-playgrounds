@@ -85,7 +85,7 @@ public class ParametricRunsEquilnet {
             }
         }
 
-        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseDir+"/runInfo.txt");
+        parametricRuns.writeNewOrAppendToRemoteFile(buffer, baseDir+"/runInfo.txt");
         parametricRuns.close();
     }
 }
