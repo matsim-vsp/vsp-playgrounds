@@ -89,7 +89,7 @@ public class ModeChoiceRandomizerTest {
         }
 
         OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.class);
-        opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+        opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(
