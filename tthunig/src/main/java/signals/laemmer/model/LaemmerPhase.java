@@ -84,14 +84,18 @@ class LaemmerPhase {
         if (!this.laemmerSignalController2.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
             updateStabilization(now);
         }
-        calculatePriorityIndex(now);
+        //TODO check if it's a good idea to omit calculating the priority index if stabilization is needed
+        // - I think we need it to find a good combination of vehicle flows which can drive together
+        // - probably we'll have outdated values somewhere and make decitions on them, pschade Dec 17
+        if (!this.stabilize)
+        	calculatePriorityIndex(now);
     }
 
     private void updateAbortionPenalty(double now) {
         this.abortionPenalty = 0;
         if (this.laemmerSignalController2.activeRequest != null && this.equals(this.laemmerSignalController2.activeRequest.signal)) {
             double waitingTimeSum = 0;
-            double remainingInBetweenTime = Math.max(this.laemmerSignalController2.activeRequest.time - now, 0);
+            double remainingInBetweenTime = Math.max(this.laemmerSignalController2.activeRequest.onsetTime - now, 0);
             for (double i = remainingInBetweenTime; i < this.laemmerSignalController2.DEFAULT_INTERGREEN; i++) {
                 for (Id<SignalGroup> signalGroup : phase.getGreenSignalGroups()) {
 					for (Signal signal : laemmerSignalController2.getSystem().getSignalGroups().get(signalGroup).getSignals().values()) {
@@ -130,8 +134,8 @@ class LaemmerPhase {
     private void calculatePriorityIndex(double now) {
         this.index = 0;
         if (this.laemmerSignalController2.activeRequest != null && this.laemmerSignalController2.activeRequest.signal == this) {
-            double remainingInBetweenTime = Math.max(this.laemmerSignalController2.activeRequest.time - now, 0);
-            double remainingMinG = Math.max(this.laemmerSignalController2.activeRequest.time - now + this.laemmerSignalController2.MIN_G - remainingInBetweenTime, 0);
+            double remainingInBetweenTime = Math.max(this.laemmerSignalController2.activeRequest.onsetTime - now, 0);
+            double remainingMinG = Math.max(this.laemmerSignalController2.activeRequest.onsetTime - now + this.laemmerSignalController2.laemmerConfig.getMinGreenTime() - remainingInBetweenTime, 0);
             for (double i = remainingInBetweenTime; i <= this.laemmerSignalController2.DEFAULT_INTERGREEN; i++) {
                 double nExpected = 0;
                 double reqGreenTime = remainingMinG;
@@ -174,14 +178,14 @@ class LaemmerPhase {
             }
         } else {
             double nExpected = 0;
-            double reqGreenTime = this.laemmerSignalController2.MIN_G;
+            double reqGreenTime = this.laemmerSignalController2.laemmerConfig.getMinGreenTime();
             for (Id<SignalGroup> signalGroup : phase.getGreenSignalGroups()) {
 				for (Signal signal : laemmerSignalController2.getSystem().getSignalGroups().get(signalGroup).getSignals().values()) {
 					if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
 						for (Id<Lane> laneId : signal.getLaneIds()) {
 							double nTemp = this.laemmerSignalController2.getNumberOfExpectedVehiclesOnLane(
 									now + this.laemmerSignalController2.DEFAULT_INTERGREEN
-											+ this.laemmerSignalController2.MIN_G,
+											+ this.laemmerSignalController2.laemmerConfig.getMinGreenTime(),
 									signal.getLinkId(), laneId);
 							nExpected += nTemp;
 							double laneFlow = this.laemmerSignalController2.lanes.getLanesToLinkAssignments()
@@ -195,7 +199,7 @@ class LaemmerPhase {
 					} else {
 						double nTemp = this.laemmerSignalController2.getNumberOfExpectedVehiclesOnLink(
 								now + this.laemmerSignalController2.DEFAULT_INTERGREEN
-										+ this.laemmerSignalController2.MIN_G,
+										+ this.laemmerSignalController2.laemmerConfig.getMinGreenTime(),
 								signal.getLinkId());
 						nExpected += nTemp;
 						double linkFlow = this.laemmerSignalController2.network.getLinks().get(signal.getLinkId())
@@ -240,9 +244,9 @@ class LaemmerPhase {
 
         this.regulationTime = 0;
         this.stabilize = false;
-        double nCrit = determiningArrivalRate * this.laemmerSignalController2.desiredPeriod
-                * ((this.laemmerSignalController2.maxPeriod - (intergreenTime_a / (1 - determiningLoad)))
-                / (this.laemmerSignalController2.maxPeriod - this.laemmerSignalController2.desiredPeriod));
+        double nCrit = determiningArrivalRate * this.laemmerSignalController2.laemmerConfig.getDesiredCycleTime()
+                * ((this.laemmerSignalController2.laemmerConfig.getMaxCycleTime() - (intergreenTime_a / (1 - determiningLoad)))
+                / (this.laemmerSignalController2.laemmerConfig.getMaxCycleTime() - this.laemmerSignalController2.laemmerConfig.getDesiredCycleTime()));
 
         if (n >= nCrit) {
         	/* TODO actually, this is the wrong place to check downstream conditions, since situation can change until the group has moved up to the queue front. 
@@ -253,7 +257,7 @@ class LaemmerPhase {
 				this.laemmerSignalController2.regulationQueue.add(this);
 				// signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" +
 				// tIdle);
-				this.regulationTime = Math.max(Math.rint(determiningLoad * this.laemmerSignalController2.desiredPeriod + (outflowSum / this.laemmerSignalController2.flowSum) * Math.max(this.laemmerSignalController2.tIdle, 0)), this.laemmerSignalController2.MIN_G);
+				this.regulationTime = Math.max(Math.rint(determiningLoad * this.laemmerSignalController2.laemmerConfig.getDesiredCycleTime() + (outflowSum / this.laemmerSignalController2.flowSum) * Math.max(this.laemmerSignalController2.tIdle, 0)), this.laemmerSignalController2.laemmerConfig.getMinGreenTime());
 				this.stabilize = true;
 			}
         }

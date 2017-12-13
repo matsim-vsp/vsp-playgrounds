@@ -79,9 +79,9 @@ public class LaemmerLane {
 
         this.regulationTime = 0;
         this.stabilize = false;
-        double nCrit = determiningArrivalRate * this.laemmerSignalController2.desiredPeriod
-                * ((this.laemmerSignalController2.maxPeriod - (intergreenTime_a / (1 - determiningLoad)))
-                / (this.laemmerSignalController2.maxPeriod - this.laemmerSignalController2.desiredPeriod));
+        double nCrit = determiningArrivalRate * this.laemmerSignalController2.laemmerConfig.getDesiredCycleTime()
+                * ((this.laemmerSignalController2.laemmerConfig.getMaxCycleTime() - (intergreenTime_a / (1 - determiningLoad)))
+                / (this.laemmerSignalController2.laemmerConfig.getMaxCycleTime() - this.laemmerSignalController2.laemmerConfig.getMaxCycleTime()));
 
         if (n >= nCrit) {
         	/* TODO actually, this is the wrong place to check downstream conditions, since situation can change until the group has moved up to the queue front. 
@@ -93,7 +93,7 @@ public class LaemmerLane {
 				this.laemmerSignalController2.addLaneForStabilization(this);
 				// signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" +
 				// tIdle);
-				this.regulationTime = Math.max(Math.rint(determiningLoad * this.laemmerSignalController2.desiredPeriod + (outflowSum / this.laemmerSignalController2.flowSum) * Math.max(this.laemmerSignalController2.tIdle, 0)), this.laemmerSignalController2.MIN_G);
+				this.regulationTime = Math.max(Math.rint(determiningLoad * this.laemmerSignalController2.laemmerConfig.getDesiredCycleTime() + (outflowSum / this.laemmerSignalController2.flowSum) * Math.max(this.laemmerSignalController2.tIdle, 0)), this.laemmerSignalController2.laemmerConfig.getMinGreenTime());
 				this.stabilize = true;
 			}
         }
