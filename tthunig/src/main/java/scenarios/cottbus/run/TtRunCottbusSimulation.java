@@ -162,7 +162,7 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/opdyts/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/opdyts/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
@@ -170,7 +170,22 @@ public class TtRunCottbusSimulation {
 	private static final boolean USE_COUNTS = false;
 	private static final double SCALING_FACTOR = 0.7;
 	
-	public static void main(String[] args) {		
+	public static void main(String[] args) {
+		
+		boolean useMSA = false;
+		int opdytsIt = 30;
+		int stepSize = 20;
+		double selfTunWt = 1;
+		int warmUpIt = 2;
+		if (args != null && args.length > 0) {
+			OUTPUT_BASE_DIR = args[0];
+			useMSA = Boolean.valueOf(args[1]);
+			opdytsIt = Integer.valueOf(args[2]);
+			stepSize = Integer.valueOf(args[3]);
+			selfTunWt = Double.valueOf(args[4]);
+			warmUpIt = Integer.valueOf(args[5]);
+		}
+		
 		Config config = defineConfig();
 		
 //		OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class ) ;
@@ -181,16 +196,18 @@ public class TtRunCottbusSimulation {
 		
 		if (USE_OPDYTS) {
 			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
+			
 			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
 			opdytsConfigGroup.setNumberOfIterationsForConvergence(10); // 5
 
-			opdytsConfigGroup.setMaxIteration(30);
+			// TODO set useMSA flag
+			opdytsConfigGroup.setMaxIteration(opdytsIt);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(20);
+			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
-			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
+			opdytsConfigGroup.setWarmUpIterations(warmUpIt); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);
-			opdytsConfigGroup.setSelfTuningWeight(4);
+			opdytsConfigGroup.setSelfTuningWeight(selfTunWt);
 
 			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
 
@@ -303,7 +320,8 @@ public class TtRunCottbusSimulation {
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap1.0.xml.gz");
 			break;
 		case WoMines100itcap07MS:
-			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-5-55_100it_cap07_MS/1000.output_plans.xml.gz");
+			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap0.7.xml.gz");
+//			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-5-55_100it_cap07_MS/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSRand:
 			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
@@ -427,7 +445,7 @@ public class TtRunCottbusSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
+		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
 
 		config.travelTimeCalculator().setTravelTimeCalculatorType(TravelTimeCalculatorType.TravelTimeCalculatorHashMap.toString());
 		// hash map and array produce same results. only difference: memory and time.
