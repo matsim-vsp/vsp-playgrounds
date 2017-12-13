@@ -36,7 +36,7 @@ public class ParametricRunsPatnaNetworkModes {
         String matsimDir = "r_87b4237ac664bb1068965f2e8797e6bd3cfa7e1f_patnaOpdyts_25Oct";
 
         StringBuilder buffer = new StringBuilder();
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
 
         String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixedVariation","diagonal_fixedVariation"};
         double [] stepSizes = {0.5, 0.75, 1.0};
@@ -84,7 +84,7 @@ public class ParametricRunsPatnaNetworkModes {
             }
         }
 
-        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseOutDir+"/runInfo.txt");
+        parametricRuns.writeNewOrAppendToRemoteFile(buffer, baseOutDir+"/runInfo.txt");
         parametricRuns.close();
     }
 

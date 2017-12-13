@@ -6,8 +6,6 @@
 		<param name="outputDirectory" value="" />
 		<param name="eventsFileFormat" value="xml" />
 		<param name="mobsim" value="qsim" />
-		<param name="firstIteration" value="0" />
-		<param name="lastIteration" value="1" />
 		<param name="snapshotFormat" value="otfvis" />
 		<param name="writeSnapshotsInterval" value="0" />
 		<param name="writeEventsInterval" value="1" />

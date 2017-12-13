@@ -49,9 +49,10 @@ public class JobScriptWriter {
      * <li>required free memory is 7.5 GB</li>
      * </ul>
      * In order to override, pass the arguments with 'qsub'.
+     * @param userName 
      */
-    public JobScriptWriter() {
-        createDefaults();
+    public JobScriptWriter(String userName) {
+        createDefaults(userName);
     }
 
     //main example
@@ -75,7 +76,7 @@ public class JobScriptWriter {
                         "diagonal_random"
         };
 
-        JobScriptWriter jobScriptWriter = new JobScriptWriter();
+        JobScriptWriter jobScriptWriter = new JobScriptWriter("agarwal");
         jobScriptWriter.appendCommands(jobName, locationOfClusterLogFile, additionalLines);
         jobScriptWriter.writeLocally(fileName); // only local address
     }
@@ -169,7 +170,7 @@ public class JobScriptWriter {
         }
     }
 
-    private void createDefaults(){
+    private void createDefaults(String userName){
         buffer.append("#!/bin/bash --login");
         buffer.append(newLine);
 
@@ -185,7 +186,7 @@ public class JobScriptWriter {
         buffer.append("#$ -m be"); //write a mail at beginning and end of the job
         buffer.append(newLine);
 
-        buffer.append("#$ -M agarwal@vsp.tu-berlin.de"); // email address
+        buffer.append("#$ -M "+userName+"@vsp.tu-berlin.de"); // email address
         buffer.append(newLine);
 
         buffer.append("#$ -pe mp 4"); // job runs on a 16 GB node with 4 processors

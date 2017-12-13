@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -91,7 +92,9 @@ import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
  */
 public class RunOpdytsForGreenWaves {
 
-	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize7random_30it_score/";
+	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOptForFirst_WorstForTwoOthers_stepSize30random_30it_tt";
+//	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOptForFirst_0ForTwoOthers_stepSize10random_20it_tt";
+//	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/offsets0-20/";
 
 	private static final boolean USE_OPDYTS = true;
 
@@ -105,16 +108,16 @@ public class RunOpdytsForGreenWaves {
 
 		if (USE_OPDYTS) {
 			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
-			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
-			opdytsConfigGroup.setNumberOfIterationsForConvergence(20); // 5
+			opdytsConfigGroup.setNumberOfIterationsForAveraging(2); // 2
+			opdytsConfigGroup.setNumberOfIterationsForConvergence(5); // 5
 
 			opdytsConfigGroup.setMaxIteration(30);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(7);
+			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(30);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);
-			opdytsConfigGroup.setSelfTuningWeight(4);
+			opdytsConfigGroup.setSelfTuningWeight(4); //1
 			
 			opdytsConfigGroup.setBinSize(10);
 
@@ -124,8 +127,7 @@ public class RunOpdytsForGreenWaves {
 			simulator.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
-					// TODO why does it work to inject this in TravelTimeObjectiveFunction, although
-					// TravelTimeObjectiveFunction is not created by guice??
+					// this can later be accessed by TravelTimeObjectiveFunction, because it is bind inside MATSimSimulator2
 					bind(TtTotalTravelTime.class).asEagerSingleton();
 					addEventHandlerBinding().to(TtTotalTravelTime.class);
 
@@ -233,14 +235,23 @@ public class RunOpdytsForGreenWaves {
 			signalControl.addSignalSystemControllerData(signalSystemControl);
 
 			// create a plan for the signal system (with defined cycle time and offset 0)
+			// optimal offsets:
 //			 int offset = 11;
 //			 if (i==1) offset = 21;
 //			 else if (i==2) offset = 31;
+			// worst offset for second system, when first two are optimal:
 //			 else if (i==2) offset = 231;
+			// worst offsets:
 //			 int offset = 211;
 //			 if (i==1) offset = 121;
 //			 else if (i==2) offset = 32;
-			int offset = 0;
+			 // first opt, second+third worst:
+			 int offset = 11;
+			 if (i==1) offset = 221;
+			 else if (i==2) offset = 131;
+			 // zero-offsets:
+//			int offset = 0;
+//			if (i==0) offset = 11;
 			SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 300, offset,
 					Id.create("SignalPlan", SignalPlan.class));
 			signalSystemControl.addSignalPlanData(signalPlan);
@@ -328,6 +339,10 @@ public class RunOpdytsForGreenWaves {
 
 	private static Config createConfig() {
 		Config config = ConfigUtils.createConfig();
+		int randomSeed = (new Random()).nextInt(9999);
+		config.global().setRandomSeed(randomSeed);
+		OUTPUT_DIR += "_seed" + randomSeed + "/";
+
 		config.controler().setOutputDirectory(OUTPUT_DIR);
 		config.controler().setLastIteration(1);
 

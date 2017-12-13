@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 def plotDecisionVariableParameters(parentDir, regexStr, lastItr, statsFileName, numberOfRowsToPrint):
-    opdytsDir = list(range(0, 10, 1))
+    opdytsDir = list(range(0, lastItr, 1))
     for i in opdytsDir:
         file = parentDir + '/_' + str(i) + '/' + statsFileName
         if Path(file).is_file() :
@@ -43,6 +43,6 @@ def plotDecisionVariableParameters(parentDir, regexStr, lastItr, statsFileName, 
 #     print("plotting from dir " + parentDir)
 #     plotModalASC(parentDir, "asc", 40, '/opdyts_modalStats.txt', 50)
 
-filesDir = '/Users/amit/Documents/gitlab/runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize7random_30it_score/'
+filesDir = '/Users/amit/Documents/gitlab/runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffset0_stepSize10random_30it_travelTime_selfTunerWt1/'
 
-plotDecisionVariableParam
+plotDecisionVariableParameters(filesDir, 'offset', 30, 'opdyts_offsetStats.txt', 20)

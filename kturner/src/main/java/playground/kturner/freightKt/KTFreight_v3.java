@@ -21,6 +21,7 @@ package playground.kturner.freightKt;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,6 +56,7 @@ import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.consistency.VspConfigConsistencyCheckerImpl;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
 import org.matsim.core.controler.Controler;
@@ -101,82 +103,79 @@ public class KTFreight_v3 {
 	private static final Logger log = Logger.getLogger(KTFreight_v3.class) ;
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
-	//		private static final String INPUT_DIR = "C:/Users/kturner/workspace/projects_freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
-	//		private static final String OUTPUT_DIR = "Z:/WinHome/Docs/runs/Berlin/aldi/Base/" ;
-	//		private static final String TEMP_DIR = "Z:/WinHome/Docs/runs/Temp/";
-
-	private static final String INPUT_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/input/Berlin_Szenario/" ;
-	private static final String OUTPUT_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/JSprit/Berlin/aldi/Toll20onHeavy/" ;
-	private static final String TEMP_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/Temp/";
-
-	//Dateinamen ohne XML-Endung
-	private static final String NETFILE_NAME = "network" ;
-	private static final String VEHTYPES_NAME = "vehicleTypes" ;
-	private static final String CARRIERS_NAME = "carrierLEH_v2_withFleet" ;
-	private static final String ALGORITHM_NAME = "mdvrp_algorithmConfig_2" ;
-	private static final String TOLL_NAME = "toll_cordon20";		//Zur Mautberechnung
-	private static final String LEZ_NAME = "toll_area";  //Zonendefinition (Links) für anhand eines Maut-Files
-
-	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
-	private static final String uccC_prefix = "UCC-";	
-
-	//All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-	private static final ArrayList<String> retailerNames = 
-			new ArrayList<String>(Arrays.asList("aldi")); 
-	//Location of UCC
-	private static final ArrayList<String> uccDepotsLinkIdsString = 
-			new ArrayList<String>(Arrays.asList("6874", "3058", "5468")); 
-	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
-	private static final ArrayList<String> onlyTollVehTypes = 
-			//				new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen", "medium18t", "light8t", "light8t_frozen"));
-			new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen"));
-	//Ende  Namesdefinition Berlin
+//	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
+//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MAoutput/JSprit/Berlin/aldi/Toll20onHeavy/" ;
+//	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/"";
+//
+//	//Dateinamen
+//	private static final String NETFILE_NAME = "network.xml" ;
+//	private static final String VEHTYPEFILE_NAME = "vehicleTypes.xml" ;
+//	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ;
+//	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
+//	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung
+//	private static final String TOLLAREAFILE_NAME = "toll_area.xml";  //Zonendefinition (Links) für anhand eines Maut-Files
+//
+//	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
+//	private static final String uccC_prefix = "UCC-";	
+//
+//	//All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
+//	private static final ArrayList<String> retailerNames = 
+//			new ArrayList<String>(Arrays.asList("aldi")); 
+//	//Location of UCC
+//	private static final ArrayList<String> uccDepotsLinkIdsString = 
+//			new ArrayList<String>(Arrays.asList("6874", "3058", "5468")); 
+//	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
+//	private static final ArrayList<String> onlyTollVehTypes = 
+//			//				new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen", "medium18t", "light8t", "light8t_frozen"));
+//			new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen"));
+//	//Ende  Namesdefinition Berlin
 
 
 	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
-	//	private static final String INPUT_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/input/Grid_Szenario/" ;
-	//	private static final String OUTPUT_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/JSprit/Grid/Congestion/" ;
-	//	private static final String TEMP_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/Temp/" ;	
-	//
-	//	//Dateinamen ohne XML-Endung
-	//	private static final String NETFILE_NAME = "grid-network" ;
-	//	private static final String VEHTYPES_NAME = "grid-vehTypes_kt" ;
-	//	private static final String CARRIERS_NAME = "grid-carrier_kt" ;
-	//	private static final String ALGORITHM_NAME = "mdvrp_algorithmConfig_2" ;
-	//	private static final String TOLL_NAME = "grid-tollDistance";
-	//	private static final String LEZ_NAME = "grid-tollArea"; 
-	//	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId). Vermeide "_", 
-	//	//um die Analyse der MATSIMEvents einfacher zu gestalten (Dort ist "_" als Trennzeichen verwendet.
-	//	private static final String uccC_prefix = "UCC-";		
-	//	// All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-	//	private static final ArrayList<String> retailerNames = null ;
-	////			new ArrayList<String>(Arrays.asList("gridCarrier3"));
-	////		= new ArrayList<String>("gridCarrier", "gridCarrier1", "gridCarrier2", "gridCarrier3"); 
-	//	//Location of UCC
-	//	private static final ArrayList<String> uccDepotsLinkIdsString =
-	//		new ArrayList<String>(Arrays.asList("j(0,5)", "j(10,5)")); 
-	//	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
-	//	private static final ArrayList<String> onlyTollVehTypes =  null;
-	////		new ArrayList<String>(Arrays.asList("gridType01", "gridType03", "gridType05", "gridType10")); 
-	////	//Ende Namesdefinition Grid
+	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/JSprit/Grid/base/" ;
+	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
+	
+	
+	//Dateinamen
+	private static final String NETFILE_NAME = "grid-network.xml" ;
+	private static final String VEHTYPEFILE_NAME = "grid-vehTypes_kt.xml" ;
+	private static final String CARRIERFILE_NAME = "grid-carrier_kt.xml" ;
+	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
+	private static final String TOLLFILE_NAME = "grid-tollDistance.xml";
+	private static final String TOLLAREAFILE_NAME = "grid-tollArea.xml"; 
+	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId). Vermeide "_", 
+	//um die Analyse der MATSIMEvents einfacher zu gestalten (Dort ist "_" als Trennzeichen verwendet.
+	private static final String uccC_prefix = "UCC-";		
+	// All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
+	private static final ArrayList<String> retailerNames = null ;
+//			new ArrayList<String>(Arrays.asList("gridCarrier3"));
+//		= new ArrayList<String>("gridCarrier", "gridCarrier1", "gridCarrier2", "gridCarrier3"); 
+	//Location of UCC
+	private static final ArrayList<String> uccDepotsLinkIdsString =
+		new ArrayList<String>(Arrays.asList("j(0,5)", "j(10,5)")); 
+	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
+	private static final ArrayList<String> onlyTollVehTypes =  null;
+//		new ArrayList<String>(Arrays.asList("gridType01", "gridType03", "gridType05", "gridType10")); 
+//	//Ende Namesdefinition Grid
 
 
 	private static final String RUN = "Run_" ;
 	private static int runIndex = 0;
 
-	private static final String NETFILE = INPUT_DIR + NETFILE_NAME + ".xml" ;
-	private static final String VEHTYPEFILE = INPUT_DIR + VEHTYPES_NAME + ".xml";
-	private static final String CARRIERFILE = INPUT_DIR + CARRIERS_NAME + ".xml" ;
-	private static final String ALGORITHMFILE = INPUT_DIR + ALGORITHM_NAME + ".xml";
-	private static final String TOLLFILE = INPUT_DIR + TOLL_NAME + ".xml";
-	private static final String ZONEFILE = INPUT_DIR + LEZ_NAME + ".xml";
+	private static final String NETFILE = INPUT_DIR + NETFILE_NAME ;
+	private static final String VEHTYPEFILE = INPUT_DIR + VEHTYPEFILE_NAME;
+	private static final String CARRIERFILE = INPUT_DIR + CARRIERFILE_NAME;
+	private static final String ALGORITHMFILE = INPUT_DIR + ALGORITHMFILE_NAME;
+	private static final String TOLLFILE = INPUT_DIR + TOLLFILE_NAME;
+	private static final String TOLLAREAFILE = INPUT_DIR + TOLLAREAFILE_NAME;
 
 
 	// Einstellungen für den Run	
 	private static final boolean addingCongestion = true ;  //uses NetworkChangeEvents to reduce freespeed.
 	private static final boolean addingToll = true;  //added, kt. 07.08.2014
 	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
-	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
+	private static final boolean runMatsim = false;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
 	private static final int MAX_JSPRIT_ITERATION = 4000;
 	private static final int NU_OF_TOTAL_RUNS = 10;	
@@ -253,7 +252,11 @@ public class KTFreight_v3 {
 
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration ); 
+				
+		//Some config stuff to comply to vsp-defaults
+		ConfigUtils.addOrGetModule(config, PlanCalcScoreConfigGroup.class).setFractionOfIterationsToStartScoreMSA(0.8); //TODO: KMT neu, 07.12. to fix config
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspDefaultsCheckingLevel.warn);
+		
 		return config;
 	}  //End createConfig
 
@@ -280,7 +283,7 @@ public class KTFreight_v3 {
 				uccDepotsLinkIds.add(Id.createLinkId(linkId));
 			}
 
-			UccCarrierCreator uccCarrierCreator = new UccCarrierCreator(carriers, vehicleTypes, ZONEFILE, uccC_prefix, retailerNames, uccDepotsLinkIds, 0.0, 0.0 );
+			UccCarrierCreator uccCarrierCreator = new UccCarrierCreator(carriers, vehicleTypes, TOLLAREAFILE, uccC_prefix, retailerNames, uccDepotsLinkIds, 0.0, 0.0 );
 			uccCarrierCreator.createSplittedUccCarrriers();
 			carriers = uccCarrierCreator.getSplittedCarriers();
 
@@ -592,7 +595,7 @@ public class KTFreight_v3 {
 	 */
 	private static CarrierScoringFunctionFactoryImpl_KT createMyScoringFunction2 (final Scenario scenario) {
 
-		textInfofile.writeTextLineToFile("createMyScoringFunction2 aufgerufen");
+		//textInfofile.writeTextLineToFile("createMyScoringFunction2 aufgerufen");
 
 		return new CarrierScoringFunctionFactoryImpl_KT(scenario, scenario.getConfig().controler().getOutputDirectory()) {
 
@@ -638,14 +641,16 @@ public class KTFreight_v3 {
 		File file = new File(OUTPUT_DIR + "#RunInformation.txt");
 		try {
 			FileWriter writer = new FileWriter(file);  //Neuer File (überschreibt im Zweifel den alten - der jedoch nicht existieren dürfte!
-
+			writer.write("System date and time writing this file: " + LocalDateTime.now() + System.getProperty("line.separator") + System.getProperty("line.separator"));
+			
 			writer.write("##Inputfiles:" +System.getProperty("line.separator"));
-			writer.write("Net: \t \t" + NETFILE +System.getProperty("line.separator"));
-			writer.write("Carrier:  \t" + CARRIERFILE +System.getProperty("line.separator"));
-			writer.write("VehType: \t" + VEHTYPEFILE +System.getProperty("line.separator"));
-			writer.write("Algorithm: \t" + ALGORITHMFILE +System.getProperty("line.separator"));
-			writer.write("Toll: \t" + TOLL_NAME +System.getProperty("line.separator"));
-			writer.write("LowEmissionZone: \t" + LEZ_NAME +System.getProperty("line.separator"));
+			writer.write("Input-Directory: " + INPUT_DIR);
+			writer.write("Net: \t \t" + NETFILE_NAME +System.getProperty("line.separator"));
+			writer.write("Carrier:  \t" + CARRIERFILE_NAME +System.getProperty("line.separator"));
+			writer.write("VehType: \t" + VEHTYPEFILE_NAME +System.getProperty("line.separator"));
+			writer.write("Algorithm: \t" + ALGORITHMFILE_NAME +System.getProperty("line.separator"));
+			writer.write("Toll: \t" + TOLLFILE_NAME +System.getProperty("line.separator"));
+			writer.write("LowEmissionZone: \t" + TOLLAREAFILE_NAME +System.getProperty("line.separator"));
 
 			writer.write(System.getProperty("line.separator"));
 			writer.write("##Run Settings:" +System.getProperty("line.separator"));
@@ -656,7 +661,7 @@ public class KTFreight_v3 {
 			writer.write("Last Matsim Iteration: \t" + LAST_MATSIM_ITERATION +System.getProperty("line.separator"));
 			writer.write("Max Jsprit Iteration: \t" + MAX_JSPRIT_ITERATION +System.getProperty("line.separator"));
 			writer.write("Number of Runs: \t" + NU_OF_TOTAL_RUNS +System.getProperty("line.separator"));
-
+			
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
@@ -670,12 +675,15 @@ public class KTFreight_v3 {
 		System.out.println("Verzeichnis " + file + " erstellt: "+ file.mkdirs());	
 	}
 
+	//TODO: Wenn die Dateien #JspritCarrierScoreInformation.tex und #TextInformation.txt bereits da sind, werden die nicht verschoben/Überschrieben -> diese Daten passen ggf nicht zu den aktuellen Runs !!!
+	//TODO: Ausgabe, dass Datei verschoben wurde komme, obwohl dies nicht erfolgt ist.
+	//TODO: Lösche Tempverzeichnispfad, wenn leer und zwar so weit hoch, wie die Ordner leer sind.
 	private static void moveTempFiles (File sourceDir, File destDir) {
 		File[] files = sourceDir.listFiles();
 		File destFile = null;
 		destDir.mkdirs();
 
-		try{
+		try{																			
 			for (int i = 0; i < files.length; i++) {
 				destFile = new File(destDir.getAbsolutePath() + System.getProperty("file.separator") + files[i].getName());
 				if (files[i].isDirectory()) {

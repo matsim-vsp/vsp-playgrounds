@@ -71,13 +71,14 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 		// iterate over all signal systems and vary offsets axially (except the first system, which is kept fixed)
 		for (Id<SignalSystem> systemId : oldOffsets.getSignalSystemControllerDataBySystemId().keySet()) {
 			if (systemId.equals(fixedSystemId)) {
+//			if (!systemId.equals(Id.create("SignalSystem4", SignalSystem.class))) {
 				continue;
 			}
-			double delta = random.nextDouble();
+			int delta = random.nextInt((int)opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable()-1)+1;
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
-					plan.setOffset(plan.getOffset() + (int) (opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * delta) );
+					plan.setOffset(plan.getOffset() + delta);
 				}
 				OffsetDecisionVariable variation = new OffsetDecisionVariable(newOffsets, scenario);
 				result.add(variation);
@@ -85,7 +86,7 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
-					plan.setOffset(plan.getOffset() - (int) (opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() * delta) );
+					plan.setOffset(plan.getOffset() - delta);
 				}
 				OffsetDecisionVariable variation = new OffsetDecisionVariable(newOffsets, scenario);
 				result.add(variation);

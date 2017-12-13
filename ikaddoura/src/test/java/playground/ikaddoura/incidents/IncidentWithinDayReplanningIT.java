@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
@@ -39,7 +38,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.mobsim.jdeqsim.Vehicle;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
@@ -58,7 +56,6 @@ import playground.ikaddoura.incidents.incidentWithinDayReplanning.IncidentBestRo
  * 3: network incident (reduced freespeed travel time long after trip has started); with within-day replanning
  * (a=dvrp approach; b=dobler approach)
  * 
- * 4: two agents; no network incident; no within-day replanning
  * 5: two agents; no network incident; with within-day replanning
  * (a=dvrp approach; b=dobler approach)
  * 
@@ -92,6 +89,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setInputFile(networkFile);
 			config.plans().setInputFile("plans.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(1);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -108,6 +107,8 @@ public class IncidentWithinDayReplanningIT {
 			String outputDirectory = testUtils.getOutputDirectory() + "output_1a/";
 			
 			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml", new DvrpConfigGroup());
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(1);
 
 			config.network().setInputFile(networkFile);
 			config.network().setChangeEventsInputFile(networkChangeEventsFile);
@@ -153,6 +154,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setTimeVariantNetwork(true);
 			config.plans().setInputFile("plans.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(1);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -192,6 +195,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setTimeVariantNetwork(true);
 			config.plans().setInputFile("plans.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(1);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -260,6 +265,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setTimeVariantNetwork(true);
 			config.plans().setInputFile("plans.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(0);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -318,6 +325,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setTimeVariantNetwork(true);
 			config.plans().setInputFile("plans.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(0);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -358,62 +367,10 @@ public class IncidentWithinDayReplanningIT {
 			
 		Assert.assertEquals(true, getLongRouteDemand(handler2b) == 1 && getShortRouteDemand(handler2b) == 0);
 	}
-		
-	// see if the network change events are considered in the travel time computation
-	// no within-day replanning
-	// dobler approach
-	// TODO
-//	@Ignore
-	@Test
-	public final void test1bChangeEventAfterTripNoReplanning() {
-		
-		LinkDemandEventHandler handler3b;
-		{
-			String networkChangeEventsFile = "networkChangeEvents-network-2-routes_10.00.xml";
-			String outputDirectory = testUtils.getOutputDirectory() + "output_3b_noReplanning/";
-			
-			final Config config = ConfigUtils.loadConfig(testUtils.getPackageInputDirectory() + "config.xml");
-
-			config.network().setInputFile(networkFile);
-			config.network().setChangeEventsInputFile(networkChangeEventsFile);
-			config.network().setTimeVariantNetwork(true);
-			config.plans().setInputFile("plans.xml");
-			config.controler().setOutputDirectory(outputDirectory);
-			
-			final Scenario scenario = ScenarioUtils.loadScenario(config);
-			final Controler controler = new Controler(scenario);
-			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-
-			Set<String> analyzedModes = new HashSet<>();
-			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
-			
-			controler.addOverridingModule( new AbstractModule() {
-				@Override public void install() {
-					
-					this.bind(TravelTime.class).toInstance(travelTime);
-					this.addEventHandlerBinding().toInstance(travelTime);
-					this.addMobsimListenerBinding().toInstance(travelTime);
-				}
-			}) ;
-			
-			handler3b = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler3b);
-			
-			controler.run();
-			
-			System.out.println();
-			Assert.assertEquals("Should be the freespeed travel time.", 4000., travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 12 * 3600., scenario.getPopulation().getPersons().get(0), scenario.getVehicles().getVehicles().get(0)), testUtils.EPSILON);
-			Assert.assertEquals("Should be the freespeed travel time.", 396., travelTime.getLinkTravelTime(scenario.getNetwork().getLinks().get(Id.createLinkId("link_7_8")), 7 * 3600., scenario.getPopulation().getPersons().get(0), scenario.getVehicles().getVehicles().get(0)), testUtils.EPSILON);
-
-		}
-	}
 	
 	// see if the network change events are considered in the travel time computation
 	// with withing-day replanning
 	// dobler approach
-	// TODO
-//	@Ignore
 	@Test
 	public final void test1bChangeEventAfterTripWithReplanning() {
 		
@@ -429,6 +386,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setTimeVariantNetwork(true);
 			config.plans().setInputFile("plans.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(0);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -481,6 +440,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setInputFile(networkFile);
 			config.plans().setInputFile("plans_moreAgents.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(1);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -502,6 +463,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setInputFile(networkFile);
 			config.plans().setInputFile("plans_moreAgents.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(1);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
@@ -556,6 +519,8 @@ public class IncidentWithinDayReplanningIT {
 			config.network().setInputFile(networkFile);
 			config.plans().setInputFile("plans_moreAgents.xml");
 			config.controler().setOutputDirectory(outputDirectory);
+			config.controler().setFirstIteration(0);
+			config.controler().setLastIteration(0);
 			
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
