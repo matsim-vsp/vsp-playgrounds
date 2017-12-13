@@ -56,12 +56,23 @@ public class SignalPhase {
 			return false;
 	}
 
+	//  @deprecated not working yet. 
 	public SignalGroupState getState() {
 		boolean allGreen = true;
 		for (SignalGroup sg : signalGroups)
 			allGreen &= sg.getState().equals(SignalGroupState.GREEN);
 		return (allGreen ? SignalGroupState.GREEN : SignalGroupState.RED);
 	}
+	// @deprecated should replaced by by getState(). beforehand create field for list of signalgroup-objects in constructor.
+	public SignalGroupState getState(SignalSystem signalSystem) {
+		boolean allGreen = true;
+		for (SignalGroup sg : signalSystem.getSignalGroups().values()) {
+			if (this.greenSignalsToLanes.containsKey(sg.getId()))
+				allGreen &= sg.getState().equals(SignalGroupState.GREEN);
+		}
+		return (allGreen ? SignalGroupState.GREEN : SignalGroupState.RED);
+	}
+	
 	
 	public Id<SignalPhase> getId() {
 		return this.id;
