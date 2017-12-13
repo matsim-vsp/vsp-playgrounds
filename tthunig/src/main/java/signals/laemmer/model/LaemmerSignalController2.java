@@ -133,11 +133,13 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
     @Override
     public void simulationInitialized(double simStartTimeSeconds) {
     	java.util.Map<Id<Lane>, Lane> lanemap = new java.util.HashMap<>();
+    	List<LaemmerLane> laemmerLanes = new LinkedList<>();
 
     	this.initializeSensoring();
     	
-    	for (LanesToLinkAssignment ltl : lanes.getLanesToLinkAssignments().values())
-   			lanemap.putAll(ltl.getLanes());
+    	for (LanesToLinkAssignment ltl : lanes.getLanesToLinkAssignments().values()) {
+   			lanemap.putAll(ltl.getLanes());	
+    	}
 
     	System.err.println("SIGGROUPS SIZE: "+system.getSignalGroups().size());
 
@@ -154,17 +156,22 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
         	}
         	laemmerPhases.add(laemmerPhase);
 		}
-    }
-
-    @Override
-    public boolean isAnalysisEnabled() {
-        return this.laemmerConfig.isAnalysisEnabled();
+        
+        //create a laemmerLane for each signalized lane
+        for (SignalGroup sg : this.system.getSignalGroups().values()) {
+        	for (Signal signal : sg.getSignals().values())
+        		for (Id<Lane> laneId : signal.getLaneIds())
+        			laemmerLanes.add(new LaemmerLane(this.network.getLinks().get(signal.getLinkId()), lanemap.get(laneId), sg, signal, this));
+        }
+        
+        
     }
 
     @Override
     public void updateState(double now) {
         updateRepresentativeDriveways(now);
-        if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
+        if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
+        		laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
             updateActiveRegulation(now);
         }
         updateSignals(now);
@@ -180,6 +187,11 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
         processSelection(now, selection);
     }
 
+    @Override
+    public boolean isAnalysisEnabled() {
+    	return this.laemmerConfig.isAnalysisEnabled();
+    }
+    
     private void updateActiveRegulation(double now) {
         if (activeRequest != null && !regulationQueue.isEmpty() && regulationQueue.peek().equals(activeRequest.signal)) {
             LaemmerPhase phase = regulationQueue.peek();
@@ -197,10 +209,12 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
 
     private LaemmerPhase selectSignal() {
         LaemmerPhase max = null;
-        if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
+        if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
+        		laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
             max = regulationQueue.peek();
         }
-        if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
+        if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
+        		laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
             if (max == null) {
                 double index = 0;
                 for (LaemmerPhase phase : laemmerPhases) {
@@ -374,5 +388,14 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
 
 	public SignalSystem getSystem() {
 		return this.system;
+	}
+
+	public void addLaneForStabilization(LaemmerLane laemmerLane) {
+		// TODO implement lane stabilization: Find best phase for stabilization on selection (e.g. with most lanes for stabilization or phase highest priority containing this lane, pschade Dec '17 		
+	}
+
+	public boolean needStabilization(LaemmerLane laemmerLane) {
+		// TODO return true if lammerLane already needs stabilization
+		return false;
 	}
 }
