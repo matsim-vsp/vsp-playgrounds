@@ -52,9 +52,11 @@ public class PrepareParametricRuns {
     public static final String newLine = System.getProperty("line.separator");
     private final Session session;
     private final ChannelSftp sftp;
+    private final String userName;
 
     public PrepareParametricRuns(String pathToKnownHosts, String pathToPrivateKey, String userName) {
-        try {
+    this.userName = userName;
+    	try {
             JSch jSch = new JSch();
             jSch.setKnownHosts(pathToKnownHosts); // location of the ssh fingerprint (unique host key)
             jSch.addIdentity(pathToPrivateKey); // this is the private key required.
@@ -209,13 +211,13 @@ public class PrepareParametricRuns {
         // location of file must be locale and then can be copied to remote.
         String jobScriptFileName = locationOfOutput+"/script_"+jobName+".sh";
 
-        JobScriptWriter scriptWriter = new JobScriptWriter();
+        JobScriptWriter scriptWriter = new JobScriptWriter(userName);
         scriptWriter.appendCommands( jobName, locationOfOutput, additionalLines);
         scriptWriter.writeRemoteLocation(sftp, jobScriptFileName);
 
         return new String [] {
-                "qstat -u agarwal",
-//                "qsub "+scriptWriter.getJobScript(),
-                "qstat -u agarwal" };
+                "qstat -u "+userName,
+                "qsub "+scriptWriter.getJobScript(),
+                "qstat -u "+userName };
     }
 }
