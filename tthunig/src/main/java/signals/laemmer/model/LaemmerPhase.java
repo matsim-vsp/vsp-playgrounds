@@ -6,8 +6,6 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.lanes.data.Lane;
 
-import com.jogamp.opengl.util.awt.AWTGLPixelBuffer.SingleAWTGLPixelBufferProvider;
-
 class LaemmerPhase {
 
     /**
@@ -286,7 +284,7 @@ class LaemmerPhase {
 	            }
 	        }
     	}
-        builder.append(this.phase.getState().name()+ ";")
+        builder.append(this.phase.getState(this.laemmerSignalController2.getSystem()).name()+ ";")
                 .append(this.index + ";")
                 .append(this.determiningLoad + ";")
                 .append(this.intergreenTime_a + ";")
