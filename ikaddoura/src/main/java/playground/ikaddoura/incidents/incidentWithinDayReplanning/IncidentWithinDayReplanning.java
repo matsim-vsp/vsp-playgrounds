@@ -57,7 +57,7 @@ public class IncidentWithinDayReplanning {
 	private static final boolean reducePopulationToAffectedAgents = false;
 	private static final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
 	
-	private static boolean applyNetworkChangeEvents = false;
+	private static boolean applyNetworkChangeEvents = true;
 	private static boolean applyWithinDayReplanning = true;
 	private static boolean onlyReplanDirectlyAffectedAgents = false;
 	private static int withinDayReplanInterval = 1800;
