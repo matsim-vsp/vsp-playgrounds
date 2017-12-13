@@ -40,7 +40,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
-import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.NetworkChangeEventsWriter;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -103,7 +102,13 @@ public class Incident2NetworkChangeEventsWriter {
 				outputNetwork.addNode(outputNetwork.getFactory().createNode(node.getId(), node.getCoord()));
 			}
 			for (Link link : network.getLinks().values()) {
-				outputNetwork.addLink(outputNetwork.getFactory().createLink(link.getId(), link.getFromNode(), link.getToNode()));
+				Link linkToAdd = outputNetwork.getFactory().createLink(link.getId(), link.getFromNode(), link.getToNode());
+				linkToAdd.setAllowedModes(link.getAllowedModes());
+				linkToAdd.setCapacity(link.getCapacity());
+				linkToAdd.setFreespeed(link.getFreespeed());
+				linkToAdd.setLength(link.getLength());
+				linkToAdd.setNumberOfLanes(link.getNumberOfLanes());
+				outputNetwork.addLink(linkToAdd);
 			}
 			
 			List<NetworkChangeEvent> networkChangeEvents = new ArrayList<>();
@@ -187,12 +192,15 @@ public class Incident2NetworkChangeEventsWriter {
 			}
 		}
 		
+		log.info("Number of network change events: " + networkChangeEvents.size());
 		return networkChangeEvents;
 	}
 
 	private Map<Id<Link>, List<NetworkIncident>> processLongtermIncidents(Map<Id<Link>, List<NetworkIncident>> linkId2rawIncidentsCurrentDay, Network outputNetwork, double dateInSec, String outputDirectory) {
 
 		log.info("Processing longterm incidents...");
+		
+		int adjustedLinksCounter = 0;
 		
 		Map<Id<Link>, List<NetworkIncident>> processedLink2NI = new HashMap<>();
 		
@@ -203,13 +211,19 @@ public class Incident2NetworkChangeEventsWriter {
 			
 			Link mostRestrictiveLink = outputNetwork.getLinks().get(linkId);
 			
+			boolean linkNotYetConsidered = true;
 			// all incidents per link
 			for (NetworkIncident ni : linkId2rawIncidentsCurrentDay.get(linkId)) {
-
-				if (ni.getStartTime() == 0. && ni.getEndTime() >= 24. * 3600.) {
+				
+				if (ni.getStartTime() <= 0. && ni.getEndTime() >= this.dayEndTime) {
 					// longterm incident
-					
+										
 					mostRestrictiveLink = getMoreRestrictiveIncidentLink(mostRestrictiveLink, ni.getIncidentLink());
+					
+					if (linkNotYetConsidered) {
+						adjustedLinksCounter++;
+						linkNotYetConsidered = false;
+					}
 					
 				} else {
 					processedNI.add(ni);
@@ -228,6 +242,8 @@ public class Incident2NetworkChangeEventsWriter {
 
 		new NetworkWriter(outputNetwork).write(outputDirectory + "network_" + DateTime.secToDateString(dateInSec) + ".xml.gz");
 
+		
+		log.info("Links with longterm traffic incidents: " + adjustedLinksCounter);
 		log.info("Processing longterm incidents... Done.");
 		
 		return processedLink2NI;
@@ -275,7 +291,6 @@ public class Incident2NetworkChangeEventsWriter {
 
 		// empty list
 		if (incidents.isEmpty()) {
-			log.warn("	> Empty list.");
 			return incidentsProcessed;
 		}
 		
@@ -534,8 +549,8 @@ public class Incident2NetworkChangeEventsWriter {
 			}
 		}
 		log.info("Collecting all incidents that are relevant for this day... Done.");
-		log.info("Relevant incidents: " + relevantIncidentCounter);
-		log.info("Number of links with incidents: " + linkId2rawIncidents.size());
+		log.info("Relevant traffic incidents: " + relevantIncidentCounter);
+		log.info("Number of links with traffic incidents: " + linkId2rawIncidents.size());
 		return linkId2rawIncidents;
 	}
 
