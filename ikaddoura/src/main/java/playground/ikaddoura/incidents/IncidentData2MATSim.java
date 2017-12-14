@@ -51,8 +51,8 @@ import playground.ikaddoura.incidents.io.Incident2SHPWriter;
  * This class analyzes incidents and writes them into a csv and a shapefile.
  *
  */
-public class IncidentDataAnalysis {
-	private final Logger log = Logger.getLogger(IncidentDataAnalysis.class);
+public class IncidentData2MATSim {
+	private final Logger log = Logger.getLogger(IncidentData2MATSim.class);
 
 	private String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_network.xml.gz";
 	private String crs = TransformationFactory.DHDN_GK4;
@@ -72,15 +72,15 @@ public class IncidentDataAnalysis {
 
 	public static void main(String[] args) throws XMLStreamException, IOException, ParseException {
 		
-		IncidentDataAnalysis incidentAnalysis = new IncidentDataAnalysis();
+		IncidentData2MATSim incidentAnalysis = new IncidentData2MATSim();
 		incidentAnalysis.run();	
 	}
 	
-	public IncidentDataAnalysis() {
+	public IncidentData2MATSim() {
 		log.info("Using the default constructor...");
 	}
 	
-	public IncidentDataAnalysis(
+	public IncidentData2MATSim(
 			String networkFile,
 			String crs,
 			String inputDirectory,

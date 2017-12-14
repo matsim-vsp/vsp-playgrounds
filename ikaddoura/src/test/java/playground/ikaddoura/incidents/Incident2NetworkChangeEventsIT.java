@@ -64,7 +64,7 @@ public class Incident2NetworkChangeEventsIT {
 
 		String crs = TransformationFactory.DHDN_GK4;
 		
-		IncidentDataAnalysis analysis = new IncidentDataAnalysis(
+		IncidentData2MATSim analysis = new IncidentData2MATSim(
 				networkFile,
 				crs,
 				inputDirectory,
