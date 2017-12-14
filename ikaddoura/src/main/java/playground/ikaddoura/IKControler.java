@@ -48,7 +48,7 @@ public class IKControler {
 			log.info("configFile: "+ configFile);
 			
 		} else {
-			configFile = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/cottbus/input/config.xml";
+			configFile = "../../shared-svn/studies/ihab/cottbus/input/config.xml";
 		}
 		
 		IKControler main = new IKControler();
