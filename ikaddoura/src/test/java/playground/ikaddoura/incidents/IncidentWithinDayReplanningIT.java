@@ -41,7 +41,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
-import org.matsim.withinday.trafficmonitoring.TravelTimeCollector;
+import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
 import com.google.inject.name.Names;
 
@@ -278,7 +278,7 @@ public class IncidentWithinDayReplanningIT {
 
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 			
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -338,7 +338,7 @@ public class IncidentWithinDayReplanningIT {
 
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 			
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -399,7 +399,7 @@ public class IncidentWithinDayReplanningIT {
 
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 			
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -532,7 +532,7 @@ public class IncidentWithinDayReplanningIT {
 			
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 			
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {

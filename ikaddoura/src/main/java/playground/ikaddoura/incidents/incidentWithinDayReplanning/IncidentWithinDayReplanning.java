@@ -36,7 +36,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.withinday.trafficmonitoring.TravelTimeCollector;
+import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
 import playground.ikaddoura.incidents.NetworkChangeEventsUtils;
 
@@ -142,7 +142,7 @@ public class IncidentWithinDayReplanning {
 			
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 		
 			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
 			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(onlyReplanDirectlyAffectedAgents);
