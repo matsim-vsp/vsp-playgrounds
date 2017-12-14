@@ -46,8 +46,8 @@ import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 public class GisAnalysis {
 	private final static Logger log = Logger.getLogger(GisAnalysis.class);
 	
-	private static String runDirectory1 = "../../runs-svn/incidents/berlin/output/output_2016-02-11_networkChangeEvents-false_withinDayReplanning-true_onlyReplanDirectlyAffectedAgents-false_replanInterval-1800/";
-	private static String runDirectory2 = "../../runs-svn/incidents/berlin/output/output_2016-02-11_networkChangeEvents-true_withinDayReplanning-true_onlyReplanDirectlyAffectedAgents-false_replanInterval-1800/";
+	private static String runDirectory1 = "../../runs-svn/incidents-longterm-shortterm/output/output_2016-02-11_networkChangeEvents-false_withinDayReplanning-true_onlyReplanDirectlyAffectedAgents-false_replanInterval-1800/";
+	private static String runDirectory2 = "../../runs-svn/incidents-longterm-shortterm/output/output_2016-02-11_networkChangeEvents-true_withinDayReplanning-true_onlyReplanDirectlyAffectedAgents-false_replanInterval-1800/";
 
 	private final String crs = TransformationFactory.DHDN_GK4;
 	private final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(crs, crs);
