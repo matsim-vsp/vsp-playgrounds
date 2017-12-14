@@ -209,7 +209,7 @@ public class TtRunCottbusSimulation {
 			// TODO set useMSA flag
 			opdytsConfigGroup.setMaxIteration(opdytsIt);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+			opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(warmUpIt); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);
