@@ -48,7 +48,7 @@ import playground.ikaddoura.incidents.io.Incident2SHPWriter;
 /**
  * @author ikaddoura
  * 
- * This class analyzes incidents and writes them into a csv and a shapefile.
+ * This class writes traffic incident data into a csv files, shapefiles, network change events (shortterm effects) and a network file (longterm effects).
  *
  */
 public class IncidentData2MATSim {
