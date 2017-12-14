@@ -74,10 +74,10 @@ public class AnalysisControlerListener implements IterationEndsListener {
 	@Inject
 	private BasicPersonTripAnalysisHandler basicHandler;
 	
-	@Inject
+	@Inject(optional=true)
 	private NoiseAnalysisHandler noiseHandler;
 	
-	@Inject
+	@Inject(optional=true)
 	private PersonMoneyLinkHandler moneyHandler;
 	
 	@Inject(optional=true)
