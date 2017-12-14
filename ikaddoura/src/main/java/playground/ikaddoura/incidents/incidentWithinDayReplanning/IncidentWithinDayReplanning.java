@@ -94,7 +94,6 @@ public class IncidentWithinDayReplanning {
 
 	private void run() {
 		
-//		final Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup());
 		final Config config = ConfigUtils.loadConfig(configFile);
 
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
@@ -157,14 +156,9 @@ public class IncidentWithinDayReplanning {
 					
 					this.bind(TravelTime.class).toInstance(travelTime);
 					this.addEventHandlerBinding().toInstance(travelTime);
-					this.addMobsimListenerBinding().toInstance(travelTime);
-					
-//					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-//					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
-//					
+					this.addMobsimListenerBinding().toInstance(travelTime);			
 				}
 			}) ;
-//			controler.addOverridingModule(new DvrpTravelTimeModule());
 			
 		} else {
 			if (applyNetworkChangeEvents) {
