@@ -57,12 +57,12 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
 /**
-* Tests if network change events are considered by {@link TravelTimeCollector}.
+* Tests if network change events are considered by {@link WithinDayTravelTime}.
 * 
 * @author ikaddoura
 * 
 */
-public class TravelTimeCollectorWithNetworkChangeEventsTest {
+public class WithinDayTravelTimeWithNetworkChangeEventsTest {
 
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
