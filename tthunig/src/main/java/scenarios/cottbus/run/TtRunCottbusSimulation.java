@@ -52,6 +52,7 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsWriter20;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsWriter20;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -72,6 +73,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.data.LanesWriter;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingModule;
+import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
@@ -125,19 +127,19 @@ public class TtRunCottbusSimulation {
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MS;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MS;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
 		BTU_POP_BTU_ROUTES,
 		WMines, // with mines as working places. causes an oversized number of working places in the south west of Cottbus.
 		WoMines, // without mines as working places
-		WoMines100itcap1, // without mines. iterated for 100it with capacity 1.0
+		WoMines100itcap1MS, // without mines. iterated for 100it with capacity 1.0 and signals MS
 		WoMines100itcap07MS, // without mines. iterated for 100it with capacity 0.7 and signals MS
 		WoMines100itcap07MSRand // same as prev, but with signals MS_RANDOM_OFFSETS
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -156,19 +158,21 @@ public class TtRunCottbusSimulation {
 		NONE, CP_V3, CP_V4, CP_V7, CP_V8, CP_V9, CP_V10, FLOWBASED, CORDON_INNERCITY, CORDON_RING
 	}
 	
-	private static final boolean USE_OPDYTS = true;
+	private static final boolean USE_OPDYTS = false;
+	private static final boolean VIS = true;
 	
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/opdyts/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/laemmer/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
-	private static final boolean WRITE_INITIAL_FILES = false;
+	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = 0.7;
+	private static final double SCALING_FACTOR = 1.;
+	
 	
 	public static void main(String[] args) {
 		
@@ -188,9 +192,11 @@ public class TtRunCottbusSimulation {
 		
 		Config config = defineConfig();
 		
-//		OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class ) ;
-//		otfvisConfig.setDrawTime(true);
-//		otfvisConfig.setAgentSize(80f);
+		if (VIS) {
+			OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
+			otfvisConfig.setDrawTime(true);
+			otfvisConfig.setAgentSize(80f);
+		}
 		
 		Scenario scenario = prepareScenario( config );
 		
@@ -203,7 +209,7 @@ public class TtRunCottbusSimulation {
 			// TODO set useMSA flag
 			opdytsConfigGroup.setMaxIteration(opdytsIt);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+			opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(warmUpIt); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);
@@ -260,7 +266,9 @@ public class TtRunCottbusSimulation {
 			// start a normal matsim run without opdyts:
 			Controler controler = prepareController( scenario );
 	
-//			controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
+			if (VIS) {
+				controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+			}
 			
 			controler.run();
 			
@@ -316,7 +324,7 @@ public class TtRunCottbusSimulation {
 			// BaseCase plans, no links for acitivties, no routes
 //			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_woLinks.xml.gz");
 			break;
-		case WoMines100itcap1:
+		case WoMines100itcap1MS:
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap1.0.xml.gz");
 			break;
 		case WoMines100itcap07MS:
@@ -528,8 +536,9 @@ public class TtRunCottbusSimulation {
 		config.planCalcScore().setWriteExperiencedPlans(true);
 		config.controler().setCreateGraphs(true);
 
-		config.controler().setWriteEventsInterval(config.controler().getLastIteration());
-		config.controler().setWritePlansInterval(config.controler().getLastIteration());
+		int lastIt = config.controler().getLastIteration();
+		config.controler().setWriteEventsInterval(lastIt==0? 1 : lastIt);
+		config.controler().setWritePlansInterval(lastIt==0? 1 : lastIt);
 
 		// define activity types
 		{
@@ -739,6 +748,8 @@ public class TtRunCottbusSimulation {
 			// TODO change for laemmer
 			laemmerConfig.setAnalysisEnabled(false);
 			laemmerConfig.setDesiredCycleTime(90);
+			laemmerConfig.setMaxCycleTime(135);
+//			laemmerConfig.setMinGreenTime(5);
 			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 		}

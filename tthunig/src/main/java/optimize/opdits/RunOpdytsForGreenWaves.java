@@ -22,7 +22,6 @@ package optimize.opdits;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -113,7 +112,7 @@ public class RunOpdytsForGreenWaves {
 
 			opdytsConfigGroup.setMaxIteration(30);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(30);
+			opdytsConfigGroup.setDecisionVariableStepSize(30);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(1);

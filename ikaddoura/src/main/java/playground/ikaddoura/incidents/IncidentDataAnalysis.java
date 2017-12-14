@@ -54,26 +54,14 @@ public class IncidentDataAnalysis {
 
 	private String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_network.xml.gz";
 	private String crs = TransformationFactory.DHDN_GK4;
-//	private String crs = TransformationFactory.WGS84_UTM33N;
 	
-	private String inputDirectory = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/incidents/server/output-berlin/incidentData_berlin_2016-03/";
-	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/incidentData_berlin_2016-03-15/";
+	private String inputDirectory = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/incidents/server/output-berlin/incidentData_berlin_2016-02/";
+	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/LongtermVsShortterm_incidentData_berlin_2016-02/";
 	
 	private boolean writeCSVFileForEachXMLFile = false;
 	
-	private boolean writeAllTrafficItems2ShapeFile = false;
-	
-	private boolean writeDaySpecificTrafficItems2ShapeFile = true;
-//	private String shpFileStartDateTime = "2016-02-11";
-//	private String shpFileEndDateTime = "2016-03-26";
-	private String shpFileStartDateTime = "2016-03-15";
-	private String shpFileEndDateTime = "2016-03-15";
-	
-	private boolean writeNetworkChangeEventFiles = true;
-//	private String networkChangeEventStartDateTime = "2016-02-11";
-//	private String networkChangeEventEndDateTime = "2016-03-26";
-	private String networkChangeEventStartDateTime = "2016-03-15";
-	private String networkChangeEventEndDateTime = "2016-03-15";
+	private String analysisStartDateTime = "2016-02-11";
+	private String analysisEndDateTime = "2016-02-11";
 	
 // ##################################################################
 	
@@ -98,8 +86,8 @@ public class IncidentDataAnalysis {
 			boolean writeCSVFileForEachXMLFile,
 			boolean writeAllTrafficItems2ShapeFile,
 			boolean writeDaySpecificTrafficItems2ShapeFile,
-			String shpStartDateTime,
-			String shpEndDateTime,
+			String start,
+			String end,
 			boolean writeNetworkChangeEventFiles,
 			String nceStartDateTime,
 			String nceEndDateTime) {
@@ -109,13 +97,8 @@ public class IncidentDataAnalysis {
 		this.inputDirectory = inputDirectory;
 		this.outputDirectory = outputDirectory;
 		this.writeCSVFileForEachXMLFile = writeCSVFileForEachXMLFile;
-		this.writeAllTrafficItems2ShapeFile = writeAllTrafficItems2ShapeFile;
-		this.writeDaySpecificTrafficItems2ShapeFile = writeDaySpecificTrafficItems2ShapeFile;
-		this.shpFileStartDateTime = shpStartDateTime;
-		this.shpFileEndDateTime = shpEndDateTime;
-		this.writeNetworkChangeEventFiles = writeNetworkChangeEventFiles;
-		this.networkChangeEventStartDateTime = nceStartDateTime;
-		this.networkChangeEventEndDateTime = nceEndDateTime;
+		this.analysisStartDateTime = start;
+		this.analysisEndDateTime = end;
 	}
 
 	public void run() throws XMLStreamException, IOException, ParseException {
@@ -127,59 +110,57 @@ public class IncidentDataAnalysis {
 			e1.printStackTrace();
 		}
 		
-		collectTrafficItems(); // traffic items that have the same traffic item IDs are updated by the more recent information or by the update traffic item
-		Incident2CSVWriter.writeTrafficItems(trafficItems.values(), outputDirectory + "incidentData_beforeConsideringUpdateMessages.csv");
-	
+		collectTrafficItems(); // traffic items that have the same traffic item IDs are updated by the more recent information or by the update traffic item	
 		updateTrafficItems(); // update all traffic items that are updated or canceled by another traffic item
 		
 		// write CSV file which contains all information (start point, end point, type, ...) 
 		Incident2CSVWriter.writeTrafficItems(trafficItems.values(), outputDirectory + "incidentData.csv");
-				
+								
+		// get traffic incidents in relevant time span
+		Set<String> analysisTimeSpanTrafficItemIds = getTrafficItemIdsRelevantForTimeSpan(this.trafficItems, analysisStartDateTime, analysisEndDateTime);
+
+		Scenario scenario = loadScenario();
+		
 		// map incidents on network
-		final Incident2Network networkMapper = new Incident2Network(loadScenario(), this.trafficItems, this.crs);
-		networkMapper.computeIncidentPaths();
+		final Incident2Network networkMapper = new Incident2Network(scenario, this.crs);
+		networkMapper.computeIncidentPaths(this.trafficItems, analysisTimeSpanTrafficItemIds);
 		final Map<String, Path> trafficItemId2path = networkMapper.getTrafficItemId2path();
 
+		// write to shape file
+		log.info("Writing traffic items and congestion information to shape file...");
 		final Incident2SHPWriter shpWriter = new Incident2SHPWriter(this.tmc, this.trafficItems, trafficItemId2path);
-
-		if (writeAllTrafficItems2ShapeFile) {
-			log.info("Writing all traffic items to shape file...");
-			
-			shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_all.shp", this.trafficItems.keySet(), this.crs);
-			
-			final Set<String> trafficItemsToCheck = networkMapper.getTrafficItemsToCheck();
-			shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_WARNING.shp", trafficItemsToCheck, this.crs);
-			log.info("Writing all traffic items to shape file... Done.");
-		}
+		shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_" + analysisStartDateTime + "_" + analysisEndDateTime + ".shp", analysisTimeSpanTrafficItemIds, this.crs);
 		
-		if (writeDaySpecificTrafficItems2ShapeFile) {
-			log.info("Writing filtered traffic items to shape file(s)...");
+		shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_" + analysisStartDateTime + "_" + analysisEndDateTime + "_WARNING-implausibleRouteGeometry.shp", networkMapper.getTrafficItemsImplausibleRouteGeometry(), this.crs);
+		shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_" + analysisStartDateTime + "_" + analysisEndDateTime + "_WARNING-implausibleRouteLength.shp", networkMapper.getTrafficItemsImplausibleRouteLength(), this.crs);
+		
+		shpWriter.writeCongestionInfo2ShapeFile(outputDirectory + "delays_" + analysisStartDateTime + "_" + analysisEndDateTime + ".shp", analysisTimeSpanTrafficItemIds, crs);
+		log.info("Writing traffic items to shape file... Done.");
+		
+		log.info("Writing network change events...");
+		final Incident2NetworkChangeEventsWriter nceWriter = new Incident2NetworkChangeEventsWriter(scenario.getNetwork(), this.tmc, this.trafficItems, trafficItemId2path, this.crs);
+		nceWriter.writeIncidentLinksToNetworkChangeEventFile(this.analysisStartDateTime, this.analysisEndDateTime, analysisTimeSpanTrafficItemIds, this.outputDirectory);
+		log.info("Writing network change events... Done.");
+			
+		OutputDirectoryLogging.closeOutputDirLogging();
+	}
 
-			final Set<String> filteredTrafficItems = new HashSet<>();
-			for (TrafficItem item : this.trafficItems.values()) {
+	private Set<String> getTrafficItemIdsRelevantForTimeSpan(Map<String, TrafficItem> trafficItems, String shpFileStartDateTime, String shpFileEndDateTime) {
+		final Set<String> filteredTrafficItems = new HashSet<>();
+		for (TrafficItem item : trafficItems.values()) {
+			try {
 				if (DateTime.parseDateTimeToDateTimeSeconds(item.getEndDateTime()) < DateTime.parseDateTimeToDateTimeSeconds(shpFileStartDateTime)
 						|| DateTime.parseDateTimeToDateTimeSeconds(item.getStartDateTime()) > DateTime.parseDateTimeToDateTimeSeconds(shpFileEndDateTime) + (24 * 3600.)) {
 				} else {
 					filteredTrafficItems.add(item.getId());
 				}
+			} catch (ParseException e) {
+				e.printStackTrace();
 			}
-			shpWriter.writeTrafficItemLinksToShapeFile(outputDirectory + "trafficItems_" + shpFileStartDateTime + "_" + shpFileEndDateTime + ".shp", filteredTrafficItems, crs);
-			shpWriter.writeCongestionInfo2ShapeFile(outputDirectory + "delays_" + shpFileStartDateTime + "_" + shpFileEndDateTime + ".shp", filteredTrafficItems, crs);
-			log.info("Writing filtered traffic items to shape file(s)... Done.");
 		}
 		
-		if (writeNetworkChangeEventFiles) {
-			// write network change events file and network incident shape file for each day
-			
-			log.info("Writing network change events...");
-
-			final Incident2NetworkChangeEventsWriter nceWriter = new Incident2NetworkChangeEventsWriter(this.tmc, this.trafficItems, trafficItemId2path, this.crs);
-			nceWriter.writeIncidentLinksToNetworkChangeEventFile(this.networkChangeEventStartDateTime, this.networkChangeEventEndDateTime, this.outputDirectory);
-			
-			log.info("Writing network change events... Done.");
-		}
-		
-		OutputDirectoryLogging.closeOutputDirLogging();
+		log.info("Traffic items in time span: " + filteredTrafficItems.size());
+		return filteredTrafficItems;
 	}
 
 	private void collectTrafficItems() throws XMLStreamException, IOException {
