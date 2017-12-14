@@ -37,6 +37,8 @@ import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
+import playground.ikaddoura.incidents.data.DateTime;
+import playground.ikaddoura.incidents.data.TMCAlerts;
 import playground.ikaddoura.incidents.data.TrafficItem;
 import playground.ikaddoura.incidents.io.HereMapsTrafficItemXMLReader;
 import playground.ikaddoura.incidents.io.Incident2CSVWriter;

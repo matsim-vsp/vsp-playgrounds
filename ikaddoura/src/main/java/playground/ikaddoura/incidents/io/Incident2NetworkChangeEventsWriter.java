@@ -45,9 +45,9 @@ import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.ikaddoura.incidents.DateTime;
-import playground.ikaddoura.incidents.TMCAlerts;
+import playground.ikaddoura.incidents.data.DateTime;
 import playground.ikaddoura.incidents.data.NetworkIncident;
+import playground.ikaddoura.incidents.data.TMCAlerts;
 import playground.ikaddoura.incidents.data.TrafficItem;
 
 /**

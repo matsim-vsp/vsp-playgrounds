@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.incidents;
+package playground.ikaddoura.incidents.analysis;
 
 import java.io.BufferedWriter;
 import java.io.File;
