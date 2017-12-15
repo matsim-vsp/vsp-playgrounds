@@ -130,8 +130,10 @@ public class PersonTripNoiseAnalysis {
 				double causedNoiseCost = 0.;
 				double affectedNoiseCost = 0.;
 				
-				if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
-					affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+				if (noiseHandler != null) {
+					if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
+						affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+					}
 				}
 				
 				if (basicHandler.getPersonId2tripNumber2legMode().containsKey(id)) {
@@ -141,8 +143,10 @@ public class PersonTripNoiseAnalysis {
 							tollPayments = tollPayments + basicHandler.getPersonId2tripNumber2payment().get(id).get(trip);
 						}
 						
-						if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
-							causedNoiseCost = causedNoiseCost + noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip);
+						if (noiseHandler != null) {
+							if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
+								causedNoiseCost = causedNoiseCost + noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip);
+							}
 						}
 						
 						if (ignoreModes || basicHandler.getPersonId2tripNumber2legMode().get(id).get(trip).equals(mode)) {
