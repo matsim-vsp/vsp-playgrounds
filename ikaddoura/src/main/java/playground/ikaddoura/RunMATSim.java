@@ -25,7 +25,6 @@ import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.events.EventsUtils;
@@ -33,11 +32,9 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.AnalysisControlerListener;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
+import playground.ikaddoura.analysis.PersonTripAnalysisRun;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
 * @author ikaddoura
@@ -95,41 +92,15 @@ public class RunMATSim {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 		
-		controler.addOverridingModule(new AbstractModule() {
-							
-			@Override
-			public void install() {
-				
-				this.bind(BasicPersonTripAnalysisHandler.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(BasicPersonTripAnalysisHandler.class);
-
-				this.bind(DelayAnalysis.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(DelayAnalysis.class);
-				
-				this.addControlerListenerBinding().to(AnalysisControlerListener.class);		
-			}
-		});
-		
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 		
 		controler.run();
 		
 		// some post processing
 		
-		Network2Shape.exportNetwork2Shp1(scenario, crs, TransformationFactory.getCoordinateTransformation(crs, crs));
-		
-		EventsManager events = EventsUtils.createEventsManager();
-				
-		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork());
-		events.addHandler(handler);
-		
-		String eventsFile = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + config.controler().getRunId() + "." + config.controler().getLastIteration() + ".events.xml.gz";
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(eventsFile);
-		
-		String analysis_output_file = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + config.controler().getRunId() + "." + config.controler().getLastIteration() + ".link_dailyTrafficVolume.csv";
-		handler.printResults(analysis_output_file);
-				
+		PersonTripAnalysisRun analysis = new PersonTripAnalysisRun(scenario);
+		analysis.setCrs(crs);
+		analysis.run();
 	}
 
 }
