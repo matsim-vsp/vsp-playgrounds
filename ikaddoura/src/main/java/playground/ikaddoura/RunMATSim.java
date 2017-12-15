@@ -31,10 +31,12 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.AnalysisControlerListener;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
@@ -50,6 +52,8 @@ public class RunMATSim {
 	private static String runId;
 		
 	private static boolean otfvis;
+	
+	private final String crs = TransformationFactory.DHDN_GK4;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -68,9 +72,9 @@ public class RunMATSim {
 		} else {
 			
 			configFile = "../../runs-svn/incidents-longterm-shortterm/input/config-longterm.xml";
-			outputDirectory = "../../runs-svn/incidents-longterm-shortterm/output/test/";
+			outputDirectory = "../../runs-svn/incidents-longterm-shortterm/output/test4/";
+			runId = "test-run";
 			
-			runId = null;
 			otfvis = false;
 		}
 		
@@ -111,6 +115,8 @@ public class RunMATSim {
 		controler.run();
 		
 		// some post processing
+		
+		Network2Shape.exportNetwork2Shp1(scenario, crs, TransformationFactory.getCoordinateTransformation(crs, crs));
 		
 		EventsManager events = EventsUtils.createEventsManager();
 				

@@ -20,12 +20,8 @@
 
 package playground.ikaddoura.analysis.qgis;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -33,21 +29,16 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.core.utils.gis.PolylineFeatureFactory;
-import org.matsim.core.utils.gis.ShapeFileWriter;
-import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.analysis.shapes.Network2Shape;
 
 public class GisAnalysis {
 	private final static Logger log = Logger.getLogger(GisAnalysis.class);
 	
-	private static String runDirectory1 = "../../runs-svn/incidents-longterm-shortterm/output/output_2016-02-11_networkChangeEvents-false_withinDayReplanning-true_onlyReplanDirectlyAffectedAgents-false_replanInterval-1800/";
-	private static String runDirectory2 = "../../runs-svn/incidents-longterm-shortterm/output/output_2016-02-11_networkChangeEvents-true_withinDayReplanning-true_onlyReplanDirectlyAffectedAgents-false_replanInterval-1800/";
+	private static String runDirectory1 = "/Users/ihab/Desktop/ils4/kaddoura/incidents/output/output_run1a_baseCase/";
+	private static String runDirectory2 = "/Users/ihab/Desktop/ils4/kaddoura/incidents/output/output_run2a_2016-02-11/";
 
 	private final String crs = TransformationFactory.DHDN_GK4;
 	private final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(crs, crs);
@@ -73,45 +64,12 @@ public class GisAnalysis {
 		Scenario scenario2 = writeTrafficVolumeCSVFile(outputDirectory2);
 		
 		// write network to shapefile
-		exportNetwork2Shapefile(scenario1);
-		exportNetwork2Shapefile(scenario2);
-		
+		Network2Shape.exportNetwork2Shp1(scenario1, crs, ct);
+		Network2Shape.exportNetwork2Shp1(scenario2, crs, ct);
+				
 		// write qgis project file
 		// TODO
 
-	}
-
-	private void exportNetwork2Shapefile(Scenario scenario) {
-		
-		PolylineFeatureFactory factory = new PolylineFeatureFactory.Builder()
-		.setCrs(MGC.getCRS(crs))
-		.setName("Link")
-		.addAttribute("Id", String.class)
-		.addAttribute("Length", Double.class)
-		.addAttribute("capacity", Double.class)
-		.addAttribute("lanes", Double.class)
-		.addAttribute("Freespeed", Double.class)
-		.addAttribute("Modes", String.class)
-		.create();
-		
-		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
-						
-		for (Link link : scenario.getNetwork().getLinks().values()){
-			if (link.getAllowedModes().contains("car")) {
-				SimpleFeature feature = factory.createPolyline(
-						new Coordinate[]{
-								new Coordinate(MGC.coord2Coordinate(ct.transform(link.getFromNode().getCoord()))),
-								new Coordinate(MGC.coord2Coordinate(ct.transform(link.getToNode().getCoord())))
-						}, new Object[] {link.getId(), link.getLength(), link.getCapacity(), link.getNumberOfLanes(), link.getFreespeed(), link.getAllowedModes()
-						}, null
-				);
-				features.add(feature);
-			}
-		}
-		
-		log.info("Writing out network lines shapefile... ");
-		ShapeFileWriter.writeGeometries(features, scenario.getConfig().controler().getOutputDirectory() + "network.shp");
-		log.info("Writing out network lines shapefile... Done.");
 	}
 
 	private Scenario writeTrafficVolumeCSVFile(String outputDirectory) {
