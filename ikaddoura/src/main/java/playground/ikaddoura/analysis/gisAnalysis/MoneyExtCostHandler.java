@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis.moneyGIS;
+package playground.ikaddoura.analysis.gisAnalysis;
 
 
 import java.util.HashMap;
