@@ -79,7 +79,11 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 			
 			for (Id<Link> linkId : this.network.getLinks().keySet()){
 				
-				bw.write(linkId + ";" + this.linkId2demand.get(linkId));
+				double volume = 0.;
+				if (this.linkId2demand.get(linkId) != null) {
+					volume = this.linkId2demand.get(linkId);
+				}
+				bw.write(linkId + ";" + volume);
 				bw.newLine();
 			}
 			

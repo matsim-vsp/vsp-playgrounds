@@ -42,6 +42,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripNoiseAnalysis;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
+import playground.ikaddoura.analysis.dynamicLinkDemand.DynamicLinkDemandEventHandler;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
@@ -55,8 +56,7 @@ import playground.ikaddoura.decongestion.handler.DelayAnalysis;
  * trip-based information
  * person ; trip no.; leg mode ; stuckAbort (trip) ; departure time (trip) ; trip arrival time (trip) ; travel time (trip) ; travel distance (trip) ; toll payment (trip)
  * 
- * person-based information
- * person ; total no. of trips (day) ; travel time (day) ; travel distance (day) ; toll payments (day) ; affected noise cost (day)
+ * (...)
  * 
  * 
  */
@@ -149,11 +149,13 @@ public class PersonTripAnalysisRun {
 		delayAnalysis.setScenario(scenario);
 		
 		LinkDemandEventHandler trafficVolumeAnalysis = new LinkDemandEventHandler(scenario.getNetwork());
+		DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis = new DynamicLinkDemandEventHandler(scenario.getNetwork());
 		
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(basicHandler);
 		events.addHandler(delayAnalysis);
 		events.addHandler(trafficVolumeAnalysis);
+		events.addHandler(dynamicTrafficVolumeAnalysis);
 		
 		log.info("Reading the events file...");
 		MatsimEventsReader reader = new MatsimEventsReader(events);
@@ -194,7 +196,8 @@ public class PersonTripAnalysisRun {
 		analysis.printAvgValuePerParameter(analysisOutputDirectory + "travelTimePerDepartureTime_car_3600.csv", departureTime2travelTime);
 	
 		trafficVolumeAnalysis.printResults(analysisOutputDirectory + "link_dailyTrafficVolume.csv");
-		Network2Shape.exportNetwork2Shp1(scenario, crs, TransformationFactory.getCoordinateTransformation(crs, crs));
+		dynamicTrafficVolumeAnalysis.printResults(analysisOutputDirectory);
+		Network2Shape.exportNetwork2Shp1(scenario, analysisOutputDirectory, crs, TransformationFactory.getCoordinateTransformation(crs, crs));
 
 	}
 

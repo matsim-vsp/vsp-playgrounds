@@ -22,19 +22,14 @@ package playground.ikaddoura;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.PersonTripAnalysisRun;
-import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.analysis.shapes.Network2Shape;
 
 /**
 * @author ikaddoura
@@ -69,7 +64,7 @@ public class RunMATSim {
 		} else {
 			
 			configFile = "../../runs-svn/incidents-longterm-shortterm/input/config-longterm.xml";
-			outputDirectory = "../../runs-svn/incidents-longterm-shortterm/output/test4/";
+			outputDirectory = "../../runs-svn/incidents-longterm-shortterm/output/test9/";
 			runId = "test-run";
 			
 			otfvis = false;
