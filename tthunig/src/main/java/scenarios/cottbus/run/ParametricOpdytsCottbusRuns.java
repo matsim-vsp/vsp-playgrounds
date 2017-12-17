@@ -45,6 +45,7 @@ public class ParametricOpdytsCottbusRuns {
         double [] selfTuningWts = {1.0, 4.0};
 //        double [] selfTuningWts = {1.0};
         int [] warmUpIts = {5, 10};
+//        int [] warmUpIts = {5};
 		
         buffer.append(
                 "runNr\tuseMSA\topdytsIts\tstepSize\tselfTunerWt\twarmUpIts")
@@ -69,7 +70,7 @@ public class ParametricOpdytsCottbusRuns {
                                     PrepareParametricRuns.newLine,
 
                                     "java -Djava.awt.headless=true -Xmx29G -cp tthunig-0.10.0-SNAPSHOT.jar " +
-                                            "playground/tthunig/scenarios/cottbus/run/TtRunCottbusSimulation " +
+                                            "scenarios/cottbus/run/TtRunCottbusSimulation " +
                                             baseOutDir+jobName+"/ " +
                                             params+" "
                             };

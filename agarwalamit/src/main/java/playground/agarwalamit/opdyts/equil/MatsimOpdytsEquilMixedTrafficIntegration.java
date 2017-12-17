@@ -106,7 +106,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
-		opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+		opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
 		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
 		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);

@@ -58,7 +58,7 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 		this.scenario = scenario;
 		this.fixedSystemId = ((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().keySet().iterator().next();
         this.opdytsConfigGroup = (OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME);
-        if (opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable() < 1) {
+        if (opdytsConfigGroup.getDecisionVariableStepSize() < 1) {
         		throw new RuntimeException("for offset optimization we need an variation size of at least 1 second (otherwise nothing is changed by opdyts)");
         }
 	}
@@ -74,7 +74,7 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 //			if (!systemId.equals(Id.create("SignalSystem4", SignalSystem.class))) {
 				continue;
 			}
-			int delta = random.nextInt((int)opdytsConfigGroup.getVariationSizeOfRandomizeDecisionVariable()-1)+1;
+			int delta = random.nextInt((int)opdytsConfigGroup.getDecisionVariableStepSize()-1)+1;
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {

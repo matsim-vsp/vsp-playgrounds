@@ -36,7 +36,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.withinday.trafficmonitoring.TravelTimeCollector;
+import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
 import playground.ikaddoura.incidents.NetworkChangeEventsUtils;
 
@@ -57,7 +57,7 @@ public class IncidentWithinDayReplanning {
 	private static final boolean reducePopulationToAffectedAgents = false;
 	private static final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
 	
-	private static boolean applyNetworkChangeEvents = false;
+	private static boolean applyNetworkChangeEvents = true;
 	private static boolean applyWithinDayReplanning = true;
 	private static boolean onlyReplanDirectlyAffectedAgents = false;
 	private static int withinDayReplanInterval = 1800;
@@ -142,7 +142,7 @@ public class IncidentWithinDayReplanning {
 			
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 		
 			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
 			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(onlyReplanDirectlyAffectedAgents);

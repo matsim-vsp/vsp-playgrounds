@@ -21,12 +21,14 @@ package playground.kturner.freightKt;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -82,6 +84,7 @@ import jsprit.core.algorithm.io.VehicleRoutingAlgorithms;
 import jsprit.core.problem.VehicleRoutingProblem;
 import jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import jsprit.core.util.Solutions;
+import playground.kturner.utils.MoveDirVisitor;
 
 /**
  * Kurzfassung:
@@ -98,6 +101,8 @@ import jsprit.core.util.Solutions;
  * @author kturner
  * 
  */
+
+//TODO: When running jsprit only (w/o MATSim) no log-files were written
 public class KTFreight_v3 {
 
 	private static final Logger log = Logger.getLogger(KTFreight_v3.class) ;
@@ -194,12 +199,17 @@ public class KTFreight_v3 {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
 			rpscheme = new RoadPricingSchemeImpl();		
 			rpCalculator = new VehicleTypeDependentRoadPricingCalculator();	
-
 			runIndex = i;	
 			multipleRun(args);	
 		}
 		writeRunInfo();	
-		moveTempFiles(new File(TEMP_DIR), new File(OUTPUT_DIR)); //move of temp-files
+		
+		try {
+			Files.walkFileTree(FileSystems.getDefault().getPath(TEMP_DIR), new MoveDirVisitor(FileSystems.getDefault().getPath(TEMP_DIR), FileSystems.getDefault().getPath(OUTPUT_DIR), StandardCopyOption.REPLACE_EXISTING));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+//		moveTempFiles(new File(TEMP_DIR), new File(OUTPUT_DIR)); //move of temp-files
 		System.out.println("#### End of all runs --Y Finished ####");
 	}
 
@@ -672,34 +682,12 @@ public class KTFreight_v3 {
 
 	//Ergänzung kt: 1.8.2014 Erstellt das angegebene Verzeichnis. Falls es bereits exisitert, geschieht nichts
 	private static void createDir(File file) {
-		System.out.println("Verzeichnis " + file + " erstellt: "+ file.mkdirs());	
+		if (!file.exists()){
+			log.info("Create directory: " + file + " : " + file.mkdirs());
+		} else
+			log.warn("Directory already exists! Check for older stuff: " + file.toString());
 	}
 
-	//TODO: Wenn die Dateien #JspritCarrierScoreInformation.tex und #TextInformation.txt bereits da sind, werden die nicht verschoben/Überschrieben -> diese Daten passen ggf nicht zu den aktuellen Runs !!!
-	//TODO: Ausgabe, dass Datei verschoben wurde komme, obwohl dies nicht erfolgt ist.
-	//TODO: Lösche Tempverzeichnispfad, wenn leer und zwar so weit hoch, wie die Ordner leer sind.
-	private static void moveTempFiles (File sourceDir, File destDir) {
-		File[] files = sourceDir.listFiles();
-		File destFile = null;
-		destDir.mkdirs();
-
-		try{																			
-			for (int i = 0; i < files.length; i++) {
-				destFile = new File(destDir.getAbsolutePath() + System.getProperty("file.separator") + files[i].getName());
-				if (files[i].isDirectory()) {
-					FileUtils.copyDirectory(files[i], destFile);
-					FileUtils.deleteDirectory(files[i]);
-				}
-				else {
-					files[i].renameTo(destFile);
-					System.out.println("Datei wurde verschoben: " + files[i].toString() + " nach: " + destFile);
-				}
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
+	
 }
 
