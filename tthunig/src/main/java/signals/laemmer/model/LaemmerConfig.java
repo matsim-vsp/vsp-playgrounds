@@ -121,4 +121,9 @@ public class LaemmerConfig {
 	public boolean isCheckDownstream() {
 		return checkDownstream;
 	}
+
+	public boolean useHeuristicPhaseGeneration() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

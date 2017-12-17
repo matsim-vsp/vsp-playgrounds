@@ -35,6 +35,7 @@ class LaemmerPhase {
     }
 
     //TODO Overthink, if it's a good idea to have a determining driveway for a laemmerPhase since there can be multiple phases with this driveway
+    @Deprecated //stabilization should be done lane-wise with LaemmerLane
     void determineRepresentativeDriveway(double now) {
         this.determiningLoad = 0;
         this.determiningLink = null;
@@ -93,7 +94,7 @@ class LaemmerPhase {
 
     private void updateAbortionPenalty(double now) {
         this.abortionPenalty = 0;
-        if (this.laemmerSignalController2.activeRequest != null && this.equals(this.laemmerSignalController2.activeRequest.signal)) {
+        if (this.laemmerSignalController2.activeRequest != null && this.equals(this.laemmerSignalController2.activeRequest.laemmerPhase)) {
             double waitingTimeSum = 0;
             double remainingInBetweenTime = Math.max(this.laemmerSignalController2.activeRequest.onsetTime - now, 0);
             for (double i = remainingInBetweenTime; i < this.laemmerSignalController2.DEFAULT_INTERGREEN; i++) {
@@ -133,7 +134,7 @@ class LaemmerPhase {
 
     private void calculatePriorityIndex(double now) {
         this.index = 0;
-        if (this.laemmerSignalController2.activeRequest != null && this.laemmerSignalController2.activeRequest.signal == this) {
+        if (this.laemmerSignalController2.activeRequest != null && this.laemmerSignalController2.activeRequest.laemmerPhase == this) {
             double remainingInBetweenTime = Math.max(this.laemmerSignalController2.activeRequest.onsetTime - now, 0);
             double remainingMinG = Math.max(this.laemmerSignalController2.activeRequest.onsetTime - now + this.laemmerSignalController2.laemmerConfig.getMinGreenTime() - remainingInBetweenTime, 0);
             for (double i = remainingInBetweenTime; i <= this.laemmerSignalController2.DEFAULT_INTERGREEN; i++) {
@@ -213,12 +214,13 @@ class LaemmerPhase {
 			}
 			double penalty = 0;
             if (this.laemmerSignalController2.activeRequest != null) {
-                penalty = this.laemmerSignalController2.activeRequest.signal.abortionPenalty;
+                penalty = this.laemmerSignalController2.activeRequest.laemmerPhase.abortionPenalty;
             }
             index = nExpected / (penalty + this.laemmerSignalController2.DEFAULT_INTERGREEN + reqGreenTime);
         }
     }
 
+    @Deprecated //Stabilization should be done lane-wise with LaemmerLane
     private void updateStabilization(double now) {
 
         if (determiningArrivalRate == 0) {

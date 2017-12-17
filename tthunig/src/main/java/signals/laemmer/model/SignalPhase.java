@@ -37,7 +37,7 @@ public class SignalPhase {
 	
 	public void addGreenSignalGroupsAndLanes(Id<SignalGroup> signal, List<Id<Lane>> lanes) {
 		greenSignalsToLanes.put(signal, lanes);
-		lanes.addAll(lanes);
+		this.lanes.addAll(lanes);
 	}
 	
 	public Set<Id<SignalGroup>> getGreenSignalGroups(){

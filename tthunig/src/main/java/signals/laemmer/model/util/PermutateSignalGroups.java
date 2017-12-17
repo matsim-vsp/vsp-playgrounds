@@ -128,6 +128,7 @@ public class PermutateSignalGroups {
 	
     public static ArrayList<SignalPhase> createPhasesFromSignalGroups(SignalSystem system, Map<Id<Lane>, Lane> lanemap) {
 		ArrayList<SignalGroup> signalGroups = new ArrayList<>(system.getSignalGroups().values());
+		//FIXME remove debug output
 		System.err.println("All permuations size w/o duplicates: "+removeDuplicates(permutate(signalGroups, signalGroups.size())).size());
 		ArrayList<ArrayList<SignalGroup>> allSignalGroupPerms = removeDuplicates(permutate(signalGroups, signalGroups.size()));
 		ArrayList<SignalPhase> validPhases = new ArrayList<>();
@@ -135,23 +136,31 @@ public class PermutateSignalGroups {
 		ArrayList<ArrayList<SignalGroup>> illegalGroups = new ArrayList<>();
 		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
 			ArrayList<Id<Lane>> lanesOfAllSg = new ArrayList<>();
+			//collect all lanes in this permutation
 			for (SignalGroup sg : sgs) {
 				for (Signal signal : sg.getSignals().values()) {
 					lanesOfAllSg.addAll(signal.getLaneIds());
 				}
 			}
-			for (SignalGroup sg : sgs) {
+//			I think the following loop isn't needed since sg is not used and we only have to check if there are tow conflicting lanes in a permutation, pschade Dec 17
+//			for (SignalGroup sg : sgs) {
 				for (Id<Lane> l : lanesOfAllSg) {
+					boolean hasIllegal = false;
 					for (Id<Lane> illegalLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
 						if (lanesOfAllSg.contains(illegalLane)) {
 							illegalGroups.add(sgs);
+							hasIllegal = true;
 							break;
 						}
 					}
+					//if one lane already conflicts with another we can skip further checks and mark this group as illegal, pschade Dec 17
+					if (hasIllegal)
+						break;
 				}
-			}
+//			}
 		}
 		allSignalGroupPerms.removeAll(illegalGroups);
+		//FIXME remove debug output
 		System.err.println("After remove illegal ones: "+allSignalGroupPerms.size());
 		
 		for(ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
@@ -164,6 +173,7 @@ public class PermutateSignalGroups {
 				newPhase.addGreenSignalGroupsAndLanes(sg.getId(), lanes);
 			}
 			validPhases.add(newPhase);
+			//FIXME remove debug output
 			System.out.println(newPhase.toString());
 		}
 		return validPhases;
