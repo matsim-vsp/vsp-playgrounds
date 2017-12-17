@@ -54,6 +54,9 @@ public class LaemmerLane {
        if (this.stabilize) {
     	   laemmerSignalController2.addLaneForStabilization(this);
        }
+       else {
+    	   laemmerSignalController2.removeLaneForStabilization(this);
+       }
     }
     
 	//TODO i'm unsure if there are some advantages to have this split from update(), pschade Dec 17

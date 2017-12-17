@@ -440,4 +440,8 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
 	public boolean needStabilization(LaemmerLane laemmerLane) {
 		return lanesForStabilization.contains(laemmerLane);
 	}
+
+	public void removeLaneForStabilization(LaemmerLane laemmerLane) {
+		lanesForStabilization.remove(laemmerLane);
+	}
 }

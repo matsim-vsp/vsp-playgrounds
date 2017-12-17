@@ -105,6 +105,8 @@ public class SingleCrossingScenario2 {
 	private boolean groupedSignals = true;
 	private double minG = 0;
 	private boolean temporalCrowd = false;
+	private double leftTurningFactorNS;
+	private double leftTurningFactorWE;
 
 	public void setFlowNS(double flowNS) {
 		this.flowNS = flowNS;
@@ -181,6 +183,32 @@ public class SingleCrossingScenario2 {
 		this.liveArrivalRates = liveArrivalRates;
 		this.minG = minG;
 	}
+
+	/** 
+	 * @param flowNS
+	 * @param leftTurningFactorNS Factor to calculate the flow from flowNS. Left-turning flow will not be subtracted from straight flow
+	 * @param flowWE
+	 * @param leftTurningFactorWE Factor to calculate the flow from flowWE. Left-turning flow will not be subtracted from straight flow
+	 * @param useLaemmer
+	 * @param laemmerRegime
+	 * @param vis
+	 * @param logEnabled
+	 * @param stochastic
+	 * @param lanes
+	 * @param liveArrivalRates
+	 * @param grouped
+	 * @param minG
+	 * @param temporalCrowd
+	 */
+	public SingleCrossingScenario2(double flowNS, double leftTurningFactorNS, double flowWE, double leftTurningFactorWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
+		this(flowNS, flowWE, useLaemmer, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
+		this.laemmerRegime = laemmerRegime;
+		this.liveArrivalRates = liveArrivalRates;
+		this.minG = minG;
+		this.leftTurningFactorNS = leftTurningFactorNS;
+		this.leftTurningFactorWE = leftTurningFactorWE;
+	}
 	
 	public Controler defineControler() {
 		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
@@ -188,8 +216,8 @@ public class SingleCrossingScenario2 {
         laemmerConfig.setDefaultIntergreenTime(5);
 
         if(groupedSignals) {
-            laemmerConfig.setDesiredCycleTime(60);
-            laemmerConfig.setMaxCycleTime(90);
+            laemmerConfig.setDesiredCycleTime(90);
+            laemmerConfig.setMaxCycleTime(120);
         } else {
             laemmerConfig.setDesiredCycleTime(120);
             laemmerConfig.setMaxCycleTime(180);
@@ -475,10 +503,14 @@ public class SingleCrossingScenario2 {
     private void createPopulation(Population pop) {
         String[] linksNS = {"6_7-8_9", "9_8-7_6"};
         String[] linksWE = {"5_4-2_1", "1_2-4_5"};
+        String[] linksNSleftTurning = {"6_7-4_5", "8_9-2_1"};
+        String[] linksWEleftTurning = {"1_2-7_6", "5_4-8_9"};
 
         Random rnd = new Random(14);
         createPopulationForRelation(flowNS, pop, linksNS, rnd);
         createPopulationForRelation(flowWE, pop, linksWE, rnd);
+        createPopulationForRelation(flowNS * leftTurningFactorNS, pop, linksNSleftTurning, rnd);
+        createPopulationForRelation(flowWE * leftTurningFactorWE, pop, linksWEleftTurning, rnd);
     }
     
     private void createPopulationForRelation(double flow, Population population, String[] links, Random rnd) {
@@ -497,7 +529,6 @@ public class SingleCrossingScenario2 {
             Map<Double, Integer> insertNAtSecond = new HashMap<>();
             if (stochasticDemand) {
                 for (double i = 0; i < 5400; i++) {
-
                     double expT = 1 - Math.exp(-lambdaT);
                     double p1 = rnd.nextDouble();
                     if (p1 < expT) {

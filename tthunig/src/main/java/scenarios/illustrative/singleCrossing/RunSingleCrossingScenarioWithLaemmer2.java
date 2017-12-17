@@ -32,11 +32,11 @@ public class RunSingleCrossingScenarioWithLaemmer2 {
     		log.info("Running single crossing scenario with fixed-time signals...");
     	}
         
-        double flowNS = 360;
-        double flowWE = 1800;
+        double flowNS = 200;
+        double flowWE = 1000;
 //        for (int i = 0; i <= 2520; i += 120) {
 //        	flowWE = i;
-            SingleCrossingScenario2 singleCrossingScenario2 = new SingleCrossingScenario2(flowNS, flowWE, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
+            SingleCrossingScenario2 singleCrossingScenario2 = new SingleCrossingScenario2(flowNS, 0.0, flowWE, 0.15, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
 			Controler singleCrossingScenario2Controler = singleCrossingScenario2.defineControler();
             singleCrossingScenario2Controler.run();
 //        }

@@ -83,7 +83,7 @@ class LaemmerPhase {
         updateAbortionPenalty(now);
 
         if (!this.laemmerSignalController2.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
-            updateStabilization(now);
+            //updateStabilization(now);
         }
         //TODO check if it's a good idea to omit calculating the priority index if stabilization is needed
         // - I think we need it to find a good combination of vehicle flows which can drive together
