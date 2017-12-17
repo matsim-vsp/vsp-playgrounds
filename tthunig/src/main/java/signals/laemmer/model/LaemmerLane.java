@@ -28,10 +28,7 @@ public class LaemmerLane {
 		this.signalGroup = signalGroup;
 	}
 	
-    public double getRegulationTime() {
-		return regulationTime;
-	}
-
+    //TODO this should be combined with update stabilization, since there isn't a representive driveway
 	void determineRepresentativeDriveway(double now) {
         this.determiningLoad = 0;
         this.outflowSum = 0;
@@ -52,8 +49,14 @@ public class LaemmerLane {
 				}
     }
 	
-	
-	
+    void update(double now) {
+       updateStabilization(now);
+       if (this.stabilize) {
+    	   laemmerSignalController2.addLaneForStabilization(this);
+       }
+    }
+    
+	//TODO i'm unsure if there are some advantages to have this split from update(), pschade Dec 17
     private void updateStabilization(double now) {
 
         if (determiningArrivalRate == 0) {
@@ -99,4 +102,11 @@ public class LaemmerLane {
         }
     }
 
+	public Lane getLane() {
+		return this.physicalLane;
+	}
+	
+    public double getRegulationTime() {
+		return regulationTime;
+	}	
 }
