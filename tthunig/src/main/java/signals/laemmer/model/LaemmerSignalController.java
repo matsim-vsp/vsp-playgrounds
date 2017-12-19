@@ -135,10 +135,9 @@ public class LaemmerSignalController extends AbstractSignalController implements
         updateSignals(now);
         
         // TODO test what happens, when I move this up to the first line of this method. should save runtime. tt, dez'17
+        // note: stabilization has still to be done to increment 'a'... tt, dez'17
         if(activeRequest != null && activeRequest.signal.group.getState().equals(SignalGroupState.GREEN)) {
             double remainingMinG = activeRequest.onsetTime + laemmerConfig.getMinGreenTime() - now;
-//            double remainingInBetweenTime = Math.max(activeRequest.time - now, 0);
-//            double remainingMinG = Math.max(activeRequest.time - now + laemmerConfig.getMinGreenTime() - remainingInBetweenTime, 0);
             if (remainingMinG > 0) {
                 return;
             }
