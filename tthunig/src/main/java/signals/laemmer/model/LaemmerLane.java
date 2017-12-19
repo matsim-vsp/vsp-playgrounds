@@ -6,10 +6,14 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.lanes.data.Lane;
 
+/**
+ * 
+ * @author pschade
+ */
 public class LaemmerLane {
 
 	private Lane physicalLane;
-	private LaemmerSignalController2 laemmerSignalController2;
+	private FullyAdaptiveLaemmerSignalController laemmerSignalController2;
 	private double determiningLoad;
 	private int outflowSum;
 	private Signal signal;
@@ -20,7 +24,7 @@ public class LaemmerLane {
 	private boolean stabilize;
 	private SignalGroup signalGroup;
 
-	public LaemmerLane (Link link, Lane physicalLane, SignalGroup signalGroup, Signal signal, LaemmerSignalController2 laemmerSignalControler) {
+	public LaemmerLane (Link link, Lane physicalLane, SignalGroup signalGroup, Signal signal, FullyAdaptiveLaemmerSignalController laemmerSignalControler) {
 		this.physicalLane = physicalLane;
 		this.laemmerSignalController2 = laemmerSignalControler;
 		this.signal = signal;

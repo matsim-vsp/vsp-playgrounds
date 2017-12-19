@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by nkuehnel on 03.04.2017.
+ * @author nkuehnel, tthunig
  */
 public class LaemmerConfig {
 	

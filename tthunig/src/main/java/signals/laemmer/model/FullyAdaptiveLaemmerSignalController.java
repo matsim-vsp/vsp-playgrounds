@@ -53,12 +53,13 @@ import signals.sensor.LinkSensorManager;
  * @author dgrether
  * @author tthunig
  * @author nkuehnel
+ * @author pschade
  */
 //TODO Change all signalgroups to phases 
 
-public class LaemmerSignalController2 extends AbstractSignalController implements SignalController, Analyzable {
+public class FullyAdaptiveLaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
 
-    public static final String IDENTIFIER = "LaemmerSignalController2";
+    public static final String IDENTIFIER = "FullyAdaptiveLaemmerSignalController";
 
     Queue<LaemmerPhase> regulationQueue = new LinkedList<>();
 
@@ -104,12 +105,12 @@ public class LaemmerSignalController2 extends AbstractSignalController implement
 
         @Override
         public SignalController get() {
-            return new LaemmerSignalController2(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor);
+            return new FullyAdaptiveLaemmerSignalController(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor);
         }
     }
 
 
-    private LaemmerSignalController2(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
+    private FullyAdaptiveLaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
     	this.laemmerConfig = laemmerConfig;
         this.sensorManager = sensorManager;
         this.network = scenario.getNetwork();

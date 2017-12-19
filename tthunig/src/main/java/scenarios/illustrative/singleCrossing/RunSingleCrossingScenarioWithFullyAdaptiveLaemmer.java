@@ -7,9 +7,9 @@ import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.laemmer.run.LaemmerMain;
 
 /**
- * @author nkuehnel, tthunig
+ * @author nkuehnel, tthunig, pschade
  */
-public class RunSingleCrossingScenarioWithLaemmer2 {
+public class RunSingleCrossingScenarioWithFullyAdaptiveLaemmer {
     private static final Logger log = Logger.getLogger(LaemmerMain.class);
 
     private static final boolean USE_LAEMMER = true;
@@ -36,8 +36,8 @@ public class RunSingleCrossingScenarioWithLaemmer2 {
         double flowWE = 1000;
 //        for (int i = 0; i <= 2520; i += 120) {
 //        	flowWE = i;
-            SingleCrossingScenario2 singleCrossingScenario2 = new SingleCrossingScenario2(flowNS, 0.0, flowWE, 0.15, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
-			Controler singleCrossingScenario2Controler = singleCrossingScenario2.defineControler();
+            ComplexSingleCrossingScenario complexSingleCrossingSc = new ComplexSingleCrossingScenario(flowNS, 0.0, flowWE, 0.15, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
+			Controler singleCrossingScenario2Controler = complexSingleCrossingSc.defineControler();
             singleCrossingScenario2Controler.run();
 //        }
     }

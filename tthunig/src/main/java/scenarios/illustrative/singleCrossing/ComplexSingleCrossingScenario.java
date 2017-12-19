@@ -76,14 +76,14 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.laemmer.model.LaemmerConfig;
-import signals.laemmer.model.LaemmerSignalController2;
+import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerConfig.Regime;
 
 /**
- * @author tthunig
+ * @author tthunig, pschade
  *
  */
-public class SingleCrossingScenario2 {
+public class ComplexSingleCrossingScenario {
 
 	private String OUTPUT_BASE_DIR = "../../runs-svn/singleCrossingScenario2/";
     private static final int LANE_CAPACITY = 1800;
@@ -159,12 +159,12 @@ public class SingleCrossingScenario2 {
 		this.temporalCrowd = temporalCrowd;
 	}
 	
-	public SingleCrossingScenario2() {}
+	public ComplexSingleCrossingScenario() {}
 	
 	/**
 	 * constructor useful for scenarios without laemmer signals
 	 */
-	public SingleCrossingScenario2(double flowNS, double flowWE, boolean useLaemmer, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
+	public ComplexSingleCrossingScenario(double flowNS, double flowWE, boolean useLaemmer, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
 		this.flowNS = flowNS;
 		this.flowWE = flowWE;
 		this.useLaemmer = useLaemmer;
@@ -176,7 +176,7 @@ public class SingleCrossingScenario2 {
 		this.temporalCrowd = temporalCrowd;
 	}
 	
-	public SingleCrossingScenario2(double flowNS, double flowWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+	public ComplexSingleCrossingScenario(double flowNS, double flowWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
 		this(flowNS, flowWE, useLaemmer, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
@@ -200,7 +200,7 @@ public class SingleCrossingScenario2 {
 	 * @param minG
 	 * @param temporalCrowd
 	 */
-	public SingleCrossingScenario2(double flowNS, double leftTurningFactorNS, double flowWE, double leftTurningFactorWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+	public ComplexSingleCrossingScenario(double flowNS, double leftTurningFactorNS, double flowWE, double leftTurningFactorWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
 		this(flowNS, flowWE, useLaemmer, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
@@ -250,7 +250,7 @@ public class SingleCrossingScenario2 {
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
         createNetwork(scenario.getNetwork());
         if (useLanes) {
-        	SingleCrossingScenario2.createLanes(scenario.getLanes());
+        	ComplexSingleCrossingScenario.createLanes(scenario.getLanes());
         }
         createPopulation(scenario.getPopulation());
         createSignals(scenario, laemmerConfig);
@@ -735,7 +735,7 @@ public class SingleCrossingScenario2 {
         }
 
 		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
-        signalSystemControl.setControllerIdentifier(LaemmerSignalController2.IDENTIFIER);
+        signalSystemControl.setControllerIdentifier(FullyAdaptiveLaemmerSignalController.IDENTIFIER);
         signalControl.addSignalSystemControllerData(signalSystemControl);
 	}
 	
