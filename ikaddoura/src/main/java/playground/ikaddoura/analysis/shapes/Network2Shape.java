@@ -74,7 +74,11 @@ public class Network2Shape {
 		}
 		
 		log.info("Writing network to shapefile... ");
-		ShapeFileWriter.writeGeometries(features, outputPath + scenario.getConfig().controler().getRunId() + ".network.shp");
+		if (scenario.getConfig().controler().getRunId() == null) {
+			ShapeFileWriter.writeGeometries(features, outputPath + "network.shp");
+		} else {
+			ShapeFileWriter.writeGeometries(features, outputPath + scenario.getConfig().controler().getRunId() + ".network.shp");
+		}
 		log.info("Writing network to shapefile... Done.");
 	}
 

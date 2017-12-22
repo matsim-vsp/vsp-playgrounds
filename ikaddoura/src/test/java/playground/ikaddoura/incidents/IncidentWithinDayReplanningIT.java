@@ -28,7 +28,9 @@ import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeEstimator;
@@ -46,7 +48,7 @@ import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 import com.google.inject.name.Names;
 
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.incidents.incidentWithinDayReplanning.IncidentBestRouteMobsimListener;
+import playground.ikaddoura.incidents.incidentWithinDayReplanning.WithinDayReplanningDaytimeIntervals;
 
 /**
  * 0: no network incident; no within-day replanning
@@ -119,10 +121,8 @@ public class IncidentWithinDayReplanningIT {
 			final Scenario scenario = ScenarioUtils.loadScenario(config);
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
 
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -161,9 +161,7 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
 
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -202,9 +200,7 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
 
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -272,9 +268,7 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
 
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
@@ -332,9 +326,7 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
 
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
@@ -393,9 +385,7 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
 
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
@@ -470,10 +460,8 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
-				
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
+
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
 				@Override public void install() {
@@ -526,10 +514,8 @@ public class IncidentWithinDayReplanningIT {
 			final Controler controler = new Controler(scenario);
 			controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 			
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(false);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
-			
+			WithinDayReplanningDaytimeIntervals incidentMobsimListener = new WithinDayReplanningDaytimeIntervals(scenario.getPopulation().getPersons().keySet(), withinDayReplanInterval);
+
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
 			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
