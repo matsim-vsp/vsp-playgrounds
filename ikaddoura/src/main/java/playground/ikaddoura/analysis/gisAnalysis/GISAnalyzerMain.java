@@ -63,9 +63,13 @@ public class GISAnalyzerMain {
 //	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
 //	private final String runId = "run4b";
 	
-	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingT/";
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingT/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run5b";
+	
+	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
 	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
-	private final String runId = "run5b";
+	private final String runId = "run6b";
 	
 	// ####
 	

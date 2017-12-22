@@ -56,6 +56,7 @@ public class DelayAnalysis implements LinkEnterEventHandler, LinkLeaveEventHandl
 	private double totalDelayPerDay_sec = 0.;
 	private double totalTravelTimePerDay_sec = 0.;
 	private int warnCnt = 0;
+	private int warnCnt2 = 0;
 
 	public void setScenario(Scenario scenario) {
 		this.scenario = scenario;
@@ -79,8 +80,14 @@ public class DelayAnalysis implements LinkEnterEventHandler, LinkLeaveEventHandl
 			double delayThisAgent = traveltimeThisAgent - freespeedTravelTime;		
 			
 			if (delayThisAgent < -1.)  { 
-				throw new RuntimeException("The delay is negative. Aborting..." + delayThisAgent);
-			
+				if (warnCnt2 <= 5) {
+					log.warn("The delay is negative! Delay:" + delayThisAgent + " - traveltime: " + traveltimeThisAgent + " - freespeed traveltime: " + freespeedTravelTime + " - link: " + event.getLinkId() );
+					log.warn(event.toString());
+					if (warnCnt2 == 5) {
+						log.warn("Further warnings of this type will not be printed out.");
+					}
+					warnCnt2++;
+				}
 			} else if (delayThisAgent < 0.) {
 				if (warnCnt  == 0) {
 					log.warn("Delay is " + delayThisAgent + ". A delay of 1 sec may result from rounding errors. Therefore a delay of 1 sec is ignored and set to zero.");
