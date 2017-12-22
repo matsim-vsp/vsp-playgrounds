@@ -141,6 +141,13 @@ public class PersonTripAnalysisRun {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
+		
+		String analysisOutputDirectoryWithRunIdPrefix;
+		if (this.scenario.getConfig().controler().getRunId() == null) {
+			analysisOutputDirectoryWithRunIdPrefix = analysisOutputDirectory;
+		} else {
+			analysisOutputDirectoryWithRunIdPrefix = analysisOutputDirectory + this.scenario.getConfig().controler().getRunId() + ".";
+		}
 	
 		BasicPersonTripAnalysisHandler basicHandler = new BasicPersonTripAnalysisHandler();
 		basicHandler.setScenario(scenario);
@@ -174,29 +181,29 @@ public class PersonTripAnalysisRun {
 		PersonTripNoiseAnalysis analysis = new PersonTripNoiseAnalysis();
 		
 		log.info("Print trip information...");
-		analysis.printTripInformation(analysisOutputDirectory, TransportMode.car, basicHandler, null, null);
+		analysis.printTripInformation(analysisOutputDirectoryWithRunIdPrefix, TransportMode.car, basicHandler, null, null);
 		log.info("Print trip information... Done.");
 
 		log.info("Print person information...");
-		analysis.printPersonInformation(analysisOutputDirectory, TransportMode.car, personId2userBenefit, basicHandler, null);	
+		analysis.printPersonInformation(analysisOutputDirectoryWithRunIdPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);	
 		log.info("Print person information... Done.");
 
-		analysis.printAggregatedResults(analysisOutputDirectory, TransportMode.car, personId2userBenefit, basicHandler, null);
-		analysis.printAggregatedResults(analysisOutputDirectory, null, personId2userBenefit, basicHandler, null);
+		analysis.printAggregatedResults(analysisOutputDirectoryWithRunIdPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);
+		analysis.printAggregatedResults(analysisOutputDirectoryWithRunIdPrefix, null, personId2userBenefit, basicHandler, null);
 		
-		analysis.printAggregatedResults(analysisOutputDirectory, personId2userBenefit, basicHandler, null, null, delayAnalysis, null);
+		analysis.printAggregatedResults(analysisOutputDirectoryWithRunIdPrefix, personId2userBenefit, basicHandler, null, null, delayAnalysis, null);
 		
 		SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(analysisOutputDirectory + "tollsPerDepartureTime_car_3600.csv", departureTime2tolls);
+		analysis.printAvgValuePerParameter(analysisOutputDirectoryWithRunIdPrefix + "tollsPerDepartureTime_car_3600.csv", departureTime2tolls);
 		
 		SortedMap<Double, List<Double>> departureTime2traveldistance = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2tripDistance(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(analysisOutputDirectory + "distancePerDepartureTime_car_3600.csv", departureTime2traveldistance);
+		analysis.printAvgValuePerParameter(analysisOutputDirectoryWithRunIdPrefix + "distancePerDepartureTime_car_3600.csv", departureTime2traveldistance);
 		
 		SortedMap<Double, List<Double>> departureTime2travelTime = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2travelTime(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(analysisOutputDirectory + "travelTimePerDepartureTime_car_3600.csv", departureTime2travelTime);
+		analysis.printAvgValuePerParameter(analysisOutputDirectoryWithRunIdPrefix + "travelTimePerDepartureTime_car_3600.csv", departureTime2travelTime);
 	
-		trafficVolumeAnalysis.printResults(analysisOutputDirectory + "link_dailyTrafficVolume.csv");
-		dynamicTrafficVolumeAnalysis.printResults(analysisOutputDirectory);
+		trafficVolumeAnalysis.printResults(analysisOutputDirectoryWithRunIdPrefix + "link_dailyTrafficVolume.csv");
+		dynamicTrafficVolumeAnalysis.printResults(analysisOutputDirectoryWithRunIdPrefix);
 		Network2Shape.exportNetwork2Shp1(scenario, analysisOutputDirectory, crs, TransformationFactory.getCoordinateTransformation(crs, crs));
 
 	}
