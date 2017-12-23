@@ -400,7 +400,7 @@ public class KTFreight_v3 {
 			ArrayList<CarrierService> multiassignedServices = new ArrayList<CarrierService>();
 			ArrayList<CarrierService> unassignedServices = new ArrayList<CarrierService>();
 
-			System.out.println("### Carrier: " +c.getId());
+			log.info("### Check service assignements of Carrier: " +c.getId());
 			//Erfasse alle einer Tour zugehörigen (-> stattfindenden) Services 
 			for (ScheduledTour tour : c.getSelectedPlan().getScheduledTours()){
 				for (TourElement te : tour.getTour().getTourElements()){
@@ -408,24 +408,22 @@ public class KTFreight_v3 {
 						CarrierService assignedService = ((ServiceActivity) te).getService();
 						if (!assignedServices.contains(assignedService)){
 							assignedServices.add(assignedService);
-							System.out.println("Assigned Service: " +assignedServices.toString());
+							log.info("Assigned Service: " +assignedServices.toString());
 						} else {
 							multiassignedServices.add(assignedService);
-							log.warn("Service wurde von dem Carrier " + c.getId().toString() + " bereits angefahren: " + assignedService.getId().toString() );
+							log.warn("Service " + assignedService.getId().toString() + " has already been assigned to Carrier " + c.getId().toString() + " -> multiple Assignment!");
 						}
 					}
 				}
 			}
 
-			//Nun prüfe, ob alle definierten Services zugeordnet wurden
+			//Check, if all Services of the Carrier were assigned
 			for (CarrierService service : c.getServices()){
-				System.out.println("Service to Check: " + service.toString());
 				if (!assignedServices.contains(service)){
-					System.out.println("Service not assigned: " +service.toString());
 					unassignedServices.add(service);
-					log.warn("Service wird von Carrier " + c.getId().toString() + " NICHT bedient: " + service.getId().toString() );
+					log.warn("Service " + service.getId().toString() +" will NOT be served by Carrier " + c.getId().toString());
 				} else {
-					System.out.println("Service was assigned: " +service.toString());
+					log.info("Service was assigned: " +service.toString());
 				}
 			}
 
@@ -442,7 +440,10 @@ public class KTFreight_v3 {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} 
+			} else {
+				log.info("No service(s)of " + c.getId().toString() +" were assigned to a tour more then one times.");
 			}
+				
 
 			//Schreibe die nicht eingeplanten Services in Datei
 			if (!unassignedServices.isEmpty()){
@@ -457,6 +458,8 @@ public class KTFreight_v3 {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} 
+			} else {
+				log.info("All service(s) of " + c.getId().toString() +" were assigned to at least one tour");
 			}
 
 		}//for(carriers)
