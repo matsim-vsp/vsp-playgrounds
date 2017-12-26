@@ -143,26 +143,38 @@ public final class LinkSensorManager implements LinkEnterEventHandler, LinkLeave
 	}
 
 	public void registerAverageNumberOfCarsPerSecondMonitoringOnLane(Id<Link> linkId, Id<Lane> laneId) {
+		registerAverageNumberOfCarsPerSecondMonitoringOnLane(linkId, laneId, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+	}
+	public void registerAverageNumberOfCarsPerSecondMonitoringOnLane(Id<Link> linkId, Id<Lane> laneId, double lookBackTime, double timeBucketCollectionDuration) {
 		Link link = this.network.getLinks().get(linkId);
+		//check if link is in the network
 		if (link == null){
 			throw new IllegalStateException("Link with Id " + linkId + " is not in the network, can't register sensor");
 		}
+		//check if lane exists
 		if (this.laneDefinitions == null || this.laneDefinitions.getLanesToLinkAssignments().get(linkId) == null ||
 				this.laneDefinitions.getLanesToLinkAssignments().get(linkId).getLanes().get(laneId) == null) {
 			throw new IllegalStateException("No data found for lane  " + laneId + " on link  " + linkId + " is not in the network, can't register sensor");
 		}
+		//check if the sensor-map already contains an entry for this link
 		if (! this.linkIdLaneIdSensorMap.containsKey(linkId)){
 			this.linkIdLaneIdSensorMap.put(linkId, new HashMap<>());
 		}
+		//check if the entry in sensor-map for this link has already a value for this lane
 		if (! this.linkIdLaneIdSensorMap.get(linkId).containsKey(laneId)){
 			Lane lane = this.laneDefinitions.getLanesToLinkAssignments().get(linkId).getLanes().get(laneId);
 			this.linkIdLaneIdSensorMap.get(linkId).put(laneId, new LaneSensor(link, lane));
 		}
-		linkIdLaneIdSensorMap.get(linkId).get(laneId).registerAverageVehiclesPerSecondToMonitor();
+		//register AvgVehPerSecond monitor for this lane
+		linkIdLaneIdSensorMap.get(linkId).get(laneId).registerAverageVehiclesPerSecondToMonitor(lookBackTime, timeBucketCollectionDuration);
 
 	}
 
 	public void registerAverageNumberOfCarsPerSecondMonitoring(Id<Link> linkId) {
+		registerAverageNumberOfCarsPerSecondMonitoring(linkId, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+	}
+	
+	public void registerAverageNumberOfCarsPerSecondMonitoring(Id<Link> linkId, double lookBackTime, double timeBucketCollectionDuration) {
 		if (!this.linkIdSensorMap.containsKey(linkId)){
 			Link link = this.network.getLinks().get(linkId);
 			if (link == null){
@@ -170,7 +182,7 @@ public final class LinkSensorManager implements LinkEnterEventHandler, LinkLeave
 			}
 			this.linkIdSensorMap.put(link.getId(), new LinkSensor(link));
 		}
-		this.linkIdSensorMap.get(linkId).registerAverageVehiclesPerSecondToMonitor();
+		this.linkIdSensorMap.get(linkId).registerAverageVehiclesPerSecondToMonitor(lookBackTime, timeBucketCollectionDuration);
 	}
 
 	@Deprecated //not tested
