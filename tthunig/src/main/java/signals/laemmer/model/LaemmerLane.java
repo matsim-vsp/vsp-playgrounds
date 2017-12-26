@@ -1,6 +1,5 @@
 package signals.laemmer.model;
 
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
@@ -91,7 +90,7 @@ public class LaemmerLane {
         this.stabilize = false;
         double nCrit = determiningArrivalRate * this.laemmerSignalController2.laemmerConfig.getDesiredCycleTime()
                 * ((this.laemmerSignalController2.laemmerConfig.getMaxCycleTime() - (intergreenTime_a / (1 - determiningLoad)))
-                / (this.laemmerSignalController2.laemmerConfig.getMaxCycleTime() - this.laemmerSignalController2.laemmerConfig.getMaxCycleTime()));
+                / (this.laemmerSignalController2.laemmerConfig.getMaxCycleTime() - this.laemmerSignalController2.laemmerConfig.getDesiredCycleTime()));
 
         if (n >= nCrit) {
         	/* TODO actually, this is the wrong place to check downstream conditions, since situation can change until the group has moved up to the queue front. 

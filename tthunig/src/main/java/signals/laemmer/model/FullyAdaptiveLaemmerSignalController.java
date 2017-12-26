@@ -173,7 +173,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
         
         // TODO test what happens, when I move this up to the first line of this method. should save runtime. tt, dez'17
         // note: stabilization has still to be done to increment 'a'... tt, dez'17
-        if(activeRequest != null && activeRequest.laemmerPhase.phase.getState().equals(SignalGroupState.GREEN)) {
+        if(activeRequest != null && activeRequest.laemmerPhase.phase.getState(this.system).equals(SignalGroupState.GREEN)) {
             double remainingMinG = activeRequest.onsetTime + laemmerConfig.getMinGreenTime() - now;
             if (remainingMinG > 0) {
                 return;
@@ -364,20 +364,19 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
                 if (signal.getLaneIds() != null && !(signal.getLaneIds().isEmpty())) {
                     for (Id<Lane> laneId : signal.getLaneIds()) {
                         this.sensorManager.registerNumberOfCarsOnLaneInDistanceMonitoring(signal.getLinkId(), laneId, 0.);
-                        this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoringOnLane(signal.getLinkId(), laneId);
-                        System.out.println("im here!");
+                        this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoringOnLane(signal.getLinkId(), laneId, 15.0*60.0, 120.0);
                     }
                 }
                 //always register link in case only one lane is specified (-> no LaneEnter/Leave-Events?), xy
                 //moved this to next for-loop, unsure, if this is still needed, pschade Nov'17 
                 this.sensorManager.registerNumberOfCarsInDistanceMonitoring(signal.getLinkId(), 0.);
-                this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
+                this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId(), 15.0*60.0, 120.0);
             }
         }
         //moved here from above, pschade Nov'17
         for (Link link : this.network.getLinks().values()) {
             this.sensorManager.registerNumberOfCarsInDistanceMonitoring(link.getId(), 0.);
-            this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(link.getId());
+            this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(link.getId(), 15.0*60.0, 120.0);
         }
         if (laemmerConfig.isCheckDownstream()){
 			downstreamSensor.registerDownstreamSensors(system);
@@ -388,9 +387,9 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
     public String getStatFields() {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("T_idle;selected;total delay;");
-        for (LaemmerPhase laemmerSignal : laemmerPhases) {
-            laemmerSignal.getStatFields(builder);
+        builder.append("T_idle;selected;total delay;numOfLanesNeedsStabilize");
+        for (LaemmerPhase laemmerPhase : laemmerPhases) {
+            laemmerPhase.getStatFields(builder);
         }
         return builder.toString();
     }
@@ -403,10 +402,10 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
         if (activeRequest != null) {
             selected = activeRequest.laemmerPhase.phase.getId().toString();
         }
-        builder.append(tIdle + ";" + selected + ";" + delayCalculator.getTotalDelay() + ";");
-        for (LaemmerPhase laemmerSignal : laemmerPhases) {
-           //TODO implement getStepStats
-           //laemmerSignal.getStepStats(builder, now);
+        builder.append(tIdle + ";" + selected + ";" + delayCalculator.getTotalDelay() + ";"+this.lanesForStabilization.size()+";");
+        for (LaemmerPhase laemmerPhase : laemmerPhases) {
+           //TODO test implementation of getStepStats
+           laemmerPhase.getStepStats(builder, now);
         }
         return builder.toString();
     }

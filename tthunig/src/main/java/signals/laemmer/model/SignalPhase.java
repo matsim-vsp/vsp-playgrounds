@@ -21,23 +21,32 @@ public class SignalPhase {
 	private Id<SignalPhase> id;
 	
 	public SignalPhase() {
-		
+		this.id = Id.create("empty phase", SignalPhase.class);
 	}
 	
 	public SignalPhase(Map<Id<SignalGroup>, LinkedList<Id<Lane>>> greenSignalesToLanes) {
 		this.greenSignalsToLanes.putAll(greenSignalesToLanes);
-		StringBuilder idStringBuilder = new StringBuilder();
-		for (Id<SignalGroup> group : greenSignalesToLanes.keySet())
-			idStringBuilder.append(group+"-");
-		idStringBuilder.deleteCharAt(idStringBuilder.length()-1);
-		this.id = Id.create(idStringBuilder.toString(), SignalPhase.class);
+		this.id = createIdFromCurrentSignalGroups();
 		//TODO prüfen ob das funktioniert:
 		greenSignalesToLanes.values().forEach(lanes::addAll);
+	}
+	
+	private Id<SignalPhase> createIdFromCurrentSignalGroups() {
+		StringBuilder idStringBuilder = new StringBuilder();
+		for (Id<SignalGroup> group : this.greenSignalsToLanes.keySet())
+			idStringBuilder.append(group+"-");
+		idStringBuilder.deleteCharAt(idStringBuilder.length()-1);
+		return Id.create(idStringBuilder.toString(), SignalPhase.class);
 	}
 	
 	public void addGreenSignalGroupsAndLanes(Id<SignalGroup> signal, List<Id<Lane>> lanes) {
 		greenSignalsToLanes.put(signal, lanes);
 		this.lanes.addAll(lanes);
+		//FIXME Id should be unique per run, I prefer to disallow altering the signalgruops and lanes of a generated phase.
+		//if its important to batch-create a lane, we should add a function to finally create the lane, which "locks" the lanes/phases and creates an Id
+		//
+		//update Id since SignalGroups changed
+		this.id = createIdFromCurrentSignalGroups();
 	}
 	
 	public Set<Id<SignalGroup>> getGreenSignalGroups(){
@@ -56,14 +65,15 @@ public class SignalPhase {
 			return false;
 	}
 
-	//  @deprecated not working yet. 
+	//  @deprecated not working yet due lack of list of signalgroups. change constructor for that.
+	@Deprecated
 	public SignalGroupState getState() {
 		boolean allGreen = true;
 		for (SignalGroup sg : signalGroups)
 			allGreen &= sg.getState().equals(SignalGroupState.GREEN);
 		return (allGreen ? SignalGroupState.GREEN : SignalGroupState.RED);
 	}
-	// @deprecated should replaced by by getState(). beforehand create field for list of signalgroup-objects in constructor.
+	// @deprecated should replaced by getState(). beforehand create field for list of signalgroup-objects in constructor.
 	public SignalGroupState getState(SignalSystem signalSystem) {
 		boolean allGreen = true;
 		for (SignalGroup sg : signalSystem.getSignalGroups().values()) {

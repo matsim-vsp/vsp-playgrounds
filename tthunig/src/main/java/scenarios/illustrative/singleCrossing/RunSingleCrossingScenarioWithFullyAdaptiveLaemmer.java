@@ -16,7 +16,7 @@ public class RunSingleCrossingScenarioWithFullyAdaptiveLaemmer {
     private static final Regime LAEMMER_REGIME = Regime.COMBINED;
     
     private static final boolean VISUALIZE_WITH_OTFVIS = true;
-    private static final boolean LOG_ENABLED = false;
+    private static final boolean LOG_ENABLED = true;
     private static final boolean LIVE_ARRIVAL_RATES = true;
     private static final boolean STOCHASTIC_DEMAND = false;
     private static final boolean USE_LANES = true;
