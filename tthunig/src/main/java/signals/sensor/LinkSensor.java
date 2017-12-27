@@ -100,7 +100,8 @@ public final class LinkSensor {
 		registerAverageVehiclesPerSecondToMonitor(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 	}
 	
-	public void registerAverageVehiclesPerSecondToMonitor(double lookBackTime, double timeBucketCollectionDuration) {		
+	public void registerAverageVehiclesPerSecondToMonitor(double lookBackTime, double timeBucketCollectionDuration) {
+		this.doAverageVehiclesPerSecondMonitoring = true;
 		this.lookBackTime = lookBackTime;
 		this.timeBucketCollectionDuration = timeBucketCollectionDuration;
 		this.timeBuckets = new LinkedList<AtomicInteger>();
@@ -139,14 +140,16 @@ public final class LinkSensor {
 	public double getAvgVehiclesPerSecond(double now) {
 		if (now > monitoringStartTime) {
 			if (lookBackTime == Double.POSITIVE_INFINITY) {
-				return totalVehicles / (now - monitoringStartTime);
+				return totalVehicles / ((now - monitoringStartTime)+1);
 			} else {
 				updateBucketsUntil(now);
 				//if we have less buckets collected than needed for lookback, we calculate the average only with the buckets we already have.
-				return timeBuckets.stream().mapToInt(AtomicInteger::intValue).sum()/(timeBuckets.size() * this.timeBucketCollectionDuration);
+				if (timeBuckets.size() > 0)
+					return timeBuckets.stream().mapToInt(AtomicInteger::intValue).sum()/(timeBuckets.size() * this.timeBucketCollectionDuration);
+				else return 0.0;
 			}
 		} else {
-			return 0;
+			return 0.0;
 		}
 	}
 	
@@ -157,11 +160,11 @@ public final class LinkSensor {
 	 * @param time timestamp until wich the bucketqueue should be updated
 	 */
 	private void updateBucketsUntil(double time) {
-		if (time > currentBucketStartTime + timeBucketCollectionDuration) {
+		if (time >= currentBucketStartTime + timeBucketCollectionDuration) {
 			queueFullBucket(currentBucket);
 			currentBucketStartTime += timeBucketCollectionDuration;
 			//look if we need to create some empty buckets which queueing we missed in the meantime because no vehicle came until last update
-			for (double i = currentBucketStartTime; i < time-this.timeBucketCollectionDuration; i += this.timeBucketCollectionDuration) {
+			for (double i = currentBucketStartTime; i <= time-this.timeBucketCollectionDuration; i += this.timeBucketCollectionDuration) {
 				queueFullBucket(new AtomicInteger(0));
 				currentBucketStartTime += timeBucketCollectionDuration;
 			}
@@ -185,7 +188,7 @@ public final class LinkSensor {
 	public void handleEvent(LinkEnterEvent event) {
 		this.vehiclesOnLink++;
 		if(this.doAverageVehiclesPerSecondMonitoring) {
-			if (lookBackTime == Double.POSITIVE_INFINITY) {
+			if (lookBackTime != Double.POSITIVE_INFINITY) {
 				updateBucketsUntil(event.getTime());
 				currentBucket.incrementAndGet();
 			}
