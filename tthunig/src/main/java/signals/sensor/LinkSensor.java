@@ -101,13 +101,15 @@ public final class LinkSensor {
 	}
 	
 	public void registerAverageVehiclesPerSecondToMonitor(double lookBackTime, double timeBucketCollectionDuration) {
-		this.doAverageVehiclesPerSecondMonitoring = true;
-		this.lookBackTime = lookBackTime;
-		this.timeBucketCollectionDuration = timeBucketCollectionDuration;
-		this.timeBuckets = new LinkedList<AtomicInteger>();
-		this.currentBucketStartTime = 0.0;
-		this.currentBucket = new AtomicInteger(0);
-		this.numOfBucketsNeededForLookback = (int) Math.ceil(lookBackTime/timeBucketCollectionDuration);
+		if (!doAverageVehiclesPerSecondMonitoring) {
+			this.doAverageVehiclesPerSecondMonitoring = true;
+			this.lookBackTime = lookBackTime;
+			this.timeBucketCollectionDuration = timeBucketCollectionDuration;
+			this.timeBuckets = new LinkedList<AtomicInteger>();
+			this.currentBucketStartTime = 0.0;
+			this.currentBucket = new AtomicInteger(0);
+			this.numOfBucketsNeededForLookback = (int) Math.ceil(lookBackTime / timeBucketCollectionDuration);
+		}
 	}
 
 	private void enableDistanceMonitoring() {
