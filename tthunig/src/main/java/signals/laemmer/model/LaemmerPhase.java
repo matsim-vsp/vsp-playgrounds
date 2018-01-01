@@ -21,7 +21,7 @@ class LaemmerPhase {
     private boolean stabilize = false;
 
     private double intergreenTime_a;
-    double regulationTime = 0;
+    private double regulationTime = 0;
 
     Id<Lane> determiningLane;
     Id<Link> determiningLink;
@@ -298,5 +298,13 @@ class LaemmerPhase {
                 .append(this.abortionPenalty + ";")
                 .append(this.regulationTime + ";")
                 .append(totalN + ";");
+    }
+    
+    double getRegulationTime() {
+    	return regulationTime;
+    }
+    
+    void setRegulationTime(double regulationTime) {
+    	this.regulationTime = regulationTime;
     }
 }

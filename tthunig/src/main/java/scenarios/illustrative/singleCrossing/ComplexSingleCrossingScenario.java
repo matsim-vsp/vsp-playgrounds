@@ -93,7 +93,7 @@ public class ComplexSingleCrossingScenario {
 	public static final Id<SignalGroup> signalGroupId4 = Id.create("SignalGroup4", SignalGroup.class);
 	public static final Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
 
-	private double flowNS = 360;
+	private double flowNS = 1200;
 	private double flowWE = 0.5 * 2520;
 	private boolean useLaemmer = true;
 	private Regime laemmerRegime = Regime.COMBINED;
@@ -617,14 +617,15 @@ public class ComplexSingleCrossingScenario {
 //		We cannot create SignalGroups, as long as there is no information which signals can be groped. Beside that, it seems
 //        to be useless to group signals in simulations, because all signals in a signal groups are always in the same
 //		  state. So for now, one signal group for each signal is created. pschade
-
-          for (Id<Signal> s : signalSystem1.getSignalData().keySet()) {
-        	  SignalGroupData signalGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("SignalGroup"+s.toString(), SignalGroup.class));
-        	  signalGroup.addSignalId(s);
-        	  signalGroups.addSignalGroupData(signalGroup);
-          }
-          // TODO tt: this would do the same:
-//          SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem1);
+//	
+//			older implementation, new below (below tt comment)
+//          for (Id<Signal> s : signalSystem1.getSignalData().keySet()) {
+//        	  SignalGroupData signalGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("SignalGroup"+s.toString(), SignalGroup.class));
+//        	  signalGroup.addSignalId(s);
+//        	  signalGroups.addSignalGroupData(signalGroup);
+//          }
+          // TODO test, if everythink still working. pschade //tt: this would do the same:
+          SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem1);
         	
 //        SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
 //        signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
