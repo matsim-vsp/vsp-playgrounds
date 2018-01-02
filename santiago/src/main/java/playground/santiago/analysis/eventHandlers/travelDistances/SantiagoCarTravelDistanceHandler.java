@@ -40,21 +40,16 @@ import playground.santiago.network.GetTollwayAndSecondaryLinks;
 
 /**
  * 1. First -> Read shape and get links of highways -> DONE!
- * 1.1. Second -> Read network and get links not in highway links.
- * 2. Second -> Read _gantries_ and get tolls by period of the day
- * 3. Third -> Compute distances traveled.
+ * 2. Second -> Read network and get links not in highway links -> DONE!
+ * 3. Third -> Read gantries and get tolls by period of the day
+ * 4. Fourth -> Compute distances traveled.
  */
 
 public class SantiagoCarTravelDistanceHandler
 implements PersonDepartureEventHandler, LinkLeaveEventHandler, PersonArrivalEventHandler,
 TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, TransitDriverStartsEventHandler {
 	
-	private final static Logger LOG = Logger.getLogger(SantiagoCarTravelDistanceHandler.class);
-	
-	
-	private final String shapeFile = "";
-	
-	
+	private final static Logger LOG = Logger.getLogger(SantiagoCarTravelDistanceHandler.class);	
 	private final Network network;
 	private final Config config;
 	private final SortedMap<String, Map<Id<Person>, List<String>>> modePersonIdDistances = new TreeMap<>();
@@ -81,12 +76,6 @@ TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeave
 		this.mainModes.addAll(this.config.qsim().getMainModes());
 		this.network = network;
 		this.stuckAgents=stuckAgents;
-		
-		Set<Id<Link>> linkIds = GetTollwayAndSecondaryLinks.getTollwayLinks(shapeFile);
-		
-
-		
-		
 
 	}
 
