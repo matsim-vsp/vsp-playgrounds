@@ -24,9 +24,7 @@ import java.util.Collections;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
-import org.matsim.contrib.signals.controler.SignalsModule;
 import org.matsim.contrib.signals.otfvis.OTFClientLiveWithSignals;
-import org.matsim.contrib.signals.otfvis.OTFVisWithSignals;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.ControlerDefaultsModule;

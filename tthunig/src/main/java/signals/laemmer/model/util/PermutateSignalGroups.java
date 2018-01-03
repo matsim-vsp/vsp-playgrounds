@@ -2,6 +2,7 @@ package signals.laemmer.model.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,14 +103,17 @@ public class PermutateSignalGroups {
 		//check for illegal combinations
 		ArrayList<SignalGroup> illegalGroups = new ArrayList<>();
 		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
+			//check every signalGroup in this combination for illegal flows
 			for (SignalGroup sg : sgs) {
-				ArrayList<Id> lanesOfCurrSg = new ArrayList<>();
+				//collect all lanes from this signalgroup's signals
+				ArrayList<Id<Lane>> lanesOfCurrSg = new ArrayList<>();
 				for (Signal signal : sg.getSignals().values()) {
 					lanesOfCurrSg.addAll(signal.getLaneIds());
 				}
+				//iterate over all lanes an their conflictingLanes and check, if one of these illegal lanes are also in the collected landes of this phase
 				for (Id<Lane> l : lanesOfCurrSg) {
-					for (Id<Lane> illegalLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
-						if (lanesOfCurrSg.contains(illegalLane)) {
+					for (Id<Lane> conflictingLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
+						if (lanesOfCurrSg.contains(conflictingLane)) {
 							illegalGroups.add(sg);
 							break;
 						}
@@ -146,8 +150,8 @@ public class PermutateSignalGroups {
 //			for (SignalGroup sg : sgs) {
 				for (Id<Lane> l : lanesOfAllSg) {
 					boolean hasIllegal = false;
-					for (Id<Lane> illegalLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
-						if (lanesOfAllSg.contains(illegalLane)) {
+					for (Id<Lane> conflictingLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
+						if (lanesOfAllSg.contains(conflictingLane)) {
 							illegalGroups.add(sgs);
 							hasIllegal = true;
 							break;

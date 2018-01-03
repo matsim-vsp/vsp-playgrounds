@@ -1,4 +1,4 @@
-package playground.tschlenther;
+package playground.tschlenther.generalUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

@@ -30,7 +30,7 @@ import org.matsim.vehicles.Vehicle;
 
 /**
  * a simpler version of ParkingSearchAndEgressTimeEvaluator in org.matsim.contrib.parking.parkingsearch.evaluation
- * @author schlenther
+ * @author tschlenther
  *
  */
 public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartParkingSearchEventHandler, PersonEntersVehicleEventHandler{
@@ -39,8 +39,12 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 	Map<Id<Vehicle>,Id<Person>> drivers = new HashMap<>();
 	private Set<Id<Link>> monitoredLinks;
 	private List<String> linkTimeStamps = new ArrayList<>();
-	private double[] parkingCounts = new double[96];
-	private double[] parkingTime = new double[96];
+	
+	//we count the parking procedures and the total spent parking time per slot
+	//number of slots = 24* nrOfSLotsPerHour
+	private int nrOfSlotsPerHour = 4;
+	private double[] parkingProcedures = new double[24*nrOfSlotsPerHour];
+	private double[] parkingTime = new double[24*nrOfSlotsPerHour];
 	
 	public SearchTimeEvaluator(Set<Id<Link>> monitoredLinks) {
 		this.monitoredLinks = monitoredLinks;
@@ -51,8 +55,8 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 		this.searchTime.clear();;
 		this.drivers.clear();
 		this.linkTimeStamps.clear();
-		this.parkingCounts = new double[96];
-		this.parkingTime = new double[96];
+		this.parkingProcedures = new double[24*nrOfSlotsPerHour];
+		this.parkingTime = new double[24*nrOfSlotsPerHour];
 	}
 
 	@Override
@@ -78,9 +82,9 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 			if (event.getLegMode().equals(TransportMode.car)){
 				double parkingTime = event.getTime() - searchTime.remove(event.getPersonId());
 				int hour = (int) (event.getTime() / 3600);
-				int slot = (int) (event.getTime()/900);
-				if ((slot)<96){
-					this.parkingCounts[slot]++;
+				int slot = (int) (event.getTime()/ (3600/nrOfSlotsPerHour) );
+				if ((slot)< (24*nrOfSlotsPerHour) ){
+					this.parkingProcedures[slot]++;
 					this.parkingTime[slot]+=parkingTime;
 					String stamp = "" + hour  + ";" + slot + ";" + df.format(event.getTime()) + ";" + event.getLinkId() + ";"+ df.format(parkingTime);
 					this.linkTimeStamps.add(stamp);
@@ -98,11 +102,11 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 	DecimalFormat df = new DecimalFormat("##.##");	
 		try {
 			bw.write("timeSlot;parkingCounts;averageSearchTime");
-			for (int i = 0; i<this.parkingCounts.length;i++){
+			for (int i = 0; i<this.parkingProcedures.length;i++){
 				bw.newLine();
 				double avgTime = 0;
-				if(!(parkingCounts[i] == 0)) avgTime = parkingTime[i]/parkingCounts[i];
-				bw.write(i+";"+df.format(parkingCounts[i])+";"+df.format(avgTime));
+				if(!(parkingProcedures[i] == 0)) avgTime = parkingTime[i]/parkingProcedures[i];
+				bw.write(i+";"+df.format(parkingProcedures[i])+";"+df.format(avgTime));
 			}
 			bw.flush();
 			bw.close();
@@ -116,7 +120,7 @@ public class SearchTimeEvaluator implements PersonArrivalEventHandler, StartPark
 	public void writeLinkTimeStamps(String filename){
 		BufferedWriter bw = IOUtils.getBufferedWriter(filename);
 			try {
-				bw.write("Stunde;SlotNr;SimTime;LinkID;searchTime");
+				bw.write("hour;slotNr;simTime;linkID;searchTime");
 				for (String s: this.linkTimeStamps){
 					bw.newLine();
 					bw.write(s);

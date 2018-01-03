@@ -37,6 +37,7 @@ import org.matsim.contrib.parking.parkingsearch.manager.vehicleteleportationlogi
 import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.contrib.parking.parkingsearch.search.RandomParkingSearchLogic;
+import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.mobsim.framework.Mobsim;
@@ -80,20 +81,22 @@ public class FreefloatingParkingAgentFactory implements AgentFactory {
 	
 	private final QSim qsim;
 	private final FFCSConfigGroup ffcsconfig;
+	private final ParkingSearchConfigGroup parkingConfigGroup;
 	/**
 	 * 
 	 */
 	@Inject
 	public FreefloatingParkingAgentFactory(QSim qsim, Config config) {
 		this.qsim = qsim;
-		this.ffcsconfig = (FFCSConfigGroup) config.getModule("freefloating");
+		this.ffcsconfig = (FFCSConfigGroup) config.getModules().get(FFCSConfigGroup.GROUP_NAME);
+		this.parkingConfigGroup = (ParkingSearchConfigGroup) config.getModules().get(ParkingSearchConfigGroup.GROUP_NAME);
 	}
 
 	@Override
 	public MobsimAgent createMobsimAgentFromPerson(Person p) {
 		ParkingSearchLogic parkingLogic  = new FFCSorRandomParkingChoiceLogic(network,(FacilityBasedFreefloatingParkingManager) parkingManager,ffcsmanager,parkingRouter);
 		CarsharingParkingAgentLogic agentLogic = new CarsharingParkingAgentLogic(p.getSelectedPlan(), parkingManager, walkLegFactory,
-				parkingRouter, events, parkingLogic,  ((QSim) qsim).getSimTimer(),teleportationLogic, ffcsmanager, ffcsconfig );
+				parkingRouter, events, parkingLogic,  ((QSim) qsim).getSimTimer(),teleportationLogic, ffcsmanager, ffcsconfig,parkingConfigGroup );
 		Id<Link> startLinkId = ((Activity) p.getSelectedPlan().getPlanElements().get(0)).getLinkId();
 		if (startLinkId == null) {
 			throw new NullPointerException(" No start link found. Should not happen.");
