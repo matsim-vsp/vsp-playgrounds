@@ -1,17 +1,15 @@
 package playground.santiago.network;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
@@ -24,13 +22,13 @@ import org.opengis.feature.simple.SimpleFeature;
 public class GetTollwayAndSecondaryLinks {
 	
 	String shapeFile;
-	String networkFile;
-	Set tollwayLinks;
-	Set secondaryLinks;
+	Network network;
+	Map<Id<Link>, String> tollwayLinks;
+	Set<Id<Link>> secondaryLinks;
 		
-	public GetTollwayAndSecondaryLinks(String shapeFile, String networkFile){
+	public GetTollwayAndSecondaryLinks(String shapeFile, Network network){
 		this.shapeFile = shapeFile;
-		this.networkFile = networkFile;
+		this.network = network;
 		processLinks();
 	}
 	
@@ -39,32 +37,29 @@ public class GetTollwayAndSecondaryLinks {
 		ShapeFileReader shapeReader = new ShapeFileReader();
 		shapeReader.readFileAndInitialize(shapeFile);
 		Collection<SimpleFeature> features = shapeReader.getFeatureSet();		
-		tollwayLinks = new HashSet<Id<Link>>();
+		tollwayLinks = new HashMap<>();
 
 		for(SimpleFeature feature : features){
-			tollwayLinks.add(Id.createLinkId((String) feature.getAttribute(1)));
+			tollwayLinks.put(Id.createLinkId((String) feature.getAttribute(1)), ((String) feature.getAttribute(9)));
 		}
 
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
-		Network network = (Network) scenario.getNetwork();
-		secondaryLinks = new HashSet<Id<Link>>();
+		secondaryLinks = new HashSet<>();
 
 		for (Link link : network.getLinks().values()) {
 			if (link.getAllowedModes().contains(TransportMode.pt)){
 				//OMITTING...
 			} else {				
 				Id<Link> linkId = link.getId();				
-				if (tollwayLinks.contains(linkId)){
+				if (tollwayLinks.containsKey(linkId)){
 					//OMITTING...
 				} else {
-					secondaryLinks.add(Id.createLinkId(linkId));
+					secondaryLinks.add(linkId);
 				}
 			}
 		}
 	}
 		
-	public Set<Id<Link>> getTollwayLinks(){
+	public Map<Id<Link>, String> getTollwayLinks(){
 		return tollwayLinks;
 	}
 	
