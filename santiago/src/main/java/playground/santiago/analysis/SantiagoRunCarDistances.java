@@ -6,13 +6,14 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 
 import playground.santiago.analysis.others.SantiagoStuckAgentsAnalysis;
+import playground.santiago.analysis.travelDistances.SantiagoSecondaryDistanceAnalysis;
 import playground.santiago.analysis.travelDistances.SantiagoTollwayDistanceAnalysis;
 
 /**
  * 
  */
 
-public class SantiagoRunTollwayDistances {
+public class SantiagoRunCarDistances {
 	
 	private static final String CASE_NAME = "baseCase1pct";
 	private static final String STEP_NAME = "Step1";
@@ -30,6 +31,9 @@ public class SantiagoRunTollwayDistances {
 		
 		SantiagoTollwayDistanceAnalysis tollwayAnalysis = new SantiagoTollwayDistanceAnalysis(CASE_NAME,STEP_NAME, stuckAgents, SHAPE_FILE);
 		tollwayAnalysis.writeFileForTollwayDistances(it, itAux);
+		
+		SantiagoSecondaryDistanceAnalysis secondaryAnalysis = new SantiagoSecondaryDistanceAnalysis(CASE_NAME,STEP_NAME, stuckAgents, SHAPE_FILE);
+		secondaryAnalysis.writeFileForSecondaryDistances(it, itAux);
 		
 	}
 }
