@@ -2,14 +2,11 @@ package playground.santiago.analysis.eventHandlers.travelDistances;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
+
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -29,13 +26,9 @@ import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
-import org.matsim.core.api.experimental.events.handler.TeleportationArrivalEventHandler;
 import org.matsim.core.config.Config;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 
-import playground.santiago.analysis.travelDistances.SantiagoPTDistanceFromPlans;
 import playground.santiago.network.GetTollwayAndSecondaryLinks;
 
 /**
