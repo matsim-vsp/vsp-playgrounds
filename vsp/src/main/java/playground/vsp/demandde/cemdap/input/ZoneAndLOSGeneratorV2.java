@@ -60,6 +60,8 @@ public class ZoneAndLOSGeneratorV2 {
 	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
 
 	// spatial refinement. Amit Nov'17
+	// Technically, one can get the list of municipality IDs for spatial refinement from features in provided shape file.
+	// However, it is better to take IDs as argument to exclude some municipality from the given shape. Amit Jan'18
 	private List<String> municipalityIDsForSpatialRefinement;
 	private double defaultIntraZoneDistanceForSpatialRefinement;
 	
@@ -423,4 +425,8 @@ public class ZoneAndLOSGeneratorV2 {
 	public void setCostDistanceRatio_USD_mile(double costDistanceRatio_USD_mile) {
     	this.costDistanceRatio_USD_mile = costDistanceRatio_USD_mile;
     }
+
+    public void setShapeFileForRefinement(String shapeFileForRefinement, String featureKeyInShapeFileForRefinement){
+		readShape(shapeFileForRefinement, featureKeyInShapeFileForRefinement);
+	}
 }
