@@ -81,7 +81,10 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, TransitDrive
 		String mode = this.personIdDepartureLegModes.get(personId);
 		double time = event.getTime();
 		double midHour = midHourByTime(time);
-		
+//		if(time>1800){
+//		System.out.println(time);
+//		System.out.println(midHour);
+//		}
 		if(transitDriverPersons.contains(personId)||stuckAgents.contains(personId)||!mode.equals(TransportMode.car)){
 			//Omitting...
 		} else {
@@ -142,7 +145,7 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, TransitDrive
 
 
 	public double midHourByTime(double time){
-		double midHour = Math.floor((1/1800)*time);
+		double midHour = Math.floor(time/1800);
 		return midHour;
 	}
 
