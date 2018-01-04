@@ -31,6 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -60,9 +61,7 @@ public class ZoneAndLOSGeneratorV2 {
 	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
 
 	// spatial refinement. Amit Nov'17
-	// Technically, one can get the list of municipality IDs for spatial refinement from features in provided shape file.
-	// However, it is better to take IDs as argument to exclude some municipality from the given shape. Amit Jan'18
-	private List<String> municipalityIDsForSpatialRefinement;
+	private List<String> zoneIdsForSpatialRefinement; // this is filled if shape file for spatial refinement is provided.
 	private double defaultIntraZoneDistanceForSpatialRefinement;
 	
 	public static void main(String[] args) {
@@ -382,7 +381,7 @@ public class ZoneAndLOSGeneratorV2 {
 	}
 
 	private double getIntraZonalDistance(String municipalityId){
-		if (this.municipalityIDsForSpatialRefinement!=null && this.municipalityIDsForSpatialRefinement.contains(municipalityId)) {
+		if (this.zoneIdsForSpatialRefinement !=null && this.zoneIdsForSpatialRefinement.contains(municipalityId)) {
 			return this.defaultIntraZoneDistanceForSpatialRefinement;
 		} else {
 			return this.defaultIntraZoneDistance;
@@ -401,10 +400,6 @@ public class ZoneAndLOSGeneratorV2 {
 	 */
 	public void setDefaultIntraZoneDistanceForSpatialRefinement(double defaultIntraZoneDistanceForSpatialRefinement) {
 		this.defaultIntraZoneDistanceForSpatialRefinement = defaultIntraZoneDistanceForSpatialRefinement;
-	}
-
-	public void setMunicipalityIDsForSpatialRefinement(List<String> municipalityIDsForSpatialRefinement) {
-		this.municipalityIDsForSpatialRefinement = municipalityIDsForSpatialRefinement;
 	}
 
 	public void setBeelineDistanceFactor(double beelineDistanceFactor) {
@@ -426,7 +421,13 @@ public class ZoneAndLOSGeneratorV2 {
     	this.costDistanceRatio_USD_mile = costDistanceRatio_USD_mile;
     }
 
-    public void setShapeFileForRefinement(String shapeFileForRefinement, String featureKeyInShapeFileForRefinement){
-		readShape(shapeFileForRefinement, featureKeyInShapeFileForRefinement);
+    public void setShapeFileForRefinement(String shapeFileForSpatialRefinement, String featureKeyInShapeFileForRefinement){
+		LOG.info("Using spatial refinement...");
+		this.zoneIdsForSpatialRefinement = ShapeFileReader
+				.getAllFeatures(shapeFileForSpatialRefinement)
+				.stream()
+				.map(feature -> feature.getAttribute(featureKeyInShapeFileForRefinement).toString())
+				.collect(Collectors.toList());
+		readShape(shapeFileForSpatialRefinement, featureKeyInShapeFileForRefinement);
 	}
 }
