@@ -29,10 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -88,6 +85,7 @@ import jsprit.core.algorithm.io.VehicleRoutingAlgorithms;
 import jsprit.core.problem.VehicleRoutingProblem;
 import jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import jsprit.core.util.Solutions;
+import playground.kturner.utils.MergeFileVisitor;
 import playground.kturner.utils.MoveDirVisitor;
 
 /**
@@ -106,7 +104,6 @@ import playground.kturner.utils.MoveDirVisitor;
  * 
  */
 
-//TODO: When running jsprit only (w/o MATSim) no log-files were written
 /**
  * @author kturner
  *
@@ -114,12 +111,12 @@ import playground.kturner.utils.MoveDirVisitor;
 public class KTFreight_v3 {
 
 	private static final Logger log = Logger.getLogger(KTFreight_v3.class) ;
-	private static final String LOGFILE_KMT =  "logfileKMT.log";
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
 //	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
 //	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MAoutput/JSprit/Berlin/aldi/Toll20onHeavy/" ;
 //	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/"";
+//	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 //
 //	//Dateinamen
 //	private static final String NETFILE_NAME = "network.xml" ;
@@ -149,6 +146,7 @@ public class KTFreight_v3 {
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
 	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/base_log2/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
+	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
 	
 	//Dateinamen
@@ -204,7 +202,7 @@ public class KTFreight_v3 {
 
 
 	public static void main(String[] args) throws IOException {
-		OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR + "Logs/");
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR);
 		for (int i = 1; i<=NU_OF_TOTAL_RUNS; i++) {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
 			rpscheme = new RoadPricingSchemeImpl();		
@@ -222,14 +220,17 @@ public class KTFreight_v3 {
 
 		log.info("#### End of all runs --Y Finished ####");
 		OutputDirectoryLogging.closeOutputDirLogging(); 
-		mergeLogfiles(OUTPUT_DIR + "Logs/"); //TODO: bring together all logfiles.
+
+		//Merge logfiles
+		Files.walkFileTree(FileSystems.getDefault().getPath(LOG_DIR), new MergeFileVisitor(new File(LOG_DIR + "logfile.log"), true) );
+		Files.walkFileTree(FileSystems.getDefault().getPath(LOG_DIR), new MergeFileVisitor(new File(LOG_DIR + "logfileWarningsErrors.log"), true) );
 	}
 
 
 	//### KT 03.12.2014 multiple run for testing the variaty of the jsprit solutions (especially in terms of costs). 
 	private static void multipleRun (String[] args) throws IOException{	
 		OutputDirectoryLogging.closeOutputDirLogging();	//close old Log
-		OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR + "Logs/log_" + runIndex);	//create new log
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR + "log_" + runIndex);	//create new log
 		log.info("#### Starting Run: " + runIndex + " of: "+ NU_OF_TOTAL_RUNS);
 		createDir(new File(OUTPUT_DIR + RUN + runIndex));
 		createDir(new File(TEMP_DIR + RUN + runIndex));	
@@ -257,7 +258,7 @@ public class KTFreight_v3 {
 
 		if ( runMatsim){
 			matsimRun(scenario, carriers);	//final MATSim configurations and start of the MATSim-Run
-			OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR + "Logs/log_" + runIndex +"a");	//MATSim closes log at the end. therefore we need a new one to log the rest of this iteration
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR + "/log_" + runIndex +"a");	//MATSim closes log at the end. therefore we need a new one to log the rest of this iteration
 		}
 			
 		finalOutput(config, carriers);	//write some final Output
@@ -707,20 +708,6 @@ public class KTFreight_v3 {
 			log.warn("Directory already exists! Check for older stuff: " + file.toString());
 	}
 	
-
-	
-	/**
-	 * TODO: merge logfiles
-	 * TODO: move combined logfile to output dir
-	 * TODO: remove empty dirs
-	 * TODO: write short documentation here / maybe extract this method to utils
-	 * TODO: make log-Dir to private static final String so it is set in the input block
-	 * @param string
-	 */
-	private static void mergeLogfiles(String string) {
-		// TODO Auto-generated method stub
-	}
-
 	
 }
 
