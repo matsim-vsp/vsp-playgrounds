@@ -60,6 +60,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.consistency.VspConfigConsistencyCheckerImpl;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlansConfigGroup;
+import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
+import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerUtils;
@@ -280,8 +282,26 @@ public class KTFreight_v3 {
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration ); 
 				
-		//Some config stuff to comply to vsp-defaults
-		ConfigUtils.addOrGetModule(config, PlanCalcScoreConfigGroup.class).setFractionOfIterationsToStartScoreMSA(0.8); //TODO: KMT neu, 07.12. to fix config
+		//Some config stuff to comply to vsp-defaults even there is currently only 1 MATSim iteration and 
+		//therefore no need for e.g. a strategy! KMT jan/18
+		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.8);
+		config.plans().setRemovingUnneccessaryPlanAttributes(true);
+		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+//		config.qsim().setUsePersonIdForMissingVehicleId(false);		//TODO: Doesn't work here yet: "java.lang.IllegalStateException: NetworkRoute without a specified vehicle id." KMT jan/18
+		config.qsim().setUsingTravelTimeCheckInTeleportation(true);
+		config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
+		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		
+		StrategySettings stratSettings1 = new StrategySettings();
+		stratSettings1.setStrategyName("ChangeExpBeta");
+		stratSettings1.setWeight(0.1);
+		config.strategy().addStrategySettings(stratSettings1);
+		
+		StrategySettings stratSettings2 = new StrategySettings();
+		stratSettings2.setStrategyName("BestScore");
+		stratSettings2.setWeight(0.9);
+		config.strategy().addStrategySettings(stratSettings2);
+		
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspDefaultsCheckingLevel.warn);
 		
 		return config;
