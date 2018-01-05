@@ -33,9 +33,6 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.contrib.cadyts.car.CadytsCarModule;
-import org.matsim.contrib.cadyts.car.CadytsContext;
-import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -45,6 +42,7 @@ import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
@@ -53,19 +51,10 @@ import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.scoring.ScoringFunction;
-import org.matsim.core.scoring.ScoringFunctionFactory;
-import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingModule;
 
-import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingConfigGroup;
-import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingModule;
+import playground.santiago.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingModule;
 import playground.santiago.SantiagoScenarioConstants;
 
 import javax.inject.Inject;
@@ -84,6 +73,7 @@ public class SantiagoScenarioRunnerWithDepChoice {
 	private static boolean doModeChoice; 
 	private static boolean mapActs2Links;
 	private static boolean departureTimeChoice;
+	private static String originalPlans;
 	/***/
 	private static String caseName = "baseCase1pct";
 	private static String simulationStep = "Step2.A";
@@ -102,6 +92,7 @@ public class SantiagoScenarioRunnerWithDepChoice {
 			doModeChoice = Boolean.parseBoolean(args[3]); //DOMODECHOICE?
 			mapActs2Links = Boolean.parseBoolean(args[4]); //MAPACTS2LINKS?
 			departureTimeChoice=Boolean.parseBoolean(args[5]); //DEPARTURETIMECHOICE?
+			originalPlans = args[6]; //PATH TO ORIGINAL PLANS FILE
 			
 		} else {
 		
@@ -111,20 +102,24 @@ public class SantiagoScenarioRunnerWithDepChoice {
 			doModeChoice=true;
 			mapActs2Links=false;
 			departureTimeChoice=false; //TODO: BE AWARE OF THIS!
+			originalPlans = "../../../runs-svn/santiago/baseCase1pct/inputForStep0/randomized_sampled_plans.xml.gz";
 		
 		}	
 
-			
-			Config config = ConfigUtils.loadConfig(configFile);
-			Scenario scenario = ScenarioUtils.loadScenario(config);
-			config.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
-			Controler controler = new Controler(scenario);
+			Scenario originalScenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());		
+			PopulationReader pr = new PopulationReader(originalScenario);
+			pr.readFile(originalPlans);
+					
+			Config baseConfig = ConfigUtils.loadConfig(configFile);
+			Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
+			baseConfig.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
+			Controler controler = new Controler(baseScenario);
 			
 			// adding other network modes than car requires some router; here, the same values as for car are used
 			setNetworkModeRouting(controler);
 			
 			// adding pt fare
-			controler.getEvents().addHandler(new PTFareHandler(controler, doModeChoice, scenario.getPopulation()));
+			controler.getEvents().addHandler(new PTFareHandler(controler, doModeChoice, baseScenario.getPopulation()));
 			
 			// adding basic strategies for car and non-car users
 			setBasicStrategiesForSubpopulations(controler);
@@ -133,30 +128,25 @@ public class SantiagoScenarioRunnerWithDepChoice {
 			if(doModeChoice) setModeChoiceForSubpopulations(controler);
 			
 			// mapping agents' activities to links on the road network to avoid being stuck on the transit network
-			if(mapActs2Links) mapActivities2properLinks(scenario);
+			if(mapActs2Links) mapActivities2properLinks(baseScenario);
 			
 			//Adding the toll links file in the config
-			RoadPricingConfigGroup rpcg = ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
+			RoadPricingConfigGroup rpcg = ConfigUtils.addOrGetModule(baseConfig, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
 			rpcg.setTollLinksFile(gantriesFile);
 			
 			//Adding randomness to the router, sigma = 3
-			config.plansCalcRoute().setRoutingRandomness(sigma); 
+			baseConfig.plansCalcRoute().setRoutingRandomness(sigma); 
 
 			controler.addOverridingModule(new RoadPricingModule());	
 
 			if(departureTimeChoice){
-				
-				AgentSpecificActivitySchedulingConfigGroup asasConfigGroup = (AgentSpecificActivitySchedulingConfigGroup) scenario.getConfig().getModules().get(AgentSpecificActivitySchedulingConfigGroup.GROUP_NAME);
-				asasConfigGroup.setTolerance(0.);				
-				controler.addOverridingModule(new AgentSpecificActivitySchedulingModule(scenario));
-				
+				//Using the default parameters in asasConfigGroup
+//				AgentSpecificActivitySchedulingConfigGroup asasConfigGroup = (AgentSpecificActivitySchedulingConfigGroup) scenario.getConfig().getModules().get(AgentSpecificActivitySchedulingConfigGroup.GROUP_NAME);
+				controler.addOverridingModule(new AgentSpecificActivitySchedulingModule(originalScenario,baseScenario));
 			}
 			
-			
 			//Run!
-			controler.run();		
-			
-			
+			controler.run();			
 	}
 	
 	
