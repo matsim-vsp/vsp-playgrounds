@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +47,9 @@ public class ZoneAndLOSGeneratorV2 {
 
 	// Storage objects
 	private final Set<String> municipalities = new HashSet<>();
-	private final List<String> zones = new LinkedList<>();
+	// to exclude any duplicates using Set instead of List. It is a possibility:
+	// in a shape files: two isolated zones = two polygons = two simple features. Amit Jan'18
+	private final Set<String> zones = new LinkedHashSet<>();
 	private final Map<String, Geometry> zoneMap = new HashMap<>();
 	private final Map<String, Map<String, Double>> zone2ZoneDistanceMap = new HashMap<>();
 	private final Map<String, Map<String, Integer>> zone2ZoneAdjacencyMap = new HashMap<>();
