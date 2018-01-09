@@ -19,7 +19,7 @@
 /**
  * 
  */
-package playground.tschlenther;
+package playground.tschlenther.generalUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

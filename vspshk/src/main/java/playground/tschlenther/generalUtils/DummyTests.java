@@ -1,4 +1,4 @@
-package playground.tschlenther;
+package playground.tschlenther.generalUtils;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;

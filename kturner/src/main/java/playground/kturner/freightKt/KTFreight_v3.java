@@ -21,12 +21,14 @@ package playground.kturner.freightKt;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -56,12 +58,14 @@ import org.matsim.contrib.freight.scoring.CarrierScoringFunctionFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.consistency.VspConfigConsistencyCheckerImpl;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlansConfigGroup;
+import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
+import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
@@ -82,6 +86,8 @@ import jsprit.core.algorithm.io.VehicleRoutingAlgorithms;
 import jsprit.core.problem.VehicleRoutingProblem;
 import jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import jsprit.core.util.Solutions;
+import playground.kturner.utils.MergeFileVisitor;
+import playground.kturner.utils.MoveDirVisitor;
 
 /**
  * Kurzfassung:
@@ -98,6 +104,11 @@ import jsprit.core.util.Solutions;
  * @author kturner
  * 
  */
+
+/**
+ * @author kturner
+ *
+ */
 public class KTFreight_v3 {
 
 	private static final Logger log = Logger.getLogger(KTFreight_v3.class) ;
@@ -106,6 +117,7 @@ public class KTFreight_v3 {
 //	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
 //	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MAoutput/JSprit/Berlin/aldi/Toll20onHeavy/" ;
 //	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/"";
+//	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 //
 //	//Dateinamen
 //	private static final String NETFILE_NAME = "network.xml" ;
@@ -133,8 +145,9 @@ public class KTFreight_v3 {
 
 	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/JSprit/Grid/base/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/base_log3/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
+	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
 	
 	//Dateinamen
@@ -175,10 +188,10 @@ public class KTFreight_v3 {
 	private static final boolean addingCongestion = true ;  //uses NetworkChangeEvents to reduce freespeed.
 	private static final boolean addingToll = true;  //added, kt. 07.08.2014
 	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
-	private static final boolean runMatsim = false;	 //when false only jsprit run will be performed
+	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
 	private static final int MAX_JSPRIT_ITERATION = 4000;
-	private static final int NU_OF_TOTAL_RUNS = 10;	
+	private static final int NU_OF_TOTAL_RUNS = 2;	
 
 	//temporär zum Programmieren als Ausgabe
 	private static WriteTextToFile textInfofile; 
@@ -189,24 +202,37 @@ public class KTFreight_v3 {
 			new VehicleTypeDependentRoadPricingCalculator();
 
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR);
 		for (int i = 1; i<=NU_OF_TOTAL_RUNS; i++) {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
 			rpscheme = new RoadPricingSchemeImpl();		
 			rpCalculator = new VehicleTypeDependentRoadPricingCalculator();	
-
 			runIndex = i;	
 			multipleRun(args);	
 		}
 		writeRunInfo();	
-		moveTempFiles(new File(TEMP_DIR), new File(OUTPUT_DIR)); //move of temp-files
-		System.out.println("#### End of all runs --Y Finished ####");
+		
+		try {
+			Files.walkFileTree(FileSystems.getDefault().getPath(TEMP_DIR), new MoveDirVisitor(FileSystems.getDefault().getPath(TEMP_DIR), FileSystems.getDefault().getPath(OUTPUT_DIR), StandardCopyOption.REPLACE_EXISTING));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		log.info("#### End of all runs --Y Finished ####");
+		OutputDirectoryLogging.closeOutputDirLogging(); 
+
+		//Merge logfiles
+		Files.walkFileTree(FileSystems.getDefault().getPath(LOG_DIR), new MergeFileVisitor(new File(LOG_DIR + "logfile.log"), true) );
+		Files.walkFileTree(FileSystems.getDefault().getPath(LOG_DIR), new MergeFileVisitor(new File(LOG_DIR + "logfileWarningsErrors.log"), true) );
 	}
 
 
 	//### KT 03.12.2014 multiple run for testing the variaty of the jsprit solutions (especially in terms of costs). 
-	private static void multipleRun (String[] args){	
-		System.out.println("#### Starting Run: " + runIndex + " of: "+ NU_OF_TOTAL_RUNS);
+	private static void multipleRun (String[] args) throws IOException{	
+		OutputDirectoryLogging.closeOutputDirLogging();	//close old Log
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR + "log_" + runIndex);	//create new log
+		log.info("#### Starting Run: " + runIndex + " of: "+ NU_OF_TOTAL_RUNS);
 		createDir(new File(OUTPUT_DIR + RUN + runIndex));
 		createDir(new File(TEMP_DIR + RUN + runIndex));	
 
@@ -233,7 +259,9 @@ public class KTFreight_v3 {
 
 		if ( runMatsim){
 			matsimRun(scenario, carriers);	//final MATSim configurations and start of the MATSim-Run
+			OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR + "/log_" + runIndex +"a");	//MATSim closes log at the end. therefore we need a new one to log the rest of this iteration
 		}
+			
 		finalOutput(config, carriers);	//write some final Output
 	} 
 
@@ -253,8 +281,26 @@ public class KTFreight_v3 {
 		//Damit nicht alle um Mitternacht losfahren
 		config.plans().setActivityDurationInterpretation(PlansConfigGroup.ActivityDurationInterpretation.tryEndTimeThenDuration ); 
 				
-		//Some config stuff to comply to vsp-defaults
-		ConfigUtils.addOrGetModule(config, PlanCalcScoreConfigGroup.class).setFractionOfIterationsToStartScoreMSA(0.8); //TODO: KMT neu, 07.12. to fix config
+		//Some config stuff to comply to vsp-defaults even there is currently only 1 MATSim iteration and 
+		//therefore no need for e.g. a strategy! KMT jan/18
+		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.8);
+		config.plans().setRemovingUnneccessaryPlanAttributes(true);
+		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+//		config.qsim().setUsePersonIdForMissingVehicleId(false);		//TODO: Doesn't work here yet: "java.lang.IllegalStateException: NetworkRoute without a specified vehicle id." KMT jan/18
+		config.qsim().setUsingTravelTimeCheckInTeleportation(true);
+		config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
+		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		
+		StrategySettings stratSettings1 = new StrategySettings();
+		stratSettings1.setStrategyName("ChangeExpBeta");
+		stratSettings1.setWeight(0.1);
+		config.strategy().addStrategySettings(stratSettings1);
+		
+		StrategySettings stratSettings2 = new StrategySettings();
+		stratSettings2.setStrategyName("BestScore");
+		stratSettings2.setWeight(0.9);
+		config.strategy().addStrategySettings(stratSettings2);
+		
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspDefaultsCheckingLevel.warn);
 		
 		return config;
@@ -390,7 +436,7 @@ public class KTFreight_v3 {
 			ArrayList<CarrierService> multiassignedServices = new ArrayList<CarrierService>();
 			ArrayList<CarrierService> unassignedServices = new ArrayList<CarrierService>();
 
-			System.out.println("### Carrier: " +c.getId());
+			log.info("### Check service assignements of Carrier: " +c.getId());
 			//Erfasse alle einer Tour zugehörigen (-> stattfindenden) Services 
 			for (ScheduledTour tour : c.getSelectedPlan().getScheduledTours()){
 				for (TourElement te : tour.getTour().getTourElements()){
@@ -398,24 +444,22 @@ public class KTFreight_v3 {
 						CarrierService assignedService = ((ServiceActivity) te).getService();
 						if (!assignedServices.contains(assignedService)){
 							assignedServices.add(assignedService);
-							System.out.println("Assigned Service: " +assignedServices.toString());
+							log.info("Assigned Service: " +assignedServices.toString());
 						} else {
 							multiassignedServices.add(assignedService);
-							log.warn("Service wurde von dem Carrier " + c.getId().toString() + " bereits angefahren: " + assignedService.getId().toString() );
+							log.warn("Service " + assignedService.getId().toString() + " has already been assigned to Carrier " + c.getId().toString() + " -> multiple Assignment!");
 						}
 					}
 				}
 			}
 
-			//Nun prüfe, ob alle definierten Services zugeordnet wurden
+			//Check, if all Services of the Carrier were assigned
 			for (CarrierService service : c.getServices()){
-				System.out.println("Service to Check: " + service.toString());
 				if (!assignedServices.contains(service)){
-					System.out.println("Service not assigned: " +service.toString());
 					unassignedServices.add(service);
-					log.warn("Service wird von Carrier " + c.getId().toString() + " NICHT bedient: " + service.getId().toString() );
+					log.warn("Service " + service.getId().toString() +" will NOT be served by Carrier " + c.getId().toString());
 				} else {
-					System.out.println("Service was assigned: " +service.toString());
+					log.info("Service was assigned: " +service.toString());
 				}
 			}
 
@@ -432,7 +476,10 @@ public class KTFreight_v3 {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} 
+			} else {
+				log.info("No service(s)of " + c.getId().toString() +" were assigned to a tour more then one times.");
 			}
+				
 
 			//Schreibe die nicht eingeplanten Services in Datei
 			if (!unassignedServices.isEmpty()){
@@ -447,6 +494,8 @@ public class KTFreight_v3 {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} 
+			} else {
+				log.info("All service(s) of " + c.getId().toString() +" were assigned to at least one tour");
 			}
 
 		}//for(carriers)
@@ -532,7 +581,7 @@ public class KTFreight_v3 {
 		final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
 		RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
 		try {
-			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModule(RoadPricingConfigGroup.GROUP_NAME) ;
+			RoadPricingConfigGroup rpConfig = (RoadPricingConfigGroup) config.getModules().get(RoadPricingConfigGroup.GROUP_NAME);
 			rpConfig.setTollLinksFile(TOLLFILE);
 			rpReader.readFile(rpConfig.getTollLinksFile());
 		} catch (Exception e) {
@@ -672,34 +721,12 @@ public class KTFreight_v3 {
 
 	//Ergänzung kt: 1.8.2014 Erstellt das angegebene Verzeichnis. Falls es bereits exisitert, geschieht nichts
 	private static void createDir(File file) {
-		System.out.println("Verzeichnis " + file + " erstellt: "+ file.mkdirs());	
+		if (!file.exists()){
+			log.info("Create directory: " + file + " : " + file.mkdirs());
+		} else
+			log.warn("Directory already exists! Check for older stuff: " + file.toString());
 	}
-
-	//TODO: Wenn die Dateien #JspritCarrierScoreInformation.tex und #TextInformation.txt bereits da sind, werden die nicht verschoben/Überschrieben -> diese Daten passen ggf nicht zu den aktuellen Runs !!!
-	//TODO: Ausgabe, dass Datei verschoben wurde komme, obwohl dies nicht erfolgt ist.
-	//TODO: Lösche Tempverzeichnispfad, wenn leer und zwar so weit hoch, wie die Ordner leer sind.
-	private static void moveTempFiles (File sourceDir, File destDir) {
-		File[] files = sourceDir.listFiles();
-		File destFile = null;
-		destDir.mkdirs();
-
-		try{																			
-			for (int i = 0; i < files.length; i++) {
-				destFile = new File(destDir.getAbsolutePath() + System.getProperty("file.separator") + files[i].getName());
-				if (files[i].isDirectory()) {
-					FileUtils.copyDirectory(files[i], destFile);
-					FileUtils.deleteDirectory(files[i]);
-				}
-				else {
-					files[i].renameTo(destFile);
-					System.out.println("Datei wurde verschoben: " + files[i].toString() + " nach: " + destFile);
-				}
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
+	
+	
 }
 

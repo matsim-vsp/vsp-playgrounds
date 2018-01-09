@@ -2,6 +2,7 @@ package signals.laemmer.model.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,14 +103,17 @@ public class PermutateSignalGroups {
 		//check for illegal combinations
 		ArrayList<SignalGroup> illegalGroups = new ArrayList<>();
 		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
+			//check every signalGroup in this combination for illegal flows
 			for (SignalGroup sg : sgs) {
-				ArrayList<Id> lanesOfCurrSg = new ArrayList<>();
+				//collect all lanes from this signalgroup's signals
+				ArrayList<Id<Lane>> lanesOfCurrSg = new ArrayList<>();
 				for (Signal signal : sg.getSignals().values()) {
 					lanesOfCurrSg.addAll(signal.getLaneIds());
 				}
+				//iterate over all lanes an their conflictingLanes and check, if one of these illegal lanes are also in the collected landes of this phase
 				for (Id<Lane> l : lanesOfCurrSg) {
-					for (Id<Lane> illegalLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
-						if (lanesOfCurrSg.contains(illegalLane)) {
+					for (Id<Lane> conflictingLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
+						if (lanesOfCurrSg.contains(conflictingLane)) {
 							illegalGroups.add(sg);
 							break;
 						}
@@ -128,6 +132,7 @@ public class PermutateSignalGroups {
 	
     public static ArrayList<SignalPhase> createPhasesFromSignalGroups(SignalSystem system, Map<Id<Lane>, Lane> lanemap) {
 		ArrayList<SignalGroup> signalGroups = new ArrayList<>(system.getSignalGroups().values());
+		//FIXME remove debug output
 		System.err.println("All permuations size w/o duplicates: "+removeDuplicates(permutate(signalGroups, signalGroups.size())).size());
 		ArrayList<ArrayList<SignalGroup>> allSignalGroupPerms = removeDuplicates(permutate(signalGroups, signalGroups.size()));
 		ArrayList<SignalPhase> validPhases = new ArrayList<>();
@@ -135,23 +140,31 @@ public class PermutateSignalGroups {
 		ArrayList<ArrayList<SignalGroup>> illegalGroups = new ArrayList<>();
 		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
 			ArrayList<Id<Lane>> lanesOfAllSg = new ArrayList<>();
+			//collect all lanes in this permutation
 			for (SignalGroup sg : sgs) {
 				for (Signal signal : sg.getSignals().values()) {
 					lanesOfAllSg.addAll(signal.getLaneIds());
 				}
 			}
-			for (SignalGroup sg : sgs) {
+//			I think the following loop isn't needed since sg is not used and we only have to check if there are tow conflicting lanes in a permutation, pschade Dec 17
+//			for (SignalGroup sg : sgs) {
 				for (Id<Lane> l : lanesOfAllSg) {
-					for (Id<Lane> illegalLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
-						if (lanesOfAllSg.contains(illegalLane)) {
+					boolean hasIllegal = false;
+					for (Id<Lane> conflictingLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
+						if (lanesOfAllSg.contains(conflictingLane)) {
 							illegalGroups.add(sgs);
+							hasIllegal = true;
 							break;
 						}
 					}
+					//if one lane already conflicts with another we can skip further checks and mark this group as illegal, pschade Dec 17
+					if (hasIllegal)
+						break;
 				}
-			}
+//			}
 		}
 		allSignalGroupPerms.removeAll(illegalGroups);
+		//FIXME remove debug output
 		System.err.println("After remove illegal ones: "+allSignalGroupPerms.size());
 		
 		for(ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
@@ -164,6 +177,7 @@ public class PermutateSignalGroups {
 				newPhase.addGreenSignalGroupsAndLanes(sg.getId(), lanes);
 			}
 			validPhases.add(newPhase);
+			//FIXME remove debug output
 			System.out.println(newPhase.toString());
 		}
 		return validPhases;

@@ -93,7 +93,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 		}
 
 		// write header
-		String header = "it\ttotal tt[s]\ttotal delay[s]\ttotal dist[m]\tavg trip speed[m/s]";
+		String header = "it\ttotal tt[s]\ttotal delay[s]\ttotal dist[m]\tavg trip speed[m/s]\ttot stucked agents";
 		this.overallItWritingStream.println(header);
 	}
 
@@ -109,11 +109,11 @@ public final class TtAnalyzedGeneralResultsWriter {
 		double totalDealyIt = handler.getTotalDelay();
 		double totalDistIt = handler.getTotalDistance();
 		double avgTripSpeedIt = handler.getAverageTripSpeed();
-		
+		int stuckedAgents = handler.getstuckedAgents();
 		// write results
 		StringBuffer line = new StringBuffer();
 		line.append(iteration + "\t" + totalTTIt + "\t" + totalDealyIt + "\t" 
-				+ totalDistIt + "\t" + avgTripSpeedIt);
+				+ totalDistIt + "\t" + avgTripSpeedIt + "\t" + stuckedAgents);
 		this.overallItWritingStream.println(line.toString());
 	}
 

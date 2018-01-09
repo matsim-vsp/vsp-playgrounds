@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by nkuehnel on 03.04.2017.
+ * @author nkuehnel, tthunig
  */
 public class LaemmerConfig {
 	
@@ -20,8 +20,13 @@ public class LaemmerConfig {
     private double maxCycleTime = 120;
     private double desiredCycleTime = 70;
 
-    private double defaultIntergreenTime = 5;
-    private double minGreenTime = 0;
+    private double defaultIntergreenTime = 5.0;
+    private double minGreenTime = 0.0;
+    
+    //size of timeBuckets for LaneSensor and LinkSensor
+    private double timeBucketSize = 15.0;
+    //lookBackTime for LaneSensor and LinkSensor
+    private double lookBackTime = 300.0;
 
     private Map<Id<Link>, Double> linkArrivalRates = new HashMap<>();
     private Map<Id<Link>, Map<Id<Lane>,Double>> laneArrivalRates = new HashMap<>();
@@ -120,5 +125,26 @@ public class LaemmerConfig {
 	
 	public boolean isCheckDownstream() {
 		return checkDownstream;
+	}
+
+	public boolean useHeuristicPhaseGeneration() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public double getTimeBucketSize() {
+		return timeBucketSize;
+	}
+
+	public void setTimeBucketSize(double timeBucketSize) {
+		this.timeBucketSize = timeBucketSize;
+	}
+
+	public double getLookBackTime() {
+		return lookBackTime;
+	}
+
+	public void setLookBackTime(double lookBackTime) {
+		this.lookBackTime = lookBackTime;
 	}
 }

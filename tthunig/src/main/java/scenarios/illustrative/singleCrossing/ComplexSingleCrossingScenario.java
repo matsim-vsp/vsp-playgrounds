@@ -76,14 +76,14 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.laemmer.model.LaemmerConfig;
-import signals.laemmer.model.LaemmerSignalController2;
+import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerConfig.Regime;
 
 /**
- * @author tthunig
+ * @author tthunig, pschade
  *
  */
-public class SingleCrossingScenario2 {
+public class ComplexSingleCrossingScenario {
 
 	private String OUTPUT_BASE_DIR = "../../runs-svn/singleCrossingScenario2/";
     private static final int LANE_CAPACITY = 1800;
@@ -93,7 +93,7 @@ public class SingleCrossingScenario2 {
 	public static final Id<SignalGroup> signalGroupId4 = Id.create("SignalGroup4", SignalGroup.class);
 	public static final Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
 
-	private double flowNS = 360;
+	private double flowNS = 1200;
 	private double flowWE = 0.5 * 2520;
 	private boolean useLaemmer = true;
 	private Regime laemmerRegime = Regime.COMBINED;
@@ -105,6 +105,8 @@ public class SingleCrossingScenario2 {
 	private boolean groupedSignals = true;
 	private double minG = 0;
 	private boolean temporalCrowd = false;
+	private double leftTurningFactorNS;
+	private double leftTurningFactorWE;
 
 	public void setFlowNS(double flowNS) {
 		this.flowNS = flowNS;
@@ -157,12 +159,12 @@ public class SingleCrossingScenario2 {
 		this.temporalCrowd = temporalCrowd;
 	}
 	
-	public SingleCrossingScenario2() {}
+	public ComplexSingleCrossingScenario() {}
 	
 	/**
 	 * constructor useful for scenarios without laemmer signals
 	 */
-	public SingleCrossingScenario2(double flowNS, double flowWE, boolean useLaemmer, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
+	public ComplexSingleCrossingScenario(double flowNS, double flowWE, boolean useLaemmer, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
 		this.flowNS = flowNS;
 		this.flowWE = flowWE;
 		this.useLaemmer = useLaemmer;
@@ -174,12 +176,38 @@ public class SingleCrossingScenario2 {
 		this.temporalCrowd = temporalCrowd;
 	}
 	
-	public SingleCrossingScenario2(double flowNS, double flowWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+	public ComplexSingleCrossingScenario(double flowNS, double flowWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
 		this(flowNS, flowWE, useLaemmer, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
 		this.liveArrivalRates = liveArrivalRates;
 		this.minG = minG;
+	}
+
+	/** 
+	 * @param flowNS
+	 * @param leftTurningFactorNS Factor to calculate the flow from flowNS. Left-turning flow will not be subtracted from straight flow
+	 * @param flowWE
+	 * @param leftTurningFactorWE Factor to calculate the flow from flowWE. Left-turning flow will not be subtracted from straight flow
+	 * @param useLaemmer
+	 * @param laemmerRegime
+	 * @param vis
+	 * @param logEnabled
+	 * @param stochastic
+	 * @param lanes
+	 * @param liveArrivalRates
+	 * @param grouped
+	 * @param minG
+	 * @param temporalCrowd
+	 */
+	public ComplexSingleCrossingScenario(double flowNS, double leftTurningFactorNS, double flowWE, double leftTurningFactorWE, boolean useLaemmer, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
+		this(flowNS, flowWE, useLaemmer, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
+		this.laemmerRegime = laemmerRegime;
+		this.liveArrivalRates = liveArrivalRates;
+		this.minG = minG;
+		this.leftTurningFactorNS = leftTurningFactorNS;
+		this.leftTurningFactorWE = leftTurningFactorWE;
 	}
 	
 	public Controler defineControler() {
@@ -188,8 +216,8 @@ public class SingleCrossingScenario2 {
         laemmerConfig.setDefaultIntergreenTime(5);
 
         if(groupedSignals) {
-            laemmerConfig.setDesiredCycleTime(60);
-            laemmerConfig.setMaxCycleTime(90);
+            laemmerConfig.setDesiredCycleTime(90);
+            laemmerConfig.setMaxCycleTime(120);
         } else {
             laemmerConfig.setDesiredCycleTime(120);
             laemmerConfig.setMaxCycleTime(180);
@@ -222,7 +250,7 @@ public class SingleCrossingScenario2 {
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
         createNetwork(scenario.getNetwork());
         if (useLanes) {
-        	SingleCrossingScenario2.createLanes(scenario.getLanes());
+        	ComplexSingleCrossingScenario.createLanes(scenario.getLanes());
         }
         createPopulation(scenario.getPopulation());
         createSignals(scenario, laemmerConfig);
@@ -475,10 +503,14 @@ public class SingleCrossingScenario2 {
     private void createPopulation(Population pop) {
         String[] linksNS = {"6_7-8_9", "9_8-7_6"};
         String[] linksWE = {"5_4-2_1", "1_2-4_5"};
+        String[] linksNSleftTurning = {"6_7-4_5", "8_9-2_1"};
+        String[] linksWEleftTurning = {"1_2-7_6", "5_4-8_9"};
 
         Random rnd = new Random(14);
         createPopulationForRelation(flowNS, pop, linksNS, rnd);
         createPopulationForRelation(flowWE, pop, linksWE, rnd);
+        createPopulationForRelation(flowNS * leftTurningFactorNS, pop, linksNSleftTurning, rnd);
+        createPopulationForRelation(flowWE * leftTurningFactorWE, pop, linksWEleftTurning, rnd);
     }
     
     private void createPopulationForRelation(double flow, Population population, String[] links, Random rnd) {
@@ -497,7 +529,6 @@ public class SingleCrossingScenario2 {
             Map<Double, Integer> insertNAtSecond = new HashMap<>();
             if (stochasticDemand) {
                 for (double i = 0; i < 5400; i++) {
-
                     double expT = 1 - Math.exp(-lambdaT);
                     double p1 = rnd.nextDouble();
                     if (p1 < expT) {
@@ -586,14 +617,15 @@ public class SingleCrossingScenario2 {
 //		We cannot create SignalGroups, as long as there is no information which signals can be groped. Beside that, it seems
 //        to be useless to group signals in simulations, because all signals in a signal groups are always in the same
 //		  state. So for now, one signal group for each signal is created. pschade
-
-          for (Id<Signal> s : signalSystem1.getSignalData().keySet()) {
-        	  SignalGroupData signalGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("SignalGroup"+s.toString(), SignalGroup.class));
-        	  signalGroup.addSignalId(s);
-        	  signalGroups.addSignalGroupData(signalGroup);
-          }
-          // TODO tt: this would do the same:
-//          SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem1);
+//	
+//			older implementation, new below (below tt comment)
+//          for (Id<Signal> s : signalSystem1.getSignalData().keySet()) {
+//        	  SignalGroupData signalGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("SignalGroup"+s.toString(), SignalGroup.class));
+//        	  signalGroup.addSignalId(s);
+//        	  signalGroups.addSignalGroupData(signalGroup);
+//          }
+          // TODO test, if everythink still working. pschade //tt: this would do the same:
+          SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem1);
         	
 //        SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
 //        signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
@@ -704,7 +736,7 @@ public class SingleCrossingScenario2 {
         }
 
 		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
-        signalSystemControl.setControllerIdentifier(LaemmerSignalController2.IDENTIFIER);
+        signalSystemControl.setControllerIdentifier(FullyAdaptiveLaemmerSignalController.IDENTIFIER);
         signalControl.addSignalSystemControllerData(signalSystemControl);
 	}
 	

@@ -45,7 +45,7 @@ import signals.downstreamSensor.DownstreamSensor;
 import signals.gershenson.DgRoederGershensonSignalController;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerSignalController;
-import signals.laemmer.model.LaemmerSignalController2;
+import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.sensor.LinkSensorManager;
 import signals.sylvia.controler.DgSylviaConfig;
 import signals.sylvia.data.DgSylviaPreprocessData;
@@ -73,7 +73,7 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 		signalControlProvider.put(SylviaSignalController.IDENTIFIER, new SylviaSignalController.SignalControlProvider(sylviaConfig, sensorManager, downstreamSensor));
 		signalControlProvider.put(DownstreamPlanbasedSignalController.IDENTIFIER, new DownstreamPlanbasedSignalController.SignalControlProvider(downstreamSensor));
 		signalControlProvider.put(LaemmerSignalController.IDENTIFIER, new LaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
-		signalControlProvider.put(LaemmerSignalController2.IDENTIFIER, new LaemmerSignalController2.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
+		signalControlProvider.put(FullyAdaptiveLaemmerSignalController.IDENTIFIER, new FullyAdaptiveLaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
 		signalControlProvider.put(DgRoederGershensonSignalController.IDENTIFIER, new DgRoederGershensonSignalController.SignalControlProvider(sensorManager, scenario));
 		signalControlProvider.put(AdvancedPlanBasedSignalSystemController.IDENTIFIER, new AdvancedPlanBasedSignalSystemController.SignalControlProvider(sensorManager, delayCalculator));
 	}
