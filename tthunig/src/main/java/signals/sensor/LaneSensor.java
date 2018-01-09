@@ -69,18 +69,20 @@ public final class LaneSensor {
 	 */
 	public void registerDistanceToMonitor(Double distanceMeter){
 		if (! this.doDistanceMonitoring) {
-			this.enableDistanceMonitoring();
+//			this.enableDistanceMonitoring();
+			this.doDistanceMonitoring = true;
+			this.distanceMeterCarLocatorMap = new HashMap<>();
 		}
-		this.distanceMeterCarLocatorMap.put(distanceMeter, new HashMap<Id<Vehicle>, CarLocator>());
+		this.distanceMeterCarLocatorMap.put(distanceMeter, new HashMap<>());
 //		this.inActivityDistanceCarLocatorMap.put(distanceMeter, new HashMap<Id<Vehicle>, CarLocator>());
 	}
 
-	private void enableDistanceMonitoring() {
-		this.doDistanceMonitoring = true;
-		this.distanceMeterCarLocatorMap = new HashMap<Double, Map<Id<Vehicle>, CarLocator>>();
-//		this.link2WaitEventPerVehicleId = new HashMap<Id<Vehicle>, VehicleLeavesTrafficEvent>();
-//		this.inActivityDistanceCarLocatorMap = new HashMap<Double, Map<Id<Vehicle>, CarLocator>>();
-	}
+//	private void enableDistanceMonitoring() {
+//		this.doDistanceMonitoring = true;
+//		this.distanceMeterCarLocatorMap = new HashMap<>();
+////		this.link2WaitEventPerVehicleId = new HashMap<Id<Vehicle>, VehicleLeavesTrafficEvent>();
+////		this.inActivityDistanceCarLocatorMap = new HashMap<Double, Map<Id<Vehicle>, CarLocator>>();
+//	}
 
 	public void handleEvent(LaneLeaveEvent event) {
 		this.agentsOnLane--;
