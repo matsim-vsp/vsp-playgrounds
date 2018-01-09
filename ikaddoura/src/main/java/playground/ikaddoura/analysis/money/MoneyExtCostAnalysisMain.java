@@ -33,10 +33,9 @@ import org.matsim.core.scenario.ScenarioUtils;
  */
 public class MoneyExtCostAnalysisMain {
 
-//	static String outputDirectory = "/Users/ihab/Desktop/ils4a/kaddoura/cne/munich/output/output_run4_muc_cne_DecongestionPID/";
-//	static String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output_final/m_r_output_run4_bln_cne_DecongestionPID/";
-	static String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/berlin_scenario_2016/be_127/";
-
+	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingT/";
+	private String runId = "run5b";
+	
 	public static void main(String[] args) {
 		MoneyExtCostAnalysisMain anaMain = new MoneyExtCostAnalysisMain();
 		anaMain.run();
@@ -48,21 +47,18 @@ public class MoneyExtCostAnalysisMain {
 		if (!outputDirectory.endsWith("/")) {
 			outputDirectory = outputDirectory + "/";
 		}
-	
+			
 		EventsManager eventsManager = EventsUtils.createEventsManager();
 		
 		Config config = ConfigUtils.createConfig();
-//		config.network().setInputFile(outputDirectory + "output_network.xml.gz");
-		config.network().setInputFile(outputDirectory + "be_127.output_network.xml.gz");
+		config.network().setInputFile(outputDirectory + runId + ".output_network.xml.gz");
 		Network network = ScenarioUtils.loadScenario(config).getNetwork();
 		
 		MoneyExtCostHandler handler = new MoneyExtCostHandler(network);
 		eventsManager.addHandler(handler);
 		
 		CombinedPersonLinkMoneyEventsReader reader = new CombinedPersonLinkMoneyEventsReader(eventsManager);
-//		reader.readFile(outputDirectory + "output_events.xml.gz");
-		reader.readFile(outputDirectory + "be_127.output_events.xml.gz");		
-//		reader.readFile(outputDirectory + "ITERS/it.1500/1500.events.xml.gz");
+		reader.readFile(outputDirectory + runId + ".output_events.xml.gz");
 		
 		handler.writeInfo(outputDirectory);
 	} 

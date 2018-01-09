@@ -29,7 +29,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.PersonTripAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysisRun;
 
 /**
 * @author ikaddoura
@@ -93,7 +93,7 @@ public class RunMATSim {
 		
 		// some post processing
 		
-		PersonTripAnalysisRun analysis = new PersonTripAnalysisRun(scenario);
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario);
 		analysis.setCrs(crs);
 		analysis.run();
 	}

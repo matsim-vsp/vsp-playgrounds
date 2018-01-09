@@ -34,10 +34,12 @@ import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
+import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.noise.personLinkMoneyEvents.PersonLinkMoneyEvent;
@@ -48,12 +50,13 @@ import org.matsim.vehicles.Vehicle;
  * @author ikaddoura
  *
  */
-public class MoneyExtCostHandler implements  PersonLinkMoneyEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, LinkLeaveEventHandler, PersonEntersVehicleEventHandler {
+public class MoneyExtCostHandler implements  PersonMoneyEventHandler, PersonLinkMoneyEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, LinkLeaveEventHandler, PersonEntersVehicleEventHandler {
 	private static final Logger log = Logger.getLogger(MoneyExtCostHandler.class);
 
 	private final double timeBinSize = 3600.;
 	
 	private final Map<Integer, Double> timeBin2congestionTollPayments = new HashMap<>();
+	private final Map<Integer, Double> timeBin2moneyPayment = new HashMap<>();
 	private final Map<Integer, Double> timeBin2noiseTollPayments = new HashMap<>();
 	private final Map<Integer, Double> timeBin2airPollutionTollPayments = new HashMap<>();
 	private final Map<Integer, Integer> timeBin2numberOfCarDepartures = new HashMap<>();
@@ -83,85 +86,98 @@ public class MoneyExtCostHandler implements  PersonLinkMoneyEventHandler, Person
 		this.vehicleId2personId.clear();
 		this.timeBin2carTravelTime.clear();
 		this.personId2departureTime.clear();
+		this.timeBin2moneyPayment.clear();
 	}
 	
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
 		
-		if (this.personId2distance.get(this.vehicleId2personId.get(event.getVehicleId())) == null) {
-			this.personId2distance.put(this.vehicleId2personId.get(event.getVehicleId()), network.getLinks().get(event.getLinkId()).getLength());
-		} else {
-			this.personId2distance.put(this.vehicleId2personId.get(event.getVehicleId()), this.personId2distance.get(this.vehicleId2personId.get(event.getVehicleId())) + network.getLinks().get(event.getLinkId()).getLength());
-		}
+		if (isPerson(this.vehicleId2personId.get(event.getVehicleId()))) {
+			if (this.personId2distance.get(this.vehicleId2personId.get(event.getVehicleId())) == null) {
+				this.personId2distance.put(this.vehicleId2personId.get(event.getVehicleId()), network.getLinks().get(event.getLinkId()).getLength());
+			} else {
+				this.personId2distance.put(this.vehicleId2personId.get(event.getVehicleId()), this.personId2distance.get(this.vehicleId2personId.get(event.getVehicleId())) + network.getLinks().get(event.getLinkId()).getLength());
+			}
+		}	
+	
 	}
 	
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
-		if (event.getLegMode().equals(TransportMode.car)) {
-			
-			if (this.timeBin2carTravelDistance.get(getIntervalNr(event.getTime())) == null) {
-				this.timeBin2carTravelDistance.put(getIntervalNr(event.getTime()), this.personId2distance.get(event.getPersonId()));
-			} else {
-				this.timeBin2carTravelDistance.put(getIntervalNr(event.getTime()), this.timeBin2carTravelDistance.get(getIntervalNr(event.getTime())) + this.personId2distance.get(event.getPersonId()));
-			}
-			
-			if (this.timeBin2carTravelTime.get(getIntervalNr(event.getTime())) == null) {
-				this.timeBin2carTravelTime.put(getIntervalNr(event.getTime()), event.getTime() - this.personId2departureTime.get(event.getPersonId()));
-			} else {
-				this.timeBin2carTravelTime.put(getIntervalNr(event.getTime()), this.timeBin2carTravelTime.get(getIntervalNr(event.getTime())) + (event.getTime() - this.personId2departureTime.get(event.getPersonId())));
-			}
-			
-			if (this.timeBin2numberOfCarArrivals.get(getIntervalNr(event.getTime())) == null) {
-				this.timeBin2numberOfCarArrivals.put(getIntervalNr(event.getTime()), 1);
-			} else {
-				this.timeBin2numberOfCarArrivals.put(getIntervalNr(event.getTime()), this.timeBin2numberOfCarArrivals.get(getIntervalNr(event.getTime())) + 1);
+		
+		if (isPerson(event.getPersonId())) {
+			if (event.getLegMode().equals(TransportMode.car)) {
+				
+				if (this.timeBin2carTravelDistance.get(getIntervalNr(event.getTime())) == null) {
+					this.timeBin2carTravelDistance.put(getIntervalNr(event.getTime()), this.personId2distance.get(event.getPersonId()));
+				} else {
+					this.timeBin2carTravelDistance.put(getIntervalNr(event.getTime()), this.timeBin2carTravelDistance.get(getIntervalNr(event.getTime())) + this.personId2distance.get(event.getPersonId()));
+				}
+				
+				if (this.timeBin2carTravelTime.get(getIntervalNr(event.getTime())) == null) {
+					this.timeBin2carTravelTime.put(getIntervalNr(event.getTime()), event.getTime() - this.personId2departureTime.get(event.getPersonId()));
+				} else {
+					this.timeBin2carTravelTime.put(getIntervalNr(event.getTime()), this.timeBin2carTravelTime.get(getIntervalNr(event.getTime())) + (event.getTime() - this.personId2departureTime.get(event.getPersonId())));
+				}
+				
+				if (this.timeBin2numberOfCarArrivals.get(getIntervalNr(event.getTime())) == null) {
+					this.timeBin2numberOfCarArrivals.put(getIntervalNr(event.getTime()), 1);
+				} else {
+					this.timeBin2numberOfCarArrivals.put(getIntervalNr(event.getTime()), this.timeBin2numberOfCarArrivals.get(getIntervalNr(event.getTime())) + 1);
+				}
 			}
 		}
+
 	}
 
 	@Override
 	public void handleEvent(PersonLinkMoneyEvent event) {
 		
-		if (event.getDescription().equalsIgnoreCase("congestion")) {
-			
-			if (this.timeBin2congestionTollPayments.get(getIntervalNr(event.getRelevantTime())) == null) {
-				this.timeBin2congestionTollPayments.put(getIntervalNr(event.getRelevantTime()), event.getAmount());
+		if (isPerson(event.getPersonId())) {
+			if (event.getDescription().equalsIgnoreCase("congestion")) {
+				
+				if (this.timeBin2congestionTollPayments.get(getIntervalNr(event.getRelevantTime())) == null) {
+					this.timeBin2congestionTollPayments.put(getIntervalNr(event.getRelevantTime()), event.getAmount());
+				} else {
+					this.timeBin2congestionTollPayments.put(getIntervalNr(event.getRelevantTime()), this.timeBin2congestionTollPayments.get(getIntervalNr(event.getRelevantTime())) + event.getAmount());
+				}
+				
+			} else if (event.getDescription().equalsIgnoreCase("noise")) {
+				
+				if (this.timeBin2noiseTollPayments.get(getIntervalNr(event.getRelevantTime())) == null) {
+					this.timeBin2noiseTollPayments.put(getIntervalNr(event.getRelevantTime()), event.getAmount());
+				} else {
+					this.timeBin2noiseTollPayments.put(getIntervalNr(event.getRelevantTime()), this.timeBin2noiseTollPayments.get(getIntervalNr(event.getRelevantTime())) + event.getAmount());
+				}
+				
+			} else if (event.getDescription().equalsIgnoreCase("airPollution")) {
+				
+				if (this.timeBin2airPollutionTollPayments.get(getIntervalNr(event.getRelevantTime())) == null) {
+					this.timeBin2airPollutionTollPayments.put(getIntervalNr(event.getRelevantTime()), event.getAmount());
+				} else {
+					this.timeBin2airPollutionTollPayments.put(getIntervalNr(event.getRelevantTime()), this.timeBin2airPollutionTollPayments.get(getIntervalNr(event.getRelevantTime())) + event.getAmount());
+				}
+				
 			} else {
-				this.timeBin2congestionTollPayments.put(getIntervalNr(event.getRelevantTime()), this.timeBin2congestionTollPayments.get(getIntervalNr(event.getRelevantTime())) + event.getAmount());
+				throw new RuntimeException("Unknown money event description. Aborting...");
 			}
-			
-		} else if (event.getDescription().equalsIgnoreCase("noise")) {
-			
-			if (this.timeBin2noiseTollPayments.get(getIntervalNr(event.getRelevantTime())) == null) {
-				this.timeBin2noiseTollPayments.put(getIntervalNr(event.getRelevantTime()), event.getAmount());
-			} else {
-				this.timeBin2noiseTollPayments.put(getIntervalNr(event.getRelevantTime()), this.timeBin2noiseTollPayments.get(getIntervalNr(event.getRelevantTime())) + event.getAmount());
-			}
-			
-		} else if (event.getDescription().equalsIgnoreCase("airPollution")) {
-			
-			if (this.timeBin2airPollutionTollPayments.get(getIntervalNr(event.getRelevantTime())) == null) {
-				this.timeBin2airPollutionTollPayments.put(getIntervalNr(event.getRelevantTime()), event.getAmount());
-			} else {
-				this.timeBin2airPollutionTollPayments.put(getIntervalNr(event.getRelevantTime()), this.timeBin2airPollutionTollPayments.get(getIntervalNr(event.getRelevantTime())) + event.getAmount());
-			}
-			
-		} else {
-			throw new RuntimeException("Unknown money event description. Aborting...");
 		}
 	}
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		if (event.getLegMode().equals(TransportMode.car)) {
-			
-			this.personId2distance.put(event.getPersonId(), 0.);
-			this.personId2departureTime.put(event.getPersonId(), event.getTime());
-			
-			if (this.timeBin2numberOfCarDepartures.get(getIntervalNr(event.getTime())) == null) {
-				this.timeBin2numberOfCarDepartures.put(getIntervalNr(event.getTime()), 1);
-			} else {
-				this.timeBin2numberOfCarDepartures.put(getIntervalNr(event.getTime()), this.timeBin2numberOfCarDepartures.get(getIntervalNr(event.getTime())) + 1);
+		
+		if (isPerson(event.getPersonId())) {
+			if (event.getLegMode().equals(TransportMode.car)) {
+				
+				this.personId2distance.put(event.getPersonId(), 0.);
+				this.personId2departureTime.put(event.getPersonId(), event.getTime());
+				
+				if (this.timeBin2numberOfCarDepartures.get(getIntervalNr(event.getTime())) == null) {
+					this.timeBin2numberOfCarDepartures.put(getIntervalNr(event.getTime()), 1);
+				} else {
+					this.timeBin2numberOfCarDepartures.put(getIntervalNr(event.getTime()), this.timeBin2numberOfCarDepartures.get(getIntervalNr(event.getTime())) + 1);
+				}
 			}
 		}
 	}
@@ -178,7 +194,7 @@ public class MoneyExtCostHandler implements  PersonLinkMoneyEventHandler, Person
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 			
-			bw.write("TimeBin ; TimeBinEndTime ; NumberOfDepartures ; NumberOfArrivals ; TotalTravelTime ; TotalTravelDistance ; CongestionTolls ; NoiseTolls ; AirPollutionTolls");
+			bw.write("TimeBin ; TimeBinEndTime ; NumberOfDepartures ; NumberOfArrivals ; TotalTravelTime ; TotalTravelDistance ; CongestionTolls ; NoiseTolls ; AirPollutionTolls ; Tolls/Fares");
 			bw.newLine();
 			
 			for (int n = 0; n <= 30 ; n++) {
@@ -190,6 +206,7 @@ public class MoneyExtCostHandler implements  PersonLinkMoneyEventHandler, Person
 				double congestionTolls = 0.;
 				double noiseTolls = 0.;
 				double airPollutionTolls = 0.;
+				double tollFare = 0.;
 				
 				if (timeBin2numberOfCarDepartures.get(n) != null) {
 					departures = timeBin2numberOfCarDepartures.get(n);
@@ -219,7 +236,11 @@ public class MoneyExtCostHandler implements  PersonLinkMoneyEventHandler, Person
 					airPollutionTolls = -1 * timeBin2airPollutionTollPayments.get(n);
 				}
 				
-				bw.write(n + " ; " + (n + 1) * this.timeBinSize + " ; " + departures + " ; " + arrivals + " ; " + travelTime + " ; " + distance + " ; " + congestionTolls + " ; " + noiseTolls + " ; " + airPollutionTolls);
+				if (timeBin2moneyPayment.get(n) != null) {
+					tollFare = -1 * timeBin2moneyPayment.get(n);
+				}
+				
+				bw.write(n + " ; " + (n + 1) * this.timeBinSize + " ; " + departures + " ; " + arrivals + " ; " + travelTime + " ; " + distance + " ; " + congestionTolls + " ; " + noiseTolls + " ; " + airPollutionTolls + " ; " + tollFare);
 				bw.newLine();
 			}
 			
@@ -234,5 +255,24 @@ public class MoneyExtCostHandler implements  PersonLinkMoneyEventHandler, Person
 	@Override
 	public void handleEvent(PersonEntersVehicleEvent event) {
 		this.vehicleId2personId.put(event.getVehicleId(), event.getPersonId());
+	}
+
+	@Override
+	public void handleEvent(PersonMoneyEvent event) {
+		if (isPerson(event.getPersonId())) {
+			if (this.timeBin2moneyPayment.get(getIntervalNr(event.getTime())) == null) {
+				this.timeBin2moneyPayment.put(getIntervalNr(event.getTime()), event.getAmount());
+			} else {
+				this.timeBin2moneyPayment.put(getIntervalNr(event.getTime()), this.timeBin2moneyPayment.get(getIntervalNr(event.getTime())) + event.getAmount());
+			}
+		}
+	}
+
+	private boolean isPerson(Id<Person> personId) {
+		if (personId.toString().startsWith("rt") || personId.toString().startsWith("taxi")) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

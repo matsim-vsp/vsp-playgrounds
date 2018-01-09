@@ -60,8 +60,8 @@ import playground.ikaddoura.decongestion.handler.DelayAnalysis;
  * 
  * 
  */
-public class PersonTripAnalysisRun {
-	private static final Logger log = Logger.getLogger(PersonTripAnalysisRun.class);
+public class IKAnalysisRun {
+	private static final Logger log = Logger.getLogger(IKAnalysisRun.class);
 
 	private final String runDirectory;
 	private final String runId;
@@ -83,11 +83,11 @@ public class PersonTripAnalysisRun {
 			log.info("Run directory " + runDirectory);
 		}
 		
-		PersonTripAnalysisRun analysis = new PersonTripAnalysisRun(runDirectory, null);
+		IKAnalysisRun analysis = new IKAnalysisRun(runDirectory, null);
 		analysis.run();
 	}
 	
-	public PersonTripAnalysisRun(String runDirectory, String runId) {
+	public IKAnalysisRun(String runDirectory, String runId) {
 		
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
 		
@@ -112,7 +112,7 @@ public class PersonTripAnalysisRun {
 		this.scenario = ScenarioUtils.loadScenario(config);
 	}
 	
-	public PersonTripAnalysisRun(Scenario scenario) {
+	public IKAnalysisRun(Scenario scenario) {
 		
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
