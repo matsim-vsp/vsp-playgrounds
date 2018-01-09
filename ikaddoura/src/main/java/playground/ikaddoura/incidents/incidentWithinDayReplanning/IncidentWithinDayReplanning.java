@@ -39,7 +39,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
-import playground.ikaddoura.analysis.PersonTripAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.incidents.NetworkChangeEventsUtils;
 
 /**
@@ -60,7 +60,7 @@ public class IncidentWithinDayReplanning {
 	private final boolean reducePopulationToAffectedAgents = false;
 	private final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
 	
-	private final boolean applyNetworkChangeEvents = false;
+	private final boolean applyNetworkChangeEvents = true;
 	private final boolean applyWithinDayReplanning = true;
 	private final int withinDayReplanInterval = 300;
 	
@@ -160,7 +160,7 @@ public class IncidentWithinDayReplanning {
 				
 		controler.run();		
 		
-		PersonTripAnalysisRun analysis = new PersonTripAnalysisRun(scenario);
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario);
 		analysis.setCrs(crs);
 		analysis.run();
 	}
