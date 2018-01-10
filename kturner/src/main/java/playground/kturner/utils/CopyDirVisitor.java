@@ -8,6 +8,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import org.apache.log4j.Logger;
+
 /**
  * @author kturner
  *
@@ -20,6 +22,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 
 public class CopyDirVisitor extends SimpleFileVisitor<Path> {
+	
+	private static final Logger log = Logger.getLogger(CopyDirVisitor.class) ;
+	
     private Path fromPath;
     private Path toPath;
     private StandardCopyOption copyOption;
@@ -34,18 +39,22 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
      * 			Destination path to were files and directories should be copied to.
      * @param copyOption
      * 			Defines the copyOption.
+     * @throws IOException 
      * 
      */
-    public CopyDirVisitor(Path fromPath, Path toPath, StandardCopyOption copyOption) {
+    public CopyDirVisitor(Path fromPath, Path toPath, StandardCopyOption copyOption) throws IOException {
         this.fromPath = fromPath;
         this.toPath = toPath;
         this.copyOption = copyOption;
         
+        if (!Files.exists(toPath)){
+        	Files.createDirectory(toPath);
+        	log.info("Created directory: " + toPath.toString());
+        }
     }
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-        toPath.getFileName().toFile().mkdirs();
     	Path targetPath = toPath.resolve(fromPath.relativize(dir));
         if (!Files.exists(targetPath)) {
             Files.createDirectory(targetPath);
