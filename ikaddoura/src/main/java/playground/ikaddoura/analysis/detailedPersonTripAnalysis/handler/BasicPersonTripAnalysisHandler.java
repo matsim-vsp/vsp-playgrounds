@@ -134,6 +134,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 		taxiDrivers.clear();
 		taxiVehicleId2totalDistance.clear();
 		carVehicleId2totalDistance.clear();
+		personId2stuckAndAbortEvents.clear();
 	}
 	
 	@Override
