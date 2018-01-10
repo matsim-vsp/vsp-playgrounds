@@ -83,6 +83,8 @@ import org.matsim.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.vehicles.VehicleType;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
+import com.graphhopper.jsprit.io.algorithm.VehicleRoutingAlgorithms;
+import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.graphhopper.jsprit.core.util.Solutions;
@@ -146,7 +148,7 @@ public class KTFreight_v3 {
 
 	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/UCC1/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/jsprit/Grid/newImports/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
@@ -185,13 +187,13 @@ public class KTFreight_v3 {
 
 
 	// Einstellungen für den Run	
-	private static final boolean addingCongestion = true ;  //uses NetworkChangeEvents to reduce freespeed.
-	private static final boolean addingToll = true;  //added, kt. 07.08.2014
-	private static final boolean usingUCC = true;	 //Using Transshipment-Center, added kt 30.04.2015
-	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
+	private static final boolean addingCongestion = false ;  //uses NetworkChangeEvents to reduce freespeed.
+	private static final boolean addingToll = false;  //added, kt. 07.08.2014
+	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
+	private static final boolean runMatsim = false;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
 	private static final int MAX_JSPRIT_ITERATION = 4000;
-	private static final int NU_OF_TOTAL_RUNS = 2;	
+	private static final int NU_OF_TOTAL_RUNS = 10;	
 
 	//temporär zum Programmieren als Ausgabe
 	private static WriteTextToFile textInfofile; 
@@ -413,7 +415,7 @@ public class KTFreight_v3 {
 			vrpBuilder.setRoutingCost(netBasedCosts) ;
 			VehicleRoutingProblem vrp = vrpBuilder.build() ;
 
-			VehicleRoutingAlgorithm algorithm = VehicleRoutingAlgorithms.readAndCreateAlgorithm(vrp,ALGORITHMFILE);
+			VehicleRoutingAlgorithm algorithm = VehicleRoutingAlgorithms.readAndCreateAlgorithm(vrp, ALGORITHMFILE);
 			algorithm.setMaxIterations(MAX_JSPRIT_ITERATION);
 
 			VehicleRoutingProblemSolution solution = Solutions.bestOf(algorithm.searchSolutions());
