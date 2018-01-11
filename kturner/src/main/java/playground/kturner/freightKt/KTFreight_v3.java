@@ -221,12 +221,13 @@ public class KTFreight_v3 {
 			e.printStackTrace();
 		}
 
-		log.info("#### End of all runs --Y Finished ####");
+		log.info("#### End of all runs ####");
 		OutputDirectoryLogging.closeOutputDirLogging(); 
 
 		//Merge logfiles
 		Files.walkFileTree(FileSystems.getDefault().getPath(LOG_DIR), new MergeFileVisitor(new File(LOG_DIR + "logfile.log"), true) );
 		Files.walkFileTree(FileSystems.getDefault().getPath(LOG_DIR), new MergeFileVisitor(new File(LOG_DIR + "logfileWarningsErrors.log"), true) );
+		System.out.println("#### Finished ####");
 	}
 
 
