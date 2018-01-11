@@ -27,10 +27,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -46,7 +47,9 @@ public class ZoneAndLOSGeneratorV2 {
 
 	// Storage objects
 	private final Set<String> municipalities = new HashSet<>();
-	private final List<String> zones = new LinkedList<>();
+	// to exclude any duplicates using Set instead of List. It is a possibility:
+	// in a shape files: two isolated zones = two polygons = two simple features. Amit Jan'18
+	private final Set<String> zones = new LinkedHashSet<>();
 	private final Map<String, Geometry> zoneMap = new HashMap<>();
 	private final Map<String, Map<String, Double>> zone2ZoneDistanceMap = new HashMap<>();
 	private final Map<String, Map<String, Integer>> zone2ZoneAdjacencyMap = new HashMap<>();
@@ -60,7 +63,7 @@ public class ZoneAndLOSGeneratorV2 {
 	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
 
 	// spatial refinement. Amit Nov'17
-	private List<String> municipalityIDsForSpatialRefinement;
+	private List<String> zoneIdsForSpatialRefinement; // this is filled if shape file for spatial refinement is provided.
 	private double defaultIntraZoneDistanceForSpatialRefinement;
 	
 	public static void main(String[] args) {
@@ -380,7 +383,7 @@ public class ZoneAndLOSGeneratorV2 {
 	}
 
 	private double getIntraZonalDistance(String municipalityId){
-		if (this.municipalityIDsForSpatialRefinement!=null && this.municipalityIDsForSpatialRefinement.contains(municipalityId)) {
+		if (this.zoneIdsForSpatialRefinement !=null && this.zoneIdsForSpatialRefinement.contains(municipalityId)) {
 			return this.defaultIntraZoneDistanceForSpatialRefinement;
 		} else {
 			return this.defaultIntraZoneDistance;
@@ -401,10 +404,6 @@ public class ZoneAndLOSGeneratorV2 {
 		this.defaultIntraZoneDistanceForSpatialRefinement = defaultIntraZoneDistanceForSpatialRefinement;
 	}
 
-	public void setMunicipalityIDsForSpatialRefinement(List<String> municipalityIDsForSpatialRefinement) {
-		this.municipalityIDsForSpatialRefinement = municipalityIDsForSpatialRefinement;
-	}
-
 	public void setBeelineDistanceFactor(double beelineDistanceFactor) {
     	this.beelineDistanceFactor = beelineDistanceFactor;
     }
@@ -423,4 +422,14 @@ public class ZoneAndLOSGeneratorV2 {
 	public void setCostDistanceRatio_USD_mile(double costDistanceRatio_USD_mile) {
     	this.costDistanceRatio_USD_mile = costDistanceRatio_USD_mile;
     }
+
+    public void setShapeFileForRefinement(String shapeFileForSpatialRefinement, String featureKeyInShapeFileForRefinement){
+		LOG.info("Using spatial refinement...");
+		this.zoneIdsForSpatialRefinement = ShapeFileReader
+				.getAllFeatures(shapeFileForSpatialRefinement)
+				.stream()
+				.map(feature -> feature.getAttribute(featureKeyInShapeFileForRefinement).toString())
+				.collect(Collectors.toList());
+		readShape(shapeFileForSpatialRefinement, featureKeyInShapeFileForRefinement);
+	}
 }

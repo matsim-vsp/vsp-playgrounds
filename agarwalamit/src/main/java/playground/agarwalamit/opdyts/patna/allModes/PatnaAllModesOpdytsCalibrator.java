@@ -87,6 +87,7 @@ public class PatnaAllModesOpdytsCalibrator {
 		String OUT_DIR = null;
 		String relaxedPlans ;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
+		boolean useConfigRandomSeed = true;
 
 		double stepSize = 1.0;
 		int iterations2Convergence = 800;
@@ -106,6 +107,7 @@ public class PatnaAllModesOpdytsCalibrator {
 			iterations2Convergence = Integer.valueOf(args[5]);
 			selfTuningWt = Double.valueOf(args[6]);
 			warmUpItrs = Integer.valueOf(args[7]);
+			useConfigRandomSeed = Boolean.valueOf(args[8]);
 
 			if (args.length>8) patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.valueOf(args[8]);
 		} else {
@@ -123,9 +125,11 @@ public class PatnaAllModesOpdytsCalibrator {
 		config.controler().setOutputDirectory(OUT_DIR);
 
 		// from GF, every run should have a different random seed.
-		int randomSeed = new Random().nextInt(9999);
-		config.global().setRandomSeed(randomSeed);
-
+		if (!useConfigRandomSeed) {
+			int randomSeed = new Random().nextInt(9999);
+			config.global().setRandomSeed(randomSeed);
+		}
+		
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 

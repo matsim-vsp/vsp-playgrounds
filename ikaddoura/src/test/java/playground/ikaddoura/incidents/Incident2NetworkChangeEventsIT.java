@@ -40,6 +40,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.testcases.MatsimTestUtils;
 
+import playground.ikaddoura.incidents.data.DateTime;
+
 /**
  * @author ikaddoura
  *
@@ -62,7 +64,7 @@ public class Incident2NetworkChangeEventsIT {
 
 		String crs = TransformationFactory.DHDN_GK4;
 		
-		IncidentDataAnalysis analysis = new IncidentDataAnalysis(
+		IncidentData2MATSim analysis = new IncidentData2MATSim(
 				networkFile,
 				crs,
 				inputDirectory,

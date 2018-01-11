@@ -70,7 +70,8 @@ public class LaemmerSignalController extends AbstractSignalController implements
     private final double DEFAULT_INTERGREEN;
     
     private double tIdle;
-    private double flowSum;
+    // TODO this should also be a constant (s. signalOutflowCapacity below). tt, dez'17
+    private double systemOutflowCapacity;
 
 
     public final static class SignalControlProvider implements Provider<SignalController> {
@@ -132,7 +133,9 @@ public class LaemmerSignalController extends AbstractSignalController implements
         if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
             updateActiveRegulation(now);
         }
-        updateSignals(now);
+        for (LaemmerSignal signal : laemmerSignals) {
+            signal.update(now);
+        }
         
         // TODO test what happens, when I move this up to the first line of this method. should save runtime. tt, dez'17
         // note: stabilization has still to be done to increment 'a'... tt, dez'17
@@ -147,6 +150,9 @@ public class LaemmerSignalController extends AbstractSignalController implements
         processSelection(now, selection);
     }
 
+    /**
+     * checks whether the active regulation (stabilization) has to be stopped (i.e. removed from the regulation queue)
+     */
     private void updateActiveRegulation(double now) {
         if (activeRequest != null && !regulationQueue.isEmpty() && regulationQueue.peek().equals(activeRequest.signal)) {
             LaemmerSignal signal = regulationQueue.peek();
@@ -205,22 +211,18 @@ public class LaemmerSignalController extends AbstractSignalController implements
 		}
     }
 
-    private void updateSignals(double now) {
-        for (LaemmerSignal signal : laemmerSignals) {
-            signal.update(now);
-            // this is already done in updateStabilization in LaemmerSignal called by the above, theresa jul'17
-//            if (signal.stabilize && !regulationQueue.contains(signal)) {
-//                regulationQueue.add(signal);
-//            }
-        }
-    }
-
+    /**
+     * updates the parameters needed for calculation:
+     * 1. determines the current representative driveway of each signal
+     * 2. sums up the outflow capacity of all signals of the system
+     * 3. calculates the remaining cycle time tIdle
+     */
     private void updateRepresentativeDriveways(double now) {
-        flowSum = 0;
+        systemOutflowCapacity = 0;
         tIdle = laemmerConfig.getDesiredCycleTime();
         for (LaemmerSignal signal : laemmerSignals) {
             signal.determineRepresentativeDriveway(now);
-            flowSum += signal.outflowSum;
+            systemOutflowCapacity += signal.signalOutflowCapacity;
             tIdle -= Math.max(signal.determiningLoad * laemmerConfig.getDesiredCycleTime() + DEFAULT_INTERGREEN, laemmerConfig.getMinGreenTime());
         }
         tIdle = Math.max(0, tIdle);
@@ -338,7 +340,8 @@ public class LaemmerSignalController extends AbstractSignalController implements
         private Id<Link> determiningLink;
         private double determiningArrivalRate;
         private double determiningLoad;
-        private double outflowSum;
+        // TODO isn't this a constant? theresa, dez'17
+        private double signalOutflowCapacity;
 
         LaemmerSignal(SignalGroup signalGroup) {
             this.group = signalGroup;
@@ -348,14 +351,14 @@ public class LaemmerSignalController extends AbstractSignalController implements
             this.determiningLoad = 0;
             this.determiningLink = null;
             this.determiningLane = null;
-            this.outflowSum = 0;
+            this.signalOutflowCapacity = 0;
             for (Signal signal : group.getSignals().values()) {
                 if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
                     for (Id<Lane> laneId : signal.getLaneIds()) {
                         double arrivalRate = getAverageLaneArrivalRate(now, signal.getLinkId(), laneId);
-                        double outflow = lanes.getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId).getCapacityVehiclesPerHour() * config.qsim().getFlowCapFactor() / 3600;
-                        outflowSum += outflow;
-                        double tempLoad = arrivalRate / outflow;
+                        double laneOutflow = lanes.getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId).getCapacityVehiclesPerHour() * config.qsim().getFlowCapFactor() / 3600;
+                        signalOutflowCapacity += laneOutflow;
+                        double tempLoad = arrivalRate / laneOutflow;
                         if (tempLoad >= this.determiningLoad) {
                             this.determiningLoad = tempLoad;
                             this.determiningArrivalRate = arrivalRate;
@@ -365,10 +368,10 @@ public class LaemmerSignalController extends AbstractSignalController implements
                     }
                 } else {
                     sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
-                    double outflow = network.getLinks().get(signal.getLinkId()).getCapacity() * config.qsim().getFlowCapFactor() / 3600;
-                    outflowSum += outflow;
+                    double linkOutflow = network.getLinks().get(signal.getLinkId()).getCapacity() * config.qsim().getFlowCapFactor() / 3600;
+                    signalOutflowCapacity += linkOutflow;
                     double arrivalRate = getAverageArrivalRate(now, signal.getLinkId());
-                    double tempLoad = arrivalRate / outflow;
+                    double tempLoad = arrivalRate / linkOutflow;
                     if (tempLoad >= this.determiningLoad) {
                         this.determiningLoad = tempLoad;
                         this.determiningArrivalRate = arrivalRate;
@@ -528,7 +531,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
 					regulationQueue.add(this);
 					// signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" +
 					// tIdle);
-					this.regulationTime = Math.max(Math.rint(determiningLoad * laemmerConfig.getDesiredCycleTime() + (outflowSum / flowSum) * Math.max(tIdle, 0)), laemmerConfig.getMinGreenTime());
+					this.regulationTime = Math.max(Math.rint(determiningLoad * laemmerConfig.getDesiredCycleTime() + (signalOutflowCapacity / systemOutflowCapacity) * tIdle), laemmerConfig.getMinGreenTime());
 					this.stabilize = true;
 				}
             }

@@ -52,7 +52,7 @@ public class NetworkChangeEventsUtils {
 		
 		for (NetworkChangeEvent nce : NetworkUtils.getNetworkChangeEvents(network)) {
 			for (Link link : nce.getLinks()) {
-				if (!incidentLinkIds.contains(link)) {
+				if (!incidentLinkIds.contains(link.getId())) {
 					incidentLinkIds.add(link.getId());
 				}
 			}
@@ -63,41 +63,6 @@ public class NetworkChangeEventsUtils {
 		
 		return incidentLinkIds;
 	}
-
-//	public static void reducePopulationToAgentsDrivingAlongSpecificLinks(final Scenario scenario, Set<Id<Link>> linkIDs) {
-//
-//		for ( Iterator<? extends Person> it = scenario.getPopulation().getPersons().values().iterator() ; it.hasNext() ; ) {
-//			Person person = it.next() ;
-//			
-//			boolean agentDrivesAlongSpecificLink = false;
-//			for ( Leg leg : TripStructureUtils.getLegs( person.getSelectedPlan() ) ) {
-//				
-//				if (leg.getMode().equals(TransportMode.car)) {
-//					
-//					if ( leg.getRoute() instanceof NetworkRoute ) {					
-//						
-//						NetworkRoute route = (NetworkRoute) leg.getRoute() ;
-//						
-//						for (Id<Link> linkId : linkIDs) {
-//							if (route.getLinkIds().contains(linkId)) {
-//								agentDrivesAlongSpecificLink = true;
-//								break;	// no need to go through all other link IDs						
-//							}
-//						}
-//						
-//						break; // no need to go through all other legs
-//						
-//					} else {					
-//						log.warn("This car trip has no network route: " + leg.toString() + " Aborting...");
-//					}		
-//				}
-//			}
-//			
-//			if (!agentDrivesAlongSpecificLink) {
-//				it.remove(); 
-//			}
-//		}		
-//	}
 	
 	public static void filterPopulation(final Scenario scenario, Set<Id<Person>> personIdsToKeepInPopulation) {
 

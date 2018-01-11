@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.analysis.moneyGIS;
+package playground.ikaddoura.analysis.gisAnalysis;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,19 +58,19 @@ import com.vividsolutions.jts.geom.Point;
  * @author ikaddoura
  *
  */
-public class TollGISAnalyzer {
+public class GISAnalyzer {
 	
 	private final String homeActivity;
 	private final int scalingFactor;
 		
-	private static final Logger log = Logger.getLogger(TollGISAnalyzer.class);
+	private static final Logger log = Logger.getLogger(GISAnalyzer.class);
 	private Map<Integer, SimpleFeature> features = new HashMap<>();
 	private Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
 	private String zonesCRS;
 	private String fileName;
 	private CoordinateTransformation ct;
 
-	public TollGISAnalyzer(
+	public GISAnalyzer(
 			String shapeFileZones,
 			int scalingFactor,
 			String homeActivity,

@@ -74,10 +74,10 @@ public class AnalysisControlerListener implements IterationEndsListener {
 	@Inject
 	private BasicPersonTripAnalysisHandler basicHandler;
 	
-	@Inject
+	@Inject(optional=true)
 	private NoiseAnalysisHandler noiseHandler;
 	
-	@Inject
+	@Inject(optional=true)
 	private PersonMoneyLinkHandler moneyHandler;
 	
 	@Inject(optional=true)
@@ -129,7 +129,7 @@ public class AnalysisControlerListener implements IterationEndsListener {
 		this.iteration2userBenefits.put(event.getIteration(), userBenefits);
 		this.iteration2totalTollPayments.put(event.getIteration(), basicHandler.getTotalPaymentsByPersons());
 		this.iteration2totalTravelTime.put(event.getIteration(), basicHandler.getTotalTravelTimeByPersons());
-		this.iteration2totalNoiseDamages.put(event.getIteration(), noiseHandler.getAffectedNoiseCost());
+		if (noiseHandler != null) this.iteration2totalNoiseDamages.put(event.getIteration(), noiseHandler.getAffectedNoiseCost());
 						
 		writeIterationStats(
 				this.iteration2userBenefits,
@@ -158,10 +158,14 @@ public class AnalysisControlerListener implements IterationEndsListener {
 
 		for (int i = this.scenario.getConfig().controler().getFirstIteration(); i <= event.getIteration(); i++) {
 			iterations2[i] = i;
-			values2a[i] = this.iteration2userBenefits.get(i) + this.iteration2totalTollPayments.get(i) - this.iteration2totalNoiseDamages.get(i);
+			double noiseDamages = 0.;
+			if ((iteration2totalNoiseDamages != null) && (!iteration2totalNoiseDamages.isEmpty())) {
+				noiseDamages = this.iteration2totalNoiseDamages.get(i);
+			}
+			values2a[i] = this.iteration2userBenefits.get(i) + this.iteration2totalTollPayments.get(i) - noiseDamages;
 			values2b[i] = this.iteration2userBenefits.get(i);
 			values2c[i] = this.iteration2totalTollPayments.get(i);
-			values2d[i] = this.iteration2totalNoiseDamages.get(i);
+			values2d[i] = noiseDamages;
 		}
 		chart2.addSeries("System welfare", iterations2, values2a);
 		chart2.addSeries("User benefits", iterations2, values2b);
@@ -174,7 +178,11 @@ public class AnalysisControlerListener implements IterationEndsListener {
 		double[] values3 = new double[event.getIteration() + 1];
 		for (int i = this.scenario.getConfig().controler().getFirstIteration(); i <= event.getIteration(); i++) {
 			iterations3[i] = i;
-			values3[i] = this.iteration2totalNoiseDamages.get(i);
+			double noiseDamages = 0.;
+			if ((iteration2totalNoiseDamages != null) && (!iteration2totalNoiseDamages.isEmpty())) {
+				noiseDamages = this.iteration2totalNoiseDamages.get(i);
+			}
+			values3[i] = noiseDamages;
 		}
 		chart3.addSeries("Noise damages", iterations3, values3);
 		chart3.saveAsPng(runDirectory + "noiseDamages.png", 800, 600);
@@ -197,12 +205,16 @@ public class AnalysisControlerListener implements IterationEndsListener {
 			bw.newLine();
 			
 			for (Integer iteration : iteration2userBenefits.keySet()) {
+				double noiseDamages = 0.;
+				if ( (iteration2totalNoiseDamages != null) && (!iteration2totalNoiseDamages.isEmpty()) ) {
+					noiseDamages = iteration2totalNoiseDamages.get(iteration);
+				}
 				bw.write(iteration + " ; "
 						+ iteration2userBenefits.get(iteration) + " ; "
 						+ iteration2totalTollPayments.get(iteration) + " ; "
 						+ iteration2totalTravelTime.get(iteration) / 3600. + " ; "
-						+ iteration2totalNoiseDamages.get(iteration) + ";"
-						+ (iteration2totalTollPayments.get(iteration) + iteration2userBenefits.get(iteration) - iteration2totalNoiseDamages.get(iteration))
+						+ noiseDamages  + ";"
+						+ (iteration2totalTollPayments.get(iteration) + iteration2userBenefits.get(iteration) - noiseDamages)
 						);
 				bw.newLine();
 			}

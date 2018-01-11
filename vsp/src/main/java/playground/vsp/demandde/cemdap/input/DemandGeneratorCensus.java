@@ -162,7 +162,7 @@ public class DemandGeneratorCensus {
 //			this.spatialRefinementZoneIds = readShape();
 			//initialize with given municipality ids
 			// Technically, one can get the list of municipality IDs for spatial refinement from features in provided shape file.
-			// Howver, it is better to take IDs as argument to exclude some municipality from the given shape. Amit Nov'17
+			// However, it is better to take IDs as argument to exclude some municipality from the given shape. Amit Nov'17
 			this.idsOfMunicipalityForSpatialRefinement.stream().forEach(e->spatialRefinementZoneIds.put(e, new ArrayList<>()));
 			readShape();
 		} else {
