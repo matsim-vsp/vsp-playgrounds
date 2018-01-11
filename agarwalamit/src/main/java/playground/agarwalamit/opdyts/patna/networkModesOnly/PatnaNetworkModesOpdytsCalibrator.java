@@ -74,6 +74,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		String OUT_DIR = null;
 		String relaxedPlans ;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
+		boolean useConfigRandomSeed = true;
 
 		double stepSize = 1.0;
 		int iterations2Convergence = 800;
@@ -91,6 +92,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 			iterations2Convergence = Integer.valueOf(args[5]);
 			selfTuningWt = Double.valueOf(args[6]);
 			warmUpItrs = Integer.valueOf(args[7]);
+			useConfigRandomSeed = Boolean.valueOf(args[8]);
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/input/config_networkModesOnly.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/output/";
@@ -104,8 +106,10 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		config.controler().setOutputDirectory(OUT_DIR);
 
 		// from GF, every run should have a different random seed.
-		int randomSeed = new Random().nextInt(9999);
-		config.global().setRandomSeed(randomSeed);
+		if (!useConfigRandomSeed) {
+			int randomSeed = new Random().nextInt(9999);
+			config.global().setRandomSeed(randomSeed);
+		}
 
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
