@@ -367,7 +367,6 @@ public class LaemmerSignalController extends AbstractSignalController implements
                         }
                     }
                 } else {
-                    sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
                     double linkOutflow = network.getLinks().get(signal.getLinkId()).getCapacity() * config.qsim().getFlowCapFactor() / 3600;
                     signalOutflowCapacity += linkOutflow;
                     double arrivalRate = getAverageArrivalRate(now, signal.getLinkId());
