@@ -55,25 +55,49 @@ import org.matsim.counts.CountsReaderMatsimV1;
 public class CreateNetFromOSMKeepingCountLinks {
 	
 	private static Logger log = Logger.getLogger(CreateNetFromOSMKeepingCountLinks.class);
-
-	private static final String INPUT_OSMFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/allWaysNRW.osm";
 	
+	/*
+	 * there are two usecases for this class. in either case, you want to create a new matsim network out of an osm file
+	 * keeping links and that counts (in the old network) lie on, so you don't have to rematch count stations.
+	 * 
+	 * 1) you have an osm-file, and a csv file (see method readNodeIDsFromCSV for needed structure) that contains information
+	 * 	  about count location.
+	 * 		=> set the field variable readNodeIDsFromCSV = true 
+	 * 
+	 * 2) you have an osm-file, and you have the old network file as well as the old count file
+	 * 		=> => set the field variable readNodeIDsFromCSV = false		
+	 */
+
+	
+	//-------------------INPUT---------------------------------------
+	
+	private static final String INPUT_OSMFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/allWaysNRW.osm";
+
+	//--------USECASE 1)-------------------
 	private static final String INPUT_COUNT_NODES= "C:/Users/Work/svn/shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/counts-osm-mapping/2017-06-17/OSM-nodes.csv";
+	
+	//--------USECASE 2)-------------------
+	private static final String  PATH_OLD_NETFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/tertiaryNemo_10112017_EPSG_25832_filteredcleaned_network.xml.gz";
+	private static final String PATH_OLD_COUNTSFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/counts/24112017/NemoCounts_data_allCounts_KFZ.xml";
+	
+	
+	//--------------------OUTPUT----------------------------------------------------
 	private static final String OUTPUT_NETWORK = "C:/Users/Work/VSP/OSM/testNetCreatorKeepingCountLinksFromOldCOuntsFile.xml";
+	
+	
+	//----------------GENERAL SETTINGS-------------------------------------------
+	//set true, if csv file is given that contains information about count location. set to false if an old network and counts file is given, to extract the info from.
+	private static boolean readNodeIDsFromCSV = false;
 	
 	private static final boolean keepPaths = false;
 	
 	//at the moment, the simplifier is not considered to be stable in term of creating gapless networks, tschlenther dec' 17
 	private static final boolean doSimplify = false;
 	
-	//set true, if csv file is given that contains information about count location. set to false if an old network and counts file is given, to extract the info from.
-	private static boolean readNodeIDsFromCSV = false;
-	
-	private static final String  PATH_OLD_NETFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/tertiaryNemo_10112017_EPSG_25832_filteredcleaned_network.xml.gz";
-	private static final String PATH_OLD_COUNTSFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/counts/24112017/NemoCounts_data_allCounts_KFZ.xml";
-	
 	private static final CoordinateTransformation TRANSFORMATION = 
 			TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, TransformationFactory.WGS84_UTM33N);
+	
+	
 	/**
 	 * @param args
 	 */
