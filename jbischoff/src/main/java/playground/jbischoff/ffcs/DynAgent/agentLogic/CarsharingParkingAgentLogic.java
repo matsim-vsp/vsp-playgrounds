@@ -73,8 +73,8 @@ public class CarsharingParkingAgentLogic extends ParkingAgentLogic {
 	 * @param parkingLogic
 	 * @param timer
 	 * @param teleportationLogic
-	 * @param FreefloatingCarsharingManager
-	 * @param FFCSConfigGroup
+	 * @param ffcmanager
+	 * @param ffcsconfig
 	 */
 	public CarsharingParkingAgentLogic(Plan plan, ParkingSearchManager parkingManager, WalkLegFactory walkLegFactory,
 			ParkingRouter parkingRouter, EventsManager events, ParkingSearchLogic parkingLogic, MobsimTimer timer,
