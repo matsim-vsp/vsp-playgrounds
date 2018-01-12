@@ -24,6 +24,7 @@ package playground.tschlenther.createNetwork.OSM;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -52,10 +53,13 @@ import org.matsim.counts.CountsReaderMatsimV1;
  *
  */
 public class CreateNetFromOSMKeepingCountLinks {
+	
+	private static Logger log = Logger.getLogger(CreateNetFromOSMKeepingCountLinks.class);
 
-	private static final String INPUT_OSMFILE = "C:/Users/Work/svn/shared-svn/studies/fzwick/berlinHighways.osm";
+	private static final String INPUT_OSMFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/allWaysNRW.osm";
+	
 	private static final String INPUT_COUNT_NODES= "C:/Users/Work/svn/shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/counts-osm-mapping/2017-06-17/OSM-nodes.csv";
-	private static final String OUTPUT_NETWORK = "C:/Users/Work/VSP/OSM/testFull.xml";
+	private static final String OUTPUT_NETWORK = "C:/Users/Work/VSP/OSM/testNetCreatorKeepingCountLinksFromOldCOuntsFile.xml";
 	
 	private static final boolean keepPaths = false;
 	
@@ -63,10 +67,10 @@ public class CreateNetFromOSMKeepingCountLinks {
 	private static final boolean doSimplify = false;
 	
 	//set true, if csv file is given that contains information about count location. set to false if an old network and counts file is given, to extract the info from.
-	private static boolean readNodeIDsFromCSV = true;
+	private static boolean readNodeIDsFromCSV = false;
 	
-	private static String  pathToOldNetworkFile = "";
-	private static String pathToCountsFile = "";
+	private static String  pathToOldNetworkFile = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/tertiaryNemo_10112017_EPSG_25832_filteredcleaned_network.xml.gz";
+	private static String pathToCountsFile = "C:/Users/Work/git/NEMO-gitfat/data/input/counts/24112017/NemoCounts_data_allCounts_KFZ.xml";
 	
 	/**
 	 * @param args
@@ -77,7 +81,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 	
 	
 	private static void readAndWrite(){
-	
+		//set the coordinate system you want the network to be translated to as second parameter
 		CoordinateTransformation ct = 
 			 TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, TransformationFactory.WGS84_UTM33N);
 		
@@ -119,6 +123,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 	
 	
 	private static Set<Long> readNodeIDsFromOldNet(String pathToOldNetworkFile, String pathToCountsFile) {
+		log.info("start reading in node id's by using old network and counts file...");
 		Set<Long> allNodeIDs = new HashSet<Long>();
 		
 		//read in Network
@@ -137,7 +142,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 			allNodeIDs.add(parseNodeID(net.getLinks().get(id).getToNode().getId()));
 		}
 		
-		
+		log.info("finished reading in node id's ...");
 		return allNodeIDs;
 	}
 
@@ -157,6 +162,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 	 * @return
 	 */
 	private static Set<Long> readNodeIDsFromCSV(String pathToCSVFile, String delimiter){
+		log.info("start reading in node id's from given csv file...");
 		Set<Long> allNodeIDs = new HashSet<Long>();
 		
 		TabularFileParserConfig config = new TabularFileParserConfig();
@@ -173,6 +179,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 				header = false;				
 			}
 		});
+	    log.info("finished reading in node id's from given csv file...");
 	    return allNodeIDs;
 		
 	}
