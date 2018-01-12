@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.incidents;
+package playground.ikaddoura.incidents.data;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,8 +29,6 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import playground.ikaddoura.incidents.data.TrafficItem;
 
 /** 
 * Provides the MATSim interpretation of traffic incident codes and some log information.

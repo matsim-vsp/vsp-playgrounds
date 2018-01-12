@@ -1,4 +1,4 @@
-package playground.ikaddoura.analysis.moneyGIS;
+package playground.ikaddoura.analysis.gisAnalysis;
 /* *********************************************************************** *
  * project: org.matsim.*
  *                                                                         *
@@ -41,31 +41,35 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPer
  * @author ikaddoura
  *
  */
-public class TollGISAnalyzerMain {
+public class GISAnalyzerMain {
 	
-//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
 //	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
 //	private final String runId = "run0";
 	
-	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run1";
+	
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run2b";
+	
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run3b";
+	
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingF/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run4b";
+	
+//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingT/";
+//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
+//	private final String runId = "run5b";
+	
+	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v5000_SAVuserOpCostPricingT_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
 	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
-	private final String runId = "run1";
-	
-//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
-//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
-//	private final String runId = "run2";
-	
-//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingT_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
-//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
-//	private final String runId = "run3";
-	
-//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingF/";
-//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
-//	private final String runId = "run4";
-	
-//	private final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v10000_SAVuserOpCostPricingT_SAVuserExtCostPricingT_SAVdriverExtCostPricingT_CCuserExtCostPricingT/";
-//	private final String scenarioCRS = TransformationFactory.DHDN_GK4;
-//	private final String runId = "run5";
+	private final String runId = "run6b";
 	
 	// ####
 	
@@ -84,10 +88,10 @@ public class TollGISAnalyzerMain {
 	private final String homeActivity = "home";
 	private final int scalingFactor = 10;
 	
-	private static final Logger log = Logger.getLogger(TollGISAnalyzerMain.class);
+	private static final Logger log = Logger.getLogger(GISAnalyzerMain.class);
 	
 	public static void main(String[] args) throws IOException {
-		TollGISAnalyzerMain main = new TollGISAnalyzerMain();
+		GISAnalyzerMain main = new GISAnalyzerMain();
 		main.run();
 	}
 		
@@ -153,13 +157,13 @@ public class TollGISAnalyzerMain {
 		}
 		
 		log.info("Analyzing zones...");
-		TollGISAnalyzer gisAnalysis = new TollGISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS, runId + "." + outputFileName);
+		GISAnalyzer gisAnalysis = new GISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS, runId + "." + outputFileName);
 		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll(), personId2travelTime, mode2personId2trips );
 		log.info("Analyzing zones... Done.");
 	}
 	
 	private Scenario loadScenario() {
-		Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml.gz");
+		Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
 		config.network().setInputFile(runDirectory + runId + ".output_network.xml.gz");
 		config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
 		config.plans().setInputPersonAttributeFile(null);

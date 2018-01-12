@@ -38,9 +38,9 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-import playground.ikaddoura.incidents.DateTime;
-import playground.ikaddoura.incidents.TMCAlerts;
+import playground.ikaddoura.incidents.data.DateTime;
 import playground.ikaddoura.incidents.data.NetworkIncident;
+import playground.ikaddoura.incidents.data.TMCAlerts;
 import playground.ikaddoura.incidents.data.TrafficItem;
 
 /**

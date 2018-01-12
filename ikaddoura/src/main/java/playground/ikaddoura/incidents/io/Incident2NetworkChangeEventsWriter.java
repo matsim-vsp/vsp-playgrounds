@@ -45,9 +45,9 @@ import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.ikaddoura.incidents.DateTime;
-import playground.ikaddoura.incidents.TMCAlerts;
+import playground.ikaddoura.incidents.data.DateTime;
 import playground.ikaddoura.incidents.data.NetworkIncident;
+import playground.ikaddoura.incidents.data.TMCAlerts;
 import playground.ikaddoura.incidents.data.TrafficItem;
 
 /**
@@ -120,12 +120,12 @@ public class Incident2NetworkChangeEventsWriter {
 			Map<Id<Link>, List<NetworkIncident>> linkI2rawIncidentsCurrentDayShortterm = processLongtermIncidents(linkId2rawIncidentsCurrentDay, outputNetwork, dateInSec, outputDirectory);
 			
 			// process shortterm incidents, i.e. account for several network changes on the same link
-			Map<Id<Link>, List<NetworkIncident>> linkId2processedIncidentsCurrentDay = processShorttermIncidents(linkI2rawIncidentsCurrentDayShortterm);
+			Map<Id<Link>, List<NetworkIncident>> linkId2processedIncidentsCurrentDay = processShorttermIncidents(linkI2rawIncidentsCurrentDayShortterm, outputNetwork);
 			Incident2CSVWriter.writeProcessedNetworkIncidents(linkId2processedIncidentsCurrentDay, outputDirectory + "processedNetworkIncidents_" + DateTime.secToDateString(dateInSec) + ".csv");
 			Incident2SHPWriter.writeDailyIncidentLinksToShapeFile(linkId2processedIncidentsCurrentDay, outputDirectory, dateInSec, crs);
 						
 			// write shortterm incidents to network change events
-			networkChangeEvents = getNetworkChangeEvents(linkId2processedIncidentsCurrentDay);
+			networkChangeEvents = getNetworkChangeEvents(linkId2processedIncidentsCurrentDay, outputNetwork);
 			new NetworkChangeEventsWriter().write(outputDirectory + "networkChangeEvents_" + DateTime.secToDateString(dateInSec) + ".xml.gz", networkChangeEvents);
 			
 			dateInSec = dateInSec + 24 * 3600.;
@@ -134,7 +134,7 @@ public class Incident2NetworkChangeEventsWriter {
 		log.info("Writing network change events and network files completed.");		
 	}
 	
-	private List<NetworkChangeEvent> getNetworkChangeEvents(Map<Id<Link>, List<NetworkIncident>> linkId2processedIncidentsCurrentDay) {
+	private List<NetworkChangeEvent> getNetworkChangeEvents(Map<Id<Link>, List<NetworkIncident>> linkId2processedIncidentsCurrentDay, Network outputNetwork) {
 		
 		List<NetworkChangeEvent> networkChangeEvents = new ArrayList<>();
 		
@@ -179,13 +179,13 @@ public class Incident2NetworkChangeEventsWriter {
 				}
 				
 				if (setBackToOriginalValues) {
-					// incident end: set back to original values
+					// incident end: set back to original values (network which accounts for long-terme effects)
 					NetworkChangeEvent nceEnd = new NetworkChangeEvent(incident.getEndTime());
-					nceEnd.addLink(incident.getLink());
+					nceEnd.addLink(outputNetwork.getLinks().get(linkId));
 					
-					nceEnd.setFlowCapacityChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, Math.round((incident.getLink().getCapacity() / 3600.) * 1000) / 1000.0));
-					nceEnd.setFreespeedChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, incident.getLink().getFreespeed()));
-					nceEnd.setLanesChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, incident.getLink().getNumberOfLanes()));
+					nceEnd.setFlowCapacityChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, Math.round((outputNetwork.getLinks().get(linkId).getCapacity() / 3600.) * 1000) / 1000.0));
+					nceEnd.setFreespeedChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, outputNetwork.getLinks().get(linkId).getFreespeed()));
+					nceEnd.setLanesChange(new ChangeValue(ChangeType.ABSOLUTE_IN_SI_UNITS, outputNetwork.getLinks().get(linkId).getNumberOfLanes()));
 					
 					networkChangeEvents.add(nceEnd);
 				}
@@ -249,7 +249,7 @@ public class Incident2NetworkChangeEventsWriter {
 		return processedLink2NI;
 	}
 
-	private Map<Id<Link>, List<NetworkIncident>> processShorttermIncidents(Map<Id<Link>, List<NetworkIncident>> linkId2rawIncidentsCurrentDay) {
+	private Map<Id<Link>, List<NetworkIncident>> processShorttermIncidents(Map<Id<Link>, List<NetworkIncident>> linkId2rawIncidentsCurrentDay, Network outputNetwork) {
 		
 		log.info("Processing the network incidents...");
 		
@@ -271,7 +271,7 @@ public class Incident2NetworkChangeEventsWriter {
 				if (debug) log.warn("	" + ni.toString());
 			}
 					
-			List<NetworkIncident> processedIncidents = processIncidents(linkId2rawIncidentsCurrentDay.get(linkId));
+			List<NetworkIncident> processedIncidents = processIncidents(linkId2rawIncidentsCurrentDay.get(linkId), outputNetwork.getLinks().get(linkId));
 			linkId2linkIncidentsProcessed.put(linkId, processedIncidents);	
 					
 			if (debug) log.warn("##### Processed incidents:");
@@ -285,7 +285,7 @@ public class Incident2NetworkChangeEventsWriter {
 		return linkId2linkIncidentsProcessed;
 	}
 	
-	private List<NetworkIncident> processIncidents(List<NetworkIncident> incidents) {
+	private List<NetworkIncident> processIncidents(List<NetworkIncident> incidents, Link link) {
 		List<NetworkIncident> incidentsProcessed = new ArrayList<>();
 		incidentsProcessed.addAll(incidents);
 
@@ -310,7 +310,7 @@ public class Incident2NetworkChangeEventsWriter {
 				
 		// split overlaps
 		if (incidentsProcessed.size() > 1) {
-			incidentsProcessed = breakOverlappingIntervals(incidentsProcessed);
+			incidentsProcessed = breakOverlappingIntervals(incidentsProcessed, link);
 			if (debug) log.warn("	> After breaking overlapping incidents:");
 			for (NetworkIncident ni : incidentsProcessed) {
 				if (debug) log.warn("		>> " + ni.toString());
@@ -349,7 +349,7 @@ public class Incident2NetworkChangeEventsWriter {
 		return incidentsProcessed;
 	}
 
-	private static List<NetworkIncident> breakOverlappingIntervals( List<NetworkIncident> incidents ) {
+	private static List<NetworkIncident> breakOverlappingIntervals( List<NetworkIncident> incidents, Link link ) {
 
 	    TreeMap<Integer,Integer> endPoints = new TreeMap<>();
 
@@ -400,7 +400,10 @@ public class Incident2NetworkChangeEventsWriter {
 	    				incidentLink = incident.getIncidentLink();
 	    				id = incident.getId();
 	    			} else {
-	    				incidentLink = getMoreRestrictiveIncidentLink(incidentLink, incident.getIncidentLink());
+	    				
+	    				incidentLink = getMoreRestrictiveIncidentLink(incidentLink, incident.getIncidentLink()); // get the most restrictive short-term incident
+	    				incidentLink = getMoreRestrictiveIncidentLink(incidentLink, link); // make sure the incident is not less restrictive than the normal network (long-term incidents)
+	    			
 	    				id = id + "+" + incident.getId();
 	    			}
 	    			

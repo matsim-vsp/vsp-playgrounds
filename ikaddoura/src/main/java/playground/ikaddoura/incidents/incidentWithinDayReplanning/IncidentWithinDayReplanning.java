@@ -36,8 +36,10 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
+import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.incidents.NetworkChangeEventsUtils;
 
 /**
@@ -48,44 +50,30 @@ public class IncidentWithinDayReplanning {
 
 // ############################################################################################################################################
 
-	private static String day = "2016-02-11";
-//	private static String day = "2016-03-15";
+	private final String day = "2016-02-11";
+//	private final String day = "2016-03-15";
 	
-	private static String configFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/config.xml";
-	private static String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_";
-
-	private static final boolean reducePopulationToAffectedAgents = false;
-	private static final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
+	private final String configFile = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/input/config_short-term.xml";
+	private final String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/output/output_departureTimeInterval_";
+	private final String runId = "run1";
 	
-	private static boolean applyNetworkChangeEvents = true;
-	private static boolean applyWithinDayReplanning = true;
-	private static boolean onlyReplanDirectlyAffectedAgents = false;
-	private static int withinDayReplanInterval = 1800;
+	private final boolean reducePopulationToAffectedAgents = false;
+	private final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
+	
+	private final boolean applyNetworkChangeEvents = true;
+	private final boolean applyWithinDayReplanning = true;
+	private final int withinDayReplanInterval = 300;
+	
+	private final String crs = TransformationFactory.DHDN_GK4;
 		
 // ############################################################################################################################################
 	
-	private static final Logger log = Logger.getLogger(IncidentWithinDayReplanning.class);
+	private final Logger log = Logger.getLogger(IncidentWithinDayReplanning.class);
 	
 	public static void main(String[] args) {
 		
 		if (args.length > 0) {
-			configFile = args[0];		
-			log.info("configFile: "+ configFile);
-			
-			runOutputBaseDirectory = args[1];
-			log.info("runOutputBaseDirectory: "+ runOutputBaseDirectory);
-			
-			applyNetworkChangeEvents = Boolean.parseBoolean(args[2]);
-			log.info("applyNetworkChangeEvents: "+ applyNetworkChangeEvents);
-			
-			applyWithinDayReplanning = Boolean.parseBoolean(args[3]);
-			log.info("applyWithinDayReplanning: "+ applyWithinDayReplanning);
-			
-			onlyReplanDirectlyAffectedAgents = Boolean.parseBoolean(args[4]);
-			log.info("onlyReplanDirectlyAffectedAgents: "+ onlyReplanDirectlyAffectedAgents);
-			
-			withinDayReplanInterval = Integer.parseInt(args[5]);
-			log.info("withinDayReplanInterval: "+ withinDayReplanInterval);
+			throw new RuntimeException("Not implemented. Aborting...");
 		}
 		
 		IncidentWithinDayReplanning incidentWithinDayReplanning = new IncidentWithinDayReplanning();
@@ -94,15 +82,15 @@ public class IncidentWithinDayReplanning {
 
 	private void run() {
 		
-//		final Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup());
 		final Config config = ConfigUtils.loadConfig(configFile);
+		
+		config.controler().setRunId(runId);
 
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 
 		config.controler().setOutputDirectory(runOutputBaseDirectory + day
 				+ "_networkChangeEvents-" + applyNetworkChangeEvents
 				+ "_withinDayReplanning-" + applyWithinDayReplanning
-				+ "_onlyReplanDirectlyAffectedAgents-" + onlyReplanDirectlyAffectedAgents
 				+ "_replanInterval-" + withinDayReplanInterval
 				+ "/");
 		
@@ -120,7 +108,7 @@ public class IncidentWithinDayReplanning {
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		final Controler controler = new Controler(scenario);
-		controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+		controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
 		
 		if (reducePopulationToAffectedAgents) {
 			log.warn("Reduced population should only be used for testing purposes.");
@@ -144,9 +132,11 @@ public class IncidentWithinDayReplanning {
 			analyzedModes.add(TransportMode.car);
 			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 		
-			IncidentBestRouteMobsimListener incidentMobsimListener = new IncidentBestRouteMobsimListener();
-			incidentMobsimListener.setOnlyReplanDirectlyAffectedAgents(onlyReplanDirectlyAffectedAgents);
-			incidentMobsimListener.setWithinDayReplanInterval(withinDayReplanInterval);
+//			Set<Id<Link>> links = NetworkChangeEventsUtils.getIncidentLinksFromNetworkChangeEventsFile(scenario);
+//			Set<Id<Person>> personIds = NetworkChangeEventsUtils.getPersonIDsOfAgentsDrivingAlongSpecificLinks(scenario, links);
+			Set<Id<Person>> personIds = scenario.getPopulation().getPersons().keySet();
+			
+			WithinDayReplanningDepartureTimeIntervals incidentMobsimListener = new WithinDayReplanningDepartureTimeIntervals(personIds, withinDayReplanInterval);
 			
 			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
@@ -154,17 +144,13 @@ public class IncidentWithinDayReplanning {
 					
 					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
+					this.addEventHandlerBinding().toInstance(incidentMobsimListener);
 					
 					this.bind(TravelTime.class).toInstance(travelTime);
 					this.addEventHandlerBinding().toInstance(travelTime);
-					this.addMobsimListenerBinding().toInstance(travelTime);
-					
-//					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-//					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
-//					
+					this.addMobsimListenerBinding().toInstance(travelTime);			
 				}
 			}) ;
-//			controler.addOverridingModule(new DvrpTravelTimeModule());
 			
 		} else {
 			if (applyNetworkChangeEvents) {
@@ -173,6 +159,10 @@ public class IncidentWithinDayReplanning {
 		}
 				
 		controler.run();		
+		
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario);
+		analysis.setCrs(crs);
+		analysis.run();
 	}
 	
 }

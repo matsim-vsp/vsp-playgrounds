@@ -34,8 +34,9 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripBasicAnalysisRun;
+import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 
 /**
@@ -102,8 +103,9 @@ public class DecongestionRunFromConfig {
 	
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists);
         controler.run();
-        
-        PersonTripBasicAnalysisRun analysis = new PersonTripBasicAnalysisRun(outputDirectory);
+		
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario);
+		analysis.setCrs(TransformationFactory.DHDN_GK4);
 		analysis.run();
 	}
 }

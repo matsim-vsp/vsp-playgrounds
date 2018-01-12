@@ -37,6 +37,8 @@ import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
+import playground.ikaddoura.incidents.data.DateTime;
+import playground.ikaddoura.incidents.data.TMCAlerts;
 import playground.ikaddoura.incidents.data.TrafficItem;
 import playground.ikaddoura.incidents.io.HereMapsTrafficItemXMLReader;
 import playground.ikaddoura.incidents.io.Incident2CSVWriter;
@@ -46,17 +48,17 @@ import playground.ikaddoura.incidents.io.Incident2SHPWriter;
 /**
  * @author ikaddoura
  * 
- * This class analyzes incidents and writes them into a csv and a shapefile.
+ * This class writes traffic incident data into a csv files, shapefiles, network change events (shortterm effects) and a network file (longterm effects).
  *
  */
-public class IncidentDataAnalysis {
-	private final Logger log = Logger.getLogger(IncidentDataAnalysis.class);
+public class IncidentData2MATSim {
+	private final Logger log = Logger.getLogger(IncidentData2MATSim.class);
 
-	private String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/be_251.output_network.xml.gz";
+	private String networkFile = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/input/be_251.output_network.xml.gz";
 	private String crs = TransformationFactory.DHDN_GK4;
 	
 	private String inputDirectory = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/incidents/server/output-berlin/incidentData_berlin_2016-02/";
-	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/input/LongtermVsShortterm_incidentData_berlin_2016-02/";
+	private String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/input/longterm-vs-shortterm_incidentData_berlin_2016-02-11/";
 	
 	private boolean writeCSVFileForEachXMLFile = false;
 	
@@ -70,15 +72,15 @@ public class IncidentDataAnalysis {
 
 	public static void main(String[] args) throws XMLStreamException, IOException, ParseException {
 		
-		IncidentDataAnalysis incidentAnalysis = new IncidentDataAnalysis();
+		IncidentData2MATSim incidentAnalysis = new IncidentData2MATSim();
 		incidentAnalysis.run();	
 	}
 	
-	public IncidentDataAnalysis() {
+	public IncidentData2MATSim() {
 		log.info("Using the default constructor...");
 	}
 	
-	public IncidentDataAnalysis(
+	public IncidentData2MATSim(
 			String networkFile,
 			String crs,
 			String inputDirectory,

@@ -30,7 +30,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class LinkDemandAnalysisRun {
 	
-	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT";
+	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT";
 	private String runId = "run1";
 	private String outputDirectory;
 	private String taxiPrefix = "rt";
@@ -50,7 +50,7 @@ public class LinkDemandAnalysisRun {
 			outputDirectory = outputDirectory + "/";
 		}
 	
-		Config config = ConfigUtils.loadConfig(outputDirectory + runId + ".output_config.xml.gz");
+		Config config = ConfigUtils.loadConfig(outputDirectory + runId + ".output_config.xml");
 		config.plans().setInputFile(null);
 		config.plans().setInputPersonAttributeFile(null);
 		config.network().setChangeEventsInputFile(null);

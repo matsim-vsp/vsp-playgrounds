@@ -29,6 +29,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.testcases.MatsimTestUtils;
 
+import playground.ikaddoura.incidents.data.DateTime;
+
 /**
  * @author ikaddoura
  *

@@ -56,6 +56,7 @@ import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup.TravelTimeCalculatorType;
@@ -139,7 +140,7 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap07MSRand // same as prev, but with signals MS_RANDOM_OFFSETS
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_DOUBLE_GROUPS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -149,7 +150,7 @@ public class TtRunCottbusSimulation {
 		ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_MS, // all MS systems as downstream with MS basis, rest downstream with green basis
 		ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_GREEN, // all systems inside envelope downstream with green basis
 		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with green basis, rest all green
-		LAEMMER
+		LAEMMER_NICO_GROUPS, MS_FIXED_LAEMMER_GROUPS, LAEMMER_DOUBLE_GROUPS
 	}
 	
 	// defines which kind of pricing should be used
@@ -159,7 +160,7 @@ public class TtRunCottbusSimulation {
 	}
 	
 	private static final boolean USE_OPDYTS = false;
-	private static final boolean VIS = true;
+	private static final boolean VIS = false;
 	
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
@@ -196,6 +197,7 @@ public class TtRunCottbusSimulation {
 			OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
 			otfvisConfig.setDrawTime(true);
 			otfvisConfig.setAgentSize(80f);
+			config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
 		}
 		
 		Scenario scenario = prepareScenario( config );
@@ -423,12 +425,19 @@ public class TtRunCottbusSimulation {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
 				break;
-			case LAEMMER:
+			case LAEMMER_DOUBLE_GROUPS:
 				// overwrite signal groups
-//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases.xml"); // TODO
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases.xml");
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;
+			case LAEMMER_NICO_GROUPS:
+//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases.xml");
 //				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases_6.xml");
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;				
+			case MS_FIXED_LAEMMER_GROUPS:
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_laemmerFixedGroups.xml");
 				break;
 			}
 		}
@@ -749,7 +758,8 @@ public class TtRunCottbusSimulation {
 			laemmerConfig.setAnalysisEnabled(false);
 			laemmerConfig.setDesiredCycleTime(90);
 			laemmerConfig.setMaxCycleTime(135);
-//			laemmerConfig.setMinGreenTime(5);
+			laemmerConfig.setMinGreenTime(5);
+			laemmerConfig.setCheckDownstream(true);
 			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 		}

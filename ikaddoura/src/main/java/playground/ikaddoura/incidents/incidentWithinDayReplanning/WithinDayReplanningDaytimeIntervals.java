@@ -23,7 +23,6 @@ package playground.ikaddoura.incidents.incidentWithinDayReplanning;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,20 +54,20 @@ import org.matsim.withinday.utils.EditRoutes;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.incidents.NetworkChangeEventsUtils;
-
 /**
+ * Within-day replan all registered and traveling agents in regular time intervals,
+ * e.g. at time = 600, 1200, 1800, ...
+ * 
  * @author nagel, ikaddoura
  *
  */
-public class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListener, IterationStartsListener {
+public class WithinDayReplanningDaytimeIntervals implements MobsimBeforeSimStepListener, IterationStartsListener {
 
-	private static final Logger log = Logger.getLogger(IncidentBestRouteMobsimListener.class);
+	private static final Logger log = Logger.getLogger(WithinDayReplanningDaytimeIntervals.class);
 	
-	private int withinDayReplanInterval = 3600;
-	private boolean onlyReplanDirectlyAffectedAgents = true;
-
-	private Set<Id<Person>> withinDayReplanningAgents = new HashSet<>();
+	private final int withinDayReplanInterval;
+	private final Set<Id<Person>> withinDayReplanningAgents;
+	
 	private EditRoutes editRoutes;
 	private int modifiedRoutesCounter;
 	private int reRouteSameRouteCounter;
@@ -85,7 +84,19 @@ public class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListe
 	@Inject
 	private Map<String, TravelDisutilityFactory> travelDisutilityFactories;
 	
-	public IncidentBestRouteMobsimListener() {		
+	public WithinDayReplanningDaytimeIntervals(Set<Id<Person>> personIds, int withinDayReplanInterval) {
+		
+		this.withinDayReplanningAgents = personIds;
+		this.withinDayReplanInterval = withinDayReplanInterval;
+		
+		log.info("****** Considering " + withinDayReplanningAgents.size() + " agents for within-day replanning...");
+				
+		if (withinDayReplanningAgents.isEmpty()) {
+			throw new RuntimeException("****** No agent considered for replanning. Either re-route all agents or use the time variant network. Aborting...");
+		} else {
+			log.info("****** Re-routing " + withinDayReplanningAgents.size() + " agents every " + this.withinDayReplanInterval + " seconds.");
+		}
+		
 		log.info("****** Within-day replanning interval: " + withinDayReplanInterval);
 	}
 
@@ -210,46 +221,7 @@ public class IncidentBestRouteMobsimListener implements MobsimBeforeSimStepListe
 
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
-		
 		this.editRoutes = new EditRoutes(scenario.getNetwork(), pathAlgoFactory.createPathCalculator(scenario.getNetwork(), this.travelDisutilityFactories.get(TransportMode.car).createTravelDisutility(travelTime), travelTime), scenario.getPopulation().getFactory());
-		
-		log.info("****** Iteration starts. Computing the agents to be considered for within-day replanning...");
-		
-		withinDayReplanningAgents.clear();
-		
-		if (onlyReplanDirectlyAffectedAgents) {
-			log.info("****** Only re-routing agents driving along an incident link...");
-			Set<Id<Link>> incidentLinkIds = NetworkChangeEventsUtils.getIncidentLinksFromNetworkChangeEventsFile(scenario);
-			withinDayReplanningAgents.addAll(NetworkChangeEventsUtils.getPersonIDsOfAgentsDrivingAlongSpecificLinks(scenario, incidentLinkIds));
-			
-			if (withinDayReplanningAgents.isEmpty()) {
-				throw new RuntimeException("****** No agent considered for replanning. Either re-route all agents or use the time variant network. Aborting...");
-			} else {
-				log.info("****** Re-routing " + withinDayReplanningAgents.size() + " agents every " + this.withinDayReplanInterval + " seconds.");
-			}
-			
-		} else {
-			log.info("****** Re-routing all agents every " + this.withinDayReplanInterval + " seconds.");
-			withinDayReplanningAgents.addAll(this.scenario.getPopulation().getPersons().keySet());
-		}
-	}
-	
-	public int getWithinDayReplanInterval() {
-		return withinDayReplanInterval;
-	}
-
-	public void setWithinDayReplanInterval(int withinDayReplanInterval) {
-		log.info("Setting within-day replanning interval to " +  withinDayReplanInterval);
-		this.withinDayReplanInterval = withinDayReplanInterval;
-	}
-
-	public boolean isOnlyReplanDirectlyAffectedAgents() {
-		return onlyReplanDirectlyAffectedAgents;
-	}
-
-	public void setOnlyReplanDirectlyAffectedAgents(boolean onlyReplanDirectlyAffectedAgents) {
-		log.info("Setting 'onlyReplanDirectlyAffectedAgents' to " +  onlyReplanDirectlyAffectedAgents);
-		this.onlyReplanDirectlyAffectedAgents = onlyReplanDirectlyAffectedAgents;
 	}
 
 }

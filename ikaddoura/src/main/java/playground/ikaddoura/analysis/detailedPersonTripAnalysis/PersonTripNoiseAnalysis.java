@@ -130,8 +130,10 @@ public class PersonTripNoiseAnalysis {
 				double causedNoiseCost = 0.;
 				double affectedNoiseCost = 0.;
 				
-				if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
-					affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+				if (noiseHandler != null) {
+					if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
+						affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+					}
 				}
 				
 				if (basicHandler.getPersonId2tripNumber2legMode().containsKey(id)) {
@@ -141,8 +143,10 @@ public class PersonTripNoiseAnalysis {
 							tollPayments = tollPayments + basicHandler.getPersonId2tripNumber2payment().get(id).get(trip);
 						}
 						
-						if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
-							causedNoiseCost = causedNoiseCost + noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip);
+						if (noiseHandler != null) {
+							if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
+								causedNoiseCost = causedNoiseCost + noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip);
+							}
 						}
 						
 						if (ignoreModes || basicHandler.getPersonId2tripNumber2legMode().get(id).get(trip).equals(mode)) {
@@ -304,24 +308,32 @@ public class PersonTripNoiseAnalysis {
 							tollPayment = String.valueOf(basicHandler.getPersonId2tripNumber2payment().get(id).get(trip));
 						}
 						
-						String congestionTollPayment = "0";
-						if (moneyHandler.getPersonId2tripNumber2congestionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).containsKey(trip)) {
-							congestionTollPayment = String.valueOf(moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).get(trip));
+						String congestionTollPayment = "unknown";						
+						if (moneyHandler != null) {
+							if (moneyHandler.getPersonId2tripNumber2congestionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).containsKey(trip)) {
+								congestionTollPayment = String.valueOf(moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).get(trip));
+							}
 						}
 						
-						String noiseTollPayment = "0";
-						if (moneyHandler.getPersonId2tripNumber2noisePayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2noisePayment().get(id).containsKey(trip)) {
-							noiseTollPayment = String.valueOf(moneyHandler.getPersonId2tripNumber2noisePayment().get(id).get(trip));
+						String noiseTollPayment = "unknown";
+						if (moneyHandler != null) {
+							if (moneyHandler.getPersonId2tripNumber2noisePayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2noisePayment().get(id).containsKey(trip)) {
+								noiseTollPayment = String.valueOf(moneyHandler.getPersonId2tripNumber2noisePayment().get(id).get(trip));
+							}
 						}
 						
-						String airPollutionTollPayment = "0";
-						if (moneyHandler.getPersonId2tripNumber2airPollutionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).containsKey(trip)) {
-							airPollutionTollPayment = String.valueOf(moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).get(trip));
+						String airPollutionTollPayment = "unknown";
+						if (moneyHandler != null) {
+							if (moneyHandler.getPersonId2tripNumber2airPollutionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).containsKey(trip)) {
+								airPollutionTollPayment = String.valueOf(moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).get(trip));
+							}
 						}
 						
-						String causedNoiseCost = "0";
-						if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
-							causedNoiseCost = String.valueOf(noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip));
+						String causedNoiseCost = "unknown";
+						if (noiseHandler != null) {
+							if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
+								causedNoiseCost = String.valueOf(noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip));
+							}
 						}
 						
 						bw.write(id + ";"
@@ -389,8 +401,10 @@ public class PersonTripNoiseAnalysis {
 			
 			for (Id<Person> id : basicHandler.getScenario().getPopulation().getPersons().keySet()) {
 				
-				if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
-					affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+				if (noiseHandler != null) {
+					if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
+						affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+					}
 				}
 				
 				if (basicHandler.getPersonId2tripNumber2legMode().containsKey(id)) {
@@ -619,8 +633,10 @@ public class PersonTripNoiseAnalysis {
 			
 			for (Id<Person> id : basicHandler.getScenario().getPopulation().getPersons().keySet()) {
 				
-				if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
-					affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+				if (noiseHandler != null) {
+					if (noiseHandler.getPersonId2affectedNoiseCost().containsKey(id)) {
+						affectedNoiseCost = affectedNoiseCost + noiseHandler.getPersonId2affectedNoiseCost().get(id);
+					}
 				}
 				
 				if (basicHandler.getPersonId2tripNumber2legMode().containsKey(id)) {
@@ -641,20 +657,24 @@ public class PersonTripNoiseAnalysis {
 							moneyPaymentsByUsers = moneyPaymentsByUsers + basicHandler.getPersonId2tripNumber2payment().get(id).get(trip);
 						}
 						
-						if (moneyHandler.getPersonId2tripNumber2congestionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).containsKey(trip)) {
-							congestionPayments = congestionPayments + moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).get(trip);
+						if (moneyHandler != null) {
+							if (moneyHandler.getPersonId2tripNumber2congestionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).containsKey(trip)) {
+								congestionPayments = congestionPayments + moneyHandler.getPersonId2tripNumber2congestionPayment().get(id).get(trip);
+							}
+							
+							if (moneyHandler.getPersonId2tripNumber2noisePayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2noisePayment().get(id).containsKey(trip)) {
+								noisePayments = noisePayments + moneyHandler.getPersonId2tripNumber2noisePayment().get(id).get(trip);
+							}
+							
+							if (moneyHandler.getPersonId2tripNumber2airPollutionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).containsKey(trip)) {
+								airPollutionPayments = airPollutionPayments + moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).get(trip);
+							}
 						}
 						
-						if (moneyHandler.getPersonId2tripNumber2noisePayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2noisePayment().get(id).containsKey(trip)) {
-							noisePayments = noisePayments + moneyHandler.getPersonId2tripNumber2noisePayment().get(id).get(trip);
-						}
-						
-						if (moneyHandler.getPersonId2tripNumber2airPollutionPayment().containsKey(id) && moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).containsKey(trip)) {
-							airPollutionPayments = airPollutionPayments + moneyHandler.getPersonId2tripNumber2airPollutionPayment().get(id).get(trip);
-						}
-						
-						if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
-							causedNoiseCost = causedNoiseCost + noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip);
+						if (noiseHandler != null) {
+							if (noiseHandler.getPersonId2tripNumber2causedNoiseCost().containsKey(id) && noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).containsKey(trip)) {
+								causedNoiseCost = causedNoiseCost + noiseHandler.getPersonId2tripNumber2causedNoiseCost().get(id).get(trip);
+							}
 						}
 						
 					}
