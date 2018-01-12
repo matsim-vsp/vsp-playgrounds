@@ -69,9 +69,11 @@ public class CreateNetFromOSMKeepingCountLinks {
 	//set true, if csv file is given that contains information about count location. set to false if an old network and counts file is given, to extract the info from.
 	private static boolean readNodeIDsFromCSV = false;
 	
-	private static String  pathToOldNetworkFile = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/tertiaryNemo_10112017_EPSG_25832_filteredcleaned_network.xml.gz";
-	private static String pathToCountsFile = "C:/Users/Work/git/NEMO-gitfat/data/input/counts/24112017/NemoCounts_data_allCounts_KFZ.xml";
+	private static final String  PATH_OLD_NETFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/tertiaryNemo_10112017_EPSG_25832_filteredcleaned_network.xml.gz";
+	private static final String PATH_OLD_COUNTSFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/counts/24112017/NemoCounts_data_allCounts_KFZ.xml";
 	
+	private static final CoordinateTransformation TRANSFORMATION = 
+			TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, TransformationFactory.WGS84_UTM33N);
 	/**
 	 * @param args
 	 */
@@ -82,15 +84,13 @@ public class CreateNetFromOSMKeepingCountLinks {
 	
 	private static void readAndWrite(){
 		//set the coordinate system you want the network to be translated to as second parameter
-		CoordinateTransformation ct = 
-			 TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, TransformationFactory.WGS84_UTM33N);
 		
 		Config config = ConfigUtils.createConfig();
 		Scenario scenario = ScenarioUtils.createScenario(config);
 
 		Network network = scenario.getNetwork();
 		
-		OsmNetworkReader onr = new OsmNetworkReader(network,ct);
+		OsmNetworkReader onr = new OsmNetworkReader(network,TRANSFORMATION);
 		onr.setKeepPaths(keepPaths);
 		
 		Set<Long> nodeIDsToKeep = new HashSet<Long>();
@@ -98,7 +98,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 		if(readNodeIDsFromCSV){
 			nodeIDsToKeep = readNodeIDsFromCSV(INPUT_COUNT_NODES, "\t");
 		} else{
-			nodeIDsToKeep = readNodeIDsFromOldNet(pathToOldNetworkFile, pathToCountsFile);
+			nodeIDsToKeep = readNodeIDsFromOldNet(PATH_OLD_NETFILE, PATH_OLD_COUNTSFILE);
 		}
 		
 		onr.setNodeIDsToKeep(nodeIDsToKeep);
