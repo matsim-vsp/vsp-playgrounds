@@ -70,7 +70,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
     private final double DEFAULT_INTERGREEN;
     
     private double tIdle;
-    // TODO this should also be a constant (s. signalOutflowCapacity below). tt, dez'17
+    // TODO this should be a constant. can be calculated once in simulationInitialized. tt, dez'17
     private double systemOutflowCapacity;
 
 
@@ -340,7 +340,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
         private Id<Link> determiningLink;
         private double determiningArrivalRate;
         private double determiningLoad;
-        // TODO isn't this a constant? theresa, dez'17
+        // this actually is a constant, but I guess it's ok to calculate it again every second, because lane/link outflow has to be calculated anyway... tt,jan'18 
         private double signalOutflowCapacity;
 
         LaemmerSignal(SignalGroup signalGroup) {
