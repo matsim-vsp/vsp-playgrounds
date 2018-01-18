@@ -22,8 +22,10 @@ package playground.vsp.demandde.cemdap.output;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -41,6 +43,7 @@ import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
 import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
+import playground.vsp.demandde.corineLandcover.GeometryUtils;
 
 /**
  * @author dziemke
@@ -125,14 +128,19 @@ public class CemdapStops2MatsimPlansConverter {
 		Map<Id<Person>, Coord> homeZones = new HashMap<>();
 		
 		// Write all (geographic) features of planning area to a map
-		Map<String,SimpleFeature> zones = new HashMap<>();
+		Map<String,Geometry> zones = new HashMap<>();
 		for (Map.Entry<String, String> entry : shapeFileToFeatureKey.entrySet()) {
 			for (SimpleFeature feature : ShapeFileReader.getAllFeatures(entry.getKey())) {
+				Geometry geometry = (Geometry)feature.getDefaultGeometry();
 				String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(entry.getValue()));
 				// TODO check if removal of leading zero is always valid
 				// It was necessary since code may interpret number incorrectly if leading zero present; dz, jul'17
-				// Can this lead to duplicate keys?? Amit Nov'17
-				zones.put(shapeId, feature);
+				// Can this lead to duplicate keys?? Amit Nov'17--Probably not, but duplicate keys are possible anyways. Amit Jan'18
+				if (zones.get(shapeId) !=null) { // union geoms corresponding to same zone id.
+					zones.put(shapeId, GeometryUtils.combine(Arrays.asList(geometry, zones.get(shapeId))));
+				} else {
+					zones.put(shapeId, geometry);
+				}
 			}
 		}
 		
