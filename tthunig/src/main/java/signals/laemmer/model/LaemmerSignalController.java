@@ -509,6 +509,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
             if (n == 0) {
                 a = DEFAULT_INTERGREEN;
             } else {
+            		// TODO: a should be time dependent and not dependent on the simulation time step size as it is now. tt, jan'18
                 a++;
             }
 
