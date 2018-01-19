@@ -35,9 +35,10 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.analysis.LinkSpeedHandler;
+import playground.agarwalamit.analysis.linkSpeed.LinkSpeedHandler;
 import playground.agarwalamit.analysis.emission.filtering.FilteredColdEmissionHandler;
 import playground.agarwalamit.analysis.emission.filtering.FilteredWarmEmissionHandler;
+import playground.agarwalamit.analysis.linkSpeed.LinkSpeedHandlerBackwardCompatible;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.NumberUtils;
@@ -49,14 +50,13 @@ import playground.agarwalamit.utils.NumberUtils;
 public class LinkSpeedEmissionWriter {
 
     public static void main(String[] args) {
-
         //Patna
         String patnaDir = FileUtils.RUNS_SVN + "/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
         new LinkSpeedEmissionWriter().run(patnaDir + "output_config.xml.gz",
                 patnaDir + "output_network.xml.gz",
                 patnaDir + "output_events.xml.gz",
                 patnaDir + "output_emissions_events.xml.gz",
-                patnaDir + "analysis/linkSpeedEmissionStats.txt");
+                patnaDir + "analysis/linkSpeedEmissionStats.txt", false);
 
         //munich
         //TODO LinkSpeedHandler will not work for following files becuase vehicleEntersTrafficEvent does not exists.
@@ -65,26 +65,42 @@ public class LinkSpeedEmissionWriter {
                 munichDir + "output_network.xml.gz",
                 munichDir + "ITERS/it.1500/1500.events.xml.gz",
                 munichDir + "ITERS/it.1500/1500.emission.events.xml",
-                munichDir + "analysis/linkSpeedEmissionStats.txt");
+                munichDir + "analysis/linkSpeedEmissionStats.txt", true);
     }
 
 
-    public void run(String configFile, String networkFile, String eventsFile, String emissionEventsFile, String outFile) {
+    public void run(String configFile, String networkFile, String eventsFile, String emissionEventsFile, String outFile, boolean analysis4Munich) {
         double simEndTime = LoadMyScenarios.getSimulationEndTime(configFile);
         Network network = LoadMyScenarios.loadScenarioFromNetwork(networkFile).getNetwork();
-        int noOfTimeBins = (int) (simEndTime/3600 * 4); // 15 min bin
+        int noOfTimeBins = (int) ( simEndTime/(3600*2) );
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
+        SortedMap<Double, Map<Id<Link>, Double>> time2link2speed = null;
 
-        LinkSpeedHandler linkSpeedHandler = new LinkSpeedHandler(simEndTime,
-                noOfTimeBins,
-                network,
-                Arrays.asList("car", "motorbike"));
-        eventsManager.addHandler(linkSpeedHandler);
+        LinkSpeedHandler linkSpeedHandlerOthers = null;
+        LinkSpeedHandlerBackwardCompatible linkSpeedHandlerMunich = null;
+        if(analysis4Munich) {
+            linkSpeedHandlerMunich = new LinkSpeedHandlerBackwardCompatible(simEndTime,
+                    noOfTimeBins,
+                    network,
+                    Arrays.asList("car", "motorbike"));
+            eventsManager.addHandler(linkSpeedHandlerMunich);
+        } else {
+            linkSpeedHandlerOthers = new LinkSpeedHandler(simEndTime,
+                    noOfTimeBins,
+                    network,
+                    Arrays.asList("car", "motorbike"));
+            eventsManager.addHandler(linkSpeedHandlerOthers);
+        }
 
         MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
         reader.readFile(eventsFile);
-        SortedMap<Double, Map<Id<Link>, Double>> time2link2speed = linkSpeedHandler.getTime2link2AverageTimeMeanSpeed();
+
+        if(analysis4Munich){
+            time2link2speed = linkSpeedHandlerMunich.getTime2link2AverageTimeMeanSpeed();
+        } else {
+            time2link2speed = linkSpeedHandlerOthers.getTime2link2AverageTimeMeanSpeed();
+        }
 
         EventsManager eventsManager2 = EventsUtils.createEventsManager();
         FilteredWarmEmissionHandler warmEmissionHandler = new FilteredWarmEmissionHandler(simEndTime, noOfTimeBins);
@@ -102,6 +118,7 @@ public class LinkSpeedEmissionWriter {
             writer.write(
                     "endOfTimeInterval\tlinkId\ttimeMeanSpeedKPH\twarmNO2EmissionGram\tcoldNO2EmissionGram\ttotalEmissionsGram\n");
             for (double time : time2link2speed.keySet()) {
+                if (time>86400.) continue;
                 for (Id<Link> linkId : time2link2speed.get(time).keySet()) {
                     double warmNO2 = time2warmEmissionsTotal.getOrDefault(time, new HashMap<>())
                                                             .getOrDefault(linkId, new HashMap<>())

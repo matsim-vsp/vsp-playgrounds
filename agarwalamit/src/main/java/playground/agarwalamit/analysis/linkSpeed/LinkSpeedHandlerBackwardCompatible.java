@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.analysis;
+package playground.agarwalamit.analysis.linkSpeed;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,22 +27,27 @@ import java.util.TreeMap;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.api.core.v01.events.PersonArrivalEvent;
+import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
+import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
+import org.matsim.vehicles.Vehicle;
 
 /**
+ * Use this if there is no vehicle enters and vehicle leaves traffic events
  * Created by amit on 18.01.18.
  */
 
-public class LinkSpeedHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+public class LinkSpeedHandlerBackwardCompatible implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
 
     private Map<Id<Link>,Map<Id<Person>,Double>> link2PersonEnterTime = new HashMap<>();
     private SortedMap<Double,Map<Id<Link>,Double>> time2link2SpeedSum = new TreeMap<>();
@@ -53,13 +58,13 @@ public class LinkSpeedHandler implements LinkEnterEventHandler, LinkLeaveEventHa
     private final Network network;
     private final List<String> modesUnderConsideration ;
 
-    private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
+    private final Map<Id<Vehicle>, Id<Person>> driverAgents = new HashMap<>();
 
-    public LinkSpeedHandler(double simulationEndTime, int noOfTimeBins, Network network){
+    public LinkSpeedHandlerBackwardCompatible(double simulationEndTime, int noOfTimeBins, Network network){
         this(simulationEndTime, noOfTimeBins, network, null);
     }
 
-    public LinkSpeedHandler(double simulationEndTime, int noOfTimeBins, Network network, List<String> modesUnderConsideration){
+    public LinkSpeedHandlerBackwardCompatible(double simulationEndTime, int noOfTimeBins, Network network, List<String> modesUnderConsideration){
         this.timeBinSize = simulationEndTime / noOfTimeBins;
         this.network = network;
         this.modesUnderConsideration = modesUnderConsideration;
@@ -70,13 +75,13 @@ public class LinkSpeedHandler implements LinkEnterEventHandler, LinkLeaveEventHa
         this.time2link2SpeedSum.clear();
         this.time2link2timeCount.clear();
         this.link2PersonEnterTime.clear();
-        this.delegate.reset(iteration);
         this.person2Mode.clear();
+        this.driverAgents.clear();
     }
 
     @Override
     public void handleEvent(LinkEnterEvent event) {
-        Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
+        Id<Person> personId = this.driverAgents.get(event.getVehicleId());
         String mode = this.person2Mode.get(personId);
         if ( this.modesUnderConsideration != null && ! this.modesUnderConsideration.contains(mode) ) {
             // modes under consideration for analysis are provided AND _mode_ is not one of them
@@ -98,8 +103,7 @@ public class LinkSpeedHandler implements LinkEnterEventHandler, LinkLeaveEventHa
 
     @Override
     public void handleEvent(LinkLeaveEvent event) {
-
-        Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
+        Id<Person> personId = this.driverAgents.get(event.getVehicleId());
         String mode = this.person2Mode.get(personId);
         if ( this.modesUnderConsideration != null && ! this.modesUnderConsideration.contains(mode) ) {
             // modes under consideration for analysis are provided AND _mode_ is not one of them
@@ -136,18 +140,6 @@ public class LinkSpeedHandler implements LinkEnterEventHandler, LinkLeaveEventHa
         this.time2link2timeCount.put(endOfTimeInterval, link2count);
     }
 
-    @Override
-    public void handleEvent(VehicleEntersTrafficEvent event) {
-        this.delegate.handleEvent(event);
-        this.person2Mode.put(event.getPersonId(), event.getNetworkMode());
-    }
-
-    @Override
-    public void handleEvent(VehicleLeavesTrafficEvent event) {
-        this.delegate.handleEvent(event);
-        this.person2Mode.remove(event.getPersonId());
-    }
-
     private SortedMap<Double, Map<Id<Link>, Double>> time2link2timeMeanSpeed = new TreeMap<>();
     boolean timeMeanSpeedStored = false;
 
@@ -163,6 +155,26 @@ public class LinkSpeedHandler implements LinkEnterEventHandler, LinkLeaveEventHa
             }
         }
         return time2link2timeMeanSpeed;
+    }
+
+    @Override
+    public void handleEvent(PersonDepartureEvent event) {
+        this.person2Mode.put(event.getPersonId(), event.getLegMode());
+    }
+
+    @Override
+    public void handleEvent(PersonEntersVehicleEvent event) {
+        this.driverAgents.put(event.getVehicleId(), event.getPersonId());
+    }
+
+    @Override
+    public void handleEvent(PersonLeavesVehicleEvent event) {
+        this.driverAgents.remove(event.getVehicleId());
+    }
+
+    @Override
+    public void handleEvent(PersonArrivalEvent event) {
+        this.person2Mode.remove(event.getPersonId());
     }
 }
 
