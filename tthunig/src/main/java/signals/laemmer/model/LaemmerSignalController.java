@@ -70,7 +70,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
     private final double DEFAULT_INTERGREEN;
     
     private double tIdle;
-    // TODO this should also be a constant (s. signalOutflowCapacity below). tt, dez'17
+    // TODO this should be a constant. can be calculated once in simulationInitialized. tt, dez'17
     private double systemOutflowCapacity;
 
 
@@ -340,7 +340,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
         private Id<Link> determiningLink;
         private double determiningArrivalRate;
         private double determiningLoad;
-        // TODO isn't this a constant? theresa, dez'17
+        // this actually is a constant, but I guess it's ok to calculate it again every second, because lane/link outflow has to be calculated anyway... tt,jan'18 
         private double signalOutflowCapacity;
 
         LaemmerSignal(SignalGroup signalGroup) {
@@ -367,7 +367,6 @@ public class LaemmerSignalController extends AbstractSignalController implements
                         }
                     }
                 } else {
-                    sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
                     double linkOutflow = network.getLinks().get(signal.getLinkId()).getCapacity() * config.qsim().getFlowCapFactor() / 3600;
                     signalOutflowCapacity += linkOutflow;
                     double arrivalRate = getAverageArrivalRate(now, signal.getLinkId());
@@ -510,6 +509,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
             if (n == 0) {
                 a = DEFAULT_INTERGREEN;
             } else {
+            		// TODO: a should be time dependent and not dependent on the simulation time step size as it is now. tt, jan'18
                 a++;
             }
 

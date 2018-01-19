@@ -2,7 +2,6 @@ package signals.laemmer.model.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,7 +109,7 @@ public class PermutateSignalGroups {
 				for (Signal signal : sg.getSignals().values()) {
 					lanesOfCurrSg.addAll(signal.getLaneIds());
 				}
-				//iterate over all lanes an their conflictingLanes and check, if one of these illegal lanes are also in the collected landes of this phase
+				//iterate over all lanes an their conflictingLanes and check, if one of these illegal lanes are also in the collected lanes of this phase
 				for (Id<Lane> l : lanesOfCurrSg) {
 					for (Id<Lane> conflictingLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
 						if (lanesOfCurrSg.contains(conflictingLane)) {
@@ -123,17 +122,10 @@ public class PermutateSignalGroups {
 		}
 		allSignalGroupPerms.removeAll(illegalGroups);
 		return allSignalGroupPerms;
-		
-//		System.out.println("SIZE OF SIGNALGROUPPERMS: "+allSignalGroupPerms.size());
-//		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
-//			System.out.println();;
-//		}
-	}
+		}
 	
     public static ArrayList<SignalPhase> createPhasesFromSignalGroups(SignalSystem system, Map<Id<Lane>, Lane> lanemap) {
 		ArrayList<SignalGroup> signalGroups = new ArrayList<>(system.getSignalGroups().values());
-		//FIXME remove debug output
-		System.err.println("All permuations size w/o duplicates: "+removeDuplicates(permutate(signalGroups, signalGroups.size())).size());
 		ArrayList<ArrayList<SignalGroup>> allSignalGroupPerms = removeDuplicates(permutate(signalGroups, signalGroups.size()));
 		ArrayList<SignalPhase> validPhases = new ArrayList<>();
 		//check for illegal combinations
@@ -164,8 +156,6 @@ public class PermutateSignalGroups {
 //			}
 		}
 		allSignalGroupPerms.removeAll(illegalGroups);
-		//FIXME remove debug output
-		System.err.println("After remove illegal ones: "+allSignalGroupPerms.size());
 		
 		for(ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
 			SignalPhase newPhase = new SignalPhase();
@@ -177,9 +167,20 @@ public class PermutateSignalGroups {
 				newPhase.addGreenSignalGroupsAndLanes(sg.getId(), lanes);
 			}
 			validPhases.add(newPhase);
-			//FIXME remove debug output
-			System.out.println(newPhase.toString());
 		}
 		return validPhases;
+	}
+
+	public static ArrayList<SignalPhase> removeSubPhases(ArrayList<SignalPhase> signalPhases) {
+		ArrayList<SignalPhase> phasesToRemove = new ArrayList<>();
+		for (SignalPhase signalPhase : signalPhases) {
+			for (SignalPhase otherSignalPhase : signalPhases) {
+				if (!signalPhase.equals(otherSignalPhase) && signalPhase.getGreenLanes().containsAll(otherSignalPhase.getGreenLanes())){
+					phasesToRemove.add(otherSignalPhase);
+				}
+			}
+		}
+		signalPhases.removeAll(phasesToRemove);
+		return signalPhases;
 	}
 }

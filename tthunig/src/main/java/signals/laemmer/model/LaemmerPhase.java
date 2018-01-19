@@ -80,17 +80,11 @@ class LaemmerPhase {
 		}
     }
 
-    void update(double now) {
-        updateAbortionPenalty(now);
-
-        if (!this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
-            //updateStabilization(now);
-        }
-        //TODO check if it's a good idea to omit calculating the priority index if stabilization is needed
-        // - I think we need it to find a good combination of vehicle flows which can drive together
-        // - probably we'll have outdated values somewhere and make decitions on them, pschade Dec 17
-        if (!this.stabilize)
+    void updateAbortationPenaltyAndPriorityIndex(double now) {
+        if (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
+        	updateAbortionPenalty(now);
         	calculatePriorityIndex(now);
+        }
     }
 
     private void updateAbortionPenalty(double now) {
@@ -221,51 +215,6 @@ class LaemmerPhase {
         }
     }
 
-    @Deprecated //Stabilization should be done lane-wise with LaemmerLane
-    private void updateStabilization(double now) {
-
-        if (determiningArrivalRate == 0) {
-            return;
-        }
-
-        double n = 0;
-        if (determiningLane != null) {
-            n = this.fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(now, determiningLink, determiningLane);
-        } else {
-            n = this.fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLink(now, determiningLink);
-        }
-
-        if (n == 0) {
-            intergreenTime_a = this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN;
-        } else {
-            intergreenTime_a++;
-        }
-
-        if (this.fullyAdaptiveLaemmerSignalController.regulationQueue.contains(this)) {
-            return;
-        }
-
-        this.regulationTime = 0;
-        this.stabilize = false;
-        double nCrit = determiningArrivalRate * this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime()
-                * ((this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMaxCycleTime() - (intergreenTime_a / (1 - determiningLoad)))
-                / (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMaxCycleTime() - this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime()));
-
-        if (n >= nCrit) {
-        	/* TODO actually, this is the wrong place to check downstream conditions, since situation can change until the group has moved up to the queue front. 
-        	 * a better moment would be while polling from the queue: poll the first element with downstream empty. but we would need a linked list instead of queue for this
-        	 * and could no longer check for empty regulationQueue to decide for stabilization vs optimization... I would prefer to have some tests before! theresa, jul'17 */
-        	//TODO allDownstreamLinksEmpty should be able to check for a phase. for now we are checking for an arbitrary signalGroup in it. pschade, nov 17
-			if (!this.fullyAdaptiveLaemmerSignalController.laemmerConfig.isCheckDownstream() || this.fullyAdaptiveLaemmerSignalController.downstreamSensor.allDownstreamLinksEmpty(this.fullyAdaptiveLaemmerSignalController.getSystem().getId(), phase.getGreenSignalGroups().iterator().next())) {
-				this.fullyAdaptiveLaemmerSignalController.regulationQueue.add(this);
-				// signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" +
-				// tIdle);
-				this.regulationTime = Math.max(Math.rint(determiningLoad * this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime() + (outflowSum / this.fullyAdaptiveLaemmerSignalController.flowSum) * Math.max(this.fullyAdaptiveLaemmerSignalController.tIdle, 0)), this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMinGreenTime());
-				this.stabilize = true;
-			}
-        }
-    }
-
     public void getStatFields(StringBuilder builder) {
         builder.append("state_" + this.phase.getId() +";");
         builder.append("index_" + this.phase.getId() + ";");
@@ -298,13 +247,5 @@ class LaemmerPhase {
                 .append(this.abortionPenalty + ";")
                 .append(this.regulationTime + ";")
                 .append(totalN + ";");
-    }
-    
-    double getRegulationTime() {
-    	return regulationTime;
-    }
-    
-    void setRegulationTime(double regulationTime) {
-    	this.regulationTime = regulationTime;
     }
 }

@@ -108,11 +108,20 @@ public class CorineLandCoverData {
      * @return a random point such that it is inside the @param feature as well as inside the zones corresponding to the given activity type.
      */
     public Point getRandomPoint (final SimpleFeature feature, final String activityType) {
+        return getRandomPoint((Geometry)feature.getDefaultGeometry(), activityType);
+    }
+
+    /**
+     * @param geometry geometry of zone simplefeature
+     * @param activityType classified as 'home' and 'other' activity types.
+     * @return a random point such that it is inside the @param feature as well as inside the zones corresponding to the given activity type.
+     */
+    public Point getRandomPoint (final Geometry geometry, final String activityType) {
         Geometry zoneGeom;
         if ( this.simplifyGeometries ) {
-              zoneGeom = GeometryUtils.getSimplifiedGeom( (Geometry) feature.getDefaultGeometry() ) ;
+            zoneGeom = GeometryUtils.getSimplifiedGeom( geometry) ;
         } else {
-            zoneGeom = (Geometry) feature.getDefaultGeometry();
+            zoneGeom = geometry;
         }
 
         Geometry landUseGeom ;
@@ -121,14 +130,14 @@ public class CorineLandCoverData {
             landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
             landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
         } else {
-           if (! activityType.equalsIgnoreCase("other") && warnCnt < 1) {
-               LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
-               LOGGER.warn(Gbl.ONLYONCE);
-               warnCnt++;
-           }
+            if (! activityType.equalsIgnoreCase("other") && warnCnt < 1) {
+                LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
+                LOGGER.warn(Gbl.ONLYONCE);
+                warnCnt++;
+            }
 
-           landUseGeom =  this.activityType2CombinedLandcoverZone.get("other") ;
-           landUseGeoms = this.activityTypes2ListOfLandCoverZones.get("other");
+            landUseGeom =  this.activityType2CombinedLandcoverZone.get("other") ;
+            landUseGeoms = this.activityTypes2ListOfLandCoverZones.get("other");
         }
 
         if (this.combiningGeom) return GeometryUtils.getPointInteriorToGeometry( landUseGeom, zoneGeom );
@@ -142,6 +151,16 @@ public class CorineLandCoverData {
      */
     public Coord getRandomCoord (final SimpleFeature feature, final String activityType) {
         Point p = getRandomPoint(feature, activityType);
+        return new Coord(p.getX(), p.getY());
+    }
+
+    /**
+     * @param geometry simpleFeature (zone)
+     * @param activityType classified as 'home' and 'other' activity types.
+     * @return
+     */
+    public Coord getRandomCoord (final Geometry geometry, final String activityType) {
+        Point p = getRandomPoint(geometry, activityType);
         return new Coord(p.getX(), p.getY());
     }
 

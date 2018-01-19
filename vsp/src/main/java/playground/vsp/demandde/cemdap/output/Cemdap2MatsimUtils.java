@@ -38,8 +38,7 @@ public class Cemdap2MatsimUtils {
 	public final static Random random = MatsimRandom.getRandom();
 	private final static GeometryFactory geometryFactory = new GeometryFactory();
 
-	public static final Coord getRandomCoordinate(SimpleFeature feature) {
-		Geometry geometry = (Geometry) feature.getDefaultGeometry();
+	public static final Coord getRandomCoordinate(Geometry geometry) {
 		Envelope envelope = geometry.getEnvelopeInternal();
 		while (true) {
 			Point point = getRandomCoordinate(envelope);
@@ -47,6 +46,10 @@ public class Cemdap2MatsimUtils {
 				return new Coord(point.getX(), point.getY());
 			}
 		}
+	}
+
+	public static final Coord getRandomCoordinate(SimpleFeature feature) {
+		return getRandomCoordinate((Geometry) feature.getDefaultGeometry());
 	}
 	
 	public static final Point getRandomCoordinate(Envelope envelope) {

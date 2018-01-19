@@ -20,7 +20,7 @@
 package playground.vsp.demandde.cemdap.output;
 
 import java.util.Map;
-
+import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -30,9 +30,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
-import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
-import playground.vsp.demandde.corineLandcover.LandCoverUtils;
 
 /**
  * @author dziemke
@@ -43,7 +41,7 @@ public class Feature2Coord {
 	public Feature2Coord() {
 	}
 
-	public final void assignCoords(Population population, int planNumber, ObjectAttributes personZoneAttributes, Map<String, SimpleFeature> zones,
+	public final void assignCoords(Population population, int planNumber, ObjectAttributes personZoneAttributes, Map<String, Geometry> zones,
 			Map<Id<Person>, Coord> homeZones, boolean allowVariousWorkAndEducationLocations,  CorineLandCoverData corineLandCoverData ) {
 		int counter = 0;
 		LOG.info("Start assigning (non-home) coordinates. Plan number is " + planNumber +".");
@@ -65,15 +63,15 @@ public class Feature2Coord {
 					if (zoneId == null) {
 						LOG.error("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 					}
-					SimpleFeature zone = zones.get(zoneId);
-					if (zone == null) {
+					Geometry geometry = zones.get(zoneId);
+					if (geometry == null) {
 						throw new RuntimeException("Zone with id " + zoneId + " not found.");
 					}
 					if (allowVariousWorkAndEducationLocations) {
 						if (activity.getType().equals(ActivityTypes.HOME)) {
 							((Activity)activity).setCoord(homeZones.get(person.getId()));
 						} else {
-							Coord coord = getCoord(corineLandCoverData, zone, "other");
+							Coord coord = getCoord(corineLandCoverData, geometry, "other");
 							((Activity)activity).setCoord(coord);
 						}
 					} else {
@@ -81,16 +79,16 @@ public class Feature2Coord {
 							((Activity)activity).setCoord(homeZones.get(person.getId()));
 						} else if (activity.getType().equals(ActivityTypes.WORK)) {
 							if (workCoord == null) {
-								workCoord = getCoord(corineLandCoverData, zone, "other");
+								workCoord = getCoord(corineLandCoverData, geometry, "other");
 							}
 							((Activity)activity).setCoord(workCoord);
 						} else if (activity.getType().equals(ActivityTypes.EDUCATION)) {
 							if (educCoord == null) {
-								educCoord = getCoord(corineLandCoverData, zone, "other");
+								educCoord = getCoord(corineLandCoverData, geometry, "other");
 							}
 							((Activity)activity).setCoord(educCoord);
 						} else {
-							Coord coord = getCoord(corineLandCoverData, zone, "other");
+							Coord coord = getCoord(corineLandCoverData, geometry, "other");
 							((Activity)activity).setCoord(coord);
 						}
 					}
@@ -101,18 +99,18 @@ public class Feature2Coord {
 		LOG.info("Finished assigning non-home coordinates.");
 	}
 
-	private Coord getCoord (CorineLandCoverData corineLandCoverData, SimpleFeature feature, String activityType) {
+	private Coord getCoord (CorineLandCoverData corineLandCoverData, Geometry geometry, String activityType) {
 		Coord coord ;
 		if (corineLandCoverData==null) {
-			coord = Cemdap2MatsimUtils.getRandomCoordinate(feature);
+			coord = Cemdap2MatsimUtils.getRandomCoordinate(geometry);
 		} else {
-			coord = corineLandCoverData.getRandomCoord(feature,activityType);
+			coord = corineLandCoverData.getRandomCoord(geometry, activityType);
 		}
 		return coord;
 	}
 
 	
-	public final void assignHomeCoords(Population population, ObjectAttributes personZoneAttributes, Map<String, SimpleFeature> zones, Map<Id<Person>, Coord> homeZones, CorineLandCoverData corineLandCoverData) {
+	public final void assignHomeCoords(Population population, ObjectAttributes personZoneAttributes, Map<String, Geometry> zones, Map<Id<Person>, Coord> homeZones, CorineLandCoverData corineLandCoverData) {
 		int counter = 0;
 		LOG.info("Start assigning home coordinates.");
 		for (Person person : population.getPersons().values()) {
@@ -131,12 +129,12 @@ public class Feature2Coord {
 					if (zoneId == null) {
 						LOG.error("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 					}
-					SimpleFeature zone = zones.get(zoneId);
-					if (zone == null) {
+					Geometry geometry = zones.get(zoneId);
+					if (geometry == null) {
 						throw new RuntimeException("Zone with id " + zoneId + " not found.");
 					}
 					if (activity.getType().equals(ActivityTypes.HOME)) {
-						Coord homeCoord = getCoord(corineLandCoverData, zone, "home");
+						Coord homeCoord = getCoord(corineLandCoverData, geometry, "home");
 						homeZones.put(personId, homeCoord);
 					}
 					activityIndex++;

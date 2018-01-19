@@ -1,19 +1,25 @@
 package playground.michalm.poznan.supply;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.network.*;
-import org.matsim.core.config.*;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.utils.CreatePseudoNetwork;
 import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.visum.*;
+import org.matsim.visum.VisumNetwork;
+import org.matsim.visum.VisumNetworkReader;
 
-import playground.mrieser.pt.converter.Visum2TransitSchedule;
+import playground.vsp.andreas.mzilske.bvg09.Visum2TransitSchedule;
 
 public class CreatePoznanPT {
 	public static void go(String visumFile, String transitScheduleWithNetworkFile, String transitNetworkFile,
