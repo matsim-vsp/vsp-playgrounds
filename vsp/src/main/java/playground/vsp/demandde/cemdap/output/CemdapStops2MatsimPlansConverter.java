@@ -180,7 +180,8 @@ public class CemdapStops2MatsimPlansConverter {
 					counter++;
 				}
 			}
-			LOG.info("For " + counter + " persons, stay-home plans have been added. Plan number is " + planNumber + ".");
+			LOG.info("For " + counter + " persons who were not assigned with an activity-travel by CEMDAP (i.e. persons not contained in stops.out), " +
+					"a stay-home plans was added. Plan number is " + planNumber + ".");
 		}
 
 		if (assignCoordinatesToActivities) {
