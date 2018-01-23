@@ -81,5 +81,10 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<dependency>
+			  <groupId>vsp-playground</groupId>
+			<artifactId>vsp</artifactId>
+			<version>0.10.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>

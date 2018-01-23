@@ -28,7 +28,9 @@ public class SignalPhase {
 		this.greenSignalsToLanes.putAll(greenSignalesToLanes);
 		this.id = createIdFromCurrentSignalGroups();
 		//TODO test if it provokes problems if the greenSingalToLanes are not in a deterministic order.
-		greenSignalesToLanes.values().forEach(lanes::addAll);
+		for (LinkedList<Id<Lane>> lane : greenSignalesToLanes.values()) {
+			lanes.addAll(lane);
+		}
 	}
 	
 	private Id<SignalPhase> createIdFromCurrentSignalGroups() {
