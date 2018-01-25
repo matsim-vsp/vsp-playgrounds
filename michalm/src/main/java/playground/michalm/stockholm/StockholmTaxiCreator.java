@@ -19,15 +19,17 @@
 
 package playground.michalm.stockholm;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.matsim.api.core.v01.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.*;
+import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.VehicleGenerator.VehicleCreator;
-import org.matsim.contrib.util.random.*;
-
-import com.beust.jcommander.internal.Lists;
+import org.matsim.contrib.dvrp.data.VehicleImpl;
+import org.matsim.contrib.util.random.RandomUtils;
+import org.matsim.contrib.util.random.UniformRandom;
 
 public class StockholmTaxiCreator implements VehicleCreator {
 	private static final int PAXPERCAR = 4;
@@ -37,9 +39,8 @@ public class StockholmTaxiCreator implements VehicleCreator {
 
 	private int currentVehicleId = 0;
 
-	@SuppressWarnings("unchecked")
 	public StockholmTaxiCreator(Scenario scenario) {
-		links = (List<Link>) Lists.newArrayList(scenario.getNetwork().getLinks().values());
+		links = new ArrayList<>(scenario.getNetwork().getLinks().values());
 	}
 
 	@Override

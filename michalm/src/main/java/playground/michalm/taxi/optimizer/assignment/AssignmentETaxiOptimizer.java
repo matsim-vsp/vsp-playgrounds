@@ -21,6 +21,7 @@ package playground.michalm.taxi.optimizer.assignment;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
@@ -28,16 +29,18 @@ import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.contrib.dvrp.util.LinkTimePair;
 import org.matsim.contrib.locationchoice.router.BackwardFastMultiNodeDijkstraFactory;
 import org.matsim.contrib.locationchoice.router.BackwardMultiNodePathCalculator;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
 import org.matsim.contrib.taxi.optimizer.VehicleData;
-import org.matsim.contrib.taxi.optimizer.VehicleData.Entry;
+import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentRequestInserter;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.assignment.VehicleAssignmentProblem;
 import org.matsim.contrib.taxi.optimizer.assignment.VehicleAssignmentProblem.AssignmentCost;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.scheduler.TaxiScheduleInquiry;
 import org.matsim.contrib.util.PartialSort;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
@@ -48,7 +51,6 @@ import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 import playground.michalm.ev.data.Battery;
@@ -155,7 +157,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 
 	// if socCheckTimeStep is too small --> small number of idle plugs --> poorer assignments
 	protected void scheduleCharging() {
-		AssignmentChargerPlugData pData = new AssignmentChargerPlugData(timer.getTimeOfDay(),
+		AssignmentDestinationData<ChargerPlug> pData = AssignmentChargerPlugData.create(timer.getTimeOfDay(),
 				evData.getChargers().values());
 		if (pData.getSize() == 0) {
 			return;
@@ -191,30 +193,32 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		super.nextTask(vehicle);
 	}
 
-	private VehicleData initVehicleDataForCharging(AssignmentChargerPlugData pData) {
-		Iterable<? extends Vehicle> vehiclesBelowMinSocLevel = Iterables.filter(fleet.getVehicles().values(),
-				this::doNeedChargingScheduling);
-
+	private VehicleData initVehicleDataForCharging(AssignmentDestinationData<ChargerPlug> pData) {
 		// XXX if chargers are heavily used then shorten the planning horizon;
 		// (like with undersupply of taxis)
 		double chargingPlanningHorizon = 10 * 60;// 10 minutes (should be longer than socCheckTimeStep)
-		VehicleData vData = new VehicleData(timer.getTimeOfDay(), eScheduler, vehiclesBelowMinSocLevel,
-				chargingPlanningHorizon);
+		double maxDepartureTime = timer.getTimeOfDay() + chargingPlanningHorizon;
+		Stream<? extends Vehicle> vehiclesBelowMinSocLevel = fleet.getVehicles().values().stream()
+				.filter(v -> isChargingSchedulable(v, eScheduler, maxDepartureTime));
 
 		// filter least charged vehicles
-		PartialSort<Entry> leastChargedSort = new PartialSort<>(pData.getSize());
-		for (Entry e : vData.getEntries()) {
-			Battery b = ((EvrpVehicle)e.vehicle).getEv().getBattery();
-			leastChargedSort.add(e, b.getSoc());// assumption: all b.capacities are equal
-		}
+		// assumption: all b.capacities are equal
+		@SuppressWarnings("unchecked")
+		Stream<? extends Vehicle> leastChargedVehicles = (Stream<? extends Vehicle>)PartialSort.kSmallestElements(
+				pData.getSize(), vehiclesBelowMinSocLevel, v -> ((EvrpVehicle)v).getEv().getBattery().getSoc());
 
-		return new VehicleData(leastChargedSort.retriveKSmallestElements());
+		return new VehicleData(timer.getTimeOfDay(), eScheduler, leastChargedVehicles);
 	}
 
 	// TODO MIN_RELATIVE_SOC should depend on %idle
-	private boolean doNeedChargingScheduling(Vehicle v) {
+	private boolean isChargingSchedulable(Vehicle v, TaxiScheduleInquiry scheduleInquiry, double maxDepartureTime) {
 		Battery b = ((EvrpVehicle)v).getEv().getBattery();
 		boolean undercharged = b.getSoc() < params.minRelativeSoc * b.getCapacity();
-		return (undercharged && !scheduledForCharging.containsKey(v.getId()));
+		if (!undercharged || !scheduledForCharging.containsKey(v.getId())) {
+			return false;// not needed or already planned
+		}
+
+		LinkTimePair departure = scheduleInquiry.getImmediateDiversionOrEarliestIdleness(v);
+		return departure != null && departure.time <= maxDepartureTime;// schedulable within the time horizon
 	}
 }

@@ -19,8 +19,10 @@
 
 package playground.michalm.taxi.optimizer;
 
+import java.util.stream.Stream;
+
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.taxi.optimizer.*;
+import org.matsim.contrib.taxi.optimizer.BestDispatchFinder;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
 import org.matsim.contrib.util.LinkProvider;
 
@@ -38,7 +40,7 @@ public class BestChargerFinder {
 		this.dispatchFinder = dispatchFinder;
 	}
 
-	public Dispatch<Charger> findBestChargerForVehicle(Vehicle veh, Iterable<Charger> chargers) {
+	public Dispatch<Charger> findBestChargerForVehicle(Vehicle veh, Stream<Charger> chargers) {
 		return dispatchFinder.findBestDestination(veh, chargers, CHARGER_TO_LINK);
 	}
 }

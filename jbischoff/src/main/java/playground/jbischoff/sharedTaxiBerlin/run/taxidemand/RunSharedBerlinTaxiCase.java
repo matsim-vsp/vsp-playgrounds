@@ -61,7 +61,6 @@ public class RunSharedBerlinTaxiCase {
 			drt.setNumberOfThreads(7);
 			drt.setMaxTravelTimeAlpha(5);
 			drt.setMaxTravelTimeBeta(3000);
-			drt.setkNearestVehicles(7);
 			drt.setRebalancingInterval(1800);
 			
 			config.controler().setRunId(runId);
