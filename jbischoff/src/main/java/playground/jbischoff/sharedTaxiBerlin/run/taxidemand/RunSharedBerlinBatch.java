@@ -66,7 +66,6 @@ public class RunSharedBerlinBatch {
 //			drt.setNumberOfThreads(8);
 			drt.setMaxTravelTimeAlpha(a);
 			drt.setMaxTravelTimeBeta(b);
-			drt.setkNearestVehicles(56);
 			
 			config.controler().setRunId(runId);
 			config.controler().setOutputDirectory("/net/ils4/jbischoff/sharedTaxi/parameterizedRuns/"+runId+"/");

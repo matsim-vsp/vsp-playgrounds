@@ -19,7 +19,7 @@
 
 package playground.michalm.taxi.optimizer.rules;
 
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
@@ -40,8 +40,6 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
-
-import com.google.common.collect.Iterables;
 
 import playground.michalm.ev.data.Battery;
 import playground.michalm.ev.data.Charger;
@@ -95,17 +93,18 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, params.socCheckTimeStep)) {
-			chargeIdleUnderchargedVehicles(Iterables.filter(idleTaxiRegistry.getVehicles(), this::isUndercharged));
+			chargeIdleUnderchargedVehicles(idleTaxiRegistry.vehicles().filter(this::isUndercharged));
 		}
 
 		super.notifyMobsimBeforeSimStep(e);
 	}
 
-	private void chargeIdleUnderchargedVehicles(Iterable<Vehicle> vehicles) {
-		for (Vehicle v : vehicles) {
-			Dispatch<Charger> eDispatch = eDispatchFinder.findBestChargerForVehicle(v, evData.getChargers().values());
+	private void chargeIdleUnderchargedVehicles(Stream<Vehicle> vehicles) {
+		vehicles.forEach(v -> {
+			Dispatch<Charger> eDispatch = eDispatchFinder.findBestChargerForVehicle(v,
+					evData.getChargers().values().stream());
 			eScheduler.scheduleCharging((EvrpVehicle)v, eDispatch.destination, eDispatch.path);
-		}
+		});
 	}
 
 	@Override
@@ -113,7 +112,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		super.nextTask(vehicle);
 
 		if (eScheduler.isIdle(vehicle) && isUndercharged(vehicle)) {
-			chargeIdleUnderchargedVehicles(Collections.singleton(vehicle));
+			chargeIdleUnderchargedVehicles(Stream.of(vehicle));
 		}
 	}
 

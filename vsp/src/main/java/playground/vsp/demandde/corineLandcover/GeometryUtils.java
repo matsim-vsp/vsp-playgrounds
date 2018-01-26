@@ -45,10 +45,19 @@ public class GeometryUtils {
      * @return a simplified geometry by increasing tolerance until number of vertices are less than 1000.
      */
     public static Geometry getSimplifiedGeom(final Geometry geom){
+        return getSimplifiedGeom(geom, 1000);
+    }
+
+    /**
+     * @param geom
+     * @praam maxNumberOfVertices
+     * @return a simplified geometry by increasing tolerance until number of vertices are less than 'maxNumberOfVertices'.
+     */
+    public static Geometry getSimplifiedGeom(final Geometry geom, final int maxNumberOfVertices){
         Geometry outGeom = geom;
         double distanceTolerance = 1;
         int numberOfVertices = getNumberOfVertices(geom);
-        while (numberOfVertices > 300){
+        while (numberOfVertices > maxNumberOfVertices){
             outGeom = getSimplifiedGeom(outGeom, distanceTolerance);
             numberOfVertices = getNumberOfVertices(outGeom);
             distanceTolerance *= 10;

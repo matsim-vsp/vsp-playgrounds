@@ -70,7 +70,6 @@ public class RunSharedTaxiWithDynamicZones {
 		drt.setMaxTravelTimeBeta(420);
 		drt.setMaxWaitTime(420);
 		drt.setIdleVehiclesReturnToDepots(false);
-		drt.setkNearestVehicles(21);
 		
 		
 		Controler controler = DrtControlerCreator.createControler(config, false);

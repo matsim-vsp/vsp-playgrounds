@@ -27,7 +27,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 public class RunSharedTaxiBerlin {
 	public static void main(String[] args) {
-		String configFile = "../../../shared-svn/projects/bvg_sharedTaxi/input/config.xml";
+		String configFile = "../../shared-svn/projects/bvg_sharedTaxi/input/config_2.xml";
 		RunSharedTaxiBerlin.run(configFile, false);
 	}
 

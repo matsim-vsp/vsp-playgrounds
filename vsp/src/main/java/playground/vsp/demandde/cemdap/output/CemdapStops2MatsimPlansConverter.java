@@ -135,7 +135,8 @@ public class CemdapStops2MatsimPlansConverter {
 				String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(entry.getValue()));
 				// TODO check if removal of leading zero is always valid
 				// It was necessary since code may interpret number incorrectly if leading zero present; dz, jul'17
-				// Can this lead to duplicate keys?? Amit Nov'17--Probably not, but duplicate keys are possible anyways. Amit Jan'18
+				// Can this lead to duplicate keys?? Amit Nov'17
+				// Probably not, but duplicate keys are possible anyways. Amit Jan'18
 				if (zones.get(shapeId) !=null) { // union geoms corresponding to same zone id.
 					zones.put(shapeId, GeometryUtils.combine(Arrays.asList(geometry, zones.get(shapeId))));
 				} else {
@@ -180,14 +181,13 @@ public class CemdapStops2MatsimPlansConverter {
 					counter++;
 				}
 			}
-			LOG.info("For " + counter + " persons, stay-home plans have been added. Plan number is " + planNumber + ".");
+			LOG.info("For " + counter + " persons who were not assigned with an activity-travel by CEMDAP (i.e. persons not contained in stops.out), " +
+					"a stay-home plans was added. Plan number is " + planNumber + ".");
 		}
 
 		if (assignCoordinatesToActivities) {
 			// Assign home coordinates
 			Feature2Coord feature2Coord = new Feature2Coord();
-			// TODO consideration of CORINE land cover probably in this step
-			//Done. Amit Oct'17
 			feature2Coord.assignHomeCoords(population,
 					personZoneAttributesMap.get(0),
 					zones,
@@ -197,8 +197,6 @@ public class CemdapStops2MatsimPlansConverter {
 			// Assign coordinates to all other activities
 			for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
 				feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, corineLandCoverData);
-				// TODO consideration of CORINE land cover probably in this step
-				//Done. Amit Oct'17
 			}
 		} else {
 			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");
@@ -215,6 +213,7 @@ public class CemdapStops2MatsimPlansConverter {
 								throw new RuntimeException("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 							}
 							activity.setType(activityType+"_"+zoneId);
+							activityIndex++;
 						}
 					}
 				}
