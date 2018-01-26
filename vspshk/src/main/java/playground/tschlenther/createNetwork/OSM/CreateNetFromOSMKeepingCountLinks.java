@@ -21,7 +21,10 @@
  */
 package playground.tschlenther.createNetwork.OSM;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -38,6 +41,7 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.OsmNetworkReader;
@@ -47,6 +51,9 @@ import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 import org.matsim.counts.Count;
 import org.matsim.counts.Counts;
 import org.matsim.counts.CountsReaderMatsimV1;
+import org.matsim.counts.CountsWriter;
+
+import playground.tschlenther.createNetwork.CountLinkFinder;
 
 /**
  * @author tschlenther
@@ -73,17 +80,17 @@ public class CreateNetFromOSMKeepingCountLinks {
 	
 	private static final String INPUT_OSMFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/allWaysNRW.osm";
 
-	//--------USECASE 1)-------------------
-	private static final String INPUT_COUNT_NODES= "C:/Users/Work/svn/shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/counts-osm-mapping/2017-06-17/OSM-nodes.csv";
+	//		USECASE 1)
+	private static final String INPUT_COUNT_NODES= "C:/Users/Work/git/NEMO-gitfat/data/input/counts/mapmatching/Nemo_kurzfristZaehlstellen_OSMNodeIDs_UTM33N-Master.csv";
 	
-	//--------USECASE 2)-------------------
-	private static final String  PATH_OLD_NETFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/tertiaryNemo_10112017_EPSG_25832_filteredcleaned_network.xml.gz";
+	//		USECASE 2)
+	private static final String PATH_OLD_NETFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/network/allWaysNRW/tertiaryNemo_10112017_EPSG_25832_filteredcleaned_network.xml.gz";
 	private static final String PATH_OLD_COUNTSFILE = "C:/Users/Work/git/NEMO-gitfat/data/input/counts/24112017/NemoCounts_data_allCounts_KFZ.xml";
 	
 	
 	//--------------------OUTPUT----------------------------------------------------
-	private static final String OUTPUT_NETWORK = "C:/Users/Work/VSP/OSM/testNetCreatorKeepingCountLinksFromOldCOuntsFile.xml";
-	
+	private static final String OUTPUT_NETWORK = "C:/Users/Work/VSP/OSM/test_newNet_CSV.xml.gz";
+	private static final String OUTPUT_COUNTS = "C:/Users/Work/VSP/OSM/test_newCounts_CSV.xml";
 	
 	//----------------GENERAL SETTINGS-------------------------------------------
 	//set true, if csv file is given that contains information about count location. set to false if an old network and counts file is given, to extract the info from.
@@ -95,8 +102,11 @@ public class CreateNetFromOSMKeepingCountLinks {
 	private static final boolean doSimplify = false;
 	
 	private static final CoordinateTransformation TRANSFORMATION = 
-			TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, TransformationFactory.WGS84_UTM33N);
+			TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, "EPSG:25832");
 	
+	
+	//-----------------------------------------------------------
+	private static Map<Id<Link>,Tuple<Id<Node>,Id<Node>>> nodesOfCounts = new HashMap<Id<Link>, Tuple<Id<Node>, Id<Node>>>();
 	
 	/**
 	 * @param args
@@ -119,12 +129,17 @@ public class CreateNetFromOSMKeepingCountLinks {
 		
 		Set<Long> nodeIDsToKeep = new HashSet<Long>();
 
+		Counts<Link> counts = new Counts();
 		if(readNodeIDsFromCSV){
-			nodeIDsToKeep = readNodeIDsFromCSV(INPUT_COUNT_NODES, "\t");
+			nodeIDsToKeep = readNodeIDsFromCSV(INPUT_COUNT_NODES, ";");
 		} else{
-			nodeIDsToKeep = readNodeIDsFromOldNet(PATH_OLD_NETFILE, PATH_OLD_COUNTSFILE);
+			//read in counts
+			CountsReaderMatsimV1 countsReader = new CountsReaderMatsimV1(counts);
+			countsReader.readFile(PATH_OLD_COUNTSFILE);
+			nodeIDsToKeep = readNodeIDsFromOldNet(PATH_OLD_NETFILE, counts);
 		}
 		
+//		onr.setHierarchyLayer(7);
 		onr.setNodeIDsToKeep(nodeIDsToKeep);
 		onr.parse(INPUT_OSMFILE);
 		
@@ -134,19 +149,59 @@ public class CreateNetFromOSMKeepingCountLinks {
 			simp.setNodesNotToMerge(nodeIDsToKeep);
 			simp.run(network);
 		}
-
+		
 		/*
 		 * Clean the Network. Cleaning means removing disconnected components, so that afterwards there is a route from every link
 		 * to every other link. This may not be the case in the initial network converted from OpenStreetMap.
 		 */
 		new NetworkCleaner().run(network);
-		
 		new NetworkWriter(network).write(OUTPUT_NETWORK);
-		
+
+		writeUpdatedCountsFile(network, counts);
+		log.info("FINISHED");
 	}
 	
 	
-	private static Set<Long> readNodeIDsFromOldNet(String pathToOldNetworkFile, String pathToCountsFile) {
+	private static void writeUpdatedCountsFile(Network network, Counts oldCounts){
+		log.info("updating counts...");
+		Counts updatedCounts = new Counts();
+		for(Id<Link> countLocation : nodesOfCounts.keySet()){
+			
+			//determine the new link id
+			CountLinkFinder linkFinder = new CountLinkFinder(network);
+			Id<Link> newLinkId = null;
+			Node fromNode = network.getNodes().get(nodesOfCounts.get(countLocation).getFirst());
+			Id<Node> toNodeID = nodesOfCounts.get(countLocation).getSecond();		
+			
+			for(Link outlink : fromNode.getOutLinks().values()){
+				if(outlink.getToNode().getId().equals(toNodeID)){
+					newLinkId = outlink.getId();
+				}
+			}
+			if(newLinkId == null){
+				newLinkId = linkFinder.getFirstLinkOnTheWayFromNodeToNode(fromNode, network.getNodes().get(toNodeID));
+			}
+			
+			//copy old volumes if available
+			if(readNodeIDsFromCSV){
+				Count updatedCount = updatedCounts.createAndAddCount(newLinkId, countLocation.toString());
+				updatedCounts.setYear(LocalDate.now().getYear());
+			} else{
+				updatedCounts.setYear(oldCounts.getYear());
+				updatedCounts.setDescription(oldCounts.getDescription() + "\t updated this file on" + LocalDate.now().toString());
+				Count count = oldCounts.getCount(countLocation);
+				Count updatedCount = updatedCounts.createAndAddCount(newLinkId, count.getCsLabel());
+				for(Integer i : (Set<Integer>) count.getVolumes().keySet()){
+					updatedCount.createVolume(i, count.getVolume(i).getValue());
+				}
+			}
+		}
+		log.info("writing new counts file to " + OUTPUT_COUNTS);
+		CountsWriter writer = new CountsWriter(updatedCounts);
+		writer.write(OUTPUT_COUNTS);
+	}
+	
+	private static Set<Long> readNodeIDsFromOldNet(String pathToOldNetworkFile, Counts<Link> counts) {
 		log.info("start reading in node id's by using old network and counts file...");
 		Set<Long> allNodeIDs = new HashSet<Long>();
 		
@@ -155,15 +210,14 @@ public class CreateNetFromOSMKeepingCountLinks {
 		MatsimNetworkReader networkReader = new MatsimNetworkReader(scenario.getNetwork());
 		networkReader.readFile(pathToOldNetworkFile); 
 		Network net = scenario.getNetwork();
-
-		//read in counts
-		Counts<Link> counts = new Counts();
-		CountsReaderMatsimV1 countsReader = new CountsReaderMatsimV1(counts);
-		countsReader.readFile(pathToCountsFile);
 		
 		for(Id<Link> id : counts.getCounts().keySet()){
-			allNodeIDs.add(parseNodeID(net.getLinks().get(id).getFromNode().getId()));
-			allNodeIDs.add(parseNodeID(net.getLinks().get(id).getToNode().getId()));
+			Id<Node> fromNode = net.getLinks().get(id).getFromNode().getId();
+			Id<Node> toNode = net.getLinks().get(id).getToNode().getId();
+
+			nodesOfCounts.put(id,new Tuple<Id<Node>, Id<Node>>(fromNode,toNode));
+			allNodeIDs.add(parseNodeID(fromNode));
+			allNodeIDs.add(parseNodeID(toNode));
 		}
 		
 		log.info("finished reading in node id's ...");
@@ -199,6 +253,7 @@ public class CreateNetFromOSMKeepingCountLinks {
 				if(!header){
 					allNodeIDs.add( Long.parseLong(row[1]) );
 					allNodeIDs.add( Long.parseLong(row[2]) );
+					nodesOfCounts.put(Id.createLinkId(row[0]),new Tuple<Id<Node>, Id<Node>>(Id.createNodeId(row[1]),Id.createNodeId(row[2])));
 				}
 				header = false;				
 			}
