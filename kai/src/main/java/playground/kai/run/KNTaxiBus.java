@@ -35,6 +35,9 @@ public final class KNTaxiBus {
 		DrtConfigGroup drtConfig = ConfigUtils.addOrGetModule(config,DrtConfigGroup.class) ;
 		DvrpConfigGroup dvrpConfig = ConfigUtils.addOrGetModule(config,DvrpConfigGroup.class) ;
 		
+		drtConfig.setMaxTravelTimeAlpha(10.);
+		drtConfig.setMaxTravelTimeBeta(3600.);
+		
 		Scenario scenario = ScenarioUtils.loadScenario(config) ;
 		
 		for ( Person person : scenario.getPopulation().getPersons().values() ) {
