@@ -22,6 +22,7 @@ package playground.michalm.taxi.optimizer.assignment;
 import org.matsim.contrib.dvrp.path.OneToManyPathSearch.PathData;
 import org.matsim.contrib.taxi.optimizer.VehicleData;
 import org.matsim.contrib.taxi.optimizer.VehicleData.Entry;
+import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData.DestEntry;
 import org.matsim.contrib.taxi.optimizer.assignment.VehicleAssignmentProblem.AssignmentCost;
 
@@ -56,7 +57,7 @@ public class ETaxiToPlugAssignmentCostProvider {
 		this.params = params;
 	}
 
-	public AssignmentCost<ChargerPlug> getCost(AssignmentChargerPlugData pData, VehicleData vData) {
+	public AssignmentCost<ChargerPlug> getCost(AssignmentDestinationData<ChargerPlug> pData, VehicleData vData) {
 		final Mode currentMode = Mode.CHARGING_START_TIME;
 		return new AssignmentCost<ChargerPlug>() {
 			public double calc(Entry departure, DestEntry<ChargerPlug> plugEntry, PathData pathData) {

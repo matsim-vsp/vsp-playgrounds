@@ -216,7 +216,7 @@ public class TaxiZoneManager implements IterationEndsListener {
 		} else
 		if (currentZones.size()>2*k){
 			Logger.getLogger(getClass()).info("Removing zones in iteration "+it);
-		for(String z : worstZoneSort.retriveKSmallestElements()){
+		for(String z : worstZoneSort.kSmallestElements()){
 			currentZones.remove(z);
 			Logger.getLogger(getClass()).info("Removing zone\t"+z);
 		}
