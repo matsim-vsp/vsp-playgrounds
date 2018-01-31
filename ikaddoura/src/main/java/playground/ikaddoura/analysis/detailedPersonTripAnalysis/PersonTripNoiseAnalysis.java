@@ -760,10 +760,10 @@ public class PersonTripNoiseAnalysis {
 			bw.write("number of taxi users (former non-car users) (sample size);" + savUsersFormerNonCarUsers);
 			bw.newLine();
 			
-			bw.write("fix cost payments by taxi users (former car users) (sample size) [monetary units];" + paymentsSAVUserFormerCarUser);
+			bw.write("fixed cost payments by taxi users (former car users) (sample size) [monetary units];" + paymentsSAVUserFormerCarUser);
 			bw.newLine();
 			
-			bw.write("fix cost payments by taxi users (former non-car users) (sample size) [monetary units];" + paymentsSAVUserFormerNonCarUser);
+			bw.write("fixed cost payments by taxi users (former non-car users) (sample size) [monetary units];" + paymentsSAVUserFormerNonCarUser);
 			bw.newLine();
 			
 			bw.write("-----------");

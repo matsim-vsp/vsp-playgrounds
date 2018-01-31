@@ -78,7 +78,8 @@ public class CNEBerlin3 {
 	private static double sigma;
 	
 	private static CongestionTollingApproach congestionTollingApproach;
-	private static double kP; // TODO: move to config file (decongestion)
+	private static double kP;
+	private static double toleratedDelay;
 		
 	public static void main(String[] args) throws IOException {
 		
@@ -120,6 +121,9 @@ public class CNEBerlin3 {
 			kP = Double.parseDouble(args[7]);
 			log.info("kP: " + kP);
 			
+			toleratedDelay = Double.parseDouble(args[8]);
+			log.info("toleratedDelay" + toleratedDelay);
+			
 		} else {
 			
 			outputDirectory = "../../../runs-svn/cne/berlin-dz-1pct/output/test/";
@@ -132,7 +136,8 @@ public class CNEBerlin3 {
 			sigma = 0.;
 			
 			congestionTollingApproach = CongestionTollingApproach.DecongestionPID;
-			kP = 2 * ( 10 / 3600. );			
+			kP = 2 * ( 10 / 3600. );	
+			toleratedDelay = 30.;
 		}
 				
 		CNEBerlin3 cnControler = new CNEBerlin3();
@@ -168,19 +173,19 @@ public class CNEBerlin3 {
 		// decongestion pricing Berlin settings
 		
 		final DecongestionConfigGroup decongestionSettings = (DecongestionConfigGroup) controler.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
-		
+
 		if (congestionTollingApproach.toString().equals(CongestionTollingApproach.DecongestionPID.toString())) {
 			
 			decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
 			decongestionSettings.setKp(kP);
 			decongestionSettings.setKi(0.);
 			decongestionSettings.setKd(0.);
-			
+						
 			decongestionSettings.setMsa(true);
 			
+			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(toleratedDelay);
 			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
 			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
 			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
 
 		} else if (congestionTollingApproach.toString().equals(CongestionTollingApproach.DecongestionBangBang.toString())) {
@@ -191,9 +196,9 @@ public class CNEBerlin3 {
 			
 			decongestionSettings.setMsa(false);
 			
+			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(toleratedDelay);
 			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
 			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
 			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
 			
 		} else {

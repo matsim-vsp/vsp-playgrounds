@@ -54,10 +54,10 @@ public class MergeCSVFiles {
 	
 	private static final Logger log = Logger.getLogger(MergeCSVFiles.class);
 	
-	private static final String directory = "/Users/ihab/Desktop/ils4/kaddoura/optAV/output_b_Kp-0.05/";
-	private static final String fileName = "aggregated_info";
+	private static final String directory = "/Users/ihab/Desktop/ils4a/kaddoura/cne/berlin-dz-1pct-simpleNetwork/output-Kp-tuning/";
+	private static final String fileName = "aggregated_info_car";
 	private static final String separator = ";";
-	private static final int finalIteration = 200;
+	private static final int finalIteration = 100;
 	
 	private static TreeMap<String, LinkedHashMap<String, String>> path2key2Value = new TreeMap<>();
 	
@@ -68,7 +68,7 @@ public class MergeCSVFiles {
 
 		for (File f : fileList) {
 			
-			if (f.getName().endsWith(".csv") && f.getName().equalsIgnoreCase(fileName + ".csv")) {
+			if (!f.getName().startsWith("merged") && f.getName().endsWith(fileName + ".csv")) {
 				
 				log.info("*** file: " + f.getPath());
 				
