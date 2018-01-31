@@ -56,6 +56,7 @@ import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup.TravelTimeCalculatorType;
@@ -127,7 +128,7 @@ public class TtRunCottbusSimulation {
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MS;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MSideal;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -136,10 +137,12 @@ public class TtRunCottbusSimulation {
 		WoMines, // without mines as working places
 		WoMines100itcap1MS, // without mines. iterated for 100it with capacity 1.0 and signals MS
 		WoMines100itcap07MS, // without mines. iterated for 100it with capacity 0.7 and signals MS
-		WoMines100itcap07MSRand // same as prev, but with signals MS_RANDOM_OFFSETS
+		WoMines100itcap07MSRand, // same as prev, but with signals MS_RANDOM_OFFSETS
+		WoMines100itcap07MSideal, // without mines. iterated for 100it with capacity 0.7 and adapted MS signals (fixed intergreen... comparable to laemmer)
+		WoMines100itcap1MSideal
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_DOUBLE_GROUPS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -149,7 +152,9 @@ public class TtRunCottbusSimulation {
 		ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_MS, // all MS systems as downstream with MS basis, rest downstream with green basis
 		ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_GREEN, // all systems inside envelope downstream with green basis
 		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with green basis, rest all green
-		LAEMMER
+		LAEMMER_NICO_GROUPS, // laemmer with the fixed signal groups, that nico defined in his MA. except: bug fix in system 1 and 5 (1905 was included twice, 1902 forgotten; 1802 included twice, 1803 forgotten)
+		LAEMMER_DOUBLE_GROUPS, // laemmer with fixed signal groups, where signals can be included more than once, i.e. alternative groups can be modeled
+		MS_FIXED_LAEMMER_GROUPS // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 	}
 	
 	// defines which kind of pricing should be used
@@ -159,7 +164,7 @@ public class TtRunCottbusSimulation {
 	}
 	
 	private static final boolean USE_OPDYTS = false;
-	private static final boolean VIS = true;
+	private static final boolean VIS = false;
 	
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
@@ -196,6 +201,7 @@ public class TtRunCottbusSimulation {
 			OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
 			otfvisConfig.setDrawTime(true);
 			otfvisConfig.setAgentSize(80f);
+			config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
 		}
 		
 		Scenario scenario = prepareScenario( config );
@@ -334,6 +340,12 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap07MSRand:
 			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
 			break;	
+		case WoMines100itcap07MSideal:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-01-17-13-14-14_100it_MSideal_cap07_stuck600/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap1MSideal:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-01-17-12-1-45_100it_MSideal_cap10_stuck600/1000.output_plans.xml.gz");
+			break;
 		case GRID_LOCK_BTU:
 			// take these as initial plans
 			if (SIGNAL_TYPE.equals(SignalType.MS) || SIGNAL_TYPE.equals(SignalType.DOWNSTREAM_MS)){
@@ -423,12 +435,19 @@ public class TtRunCottbusSimulation {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
 				break;
-			case LAEMMER:
+			case LAEMMER_DOUBLE_GROUPS:
 				// overwrite signal groups
-//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases.xml"); // TODO
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases.xml");
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;
+			case LAEMMER_NICO_GROUPS:
+//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases.xml");
 //				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases_6.xml");
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;				
+			case MS_FIXED_LAEMMER_GROUPS:
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_laemmerFixedGroups.xml");
 				break;
 			}
 		}
@@ -502,7 +521,9 @@ public class TtRunCottbusSimulation {
 		else 
 			config.strategy().setMaxAgentPlanMemorySize( 5 );
 
-		config.qsim().setStuckTime( 3600 );
+		// TODO
+		config.qsim().setStuckTime( 600 );
+//		config.qsim().setStuckTime( 3600 ); // default ist 10s
 		config.qsim().setRemoveStuckVehicles(false);
 		config.qsim().setStartTime(3600 * 5); 
 		// TODO change to a higher value for congested scenarios
@@ -749,7 +770,8 @@ public class TtRunCottbusSimulation {
 			laemmerConfig.setAnalysisEnabled(false);
 			laemmerConfig.setDesiredCycleTime(90);
 			laemmerConfig.setMaxCycleTime(135);
-//			laemmerConfig.setMinGreenTime(5);
+			laemmerConfig.setMinGreenTime(0);
+			laemmerConfig.setCheckDownstream(false);
 			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 		}

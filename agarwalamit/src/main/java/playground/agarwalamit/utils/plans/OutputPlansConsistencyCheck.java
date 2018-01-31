@@ -20,6 +20,7 @@
 package playground.agarwalamit.utils.plans;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,6 +74,8 @@ public class OutputPlansConsistencyCheck {
         reader.readFile(configFile);
 
         this.outputDir = outputDir;
+        if (! new File(this.outputDir+"/analysis/").exists()) new File(this.outputDir+"/analysis/").mkdirs();
+
         this.sc = LoadMyScenarios.loadScenarioFromPlans(initialPlans);
         this.pf = pf;
     }

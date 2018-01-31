@@ -11,6 +11,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
 
+import org.apache.log4j.Logger;
+
 /**
  * @author kturner
  *
@@ -21,6 +23,9 @@ import java.util.Objects;
 //TODO: insert new constructor: separate destiniationFile and filename of files to merge.
 
 public class MergeFileVisitor extends SimpleFileVisitor<Path> {
+	
+	private static final Logger log = Logger.getLogger(MergeFileVisitor.class);
+	
 	private File destinationFile;
 	private boolean removeMergedFiles;
 	
@@ -61,6 +66,7 @@ public class MergeFileVisitor extends SimpleFileVisitor<Path> {
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 		if (file.getFileName().equals(destinationFile.toPath().getFileName()) && file.toFile().getCanonicalPath() != destinationFile.getCanonicalPath()){ //avoid handeling destinationFile 
+			log.info("Merging "+ file.toString() + " into " + destinationFile);
 			try (
 					FileReader reader = new FileReader(file.toString()); 
 					FileWriter writer = new FileWriter(destinationFile, true); ){  
@@ -71,12 +77,14 @@ public class MergeFileVisitor extends SimpleFileVisitor<Path> {
 				}
 				writer.flush();
 				writer.close();
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			
 			if (removeMergedFiles){ 
 				Files.delete(file); //Delete file after content was merged
+				log.info("Removed merged file: "+ file.toString());
 			}
 		}
 

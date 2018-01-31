@@ -43,6 +43,11 @@ import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.utils.SignalUtils;
 
+/**
+ * @author sbraun
+ */
+
+
 public class TtsignalAnalysisToolTest {
 
 	private static Id<Link> LINK_ID12 = Id.create("1_2", Link.class);
@@ -50,6 +55,7 @@ public class TtsignalAnalysisToolTest {
 	private static Id<Link> LINK_ID34 = Id.create("3_4", Link.class);
 	private static Id<Link> LINK_ID45 = Id.create("4_5", Link.class);
 	private static Id<SignalGroup> SIGNALGROUP = Id.create("SignalGroup-2_3", SignalGroup.class);
+	private static Id<SignalSystem> SIGNALSYSTEM = Id.create("SignalSystem-3", SignalSystem.class);
 
 	
 	@Rule
@@ -57,16 +63,16 @@ public class TtsignalAnalysisToolTest {
 		
 	@Test
 	public void testTotalSignalGreenTime() {
-		ScenarioForTest testscenario = new ScenarioForTest(0.0,1000.);
+		ScenarioForTest testscenario = new ScenarioForTest(0.0,10060.);
 		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		double totalgreentime = ((Double)signalAnalysishandler.getTotalSignalGreenTime().get(SIGNALGROUP)).doubleValue();
 			
-		Assert.assertEquals("The total green time of SignalGroup 2-3",240.,totalgreentime, MatsimTestUtils.EPSILON); 		
+		Assert.assertEquals("The total green time of SignalGroup 2-3",1560.,totalgreentime, MatsimTestUtils.EPSILON); 		
 	}
 
 	@Test
 	public void testSumBygoneGreenTime() {
-		ScenarioForTest testscenario = new ScenarioForTest(0.0,1000.);
+		ScenarioForTest testscenario = new ScenarioForTest(0.0,10000.);
 		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		
 		double greenAt51 = signalAnalysishandler.getSumOfBygoneSignalGreenTime().get(new Double(51)).get(SIGNALGROUP).doubleValue();
@@ -79,13 +85,13 @@ public class TtsignalAnalysisToolTest {
 	}	
 
 	@Test
-	public void testAvgGreenCyclepersignalGroup() {
-		ScenarioForTest testscenario = new ScenarioForTest(0.0,181.);
+	public void testAvgGreenCycleperSignalGroup() {
+		ScenarioForTest testscenario = new ScenarioForTest(0.0,0.0);
 		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		
-		double avgGreenCycle = signalAnalysishandler.calculateAvgSignalGreenTimePerFlexibleCycle().get(SIGNALGROUP).doubleValue();
-	
-		Assert.assertEquals("The average Greencycle should be 60", 60.,avgGreenCycle, MatsimTestUtils.EPSILON);		
+		double avgGreenCycle = signalAnalysishandler.calculateAvgFlexibleCycleTimePerSignalSystem().get(SIGNALSYSTEM).doubleValue();
+		
+		Assert.assertEquals("The average Greencycle should be 115.55555", 115.5555555555555,avgGreenCycle, MatsimTestUtils.EPSILON);		
 	}
 	
 //TODO Is this doing what it suppose to do?? 
@@ -95,7 +101,7 @@ public class TtsignalAnalysisToolTest {
 		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		
 		double greenRatio = signalAnalysishandler.calculateSignalGreenTimeRatios().get(SIGNALGROUP).doubleValue();
-		Assert.assertEquals("The average Greencycle should be ", 0.14018691588, greenRatio, MatsimTestUtils.EPSILON);		
+		Assert.assertEquals("Ratio of Greentime to relevant simulation time", 0.018939393939, greenRatio, MatsimTestUtils.EPSILON);		
 	}
 	
 	@Test
@@ -114,7 +120,7 @@ public class TtsignalAnalysisToolTest {
 		private Double planEndTime;		
 		private Scenario scenario;
 		private int populationsize = 4;
-		private int offsets = 10;
+		private int offsets = 1000;
 		
 		ScenarioForTest(double planStartTime, double planEndTime){
 			this.planStartTime = new Double(planStartTime);
@@ -161,7 +167,7 @@ public class TtsignalAnalysisToolTest {
 			
 			
 			ActivityParams dummyAct = new ActivityParams("dummy");
-			dummyAct.setTypicalDuration(100);
+			dummyAct.setTypicalDuration(10);
 			config.planCalcScore().addActivityParams(dummyAct);
 			
 			
@@ -198,6 +204,10 @@ public class TtsignalAnalysisToolTest {
 		private void createNetwork() {
 			Network network = scenario.getNetwork();
 			NetworkFactory nfac = network.getFactory();
+			
+			double traveltime = 1000; 
+			double freespeed = 10;
+			double length = traveltime*freespeed;
 		
 			Node node1 = nfac.createNode(Id.createNodeId("1"), CoordUtils.createCoord(0., 100.));
 			Node node2 = nfac.createNode(Id.createNodeId("2"), CoordUtils.createCoord(100., 100.));
@@ -213,22 +223,26 @@ public class TtsignalAnalysisToolTest {
 		
 			Link link12 = nfac.createLink((LINK_ID12), node1, node2);
 			link12.setCapacity(100.);
-			link12.getFreespeed(50*3.6);
+			link12.setLength(length);
+			link12.setFreespeed(freespeed);
 			network.addLink(link12);
 		
 			Link link23 = nfac.createLink((LINK_ID23), node2, node3);
 			link23.setCapacity(100.);
-			link23.getFreespeed(50*3.6);
+			link23.setLength(length);
+			link23.setFreespeed(50*3.6);
 			network.addLink(link23);
 		
 			Link link34 = nfac.createLink((LINK_ID34), node3, node4);
 			link34.setCapacity(100.);
-			link34.getFreespeed(50*3.6);
+			link34.setLength(length);
+			link34.setFreespeed(50*3.6);
 			network.addLink(link34);
 		
 			Link link45 = nfac.createLink((LINK_ID45), node4, node5);
 			link45.setCapacity(100.);
-			link45.getFreespeed(50*3.6);
+			link45.setLength(length);
+			link45.setFreespeed(50*3.6);
 			network.addLink(link45);
 		}
 	
@@ -264,7 +278,7 @@ public class TtsignalAnalysisToolTest {
 			SignalControlDataFactory conFac = new SignalControlDataFactoryImpl();
 			
 			//Signal at Node 3
-			Id<SignalSystem> signalSystemId = Id.create("SignalSystem-3", SignalSystem.class);
+			Id<SignalSystem> signalSystemId = SIGNALSYSTEM;
 			SignalSystemData signalSystem = sysfac.createSignalSystemData(signalSystemId);
 			signalSystems.addSignalSystemData(signalSystem);
 			

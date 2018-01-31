@@ -23,11 +23,16 @@ package scenarios.illustrative.singleCrossing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -89,6 +94,7 @@ public class ComplexSingleCrossingScenario {
     private static final int LANE_CAPACITY = 1800;
 	public static final Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
 	public static final Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
+	public static final Id<SignalGroup> signalGroupId1l = Id.create("SignalGroup1l", SignalGroup.class);
 	public static final Id<SignalGroup> signalGroupId3 = Id.create("SignalGroup3", SignalGroup.class);
 	public static final Id<SignalGroup> signalGroupId4 = Id.create("SignalGroup4", SignalGroup.class);
 	public static final Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
@@ -214,10 +220,11 @@ public class ComplexSingleCrossingScenario {
 		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
         LaemmerConfig laemmerConfig = new LaemmerConfig();
         laemmerConfig.setDefaultIntergreenTime(5);
-
+        laemmerConfig.setActiveStabilizationStrategy(LaemmerConfig.StabilizationStrategy.COMBINE_SIMILAR_REGULATIONTIME);
+        
         if(groupedSignals) {
-            laemmerConfig.setDesiredCycleTime(90);
-            laemmerConfig.setMaxCycleTime(120);
+            laemmerConfig.setDesiredCycleTime(60);
+            laemmerConfig.setMaxCycleTime(90);
         } else {
             laemmerConfig.setDesiredCycleTime(120);
             laemmerConfig.setMaxCycleTime(180);
@@ -603,8 +610,39 @@ public class ComplexSingleCrossingScenario {
         }
         else {
                 for (Lane lane : scenario.getLanes().getLanesToLinkAssignments().get(inLink.getId()).getLanes().values()) {
+                	signal = null;
                     if(lane.getToLinkIds() != null && !lane.getToLinkIds().isEmpty()) {
-                    	signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId() + "_" +lane.getId(), Signal.class));
+                    	//here we need to find a signal which already has a lane leading to one of the outlinks of the currently processed lane for which we need to find/add a signal
+                    	List<SignalData> signalDataForCurrentLink = new LinkedList<>();
+                    	if (signalSystem1.getSignalData() != null) {
+//                    			signalDataForCurrentLink = signalSystem1.getSignalData().values().stream().filter(sd->sd.getLinkId().equals(inLink.getId())).collect(Collectors.toList());
+                    		for (SignalData sd : signalSystem1.getSignalData().values()) {
+                    			if (sd.getLinkId().equals(inLink.getId())){
+                    				signalDataForCurrentLink.add(sd);
+                    			}
+                    		}
+                    	}
+                    	if (signalDataForCurrentLink != null) {
+                    		// (1) iterate over all signalDatas which have same link as the current lane is positioned on
+							for (SignalData sd : signalDataForCurrentLink) {
+								// (2) iterate over all lanes of this signal
+								for (Id<Lane> l : sd.getLaneIds()) {
+									//iterate over all toLinks of every lane of the signal from (2) 
+									for (Id<Link> knownToLink : scenario.getLanes().getLanesToLinkAssignments()
+											.get(inLink.getId()).getLanes().get(l).getToLinkIds()) {
+										//iterate over all toLinks of the currently processed lane for which we need to find/add a signal
+										for (Id<Link> toLink : lane.getToLinkIds()) {
+											//finally we (hopefully) found one signal
+											if (knownToLink.equals(toLink))
+												signal = sd;
+										}
+									}
+								}
+							} 
+						}
+						if (signal == null) {
+                    		signal = sysFac.createSignalData(Id.create("Signal" + inLink.getId() + "_" +lane.getId(), Signal.class));
+                    	}
                     	signal.addLaneId(lane.getId());
                     	signal.setLinkId(inLink.getId());
                     	signalSystem1.addSignalData(signal);
@@ -625,7 +663,25 @@ public class ComplexSingleCrossingScenario {
 //        	  signalGroups.addSignalGroupData(signalGroup);
 //          }
           // TODO test, if everythink still working. pschade //tt: this would do the same:
-          SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem1);
+          if (useLaemmer) {
+        	  SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem1);
+          } else {
+        	  SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
+        	  signalGroup1.addSignalId(Id.create("Signal2_3_2_3.r", Signal.class));
+        	  signalGroup1.addSignalId(Id.create("Signal4_3_4_3.r", Signal.class));
+              signalGroups.addSignalGroupData(signalGroup1);
+
+        	  SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId2);
+        	  signalGroup2.addSignalId(Id.create("Signal7_3_7_3.ol", Signal.class));
+        	  signalGroup2.addSignalId(Id.create("Signal8_3_8_3.ol", Signal.class));
+              signalGroups.addSignalGroupData(signalGroup2);
+
+        	  SignalGroupData signalGroup1l = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1l);
+        	  signalGroup1l.addSignalId(Id.create("Signal2_3_2_3.l", Signal.class));
+        	  signalGroup1l.addSignalId(Id.create("Signal4_3_4_3.l", Signal.class));
+              signalGroups.addSignalGroupData(signalGroup1l);
+
+          }
         	
 //        SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
 //        signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
@@ -671,6 +727,7 @@ public class ComplexSingleCrossingScenario {
         // create a plan for the signal system (with defined cycle time and offset 0)
         SignalPlanData signalPlan;
         if(groupedSignals) {
+        	//TODO T_CYC should be synconized with desiredCycleTimt eform laemmerConfig, pschade Jan'18
             signalPlan =  SignalUtils.createSignalPlan(conFac, 60, 0, Id.create("SignalPlan1", SignalPlan.class));
         }  else {
             signalPlan = SignalUtils.createSignalPlan(conFac, 120, 0, Id.create("SignalPlan1", SignalPlan.class));
@@ -679,17 +736,21 @@ public class ComplexSingleCrossingScenario {
 
         double lambda1 = flowWE / 3600;
         double lambda2 = flowNS / 1800;
-
+        double lambda1l = (flowWE * leftTurningFactorWE)/1800;
+        
         if(groupedSignals) {
-            int T_CYC = 60;
-            int TAU_SUM = 10;
-            double lambdaSum = lambda1 + lambda2;
+            //TODO T_CYC should be synconized with desiredCycleTimt eform laemmerConfig, pschade Jan'18
+        	int T_CYC = 60;
+            int TAU_SUM = 15;
+            double lambdaSum = lambda1 + lambda2 + lambda1l;
             int g1 = (int) Math.rint((lambda1 / lambdaSum) * ((T_CYC) - TAU_SUM));
             int g2 = (int) Math.rint((lambda2 / lambdaSum) * ((T_CYC) - TAU_SUM));
-
+            int g1l = (int) Math.rint((lambda1l / lambdaSum) * ((T_CYC) - TAU_SUM));
+            
             // specify signal group settings for all signal groups
             signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1, 0, g1));
             signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId2, g1 + 5, g1 + 5 + g2));
+            signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1l, g1 + 5 + g2 + 5, g1 + 5 + g2 + 5 + g1l));
         } else {
             int T_CYC = 120;
             int TAU_SUM = 20;
@@ -717,7 +778,6 @@ public class ComplexSingleCrossingScenario {
 
 		if (!liveArrivalRates) {
             if (useLanes) {
-            	//where are the straight moving vehicles? why they aren't defined here? pschade
                 laemmerConfig.addArrivalRateForLane(Id.createLinkId("2_3"), Id.create("2_3.l", Lane.class), (flowWE / 3600) / 2);
                 laemmerConfig.addArrivalRateForLane(Id.createLinkId("2_3"), Id.create("2_3.r", Lane.class), (flowWE / 3600) / 2);
 

@@ -149,7 +149,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	 */
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
-		if(!event.getActType().equals("pt interaction")){
+		if(! (event.getActType().equals("pt interaction") || event.getActType().equals("drt interaction")) ){
 			agent2CurrentTripActivityBefore.put(event.getPersonId(), event.getActType());			
 		}
 	}
@@ -318,7 +318,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	public void handleEvent(ActivityStartEvent event) {
 		if(agent2CurrentTripStartLink.containsKey(event.getPersonId())){
 			// Check if this a real activity or whether the trip will continue with another leg after an "pt interaction"
-			if(!event.getActType().equals("pt interaction")){				
+			if(! (event.getActType().equals("pt interaction") || event.getActType().equals("drt interaction")) ){				
 				//Check if trip starts or ends in the monitored area, that means on the monitored start and end links
 				//monitoredStartAndEndLinks=null -> all links are to be monitored
 				if(monitoredStartAndEndLinks == null || 

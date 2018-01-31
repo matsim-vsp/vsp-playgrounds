@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import javax.management.InvalidAttributeValueException;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -145,7 +147,7 @@ public class KTFreight_v3 {
 
 	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/base_log3/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/UCC1/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
@@ -165,8 +167,7 @@ public class KTFreight_v3 {
 //			new ArrayList<String>(Arrays.asList("gridCarrier3"));
 //		= new ArrayList<String>("gridCarrier", "gridCarrier1", "gridCarrier2", "gridCarrier3"); 
 	//Location of UCC
-	private static final ArrayList<String> uccDepotsLinkIdsString =
-		new ArrayList<String>(Arrays.asList("j(0,5)", "j(10,5)")); 
+	private static final ArrayList<String> uccDepotsLinkIdsString = new ArrayList<String>(Arrays.asList("j(0,5)", "j(10,5)")); 
 	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
 	private static final ArrayList<String> onlyTollVehTypes =  null;
 //		new ArrayList<String>(Arrays.asList("gridType01", "gridType03", "gridType05", "gridType10")); 
@@ -187,7 +188,7 @@ public class KTFreight_v3 {
 	// Einstellungen für den Run	
 	private static final boolean addingCongestion = true ;  //uses NetworkChangeEvents to reduce freespeed.
 	private static final boolean addingToll = true;  //added, kt. 07.08.2014
-	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
+	private static final boolean usingUCC = true;	 //Using Transshipment-Center, added kt 30.04.2015
 	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
 	private static final int MAX_JSPRIT_ITERATION = 4000;
@@ -202,7 +203,7 @@ public class KTFreight_v3 {
 			new VehicleTypeDependentRoadPricingCalculator();
 
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InvalidAttributeValueException {
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR);
 		for (int i = 1; i<=NU_OF_TOTAL_RUNS; i++) {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
@@ -229,7 +230,7 @@ public class KTFreight_v3 {
 
 
 	//### KT 03.12.2014 multiple run for testing the variaty of the jsprit solutions (especially in terms of costs). 
-	private static void multipleRun (String[] args) throws IOException{	
+	private static void multipleRun (String[] args) throws IOException, InvalidAttributeValueException{	
 		OutputDirectoryLogging.closeOutputDirLogging();	//close old Log
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR + "log_" + runIndex);	//create new log
 		log.info("#### Starting Run: " + runIndex + " of: "+ NU_OF_TOTAL_RUNS);
@@ -306,7 +307,7 @@ public class KTFreight_v3 {
 		return config;
 	}  //End createConfig
 
-	private static Carriers jspritRun(Config config, Scenario scenario) {
+	private static Carriers jspritRun(Config config, Scenario scenario) throws InvalidAttributeValueException {
 		CarrierVehicleTypes vehicleTypes = createVehicleTypes();
 
 		Carriers carriers = createCarriers(vehicleTypes);
@@ -323,10 +324,21 @@ public class KTFreight_v3 {
 		 * ihrer Tour mit übernommen wird.	
 		 */
 		if (usingUCC) {		
-			//TODO: Tests ob uccDepotsLinkIdsString != null und ob LinkIds element des Netzwerkes.
 			ArrayList<Id<Link>> uccDepotsLinkIds = new ArrayList<Id<Link>>();	//Location of UCC
+			if (uccDepotsLinkIdsString == null){
+				throw new InvalidAttributeValueException("null value for UCC-locations");
+			}
+			
+			if (uccDepotsLinkIdsString.size() == 0){
+				throw new InvalidAttributeValueException("no UCC-locations defined");
+			}
+			
 			for (String linkId : uccDepotsLinkIdsString){
-				uccDepotsLinkIds.add(Id.createLinkId(linkId));
+				if (scenario.getNetwork().getLinks().containsKey(Id.createLinkId(linkId))){
+					uccDepotsLinkIds.add(Id.createLinkId(linkId));
+				} else {
+					throw new InvalidAttributeValueException("UCC-Location is not part of the network: " + linkId);
+				}
 			}
 
 			UccCarrierCreator uccCarrierCreator = new UccCarrierCreator(carriers, vehicleTypes, TOLLAREAFILE, uccC_prefix, retailerNames, uccDepotsLinkIds, 0.0, 0.0 );

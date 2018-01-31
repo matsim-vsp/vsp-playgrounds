@@ -81,6 +81,18 @@
 			<!--<artifactId>otp</artifactId>-->
 			<!--<version>0.19.0</version>-->
 		<!--</dependency>-->
+		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_2.11</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+		<!--following is required to avoid exception (trying to access com.google.common.base.Stopwatch.init which is not accessible anymore)-->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>18.0</version>
+		</dependency>
 		<dependency>
 			<groupId>se.walkercrou</groupId>
 			<artifactId>google-places-api-java</artifactId>

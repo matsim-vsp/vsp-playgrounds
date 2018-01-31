@@ -14,19 +14,24 @@ import java.util.Map;
  */
 public class LaemmerConfig {
 	
+    //Probably consider to try also a combination of simmilar outflow rates
+    public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME}; 
+    private StabilizationStrategy activeStabilizationStrategy = StabilizationStrategy.COMBINE_SIMILAR_REGULATIONTIME;
+    
     public enum Regime {COMBINED, OPTIMIZING, STABILIZING};
     private Regime activeRegime = Regime.COMBINED;
 
-    private double maxCycleTime = 120;
-    private double desiredCycleTime = 70;
+    private double maxCycleTime = 180;
+    private double desiredCycleTime = 120;
 
     private double defaultIntergreenTime = 5.0;
-    private double minGreenTime = 0.0;
+    //I think this shouldn't default to 0.0, pschade Jan'18
+    private double minGreenTime = 5.0;
     
     //size of timeBuckets for LaneSensor and LinkSensor
-    private double timeBucketSize = 15.0;
+    private double timeBucketSize = Double.POSITIVE_INFINITY; //15.0;
     //lookBackTime for LaneSensor and LinkSensor
-    private double lookBackTime = 300.0;
+    private double lookBackTime = Double.POSITIVE_INFINITY; //300.0;
 
     private Map<Id<Link>, Double> linkArrivalRates = new HashMap<>();
     private Map<Id<Link>, Map<Id<Lane>,Double>> laneArrivalRates = new HashMap<>();
@@ -36,6 +41,8 @@ public class LaemmerConfig {
     
 	/** activate the phase only if downstream links are empty. */
 	private boolean checkDownstream = false;
+
+	private boolean isRemoveSubPhases = true;
 
     //    @Nullable
     public Double getLaneArrivalRate(Id<Link> linkId, Id<Lane> laneId) {
@@ -53,8 +60,16 @@ public class LaemmerConfig {
     public void setMinGreenTime(double minGreenTime) {
         this.minGreenTime = minGreenTime;
     }
+    
+    public StabilizationStrategy getActiveStabilizationStrategy() {
+		return activeStabilizationStrategy;
+	}
 
-    public Regime getActiveRegime() {
+	public void setActiveStabilizationStrategy(StabilizationStrategy activeStabilizationStrategy) {
+		this.activeStabilizationStrategy = activeStabilizationStrategy;
+	}
+
+	public Regime getActiveRegime() {
         return activeRegime;
     }
 
@@ -146,5 +161,9 @@ public class LaemmerConfig {
 
 	public void setLookBackTime(double lookBackTime) {
 		this.lookBackTime = lookBackTime;
+	}
+
+	public boolean isRemoveSubPhases() {
+		return isRemoveSubPhases ;
 	}
 }

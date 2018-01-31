@@ -20,13 +20,15 @@
 package playground.michalm.taxi.optimizer.assignment;
 
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
+import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData.DestEntry;
+
+import com.google.common.collect.ImmutableList;
 
 import playground.michalm.ev.data.Charger;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
-import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
 
-class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
-	class ChargerPlug {
+class AssignmentChargerPlugData {
+	static class ChargerPlug {
 		public final Charger charger;
 		public final int idx;
 
@@ -36,7 +38,9 @@ class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
 		}
 	}
 
-	AssignmentChargerPlugData(double currentTime, Iterable<Charger> chargers) {
+	static AssignmentDestinationData<ChargerPlug> create(double currentTime, Iterable<Charger> chargers) {
+		ImmutableList.Builder<DestEntry<ChargerPlug>> builder = ImmutableList.builder();
+
 		int idx = 0;
 		for (Charger c : chargers) {
 			ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
@@ -55,7 +59,7 @@ class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
 			int unassignedPlugs = Math.max(c.getPlugs() - assignedVehicles, 0);
 			for (int p = 0; p < unassignedPlugs; p++) {
 				ChargerPlug plug = new ChargerPlug(c, p);
-				entries.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), currentTime));
+				builder.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), currentTime));
 			}
 
 			// we do not want to have long queues at chargers: 1 awaiting veh per plug is the limit
@@ -69,8 +73,10 @@ class AssignmentChargerPlugData extends AssignmentDestinationData<ChargerPlug> {
 			double chargeStart = currentTime + logic.estimateAssignedWorkload() / (c.getPlugs() - unassignedPlugs);
 			for (int p = unassignedPlugs; p < assignableVehicles; p++) {
 				ChargerPlug plug = new ChargerPlug(c, p);
-				entries.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), chargeStart));
+				builder.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), chargeStart));
 			}
 		}
+
+		return new AssignmentDestinationData<>(builder.build());
 	}
 }
