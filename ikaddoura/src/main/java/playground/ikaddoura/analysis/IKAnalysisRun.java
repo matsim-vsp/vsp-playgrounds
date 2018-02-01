@@ -49,14 +49,24 @@ import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
  * 
- * Provides the following analysis: 
+ * Provides several analysis:
  * 
- * aggregated results: number of trips, number of stuck trips, travel time, travel distance, caused/affected noise cost, toll payments, user benefits, welfare
+ * basic aggregated analysis 
+ * --> aggregated results: number of trips, number of stuck trips, travel time, travel distance, caused/affected noise cost, toll payments, user benefits, welfare
  * 
- * trip-based information
- * person ; trip no.; leg mode ; stuckAbort (trip) ; departure time (trip) ; trip arrival time (trip) ; travel time (trip) ; travel distance (trip) ; toll payment (trip)
+ * basic person-specific information
+ * person ; number of trips; ...
  * 
- * (...)
+ * basic trip-specific information
+ * --> person ; trip no.; leg mode ; stuckAbort (trip) ; departure time (trip) ; trip arrival time (trip) ; travel time (trip) ; travel distance (trip) ; toll payment (trip)
+ * 
+ * delay information
+ * 
+ * daily traffic volume per link
+ * 
+ * hourly traffic volume per link
+ * 
+ * ... and writes out the network as a shapefile.
  * 
  * 
  */
