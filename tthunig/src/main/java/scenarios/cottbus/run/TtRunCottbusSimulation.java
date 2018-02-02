@@ -128,7 +128,7 @@ public class TtRunCottbusSimulation {
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MSideal;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -142,7 +142,7 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap1MSideal
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_DOUBLE_GROUPS;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS_IDEAL;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -154,7 +154,7 @@ public class TtRunCottbusSimulation {
 		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with green basis, rest all green
 		LAEMMER_NICO_GROUPS, // laemmer with the fixed signal groups, that nico defined in his MA. except: bug fix in system 1 and 5 (1905 was included twice, 1902 forgotten; 1802 included twice, 1803 forgotten)
 		LAEMMER_DOUBLE_GROUPS, // laemmer with fixed signal groups, where signals can be included more than once, i.e. alternative groups can be modeled
-		MS_FIXED_LAEMMER_GROUPS // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
+		MS_IDEAL // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 	}
 	
 	// defines which kind of pricing should be used
@@ -365,7 +365,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(0);
+		config.controler().setLastIteration(100);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
@@ -446,8 +446,8 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
 				break;				
-			case MS_FIXED_LAEMMER_GROUPS:
-				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_laemmerFixedGroups.xml");
+			case MS_IDEAL:
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_idealized.xml");
 				break;
 			}
 		}
@@ -472,7 +472,9 @@ public class TtRunCottbusSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
+		config.travelTimeCalculator().setTraveltimeBinSize( 300 );
+//		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
+		// TODO
 
 		config.travelTimeCalculator().setTravelTimeCalculatorType(TravelTimeCalculatorType.TravelTimeCalculatorHashMap.toString());
 		// hash map and array produce same results. only difference: memory and time.
