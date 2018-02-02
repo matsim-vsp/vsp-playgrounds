@@ -100,7 +100,7 @@ public class CottbusFootballBatch {
 			controler.addControlerListener(cbfbControllerListener);
 			//add the signals module
 //			controler.addOverridingModule(new SylviaSignalsModule());
-			/* sylvia moved to playground tthunig. If you want to use sylvia use e.g. TtBasicController in playground tthunig. theresa, apr'17 */
+			/* sylvia moved to playground tthunig. If you want to use sylvia use e.g. CombinedSignalsModule in playground tthunig. theresa, apr'17 */
 			controler.addOverridingModule(new SignalsModule());
 			
 			controler.run();
