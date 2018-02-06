@@ -32,7 +32,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.jfree.base.config.ModifiableConfiguration;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -48,7 +47,6 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
-import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballStrings;
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
@@ -62,15 +60,17 @@ import utils.ModifyNetwork;
 public class RunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
 	
-	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER, NONE};
-	private static final SignalControl CONTROL_TYPE = SignalControl.LAEMMER;
+	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE};
+	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
 	private static final boolean LONG_LANES = true;
 	private static final double FLOW_CAP = .7;
 	private static final int STUCK_TIME = 600;
 	
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	private static final boolean USE_MS_IDEAL_BASE_PLANS = false;
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {		
 		Config baseConfig;
 		if (args != null && args.length != 0){
 			baseConfig = ConfigUtils.loadConfig(args[0]);
@@ -85,19 +85,22 @@ public class RunCottbusFootball {
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		switch (CONTROL_TYPE){
 		case FIXED_IDEAL:
-			signalsConfigGroup.setSignalControlFile("signal_control_no_13_laemmersFixedGroups.xml");
+			signalsConfigGroup.setSignalControlFile("signal_control_no_13_idealized.xml");
 			break;
 		case SYLVIA:
 			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13.xml");
 			break;
 		case SYLVIA_IDEAL:
 			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13_idealized.xml");
-		case LAEMMER:
+		case LAEMMER_NICO:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
 			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer.xml");
 //			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased.xml");
 //			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer2phases.xml");
-//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer_doublePhases.xml");
+			break;
+		case LAEMMER_DOUBLE:
+			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
+			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer_doublePhases.xml");
 			break;
 		case NONE:
 			signalsConfigGroup.setUseSignalSystems(false);
@@ -109,7 +112,13 @@ public class RunCottbusFootball {
 			break;
 		}
 		
-		baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap"+FLOW_CAP+".xml.gz");
+		if (USE_MS_IDEAL_BASE_PLANS) {
+			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
+					+ "commuter_population_wgs84_utm33n_car_only_100it_MSideal_cap"+FLOW_CAP+".xml.gz");
+		} else { 
+			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
+					+ "commuter_population_wgs84_utm33n_car_only_100it_MS_cap"+FLOW_CAP+".xml.gz");
+		}
 		
 		baseConfig.qsim().setFlowCapFactor(FLOW_CAP);
 		baseConfig.qsim().setStorageCapFactor( FLOW_CAP / Math.pow(FLOW_CAP,1/4.) );
@@ -143,13 +152,21 @@ public class RunCottbusFootball {
 			break;
 		case SYLVIA_IDEAL:
 			baseOutputDirectory+= "sylviaIdeal_maxExt1.5_fixedCycle";
-		case LAEMMER:
-//			baseOutputDirectory+= "laemmer_doubleGroups";
+			break;
+		case LAEMMER_NICO:
 			baseOutputDirectory+= "laemmer_nicoGroups";
+			break;
+		case LAEMMER_DOUBLE:
+			baseOutputDirectory+= "laemmer_doubleGroups";
 			break;
 		case NONE:
 			baseOutputDirectory+= "noSignals";
 			break;
+		}
+		if (USE_MS_IDEAL_BASE_PLANS) {
+			baseOutputDirectory += "_MSidealPlans";
+		} else {
+			baseOutputDirectory += "_MSPlans";
 		}
 		baseOutputDirectory+= "/";
 		LOG.info("using base output directory: " + baseOutputDirectory);
@@ -228,17 +245,6 @@ public class RunCottbusFootball {
 			writer.newLine();
 		}
 		writer.close();
-	}
-
-	
-	private static void createOutputDirectory(String outputDirectory){
-		File outdir = new File(outputDirectory);
-		if (outdir.exists()){
-			throw new IllegalArgumentException("Output directory " + outputDirectory + " already exists!");
-		}
-		else {
-			outdir.mkdir();
-		}
 	}
 
 	
