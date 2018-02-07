@@ -32,15 +32,13 @@ import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
  * Trip distances are calculated by summing up the link lengths for all link leave events which 
  * includes the link on which agent is departed. Inclusion of departure link can be argued against arrival link. 
  *
- * TODO Also look on {@link TripDistanceHandler} which can do the work by this class, if so, remove it.
- *
  * @author amit
  */
 
-public class TripRouteDistanceHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler, LinkLeaveEventHandler,
+public class TripRouteDistanceInTimeBinHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler, LinkLeaveEventHandler,
 VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 
-	private static final Logger LOG = Logger.getLogger(TripRouteDistanceHandler.class);
+	private static final Logger LOG = Logger.getLogger(TripRouteDistanceInTimeBinHandler.class);
 	private final SortedMap<Id<Person>,Double> personId2TripDepartTimeBin = new TreeMap<>();
 	private final SortedMap<Double, Map<Id<Person>,Integer>> timeBin2Person2TripsCount = new TreeMap<>();
 	private final SortedMap<Double, Map<Id<Person>,List<Double>>> timeBin2Person2TripsDistance = new TreeMap<>();
@@ -55,7 +53,7 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 	private final double timeBinSize;
 	private final int nonCarWarning= 0;
 	
-	public TripRouteDistanceHandler(final Network network, final double simulationEndTime, final int noOfTimeBins) {
+	public TripRouteDistanceInTimeBinHandler(final Network network, final double simulationEndTime, final int noOfTimeBins) {
 		LOG.info("A trip starts with departure event and ends with arrival events.");
 		this.network = network;
 		this.timeBinSize = simulationEndTime / noOfTimeBins;

@@ -50,7 +50,7 @@ public class FilteredTripRouteDistanceHandler implements PersonDepartureEventHan
     private static final Logger LOGGER = Logger.getLogger(FilteredTripRouteDistanceHandler.class);
     private final Vehicle2DriverEventHandler veh2DriverDelegate = new Vehicle2DriverEventHandler();
 
-    private final TripRouteDistanceHandler delegate;
+    private final TripRouteDistanceInTimeBinHandler delegate;
 
     private final PersonFilter pf ;
     private final String ug ;
@@ -59,7 +59,7 @@ public class FilteredTripRouteDistanceHandler implements PersonDepartureEventHan
      * User group filtering will be used, persons belongs to the given user group will be considered.
      */
     public FilteredTripRouteDistanceHandler(final Network network, final double simulationEndTime, final int noOfTimeBins, final String userGroup, final PersonFilter personFilter){
-        this.delegate = new TripRouteDistanceHandler(network, simulationEndTime, noOfTimeBins);
+        this.delegate = new TripRouteDistanceInTimeBinHandler(network, simulationEndTime, noOfTimeBins);
 
         this.ug=userGroup;
         this.pf = personFilter;

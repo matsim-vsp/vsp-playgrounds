@@ -32,7 +32,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.jfree.base.config.ModifiableConfiguration;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -48,7 +47,6 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
-import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballStrings;
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
@@ -56,47 +54,53 @@ import signals.sylvia.controler.DgSylviaConfig;
 import utils.ModifyNetwork;
 
 /**
- * @author tthunig, copied from dgrether CottbusFootballBatch
+ * @author tthunig, based on dgrether CottbusFootballBatch
  *
  */
 public class RunCottbusFootball {
-	private static final Logger log = Logger.getLogger(RunCottbusFootball.class);
+	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
 	
-	private enum SignalControl {FIXED, SYLVIA, LAEMMER, NONE};
-	private static final SignalControl controlType = SignalControl.LAEMMER;
-	private static final boolean checkDownstream = false;
+	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE};
+	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED;
+	private static final boolean CHECK_DOWNSTREAM = false;
 	
-	private static final boolean longLanes = true;
+	private static final boolean LONG_LANES = true;
+	private static final double FLOW_CAP = .7;
+	private static final int STUCK_TIME = 600;
 	
-	/**
-	 * @param args
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
-	 */
-	public static void main(String[] args) throws FileNotFoundException, IOException {
+	private static final boolean USE_MS_IDEAL_BASE_PLANS = false;
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {		
 		Config baseConfig;
 		if (args != null && args.length != 0){
 			baseConfig = ConfigUtils.loadConfig(args[0]);
 		} else {
-			String configFileName = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/config_cap1.0.xml";
+			String configFileName = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/config.xml";
 			baseConfig = ConfigUtils.loadConfig(configFileName);
-			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/run1200/");
+			String scenarioDescription = "flowCap" + FLOW_CAP + "_longLanes" + LONG_LANES + "_stuckTime" + STUCK_TIME;
+			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/" + scenarioDescription + "/run1200/");
 			baseConfig.controler().setRunId("1200");
 		}
 		baseConfig.controler().setLastIteration(0);
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
-		switch (controlType){
+		switch (CONTROL_TYPE){
+		case FIXED_IDEAL:
+			signalsConfigGroup.setSignalControlFile("signal_control_no_13_idealized.xml");
+			break;
 		case SYLVIA:
 			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13.xml");
 			break;
-		case LAEMMER:
+		case SYLVIA_IDEAL:
+			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13_idealized.xml");
+		case LAEMMER_NICO:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
-//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer.xml");
-//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer_6.xml"); //2
-//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased.xml"); //1
-			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased_6.xml");
-//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer2phases_6.xml");
-//			baseConfig.network().setLaneDefinitionsFile("lanes_long.xml");
+			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer.xml");
+//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased.xml");
+//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer2phases.xml");
+			break;
+		case LAEMMER_DOUBLE:
+			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
+			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer_doublePhases.xml");
 			break;
 		case NONE:
 			signalsConfigGroup.setUseSignalSystems(false);
@@ -108,42 +112,64 @@ public class RunCottbusFootball {
 			break;
 		}
 		
+		if (USE_MS_IDEAL_BASE_PLANS) {
+			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
+					+ "commuter_population_wgs84_utm33n_car_only_100it_MSideal_cap"+FLOW_CAP+".xml.gz");
+		} else { 
+			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
+					+ "commuter_population_wgs84_utm33n_car_only_100it_MS_cap"+FLOW_CAP+".xml.gz");
+		}
+		
+		baseConfig.qsim().setFlowCapFactor(FLOW_CAP);
+		baseConfig.qsim().setStorageCapFactor( FLOW_CAP / Math.pow(FLOW_CAP,1/4.) );
+		
+		baseConfig.qsim().setStuckTime(STUCK_TIME);
+		baseConfig.qsim().setEndTime(36*3600);
+		
 		Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
-		if (longLanes){
+		if (LONG_LANES){
 			// extend short lanes (needed for laemmer)
 			ModifyNetwork.lengthenAllLanes(baseScenario);
 		}
 		
 		// add missing scenario elements
-		if (!controlType.equals(SignalControl.NONE))
+		if (!CONTROL_TYPE.equals(SignalControl.NONE))
 			baseScenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(baseConfig).loadSignalsData());
 		//create the output directoy
 		String baseOutputDirectory = baseConfig.controler().getOutputDirectory();
 		if (! baseOutputDirectory.endsWith("/")){
 			baseOutputDirectory = baseOutputDirectory.concat("/");
 		}
-		switch (controlType){
+		switch (CONTROL_TYPE){
+		case FIXED_IDEAL:
+			baseOutputDirectory+= "fixedTimeIdeal";
+			break;
 		case FIXED:
-			baseOutputDirectory+= "footballFixedTime"; 
+			baseOutputDirectory+= "fixedTime"; 
 			break;
 		case SYLVIA:
-			baseOutputDirectory+= "footballSylvia_fixedCycle";
+			baseOutputDirectory+= "sylvia_maxExt1.5_fixedCycle";
 			break;
-		case LAEMMER:
-			baseOutputDirectory+= "footballLaemmer_LinkBased_6";
+		case SYLVIA_IDEAL:
+			baseOutputDirectory+= "sylviaIdeal_maxExt1.5_fixedCycle";
+			break;
+		case LAEMMER_NICO:
+			baseOutputDirectory+= "laemmer_nicoGroups";
+			break;
+		case LAEMMER_DOUBLE:
+			baseOutputDirectory+= "laemmer_doubleGroups";
 			break;
 		case NONE:
-			baseOutputDirectory+= "footballNoSignals";
+			baseOutputDirectory+= "noSignals";
 			break;
 		}
-		if (checkDownstream){
-			baseOutputDirectory+= "_bp";
-		}
-		if (longLanes){
-			baseOutputDirectory+= "_LongLanes";
+		if (USE_MS_IDEAL_BASE_PLANS) {
+			baseOutputDirectory += "_MSidealPlans";
+		} else {
+			baseOutputDirectory += "_MSPlans";
 		}
 		baseOutputDirectory+= "/";
-		log.info("using base output directory: " + baseOutputDirectory);
+		LOG.info("using base output directory: " + baseOutputDirectory);
 		Population fanPop = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
 		//initialize variables needed in the loop
 		String runId = baseConfig.controler().getRunId();
@@ -172,19 +198,19 @@ public class RunCottbusFootball {
 			CottbusFootballAnalysisControllerListener cbfbControllerListener = new CottbusFootballAnalysisControllerListener();
 			controler.addControlerListener(cbfbControllerListener);
 			//add the signals module
-			if (!controlType.equals(SignalControl.NONE)) {
+			if (!CONTROL_TYPE.equals(SignalControl.NONE)) {
 				CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 				DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-//				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-				sylviaConfig.setSignalGroupMaxGreenScale(2);
-				sylviaConfig.setCheckDownstream(checkDownstream);
+				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+				sylviaConfig.setSignalGroupMaxGreenScale(1.5);
+				sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setSylviaConfig(sylviaConfig);
 				LaemmerConfig laemmerConfig = new LaemmerConfig();
 				laemmerConfig.setDesiredCycleTime(90);
 		        laemmerConfig.setMaxCycleTime(135);
-				laemmerConfig.setMinGreenTime(5);
+//				laemmerConfig.setMinGreenTime(5);
 //				laemmerConfig.setAnalysisEnabled(true);
-				laemmerConfig.setCheckDownstream(checkDownstream);
+				laemmerConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
 			}
@@ -212,24 +238,13 @@ public class RunCottbusFootball {
 		SortedMap<Integer, Double> sorted = new TreeMap<>();
 		sorted.putAll(map);
 		BufferedWriter writer = IOUtils.getBufferedWriter(filename);
-		writer.write("Football fans %" + CottbusFootballStrings.SEPARATOR + headerColumn2);
+		writer.write("Football fans %\t" + headerColumn2);
 		writer.newLine();
 		for (Entry<Integer, Double> e : sorted.entrySet()){
-			writer.write(e.getKey().toString() + CottbusFootballStrings.SEPARATOR + e.getValue().toString());
+			writer.write(e.getKey().toString() + "\t" + e.getValue().toString());
 			writer.newLine();
 		}
 		writer.close();
-	}
-
-	
-	private static void createOutputDirectory(String outputDirectory){
-		File outdir = new File(outputDirectory);
-		if (outdir.exists()){
-			throw new IllegalArgumentException("Output directory " + outputDirectory + " already exists!");
-		}
-		else {
-			outdir.mkdir();
-		}
 	}
 
 	
