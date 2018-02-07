@@ -78,7 +78,11 @@ import signals.gershenson.DgRoederGershensonSignalController;
 public class GershensonIT {
 
 	private static final Logger log = Logger.getLogger(GershensonIT.class);
-
+	private static final Id<SignalGroup> SIGNALGROUPID1 = Id.create("SignalGroup1", SignalGroup.class);
+	private static final Id<SignalGroup> SIGNALGROUPID2 = Id.create("SignalGroup2", SignalGroup.class);
+	private static final Id<SignalSystem> SIGNALSYSTEMID = Id.create("SignalSystem1", SignalSystem.class);
+	
+	
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 
@@ -97,10 +101,11 @@ public class GershensonIT {
 		Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
 		Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
 		Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+		
 
-		log.info("total signal green times: " + totalSignalGreenTimes.get(signalGroupId1) + ", " + totalSignalGreenTimes.get(signalGroupId2));
-		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(signalGroupId1) + ", " + avgSignalGreenTimePerCycle.get(signalGroupId2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(signalSystemId));
+		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
 //		Assert.assertEquals("total signal green times of both groups are not similiar enough", 0.0, totalSignalGreenTimes.get(signalGroupId1) - totalSignalGreenTimes.get(signalGroupId2),
 //				totalSignalGreenTimes.get(signalGroupId1) / 3); // may differ by 1/3
 //		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 25, avgSignalGreenTimePerCycle.get(signalGroupId1), 5);
@@ -120,13 +125,14 @@ public class GershensonIT {
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // group 1 should have more total green time than group 2
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle();
 		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
-		Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-		Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-		Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+//		Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
+//		Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
+//		Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
 
-		log.info("total signal green times: " + totalSignalGreenTimes.get(signalGroupId1) + ", " + totalSignalGreenTimes.get(signalGroupId2));
-		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(signalGroupId1) + ", " + avgSignalGreenTimePerCycle.get(signalGroupId2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(signalSystemId));
+		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
+		
 		
 		// TODO does not seem to be plausible. but what is plausible for gershenson?
 //		Assert.assertTrue("total signal green time of group 1 is not bigger than of group 2", totalSignalGreenTimes.get(signalGroupId1) > totalSignalGreenTimes.get(signalGroupId2));
@@ -261,8 +267,8 @@ public class GershensonIT {
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
 		// create signal system
-		Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
-		SignalSystemData signalSystem = sysFac.createSignalSystemData(signalSystemId);
+		//Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+		SignalSystemData signalSystem = sysFac.createSignalSystemData(SIGNALSYSTEMID);
 		signalSystems.addSignalSystemData(signalSystem);
 
 		// create a signal for every inLink
@@ -273,23 +279,24 @@ public class GershensonIT {
 		}
 
 		// group signals with non conflicting streams
-		Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-		SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId1);
+		//Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
+		SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID, SIGNALGROUPID1);
 		signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
 		signalGroup1.addSignalId(Id.create("Signal4_3", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup1);
 
-		Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-		SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(signalSystemId, signalGroupId2);
+		//Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
+		SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID, SIGNALGROUPID2);
 		signalGroup2.addSignalId(Id.create("Signal7_3", Signal.class));
 		signalGroup2.addSignalId(Id.create("Signal8_3", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup2);
 
 		// create the signal control
-		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
+		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(SIGNALSYSTEMID);
 		signalSystemControl.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl);
 
+		
 		// no plan is needed for GershensonController
 //		// create a plan for the signal system (with defined cycle time and offset 0)
 //		SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 60, 0, Id.create("SignalPlan1", SignalPlan.class));
