@@ -482,10 +482,10 @@ public class DgRoederGershensonSignalController implements SignalController {
 		return highest;
 	}
 	
-	private Boolean vehiclesApproachingSomewhere(Integer value) {
+	private Boolean vehiclesApproachingSomewhere() {
 		Boolean approach = false;
 		for (Id<SignalGroup> signal : approachingVehiclesGroupMap.keySet()) {
-			if(!approach && approachingVehiclesGroupMap.get(signal).compareTo(value)!=0) {
+			if(!approach && approachingVehiclesGroupMap.get(signal).compareTo(0)!=0) {
 				approach = true;
 			}
 		}
@@ -519,7 +519,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		
 		
 		//This is just to demonstrate that the algorithm works
-		if (timeSeconds%1==0) {
+		if (timeSeconds%67==0) {
 			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString());
 		}
 		
@@ -552,12 +552,13 @@ public class DgRoederGershensonSignalController implements SignalController {
 //-----------------End of Preparation--------------
 
 	//Rule 6
-	//if the whole intersection is jammed, turn all signals to RED	
-		if (!jammedSignalGroup.containsValue(false)) {
+	//if the whole intersection is jammed OR
+	//no Cars approaching the Signalsystem.
+	//	-> turn all signals to RED	
+		if (!jammedSignalGroup.containsValue(false)  || !vehiclesApproachingSomewhere()) {
 			for (SignalGroup group : this.system.getSignalGroups().values()){ 
 				if (!SignalGroupState.RED.equals(group.getState())) switchlight(group,timeSeconds);
 			}
-			log.info("Envoke Rule 6");
 		} else {
 	//Rule 5
 	//At least one Outlink is jammed - from all groups, which are not jammed turn the one with the highest counter to GREEN
@@ -588,7 +589,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 				} else {
 	//Rule 4
 	//One Group has GREEN but no cars approaching and another group has RED and Cars approaching (switch them)
-					if(approachingVehiclesGroupMap.containsValue(0) && vehiclesApproachingSomewhere(0)) {
+					if(approachingVehiclesGroupMap.containsValue(0) && vehiclesApproachingSomewhere()) {
 						for (SignalGroup group : this.system.getSignalGroups().values()) {
 							if (group.getState().equals(SignalGroupState.GREEN) &&
 									(counter.get(group.getId())==0 || !highestcount().equals(group.getId()))){

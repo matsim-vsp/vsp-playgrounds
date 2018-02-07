@@ -24,6 +24,7 @@ package signalsystems.gershenson;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
@@ -91,26 +92,26 @@ public class GershensonIT {
 	 */
 	@Test
 	public void testDemandAB() {
-		double[] noPersons = { 3600, 3600 };
+		double[] noPersons = { 3600, 3600, 0, 0 };
 		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons);
 
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // should be more or less equal (OW direction is always favored as the first phase)
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle(); // should be more or less equal and around 25
 		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem(); // should be 60
-		Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-		Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-		Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+
 		
 
 		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
-//		Assert.assertEquals("total signal green times of both groups are not similiar enough", 0.0, totalSignalGreenTimes.get(signalGroupId1) - totalSignalGreenTimes.get(signalGroupId2),
-//				totalSignalGreenTimes.get(signalGroupId1) / 3); // may differ by 1/3
-//		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 25, avgSignalGreenTimePerCycle.get(signalGroupId1), 5);
-//		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 25, avgSignalGreenTimePerCycle.get(signalGroupId2), 5);
-//		Assert.assertEquals("avg cycle time of the system is wrong", 60, avgCycleTimePerSystem.get(signalSystemId), MatsimTestUtils.EPSILON);
+		
+		
+		
+		Assert.assertEquals("total signal green times of both groups are not similiar enough", 0.0, totalSignalGreenTimes.get(SIGNALGROUPID1) - totalSignalGreenTimes.get(SIGNALGROUPID2), 3.);
+		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 3.9870689655172415, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.9913793103448274, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg cycle time of the system is wrong", 8.413793103448276, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
 	}
 
 	/**
@@ -118,29 +119,48 @@ public class GershensonIT {
 	 */
 	@Test
 	public void testDemandA() {
-		double[] noPersons = { 3600, 0 };
+		double[] noPersons = { 3600, 0, 0, 0 };
 		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons);
 
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // group 1 should have more total green time than group 2
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle();
 		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
-//		Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-//		Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-//		Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+
 
 		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
 		
-		
-		// TODO does not seem to be plausible. but what is plausible for gershenson?
-//		Assert.assertTrue("total signal green time of group 1 is not bigger than of group 2", totalSignalGreenTimes.get(signalGroupId1) > totalSignalGreenTimes.get(signalGroupId2));
-//		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 45, avgSignalGreenTimePerCycle.get(signalGroupId1), 5);
-//		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 5, avgSignalGreenTimePerCycle.get(signalGroupId2), 5);
-//		Assert.assertEquals("avg cycle time of the system is wrong", 60, avgCycleTimePerSystem.get(signalSystemId), MatsimTestUtils.EPSILON);
+		Assert.assertTrue("total signal green time of group 1 is not bigger than of group 2", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
+		Assert.assertTrue("total signal green time of group 2 should be zero", totalSignalGreenTimes.get(SIGNALGROUPID2)==0);
+		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 1850.0, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), 5.);
+		Assert.assertEquals("avg cycle time of the system is wrong", 1951, avgCycleTimePerSystem.get(SIGNALSYSTEMID), 2.);
 	}
+	@Test
+	public void testDemandABCD() {
+		double[] noPersons = { 3600, 2400, 1200, 2400 };
+		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons);
 
+		// check signal results
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // group 1 should have more total green time than group 2
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
+
+
+		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
+		
+		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 7.330275229357798, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.984709480122324, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg cycle time of the system is wrong", 11.932721712538227, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
+	}
+	
+	
+	
+	
+	
 	private TtSignalAnalysisTool runScenario(double[] noPersons) {
 		Config config = defineConfig();
 
@@ -170,7 +190,7 @@ public class GershensonIT {
 
 	private void createScenarioElements(Scenario scenario, double[] noPersons) {
 		createNetwork(scenario.getNetwork());
-		createPopulation(scenario.getPopulation(), noPersons);
+		createPopulationScenario1(scenario.getPopulation(), noPersons);
 		createSignals(scenario);
 	}
 
@@ -224,8 +244,8 @@ public class GershensonIT {
 		}
 	}
 
-	private static void createPopulation(Population population, double[] noPersons) {
-		String[] odRelations = { "1_2-4_5", "6_7-8_9" };
+	private static void createPopulationScenario1(Population population, double[] noPersons) {
+		String[] odRelations = { "1_2-4_5", "6_7-8_9", "4_5-1_2", "8_9-6_7"};
 		int odIndex = 0;
 
 		for (String od : odRelations) {
