@@ -41,9 +41,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class Network2Shape {
 	private final static Logger log = Logger.getLogger(Network2Shape.class);
 
-	public static void exportNetwork2Shp1(Scenario scenario, String outputDirectory, String crs, CoordinateTransformation ct){
+	public static void exportNetwork2Shp(Scenario scenario, String outputDirectory, String crs, CoordinateTransformation ct){
 		
-		String outputPath = outputDirectory + "/network-shp/";
+		String outputPath = outputDirectory + "network-shp/";
 		File file = new File(outputPath);
 		file.mkdirs();
 		

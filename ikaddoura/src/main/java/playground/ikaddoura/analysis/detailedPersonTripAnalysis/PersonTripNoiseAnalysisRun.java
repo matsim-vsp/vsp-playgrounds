@@ -177,7 +177,7 @@ public class PersonTripNoiseAnalysisRun {
 		
 		// print the results
 		
-		PersonTripNoiseAnalysis analysis = new PersonTripNoiseAnalysis();
+		PersonTripAnalysis analysis = new PersonTripAnalysis();
 		
 		log.info("Print trip information...");
 		analysis.printTripInformation(outputPath, TransportMode.car, basicHandler, noiseHandler, moneyHandler);

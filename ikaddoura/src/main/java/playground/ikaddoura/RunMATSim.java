@@ -93,8 +93,7 @@ public class RunMATSim {
 		
 		// some post processing
 		
-		IKAnalysisRun analysis = new IKAnalysisRun(scenario);
-		analysis.setCrs(crs);
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario, crs);
 		analysis.run();
 	}
 
