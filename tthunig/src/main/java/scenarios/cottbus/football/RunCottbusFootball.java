@@ -50,6 +50,7 @@ import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreato
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
+import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.sylvia.controler.DgSylviaConfig;
 import utils.ModifyNetwork;
 
@@ -60,12 +61,13 @@ import utils.ModifyNetwork;
 public class RunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
 	
+	// SYLVIA_IDEAL does not exist yet
 	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE};
-	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED;
+	private static final SignalControl CONTROL_TYPE = SignalControl.LAEMMER_DOUBLE;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
 	private static final boolean LONG_LANES = true;
-	private static final double FLOW_CAP = .7;
+	private static final double FLOW_CAP = 1.;
 	private static final int STUCK_TIME = 600;
 	
 	private static final boolean USE_MS_IDEAL_BASE_PLANS = false;
@@ -210,6 +212,8 @@ public class RunCottbusFootball {
 		        laemmerConfig.setMaxCycleTime(135);
 //				laemmerConfig.setMinGreenTime(5);
 //				laemmerConfig.setAnalysisEnabled(true);
+//		        laemmerConfig.setActiveRegime(Regime.STABILIZING);		       
+		        laemmerConfig.setActiveRegime(Regime.OPTIMIZING);
 				laemmerConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);

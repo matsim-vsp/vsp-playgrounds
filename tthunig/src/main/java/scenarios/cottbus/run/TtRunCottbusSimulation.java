@@ -137,12 +137,14 @@ public class TtRunCottbusSimulation {
 		WoMines, // without mines as working places
 		WoMines100itcap1MS, // without mines. iterated for 100it with capacity 1.0 and signals MS
 		WoMines100itcap07MS, // without mines. iterated for 100it with capacity 0.7 and signals MS
+		WoMines100itcap07MStbs300, // same es above just with tbs 300 instead of 10
+		WoMines100itcap1MStbs300,
 		WoMines100itcap07MSRand, // same as prev, but with signals MS_RANDOM_OFFSETS
 		WoMines100itcap07MSideal, // without mines. iterated for 100it with capacity 0.7 and adapted MS signals (fixed intergreen... comparable to laemmer)
 		WoMines100itcap1MSideal
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS_IDEAL;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -176,7 +178,7 @@ public class TtRunCottbusSimulation {
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = 1.;
+	private static final double SCALING_FACTOR = .7;
 	
 	
 	public static void main(String[] args) {
@@ -323,8 +325,6 @@ public class TtRunCottbusSimulation {
 			break;
 		case WoMines:
 			// TODO choose one
-			// BaseCase output plans. the number specifies the flow and storage capacity that was used	
-//			config.plans().setInputFile(OUTPUT_BASE_DIR + "run3100/3100.output_plans.xml.gz");
 			// BaseCase plans, no routes
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only.xml.gz");
 			// BaseCase plans, no links for acitivties, no routes
@@ -336,6 +336,12 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap07MS:
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap0.7.xml.gz");
 //			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-5-55_100it_cap07_MS/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MStbs300:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-7-11-58-38_100it_MS_cap07_stuck600_tbs300/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap1MStbs300:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-7-12-9-49_100it_MS_cap10_stuck600_tbs300/1000.output_plans.xml.gz");
 			break;
 		case WoMines100itcap07MSRand:
 			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
@@ -472,7 +478,8 @@ public class TtRunCottbusSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize( 300 );
+		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
+//		config.travelTimeCalculator().setTraveltimeBinSize( 300 );
 //		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
 		// TODO
 
@@ -524,7 +531,8 @@ public class TtRunCottbusSimulation {
 			config.strategy().setMaxAgentPlanMemorySize( 5 );
 
 		// TODO
-		config.qsim().setStuckTime( 600 );
+		config.qsim().setStuckTime( 120 );
+//		config.qsim().setStuckTime( 600 );
 //		config.qsim().setStuckTime( 3600 ); // default ist 10s
 		config.qsim().setRemoveStuckVehicles(false);
 		config.qsim().setStartTime(3600 * 5); 
