@@ -15,8 +15,8 @@ import java.util.Map;
 public class LaemmerConfig {
 	
     //Probably consider to try also a combination of simmilar outflow rates
-    public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME}; 
-    private StabilizationStrategy activeStabilizationStrategy = StabilizationStrategy.COMBINE_SIMILAR_REGULATIONTIME;
+    public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME, HEURISTIC}; 
+    private StabilizationStrategy activeStabilizationStrategy = StabilizationStrategy.HEURISTIC;
     
     public enum Regime {COMBINED, OPTIMIZING, STABILIZING};
     private Regime activeRegime = Regime.COMBINED;
@@ -141,7 +141,8 @@ public class LaemmerConfig {
 	public boolean isCheckDownstream() {
 		return checkDownstream;
 	}
-
+	
+	@Deprecated /** deprecated, use getStabilizationStrategy instead **/
 	public boolean useHeuristicPhaseGeneration() {
 		// TODO Auto-generated method stub
 		return false;

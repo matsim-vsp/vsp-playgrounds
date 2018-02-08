@@ -26,9 +26,9 @@ public class LaemmerLane {
 	private SignalGroup signalGroup;
 
 	//TODO laemmerLane should also work without lanes, pschade, Jan'18
-	public LaemmerLane (Link link, Lane physicalLane, SignalGroup signalGroup, Signal signal, FullyAdaptiveLaemmerSignalController laemmerSignalControler) {
+	public LaemmerLane (Link link, Lane physicalLane, SignalGroup signalGroup, Signal signal, FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController) {
 		this.physicalLane = physicalLane;
-		this.fullyAdaptiveLaemmerSignalController = laemmerSignalControler;
+		this.fullyAdaptiveLaemmerSignalController = fullyAdaptiveLaemmerSignalController;
 		this.signal = signal;
 		this.link = link;
 		this.signalGroup = signalGroup;
@@ -39,7 +39,12 @@ public class LaemmerLane {
 		this.fullyAdaptiveLaemmerSignalController.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId(), this.fullyAdaptiveLaemmerSignalController.getLaemmerConfig().getLookBackTime(), this.fullyAdaptiveLaemmerSignalController.getLaemmerConfig().getTimeBucketSize());
 	}
 	
-    //TODO this should be combined with update stabilization, since there isn't a representive driveway any more
+    public LaemmerLane(Link link, SignalGroup signalGroup, Signal signal,
+			FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController) {
+    	this(link, null, signalGroup, signal, fullyAdaptiveLaemmerSignalController);
+    }
+
+	//TODO this should be combined with update stabilization, since there isn't a representive driveway any more
 	void calcLoadAndArrivalrate(double now) {
 		this.determiningLoad = 0;
 		double arrivalRate = 0.0;
@@ -151,6 +156,14 @@ public class LaemmerLane {
 
 	public void shortenRegulationTime(double passedRegulationTime) {
 		this.regulationTime -= passedRegulationTime;
+	}
+
+	public Signal getSignal() {
+		return signal;
+	}
+
+	public SignalGroup getSignalGroup() {
+		return signalGroup;
 	}
     
 }

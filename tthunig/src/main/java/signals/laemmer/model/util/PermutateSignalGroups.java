@@ -2,16 +2,20 @@ package signals.laemmer.model.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.data.Lanes;
 
 import signals.laemmer.model.SignalPhase;
 
@@ -94,34 +98,86 @@ public class PermutateSignalGroups {
 		return clearedPermutes;
 	}
 	
-	@Deprecated //use createPhasesFromSignalGroups instead
-    private static ArrayList<ArrayList<SignalGroup>> createAllSignalPermutations(SignalSystem system, HashMap<Id<Lane>, Lane> lanemap) {
+    public static ArrayList<SignalPhase> createPhasesFromSignalGroups(SignalSystem system, Network network, Lanes lanes) {
 		ArrayList<SignalGroup> signalGroups = new ArrayList<>(system.getSignalGroups().values());
 		ArrayList<ArrayList<SignalGroup>> allSignalGroupPerms = removeDuplicates(permutate(signalGroups, signalGroups.size()));
+		ArrayList<SignalPhase> validPhases = new ArrayList<>();
+
+		System.out.println("size of siggroups before illegal; "+allSignalGroupPerms.size());
 		
 		//check for illegal combinations
-		ArrayList<SignalGroup> illegalGroups = new ArrayList<>();
+		ArrayList<ArrayList<SignalGroup>> illegalSignalGroups = new ArrayList<>();
 		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
 			//check every signalGroup in this combination for illegal flows
-			for (SignalGroup sg : sgs) {
-				//collect all lanes from this signalgroup's signals
-				ArrayList<Id<Lane>> lanesOfCurrSg = new ArrayList<>();
-				for (Signal signal : sg.getSignals().values()) {
-					lanesOfCurrSg.addAll(signal.getLaneIds());
-				}
-				//iterate over all lanes an their conflictingLanes and check, if one of these illegal lanes are also in the collected lanes of this phase
-				for (Id<Lane> l : lanesOfCurrSg) {
-					for (Id<Lane> conflictingLane : ( (ArrayList<Id<Lane>>) (lanemap.get(l).getAttributes().getAttribute("conflictingLanes")) ) ) {
-						if (lanesOfCurrSg.contains(conflictingLane)) {
-							illegalGroups.add(sg);
-							break;
+			for (SignalGroup outerSg : sgs) {
+				//further tests can skipped after at least one illegal combination where found
+				boolean isIllegal = false;
+				for (Signal outerSignal : outerSg.getSignals().values()) {
+					Conflicts outerSignalLinkConflicts = (Conflicts) network.getLinks().get(outerSignal.getLinkId()).getAttributes().getAttribute("conflicts"); 
+					for (SignalGroup innerSg : sgs) {
+						for (Signal innerSignal : innerSg.getSignals().values()) {
+							Conflicts innerSignalLinkConflicts = (Conflicts) network.getLinks().get(innerSignal.getLinkId()).getAttributes().getAttribute("conflicts");
+							//skip if inner and outer signal are the same signal
+							if (outerSignal.equals(innerSignal))
+								continue;
+							if ((outerSignalLinkConflicts != null && outerSignalLinkConflicts.hasConflict(innerSignal.getLinkId()))
+									|| (innerSignalLinkConflicts != null && innerSignalLinkConflicts.hasConflict(outerSignal.getLinkId()))) {
+								isIllegal = true;
+								break;
+							}
+							for (Id<Lane> outerSignalLane : outerSignal.getLaneIds()) {
+								Conflicts outerSignalLaneConflicts = (Conflicts) lanes.getLanesToLinkAssignments().get(outerSignal.getLinkId()).getLanes().get(outerSignalLane).getAttributes().getAttribute("conflicts");
+								if ((outerSignalLaneConflicts != null && outerSignalLaneConflicts.hasConflict(innerSignal.getLinkId()))
+										|| (innerSignalLinkConflicts != null &&innerSignalLinkConflicts.hasConflict(outerSignal.getLinkId(), outerSignalLane))) {
+									isIllegal = true;
+									break;
+								}
+								for(Id<Lane> innerSignalLane : innerSignal.getLaneIds()) {
+									Conflicts innerSignalLaneConflicts = (Conflicts) lanes.getLanesToLinkAssignments().get(innerSignal.getLinkId()).getLanes().get(innerSignalLane).getAttributes().getAttribute("conflicts");
+									if ((innerSignalLaneConflicts != null && (innerSignalLaneConflicts.hasConflict(outerSignal.getLinkId())
+											|| innerSignalLaneConflicts.hasConflict(outerSignal.getLinkId(), outerSignalLane)))
+											|| (outerSignalLinkConflicts != null && outerSignalLinkConflicts.hasConflict(innerSignal.getLinkId(), innerSignalLane))
+											|| (outerSignalLaneConflicts != null && outerSignalLaneConflicts.hasConflict(innerSignal.getLinkId(), innerSignalLane))) {
+										isIllegal = true;
+										break;
+									}
+								}
+								if (isIllegal)
+									break;
+							}
+							if (isIllegal)
+								break;
 						}
+						if(isIllegal)
+							break;
 					}
+					if(isIllegal)
+						break;
+				}
+				if(isIllegal) {
+					illegalSignalGroups.add(sgs);
+					isIllegal = true;
+					break;
 				}
 			}
 		}
-		allSignalGroupPerms.removeAll(illegalGroups);
-		return allSignalGroupPerms;
+		System.out.println("removing "+illegalSignalGroups.size()+" illegal ones");
+		allSignalGroupPerms.removeAll(illegalSignalGroups);
+		
+		System.out.println("size after removing illegals: "+allSignalGroupPerms.size());
+		
+		for(ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
+			SignalPhase newPhase = new SignalPhase();
+			for (SignalGroup sg : sgs) {
+				List<Id<Lane>> signalLanes = new LinkedList<>();
+				for (Signal s : sg.getSignals().values()) {
+					signalLanes.addAll(s.getLaneIds());
+				}
+				newPhase.addGreenSignalGroupsAndLanes(sg.getId(), signalLanes);
+			}
+			validPhases.add(newPhase);
+		}
+		return validPhases;
 		}
 	
     public static ArrayList<SignalPhase> createPhasesFromSignalGroups(SignalSystem system, Map<Id<Lane>, Lane> lanemap) {

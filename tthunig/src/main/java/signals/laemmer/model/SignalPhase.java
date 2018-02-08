@@ -1,13 +1,15 @@
 package signals.laemmer.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
@@ -16,10 +18,10 @@ import org.matsim.lanes.data.Lane;
 public class SignalPhase {
 	// TODO ist doch sinnvoll, dass eine Signalphase ihre Groups kennt. Muss beim Erstellen der Phase gefuellt werden (Konstruktor)! tt, dez'17
 	private List<SignalGroup> signalGroups = new LinkedList<>();
-	private Map<Id<SignalGroup>, List<Id<Lane>>> greenSignalsToLanes = new HashMap<>();
-	private Set<Id<Lane>> lanes = new HashSet<>();
+	private Map<Id<SignalGroup>, List<Id<Lane>>> greenSignalsToLanes = new LinkedHashMap<>();
+	private SortedSet<Id<Lane>> lanes = new TreeSet<Id<Lane>>();
 	private Id<SignalPhase> id;
-	
+		
 	public SignalPhase() {
 		this.id = Id.create("empty phase", SignalPhase.class);
 	}
@@ -55,6 +57,7 @@ public class SignalPhase {
 		return greenSignalsToLanes.keySet();
 	}
 	
+	//TODO rework with links
 	public Set<Id<Lane>> getGreenLanes(){
 		return this.lanes;
 	}
@@ -75,7 +78,7 @@ public class SignalPhase {
 			allGreen &= sg.getState().equals(SignalGroupState.GREEN);
 		return (allGreen ? SignalGroupState.GREEN : SignalGroupState.RED);
 	}
-	// @deprecated should replaced by getState(). beforehand create field for list of signalgroup-objects in constructor.
+	// @deprecated should replaced by getState() w/o SignalSystem-Parameter. beforehand create field for list of signalgroup-objects in constructor.
 	public SignalGroupState getState(SignalSystem signalSystem) {
 		boolean allGreen = true;
 		for (SignalGroup sg : signalSystem.getSignalGroups().values()) {
@@ -97,5 +100,13 @@ public class SignalPhase {
 			string.append(sg.toString()+"; ");
 		}
 		return string.toString();
+	}
+
+	public void addGreenSignalGroupsAndLanes(SignalGroup signalGroup) {
+		List<Id<Lane>> laneIds = new LinkedList<>();
+		for (Signal signal : signalGroup.getSignals().values()) {
+			laneIds.addAll(signal.getLaneIds());
+		}
+		addGreenSignalGroupsAndLanes(signalGroup.getId(), laneIds);
 	}
 }
