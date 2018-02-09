@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import javax.management.InvalidAttributeValueException;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -115,64 +116,65 @@ import playground.kturner.utils.MoveDirVisitor;
 public class KTFreight_v3 {
 
 	private static final Logger log = Logger.getLogger(KTFreight_v3.class) ;
+	private static final Level loggingLevel = Level.INFO; //
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
-//	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
-//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MAoutput/JSprit/Berlin/aldi/Toll20onHeavy/" ;
-//	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/"";
-//	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
-//
-//	//Dateinamen
-//	private static final String NETFILE_NAME = "network.xml" ;
-//	private static final String VEHTYPEFILE_NAME = "vehicleTypes.xml" ;
-//	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ;
-//	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
-//	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung
-//	private static final String TOLLAREAFILE_NAME = "toll_area.xml";  //Zonendefinition (Links) für anhand eines Maut-Files
-//
-//	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
-//	private static final String uccC_prefix = "UCC-";	
-//
-//	//All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-//	private static final ArrayList<String> retailerNames = 
-//			new ArrayList<String>(Arrays.asList("aldi")); 
-//	//Location of UCC
-//	private static final ArrayList<String> uccDepotsLinkIdsString = 
-//			new ArrayList<String>(Arrays.asList("6874", "3058", "5468")); 
-//	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
-//	private static final ArrayList<String> onlyTollVehTypes = 
-//			//				new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen", "medium18t", "light8t", "light8t_frozen"));
-//			new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen"));
-//	//Ende  Namesdefinition Berlin
-
-
-	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
-	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/jsprit/Grid/newImports/" ;
+	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Base/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
-	
-	
+
 	//Dateinamen
-	private static final String NETFILE_NAME = "grid-network.xml" ;
-	private static final String VEHTYPEFILE_NAME = "grid-vehTypes_kt.xml" ;
-	private static final String CARRIERFILE_NAME = "grid-carrier_kt.xml" ;
+	private static final String NETFILE_NAME = "network.xml" ;
+	private static final String VEHTYPEFILE_NAME = "vehicleTypes.xml" ;
+	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ;
 	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
-	private static final String TOLLFILE_NAME = "grid-tollDistance.xml";
-	private static final String TOLLAREAFILE_NAME = "grid-tollArea.xml"; 
-	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId). Vermeide "_", 
-	//um die Analyse der MATSIMEvents einfacher zu gestalten (Dort ist "_" als Trennzeichen verwendet.
-	private static final String uccC_prefix = "UCC-";		
-	// All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-	private static final ArrayList<String> retailerNames = null ;
-//			new ArrayList<String>(Arrays.asList("gridCarrier3"));
-//		= new ArrayList<String>("gridCarrier", "gridCarrier1", "gridCarrier2", "gridCarrier3"); 
+	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung
+	private static final String TOLLAREAFILE_NAME = "toll_area.xml";  //Zonendefinition (Links) für anhand eines Maut-Files
+
+	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
+	private static final String uccC_prefix = "UCC-";	
+
+	//All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
+	private static final ArrayList<String> retailerNames = null;
+//			new ArrayList<String>(Arrays.asList("aldi")); 
 	//Location of UCC
-	private static final ArrayList<String> uccDepotsLinkIdsString = new ArrayList<String>(Arrays.asList("j(0,5)", "j(10,5)")); 
+	private static final ArrayList<String> uccDepotsLinkIdsString = 
+			new ArrayList<String>(Arrays.asList("6874", "3058", "5468")); 
 	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
-	private static final ArrayList<String> onlyTollVehTypes =  null;
-//		new ArrayList<String>(Arrays.asList("gridType01", "gridType03", "gridType05", "gridType10")); 
-//	//Ende Namesdefinition Grid
+	private static final ArrayList<String> onlyTollVehTypes = 
+			//				new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen", "medium18t", "light8t", "light8t_frozen"));
+			new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen"));
+	//Ende  Namesdefinition Berlin
+
+
+//	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
+//	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
+//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/jsprit/Grid/newImports/" ;
+//	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
+//	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
+//	
+//	
+//	//Dateinamen
+//	private static final String NETFILE_NAME = "grid-network.xml" ;
+//	private static final String VEHTYPEFILE_NAME = "grid-vehTypes_kt.xml" ;
+//	private static final String CARRIERFILE_NAME = "grid-carrier_kt.xml" ;
+//	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
+//	private static final String TOLLFILE_NAME = "grid-tollDistance.xml";
+//	private static final String TOLLAREAFILE_NAME = "grid-tollArea.xml"; 
+//	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId). Vermeide "_", 
+//	//um die Analyse der MATSIMEvents einfacher zu gestalten (Dort ist "_" als Trennzeichen verwendet.
+//	private static final String uccC_prefix = "UCC-";		
+//	// All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
+//	private static final ArrayList<String> retailerNames = null ;
+////			new ArrayList<String>(Arrays.asList("gridCarrier3"));
+////		= new ArrayList<String>("gridCarrier", "gridCarrier1", "gridCarrier2", "gridCarrier3"); 
+//	//Location of UCC
+//	private static final ArrayList<String> uccDepotsLinkIdsString = new ArrayList<String>(Arrays.asList("j(0,5)", "j(10,5)")); 
+//	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
+//	private static final ArrayList<String> onlyTollVehTypes =  null;
+////		new ArrayList<String>(Arrays.asList("gridType01", "gridType03", "gridType05", "gridType10")); 
+////	//Ende Namesdefinition Grid
 
 
 	private static final String RUN = "Run_" ;
@@ -190,9 +192,9 @@ public class KTFreight_v3 {
 	private static final boolean addingCongestion = false ;  //uses NetworkChangeEvents to reduce freespeed.
 	private static final boolean addingToll = false;  //added, kt. 07.08.2014
 	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
-	private static final boolean runMatsim = false;	 //when false only jsprit run will be performed
+	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
-	private static final int MAX_JSPRIT_ITERATION = 4000;
+	private static final int MAX_JSPRIT_ITERATION = 10000;
 	private static final int NU_OF_TOTAL_RUNS = 10;	
 
 	//temporär zum Programmieren als Ausgabe
@@ -205,6 +207,7 @@ public class KTFreight_v3 {
 
 
 	public static void main(String[] args) throws IOException, InvalidAttributeValueException {
+		log.setLevel(loggingLevel);
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR);
 		for (int i = 1; i<=NU_OF_TOTAL_RUNS; i++) {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
