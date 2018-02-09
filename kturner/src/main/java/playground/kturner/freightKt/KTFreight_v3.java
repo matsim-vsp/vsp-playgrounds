@@ -45,6 +45,7 @@ import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
+import org.matsim.contrib.freight.carrier.CarrierVehicleTypeWriter;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.carrier.ScheduledTour;
@@ -115,7 +116,7 @@ import playground.kturner.utils.MoveDirVisitor;
  */
 public class KTFreight_v3 {
 
-	private static final Logger log = Logger.getLogger(KTFreight_v3.class) ;
+	private static final Logger log = Logger.getLogger(KTFreight_v3.class); ;
 	private static final Level loggingLevel = Level.INFO; //
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
@@ -698,6 +699,8 @@ public class KTFreight_v3 {
 		}		
 		new CarrierPlanXmlWriterV2(carriers).write( config.controler().getOutputDirectory() + "/output_carriers.xml") ;
 		new CarrierPlanXmlWriterV2(carriers).write( config.controler().getOutputDirectory() + "/output_carriers.xml.gz") ;
+		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml");
+		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml.gz");
 	}
 
 	/**
