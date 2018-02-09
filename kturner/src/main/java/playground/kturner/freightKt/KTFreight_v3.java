@@ -269,7 +269,7 @@ public class KTFreight_v3 {
 			OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR + "/log_" + runIndex +"a");	//MATSim closes log at the end. therefore we need a new one to log the rest of this iteration
 		}
 			
-		finalOutput(config, carriers);	//write some final Output
+		writeAdditionalRunOutput(config, carriers);	//write some final Output
 	} 
 
 	private static Config createConfig(String[] args) {
@@ -692,7 +692,7 @@ public class KTFreight_v3 {
 		};
 	}
 
-	private static void finalOutput(Config config, Carriers carriers) {
+	private static void writeAdditionalRunOutput(Config config, Carriers carriers) {
 		// ### some final output: ###
 		if (runMatsim){		//makes only sence, when MATSimrRun was performed KT 06.04.15
 			new WriteCarrierScoreInfos(carriers, new File(OUTPUT_DIR + "#MatsimCarrierScoreInformation.txt"), runIndex);
@@ -701,6 +701,8 @@ public class KTFreight_v3 {
 		new CarrierPlanXmlWriterV2(carriers).write( config.controler().getOutputDirectory() + "/output_carriers.xml.gz") ;
 		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml");
 		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml.gz");
+		
+		//TODO: Wirte all InputFiles in an "Input"-Directory with the Run-dir?
 	}
 
 	/**
