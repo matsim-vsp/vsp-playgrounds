@@ -49,8 +49,8 @@ import playground.ikaddoura.optAV.SAVFixCostHandler;
  * @author ikaddoura
  *
  */
-public class PersonTripNoiseAnalysis {
-	private static final Logger log = Logger.getLogger(PersonTripNoiseAnalysis.class);
+public class PersonTripAnalysis {
+	private static final Logger log = Logger.getLogger(PersonTripAnalysis.class);
 	
 	public void printAvgValuePerParameter(String csvFile, SortedMap<Double, List<Double>> parameter2values) {
 		String fileName = csvFile;

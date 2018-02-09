@@ -19,6 +19,7 @@
 
 package playground.ikaddoura.incidents.incidentWithinDayReplanning;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -160,8 +161,7 @@ public class IncidentWithinDayReplanning {
 				
 		controler.run();		
 		
-		IKAnalysisRun analysis = new IKAnalysisRun(scenario);
-		analysis.setCrs(crs);
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario, crs);
 		analysis.run();
 	}
 	

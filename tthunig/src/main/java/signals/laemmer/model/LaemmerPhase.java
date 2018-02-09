@@ -6,6 +6,8 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.lanes.data.Lane;
 
+import signals.sensor.CarLocator;
+
 /**
  * 
  * @author pschade
@@ -84,7 +86,7 @@ class LaemmerPhase {
         if (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
         	updateAbortionPenalty(now);
         	calculatePriorityIndex(now);
-        }
+        }        
     }
 
     private void updateAbortionPenalty(double now) {

@@ -64,8 +64,8 @@ public class GisAnalysis {
 		Scenario scenario2 = writeTrafficVolumeCSVFile(outputDirectory2);
 		
 		// write network to shapefile
-		Network2Shape.exportNetwork2Shp1(scenario1, scenario1.getConfig().controler().getOutputDirectory(), crs, ct);
-		Network2Shape.exportNetwork2Shp1(scenario2, scenario2.getConfig().controler().getOutputDirectory(), crs, ct);
+		Network2Shape.exportNetwork2Shp(scenario1, scenario1.getConfig().controler().getOutputDirectory(), crs, ct);
+		Network2Shape.exportNetwork2Shp(scenario2, scenario2.getConfig().controler().getOutputDirectory(), crs, ct);
 				
 		// write qgis project file
 		// TODO

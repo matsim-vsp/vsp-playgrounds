@@ -102,7 +102,7 @@ public class AnalysisControlerListener implements IterationEndsListener {
 			userBenefits += userBenefit;
 		}
 		
-		PersonTripNoiseAnalysis analysis = new PersonTripNoiseAnalysis();
+		PersonTripAnalysis analysis = new PersonTripAnalysis();
 		
 		if (event.getIteration() == this.scenario.getConfig().controler().getLastIteration()) {
 			log.info("Print trip information...");

@@ -47,7 +47,7 @@ import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
 
 /**
- * run class for DZ's berlin scenario, 1 pct sample size
+ * run class for DZ's berlin scenario
  * 
  * @author ikaddoura
  *

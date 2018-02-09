@@ -127,38 +127,9 @@ public class GISAnalyzerMain {
 			personId2userBenefits.put(person.getId(), score);
 		}
 		
-		Map<Id<Person>, Double> personId2travelTime = new HashMap<>();
-		for (Id<Person> personId : basicHandler.getPersonId2tripNumber2travelTime().keySet()) {
-			double tt = 0.;
-			for (Integer tripNr : basicHandler.getPersonId2tripNumber2travelTime().get(personId).keySet()) {
-				tt = tt + basicHandler.getPersonId2tripNumber2travelTime().get(personId).get(tripNr); 
-			}
-			personId2travelTime.put(personId, tt);
-		}
-
-		Map<String, Map<Id<Person>, Double>> mode2personId2trips = new HashMap<>();
-		
-		for (Id<Person> personId : basicHandler.getPersonId2tripNumber2legMode().keySet()) {
-			for (Integer tripNr : basicHandler.getPersonId2tripNumber2legMode().get(personId).keySet()) {
-				String mode = basicHandler.getPersonId2tripNumber2legMode().get(personId).get(tripNr);
-				if(mode2personId2trips.get(mode) == null) {
-					Map<Id<Person>, Double> personId2trips = new HashMap<>();
-					personId2trips.put(personId, 1.0);
-					mode2personId2trips.put(mode, personId2trips);
-				} else {
-					if(mode2personId2trips.get(mode).get(personId) == null) {
-						mode2personId2trips.get(mode).put(personId, 1.0);
-					} else {
-						double tripsSoFar = mode2personId2trips.get(mode).get(personId);
-						mode2personId2trips.get(mode).put(personId, tripsSoFar + 1.0);
-					}
-				}
-			}
-		}
-		
 		log.info("Analyzing zones...");
-		GISAnalyzer gisAnalysis = new GISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS, runId + "." + outputFileName);
-		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll(), personId2travelTime, mode2personId2trips );
+		GISAnalyzer gisAnalysis = new GISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS);
+		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, runId + "." + outputFileName, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll(), basicHandler );
 		log.info("Analyzing zones... Done.");
 	}
 	

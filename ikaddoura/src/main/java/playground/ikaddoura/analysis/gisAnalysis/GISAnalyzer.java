@@ -47,6 +47,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
+
 /**
  * 
  * Reads in a shapeFile and performs a zone-based analysis:
@@ -75,13 +77,10 @@ public class GISAnalyzer {
 			int scalingFactor,
 			String homeActivity,
 			String zonesCRS,
-			String scenarioCRS,
-			String fileName) {
+			String scenarioCRS) {
 		
 		this.scalingFactor = scalingFactor;
-		this.homeActivity = homeActivity;
-		this.fileName = fileName;
-		
+		this.homeActivity = homeActivity;		
 		this.zonesCRS = zonesCRS;
 		this.ct = TransformationFactory.getCoordinateTransformation(scenarioCRS, zonesCRS);
 
@@ -95,18 +94,44 @@ public class GISAnalyzer {
 		log.info("Reading zone shapefile... Done. Number of zones: " + featureCounter);
 	}
 	
-	public void analyzeZoneTollsUserBenefits(Scenario scenario, String runDirectory,
+	public void analyzeZoneTollsUserBenefits(Scenario scenario, String runDirectory, String fileName,
 			Map<Id<Person>, Double> personId2userBenefits,
 			Map<Id<Person>, Double> personId2tollPayments,
 			Map<Id<Person>, Double> personId2congestionPayments,
 			Map<Id<Person>, Double> personId2noisePayments,
 			Map<Id<Person>, Double> personId2airPollutionPayments,
-			Map<Id<Person>, Double> personId2travelTime,
-			Map<String, Map<Id<Person>, Double>> mode2personId2trips) {
-		String outputPath = runDirectory + "spatial_analysis/tolls_userBenefits_travelTime_modes_zones/";
+			BasicPersonTripAnalysisHandler basicHandler) {
 		
-		File file = new File(outputPath);
-		file.mkdirs();
+		String outputPath = runDirectory;
+		
+		Map<Id<Person>, Double> personId2travelTime = new HashMap<>();
+		for (Id<Person> personId : basicHandler.getPersonId2tripNumber2travelTime().keySet()) {
+			double tt = 0.;
+			for (Integer tripNr : basicHandler.getPersonId2tripNumber2travelTime().get(personId).keySet()) {
+				tt = tt + basicHandler.getPersonId2tripNumber2travelTime().get(personId).get(tripNr); 
+			}
+			personId2travelTime.put(personId, tt);
+		}
+
+		Map<String, Map<Id<Person>, Double>> mode2personId2trips = new HashMap<>();
+		
+		for (Id<Person> personId : basicHandler.getPersonId2tripNumber2legMode().keySet()) {
+			for (Integer tripNr : basicHandler.getPersonId2tripNumber2legMode().get(personId).keySet()) {
+				String mode = basicHandler.getPersonId2tripNumber2legMode().get(personId).get(tripNr);
+				if(mode2personId2trips.get(mode) == null) {
+					Map<Id<Person>, Double> personId2trips = new HashMap<>();
+					personId2trips.put(personId, 1.0);
+					mode2personId2trips.put(mode, personId2trips);
+				} else {
+					if(mode2personId2trips.get(mode).get(personId) == null) {
+						mode2personId2trips.get(mode).put(personId, 1.0);
+					} else {
+						double tripsSoFar = mode2personId2trips.get(mode).get(personId);
+						mode2personId2trips.get(mode).put(personId, tripsSoFar + 1.0);
+					}
+				}
+			}
+		}
 				
 		// home activities
 		log.info("Analyzing Home activities per zone...");
