@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -35,18 +34,27 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.core.router.InitialNode;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.Facility;
-import org.matsim.pt.router.*;
+import org.matsim.pt.router.PreparedTransitSchedule;
+import org.matsim.pt.router.TransitLeastCostPathTree;
+import org.matsim.pt.router.TransitRouter;
+import org.matsim.pt.router.TransitRouterConfig;
+import org.matsim.pt.router.TransitRouterNetwork;
 import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkLink;
 import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkNode;
+import org.matsim.pt.router.TransitRouterNetworkTravelTimeAndDisutility;
+import org.matsim.pt.router.TransitTravelDisutility;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
-import org.matsim.pt.transitSchedule.api.*;
-
-import java.util.*;
+import org.matsim.pt.transitSchedule.api.TransitLine;
+import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.pt.transitSchedule.api.TransitRouteStop;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 /**
  * Not thread-safe because TransitLeastCostPathTree is not. Does not expect the TransitSchedule to change once constructed! michaz '13
@@ -88,7 +96,7 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
         this.preparedTransitSchedule = preparedTransitSchedule;
     }
 
-    private Map<Node, TransitLeastCostPathTree.InitialNode> locateWrappedNearestTransitNodes(Person person, Coord coord, double departureTime) {
+    private Map<Node, InitialNode> locateWrappedNearestTransitNodes(Person person, Coord coord, double departureTime) {
         Collection<TransitRouterNetworkNode> nearestNodes = this.transitNetwork.getNearestNodes(coord, this.config.getSearchRadius());
         if (nearestNodes.size() < 2) {
             // also enlarge search area if only one stop found, maybe a second one is near the border of the search area
@@ -96,12 +104,12 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
             double distance = CoordUtils.calcEuclideanDistance(coord, nearestNode.stop.getStopFacility().getCoord());
             nearestNodes = this.transitNetwork.getNearestNodes(coord, distance + this.config.getExtensionRadius());
         }
-        Map<Node, TransitLeastCostPathTree.InitialNode> wrappedNearestNodes = new LinkedHashMap<>();
+        Map<Node, InitialNode> wrappedNearestNodes = new LinkedHashMap<>();
         for (TransitRouterNetworkNode node : nearestNodes) {
             Coord toCoord = node.stop.getStopFacility().getCoord();
             double initialTime = getWalkTime(person, coord, toCoord);
             double initialCost = getWalkDisutility(person, coord, toCoord);
-            wrappedNearestNodes.put(node, new TransitLeastCostPathTree.InitialNode(initialCost, initialTime + departureTime));
+            wrappedNearestNodes.put(node, new InitialNode(initialCost, initialTime + departureTime));
         }
         return wrappedNearestNodes;
     }
@@ -117,9 +125,9 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
     @Override
     public List<Leg> calcRoute(final Facility<?> fromFacility, final Facility<?> toFacility, final double departureTime, final Person person) {
         // find possible start stops
-        Map<Node, TransitLeastCostPathTree.InitialNode> wrappedFromNodes = this.locateWrappedNearestTransitNodes(person, fromFacility.getCoord(), departureTime);
+        Map<Node, InitialNode> wrappedFromNodes = this.locateWrappedNearestTransitNodes(person, fromFacility.getCoord(), departureTime);
         // find possible end stops
-        Map<Node, TransitLeastCostPathTree.InitialNode> wrappedToNodes = this.locateWrappedNearestTransitNodes(person, toFacility.getCoord(), departureTime);
+        Map<Node, InitialNode> wrappedToNodes = this.locateWrappedNearestTransitNodes(person, toFacility.getCoord(), departureTime);
 
         if (this.fromFacility == null || !this.fromFacility.getCoord().equals(fromFacility.getCoord())) {
             transitLeastCostPathTree = new TransitLeastCostPathTree(this.transitNetwork, this.travelDisutility,
