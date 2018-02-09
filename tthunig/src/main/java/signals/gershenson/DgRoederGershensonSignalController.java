@@ -395,12 +395,13 @@ public class DgRoederGershensonSignalController implements SignalController {
 
 	
 	//Method to monitor approaching cars for a signal group
-	private void carsOnInLinks(SignalGroup group) {
+	private void carsOnInLinks(SignalGroup group, double now) {
 		if (!approachingVehiclesMap.containsKey(group.getId())) {
 			approachingVehiclesMap.put(group.getId(), new HashMap<Id<Link>,Integer>());
 		}
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getInLinks()) {
-			Integer cars = this.sensorManager.getNumberOfCarsOnLink(link.getId());
+			//Integer cars = this.sensorManager.getNumberOfCarsOnLink(link.getId());
+			Integer cars = this.sensorManager.getNumberOfCarsInDistance(link.getId(), d, now); 
 			approachingVehiclesMap.get(group.getId()).put(link.getId(), cars);
 		} 
 	}
@@ -511,7 +512,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	private int lengthOfPlatoonTails = 2;
 	private int minimumGREENtime = 4;
 	private double monitoredPlatoonTail = 25.;
-	
+	private double d = 50.;
 	
 	@Override
 	public void updateState(double timeSeconds) {
@@ -519,9 +520,9 @@ public class DgRoederGershensonSignalController implements SignalController {
 		
 		
 		//This is just to demonstrate that the algorithm works
-		if (timeSeconds%67==0) {
-			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString());
-		}
+//		if (timeSeconds%1==0) {
+//			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString());
+//		}
 		
 		jammedSignalGroup.clear();
 		jammedOutLinkMap.clear();
@@ -531,7 +532,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		for (SignalGroup group : this.system.getSignalGroups().values()){
 			timecounter.merge(group.getId(), 0, (a,b) -> a+1);
 			//fills approachingVehiclesMap
-			carsOnInLinks(group);
+			carsOnInLinks(group,timeSeconds);
 			//fills jammedOutLinkMap
 			jamOnOutLink(group);
 			

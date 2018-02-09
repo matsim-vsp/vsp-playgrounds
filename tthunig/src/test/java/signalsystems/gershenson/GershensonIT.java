@@ -110,9 +110,9 @@ public class GershensonIT {
 		
 		
 		Assert.assertEquals("total signal green times of both groups are not similiar enough", 0.0, totalSignalGreenTimes.get(SIGNALGROUPID1) - totalSignalGreenTimes.get(SIGNALGROUPID2), 3.);
-		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 3.9870689655172415, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.9913793103448274, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("avg cycle time of the system is wrong", 8.413793103448276, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 3.9889380530973453, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.993362831858407, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg cycle time of the system is wrong", 8.639380530973451, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
 	}
 
 	/**
@@ -135,7 +135,7 @@ public class GershensonIT {
 		
 		Assert.assertTrue("total signal green time of group 1 is not bigger than of group 2", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
 		Assert.assertTrue("total signal green time of group 2 should be zero", totalSignalGreenTimes.get(SIGNALGROUPID2)==0);
-		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 1850.0, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), 5.);
+		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 1802.5, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), 5.);
 		Assert.assertEquals("avg cycle time of the system is wrong", 1951, avgCycleTimePerSystem.get(SIGNALSYSTEMID), 2.);
 	}
 	@Test
@@ -153,9 +153,11 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
 		
-		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 7.330275229357798, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.984709480122324, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("avg cycle time of the system is wrong", 11.932721712538227, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("total signal time of group 1 is wrong",2349.,totalSignalGreenTimes.get(SIGNALGROUPID1),MatsimTestUtils.EPSILON);
+		Assert.assertEquals("total signal time of group 1 is wrong",1256.,totalSignalGreenTimes.get(SIGNALGROUPID2),MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 7.457142857142857, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.9873015873015873, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg cycle time of the system is wrong", 12.387301587301588, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
 	}
 
 	@Ignore
