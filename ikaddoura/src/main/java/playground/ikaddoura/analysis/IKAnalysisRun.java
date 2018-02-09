@@ -102,7 +102,7 @@ public class IKAnalysisRun {
 	private final String runIdToCompareWith;
 	private final Scenario scenario0;
 
-	private final String outputDirectoryName = "analysis-IK-2018-02-09";
+	private final String outputDirectoryName = "analysis-IK";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -156,8 +156,15 @@ public class IKAnalysisRun {
 			scalingFactor = 10;			
 		}
 		
-		IKAnalysisRun analysis = new IKAnalysisRun(runDirectory, runId, runDirectoryToCompareWith, runIdToCompareWith,
-				scenarioCRS, shapeFileZones, zonesCRS, homeActivity, scalingFactor);
+		IKAnalysisRun analysis = new IKAnalysisRun(runDirectory,
+				runId,
+				runDirectoryToCompareWith,
+				runIdToCompareWith,
+				scenarioCRS,
+				shapeFileZones,
+				zonesCRS,
+				homeActivity,
+				scalingFactor);
 		analysis.run();
 	}
 	
