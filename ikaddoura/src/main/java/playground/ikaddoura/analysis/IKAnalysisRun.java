@@ -392,7 +392,7 @@ public class IKAnalysisRun {
 		
 		// scenario comparison: person-specific mode-shift effects
 		if (scenario1 != null & scenario0 != null) {
-			String visScriptTemplateFile = "./visualization-scripts/scenario-comparison_person-specific-mode-shift-effects.qgs";
+			String visScriptTemplateFile = "./visualization-scripts/scenario-comparison_person-specific-mode-switch-effects.qgs";
 			String visScriptOutputFile = personTripScenarioComparisonOutputDirectory + "scenario-comparison_person-specific-mode-switch-effects_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
