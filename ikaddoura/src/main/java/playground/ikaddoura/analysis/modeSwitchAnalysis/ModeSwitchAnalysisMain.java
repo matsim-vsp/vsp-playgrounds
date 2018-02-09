@@ -128,7 +128,7 @@ public class ModeSwitchAnalysisMain {
 			log.info("Loading scenario1 and reading events... Done.");
 		}
 		
-		ModeSwitchAnalysis modeSwitchAnalysis = new ModeSwitchAnalysis();
-		modeSwitchAnalysis.analyze(directory1, scenario0, basicHandler0, moneyHandler0, scenario1, basicHandler1, moneyHandler1);
+		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0);
+		modeSwitchAnalysis.analyzeByMode();
     }
 }

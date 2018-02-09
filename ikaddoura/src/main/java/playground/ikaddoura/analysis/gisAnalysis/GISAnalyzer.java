@@ -19,7 +19,6 @@
 
 package playground.ikaddoura.analysis.gisAnalysis;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,16 +60,14 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPer
  *
  */
 public class GISAnalyzer {
-	
+	private static final Logger log = Logger.getLogger(GISAnalyzer.class);
+
 	private final String homeActivity;
 	private final int scalingFactor;
-		
-	private static final Logger log = Logger.getLogger(GISAnalyzer.class);
-	private Map<Integer, SimpleFeature> features = new HashMap<>();
-	private Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
-	private String zonesCRS;
-	private String fileName;
-	private CoordinateTransformation ct;
+	private final Map<Integer, SimpleFeature> features = new HashMap<>();
+	private final Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
+	private final String zonesCRS;
+	private final CoordinateTransformation ct;
 
 	public GISAnalyzer(
 			String shapeFileZones,
@@ -213,7 +210,7 @@ public class GISAnalyzer {
 			featuresToWriteOut.add(feature);
 		}
 		
-		ShapeFileWriter.writeGeometries(featuresToWriteOut, outputPath + scenario.getConfig().controler().getLastIteration() + "." + fileName);
+		ShapeFileWriter.writeGeometries(featuresToWriteOut, outputPath + fileName);
 
 		log.info("Writing shape file... Done.");
 		
