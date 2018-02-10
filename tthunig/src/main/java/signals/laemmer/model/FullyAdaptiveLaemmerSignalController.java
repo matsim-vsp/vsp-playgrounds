@@ -389,7 +389,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 											Conflicts systemsConflicts = (Conflicts) lanes.getLanesToLinkAssignments().get(systemsSignal.getLinkId()).getLanes().get(systemsLane).getAttributes().getAttribute("conflicts");
 											Conflicts presentConflicts = (Conflicts) lanes.getLanesToLinkAssignments().get(presentSignal.getLinkId()).getLanes().get(presentLane).getAttributes().getAttribute("conflicts");
 											if (systemsConflicts != null && (systemsConflicts.hasConflict(presentSignal.getLinkId(), presentLane) || systemsConflicts.hasAllowedConflictWithPriorityAgainst(presentSignal.getLinkId(), presentLane))
-													|| presentConflicts != null && (presentConflicts.hasConflict(systemsSignal.getLinkId(), systemsLane) || presentConflicts.hasAllowedConflictWithNoPriorityAgainst(systemsSignal.getLinkId(), systemsLane)))
+													|| presentConflicts != null && (presentConflicts.hasConflict(systemsSignal.getLinkId(), systemsLane) || presentConflicts.hasAllowedConflictWithNonPriorityAgainst(systemsSignal.getLinkId(), systemsLane)))
 												addSg = false;
 											if (!addSg)
 												break;
