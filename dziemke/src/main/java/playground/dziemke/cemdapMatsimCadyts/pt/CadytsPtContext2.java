@@ -24,9 +24,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
-
+import cadyts.calibrators.analytical.AnalyticalCalibrator;
+import cadyts.measurements.SingleLinkMeasurement.TYPE;
+import cadyts.supply.SimResults;
 import org.apache.log4j.Logger;
 import org.matsim.analysis.IterationStopWatch;
 import org.matsim.api.core.v01.Coord;
@@ -65,11 +66,9 @@ import org.matsim.counts.algorithms.CountSimComparisonKMLWriter;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
+import org.matsim.pt.transitSchedule.api.TransitStopArea;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-
-import cadyts.calibrators.analytical.AnalyticalCalibrator;
-import cadyts.measurements.SingleLinkMeasurement.TYPE;
-import cadyts.supply.SimResults;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 
 /**
  * @author nagel
@@ -352,16 +351,31 @@ CadytsContextI<TransitStopFacility> {
 		public String getName() {
 			return null;
 		}
-	
+
 		@Override
-		public String getStopPostAreaId() {
+		public Id<TransitStopArea> getStopAreaId() {
+			throw new RuntimeException("not implemented yet.");
+		}
+
+		@Override
+		public void setStopAreaId(Id<TransitStopArea> stopAreaId) {
+			throw new RuntimeException("not implemented yet.");
+		}
+
+		@Override
+		public Attributes getAttributes() {
 			return null;
 		}
-	
-		@Override
-		public void setStopPostAreaId(String stopPostAreaId) {
-	
-		}
+
+//		@Override
+//		public String getStopPostAreaId() {
+//			return null;
+//		}
+//
+//		@Override
+//		public void setStopPostAreaId(String stopPostAreaId) {
+//
+//		}
 	}
 
 
