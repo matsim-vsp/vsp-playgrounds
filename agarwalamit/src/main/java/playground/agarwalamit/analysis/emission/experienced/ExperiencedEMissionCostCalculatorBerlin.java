@@ -73,13 +73,13 @@ public class ExperiencedEMissionCostCalculatorBerlin {
 //				,"m_r_output_n"
 //				,"m_r_output_run0_baseCase"
 				
-//				,"r_output_c"
-//				,"r_output_c_0.01"
-//				,"r_output_cne"
-//				,"r_output_cne_0.01"
-//				,"r_output_e"
-				"r_output_n"
-				,"r_output_run0_baseCase"
+				"r_output_c"
+				,"r_output_c_0.01"
+				,"r_output_cne"
+				,"r_output_cne_0.01"
+				,"r_output_e"
+				,"r_output_n"
+//				,"r_output_run0_baseCase"
 		};
 		int [] its = {200};
  

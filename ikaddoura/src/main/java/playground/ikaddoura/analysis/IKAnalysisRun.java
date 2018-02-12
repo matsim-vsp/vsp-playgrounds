@@ -102,7 +102,7 @@ public class IKAnalysisRun {
 	private final String runIdToCompareWith;
 	private final Scenario scenario0;
 
-	private final String outputDirectoryName = "analysis-IK";
+	private final String outputDirectoryName = "analysis-ik-v0";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -136,12 +136,12 @@ public class IKAnalysisRun {
 		
 		} else {
 			
-//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_cne/";
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_cne/";
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
 			runId = "policyCase";
 			
-//			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_run0_baseCase/";	
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_run0_baseCase/";	
+//			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
 			runIdToCompareWith = "baseCase";
 			
 			scenarioCRS = TransformationFactory.DHDN_GK4;	
@@ -149,8 +149,11 @@ public class IKAnalysisRun {
 //			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
 //			zonesCRS = TransformationFactory.DHDN_GK4;
 
-			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
-			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
+			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/greater-berlin-area_3000/greater-berlin-area_3000.shp";
+			zonesCRS = TransformationFactory.DHDN_GK4;
+			
+//			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
+//			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
 			
 			homeActivity = "home";
 			scalingFactor = 10;			
