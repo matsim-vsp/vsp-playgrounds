@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -45,6 +46,8 @@ class UccCarrierCreator {
 	 * 
 	 * UCC: Urban Consolidation Center -> transshipment center 
 	 */
+	
+private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//TODO: Logging-Level ansehen und ggf anpassen.
 
 	private Carriers carriers ;
 	private CarrierVehicleTypes vehicleTypes  ;	
@@ -158,7 +161,7 @@ class UccCarrierCreator {
 		//		ignoriert werden (und somit nicht alle Depots genutzt werden).
 		splittedCarriers = renameVehId(splittedCarriers); 				
 
-		System.out.println("### ENDE: UCCCarriers.run ###");
+		log.info("### ENDE: UCCCarriers.run ###");
 	}
 
 	//Step 1: Analyse der Carrier hier entfernt und in Package PreWork gelassen.
@@ -234,7 +237,7 @@ class UccCarrierCreator {
 			//Fahrzeug für jedes Lieferzeitfenster erstellen (analog Schröder/Liedtke, da jsprit keine Wartezeiten berücksichtigt.
 			if (!uccCarrier.getServices().isEmpty()){		//keinen UCC ohne Nachfrage übernehmen.
 				ArrayList<TimeWindow> timeWindows = calcTimeWindows(uccCarrier);
-				System.out.println("Zeitfenster: " + timeWindows.toString());
+				log.info("Zeitfenster: " + timeWindows.toString());
 				for (TimeWindow tw : timeWindows) {
 					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 															//TODO: Warum für jeden service ein Fahrzeug emit diesen Zeiten erstellen? -> zusammenfassen (gerade/zunächst bei fleetSize = Infinity)? KMT Feb/18	
 							Math.max(0, tw.getStart() -uccEarlierOpeningTime), Math.min(24*3500, tw.getEnd() +uccLaterClosingTime));  //TODO: Warum 3500? KMT feb/18
@@ -531,8 +534,8 @@ class UccCarrierCreator {
 			TimeWindow tw = TimeWindow.newInstance(startTime, endTime);
 			if (!timeInTimeWindow(timeWindows, tw)) {
 				timeWindows.add(tw);
-				System.out.println("added TimeWindow: " + tw.toString());
-			} else System.out.println("Nicht hinzugefügt");
+				log.debug("added TimeWindow: " + tw.toString());
+			} else log.debug("Not added");
 		}
 		return timeWindows;
 	}
@@ -540,11 +543,11 @@ class UccCarrierCreator {
 	private boolean timeInTimeWindow(ArrayList<TimeWindow> timeWindows ,TimeWindow timewindow){
 		for (TimeWindow tw : timeWindows){
 			if (tw.getStart() == timewindow.getStart() && tw.getEnd() == timewindow.getEnd()) {
-				System.out.println("TW ist bereits enthalten");
+				log.info("TW ist bereits enthalten");
 				return true;
 			}
 		}
-		System.out.println("TW bisher nicht enthalten");
+		log.info("TW bisher nicht enthalten");
 		return false;
 	}
 }
