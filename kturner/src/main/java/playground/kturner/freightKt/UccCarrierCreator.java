@@ -208,7 +208,7 @@ class UccCarrierCreator {
 			throw new RuntimeException(e);
 		}
 
-		Set<Id<Link>> tolledLinkIds = scheme.getTolledLinkIds();  //Link-Ids des MautSchemas
+		Set<Id<Link>> tolledLinkIds = scheme.getTolledLinkIds();  //Link-Ids des MautSchemas			//TODO: Umbenennen, sodass nicht mehr direkt auf Mautlinks abziehlt. Belieferungszone kann ja auch ohne Maut-Szenario exisiteren ;)
 		//Liste der zum UCC-Carrier übertragenen Services -> wird später aus normalen Carrier entfernt
 		Set<CarrierService> serviceToRemove= new HashSet<CarrierService>(); 	
 
@@ -236,8 +236,8 @@ class UccCarrierCreator {
 				ArrayList<TimeWindow> timeWindows = calcTimeWindows(uccCarrier);
 				System.out.println("Zeitfenster: " + timeWindows.toString());
 				for (TimeWindow tw : timeWindows) {
-					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 
-							Math.max(0, tw.getStart() -uccEarlierOpeningTime), Math.min(24*3500, tw.getEnd() +uccLaterClosingTime)); 
+					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 															//TODO: Warum für jeden service ein Fahrzeug emit diesen Zeiten erstellen? -> zusammenfassen (gerade/zunächst bei fleetSize = Infinity)? KMT Feb/18	
+							Math.max(0, tw.getStart() -uccEarlierOpeningTime), Math.min(24*3500, tw.getEnd() +uccLaterClosingTime));  //TODO: Warum 3500? KMT feb/18
 				}
 				checkCapacity(uccCarrier, vehicleTypes);
 				uccCarrier.getCarrierCapabilities().setFleetSize(FleetSize.INFINITE);
