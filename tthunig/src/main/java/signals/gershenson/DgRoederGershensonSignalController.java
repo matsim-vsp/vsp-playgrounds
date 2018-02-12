@@ -47,6 +47,17 @@ import signals.sensor.LinkSensorManager;
 
 
 /**
+ * Implement Gershenson-Controller as outlined in "Self-Organizing Traffic Lights at
+ * Multiple-Street Intersections" (Gershenson/Rosenblueth 2011). 
+ * NULL-Status: All Groups are RED if nobody approaches the SignalSystem. 
+ * 
+ * default values:
+ * d=50m 
+ * r=25m 
+ * t_min = 4s 
+ * m= 2 veh 
+ * n= 13.33 veh*s   (sbraun Feb.18)
+ * 
  * @author dgrether
  *
  */
@@ -395,12 +406,13 @@ public class DgRoederGershensonSignalController implements SignalController {
 
 	
 	//Method to monitor approaching cars for a signal group
-	private void carsOnInLinks(SignalGroup group) {
+	private void carsOnInLinks(SignalGroup group, double now) {
 		if (!approachingVehiclesMap.containsKey(group.getId())) {
 			approachingVehiclesMap.put(group.getId(), new HashMap<Id<Link>,Integer>());
 		}
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getInLinks()) {
-			Integer cars = this.sensorManager.getNumberOfCarsOnLink(link.getId());
+			//Integer cars = this.sensorManager.getNumberOfCarsOnLink(link.getId());
+			Integer cars = this.sensorManager.getNumberOfCarsInDistance(link.getId(), d, now); 
 			approachingVehiclesMap.get(group.getId()).put(link.getId(), cars);
 		} 
 	}
@@ -410,7 +422,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 			jammedOutLinkMap.put(group.getId(), new HashMap<Id<Link>,Boolean>());
 		}
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getOutLinks()) {
-			double storageCap = (link.getLength() * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
+			double storageCap = ((link.getLength()-minmumDistanceBehindIntersection) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
 			Boolean jammed = false;
 			if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * this.storageCapacityOutlinkJam)){
 				jammed = true;
@@ -449,8 +461,11 @@ public class DgRoederGershensonSignalController implements SignalController {
 	private void updatecounter(){
 		counter.clear();		
 		for(SignalGroup group : this.system.getSignalGroups().values()) {
-			if (timecounter.containsKey(group.getId()) && approachingVehiclesGroupMap.containsKey(group.getId())){
-				counter.put(group.getId(), (double) timecounter.get(group.getId())*approachingVehiclesGroupMap.get(group.getId()));
+			if (timecounter.containsKey(group.getId()) && approachingVehiclesGroupMap.containsKey(group.getId()) &&
+					signalGroupstatesMap.containsKey(group.getId())){
+					
+					counter.put(group.getId(), (double) timecounter.get(group.getId())*approachingVehiclesGroupMap.get(group.getId()));
+				
 			}
 		}
 
@@ -463,7 +478,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 				if(sensorManager.getNumberOfCarsInDistance(link.getId(), monitoredPlatoonTail, time) < lengthOfPlatoonTails && 
 						sensorManager.getNumberOfCarsInDistance(link.getId(), monitoredPlatoonTail, time) > 0) {
 					VehInR = true;
-					log.info("There were Vehicles in R in " + signal + " at time " +time + "s on link " + link.getId() );
+					//log.info("There were Vehicles in R in " + signal + " at time " +time + "s on link " + link.getId() );
 				}
 			}
 		}
@@ -511,7 +526,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 	private int lengthOfPlatoonTails = 2;
 	private int minimumGREENtime = 4;
 	private double monitoredPlatoonTail = 25.;
-	
+	private double d = 50.;
+	private double minmumDistanceBehindIntersection =10.;
 	
 	@Override
 	public void updateState(double timeSeconds) {
@@ -519,8 +535,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 		
 		
 		//This is just to demonstrate that the algorithm works
-		if (timeSeconds%67==0) {
-			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString());
+		if (timeSeconds%1==0) {
+			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString() + approachingVehiclesGroupMap.toString());
 		}
 		
 		jammedSignalGroup.clear();
@@ -531,7 +547,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		for (SignalGroup group : this.system.getSignalGroups().values()){
 			timecounter.merge(group.getId(), 0, (a,b) -> a+1);
 			//fills approachingVehiclesMap
-			carsOnInLinks(group);
+			carsOnInLinks(group,timeSeconds);
 			//fills jammedOutLinkMap
 			jamOnOutLink(group);
 			
@@ -553,7 +569,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 
 	//Rule 6
 	//if the whole intersection is jammed OR
-	//no Cars approaching the Signalsystem.
+	//no Cars approaching the SignalSystem.
 	//	-> turn all signals to RED	
 		if (!jammedSignalGroup.containsValue(false)  || !vehiclesApproachingSomewhere()) {
 			for (SignalGroup group : this.system.getSignalGroups().values()){ 
@@ -592,12 +608,13 @@ public class DgRoederGershensonSignalController implements SignalController {
 					if(approachingVehiclesGroupMap.containsValue(0) && vehiclesApproachingSomewhere()) {
 						for (SignalGroup group : this.system.getSignalGroups().values()) {
 							if (group.getState().equals(SignalGroupState.GREEN) &&
-									(counter.get(group.getId())==0 || !highestcount().equals(group.getId()))){
+									(approachingVehiclesGroupMap.get(group.getId())==0 || !highestcount().equals(group.getId()))){
 								switchlight(group,timeSeconds);
 							}
 							if(highestcount().equals(group.getId()) && group.getState().equals(SignalGroupState.RED)) {
 								switchlight(group,timeSeconds);
 							}
+							
 						}
 					} else {
 	//Rule 3

@@ -26,11 +26,11 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -90,7 +90,8 @@ public class TransitSchedule2Shape {
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		Network network = scenario.getNetwork();
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(NETWORKFILE);
-		new TransitScheduleReaderV1(transitSchedule, network).readFile(SCHEDULEFILE);
+//		new TransitScheduleReaderV1(transitSchedule, network).readFile(SCHEDULEFILE);
+		new TransitScheduleReaderV1(transitSchedule, new RouteFactories()).readFile(SCHEDULEFILE);
 	
 		Map<Id, SortedMap<String, Object>> lineAttributesMap = TransitSchedule2Shape.getAttributesForLines(transitSchedule, pIdentifier);
 		Collection<Id> linesToConvert = TransitSchedule2Shape.getIdsFromAllLinesButParatransitYoungerThanIterationGiven(transitSchedule, pIdentifier, removeAllParatransitLinesYoungerThanIteration);

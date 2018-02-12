@@ -24,6 +24,7 @@ package scenarios.cottbus.football;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,18 +33,27 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
+import org.matsim.contrib.signals.model.Signal;
+import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.lanes.data.Lane;
 
+import de.micromata.opengis.kml.v_2_2_0.Link;
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
@@ -60,7 +70,7 @@ import utils.ModifyNetwork;
 public class RunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
 	
-	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE};
+	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE, LAEMMER_FULLY_ADAPTIVE};
 	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
@@ -102,6 +112,10 @@ public class RunCottbusFootball {
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
 			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer_doublePhases.xml");
 			break;
+		case LAEMMER_FULLY_ADAPTIVE:
+			signalsConfigGroup.setSignalControlFile("signal_control_laemmer_fully_adaptive.xml");
+			signalsConfigGroup.setSignalControlFile("signal_control_no_13.xml");
+			break;
 		case NONE:
 			signalsConfigGroup.setUseSignalSystems(false);
 			signalsConfigGroup.setSignalControlFile(null);
@@ -111,6 +125,7 @@ public class RunCottbusFootball {
 		default:
 			break;
 		}
+
 		
 		if (USE_MS_IDEAL_BASE_PLANS) {
 			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
@@ -130,6 +145,10 @@ public class RunCottbusFootball {
 		if (LONG_LANES){
 			// extend short lanes (needed for laemmer)
 			ModifyNetwork.lengthenAllLanes(baseScenario);
+		}
+		
+		if (CONTROL_TYPE.equals(SignalControl.LAEMMER_FULLY_ADAPTIVE)) {
+			//TODO manipulate network
 		}
 		
 		// add missing scenario elements
@@ -214,6 +233,41 @@ public class RunCottbusFootball {
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
 			}
+			//////
+			StringBuilder builder = new StringBuilder();
+			builder.append("SignalSystemId; SignalGroupId; SignalId; LinkId; LinkCapacity; LinkLaneCnt; LaneId; LaneCapacity; LaneCnt; toLinks; toLanes\n");
+			for (SignalSystemData signalSystemsData : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().values()) {
+				for (SignalGroupData sg : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemsData.getId()).values()) {
+					for (Id<Signal> signalId : sg.getSignalIds()) {
+						SignalData signal = ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().get(signalSystemsData.getId()).getSignalData().get(signalId);
+						org.matsim.api.core.v01.network.Link link = baseScenario.getNetwork().getLinks().get(signal.getLinkId());
+						if (signal.getLaneIds() != null) {
+							for (Id<Lane> laneId : signal.getLaneIds()) {
+								String toLinks = new String();
+								String toLanes = new String();
+								Lane lane = baseScenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId);
+								if (lane.getToLinkIds() != null) {
+									for (Id<org.matsim.api.core.v01.network.Link> toLinkId : lane.getToLinkIds())
+										toLinks = toLinks.concat(", "+toLinkId.toString());
+								}
+								if (lane.getToLaneIds() != null) {
+									for (Id<Lane> toLaneId : lane.getToLaneIds()) 
+										toLanes = toLanes.concat(", "+toLaneId.toString());
+								}
+								builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + lane.getId() + "; " + lane.getCapacityVehiclesPerHour() + "; "+ lane.getNumberOfRepresentedLanes()+"; "+toLinks+"; "+toLanes+"\n");
+							}
+						}
+						else {
+							builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + "null" + "; " + "null" + "; "+ "null" +"; "+ "null" +"; "+ "null" +"\n");
+						}
+					}
+				}
+			}
+			File tmp = File.createTempFile("signaledNodesdata", ".csv");
+			FileWriter writer = new FileWriter(tmp);
+			writer.append(builder.toString());
+			writer.close();
+			//////
 			
 			controler.run();
 			if (cbfbControllerListener.getAverageTraveltime() != null){
@@ -232,6 +286,7 @@ public class RunCottbusFootball {
 		writeAnalysis(percentageOfFans2AverageTTMap, baseOutputDirectory + "average_traveltimes_last_iteration.csv", "Average travel time");
 		writeAnalysis(percentageOfFans2TotalTTMap, baseOutputDirectory + "total_traveltimes_last_iteration.csv", "Total travel time");
 		writeAnalysis(percentageOfFans2noStuckedAgents, baseOutputDirectory + "numberOfStuckedAgents_last_iteration.csv", "Number of stucked agents");
+				
 	}
 		
 	private static void writeAnalysis(Map<Integer, Double> map, String filename, String headerColumn2) throws FileNotFoundException, IOException{
