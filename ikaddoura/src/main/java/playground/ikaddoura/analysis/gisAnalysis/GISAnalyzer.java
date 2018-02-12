@@ -62,14 +62,16 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPer
 public class GISAnalyzer {
 	private static final Logger log = Logger.getLogger(GISAnalyzer.class);
 
-	private final String homeActivity;
 	private final int scalingFactor;
 	private final Map<Integer, SimpleFeature> features = new HashMap<>();
 	private final Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
 	private final String zonesCRS;
 	private final CoordinateTransformation ct;
+	
+	private final Map<Id<Person>, Integer> personId2homeZoneId;
 
 	public GISAnalyzer(
+			Scenario scenario,
 			String shapeFileZones,
 			int scalingFactor,
 			String homeActivity,
@@ -77,7 +79,6 @@ public class GISAnalyzer {
 			String scenarioCRS) {
 		
 		this.scalingFactor = scalingFactor;
-		this.homeActivity = homeActivity;		
 		this.zonesCRS = zonesCRS;
 		this.ct = TransformationFactory.getCoordinateTransformation(scenarioCRS, zonesCRS);
 
@@ -89,9 +90,42 @@ public class GISAnalyzer {
 			featureCounter++;
 		}
 		log.info("Reading zone shapefile... Done. Number of zones: " + featureCounter);
+		
+		log.info("Pre-processing the population data...");
+		
+		log.info("		--> Getting the persons' home coordinates.");
+		SortedMap<Id<Person>,Coord> personId2homeCoord = getPersonId2Coordinates(scenario.getPopulation(), homeActivity);
+		
+		log.info("		--> Getting the persons' home zones.");
+		personId2homeZoneId = getPersonId2homeZoneId(personId2homeCoord);
+		
 	}
 	
-	public void analyzeZoneTollsUserBenefits(Scenario scenario, String runDirectory, String fileName,
+	private Map<Id<Person>, Integer> getPersonId2homeZoneId(SortedMap<Id<Person>, Coord> personId2homeCoord) {
+
+		Map<Id<Person>, Integer> personId2homeZone = new HashMap<>();
+		
+		for (Id<Person> personId : personId2homeCoord.keySet()) {
+			if (personId2homeCoord.get(personId) == null) {
+				// person without a home activity
+			} else {
+
+				Point p = MGC.coord2Point(ct.transform(personId2homeCoord.get(personId))); 
+
+				for (Integer zoneId : zoneId2geometry.keySet()) {
+					
+					if (p.within(zoneId2geometry.get(zoneId))){
+						personId2homeZone.put(personId, zoneId);
+						break;
+					}
+				}
+			}
+		}
+		return personId2homeZone;
+	}
+
+	public void analyzeZoneTollsUserBenefits(
+			String runDirectory, String fileName,
 			Map<Id<Person>, Double> personId2userBenefits,
 			Map<Id<Person>, Double> personId2tollPayments,
 			Map<Id<Person>, Double> personId2congestionPayments,
@@ -129,35 +163,27 @@ public class GISAnalyzer {
 				}
 			}
 		}
-				
-		// home activities
-		log.info("Analyzing Home activities per zone...");
-		Map<Integer,Integer> zoneNr2homeActivities = getZoneNr2activityLocations(homeActivity, scenario.getPopulation(), this.zoneId2geometry, this.scalingFactor);
-		log.info("Analyzing Home activities per zone... Done.");
-		
-		// all activities
-		log.info("Analyzing all activities per zone...");
-		Map<Integer,Integer> zoneNr2activities = getZoneNr2activityLocations(null, scenario.getPopulation(), this.zoneId2geometry, this.scalingFactor);
-		log.info("Analyzing all activities per zone... Done.");
+						
+		Map<Integer,Integer> zoneNr2homeActivities = getZoneNr2activityLocations();
 		
 		// absolute numbers mapped back to home location
 		log.info("Mapping absolute toll payments and user benefits to home location...");
-		Map<Integer,Double> zoneNr2tollPayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2tollPayments, this.zoneId2geometry, this.scalingFactor);
+		Map<Integer,Double> zoneNr2tollPayments = getZoneNr2totalAmount(personId2tollPayments);
 		
-		Map<Integer,Double> zoneNr2congestionPayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2congestionPayments, this.zoneId2geometry, this.scalingFactor);
-		Map<Integer,Double> zoneNr2noisePayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2noisePayments, this.zoneId2geometry, this.scalingFactor);
-		Map<Integer,Double> zoneNr2airPollutionPayments = getZoneNr2totalAmount(scenario.getPopulation(), personId2airPollutionPayments, this.zoneId2geometry, this.scalingFactor);
+		Map<Integer,Double> zoneNr2congestionPayments = getZoneNr2totalAmount(personId2congestionPayments);
+		Map<Integer,Double> zoneNr2noisePayments = getZoneNr2totalAmount(personId2noisePayments);
+		Map<Integer,Double> zoneNr2airPollutionPayments = getZoneNr2totalAmount(personId2airPollutionPayments);
 
-		Map<Integer,Double> zoneNr2userBenefits = getZoneNr2totalAmount(scenario.getPopulation(), personId2userBenefits, this.zoneId2geometry, this.scalingFactor);
+		Map<Integer,Double> zoneNr2userBenefits = getZoneNr2totalAmount(personId2userBenefits);
 		
-		Map<Integer, Double> zoneNr2travelTime = getZoneNr2totalAmount(scenario.getPopulation(), personId2travelTime, zoneId2geometry, scalingFactor);
+		Map<Integer, Double> zoneNr2travelTime = getZoneNr2totalAmount(personId2travelTime);
 		
-		Map<Integer, Double> zoneNr2carTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("car"), zoneId2geometry, scalingFactor);
-		Map<Integer, Double> zoneNr2ptSlowTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("ptSlow"), zoneId2geometry, scalingFactor);
-		Map<Integer, Double> zoneNr2ptTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("pt"), zoneId2geometry, scalingFactor);
-		Map<Integer, Double> zoneNr2taxiTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("taxi"), zoneId2geometry, scalingFactor);
-		Map<Integer, Double> zoneNr2bicycleTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("bicycle"), zoneId2geometry, scalingFactor);
-		Map<Integer, Double> zoneNr2walkTrips = getZoneNr2totalAmount(scenario.getPopulation(), mode2personId2trips.get("walk"), zoneId2geometry, scalingFactor);
+		Map<Integer, Double> zoneNr2carTrips = getZoneNr2totalAmount(mode2personId2trips.get("car"));
+		Map<Integer, Double> zoneNr2ptSlowTrips = getZoneNr2totalAmount(mode2personId2trips.get("ptSlow"));
+		Map<Integer, Double> zoneNr2ptTrips = getZoneNr2totalAmount(mode2personId2trips.get("pt"));
+		Map<Integer, Double> zoneNr2taxiTrips = getZoneNr2totalAmount(mode2personId2trips.get("taxi"));
+		Map<Integer, Double> zoneNr2bicycleTrips = getZoneNr2totalAmount(mode2personId2trips.get("bicycle"));
+		Map<Integer, Double> zoneNr2walkTrips = getZoneNr2totalAmount(mode2personId2trips.get("walk"));
 		
 		log.info("Mapping absolute toll payments and user benefits to home location... Done.");
 		
@@ -168,7 +194,6 @@ public class GISAnalyzer {
 				setName("zone").
 				addAttribute("ID", Integer.class).
 				addAttribute("HomeAct", Integer.class).
-				addAttribute("AllAct", Integer.class).
 				addAttribute("Tolls", Double.class).
 				addAttribute("C", Double.class).
 				addAttribute("N", Double.class).
@@ -189,7 +214,6 @@ public class GISAnalyzer {
 			Map<String, Object> attributeValues = new HashMap<>();
 			attributeValues.put("ID", id);
 			attributeValues.put("HomeAct", zoneNr2homeActivities.get(id));
-			attributeValues.put("AllAct", zoneNr2activities.get(id));		
 			attributeValues.put("Tolls", zoneNr2tollPayments.get(id));
 			attributeValues.put("C", zoneNr2congestionPayments.get(id));
 			attributeValues.put("N", zoneNr2noisePayments.get(id));
@@ -216,35 +240,30 @@ public class GISAnalyzer {
 		
 	}
 
-	private Map<Integer, Double> getZoneNr2totalAmount(Population population, Map<Id<Person>, Double> personId2amountSum, Map<Integer, Geometry> zoneId2geometry, int scalingFactor) {
+	private Map<Integer, Double> getZoneNr2totalAmount(Map<Id<Person>, Double> personId2amount) {
 
-		log.info(".");
 		Map<Integer, Double> zoneNr2totalAmount = new HashMap<Integer, Double>();	
 		
 		for (Integer zoneId : zoneId2geometry.keySet()) {
 			zoneNr2totalAmount.put(zoneId, 0.);
 		}
-		
-		SortedMap<Id<Person>,Coord> personId2homeCoord = getPersonId2Coordinates(population, homeActivity);
-		
-		if (personId2amountSum != null) {
-			for (Id<Person> personId : personId2amountSum.keySet()) {
-				if (personId2homeCoord.containsKey(personId)){
-					for (Integer zoneId : zoneId2geometry.keySet()) {
-						Geometry geometry = zoneId2geometry.get(zoneId);
-						Point p = MGC.coord2Point(ct.transform(personId2homeCoord.get(personId))); 
-						
-						if (p.within(geometry)){
-							if (zoneNr2totalAmount.get(zoneId) == null){
-								zoneNr2totalAmount.put(zoneId, personId2amountSum.get(personId) * scalingFactor);
-							} else {
-								double tollPayments = zoneNr2totalAmount.get(zoneId);
-								zoneNr2totalAmount.put(zoneId, tollPayments + (personId2amountSum.get(personId) * scalingFactor) );
-							}
-						}
-					}
+				
+		if (personId2amount != null) {
+			
+			int counter = 0;
+			for (Id<Person> personId : personId2amount.keySet()) {
+				counter++;
+				
+				if (counter%100000 == 0) {
+					log.info( Math.round(((double) counter / (double) personId2amount.size() ) * 100) + "%..."); 
+				}
+				
+				if (personId2homeZoneId.get(personId) == null) {
+					// person without a home activity
 				} else {
-					// person doesn't have a home activity
+					Integer zoneId = personId2homeZoneId.get(personId);
+					double previousValue = zoneNr2totalAmount.get(zoneId);
+					zoneNr2totalAmount.put(zoneId, previousValue + (personId2amount.get(personId) * scalingFactor));
 				}
 			}
 		}
@@ -252,31 +271,26 @@ public class GISAnalyzer {
 		return zoneNr2totalAmount;
 	}
 
-	private Map<Integer, Integer> getZoneNr2activityLocations(String activity, Population population, Map<Integer, Geometry> zoneNr2zoneGeometry, int scalingFactor) {
-		Map<Integer, Integer> zoneNr2activity = new HashMap<Integer, Integer>();	
+	private Map<Integer, Integer> getZoneNr2activityLocations() {
+		Map<Integer, Integer> zoneNr2personCounter = new HashMap<Integer, Integer>();	
 
 		for (Integer zoneId : zoneId2geometry.keySet()) {
-			zoneNr2activity.put(zoneId, 0);
+			zoneNr2personCounter.put(zoneId, 0);
 		}
-		
-		SortedMap<Id<Person>,Coord> personId2activityCoord = getPersonId2Coordinates(population, activity);
-		
-		for (Coord coord : personId2activityCoord.values()) {
-			for (Integer nr : zoneNr2zoneGeometry.keySet()) {
-				Geometry geometry = zoneNr2zoneGeometry.get(nr);
-				Point p = MGC.coord2Point(ct.transform(coord)); 
-				
-				if (p.within(geometry)){
-					if (zoneNr2activity.get(nr) == null){
-						zoneNr2activity.put(nr, scalingFactor);
-					} else {
-						int activityCounter = zoneNr2activity.get(nr);
-						zoneNr2activity.put(nr, activityCounter + scalingFactor);
-					}
-				}
+			
+		int counter = 0;
+		for (Id<Person> personId : personId2homeZoneId.keySet()) {
+			
+			counter++;
+			
+			if (counter % 100000 == 0) {
+				log.info( Math.round(((double) counter / (double) personId2homeZoneId.size() ) * 100) + "%..."); 
 			}
+			
+			int previousValue = zoneNr2personCounter.get(personId2homeZoneId.get(personId));
+			zoneNr2personCounter.put(personId2homeZoneId.get(personId), previousValue  + scalingFactor);			
 		}
-		return zoneNr2activity;
+		return zoneNr2personCounter;
 	}
 	
 	private SortedMap<Id<Person>, Coord> getPersonId2Coordinates(Population population, String activity) {
@@ -289,7 +303,7 @@ public class GISAnalyzer {
 				if (pE instanceof Activity){
 					Activity act = (Activity) pE;
 					
-					if (act.getType().equals(activity) || activity == null) {
+					if (act.getType().equals(activity)) {
 						
 						Coord coord = act.getCoord();
 						personId2coord.put(person.getId(), coord);
