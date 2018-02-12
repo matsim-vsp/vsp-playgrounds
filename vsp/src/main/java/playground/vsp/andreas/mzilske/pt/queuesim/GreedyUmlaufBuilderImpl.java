@@ -159,7 +159,7 @@ public class GreedyUmlaufBuilderImpl implements UmlaufBuilder {
 	}
 
 	private String getLastStopPostAreaId(Umlauf umlauf) {
-		return getLastStop(umlauf).getStopFacility().getStopPostAreaId();
+		return getLastStop(umlauf).getStopFacility().getStopAreaId().toString();
 	}
 
 	private UmlaufKey getKey(Umlauf umlauf) {
@@ -167,7 +167,7 @@ public class GreedyUmlaufBuilderImpl implements UmlaufBuilder {
 	}
 
 	private Umlauf findFittingUmlauf(UmlaufStueck umlaufStueck) {
-		String firstStopPostAreaId = umlaufStueck.getRoute().getStops().get(0).getStopFacility().getStopPostAreaId();
+		String firstStopPostAreaId = umlaufStueck.getRoute().getStops().get(0).getStopFacility().getStopAreaId().toString();
 		Id<TransitLine> lineId = umlaufStueck.getLine().getId();
 		UmlaufKey earliestAtPoint = new UmlaufKey(lineId, Id.create(firstStopPostAreaId, TransitStopFacility.class), 0.0, Id.create(0, Umlauf.class));
 		UmlaufKey latestAtPoint = new UmlaufKey(lineId, Id.create(firstStopPostAreaId, TransitStopFacility.class), umlaufStueck.getDeparture().getDepartureTime(), Id.create(0, Umlauf.class));
