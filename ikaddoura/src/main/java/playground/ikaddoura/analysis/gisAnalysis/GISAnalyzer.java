@@ -99,6 +99,8 @@ public class GISAnalyzer {
 		log.info("		--> Getting the persons' home zones.");
 		personId2homeZoneId = getPersonId2homeZoneId(personId2homeCoord);
 		
+		log.info("Pre-processing the population data... Done.");
+		
 	}
 	
 	private Map<Id<Person>, Integer> getPersonId2homeZoneId(SortedMap<Id<Person>, Coord> personId2homeCoord) {
@@ -250,13 +252,7 @@ public class GISAnalyzer {
 				
 		if (personId2amount != null) {
 			
-			int counter = 0;
 			for (Id<Person> personId : personId2amount.keySet()) {
-				counter++;
-				
-				if (counter%100000 == 0) {
-					log.info( Math.round(((double) counter / (double) personId2amount.size() ) * 100) + "%..."); 
-				}
 				
 				if (personId2homeZoneId.get(personId) == null) {
 					// person without a home activity
@@ -278,15 +274,7 @@ public class GISAnalyzer {
 			zoneNr2personCounter.put(zoneId, 0);
 		}
 			
-		int counter = 0;
 		for (Id<Person> personId : personId2homeZoneId.keySet()) {
-			
-			counter++;
-			
-			if (counter % 100000 == 0) {
-				log.info( Math.round(((double) counter / (double) personId2homeZoneId.size() ) * 100) + "%..."); 
-			}
-			
 			int previousValue = zoneNr2personCounter.get(personId2homeZoneId.get(personId));
 			zoneNr2personCounter.put(personId2homeZoneId.get(personId), previousValue  + scalingFactor);			
 		}

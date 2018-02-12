@@ -136,11 +136,11 @@ public class IKAnalysisRun {
 		
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_cne/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/r_output_cne/";
 //			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
 			runId = "policyCase";
 			
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_run0_baseCase/";	
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/r_output_run0_baseCase/";	
 //			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
 			runIdToCompareWith = "baseCase";
 			
@@ -438,6 +438,8 @@ public class IKAnalysisRun {
 			script.setCRS(this.scenarioCRS);
 			script.write();
 		} 
+		
+		log.info("Analysis completed.");
 	}
 
 	private void printResults(Scenario scenario,
