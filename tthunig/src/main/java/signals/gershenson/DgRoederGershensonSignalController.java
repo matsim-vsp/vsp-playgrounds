@@ -147,15 +147,15 @@ public class DgRoederGershensonSignalController implements SignalController {
 			for (Link outLink : metadata.getOutLinks()){
 				this.sensorManager.registerNumberOfCarsMonitoring(outLink.getId());
 				//this.sensorManager.registerNumberOfCarsInDistanceMonitoring(linkId, distanceMeter);;
-				log.error("Register Outlink "+ outLink.getId().toString());
+				log.info("Register Outlink "+ outLink.getId().toString());
 			}
 			
 			//TODO initialize inLinks
 			for (Link inLink : metadata.getInLinks()){
 				this.sensorManager.registerNumberOfCarsMonitoring(inLink.getId());
 				log.info("Register Inlink "+ inLink.getId().toString());
-				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), 25.);
-				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), 50.);
+				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), monitoredPlatoonTail);
+				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), d);
 			}
 		}	
 	}
@@ -564,7 +564,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 			jammedSignalGroup.put(group.getId(), jammedafterIntersection(group));
 		}
 		
-		
+		//log.error("At "+ timeSeconds + " are the following groups jammed: "+ jammedSignalGroup.toString());
 		//fills approachingVehiclesGroupMap and counter (product of internal times with vehicles)
 		carsApproachInGroup();
 		updatecounter();
@@ -587,7 +587,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	//At least one Outlink is jammed - from all groups, which are not jammed turn the one with the highest counter to GREEN
 	//the others to RED
 			if (jammedSignalGroup.containsValue(true)) {
-				log.error("Envoke Rule 5 at "+timeSeconds + jammedSignalGroup.toString());
+				//log.error("Envoke Rule 5 at "+timeSeconds + jammedSignalGroup.toString());
 				for (SignalGroup group : this.system.getSignalGroups().values()) {
 					if (jammedSignalGroup.get(group.getId()) && 
 							signalGroupstatesMap.get(group.getId()).equals(SignalGroupState.GREEN)) {
