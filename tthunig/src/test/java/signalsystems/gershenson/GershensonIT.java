@@ -180,7 +180,42 @@ public class GershensonIT {
 	}
 	@Test
 	public void testSingleCrossingwithOutboundCongestionFromA() {
-		String scenarioType = "singleCrossingOneBottlenecks";
+		String scenarioTypeTestCase = "singleCrossingOneBottlenecks";
+		String scenarioTypeNullCase = "singleCrossingNoBottlenecks";
+		double[] noPersons = { 3600, 3600, 0, 0 };
+		TtSignalAnalysisTool signalAnalyzerTestCase = runScenario(noPersons,scenarioTypeTestCase);
+		TtSignalAnalysisTool signalAnalyzerNullCase = runScenario(noPersons,scenarioTypeNullCase);
+
+		// check signal results TestCase
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimesTestCase = signalAnalyzerTestCase.getTotalSignalGreenTime(); 
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleTestCase = signalAnalyzerTestCase.calculateAvgSignalGreenTimePerFlexibleCycle();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemTestCase = signalAnalyzerTestCase.calculateAvgFlexibleCycleTimePerSignalSystem();
+		Map<Id<SignalGroup>, Double> greenTimeRatiosTestCase = signalAnalyzerTestCase.calculateSignalGreenTimeRatios();
+		// check signal results NullCase
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimesNullCase = signalAnalyzerNullCase.getTotalSignalGreenTime(); 
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleNullCase = signalAnalyzerNullCase.calculateAvgSignalGreenTimePerFlexibleCycle();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemNullCase = signalAnalyzerNullCase.calculateAvgFlexibleCycleTimePerSignalSystem();
+		Map<Id<SignalGroup>, Double> greenTimeRatiosNullCase = signalAnalyzerNullCase.calculateSignalGreenTimeRatios();
+
+		log.info("Data of TestCase");
+		log.info("total signal green times: " + totalSignalGreenTimesTestCase.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimesTestCase.get(SIGNALGROUPID2));
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemTestCase.get(SIGNALSYSTEMID));
+		log.info("Data of NullCase");
+		log.info("total signal green times: " + totalSignalGreenTimesNullCase.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimesNullCase.get(SIGNALGROUPID2));
+		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleNullCase.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycleNullCase.get(SIGNALGROUPID2));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemNullCase.get(SIGNALSYSTEMID));
+		
+		
+		Assert.assertTrue("avg greentime cycle of group 2 should be higher then group1 ", avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID2)>avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID1));
+		Assert.assertEquals("The green time ratio of Group1 should be ",0.2501851851851852 , greenTimeRatiosTestCase.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
+		Assert.assertTrue("The total green Time of Group 2 should become larger if Rule 5 triggers for Group 1", totalSignalGreenTimesTestCase.get(SIGNALGROUPID2)>totalSignalGreenTimesNullCase.get(SIGNALGROUPID2));
+	}
+
+	
+	@Test
+	public void testSingleCrossingwithOutboundCongestionFromAB() {
+		String scenarioType = "singleCrossingTwoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
 		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
@@ -196,33 +231,10 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
 		
-		Assert.assertTrue("avg greentime cycle of group 2 should be higher then group1 ", avgSignalGreenTimePerCycle.get(SIGNALGROUPID2)>avgSignalGreenTimePerCycle.get(SIGNALGROUPID1));
-		Assert.assertEquals("The green time ratio of Group1 should be ",0.2501851851851852 , greenTimeRatios.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg greentime cycle of group 2 should be more or less the same as in group1 ",0.0 , avgSignalGreenTimePerCycle.get(SIGNALGROUPID2)-avgSignalGreenTimePerCycle.get(SIGNALGROUPID1),5);
+		//Assert.assertEquals("The green time ratio of Group1 should be ",0.2501851851851852 , greenTimeRatios.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
 	}
 
-	@Ignore
-	public void testScenario2DemandABCD() {
-		double[] noPersons = { 3600, 3600, 3600, 3600 };
-		TtSignalAnalysisTool signalAnalyzer = runScenario2(noPersons);
-
-		// check signal results
-		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // should be more or less equal (OW direction is always favored as the first phase)
-		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle(); // should be more or less equal and around 25
-		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem(); // should be 60
-
-		
-
-		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
-		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
-		
-		
-		
-//		Assert.assertEquals("total signal green times of both groups are not similiar enough", 0.0, totalSignalGreenTimes.get(SIGNALGROUPID1) - totalSignalGreenTimes.get(SIGNALGROUPID2), 3.);
-//		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 3.9870689655172415, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
-//		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.9913793103448274, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
-//		Assert.assertEquals("avg cycle time of the system is wrong", 8.413793103448276, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
-	}
 	
 	
 	
@@ -329,7 +341,7 @@ public class GershensonIT {
 				link.setCapacity(1200);				
 			}
 			if (numberOfBottlenecks==2 && ((fromNodeId.equals("3") && toNodeId.equals("4"))|| fromNodeId.equals("3") && toNodeId.equals("8"))) {
-				link.setCapacity(2000);				
+				link.setCapacity(1200);				
 			}
 			
 			net.addLink(link);
