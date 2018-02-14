@@ -168,7 +168,8 @@ public class Visum2TransitSchedule {
 			log.error("Could not find TransportMode for " + line.tCode + ", more info: " + line.id);
 		}
 		TransitRouteImpl tRoute = (TransitRouteImpl) builder.createTransitRoute(Id.create(timeProfile.lineName.toString()+"."+timeProfile.lineRouteName.toString()+"."+ timeProfile.index.toString()+"."+timeProfile.dirCode.toString(), TransitRoute.class),null,stops,mode);
-		tRoute.setLineRouteName(timeProfile.lineRouteName.toString());
+//		tRoute.setLineRouteName(timeProfile.lineRouteName.toString());
+		tRoute.getAttributes().putAttribute("lineRouteName",timeProfile.lineRouteName.toString());
 		tRoute.setDirection(timeProfile.dirCode.toString());
 		return tRoute;
 	}

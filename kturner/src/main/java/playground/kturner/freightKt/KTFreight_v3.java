@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import javax.management.InvalidAttributeValueException;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -44,6 +45,7 @@ import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
+import org.matsim.contrib.freight.carrier.CarrierVehicleTypeWriter;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.contrib.freight.carrier.ScheduledTour;
@@ -114,12 +116,14 @@ import playground.kturner.utils.MoveDirVisitor;
  */
 public class KTFreight_v3 {
 
-	private static final Logger log = Logger.getLogger(KTFreight_v3.class) ;
+	private static final Logger log = Logger.getLogger(KTFreight_v3.class);
+	private static final Level loggingLevel = Level.INFO; 		//Set to info to avoid all Debug-Messages, e.g. from VehicleRountingAlgorithm, but can be set to other vaules if needed. KMT feb/18. 
 
-	//Beginn Namesdefinition KT Für Berlin-Szenario 
+
+//	//Beginn Namesdefinition KT Für Berlin-Szenario 
 //	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
-//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MAoutput/JSprit/Berlin/aldi/Toll20onHeavy/" ;
-//	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/"";
+//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/test/" ;
+//	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 //	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 //
 //	//Dateinamen
@@ -134,8 +138,8 @@ public class KTFreight_v3 {
 //	private static final String uccC_prefix = "UCC-";	
 //
 //	//All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-//	private static final ArrayList<String> retailerNames = 
-//			new ArrayList<String>(Arrays.asList("aldi")); 
+//	private static final ArrayList<String> retailerNames = null;
+////			new ArrayList<String>(Arrays.asList("aldi")); 
 //	//Location of UCC
 //	private static final ArrayList<String> uccDepotsLinkIdsString = 
 //			new ArrayList<String>(Arrays.asList("6874", "3058", "5468")); 
@@ -148,7 +152,7 @@ public class KTFreight_v3 {
 
 	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/jsprit/Grid/newImports/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/UCC/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
@@ -189,10 +193,10 @@ public class KTFreight_v3 {
 	// Einstellungen für den Run	
 	private static final boolean addingCongestion = false ;  //uses NetworkChangeEvents to reduce freespeed.
 	private static final boolean addingToll = false;  //added, kt. 07.08.2014
-	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
-	private static final boolean runMatsim = false;	 //when false only jsprit run will be performed
+	private static final boolean usingUCC = true;	 //Using Transshipment-Center, added kt 30.04.2015
+	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
-	private static final int MAX_JSPRIT_ITERATION = 4000;
+	private static final int MAX_JSPRIT_ITERATION = 10000;
 	private static final int NU_OF_TOTAL_RUNS = 10;	
 
 	//temporär zum Programmieren als Ausgabe
@@ -205,7 +209,9 @@ public class KTFreight_v3 {
 
 
 	public static void main(String[] args) throws IOException, InvalidAttributeValueException {
+		Logger.getRootLogger().setLevel(loggingLevel);
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR);
+//		copyInputFilesToOutputDirectory();
 		for (int i = 1; i<=NU_OF_TOTAL_RUNS; i++) {
 			//Damit jeweils neu besetzt wird; sonst würde es sich aufkumulieren.
 			rpscheme = new RoadPricingSchemeImpl();		
@@ -229,6 +235,21 @@ public class KTFreight_v3 {
 		Files.walkFileTree(FileSystems.getDefault().getPath(LOG_DIR), new MergeFileVisitor(new File(LOG_DIR + "logfileWarningsErrors.log"), true) );
 		System.out.println("#### Finished ####");
 	}
+
+	//TODO: Erstellen
+//	private static void copyInputFilesToOutputDirectory() throws IOException {
+//		File saveInputDirectory = new File(OUTPUT_DIR + "Input");
+//		createDir(saveInputDirectory);
+//		Files.copy(new File(NETFILE).toPath(), saveInputDirectory.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//		
+////		private static final String NETFILE = INPUT_DIR + NETFILE_NAME ;
+////		private static final String VEHTYPEFILE = INPUT_DIR + VEHTYPEFILE_NAME;
+////		private static final String CARRIERFILE = INPUT_DIR + CARRIERFILE_NAME;
+////		private static final String ALGORITHMFILE = INPUT_DIR + ALGORITHMFILE_NAME;
+////		private static final String TOLLFILE = INPUT_DIR + TOLLFILE_NAME;
+////		private static final String TOLLAREAFILE = INPUT_DIR + TOLLAREAFILE_NAME;
+//		
+//	}
 
 
 	//### KT 03.12.2014 multiple run for testing the variaty of the jsprit solutions (especially in terms of costs). 
@@ -265,7 +286,7 @@ public class KTFreight_v3 {
 			OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR + "/log_" + runIndex +"a");	//MATSim closes log at the end. therefore we need a new one to log the rest of this iteration
 		}
 			
-		finalOutput(config, carriers);	//write some final Output
+		writeAdditionalRunOutput(config, carriers);	//write some final Output
 	} 
 
 	private static Config createConfig(String[] args) {
@@ -458,7 +479,7 @@ public class KTFreight_v3 {
 						CarrierService assignedService = ((ServiceActivity) te).getService();
 						if (!assignedServices.contains(assignedService)){
 							assignedServices.add(assignedService);
-							log.info("Assigned Service: " +assignedServices.toString());
+							log.debug("Assigned Service: " +assignedServices.toString());
 						} else {
 							multiassignedServices.add(assignedService);
 							log.warn("Service " + assignedService.getId().toString() + " has already been assigned to Carrier " + c.getId().toString() + " -> multiple Assignment!");
@@ -473,7 +494,7 @@ public class KTFreight_v3 {
 					unassignedServices.add(service);
 					log.warn("Service " + service.getId().toString() +" will NOT be served by Carrier " + c.getId().toString());
 				} else {
-					log.info("Service was assigned: " +service.toString());
+					log.debug("Service was assigned: " +service.toString());
 				}
 			}
 
@@ -688,13 +709,17 @@ public class KTFreight_v3 {
 		};
 	}
 
-	private static void finalOutput(Config config, Carriers carriers) {
+	private static void writeAdditionalRunOutput(Config config, Carriers carriers) {
 		// ### some final output: ###
 		if (runMatsim){		//makes only sence, when MATSimrRun was performed KT 06.04.15
 			new WriteCarrierScoreInfos(carriers, new File(OUTPUT_DIR + "#MatsimCarrierScoreInformation.txt"), runIndex);
 		}		
 		new CarrierPlanXmlWriterV2(carriers).write( config.controler().getOutputDirectory() + "/output_carriers.xml") ;
 		new CarrierPlanXmlWriterV2(carriers).write( config.controler().getOutputDirectory() + "/output_carriers.xml.gz") ;
+		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml");
+		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml.gz");
+		
+		//TODO: Wirte all InputFiles in an "Input"-Directory with the Run-dir?
 	}
 
 	/**
@@ -736,7 +761,7 @@ public class KTFreight_v3 {
 	//Ergänzung kt: 1.8.2014 Erstellt das angegebene Verzeichnis. Falls es bereits exisitert, geschieht nichts
 	private static void createDir(File file) {
 		if (!file.exists()){
-			log.info("Create directory: " + file + " : " + file.mkdirs());
+			log.debug("Create directory: " + file + " : " + file.mkdirs());
 		} else
 			log.warn("Directory already exists! Check for older stuff: " + file.toString());
 	}

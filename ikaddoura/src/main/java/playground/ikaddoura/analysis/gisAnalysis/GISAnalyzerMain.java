@@ -128,8 +128,8 @@ public class GISAnalyzerMain {
 		}
 		
 		log.info("Analyzing zones...");
-		GISAnalyzer gisAnalysis = new GISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS);
-		gisAnalysis.analyzeZoneTollsUserBenefits(scenario, runDirectory, runId + "." + outputFileName, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll(), basicHandler );
+		GISAnalyzer gisAnalysis = new GISAnalyzer(scenario, shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS);
+		gisAnalysis.analyzeZoneTollsUserBenefits(runDirectory, runId + "." + outputFileName, personId2userBenefits, moneyHandler.getPersonId2toll(), moneyHandler.getPersonId2congestionToll(), moneyHandler.getPersonId2noiseToll(), moneyHandler.getPersonId2airPollutionToll(), basicHandler );
 		log.info("Analyzing zones... Done.");
 	}
 	

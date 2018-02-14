@@ -21,17 +21,11 @@ package playground.ikaddoura.analysis;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -47,15 +41,15 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysis;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.WinnerLoserPersonAnalyzer;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
 import playground.ikaddoura.analysis.dynamicLinkDemand.DynamicLinkDemandEventHandler;
 import playground.ikaddoura.analysis.gisAnalysis.GISAnalyzer;
 import playground.ikaddoura.analysis.gisAnalysis.MoneyExtCostHandler;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.analysis.modeSwitchAnalysis.ModeSwitchAnalysis;
+import playground.ikaddoura.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
+import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
@@ -108,7 +102,7 @@ public class IKAnalysisRun {
 	private final String runIdToCompareWith;
 	private final Scenario scenario0;
 
-	private final String outputDirectoryName = "analysis-ik";
+	private final String outputDirectoryName = "analysis-ik-v0";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -142,12 +136,12 @@ public class IKAnalysisRun {
 		
 		} else {
 			
-//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_cne/";
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/r_output_cne/";
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
 			runId = "policyCase";
 			
-//			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_run0_baseCase/";	
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/r_output_run0_baseCase/";	
+//			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
 			runIdToCompareWith = "baseCase";
 			
 			scenarioCRS = TransformationFactory.DHDN_GK4;	
@@ -155,58 +149,26 @@ public class IKAnalysisRun {
 //			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
 //			zonesCRS = TransformationFactory.DHDN_GK4;
 
-			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
-			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
+			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/greater-berlin-area_3000/greater-berlin-area_3000.shp";
+			zonesCRS = TransformationFactory.DHDN_GK4;
+			
+//			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
+//			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
 			
 			homeActivity = "home";
 			scalingFactor = 10;			
 		}
 		
-		IKAnalysisRun analysis = new IKAnalysisRun(runDirectory, runId, runDirectoryToCompareWith, runIdToCompareWith,
-				scenarioCRS, shapeFileZones, zonesCRS, homeActivity, scalingFactor);
+		IKAnalysisRun analysis = new IKAnalysisRun(runDirectory,
+				runId,
+				runDirectoryToCompareWith,
+				runIdToCompareWith,
+				scenarioCRS,
+				shapeFileZones,
+				zonesCRS,
+				homeActivity,
+				scalingFactor);
 		analysis.run();
-	}
-	
-	public IKAnalysisRun(String runDirectory, String runId,
-			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor) {
-		
-		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
-		
-		this.runDirectory = runDirectory;
-		this.runId = runId;
-
-		this.scenario1 = loadScenario(runDirectory, runId);
-		
-		this.runDirectoryToCompareWith = null;
-		this.runIdToCompareWith = null;
-		this.scenario0 = null;
-		
-		this.scenarioCRS = scenarioCRS;
-		this.shapeFileZones = shapeFileZones;
-		this.zonesCRS = zonesCRS;
-		this.homeActivity = homeActivity;
-		this.scalingFactor = scalingFactor;
-	}
-	
-	public IKAnalysisRun(Scenario scenario,
-			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor) {
-		
-		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
-		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
-
-		this.scenario1 = scenario;
-		this.runDirectory = runDirectory;
-		this.runId = scenario.getConfig().controler().getRunId();
-		
-		this.scenario0 = null;
-		this.runDirectoryToCompareWith = null;
-		this.runIdToCompareWith = null;
-		
-		this.scenarioCRS = scenarioCRS;
-		this.shapeFileZones = shapeFileZones;
-		this.zonesCRS = zonesCRS;
-		this.homeActivity = homeActivity;
-		this.scalingFactor = scalingFactor;
 	}
 	
 	public IKAnalysisRun(Scenario scenario, String scenarioCRS) {
@@ -218,6 +180,7 @@ public class IKAnalysisRun {
 		this.runDirectory = runDirectory;
 		this.runId = scenario.getConfig().controler().getRunId();
 		
+		// scenario 0 will not be analyzed
 		this.scenario0 = null;
 		this.runDirectoryToCompareWith = null;
 		this.runIdToCompareWith = null;
@@ -364,16 +327,12 @@ public class IKAnalysisRun {
 		}
 
 		// #####################################
-		// Read the events file
+		// Read the events file and plans file
 		// #####################################
 		
 		if (scenario1 != null) readEventsFile(runDirectory, runId, events1);
 		if (scenario0 != null) readEventsFile(runDirectoryToCompareWith, runIdToCompareWith, events0);
 				
-		// #####################################
-		// Analyze the plans file
-		// #####################################
-		
 		Map<Id<Person>, Double> personId2userBenefit1 = getPersonId2UserBenefit(scenario1);
 		Map<Id<Person>, Double> personId2userBenefit2 = getPersonId2UserBenefit(scenario0);
 		
@@ -391,27 +350,24 @@ public class IKAnalysisRun {
 		// Scenario comparison
 		// #####################################
 		
+		String personTripScenarioComparisonOutputDirectory = null;
+		
 		if (scenario1 != null & scenario0 != null) {
 			
-			// mode switch analysis
-			String modeSwitchAnalysisOutputDirectory = analysisOutputDirectory + "modeSwitchAnalysis_" + runId + "-vs-" + runIdToCompareWith + "/";
-			createDirectory(modeSwitchAnalysisOutputDirectory);
+			personTripScenarioComparisonOutputDirectory = analysisOutputDirectory + "scenario-comparison_" + runId + "-vs-" + runIdToCompareWith + "/";
+			createDirectory(personTripScenarioComparisonOutputDirectory);
 
-			ModeSwitchAnalysis modeSwitchAnalysis = new ModeSwitchAnalysis();
+			PersonTripScenarioComparison scenarioComparison = new PersonTripScenarioComparison(this.homeActivity, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0);
 			try {
-				modeSwitchAnalysis.analyze(modeSwitchAnalysisOutputDirectory, scenario0, basicHandler0, personTripMoneyHandler0, scenario1, basicHandler1, personTripMoneyHandler1);
+				scenarioComparison.analyzeByMode();
+				scenarioComparison.analyzeByScore(0.0);
+				scenarioComparison.analyzeByScore(1.0);
+				scenarioComparison.analyzeByScore(10.0);
+				scenarioComparison.analyzeByScore(100.0);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			// winner-loser analysis
-			
-			String winnerLoserAnalysisOutputDirectory = analysisOutputDirectory + "winner-loser-analysis" + runId + "-vs-" + runIdToCompareWith + "/";
-			createDirectory(winnerLoserAnalysisOutputDirectory);
-			
-			WinnerLoserPersonAnalyzer winnerLoserAnalyzer = new WinnerLoserPersonAnalyzer(winnerLoserAnalysisOutputDirectory, basicHandler0, basicHandler1);
-			winnerLoserAnalyzer.analyze();
-			// TODO
+		
 		}
 
 		// #####################################
@@ -419,142 +375,71 @@ public class IKAnalysisRun {
 		// #####################################
 
 		// traffic volumes
-		
-		{
-			File srcFile = new File("./visualization-scripts/traffic-volume_absolute-difference_noCRS.qgs");
+		if (scenario1 != null & scenario0 != null) {
+			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute-difference_noCRS.qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute-difference_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
 			
-			String qgisProjectFileTrafficVolumeDifference = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute-difference_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
-			File destDir = new File(qgisProjectFileTrafficVolumeDifference);
-			try {
-				FileUtils.copyFile(srcFile, destDir);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			Path path = Paths.get(qgisProjectFileTrafficVolumeDifference);
-			Charset charset = StandardCharsets.UTF_8;
-
-			String content = null;
-			try {
-				content = new String(Files.readAllBytes(path), charset);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			// template adjustments
-			content = content.replaceAll("baseCaseRunId", this.runIdToCompareWith);
-			content = content.replaceAll("policyCaseRunId", this.runId);
-			content = content.replaceAll("_MATSimScenarioScaleFactor_", String.valueOf(this.scalingFactor));
-			
-			if (this.scenarioCRS.equals(TransformationFactory.DHDN_GK4)) {
-				content = content.replaceAll("crs-specification",
-						"  <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>" + 
-						"  <srsid>2648</srsid>" + 
-						"  <srid>31468</srid>" + 
-						"  <authid>EPSG:31468</authid>" + 
-						"  <description>DHDN / Gauss-Kruger zone 4</description>" + 
-						"  <projectionacronym>tmerc</projectionacronym>" + 
-						"  <ellipsoidacronym>bessel</ellipsoidacronym>" + 
-						"  <geographicflag>false</geographicflag>");
-			} else {
-				log.warn("The crs needs to be set manually via QGIS.");
-			}
-			
-			try {
-				Files.write(path, content.getBytes(charset));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
+			script.setRunIdToCompareWith(this.runIdToCompareWith);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.scenarioCRS);
+			script.write();
 		}
 		
 		// spatial zone-based analysis
-		
-		{
-			File srcFile = new File("./visualization-scripts/spatial-welfare-mode-analysis_noCRS.qgs");
+		if (scenario1 != null & scenario0 != null) {
+			String visScriptTemplateFile = "./visualization-scripts/zone-based-analysis_welfare_modes.qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "zone-based-analysis_welfare_modes/" + "zone-based-analysis_welfare_modes_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
 			
-			String qgisProjectFileZoneAnalysis = analysisOutputDirectory + "spatial-welfare-mode-analysis/" + "spatial-welfare-mode-analysis_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
-			File destDir = new File(qgisProjectFileZoneAnalysis);
-			try {
-				FileUtils.copyFile(srcFile, destDir);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			Path path = Paths.get(qgisProjectFileZoneAnalysis);
-			Charset charset = StandardCharsets.UTF_8;
-
-			String content = null;
-			try {
-				content = new String(Files.readAllBytes(path), charset);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			// template adjustments
-			content = content.replaceAll("baseCaseRunId", this.runIdToCompareWith);
-			content = content.replaceAll("policyCaseRunId", this.runId);
-			
-			if (this.zonesCRS.equals(TransformationFactory.DHDN_GK4)) {
-				content = content.replaceAll("crs-specification",
-						"  <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>" + 
-						"  <srsid>2648</srsid>" + 
-						"  <srid>31468</srid>" + 
-						"  <authid>EPSG:31468</authid>" + 
-						"  <description>DHDN / Gauss-Kruger zone 4</description>" + 
-						"  <projectionacronym>tmerc</projectionacronym>" + 
-						"  <ellipsoidacronym>bessel</ellipsoidacronym>" + 
-						"  <geographicflag>false</geographicflag>");
-			
-			} else if (this.zonesCRS.equals(TransformationFactory.DHDN_SoldnerBerlin)) {
-				content = content.replaceAll("crs-specification",
-					      "	 <proj4>+proj=cass +lat_0=52.41864827777778 +lon_0=13.62720366666667 +x_0=40000 +y_0=10000 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>" + 
-					      "	 <srsid>1031</srsid>" + 
-					      "	 <srid>3068</srid>" + 
-					      "	 <authid>EPSG:3068</authid>" + 
-					      "	 <description>DHDN / Soldner Berlin</description>" + 
-					      "  <projectionacronym>cass</projectionacronym>" + 
-					      "	 <ellipsoidacronym>bessel</ellipsoidacronym>" + 
-					      "	 <geographicflag>false</geographicflag>");
-			} else {
-				log.warn("The crs needs to be set manually via QGIS.");
-			}
-			
-			try {
-				Files.write(path, content.getBytes(charset));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
+			script.setRunIdToCompareWith(this.runIdToCompareWith);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.zonesCRS);
+			script.write();
 		}
 		
-		// externality-specific toll payments
+		// scenario comparison: person-specific mode-shift effects
+		if (scenario1 != null & scenario0 != null) {
+			String visScriptTemplateFile = "./visualization-scripts/scenario-comparison_person-specific-mode-switch-effects.qgs";
+			String visScriptOutputFile = personTripScenarioComparisonOutputDirectory + "scenario-comparison_person-specific-mode-switch-effects_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
+			
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
+			script.setRunIdToCompareWith(this.runIdToCompareWith);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.scenarioCRS);
+			script.write();
+		}
 		
+		// scenario comparison: person-specific winner-loser analysis
+		if (scenario1 != null & scenario0 != null) {
+			String visScriptTemplateFile = "./visualization-scripts/scenario-comparison_person-specific-winner-loser.qgs";
+			String visScriptOutputFile = personTripScenarioComparisonOutputDirectory + "scenario-comparison_person-specific-winner-loser_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
+			
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
+			script.setRunIdToCompareWith(this.runIdToCompareWith);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.scenarioCRS);
+			script.write();
+		}
+	
+		// externality-specific toll payments
 		{
-			File srcFile = new File("./visualization-scripts/extCostPerTimeOfDay-cne_percentages.R");
-			
-			String qgisProjectFileTrafficVolumeDifference = analysisOutputDirectory + "person-trip-welfare-analysis/" + "extCostPerTimeOfDay-cne_percentages_" + runId + ".R";
-			File destDir = new File(qgisProjectFileTrafficVolumeDifference);
-			try {
-				FileUtils.copyFile(srcFile, destDir);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			Path path = Paths.get(qgisProjectFileTrafficVolumeDifference);
-			Charset charset = StandardCharsets.UTF_8;
-
-			String content = null;
-			try {
-				content = new String(Files.readAllBytes(path), charset);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			// template adjustments
-			content = content.replaceAll("baseCaseRunId", this.runIdToCompareWith);
-			content = content.replaceAll("policyCaseRunId", this.runId);
-			try {
-				Files.write(path, content.getBytes(charset));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			String visScriptTemplateFile = "./visualization-scripts/extCostPerTimeOfDay-cne_percentages.R";
+			String visScriptOutputFile = analysisOutputDirectory + "person-trip-welfare-analysis/" + "extCostPerTimeOfDay-cne_percentages_" + runId + ".R";
+					
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
+			script.setRunIdToCompareWith(this.runIdToCompareWith);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.scenarioCRS);
+			script.write();
 		} 
+		
+		log.info("Analysis completed.");
 	}
 
 	private void printResults(Scenario scenario,
@@ -632,12 +517,12 @@ public class IKAnalysisRun {
 		
 		if (shapeFileZones != null && zonesCRS != null && scenarioCRS != null && scalingFactor != 0) {		
 			
-			String spatialAnalysisOutputDirectory = analysisOutputDirectory + "spatial-welfare-mode-analysis/";
+			String spatialAnalysisOutputDirectory = analysisOutputDirectory + "zone-based-analysis_welfare_modes/";
 			createDirectory(spatialAnalysisOutputDirectory);
 			String spatialAnalysisOutputDirectoryWithPrefix = spatialAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".";
 			
-			GISAnalyzer gisAnalysis = new GISAnalyzer(shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS);
-			gisAnalysis.analyzeZoneTollsUserBenefits(scenario, spatialAnalysisOutputDirectoryWithPrefix, "tolls_userBenefits_travelTime_modes_zones.shp", personId2userBenefit, personMoneyHandler.getPersonId2toll(), personMoneyHandler.getPersonId2congestionToll(), personMoneyHandler.getPersonId2noiseToll(), personMoneyHandler.getPersonId2airPollutionToll(), basicHandler);
+			GISAnalyzer gisAnalysis = new GISAnalyzer(scenario, shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS);
+			gisAnalysis.analyzeZoneTollsUserBenefits(spatialAnalysisOutputDirectoryWithPrefix, "tolls_userBenefits_travelTime_modes_zones.shp", personId2userBenefit, personMoneyHandler.getPersonId2toll(), personMoneyHandler.getPersonId2congestionToll(), personMoneyHandler.getPersonId2noiseToll(), personMoneyHandler.getPersonId2airPollutionToll(), basicHandler);
 		}
 		
 		// #####################################

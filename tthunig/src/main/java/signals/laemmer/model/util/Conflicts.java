@@ -93,15 +93,15 @@ public class Conflicts {
 		return genericCheckConflict(conflictingLink, conflictingLane, conflicts);
 	}
 	
-	public boolean hasAllowedConflictNonPriority(Id<Link> conflictingLink) {
+	public boolean hasAllowedConflictWithNonPriorityAgainst(Id<Link> conflictingLink) {
 		return genericCheckConflict(conflictingLink, allowedConflictsNonPriority);
 	}
 	
-	public boolean hasAllowedConflictWithNoPriorityAgainst(Id<Link> conflictingLink, Id<Lane> conflictingLane) {
+	public boolean hasAllowedConflictWithNonPriorityAgainst(Id<Link> conflictingLink, Id<Lane> conflictingLane) {
 		return genericCheckConflict(conflictingLink, conflictingLane, allowedConflictsNonPriority);
 	}
 	
-	public boolean hasAllowedConflictPriority(Id<Link> conflictingLink) {
+	public boolean hasAllowedConflictWithPriorityAgainst(Id<Link> conflictingLink) {
 		return genericCheckConflict(conflictingLink, allowedConflictsPriority);
 	}
 	
