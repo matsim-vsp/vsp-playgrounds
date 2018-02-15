@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -73,14 +72,18 @@ import org.matsim.lanes.data.Lanes;
 import org.matsim.lanes.data.LanesFactory;
 import org.matsim.lanes.data.LanesToLinkAssignment;
 import org.matsim.lanes.data.LanesUtils;
+import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
+import scala.reflect.internal.Trees.This;
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.laemmer.model.util.Conflicts;
+import signals.laemmer.model.util.ConflictsConverter;
 
 /**
  * @author tthunig, pschade
@@ -100,7 +103,7 @@ public class ComplexSingleCrossingScenario {
 	private double flowNS = 1200;
 	private double flowWE = 0.5 * 2520;
 	private boolean useLaemmer = true;
-	private Regime laemmerRegime = Regime.COMBINED;
+	private Regime laemmerRegime = Regime.STABILIZING;
 	private boolean vis = false;
 	private boolean logEnabled = false;
 	private boolean stochasticDemand = false;
@@ -255,6 +258,8 @@ public class ComplexSingleCrossingScenario {
         createNetwork(scenario.getNetwork());
         if (useLanes) {
         	ComplexSingleCrossingScenario.createLanes(scenario.getLanes());
+        } else {
+        	createLinkConflicts(scenario.getNetwork());
         }
         createPopulation(scenario.getPopulation());
         createSignals(scenario, laemmerConfig);
@@ -384,9 +389,32 @@ public class ComplexSingleCrossingScenario {
             link.setAllowedModes(modes);
             net.addLink(link);
         }
-    }
+   }
     
-//TODO create conflicting lanes attribute from laemmerbasicexample
+    private static void createLinkConflicts(Network network) {
+    	Conflicts link2_3conflicts = new Conflicts(Id.createLinkId("2_3"));
+    	Conflicts link4_3conflicts = new Conflicts(Id.createLinkId("2_3"));
+    	Conflicts link7_3conflicts = new Conflicts(Id.createLinkId("2_3"));
+    	Conflicts link8_3conflicts = new Conflicts(Id.createLinkId("2_3"));
+    	
+    	link2_3conflicts.addConflict(Id.createLinkId("7_3"));
+    	link2_3conflicts.addConflict(Id.createLinkId("8_3"));
+    	
+    	link4_3conflicts.addConflict(Id.createLinkId("7_3"));
+    	link4_3conflicts.addConflict(Id.createLinkId("8_3"));
+    	
+    	link7_3conflicts.addConflict(Id.createLinkId("2_3"));
+    	link7_3conflicts.addConflict(Id.createLinkId("4_3"));
+    	
+    	link8_3conflicts.addConflict(Id.createLinkId("2_3"));
+    	link8_3conflicts.addConflict(Id.createLinkId("4_3"));
+    	
+    	network.getLinks().get(Id.createLinkId("2_3")).getAttributes().putAttribute("conflicts", link2_3conflicts);
+    	network.getLinks().get(Id.createLinkId("4_3")).getAttributes().putAttribute("conflicts", link4_3conflicts);
+    	network.getLinks().get(Id.createLinkId("7_3")).getAttributes().putAttribute("conflicts", link7_3conflicts);
+    	network.getLinks().get(Id.createLinkId("8_3")).getAttributes().putAttribute("conflicts", link8_3conflicts);
+    }
+
     private static void createLanes(Lanes lanes) {
         LanesFactory factory = lanes.getFactory();
 
@@ -432,7 +460,6 @@ public class ComplexSingleCrossingScenario {
         lane2_3rconflicts.addConflict(Id.createLinkId("7_3"),  Id.create("7_3.ol", Lane.class));
         lane2_3rconflicts.addConflict(Id.createLinkId("8_3"),  Id.create("8_3.ol", Lane.class));
         lanesForLink2_3.getLanes().get(Id.create("2_3.r", Lane.class)).getAttributes().putAttribute("conflicts",lane2_3rconflicts); 
-
         
         // create lanes for link 4_3
         LanesToLinkAssignment lanesForLink4_3 = factory
@@ -502,7 +529,15 @@ public class ComplexSingleCrossingScenario {
         Conflicts lane8_3conflicts =  new Conflicts(Id.createLinkId("8_3"), Id.create("8_3.ol", Lane.class)); 
         lane8_3conflicts.addConflict(Id.createLinkId("2_3"), null);
         lane8_3conflicts.addConflict(Id.createLinkId("4_3"), null);
-        lanesForLink8_3.getLanes().get(Id.create("8_3.ol", Lane.class)).getAttributes().putAttribute("conflicts",lane8_3conflicts); 
+        lanesForLink8_3.getLanes().get(Id.create("8_3.ol", Lane.class)).getAttributes().putAttribute("conflicts",lane8_3conflicts);
+        ObjectAttributes obja = new ObjectAttributes();
+        obja.putAttribute("4_3l", "conflicts", lane4_3lconflicts);
+        obja.putAttribute("4_3s", "conflicts", lane4_3sconflicts);
+        obja.putAttribute("4_3r", "conflicts", lane4_3rconflicts);
+        obja.putAttribute("7_3", "conflicts", lane7_3conflicts);
+        org.matsim.utils.objectattributes.ObjectAttributesXmlWriter writer = new ObjectAttributesXmlWriter(obja);
+        writer.putAttributeConverter(Conflicts.class, new ConflictsConverter());
+        writer.writeFile("/tmp/test.xml");
     }
     
     private void createPopulation(Population pop) {
