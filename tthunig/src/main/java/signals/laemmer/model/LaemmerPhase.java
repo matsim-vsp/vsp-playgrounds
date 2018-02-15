@@ -6,8 +6,6 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.lanes.data.Lane;
 
-import signals.sensor.CarLocator;
-
 /**
  * 
  * @author pschade
@@ -242,7 +240,7 @@ class LaemmerPhase {
 	            }
 	        }
     	}
-        builder.append(this.phase.getState(this.fullyAdaptiveLaemmerSignalController.getSystem()).name()+ ";")
+        builder.append(this.phase.getState().name()+ ";")
                 .append(this.index + ";")
                 .append(this.determiningLoad + ";")
                 .append(this.intergreenTime_a + ";")

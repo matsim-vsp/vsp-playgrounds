@@ -3,6 +3,7 @@ package signals.laemmer.model;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.data.Lane;
 
 /**
@@ -94,7 +95,7 @@ public class LaemmerLane {
         }
 
  
-        if (this.fullyAdaptiveLaemmerSignalController.needStabilization(this)) {
+        if (this.fullyAdaptiveLaemmerSignalController.needStabilization(this) || this.signalGroup.getState().equals(SignalGroupState.GREEN)) {
             return;
         }
 
@@ -127,15 +128,27 @@ public class LaemmerLane {
 	}
     
     public void getStatFields(StringBuilder builder) {
-        builder.append("isGreen_" + this.physicalLane.getId() +";");
-        builder.append("load_" + this.physicalLane.getId() + ";");
-        builder.append("a_" + this.physicalLane.getId() + ";");
-        builder.append("regTime_" + this.physicalLane.getId() + ";");
-        builder.append("nTotal_" + this.physicalLane.getId() + ";");
+    	String identifier;
+    	if (this.physicalLane == null) {
+    		identifier = this.link.getId().toString();
+    	} else {
+    		identifier = this.physicalLane.getId().toString();
+    	}
+    	
+        builder.append("isGreen_" + identifier +";");
+        builder.append("load_" + identifier + ";");
+        builder.append("a_" + identifier + ";");
+        builder.append("regTime_" + identifier + ";");
+        builder.append("nTotal_" + identifier + ";");
     }
 
     public void getStepStats(StringBuilder builder, double now) {
-        int totalN = fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), physicalLane.getId());
+    	int totalN;
+    	if (this.physicalLane == null) {
+    		totalN = fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId());
+    	} else {
+    		totalN = fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), physicalLane.getId());
+    	}
         builder.append(this.signal.getSignalizeableItems().iterator().next().hasGreenForAllToLinks()+ ";")
                 .append(this.determiningLoad + ";")
                 .append(this.stabilizationPressure_a + ";")
