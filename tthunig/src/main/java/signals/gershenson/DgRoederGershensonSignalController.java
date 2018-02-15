@@ -154,8 +154,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 			for (Link inLink : metadata.getInLinks()){
 				this.sensorManager.registerNumberOfCarsMonitoring(inLink.getId());
 				log.info("Register Inlink "+ inLink.getId().toString());
-				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), 25.);
-				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), 50.);
+				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), monitoredPlatoonTail);
+				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), d);
 			}
 		}	
 	}
@@ -207,10 +207,10 @@ public class DgRoederGershensonSignalController implements SignalController {
 			}
 		}
 	}
-	
+	//TODO This method doesnt work  --- fixed
 	private void addOutLinksWithoutBackLinkToMetadata(Link inLink, SignalGroupMetadata metadata){
 		for (Link outLink : inLink.getToNode().getOutLinks().values()){
-			if (!outLink.getFromNode().equals(inLink.getToNode())){
+			if (!outLink.getToNode().equals(inLink.getToNode())){
 				metadata.addOutLink(outLink);
 			}
 		}
@@ -421,14 +421,17 @@ public class DgRoederGershensonSignalController implements SignalController {
 		if (!jammedOutLinkMap.containsKey(group.getId())) {
 			jammedOutLinkMap.put(group.getId(), new HashMap<Id<Link>,Boolean>());
 		}
+
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getOutLinks()) {
 			double storageCap = ((link.getLength()-minmumDistanceBehindIntersection) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
-			Boolean jammed = false;
+			boolean jammed = false;
 			if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * this.storageCapacityOutlinkJam)){
 				jammed = true;
 			}
 			jammedOutLinkMap.get(group.getId()).put(link.getId(), jammed);
-		} 	
+			
+		}
+		
 	}
 	
 	private void initSignalStates(double now) {
@@ -493,7 +496,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 				if(counter.get(highest)<counter.get(signalgroup)) highest = signalgroup;
 			}
 		}
-		if (highest == null) log.error("There are no Signalgroups in the, which are not jammed. Rule 6 should have triggerd before");
+		//if (highest == null) log.error("There are no Signalgroups in the, which are not jammed. Rule 6 should have triggerd before");
 		return highest;
 	}
 	
@@ -534,14 +537,15 @@ public class DgRoederGershensonSignalController implements SignalController {
 	// Get data which is needed before going through the rule set	
 		
 		
-		//This is just to demonstrate that the algorithm works
-		if (timeSeconds%1==0) {
-			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString() + approachingVehiclesGroupMap.toString());
-		}
+//		//This is just to demonstrate that the algorithm works
+//		if (timeSeconds%1==0) {
+//			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString() + approachingVehiclesGroupMap.toString());
+//		}
 		
 		jammedSignalGroup.clear();
 		jammedOutLinkMap.clear();
 		approachingVehiclesMap.clear();
+		
 		
 		
 		for (SignalGroup group : this.system.getSignalGroups().values()){
@@ -558,7 +562,9 @@ public class DgRoederGershensonSignalController implements SignalController {
 			}
 			
 			jammedSignalGroup.put(group.getId(), jammedafterIntersection(group));
-		}	
+		}
+		
+		//log.error("At "+ timeSeconds + " are the following groups jammed: "+ jammedSignalGroup.toString());
 		//fills approachingVehiclesGroupMap and counter (product of internal times with vehicles)
 		carsApproachInGroup();
 		updatecounter();
@@ -572,6 +578,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	//no Cars approaching the SignalSystem.
 	//	-> turn all signals to RED	
 		if (!jammedSignalGroup.containsValue(false)  || !vehiclesApproachingSomewhere()) {
+			//log.info("Envoke Rule 6 at "+timeSeconds + !vehiclesApproachingSomewhere());
 			for (SignalGroup group : this.system.getSignalGroups().values()){ 
 				if (!SignalGroupState.RED.equals(group.getState())) switchlight(group,timeSeconds);
 			}
@@ -580,6 +587,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	//At least one Outlink is jammed - from all groups, which are not jammed turn the one with the highest counter to GREEN
 	//the others to RED
 			if (jammedSignalGroup.containsValue(true)) {
+				//log.error("Envoke Rule 5 at "+timeSeconds + jammedSignalGroup.toString());
 				for (SignalGroup group : this.system.getSignalGroups().values()) {
 					if (jammedSignalGroup.get(group.getId()) && 
 							signalGroupstatesMap.get(group.getId()).equals(SignalGroupState.GREEN)) {
@@ -678,8 +686,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 		/* start initialization process. 
 		 * can not be started earlier in the constructor because the signal system ID is needed. theresa, jan'17 */
 		initSignalGroupMetadata();
-//		initSignalStates();
-//		registerAndInitializeSensorManager();
+		//initSignalStates();
+		registerAndInitializeSensorManager();
 		
 	}	
 

@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
@@ -50,7 +51,9 @@ public class SelectedPlansFilter {
 			PopulationFactory factory = popOut.getFactory();
 			Person newP = factory.createPerson(p.getId());
 			popOut.addPerson(newP);
-			newP.addPlan(selectedPlan);
+			Plan newPlan = factory.createPlan();
+			PopulationUtils.copyFromTo(selectedPlan, newPlan);
+			newP.addPlan(newPlan);
 		}
 	}
 	

@@ -17,18 +17,17 @@ import org.matsim.core.scenario.ScenarioUtils;
 public class FreightAnalyseKT {
 
 	/**
-	 * @param args
+	 *  Calculates and writes some analysis for the defined Runs.
+	 *  
+	 *  @author kturner
 	 */
 	
-	//TODO: VEhicleTypes in Simulation als ebenfalls in OutputDir schreiben lassen, damit Zuordnugn zru Simulation erkennbar ist.
-//	private static final String RUN_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/JSprit/Berlin/aldi/base_rushhourTrue/Run_1/" ;
-//	private static final String RUN_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/JSprit/Berlin/aldi/CordonTollOnHeavy/Run_1/" ;
-	private static final String RUN_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/JSprit/Berlin/aldi/ElectroWithoutUCC/Run_1/" ;
-//	private static final String RUN_DIR = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/output/JSprit/Berlin/aldi/UCC/Run_1/" ;
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Base/Run_1" ;
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/CordonTollOnHeavy/Run_1/" ; //City-Maut
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithoutUCC/Run_1/" ; //CO2-free City
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithUCC/Run_1/" 	//CO2-freie city mit UCC
 
-	//	private static final String VEHTYPEFILE = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/input/Grid_Szenario/grid-vehTypes_kt.xml";
-	private static final String VEHTYPEFILE = "F:/OneDrive/Dokumente/Masterarbeit/MATSIM/input/Berlin_Szenario/vehicleTypes.xml"; 
-	private static final String OUTPUT_DIR = RUN_DIR + "Statistik/" ;
+	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
 		
 	private static final Logger log = Logger.getLogger(FreightAnalyseKT.class);
 	
@@ -40,11 +39,13 @@ public class FreightAnalyseKT {
 	
 		private void run() {
 			
+			//TODO: Why is the configfile not used as .gz?
 			String configFile = RUN_DIR + "output_config.xml"; //Datei wurde um Parameter (Scenario) "useVehicles" erleichtert.
 //			String configFile = RUN_DIR + "output_config.xml.gz";
 			String populationFile = null;
 			String networkFile = RUN_DIR+ "output_network.xml.gz";
 			String carrierFile = RUN_DIR+ "output_carriers.xml.gz";
+			String vehicleTypefile = RUN_DIR+ "output_vehicleTypes.xml.gz";
 			
 			Config config = ConfigUtils.loadConfig(configFile);		
 			config.plans().setInputFile(populationFile);
@@ -54,7 +55,7 @@ public class FreightAnalyseKT {
 			EventsManager events = EventsUtils.createEventsManager();
 			
 			CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
-			new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPEFILE) ;
+			new CarrierVehicleTypeReader(vehicleTypes).readFile(vehicleTypefile) ;
 			
 			Carriers carriers = new Carriers() ;
 			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile) ;

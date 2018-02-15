@@ -9,6 +9,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
@@ -49,7 +50,8 @@ public class TransitLineRemover {
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		Network network = scenario.getNetwork();
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(NETWORKFILE);
-		new TransitScheduleReaderV1(baseCaseTransitSchedule, network).readFile(SCHEDULEFILE);
+//		new TransitScheduleReaderV1(baseCaseTransitSchedule, network).readFile(SCHEDULEFILE);
+		new TransitScheduleReaderV1(baseCaseTransitSchedule, new RouteFactories()).readFile(SCHEDULEFILE);
 		
 		// Move one stop to a new link (wrong matching in original model)
 //		for (TransitStopFacility stop : baseCaseTransitSchedule.getFacilities().values()) {
