@@ -451,7 +451,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 					
 					List<LaemmerPhase> candidatePhases = new LinkedList<>();
 					for (LaemmerPhase laemmerPhase : laemmerPhases) {
-						if (laemmerPhase.phase.containsGreenLane(lanesForStabilization.peek().getLink().getId(), lanesForStabilization.peek().getLane().getId())) {
+						if (laemmerPhase.phase.containsGreenLane(lanesForStabilization.peek().getLink().getId(), (lanesForStabilization.peek().getLane() == null ? null :lanesForStabilization.peek().getLane().getId()))) {
 							candidatePhases.add(laemmerPhase);
 						}
 					}

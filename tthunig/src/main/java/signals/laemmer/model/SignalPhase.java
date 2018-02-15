@@ -5,6 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
@@ -111,6 +112,14 @@ public class SignalPhase {
 
 	public int getNumberOfGreenLanes() {
 		//TODO could also be a field which is updated while adding new signalGroups
-		return lanesToLinks.entrySet().parallelStream().mapToInt(e -> e.getValue().size()).sum();
+		int numOfGreenLanes = 0;
+		for (Entry<Id<Link>, List<Id<Lane>>> e : lanesToLinks.entrySet()) {
+			if (e.getValue() != null) {
+				numOfGreenLanes += e.getValue().size();
+			}
+		}
+		return numOfGreenLanes;
+		//TODO check if null values can be filtered.
+		//return lanesToLinks.entrySet().parallelStream().mapToInt(e -> e.getValue().size()).sum();
 	}
 }
