@@ -22,7 +22,7 @@ public class FreightAnalyseKT {
 	 *  @author kturner
 	 */
 	
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Base/Run_1" ;
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Aldi_Base/Run_1" ;
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/CordonTollOnHeavy/Run_1/" ; //City-Maut
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithoutUCC/Run_1/" ; //CO2-free City
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithUCC/Run_1/" 	//CO2-freie city mit UCC
@@ -52,7 +52,7 @@ public class FreightAnalyseKT {
 			config.network().setInputFile(networkFile);
 			
 			MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
-			EventsManager events = EventsUtils.createEventsManager();
+			EventsManager eventsManager = EventsUtils.createEventsManager();
 			
 			CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
 			new CarrierVehicleTypeReader(vehicleTypes).readFile(vehicleTypefile) ;
@@ -61,13 +61,13 @@ public class FreightAnalyseKT {
 			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile) ;
 
 			TripEventHandler tripHandler = new TripEventHandler(scenario, vehicleTypes);
-			events.addHandler(tripHandler);
+			eventsManager.addHandler(tripHandler);
 					
 			int iteration = config.controler().getLastIteration();
 			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
 			
 			log.info("Reading the event file...");
-			MatsimEventsReader reader = new MatsimEventsReader(events);
+			MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
 			reader.readFile(eventsFile);
 			log.info("Reading the event file... Done.");
 			
