@@ -21,13 +21,23 @@
  */
 package signalsystems.gershenson;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -114,7 +124,7 @@ public class GershensonIT {
 		Assert.assertEquals("avg cycle time of the system is wrong", 8.423929098966026, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
 	}
 	@Test
-	public void testSingleCrossingDifferentDemandAB() {
+	public void testSingleCrossingDifferentUniformDemandAB() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 2000, 600, 0, 0 };
 		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
@@ -195,8 +205,7 @@ public class GershensonIT {
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimesNullCase = signalAnalyzerNullCase.getTotalSignalGreenTime(); 
 		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleNullCase = signalAnalyzerNullCase.calculateAvgSignalGreenTimePerFlexibleCycle();
 		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemNullCase = signalAnalyzerNullCase.calculateAvgFlexibleCycleTimePerSignalSystem();
-		Map<Id<SignalGroup>, Double> greenTimeRatiosNullCase = signalAnalyzerNullCase.calculateSignalGreenTimeRatios();
-
+		
 		log.info("Data of TestCase");
 		log.info("total signal green times: " + totalSignalGreenTimesTestCase.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimesTestCase.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID2));
@@ -231,9 +240,41 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
 		
-		Assert.assertEquals("avg greentime cycle of group 2 should be more or less the same as in group1 ",0.0 , avgSignalGreenTimePerCycle.get(SIGNALGROUPID2)-avgSignalGreenTimePerCycle.get(SIGNALGROUPID1),5);
-		//Assert.assertEquals("The green time ratio of Group1 should be ",0.2501851851851852 , greenTimeRatios.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg greentime cycle of group 2 should be more or less the same as in group1 ",0.0 , totalSignalGreenTimes.get(SIGNALGROUPID2)-totalSignalGreenTimes.get(SIGNALGROUPID1),5);
 	}
+
+	
+		
+	@Test
+	public void testsingleCrossingStochasticDemandAB() {
+		String scenarioType = "singleCrossingStochasticDemandAB";
+		double[] noPersons = { 2800., 2800., 0., 0. };
+		TtSignalAnalysisTool signalAnalyzerPlan = runScenario(noPersons,scenarioType);
+		scenarioType = "singleCrossingNoBottlenecks";
+		TtSignalAnalysisTool signalAnalyzerNull = runScenario(noPersons,scenarioType);
+		
+		
+		// check signal results Plan
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimesPlan = signalAnalyzerPlan.getTotalSignalGreenTime(); 
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCyclePlan = signalAnalyzerPlan.calculateAvgSignalGreenTimePerFlexibleCycle();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemPlan = signalAnalyzerPlan.calculateAvgFlexibleCycleTimePerSignalSystem();
+		
+		// check signal results Null
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimesNull = signalAnalyzerNull.getTotalSignalGreenTime(); 
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycleNull = signalAnalyzerNull.calculateAvgSignalGreenTimePerFlexibleCycle();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemNull = signalAnalyzerNull.calculateAvgFlexibleCycleTimePerSignalSystem();
+		
+		
+
+		log.info("total signal green times: Plan " + totalSignalGreenTimesPlan.get(SIGNALGROUPID1) + ", Null " + totalSignalGreenTimesNull.get(SIGNALGROUPID1));
+		log.info("total signal green times: Plan " + totalSignalGreenTimesPlan.get(SIGNALGROUPID2) + ", Null " + totalSignalGreenTimesNull.get(SIGNALGROUPID2));
+		
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemPlan.get(SIGNALSYSTEMID));
+		
+		Assert.assertEquals("The total green times in the stochastic case should be more or less equal (+/- 5 %)",1.0 , totalSignalGreenTimesPlan.get(SIGNALGROUPID2)/totalSignalGreenTimesPlan.get(SIGNALGROUPID1),0.05);
+		Assert.assertTrue("The total green time of Group 1 in the stochastic should higher then in the Non-Stochastic", totalSignalGreenTimesPlan.get(SIGNALGROUPID1)>totalSignalGreenTimesNull.get(SIGNALGROUPID1));
+	}
+	
 
 	
 	
@@ -268,19 +309,29 @@ public class GershensonIT {
 	}
 
 	private void createScenarioElements(Scenario scenario, double[] noPersons, String scenarioType) {
+		boolean[] stochasticDemand = new boolean[noPersons.length];
+		for(int i = 0; i < stochasticDemand.length; i++) stochasticDemand[i] = false;
+		
 		if (scenarioType.equals("singleCrossingNoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 0);
-			createPopulationScenario(scenario.getPopulation(), noPersons);
+			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
 			createSignalsSingleCrossing(scenario, true);
 		}
 		if (scenarioType.equals("singleCrossingOneBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 1);
-			createPopulationScenario(scenario.getPopulation(), noPersons);
+			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
 			createSignalsSingleCrossing(scenario, true);
 		}
 		if (scenarioType.equals("singleCrossingTwoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 2);
-			createPopulationScenario(scenario.getPopulation(), noPersons);
+			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
+			createSignalsSingleCrossing(scenario, false);
+		}
+		if (scenarioType.equals("singleCrossingStochasticDemandAB")) {
+			stochasticDemand[0]=true;
+			stochasticDemand[1]=true;
+			createNetworkSingleCrossing(scenario.getNetwork(), 0);
+			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
 			createSignalsSingleCrossing(scenario, false);
 		}
 
@@ -351,7 +402,7 @@ public class GershensonIT {
 
 		
 
-	private static void createPopulationScenario(Population population, double[] noPersons) {
+	private static void createPopulationScenario(Population population, double[] noPersons, boolean[] stochasticDemand) {
 		String[] odRelations = { "1_2-4_5", "6_7-8_9", "4_5-1_2", "8_9-6_7"};
 		int odIndex = 0;
 
@@ -360,30 +411,78 @@ public class GershensonIT {
 			String toLinkId = od.split("-")[1];
 			
 			double demand = noPersons[odIndex];
-			
-			for (int i = 0; i < noPersons[odIndex]; i++) {
-				// create a person
-				Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i));
-				population.addPerson(person);
 
-				// create a plan for the person that contains all this information
-				Plan plan = population.getFactory().createPlan();
-				person.addPlan(plan);
-
-				// create a start activity at the from link
-				Activity startAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(fromLinkId));
-				// distribute agents uniformly during one hour.
-				startAct.setEndTime(i*(3600/demand));
-				plan.addActivity(startAct);
-
-				// create a dummy leg
-				plan.addLeg(population.getFactory().createLeg(TransportMode.car));
-
-				// create a drain activity at the to link
-				Activity drainAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(toLinkId));
-				plan.addActivity(drainAct);
+			if (!stochasticDemand[odIndex]) {
+				for (int i = 0; i < noPersons[odIndex]; i++) {
+					// create a person
+					Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i));
+					population.addPerson(person);
+	
+					// create a plan for the person that contains all this information
+					Plan plan = population.getFactory().createPlan();
+					person.addPlan(plan);
+	
+					// create a start activity at the from link
+					Activity startAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(fromLinkId));
+					// distribute agents uniformly during one hour.
+					startAct.setEndTime(i*(3600/demand));
+					plan.addActivity(startAct);
+	
+					// create a dummy leg
+					plan.addLeg(population.getFactory().createLeg(TransportMode.car));
+	
+					// create a drain activity at the to link
+					Activity drainAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(toLinkId));
+					plan.addActivity(drainAct);
+				}
+				odIndex++;
+			} else {
+				Random rnd = new Random(odIndex);
+				Map<Integer, Integer> startAtTime = new HashMap<Integer, Integer>();
+				for (int i = 0; i < demand; i++) {
+					//if demand ==3600 this becomes 0.5
+                    double expT = 1 - Math.exp(-demand*Math.log(2.)/3600);
+                    double p1 = rnd.nextDouble();
+                    if (p1 < expT) {
+                        double p2 = rnd.nextDouble();
+                        int randomDemand = 0;   
+                        while(true) {
+                        	p2 = rnd.nextDouble();
+                        	double expN = Math.exp(-Math.log(1.1)*(randomDemand++));          
+                        	if(p2>expN) break;
+                        }
+                        startAtTime.put(i, randomDemand++);
+                    }   
+                }
+				
+				//Plans for stochastic demands
+				for (Integer i :startAtTime.keySet()) {
+					for(int j =0; j < (int)startAtTime.get(i); j++) {
+						// create a person
+						Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i.toString()+"-"+j));
+						population.addPerson(person);
+		
+						// create a plan for the person that contains all this information
+						Plan plan = population.getFactory().createPlan();
+						person.addPlan(plan);
+		
+						// create a start activity at the from link
+						Activity startAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(fromLinkId));
+						// distribute agents uniformly during one hour.
+						startAct.setEndTime(i);
+						plan.addActivity(startAct);
+		
+						// create a dummy leg
+						plan.addLeg(population.getFactory().createLeg(TransportMode.car));
+		
+						// create a drain activity at the to link
+						Activity drainAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(toLinkId));
+						plan.addActivity(drainAct);	
+					}	
+				}
+				odIndex++;
 			}
-			odIndex++;
+			
 		}
 	}
 
