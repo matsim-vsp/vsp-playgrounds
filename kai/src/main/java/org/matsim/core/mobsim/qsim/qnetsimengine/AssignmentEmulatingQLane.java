@@ -424,14 +424,24 @@ class AssignmentEmulatingQLane implements QLaneI {
 	@Override public final void addTransitSlightlyUpstreamOfStop( final QVehicle veh) {
 		this.vehQueue.addFirst(veh) ;
 	}
-
-	@Override public final void changeUnscaledFlowCapacityPerSecond( final double val ) {
-		// irrelevant so we ignore it
+	
+	@Override
+	public void changeUnscaledFlowCapacityPerSecond(double val) {
+		throw new RuntimeException("not implemented");
+	}
+	
+	@Override
+	public void changeEffectiveNumberOfLanes(double val) {
+		throw new RuntimeException("not implemented");
 	}
 
-	@Override public final void changeEffectiveNumberOfLanes( final double val ) {
-		// this variable will not do anything so we will ignore it.
-	}
+//	@Override public final void changeUnscaledFlowCapacityPerSecond( final double val ) {
+//		// irrelevant so we ignore it
+//	}
+//
+//	@Override public final void changeEffectiveNumberOfLanes( final double val ) {
+//		// this variable will not do anything so we will ignore it.
+//	}
 
 	@Override public Id<Lane> getId() {
 		// need this so we can generate lane events although we do not need them here. kai, sep'13
@@ -498,13 +508,19 @@ class AssignmentEmulatingQLane implements QLaneI {
 	public double getSimulatedFlowCapacityPerTimeStep() {
 		throw new RuntimeException("not implemented") ;
 	}
+	
+	@Override
+	public void recalcTimeVariantAttributes() {
+		throw new RuntimeException("not implemented");
+	}
+	
 	@Override
 	public double getStorageCapacity() {
 		return Double.POSITIVE_INFINITY ;
 	}
-	@Override public void changeSpeedMetersPerSecond( double val ) {
-		throw new RuntimeException("not implemented") ;
-	}
+//	@Override public void changeSpeedMetersPerSecond( double val ) {
+//		throw new RuntimeException("not implemented") ;
+//	}
 	@Override public double getLoadIndicator() {
 		throw new RuntimeException("not implemented") ;
 	}
