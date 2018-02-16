@@ -237,7 +237,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	
 	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
 	public Map<Id<VehicleType>,Double> getVehTypId2TourDistances(Id<VehicleType> vehTypeId) {
-		System.out.println("Distance für fzgTyp soll ermittelt werden " + vehTypeId.toString());
+		log.info("Calculate distances for vehicleTyp " + vehTypeId.toString());
 		Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new HashMap<Id<VehicleType>, Double>();
 		for(Id<Person> personId: personId2tripNumber2tripDistance.keySet()){
 			for(int i : personId2tripNumber2tripDistance.get(personId).keySet()){
@@ -246,10 +246,10 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 						double distance = personId2tripNumber2tripDistance.get(personId).get(i);
 						if (vehTypeId2TourDistances.containsKey(vehTypeId)){
 							vehTypeId2TourDistances.put(vehTypeId, vehTypeId2TourDistances.get(vehTypeId) + distance);
-							System.out.println("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
 						} else {
 							vehTypeId2TourDistances.put(vehTypeId, distance);
-							System.out.println("Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
 						}
 					}
 				}else{

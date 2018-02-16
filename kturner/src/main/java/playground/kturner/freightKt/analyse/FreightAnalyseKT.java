@@ -2,7 +2,6 @@ package playground.kturner.freightKt.analyse;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 
 import org.apache.log4j.Logger;
 import org.matsim.contrib.freight.carrier.Carrier;
@@ -27,11 +26,13 @@ public class FreightAnalyseKT {
 	 *  @author kturner
 	 */
 	
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Aldi_Base/Run_1/" ;
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Aldi_Base/Run_1/" ;
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/CordonTollOnHeavy/Run_1/" ; //City-Maut
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithoutUCC/Run_1/" ; //CO2-free City
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithUCC/Run_1/" 	//CO2-freie city mit UCC
 
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/Base/Run_1/" ;
+	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
 		
 	private static final Logger log = Logger.getLogger(FreightAnalyseKT.class);
