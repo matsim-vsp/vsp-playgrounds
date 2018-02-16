@@ -46,12 +46,20 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.lanes.data.Lane;
+import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
+import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import de.micromata.opengis.kml.v_2_2_0.Link;
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
@@ -60,6 +68,9 @@ import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreato
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
+import signals.laemmer.model.util.Conflicts;
+import signals.laemmer.model.util.ConflictsConverter;
+import signals.laemmer.model.util.PsObjectAttributes;
 import signals.sylvia.controler.DgSylviaConfig;
 import utils.ModifyNetwork;
 
@@ -71,12 +82,14 @@ public class RunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
 	
 	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE, LAEMMER_FULLY_ADAPTIVE};
-	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED;
+	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED_IDEAL;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
 	private static final boolean LONG_LANES = true;
 	private static final double FLOW_CAP = .7;
 	private static final int STUCK_TIME = 600;
+	private static final boolean VIS = true;
+	private static final boolean OVERWRITE_FILES = true;
 	
 	private static final boolean USE_MS_IDEAL_BASE_PLANS = false;
 	
@@ -90,6 +103,9 @@ public class RunCottbusFootball {
 			String scenarioDescription = "flowCap" + FLOW_CAP + "_longLanes" + LONG_LANES + "_stuckTime" + STUCK_TIME;
 			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/" + scenarioDescription + "/run1200/");
 			baseConfig.controler().setRunId("1200");
+		}
+		if (OVERWRITE_FILES) {
+			baseConfig.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		}
 		baseConfig.controler().setLastIteration(0);
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
@@ -114,7 +130,7 @@ public class RunCottbusFootball {
 			break;
 		case LAEMMER_FULLY_ADAPTIVE:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer_fully_adaptive.xml");
-			signalsConfigGroup.setSignalControlFile("signal_control_no_13.xml");
+			//signalsConfigGroup.setSignalControlFile("signal_control_no_13.xml");
 			break;
 		case NONE:
 			signalsConfigGroup.setUseSignalSystems(false);
@@ -142,13 +158,29 @@ public class RunCottbusFootball {
 		baseConfig.qsim().setEndTime(36*3600);
 		
 		Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
+		
 		if (LONG_LANES){
 			// extend short lanes (needed for laemmer)
 			ModifyNetwork.lengthenAllLanes(baseScenario);
 		}
 		
 		if (CONTROL_TYPE.equals(SignalControl.LAEMMER_FULLY_ADAPTIVE)) {
-			//TODO manipulate network
+			ObjectAttributes conflictsObjectAttributes = new PsObjectAttributes();
+			ObjectAttributesXmlReader conflictsReader = new ObjectAttributesXmlReader(conflictsObjectAttributes);
+			conflictsReader.putAttributeConverter(signals.laemmer.model.util.Conflicts.class, new ConflictsConverter());
+			conflictsReader.readFile(baseConfig.getContext().getPath().replaceAll("config.xml", "")+"conflicts.xml"); //TODO find correct path
+			for (Entry<String, Map<String, Object>> e : ((PsObjectAttributes)conflictsObjectAttributes).getAttriutesAsEntrySet()) {
+				Conflicts conflicts = ((Conflicts) e.getValue().get("conflicts"));
+				if(conflicts.getLaneId() == null) {
+					baseScenario.getNetwork().getLinks().get(conflicts.getLinkId()).getAttributes().putAttribute("conflicts", conflicts);
+				} else {
+					System.out.println("processing conflict for link "+conflicts.getLinkId()+" and lane "+conflicts.getLaneId());
+					baseScenario.getLanes().getLanesToLinkAssignments().get(
+							conflicts.getLinkId()).getLanes().get(
+									conflicts.getLaneId()).getAttributes().
+					putAttribute("conflicts", conflicts);
+				}
+			}
 		}
 		
 		// add missing scenario elements
@@ -177,6 +209,9 @@ public class RunCottbusFootball {
 			break;
 		case LAEMMER_DOUBLE:
 			baseOutputDirectory+= "laemmer_doubleGroups";
+			break;
+		case LAEMMER_FULLY_ADAPTIVE:
+			baseOutputDirectory+= "laemmer_fullyAdaptive";
 			break;
 		case NONE:
 			baseOutputDirectory+= "noSignals";
@@ -233,43 +268,56 @@ public class RunCottbusFootball {
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
 			}
-			//////
-			StringBuilder builder = new StringBuilder();
-			builder.append("SignalSystemId; SignalGroupId; SignalId; LinkId; LinkCapacity; LinkLaneCnt; LaneId; LaneCapacity; LaneCnt; toLinks; toLanes\n");
-			for (SignalSystemData signalSystemsData : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().values()) {
-				for (SignalGroupData sg : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemsData.getId()).values()) {
-					for (Id<Signal> signalId : sg.getSignalIds()) {
-						SignalData signal = ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().get(signalSystemsData.getId()).getSignalData().get(signalId);
-						org.matsim.api.core.v01.network.Link link = baseScenario.getNetwork().getLinks().get(signal.getLinkId());
-						if (signal.getLaneIds() != null) {
-							for (Id<Lane> laneId : signal.getLaneIds()) {
-								String toLinks = new String();
-								String toLanes = new String();
-								Lane lane = baseScenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId);
-								if (lane.getToLinkIds() != null) {
-									for (Id<org.matsim.api.core.v01.network.Link> toLinkId : lane.getToLinkIds())
-										toLinks = toLinks.concat(", "+toLinkId.toString());
-								}
-								if (lane.getToLaneIds() != null) {
-									for (Id<Lane> toLaneId : lane.getToLaneIds()) 
-										toLanes = toLanes.concat(", "+toLaneId.toString());
-								}
-								builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + lane.getId() + "; " + lane.getCapacityVehiclesPerHour() + "; "+ lane.getNumberOfRepresentedLanes()+"; "+toLinks+"; "+toLanes+"\n");
-							}
-						}
-						else {
-							builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + "null" + "; " + "null" + "; "+ "null" +"; "+ "null" +"; "+ "null" +"\n");
-						}
-					}
-				}
-			}
-			File tmp = File.createTempFile("signaledNodesdata", ".csv");
-			FileWriter writer = new FileWriter(tmp);
-			writer.append(builder.toString());
-			writer.close();
+			//////code for writing out link-lane-signal-combinations as csv//////
+//			StringBuilder builder = new StringBuilder();
+//			builder.append("SignalSystemId; SignalGroupId; SignalId; LinkId; LinkCapacity; LinkLaneCnt; LaneId; LaneCapacity; LaneCnt; toLinks; toLanes\n");
+//			for (SignalSystemData signalSystemsData : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().values()) {
+//				for (SignalGroupData sg : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemsData.getId()).values()) {
+//					for (Id<Signal> signalId : sg.getSignalIds()) {
+//						SignalData signal = ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().get(signalSystemsData.getId()).getSignalData().get(signalId);
+//						org.matsim.api.core.v01.network.Link link = baseScenario.getNetwork().getLinks().get(signal.getLinkId());
+//						if (signal.getLaneIds() != null) {
+//							for (Id<Lane> laneId : signal.getLaneIds()) {
+//								String toLinks = new String();
+//								String toLanes = new String();
+//								Lane lane = baseScenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId);
+//								if (lane.getToLinkIds() != null) {
+//									for (Id<org.matsim.api.core.v01.network.Link> toLinkId : lane.getToLinkIds())
+//										toLinks = toLinks.concat(", "+toLinkId.toString());
+//								}
+//								if (lane.getToLaneIds() != null) {
+//									for (Id<Lane> toLaneId : lane.getToLaneIds()) 
+//										toLanes = toLanes.concat(", "+toLaneId.toString());
+//								}
+//								builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + lane.getId() + "; " + lane.getCapacityVehiclesPerHour() + "; "+ lane.getNumberOfRepresentedLanes()+"; "+toLinks+"; "+toLanes+"\n");
+//							}
+//						}
+//						else {
+//							builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + "null" + "; " + "null" + "; "+ "null" +"; "+ "null" +"; "+ "null" +"\n");
+//						}
+//					}
+//				}
+//			}
+//			File tmp = File.createTempFile("signaledNodesdata", ".csv");
+//			FileWriter writer = new FileWriter(tmp);
+//			writer.append(builder.toString());
+//			writer.close();
 			//////
 			
+	        if (VIS) {
+	            baseScenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+	            baseScenario.getConfig().qsim().setNodeOffset(5.);
+	            OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(baseScenario.getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
+	            otfvisConfig.setScaleQuadTreeRect(true);
+//	            otfvisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
+//	            otfvisConfig.setAgentSize(240);
+	            controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+	        }
+			
+			
 			controler.run();
+			
+			
 			if (cbfbControllerListener.getAverageTraveltime() != null){
 				percentageOfFans2AverageTTMap.put(numberOfFootballFans, cbfbControllerListener.getAverageTraveltime());
 				percentageOfFans2TotalTTMap.put(numberOfFootballFans, cbfbControllerListener.getTotalTraveltime());
