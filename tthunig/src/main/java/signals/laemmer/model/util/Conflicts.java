@@ -11,24 +11,24 @@ import org.matsim.lanes.data.Lane;
 
 public class Conflicts {
 	static org.apache.log4j.Logger log = org.apache.log4j.LogManager.getLogger(Conflicts.class);
-	private Id<Link> link;
-	private Id<Lane> lane = null;
+	private Id<Link> linkId;
+	private Id<Lane> laneId = null;
 	private TreeMap<Id<Link>, List<Id<Lane>>> conflicts = new TreeMap<>();
 	private TreeMap<Id<Link>, List<Id<Lane>>> allowedConflictsNonPriority = new TreeMap<>();
 	private TreeMap<Id<Link>, List<Id<Lane>>> allowedConflictsPriority = new TreeMap<>();
 	
 	public Conflicts(Id<Link> link) {
-		this.link = link;
+		this.linkId = link;
 	}
 	
 	public Conflicts(Id<Link> link, Id<Lane> lane) {
 		this(link);
-		this.lane = lane;
+		this.laneId = lane;
 	}
 	
 	private void add(Id<Link> conflictingLink, TreeMap<Id<Link>, List<Id<Lane>>> map){
 		if (map.containsKey(conflictingLink))
-			log.warn("Replacing prior created, possibly lane-wise, conflicts from "+this.link+(this.lane == null? "" : ", "+ this.lane)+" to "+conflictingLink+". Now all lanes of "+conflictingLink+" conflicts to "+this.link+".");
+			log.warn("Replacing prior created, possibly lane-wise, conflicts from "+this.linkId+(this.laneId == null? "" : ", "+ this.laneId)+" to "+conflictingLink+". Now all lanes of "+conflictingLink+" conflicts to "+this.linkId+".");
 		map.put(conflictingLink, null);
 	}
 	
@@ -108,5 +108,49 @@ public class Conflicts {
 	public boolean hasAllowedConflictWithPriorityAgainst(Id<Link> conflictingLink, Id<Lane> conflictingLane) {
 		return genericCheckConflict(conflictingLink, conflictingLane, allowedConflictsPriority);
 	}
+
+	/**
+	 * @return the conflicts, used for serialisation
+	 */
+	TreeMap<Id<Link>, List<Id<Lane>>> getConflicts() {
+		return conflicts;
+	}
+
+	/**
+	 * @return the allowedConflictsNonPriority, used for serialisation
+	 */
+	TreeMap<Id<Link>, List<Id<Lane>>> getAllowedConflictsNonPriority() {
+		return allowedConflictsNonPriority;
+	}
+
+	/**
+	 * @return the allowedConflictsPriority, used for serialisation
+	 */
+	TreeMap<Id<Link>, List<Id<Lane>>> getAllowedConflictsPriority() {
+		return allowedConflictsPriority;
+	}
+
+	/**
+	 * Method for serialization. For easier handling the data type is same as for the conflicts.
+	 * @return TreeMap with ids for which this conflicts are defined. linkId as key and, if present, a LinkedList as with only the laneId as value. 
+	 */
+	public TreeMap<Id<Link>, List<Id<Lane>>> getIdsForSerialisation() {
+		TreeMap<Id<Link>, List<Id<Lane>>> ids = new TreeMap<>();
+		if(this.laneId == null) {
+			ids.put(this.linkId, null);
+		} else {
+			ids.put(this.linkId, new LinkedList<Id<Lane>>(Arrays.asList(this.laneId)));
+		}
+		return ids;
+	}
+
+	public Id<Link> getLinkId() {
+		return linkId;
+	}
+
+	public Id<Lane> getLaneId() {
+		return laneId;
+	}
+	
 	
 }
