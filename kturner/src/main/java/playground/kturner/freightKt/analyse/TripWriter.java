@@ -37,8 +37,6 @@ import org.matsim.contrib.freight.carrier.CarrierVehicleType;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.vehicles.VehicleType;
 
-import playground.kturner.freightKt.analyse.TripEventHandler.VehicleTypeSpezificCapabilities;
-
 /**
  * @author ikaddoura , lkroeger
  *
@@ -180,6 +178,7 @@ public class TripWriter {
 	 * des Carriers für jeden FahrzeugTyp einzeln auf und bildet auch Gesamtsumme.
 	 * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
 	 */
+	//TODO: Ergebnisse können nicht stimmen: Entfernung in m und km haben gleichen Wert. // für _frozen Carrier ist Faktor 10. eigentlich müsste aber Faktor 1000 sein ... KMT feb/18
 	public void writeResultsPerVehicleTypes() {
 		
 		String fileName = this.outputFolder + "total_infos_per_vehicleType.csv";

@@ -26,49 +26,6 @@ import org.matsim.vehicles.VehicleType;
 class TripEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
 PersonDepartureEventHandler, PersonArrivalEventHandler {
 
-	public class VehicleTypeSpezificCapabilities{
-		private double fixCosts;
-		private double costsPerMeter;
-		private double costsPerSecond;
-		private double fuelConsumtion;
-		private double emissionsPerMeter; //TODO: Wird nicht mit eingelesen in CarrierVehicleTypeReader -> Eigenen Reader und eigene Klassen bauen; Zur Not erstmal per Hand setzen...
-		private int capacity;
-		
-		VehicleTypeSpezificCapabilities(double fixCosts, double costsPerMeter,
-				double costsPerSecond, double fuelConsumtion, double emissionsPerMeter, int capacity) {
-			this.fixCosts = fixCosts;
-			this.costsPerMeter = costsPerMeter;
-			this.costsPerSecond = costsPerSecond;
-			this.fuelConsumtion = fuelConsumtion;
-			this.emissionsPerMeter = emissionsPerMeter;
-			this.capacity = capacity;
-		}
-
-		double getFixCosts() {
-			return fixCosts;
-		}
-
-		double getCostsPerMeter() {
-			return costsPerMeter;
-		}
-
-		double getCostsPerSecond() {
-			return costsPerSecond;
-		}
-
-		double getCapacity() {
-			return capacity;
-		}	
-		
-		double getFuelConsumtion() {
-			return fuelConsumtion;
-		}	
-		
-		double getEmissionsPerMeter() {
-			return emissionsPerMeter;
-		}	
-	}
-
 	private final static Logger log = Logger.getLogger(TripEventHandler.class);
 
 	private Scenario scenario;
@@ -106,7 +63,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	private void readVehicleTypeCapabilities() {
 		for (CarrierVehicleType vehType : vehicleTypes.getVehicleTypes().values()){
 		//Emissionswerte nicht über Eigenschaften einlesbar :(	
-			double emissionsPerMeter = -99999.0;
+			double emissionsPerMeter = -99999.0;			//TODO: log.warn wenn vehType nochjt definiert ist... kmt feb/18
 			switch (vehType.getId().toString()) {
 			case "heavy40t" : emissionsPerMeter = 0.917;
 				break;
