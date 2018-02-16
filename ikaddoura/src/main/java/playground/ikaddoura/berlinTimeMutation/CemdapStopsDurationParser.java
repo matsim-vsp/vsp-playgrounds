@@ -88,37 +88,45 @@ public class CemdapStopsDurationParser {
 			
 			for (Id<Person> personId : population.getPersons().keySet()) {
 				
-				if (personId2actNr2cemdapDuration.get(personId) == null) {
-					
+				if (personId2actNr2cemdapDuration.get(personId) == null) {				
+					LOG.warn("Person Id " + personId + " not found in the cemdap stops file.");
+
 					PopulationWriter popWriter = new PopulationWriter(population);
 					popWriter.write(outputplansfile);
 					
-					throw new RuntimeException("Person Id " + personId + " not found in the cemdap stops file.");
+					throw new RuntimeException("Aborting... Plansfile doesn't contain all agents and shouldn't be used.");
 				}
-				
+
+				int personActivityCounter = 0;
+
 				for (PlanElement pE : population.getPersons().get(personId).getSelectedPlan().getPlanElements()) {
-					int personActivityCounter = 0;
 					if (pE instanceof Activity) {
 						Activity act = (Activity) pE;
-						
-						if (personId2actNr2cemdapDuration.get(personId).get(personActivityCounter) == null) {
+
+						if (personActivityCounter < personId2actNr2cemdapDuration.get(personId).size()) {							
+							double duration = personId2actNr2cemdapDuration.get(personId).get(personActivityCounter);
+							act.getAttributes().putAttribute("cemdap-duration", duration);
 							
+							// use duration instead of activity end time if cemdap-duration <= 30 min
+							if (duration <= 30. * 60.) {
+								act.setEndTime(Double.MIN_VALUE);
+								act.setMaximumDuration(duration);
+							}
+													
+						} else if (personActivityCounter == personId2actNr2cemdapDuration.get(personId).size()) {
+							// skip last activity, probably overnight home activity
+						} else {						
+							
+							LOG.warn("Activity number " + personActivityCounter + " of person Id " + personId + " not found in the cemdap stops file.");
+
 							PopulationWriter popWriter = new PopulationWriter(population);
 							popWriter.write(outputplansfile);
 							
-							throw new RuntimeException("Activity number " + personActivityCounter + " of person Id " + personId + " not found in the cemdap stops file.");
+							throw new RuntimeException("Aborting... Plansfile doesn't contain all agents and shouldn't be used.");
 						}
-						
-						double duration = personId2actNr2cemdapDuration.get(personId).get(personActivityCounter);
-						act.getAttributes().putAttribute("cemdap-duration", duration);
-						
-						// use duration instead of activity end time if cemdap-duration <= 30 min
-						if (duration <= 30. * 60.) {
-							act.setEndTime(Double.MIN_VALUE);
-							act.setMaximumDuration(duration);
-						}
-					
+
 						personActivityCounter++;
+
 					}
 				}
 			}
