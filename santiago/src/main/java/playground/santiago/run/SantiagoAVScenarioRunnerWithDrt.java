@@ -130,7 +130,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 
 		Controler controler = new Controler(scenario);
 
-		addTaxis(controler, DrtConfigGroup.get(config));
+		addTaxis(controler);
 
 		// adding other network modes than car requires some router; here, the same values as for car are used
 		setNetworkModeRouting(controler);
@@ -196,8 +196,8 @@ public class SantiagoAVScenarioRunnerWithDrt {
 
 	}
 
-	private static void addTaxis(Controler controler, DrtConfigGroup drtCfg) {
-		controler.addOverridingModule(new DvrpModule(DrtControlerCreator.createModuleForQSimPlugin(drtCfg),
+	private static void addTaxis(Controler controler) {
+		controler.addOverridingModule(new DvrpModule(DrtControlerCreator.createModuleCreatorForQSimPlugin(),
 				DrtOptimizer.class, DefaultUnplannedRequestInserter.class));
 		controler.addOverridingModule(new DrtModule());
 		controler.addOverridingModule(new DrtAnalysisModule());
