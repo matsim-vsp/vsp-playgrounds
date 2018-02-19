@@ -42,9 +42,6 @@ public class SignalPhase {
 	}
 	
 	public void addGreenSignalGroup(SignalGroup signalGroup) {
-		if (signalGroup.getId().equals(Id.create(2612, SignalGroup.class))) {
-			System.out.println("here");
-		}
 		signalGroups.add(signalGroup);
 		for (Signal signal : signalGroup.getSignals().values()) {
 			if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {

@@ -6,6 +6,11 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.lanes.data.Lane;
 
+import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
+import signals.laemmer.model.stabilizationStrategies.CombineSimilarRegulationTime;
+import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
+import signals.laemmer.model.stabilizationStrategies.MaxLaneCountStrategy;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +20,7 @@ import java.util.Map;
 public class LaemmerConfig {
 	
     //Probably consider to try also a combination of simmilar outflow rates
-    public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME, HEURISTIC}; 
+    public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME, HEURISTIC, CUSTOM}; 
     private StabilizationStrategy activeStabilizationStrategy = StabilizationStrategy.HEURISTIC;
     
     public enum Regime {COMBINED, OPTIMIZING, STABILIZING};
@@ -43,6 +48,8 @@ public class LaemmerConfig {
 	private boolean checkDownstream = false;
 
 	private boolean isRemoveSubPhases = true;
+
+	private String customStabilizationStrategy = null;
 
     //    @Nullable
     public Double getLaneArrivalRate(Id<Link> linkId, Id<Lane> laneId) {
@@ -167,4 +174,30 @@ public class LaemmerConfig {
 	public boolean isRemoveSubPhases() {
 		return isRemoveSubPhases ;
 	}
+
+	public String getStabilizationStrategy() {
+		switch (activeStabilizationStrategy) {
+		case HEURISTIC:
+			return HeuristicStrategy.class.getName();
+		case USE_MAX_LANECOUNT:
+			return MaxLaneCountStrategy.class.getName();
+		case COMBINE_SIMILAR_REGULATIONTIME:
+			return CombineSimilarRegulationTime.class.getName();
+		case PRIORIZE_HIGHER_POSITIONS:
+			return null;
+		case CUSTOM:
+			if(this.customStabilizationStrategy == null) {
+				throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");
+			} else {
+				return customStabilizationStrategy;
+			}
+		}
+		return null;
+	}
+	
+	public void setCustomStabilzationStrategy(Class<? extends AbstractStabilizationStrategy> customStrategy) {
+		this.activeStabilizationStrategy = StabilizationStrategy.CUSTOM;
+		this.customStabilizationStrategy = customStrategy.getName();
+	}
+	
 }
