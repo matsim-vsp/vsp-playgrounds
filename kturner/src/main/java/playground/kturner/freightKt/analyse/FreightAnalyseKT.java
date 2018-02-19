@@ -12,6 +12,7 @@ import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.MutableScenario;
@@ -26,21 +27,24 @@ public class FreightAnalyseKT {
 	 *  @author kturner
 	 */
 	
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Aldi_Base/Run_1/" ;
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Aldi_Base/Run_1/" ;
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/CordonTollOnHeavy/Run_1/" ; //City-Maut
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithoutUCC/Run_1/" ; //CO2-free City
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithUCC/Run_1/" 	//CO2-freie city mit UCC
 
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/Base/Run_1/" ;
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/Base/Run_1/" ;
 	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
 		
 	private static final Logger log = Logger.getLogger(FreightAnalyseKT.class);
 	
 	public static void main(String[] args) throws UncheckedIOException, IOException {
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR);
 		
 		FreightAnalyseKT analysis = new FreightAnalyseKT();
 		analysis.run();
+		log.info("### Finished ###");
+		OutputDirectoryLogging.closeOutputDirLogging();
 	}
 	
 		private void run() throws UncheckedIOException, IOException {
@@ -85,7 +89,8 @@ public class FreightAnalyseKT {
 			
 			tripWriter.writeResultsPerVehicleTypes();
 			
-			System.out.println("### ENDE ####");
+			
+			log.info("### Analysis DONE");
 			
 	}
 
