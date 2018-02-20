@@ -40,8 +40,8 @@ public class CorineLandCoverData {
 
     public static final Logger LOGGER = Logger.getLogger(CorineLandCoverData.class);
 
-    private final Map<String, Geometry> activityType2CombinedLandcoverZone = new HashMap<>();
-    Map<String, List<Geometry>> activityTypes2ListOfLandCoverZones = new HashMap<>();
+    private final Map<LandCoverUtils.LandCoverActivityType, Geometry> activityType2CombinedLandcoverZone = new HashMap<>();
+    Map<LandCoverUtils.LandCoverActivityType, List<Geometry>> activityTypes2ListOfLandCoverZones = new HashMap<>();
 
 
     private int warnCnt = 0;
@@ -61,9 +61,9 @@ public class CorineLandCoverData {
 
         for (SimpleFeature landCoverZone : landCoverFeatures) {
             int landCoverId = Integer.valueOf( (String) landCoverZone.getAttribute(LandCoverUtils.CORINE_LANDCOVER_TAG_ID));
-            List<String> acts = landCoverUtils.getActivityTypesFromZone(landCoverId);
+            List<LandCoverUtils.LandCoverActivityType> acts = landCoverUtils.getActivityTypesFromZone(landCoverId);
 
-            for (String activityTypeFromLandCover : acts ) {
+            for (LandCoverUtils.LandCoverActivityType activityTypeFromLandCover : acts ) {
                 List<Geometry> geoms = activityTypes2ListOfLandCoverZones.get(activityTypeFromLandCover);
                 if (geoms==null) {
                     geoms = new ArrayList<>();
@@ -82,7 +82,7 @@ public class CorineLandCoverData {
             LOGGER.warn("Combining geoms is most expensive operation. See http://docs.geotools.org/latest/userguide/library/jts/combine.html");
             // combine geoms of the same activity types
             // Not sure, Out of two options --simplify and merge OR merge and simplify-- I think, the former would be somewhat better. Amit Oct'17
-            for (String activityTypeFromLandCover : activityTypes2ListOfLandCoverZones.keySet()) {
+            for (LandCoverUtils.LandCoverActivityType activityTypeFromLandCover : activityTypes2ListOfLandCoverZones.keySet()) {
                 LOGGER.info("Merging the geometries of the activity types "+activityTypeFromLandCover+".");
                 Geometry combinedGeom = GeometryUtils.combine(activityTypes2ListOfLandCoverZones.get(activityTypeFromLandCover));
                 activityType2CombinedLandcoverZone.put(activityTypeFromLandCover, combinedGeom);
@@ -107,7 +107,7 @@ public class CorineLandCoverData {
      * @param activityType classified as 'home' and 'other' activity types.
      * @return a random point such that it is inside the @param feature as well as inside the zones corresponding to the given activity type.
      */
-    public Point getRandomPoint (final SimpleFeature feature, final String activityType) {
+    public Point getRandomPoint (final SimpleFeature feature, final LandCoverUtils.LandCoverActivityType activityType) {
         return getRandomPoint((Geometry)feature.getDefaultGeometry(), activityType);
     }
 
@@ -116,7 +116,7 @@ public class CorineLandCoverData {
      * @param activityType classified as 'home' and 'other' activity types.
      * @return a random point such that it is inside the @param feature as well as inside the zones corresponding to the given activity type.
      */
-    public Point getRandomPoint (final Geometry geometry, final String activityType) {
+    public Point getRandomPoint (final Geometry geometry, final LandCoverUtils.LandCoverActivityType activityType) {
         Geometry zoneGeom;
         if ( this.simplifyGeometries ) {
             zoneGeom = GeometryUtils.getSimplifiedGeom( geometry) ;
@@ -126,18 +126,18 @@ public class CorineLandCoverData {
 
         Geometry landUseGeom ;
         Collection<Geometry> landUseGeoms ;
-        if (activityType.equalsIgnoreCase("home") ) {
+        if (activityType.equals(LandCoverUtils.LandCoverActivityType.home) ) {
             landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
             landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
         } else {
-            if (! activityType.equalsIgnoreCase("other") && warnCnt < 1) {
+            if (! activityType.equals(LandCoverUtils.LandCoverActivityType.other) && warnCnt < 1) {
                 LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
                 LOGGER.warn(Gbl.ONLYONCE);
                 warnCnt++;
             }
 
-            landUseGeom =  this.activityType2CombinedLandcoverZone.get("other") ;
-            landUseGeoms = this.activityTypes2ListOfLandCoverZones.get("other");
+            landUseGeom =  this.activityType2CombinedLandcoverZone.get(LandCoverUtils.LandCoverActivityType.other) ;
+            landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(LandCoverUtils.LandCoverActivityType.other);
         }
 
         if (this.combiningGeom) return GeometryUtils.getPointInteriorToGeometry( landUseGeom, zoneGeom );
@@ -149,7 +149,7 @@ public class CorineLandCoverData {
      * @param activityType classified as 'home' and 'other' activity types.
      * @return
      */
-    public Coord getRandomCoord (final SimpleFeature feature, final String activityType) {
+    public Coord getRandomCoord (final SimpleFeature feature, final LandCoverUtils.LandCoverActivityType activityType) {
         Point p = getRandomPoint(feature, activityType);
         return new Coord(p.getX(), p.getY());
     }
@@ -159,7 +159,7 @@ public class CorineLandCoverData {
      * @param activityType classified as 'home' and 'other' activity types.
      * @return
      */
-    public Coord getRandomCoord (final Geometry geometry, final String activityType) {
+    public Coord getRandomCoord (final Geometry geometry, final LandCoverUtils.LandCoverActivityType activityType) {
         Point p = getRandomPoint(geometry, activityType);
         return new Coord(p.getX(), p.getY());
     }
@@ -170,7 +170,7 @@ public class CorineLandCoverData {
      * @param point
      * @return if point falls inside the geom of given activity type
      */
-    public boolean isPointInsideLandCover(String activityType, Point point){
+    public boolean isPointInsideLandCover(LandCoverUtils.LandCoverActivityType activityType, Point point){
         if (combiningGeom) {
             Geometry geometry = this.activityType2CombinedLandcoverZone.get(activityType);
             return geometry.contains(point);

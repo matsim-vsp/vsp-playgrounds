@@ -31,16 +31,18 @@ import java.util.Map;
 
 public class LandCoverUtils {
 
+    public enum LandCoverActivityType {home, other}
+
     public static final String CORINE_LANDCOVER_TAG_ID = "CODE_12";
 
-    private final Map<String, List<Integer>> activityType2LandCoverId = new HashMap<>();
+    private final Map<LandCoverActivityType, List<Integer>> activityType2LandCoverId = new HashMap<>();
 
     LandCoverUtils() {
         {
             List<Integer> landCoverIds = new ArrayList<>();
             landCoverIds.add(111); // continuous urban fabric
             landCoverIds.add(112); // Discontinuous urban fabric
-            activityType2LandCoverId.put("home",landCoverIds);
+            activityType2LandCoverId.put(LandCoverActivityType.home,landCoverIds);
         }
         {
             List<Integer> landCoverIds = new ArrayList<>();
@@ -51,13 +53,13 @@ public class LandCoverUtils {
             landCoverIds.add(124); //Airports
             landCoverIds.add(133); //Construction sites
             landCoverIds.add(142); //Sport and leisure facilities
-            activityType2LandCoverId.put("other", landCoverIds);
+            activityType2LandCoverId.put(LandCoverActivityType.other, landCoverIds);
         }
     }
 
-    public List<String> getActivityTypesFromZone(final int landCoverId){
-        List<String> output = new ArrayList<>();
-        for(String activityTypeFromLandCover : activityType2LandCoverId.keySet() ) {
+    public List<LandCoverActivityType> getActivityTypesFromZone(final int landCoverId){
+        List<LandCoverActivityType> output = new ArrayList<>();
+        for(LandCoverActivityType activityTypeFromLandCover : activityType2LandCoverId.keySet() ) {
             if (activityType2LandCoverId.get(activityTypeFromLandCover).contains(landCoverId)) {
                 output.add(activityTypeFromLandCover);
             }
