@@ -125,7 +125,7 @@ public class RandomNumberUtils {
 	public static String getRandomStringFromDiscreteDistribution(final SortedMap<String, Double> discreteDistribution) {
 		//Checks
 		double sum = MapUtils.doubleValueSum(discreteDistribution);
-		SortedMap<String, Double> probs = new TreeMap<>();
+		SortedMap<String, Double> probs = new TreeMap<>(); //TODO probably the sorted map should be from value to String so that they are ordered.
 		if (sum <= 0. ) throw new IllegalArgumentException("Sum of the values for given distribution is "+sum+". Aborting ...");
 		else if (sum != 1 ) {
 			LOG.warn("Sum of the values for given distribution is not equal to one. Converting them ...");
