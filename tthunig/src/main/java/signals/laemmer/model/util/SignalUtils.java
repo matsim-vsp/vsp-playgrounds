@@ -1,5 +1,8 @@
 package signals.laemmer.model.util;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,12 +11,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.core.controler.Controler;
 import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 
@@ -261,5 +273,97 @@ public class SignalUtils {
 		}
 		signalPhases.removeAll(phasesToRemove);
 		return signalPhases;
+	}
+	
+	public static void writeSignaltoLanesAndLinksCombinationsToTempFile(Scenario scenario, Controler controler) throws IOException {
+		StringBuilder builder = new StringBuilder();
+		builder.append("SignalSystemId; SignalGroupId; SignalId; LinkId; LinkCapacity; LinkLaneCnt; LaneId; LaneCapacity; LaneCnt; toLinks; toLanes\n");
+		for (SignalSystemData signalSystemsData : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().values()) {
+			for (SignalGroupData sg : ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemsData.getId()).values()) {
+				for (Id<Signal> signalId : sg.getSignalIds()) {
+					SignalData signal = ((SignalsData)controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().get(signalSystemsData.getId()).getSignalData().get(signalId);
+					org.matsim.api.core.v01.network.Link link = scenario.getNetwork().getLinks().get(signal.getLinkId());
+					if (signal.getLaneIds() != null) {
+						for (Id<Lane> laneId : signal.getLaneIds()) {
+							String toLinks = new String();
+							String toLanes = new String();
+							Lane lane = scenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId);
+							if (lane.getToLinkIds() != null) {
+								for (Id<org.matsim.api.core.v01.network.Link> toLinkId : lane.getToLinkIds())
+									toLinks = toLinks.concat(", "+toLinkId.toString());
+							}
+							if (lane.getToLaneIds() != null) {
+								for (Id<Lane> toLaneId : lane.getToLaneIds()) 
+									toLanes = toLanes.concat(", "+toLaneId.toString());
+							}
+							builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + lane.getId() + "; " + lane.getCapacityVehiclesPerHour() + "; "+ lane.getNumberOfRepresentedLanes()+"; "+toLinks+"; "+toLanes+"\n");
+						}
+					}
+					else {
+						builder.append(signalSystemsData.getId()+"; "+sg.getId()+"; "+ signal.getId() + "; " + link.getId() + "; " + link.getCapacity() + "; " + link.getNumberOfLanes() + "; " + "null" + "; " + "null" + "; "+ "null" +"; "+ "null" +"; "+ "null" +"\n");
+					}
+				}
+			}
+		}
+		File tmp = File.createTempFile("signaledNodesdata", ".csv");
+		FileWriter writer = new FileWriter(tmp);
+		writer.append(builder.toString());
+		writer.close();
+	}
+	
+	/**
+	 * Estimates the number of minimal needed phases in a signalSystem. Will not return accurate results if:
+	 *  - if two links, but not opposite links, have seperate signaled left-tunring-lanes
+	 *  - probably on crossings with more than for links
+	 *  - and probably other non-common crossing layouts.
+	 * @param signalSystem
+	 * @param network
+	 * @param lanes
+	 * @return minimal number of phases.
+	 */
+	public static int estimateNumberOfPhases(SignalSystem signalSystem, Network network, Lanes lanes) {
+		int numOfPhases = 2; //at least each signalized crossing will have two phases
+		TreeMap<Id<Link>, List<Id<Link>>> linksToConflictingLinks = new TreeMap<>(); //map with entry for each link and list with all links, for whom any kind of conflict (linkwise or lanewise) exist
+		for (Signal signal : signalSystem.getSignals().values()) {
+			List<Id<Link>> thisLinksConflicts;
+			if (!linksToConflictingLinks.containsKey(signal.getLinkId())) {
+				thisLinksConflicts = new LinkedList<>();
+				linksToConflictingLinks.put(signal.getLinkId(), thisLinksConflicts);
+			} else {
+				thisLinksConflicts = linksToConflictingLinks.get(signal.getLinkId());
+			}
+			//add all link-level conflicts
+			Conflicts linksConflicts = (Conflicts) network.getLinks().get(signal.getLinkId()).getAttributes().getAttribute("conflicts");
+			if (linksConflicts != null) {
+				for (Id<Link> conflictingLinkId : linksConflicts.getConflicts().keySet()) {
+					if(!thisLinksConflicts.contains(conflictingLinkId)) {
+						thisLinksConflicts.add(conflictingLinkId);
+					}
+				}
+			}
+			if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
+				//add all lane-level conflicts
+				for (Id<Lane> laneId : signal.getLaneIds()) {
+					Conflicts lanesConflicts = (Conflicts) lanes.getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId).getAttributes()
+							.getAttribute("conflicts");
+					if (lanesConflicts != null) {
+						for (Id<Link> conflictingLinkId : lanesConflicts.getConflicts().keySet()) {
+							if (!thisLinksConflicts.contains(conflictingLinkId)) {
+								thisLinksConflicts.add(conflictingLinkId);
+							}
+						}
+					}
+				} 
+			}
+		}
+		//for each two links, for whom more than two conflicts exist, we assume a second phase.
+		int additionalPhases = 0;
+		for (List<Id<Link>> conflictsList : linksToConflictingLinks.values()) {
+			if (conflictsList.size() > 2) {
+				additionalPhases++;
+			}
+		}
+		numOfPhases += (Math.ceil(additionalPhases/2.0));
+		return numOfPhases;
 	}
 }
