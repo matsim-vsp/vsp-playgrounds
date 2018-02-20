@@ -1,5 +1,6 @@
 package signals.laemmer.model;
 
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
@@ -25,6 +26,7 @@ public class LaemmerLane {
 	private double regulationTime;
 	private boolean needStabilization;
 	private SignalGroup signalGroup;
+	private double queueLength;
 
 	//TODO laemmerLane should also work without lanes, pschade, Jan'18
 	public LaemmerLane (Link link, Lane physicalLane, SignalGroup signalGroup, Signal signal, FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController) {
@@ -50,10 +52,17 @@ public class LaemmerLane {
 		this.determiningLoad = 0;
 		double arrivalRate = 0.0;
 		if (this.physicalLane != null) {
-			arrivalRate = this.fullyAdaptiveLaemmerSignalController.getAverageLaneArrivalRate(now, link.getId(),
-					physicalLane.getId());
+			arrivalRate = this.fullyAdaptiveLaemmerSignalController.getAverageLaneArrivalRate(now, link.getId(), physicalLane.getId());
+			this.queueLength = fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(now, link.getId(), physicalLane.getId());
+			//try to scale queue length on small links, pschade Feb'18
+			if (this.physicalLane.getStartsAtMeterFromLinkEnd() < 250)
+				queueLength *= 250/physicalLane.getStartsAtMeterFromLinkEnd();
 		} else {
 			arrivalRate = this.fullyAdaptiveLaemmerSignalController.getAverageArrivalRate(now, link.getId());
+			this.queueLength = fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLink(now, link.getId());
+			//try to scale queue length on small links, pschade Feb'18
+			if (this.link.getLength() < 250)
+				queueLength *= 250/link.getLength();
 		}
 		this.determiningLoad = arrivalRate / maximumOutflow;
 		this.determiningArrivalRate = arrivalRate;
@@ -75,7 +84,7 @@ public class LaemmerLane {
     	this.needStabilization = false;
 
         if (determiningArrivalRate == 0) {
-            return;
+        	return;
         }
 
         double n = 0;
@@ -94,7 +103,6 @@ public class LaemmerLane {
         	stabilizationPressure_a++;
         }
 
- 
         if (this.fullyAdaptiveLaemmerSignalController.needStabilization(this) || this.signalGroup.getState().equals(SignalGroupState.GREEN)) {
             return;
         }
@@ -113,11 +121,23 @@ public class LaemmerLane {
 				this.fullyAdaptiveLaemmerSignalController.addLaneForStabilization(this);
 				// signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" +
 				// tIdle);
-				this.regulationTime = Math.max(Math.rint(determiningLoad * this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime() + (maximumOutflow / this.fullyAdaptiveLaemmerSignalController.flowSum) * Math.max(this.fullyAdaptiveLaemmerSignalController.tIdle, 0)), this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMinGreenTime());
+				this.regulationTime = Math.max(Math.rint(determiningLoad * this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime()),
+						this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMinGreenTime());
+				//approach to extend stabilisation time when vehicles are waiting but no new vehicles are approaching
+				//this.regulationTime = Math.max(this.regulationTime, Math.rint(this.queueLength*(this.maximumOutflow/3600.0)));
 				this.needStabilization = true;
+				if (fullyAdaptiveLaemmerSignalController.getDebug())
+					System.out.println("Stabilising "+this.getLink().getId()+"-"+this.getLaneId()+" n="+n+" nCrit="+nCrit+" a="+stabilizationPressure_a);
 			}
         }
     }
+
+	private Id<Lane> getLaneId() {
+		if (this.physicalLane == null)
+			return null;
+		else
+			return this.physicalLane.getId();
+	}
 
 	public Lane getLane() {
 		return this.physicalLane;
@@ -171,6 +191,10 @@ public class LaemmerLane {
 		this.regulationTime -= passedRegulationTime;
 	}
 
+	public void extendRegulationTime(double extraTime) {
+		this.regulationTime += extraTime;
+	}
+
 	public Signal getSignal() {
 		return signal;
 	}
@@ -178,5 +202,6 @@ public class LaemmerLane {
 	public SignalGroup getSignalGroup() {
 		return signalGroup;
 	}
+
     
 }

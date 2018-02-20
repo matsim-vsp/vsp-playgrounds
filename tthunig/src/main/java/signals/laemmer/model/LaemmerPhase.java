@@ -10,7 +10,7 @@ import org.matsim.lanes.data.Lane;
  * 
  * @author pschade
  */
-class LaemmerPhase {
+public class LaemmerPhase {
 
     private final FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController;
 
@@ -29,8 +29,8 @@ class LaemmerPhase {
     double determiningLoad;
     double outflowSum;
 
-    LaemmerPhase(FullyAdaptiveLaemmerSignalController laemmerSignalController2, SignalPhase signalPhase) {
-        this.fullyAdaptiveLaemmerSignalController = laemmerSignalController2;
+    public LaemmerPhase(FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController, SignalPhase signalPhase) {
+        this.fullyAdaptiveLaemmerSignalController = fullyAdaptiveLaemmerSignalController;
 		this.phase = signalPhase;
 		this.intergreenTime_a = this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN;
     }
@@ -81,7 +81,8 @@ class LaemmerPhase {
     }
 
     void updateAbortationPenaltyAndPriorityIndex(double now) {
-        if (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
+        if (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING) ||
+        		this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)) {
         	updateAbortionPenalty(now);
         	calculatePriorityIndex(now);
         }        
@@ -248,4 +249,8 @@ class LaemmerPhase {
                 .append(this.regulationTime + ";")
                 .append(totalN + ";");
     }
+
+	public SignalPhase getPhase() {
+		return this.phase;
+	}
 }

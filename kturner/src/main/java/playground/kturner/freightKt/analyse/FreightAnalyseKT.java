@@ -1,5 +1,8 @@
 package playground.kturner.freightKt.analyse;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.apache.log4j.Logger;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
@@ -9,10 +12,12 @@ import org.matsim.contrib.freight.carrier.Carriers;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.UncheckedIOException;
 
 public class FreightAnalyseKT {
 
@@ -22,52 +27,57 @@ public class FreightAnalyseKT {
 	 *  @author kturner
 	 */
 	
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Base/Run_1" ;
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Aldi_Base/Run_1/" ;
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/CordonTollOnHeavy/Run_1/" ; //City-Maut
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithoutUCC/Run_1/" ; //CO2-free City
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithUCC/Run_1/" 	//CO2-freie city mit UCC
 
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/Base/Run_1/" ;
+	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
 		
 	private static final Logger log = Logger.getLogger(FreightAnalyseKT.class);
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UncheckedIOException, IOException {
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR);
 		
 		FreightAnalyseKT analysis = new FreightAnalyseKT();
 		analysis.run();
+		log.info("### Finished ###");
+		OutputDirectoryLogging.closeOutputDirLogging();
 	}
 	
-		private void run() {
+		private void run() throws UncheckedIOException, IOException {
 			
 			//TODO: Why is the configfile not used as .gz?
-			String configFile = RUN_DIR + "output_config.xml"; //Datei wurde um Parameter (Scenario) "useVehicles" erleichtert.
-//			String configFile = RUN_DIR + "output_config.xml.gz";
-			String populationFile = null;
-			String networkFile = RUN_DIR+ "output_network.xml.gz";
-			String carrierFile = RUN_DIR+ "output_carriers.xml.gz";
-			String vehicleTypefile = RUN_DIR+ "output_vehicleTypes.xml.gz";
+			File configFile = new File(RUN_DIR + "output_config.xml");
+//			File configFile = new File(RUN_DIR + "output_config.xml.gz");
+			File populationFile = new File(RUN_DIR + "output_plans.xml.gz");
+			File networkFile = new File(RUN_DIR+ "output_network.xml.gz");
+			File carrierFile = new File(RUN_DIR+ "output_carriers.xml.gz");
+			File vehicleTypefile = new File(RUN_DIR+ "output_vehicleTypes.xml.gz");
 			
-			Config config = ConfigUtils.loadConfig(configFile);		
-			config.plans().setInputFile(populationFile);
-			config.network().setInputFile(networkFile);
+			Config config = ConfigUtils.loadConfig(configFile.getAbsolutePath());		
+			config.plans().setInputFile(populationFile.getAbsolutePath());
+			config.network().setInputFile(networkFile.getAbsolutePath());
 			
 			MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
-			EventsManager events = EventsUtils.createEventsManager();
+			EventsManager eventsManager = EventsUtils.createEventsManager();
 			
 			CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
-			new CarrierVehicleTypeReader(vehicleTypes).readFile(vehicleTypefile) ;
+			new CarrierVehicleTypeReader(vehicleTypes).readFile(vehicleTypefile.getAbsolutePath()) ;
 			
 			Carriers carriers = new Carriers() ;
-			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile) ;
+			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile.getAbsolutePath()) ;
 
 			TripEventHandler tripHandler = new TripEventHandler(scenario, vehicleTypes);
-			events.addHandler(tripHandler);
+			eventsManager.addHandler(tripHandler);
 					
 			int iteration = config.controler().getLastIteration();
 			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
 			
 			log.info("Reading the event file...");
-			MatsimEventsReader reader = new MatsimEventsReader(events);
+			MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
 			reader.readFile(eventsFile);
 			log.info("Reading the event file... Done.");
 			
@@ -79,7 +89,8 @@ public class FreightAnalyseKT {
 			
 			tripWriter.writeResultsPerVehicleTypes();
 			
-			System.out.println("### ENDE ####");
+			
+			log.info("### Analysis DONE");
 			
 	}
 

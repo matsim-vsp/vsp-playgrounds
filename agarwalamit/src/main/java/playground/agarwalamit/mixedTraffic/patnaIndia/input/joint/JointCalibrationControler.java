@@ -62,9 +62,9 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter.PatnaUserGroup;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
-import playground.agarwalamit.multiModeCadyts.CountsInserter;
-import playground.agarwalamit.multiModeCadyts.ModalCadytsContext;
-import playground.agarwalamit.multiModeCadyts.ModalLink;
+import playground.agarwalamit.cadyts.multiModeCadyts.CountsInserter;
+import playground.agarwalamit.cadyts.multiModeCadyts.ModalCadytsContext;
+import playground.agarwalamit.cadyts.multiModeCadyts.ModalLink;
 
 /**
  * @author amit
