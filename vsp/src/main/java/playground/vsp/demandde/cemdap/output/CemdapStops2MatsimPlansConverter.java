@@ -50,15 +50,16 @@ import playground.vsp.demandde.corineLandcover.GeometryUtils;
  */
 public class CemdapStops2MatsimPlansConverter {
 	private static final Logger LOG = Logger.getLogger(CemdapStops2MatsimPlansConverter.class);
+	
 
 	public static void main(String[] args) throws IOException {
 		// Local use
-		String cemdapDataRoot = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_output/";
+		String cemdapDataRoot = "../../shared-svn/studies/countries/de/open_berlin_scenario/cemdap_output/";
 		int numberOfFirstCemdapOutputFile = 200;
-		int numberOfPlans = 5;
-		int numberOfPlansFile = 200;
-		String outputDirectory = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/matsim_initial/" + numberOfPlansFile + "/";
-		String zonalShapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+		int numberOfPlans = 1;
+		int numberOfPlansFile = 300;
+		String outputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial/" + numberOfPlansFile + "/";
+		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
 		String zoneIdTag = "NR";		
 		boolean allowVariousWorkAndEducationLocations = true;
 		boolean addStayHomePlan = true;
@@ -69,6 +70,7 @@ public class CemdapStops2MatsimPlansConverter {
 		boolean simplifyGeometries = false;
 		boolean assignCoordinatesToActivities = true; // if set to false, the zone id will be attached to activity types and a fake coordinate will be given.
 		boolean combiningGeoms = true;
+		int activityDurationThreshold_s = 1800;
 		
 		// Server use
 		if (args.length != 0) {
@@ -84,6 +86,7 @@ public class CemdapStops2MatsimPlansConverter {
 			simplifyGeometries = Boolean.valueOf(args[9]);
 			combiningGeoms = Boolean.valueOf(args[10]);
 			assignCoordinatesToActivities = Boolean.valueOf(args[11]);
+			activityDurationThreshold_s = Integer.parseInt(args[12]);
 		}
 
 		Map<String, String> shapeFileToFeatureKey = new HashMap<>();
@@ -91,14 +94,16 @@ public class CemdapStops2MatsimPlansConverter {
 		
 		convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory,
 				shapeFileToFeatureKey, allowVariousWorkAndEducationLocations, addStayHomePlan,
-				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
+				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries,
+				combiningGeoms, assignCoordinatesToActivities, activityDurationThreshold_s);
 	}
 
 	
 	public static void convert(String cemdapDataRoot, int numberOfFirstCemdapOutputFile, int numberOfPlans, String outputDirectory,
 			Map<String, String> shapeFileToFeatureKey, // ensures, unique shape files with same or different featureKey. Amit Nov'17
 							   boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
-			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms, boolean assignCoordinatesToActivities) throws IOException {
+			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms,
+			boolean assignCoordinatesToActivities, int activityDurationThreshold_s) throws IOException {
 
 		CorineLandCoverData corineLandCoverData = null;
 		// CORINE landcover
@@ -159,7 +164,9 @@ public class CemdapStops2MatsimPlansConverter {
 		Population population = scenario.getPopulation();
 		
 		for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
-			new CemdapStopsParser().parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber));
+			CemdapStopsParser cemdapStopsParser = new CemdapStopsParser();
+			cemdapStopsParser.setActivityDurationThreshold_s(activityDurationThreshold_s);
+			cemdapStopsParser.parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber));
 			
 			// Commenting this for the time being; it does not do anything if the activity file is not considered on top of the stops file, dz,aa, sep'17
 			// Add a stay-home plan for those people who have no stops (i.e. no travel) in current stop file

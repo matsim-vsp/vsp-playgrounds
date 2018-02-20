@@ -32,7 +32,6 @@ import org.matsim.core.utils.io.IOUtils;
 /**
  * @author dziemke
  */
-@Deprecated
 public class CemdapActivityParser {
 
 	private final static Logger LOG = Logger.getLogger(CemdapActivityParser.class);
