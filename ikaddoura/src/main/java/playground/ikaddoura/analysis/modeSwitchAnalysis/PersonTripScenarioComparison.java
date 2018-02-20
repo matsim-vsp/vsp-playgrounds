@@ -524,7 +524,7 @@ public class PersonTripScenarioComparison {
         		Collection<SimpleFeature> features = new ArrayList<SimpleFeature>();
         						
                 for (String personTripNr : id2CoordOrigin.keySet()) {
-                	SimpleFeature feature = factory.createPolyline(
+                		SimpleFeature feature = factory.createPolyline(
     						
                 			new Coordinate[] {
     								new Coordinate(MGC.coord2Coordinate(id2CoordOrigin.get(personTripNr))),
@@ -536,7 +536,11 @@ public class PersonTripScenarioComparison {
     				features.add(feature);
         		}
         		
-        		ShapeFileWriter.writeGeometries(features, fileName);
+        		if (!features.isEmpty()) {
+        			ShapeFileWriter.writeGeometries(features, fileName);
+        		} else {
+        			log.info("No person with specified mode switch behavior. File " + fileName + " is not written out.");
+        		}
 	}
 
 	public void analyzeByScore(double scoreDifferenceTolerance) {

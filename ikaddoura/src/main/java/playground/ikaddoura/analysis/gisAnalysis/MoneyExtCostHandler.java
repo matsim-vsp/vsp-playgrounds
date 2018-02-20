@@ -83,7 +83,7 @@ public class MoneyExtCostHandler implements  PersonLinkMoneyEventHandler {
 	}
 
 	public Map<Id<Person>, Double> getPersonId2toll() {
-		if (personId2toll.isEmpty()) log.warn("Map is empty!");
+		if (personId2toll.isEmpty()) log.info("Returning an empty map; no person money events.");
 		return personId2toll;
 	}
 
