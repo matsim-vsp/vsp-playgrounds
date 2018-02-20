@@ -64,6 +64,7 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactor
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
@@ -92,8 +93,10 @@ public class GershensonIT {
 	private static final Logger log = Logger.getLogger(GershensonIT.class);
 	private static final Id<SignalGroup> SIGNALGROUPID1 = Id.create("SignalGroup1", SignalGroup.class);
 	private static final Id<SignalGroup> SIGNALGROUPID2 = Id.create("SignalGroup2", SignalGroup.class);
-	private static final Id<SignalSystem> SIGNALSYSTEMID = Id.create("SignalSystem1", SignalSystem.class);
-	
+	private static final Id<SignalGroup> SIGNALGROUPID3 = Id.create("SignalGroup3", SignalGroup.class);
+	private static final Id<SignalGroup> SIGNALGROUPID4 = Id.create("SignalGroup4", SignalGroup.class);
+	private static final Id<SignalSystem> SIGNALSYSTEMID1 = Id.create("SignalSystem1", SignalSystem.class);
+	private static final Id<SignalSystem> SIGNALSYSTEMID2 = Id.create("SignalSystem2", SignalSystem.class);
 	
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
@@ -116,12 +119,12 @@ public class GershensonIT {
 
 		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertEquals("total signal green times of both groups are not similiar enough", 0.0, totalSignalGreenTimes.get(SIGNALGROUPID1) - totalSignalGreenTimes.get(SIGNALGROUPID2), 3.);
 		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 3.9911373707533233, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
 		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 3.9940915805022157, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("avg cycle time of the system is wrong", 8.423929098966026, avgCycleTimePerSystem.get(SIGNALSYSTEMID), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg cycle time of the system is wrong", 8.423929098966026, avgCycleTimePerSystem.get(SIGNALSYSTEMID1), MatsimTestUtils.EPSILON);
 	}
 	@Test
 	public void testSingleCrossingDifferentUniformDemandAB() {
@@ -138,7 +141,7 @@ public class GershensonIT {
 
 		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertTrue("total signal green time should be higher for Group1", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
 		Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 6000/600 > totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2));
@@ -157,7 +160,7 @@ public class GershensonIT {
 
 		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 	//	Assert.assertTrue("total signal green time should be higher for Group1", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
 	//	Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 6000/600 > totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2));
@@ -181,12 +184,12 @@ public class GershensonIT {
 
 		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertTrue("total signal green time of group 1 is not bigger than of group 2", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
 		Assert.assertTrue("total signal green time of group 2 should be zero", totalSignalGreenTimes.get(SIGNALGROUPID2)==0);
 		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 1802.5, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), 5.);
-		Assert.assertEquals("avg cycle time of the system is wrong", 1951, avgCycleTimePerSystem.get(SIGNALSYSTEMID), 2.);
+		Assert.assertEquals("avg cycle time of the system is wrong", 1951, avgCycleTimePerSystem.get(SIGNALSYSTEMID1), 2.);
 	}
 	@Test
 	public void testSingleCrossingwithOutboundCongestionFromA() {
@@ -209,11 +212,11 @@ public class GershensonIT {
 		log.info("Data of TestCase");
 		log.info("total signal green times: " + totalSignalGreenTimesTestCase.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimesTestCase.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystemTestCase.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemTestCase.get(SIGNALSYSTEMID1));
 		log.info("Data of NullCase");
 		log.info("total signal green times: " + totalSignalGreenTimesNullCase.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimesNullCase.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycleNullCase.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycleNullCase.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystemNullCase.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemNullCase.get(SIGNALSYSTEMID1));
 		
 		
 		Assert.assertTrue("avg greentime cycle of group 2 should be higher then group1 ", avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID2)>avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID1));
@@ -238,7 +241,7 @@ public class GershensonIT {
 
 		log.info("total signal green times: " + totalSignalGreenTimes.get(SIGNALGROUPID1) + ", " + totalSignalGreenTimes.get(SIGNALGROUPID2));
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertEquals("avg greentime cycle of group 2 should be more or less the same as in group1 ",0.0 , totalSignalGreenTimes.get(SIGNALGROUPID2)-totalSignalGreenTimes.get(SIGNALGROUPID1),5);
 	}
@@ -246,7 +249,7 @@ public class GershensonIT {
 	
 		
 	@Test
-	public void testsingleCrossingStochasticDemandAB() {
+	public void testSingleCrossingStochasticDemandAB() {
 		String scenarioType = "singleCrossingStochasticDemandAB";
 		double[] noPersons = { 2800., 2800., 0., 0. };
 		TtSignalAnalysisTool signalAnalyzerPlan = runScenario(noPersons,scenarioType);
@@ -269,13 +272,31 @@ public class GershensonIT {
 		log.info("total signal green times: Plan " + totalSignalGreenTimesPlan.get(SIGNALGROUPID1) + ", Null " + totalSignalGreenTimesNull.get(SIGNALGROUPID1));
 		log.info("total signal green times: Plan " + totalSignalGreenTimesPlan.get(SIGNALGROUPID2) + ", Null " + totalSignalGreenTimesNull.get(SIGNALGROUPID2));
 		
-		log.info("avg cycle time per system: " + avgCycleTimePerSystemPlan.get(SIGNALSYSTEMID));
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemPlan.get(SIGNALSYSTEMID1));
 		
 		Assert.assertEquals("The total green times in the stochastic case should be more or less equal (+/- 5 %)",1.0 , totalSignalGreenTimesPlan.get(SIGNALGROUPID2)/totalSignalGreenTimesPlan.get(SIGNALGROUPID1),0.05);
 		Assert.assertTrue("The total green time of Group 1 in the stochastic should higher then in the Non-Stochastic", totalSignalGreenTimesPlan.get(SIGNALGROUPID1)>totalSignalGreenTimesNull.get(SIGNALGROUPID1));
 	}
 	
+	@Ignore
+	public void testDoubleCrossingUniformDemandABC() {
+		String scenarioType = "doubleCrossingUniformDemandABC";
+		double[] noPersons = { 2800., 2800., 0., 0. ,0.,0.};
+		TtSignalAnalysisTool signalAnalyzerPlan = runScenario(noPersons,scenarioType);
+		
+		// check signal results Plan
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimesPlan = signalAnalyzerPlan.getTotalSignalGreenTime(); 
+		Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCyclePlan = signalAnalyzerPlan.calculateAvgSignalGreenTimePerFlexibleCycle();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystemPlan = signalAnalyzerPlan.calculateAvgFlexibleCycleTimePerSignalSystem();
+			
 
+		log.info("total signal green times: Plan " + totalSignalGreenTimesPlan.get(SIGNALGROUPID1) + ", Null " );
+		log.info("total signal green times: Plan " + totalSignalGreenTimesPlan.get(SIGNALGROUPID2) + ", Null ");
+		
+		log.info("avg cycle time per system: " + avgCycleTimePerSystemPlan.get(SIGNALSYSTEMID1));
+		
+		
+	}
 	
 	
 	
@@ -293,8 +314,15 @@ public class GershensonIT {
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(new CombinedSignalsModule());
 
+		//scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
+		
 		// add signal analysis tool
 		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
+		
+		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
+		controler.addOverridingModule(signalsModule);
+		//controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
+		
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
@@ -302,6 +330,9 @@ public class GershensonIT {
 				this.addControlerListenerBinding().toInstance(signalAnalyzer);
 			}
 		});
+		
+		
+		
 
 		controler.run();
 
@@ -334,6 +365,11 @@ public class GershensonIT {
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
 			createSignalsSingleCrossing(scenario, false);
 		}
+		if(scenarioType.equals("doubleCrossingUniformDemandABC")) {
+			createNetworkScenario2(scenario.getNetwork(),0);
+			createPopulationScenario2(scenario.getPopulation(), noPersons);
+			createSignalsScenario2(scenario);
+		}	
 
 		
 	}
@@ -496,7 +532,7 @@ public class GershensonIT {
 
 		// create signal system
 		//Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
-		SignalSystemData signalSystem = sysFac.createSignalSystemData(SIGNALSYSTEMID);
+		SignalSystemData signalSystem = sysFac.createSignalSystemData(SIGNALSYSTEMID1);
 		signalSystems.addSignalSystemData(signalSystem);
 
 		// create a signal for every inLink
@@ -519,19 +555,19 @@ public class GershensonIT {
 
 		// group signals with non conflicting streams
 		//Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-		SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID, SIGNALGROUPID1);
+		SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID1);
 		signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
 		signalGroup1.addSignalId(Id.create("Signal4_3", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup1);
 
 		//Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-		SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID, SIGNALGROUPID2);
+		SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID2);
 		signalGroup2.addSignalId(Id.create("Signal7_3", Signal.class));
 		signalGroup2.addSignalId(Id.create("Signal8_3", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup2);
 
 		// create the signal control
-		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(SIGNALSYSTEMID);
+		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(SIGNALSYSTEMID1);
 		signalSystemControl.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl);
 
@@ -619,7 +655,7 @@ public class GershensonIT {
 	}
 	
 	private void createScenarioElements2(Scenario scenario, double[] noPersons) {
-		createNetworkScenario2(scenario.getNetwork());
+		createNetworkScenario2(scenario.getNetwork(),0);
 		createPopulationScenario2(scenario.getPopulation(), noPersons);
 		createSignalsScenario2(scenario);
 	}	
@@ -627,11 +663,11 @@ public class GershensonIT {
 	/**
 	 * creates a network like this:
 	 * 
-	 * 					 15				   20
+	 * 					 8				   12
 	 * 					 ^				   ^
 	 * 					 |				   |
 	 * 					 v				   v
-	 * 					 16				   21
+	 * 					 9				   13
 	 * 					 ^				   ^
 	 * 					 |				   |
 	 * 					 v				   v
@@ -639,25 +675,17 @@ public class GershensonIT {
 	 * 					 ^				   ^
 	 * 					 |				   |
 	 * 					 v				   v
-	 * 					 17				   22
+	 * 					 10				   14
 	 * 					 ^				   ^
 	 * 					 |				   |
 	 * 					 v				   v
-	 * 8 <----> 9 <----> 10<----> 11<----> 12<----> 13 <----> 14
-	 * 					 ^ 				   ^
-	 * 					 | 				   |
-	 * 					 v 				   v
-	 * 					 18 			   23
-	 * 					 ^ 				   ^
-	 * 					 | 				   |
-	 * 					 v 				   v
-	 * 					 19 			   24
+	 * 					 11				   15
 	 * 
 	 * 
 	 * @param net
 	 *            the object where the network should be stored
 	 */
-	private static void createNetworkScenario2(Network net) {
+	private static void createNetworkScenario2(Network net, int numberOfBottlenecks) {
 		NetworkFactory fac = net.getFactory();
 
 		net.addNode(fac.createNode(Id.createNodeId(1), new Coord(-2000, 0)));
@@ -667,44 +695,46 @@ public class GershensonIT {
 		net.addNode(fac.createNode(Id.createNodeId(5), new Coord(2000, 0)));
 		net.addNode(fac.createNode(Id.createNodeId(6), new Coord(3000, 0)));
 		net.addNode(fac.createNode(Id.createNodeId(7), new Coord(4000, 0)));
-		net.addNode(fac.createNode(Id.createNodeId(8), new Coord(-2000, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(9), new Coord(-1000, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(10), new Coord(0, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(11), new Coord(1000, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(12), new Coord(2000, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(13), new Coord(3000, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(14), new Coord(4000, -2000)));
-				
-		net.addNode(fac.createNode(Id.createNodeId(15), new Coord(0, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(16), new Coord(0, -1000)));
-		net.addNode(fac.createNode(Id.createNodeId(17), new Coord(0, 1000)));
-		net.addNode(fac.createNode(Id.createNodeId(18), new Coord(0, 3000)));
-		net.addNode(fac.createNode(Id.createNodeId(19), new Coord(0, 4000)));
-		net.addNode(fac.createNode(Id.createNodeId(20), new Coord(2000, -2000)));
-		net.addNode(fac.createNode(Id.createNodeId(21), new Coord(2000, -1000)));
-		net.addNode(fac.createNode(Id.createNodeId(22), new Coord(2000, 1000)));
-		net.addNode(fac.createNode(Id.createNodeId(23), new Coord(2000, 3000)));
-		net.addNode(fac.createNode(Id.createNodeId(24), new Coord(2000, 4000)));
+		net.addNode(fac.createNode(Id.createNodeId(8), new Coord(0,-2000)));
+		net.addNode(fac.createNode(Id.createNodeId(9), new Coord(0,-1000)));
+		net.addNode(fac.createNode(Id.createNodeId(10), new Coord(0,1000)));
+		net.addNode(fac.createNode(Id.createNodeId(11), new Coord(0,2000)));
+		net.addNode(fac.createNode(Id.createNodeId(12), new Coord(2000,-2000)));
+		net.addNode(fac.createNode(Id.createNodeId(13), new Coord(2000,-1000)));
+		net.addNode(fac.createNode(Id.createNodeId(14), new Coord(2000,1000)));			
+		net.addNode(fac.createNode(Id.createNodeId(15), new Coord(2000, 2000)));
+
 		
 		
 		String[] links = { "1_2", "2_1", "2_3", "3_2", "3_4", "4_3", "4_5", "5_4", "5_6", "6_5", "6_7", "7_6",
-				"8_9","9_8","9_10","10_9","10_11","11_10","11_12","12_11","12_13","13_14","14_13",
-				"15_16","16_15","16_3","3_16","3_17","17_3","17_10","10_17","10_18","18_10","18_19","19_18",
-				"20_21","21_20","21_5","5_21","5_22","22_5","22_12","12_22","12_23","23_12","23_24","24_12"};
+				"8_9","9_8","9_3","3_9","3_10","10_3","10_11","11_10","12_13","13_12","13_5","5_13","5_14","14_5","14_15","15_14"};
 
 		for (String linkId : links) {
 			String fromNodeId = linkId.split("_")[0];
 			String toNodeId = linkId.split("_")[1];
 			Link link = fac.createLink(Id.createLinkId(linkId), net.getNodes().get(Id.createNodeId(fromNodeId)), net.getNodes().get(Id.createNodeId(toNodeId)));
-			link.setCapacity(7200);
 			link.setLength(1000);
 			link.setFreespeed(10);
+			link.setCapacity(4800);
+			
+			//Reset Capacity if Bottleneck	
+			if (numberOfBottlenecks==1 && (fromNodeId.equals("3") && toNodeId.equals("4")) ) {
+				link.setCapacity(1200);				
+			}
+			if (numberOfBottlenecks>=1 && numberOfBottlenecks<=2
+					&& fromNodeId.equals("5") && toNodeId.equals("6")) {
+				link.setCapacity(1200);				
+			}
+			
 			net.addLink(link);
+			
+			
+			
 		}
 	}
 	
 	private static void createPopulationScenario2(Population population, double[] noPersons) {
-		String[] odRelations = { "1_2-6_7", "8_9-13_14", "15_16-18_19", "20_21-23_24"};
+		String[] odRelations = { "1_2-6_7", "8_9-10_11", "12_13-14_15", "7_6-2_1", "11_10-9_8" ,"15_14-13_12"};
 		int odIndex = 0;
 
 		for (String od : odRelations) {
@@ -746,19 +776,13 @@ public class GershensonIT {
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
 		// create signal system
-		Id<SignalSystem> signalSystemId1 = Id.create("SignalSystem1", SignalSystem.class);
-		Id<SignalSystem> signalSystemId2 = Id.create("SignalSystem2", SignalSystem.class);
-		Id<SignalSystem> signalSystemId3 = Id.create("SignalSystem3", SignalSystem.class);
-		Id<SignalSystem> signalSystemId4 = Id.create("SignalSystem4", SignalSystem.class);
-		SignalSystemData signalSystem1 = sysFac.createSignalSystemData(signalSystemId1);
-		SignalSystemData signalSystem2 = sysFac.createSignalSystemData(signalSystemId2);
-		SignalSystemData signalSystem3 = sysFac.createSignalSystemData(signalSystemId3);
-		SignalSystemData signalSystem4 = sysFac.createSignalSystemData(signalSystemId4);
+		SignalSystemData signalSystem1 = sysFac.createSignalSystemData(SIGNALSYSTEMID1);
+		SignalSystemData signalSystem2 = sysFac.createSignalSystemData(SIGNALSYSTEMID2);
+
 		
 		signalSystems.addSignalSystemData(signalSystem1);
 		signalSystems.addSignalSystemData(signalSystem2);
-		signalSystems.addSignalSystemData(signalSystem3);
-		signalSystems.addSignalSystemData(signalSystem4);
+
 		
 
 		// create a signal for every inLink
@@ -772,90 +796,40 @@ public class GershensonIT {
 			signalSystem2.addSignalData(signal);
 			signal.setLinkId(inLinkId);
 		}
-		for (Id<Link> inLinkId : scenario.getNetwork().getNodes().get(Id.createNodeId(10)).getInLinks().keySet()) {
-			SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLinkId, Signal.class));
-			signalSystem3.addSignalData(signal);
-			signal.setLinkId(inLinkId);
-		}
-		for (Id<Link> inLinkId : scenario.getNetwork().getNodes().get(Id.createNodeId(12)).getInLinks().keySet()) {
-			SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLinkId, Signal.class));
-			signalSystem4.addSignalData(signal);
-			signal.setLinkId(inLinkId);
-		}
+
 		
 		//SignalSystem1
 		// group signals with non conflicting streams
-		Id<SignalGroup> signalGroupId1Sys1 = Id.create("SignalGroup1", SignalGroup.class);
-		SignalGroupData signalGroup1Sys1 = signalGroups.getFactory().createSignalGroupData(signalSystemId1, signalGroupId1Sys1);
+		SignalGroupData signalGroup1Sys1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID1);
 		signalGroup1Sys1.addSignalId(Id.create("Signal2_3", Signal.class));
 		signalGroup1Sys1.addSignalId(Id.create("Signal4_3", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup1Sys1);
 
-		Id<SignalGroup> signalGroupId2Sys1 = Id.create("SignalGroup2", SignalGroup.class);
-		SignalGroupData signalGroup2Sys1 = signalGroups.getFactory().createSignalGroupData(signalSystemId1, signalGroupId2Sys1);
-		signalGroup2Sys1.addSignalId(Id.create("Signal16_3", Signal.class));
-		signalGroup2Sys1.addSignalId(Id.create("Signal17_3", Signal.class));
+		SignalGroupData signalGroup2Sys1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID2);
+		signalGroup2Sys1.addSignalId(Id.create("Signal19_3", Signal.class));
+		signalGroup2Sys1.addSignalId(Id.create("Signal110_3", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup2Sys1);
 
 		//SignalSystem2
 		// group signals with non conflicting streams
-		Id<SignalGroup> signalGroupId1Sys2 = Id.create("SignalGroup1", SignalGroup.class);
-		SignalGroupData signalGroup1Sys2 = signalGroups.getFactory().createSignalGroupData(signalSystemId2, signalGroupId1Sys2);
+		SignalGroupData signalGroup1Sys2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID2, SIGNALGROUPID3);
 		signalGroup1Sys2.addSignalId(Id.create("Signal4_5", Signal.class));
-		signalGroup1Sys2.addSignalId(Id.create("Signal8_5", Signal.class));
+		signalGroup1Sys2.addSignalId(Id.create("Signal6_5", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup1Sys2);
 
-		Id<SignalGroup> signalGroupId2Sys2 = Id.create("SignalGroup2", SignalGroup.class);
-		SignalGroupData signalGroup2Sys2 = signalGroups.getFactory().createSignalGroupData(signalSystemId2, signalGroupId2Sys2);
-		signalGroup2Sys2.addSignalId(Id.create("Signal21_5", Signal.class));
-		signalGroup2Sys2.addSignalId(Id.create("Signal22_5", Signal.class));
+		SignalGroupData signalGroup2Sys2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID2, SIGNALGROUPID4);
+		signalGroup2Sys2.addSignalId(Id.create("Signal213_5", Signal.class));
+		signalGroup2Sys2.addSignalId(Id.create("Signal214_5", Signal.class));
 		signalGroups.addSignalGroupData(signalGroup2Sys2);
 	
-		//SignalSystem3
-		// group signals with non conflicting streams
-		Id<SignalGroup> signalGroupId1Sys3 = Id.create("SignalGroup1", SignalGroup.class);
-		SignalGroupData signalGroup1Sys3 = signalGroups.getFactory().createSignalGroupData(signalSystemId3, signalGroupId1Sys3);
-		signalGroup1Sys3.addSignalId(Id.create("Signal9_10", Signal.class));
-		signalGroup1Sys3.addSignalId(Id.create("Signal11_10", Signal.class));
-		signalGroups.addSignalGroupData(signalGroup1Sys3);
-
-		Id<SignalGroup> signalGroupId2Sys3 = Id.create("SignalGroup2", SignalGroup.class);
-		SignalGroupData signalGroup2Sys3 = signalGroups.getFactory().createSignalGroupData(signalSystemId3, signalGroupId2Sys3);
-		signalGroup2Sys3.addSignalId(Id.create("Signal17_10", Signal.class));
-		signalGroup2Sys3.addSignalId(Id.create("Signal18_10", Signal.class));
-		signalGroups.addSignalGroupData(signalGroup2Sys3);
-		
-		//SignalSystem4
-		// group signals with non conflicting streams
-		Id<SignalGroup> signalGroupId1Sys4 = Id.create("SignalGroup1", SignalGroup.class);
-		SignalGroupData signalGroup1Sys4 = signalGroups.getFactory().createSignalGroupData(signalSystemId4, signalGroupId1Sys4);
-		signalGroup1Sys4.addSignalId(Id.create("Signal11_12", Signal.class));
-		signalGroup1Sys4.addSignalId(Id.create("Signal13_12", Signal.class));
-		signalGroups.addSignalGroupData(signalGroup1Sys4);
-
-		Id<SignalGroup> signalGroupId2Sys4 = Id.create("SignalGroup2", SignalGroup.class);
-		SignalGroupData signalGroup2Sys4 = signalGroups.getFactory().createSignalGroupData(signalSystemId4, signalGroupId2Sys4);
-		signalGroup2Sys4.addSignalId(Id.create("Signal22_12", Signal.class));
-		signalGroup2Sys4.addSignalId(Id.create("Signal23_12", Signal.class));
-		signalGroups.addSignalGroupData(signalGroup2Sys4);
-		
-		
 		
 		// create the signal control System1
-		SignalSystemControllerData signalSystemControl1 = conFac.createSignalSystemControllerData(signalSystemId1);
+		SignalSystemControllerData signalSystemControl1 = conFac.createSignalSystemControllerData(SIGNALSYSTEMID1);
 		signalSystemControl1.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl1);
 		// create the signal control System2
-		SignalSystemControllerData signalSystemControl2 = conFac.createSignalSystemControllerData(signalSystemId2);
+		SignalSystemControllerData signalSystemControl2 = conFac.createSignalSystemControllerData(SIGNALSYSTEMID2);
 		signalSystemControl2.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl2);
-		// create the signal control System3
-		SignalSystemControllerData signalSystemControl3 = conFac.createSignalSystemControllerData(signalSystemId3);
-		signalSystemControl3.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
-		signalControl.addSignalSystemControllerData(signalSystemControl3);
-		// create the signal control System1
-		SignalSystemControllerData signalSystemControl4 = conFac.createSignalSystemControllerData(signalSystemId4);
-		signalSystemControl4.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
-		signalControl.addSignalSystemControllerData(signalSystemControl4);
 	}
 }
