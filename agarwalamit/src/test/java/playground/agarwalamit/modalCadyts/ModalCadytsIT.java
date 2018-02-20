@@ -64,10 +64,10 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 
 import playground.agarwalamit.mixedTraffic.counts.MultiModeCountsControlerListener;
-import playground.agarwalamit.multiModeCadyts.CountsInserter;
-import playground.agarwalamit.multiModeCadyts.ModalCadytsContext;
-import playground.agarwalamit.multiModeCadyts.ModalCountsReader;
-import playground.agarwalamit.multiModeCadyts.ModalLink;
+import playground.agarwalamit.cadyts.multiModeCadyts.CountsInserter;
+import playground.agarwalamit.cadyts.multiModeCadyts.ModalCadytsContext;
+import playground.agarwalamit.cadyts.multiModeCadyts.ModalCountsReader;
+import playground.agarwalamit.cadyts.multiModeCadyts.ModalLink;
 
 /**
  * amit after CadytsCarIT in cadyts contrib.
