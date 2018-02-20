@@ -178,7 +178,7 @@ public class ModalCadytsIT {
 
 		// check for car
 		String mode = mainModes.get(0);
-		Count<ModalLink> count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplittor()).concat("19") , ModalLink.class ) );
+		Count<ModalLink> count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplitter()).concat("19") , ModalLink.class ) );
 		Assert.assertEquals("CsId is wrong.", count.getCsLabel() , "link_19");
 		Assert.assertEquals("Volume of hour 6 is wrong", count.getVolume(7).getValue(), 5.0 , MatsimTestUtils.EPSILON);
 		Assert.assertEquals("Max count volume is wrong.", count.getMaxVolume().getValue(), 5.0 , MatsimTestUtils.EPSILON);
@@ -214,7 +214,7 @@ public class ModalCadytsIT {
 
 		// check for bike 
 		mode = mainModes.get(1);
-		count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplittor()).concat("11") , ModalLink.class ) );
+		count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplitter()).concat("11") , ModalLink.class ) );
 		//		Assert.assertEquals("Occupancy counts description is wrong", modalLinkCounts.getDescription(), "counts values for equil net");
 		Assert.assertEquals("CsId is wrong.", count.getCsLabel() , "link_11");
 		Assert.assertEquals("Volume of hour 6 is wrong", count.getVolume(7).getValue(), 4.0 , MatsimTestUtils.EPSILON);
@@ -250,7 +250,7 @@ public class ModalCadytsIT {
 
 	//--------------------------------------------------------------
 	private double getCountRealValue(Counts<ModalLink> counts, Id<Link> linkId, String mode, int hour) {
-		Count<ModalLink> count =  counts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplittor()).concat(linkId.toString()) , ModalLink.class ) );
+		Count<ModalLink> count =  counts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplitter()).concat(linkId.toString()) , ModalLink.class ) );
 		return count.getVolume(hour).getValue();
 	}
 

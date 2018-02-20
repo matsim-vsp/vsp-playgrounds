@@ -29,13 +29,13 @@ import org.matsim.api.core.v01.network.Link;
  * @author amit
  */
 
-public class ModalLink implements Identifiable<ModalLink> {
+public final class ModalLink implements Identifiable<ModalLink> {
 	
 	private final String mode;
 	private final Id<Link> linkId;
 	private final Id<ModalLink> id;
 	
-	private static final String seperator = "_&_";
+	private static final String separator = "_&_";
 	
 	public String getMode() {
 		return mode;
@@ -48,16 +48,16 @@ public class ModalLink implements Identifiable<ModalLink> {
 	ModalLink(final String mode, final Id<Link> linkId) {
 		this.mode = mode;
 		this.linkId = linkId;
-		this.id = Id.create(this.mode.concat(getModeLinkSplittor()).concat(this.linkId.toString()), ModalLink.class);
+		this.id = Id.create(this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString()), ModalLink.class);
 	}
 
 	@Override
 	public String toString(){
-		return this.mode.concat(getModeLinkSplittor()).concat(this.linkId.toString());
+		return this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString());
 	}
 	
-	public static String getModeLinkSplittor(){
-		return seperator;
+	public static String getModeLinkSplitter(){
+		return separator;
 	}
 
 	@Override
