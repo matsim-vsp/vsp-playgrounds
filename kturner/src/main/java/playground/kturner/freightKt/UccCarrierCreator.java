@@ -239,7 +239,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 				ArrayList<TimeWindow> timeWindows = calcTimeWindows(uccCarrier);
 				log.info("Zeitfenster: " + timeWindows.toString());
 				for (TimeWindow tw : timeWindows) {
-					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 															//TODO: Warum für jeden service ein Fahrzeug emit diesen Zeiten erstellen? -> zusammenfassen (gerade/zunächst bei fleetSize = Infinity)? KMT Feb/18	
+					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 															//TODO: Warum für jeden service ein Fahrzeug mit diesen Zeiten erstellen? -> zusammenfassen (gerade/zunächst bei fleetSize = Infinity)? KMT Feb/18	
 							Math.max(0, tw.getStart() -uccEarlierOpeningTime), Math.min(24*3500, tw.getEnd() +uccLaterClosingTime));  //TODO: Warum 3500? KMT feb/18
 				}
 				checkCapacity(uccCarrier, vehicleTypes);
@@ -418,8 +418,8 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 	}
 
 	Carriers createServicesToUCC(Carriers uccCarriers,	Carriers nonUccCarriers) {
-		//Services aus den UCC für die Non-UCC erstellen -> Funktioniert grundsätzlich, KT 02.05.15
 		for (Carrier uccC : uccCarriers.getCarriers().values()){
+			int capacityOfSmallestVehicleTyp = calcCapacityOfSmallestVehicleTyp(uccC); 
 			for (Carrier nonUccC : nonUccCarriers.getCarriers().values()){
 				//TODO: Sicherstellen, dass jeder Service auch erstellt wird--> Sicherheitsabfrage, ansonsten Fehler erzeugen!	
 				if (uccC.getId().toString().equals(uccC_prefix+nonUccC.getId().toString())){
@@ -449,13 +449,19 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 					//TODO: Sicherstellen (assert), dass bisher kein Service mit UCC_Prefix existiert, da sonst doppelte Einträge -> Fehler
 					//TODO: Absicherung einbauen, dass UCC von den Zeitfenstern her beliefert werden kann. -> ggf Zeitfenster anpassen, an 
 					//neue Services erstellen des nonUccC zum Depot des uccC.
-					for (Id<Link> linkId : demandAtUCC.keySet()){				//Nun erstelle die ganzen Services
-						for (int i = 1; i<=demandAtUCC.get(linkId); i++){
+					for (Id<Link> linkId : demandAtUCC.keySet()){//Nun erstelle die ganzen Services
+						int demandToCreate = demandAtUCC.get(linkId);
+						int numberOfServicesToCreate = (int) demandToCreate / capacityOfSmallestVehicleTyp; //TODO: Vielleicht umbennen um Nutzen klarer zu machen (Anz Services mit "voller nachfrage") kmt/feb18
+						//Kleinste Liefereinheit an UCC entspricht der Kapa des kleinsten Trucks 
+						//TODO Macht das Sinn oder welche Größe sollte da gewählt werden? 1 war jedenfalls schlecht, da Services dann überall an andere Toruen rangebaut wurden und so vermutlcih unrealisitsche Touren entstehen, ehe jsprit einen neuen Truck aufmacht. KMT feb/18
+						
+						int remainingDemand = demandToCreate % capacityOfSmallestVehicleTyp;  //Rest
+						for (int i = 1; i<=numberOfServicesToCreate; i++){
 							double earliestVehDepUCC = calcEarliestDep(uccC ,linkId);	
 							CarrierService.Builder csBuilder = CarrierService.Builder
 									.newInstance(Id.create("to_"+uccC_prefix+linkId.toString()+"_"+i, CarrierService.class), linkId)
 									//Jeder Service nur Nachfrage = 1, damit Fzg Aufteilung frei erfolgen kann
-									.setCapacityDemand(1)		
+									.setCapacityDemand(capacityOfSmallestVehicleTyp)										
 									.setServiceDuration(60)	//60sec = 1min
 									// Innerhalb der ersten 2 Stunden nach Öffnungszeit soll die Ware dort ankommen 
 									//(Da aus Gründen der Vergleichbarkeit bisher die Öffnungszeiten der Hauptdepots nicht verändert werden)
@@ -463,12 +469,39 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 											Math.max(0, earliestVehDepUCC), Math.max(0, earliestVehDepUCC +7200 ))); 
 							nonUccC.getServices().add(csBuilder.build());
 						}	
+						// Service für Restnachfrage erstellen, so größer 0.
+						if (remainingDemand >0) {
+							double earliestVehDepUCC = calcEarliestDep(uccC ,linkId);	
+							CarrierService.Builder csBuilder = CarrierService.Builder
+									.newInstance(Id.create("to_"+uccC_prefix+linkId.toString()+"_"+ numberOfServicesToCreate+1, CarrierService.class), linkId)
+									//Jeder Service nur Nachfrage = 1, damit Fzg Aufteilung frei erfolgen kann
+									.setCapacityDemand(remainingDemand)											//TODO: Hier mal einen höheren Wert einsetzen, z.B. Kapa kleinstes Fzg oder die hälfte davon -> Muss klar sein, wie oft und wie groß der Rest ist , kmt /feb18
+									.setServiceDuration(60)	//60sec = 1min
+									// Innerhalb der ersten 2 Stunden nach Öffnungszeit soll die Ware dort ankommen 
+									//(Da aus Gründen der Vergleichbarkeit bisher die Öffnungszeiten der Hauptdepots nicht verändert werden)
+									.setServiceStartTimeWindow(TimeWindow.newInstance(
+											Math.max(0, earliestVehDepUCC), Math.max(0, earliestVehDepUCC +7200 ))); 
+							nonUccC.getServices().add(csBuilder.build());
+						}
 					}
 
 				} //end if
 			}
 		}
 		return nonUccCarriers;	
+	}
+
+	private int calcCapacityOfSmallestVehicleTyp(Carrier uccC) {
+		// TODO Auto-generated method stub
+		int minCapacity = 1000;					//TODO: Willkürlich ganz hoch angesetzt. -> Anpassen, besserer Lösung finden
+		for(CarrierVehicle vehicle : uccC.getCarrierCapabilities().getCarrierVehicles()) {
+			int vehicleCapacity = vehicle.getVehicleType().getCarrierVehicleCapacity() ;
+			if(vehicleCapacity < minCapacity) { 
+				minCapacity = vehicleCapacity;
+			}
+		}
+		log.debug("Capacity of smallest vehicle of " + uccC.getId() + " is " + minCapacity );
+		return minCapacity;
 	}
 
 	//Früheste Abfahrt eines Fahrzeuges des Carriers vom angebenenen Depot
