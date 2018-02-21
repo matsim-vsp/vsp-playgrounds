@@ -103,15 +103,15 @@ public class CORINELandCoverCoordsModifier {
 
     public static void main(String[] args) {
 
-        String corineLandCoverFile = "data/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp"; //<- e.g. Berlin brandenburg file, NRW
-        String zoneFile = "data/cemdap_input/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
+        String corineLandCoverFile = "/Users/amit/Documents/gitlab/mercator-nemo/data/original_files/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp"; //<- e.g. Berlin brandenburg file, NRW
+        String zoneFile = "/Users/amit/Documents/gitlab/mercator-nemo/data/original_files/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
         String zoneIdTag = "KN";
 
-        String spatialRefinementShapeFile = "data/cemdap_input/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/plz-gebiete_Ruhrgebiet_withPopulation.shp";
+        String spatialRefinementShapeFile = "/Users/amit/Documents/gitlab/mercator-nemo/data/original_files/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/plz-gebiete_Ruhrgebiet_withPopulation.shp";
         String featureKeySpatialRefinement = "plz";
 
-        String matsimPlans = "data/input/plans/2018_jan_24/mergedPlansFiles/plans_1pct_fullChoiceSet.xml.gz";
-        String outPlans = "data/input/plans/2018_jan_24/plans_1pct_fullChoiceSet_coordsAssigned2.xml.gz";
+        String matsimPlans = "/Users/amit/Documents/gitlab/mercator-nemo/data/matsim_input/zz_archive/plans/2018_jan_24/mergedPlansFiles/plans_1pct_fullChoiceSet.xml.gz";
+        String outPlans = "/Users/amit/Documents/gitlab/mercator-nemo/data/matsim_input/zz_archive/plans/2018_jan_24/mergedPlansFiles/plans_1pct_fullChoiceSet_coordsAssigned.xml.gz";
 
         boolean simplifyGeom = true;
         boolean combiningGeoms = false;
