@@ -81,12 +81,12 @@ public class CadytsDistanceBasedExample {
 
 	public static void main(String[] args) {
 		// Input and output
-		String inputNetworkFile = "../../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/input/network_diff_lengths2.xml";
+		String inputNetworkFile = "../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/input/network_diff_lengths2.xml";
 //		String inputPlansFile = "../../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/input/plans1000.xml";
-		String inputPlansFile = "../../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/input/plans1000_routes5.xml";
-		String countsFileName = "../../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/input/counts100-200_full.xml";
+		String inputPlansFile = "../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/input/plans1000_routes5.xml";
+		String countsFileName = "../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/input/counts100-200_full.xml";
 		String runId = "selectR+hist1000";
-		String outputDirectory = "../../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/output/" + runId + "";
+		String outputDirectory = "../../shared-svn/projects/cemdapMatsimCadyts/cadyts/equil/output/" + runId + "";
 		
 		// Parameters
 		final double cadytsWeightLinks = 0.;

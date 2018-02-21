@@ -209,22 +209,28 @@ public class UccCarrierCreatorTest {
     //Testet, ob die Services zur Belieferung der UCCs korrekt erstellt werden:
     //Richtige Menge an richtiges Depot
     @Test
-    @Ignore		//TODO: Test anpassen an neue Art die Servicegrößen zu den UCC zu berechnen -> Benötigt nun fahrzeugflottengröße; allgemein müssen da noch neue Tests geschrieben werden.
+    	//TODO: Test anpassen an neue Art die Servicegrößen zu den UCC zu berechnen -> Benötigt nun fahrzeugflottengröße; allgemein müssen da noch neue Tests geschrieben werden.
     public final void testCreateServicesToUCC() {
 
     	final String UCC_CARRIERS_FILE = utils.getInputDirectory() + "carriers_ucc.xml";
     	final String NON_UCC_CARRIERS_FILE = utils.getInputDirectory() + "carriers_nonUcc.xml";
+    	final String VEHICLE_TYPES_FILE = utils.getClassInputDirectory() + "vehTypes.xml";
+    	
+    	CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes();
+    	new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHICLE_TYPES_FILE);
     	
     	Carriers uccCarriers = new Carriers() ;
     	new CarrierPlanXmlReaderV2(uccCarriers).readFile(UCC_CARRIERS_FILE) ;
+    	new CarrierVehicleTypeLoader(uccCarriers).loadVehicleTypes(vehicleTypes) ;
     	
     	Carriers nonUccCarriers = new Carriers() ;
     	new CarrierPlanXmlReaderV2(nonUccCarriers).readFile(NON_UCC_CARRIERS_FILE) ;
+    	new CarrierVehicleTypeLoader(nonUccCarriers).loadVehicleTypes(vehicleTypes) ;
 
     	UccCarrierCreator creator = new UccCarrierCreator(null, null, null, "UCC-", null, null);
     	Carriers nonUCCCinclSrvToUcc = creator.createServicesToUCC(uccCarriers, nonUccCarriers);
     	
-    	
+    	// TODO: Why testet via Services? - Not wrong but not straight forward kmt/feb 18
     	ArrayList<CarrierService> services = new ArrayList<CarrierService>();
     	for (CarrierService service : nonUCCCinclSrvToUcc.getCarriers().get(Id.create("gridCarrier1", Carrier.class)).getServices()){
     		services.add(service);
@@ -232,24 +238,31 @@ public class UccCarrierCreatorTest {
     	
     	//Es muss nachfrage von zwei zum Link j(0,5) und zwei zum Link j(10,5) erstellt worden sein.
     	//Da diese aktuell (15.7.15, KT) noch zu einer Einheit sind es in Summe nunmehr 10 Services
-    	Assert.assertTrue("Anzahl Services nicht korrekt", services.size() == 10);
-    	Assert.assertTrue("Nachfrage für UCC j(0,5) nicht korrekt", calcDemandToUCC(services, "j(0,5)") == 2);
-    	Assert.assertTrue("Nachfrage für UCC j(10,5) nicht korrekt", calcDemandToUCC(services, "j(10,5)") == 2);
+    	Assert.assertTrue("Demand of nonUCC Carrier inkluding demand for UCC-supply not correct", calcDemandOfLocation(services, null) == 10);
+    	Assert.assertTrue("Nachfrage für UCC j(0,5) nicht korrekt", calcDemandOfLocation(services, "j(0,5)") == 2);
+    	Assert.assertTrue("Nachfrage für UCC j(10,5) nicht korrekt", calcDemandOfLocation(services, "j(10,5)") == 2);
        }
 
-	/**
-	 * @param services
-	 * @param demandLinkIdString
-	 * @return Gesamtnachfrage für angegebenen Ziellink
-	 */
-	private int calcDemandToUCC(ArrayList<CarrierService> services, String demandLinkIdString) {
-		int demandOfUcc = 0;
-    	for (CarrierService service : services){
-    		if (service.getLocationLinkId() == Id.createLinkId(demandLinkIdString)){
-    			demandOfUcc = demandOfUcc + service.getCapacityDemand();
-    		}
-    	}
-    	return demandOfUcc;
+    /**
+     * @param services
+     * @param locationLinkIdString
+     * @return Gesamtnachfrage für angegebenen Ziellink
+     */
+    private int calcDemandOfLocation(ArrayList<CarrierService> services, String locationLinkIdString) {
+	    	int demand = 0;
+
+	    	if (locationLinkIdString == null) {		// calc total demand
+	    		for (CarrierService service : services){
+	    				demand = demand + service.getCapacityDemand();
+		    	}
+	    	} else {								// calc total demand only for given location/link
+	    		for (CarrierService service : services){
+	    			if (service.getLocationLinkId() == Id.createLinkId(locationLinkIdString)){
+	    				demand = demand + service.getCapacityDemand();
+	    			}
+	    		}
+		}
+		return demand;
 	}
-    
+	
 }

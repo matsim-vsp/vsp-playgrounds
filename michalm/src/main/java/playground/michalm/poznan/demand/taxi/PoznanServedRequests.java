@@ -71,7 +71,6 @@ public class PoznanServedRequests {
 		Date fromDate4 = midnight("30-04");
 		Date toDate4 = midnight("01-05");
 
-		@SuppressWarnings("unchecked")
 		Predicate<PoznanServedRequest> orPredicate = Predicates.or(
 				r -> ServedRequests.isBetweenDates(r, fromDate1, toDate1),
 				r -> ServedRequests.isBetweenDates(r, fromDate2, toDate2),

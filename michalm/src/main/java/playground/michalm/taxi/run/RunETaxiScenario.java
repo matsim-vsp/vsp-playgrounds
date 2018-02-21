@@ -20,20 +20,29 @@
 package playground.michalm.taxi.run;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.dvrp.data.*;
+import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.data.FleetImpl;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.run.*;
-import org.matsim.core.config.*;
-import org.matsim.core.controler.*;
+import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.TaxiOutputModule;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import playground.michalm.ev.*;
-import playground.michalm.ev.data.*;
+import playground.michalm.ev.EvConfigGroup;
+import playground.michalm.ev.EvModule;
+import playground.michalm.ev.data.EvData;
+import playground.michalm.ev.data.EvDataImpl;
 import playground.michalm.ev.data.file.ChargerReader;
 import playground.michalm.taxi.data.file.EvrpVehicleReader;
-import playground.michalm.taxi.ev.*;
+import playground.michalm.taxi.ev.ETaxiChargerOccupancyTimeProfileCollectorProvider;
+import playground.michalm.taxi.ev.ETaxiChargerOccupancyXYDataProvider;
+import playground.michalm.taxi.ev.ETaxiUtils;
 
 public class RunETaxiScenario {
 	public static void run(String configFile, boolean otfvis) {
@@ -43,7 +52,7 @@ public class RunETaxiScenario {
 	}
 
 	public static Controler createControler(Config config, boolean otfvis) {
-		DvrpConfigGroup.get(config).setNetworkMode(null);//to switch off network filtering
+		DvrpConfigGroup.get(config).setNetworkMode(null);// to switch off network filtering
 		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
 		EvConfigGroup evCfg = EvConfigGroup.get(config);
 		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
