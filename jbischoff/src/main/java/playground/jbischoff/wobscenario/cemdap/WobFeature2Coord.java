@@ -20,11 +20,7 @@
 package playground.jbischoff.wobscenario.cemdap;
 
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.log4j.Logger;
-import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Activity;
@@ -34,10 +30,6 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.common.util.concurrent.TimeLimiter;
-
 import playground.vsp.demandde.cemdap.output.ActivityTypes;
 import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
 import playground.vsp.demandde.cemdap.output.CemdapStopsParser;
@@ -144,7 +136,7 @@ public class WobFeature2Coord {
 		if (corineLandCoverData==null) {
 			coord = Cemdap2MatsimUtils.getRandomCoordinate(feature);
 		} else {
-			coord = corineLandCoverData.getRandomCoord(feature,activityType);
+			coord = corineLandCoverData.getRandomCoord(feature,activityType.equals("home")? LandCoverUtils.LandCoverActivityType.home : LandCoverUtils.LandCoverActivityType.other );
 			
 			
 
