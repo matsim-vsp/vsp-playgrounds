@@ -70,10 +70,11 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 	private final OutputDirectoryHierarchy controlerIO;
 
 	private final Map<Id<ModalBin>,ModalBin> modalDistanceBinMap;
+	private final BeelineDistanceCollector beelineDistanceCollector;
 
 	@Inject
 	private ModalDistanceCadytsContext(Config config, Scenario scenario, @Named("calibration") DistanceDistribution inputDistanceDistribution, EventsManager eventsManager,
-									   OutputDirectoryHierarchy controlerIO, BeelineDistancePlansTranslatorBasedOnEvents plansTranslator) {
+									   OutputDirectoryHierarchy controlerIO, BeelineDistancePlansTranslatorBasedOnEvents plansTranslator, BeelineDistanceCollector beelineDistanceCollector) {
 		this.scenario = scenario;
 		this.inputDistanceDistribution = inputDistanceDistribution;
 		this.plansTranslator = plansTranslator;
@@ -82,6 +83,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 		this.controlerIO = controlerIO;
 		this.countsScaleFactor = config.counts().getCountsScaleFactor();
 		this.modalDistanceBinMap = inputDistanceDistribution.getModalBins();
+		this.beelineDistanceCollector = beelineDistanceCollector;
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		// addModule() also initializes the config group with the values read from the config file
@@ -99,7 +101,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 
 	@Override
 	public void notifyStartup(StartupEvent event) {
-		this.simResults = new ModalDistanceSimResultsContainerImpl(countsScaleFactor);
+		this.simResults = new ModalDistanceSimResultsContainerImpl(beelineDistanceCollector, countsScaleFactor);
 		
 //		// this collects events and generates cadyts plans from it
 //		this.plansTranslator = new BeelineDistancePlansTranslatorBasedOnEvents(scenario, modalLinkContainer);

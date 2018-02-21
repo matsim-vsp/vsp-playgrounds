@@ -1,7 +1,6 @@
 package playground.agarwalamit.cadyts.marginals;
 
 import java.util.Map;
-import javax.inject.Inject;
 import cadyts.measurements.SingleLinkMeasurement.TYPE;
 import cadyts.supply.SimResults;
 import org.matsim.api.core.v01.Id;
@@ -10,18 +9,19 @@ import org.matsim.api.core.v01.Id;
 
     private static final long serialVersionUID = 1L;
 
-    @Inject
     private BeelineDistanceCollector beelineDistanceCollector;
     private final double countsScaleFactor;
 
-    ModalDistanceSimResultsContainerImpl(final double countsScaleFactor) {
+    ModalDistanceSimResultsContainerImpl(final BeelineDistanceCollector beelineDistanceCollector, final double countsScaleFactor) {
+        this.beelineDistanceCollector = beelineDistanceCollector;
         this.countsScaleFactor = countsScaleFactor;
     }
 
     @Override
     public double getSimValue(final ModalBin modalBin, final int low, final int high, final TYPE type) {
-
-        return this.beelineDistanceCollector.getOutputDistanceDistribution().getModalBinToDistanceBin().get(modalBin.getId()).getCount();
+        DistanceBin bin = this.beelineDistanceCollector.getOutputDistanceDistribution().getModalBinToDistanceBin().get(modalBin.getId());
+        if (bin==null) return 0.;
+        else return bin.getCount();
     }
 
     @Override

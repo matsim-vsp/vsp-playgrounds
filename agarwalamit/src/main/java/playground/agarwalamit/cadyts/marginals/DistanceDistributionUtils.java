@@ -19,7 +19,7 @@
 
 package playground.agarwalamit.cadyts.marginals;
 
-import java.util.SortedSet;
+import java.util.Set;
 import org.matsim.api.core.v01.Id;
 
 /**
@@ -28,13 +28,15 @@ import org.matsim.api.core.v01.Id;
 
 public class DistanceDistributionUtils {
 
-    private static final String idSeperator = "_&_";
+    private static final String ID_SEPERATOR = "_&_";
 
     public enum DistanceUnit {meter, kilometer}
 
     public enum DistanceDistributionFileLabels {mode, distanceLowerLimit, distanceUpperLimit, measuredCount}
 
-    public static DistanceBin.DistanceRange getDistanceRange(double distance, SortedSet<DistanceBin.DistanceRange> distanceRanges){
+    public static DistanceBin.DistanceRange getDistanceRange(double distance, Set<DistanceBin.DistanceRange> distanceRanges){
+        if(distanceRanges.isEmpty()) throw new RuntimeException("Distance range set is empty.");
+
         for(DistanceBin.DistanceRange distanceRange : distanceRanges) {
             if (distance >= distanceRange.getLowerLimit() && distance < distanceRange.getUpperLimit())
                 return distanceRange;
@@ -43,7 +45,7 @@ public class DistanceDistributionUtils {
     }
 
     public static Id<ModalBin> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
-        return Id.create( mode.concat( idSeperator ).concat( String.valueOf(distanceRange) ), ModalBin.class);
+        return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(distanceRange) ), ModalBin.class);
     }
 
 }

@@ -129,7 +129,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 		if (tmpPlanStepFactory != null) {
 						
 			// add the "turn" to the planStepfactory
-			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId.toString()), (int) event.getTime()); //TODO check if this time would matter?
+			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) event.getTime()); //TODO check if this time would matter?
 		}
 	}
 

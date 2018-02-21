@@ -38,13 +38,13 @@ public class ModalDistanceCadytsModule extends AbstractModule{
 
     @Override
     public void install() {
-        bind(DistanceDistribution.class).asEagerSingleton();
+        bind(DistanceDistribution.class).toInstance(inputDistanceDistrbution);
         bind(Key.get(new TypeLiteral<DistanceDistribution>(){}, Names.named("calibration"))).toInstance(inputDistanceDistrbution);
 
         bind(ModalDistanceCadytsContext.class).asEagerSingleton();
         addControlerListenerBinding().to(ModalDistanceCadytsContext.class);
 
-        bind(BeelineDistanceCollector.class).asEagerSingleton();
+        bind(BeelineDistanceCollector.class);
         bind(BeelineDistancePlansTranslatorBasedOnEvents.class).asEagerSingleton();
     }
 }

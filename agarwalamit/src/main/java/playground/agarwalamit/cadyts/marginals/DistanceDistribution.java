@@ -25,9 +25,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -118,14 +118,14 @@ public class DistanceDistribution {
 
     }
 
-    public TreeSet<DistanceBin.DistanceRange> getDistanceRanges(String mode) {
+    public Set<DistanceBin.DistanceRange> getDistanceRanges(String mode) {
         // don't let anyone change the distribution after this call.
         locked = true;
         return this.modalBinMappings.values()
                                     .stream()
                                     .filter(m -> m.getMode().equals(mode))
                                     .map(ModalBin::getDistanceRange)
-                                    .collect(Collectors.toCollection(TreeSet::new));
+                                    .collect(Collectors.toSet());
     }
 
     public Map<Id<ModalBin>, ModalBin> getModalBins() {
