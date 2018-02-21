@@ -34,7 +34,7 @@ public final class ModalBin implements Identifiable<ModalBin> {
 	private final DistanceBin.DistanceRange distanceRange;
 	private final Id<ModalBin> id;
 	
-	private static final String separator = "_&_";
+
 	
 	public String getMode() {
 		return mode;
@@ -48,11 +48,7 @@ public final class ModalBin implements Identifiable<ModalBin> {
 	ModalBin(final String mode, final DistanceBin.DistanceRange distanceRange) {
 		this.mode = mode;
 		this.distanceRange = distanceRange;
-		this.id = Id.create( this.mode.concat( getModeDistanceBinSplitter() ).concat( String.valueOf(distanceRange) ), ModalBin.class);
-	}
-
-	public static String getModeDistanceBinSplitter(){
-		return separator;
+		this.id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
 	}
 
 	@Override

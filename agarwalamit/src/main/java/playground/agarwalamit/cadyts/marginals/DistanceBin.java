@@ -46,9 +46,10 @@ public class DistanceBin {
 
     @Override
     public String toString() {
-        return "DistanceBin[" +
+        return "DistanceBin{" +
                 "distanceRange=" + distanceRange +
-                ']';
+                ", count=" + count +
+                '}';
     }
 
     public static class DistanceRange {

@@ -21,7 +21,6 @@ package playground.agarwalamit.cadyts.marginals;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 import javax.inject.Inject;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -43,7 +42,7 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
 
     private final Network network;
     private final PlansCalcRouteConfigGroup configGroup;
-    private final TreeSet<DistanceBin.DistanceRange> distanceRanges;
+    private final DistanceDistribution inputDistanceDistribution;
 
     private final DistanceDistribution outputDistanceDistribution = new DistanceDistribution();
 
@@ -57,7 +56,7 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
         eventsManager.addHandler(this);
         this.network = network;
         this.configGroup = plansCalcRouteConfigGroup;
-        this.distanceRanges = inputDistanceDistribution.getDistanceRanges();
+        this.inputDistanceDistribution = inputDistanceDistribution;
     }
 
     private final Map<Id<Person>, Coord> personToOriginCoord = new HashMap<>();
@@ -69,11 +68,14 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
         Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
         Coord destinationCoord = this.network.getLinks().get(event.getLinkId()).getToNode().getCoord();
 
-        //TODO check if we should include beeline distance factor
-        double beelineDistance = this.configGroup.getModeRoutingParams().get(mode).getBeelineDistanceFactor() *
+        //TODO check if we should include beeline distance factor which is not available for network mdoes
+        PlansCalcRouteConfigGroup.ModeRoutingParams params = this.configGroup.getModeRoutingParams().get(mode);
+        double beelineDistanceFactor = 1.3;
+        if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
+        double beelineDistance = beelineDistanceFactor *
                 NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
 
-        DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.distanceRanges);
+        DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
         outputDistanceDistribution.addToDistribution(mode, distanceRange, +1);
     }
 

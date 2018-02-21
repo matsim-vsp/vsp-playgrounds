@@ -73,7 +73,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 
 	@Inject
 	private ModalDistanceCadytsContext(Config config, Scenario scenario, @Named("calibration") DistanceDistribution inputDistanceDistribution, EventsManager eventsManager,
-									   OutputDirectoryHierarchy controlerIO, Map<Id<ModalBin>,ModalBin> modalDistanceBinMap, BeelineDistancePlansTranslatorBasedOnEvents plansTranslator) {
+									   OutputDirectoryHierarchy controlerIO, BeelineDistancePlansTranslatorBasedOnEvents plansTranslator) {
 		this.scenario = scenario;
 		this.inputDistanceDistribution = inputDistanceDistribution;
 		this.plansTranslator = plansTranslator;
@@ -81,13 +81,13 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 		this.eventsManager = eventsManager;
 		this.controlerIO = controlerIO;
 		this.countsScaleFactor = config.counts().getCountsScaleFactor();
-		this.modalDistanceBinMap = modalDistanceBinMap;
+		this.modalDistanceBinMap = inputDistanceDistribution.getModalBins();
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		// addModule() also initializes the config group with the values read from the config file
 		cadytsConfig.setWriteAnalysisFile(true);
 
-		cadytsConfig.setCalibratedItems(modalDistanceBinMap.keySet().stream().map(e->e.toString()).collect(Collectors.toSet()));
+		cadytsConfig.setCalibratedItems(modalDistanceBinMap.keySet().stream().map(Object::toString).collect(Collectors.toSet()));
 		
 		this.writeAnalysisFile = cadytsConfig.isWriteAnalysisFile();
 	}

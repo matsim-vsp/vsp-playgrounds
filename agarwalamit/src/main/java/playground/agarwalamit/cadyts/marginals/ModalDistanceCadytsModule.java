@@ -19,11 +19,9 @@
 
 package playground.agarwalamit.cadyts.marginals;
 
-import java.util.Map;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
-import org.matsim.api.core.v01.Id;
 import org.matsim.core.controler.AbstractModule;
 
 /**
@@ -40,8 +38,8 @@ public class ModalDistanceCadytsModule extends AbstractModule{
 
     @Override
     public void install() {
+        bind(DistanceDistribution.class).asEagerSingleton();
         bind(Key.get(new TypeLiteral<DistanceDistribution>(){}, Names.named("calibration"))).toInstance(inputDistanceDistrbution);
-        bind(Key.get(new TypeLiteral<Map<Id<ModalBin>, ModalBin>>(){})).toInstance(inputDistanceDistrbution.getModalBins());
 
         bind(ModalDistanceCadytsContext.class).asEagerSingleton();
         addControlerListenerBinding().to(ModalDistanceCadytsContext.class);

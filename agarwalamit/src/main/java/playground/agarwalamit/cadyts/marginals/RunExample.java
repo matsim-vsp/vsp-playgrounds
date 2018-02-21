@@ -28,6 +28,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
@@ -49,11 +50,14 @@ public class RunExample {
         String configFile = "/Users/amit/Documents/git/matsim-code-examples/scenarios/equil-mixedTraffic/config-with-mode-vehicles.xml";
         double cadytsWt = 0.15;
         Config config = ConfigUtils.loadConfig(configFile);
+
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         String distanceDistributionFile = "/Users/amit/Documents/gitlab/mercator-nemo/doc/40_documents/validation/distanceDistriEssen.txt";
         DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
-        inputDistanceDistribution.fillDistanceDistribution(distanceDistributionFile, DistanceDistributionUtils.DistanceUnit.meter,"/t");
+        inputDistanceDistribution.fillDistanceDistribution(distanceDistributionFile, DistanceDistributionUtils.DistanceUnit.meter,"\t");
 
         Controler controler = new Controler(scenario);
 

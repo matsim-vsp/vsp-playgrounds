@@ -20,12 +20,15 @@
 package playground.agarwalamit.cadyts.marginals;
 
 import java.util.SortedSet;
+import org.matsim.api.core.v01.Id;
 
 /**
  * Created by amit on 21.02.18.
  */
 
 public class DistanceDistributionUtils {
+
+    private static final String idSeperator = "_&_";
 
     public enum DistanceUnit {meter, kilometer}
 
@@ -37,6 +40,10 @@ public class DistanceDistributionUtils {
                 return distanceRange;
         }
         throw new RuntimeException("No distance range found for "+ distance);
+    }
+
+    public static Id<ModalBin> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
+        return Id.create( mode.concat( idSeperator ).concat( String.valueOf(distanceRange) ), ModalBin.class);
     }
 
 }

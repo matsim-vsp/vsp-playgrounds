@@ -22,21 +22,18 @@ package playground.agarwalamit.cadyts.marginals;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.*;
+import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.DistanceDistributionFileLabels;
+import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.DistanceUnit;
 
 /**
  * Created by amit on 21.02.18.
@@ -46,7 +43,8 @@ public class DistanceDistribution {
 
     private static final Logger LOG = Logger.getLogger(DistanceDistribution.class);
 
-    private final SortedMap<String, Set<DistanceBin>> mode2DistanceBins = new TreeMap<>();
+    private final SortedMap<Id<ModalBin>, DistanceBin> mode2DistanceBins = new TreeMap<>();
+    private final Map<Id<ModalBin>, ModalBin> modalBinMappings = new HashMap<>();
     private boolean locked = false;
 
     public void fillDistanceDistribution(String inputFile, DistanceUnit distanceUnit, String itemSeparator) {
@@ -55,6 +53,8 @@ public class DistanceDistribution {
         }
 
         LOG.info("Generating distance distribution from file :" + inputFile);
+        LOG.info("Header of the file must contain following labels (order is not important): " + Arrays.stream(
+                DistanceDistributionFileLabels.values()).map(e -> e.toString() + "\t").reduce("", String::concat));
         // let's assume that input file has headers as
         try (BufferedReader reader = IOUtils.getBufferedReader(inputFile)) {
             String line = reader.readLine();
@@ -65,23 +65,32 @@ public class DistanceDistribution {
 
                 if (labels == null) {
                     labels = Arrays.asList(parts);
+                    if (labels.size() != DistanceDistributionFileLabels.values().length) {
+                        LOG.warn("Labels in the files are " + labels + ". However, desired labels are " + Arrays.stream(
+                                DistanceDistributionFileLabels.values()).map(Enum::toString).reduce(",", String::concat));
+                    }
                 } else {
-
                     DistanceBin.DistanceRange range = new DistanceBin.DistanceRange(
-                            getMultiplierToConvertInMeter( distanceUnit) * Double.valueOf(parts[labels.indexOf(
+                            getMultiplierToConvertInMeter(distanceUnit) * Double.valueOf(parts[labels.indexOf(
                                     DistanceDistributionFileLabels.distanceLowerLimit.toString())]),
-                            getMultiplierToConvertInMeter( distanceUnit) * Double.valueOf(parts[labels.indexOf(
+                            getMultiplierToConvertInMeter(distanceUnit) * Double.valueOf(parts[labels.indexOf(
                                     DistanceDistributionFileLabels.distanceUpperLimit.toString())])
                     );
-                    DistanceBin bin = new DistanceBin(range);
-                    bin.addToCount(Double.valueOf(parts[labels.indexOf(DistanceDistributionFileLabels.measuredCount.toString())]));
 
                     String mode = parts[labels.indexOf(DistanceDistributionFileLabels.mode.toString())];
 
-                    Set<DistanceBin> bins = this.mode2DistanceBins.getOrDefault(mode, new HashSet<>());
-                    bins.add(bin);
-                    this.mode2DistanceBins.put(mode, bins);
+                    Id<ModalBin> modalBinId = DistanceDistributionUtils.getModalBinId(mode, range);
 
+                    DistanceBin bin = this.mode2DistanceBins.getOrDefault(modalBinId, new DistanceBin(range));
+                    bin.addToCount(Double.valueOf(parts[labels.indexOf(DistanceDistributionFileLabels.measuredCount.toString())]));
+                    this.mode2DistanceBins.put(modalBinId, bin);
+                    //
+                    if (this.modalBinMappings.get(modalBinId) == null) {
+                        this.modalBinMappings.put(modalBinId, new ModalBin(mode, range));
+                    } else{
+                        // assuming, only one file will be passed.
+                        throw new RuntimeException("The modalBin id "+modalBinId+" already exists.");
+                    }
                 }
 
                 line = reader.readLine();
@@ -92,58 +101,39 @@ public class DistanceDistribution {
         }
     }
 
+    // would be used during simulation
     public void addToDistribution(String mode, DistanceBin.DistanceRange distanceRange, double val) {
         if (locked) {
             throw new RuntimeException("Can't add any other data to distribution.");
         }
 
-        Set<DistanceBin> bins = this.mode2DistanceBins.getOrDefault(mode, new HashSet<>());
-        DistanceBin bin = bins.stream()
-                              .filter(b -> b.getDistanceRange().equals(distanceRange))
-                              .findFirst()
-                              .orElseGet(() -> new DistanceBin(distanceRange));
+        Id<ModalBin> id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
+        DistanceBin bin = this.mode2DistanceBins.getOrDefault(id, new DistanceBin(distanceRange));
         bin.addToCount(val);
-        bins.add(bin);
-        this.mode2DistanceBins.put(mode, bins);
+        this.mode2DistanceBins.put(id, bin);
+        //
+        if (this.modalBinMappings.get(id) == null) {
+            this.modalBinMappings.put(id, new ModalBin(mode, distanceRange));
+        }
+
     }
 
-    public SortedSet<String> getModes(){
-        return new TreeSet<>(this.mode2DistanceBins.keySet());
-    }
-
-    public TreeSet<DistanceBin.DistanceRange> getDistanceRanges() {
+    public TreeSet<DistanceBin.DistanceRange> getDistanceRanges(String mode) {
         // don't let anyone change the distribution after this call.
         locked = true;
-        return this.mode2DistanceBins.values()
-                                     .stream()
-                                     .flatMap(Collection::stream)
-                                     .map(DistanceBin::getDistanceRange)
-                                     .distinct()
-                                     .collect(Collectors.toCollection(TreeSet::new));
+        return this.modalBinMappings.values()
+                                    .stream()
+                                    .filter(m -> m.getMode().equals(mode))
+                                    .map(ModalBin::getDistanceRange)
+                                    .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    public Map<Id<ModalBin>, ModalBin> getModalBins(){
-        Map<Id<ModalBin>, ModalBin> modalDistanceBinMap = new HashMap<>();
-        for(String mode : this.mode2DistanceBins.keySet()){
-            for (DistanceBin bin : this.mode2DistanceBins.get(mode)){
-                DistanceBin.DistanceRange range = bin.getDistanceRange();
-                ModalBin modalDistanceBin = new ModalBin(mode, range);
-                modalDistanceBinMap.put(modalDistanceBin.getId(), modalDistanceBin);
-            }
-        }
-        return modalDistanceBinMap;
+    public Map<Id<ModalBin>, ModalBin> getModalBins() {
+        return this.modalBinMappings;
     }
 
-    public Map<Id<ModalBin>, DistanceBin> getModalBinToDistanceBin(){
-        Map<Id<ModalBin>, DistanceBin> modalDistanceBinMap = new HashMap<>();
-        for(String mode : this.mode2DistanceBins.keySet()){
-            for (DistanceBin bin : this.mode2DistanceBins.get(mode)){
-                DistanceBin.DistanceRange range = bin.getDistanceRange();
-                ModalBin modalDistanceBin = new ModalBin(mode, range);
-                modalDistanceBinMap.put(modalDistanceBin.getId(), bin);
-            }
-        }
-        return modalDistanceBinMap;
+    public Map<Id<ModalBin>, DistanceBin> getModalBinToDistanceBin() {
+        return this.mode2DistanceBins;
     }
 
     private double getMultiplierToConvertInMeter(DistanceUnit distanceUnit) {

@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import javax.inject.Inject;
 import cadyts.demand.PlanBuilder;
 import org.apache.log4j.Logger;
@@ -38,6 +37,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
+import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
 
 class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalBin>, PersonDepartureEventHandler,
@@ -58,14 +58,14 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	private static final String STR_PLANSTEPFACTORY = "planStepFactory_marginals";
 	private static final String STR_ITERATION = "iteration_marginals";
 
-	private final Map<String, ModalBin> modalDistanceBinMap;
-	private final TreeSet<DistanceBin.DistanceRange> distanceRanges;
+	private final Map<Id<ModalBin>, ModalBin> modalDistanceBinMap;
+	private final DistanceDistribution inputDistanceDistribution;
 
 	@Inject
-    BeelineDistancePlansTranslatorBasedOnEvents(final Scenario scenario, Map<String,ModalBin> modalDistanceBinMap, DistanceDistribution inputDistanceDistribution) {
+    BeelineDistancePlansTranslatorBasedOnEvents(final Scenario scenario, DistanceDistribution inputDistanceDistribution) {
 		this.scenario = scenario;
-		this.modalDistanceBinMap = modalDistanceBinMap;
-		this.distanceRanges = inputDistanceDistribution.getDistanceRanges();
+		this.inputDistanceDistribution = inputDistanceDistribution;
+		this.modalDistanceBinMap = inputDistanceDistribution.getModalBins();
 	}
 
 	private long plansFound = 0;
@@ -101,21 +101,21 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	public void handleEvent(PersonArrivalEvent event) {
 		String mode  = event.getLegMode();
 
-		// only process desired modes
-		if ( this.modalDistanceBinMap.get(mode)==null ) return;
-
 		Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
 		Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord();
 
-		//TODO check if we should include beeline distance factor
-		double beelineDistance = this.scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode).getBeelineDistanceFactor() *
+		//TODO check if we should include beeline distance factor which is not available for network mdoes
+		PlansCalcRouteConfigGroup.ModeRoutingParams params = this.scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode);
+		double beelineDistanceFactor = 1.3;
+		if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
+		double beelineDistance = beelineDistanceFactor *
 				NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
 
-		DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.distanceRanges);
+		DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
 
 		// if only a subset of links is calibrated but the link is not contained, ignore the event
 		Id<ModalBin> mlId = Id.create(new ModalBin(mode, distanceRange).getId(), ModalBin.class);
-		if (this.modalDistanceBinMap.get(mlId.toString()) == null) return;
+		if (this.modalDistanceBinMap.get(mlId) == null) return;
 
 		// get the "Person" behind the id:
 		Person person = this.scenario.getPopulation().getPersons().get(event.getPersonId());
