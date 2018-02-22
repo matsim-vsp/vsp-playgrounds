@@ -63,7 +63,8 @@ public class CemdapStopsParser {
 
 	private int activityDurationThreshold_s = Integer.MIN_VALUE;
 
-
+	public static final String CEMDAP_STOP_DURATION_S_ATTRIBUTE_NAME = "cemdapStopDuration_s";
+	
 	public CemdapStopsParser() {
 	}
 
@@ -129,8 +130,8 @@ public class CemdapStopsParser {
 
 				int stopDuration = Integer.parseInt(entries[STOP_DUR]) * 60;
 				double endTime = departureTime + Integer.parseInt(entries[TRAVEL_TIME_TO_STOP]) * 60 + stopDuration;
+				activity.getAttributes().putAttribute(CEMDAP_STOP_DURATION_S_ATTRIBUTE_NAME, stopDuration);
 				if (endTime < 97200.) { // Set end time only if it is not the last activity of the day; 97200s = 24h+3h
-					activity.getAttributes().putAttribute("cemdapStopDuration_s", stopDuration);
 					if (stopDuration <= activityDurationThreshold_s) {
 						activity.setMaximumDuration(stopDuration);
 					} else {
