@@ -111,8 +111,13 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 		//TODO check if we should include beeline distance factor which is not available for network mdoes
 		PlansCalcRouteConfigGroup.ModeRoutingParams params = this.scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode);
-		double beelineDistanceFactor = 1.3;
+		double beelineDistanceFactor = 1.0;
 		if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
+		else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
+			beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
+		} else{
+			log.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
+		}
 		double beelineDistance = beelineDistanceFactor *
 				NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
 

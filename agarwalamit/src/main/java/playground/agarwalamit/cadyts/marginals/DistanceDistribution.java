@@ -45,6 +45,7 @@ public class DistanceDistribution {
 
     private final SortedMap<Id<ModalBin>, DistanceBin> mode2DistanceBins = new TreeMap<>();
     private final Map<Id<ModalBin>, ModalBin> modalBinMappings = new HashMap<>();
+    private final Map<String, Double> modeToBeelineDistanceFactor = new HashMap<>();
     private boolean locked = false;
 
     public void fillDistanceDistribution(String inputFile, DistanceUnit distanceUnit, String itemSeparator) {
@@ -145,5 +146,13 @@ public class DistanceDistribution {
             default:
                 throw new RuntimeException("not implemented yet.");
         }
+    }
+
+    public void setBeelineDistanceFactorForNetworkModes(String mode, double beelineDistanceFactorForNetworkModes) {
+        this.modeToBeelineDistanceFactor.put(mode,beelineDistanceFactorForNetworkModes);
+    }
+
+    public Map<String, Double> getModeToBeelineDistanceFactor() {
+        return modeToBeelineDistanceFactor;
     }
 }
