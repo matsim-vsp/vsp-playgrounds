@@ -35,6 +35,7 @@ import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
@@ -53,18 +54,27 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 public class RunExample {
 
     public static void main(String[] args) {
+        String configFile = "../../git/matsim-code-examples/scenarios/equil-mixedTraffic/config-with-mode-vehicles.xml";
+        String outputDir = "";
+        double cadytsWt = 2500.;
+        int lastIt =20;
 
-        String configFile = "/Users/amit/Documents/git/matsim-code-examples/scenarios/equil-mixedTraffic/config-with-mode-vehicles.xml";
-        double cadytsWt = 2000;
-        double beta = 1.;
+        if (args.length>0){
+            configFile = args[0];
+            outputDir = args[1];
+            cadytsWt = Double.valueOf(args[2]);
+            lastIt = Integer.valueOf(args[3]);
+        }
+
         double beelineDistanceFactorForNetworkModes = 1.0;
 
         Config config = ConfigUtils.loadConfig(configFile);
-        config.planCalcScore().setBrainExpBeta(beta);
+        config.controler().setOutputDirectory(outputDir);
+
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        config.controler().setLastIteration(20);
+        config.controler().setLastIteration(lastIt);
         config.counts().setWriteCountsInterval(1);
-        config.counts().setAverageCountsOverIterations(3);
+        config.counts().setAverageCountsOverIterations(4);
 
         // add mode choice to it
         StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
@@ -72,7 +82,7 @@ public class RunExample {
         modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.name());
         modeChoice.setWeight(0.15);
         config.strategy().addStrategySettings(modeChoice);
-        config.changeMode().setModes(new String[]{"car","bicycle"});
+        config.changeMode().setModes(new String[]{"car", "bicycle"});
         config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 
         config.planCalcScore().getOrCreateModeParams("car").setConstant(-2);
@@ -80,21 +90,7 @@ public class RunExample {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         addPersonsWithShortTrips(scenario);
 
-        DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
-        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("car",beelineDistanceFactorForNetworkModes);
-        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
-
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.0,6000.),2);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.0,6000.),8);
-
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(6000.0,12000.),4);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(6000.0,12000.),4);
-
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(12000.0,18000.),5);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(12000.0,18000.),2);
-
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(18000.0,86000.),20);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(18000.0,86000.),0);
+        DistanceDistribution inputDistanceDistribution = getInputDistanceDistribution(beelineDistanceFactorForNetworkModes);
 
         Controler controler = new Controler(scenario);
 
@@ -136,7 +132,25 @@ public class RunExample {
             }
         });
         controler.run();
+    }
 
+    private static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
+        DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
+        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("car",beelineDistanceFactorForNetworkModes);
+        inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
+
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.0,6000.),2);
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.0,6000.),8);
+
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(6000.0,12000.),4);
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(6000.0,12000.),4);
+
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(12000.0,18000.),5);
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(12000.0,18000.),2);
+
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(18000.0,86000.),20);
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(18000.0,86000.),0);
+        return inputDistanceDistribution;
     }
 
     private static void addPersonsWithShortTrips(Scenario scenario) {
@@ -156,58 +170,40 @@ public class RunExample {
         // beeline dists for each trip link1 to link20 (or link20 to link1) --->20km
 
         // short trips
-        createPersonAndPlan(population, network, 9, 18, 100); //node10-node12 = 4.98 km
-        createPersonAndPlan(population, network, 9, 18, 300); //node10-node12 = 4.98 km
-        createPersonAndPlan(population, network, 9, 18, 800); //node10-node12 = 4.98 km
+        createPersonAndPlan(population, network, 9, 18, 3); //node10-node12 = 4.98 km
 
-        createPersonAndPlan(population, network, 5, 14, 100); //node6-node12 = 4.99 km
-        createPersonAndPlan(population, network, 5, 14, 250); //node6-node12 = 4.99 km
-        createPersonAndPlan(population, network, 5, 14, 900); //node6-node12 = 4.99 km
+        createPersonAndPlan(population, network, 5, 14, 3); //node6-node12 = 4.99 km
 
-        createPersonAndPlan(population, network, 23, 1, 100); //node1-node2 = 5 km
-        createPersonAndPlan(population, network, 23, 1, 800); //node1-node2 = 5 km
-        createPersonAndPlan(population, network, 6, 15, 50); //node7-node12 = 5 km
-        createPersonAndPlan(population, network, 6, 15, 100); //node7-node12 = 5 km
+        createPersonAndPlan(population, network, 23, 1, 4); //node1-node2 = 5 km
 
-        createPersonAndPlan(population, network, 1, 6, 90); //node2-node7 = 10 km
-        createPersonAndPlan(population, network, 1, 6, 500); //node2-node7 = 10 km
-        createPersonAndPlan(population, network, 1, 6, 300); //node2-node7 = 10 km
-        createPersonAndPlan(population, network, 1, 6, 1000); //node2-node7 = 10 km
+        createPersonAndPlan(population, network, 1, 6, 4); //node2-node7 = 10 km
 
-        createPersonAndPlan(population, network, 15, 21, 1000); //node12-node14 = 11.18 km
-        createPersonAndPlan(population, network, 15, 21, 200); //node12-node14 = 11.18 km
-        createPersonAndPlan(population, network, 15, 21, 900); //node12-node14 = 11.18 km
-        createPersonAndPlan(population, network, 15, 21, 550); //node12-node14 = 11.18 km
+        createPersonAndPlan(population, network, 15, 21, 4); //node12-node14 = 11.18 km
 
-        createPersonAndPlan(population, network, 1, 15, 600); //node2-node12 = 15 km
-        createPersonAndPlan(population, network, 1, 15, 100); //node2-node12 = 15 km
-        createPersonAndPlan(population, network, 1, 15, 1000); //node2-node12 = 15 km
+        createPersonAndPlan(population, network, 1, 15, 3); //node2-node12 = 15 km
 
-        createPersonAndPlan(population, network, 1, 2, 200); //node2-node3 = 17 km
-        createPersonAndPlan(population, network, 1, 2, 600); //node2-node3 = 17 km
-        createPersonAndPlan(population, network, 1, 2, 900); //node2-node3 = 17 km
-        createPersonAndPlan(population, network, 1, 2, 600); //node2-node3 = 17 km
+        createPersonAndPlan(population, network, 1, 2, 4); //node2-node3 = 17 km
     }
 
-    private static void createPersonAndPlan(Population population, Network network, int startLinkId, int endLinkId, int factor) {
-        Id<Person> personId = Id.createPersonId(population.getPersons().size() + 1);
-        Person person = population.getFactory().createPerson(personId);
-        Plan plan = population.getFactory().createPlan();
-        //link23 to link 1
-        Activity h = population.getFactory()
-                               .createActivityFromCoord("h",
-                                       network.getLinks().get(Id.createLinkId(startLinkId)).getCoord());
-        h.setEndTime(6. * 3600. + factor);
-        plan.addActivity(h);
-        plan.addLeg(population.getFactory().createLeg("car"));
-        Activity w = population.getFactory()
-                               .createActivityFromCoord("w",
-                                       network.getLinks().get(Id.createLinkId(endLinkId)).getCoord());
-        w.setEndTime(16. * 3600. + factor);
-        plan.addActivity(w);
-        person.addPlan(plan);
-        population.addPerson(person);
+    private static void createPersonAndPlan(Population population, Network network, int startLinkId, int endLinkId, int numberOfPlans) {
+        for (int i = 0; i<numberOfPlans; i++){
+            Id<Person> personId = Id.createPersonId(population.getPersons().size() + 1);
+            Person person = population.getFactory().createPerson(personId);
+            Plan plan = population.getFactory().createPlan();
+            //link23 to link 1
+            Activity h = population.getFactory()
+                                   .createActivityFromCoord("h",
+                                           network.getLinks().get(Id.createLinkId(startLinkId)).getCoord());
+            h.setEndTime(6. * 3600. + MatsimRandom.getRandom().nextInt(startLinkId*60));
+            plan.addActivity(h);
+            plan.addLeg(population.getFactory().createLeg("car"));
+            Activity w = population.getFactory()
+                                   .createActivityFromCoord("w",
+                                           network.getLinks().get(Id.createLinkId(endLinkId)).getCoord());
+            w.setEndTime(16. * 3600. + MatsimRandom.getRandom().nextInt(endLinkId*60));
+            plan.addActivity(w);
+            person.addPlan(plan);
+            population.addPerson(person);
+        }
     }
-
-
 }

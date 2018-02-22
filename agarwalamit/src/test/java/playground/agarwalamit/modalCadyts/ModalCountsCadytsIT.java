@@ -72,7 +72,7 @@ import playground.agarwalamit.cadyts.multiModeCadyts.ModalLink;
 /**
  * amit after CadytsCarIT in cadyts contrib.
  */
-public class ModalCadytsIT {
+public class ModalCountsCadytsIT {
 
 	@Rule
 	public MatsimTestUtils utils = new MatsimTestUtils();
