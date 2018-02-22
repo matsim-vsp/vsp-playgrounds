@@ -41,6 +41,8 @@ import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.Distanc
 public class ModalDistanceDistributionControlerListener implements StartupListener, IterationEndsListener {
     private static final Logger LOG = Logger.getLogger(ModalDistanceDistributionControlerListener.class);
 
+    public static final String fileName = "multiMode_distanceDistributionCounts.txt";
+
     private final ControlerConfigGroup controlerConfigGroup;
     private final CountsConfigGroup config;
     private final DistanceDistribution inputDistanceDistribution;
@@ -113,7 +115,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
 
     private void writeData(final IterationEndsEvent event, DistanceDistribution averages) {
         String filename = controlerIO.getIterationFilename(event.getIteration(),
-                "multiMode_distanceDistributionCounts.txt");
+                fileName);
         try (BufferedWriter writer = IOUtils.getBufferedWriter(filename)) {
             writer.write(DistanceDistributionFileLabels.mode + "\t" +
                     DistanceDistributionFileLabels.distanceLowerLimit + "\t" +

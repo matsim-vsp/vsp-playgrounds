@@ -32,7 +32,7 @@ public class ModalDistanceCadytsModule extends AbstractModule{
 
     private final DistanceDistribution inputDistanceDistrbution;
 
-    ModalDistanceCadytsModule(DistanceDistribution inputDistanceDistrbution){
+    public ModalDistanceCadytsModule(DistanceDistribution inputDistanceDistrbution){
         this.inputDistanceDistrbution = inputDistanceDistrbution;
     }
 
