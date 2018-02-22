@@ -55,8 +55,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
     private final Set<Plan> plansEverSeen = new HashSet<>();
 
 	//<--a problem may appear if using following same strings with multiple Cadyts contexts. Amit Feb'18-->
-	private static final String STR_PLANSTEPFACTORY = "planStepFactory_marginals";
-	private static final String STR_ITERATION = "iteration_marginals";
+	private static final String STR_PLANSTEPFACTORY = "planStepFactory"+ModalDistanceCadytsBuilderImpl.MARGINALS;
+	private static final String STR_ITERATION = "iteration"+ModalDistanceCadytsBuilderImpl.MARGINALS;
 
 	private final Map<Id<ModalBin>, ModalBin> modalDistanceBinMap;
 	private final DistanceDistribution inputDistanceDistribution;
@@ -138,8 +138,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 		
 		if (tmpPlanStepFactory != null) {
 						
-			// add the "turn" to the planStepfactory
-			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) event.getTime()); //TODO check if this time would matter?
+			//this beeline distance is being checked from start_time (lower_limit) and end_time (upper_limit)
+			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) beelineDistance);
 		}
 	}
 
