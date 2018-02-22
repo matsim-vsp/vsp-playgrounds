@@ -101,6 +101,11 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	public void handleEvent(PersonArrivalEvent event) {
 		String mode  = event.getLegMode();
 
+		if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
+			log.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
+			return;
+		}
+
 		Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
 		Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord();
 

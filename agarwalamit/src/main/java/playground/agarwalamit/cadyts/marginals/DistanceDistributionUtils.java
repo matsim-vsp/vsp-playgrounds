@@ -35,7 +35,7 @@ public class DistanceDistributionUtils {
     public enum DistanceDistributionFileLabels {mode, distanceLowerLimit, distanceUpperLimit, measuredCount}
 
     public static DistanceBin.DistanceRange getDistanceRange(double distance, Set<DistanceBin.DistanceRange> distanceRanges){
-        if(distanceRanges.isEmpty()) throw new RuntimeException("Distance range set is empty.");
+//        if(distanceRanges.isEmpty()) throw new RuntimeException("Distance range set is empty.");
 
         for(DistanceBin.DistanceRange distanceRange : distanceRanges) {
             if (distance >= distanceRange.getLowerLimit() && distance < distanceRange.getUpperLimit())
