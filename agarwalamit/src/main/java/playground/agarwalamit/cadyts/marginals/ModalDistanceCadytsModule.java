@@ -46,5 +46,7 @@ public class ModalDistanceCadytsModule extends AbstractModule{
 
         bind(BeelineDistanceCollector.class);
         bind(BeelineDistancePlansTranslatorBasedOnEvents.class).asEagerSingleton();
+
+        addControlerListenerBinding().to(ModalDistanceDistributionControlerListener.class);
     }
 }

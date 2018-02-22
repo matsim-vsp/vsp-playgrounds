@@ -47,7 +47,7 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
     private final PlansCalcRouteConfigGroup configGroup;
     private final DistanceDistribution inputDistanceDistribution;
 
-    private final DistanceDistribution outputDistanceDistribution = new DistanceDistribution();
+    private DistanceDistribution outputDistanceDistribution = new DistanceDistribution();
 
     @Inject
     public BeelineDistanceCollector(
@@ -99,6 +99,7 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
     @Override
     public void reset(int iteration) {
         this.personToOriginCoord.clear();
+        this.outputDistanceDistribution = new DistanceDistribution();
     }
 
     public DistanceDistribution getOutputDistanceDistribution() {
