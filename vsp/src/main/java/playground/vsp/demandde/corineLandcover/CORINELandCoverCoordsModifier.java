@@ -93,7 +93,6 @@ public class CORINELandCoverCoordsModifier {
             for (SimpleFeature feature : features) {
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(key));
-//                String shapeId = ((String) feature.getAttribute(key));
 
                 if (zoneFeatures.get(shapeId) != null) { // union geoms corresponding to same zone id.
                     zoneFeatures.put(shapeId,
@@ -220,7 +219,7 @@ public class CORINELandCoverCoordsModifier {
                             } else {
                                 Point point = MGC.coord2Point(coord);
                                 if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
-                                    coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other); // TODO: Check: Was set to 'home' in a previous version. IK
+                                    coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
                                 }
                                 activity.setCoord(coord);
                             }
