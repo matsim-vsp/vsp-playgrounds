@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.agarwalamit.cadyts.marginals.prep;
 
 /**
  * Created by amit on 21.02.18.

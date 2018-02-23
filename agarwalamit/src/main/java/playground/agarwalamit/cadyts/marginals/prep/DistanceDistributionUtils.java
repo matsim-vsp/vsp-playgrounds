@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.agarwalamit.cadyts.marginals.prep;
 
 import java.util.Set;
 import org.matsim.api.core.v01.Id;
@@ -44,8 +44,8 @@ public class DistanceDistributionUtils {
         throw new RuntimeException("No distance range found for "+ distance);
     }
 
-    public static Id<ModalBin> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
-        return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(distanceRange) ), ModalBin.class);
+    public static Id<ModalBinIdentifier> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
+        return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(distanceRange) ), ModalBinIdentifier.class);
     }
 
 }

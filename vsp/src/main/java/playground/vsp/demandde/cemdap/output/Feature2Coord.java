@@ -30,8 +30,8 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
-import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
-import playground.vsp.demandde.corineLandcover.LandCoverUtils;
+import playground.vsp.corineLandcover.CorineLandCoverData;
+import playground.vsp.corineLandcover.LandCoverUtils;
 
 /**
  * @author dziemke

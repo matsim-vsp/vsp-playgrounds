@@ -29,6 +29,7 @@ import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.LookUpItemFromId;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
 
 /**
  * @author nagel

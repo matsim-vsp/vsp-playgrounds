@@ -33,8 +33,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.cemdap.output.ActivityTypes;
 import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
 import playground.vsp.demandde.cemdap.output.CemdapStopsParser;
-import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
-import playground.vsp.demandde.corineLandcover.LandCoverUtils;
+import playground.vsp.corineLandcover.CorineLandCoverData;
+import playground.vsp.corineLandcover.LandCoverUtils;
 
 /**
  * @author dziemke

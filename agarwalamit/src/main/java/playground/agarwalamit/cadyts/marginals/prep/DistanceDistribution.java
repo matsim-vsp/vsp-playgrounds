@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.agarwalamit.cadyts.marginals.prep;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.DistanceDistributionFileLabels;
-import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.DistanceUnit;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils.DistanceUnit;
 
 /**
  * Created by amit on 21.02.18.
@@ -43,8 +43,8 @@ public class DistanceDistribution {
 
     private static final Logger LOG = Logger.getLogger(DistanceDistribution.class);
 
-    private final SortedMap<Id<ModalBin>, DistanceBin> mode2DistanceBins = new TreeMap<>();
-    private final Map<Id<ModalBin>, ModalBin> modalBinMappings = new HashMap<>();
+    private final SortedMap<Id<ModalBinIdentifier>, DistanceBin> mode2DistanceBins = new TreeMap<>();
+    private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> modalBinMappings = new HashMap<>();
     private final Map<String, Double> modeToBeelineDistanceFactor = new HashMap<>();
     private boolean locked = false;
 
@@ -80,14 +80,14 @@ public class DistanceDistribution {
 
                     String mode = parts[labels.indexOf(DistanceDistributionFileLabels.mode.toString())];
 
-                    Id<ModalBin> modalBinId = DistanceDistributionUtils.getModalBinId(mode, range);
+                    Id<ModalBinIdentifier> modalBinId = DistanceDistributionUtils.getModalBinId(mode, range);
 
                     DistanceBin bin = this.mode2DistanceBins.getOrDefault(modalBinId, new DistanceBin(range));
                     bin.addToCount(Double.valueOf(parts[labels.indexOf(DistanceDistributionFileLabels.measuredCount.toString())]));
                     this.mode2DistanceBins.put(modalBinId, bin);
                     //
                     if (this.modalBinMappings.get(modalBinId) == null) {
-                        this.modalBinMappings.put(modalBinId, new ModalBin(mode, range));
+                        this.modalBinMappings.put(modalBinId, new ModalBinIdentifier(mode, range));
                     } else{
                         // assuming, only one file will be passed.
                         throw new RuntimeException("The modalBin id "+modalBinId+" already exists.");
@@ -108,13 +108,13 @@ public class DistanceDistribution {
             throw new RuntimeException("Can't add any other data to distribution.");
         }
 
-        Id<ModalBin> id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
+        Id<ModalBinIdentifier> id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
         DistanceBin bin = this.mode2DistanceBins.getOrDefault(id, new DistanceBin(distanceRange));
         bin.addToCount(val);
         this.mode2DistanceBins.put(id, bin);
         //
         if (this.modalBinMappings.get(id) == null) {
-            this.modalBinMappings.put(id, new ModalBin(mode, distanceRange));
+            this.modalBinMappings.put(id, new ModalBinIdentifier(mode, distanceRange));
         }
 
     }
@@ -125,15 +125,15 @@ public class DistanceDistribution {
         return this.modalBinMappings.values()
                                     .stream()
                                     .filter(m -> m.getMode().equals(mode))
-                                    .map(ModalBin::getDistanceRange)
+                                    .map(ModalBinIdentifier::getDistanceRange)
                                     .collect(Collectors.toSet());
     }
 
-    public Map<Id<ModalBin>, ModalBin> getModalBins() {
+    public Map<Id<ModalBinIdentifier>, ModalBinIdentifier> getModalBins() {
         return this.modalBinMappings;
     }
 
-    public Map<Id<ModalBin>, DistanceBin> getModalBinToDistanceBin() {
+    public Map<Id<ModalBinIdentifier>, DistanceBin> getModalBinToDistanceBin() {
         return this.mode2DistanceBins;
     }
 

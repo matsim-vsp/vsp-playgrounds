@@ -23,6 +23,7 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import org.matsim.core.controler.AbstractModule;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
 
 /**
  * Created by amit on 21.02.18.
