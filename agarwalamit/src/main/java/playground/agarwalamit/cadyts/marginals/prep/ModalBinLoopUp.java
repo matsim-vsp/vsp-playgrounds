@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,50 +17,26 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.agarwalamit.cadyts.marginals.prep;
 
+import java.util.Map;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Identifiable;
+import org.matsim.contrib.cadyts.general.LookUpItemFromId;
 
 /**
- * A class to create a object which contains mode and distance-bin-index information.
- * 
- * @author amit
+ * Created by amit on 20.02.18.
  */
 
-public final class ModalBin implements Identifiable<ModalBin> {
-	
-	private final String mode;
-	private final DistanceBin.DistanceRange distanceRange;
-	private final Id<ModalBin> id;
-	
+public class ModalBinLoopUp implements LookUpItemFromId<ModalBinIdentifier> {
 
-	
-	public String getMode() {
-		return mode;
-	}
+    private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping ;
 
-	public DistanceBin.DistanceRange getDistanceRange() {
-		return distanceRange;
-	}
+    public ModalBinLoopUp(Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping){
+        this.mapping = mapping;
+    }
 
-	// don't make it public: Amit Feb'18
-	ModalBin(final String mode, final DistanceBin.DistanceRange distanceRange) {
-		this.mode = mode;
-		this.distanceRange = distanceRange;
-		this.id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
-	}
-
-	@Override
-	public Id<ModalBin> getId() {
-		return this.id;
-	}
-
-	@Override
-	public String toString() {
-		return "ModalDistanceBin[" +
-				"mode='" + mode + '\'' +
-				", distanceRange=" + distanceRange +
-				']';
-	}
+    @Override
+    public ModalBinIdentifier getItem(Id<ModalBinIdentifier> id) {
+        return this.mapping.get(id);
+    }
 }

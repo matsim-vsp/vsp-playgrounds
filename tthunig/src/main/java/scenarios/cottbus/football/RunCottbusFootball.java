@@ -26,7 +26,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -36,7 +39,11 @@ import org.apache.log4j.Logger;
 import org.jets3t.service.model.BaseVersionOrDeleteMarker;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
@@ -84,7 +91,7 @@ public class RunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
 	
 	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE, LAEMMER_FULLY_ADAPTIVE};
-	private static final SignalControl CONTROL_TYPE = SignalControl.LAEMMER_DOUBLE;
+	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED_IDEAL;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
 	private static final boolean LONG_LANES = true;
@@ -93,7 +100,10 @@ public class RunCottbusFootball {
 	private static final boolean VIS = false;
 	private static final boolean OVERWRITE_FILES = true;
 	private static final int TIME_BIN_SIZE = 900;
-	private static final boolean USE_MS_IDEAL_BASE_PLANS = false;
+	private static final boolean USE_MS_IDEAL_BASE_PLANS = true;
+	private static final boolean USE_FIXED_NETWORK = true;
+	
+	private static final boolean REMOVE_ALL_LEGS_FROM_PLANS_AND_MODIFIY_ACTIVITIES_ON_MERGED_LINK = true;
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {		
 		Config baseConfig;
@@ -102,14 +112,21 @@ public class RunCottbusFootball {
 		} else {
 			String configFileName = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/config.xml";
 			baseConfig = ConfigUtils.loadConfig(configFileName);
-			String scenarioDescription = "flowCap" + FLOW_CAP + "_longLanes" + LONG_LANES + "_stuckTime" + STUCK_TIME+"_timeBinSize"+TIME_BIN_SIZE+"_signalControl-"+CONTROL_TYPE;
+			String scenarioDescription = "fixedNetwork"+USE_FIXED_NETWORK+"_flowCap" + FLOW_CAP + "_longLanes" + LONG_LANES + "_stuckTime" + STUCK_TIME+"_timeBinSize"+TIME_BIN_SIZE+"_signalControl-"+CONTROL_TYPE;
 			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/" + scenarioDescription + "/run1200/");
 			baseConfig.controler().setRunId("1200");
 		}
 		if (OVERWRITE_FILES) {
 			baseConfig.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		}
-		baseConfig.controler().setLastIteration(0);
+		if (USE_FIXED_NETWORK) {
+			baseConfig.getModules().get("network").getParams().put("inputNetworkFile", "network_wgs84_utm33n_link10284andReverseMerged.xml.gz");
+			baseConfig.network().setInputFile("network_wgs84_utm33n_link10284andReverseMerged.xml.gz");
+			baseConfig.getModules().get("network").getParams().put("laneDefinitionsFile", "lanes_link10284merged.xml");
+			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
+		}
+		
+		baseConfig.controler().setLastIteration(100);
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		switch (CONTROL_TYPE){
 		case FIXED_IDEAL:
@@ -151,7 +168,7 @@ public class RunCottbusFootball {
 			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
 					+ "commuter_population_wgs84_utm33n_car_only_100it_MS_cap"+FLOW_CAP+"_tbs"+TIME_BIN_SIZE+".xml.gz");
 		}
-		
+				
 		baseConfig.qsim().setFlowCapFactor(FLOW_CAP);
 		baseConfig.qsim().setStorageCapFactor( FLOW_CAP / Math.pow(FLOW_CAP,1/4.) );
 		baseConfig.travelTimeCalculator().setTraveltimeBinSize(TIME_BIN_SIZE);
@@ -160,6 +177,26 @@ public class RunCottbusFootball {
 		baseConfig.qsim().setEndTime(36*3600);
 		
 		Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
+		
+//		if (REMOVE_ALL_LEGS_FROM_PLANS_AND_MODIFIY_ACTIVITIES_ON_MERGED_LINK) {
+//			baseScenario.getPopulation().getPersons().values().forEach(person->{
+//				person.getPlans().forEach(plan->{
+//					List<PlanElement> allPlanElements = new LinkedList<PlanElement>(plan.getPlanElements());
+//					allPlanElements.forEach(planElement->{
+//						if(planElement instanceof Leg)
+//							((Leg)planElement).setRoute(null); //plan.getPlanElements().remove(planElement);
+//						if(planElement instanceof Activity) {
+//							if (((Activity)planElement).getLinkId().equals(Id.createLinkId("8747")) || ((Activity)planElement).getLinkId().equals(Id.createLinkId("8745"))) {
+//								((Activity)planElement).setLinkId(Id.createLinkId("10284"));
+//							} else if (((Activity)planElement).getLinkId().equals(Id.createLinkId("8744")) || ((Activity)planElement).getLinkId().equals(Id.createLinkId("8746"))) {
+//								((Activity)planElement).setLinkId(Id.createLinkId("10283"));
+//							}
+//						}
+//					});
+//				});
+//			});
+//				
+//		}
 		
 		if (LONG_LANES){
 			// extend short lanes (needed for laemmer)
@@ -238,7 +275,7 @@ public class RunCottbusFootball {
 		CottbusFanCreator fanCreator = new SimpleCottbusFanCreator(kreisShapeFile);
 		//start the runs
 		int increment = 5;
-		for (int numberOfFootballFans = 0; numberOfFootballFans <= 100; numberOfFootballFans = numberOfFootballFans + increment){
+		for (int numberOfFootballFans = 0; numberOfFootballFans <= 0; numberOfFootballFans = numberOfFootballFans + increment){
 			if (numberOfFootballFans != 0) {
 				// create additional football fans (from 0 to 2000)
 				Population p = fanCreator.createAndAddFans(baseScenario, 20 * increment);

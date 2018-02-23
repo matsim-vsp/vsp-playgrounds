@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.corineLandcover;
+package playground.vsp.corineLandcover;
 
 import java.util.Arrays;
 import java.util.Collection;

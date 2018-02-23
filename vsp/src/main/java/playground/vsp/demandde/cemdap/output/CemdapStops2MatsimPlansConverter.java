@@ -42,8 +42,8 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
-import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
-import playground.vsp.demandde.corineLandcover.GeometryUtils;
+import playground.vsp.corineLandcover.CorineLandCoverData;
+import playground.vsp.corineLandcover.GeometryUtils;
 
 /**
  * @author dziemke
