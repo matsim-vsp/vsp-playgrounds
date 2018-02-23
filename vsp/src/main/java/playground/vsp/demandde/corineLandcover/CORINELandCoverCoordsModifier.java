@@ -23,9 +23,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+
 import org.apache.log4j.Logger;
+import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
@@ -39,7 +39,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Created by amit on 24.10.17.
@@ -74,9 +76,10 @@ public class CORINELandCoverCoordsModifier {
     private final Map<String, Geometry> zoneFeatures = new HashMap<>();
 
     private final boolean sameHomeActivity;
+    private final String homeActivityPrefix;
 
     public CORINELandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
-                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity) {
+                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix) {
         this.corineLandCoverData = new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms);
         LOG.info("Loading population from plans file " + matsimPlans);
         this.population = getPopulation(matsimPlans);
@@ -87,7 +90,9 @@ public class CORINELandCoverCoordsModifier {
             Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
             for (SimpleFeature feature : features) {
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(key));
+//                String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(key));
+                String shapeId = ((String) feature.getAttribute(key));
+
                 if (zoneFeatures.get(shapeId) != null) { // union geoms corresponding to same zone id.
                     zoneFeatures.put(shapeId,
                             GeometryUtils.combine(Arrays.asList(geometry, zoneFeatures.get(shapeId))));
@@ -99,6 +104,8 @@ public class CORINELandCoverCoordsModifier {
 
         this.sameHomeActivity = sameHomeActivity;
         if (this.sameHomeActivity) LOG.info("Home activities for a person will be at the same location.");
+        
+        this.homeActivityPrefix = homeActivityPrefix;
     }
 
     public static void main(String[] args) {
@@ -116,6 +123,7 @@ public class CORINELandCoverCoordsModifier {
         boolean simplifyGeom = true;
         boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
+        String homeActivityPrefix = "home";
 
         if (args.length > 0) {
             corineLandCoverFile = args[0];
@@ -127,7 +135,8 @@ public class CORINELandCoverCoordsModifier {
             simplifyGeom = Boolean.valueOf(args[6]);
             combiningGeoms = Boolean.valueOf(args[7]);
             sameHomeActivity = Boolean.valueOf(args[8]);
-            outPlans = args[9];
+            homeActivityPrefix = args[9];
+            outPlans = args[10];
         }
 
         Map<String, String> shapeFileToFeatureKey = new HashMap<>();
@@ -139,13 +148,15 @@ public class CORINELandCoverCoordsModifier {
                 corineLandCoverFile,
                 simplifyGeom,
                 combiningGeoms,
-                sameHomeActivity);
+                sameHomeActivity,
+                homeActivityPrefix);
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
     }
 
     public void process() {
         LOG.info("Start processing, this may take a while ... ");
+                
         for (Person person : population.getPersons().values()) {
             Coord homeLocationCoord = null;
             String homeActivityName = null; // home or h or home_1 or home_2 etc
@@ -163,8 +174,14 @@ public class CORINELandCoverCoordsModifier {
                             //coord is null
                             String zoneId = activity.getType().split("_")[1];
 
-                            if (homeLocationCoord==null) { // first activity, must be home
-                                coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.home, zoneId);
+                            if (homeLocationCoord==null) {
+                                
+                            		if (activityType.startsWith(this.homeActivityPrefix)) {
+                                		coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.home, zoneId);
+                            		} else {
+                            			Log.warn("First activity is not a home activity...");
+                                		coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.other, zoneId);
+                            		}
                                 homeLocationCoord = coord;
                                 homeActivityName = activityType;
 
@@ -181,11 +198,18 @@ public class CORINELandCoverCoordsModifier {
                         }
                         else {
                             // a regular coord --> check and reassign coord if required.
-                            if (homeLocationCoord==null) { // first activity, must be home
+                            if (homeLocationCoord==null) {
                                 Point point = MGC.coord2Point(coord);
-                                if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.home, point) ){
-                                    coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.home);
-                                }
+                                
+                        			if (activityType.startsWith(this.homeActivityPrefix)) {
+                        				if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.home, point) ){
+                                            coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.home);
+                                     }
+                        			} else {
+                        				if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
+                                           coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
+                                     }
+                        			}
                                 homeLocationCoord = coord;
                                 homeActivityName = activityType;
                             } else if ( activityType.equals(homeActivityName) && sameHomeActivity) {
@@ -194,7 +218,7 @@ public class CORINELandCoverCoordsModifier {
                             } else {
                                 Point point = MGC.coord2Point(coord);
                                 if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
-                                    coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.home);
+                                    coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other); // TODO: Check: Was set to 'home' in a previous version. IK
                                 }
                                 activity.setCoord(coord);
                             }
@@ -239,7 +263,12 @@ public class CORINELandCoverCoordsModifier {
                                          .filter(geometry -> geometry.contains(point))
                                          .findFirst()
                                          .orElse(null);
-        return corineLandCoverData.getRandomCoord(zone, activityType);
+        if (zone == null) {
+        		LOG.warn(point.toString() + " / " + activityType + " not reassigned (Activitiy coordinates are in no zone).");
+        		return MGC.point2Coord(point);
+        } else {
+            return corineLandCoverData.getRandomCoord(zone, activityType);
+        }
     }
 
     private Population getPopulation(String plansFile) {
