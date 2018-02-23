@@ -158,10 +158,15 @@ public class CORINELandCoverCoordsModifier {
     public void process() {
         LOG.info("Start processing, this may take a while ... ");
                 
+        int personCounter = 0;
         for (Person person : population.getPersons().values()) {
             Coord homeLocationCoord = null;
             String homeActivityName = null; // home or h or home_1 or home_2 etc
 
+            if (personCounter%1000 == 0) {
+            		LOG.info("Person #" + personCounter);
+            }
+            
             for (Plan plan : person.getPlans()) {
                 for (PlanElement planElement : plan.getPlanElements()) {
                     if (planElement instanceof Activity) {
@@ -228,6 +233,7 @@ public class CORINELandCoverCoordsModifier {
                     }
                 }
             }
+            personCounter++;
         }
         LOG.info("Finished processing.");
     }
