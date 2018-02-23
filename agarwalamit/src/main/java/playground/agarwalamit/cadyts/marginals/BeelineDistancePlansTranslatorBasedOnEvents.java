@@ -55,8 +55,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
     private final Set<Plan> plansEverSeen = new HashSet<>();
 
 	//<--a problem may appear if using following same strings with multiple Cadyts contexts. Amit Feb'18-->
-	private static final String STR_PLANSTEPFACTORY = "planStepFactory_marginals";
-	private static final String STR_ITERATION = "iteration_marginals";
+	private static final String STR_PLANSTEPFACTORY = "planStepFactory"+ModalDistanceCadytsBuilderImpl.MARGINALS;
+	private static final String STR_ITERATION = "iteration"+ModalDistanceCadytsBuilderImpl.MARGINALS;
 
 	private final Map<Id<ModalBin>, ModalBin> modalDistanceBinMap;
 	private final DistanceDistribution inputDistanceDistribution;
@@ -101,13 +101,23 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	public void handleEvent(PersonArrivalEvent event) {
 		String mode  = event.getLegMode();
 
+		if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
+			log.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
+			return;
+		}
+
 		Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
 		Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord();
 
 		//TODO check if we should include beeline distance factor which is not available for network mdoes
 		PlansCalcRouteConfigGroup.ModeRoutingParams params = this.scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode);
-		double beelineDistanceFactor = 1.3;
+		double beelineDistanceFactor = 1.0;
 		if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
+		else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
+			beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
+		} else{
+			log.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
+		}
 		double beelineDistance = beelineDistanceFactor *
 				NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
 
@@ -128,8 +138,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 		
 		if (tmpPlanStepFactory != null) {
 						
-			// add the "turn" to the planStepfactory
-			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) event.getTime()); //TODO check if this time would matter?
+			//this beeline distance is being checked from start_time (lower_limit) and end_time (upper_limit)
+			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) beelineDistance);
 		}
 	}
 

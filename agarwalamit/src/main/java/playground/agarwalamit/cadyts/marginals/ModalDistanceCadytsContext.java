@@ -107,8 +107,11 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 //		this.plansTranslator = new BeelineDistancePlansTranslatorBasedOnEvents(scenario, modalLinkContainer);
 		this.eventsManager.addHandler(plansTranslator);
 
-		//TODO need to replace the following.
-		this.calibrator =  ModalDistanceCadytsBuilderImpl.buildCalibratorAndAddMeasurements(scenario.getConfig(), this.inputDistanceDistribution.getModalBinToDistanceBin() , new ModalBinLoopUp(modalDistanceBinMap) /*, cadytsConfig.getTimeBinSize()*/, ModalBin.class);
+		this.calibrator =  ModalDistanceCadytsBuilderImpl.buildCalibratorAndAddMeasurements(
+				scenario.getConfig(),
+				this.inputDistanceDistribution.getModalBinToDistanceBin(),
+				new ModalBinLoopUp(modalDistanceBinMap) /*, cadytsConfig.getTimeBinSize()*/,
+				ModalBin.class);
 	}
 
 	@Override

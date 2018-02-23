@@ -40,7 +40,7 @@ public final class ModalDistanceCadytsBuilderImpl {
 
 	private static Logger log = Logger.getLogger( ModalDistanceCadytsBuilderImpl.class ) ;
 
-	public static <T> AnalyticalCalibrator<T> buildCalibratorAndAddMeasurements(final Config config, final Map<Id<ModalBin>, DistanceBin> inputDistanceDistribution,
+	public static <T> AnalyticalCalibrator<T> buildCalibratorAndAddMeasurements(final Config config, final Map<Id<T>, DistanceBin> inputDistanceDistribution,
 																				LookUpItemFromId<T> lookUp, Class<T> idType) {
 
 		if (inputDistanceDistribution.isEmpty()) {
@@ -53,7 +53,7 @@ public final class ModalDistanceCadytsBuilderImpl {
 
 		//add counts data into calibrator
 		int numberOfAddedMeasurements = 0 ;
-		for(Map.Entry< Id<ModalBin>, DistanceBin> entry : inputDistanceDistribution.entrySet()){
+		for(Map.Entry< Id<T>, DistanceBin> entry : inputDistanceDistribution.entrySet()){
 			// (loop over all counting "items" (usually locations/stations)
 
 			T item = lookUp.getItem(Id.create(entry.getKey(), idType)) ;

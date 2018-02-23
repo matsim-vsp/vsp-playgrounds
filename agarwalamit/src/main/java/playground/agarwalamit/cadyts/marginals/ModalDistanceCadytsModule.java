@@ -32,7 +32,7 @@ public class ModalDistanceCadytsModule extends AbstractModule{
 
     private final DistanceDistribution inputDistanceDistrbution;
 
-    ModalDistanceCadytsModule(DistanceDistribution inputDistanceDistrbution){
+    public ModalDistanceCadytsModule(DistanceDistribution inputDistanceDistrbution){
         this.inputDistanceDistrbution = inputDistanceDistrbution;
     }
 
@@ -46,5 +46,7 @@ public class ModalDistanceCadytsModule extends AbstractModule{
 
         bind(BeelineDistanceCollector.class);
         bind(BeelineDistancePlansTranslatorBasedOnEvents.class).asEagerSingleton();
+
+        addControlerListenerBinding().to(ModalDistanceDistributionControlerListener.class);
     }
 }

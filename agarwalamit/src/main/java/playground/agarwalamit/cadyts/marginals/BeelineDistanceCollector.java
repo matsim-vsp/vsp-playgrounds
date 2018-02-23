@@ -22,6 +22,7 @@ package playground.agarwalamit.cadyts.marginals;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
@@ -40,11 +41,13 @@ import org.matsim.core.network.NetworkUtils;
 
 public class BeelineDistanceCollector implements PersonDepartureEventHandler, PersonArrivalEventHandler {
 
+    private static final Logger LOG = Logger.getLogger(BeelineDistanceCollector.class);
+
     private final Network network;
     private final PlansCalcRouteConfigGroup configGroup;
     private final DistanceDistribution inputDistanceDistribution;
 
-    private final DistanceDistribution outputDistanceDistribution = new DistanceDistribution();
+    private DistanceDistribution outputDistanceDistribution = new DistanceDistribution();
 
     @Inject
     public BeelineDistanceCollector(
@@ -64,14 +67,23 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
     @Override
     public void handleEvent(PersonArrivalEvent event) {
         String mode  = event.getLegMode();
+        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
+            LOG.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
+            return;
+        }
 
         Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
         Coord destinationCoord = this.network.getLinks().get(event.getLinkId()).getToNode().getCoord();
 
         //TODO check if we should include beeline distance factor which is not available for network mdoes
         PlansCalcRouteConfigGroup.ModeRoutingParams params = this.configGroup.getModeRoutingParams().get(mode);
-        double beelineDistanceFactor = 1.3;
+        double beelineDistanceFactor = 1.0;
         if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
+        else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
+            beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
+        } else{
+            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
+        }
         double beelineDistance = beelineDistanceFactor *
                 NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
 
@@ -87,6 +99,7 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
     @Override
     public void reset(int iteration) {
         this.personToOriginCoord.clear();
+        this.outputDistanceDistribution = new DistanceDistribution();
     }
 
     public DistanceDistribution getOutputDistanceDistribution() {
