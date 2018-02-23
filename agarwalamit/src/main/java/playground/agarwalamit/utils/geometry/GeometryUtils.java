@@ -77,7 +77,7 @@ public final class GeometryUtils {
 	public static boolean isLinkInsideGeometries(final Collection<Geometry> geometries, final Link link) {
 		Coord coord = link.getCoord();
 		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		return playground.vsp.demandde.corineLandcover.GeometryUtils.isPointInsideGeometries(geometries, point);
+		return playground.vsp.corineLandcover.GeometryUtils.isPointInsideGeometries(geometries, point);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public final class GeometryUtils {
 	 */
 	public static boolean isCoordInsideGeometries(final Collection<Geometry> geometries, final Coord coord) {
 		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
-		return playground.vsp.demandde.corineLandcover.GeometryUtils.isPointInsideGeometries(geometries, point);
+		return playground.vsp.corineLandcover.GeometryUtils.isPointInsideGeometries(geometries, point);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public final class GeometryUtils {
 	public static boolean isPointInsideFeatures(final Collection<SimpleFeature> features, final Point point) {
 		if (features.isEmpty()) throw new RuntimeException("Collection of features is empty.");
 		for(SimpleFeature sf : features){
-			if ( (playground.vsp.demandde.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(point) ) {
+			if ( (playground.vsp.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry() ) ).contains(point) ) {
 				return true;
 			}
 		}
@@ -113,7 +113,7 @@ public final class GeometryUtils {
 	public static Collection<Geometry> getSimplifiedGeometries(final Collection<SimpleFeature> features){
 		Collection<Geometry> geoms = new ArrayList<>();
 		for(SimpleFeature sf:features){
-			geoms.add(playground.vsp.demandde.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry()));
+			geoms.add(playground.vsp.corineLandcover.GeometryUtils.getSimplifiedGeom( (Geometry) sf.getDefaultGeometry()));
 		}
 		return geoms;
 	}
@@ -148,7 +148,7 @@ public final class GeometryUtils {
 
 	public static Geometry getGeometryFromListOfFeatures(final List<SimpleFeature> features) {
 		List<Geometry> geoms = features.stream().map(f -> (Geometry)f.getDefaultGeometry()).collect(Collectors.toList());
-		return playground.vsp.demandde.corineLandcover.GeometryUtils.combine(geoms);
+		return playground.vsp.corineLandcover.GeometryUtils.combine(geoms);
 	}
 
 	/**
@@ -174,5 +174,5 @@ public final class GeometryUtils {
 		return true;
 	}
 
-	// rest of the methods are moved to playground.vsp.demandde.corineLandcover.GeometryUtils. Amit Oct'17
+	// rest of the methods are moved to playground.vsp.corineLandcover.GeometryUtils. Amit Oct'17
 }
