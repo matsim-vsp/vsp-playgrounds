@@ -29,6 +29,8 @@ import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.LookUpItemFromId;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.utils.misc.Time;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 
 /**
@@ -50,7 +52,7 @@ public final class ModalDistanceCadytsBuilderImpl {
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 
-		AnalyticalCalibrator<T> matsimCalibrator = CadytsBuilderImpl.buildCalibrator(config);
+		AnalyticalCalibrator<T> matsimCalibrator = ModalDistanceCadytsBuilderImpl.buildCalibrator(config);
 
 		//add counts data into calibrator
 		int numberOfAddedMeasurements = 0 ;
@@ -74,6 +76,43 @@ public final class ModalDistanceCadytsBuilderImpl {
         if ( matsimCalibrator.getProportionalAssignment() ) {
         	throw new RuntimeException("Gunnar says that this may not work so do not set to true. kai, sep'14") ;
         }
+		return matsimCalibrator;
+	}
+
+	public static <T> AnalyticalCalibrator<T> buildCalibrator(final Config config) {
+		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class ) ;
+
+		//get timeBinSize_s and validate it
+		if ((Time.MIDNIGHT % cadytsConfig.getTimeBinSize())!= 0 ){
+			throw new RuntimeException("Cadyts requires a divisor of 86400 as time bin size value .");
+		}
+		if ( (cadytsConfig.getTimeBinSize() % 3600) != 0 ) {
+			throw new RuntimeException("At this point, time bin sizes need to be multiples of 3600.  This is not a restriction " +
+					"of Cadyts, but of the counts file format, which only allows for hourly inputs") ;
+		}
+
+
+		AnalyticalCalibrator<T> matsimCalibrator = new AnalyticalCalibrator<>(
+				config.controler().getOutputDirectory() + "/cadyts"+MARGINALS+".log",
+				MatsimRandom.getLocalInstance().nextLong(),cadytsConfig.getTimeBinSize()
+		) ;
+
+		matsimCalibrator.setRegressionInertia(cadytsConfig.getRegressionInertia()) ;
+		matsimCalibrator.setMinStddev(cadytsConfig.getMinFlowStddev_vehPerHour(), SingleLinkMeasurement.TYPE.FLOW_VEH_H);
+		matsimCalibrator.setMinStddev(cadytsConfig.getMinFlowStddev_vehPerHour(), SingleLinkMeasurement.TYPE.COUNT_VEH);
+		matsimCalibrator.setFreezeIteration(cadytsConfig.getFreezeIteration());
+		matsimCalibrator.setPreparatoryIterations(cadytsConfig.getPreparatoryIterations());
+		matsimCalibrator.setVarianceScale(cadytsConfig.getVarianceScale());
+
+		matsimCalibrator.setBruteForce(cadytsConfig.useBruteForce());
+		// I don't think this has an influence on any of the variants we are using. (Has an influence only when plan choice is left
+		// completely to cadyts, rather than just taking the score offsets.) kai, dec'13
+		// More formally, one would need to use the selectPlan() method of AnalyticalCalibrator which we are, however, not using. kai, mar'14
+		if ( matsimCalibrator.getBruteForce() ) {
+			log.warn("setting bruteForce==true for calibrator, but this won't do anything in the way the cadyts matsim integration is set up. kai, mar'14") ;
+		}
+
+		matsimCalibrator.setStatisticsFile(config.controler().getOutputDirectory() + "/calibration-stats"+MARGINALS+".txt");
 		return matsimCalibrator;
 	}
 }
