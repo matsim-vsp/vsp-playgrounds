@@ -17,27 +17,51 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.multiModeCadyts;
-
-import java.util.Map;
+package playground.agarwalamit.multiModeCadyts;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.contrib.cadyts.general.LookUpItemFromId;
+import org.matsim.api.core.v01.Identifiable;
+import org.matsim.api.core.v01.network.Link;
 
 /**
+ * A class to create a object which contains modal and link information. 
+ * 
  * @author amit
  */
 
-class ModalLinkLookUp implements LookUpItemFromId<ModalLink> {
+public final class ModalLink implements Identifiable<ModalLink> {
 	
-	private final Map<String, ModalLink> mappingOfModalLink ;
+	private final String mode;
+	private final Id<Link> linkId;
+	private final Id<ModalLink> id;
 	
-	ModalLinkLookUp (final Map<String, ModalLink> modalLinkContainer){
-		this.mappingOfModalLink = modalLinkContainer;
+	private static final String separator = "_&_";
+	
+	public String getMode() {
+		return mode;
+	}
+
+	public Id<Link> getLinkId() {
+		return linkId;
+	}
+
+	ModalLink(final String mode, final Id<Link> linkId) {
+		this.mode = mode;
+		this.linkId = linkId;
+		this.id = Id.create(this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString()), ModalLink.class);
+	}
+
+	@Override
+	public String toString(){
+		return this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString());
 	}
 	
+	public static String getModeLinkSplitter(){
+		return separator;
+	}
+
 	@Override
-	public ModalLink getItem( Id<ModalLink> id ) {
-		return this.mappingOfModalLink.get(id.toString());
+	public Id<ModalLink> getId() {
+		return this.id;
 	}
 }

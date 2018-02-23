@@ -17,37 +17,11 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
 
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
-import org.matsim.core.controler.AbstractModule;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
-
+package playground.vsp.cadyts.marginals;
 /**
- * Created by amit on 21.02.18.
+ *
+ * The idea is to use Cadyts for given (beeline) distance distributions.
+ *
+ * Created by amit on 20.02.18.
  */
-
-public class ModalDistanceCadytsModule extends AbstractModule{
-
-    private final DistanceDistribution inputDistanceDistrbution;
-
-    public ModalDistanceCadytsModule(DistanceDistribution inputDistanceDistrbution){
-        this.inputDistanceDistrbution = inputDistanceDistrbution;
-    }
-
-    @Override
-    public void install() {
-        bind(DistanceDistribution.class).toInstance(inputDistanceDistrbution);
-        bind(Key.get(new TypeLiteral<DistanceDistribution>(){}, Names.named("calibration"))).toInstance(inputDistanceDistrbution);
-
-        bind(ModalDistanceCadytsContext.class).asEagerSingleton();
-        addControlerListenerBinding().to(ModalDistanceCadytsContext.class);
-
-        bind(BeelineDistanceCollector.class);
-        bind(BeelineDistancePlansTranslatorBasedOnEvents.class).asEagerSingleton();
-
-        addControlerListenerBinding().to(ModalDistanceDistributionControlerListener.class);
-    }
-}

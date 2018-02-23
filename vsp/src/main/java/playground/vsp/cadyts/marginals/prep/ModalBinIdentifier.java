@@ -17,51 +17,50 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.multiModeCadyts;
+package playground.vsp.cadyts.marginals.prep;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Identifiable;
-import org.matsim.api.core.v01.network.Link;
 
 /**
- * A class to create a object which contains modal and link information. 
+ * A class to create a object which contains mode and distance-bin-index information.
  * 
  * @author amit
  */
 
-public final class ModalLink implements Identifiable<ModalLink> {
+public final class ModalBinIdentifier implements Identifiable<ModalBinIdentifier> {
 	
 	private final String mode;
-	private final Id<Link> linkId;
-	private final Id<ModalLink> id;
+	private final DistanceBin.DistanceRange distanceRange;
+	private final Id<ModalBinIdentifier> id;
 	
-	private static final String separator = "_&_";
+
 	
 	public String getMode() {
 		return mode;
 	}
 
-	public Id<Link> getLinkId() {
-		return linkId;
+	public DistanceBin.DistanceRange getDistanceRange() {
+		return distanceRange;
 	}
 
-	ModalLink(final String mode, final Id<Link> linkId) {
+	// don't make it public: Amit Feb'18
+	ModalBinIdentifier(final String mode, final DistanceBin.DistanceRange distanceRange) {
 		this.mode = mode;
-		this.linkId = linkId;
-		this.id = Id.create(this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString()), ModalLink.class);
+		this.distanceRange = distanceRange;
+		this.id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
 	}
 
 	@Override
-	public String toString(){
-		return this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString());
-	}
-	
-	public static String getModeLinkSplitter(){
-		return separator;
-	}
-
-	@Override
-	public Id<ModalLink> getId() {
+	public Id<ModalBinIdentifier> getId() {
 		return this.id;
+	}
+
+	@Override
+	public String toString() {
+		return "ModalDistanceBin[" +
+				"mode='" + mode + '\'' +
+				", distanceRange=" + distanceRange +
+				']';
 	}
 }

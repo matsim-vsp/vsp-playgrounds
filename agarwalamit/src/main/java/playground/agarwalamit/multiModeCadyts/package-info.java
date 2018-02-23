@@ -24,4 +24,4 @@
  * @author amit
  */
 
-package playground.agarwalamit.cadyts.multiModeCadyts;
+package playground.agarwalamit.multiModeCadyts;

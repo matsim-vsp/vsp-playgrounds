@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.modalCadyts;
+package playground.vsp.modalCadyts;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,9 +32,9 @@ import org.junit.runners.Parameterized;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
-import playground.agarwalamit.cadyts.marginals.ModalDistanceDistributionControlerListener;
-import playground.agarwalamit.cadyts.marginals.RunExample;
+import playground.vsp.cadyts.marginals.prep.DistanceBin;
+import playground.vsp.cadyts.marginals.ModalDistanceDistributionControlerListener;
+import playground.vsp.cadyts.marginals.RunExample;
 
 /**
  * Created by amit on 22.02.18.

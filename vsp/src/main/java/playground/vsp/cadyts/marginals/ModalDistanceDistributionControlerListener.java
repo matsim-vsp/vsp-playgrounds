@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.vsp.cadyts.marginals;
 
 import java.io.BufferedWriter;
 import java.util.Map;
@@ -32,10 +32,10 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
-import playground.agarwalamit.cadyts.marginals.prep.ModalBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.DistanceBin;
+import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
+import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
+import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
 
 /**
  * Created by amit on 22.02.18.

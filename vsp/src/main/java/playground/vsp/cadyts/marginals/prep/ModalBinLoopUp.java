@@ -17,35 +17,26 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals.prep;
+package playground.vsp.cadyts.marginals.prep;
 
-import java.util.Set;
+import java.util.Map;
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.cadyts.general.LookUpItemFromId;
 
 /**
- * Created by amit on 21.02.18.
+ * Created by amit on 20.02.18.
  */
 
-public class DistanceDistributionUtils {
+public class ModalBinLoopUp implements LookUpItemFromId<ModalBinIdentifier> {
 
-    private static final String ID_SEPERATOR = "_&_";
+    private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping ;
 
-    public enum DistanceUnit {meter, kilometer}
-
-    public enum DistanceDistributionFileLabels {mode, distanceLowerLimit, distanceUpperLimit, measuredCount}
-
-    public static DistanceBin.DistanceRange getDistanceRange(double distance, Set<DistanceBin.DistanceRange> distanceRanges){
-//        if(distanceRanges.isEmpty()) throw new RuntimeException("Distance range set is empty.");
-
-        for(DistanceBin.DistanceRange distanceRange : distanceRanges) {
-            if (distance >= distanceRange.getLowerLimit() && distance < distanceRange.getUpperLimit())
-                return distanceRange;
-        }
-        throw new RuntimeException("No distance range found for "+ distance);
+    public ModalBinLoopUp(Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping){
+        this.mapping = mapping;
     }
 
-    public static Id<ModalBinIdentifier> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
-        return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(distanceRange) ), ModalBinIdentifier.class);
+    @Override
+    public ModalBinIdentifier getItem(Id<ModalBinIdentifier> id) {
+        return this.mapping.get(id);
     }
-
 }

@@ -17,50 +17,27 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals.prep;
+package playground.agarwalamit.multiModeCadyts;
+
+import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Identifiable;
+import org.matsim.contrib.cadyts.general.LookUpItemFromId;
 
 /**
- * A class to create a object which contains mode and distance-bin-index information.
- * 
  * @author amit
  */
 
-public final class ModalBinIdentifier implements Identifiable<ModalBinIdentifier> {
+class ModalLinkLookUp implements LookUpItemFromId<ModalLink> {
 	
-	private final String mode;
-	private final DistanceBin.DistanceRange distanceRange;
-	private final Id<ModalBinIdentifier> id;
+	private final Map<String, ModalLink> mappingOfModalLink ;
 	
-
+	ModalLinkLookUp (final Map<String, ModalLink> modalLinkContainer){
+		this.mappingOfModalLink = modalLinkContainer;
+	}
 	
-	public String getMode() {
-		return mode;
-	}
-
-	public DistanceBin.DistanceRange getDistanceRange() {
-		return distanceRange;
-	}
-
-	// don't make it public: Amit Feb'18
-	ModalBinIdentifier(final String mode, final DistanceBin.DistanceRange distanceRange) {
-		this.mode = mode;
-		this.distanceRange = distanceRange;
-		this.id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
-	}
-
 	@Override
-	public Id<ModalBinIdentifier> getId() {
-		return this.id;
-	}
-
-	@Override
-	public String toString() {
-		return "ModalDistanceBin[" +
-				"mode='" + mode + '\'' +
-				", distanceRange=" + distanceRange +
-				']';
+	public ModalLink getItem( Id<ModalLink> id ) {
+		return this.mappingOfModalLink.get(id.toString());
 	}
 }

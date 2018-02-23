@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.vsp.cadyts.marginals;
 
 import java.net.URL;
 import javax.inject.Inject;
@@ -47,9 +47,9 @@ import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
 import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
-import playground.agarwalamit.cadyts.marginals.prep.ModalBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.DistanceBin;
+import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
+import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
 
 /**
  * Created by amit on 21.02.18.

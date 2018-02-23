@@ -17,64 +17,37 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals.prep;
+package playground.vsp.cadyts.marginals;
+
+import com.google.inject.Key;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
+import org.matsim.core.controler.AbstractModule;
+import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 
 /**
  * Created by amit on 21.02.18.
  */
 
-public class DistanceBin {
+public class ModalDistanceCadytsModule extends AbstractModule{
 
-    private final DistanceRange distanceRange;
-    private double count = 0.;
+    private final DistanceDistribution inputDistanceDistrbution;
 
-    public DistanceBin(DistanceRange distanceRange) {
-        this.distanceRange = distanceRange;
-    }
-
-    public DistanceRange getDistanceRange() {
-        return distanceRange;
-    }
-
-    public double getCount() {
-        return count;
-    }
-
-    public void addToCount(double val){
-        this.count += val;
+    public ModalDistanceCadytsModule(DistanceDistribution inputDistanceDistrbution){
+        this.inputDistanceDistrbution = inputDistanceDistrbution;
     }
 
     @Override
-    public String toString() {
-        return "DistanceBin{" +
-                "distanceRange=" + distanceRange +
-                ", count=" + count +
-                '}';
-    }
+    public void install() {
+        bind(DistanceDistribution.class).toInstance(inputDistanceDistrbution);
+        bind(Key.get(new TypeLiteral<DistanceDistribution>(){}, Names.named("calibration"))).toInstance(inputDistanceDistrbution);
 
-    public static class DistanceRange {
-        private final double lowerLimit;
-        private final double upperLimit; // allow infinity for upperLimit value
+        bind(ModalDistanceCadytsContext.class).asEagerSingleton();
+        addControlerListenerBinding().to(ModalDistanceCadytsContext.class);
 
-        public DistanceRange(double low, double high) {
-            this.lowerLimit = low;
-            this.upperLimit = high;
-        }
+        bind(BeelineDistanceCollector.class);
+        bind(BeelineDistancePlansTranslatorBasedOnEvents.class).asEagerSingleton();
 
-        public double getLowerLimit() {
-            return lowerLimit;
-        }
-
-        public double getUpperLimit() {
-            return upperLimit;
-        }
-
-        @Override
-        public String toString() {
-            return "DistanceRange[" +
-                    "lowerLimit=" + lowerLimit +
-                    ", upperLimit=" + upperLimit +
-                    ']';
-        }
+        addControlerListenerBinding().to(ModalDistanceDistributionControlerListener.class);
     }
 }

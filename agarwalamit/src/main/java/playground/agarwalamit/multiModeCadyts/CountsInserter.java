@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.multiModeCadyts;
+package playground.agarwalamit.multiModeCadyts;
 
 import java.io.BufferedReader;
 import java.io.IOException;

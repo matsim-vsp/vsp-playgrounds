@@ -18,23 +18,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.agarwalamit.multiModeCadyts;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.supply.SimResults;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
+import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
-import org.matsim.contrib.cadyts.general.CadytsContextI;
-import org.matsim.contrib.cadyts.general.CadytsCostOffsetsXMLFileIO;
-import org.matsim.contrib.cadyts.general.PlansTranslator;
+import org.matsim.contrib.cadyts.general.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -46,78 +42,68 @@ import org.matsim.core.controler.listener.BeforeMobsimListener;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.replanning.PlanStrategy;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
-import playground.agarwalamit.cadyts.marginals.prep.ModalBinIdentifier;
-import playground.agarwalamit.cadyts.marginals.prep.ModalBinLoopUp;
+import org.matsim.counts.Counts;
 
 /**
  * {@link PlanStrategy Plan Strategy} used for replanning in MATSim which uses Cadyts to
  * select plans that better match to given occupancy counts.
  */
-public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdentifier>, StartupListener, IterationEndsListener, BeforeMobsimListener {
+public class ModalCadytsContext implements CadytsContextI<ModalLink>, StartupListener, IterationEndsListener, BeforeMobsimListener {
 
-	private final static Logger log = Logger.getLogger(ModalDistanceCadytsContext.class);
+	private final static Logger log = Logger.getLogger(ModalCadytsContext.class);
 
-	private final static String LINKOFFSET_FILENAME = "linkCostOffsets"+ModalDistanceCadytsBuilderImpl.MARGINALS+".xml";
-	private static final String FLOWANALYSIS_FILENAME = "flowAnalysis"+ModalDistanceCadytsBuilderImpl.MARGINALS+".txt";
+	private final static String LINKOFFSET_FILENAME = "linkCostOffsets.xml";
+	private static final String FLOWANALYSIS_FILENAME = "flowAnalysis.txt";
 
 	private final double countsScaleFactor;
-	private final DistanceDistribution inputDistanceDistribution;
+	private final Counts<ModalLink> calibrationCounts;
 	private final boolean writeAnalysisFile;
 
-	private AnalyticalCalibrator<ModalBinIdentifier> calibrator;
-	private BeelineDistancePlansTranslatorBasedOnEvents plansTranslator;
-	private SimResults<ModalBinIdentifier> simResults;
+	private AnalyticalCalibrator<ModalLink> calibrator;
+	private ModalPlansTranslatorBasedOnEvents plansTranslator;
+	private SimResults<ModalLink> simResults;
 	private final Scenario scenario;
 	private final EventsManager eventsManager;
+	private final VolumesAnalyzer volumesAnalyzer;
 	private final OutputDirectoryHierarchy controlerIO;
-
-	private final Map<Id<ModalBinIdentifier>,ModalBinIdentifier> modalDistanceBinMap;
-	private final BeelineDistanceCollector beelineDistanceCollector;
-
-	private final ModalBinLoopUp modalBinLoopUp;
+	
+	private final Map<String,ModalLink> modalLinkContainer;
 
 	@Inject
-	private ModalDistanceCadytsContext(Config config, Scenario scenario, @Named("calibration") DistanceDistribution inputDistanceDistribution, EventsManager eventsManager,
-									   OutputDirectoryHierarchy controlerIO, BeelineDistancePlansTranslatorBasedOnEvents plansTranslator, BeelineDistanceCollector beelineDistanceCollector) {
+	private ModalCadytsContext(Config config, Scenario scenario, @Named("calibration") Counts<ModalLink> calibrationCounts, EventsManager eventsManager,
+			VolumesAnalyzer volumesAnalyzer, OutputDirectoryHierarchy controlerIO, Map<String,ModalLink> modalLinkContainer) {
 		this.scenario = scenario;
-		this.inputDistanceDistribution = inputDistanceDistribution;
-		this.plansTranslator = plansTranslator;
+		this.calibrationCounts = calibrationCounts;
 
 		this.eventsManager = eventsManager;
+		this.volumesAnalyzer = volumesAnalyzer;
 		this.controlerIO = controlerIO;
 		this.countsScaleFactor = config.counts().getCountsScaleFactor();
-		this.modalDistanceBinMap = inputDistanceDistribution.getModalBins();
-		this.beelineDistanceCollector = beelineDistanceCollector;
+		this.modalLinkContainer = modalLinkContainer;
 
 		CadytsConfigGroup cadytsConfig = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		// addModule() also initializes the config group with the values read from the config file
 		cadytsConfig.setWriteAnalysisFile(true);
 
-		cadytsConfig.setCalibratedItems(modalDistanceBinMap.keySet().stream().map(Object::toString).collect(Collectors.toSet()));
+		cadytsConfig.setCalibratedItems(modalLinkContainer.keySet());
 		
 		this.writeAnalysisFile = cadytsConfig.isWriteAnalysisFile();
-		this.modalBinLoopUp = new ModalBinLoopUp(modalDistanceBinMap);
 	}
 
 	@Override
-	public PlansTranslator<ModalBinIdentifier> getPlansTranslator() {
+	public PlansTranslator<ModalLink> getPlansTranslator() {
 		return this.plansTranslator;
 	}
 
 	@Override
 	public void notifyStartup(StartupEvent event) {
-		this.simResults = new ModalDistanceSimResultsContainerImpl(beelineDistanceCollector, countsScaleFactor);
+		this.simResults = new ModalSimResultsContainerImpl(volumesAnalyzer, countsScaleFactor);
 		
-//		// this collects events and generates cadyts plans from it
-//		this.plansTranslator = new BeelineDistancePlansTranslatorBasedOnEvents(scenario, modalLinkContainer);
+		// this collects events and generates cadyts plans from it
+		this.plansTranslator = new ModalPlansTranslatorBasedOnEvents(scenario, modalLinkContainer);
 		this.eventsManager.addHandler(plansTranslator);
 
-		this.calibrator =  ModalDistanceCadytsBuilderImpl.buildCalibratorAndAddMeasurements(
-				scenario.getConfig(),
-				this.inputDistanceDistribution.getModalBinToDistanceBin(),
-				this.modalBinLoopUp /*, cadytsConfig.getTimeBinSize()*/,
-				ModalBinIdentifier.class);
+		this.calibrator =  CadytsBuilderImpl.buildCalibratorAndAddMeasurements(scenario.getConfig(), this.calibrationCounts , new ModalLinkLookUp(modalLinkContainer) /*, cadytsConfig.getTimeBinSize()*/, ModalLink.class);
 	}
 
 	@Override
@@ -145,7 +131,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdenti
 		// write some output
 		String filename = controlerIO.getIterationFilename(event.getIteration(), LINKOFFSET_FILENAME);
 		try {
-			new CadytsCostOffsetsXMLFileIO<>(this.modalBinLoopUp, ModalBinIdentifier.class)
+			new CadytsCostOffsetsXMLFileIO<>(new ModalLinkLookUp(modalLinkContainer), ModalLink.class)
 			.write(filename, this.calibrator.getLinkCostOffsets());
 		} catch (IOException e) {
 			log.error("Could not write link cost offsets!", e);
@@ -156,7 +142,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdenti
 	 * for testing purposes only
 	 */
 	@Override
-	public AnalyticalCalibrator<ModalBinIdentifier> getCalibrator() {
+	public AnalyticalCalibrator<ModalLink> getCalibrator() {
 		return this.calibrator;
 	}
 

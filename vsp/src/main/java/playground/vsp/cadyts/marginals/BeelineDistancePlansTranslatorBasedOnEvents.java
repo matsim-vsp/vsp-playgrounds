@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.vsp.cadyts.marginals;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,10 +39,10 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils;
-import playground.agarwalamit.cadyts.marginals.prep.ModalBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.DistanceBin;
+import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
+import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
+import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
 
 class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalBinIdentifier>, PersonDepartureEventHandler,
 		PersonArrivalEventHandler {

@@ -17,26 +17,64 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals.prep;
-
-import java.util.Map;
-import org.matsim.api.core.v01.Id;
-import org.matsim.contrib.cadyts.general.LookUpItemFromId;
+package playground.vsp.cadyts.marginals.prep;
 
 /**
- * Created by amit on 20.02.18.
+ * Created by amit on 21.02.18.
  */
 
-public class ModalBinLoopUp implements LookUpItemFromId<ModalBinIdentifier> {
+public class DistanceBin {
 
-    private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping ;
+    private final DistanceRange distanceRange;
+    private double count = 0.;
 
-    public ModalBinLoopUp(Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping){
-        this.mapping = mapping;
+    public DistanceBin(DistanceRange distanceRange) {
+        this.distanceRange = distanceRange;
+    }
+
+    public DistanceRange getDistanceRange() {
+        return distanceRange;
+    }
+
+    public double getCount() {
+        return count;
+    }
+
+    public void addToCount(double val){
+        this.count += val;
     }
 
     @Override
-    public ModalBinIdentifier getItem(Id<ModalBinIdentifier> id) {
-        return this.mapping.get(id);
+    public String toString() {
+        return "DistanceBin{" +
+                "distanceRange=" + distanceRange +
+                ", count=" + count +
+                '}';
+    }
+
+    public static class DistanceRange {
+        private final double lowerLimit;
+        private final double upperLimit; // allow infinity for upperLimit value
+
+        public DistanceRange(double low, double high) {
+            this.lowerLimit = low;
+            this.upperLimit = high;
+        }
+
+        public double getLowerLimit() {
+            return lowerLimit;
+        }
+
+        public double getUpperLimit() {
+            return upperLimit;
+        }
+
+        @Override
+        public String toString() {
+            return "DistanceRange[" +
+                    "lowerLimit=" + lowerLimit +
+                    ", upperLimit=" + upperLimit +
+                    ']';
+        }
     }
 }

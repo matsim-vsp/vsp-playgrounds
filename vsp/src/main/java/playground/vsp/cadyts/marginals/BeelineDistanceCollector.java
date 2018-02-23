@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.vsp.cadyts.marginals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,9 +34,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
-import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils;
+import playground.vsp.cadyts.marginals.prep.DistanceBin;
+import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
+import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 
 /**
  * Created by amit on 21.02.18.
