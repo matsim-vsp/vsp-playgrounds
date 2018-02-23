@@ -43,6 +43,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
+
 /**
  * Created by amit on 24.10.17.
  * <li>
@@ -90,8 +92,8 @@ public class CORINELandCoverCoordsModifier {
             Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
             for (SimpleFeature feature : features) {
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-//                String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(key));
-                String shapeId = ((String) feature.getAttribute(key));
+                String shapeId = Cemdap2MatsimUtils.removeLeadingZeroFromString((String) feature.getAttribute(key));
+//                String shapeId = ((String) feature.getAttribute(key));
 
                 if (zoneFeatures.get(shapeId) != null) { // union geoms corresponding to same zone id.
                     zoneFeatures.put(shapeId,
