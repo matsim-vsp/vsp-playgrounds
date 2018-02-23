@@ -34,7 +34,7 @@ public class CorineForFreightAgents {
     		String corineLandCoverFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/corine_landcover_berlin-brandenburg/corine_lancover_berlin-brandenburg_GK4.shp";
 
 	    String zoneFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
-	    String zoneIdTag = "berlin-zone";
+	    String zoneIdTag = "NR";
 	
 	    String matsimPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/freight-agents-berlin4.0_sampleSize0.1.xml.gz";
 	    String outPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/freight-agents-berlin4.0_sampleSize0.1_corine-landcover.xml.gz";
