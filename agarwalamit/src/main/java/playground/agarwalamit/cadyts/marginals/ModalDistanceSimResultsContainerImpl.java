@@ -4,6 +4,9 @@ import java.util.Map;
 import cadyts.measurements.SingleLinkMeasurement.TYPE;
 import cadyts.supply.SimResults;
 import org.matsim.api.core.v01.Id;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
+import playground.agarwalamit.cadyts.marginals.prep.ModalBinIdentifier;
 
 /*package*/ class ModalDistanceSimResultsContainerImpl implements SimResults<ModalBinIdentifier> {
 

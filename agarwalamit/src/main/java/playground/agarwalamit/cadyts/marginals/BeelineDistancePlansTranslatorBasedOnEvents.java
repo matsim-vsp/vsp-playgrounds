@@ -39,6 +39,10 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils;
+import playground.agarwalamit.cadyts.marginals.prep.ModalBinIdentifier;
 
 class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalBinIdentifier>, PersonDepartureEventHandler,
 		PersonArrivalEventHandler {
@@ -124,7 +128,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 		DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
 
 		// if only a subset of links is calibrated but the link is not contained, ignore the event
-		Id<ModalBinIdentifier> mlId = Id.create(new ModalBinIdentifier(mode, distanceRange).getId(), ModalBinIdentifier.class);
+		Id<ModalBinIdentifier> mlId = DistanceDistributionUtils.getModalBinId(mode,distanceRange);
 		if (this.modalDistanceBinMap.get(mlId) == null) return;
 
 		// get the "Person" behind the id:

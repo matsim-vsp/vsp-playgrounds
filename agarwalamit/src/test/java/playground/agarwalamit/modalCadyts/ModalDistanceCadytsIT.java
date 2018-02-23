@@ -32,7 +32,7 @@ import org.junit.runners.Parameterized;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
-import playground.agarwalamit.cadyts.marginals.DistanceBin;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
 import playground.agarwalamit.cadyts.marginals.ModalDistanceDistributionControlerListener;
 import playground.agarwalamit.cadyts.marginals.RunExample;
 

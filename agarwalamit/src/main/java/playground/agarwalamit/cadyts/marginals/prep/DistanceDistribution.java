@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.agarwalamit.cadyts.marginals.prep;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.DistanceDistributionFileLabels;
-import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.DistanceUnit;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils.DistanceUnit;
 
 /**
  * Created by amit on 21.02.18.

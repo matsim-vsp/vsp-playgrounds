@@ -32,7 +32,10 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.cadyts.marginals.DistanceDistributionUtils.DistanceDistributionFileLabels;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceBin;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistribution;
+import playground.agarwalamit.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
+import playground.agarwalamit.cadyts.marginals.prep.ModalBinIdentifier;
 
 /**
  * Created by amit on 22.02.18.

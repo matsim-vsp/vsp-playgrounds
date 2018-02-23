@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals;
+package playground.agarwalamit.cadyts.marginals.prep;
 
 import java.util.Map;
 import org.matsim.api.core.v01.Id;
@@ -31,7 +31,7 @@ public class ModalBinLoopUp implements LookUpItemFromId<ModalBinIdentifier> {
 
     private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping ;
 
-    ModalBinLoopUp(Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping){
+    public ModalBinLoopUp(Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping){
         this.mapping = mapping;
     }
 
