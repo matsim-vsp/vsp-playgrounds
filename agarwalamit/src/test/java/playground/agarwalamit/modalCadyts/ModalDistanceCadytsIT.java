@@ -65,11 +65,11 @@ public class ModalDistanceCadytsIT {
         String outDir = utils.getOutputDirectory();
         RunExample.main(
                 new String [] {
-                        IOUtils.newUrl(EQUIL_DIR,"config-with-mode-vehicles.xml").getFile(),
                         outDir,
                         String.valueOf(this.cadytsWt),
                         String.valueOf(lastIteration)
-                }
+                },
+                IOUtils.newUrl(EQUIL_DIR,"config-with-mode-vehicles.xml")
         );
 
         //

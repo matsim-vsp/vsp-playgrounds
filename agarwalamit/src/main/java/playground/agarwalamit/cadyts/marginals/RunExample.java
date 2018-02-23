@@ -19,6 +19,7 @@
 
 package playground.agarwalamit.cadyts.marginals;
 
+import java.net.URL;
 import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -53,22 +54,25 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 
 public class RunExample {
 
-    public static void main(String[] args) {
+    public static void main(String[] args, URL configUrl) {
         String configFile = "../../git/matsim-code-examples/scenarios/equil-mixedTraffic/config-with-mode-vehicles.xml";
         String outputDir = "";
         double cadytsWt = 2500.;
         int lastIt =20;
+        Config config;
 
         if (args.length>0){
-            configFile = args[0];
-            outputDir = args[1];
-            cadytsWt = Double.valueOf(args[2]);
-            lastIt = Integer.valueOf(args[3]);
+            outputDir = args[0];
+            cadytsWt = Double.valueOf(args[1]);
+            lastIt = Integer.valueOf(args[2]);
+
+            config = ConfigUtils.loadConfig(configUrl);
+        } else {
+            config = ConfigUtils.loadConfig(configFile);
         }
 
         double beelineDistanceFactorForNetworkModes = 1.0;
 
-        Config config = ConfigUtils.loadConfig(configFile);
         config.controler().setOutputDirectory(outputDir);
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
