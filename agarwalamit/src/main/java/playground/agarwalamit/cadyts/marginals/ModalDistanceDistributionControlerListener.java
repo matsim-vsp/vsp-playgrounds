@@ -125,7 +125,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
             writer.newLine();
 
 
-            for (Map.Entry<Id<ModalBin>, DistanceBin> entry : averages.getModalBinToDistanceBin().entrySet()) {
+            for (Map.Entry<Id<ModalBinIdentifier>, DistanceBin> entry : averages.getModalBinToDistanceBin().entrySet()) {
                 writer.write(
                         averages.getModalBins().get(entry.getKey()).getMode() + "\t"
                         + entry.getValue().getDistanceRange().getLowerLimit() + "\t"

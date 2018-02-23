@@ -5,7 +5,7 @@ import cadyts.measurements.SingleLinkMeasurement.TYPE;
 import cadyts.supply.SimResults;
 import org.matsim.api.core.v01.Id;
 
-/*package*/ class ModalDistanceSimResultsContainerImpl implements SimResults<ModalBin> {
+/*package*/ class ModalDistanceSimResultsContainerImpl implements SimResults<ModalBinIdentifier> {
 
     private static final long serialVersionUID = 1L;
 
@@ -18,8 +18,9 @@ import org.matsim.api.core.v01.Id;
     }
 
     @Override
-    public double getSimValue(final ModalBin modalBin, final int low, final int high, final TYPE type) {
-        DistanceBin bin = this.beelineDistanceCollector.getOutputDistanceDistribution().getModalBinToDistanceBin().get(modalBin.getId());
+    public double getSimValue(final ModalBinIdentifier modalBinIdentifier, final int low, final int high, final TYPE type) {
+        DistanceBin bin = this.beelineDistanceCollector.getOutputDistanceDistribution().getModalBinToDistanceBin().get(
+                modalBinIdentifier.getId());
         if (bin==null) return 0.;
         else return bin.getCount();
     }
@@ -38,7 +39,7 @@ import org.matsim.api.core.v01.Id;
         stringBuffer.append(VALUES+RETURN);
 
         DistanceDistribution distanceDistribution = this.beelineDistanceCollector.getOutputDistanceDistribution();
-        for (Map.Entry<Id<ModalBin>, DistanceBin> entry : distanceDistribution.getModalBinToDistanceBin().entrySet()) {
+        for (Map.Entry<Id<ModalBinIdentifier>, DistanceBin> entry : distanceDistribution.getModalBinToDistanceBin().entrySet()) {
             if (entry.getValue().getCount() > 0) {
                     stringBuffer.append(entry.getKey().toString()+TAB);
                     stringBuffer.append(entry.getValue().getCount()+RETURN);

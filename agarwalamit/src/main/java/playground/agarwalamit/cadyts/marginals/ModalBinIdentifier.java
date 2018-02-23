@@ -28,11 +28,11 @@ import org.matsim.api.core.v01.Identifiable;
  * @author amit
  */
 
-public final class ModalBin implements Identifiable<ModalBin> {
+public final class ModalBinIdentifier implements Identifiable<ModalBinIdentifier> {
 	
 	private final String mode;
 	private final DistanceBin.DistanceRange distanceRange;
-	private final Id<ModalBin> id;
+	private final Id<ModalBinIdentifier> id;
 	
 
 	
@@ -45,14 +45,14 @@ public final class ModalBin implements Identifiable<ModalBin> {
 	}
 
 	// don't make it public: Amit Feb'18
-	ModalBin(final String mode, final DistanceBin.DistanceRange distanceRange) {
+	ModalBinIdentifier(final String mode, final DistanceBin.DistanceRange distanceRange) {
 		this.mode = mode;
 		this.distanceRange = distanceRange;
 		this.id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
 	}
 
 	@Override
-	public Id<ModalBin> getId() {
+	public Id<ModalBinIdentifier> getId() {
 		return this.id;
 	}
 

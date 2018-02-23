@@ -40,7 +40,7 @@ import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
 
-class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalBin>, PersonDepartureEventHandler,
+class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalBinIdentifier>, PersonDepartureEventHandler,
 		PersonArrivalEventHandler {
 
 	private static final Logger log = Logger.getLogger(BeelineDistancePlansTranslatorBasedOnEvents.class);
@@ -58,7 +58,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	private static final String STR_PLANSTEPFACTORY = "planStepFactory"+ModalDistanceCadytsBuilderImpl.MARGINALS;
 	private static final String STR_ITERATION = "iteration"+ModalDistanceCadytsBuilderImpl.MARGINALS;
 
-	private final Map<Id<ModalBin>, ModalBin> modalDistanceBinMap;
+	private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> modalDistanceBinMap;
 	private final DistanceDistribution inputDistanceDistribution;
 
 	@Inject
@@ -72,8 +72,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	private long plansNotFound = 0;
 
 	@Override
-	public final cadyts.demand.Plan<ModalBin> getCadytsPlan(final Plan plan) {
-		PlanBuilder<ModalBin> planStepFactory = (PlanBuilder<ModalBin>) plan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
+	public final cadyts.demand.Plan<ModalBinIdentifier> getCadytsPlan(final Plan plan) {
+		PlanBuilder<ModalBinIdentifier> planStepFactory = (PlanBuilder<ModalBinIdentifier>) plan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
 		if (planStepFactory == null) {
 			this.plansNotFound++;
 			return null;
@@ -124,7 +124,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 		DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
 
 		// if only a subset of links is calibrated but the link is not contained, ignore the event
-		Id<ModalBin> mlId = Id.create(new ModalBin(mode, distanceRange).getId(), ModalBin.class);
+		Id<ModalBinIdentifier> mlId = Id.create(new ModalBinIdentifier(mode, distanceRange).getId(), ModalBinIdentifier.class);
 		if (this.modalDistanceBinMap.get(mlId) == null) return;
 
 		// get the "Person" behind the id:
@@ -134,7 +134,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 		Plan selectedPlan = person.getSelectedPlan();
 		
 		// get the planStepFactory for the plan (or create one):
-		PlanBuilder<ModalBin> tmpPlanStepFactory = getPlanStepFactoryForPlan(selectedPlan);
+		PlanBuilder<ModalBinIdentifier> tmpPlanStepFactory = getPlanStepFactoryForPlan(selectedPlan);
 		
 		if (tmpPlanStepFactory != null) {
 						
@@ -146,10 +146,10 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	// ###################################################################################
 	// only private functions below here (low level functionality)
 
-	private PlanBuilder<ModalBin> getPlanStepFactoryForPlan(final Plan selectedPlan) {
-		PlanBuilder<ModalBin> planStepFactory = null;
+	private PlanBuilder<ModalBinIdentifier> getPlanStepFactoryForPlan(final Plan selectedPlan) {
+		PlanBuilder<ModalBinIdentifier> planStepFactory = null;
 
-		planStepFactory = (PlanBuilder<ModalBin>) selectedPlan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
+		planStepFactory = (PlanBuilder<ModalBinIdentifier>) selectedPlan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
 		Integer factoryIteration = (Integer) selectedPlan.getCustomAttributes().get(STR_ITERATION);
 		if (planStepFactory == null || factoryIteration == null || factoryIteration != this.iteration) {
 			// attach the iteration number to the plan:

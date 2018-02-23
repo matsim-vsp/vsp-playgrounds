@@ -51,7 +51,7 @@ import org.matsim.core.replanning.PlanStrategy;
  * {@link PlanStrategy Plan Strategy} used for replanning in MATSim which uses Cadyts to
  * select plans that better match to given occupancy counts.
  */
-public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, StartupListener, IterationEndsListener, BeforeMobsimListener {
+public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdentifier>, StartupListener, IterationEndsListener, BeforeMobsimListener {
 
 	private final static Logger log = Logger.getLogger(ModalDistanceCadytsContext.class);
 
@@ -62,14 +62,14 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 	private final DistanceDistribution inputDistanceDistribution;
 	private final boolean writeAnalysisFile;
 
-	private AnalyticalCalibrator<ModalBin> calibrator;
+	private AnalyticalCalibrator<ModalBinIdentifier> calibrator;
 	private BeelineDistancePlansTranslatorBasedOnEvents plansTranslator;
-	private SimResults<ModalBin> simResults;
+	private SimResults<ModalBinIdentifier> simResults;
 	private final Scenario scenario;
 	private final EventsManager eventsManager;
 	private final OutputDirectoryHierarchy controlerIO;
 
-	private final Map<Id<ModalBin>,ModalBin> modalDistanceBinMap;
+	private final Map<Id<ModalBinIdentifier>,ModalBinIdentifier> modalDistanceBinMap;
 	private final BeelineDistanceCollector beelineDistanceCollector;
 
 	@Inject
@@ -95,7 +95,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 	}
 
 	@Override
-	public PlansTranslator<ModalBin> getPlansTranslator() {
+	public PlansTranslator<ModalBinIdentifier> getPlansTranslator() {
 		return this.plansTranslator;
 	}
 
@@ -111,7 +111,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 				scenario.getConfig(),
 				this.inputDistanceDistribution.getModalBinToDistanceBin(),
 				new ModalBinLoopUp(modalDistanceBinMap) /*, cadytsConfig.getTimeBinSize()*/,
-				ModalBin.class);
+				ModalBinIdentifier.class);
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 		// write some output
 		String filename = controlerIO.getIterationFilename(event.getIteration(), LINKOFFSET_FILENAME);
 		try {
-			new CadytsCostOffsetsXMLFileIO<>(new ModalBinLoopUp(modalDistanceBinMap), ModalBin.class)
+			new CadytsCostOffsetsXMLFileIO<>(new ModalBinLoopUp(modalDistanceBinMap), ModalBinIdentifier.class)
 			.write(filename, this.calibrator.getLinkCostOffsets());
 		} catch (IOException e) {
 			log.error("Could not write link cost offsets!", e);
@@ -150,7 +150,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBin>, Sta
 	 * for testing purposes only
 	 */
 	@Override
-	public AnalyticalCalibrator<ModalBin> getCalibrator() {
+	public AnalyticalCalibrator<ModalBinIdentifier> getCalibrator() {
 		return this.calibrator;
 	}
 

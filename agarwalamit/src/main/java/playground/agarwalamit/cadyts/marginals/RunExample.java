@@ -124,7 +124,7 @@ public class RunExample {
                         sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
                         sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-                        final CadytsScoring<ModalBin> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
+                        final CadytsScoring<ModalBinIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
                                 config,
                                 cContext);
                         scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight);

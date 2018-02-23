@@ -27,16 +27,16 @@ import org.matsim.contrib.cadyts.general.LookUpItemFromId;
  * Created by amit on 20.02.18.
  */
 
-public class ModalBinLoopUp implements LookUpItemFromId<ModalBin> {
+public class ModalBinLoopUp implements LookUpItemFromId<ModalBinIdentifier> {
 
-    private final Map<Id<ModalBin>, ModalBin> mapping ;
+    private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping ;
 
-    ModalBinLoopUp(Map<Id<ModalBin>, ModalBin> mapping){
+    ModalBinLoopUp(Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping){
         this.mapping = mapping;
     }
 
     @Override
-    public ModalBin getItem(Id<ModalBin> id) {
+    public ModalBinIdentifier getItem(Id<ModalBinIdentifier> id) {
         return this.mapping.get(id);
     }
 }
