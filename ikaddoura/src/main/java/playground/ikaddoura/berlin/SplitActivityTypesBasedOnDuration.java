@@ -32,7 +32,6 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationSco
 import org.matsim.core.population.io.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.ikaddoura.utils.prepare.PopulationTools;
 import playground.vsp.demandde.cemdap.output.ActivityTypes;
 
 /**
@@ -52,10 +51,10 @@ public class SplitActivityTypesBasedOnDuration {
 
 	public static void main(String[] args) {
 		
-		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial_test/300/plans.xml.gz";
+		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/plans_10pct_corine-landcover.xml.gz";
 		
-		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial_test/300/adjusted-activity-types_plans.xml.gz";
-		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial_test/300/config_activity-parameters.xml";
+		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/plans_10pct_corine-landcover_adjusted-activity-types.xml.gz";
+		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/config_activity-parameters.xml";
 		
 		final double timeBinSize_s = 600.;
 		final String[] activities = {ActivityTypes.HOME, ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.LEISURE, ActivityTypes.SHOPPING, ActivityTypes.OTHER}; 
@@ -67,7 +66,6 @@ public class SplitActivityTypesBasedOnDuration {
 	private void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities) {
 		
 		CemdapPopulationTools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(scenario.getPopulation(), timeBinSize_s);
-		PopulationTools.removeNetworkSpecificInformation(scenario.getPopulation());
 		
 		PopulationWriter writer = new PopulationWriter(scenario.getPopulation());
 		writer.write(outputPopulationFile);
