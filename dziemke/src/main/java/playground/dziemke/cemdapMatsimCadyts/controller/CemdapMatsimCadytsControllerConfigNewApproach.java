@@ -48,7 +48,7 @@ import playground.vsp.cadyts.marginals.ModalDistanceCadytsContext;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
-import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 /**
  * @author dziemke
@@ -92,7 +92,7 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
                         sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
                         sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-                        final CadytsScoring<ModalBinIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
+                        final CadytsScoring<ModalDistanceBinIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
                                 config,
                                 cContext);
                         scoringFunction.setWeightOfCadytsCorrection(cadytsDistributionWeight);

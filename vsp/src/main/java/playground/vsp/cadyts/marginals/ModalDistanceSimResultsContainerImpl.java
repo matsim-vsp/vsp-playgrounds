@@ -6,9 +6,9 @@ import cadyts.supply.SimResults;
 import org.matsim.api.core.v01.Id;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
-import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
-/*package*/ class ModalDistanceSimResultsContainerImpl implements SimResults<ModalBinIdentifier> {
+/*package*/ class ModalDistanceSimResultsContainerImpl implements SimResults<ModalDistanceBinIdentifier> {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,7 +21,7 @@ import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
     }
 
     @Override
-    public double getSimValue(final ModalBinIdentifier modalBinIdentifier, final int low, final int high, final TYPE type) {
+    public double getSimValue(final ModalDistanceBinIdentifier modalBinIdentifier, final int low, final int high, final TYPE type) {
         DistanceBin bin = this.beelineDistanceCollector.getOutputDistanceDistribution().getModalBinToDistanceBin().get(
                 modalBinIdentifier.getId());
         if (bin==null) return 0.;
@@ -42,7 +42,7 @@ import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
         stringBuffer.append(VALUES+RETURN);
 
         DistanceDistribution distanceDistribution = this.beelineDistanceCollector.getOutputDistanceDistribution();
-        for (Map.Entry<Id<ModalBinIdentifier>, DistanceBin> entry : distanceDistribution.getModalBinToDistanceBin().entrySet()) {
+        for (Map.Entry<Id<ModalDistanceBinIdentifier>, DistanceBin> entry : distanceDistribution.getModalBinToDistanceBin().entrySet()) {
             if (entry.getValue().getCount() > 0) {
                     stringBuffer.append(entry.getKey().toString()+TAB);
                     stringBuffer.append(entry.getValue().getCount()+RETURN);

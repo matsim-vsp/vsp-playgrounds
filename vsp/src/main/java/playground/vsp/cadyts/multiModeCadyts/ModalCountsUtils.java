@@ -1,9 +1,9 @@
 /* *********************************************************************** *
- * project: org.matsim.*												   *
+ * project: org.matsim.*
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2008 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,11 +17,22 @@
  *                                                                         *
  * *********************************************************************** */
 
+package playground.vsp.cadyts.multiModeCadyts;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+
 /**
- * Cadyts infrastructure for multi (main) modes(s) calibration based on link traffic counts.
- * 
- * See {@link ModalCadytsTest}
- * @author amit
+ * Created by amit on 24.02.18.
  */
 
-package playground.agarwalamit.multiModeCadyts;
+public class ModalCountsUtils {
+
+    private static final String ID_SEPERATOR = "_&_";
+
+    public static Id<ModalCountsLinkIdentifier> getModalCountLinkId(String mode, Id<Link> linkId
+    ){
+        return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(linkId) ), ModalCountsLinkIdentifier.class);
+    }
+
+}

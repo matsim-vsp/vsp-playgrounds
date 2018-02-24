@@ -18,19 +18,25 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.multiModeCadyts;
+package playground.vsp.cadyts.multiModeCadyts;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.supply.SimResults;
 import org.apache.log4j.Logger;
 import org.matsim.analysis.VolumesAnalyzer;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.cadyts.general.*;
+import org.matsim.contrib.cadyts.general.CadytsBuilderImpl;
+import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
+import org.matsim.contrib.cadyts.general.CadytsContextI;
+import org.matsim.contrib.cadyts.general.CadytsCostOffsetsXMLFileIO;
+import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -48,30 +54,30 @@ import org.matsim.counts.Counts;
  * {@link PlanStrategy Plan Strategy} used for replanning in MATSim which uses Cadyts to
  * select plans that better match to given occupancy counts.
  */
-public class ModalCadytsContext implements CadytsContextI<ModalLink>, StartupListener, IterationEndsListener, BeforeMobsimListener {
+public class ModalCountsCadytsContext implements CadytsContextI<ModalCountsLinkIdentifier>, StartupListener, IterationEndsListener, BeforeMobsimListener {
 
-	private final static Logger log = Logger.getLogger(ModalCadytsContext.class);
+	private final static Logger log = Logger.getLogger(ModalCountsCadytsContext.class);
 
 	private final static String LINKOFFSET_FILENAME = "linkCostOffsets.xml";
 	private static final String FLOWANALYSIS_FILENAME = "flowAnalysis.txt";
 
 	private final double countsScaleFactor;
-	private final Counts<ModalLink> calibrationCounts;
+	private final Counts<ModalCountsLinkIdentifier> calibrationCounts;
 	private final boolean writeAnalysisFile;
 
-	private AnalyticalCalibrator<ModalLink> calibrator;
-	private ModalPlansTranslatorBasedOnEvents plansTranslator;
-	private SimResults<ModalLink> simResults;
+	private AnalyticalCalibrator<ModalCountsLinkIdentifier> calibrator;
+	private ModalCountsPlansTranslatorBasedOnEvents plansTranslator;
+	private SimResults<ModalCountsLinkIdentifier> simResults;
 	private final Scenario scenario;
 	private final EventsManager eventsManager;
 	private final VolumesAnalyzer volumesAnalyzer;
 	private final OutputDirectoryHierarchy controlerIO;
 	
-	private final Map<String,ModalLink> modalLinkContainer;
+	private final Map<Id<ModalCountsLinkIdentifier>,ModalCountsLinkIdentifier> modalLinkContainer;
 
 	@Inject
-	private ModalCadytsContext(Config config, Scenario scenario, @Named("calibration") Counts<ModalLink> calibrationCounts, EventsManager eventsManager,
-			VolumesAnalyzer volumesAnalyzer, OutputDirectoryHierarchy controlerIO, Map<String,ModalLink> modalLinkContainer) {
+	private ModalCountsCadytsContext(Config config, Scenario scenario, @Named("calibration") Counts<ModalCountsLinkIdentifier> calibrationCounts, EventsManager eventsManager,
+                                     VolumesAnalyzer volumesAnalyzer, OutputDirectoryHierarchy controlerIO, Map<Id<ModalCountsLinkIdentifier>,ModalCountsLinkIdentifier> modalLinkContainer) {
 		this.scenario = scenario;
 		this.calibrationCounts = calibrationCounts;
 
@@ -85,25 +91,25 @@ public class ModalCadytsContext implements CadytsContextI<ModalLink>, StartupLis
 		// addModule() also initializes the config group with the values read from the config file
 		cadytsConfig.setWriteAnalysisFile(true);
 
-		cadytsConfig.setCalibratedItems(modalLinkContainer.keySet());
+		cadytsConfig.setCalibratedItems(modalLinkContainer.keySet().stream().map(Object::toString).collect(Collectors.toSet()));
 		
 		this.writeAnalysisFile = cadytsConfig.isWriteAnalysisFile();
 	}
 
 	@Override
-	public PlansTranslator<ModalLink> getPlansTranslator() {
+	public PlansTranslator<ModalCountsLinkIdentifier> getPlansTranslator() {
 		return this.plansTranslator;
 	}
 
 	@Override
 	public void notifyStartup(StartupEvent event) {
-		this.simResults = new ModalSimResultsContainerImpl(volumesAnalyzer, countsScaleFactor);
+		this.simResults = new ModalCountsSimResultsContainerImpl(volumesAnalyzer, countsScaleFactor);
 		
 		// this collects events and generates cadyts plans from it
-		this.plansTranslator = new ModalPlansTranslatorBasedOnEvents(scenario, modalLinkContainer);
+		this.plansTranslator = new ModalCountsPlansTranslatorBasedOnEvents(scenario, modalLinkContainer);
 		this.eventsManager.addHandler(plansTranslator);
 
-		this.calibrator =  CadytsBuilderImpl.buildCalibratorAndAddMeasurements(scenario.getConfig(), this.calibrationCounts , new ModalLinkLookUp(modalLinkContainer) /*, cadytsConfig.getTimeBinSize()*/, ModalLink.class);
+		this.calibrator =  CadytsBuilderImpl.buildCalibratorAndAddMeasurements(scenario.getConfig(), this.calibrationCounts , new ModalCountsLinkLookUp(modalLinkContainer) /*, cadytsConfig.getTimeBinSize()*/, ModalCountsLinkIdentifier.class);
 	}
 
 	@Override
@@ -131,7 +137,7 @@ public class ModalCadytsContext implements CadytsContextI<ModalLink>, StartupLis
 		// write some output
 		String filename = controlerIO.getIterationFilename(event.getIteration(), LINKOFFSET_FILENAME);
 		try {
-			new CadytsCostOffsetsXMLFileIO<>(new ModalLinkLookUp(modalLinkContainer), ModalLink.class)
+			new CadytsCostOffsetsXMLFileIO<>(new ModalCountsLinkLookUp(modalLinkContainer), ModalCountsLinkIdentifier.class)
 			.write(filename, this.calibrator.getLinkCostOffsets());
 		} catch (IOException e) {
 			log.error("Could not write link cost offsets!", e);
@@ -142,7 +148,7 @@ public class ModalCadytsContext implements CadytsContextI<ModalLink>, StartupLis
 	 * for testing purposes only
 	 */
 	@Override
-	public AnalyticalCalibrator<ModalLink> getCalibrator() {
+	public AnalyticalCalibrator<ModalCountsLinkIdentifier> getCalibrator() {
 		return this.calibrator;
 	}
 

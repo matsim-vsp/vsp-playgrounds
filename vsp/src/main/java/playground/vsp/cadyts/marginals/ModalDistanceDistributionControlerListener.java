@@ -35,7 +35,7 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
-import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 /**
  * Created by amit on 22.02.18.
@@ -128,7 +128,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
             writer.newLine();
 
 
-            for (Map.Entry<Id<ModalBinIdentifier>, DistanceBin> entry : averages.getModalBinToDistanceBin().entrySet()) {
+            for (Map.Entry<Id<ModalDistanceBinIdentifier>, DistanceBin> entry : averages.getModalBinToDistanceBin().entrySet()) {
                 writer.write(
                         averages.getModalBins().get(entry.getKey()).getMode() + "\t"
                         + entry.getValue().getDistanceRange().getLowerLimit() + "\t"

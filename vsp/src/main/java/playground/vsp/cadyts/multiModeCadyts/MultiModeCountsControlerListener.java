@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.mixedTraffic.counts;
+package playground.vsp.cadyts.multiModeCadyts;
 
 import java.io.BufferedWriter;
 import java.util.HashMap;

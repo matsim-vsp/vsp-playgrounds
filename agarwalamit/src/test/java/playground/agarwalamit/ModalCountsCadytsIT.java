@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
 import javax.inject.Inject;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,16 +56,11 @@ import org.matsim.counts.Counts;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
-
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
-
-import playground.agarwalamit.mixedTraffic.counts.MultiModeCountsControlerListener;
-import playground.agarwalamit.multiModeCadyts.CountsInserter;
-import playground.agarwalamit.multiModeCadyts.ModalCadytsContext;
-import playground.agarwalamit.multiModeCadyts.ModalCountsReader;
-import playground.agarwalamit.multiModeCadyts.ModalLink;
+import playground.agarwalamit.mixedTraffic.counts.CountsInserter;
+import playground.vsp.cadyts.multiModeCadyts.ModalCountsCadytsContext;
+import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
+import playground.vsp.cadyts.multiModeCadyts.ModalCountsReader;
+import playground.vsp.cadyts.multiModeCadyts.MultiModalCountsCadytsModule;
 
 /**
  * amit after CadytsCarIT in cadyts contrib.
@@ -123,23 +116,19 @@ public class ModalCountsCadytsIT {
 		CountsInserter jcg = new CountsInserter();		
 		jcg.processInputFile( inputDir+"/countsCarBike.txt" );
 		jcg.run();
-		Counts<ModalLink> modalLinkCounts = jcg.getModalLinkCounts();
-		Map<String, ModalLink> modalLinkContainer = jcg.getModalLinkContainer();
+		Counts<ModalCountsLinkIdentifier> modalLinkCounts = jcg.getModalLinkCounts();
+		Map<Id<ModalCountsLinkIdentifier>, ModalCountsLinkIdentifier> modalLinkContainer = jcg.getModalLinkContainer();
 
 		Controler controler = new Controler(scenario);
+		controler.addOverridingModule(new MultiModalCountsCadytsModule(modalLinkCounts, modalLinkContainer));
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				bind(Key.get(new TypeLiteral<Counts<ModalLink>>(){}, Names.named("calibration"))).toInstance(modalLinkCounts);
-				bind(Key.get(new TypeLiteral<Map<String,ModalLink>>(){})).toInstance(modalLinkContainer);
-
-				bind(ModalCadytsContext.class).asEagerSingleton();
-				addControlerListenerBinding().to(ModalCadytsContext.class);
-
 				bindScoringFunctionFactory().toInstance(new ScoringFunctionFactory() {
 					@Inject private ScoringParametersForPerson parameters;
 					@Inject private Network network;
-					@Inject ModalCadytsContext cadytsContext;
+					@Inject
+					ModalCountsCadytsContext cadytsContext;
 					@Override
 					public ScoringFunction createNewScoringFunction(Person person) {
 						final ScoringParameters params = parameters.getScoringParameters(person);
@@ -149,7 +138,7 @@ public class ModalCountsCadytsIT {
 						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
 						scoringFunctionAccumulator.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-						final CadytsScoring<ModalLink> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
+						final CadytsScoring<ModalCountsLinkIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
 						final double cadytsScoringWeight = beta*30.;
 						scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight) ;
 						scoringFunctionAccumulator.addScoringFunction(scoringFunction );
@@ -157,8 +146,6 @@ public class ModalCountsCadytsIT {
 						return scoringFunctionAccumulator;
 					}
 				});
-
-				this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
 			}
 		});
 
@@ -178,7 +165,8 @@ public class ModalCountsCadytsIT {
 
 		// check for car
 		String mode = mainModes.get(0);
-		Count<ModalLink> count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplitter()).concat("19") , ModalLink.class ) );
+		Count<ModalCountsLinkIdentifier> count =  modalLinkCounts.getCount( Id.create( mode.concat(
+				ModalCountsLinkIdentifier.getModeLinkSplitter()).concat("19") , ModalCountsLinkIdentifier.class ) );
 		Assert.assertEquals("CsId is wrong.", count.getCsLabel() , "link_19");
 		Assert.assertEquals("Volume of hour 6 is wrong", count.getVolume(7).getValue(), 5.0 , MatsimTestUtils.EPSILON);
 		Assert.assertEquals("Max count volume is wrong.", count.getMaxVolume().getValue(), 5.0 , MatsimTestUtils.EPSILON);
@@ -214,7 +202,7 @@ public class ModalCountsCadytsIT {
 
 		// check for bike 
 		mode = mainModes.get(1);
-		count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplitter()).concat("11") , ModalLink.class ) );
+		count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalCountsLinkIdentifier.getModeLinkSplitter()).concat("11") , ModalCountsLinkIdentifier.class ) );
 		//		Assert.assertEquals("Occupancy counts description is wrong", modalLinkCounts.getDescription(), "counts values for equil net");
 		Assert.assertEquals("CsId is wrong.", count.getCsLabel() , "link_11");
 		Assert.assertEquals("Volume of hour 6 is wrong", count.getVolume(7).getValue(), 4.0 , MatsimTestUtils.EPSILON);
@@ -249,8 +237,8 @@ public class ModalCountsCadytsIT {
 	}
 
 	//--------------------------------------------------------------
-	private double getCountRealValue(Counts<ModalLink> counts, Id<Link> linkId, String mode, int hour) {
-		Count<ModalLink> count =  counts.getCount( Id.create( mode.concat(ModalLink.getModeLinkSplitter()).concat(linkId.toString()) , ModalLink.class ) );
+	private double getCountRealValue(Counts<ModalCountsLinkIdentifier> counts, Id<Link> linkId, String mode, int hour) {
+		Count<ModalCountsLinkIdentifier> count =  counts.getCount( Id.create( mode.concat(ModalCountsLinkIdentifier.getModeLinkSplitter()).concat(linkId.toString()) , ModalCountsLinkIdentifier.class ) );
 		return count.getVolume(hour).getValue();
 	}
 

@@ -43,8 +43,8 @@ public class DistanceDistribution {
 
     private static final Logger LOG = Logger.getLogger(DistanceDistribution.class);
 
-    private final SortedMap<Id<ModalBinIdentifier>, DistanceBin> mode2DistanceBins = new TreeMap<>();
-    private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> modalBinMappings = new HashMap<>();
+    private final SortedMap<Id<ModalDistanceBinIdentifier>, DistanceBin> mode2DistanceBins = new TreeMap<>();
+    private final Map<Id<ModalDistanceBinIdentifier>, ModalDistanceBinIdentifier> modalBinMappings = new HashMap<>();
     private final Map<String, Double> modeToBeelineDistanceFactor = new HashMap<>();
     private boolean locked = false;
 
@@ -80,14 +80,14 @@ public class DistanceDistribution {
 
                     String mode = parts[labels.indexOf(DistanceDistributionFileLabels.mode.toString())];
 
-                    Id<ModalBinIdentifier> modalBinId = DistanceDistributionUtils.getModalBinId(mode, range);
+                    Id<ModalDistanceBinIdentifier> modalBinId = DistanceDistributionUtils.getModalBinId(mode, range);
 
                     DistanceBin bin = this.mode2DistanceBins.getOrDefault(modalBinId, new DistanceBin(range));
                     bin.addToCount(Double.valueOf(parts[labels.indexOf(DistanceDistributionFileLabels.measuredCount.toString())]));
                     this.mode2DistanceBins.put(modalBinId, bin);
                     //
                     if (this.modalBinMappings.get(modalBinId) == null) {
-                        this.modalBinMappings.put(modalBinId, new ModalBinIdentifier(mode, range));
+                        this.modalBinMappings.put(modalBinId, new ModalDistanceBinIdentifier(mode, range));
                     } else{
                         // assuming, only one file will be passed.
                         throw new RuntimeException("The modalBin id "+modalBinId+" already exists.");
@@ -108,13 +108,13 @@ public class DistanceDistribution {
             throw new RuntimeException("Can't add any other data to distribution.");
         }
 
-        Id<ModalBinIdentifier> id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
+        Id<ModalDistanceBinIdentifier> id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
         DistanceBin bin = this.mode2DistanceBins.getOrDefault(id, new DistanceBin(distanceRange));
         bin.addToCount(val);
         this.mode2DistanceBins.put(id, bin);
         //
         if (this.modalBinMappings.get(id) == null) {
-            this.modalBinMappings.put(id, new ModalBinIdentifier(mode, distanceRange));
+            this.modalBinMappings.put(id, new ModalDistanceBinIdentifier(mode, distanceRange));
         }
 
     }
@@ -125,15 +125,15 @@ public class DistanceDistribution {
         return this.modalBinMappings.values()
                                     .stream()
                                     .filter(m -> m.getMode().equals(mode))
-                                    .map(ModalBinIdentifier::getDistanceRange)
+                                    .map(ModalDistanceBinIdentifier::getDistanceRange)
                                     .collect(Collectors.toSet());
     }
 
-    public Map<Id<ModalBinIdentifier>, ModalBinIdentifier> getModalBins() {
+    public Map<Id<ModalDistanceBinIdentifier>, ModalDistanceBinIdentifier> getModalBins() {
         return this.modalBinMappings;
     }
 
-    public Map<Id<ModalBinIdentifier>, DistanceBin> getModalBinToDistanceBin() {
+    public Map<Id<ModalDistanceBinIdentifier>, DistanceBin> getModalBinToDistanceBin() {
         return this.mode2DistanceBins;
     }
 

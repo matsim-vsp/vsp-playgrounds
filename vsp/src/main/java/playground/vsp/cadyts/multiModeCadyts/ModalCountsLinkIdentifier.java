@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2018 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,26 +17,54 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.cadyts.marginals.prep;
+package playground.vsp.cadyts.multiModeCadyts;
 
-import java.util.Map;
 import org.matsim.api.core.v01.Id;
-import org.matsim.contrib.cadyts.general.LookUpItemFromId;
+import org.matsim.api.core.v01.Identifiable;
+import org.matsim.api.core.v01.network.Link;
 
 /**
- * Created by amit on 20.02.18.
+ * A class to create a object which contains modal and link information. 
+ * 
+ * @author amit
  */
 
-public class ModalBinLoopUp implements LookUpItemFromId<ModalBinIdentifier> {
+public final class ModalCountsLinkIdentifier implements Identifiable<ModalCountsLinkIdentifier> {
+	
+	private final String mode;
+	private final Id<Link> linkId;
+	private final Id<ModalCountsLinkIdentifier> id;
+	
+	public static final String separator = "_&_";
+	
+	public String getMode() {
+		return mode;
+	}
 
-    private final Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping ;
+	public Id<Link> getLinkId() {
+		return linkId;
+	}
 
-    public ModalBinLoopUp(Map<Id<ModalBinIdentifier>, ModalBinIdentifier> mapping){
-        this.mapping = mapping;
-    }
+	public ModalCountsLinkIdentifier(final String mode, final Id<Link> linkId) {
+		this.mode = mode;
+		this.linkId = linkId;
+		this.id = ModalCountsUtils.getModalCountLinkId(mode, linkId);
+	}
 
-    @Override
-    public ModalBinIdentifier getItem(Id<ModalBinIdentifier> id) {
-        return this.mapping.get(id);
-    }
+	public static String getModeLinkSplitter(){
+		return separator;
+	}
+
+	@Override
+	public Id<ModalCountsLinkIdentifier> getId() {
+		return this.id;
+	}
+
+	@Override
+	public String toString() {
+		return "ModalLink[" +
+				"mode='" + mode + '\'' +
+				", linkId=" + linkId +
+				']';
+	}
 }

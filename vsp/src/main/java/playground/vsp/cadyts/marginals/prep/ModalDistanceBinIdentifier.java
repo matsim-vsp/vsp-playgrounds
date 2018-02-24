@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2018 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -19,33 +19,46 @@
 
 package playground.vsp.cadyts.marginals.prep;
 
-import java.util.Set;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 
 /**
- * Created by amit on 21.02.18.
+ * A class to create a object which contains mode and distance-bin-index information.
+ * 
+ * @author amit
  */
 
-public class DistanceDistributionUtils {
+public final class ModalDistanceBinIdentifier implements Identifiable<ModalDistanceBinIdentifier> {
+	
+	private final String mode;
+	private final DistanceBin.DistanceRange distanceRange;
+	private final Id<ModalDistanceBinIdentifier> id;
+	
+	public String getMode() {
+		return mode;
+	}
 
-    private static final String ID_SEPERATOR = "_&_";
+	public DistanceBin.DistanceRange getDistanceRange() {
+		return distanceRange;
+	}
 
-    public enum DistanceUnit {meter, kilometer}
+	// don't make it public: Amit Feb'18
+	ModalDistanceBinIdentifier(final String mode, final DistanceBin.DistanceRange distanceRange) {
+		this.mode = mode;
+		this.distanceRange = distanceRange;
+		this.id = DistanceDistributionUtils.getModalBinId(mode, distanceRange);
+	}
 
-    public enum DistanceDistributionFileLabels {mode, distanceLowerLimit, distanceUpperLimit, measuredCount}
+	@Override
+	public Id<ModalDistanceBinIdentifier> getId() {
+		return this.id;
+	}
 
-    public static DistanceBin.DistanceRange getDistanceRange(double distance, Set<DistanceBin.DistanceRange> distanceRanges){
-//        if(distanceRanges.isEmpty()) throw new RuntimeException("Distance range set is empty.");
-
-        for(DistanceBin.DistanceRange distanceRange : distanceRanges) {
-            if (distance >= distanceRange.getLowerLimit() && distance < distanceRange.getUpperLimit())
-                return distanceRange;
-        }
-        throw new RuntimeException("No distance range found for "+ distance);
-    }
-
-    public static Id<ModalDistanceBinIdentifier> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
-        return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(distanceRange) ), ModalDistanceBinIdentifier.class);
-    }
-
+	@Override
+	public String toString() {
+		return "ModalDistanceBin[" +
+				"mode='" + mode + '\'' +
+				", distanceRange=" + distanceRange +
+				']';
+	}
 }

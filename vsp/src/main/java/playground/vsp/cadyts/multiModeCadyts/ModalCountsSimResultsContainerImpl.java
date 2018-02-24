@@ -1,4 +1,4 @@
-package playground.agarwalamit.multiModeCadyts;
+package playground.vsp.cadyts.multiModeCadyts;
 
 import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Id;
@@ -7,19 +7,19 @@ import org.matsim.api.core.v01.network.Link;
 import cadyts.measurements.SingleLinkMeasurement.TYPE;
 import cadyts.supply.SimResults;
 
-/*package*/ class ModalSimResultsContainerImpl implements SimResults<ModalLink> {
+/*package*/ class ModalCountsSimResultsContainerImpl implements SimResults<ModalCountsLinkIdentifier> {
 
 	private static final long serialVersionUID = 1L;
 	private final VolumesAnalyzer volumesAnalyzer;
 	private final double countsScaleFactor;
 
-	ModalSimResultsContainerImpl(final VolumesAnalyzer volumesAnalyzer, final double countsScaleFactor) {
+	ModalCountsSimResultsContainerImpl(final VolumesAnalyzer volumesAnalyzer, final double countsScaleFactor) {
 		this.volumesAnalyzer = volumesAnalyzer;
 		this.countsScaleFactor = countsScaleFactor;
 	}
 
 	@Override
-	public double getSimValue(final ModalLink modalLinkCounter, final int startTime_s, final int endTime_s, final TYPE type) { // stopFacility or link
+	public double getSimValue(final ModalCountsLinkIdentifier modalLinkCounter, final int startTime_s, final int endTime_s, final TYPE type) { // stopFacility or link
 
 		double [] values= volumesAnalyzer.getVolumesPerHourForLink(modalLinkCounter.getLinkId(), modalLinkCounter.getMode());
 

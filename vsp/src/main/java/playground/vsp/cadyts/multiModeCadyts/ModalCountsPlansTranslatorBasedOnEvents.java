@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.multiModeCadyts;
+package playground.vsp.cadyts.multiModeCadyts;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,10 +40,10 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 
-class ModalPlansTranslatorBasedOnEvents implements PlansTranslator<ModalLink>, LinkLeaveEventHandler,
+class ModalCountsPlansTranslatorBasedOnEvents implements PlansTranslator<ModalCountsLinkIdentifier>, LinkLeaveEventHandler,
 VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 	
-	private static final Logger log = Logger.getLogger(ModalPlansTranslatorBasedOnEvents.class);
+	private static final Logger log = Logger.getLogger(ModalCountsPlansTranslatorBasedOnEvents.class);
 
 	private final Scenario scenario;
 
@@ -58,15 +58,13 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 	private static final String STR_PLANSTEPFACTORY = "planStepFactory";
 	private static final String STR_ITERATION = "iteration";
 
-	private final Set<String> calibratedLinks = new HashSet<>() ;
-	private final Map<String,ModalLink> modalLinkContainer;
+	private final Set<Id<ModalCountsLinkIdentifier>> calibratedLinks ;
+	private final Map<Id<ModalCountsLinkIdentifier>,ModalCountsLinkIdentifier> modalLinkContainer;
 
 	@Inject
-	ModalPlansTranslatorBasedOnEvents(final Scenario scenario, Map<String,ModalLink> modalLinkContainer) {
+    ModalCountsPlansTranslatorBasedOnEvents(final Scenario scenario, Map<Id<ModalCountsLinkIdentifier>,ModalCountsLinkIdentifier> modalLinkContainer) {
 		this.scenario = scenario;
-		for ( String str : modalLinkContainer.keySet() ) {
-			this.calibratedLinks.add( str ) ;
-		}
+		this.calibratedLinks = modalLinkContainer.keySet();
 		this.modalLinkContainer = modalLinkContainer;
 	}
 
@@ -74,9 +72,9 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 	private long plansNotFound = 0;
 
 	@Override
-	public final cadyts.demand.Plan<ModalLink> getCadytsPlan(final Plan plan) {
+	public final cadyts.demand.Plan<ModalCountsLinkIdentifier> getCadytsPlan(final Plan plan) {
 		@SuppressWarnings("unchecked")
-		PlanBuilder<ModalLink> planStepFactory = (PlanBuilder<ModalLink>) plan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
+		PlanBuilder<ModalCountsLinkIdentifier> planStepFactory = (PlanBuilder<ModalCountsLinkIdentifier>) plan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
 		if (planStepFactory == null) {
 			this.plansNotFound++;
 			return null;
@@ -117,8 +115,9 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 		if (driverId == null) throw new RuntimeException("Link leave event "+ event.toString() + ". However, "+event.getVehicleId()+" is not entered traffic."); 
 		
 		// if only a subset of links is calibrated but the link is not contained, ignore the event
-		Id<ModalLink> mlId = Id.create(new ModalLink(mode, event.getLinkId()).getId(),ModalLink.class);
-		if (!calibratedLinks.contains(mlId.toString()))
+
+		Id<ModalCountsLinkIdentifier> mlId = ModalCountsUtils.getModalCountLinkId(mode, event.getLinkId());
+		if (!calibratedLinks.contains(mlId))
 			return;
 		
 		// get the "Person" behind the id:
@@ -128,22 +127,22 @@ VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 		Plan selectedPlan = person.getSelectedPlan();
 		
 		// get the planStepFactory for the plan (or create one):
-		PlanBuilder<ModalLink> tmpPlanStepFactory = getPlanStepFactoryForPlan(selectedPlan);
+		PlanBuilder<ModalCountsLinkIdentifier> tmpPlanStepFactory = getPlanStepFactoryForPlan(selectedPlan);
 		
 		if (tmpPlanStepFactory != null) {
 						
 			// add the "turn" to the planStepfactory
-			tmpPlanStepFactory.addTurn(modalLinkContainer.get(mlId.toString()), (int) event.getTime());
+			tmpPlanStepFactory.addTurn(modalLinkContainer.get(mlId), (int) event.getTime());
 		}
 	}
 
 	// ###################################################################################
 	// only private functions below here (low level functionality)
 
-	private PlanBuilder<ModalLink> getPlanStepFactoryForPlan(final Plan selectedPlan) {
-		PlanBuilder<ModalLink> planStepFactory = null;
+	private PlanBuilder<ModalCountsLinkIdentifier> getPlanStepFactoryForPlan(final Plan selectedPlan) {
+		PlanBuilder<ModalCountsLinkIdentifier> planStepFactory = null;
 
-		planStepFactory = (PlanBuilder<ModalLink>) selectedPlan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
+		planStepFactory = (PlanBuilder<ModalCountsLinkIdentifier>) selectedPlan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
 		Integer factoryIteration = (Integer) selectedPlan.getCustomAttributes().get(STR_ITERATION);
 		if (planStepFactory == null || factoryIteration == null || factoryIteration != this.iteration) {
 			// attach the iteration number to the plan:

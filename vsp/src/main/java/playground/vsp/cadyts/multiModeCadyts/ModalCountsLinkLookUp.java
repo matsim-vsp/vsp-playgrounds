@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.multiModeCadyts;
+package playground.vsp.cadyts.multiModeCadyts;
 
 import java.util.Map;
 
@@ -28,16 +28,17 @@ import org.matsim.contrib.cadyts.general.LookUpItemFromId;
  * @author amit
  */
 
-class ModalLinkLookUp implements LookUpItemFromId<ModalLink> {
+class ModalCountsLinkLookUp implements LookUpItemFromId<ModalCountsLinkIdentifier> {
 	
-	private final Map<String, ModalLink> mappingOfModalLink ;
+	private final Map<Id<ModalCountsLinkIdentifier>, ModalCountsLinkIdentifier> mappingOfModalLink ;
 	
-	ModalLinkLookUp (final Map<String, ModalLink> modalLinkContainer){
+	public ModalCountsLinkLookUp(final Map<Id<ModalCountsLinkIdentifier>, ModalCountsLinkIdentifier> modalLinkContainer){
 		this.mappingOfModalLink = modalLinkContainer;
 	}
 	
 	@Override
-	public ModalLink getItem( Id<ModalLink> id ) {
-		return this.mappingOfModalLink.get(id.toString());
+	public ModalCountsLinkIdentifier getItem(Id<ModalCountsLinkIdentifier> id ) {
+		return this.mappingOfModalLink.get(id);
+
 	}
 }

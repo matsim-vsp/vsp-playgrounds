@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.multiModeCadyts;
+package playground.agarwalamit.mixedTraffic.counts;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,6 +37,7 @@ import org.matsim.counts.Counts;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.NumberUtils;
+import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
 
 /**
  * A class to read the text file for hourly, mode-specific counts and prepare them to insert in multi-mode cadyts context.
@@ -50,10 +51,10 @@ public class CountsInserter {
 
 	private final Map<Tuple<Id<Link>,String>, Map<String, Map<Integer,Double>>> countStation2time2countInfo = new HashMap<>();
 	
-	private Counts<ModalLink> counts = new Counts<>();
-	private final Map<String,ModalLink> mappedModalLink = new HashMap<>(); // central database of objects to retrieve, if needed. (similar to links in the scenario)
+	private Counts<ModalCountsLinkIdentifier> counts = new Counts<>();
+	private final Map<Id<ModalCountsLinkIdentifier>, ModalCountsLinkIdentifier> mappedModalLink = new HashMap<>(); // central database of objects to retrieve, if needed. (similar to links in the scenario)
 
-	public Map<String, ModalLink> getModalLinkContainer() {
+	public Map< Id<ModalCountsLinkIdentifier>, ModalCountsLinkIdentifier> getModalLinkContainer() {
 		return mappedModalLink;
 	}
 
@@ -65,7 +66,7 @@ public class CountsInserter {
 		jcg.run();
 	}
 
-	public Counts<ModalLink> getModalLinkCounts() {
+	public Counts<ModalCountsLinkIdentifier> getModalLinkCounts() {
 		return this.counts;
 	}
 
@@ -77,11 +78,11 @@ public class CountsInserter {
 					counts = new Counts<>();
 				}
 
-				ModalLink ml = new ModalLink(mode, mcs.getFirst()); 
-				Id<ModalLink> modalLinkId = Id.create(ml.getId(), ModalLink.class);
-				mappedModalLink.put(modalLinkId.toString(), ml);
+				ModalCountsLinkIdentifier ml = new ModalCountsLinkIdentifier(mode, mcs.getFirst());
+				Id<ModalCountsLinkIdentifier> modalLinkId = ml.getId();
+				mappedModalLink.put(modalLinkId, ml);
 				
-				Count<ModalLink> c = counts.createAndAddCount(modalLinkId, mcs.getSecond());
+				Count<ModalCountsLinkIdentifier> c = counts.createAndAddCount(modalLinkId, mcs.getSecond());
 				for(Integer i : countStation2time2countInfo.get(mcs).get(mode).keySet()){
 					double vol = countStation2time2countInfo.get(mcs).get(mode).get(i) ;
 					assert c != null;

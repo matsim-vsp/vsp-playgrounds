@@ -49,7 +49,7 @@ import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
-import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 /**
  * Created by amit on 21.02.18.
@@ -127,7 +127,7 @@ public class RunExample {
                         sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
                         sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-                        final CadytsScoring<ModalBinIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
+                        final CadytsScoring<ModalDistanceBinIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
                                 config,
                                 cContext);
                         scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight);

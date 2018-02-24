@@ -47,14 +47,14 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.replanning.PlanStrategy;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
-import playground.vsp.cadyts.marginals.prep.ModalBinIdentifier;
-import playground.vsp.cadyts.marginals.prep.ModalBinLoopUp;
+import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
+import playground.vsp.cadyts.marginals.prep.ModalDistanceBinLoopUp;
 
 /**
  * {@link PlanStrategy Plan Strategy} used for replanning in MATSim which uses Cadyts to
  * select plans that better match to given occupancy counts.
  */
-public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdentifier>, StartupListener, IterationEndsListener, BeforeMobsimListener {
+public class ModalDistanceCadytsContext implements CadytsContextI<ModalDistanceBinIdentifier>, StartupListener, IterationEndsListener, BeforeMobsimListener {
 
 	private final static Logger log = Logger.getLogger(ModalDistanceCadytsContext.class);
 
@@ -65,17 +65,17 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdenti
 	private final DistanceDistribution inputDistanceDistribution;
 	private final boolean writeAnalysisFile;
 
-	private AnalyticalCalibrator<ModalBinIdentifier> calibrator;
+	private AnalyticalCalibrator<ModalDistanceBinIdentifier> calibrator;
 	private BeelineDistancePlansTranslatorBasedOnEvents plansTranslator;
-	private SimResults<ModalBinIdentifier> simResults;
+	private SimResults<ModalDistanceBinIdentifier> simResults;
 	private final Scenario scenario;
 	private final EventsManager eventsManager;
 	private final OutputDirectoryHierarchy controlerIO;
 
-	private final Map<Id<ModalBinIdentifier>,ModalBinIdentifier> modalDistanceBinMap;
+	private final Map<Id<ModalDistanceBinIdentifier>,ModalDistanceBinIdentifier> modalDistanceBinMap;
 	private final BeelineDistanceCollector beelineDistanceCollector;
 
-	private final ModalBinLoopUp modalBinLoopUp;
+	private final ModalDistanceBinLoopUp modalBinLoopUp;
 
 	@Inject
 	private ModalDistanceCadytsContext(Config config, Scenario scenario, @Named("calibration") DistanceDistribution inputDistanceDistribution, EventsManager eventsManager,
@@ -97,11 +97,11 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdenti
 		cadytsConfig.setCalibratedItems(modalDistanceBinMap.keySet().stream().map(Object::toString).collect(Collectors.toSet()));
 		
 		this.writeAnalysisFile = cadytsConfig.isWriteAnalysisFile();
-		this.modalBinLoopUp = new ModalBinLoopUp(modalDistanceBinMap);
+		this.modalBinLoopUp = new ModalDistanceBinLoopUp(modalDistanceBinMap);
 	}
 
 	@Override
-	public PlansTranslator<ModalBinIdentifier> getPlansTranslator() {
+	public PlansTranslator<ModalDistanceBinIdentifier> getPlansTranslator() {
 		return this.plansTranslator;
 	}
 
@@ -117,7 +117,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdenti
 				scenario.getConfig(),
 				this.inputDistanceDistribution.getModalBinToDistanceBin(),
 				this.modalBinLoopUp /*, cadytsConfig.getTimeBinSize()*/,
-				ModalBinIdentifier.class);
+				ModalDistanceBinIdentifier.class);
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdenti
 		// write some output
 		String filename = controlerIO.getIterationFilename(event.getIteration(), LINKOFFSET_FILENAME);
 		try {
-			new CadytsCostOffsetsXMLFileIO<>(this.modalBinLoopUp, ModalBinIdentifier.class)
+			new CadytsCostOffsetsXMLFileIO<>(this.modalBinLoopUp, ModalDistanceBinIdentifier.class)
 			.write(filename, this.calibrator.getLinkCostOffsets());
 		} catch (IOException e) {
 			log.error("Could not write link cost offsets!", e);
@@ -156,7 +156,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalBinIdenti
 	 * for testing purposes only
 	 */
 	@Override
-	public AnalyticalCalibrator<ModalBinIdentifier> getCalibrator() {
+	public AnalyticalCalibrator<ModalDistanceBinIdentifier> getCalibrator() {
 		return this.calibrator;
 	}
 
