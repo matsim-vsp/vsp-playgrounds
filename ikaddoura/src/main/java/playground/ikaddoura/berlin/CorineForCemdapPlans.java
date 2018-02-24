@@ -22,7 +22,7 @@ package playground.ikaddoura.berlin;
 import java.util.HashMap;
 import java.util.Map;
 
-import playground.vsp.demandde.corineLandcover.CORINELandCoverCoordsModifier;
+import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
 
 /**
 * @author ikaddoura
