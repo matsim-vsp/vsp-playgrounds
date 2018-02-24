@@ -142,8 +142,9 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 		
 		if (tmpPlanStepFactory != null) {
 						
-			//this beeline distance is being checked from start_time (lower_limit) and end_time (upper_limit)
-			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) beelineDistance);
+			//this time is checked from start_time (0) and end_time (86400)
+			// --> so any number between these two should return same. Amit Feb'18
+			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) 1);
 		}
 	}
 

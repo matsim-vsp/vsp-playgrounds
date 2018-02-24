@@ -53,7 +53,7 @@ public class ModalDistanceCadytsIT {
 
     @Parameterized.Parameters(name = "{index}: cadytsWeight == {0};")
     public static Collection<Object> parameterObjects () {
-        return Arrays.asList(0.0, 2500.0);
+        return Arrays.asList(0.0, 2500.);
     }
 
     @Rule
@@ -99,7 +99,7 @@ public class ModalDistanceCadytsIT {
                         if (this.cadytsWt==0.0){
                             Assert.assertEquals("Wrong real count for mode bicycle and "+range.toString(), "0.0", parts[4] );
                         } else {
-                            Assert.assertEquals("Wrong real count for mode bicycle and "+range.toString(), "5.5", parts[4] );
+                            Assert.assertEquals("Wrong real count for mode bicycle and "+range.toString(), "3.25", parts[4] );
                         }
                     } else if (range.toString().equals(new DistanceBin.DistanceRange(12000.0, 18000.0).toString())){
                         Assert.assertEquals("Wrong measured count for mode bicycle and "+range.toString(), "2.0", parts[3] );
@@ -127,7 +127,7 @@ public class ModalDistanceCadytsIT {
                         if (this.cadytsWt==0.0){
                             Assert.assertEquals("Wrong real count for mode car and "+range.toString(), "12.0", parts[4] );
                         } else {
-                            Assert.assertEquals("Wrong real count for mode car and "+range.toString(), "6.5", parts[4] );
+                            Assert.assertEquals("Wrong real count for mode car and "+range.toString(), "8.75", parts[4] );
                         }
                     } else if (range.toString().equals(new DistanceBin.DistanceRange(12000.0, 18000.0).toString())){
                         Assert.assertEquals("Wrong measured count for mode car and "+range.toString(), "5.0", parts[3] );

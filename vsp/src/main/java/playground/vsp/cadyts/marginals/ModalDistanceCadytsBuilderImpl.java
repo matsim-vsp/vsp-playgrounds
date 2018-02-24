@@ -24,7 +24,6 @@ import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.measurements.SingleLinkMeasurement;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.contrib.cadyts.general.CadytsBuilderImpl;
 import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.LookUpItemFromId;
 import org.matsim.core.config.Config;
@@ -65,7 +64,8 @@ public final class ModalDistanceCadytsBuilderImpl {
 				throw new RuntimeException("item is null; entry=" + entry + " idType=" + idType ) ;
 			}
 			DistanceBin bin = entry.getValue();
-			matsimCalibrator.addMeasurement(item, (int) bin.getDistanceRange().getLowerLimit(), (int) bin.getDistanceRange().getUpperLimit(), bin.getCount(), SingleLinkMeasurement.TYPE.COUNT_VEH);
+			//only one measurement per day.
+			matsimCalibrator.addMeasurement(item, (int) 0, (int) 86400, bin.getCount(), SingleLinkMeasurement.TYPE.COUNT_VEH);
 			numberOfAddedMeasurements++;
 		}
 
