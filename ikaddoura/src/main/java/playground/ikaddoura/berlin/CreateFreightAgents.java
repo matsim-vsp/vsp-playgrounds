@@ -64,6 +64,8 @@ public class CreateFreightAgents {
 	private final Map<Id<Link>, Integer> linkId2dailyFreightTrafficVolumeToBerlin = new HashMap<>();
 	private final Map<Id<Link>, Integer> linkId2dailyFreightTrafficVolumeFromBerlin = new HashMap<>();
 
+	private final String freightActivityType = "freight";
+	
 	public static void main(String [] args) throws IOException, ParseException {
 
 		final String networkFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/network/network_berlin4.0_v1.xml.gz";
@@ -174,7 +176,7 @@ public class CreateFreightAgents {
 						
 			Point startP = getRandomPointInFeature(rnd, features.get("berlin"));
 			if ( startP==null ) log.warn("Point is null.");
-			Activity startActivity = popFactory.createActivityFromCoord("freightStart", MGC.point2Coord(startP) ) ;
+			Activity startActivity = popFactory.createActivityFromCoord(this.freightActivityType, MGC.point2Coord(startP) ) ;
 			plan.addActivity(startActivity);
 			
 			double startTime = calculateNormallyDistributedTime(12 * 3600, 6 * 3600.);  // approx. 2/3 between 6.00 and 18.00
@@ -184,7 +186,7 @@ public class CreateFreightAgents {
 			Leg leg1 = popFactory.createLeg(TransportMode.car);
 			plan.addLeg(leg1);
 
-			Activity endActivity = popFactory.createActivityFromCoord("freightEnd", scenario.getNetwork().getLinks().get(linkId).getToNode().getCoord());
+			Activity endActivity = popFactory.createActivityFromCoord(this.freightActivityType, scenario.getNetwork().getLinks().get(linkId).getToNode().getCoord());
 			plan.addActivity(endActivity);
 
 			pers.addPlan(plan) ;
@@ -206,7 +208,7 @@ public class CreateFreightAgents {
 			
 			Plan plan = popFactory.createPlan();
 						
-			Activity startActivity = popFactory.createActivityFromCoord("freightStart", scenario.getNetwork().getLinks().get(linkId).getFromNode().getCoord());
+			Activity startActivity = popFactory.createActivityFromCoord(this.freightActivityType, scenario.getNetwork().getLinks().get(linkId).getFromNode().getCoord());
 
 			double startTime = calculateNormallyDistributedTime(10 * 3600., 4 * 3600.); // approx. 2/3 between 6.00 and 14.00
 			startActivity.setEndTime(startTime);
@@ -218,7 +220,7 @@ public class CreateFreightAgents {
 			Point endPoint = getRandomPointInFeature(rnd, features.get("berlin"));
 			if ( endPoint==null ) log.warn("Point is null.");
 			
-			Activity endActivity = popFactory.createActivityFromCoord("freightEnd", MGC.point2Coord(endPoint) ) ;
+			Activity endActivity = popFactory.createActivityFromCoord(this.freightActivityType, MGC.point2Coord(endPoint) ) ;
 			plan.addActivity(endActivity);
 
 			pers.addPlan(plan) ;
