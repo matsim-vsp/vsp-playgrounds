@@ -78,9 +78,8 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
         Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
         Coord destinationCoord = this.network.getLinks().get(event.getLinkId()).getToNode().getCoord();
 
-        //TODO check if we should include beeline distance factor which is not available for network mdoes
         PlansCalcRouteConfigGroup.ModeRoutingParams params = this.configGroup.getModeRoutingParams().get(mode);
-        double beelineDistanceFactor = 1.0;
+        double beelineDistanceFactor = 1.3;
         if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
         else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
             beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
