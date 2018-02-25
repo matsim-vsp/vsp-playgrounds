@@ -23,7 +23,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
@@ -39,10 +40,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-
 import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
 
 /**
@@ -177,20 +174,18 @@ public class CORINELandCoverCoordsModifier {
 
                         // during matsim plans generation, for home activities following fake coordinate is assigned.
                         if ( coord !=null && coord.equals(fakeCoord) ) {
-                            //coord is null
                             String zoneId = activity.getType().split("_")[1];
 
                             if (homeLocationCoord==null) {
-                                
-                            		if (activityType.startsWith(this.homeActivityPrefix)) {
-                                		coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.home, zoneId);
-                            		} else {
-                            			Log.warn("First activity is not a home activity...");
-                                		coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.other, zoneId);
-                            		}
-                                homeLocationCoord = coord;
-                                homeActivityName = activityType;
+                                if ( activityType.startsWith(this.homeActivityPrefix) ) {
+                                    coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.home, zoneId);
 
+                                    homeLocationCoord = coord;
+                                    homeActivityName = activityType;
+                                } else {
+                                    Log.warn("First activity is not a home activity...");
+                                    coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.other, zoneId);
+                                }
                             } else if (activityType.equals(homeActivityName) && sameHomeActivity) {
                                 // same home activity, just take the stored coord
                                 coord = homeLocationCoord;
@@ -206,18 +201,18 @@ public class CORINELandCoverCoordsModifier {
                             // a regular coord --> check and reassign coord if required.
                             if (homeLocationCoord==null) {
                                 Point point = MGC.coord2Point(coord);
-                                
-                        			if (activityType.startsWith(this.homeActivityPrefix)) {
-                        				if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.home, point) ){
-                                            coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.home);
-                                     }
-                        			} else {
-                        				if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
-                                           coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
-                                     }
-                        			}
-                                homeLocationCoord = coord;
-                                homeActivityName = activityType;
+                                if (activityType.startsWith(this.homeActivityPrefix)) {
+                                    if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.home, point) ){
+                                        coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.home);
+                                    }
+                                    homeLocationCoord = coord;
+                                    homeActivityName = activityType;
+
+                                } else {
+                                    if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
+                                        coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
+                                    }
+                                }
                             } else if ( activityType.equals(homeActivityName) && sameHomeActivity) {
                                 // same home activity, just take the stored coord
                                 coord = homeLocationCoord;
@@ -271,7 +266,7 @@ public class CORINELandCoverCoordsModifier {
                                          .findFirst()
                                          .orElse(null);
         if (zone == null) {
-        		LOG.warn(point.toString() + " / " + activityType + " not reassigned (Activitiy coordinates are in no zone).");
+        		LOG.warn(point.toString() + " / " + activityType + " not reassigned (Activity coordinates are outside given shape zone.");
         		return MGC.point2Coord(point);
         } else {
             return corineLandCoverData.getRandomCoord(zone, activityType);
