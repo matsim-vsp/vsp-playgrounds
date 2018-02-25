@@ -206,7 +206,8 @@ public class CemdapStops2MatsimPlansConverter {
 				feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, corineLandCoverData);
 			}
 		} else {
-			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");
+//			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");
+			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be stored with activity attributes.");
 			// for EXTRA LARGE scenario, one can assign coordinates after sampling which would be at least '1/sampleSize' times faster. Amit Oct'17
 			for (Person person : population.getPersons().values()) {
 				for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
@@ -219,7 +220,8 @@ public class CemdapStops2MatsimPlansConverter {
 							if (zoneId == null) {
 								throw new RuntimeException("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 							}
-							activity.setType(activityType+"_"+zoneId);
+//							activity.setType(activityType+"_"+zoneId);
+							activity.getAttributes().putAttribute("zoneId", zoneId);
 							activityIndex++;
 						}
 					}

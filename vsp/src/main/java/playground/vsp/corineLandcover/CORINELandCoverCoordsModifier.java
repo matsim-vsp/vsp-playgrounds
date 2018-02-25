@@ -170,11 +170,12 @@ public class CORINELandCoverCoordsModifier {
 
                         Activity activity = (Activity) planElement;
                         Coord coord = activity.getCoord();
-                        String activityType = activity.getType().split("_")[0]; // could be home_10587 or home_1h
+//                        String activityType = activity.getType().split("_")[0]; // could be home_10587 or home_1h
+                        String activityType = activity.getType(); // could be home or home_1h
 
                         // during matsim plans generation, for home activities following fake coordinate is assigned.
                         if ( coord !=null && coord.equals(fakeCoord) ) {
-                            String zoneId = activity.getType().split("_")[1];
+                            String zoneId = (String) activity.getAttributes().getAttribute("zoneId");
 
                             if (homeLocationCoord==null) {
                                 if ( activityType.startsWith(this.homeActivityPrefix) ) {
