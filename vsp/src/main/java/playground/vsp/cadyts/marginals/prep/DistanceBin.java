@@ -23,7 +23,7 @@ package playground.vsp.cadyts.marginals.prep;
  * Created by amit on 21.02.18.
  */
 
-public class DistanceBin {
+public class DistanceBin implements Comparable<DistanceBin>{
 
     private final DistanceRange distanceRange;
     private double count = 0.;
@@ -52,7 +52,12 @@ public class DistanceBin {
                 '}';
     }
 
-    public static class DistanceRange {
+    @Override
+    public int compareTo(DistanceBin distanceBin){
+        return distanceRange.compareTo(distanceBin.getDistanceRange());
+    }
+
+    public static class DistanceRange implements Comparable<DistanceRange>{
         private final double lowerLimit;
         private final double upperLimit; // allow infinity for upperLimit value
 
@@ -75,6 +80,15 @@ public class DistanceBin {
                     "lowerLimit=" + lowerLimit +
                     ", upperLimit=" + upperLimit +
                     ']';
+        }
+
+        @Override
+        public int compareTo(DistanceRange range){
+            if (this.getLowerLimit()==range.getLowerLimit()){
+                return Double.compare(this.getUpperLimit(), range.getUpperLimit());
+            } else {
+                return Double.compare(this.getLowerLimit(), range.getLowerLimit());
+            }
         }
     }
 }

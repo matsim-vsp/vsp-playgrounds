@@ -20,10 +20,10 @@
 package playground.vsp.cadyts.marginals;
 
 import java.io.BufferedWriter;
-import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import javax.inject.Inject;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.CountsConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -84,13 +84,13 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
 
     @Override
     public void notifyIterationEnds(final IterationEndsEvent event) {
-        if (event.getIteration() == controlerConfigGroup.getFirstIteration()) {
+        if ( event.getIteration() == controlerConfigGroup.getFirstIteration() ) {
             // write the data for first iteration too
             addCounts(beelineDistanceCollector.getOutputDistanceDistribution());
             writeData(event, this.stats);
             reset();
         } else if (this.config.getWriteCountsInterval() > 0) {
-            if (useVolumesOfIteration(event.getIteration(), controlerConfigGroup.getFirstIteration())) {
+            if (useStatsOfIteration(event.getIteration(), controlerConfigGroup.getFirstIteration())) {
                 addCounts(beelineDistanceCollector.getOutputDistanceDistribution());
             }
 
@@ -128,13 +128,15 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
             writer.newLine();
 
 
-            for (Map.Entry<Id<ModalDistanceBinIdentifier>, DistanceBin> entry : averages.getModalBinToDistanceBin().entrySet()) {
+            for (SortedMap.Entry<ModalDistanceBinIdentifier, DistanceBin> entry : getSortedMap(averages).entrySet()) {
                 writer.write(
-                        averages.getModalBins().get(entry.getKey()).getMode() + "\t"
-                        + entry.getValue().getDistanceRange().getLowerLimit() + "\t"
-                        + entry.getValue().getDistanceRange().getUpperLimit() + "\t" +
-                        this.inputDistanceDistribution.getModalBinToDistanceBin().get(entry.getKey()).getCount() +"\t"+
-                        entry.getValue().getCount());
+                        entry.getKey().getMode() + "\t"
+                                + entry.getKey().getDistanceRange().getLowerLimit() + "\t"
+                                + entry.getKey().getDistanceRange().getUpperLimit() + "\t" +
+                                this.inputDistanceDistribution.getModalBinToDistanceBin()
+                                                              .get(entry.getKey().getId())
+                                                              .getCount() + "\t" +
+                                entry.getValue().getCount());
                 writer.newLine();
             }
             writer.close();
@@ -143,8 +145,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
         }
     }
 
-    /*package*/
-    private boolean useVolumesOfIteration(final int iteration, final int firstIteration) {
+    private boolean useStatsOfIteration(final int iteration, final int firstIteration) {
         int iterationMod = iteration % this.config.getWriteCountsInterval();
         int effectiveIteration = iteration - firstIteration;
         int averaging = Math.min(this.config.getAverageCountsOverIterations(), this.config.getWriteCountsInterval());
@@ -156,7 +157,6 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
                 && (effectiveIteration + (this.config.getWriteCountsInterval() - iterationMod) >= averaging));
     }
 
-    /*package*/
     private boolean createCountsInIteration(final int iteration) {
         return ((iteration % this.config.getWriteCountsInterval() == 0) && (this.iterationsUsed >= this.config.getAverageCountsOverIterations()));
     }
@@ -173,6 +173,17 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
     private void reset() {
         this.iterationsUsed = 0;
         this.stats.getModalBinToDistanceBin()
-                  .forEach((key, value) -> value.addToCount(- value.getCount()));
+                  .forEach((key, value) -> value.addToCount(-value.getCount()));
     }
+
+    //technically, following can be applied directly in DistanceDistribution, however, ordering is imp here only.
+    private SortedMap<ModalDistanceBinIdentifier, DistanceBin> getSortedMap(DistanceDistribution distanceDistribution) {
+        SortedMap<ModalDistanceBinIdentifier, DistanceBin> sortedMap = new TreeMap<>();
+        distanceDistribution.getModalBinToDistanceBin()
+                            .forEach((key, value) -> sortedMap.put(distanceDistribution.getModalBins().get(key),
+                                    value));
+        return sortedMap;
+    }
+
+
 }

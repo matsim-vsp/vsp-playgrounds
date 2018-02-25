@@ -28,7 +28,7 @@ import org.matsim.api.core.v01.Identifiable;
  * @author amit
  */
 
-public final class ModalDistanceBinIdentifier implements Identifiable<ModalDistanceBinIdentifier> {
+public final class ModalDistanceBinIdentifier implements Identifiable<ModalDistanceBinIdentifier>, Comparable<ModalDistanceBinIdentifier> {
 	
 	private final String mode;
 	private final DistanceBin.DistanceRange distanceRange;
@@ -60,5 +60,14 @@ public final class ModalDistanceBinIdentifier implements Identifiable<ModalDista
 				"mode='" + mode + '\'' +
 				", distanceRange=" + distanceRange +
 				']';
+	}
+
+	@Override
+	public int compareTo(ModalDistanceBinIdentifier identifier){
+		if (this.getMode().equals(identifier.getMode())){
+			return this.getDistanceRange().compareTo(identifier.getDistanceRange());
+		} else {
+			return this.getMode().compareTo(identifier.getMode());
+		}
 	}
 }
