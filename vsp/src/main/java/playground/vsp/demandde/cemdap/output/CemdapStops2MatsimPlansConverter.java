@@ -241,7 +241,9 @@ public class CemdapStops2MatsimPlansConverter {
 
 				Plan stayHomePlan = population.getFactory().createPlan();
 				// Create new activity with type and coordinates (but without end time) and add it to stay-home plan
-				stayHomePlan.addActivity(population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord()));
+				Activity newActivity = population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord());
+				newActivity.getAttributes().putAttribute("zoneId", firstActivity.getAttributes().getAttribute("zoneId"));
+				stayHomePlan.addActivity(newActivity);
 				person.addPlan(stayHomePlan);
 			}
 		}
