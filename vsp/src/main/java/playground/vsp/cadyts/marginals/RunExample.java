@@ -107,6 +107,7 @@ public class RunExample {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
+            	
                 bindScoringFunctionFactory().toInstance(new ScoringFunctionFactory() {
                     @Inject
                     private ScoringParametersForPerson parameters;
@@ -136,7 +137,12 @@ public class RunExample {
                         return sumScoringFunction;
                     }
                 });
+            
+                	// optional:
+        			this.bind(AgentFilter.class).to(RunExampleAgentFilter.class);
+        		
             }
+            
         });
         controler.run();
     }

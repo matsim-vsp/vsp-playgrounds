@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.inject.Inject;
 import cadyts.demand.PlanBuilder;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -39,6 +38,9 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
+
+import com.google.inject.Inject;
+
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
@@ -64,6 +66,9 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 	private final Map<Id<ModalDistanceBinIdentifier>, ModalDistanceBinIdentifier> modalDistanceBinMap;
 	private final DistanceDistribution inputDistanceDistribution;
+	
+	@Inject(optional=true)
+	private AgentFilter agentFilter;
 
 	@Inject
     BeelineDistancePlansTranslatorBasedOnEvents(final Scenario scenario, DistanceDistribution inputDistanceDistribution) {
@@ -98,53 +103,58 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		this.personToOriginCoord.put(event.getPersonId(), scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord());
+		if (agentFilter != null && agentFilter.includeAgent(event.getPersonId())) {
+			this.personToOriginCoord.put(event.getPersonId(), scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord());
+		}
 	}
 	
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
-		String mode  = event.getLegMode();
-
-		if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
-			log.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
-			return;
-		}
-
-		Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
-		Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord();
-
-		//TODO check if we should include beeline distance factor which is not available for network mdoes
-		PlansCalcRouteConfigGroup.ModeRoutingParams params = this.scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode);
-		double beelineDistanceFactor = 1.0;
-		if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
-		else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
-			beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
-		} else{
-			log.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
-		}
-		double beelineDistance = beelineDistanceFactor *
-				NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
-
-		DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
-
-		// if only a subset of links is calibrated but the link is not contained, ignore the event
-		Id<ModalDistanceBinIdentifier> mlId = DistanceDistributionUtils.getModalBinId(mode,distanceRange);
-		if (this.modalDistanceBinMap.get(mlId) == null) return;
-
-		// get the "Person" behind the id:
-		Person person = this.scenario.getPopulation().getPersons().get(event.getPersonId());
 		
-		// get the selected plan:
-		Plan selectedPlan = person.getSelectedPlan();
-		
-		// get the planStepFactory for the plan (or create one):
-		PlanBuilder<ModalDistanceBinIdentifier> tmpPlanStepFactory = getPlanStepFactoryForPlan(selectedPlan);
-		
-		if (tmpPlanStepFactory != null) {
-						
-			//this time is checked from start_time (0) and end_time (86400)
-			// --> so any number between these two should return same. Amit Feb'18
-			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) 1);
+		if (agentFilter != null && agentFilter.includeAgent(event.getPersonId())) {
+			String mode  = event.getLegMode();
+
+			if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
+				log.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
+				return;
+			}
+
+			Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
+			Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord();
+
+			//TODO check if we should include beeline distance factor which is not available for network mdoes
+			PlansCalcRouteConfigGroup.ModeRoutingParams params = this.scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode);
+			double beelineDistanceFactor = 1.0;
+			if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
+			else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
+				beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
+			} else{
+				log.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
+			}
+			double beelineDistance = beelineDistanceFactor *
+					NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
+
+			DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
+
+			// if only a subset of links is calibrated but the link is not contained, ignore the event
+			Id<ModalDistanceBinIdentifier> mlId = DistanceDistributionUtils.getModalBinId(mode,distanceRange);
+			if (this.modalDistanceBinMap.get(mlId) == null) return;
+
+			// get the "Person" behind the id:
+			Person person = this.scenario.getPopulation().getPersons().get(event.getPersonId());
+			
+			// get the selected plan:
+			Plan selectedPlan = person.getSelectedPlan();
+			
+			// get the planStepFactory for the plan (or create one):
+			PlanBuilder<ModalDistanceBinIdentifier> tmpPlanStepFactory = getPlanStepFactoryForPlan(selectedPlan);
+			
+			if (tmpPlanStepFactory != null) {
+							
+				//this time is checked from start_time (0) and end_time (86400)
+				// --> so any number between these two should return same. Amit Feb'18
+				tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) 1);
+			}
 		}
 	}
 

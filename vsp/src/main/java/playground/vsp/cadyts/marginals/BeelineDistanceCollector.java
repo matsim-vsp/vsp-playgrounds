@@ -21,7 +21,6 @@ package playground.vsp.cadyts.marginals;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -34,6 +33,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
+
+import com.google.inject.Inject;
+
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
@@ -52,6 +54,9 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
 
     private DistanceDistribution outputDistanceDistribution = new DistanceDistribution();
 
+    @Inject(optional=true)
+	private AgentFilter agentFilter;
+    
     @Inject
     public BeelineDistanceCollector(
             Network network,
@@ -69,33 +74,38 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
 
     @Override
     public void handleEvent(PersonArrivalEvent event) {
-        String mode  = event.getLegMode();
-        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
-            LOG.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
-            return;
-        }
+    	
+    		if (agentFilter != null && agentFilter.includeAgent(event.getPersonId())) {
+    			String mode  = event.getLegMode();
+    	        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
+    	            LOG.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
+    	            return;
+    	        }
 
-        Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
-        Coord destinationCoord = this.network.getLinks().get(event.getLinkId()).getToNode().getCoord();
+    	        Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
+    	        Coord destinationCoord = this.network.getLinks().get(event.getLinkId()).getToNode().getCoord();
 
-        PlansCalcRouteConfigGroup.ModeRoutingParams params = this.configGroup.getModeRoutingParams().get(mode);
-        double beelineDistanceFactor = 1.3;
-        if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
-        else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
-            beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
-        } else{
-            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
-        }
-        double beelineDistance = beelineDistanceFactor *
-                NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
+    	        PlansCalcRouteConfigGroup.ModeRoutingParams params = this.configGroup.getModeRoutingParams().get(mode);
+    	        double beelineDistanceFactor = 1.3;
+    	        if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
+    	        else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
+    	            beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
+    	        } else{
+    	            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
+    	        }
+    	        double beelineDistance = beelineDistanceFactor *
+    	                NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
 
-        DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
-        outputDistanceDistribution.addToDistribution(mode, distanceRange, +1);
+    	        DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
+    	        outputDistanceDistribution.addToDistribution(mode, distanceRange, +1);
+    		}
     }
 
     @Override
     public void handleEvent(PersonDepartureEvent event) {
-        this.personToOriginCoord.put(event.getPersonId(), network.getLinks().get(event.getLinkId()).getToNode().getCoord());
+		if (agentFilter != null && agentFilter.includeAgent(event.getPersonId())) {
+	        this.personToOriginCoord.put(event.getPersonId(), network.getLinks().get(event.getLinkId()).getToNode().getCoord());
+		}
     }
 
     @Override
