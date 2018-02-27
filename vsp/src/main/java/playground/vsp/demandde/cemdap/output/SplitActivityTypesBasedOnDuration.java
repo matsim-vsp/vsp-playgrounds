@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.vsp.demandde.cemdap.output;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationSco
 import org.matsim.core.population.io.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.vsp.demandde.cemdap.output.ActivityTypes;
+import playground.ikaddoura.berlin.CemdapPopulationTools;
 
 /**
 * @author ikaddoura
