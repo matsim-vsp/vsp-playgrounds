@@ -44,6 +44,7 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 
 import playground.dziemke.analysis.SelectedPlansAnalyzer;
 import playground.dziemke.analysis.TripAnalyzerV2Extended;
+import playground.vsp.cadyts.marginals.AgentFilter;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsContext;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
@@ -68,7 +69,8 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
 		
         controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
 
-        final double cadytsDistributionWeight = Double.valueOf(args[5]) * config.planCalcScore().getBrainExpBeta();
+        final double cadytsDistributionWeight = Double.valueOf(args[5]);
+        
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
@@ -101,6 +103,9 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
                         return sumScoringFunction;
                     }
                 });
+                
+                this.bind(AgentFilter.class).to(BerlinAgentFilter.class);
+
             }
         });
   
