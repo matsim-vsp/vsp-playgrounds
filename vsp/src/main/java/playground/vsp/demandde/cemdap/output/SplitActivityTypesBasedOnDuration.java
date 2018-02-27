@@ -32,8 +32,6 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationSco
 import org.matsim.core.population.io.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.ikaddoura.berlin.CemdapPopulationTools;
-
 /**
 * @author ikaddoura
 */
