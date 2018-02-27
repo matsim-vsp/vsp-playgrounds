@@ -33,10 +33,12 @@ import playground.vsp.demandde.cemdap.output.CemdapStopsParser;
 */
 
 public class CemdapPopulationTools {
+	
+	private double maxEndTime = 0.;
 
 	private static final Logger log = Logger.getLogger(CemdapPopulationTools.class);
 
-	public static void setActivityTypesAccordingToDurationAndMergeOvernightActivities(Population population, double timeCategorySize) {
+	public void setActivityTypesAccordingToDurationAndMergeOvernightActivities(Population population, double timeCategorySize) {
 				
 		log.info("First, setting activity types according to duration (time bin size: " + timeCategorySize + ")");				
 		log.info("Second, merging evening and morning activity if they have the same (base) type.");
@@ -48,11 +50,13 @@ public class CemdapPopulationTools {
 				setActivityTypesAccordingToDuration(plan, timeCategorySize);
 				mergeOvernightActivities(plan);				
 			}
-		}		
+		}
+		
+		log.info("maximum duration: sec: " + maxEndTime + " / hours: " + maxEndTime / 3600.);
 	}
 	
-	private static void mergeOvernightActivities(Plan plan) {
-		
+	private void mergeOvernightActivities(Plan plan) {
+
 		if (plan.getPlanElements().size() > 1) {
 		
 			Activity firstActivity = (Activity) plan.getPlanElements().get(0);
@@ -65,6 +69,10 @@ public class CemdapPopulationTools {
 				
 				double mergedDuration = Double.parseDouble(firstActivity.getType().split("_")[1]) + Double.parseDouble(lastActivity.getType().split("_")[1]);
 				
+				if (mergedDuration > maxEndTime) {
+					maxEndTime = mergedDuration;
+				}
+				
 				firstActivity.setType(firstBaseActivity + "_" + mergedDuration);
 				lastActivity.setType(lastBaseActivity + "_" + mergedDuration);
 			}
@@ -72,6 +80,7 @@ public class CemdapPopulationTools {
 		} else {
 			// skipping plans with just one activity
 		}
+				
 	}
 
 	private static void setActivityTypesAccordingToDuration(Plan plan, double timeCategorySize) {
@@ -122,6 +131,10 @@ public class CemdapPopulationTools {
 				act.setType(newType);
 			}
 		}
+	}
+
+	public double getMaxEndTime() {
+		return maxEndTime;
 	}
 	
 }
