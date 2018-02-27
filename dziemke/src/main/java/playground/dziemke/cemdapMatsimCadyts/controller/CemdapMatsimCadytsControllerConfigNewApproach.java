@@ -69,7 +69,7 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
 		
         controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
 
-        final double cadytsDistributionWeight = Double.valueOf(args[5]);
+        final double cadytsDistributionWeight = Double.valueOf(args[4]);
         
         controler.addOverridingModule(new AbstractModule() {
             @Override
@@ -133,8 +133,8 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
 
 		controler.run();
 		
-		if (args.length > 4) {
-			runAnalyses(config, args[4]);
+		if (args.length > 5) {
+			runAnalyses(config, args[5]);
 		}	
 	}
 	
