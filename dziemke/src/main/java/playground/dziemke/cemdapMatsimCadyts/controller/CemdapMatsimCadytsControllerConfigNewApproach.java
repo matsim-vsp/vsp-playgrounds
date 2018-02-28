@@ -144,29 +144,29 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("walk",beelineDistanceFactorForNetworkModes);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.,1000.),2412);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.,1000.),3308);
-        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(0.,1000.),22455);
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.,1000.),241339+61162); // car + pt
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.,1000.),330404);
+        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(0.,1000.),2245049);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(1000.,3000.),7007);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(1000.,3000.),5178);
-        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(1000.,3000.),6374);
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(1000.,3000.),700995+370121); // car + pt
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(1000.,3000.),517133);
+        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(1000.,3000.),637301);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(3000.,5000.),5946);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(3000.,5000.),2348);
-        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(3000.,5000.),825);
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(3000.,5000.),594879+423928); // car + pt
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(3000.,5000.),234520);
+        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(3000.,5000.),82478);
 
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(5000.,10000.),8431);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(5000.,10000.),1992);
-        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(5000.,10000.),225);
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(5000.,10000.),843400+785500); // car + pt
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(5000.,10000.),198907);
+        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(5000.,10000.),22477);
         
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(10000.,20000.),6805);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(10000.,20000.),543);
-        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(10000.,20000.),25);
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(10000.,20000.),680752+753850); // car + pt
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(10000.,20000.),54255);
+        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(10000.,20000.),2528);
         
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(20000.,10000000.),3385);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.,10000000.),48);
-        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(20000.,10000000.),2);
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(20000.,10000000.),338635+335439); // car + pt
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.,10000000.),4781);
+        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(20000.,10000000.),167);
         
         return inputDistanceDistribution;
     }
