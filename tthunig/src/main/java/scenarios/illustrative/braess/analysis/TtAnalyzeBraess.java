@@ -53,6 +53,9 @@ public final class TtAnalyzeBraess extends TtAbstractAnalysisTool {
 		case "3_5": // the person uses the upper route
 			route = 0;
 			break;
+		case "7_8": // the by-pass (does not exist by default)
+			route = 3;
+			break;
 		default:
 			break;
 		}
@@ -61,7 +64,7 @@ public final class TtAnalyzeBraess extends TtAbstractAnalysisTool {
 
 	@Override
 	protected void defineNumberOfRoutes() {
-		setNumberOfRoutes(3);
+		setNumberOfRoutes(4);
 	}
 
 }
