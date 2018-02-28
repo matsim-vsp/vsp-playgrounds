@@ -164,9 +164,9 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(10000.,20000.),543);
         inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(10000.,20000.),25);
         
-        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(20000.,100000.),3385);
-        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.,100000.),48);
-        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(20000.,100000.),2);
+        inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(20000.,10000000.),3385);
+        inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.,10000000.),48);
+        inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(20000.,10000000.),2);
         
         return inputDistanceDistribution;
     }
