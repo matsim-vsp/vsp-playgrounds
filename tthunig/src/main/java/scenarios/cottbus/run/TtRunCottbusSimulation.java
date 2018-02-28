@@ -119,16 +119,19 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V1;
+	private final static NetworkType NETWORK_TYPE = NetworkType.V1_2;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
+		V1_1, // same as V1 except merged links 6724 and 6708. should only have effect on sensor prediction for adaptive signals but not on fixed time signals
+		V1_2, // same as V1 except merged links 10284-8747-8745 and reverse
 		V2, // add missing highway part, add missing links, correct directions, add missing signal
 		V21, // add missing lanes
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
-	private final static PopulationType POP_TYPE = PopulationType.WoMines;
+	
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MSidealNetV1_2;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -137,14 +140,19 @@ public class TtRunCottbusSimulation {
 		WoMines, // without mines as working places
 		WoMines100itcap1MS, // without mines. iterated for 100it with capacity 1.0 and signals MS
 		WoMines100itcap07MS, // without mines. iterated for 100it with capacity 0.7 and signals MS
-		WoMines100itcap07MStbs300, // same es above just with tbs 300 instead of 10
+		WoMines100itcap07MStbs300, // same as above just with tbs 300 instead of 10
 		WoMines100itcap1MStbs300,
+		WoMines100itcap07MStbs900, // without mines. 100it. capacity 0.7. MS signals. tbs 900. stuckTime 120
+		WoMines100itcap07MStbs900stuck600, // same as above, just with stuckTime 600
 		WoMines100itcap07MSRand, // same as prev, but with signals MS_RANDOM_OFFSETS
 		WoMines100itcap07MSideal, // without mines. iterated for 100it with capacity 0.7 and adapted MS signals (fixed intergreen... comparable to laemmer)
-		WoMines100itcap1MSideal
+		WoMines100itcap1MSideal,
+		WoMines100itcap07MSidealNetV1_1, // stuck120 tbs900 network V1_1 with merged links at sys23.
+		WoMines100itcap1MSidealNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap1.0
+		WoMines100itcap07MSidealNetV1_2 // stuck120 tbs900 networkV1_2 with merged links around 10284. cap0.7
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_NICO_GROUPS;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -156,6 +164,7 @@ public class TtRunCottbusSimulation {
 		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with green basis, rest all green
 		LAEMMER_NICO_GROUPS, // laemmer with the fixed signal groups, that nico defined in his MA. except: bug fix in system 1 and 5 (1905 was included twice, 1902 forgotten; 1802 included twice, 1803 forgotten)
 		LAEMMER_DOUBLE_GROUPS, // laemmer with fixed signal groups, where signals can be included more than once, i.e. alternative groups can be modeled
+		LAEMMER_DOUBLE_GROUPS_SYS17, // as above but two additional possible groups at system 17, such that opposing traffic can have green at the same time
 		MS_IDEAL // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 	}
 	
@@ -295,6 +304,14 @@ public class TtRunCottbusSimulation {
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n.xml.gz");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes.xml");
 			break;
+		case V1_1:
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_sys23linksMerged.xml");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_sys23linksMerged.xml");
+			break;
+		case V1_2:
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_link10284andReverseMerged.xml");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_link10284merged.xml");
+			break;
 		case V2:
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v2.xml");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes.xml");
@@ -326,9 +343,9 @@ public class TtRunCottbusSimulation {
 		case WoMines:
 			// TODO choose one
 			// BaseCase plans, no routes
-			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only.xml.gz");
+//			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only.xml.gz");
 			// BaseCase plans, no links for acitivties, no routes
-//			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_woLinks.xml.gz");
+			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_woLinks.xml.gz");
 			break;
 		case WoMines100itcap1MS:
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse_woMines/commuter_population_wgs84_utm33n_car_only_100it_MS_cap1.0.xml.gz");
@@ -343,6 +360,12 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap1MStbs300:
 			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-7-12-9-49_100it_MS_cap10_stuck600_tbs300/1000.output_plans.xml.gz");
 			break;
+		case WoMines100itcap07MStbs900:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MStbs900stuck600:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-8-11-58-32_100it_MS_cap07_stuck600_tbs900/1000.output_plans.xml.gz");
+			break;
 		case WoMines100itcap07MSRand:
 			config.plans().setInputFile("../../runs-svn/cottbus/opdyts/2017-12-12-11-10-15_100it_cap07_MSrand/1000.output_plans.xml.gz");
 			break;	
@@ -351,6 +374,15 @@ public class TtRunCottbusSimulation {
 			break;
 		case WoMines100itcap1MSideal:
 			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-01-17-12-1-45_100it_MSideal_cap10_stuck600/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MSidealNetV1_1:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-13-13-58-41_100it_MS-ideal_cap07_stuck120_tbs900_networkV1-1/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MSidealNetV1_2:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-22-12-18-28_100it_MSideal_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap1MSidealNetV1_2:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-22-10-52-5_100it_MSideal_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
 		case GRID_LOCK_BTU:
 			// take these as initial plans
@@ -384,11 +416,13 @@ public class TtRunCottbusSimulation {
 			// set signal systems
 			switch (NETWORK_TYPE) {
 			case V1:
+			case V1_1:
+			case V1_2:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13.xml");
 				break;
 			case BTU_NET:
 //				signalConfigGroup.setSignalSystemFile(BTU_BASE_DIR + "output_signal_systems_v2.0.xml.gz"); // gives SAXParseException: Content is not allowed in prolog
-				signalConfigGroup.setSignalSystemFile(BTU_BASE_DIR + "signal_systems_no_13_btuNet.xml");
+				signalConfigGroup.setSignalSystemFile(BTU_BASE_DIR + "signal_systems_no_13_btuNet.xml"); // this is the same file as output_signal_systems_v2.0.xml.gz but unpacked
 				break;
 			case V2:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v2.xml");
@@ -398,7 +432,7 @@ public class TtRunCottbusSimulation {
 				break;
 			}			
 			// set signal group
-			if (NETWORK_TYPE.equals(NetworkType.V1) || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+			if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13.xml");
 			} else {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v2.xml");
@@ -412,14 +446,14 @@ public class TtRunCottbusSimulation {
 			case ALL_MS_INSIDE_ENVELOPE_REST_GREEN: // additional signal systems will be added later
 			case ALL_MS_AS_DOWNSTREAM_INSIDE_ENVELOPE_REST_GREEN: // will be changed to downstream later; additional signal systems will be added later
 			case ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_MS: // additional signal systems will be added later
-				if (NETWORK_TYPE.equals(NetworkType.V1) || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+				if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
 					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13.xml");
 				} else {
 					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v2.xml");
 				}
 				break;
 			case MS_RANDOM_OFFSETS:
-				if (NETWORK_TYPE.equals(NetworkType.V1) || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+				if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
 					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_random_offsets.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
@@ -427,7 +461,7 @@ public class TtRunCottbusSimulation {
 				break;
 			case MS_SYLVIA:
 			case ALL_MS_AS_SYLVIA_INSIDE_ENVELOPE_REST_GREEN:
-				if (NETWORK_TYPE.equals(NetworkType.V1)){
+				if (NETWORK_TYPE.toString().startsWith("V1") ){
 					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_sylvia_no_13.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
@@ -435,7 +469,7 @@ public class TtRunCottbusSimulation {
 				break;
 			case BTU_OPT:
 			case DOWNSTREAM_BTUOPT:
-				if (NETWORK_TYPE.equals(NetworkType.V1) || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+				if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
 					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_opt.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
@@ -444,6 +478,10 @@ public class TtRunCottbusSimulation {
 			case LAEMMER_DOUBLE_GROUPS:
 				// overwrite signal groups
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases.xml");
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;
+			case LAEMMER_DOUBLE_GROUPS_SYS17:
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases17.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
 				break;
 			case LAEMMER_NICO_GROUPS:
@@ -771,7 +809,7 @@ public class TtRunCottbusSimulation {
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
 			// TODO change for sylvia
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
 			sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
