@@ -68,9 +68,11 @@ public class RunCottbusFootball {
 	
 	private static final boolean LONG_LANES = true;
 	private static final double FLOW_CAP = 1.;
-	private static final int STUCK_TIME = 600;
-	
-	private static final boolean USE_MS_IDEAL_BASE_PLANS = false;
+	private static final int STUCK_TIME = 120;
+	private static final int TBS = 900;
+	private static final String SIGNALS_BASE_CASE = "MSideal"; // the signals that were used for the base case plans
+	private static final String NETWORK = "V1-2";
+	private static final double EARLIEST_ARRIVAL_TIME_AT_STADIUM = 17 * 3600; // studies by DG and JB were made with 17. in contrast 16.5 will result in more interaction with the evening peak.
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {		
 		Config baseConfig;
@@ -79,8 +81,11 @@ public class RunCottbusFootball {
 		} else {
 			String configFileName = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/config.xml";
 			baseConfig = ConfigUtils.loadConfig(configFileName);
-			String scenarioDescription = "flowCap" + FLOW_CAP + "_longLanes" + LONG_LANES + "_stuckTime" + STUCK_TIME;
-			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/" + scenarioDescription + "/run1200/");
+			String scenarioDescription = "flowCap" + FLOW_CAP + "_longLanes" + LONG_LANES + "_stuckTime" + STUCK_TIME + "_tbs" + TBS + "_basePlans" + SIGNALS_BASE_CASE + NETWORK;
+			if (EARLIEST_ARRIVAL_TIME_AT_STADIUM != 17 * 3600) {
+				scenarioDescription += "_earliestArrivalTimeOfFans" + EARLIEST_ARRIVAL_TIME_AT_STADIUM;
+			}
+			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/" + scenarioDescription + "/");
 			baseConfig.controler().setRunId("1200");
 		}
 		baseConfig.controler().setLastIteration(0);
@@ -114,13 +119,19 @@ public class RunCottbusFootball {
 			break;
 		}
 		
-		if (USE_MS_IDEAL_BASE_PLANS) {
-			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
-					+ "commuter_population_wgs84_utm33n_car_only_100it_MSideal_cap"+FLOW_CAP+".xml.gz");
-		} else { 
-			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
-					+ "commuter_population_wgs84_utm33n_car_only_100it_MS_cap"+FLOW_CAP+".xml.gz");
+		String plansFile = "cb_spn_gemeinde_nachfrage_landuse_woMines/"
+				+ "commuter_population_wgs84_utm33n_car_only_100it_"+SIGNALS_BASE_CASE+"_cap"+FLOW_CAP;
+		if (TBS!=10) {
+			plansFile += "_tbs"+TBS;
 		}
+		if (NETWORK!="V1") {
+			plansFile += "_net"+NETWORK;
+			
+			// also modify the network and lanes file
+			baseConfig.network().setInputFile("network_wgs84_utm33n_link10284andReverseMerged.xml");
+			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
+		}
+		baseConfig.plans().setInputFile(plansFile+".xml.gz");
 		
 		baseConfig.qsim().setFlowCapFactor(FLOW_CAP);
 		baseConfig.qsim().setStorageCapFactor( FLOW_CAP / Math.pow(FLOW_CAP,1/4.) );
@@ -165,11 +176,7 @@ public class RunCottbusFootball {
 			baseOutputDirectory+= "noSignals";
 			break;
 		}
-		if (USE_MS_IDEAL_BASE_PLANS) {
-			baseOutputDirectory += "_MSidealPlans";
-		} else {
-			baseOutputDirectory += "_MSPlans";
-		}
+		baseOutputDirectory += "_"+SIGNALS_BASE_CASE+"Plans";
 		baseOutputDirectory+= "/";
 		LOG.info("using base output directory: " + baseOutputDirectory);
 		Population fanPop = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
@@ -181,6 +188,7 @@ public class RunCottbusFootball {
 		//fan creator
 		String kreisShapeFile = "../../shared-svn/studies/countries/de/brandenburg_gemeinde_kreisgrenzen/kreise/dlm_kreis.shp";
 		CottbusFanCreator fanCreator = new SimpleCottbusFanCreator(kreisShapeFile);
+		fanCreator.setEarliestArrivalTimeAtStadium(EARLIEST_ARRIVAL_TIME_AT_STADIUM);
 		//start the runs
 		int increment = 5;
 		for (int numberOfFootballFans = 0; numberOfFootballFans <= 100; numberOfFootballFans = numberOfFootballFans + increment){
@@ -203,7 +211,7 @@ public class RunCottbusFootball {
 			if (!CONTROL_TYPE.equals(SignalControl.NONE)) {
 				CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 				DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
 				sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 				sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setSylviaConfig(sylviaConfig);
@@ -213,7 +221,7 @@ public class RunCottbusFootball {
 //				laemmerConfig.setMinGreenTime(5);
 //				laemmerConfig.setAnalysisEnabled(true);
 //		        laemmerConfig.setActiveRegime(Regime.STABILIZING);		       
-		        laemmerConfig.setActiveRegime(Regime.OPTIMIZING);
+//		        laemmerConfig.setActiveRegime(Regime.OPTIMIZING);
 				laemmerConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
