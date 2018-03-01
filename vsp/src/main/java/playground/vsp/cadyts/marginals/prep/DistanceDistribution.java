@@ -48,12 +48,14 @@ public class DistanceDistribution {
     private final Map<String, Double> modeToBeelineDistanceFactor = new HashMap<>();
     private final Map<String, Double> modeToScalingFactor = new HashMap<>();
     private boolean locked = false;
+    private boolean distributionAdded = false;
 
     public DistanceDistribution (){
         LOG.warn("If simulating sampled population, do not forget to add scaling factors for each mode. In general, this can be same as count scale factors.");
     }
 
     public void fillDistanceDistribution(String inputFile, DistanceUnit distanceUnit, String itemSeparator) {
+        distributionAdded =true;
         if (locked) {
             throw new RuntimeException("Can't add any other data to distribution.");
         }
@@ -111,6 +113,7 @@ public class DistanceDistribution {
 
     // would be used during simulation
     public void addToDistribution(String mode, DistanceBin.DistanceRange distanceRange, double val) {
+        distributionAdded =true;
         if (locked) {
             throw new RuntimeException("Can't add any other data to distribution.");
         }
@@ -132,6 +135,11 @@ public class DistanceDistribution {
         if (locked) {
             throw new RuntimeException("Can't add any other data to distribution.");
         }
+
+        if (distributionAdded){
+            throw new RuntimeException("Add mode-specific scaling factor before adding distribution.");
+        }
+
         this.modeToScalingFactor.put(mode, factor);
     }
 
