@@ -70,17 +70,17 @@ public class CemdapStops2MatsimPlansConverter {
 		boolean simplifyGeometries = false;
 		boolean assignCoordinatesToActivities = true; // if set to false, the zone id will be attached to activity types and a fake coordinate will be given.
 		boolean combiningGeoms = true;
-		int activityDurationThreshold_s = 1800;
+		int activityDurationThreshold_s = Integer.MIN_VALUE;
 		
 		// Server use
 		if (args.length != 0) {
-			cemdapDataRoot = args[6];
 			numberOfFirstCemdapOutputFile = Integer.parseInt(args[0]);
 			numberOfPlans = Integer.parseInt(args[1]);
 			allowVariousWorkAndEducationLocations = Boolean.parseBoolean(args[2]);
 			addStayHomePlan = Boolean.parseBoolean(args[3]);
 			outputDirectory = args[4];
 			zonalShapeFile = args[5];
+			cemdapDataRoot = args[6];
 			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
 			landCoverFile = args[8];
 			simplifyGeometries = Boolean.valueOf(args[9]);
