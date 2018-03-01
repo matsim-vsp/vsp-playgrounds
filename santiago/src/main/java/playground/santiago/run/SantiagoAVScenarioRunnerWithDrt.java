@@ -197,7 +197,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 	}
 
 	private static void addTaxis(Controler controler) {
-		controler.addOverridingModule(new DvrpModule(DrtControlerCreator.createModuleCreatorForQSimPlugin(),
+		controler.addOverridingModule(new DvrpModule(DrtControlerCreator::createModuleForQSimPlugin,
 				DrtOptimizer.class, DefaultUnplannedRequestInserter.class));
 		controler.addOverridingModule(new DrtModule());
 		controler.addOverridingModule(new DrtAnalysisModule());
