@@ -57,85 +57,67 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 public class CemdapMatsimCadytsControllerConfigNewApproach {
 	
 	public static void main(final String[] args) {
-		final Config config = ConfigUtils.loadConfig(args[0]);
-		final double cadytsScoringWeightCounts = Double.parseDouble(args[1]) * config.planCalcScore().getBrainExpBeta();
 		
-		final Scenario scenario = prepareScenario(config, Boolean.parseBoolean(args[2]), Double.parseDouble(args[3]));
-		
-        double beelineDistanceFactorForNetworkModes = 1.3;
-        DistanceDistribution inputDistanceDistribution = getInputDistanceDistribution(beelineDistanceFactorForNetworkModes);
+		final String configFile = args[0];
+		final double cadytsCountsWt = Double.parseDouble(args[1]);
+		final double cadytsMarginalsWt = Double.parseDouble(args[2]);
 
+		final Config config = ConfigUtils.loadConfig(configFile);				
+		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		final Controler controler = new Controler(scenario);
 		
-        controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
+		// marginals cadyts
+        final double beelineDistanceFactorForNetworkModes = 1.3;
+        DistanceDistribution inputDistanceDistribution = getInputDistanceDistribution(beelineDistanceFactorForNetworkModes);
+		controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
+        final double cadytsMarginalsScoringWeight = cadytsMarginalsWt * config.planCalcScore().getBrainExpBeta();
 
-        final double cadytsDistributionWeight = Double.valueOf(args[4]);
+        // counts cadyts
+        controler.addOverridingModule(new CadytsCarModule());
         
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                bindScoringFunctionFactory().toInstance(new ScoringFunctionFactory() {
-                    @Inject
-                    private ScoringParametersForPerson parameters;
-                    @Inject
-                    private ModalDistanceCadytsContext cContext;
-                    @Inject
-                    private Network network;
-                    @Inject
-                    private Config config;
-
-                    @Override
-                    public ScoringFunction createNewScoringFunction(Person person) {
-                        SumScoringFunction sumScoringFunction = new SumScoringFunction();
-
-                        final ScoringParameters params = parameters.getScoringParameters(person);
-
-                        sumScoringFunction.addScoringFunction(new CharyparNagelLegScoring(params, network));
-                        sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
-                        sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
-
-                        final CadytsScoring<ModalDistanceBinIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(),
-                                config,
-                                cContext);
-                        scoringFunction.setWeightOfCadytsCorrection(cadytsDistributionWeight);
-                        sumScoringFunction.addScoringFunction(scoringFunction);
-
-                        return sumScoringFunction;
-                    }
-                });
-                
                 this.bind(AgentFilter.class).to(BerlinAgentFilter.class);
-
             }
         });
-  
-		controler.addOverridingModule(new CadytsCarModule());
+        
+        final double cadytsCountsScoringWeight = cadytsCountsWt * config.planCalcScore().getBrainExpBeta();
 
-		controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
-			@Inject private CadytsContext cadytsContext;
-			@Inject ScoringParametersForPerson parameters;
-			@Override
-			public ScoringFunction createNewScoringFunction(Person person) {
-				SumScoringFunction sumScoringFunction = new SumScoringFunction();
-				
-				final ScoringParameters params = parameters.getScoringParameters(person);
-				sumScoringFunction.addScoringFunction(new CharyparNagelLegScoring(params, controler.getScenario().getNetwork()));
-				sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
-				sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
+        controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
+            @Inject
+            private CadytsContext cadytsContext;
+            @Inject
+            ScoringParametersForPerson parameters;
+            @Inject
+            private ModalDistanceCadytsContext marginalCadytsContext;
 
-				final CadytsScoring<Link> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
-				scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeightCounts);
-				sumScoringFunction.addScoringFunction(scoringFunction);
+            @Override
+            public ScoringFunction createNewScoringFunction(Person person) {
+                SumScoringFunction sumScoringFunction = new SumScoringFunction();
 
-				return sumScoringFunction;
-			}
-		});
+                final ScoringParameters params = parameters.getScoringParameters(person);
+                sumScoringFunction.addScoringFunction(new CharyparNagelLegScoring(params,
+                        controler.getScenario().getNetwork()));
+                sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params));
+                sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-		controler.run();
-		
-		if (args.length > 5) {
-			runAnalyses(config, args[5]);
-		}	
+                final CadytsScoring<Link> scoringFunctionCounts = new CadytsScoring<Link>(person.getSelectedPlan(),
+                        config,
+                        cadytsContext);
+                scoringFunctionCounts.setWeightOfCadytsCorrection(cadytsCountsScoringWeight);
+
+                final CadytsScoring<ModalDistanceBinIdentifier> scoringFunctionMarginals = new CadytsScoring<>(person.getSelectedPlan(),
+                        config,
+                        marginalCadytsContext);
+                scoringFunctionMarginals.setWeightOfCadytsCorrection(cadytsMarginalsScoringWeight);
+
+                sumScoringFunction.addScoringFunction(scoringFunctionCounts);
+                sumScoringFunction.addScoringFunction(scoringFunctionMarginals);
+
+                return sumScoringFunction;
+            }
+        });	
 	}
 	
 	private static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
@@ -144,6 +126,10 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("walk",beelineDistanceFactorForNetworkModes);
 
+        inputDistanceDistribution.setModeToScalingFactor("car", 5.9); // car + pt
+        inputDistanceDistribution.setModeToScalingFactor("bicycle", 10);
+        inputDistanceDistribution.setModeToScalingFactor("walk", 10);
+        
         inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.,1000.),241339+61162); // car + pt
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.,1000.),330404);
         inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(0.,1000.),2245049);
@@ -168,48 +154,6 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.,10000000.),4781);
         inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(20000.,10000000.),167);
         
-        inputDistanceDistribution.setModeToScalingFactor("car", 5.9); // car + pt
-        inputDistanceDistribution.setModeToScalingFactor("bicycle", 10);
-        inputDistanceDistribution.setModeToScalingFactor("walk", 10);
-        
         return inputDistanceDistribution;
     }
-	
-	private static Scenario prepareScenario(Config config, final boolean modifyNetwork, final double speedFactor) {
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		
-		if (modifyNetwork) {
-			for (Link link : scenario.getNetwork().getLinks().values()) {
-				if (link.getFreespeed() < 70/3.6) {
-					if (link.getCapacity() < 1000.) {
-						link.setFreespeed(speedFactor * link.getFreespeed());
-					}
-				}
-				if (link.getLength() < 100) {
-					link.setCapacity(2. * link.getCapacity());
-				}
-			}
-		}
-		return scenario;
-	}
-	
-	private static void runAnalyses(Config config, String planningAreaShapeFile) {
-		String baseDirectory = config.controler().getOutputDirectory();
-		String runId = config.controler().getRunId();
-		String networkFile = baseDirectory  + "/" + runId + ".output_network.xml.gz"; // args[0];
-		String eventsFile = baseDirectory  + "/" + runId + ".output_events.xml.gz"; // args[1];
-		String usedIteration = Integer.toString(config.controler().getLastIteration()); // usedIteration = args[5];
-		// onlySpecificMode = args[6]; onlyBerlinBased = args[7]; useDistanceFilter = args[8]
-        String outputDirectory = baseDirectory + "/analysis";
-		
-		TripAnalyzerV2Extended.main(new String[]{networkFile, eventsFile, planningAreaShapeFile, outputDirectory, runId, usedIteration, "false", "false", "false"});
-		TripAnalyzerV2Extended.main(new String[]{networkFile, eventsFile, planningAreaShapeFile, outputDirectory, runId, usedIteration, "false", "true", "true"});
-		TripAnalyzerV2Extended.main(new String[]{networkFile, eventsFile, planningAreaShapeFile, outputDirectory, runId, usedIteration, "true", "false", "false"});
-		TripAnalyzerV2Extended.main(new String[]{networkFile, eventsFile, planningAreaShapeFile, outputDirectory, runId, usedIteration, "true", "true", "true"});
-		
-		String plansInterval = Integer.toString(config.controler().getWritePlansInterval());
-		
-		SelectedPlansAnalyzer.main(new String[]{baseDirectory, runId, usedIteration, plansInterval, "false", "true"});
-		// useInterimPlans = args[4]; useOutputPlans = args[5]
-	}
 }
