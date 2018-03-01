@@ -163,6 +163,9 @@ public class RunExample {
 
         inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(18000.0,86000.),20);
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(18000.0,86000.),0);
+        inputDistanceDistribution.setModeToScalingFactor("car",1);
+        inputDistanceDistribution.setModeToScalingFactor("bicycle",1);
+
         return inputDistanceDistribution;
     }
 

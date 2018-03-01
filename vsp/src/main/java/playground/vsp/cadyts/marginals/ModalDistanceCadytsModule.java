@@ -19,9 +19,6 @@
 
 package playground.vsp.cadyts.marginals;
 
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 import org.matsim.core.controler.AbstractModule;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 
@@ -40,7 +37,6 @@ public class ModalDistanceCadytsModule extends AbstractModule{
     @Override
     public void install() {
         bind(DistanceDistribution.class).toInstance(inputDistanceDistrbution);
-        bind(Key.get(new TypeLiteral<DistanceDistribution>(){}, Names.named("calibration"))).toInstance(inputDistanceDistrbution);
 
         bind(ModalDistanceCadytsContext.class).asEagerSingleton();
         addControlerListenerBinding().to(ModalDistanceCadytsContext.class);

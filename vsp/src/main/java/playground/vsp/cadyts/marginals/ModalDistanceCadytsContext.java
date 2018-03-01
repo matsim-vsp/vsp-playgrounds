@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import javax.inject.Named;
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.supply.SimResults;
 import org.apache.log4j.Logger;
@@ -78,7 +77,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalDistanceB
 	private final ModalDistanceBinLoopUp modalBinLoopUp;
 
 	@Inject
-	private ModalDistanceCadytsContext(Config config, Scenario scenario, @Named("calibration") DistanceDistribution inputDistanceDistribution, EventsManager eventsManager,
+	private ModalDistanceCadytsContext(Config config, Scenario scenario, DistanceDistribution inputDistanceDistribution, EventsManager eventsManager,
 									   OutputDirectoryHierarchy controlerIO, BeelineDistancePlansTranslatorBasedOnEvents plansTranslator, BeelineDistanceCollector beelineDistanceCollector) {
 		this.scenario = scenario;
 		this.inputDistanceDistribution = inputDistanceDistribution;
