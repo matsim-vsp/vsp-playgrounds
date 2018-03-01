@@ -149,8 +149,12 @@ public class RunExample {
 
     private static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
         DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
+
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("car",beelineDistanceFactorForNetworkModes);
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
+
+        inputDistanceDistribution.setModeToScalingFactor("car",1);
+        inputDistanceDistribution.setModeToScalingFactor("bicycle",1);
 
         inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(0.0,6000.),2);
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(0.0,6000.),8);
@@ -163,8 +167,6 @@ public class RunExample {
 
         inputDistanceDistribution.addToDistribution("car", new DistanceBin.DistanceRange(18000.0,86000.),20);
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(18000.0,86000.),0);
-        inputDistanceDistribution.setModeToScalingFactor("car",1);
-        inputDistanceDistribution.setModeToScalingFactor("bicycle",1);
 
         return inputDistanceDistribution;
     }
