@@ -41,6 +41,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
+import playground.vsp.demandde.cemdap.output.CemdapStops2MatsimPlansConverter;
 
 /**
  * Created by amit on 24.10.17.
@@ -175,7 +176,8 @@ public class CORINELandCoverCoordsModifier {
 
                         // during matsim plans generation, for home activities following fake coordinate is assigned.
                         if ( coord !=null && coord.equals(fakeCoord) ) {
-                            String zoneId = (String) activity.getAttributes().getAttribute("zoneId");
+                            String zoneId = (String) activity.getAttributes().getAttribute(
+                                    CemdapStops2MatsimPlansConverter.activityZoneId_attributeKey);
 
                             if (homeLocationCoord==null) {
                                 if ( activityType.startsWith(this.homeActivityPrefix) ) {

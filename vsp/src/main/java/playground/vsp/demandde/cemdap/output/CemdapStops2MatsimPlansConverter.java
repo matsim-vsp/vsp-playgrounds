@@ -49,6 +49,8 @@ import playground.vsp.corineLandcover.GeometryUtils;
  * @author dziemke
  */
 public class CemdapStops2MatsimPlansConverter {
+
+	public static final String activityZoneId_attributeKey = "zoneId";
 	private static final Logger LOG = Logger.getLogger(CemdapStops2MatsimPlansConverter.class);
 	
 
@@ -221,7 +223,7 @@ public class CemdapStops2MatsimPlansConverter {
 								throw new RuntimeException("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 							}
 //							activity.setType(activityType+"_"+zoneId);
-							activity.getAttributes().putAttribute("zoneId", zoneId);
+							activity.getAttributes().putAttribute(activityZoneId_attributeKey, zoneId);
 							activityIndex++;
 						}
 					}
@@ -242,7 +244,7 @@ public class CemdapStops2MatsimPlansConverter {
 				Plan stayHomePlan = population.getFactory().createPlan();
 				// Create new activity with type and coordinates (but without end time) and add it to stay-home plan
 				Activity newActivity = population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord());
-				newActivity.getAttributes().putAttribute("zoneId", firstActivity.getAttributes().getAttribute("zoneId"));
+				newActivity.getAttributes().putAttribute(activityZoneId_attributeKey, firstActivity.getAttributes().getAttribute(activityZoneId_attributeKey));
 				stayHomePlan.addActivity(newActivity);
 				person.addPlan(stayHomePlan);
 			}
