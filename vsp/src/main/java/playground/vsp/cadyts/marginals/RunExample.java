@@ -149,10 +149,10 @@ public class RunExample {
 
     private static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
         DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
-
+                
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("car",beelineDistanceFactorForNetworkModes);
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("bicycle",beelineDistanceFactorForNetworkModes);
-
+        
         inputDistanceDistribution.setModeToScalingFactor("car",1);
         inputDistanceDistribution.setModeToScalingFactor("bicycle",1);
 
