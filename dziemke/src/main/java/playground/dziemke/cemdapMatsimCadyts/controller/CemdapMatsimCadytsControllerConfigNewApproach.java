@@ -168,6 +168,10 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
         inputDistanceDistribution.addToDistribution("bicycle", new DistanceBin.DistanceRange(20000.,10000000.),4781);
         inputDistanceDistribution.addToDistribution("walk", new DistanceBin.DistanceRange(20000.,10000000.),167);
         
+        inputDistanceDistribution.setModeToScalingFactor("car", 5.9); // car + pt
+        inputDistanceDistribution.setModeToScalingFactor("bicycle", 10);
+        inputDistanceDistribution.setModeToScalingFactor("walk", 10);
+        
         return inputDistanceDistribution;
     }
 	
