@@ -23,7 +23,6 @@ import javax.inject.Inject;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
@@ -42,8 +41,6 @@ import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 
-import playground.dziemke.analysis.SelectedPlansAnalyzer;
-import playground.dziemke.analysis.TripAnalyzerV2Extended;
 import playground.vsp.cadyts.marginals.AgentFilter;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsContext;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
@@ -52,7 +49,7 @@ import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 /**
- * @author dziemke
+ * @author dziemke, ikaddoura, aagarwal
  */
 public class CemdapMatsimCadytsControllerConfigNewApproach {
 	
@@ -118,6 +115,8 @@ public class CemdapMatsimCadytsControllerConfigNewApproach {
                 return sumScoringFunction;
             }
         });	
+        
+        controler.run();
 	}
 	
 	private static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
