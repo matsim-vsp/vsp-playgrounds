@@ -46,7 +46,12 @@ public class DistanceDistribution {
     private final SortedMap<Id<ModalDistanceBinIdentifier>, DistanceBin> mode2DistanceBins = new TreeMap<>();
     private final Map<Id<ModalDistanceBinIdentifier>, ModalDistanceBinIdentifier> modalBinMappings = new HashMap<>();
     private final Map<String, Double> modeToBeelineDistanceFactor = new HashMap<>();
+    private final Map<String, Double> modeToScalingFactor = new HashMap<>();
     private boolean locked = false;
+
+    public DistanceDistribution (){
+        LOG.warn("If simulating sampled population, do not forget to add scaling factors for each mode. In general, this can be same as count scale factors.");
+    }
 
     public void fillDistanceDistribution(String inputFile, DistanceUnit distanceUnit, String itemSeparator) {
         if (locked) {
@@ -87,7 +92,9 @@ public class DistanceDistribution {
                     this.mode2DistanceBins.put(modalBinId, bin);
                     //
                     if (this.modalBinMappings.get(modalBinId) == null) {
-                        this.modalBinMappings.put(modalBinId, new ModalDistanceBinIdentifier(mode, range));
+                        ModalDistanceBinIdentifier identifier = new ModalDistanceBinIdentifier(mode, range);
+                        identifier.setScalingFactor(this.modeToScalingFactor.getOrDefault(mode,1.0));
+                        this.modalBinMappings.put(modalBinId,identifier);
                     } else{
                         // assuming, only one file will be passed.
                         throw new RuntimeException("The modalBin id "+modalBinId+" already exists.");
@@ -114,9 +121,18 @@ public class DistanceDistribution {
         this.mode2DistanceBins.put(id, bin);
         //
         if (this.modalBinMappings.get(id) == null) {
-            this.modalBinMappings.put(id, new ModalDistanceBinIdentifier(mode, distanceRange));
+            ModalDistanceBinIdentifier identifier = new ModalDistanceBinIdentifier(mode, distanceRange);
+            identifier.setScalingFactor(this.modeToScalingFactor.getOrDefault(mode,1.0));
+            this.modalBinMappings.put(id, identifier);
         }
 
+    }
+
+    public void setModeToScalingFactor(String mode, double factor){
+        if (locked) {
+            throw new RuntimeException("Can't add any other data to distribution.");
+        }
+        this.modeToScalingFactor.put(mode, factor);
     }
 
     public Set<DistanceBin.DistanceRange> getDistanceRanges(String mode) {

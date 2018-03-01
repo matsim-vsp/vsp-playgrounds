@@ -13,11 +13,9 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
     private static final long serialVersionUID = 1L;
 
     private BeelineDistanceCollector beelineDistanceCollector;
-    private final double countsScaleFactor;
 
-    ModalDistanceSimResultsContainerImpl(final BeelineDistanceCollector beelineDistanceCollector, final double countsScaleFactor) {
+    ModalDistanceSimResultsContainerImpl(final BeelineDistanceCollector beelineDistanceCollector) {
         this.beelineDistanceCollector = beelineDistanceCollector;
-        this.countsScaleFactor = countsScaleFactor;
     }
 
     @Override
@@ -25,7 +23,7 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
         DistanceBin bin = this.beelineDistanceCollector.getOutputDistanceDistribution().getModalBinToDistanceBin().get(
                 modalBinIdentifier.getId());
         if (bin==null) return 0.;
-        else return bin.getCount();
+        else return bin.getCount() * modalBinIdentifier.getScalingFactor();
     }
 
     @Override

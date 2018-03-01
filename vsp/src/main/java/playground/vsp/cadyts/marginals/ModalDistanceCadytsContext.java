@@ -107,7 +107,7 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalDistanceB
 
 	@Override
 	public void notifyStartup(StartupEvent event) {
-		this.simResults = new ModalDistanceSimResultsContainerImpl(beelineDistanceCollector, countsScaleFactor);
+		this.simResults = new ModalDistanceSimResultsContainerImpl(beelineDistanceCollector);
 		
 //		// this collects events and generates cadyts plans from it
 //		this.plansTranslator = new BeelineDistancePlansTranslatorBasedOnEvents(scenario, modalLinkContainer);
