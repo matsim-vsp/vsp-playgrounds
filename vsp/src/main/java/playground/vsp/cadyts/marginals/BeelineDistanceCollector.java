@@ -68,6 +68,13 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
         this.network = network;
         this.configGroup = plansCalcRouteConfigGroup;
         this.inputDistanceDistribution = inputDistanceDistribution;
+        this.inputDistanceDistribution.getModeToBeelineDistanceFactor()
+                                      .forEach((key, value) -> outputDistanceDistribution.setBeelineDistanceFactorForNetworkModes(
+                                              key, value));
+
+        this.inputDistanceDistribution.getModeToScalingFactor()
+                                      .forEach((key, value) -> outputDistanceDistribution.setModeToScalingFactor(
+                                              key, value));
     }
 
     private final Map<Id<Person>, Coord> personToOriginCoord = new HashMap<>();

@@ -43,10 +43,10 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
         for (Map.Entry<Id<ModalDistanceBinIdentifier>, DistanceBin> entry : distanceDistribution.getModalBinToDistanceBin().entrySet()) {
             if (entry.getValue().getCount() > 0) {
                     stringBuffer.append(entry.getKey().toString()+TAB);
-                    stringBuffer.append(entry.getValue().getCount()+RETURN);
+                    stringBuffer.append( String.valueOf(entry.getValue().getCount()
+                            * distanceDistribution.getModalBins().get(entry.getKey()).getScalingFactor())+RETURN);
             }
         }
         return stringBuffer.toString();
     }
-
 }
