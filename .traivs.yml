@@ -1,11 +1,14 @@
-# see: https://gitlab.com/gitlab-com/support-forum/issues/537
-before_script: 
-    - "apt-get update"
-    - "apt-get install -y openjfx"
-
-image: maven:3-jdk-8
-
-build:
-  script: "mvn install -B --fail-at-end -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true"
-
-# see http://stackoverflow.com/questions/33430487/how-to-use-gitlab-ci-to-build-a-java-maven-project
+language: java
+jdk: oraclejdk8
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
+script:
+  - mvn test -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
+env:
+  global:
+    - MAVEN_OPTS="-Xmx2g"
+cache:
+  directories:
+  - $HOME/.m2
