@@ -25,16 +25,11 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
-import org.hsqldb.lib.Collection;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -52,7 +47,6 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
