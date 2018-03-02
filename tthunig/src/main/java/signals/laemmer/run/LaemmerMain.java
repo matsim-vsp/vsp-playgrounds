@@ -30,6 +30,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
+import scenarios.illustrative.singleCrossing.SingleCrossingScenario.SignalControl;
 import signals.CombinedSignalsModule;
 
 
@@ -48,7 +49,7 @@ public class LaemmerMain {
 		if (args == null || args.length == 0){
 			log.info("No args given, running example scenario...");
 			SingleCrossingScenario exampleSc = new SingleCrossingScenario();
-			exampleSc.setUseLaemmer(true);
+			exampleSc.setSignalControl(SignalControl.LAEMMER_NICO);
 			exampleSc.defineControler().run();
 		} else {
 			Config config = ConfigUtils.loadConfig(args[0]);
