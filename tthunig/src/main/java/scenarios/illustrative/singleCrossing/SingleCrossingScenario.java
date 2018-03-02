@@ -166,7 +166,7 @@ public class SingleCrossingScenario {
 	/**
 	 * constructor useful for scenarios without laemmer signals
 	 */
-	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, StabilizationStrategy stabilizationStrategy, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
+	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
 		this.flowNS = flowNS;
 		this.flowWE = flowWE;
 		this.signalControl = signalControl;
@@ -176,16 +176,22 @@ public class SingleCrossingScenario {
 		this.useLanes = lanes;
 		this.groupedSignals = grouped;
 		this.temporalCrowd = temporalCrowd;
-		this.stabilizationStrategy = stabilizationStrategy;
 	}
 	
-	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, Regime laemmerRegime, StabilizationStrategy stabilizationStrategy, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, Regime laemmerRegime, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
-		this(flowNS, flowWE, signalControl, stabilizationStrategy, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
+		this(flowNS, flowWE, signalControl, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
 		this.liveArrivalRates = liveArrivalRates;
 		this.minG = minG;
 	}
+	
+	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, Regime laemmerRegime, StabilizationStrategy stabilizationStrategy, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
+		this(flowNS, flowWE, signalControl, laemmerRegime, vis, logEnabled, stochastic, lanes, liveArrivalRates, grouped, minG, temporalCrowd);
+		this.stabilizationStrategy = stabilizationStrategy;
+	}
+	
 	
 	public Controler defineControler() {
 		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
