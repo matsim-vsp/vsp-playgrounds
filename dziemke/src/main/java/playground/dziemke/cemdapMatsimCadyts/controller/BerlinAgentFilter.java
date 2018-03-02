@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,29 +17,30 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.jtrrouter.transims;
+package playground.dziemke.cemdapMatsimCadyts.controller;
 
-import java.io.PrintWriter;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
+
+import playground.vsp.cadyts.marginals.AgentFilter;
 
 /**
- * @author michalm
- */
-public class TransimsVehicle {
-	public static final String HEADER = "VEHICLE\tHHOLD\tLOCATION\tTYPE\tSUBTYPE";
+* @author ikaddoura
+*/
 
-	private final int hhold;
-	private final int location;// parking_id
-	private final int type;
-	private final int subType;
+public class BerlinAgentFilter implements AgentFilter{
 
-	public TransimsVehicle(int hhold, int location, int type, int subtype) {
-		this.hhold = hhold;
-		this.location = location;
-		this.type = type;
-		this.subType = subtype;
-	}
+	private String[] personIdPrefixesToBeExcluded = {"freight"};
 
-	public void write(PrintWriter writer) {
-		writer.println(hhold + "\t" + hhold + "\t" + location + "\t" + type + "\t" + subType);
+	@Override
+	public boolean includeAgent(Id<Person> id) {
+		
+		for (String prefix : personIdPrefixesToBeExcluded) {
+			if (id.toString().startsWith(prefix)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
+

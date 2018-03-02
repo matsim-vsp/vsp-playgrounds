@@ -203,11 +203,10 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 
 		// filter least charged vehicles
 		// assumption: all b.capacities are equal
-		@SuppressWarnings("unchecked")
-		Stream<? extends Vehicle> leastChargedVehicles = (Stream<? extends Vehicle>)PartialSort.kSmallestElements(
+		List<? extends Vehicle> leastChargedVehicles = PartialSort.kSmallestElements(
 				pData.getSize(), vehiclesBelowMinSocLevel, v -> ((EvrpVehicle)v).getEv().getBattery().getSoc());
 
-		return new VehicleData(timer.getTimeOfDay(), eScheduler, leastChargedVehicles);
+		return new VehicleData(timer.getTimeOfDay(), eScheduler, leastChargedVehicles.stream());
 	}
 
 	// TODO MIN_RELATIVE_SOC should depend on %idle

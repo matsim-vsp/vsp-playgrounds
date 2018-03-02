@@ -10,6 +10,7 @@ import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrate
 import signals.laemmer.model.stabilizationStrategies.CombineSimilarRegulationTime;
 import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
 import signals.laemmer.model.stabilizationStrategies.MaxLaneCountStrategy;
+import signals.laemmer.model.stabilizationStrategies.PriorizeHigherPositionsStrategy;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,9 +35,9 @@ public class LaemmerConfig {
     private double minGreenTime = 5.0;
     
     //size of timeBuckets for LaneSensor and LinkSensor
-    private double timeBucketSize = Double.POSITIVE_INFINITY; //15.0;
+    private double timeBucketSize = Double.POSITIVE_INFINITY; //15.0; 5.0*60.0; 
     //lookBackTime for LaneSensor and LinkSensor
-    private double lookBackTime = Double.POSITIVE_INFINITY; //300.0;
+    private double lookBackTime = Double.POSITIVE_INFINITY; //300.0; 15.0*60.0; //
 
     private Map<Id<Link>, Double> linkArrivalRates = new HashMap<>();
     private Map<Id<Link>, Map<Id<Lane>,Double>> laneArrivalRates = new HashMap<>();
@@ -50,6 +51,20 @@ public class LaemmerConfig {
 	private boolean isRemoveSubPhases = true;
 
 	private String customStabilizationStrategy = null;
+	
+	/** if there exist queues but arrivalRate for this link/lane is 0, the queue will never emptied.
+	 * with tMinForNotGrowingQueues setten to true it will be get at least the minium green time
+	 */
+	private boolean minGreenTimeForNonGrowingQueues = true;
+	
+	/** tIdle is determined by the highest determinedLoad of the current regulationPhase and the highest determinedLoad of the top n flows not in the regulationPhase,
+	 * where n is the number of estimatedPhases minus 1. By default the flows are grouped by their signals beforehand, keeping only the flow with
+	 * the highest load per signal. This prevents that similar flows on two lanes are counted twice, since you can assume that they will be signalized together.
+	 * However, in some cases a flow can be signalized by two signals and you can probably not trust on the prerequisite, that they will be signalized together.
+	 * An example for such a case would be right-turning flows, which can be signalized for some time alone and for some other time together with the straight flow.
+	 * If your network includes such cases, you need set this to false. As a side-effect from setting it to false will be a under-estimate of tIdle in some cases.  
+	 */
+	private boolean determineMaxLoadForTIdleGroupedBySignals = true;
 
     //    @Nullable
     public Double getLaneArrivalRate(Id<Link> linkId, Id<Lane> laneId) {
@@ -159,16 +174,8 @@ public class LaemmerConfig {
 		return timeBucketSize;
 	}
 
-	public void setTimeBucketSize(double timeBucketSize) {
-		this.timeBucketSize = timeBucketSize;
-	}
-
 	public double getLookBackTime() {
 		return lookBackTime;
-	}
-
-	public void setLookBackTime(double lookBackTime) {
-		this.lookBackTime = lookBackTime;
 	}
 
 	public boolean isRemoveSubPhases() {
@@ -184,7 +191,7 @@ public class LaemmerConfig {
 		case COMBINE_SIMILAR_REGULATIONTIME:
 			return CombineSimilarRegulationTime.class.getName();
 		case PRIORIZE_HIGHER_POSITIONS:
-			return null;
+			return PriorizeHigherPositionsStrategy.class.getName();
 		case CUSTOM:
 			if(this.customStabilizationStrategy == null) {
 				throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");
@@ -198,6 +205,33 @@ public class LaemmerConfig {
 	public void setCustomStabilzationStrategy(Class<? extends AbstractStabilizationStrategy> customStrategy) {
 		this.activeStabilizationStrategy = StabilizationStrategy.CUSTOM;
 		this.customStabilizationStrategy = customStrategy.getName();
+	}
+
+	public boolean isMinGreenTimeForNonGrowingQueues() {
+		return minGreenTimeForNonGrowingQueues;
+	}
+
+	public void setMinGreenTimeForNonGrowingQueues(boolean minGreenTimeForNonGrowingQueues) {
+		this.minGreenTimeForNonGrowingQueues = minGreenTimeForNonGrowingQueues;
+	}
+
+	public boolean isDetermineMaxLoadForTIdleGroupedBySignals() {
+		return determineMaxLoadForTIdleGroupedBySignals;
+	}
+
+	public void setDetermineMaxLoadForTIdleGroupedBySignals(boolean maxLoadForTIdleGroupedBySignals) {
+		this.determineMaxLoadForTIdleGroupedBySignals = maxLoadForTIdleGroupedBySignals;
+	}
+	
+	/**
+	 * Configure the sensor for live arrival rates. Live arrival Rate can be calculated from the time, the first car entered the Link/Lane until now or by getting an average from lookBackTime.
+	 * If using last option, lookBackTime will be splitted in buckets with timeBucketsSize. Only finished buckets will be used to calculate the average.
+	 * @param lookBackTime For which duration of passed time the average should be calculated. Set to Double.POSITIVE_INFINITY to calculate from time the first car enters the link on. 
+	 * @param timeBucketSize Resolution of lookBackTime. Average is calculated only with full time buckets. Set to Double.POSITIVE_INFINITY to calculate from time the first car enters the link on. 
+	 */
+	public void setAvgCarSensorBucketParameters(double lookBackTime, double timeBucketSize) {
+		this.lookBackTime = lookBackTime;
+		this.timeBucketSize = timeBucketSize;
 	}
 	
 }

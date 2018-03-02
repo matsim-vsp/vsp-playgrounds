@@ -33,7 +33,7 @@ import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.TaxiOutputModule;
+import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -92,7 +92,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			// taxi
 			
-			controler.addOverridingModule(new TaxiOutputModule());
+			controler.addOverridingModule(TaxiDvrpModules.create());
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario1));
 			controler.addOverridingModule(new PersonTripAnalysisModule());
@@ -145,7 +145,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
 				
-			controler.addOverridingModule(new TaxiOutputModule());
+			controler.addOverridingModule(TaxiDvrpModules.create());
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario));
 			
@@ -198,7 +198,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
 				
-			controler.addOverridingModule(new TaxiOutputModule());
+			controler.addOverridingModule(TaxiDvrpModules.create());
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario));
 			
@@ -251,7 +251,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
 				
-			controler.addOverridingModule(new TaxiOutputModule());
+			controler.addOverridingModule(TaxiDvrpModules.create());
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario));
 			

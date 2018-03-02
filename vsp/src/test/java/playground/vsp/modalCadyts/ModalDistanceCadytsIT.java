@@ -51,6 +51,8 @@ public class ModalDistanceCadytsIT {
         this.cadytsWt = cadytsWt;
     }
 
+    //TODO test for different scaling factors
+
     @Parameterized.Parameters(name = "{index}: cadytsWeight == {0};")
     public static Collection<Object> parameterObjects () {
         return Arrays.asList(0.0, 2500.);

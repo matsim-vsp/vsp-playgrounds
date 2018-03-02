@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.vsp.demandde.cemdap.output;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,6 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
 import org.matsim.core.population.io.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import playground.vsp.demandde.cemdap.output.ActivityTypes;
 
 /**
 * @author ikaddoura
@@ -51,10 +49,10 @@ public class SplitActivityTypesBasedOnDuration {
 
 	public static void main(String[] args) {
 		
-		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/plans_10pct_corine-landcover.xml.gz";
+		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/pop_300/plans_10pct_corine-landcover.xml.gz";
 		
-		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/plans_10pct_corine-landcover_adjusted-activity-types.xml.gz";
-		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/config_activity-parameters.xml";
+		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/pop_300/plans_10pct_corine-landcover_test.xml.gz";
+		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/pop_300/config_activity-parameters_test.xml";
 		
 		final double timeBinSize_s = 600.;
 		final String[] activities = {ActivityTypes.HOME, ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.LEISURE, ActivityTypes.SHOPPING, ActivityTypes.OTHER}; 
@@ -63,9 +61,10 @@ public class SplitActivityTypesBasedOnDuration {
 		splitAct.run(outputPopulationFile, outputConfigFile, timeBinSize_s, activities);	
 	}
 
-	private void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities) {
+	public void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities) {
 		
-		CemdapPopulationTools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(scenario.getPopulation(), timeBinSize_s);
+		CemdapPopulationTools tools = new CemdapPopulationTools();
+		tools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(scenario.getPopulation(), timeBinSize_s);
 		
 		PopulationWriter writer = new PopulationWriter(scenario.getPopulation());
 		writer.write(outputPopulationFile);
@@ -95,7 +94,8 @@ public class SplitActivityTypesBasedOnDuration {
 				
 				log.info("Splitting activity " + activityType + " in duration-specific activities.");
 
-				double maximumDuration = 24 * 3600.;
+//				double maximumDuration = 27 * 3600.;
+				double maximumDuration = tools.getMaxEndTime();
 				
 				for (double n = timeBinSize_s; n <= maximumDuration ; n = n + timeBinSize_s) {
 					ActivityParams params = new ActivityParams(activityType + "_" + n);

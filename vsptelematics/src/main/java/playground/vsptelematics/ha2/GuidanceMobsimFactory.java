@@ -96,7 +96,7 @@ public class GuidanceMobsimFactory implements Provider<Mobsim>, ShutdownListener
 		qSim.addMobsimEngine(teleportationEngine);
 
 		if (scenario.getConfig().network().isTimeVariantNetwork()) {
-			qSim.addMobsimEngine(new NetworkChangeEventsEngine());
+			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
 		}
 
 		this.initGuidance(scenario.getNetwork());

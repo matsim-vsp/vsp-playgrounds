@@ -107,7 +107,7 @@ public final class RunBraessSimulation {
 
 	/* population parameter */
 	
-	private static final int NUMBER_OF_PERSONS = 3600; // per hour
+	private static final int NUMBER_OF_PERSONS = 7200; // per hour
 	private static final int SIMULATION_PERIOD = 1; // in hours
 	private static final double SIMULATION_START_TIME = 0.0; // seconds from midnight
 	
@@ -119,13 +119,15 @@ public final class RunBraessSimulation {
 	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.SIGNAL4_X_SECOND_Z_V2Z;
 	// if SignalBasePlan SIGNAL4_X_Seconds_Z.. is used, SECONDS_Z_GREEN gives the green time for Z
 	private static final int SECONDS_Z_GREEN = 30;
-	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.LAEMMER;
+	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.NONE;
 	
 	// defines which kind of lanes should be used
 	private static final LaneType LANE_TYPE = LaneType.NONE;
+	// defines whether an alternative (upper bound; by-pass; bicycle etc.) route should exist
+	private static final boolean BYPASS = true;
 	
 	// defines which kind of pricing should be used
-	private static final PricingType PRICING_TYPE = PricingType.NONE;
+	private static final PricingType PRICING_TYPE = PricingType.INTERVALBASED;
 	public enum PricingType{
 		NONE, V3, V4, V7, V8, V9, V10, FLOWBASED, GREGOR, INTERVALBASED
 	}
@@ -136,7 +138,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/laemmer/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/byPass/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -240,7 +242,8 @@ public final class RunBraessSimulation {
 
 		config.strategy().setMaxAgentPlanMemorySize(5);
 
-		config.qsim().setStuckTime(3600 * 10.);
+//		config.qsim().setStuckTime(3600 * 10.);
+		config.qsim().setStuckTime(300);
 		config.qsim().setRemoveStuckVehicles(false);
 
 		config.qsim().setStartTime(3600 * SIMULATION_START_TIME);
@@ -490,8 +493,9 @@ public final class RunBraessSimulation {
 //		netCreator.setUseBTUProperties( false );
 		netCreator.setSimulateInflowCap( false );
 		netCreator.setMiddleLinkExists( true );
+		netCreator.setByPassExists( BYPASS );
 		
-		netCreator.setCapFirstLast(3600);
+//		netCreator.setCapFirstLast(3600); // default is numberOfPersons
 		netCreator.setCapZ(1800);
 		netCreator.setCapFast(1800);
 		netCreator.setCapSlow(1800);
@@ -590,6 +594,10 @@ public final class RunBraessSimulation {
 			if (fastLink.getLength() != 1000){
 				runName += "_l-" + (int)fastLink.getLength() + "-" + (int)middleLink.getLength() + "-" + (int)slowLink.getLength();
 			}
+		}
+		
+		if (BYPASS) {
+			runName += "_bypass";
 		}
 		
 		if (scenario.getNetwork().getNodes().containsKey(Id.createNodeId(23))){

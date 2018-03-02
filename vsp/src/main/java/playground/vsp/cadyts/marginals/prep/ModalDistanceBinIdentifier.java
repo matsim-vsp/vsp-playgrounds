@@ -33,6 +33,8 @@ public final class ModalDistanceBinIdentifier implements Identifiable<ModalDista
 	private final String mode;
 	private final DistanceBin.DistanceRange distanceRange;
 	private final Id<ModalDistanceBinIdentifier> id;
+
+	private double scalingFactor = 1;
 	
 	public String getMode() {
 		return mode;
@@ -52,6 +54,14 @@ public final class ModalDistanceBinIdentifier implements Identifiable<ModalDista
 	@Override
 	public Id<ModalDistanceBinIdentifier> getId() {
 		return this.id;
+	}
+
+	public double getScalingFactor() {
+		return scalingFactor;
+	}
+
+	public void setScalingFactor(double scalingFactor) {
+		this.scalingFactor = scalingFactor;
 	}
 
 	@Override

@@ -1,9 +1,12 @@
 package scenarios.illustrative.singleCrossing;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.core.controler.Controler;
 
+import scenarios.illustrative.singleCrossing.SingleCrossingScenario.SignalControl;
 import signals.laemmer.model.LaemmerConfig.Regime;
+import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
 import signals.laemmer.run.LaemmerMain;
 
 /**
@@ -12,33 +15,29 @@ import signals.laemmer.run.LaemmerMain;
 public class RunSingleCrossingScenarioWithLaemmer {
     private static final Logger log = Logger.getLogger(LaemmerMain.class);
 
-    private static final boolean USE_LAEMMER = true;
-    private static final Regime LAEMMER_REGIME = Regime.COMBINED;
+    private static final SingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.LAEMMER_FULLY_ADAPTIVE;
+    private static final Regime LAEMMER_REGIME = Regime.OPTIMIZING;
     
-    private static final boolean VISUALIZE_WITH_OTFVIS = true;
+    private static final boolean VISUALIZE_WITH_OTFVIS = false;
     private static final boolean LOG_ENABLED = false;
     private static final boolean LIVE_ARRIVAL_RATES = true;
-    private static final boolean STOCHASTIC_DEMAND = false;
+    private static final boolean STOCHASTIC_DEMAND = true;
     private static final boolean USE_LANES = true;
     private static final boolean GROUPED = true;
     private static final boolean TEMPORAL_CROWD = false;
+    private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.HEURISTIC;
+    
     /** minimal green time in seconds */
     private static final int MIN_G = 0;
     
     public static void main(String[] args) {
-    	if (USE_LAEMMER){    	
-    		log.info("Running single crossing scenario with laemmer signals...");
-    	} else {
-    		log.info("Running single crossing scenario with fixed-time signals...");
-    	}
-        
+    	log.info("Running single crossing scenario with signalcontrol "+SIGNAL_CONTROL.toString());
         double flowNS = 360;
-        double flowWE = 1800;
-//        for (int i = 0; i <= 2520; i += 120) {
-//        	flowWE = i;
-            Controler singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, USE_LAEMMER, LAEMMER_REGIME, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD).defineControler();
+        double flowWE = 1440;
+        for (int i = 0; i <= 2520; i += 120) {
+        	flowWE = i;
+            Controler singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, SIGNAL_CONTROL, LAEMMER_REGIME, STABILIZATION_STRATEGY, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD).defineControler();
             singleCrossingScenario.run();
-//        }
+        }
     }
-
 }

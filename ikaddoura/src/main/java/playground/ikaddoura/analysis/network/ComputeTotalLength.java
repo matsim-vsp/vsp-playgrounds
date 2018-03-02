@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,29 +17,39 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.jtrrouter.matsim;
+package playground.ikaddoura.analysis.network;
 
-import playground.michalm.jtrrouter.Flow;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 
 /**
- * @author michalm
- */
-public class MATSimFlow extends Flow {
-	final int inLink;
-	final int outLink;
+* @author ikaddoura
+*/
 
-	public MATSimFlow(int node, int inLink, int outLink, int next, int count) {
-		super(node, next, new int[] { count }, inLink != -1, outLink != -1);
+public class ComputeTotalLength {
 
-		this.inLink = inLink;
-		this.outLink = outLink;
+	public static void main(String[] args) {
+
+		Config config = ConfigUtils.createConfig();
+		config.network().setInputFile("/Users/ihab/Documents/workspace/mercator-nemo/data/matsim_input/2018-02-16_scenario_detailedNet_Ruhr/detailedRuhr_Network_17022018filteredcleaned_network.xml.gz");
+		
+		Scenario scenario = ScenarioUtils.loadScenario(config);
+		
+		double totalLength = 0.;
+		int linkCounter = 0;
+		
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			totalLength = totalLength + link.getLength();
+			linkCounter++;
+		}
+		
+		System.out.println("Total length (km): " + totalLength / 1000.);
+		System.out.println("Total number of road segments: " + linkCounter);
+		
 	}
 
-	public int getInLink() {
-		return inLink;
-	}
-
-	public int getOutLink() {
-		return outLink;
-	}
 }
+

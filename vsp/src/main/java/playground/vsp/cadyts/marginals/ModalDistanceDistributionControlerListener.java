@@ -167,13 +167,13 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
         distribution.getModalBinToDistanceBin()
                     .forEach((key, value) -> this.stats.getModalBinToDistanceBin()
                                                        .get(key)
-                                                       .addToCount(value.getCount()));
+                                                       .addToCount(value.getCount() * this.inputDistanceDistribution.getModalBins().get(key).getScalingFactor() ));
     }
 
     private void reset() {
         this.iterationsUsed = 0;
         this.stats.getModalBinToDistanceBin()
-                  .forEach((key, value) -> value.addToCount(-value.getCount()));
+                  .forEach((key, value) -> value.addToCount( - value.getCount()));
     }
 
     //technically, following can be applied directly in DistanceDistribution, however, ordering is imp here only.
