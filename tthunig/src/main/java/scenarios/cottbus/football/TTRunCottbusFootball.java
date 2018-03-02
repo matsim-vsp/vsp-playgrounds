@@ -119,6 +119,12 @@ public class TTRunCottbusFootball {
 			break;
 		}
 		
+		if (NETWORK.equals("V1-2")) {
+			// modify the network and lanes file
+			baseConfig.network().setInputFile("network_wgs84_utm33n_link10284andReverseMerged.xml");
+			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
+		}
+		
 		String plansFile = "cb_spn_gemeinde_nachfrage_landuse_woMines/"
 				+ "commuter_population_wgs84_utm33n_car_only_100it_"+SIGNALS_BASE_CASE+"_cap"+FLOW_CAP;
 		if (TBS!=10) {
@@ -127,9 +133,6 @@ public class TTRunCottbusFootball {
 		if (NETWORK!="V1") {
 			plansFile += "_net"+NETWORK;
 			
-			// also modify the network and lanes file
-			baseConfig.network().setInputFile("network_wgs84_utm33n_link10284andReverseMerged.xml");
-			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
 		}
 		baseConfig.plans().setInputFile(plansFile+".xml.gz");
 		
