@@ -150,7 +150,7 @@ public class GershensonIT {
 	@Test
 	public void testSingleCrossingDifferentDemandABCD() {
 		String scenarioType = "singleCrossingNoBottlenecks";
-		double[] noPersons = { 1200, 600, 600, 1200 };
+		double[] noPersons = { 1200, 600, 1200, 600 };
 		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
 		// check signal results
@@ -162,8 +162,8 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
-	//	Assert.assertTrue("total signal green time should be higher for Group1", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
-	//	Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 6000/600 > totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2));
+		Assert.assertTrue("total signal green time should be higher for Group1", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
+		Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 6000/600 > totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2));
 	}
 	
 
@@ -306,15 +306,17 @@ public class GershensonIT {
 		Config config = defineConfig();
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
+		
+		
 		// add missing scenario elements
 		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 
 		createScenarioElements(scenario, noPersons, scenarioType);
+		
 
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(new CombinedSignalsModule());
 
-		//scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 		
 		// add signal analysis tool
 		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
@@ -346,29 +348,29 @@ public class GershensonIT {
 		if (scenarioType.equals("singleCrossingNoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 0);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, true);
+			createSignalsSingleCrossing(scenario, true, 3);
 		}
 		if (scenarioType.equals("singleCrossingOneBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 1);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, true);
+			createSignalsSingleCrossing(scenario, true ,3);
 		}
 		if (scenarioType.equals("singleCrossingTwoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 2);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, false);
+			createSignalsSingleCrossing(scenario, false,3);
 		}
 		if (scenarioType.equals("singleCrossingStochasticDemandAB")) {
 			stochasticDemand[0]=true;
 			stochasticDemand[1]=true;
 			createNetworkSingleCrossing(scenario.getNetwork(), 0);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, false);
+			createSignalsSingleCrossing(scenario, false,3);
 		}
 		if(scenarioType.equals("doubleCrossingUniformDemandABC")) {
 			createNetworkScenario2(scenario.getNetwork(),0);
-			createPopulationScenario2(scenario.getPopulation(), noPersons);
-			createSignalsScenario2(scenario);
+			createPopulationDoubleCrossing(scenario.getPopulation(), noPersons);
+			createSignalsSingleCrossing(scenario, false,3);
 		}	
 
 		
@@ -522,7 +524,7 @@ public class GershensonIT {
 		}
 	}
 
-	private void createSignalsSingleCrossing(Scenario scenario, boolean allowedDirectionStraight) {
+	private void createSignalsSingleCrossing(Scenario scenario, boolean allowedDirectionStraight, int systemcenter) {
 		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
 		SignalSystemsDataFactory sysFac = signalSystems.getFactory();
@@ -627,38 +629,7 @@ public class GershensonIT {
 		return config;
 	}
 //-------------------------------------------------------------------
-	private TtSignalAnalysisTool runScenario2(double[] noPersons) {
-		Config config = defineConfig();
 
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		// add missing scenario elements
-		scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
-
-		createScenarioElements2(scenario, noPersons);
-
-		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(new CombinedSignalsModule());
-
-		// add signal analysis tool
-		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				this.addEventHandlerBinding().toInstance(signalAnalyzer);
-				this.addControlerListenerBinding().toInstance(signalAnalyzer);
-			}
-		});
-
-		controler.run();
-
-		return signalAnalyzer;
-	}
-	
-	private void createScenarioElements2(Scenario scenario, double[] noPersons) {
-		createNetworkScenario2(scenario.getNetwork(),0);
-		createPopulationScenario2(scenario.getPopulation(), noPersons);
-		createSignalsScenario2(scenario);
-	}	
 	
 	/**
 	 * creates a network like this:
@@ -733,7 +704,7 @@ public class GershensonIT {
 		}
 	}
 	
-	private static void createPopulationScenario2(Population population, double[] noPersons) {
+	private static void createPopulationDoubleCrossing(Population population, double[] noPersons) {
 		String[] odRelations = { "1_2-6_7", "8_9-10_11", "12_13-14_15", "7_6-2_1", "11_10-9_8" ,"15_14-13_12"};
 		int odIndex = 0;
 
@@ -767,7 +738,7 @@ public class GershensonIT {
 		}
 	}
 	
-	private void createSignalsScenario2(Scenario scenario) {
+	private void createSignalsDoubleCrossing(Scenario scenario, boolean bottleneck) {
 		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
 		SignalSystemsDataFactory sysFac = signalSystems.getFactory();
