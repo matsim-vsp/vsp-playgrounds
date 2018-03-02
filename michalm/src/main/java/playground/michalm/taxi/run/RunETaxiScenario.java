@@ -26,7 +26,7 @@ import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiOutputModule;
+import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -68,7 +68,7 @@ public class RunETaxiScenario {
 		ETaxiUtils.initEvData(fleet, evData);
 
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(new TaxiOutputModule());
+		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new EvModule(evData));
 		controler.addOverridingModule(ETaxiOptimizerModules.createDefaultModule());
 

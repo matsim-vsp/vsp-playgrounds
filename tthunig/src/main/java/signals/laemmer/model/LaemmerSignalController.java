@@ -19,6 +19,10 @@
  * *********************************************************************** */
 package signals.laemmer.model;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +76,12 @@ public class LaemmerSignalController extends AbstractSignalController implements
     private double tIdle;
     // TODO this should be a constant. can be calculated once in simulationInitialized. tt, dez'17
     private double systemOutflowCapacity;
+
+	private double averageWaitingCarCount;
+
+	private double lastAvgCarNumUpdate;
+
+	private boolean isAvgQueueLengthNumWritten;
 
 
     public final static class SignalControlProvider implements Provider<SignalController> {
@@ -148,6 +158,10 @@ public class LaemmerSignalController extends AbstractSignalController implements
         
         LaemmerSignal selection = selectSignal();
         processSelection(now, selection);
+        //TODO remove true
+        if (isAnalysisEnabled()||true) {
+        	logQueueLengthToFile(now);
+        }
     }
 
     /**
@@ -309,6 +323,42 @@ public class LaemmerSignalController extends AbstractSignalController implements
         }
         return builder.toString();
     }
+    
+    private void logQueueLengthToFile(double now) {
+		double currentQueueLengthSum = 0.0;
+    	if (now > 30.0*60.0 && now <= 90.0*60.0) {
+//       	if (now > 15.5*3600.0 && now <= 19.0*3600.0) {
+    		for (LaemmerSignal laemmerSignal : laemmerSignals) {
+    			for (Signal signal : laemmerSignal.group.getSignals().values()) {
+    				if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {
+    					currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId());
+    				} else {
+    					for (Id<Lane> laneId : signal.getLaneIds()) {
+    						currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), laneId);	
+    					}
+    				}
+    			}
+    		}
+    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-30.0*60.0+1.0); 
+//    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-15.5*3600.0+1.0); 
+    		this.averageWaitingCarCount	+= currentQueueLengthSum;
+    		this.averageWaitingCarCount /= (now - 30.0*60.0+1.0);
+//    		this.averageWaitingCarCount /= (now - 15.5*3600.0+1.0);
+    		this.lastAvgCarNumUpdate = now; 
+    	} else if (now > 90.0*60.0 && !this.isAvgQueueLengthNumWritten) {
+//       	} else if (now > 19.0*3600.0 && !this.isAvgQueueLengthNumWritten) {
+		    try {
+		    	if (Files.notExists(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")))){
+		    		Files.createFile(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")));
+		    	}
+				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
+				this.isAvgQueueLengthNumWritten  = true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 
     class Request {
     		/** time at which the laemmer signal is planned to show green */

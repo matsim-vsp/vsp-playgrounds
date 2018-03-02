@@ -35,6 +35,7 @@ import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.taxi.optimizer.*;
 import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
 import org.matsim.contrib.taxi.run.*;
+import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
 import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
 import org.matsim.core.config.*;
 import org.matsim.core.controler.Controler;
@@ -85,7 +86,7 @@ public class RunRWPTComboBerlincaseWithLegModeChange {
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(new TaxiOutputModule());
+		controler.addOverridingModule(TaxiDvrpModules.create());
         controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new ChangeSingleLegModeWithPredefinedFromModesModule());
 		controler.run();

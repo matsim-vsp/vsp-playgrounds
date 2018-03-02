@@ -128,18 +128,24 @@ public class AdvancedPlanBasedSignalSystemController implements SignalController
 		double currentQueueLengthSum = 0.0;
     	if (now > 30.0*60.0 && now <= 90.0*60.0) {
     		for (Signal signal : this.system.getSignals().values()) {
-//    		for(LanesToLinkAssignment ltl : lanes.getLanesToLinkAssignments().values()) {
-    			for (Id<Lane> l : signal.getLaneIds()) {
-    				currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), l);
-    			}
+				if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {
+					currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId());
+				} else {
+					for (Id<Lane> laneId : signal.getLaneIds()) {
+						currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), laneId);	
+					}
+				}
     		}
     		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-30.0*60.0+1.0); 
     		this.averageWaitingCarCount	+= currentQueueLengthSum;
     		this.averageWaitingCarCount /= (now - 30.0*60.0+1.0);
-    		this.lastAvgCarNumUpdate = now; 
+    		this.lastAvgCarNumUpdate = now;
 		} else if (now > 90.0*60.0 && !this.isAvgQueueLengthNumWritten) {
-		    try {
-				Files.write(Paths.get("/tmp/avgQueueLength.csv"), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
+		    try { 
+		    	if (Files.notExists(Paths.get(("/tmp/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")))){
+		    		Files.createFile(Paths.get(("/tmp/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")));
+		    	}
+				Files.write(Paths.get(("/tmp/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
 				this.isAvgQueueLengthNumWritten  = true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -194,7 +200,7 @@ public class AdvancedPlanBasedSignalSystemController implements SignalController
             }
             int totalN = 0;
             for (Signal signal : group.getSignals().values()) {
-                if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty() && signal.getLaneIds().size() > 1) {
+                if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
                     for (Id<Lane> laneId : signal.getLaneIds()) {
                         totalN += sensorManager.getNumberOfCarsInDistanceOnLane(signal.getLinkId(), laneId, 0.,now);
                     }

@@ -30,10 +30,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiOutputModule;
+import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
@@ -114,7 +113,7 @@ public class RunAvParking {
 			}
 		});
 		controler.addOverridingModule(new ParkingTaxiModule(PrivateAVOptimizerProvider.class));
-		controler.addOverridingModule(new TaxiOutputModule());
+		controler.addOverridingModule(new TaxiModule());
 		controler.run();
 	}
 

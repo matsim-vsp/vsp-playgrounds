@@ -24,7 +24,6 @@ public class LaemmerLane {
 	private Link link;
 	private double stabilizationPressure_a;
 	private double regulationTime;
-	private boolean needStabilization;
 	private SignalGroup signalGroup;
 	private double queueLength;
 
@@ -47,7 +46,6 @@ public class LaemmerLane {
     	this(link, null, signalGroup, signal, fullyAdaptiveLaemmerSignalController);
     }
 
-	//TODO this should be combined with update stabilization, since there isn't a representive driveway any more
 	void calcLoadAndArrivalrate(double now) {
 		this.determiningLoad = 0;
 		double arrivalRate = 0.0;
@@ -55,38 +53,20 @@ public class LaemmerLane {
 			arrivalRate = this.fullyAdaptiveLaemmerSignalController.getAverageLaneArrivalRate(now, link.getId(), physicalLane.getId());
 			this.queueLength = fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(now, link.getId(), physicalLane.getId());
 			//try to scale queue length on small links, pschade Feb'18
-			if (this.physicalLane.getStartsAtMeterFromLinkEnd() < 250)
-				queueLength *= 250/physicalLane.getStartsAtMeterFromLinkEnd();
+			if (this.physicalLane.getStartsAtMeterFromLinkEnd() < 250 && this.queueLength >= this.physicalLane.getStartsAtMeterFromLinkEnd()/6.0)
+				this.queueLength *= 250/physicalLane.getStartsAtMeterFromLinkEnd();
 		} else {
 			arrivalRate = this.fullyAdaptiveLaemmerSignalController.getAverageArrivalRate(now, link.getId());
 			this.queueLength = fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLink(now, link.getId());
 			//try to scale queue length on small links, pschade Feb'18
-			if (this.link.getLength() < 250)
+			if (this.link.getLength() < 250 && this.queueLength >= this.link.getCapacity(now))
 				queueLength *= 250/link.getLength();
 		}
 		this.determiningLoad = arrivalRate / maximumOutflow;
 		this.determiningArrivalRate = arrivalRate;
 	}
-	
-	//TODO In my opinion this can be merged with updateStabilization(), pschade Jan'18
-    void updateStabilizationAndAddToQueueIfNeeded(double now) {
-    	if (!fullyAdaptiveLaemmerSignalController.needStabilization(this)) {
-	    		updateStabilization(now);
-	    	if (this.needStabilization) {
-	    	   fullyAdaptiveLaemmerSignalController.addLaneForStabilization(this);
-	    	}
-    	}
-    }
-    
-	//TODO i'm unsure if there are some advantages to have this split from update(), pschade Dec 17
-    private void updateStabilization(double now) {
-    	this.regulationTime = 0;
-    	this.needStabilization = false;
-
-        if (determiningArrivalRate == 0) {
-        	return;
-        }
-
+	   
+    void updateStabilization(double now) {
         double n = 0;
         if (this.physicalLane != null) {
             n = this.fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(now, link.getId(), physicalLane.getId());
@@ -103,12 +83,30 @@ public class LaemmerLane {
         	stabilizationPressure_a++;
         }
 
-        if (this.fullyAdaptiveLaemmerSignalController.needStabilization(this) || this.signalGroup.getState().equals(SignalGroupState.GREEN)) {
-            return;
+        //Moved check for determineArrivaleRate == 0 down because "a" should also reseted if determined arrival rate is 0.
+        if (fullyAdaptiveLaemmerSignalController.needStabilization(this) || this.signalGroup.getState().equals(SignalGroupState.GREEN)) {
+        	return;
         }
+        //reset stabilization time for recalculating
+        this.regulationTime = 0;
+        
+        //don't stabilize if arrivale rate is 0 and (a) no green time for existing queues or (b) lane is empty and greentime for exisiting queue should granted
+        // for (b) if queue length is > 0 and greentime should granted this flow will get MinGreenTime
+        if (determiningArrivalRate == 0
+        		&& (
+        			!fullyAdaptiveLaemmerSignalController.getLaemmerConfig().isMinGreenTimeForNonGrowingQueues()
+        			|| (n == 0 && fullyAdaptiveLaemmerSignalController.getLaemmerConfig().isMinGreenTimeForNonGrowingQueues() )
+        		))  {
+        	return;
+        }
+        //if there is not any queue, stabilization is not needed in any case
+        if (n == 0) {
+        	return;
+        }
+        
 
         double nCrit = determiningArrivalRate * this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime()
-                * ((this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMaxCycleTime() - (stabilizationPressure_a / (1 - determiningLoad)))
+                * ((this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMaxCycleTime() - (stabilizationPressure_a / (1.0 - determiningLoad)))
                 / (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMaxCycleTime() - this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime()));
 
         if (n >= nCrit) {
@@ -118,14 +116,13 @@ public class LaemmerLane {
         	//TODO What are we going to do with the downstream checks?
 			if (!this.fullyAdaptiveLaemmerSignalController.laemmerConfig.isCheckDownstream() ||
 					this.fullyAdaptiveLaemmerSignalController.downstreamSensor.allDownstreamLinksEmpty(this.fullyAdaptiveLaemmerSignalController.getSystem().getId(), this.signalGroup.getId())) {
-				this.fullyAdaptiveLaemmerSignalController.addLaneForStabilization(this);
 				// signalLog.debug("Regulation time parameters: lambda: " + determiningLoad + " | T: " + desiredPeriod + " | qmax: " + determiningOutflow + " | qsum: " + flowSum + " | T_idle:" +
 				// tIdle);
 				this.regulationTime = Math.max(Math.rint(determiningLoad * this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getDesiredCycleTime()),
 						this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMinGreenTime());
-				//approach to extend stabilisation time when vehicles are waiting but no new vehicles are approaching
+				//approach to extend stabilisation time when vehicles are waiting but no new vehicles are approaching:
 				//this.regulationTime = Math.max(this.regulationTime, Math.rint(this.queueLength*(this.maximumOutflow/3600.0)));
-				this.needStabilization = true;
+		    	fullyAdaptiveLaemmerSignalController.addLaneForStabilization(this);
 				if (fullyAdaptiveLaemmerSignalController.getDebug())
 					System.out.println("Stabilising "+this.getLink().getId()+"-"+this.getLaneId()+" n="+n+" nCrit="+nCrit+" a="+stabilizationPressure_a);
 			}

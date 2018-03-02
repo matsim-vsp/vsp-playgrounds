@@ -22,54 +22,37 @@
 package scenarios.cottbus.football;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.jets3t.service.model.BaseVersionOrDeleteMarker;
+import org.hsqldb.lib.Collection;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.contrib.signals.model.Signal;
-import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.lanes.data.Lane;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import de.micromata.opengis.kml.v_2_2_0.Link;
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
@@ -77,6 +60,7 @@ import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFan
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerConfig.Regime;
+import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
 import signals.laemmer.model.util.Conflicts;
 import signals.laemmer.model.util.ConflictsConverter;
 import signals.laemmer.model.util.PsObjectAttributes;
@@ -91,7 +75,7 @@ public class RunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
 	
 	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE, LAEMMER_FULLY_ADAPTIVE};
-	private static final SignalControl CONTROL_TYPE = SignalControl.FIXED_IDEAL;
+	private static final SignalControl CONTROL_TYPE = SignalControl.LAEMMER_NICO;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
 	private static final boolean LONG_LANES = true;
@@ -104,6 +88,8 @@ public class RunCottbusFootball {
 	private static final boolean USE_FIXED_NETWORK = true;
 	
 	private static final boolean REMOVE_ALL_LEGS_FROM_PLANS_AND_MODIFIY_ACTIVITIES_ON_MERGED_LINK = true;
+	private static final boolean LAEMMER_LOG_ENABLED = false;
+	private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.HEURISTIC;
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {		
 		Config baseConfig;
@@ -113,6 +99,9 @@ public class RunCottbusFootball {
 			String configFileName = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/config.xml";
 			baseConfig = ConfigUtils.loadConfig(configFileName);
 			String scenarioDescription = "fixedNetwork"+USE_FIXED_NETWORK+"_flowCap" + FLOW_CAP + "_longLanes" + LONG_LANES + "_stuckTime" + STUCK_TIME+"_timeBinSize"+TIME_BIN_SIZE+"_signalControl-"+CONTROL_TYPE;
+			if (CONTROL_TYPE == SignalControl.LAEMMER_FULLY_ADAPTIVE) {
+				scenarioDescription = scenarioDescription.concat("-"+STABILIZATION_STRATEGY.name());
+			}
 			baseConfig.controler().setOutputDirectory("../../runs-svn/cottbus/football/" + scenarioDescription + "/run1200/");
 			baseConfig.controler().setRunId("1200");
 		}
@@ -126,7 +115,7 @@ public class RunCottbusFootball {
 			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
 		}
 		
-		baseConfig.controler().setLastIteration(100);
+		baseConfig.controler().setLastIteration(0);
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		switch (CONTROL_TYPE){
 		case FIXED_IDEAL:
@@ -149,6 +138,7 @@ public class RunCottbusFootball {
 			break;
 		case LAEMMER_FULLY_ADAPTIVE:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer_fully_adaptive.xml");
+			signalsConfigGroup.setSignalGroupsFile("signal_groups_no_13_laemmer_fully_adaptive.xml");
 			//signalsConfigGroup.setSignalControlFile("signal_control_no_13.xml");
 			break;
 		case NONE:
@@ -197,7 +187,7 @@ public class RunCottbusFootball {
 //			});
 //				
 //		}
-		
+	
 		if (LONG_LANES){
 			// extend short lanes (needed for laemmer)
 			ModifyNetwork.lengthenAllLanes(baseScenario);
@@ -275,7 +265,7 @@ public class RunCottbusFootball {
 		CottbusFanCreator fanCreator = new SimpleCottbusFanCreator(kreisShapeFile);
 		//start the runs
 		int increment = 5;
-		for (int numberOfFootballFans = 0; numberOfFootballFans <= 0; numberOfFootballFans = numberOfFootballFans + increment){
+		for (int numberOfFootballFans = 0; numberOfFootballFans <= 100; numberOfFootballFans = numberOfFootballFans + increment){
 			if (numberOfFootballFans != 0) {
 				// create additional football fans (from 0 to 2000)
 				Population p = fanCreator.createAndAddFans(baseScenario, 20 * increment);
@@ -303,10 +293,12 @@ public class RunCottbusFootball {
 				LaemmerConfig laemmerConfig = new LaemmerConfig();
 				laemmerConfig.setDesiredCycleTime(90);
 		        laemmerConfig.setMaxCycleTime(135);
+		        laemmerConfig.setAnalysisEnabled(LAEMMER_LOG_ENABLED);
 //				laemmerConfig.setMinGreenTime(5);
 //				laemmerConfig.setAnalysisEnabled(true);
 		        laemmerConfig.setActiveRegime(Regime.COMBINED);
 				laemmerConfig.setCheckDownstream(CHECK_DOWNSTREAM);
+				laemmerConfig.setActiveStabilizationStrategy(STABILIZATION_STRATEGY);
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
 			}
