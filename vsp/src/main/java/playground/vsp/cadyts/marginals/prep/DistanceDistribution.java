@@ -179,4 +179,8 @@ public class DistanceDistribution {
     public Map<String, Double> getModeToBeelineDistanceFactor() {
         return modeToBeelineDistanceFactor;
     }
+
+    public Map<String, Double> getModeToScalingFactor() {
+        return modeToScalingFactor;
+    }
 }
