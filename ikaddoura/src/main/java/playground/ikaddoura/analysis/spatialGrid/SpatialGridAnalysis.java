@@ -307,14 +307,15 @@ public class SpatialGridAnalysis {
 		HashMap<Id<ReceiverPoint>,Double> id2xCoord = new HashMap<>();
 		HashMap<Id<ReceiverPoint>,Double> id2yCoord = new HashMap<>();
 		int c = 0;
-		for(Id<ReceiverPoint> id : grid.getReceiverPoints().keySet()) {
-			c++;
-			if(c % 10000 == 0) {
-				log.info("Writing out receiver point # "+ c);
-			}
-			id2xCoord.put(id, grid.getReceiverPoints().get(id).getCoord().getX());
-			id2yCoord.put(id, grid.getReceiverPoints().get(id).getCoord().getY());
-		}
+		// TODO: fix this...
+//		for(Id<ReceiverPoint> id : grid.getReceiverPoints().keySet()) {
+//			c++;
+//			if(c % 10000 == 0) {
+//				log.info("Writing out receiver point # "+ c);
+//			}
+//			id2xCoord.put(id, grid.getReceiverPoints().get(id).getCoord().getX());
+//			id2yCoord.put(id, grid.getReceiverPoints().get(id).getCoord().getY());
+//		}
 		List<String> headers = new ArrayList<String>();
 		headers.add("receiverPointId");
 		headers.add("xCoord");

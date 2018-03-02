@@ -26,4 +26,6 @@ public interface CottbusFanCreator {
 
 	public Population createAndAddFans(Scenario sc, int numberOfFans);
 
+	public void setEarliestArrivalTimeAtStadium(double earliestArrivalTime);
+
 }

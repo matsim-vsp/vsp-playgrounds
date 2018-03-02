@@ -102,7 +102,7 @@ public class IKAnalysisRun {
 	private final String runIdToCompareWith;
 	private final Scenario scenario0;
 
-	private final String outputDirectoryName = "analysis-ik-v0";
+	private final String outputDirectoryName = "analysis-ik-v1";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -136,11 +136,11 @@ public class IKAnalysisRun {
 		
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/r_output_cne/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_c/";
 //			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
 			runId = "policyCase";
 			
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/r_output_run0_baseCase/";	
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_run0_baseCase/";	
 //			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
 			runIdToCompareWith = "baseCase";
 			
@@ -464,6 +464,7 @@ public class IKAnalysisRun {
 
 		// trip-based analysis
 		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, basicHandler, null, null);
+		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, null, basicHandler, null, null);
 
 		// person-based analysis
 		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);	

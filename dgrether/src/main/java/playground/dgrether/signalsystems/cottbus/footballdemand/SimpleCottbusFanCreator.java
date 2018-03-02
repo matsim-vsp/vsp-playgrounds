@@ -65,6 +65,7 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 	private int fanId = 1;
 	private double cottbusFansPercentage = 0.25;
 	private Geometry sdfGeometry;
+	private double earliestArrivalTimeAtStadium = 17 * 3600;
 
 	public SimpleCottbusFanCreator(String kreisShapeFile) {
 		this.random = MatsimRandom.getLocalInstance();
@@ -208,7 +209,7 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 	
 	private double chooseFootballArrivalTime(){
 		double offset = 3600.0 * this.random.nextDouble();
-		double start = 3600.0 * 17.0;
+		double start = earliestArrivalTimeAtStadium;
 		return start + offset;
 	}
 	
@@ -230,6 +231,11 @@ public class SimpleCottbusFanCreator implements CottbusFanCreator {
 			p = MGC.xy2Point(x, y);
 		} while (!g.contains(p) || (exclude != null && exclude.contains(p)));
 		return p.getCoordinate();
+	}
+
+	@Override
+	public void setEarliestArrivalTimeAtStadium(double earliestArrivalTime) {
+		this.earliestArrivalTimeAtStadium = earliestArrivalTime;
 	}
 
 	

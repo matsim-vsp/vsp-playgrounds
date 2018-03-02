@@ -11,6 +11,7 @@ import playground.dziemke.analysis.general.srv.SrvTripFilterImpl;
 import playground.dziemke.analysis.general.srv.Srv2MATSimPopulation;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,60 +27,62 @@ public class AnalyzeAndCompareTrips {
 
 	// Input and output
 //	private static final String NETWORK_FILE = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network.xml.gz"; // <----------
-	private static final String NETWORK_FILE = "../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
+	private static final String NETWORK_FILE = "../../shared-svn/studies/countries/de/open_berlin_scenario/network_counts/network_shortIds.xml.gz"; // <----------
 	private static final String CONFIG_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/" + RUN_ID + ".output_config.xml.gz";
 //	private static final String CONFIG_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/config_be_202.xml";
 	private static final String EVENTS_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/" + RUN_ID + ".output_events.xml.gz";
 //	private static final String EVENTS_FILE = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/ITERS/it." + ITERATION_FOR_ANALYSIS + "/" + RUN_ID + "." + ITERATION_FOR_ANALYSIS + ".events.xml.gz";
 //	private static final String cemdapPersonsInputFile = "../../shared-svn/projects/cemdapMatsimCadyts/scenario/cemdap_berlin/" + CEMDAP_PERSONS_INPUT_FILE_ID + "/persons1.dat"; // TODO
-	private static final String AREA_SHAPE_FILE = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
+	private static final String AREA_SHAPE_FILE = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
 //	private static String outputDirectory = "../../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/analysis";
-	private static String analysisOutputDirectory = "../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/analysis_run";
+	private static String analysisOutputDirectory = "../../runs-svn/open_berlin_scenario/" + RUN_ID + "/analysis_run";
 
 	//FromSrv Parameters
-	private static final String SRV_BASE_DIR = "../../shared-svn/studies/countries/de/berlin_scenario_2016/analysis/srv/input/";
+	private static final String SRV_BASE_DIR = "../../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/input/";
 	private static final String SRV_PERSON_FILE_PATH = SRV_BASE_DIR + "P2008_Berlin2.dat";
 	private static final String SRV_TRIP_FILE_PATH = SRV_BASE_DIR + "W2008_Berlin_Weekday.dat";
-	private static final String OUTPUT_POPULATION_FILE_PATH = SRV_BASE_DIR + "testOutputPopulation.xml";
+	private static String fromSrvOutputDirectory = "../../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/output/";
+	private static final String OUTPUT_POPULATION_FILE_PATH = fromSrvOutputDirectory + "testOutputPopulation.xml";
+	//	private static String fromSrvOutputDirectory = "../../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/analysis_srv";
 //	private static String fromSrvOutputDirectory = "/Users/dominik/test-analysis";
-//	private static String fromSrvOutputDirectory = "../../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/analysis_srv";
-	private static String fromSrvOutputDirectory = "";
 
 
 	public static void main(String[] args) {
 
-		Events2TripsParser events2TripsParser = new Events2TripsParser(CONFIG_FILE, EVENTS_FILE, NETWORK_FILE);
-		List<FromMatsimTrip> fromMatsimTrips = events2TripsParser.getTrips();
+//		Events2TripsParser events2TripsParser = new Events2TripsParser(CONFIG_FILE, EVENTS_FILE, NETWORK_FILE);
+//		List<FromMatsimTrip> fromMatsimTrips = events2TripsParser.getTrips();
+//
+//		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
+////		matsimTripFilter.activateModeChoice(TransportMode.car);
+////		matsimTripFilter.activateModeChoice("pt", "ptSlow");
+////		matsimTripFilter.activateModeChoice(TransportMode.pt);
+////		matsimTripFilter.activateModeChoice("ptSlow");
+////		matsimTripFilter.activateModeChoice("bicycle");
+////		matsimTripFilter.activateModeChoice(TransportMode.walk);
+//		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
+//		matsimTripFilter.activateDist(0, 100);
+////		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
+////		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
+//		List<Trip> filteredFromMatsimTrips = TripFilter.castTrips(matsimTripFilter.filter(fromMatsimTrips));
+//
+//		// Determine output directory
+//		if (!ITERATION_FOR_ANALYSIS.equals("")) {
+//			if (EVENTS_FILE.contains(".output_events.xml.gz")) {
+//				throw new RuntimeException("Specifying a specific iteration for the analysis in the output is confusing if general output events are used.");
+//			}
+//			analysisOutputDirectory = analysisOutputDirectory + "_" + ITERATION_FOR_ANALYSIS;
+//		}
+//		analysisOutputDirectory = matsimTripFilter.adaptOutputDirectory(analysisOutputDirectory);
+//		new File(analysisOutputDirectory).mkdirs();
+//
+//		// Write output
+//		GeneralTripAnalyzer.analyze(filteredFromMatsimTrips, events2TripsParser.getNoPreviousEndOfActivityCounter(), analysisOutputDirectory);
 
-		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
-//		matsimTripFilter.activateModeChoice(TransportMode.car);
-//		matsimTripFilter.activateModeChoice("pt", "ptSlow");
-//		matsimTripFilter.activateModeChoice(TransportMode.pt);
-//		matsimTripFilter.activateModeChoice("ptSlow");
-//		matsimTripFilter.activateModeChoice("bicycle");
-//		matsimTripFilter.activateModeChoice(TransportMode.walk);
-		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
-		matsimTripFilter.activateDist(0, 100);
-//		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
-//		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
-		List<Trip> filteredFromMatsimTrips = TripFilter.castTrips(matsimTripFilter.filter(fromMatsimTrips));
-
-		// Determine output directory
-		if (!ITERATION_FOR_ANALYSIS.equals("")) {
-			if (EVENTS_FILE.contains(".output_events.xml.gz")) {
-				throw new RuntimeException("Specifying a specific iteration for the analysis in the output is confusing if general output events are used.");
-			}
-			analysisOutputDirectory = analysisOutputDirectory + "_" + ITERATION_FOR_ANALYSIS;
-		}
-		analysisOutputDirectory = matsimTripFilter.adaptOutputDirectory(analysisOutputDirectory);
-		new File(analysisOutputDirectory).mkdirs();
-
-		// Write output
-		GeneralTripAnalyzer.analyze(filteredFromMatsimTrips, events2TripsParser.getNoPreviousEndOfActivityCounter(), analysisOutputDirectory);
-
+		File file = new File("../../../");
+		System.out.println(Arrays.toString(file.list()));
 
 		Srv2MATSimPopulation srv2MATSimPopulation = new Srv2MATSimPopulation(SRV_PERSON_FILE_PATH, SRV_TRIP_FILE_PATH);
-		srv2MATSimPopulation.writePopulation(OUTPUT_POPULATION_FILE_PATH);
+//		srv2MATSimPopulation.writePopulation(OUTPUT_POPULATION_FILE_PATH);
 
 		List<FromSrvTrip> fromSrvTrips = srv2MATSimPopulation.getTrips();
 
@@ -87,29 +90,34 @@ public class AnalyzeAndCompareTrips {
 //		srvTripFilter.activateModeChoice(TransportMode.car);
 //		srvTripFilter.activateModeChoice(TransportMode.pt);
 //		srvTripFilter.activateModeChoice(TransportMode.bike);
-//		srvTripFilter.activateModeChoice(TransportMode.walk);
+		srvTripFilter.activateModeChoice(TransportMode.walk);
 		srvTripFilter.activateDist(0, 100);
 //		srvTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
 
 		// Determine output directory
-		String srvOutputDirectory = srvTripFilter.adaptOutputDirectory("analysis_srv");
-		fromSrvOutputDirectory = analysisOutputDirectory + "/" + srvOutputDirectory;
-		new File(fromSrvOutputDirectory).mkdirs();
+		String srvOutputDirectory = srvTripFilter.adaptOutputDirectory("analysis_srv1");
+		String fromSrvOutputDirectoryFullPath = fromSrvOutputDirectory + "/" + srvOutputDirectory;
+		new File(fromSrvOutputDirectoryFullPath).mkdirs();
 
-		if (!GeneralTripAnalyzer.doesExist(fromSrvOutputDirectory)) {
+		if (!GeneralTripAnalyzer.doesExist(fromSrvOutputDirectoryFullPath)) {
 			//filter
 			List<Trip> filteredFromSrvTrips = TripFilter.castTrips(srvTripFilter.filter(fromSrvTrips));
 			//write output
-			GeneralTripAnalyzer.analyze(filteredFromSrvTrips, fromSrvOutputDirectory);
+			GeneralTripAnalyzer.analyze(filteredFromSrvTrips, fromSrvOutputDirectoryFullPath);
 		}
 
 		//Gnuplot
 		String gnuplotScriptName = "plot_abs_path_run.gnu";
-		String relativePathToGnuplotScript = "../../../../shared-svn/studies/countries/de/berlin_scenario_2016/analysis/gnuplot/" + gnuplotScriptName;
-		GnuplotUtils.runGnuplotScript(analysisOutputDirectory, relativePathToGnuplotScript, srvOutputDirectory);
+		String relativePathToGnuplotScript = "../../gnuplot/" + gnuplotScriptName;
+		GnuplotUtils.runGnuplotScript(fromSrvOutputDirectory, relativePathToGnuplotScript, srvOutputDirectory);
 
-		deleteFolder(new File(fromSrvOutputDirectory));
+//		//Gnuplot
+//		String gnuplotScriptName = "plot_abs_path_run.gnu";
+//		String relativePathToGnuplotScript = "../../../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/gnuplot/" + gnuplotScriptName;
+//		GnuplotUtils.runGnuplotScript(analysisOutputDirectory, relativePathToGnuplotScript, srvOutputDirectory);
+
+//		deleteFolder(new File(fromSrvOutputDirectory));
 	}
 
 	private static void deleteFolder(File folder) {

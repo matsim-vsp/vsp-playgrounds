@@ -31,8 +31,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeEstimator;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.core.config.Config;
@@ -132,7 +132,7 @@ public class IncidentWithinDayReplanningIT {
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
 				
 					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+					bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
 				}
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
@@ -171,7 +171,7 @@ public class IncidentWithinDayReplanningIT {
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
 					
 					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+					bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
 				}
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
@@ -210,7 +210,7 @@ public class IncidentWithinDayReplanningIT {
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
 					
 					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+					bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
 				}
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());
@@ -470,7 +470,7 @@ public class IncidentWithinDayReplanningIT {
 					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
 					
 					this.bind(TravelTime.class).to(DvrpTravelTimeEstimator.class);
-					bind(Network.class).annotatedWith(Names.named(DvrpModule.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
+					bind(Network.class).annotatedWith(Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)).to(Network.class).asEagerSingleton();
 				}
 			}) ;
 			controler.addOverridingModule(new DvrpTravelTimeModule());

@@ -24,12 +24,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -50,6 +52,8 @@ import com.google.inject.Provider;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
+import signals.laemmer.model.LaemmerConfig.Regime;
+import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
 import signals.laemmer.model.util.SignalUtils;
 import signals.sensor.LinkSensorManager;
 
@@ -83,7 +87,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
     final double DEFAULT_INTERGREEN;
     double tIdle;
 
-    double flowSum;
+    double maximumSystemsOutflowSum;
 
     private TtTotalDelay delayCalculator;
 
@@ -98,8 +102,12 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 	private double lastAvgCarNumUpdate = 30.0*60.0;
 
 	private boolean isAvgQueueLengthNumWritten = false;
-
+	
 	private boolean debug = false;
+
+	private AbstractStabilizationStrategy stabilisator;
+
+	private int estNumOfPhases;
 
 
     public final static class SignalControlProvider implements Provider<SignalController> {
@@ -137,114 +145,175 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 			throw new UnsupportedOperationException("Laemmer with signal specific intergreen times is not yet implemented.");
 		}
         this.downstreamSensor = downstreamSensor;
+        try {
+        	this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationStrategy()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
+        } catch (Exception e) {	e.printStackTrace(); }
     }
 
     @Override
     public void simulationInitialized(double simStartTimeSeconds) {
-        if(system.getId().equals(Id.create("23", SignalSystem.class))){
+    	java.util.logging.Logger.getGlobal().info("initialising signalSystem "+system.getId());
+        if(system.getId().equals(Id.create("SignalSystem1", SignalSystem.class))){
         	this.debug = true;
         }
-    	laemmerLanes = new LinkedList<>();
-
+        List<Double> maximumLaneOutflows = new LinkedList<>();
+        laemmerLanes = new LinkedList<>();
+    	this.estNumOfPhases = SignalUtils.estimateNumberOfPhases(system, network, lanes);
     	this.initializeSensoring();
 
     	for (SignalGroup sg : this.system.getSignalGroups().values()) {
+    		this.system.scheduleDropping(simStartTimeSeconds, sg.getId());
+    		//schedule dropping will only shedule a dropping but not process it intermediately 
+    		sg.setState(SignalGroupState.RED);
 	    	for (Signal signal : sg.getSignals().values()) {
 	    		if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {
 	    			LaemmerLane laemmerLane = new LaemmerLane(network.getLinks().get(signal.getLinkId()), sg, signal, this);
 	    			laemmerLanes.add(laemmerLane);
-        			flowSum += laemmerLane.getMaxOutflow();
+        			maximumLaneOutflows.add(laemmerLane.getMaxOutflow());
 	    		} else {
 	    			Link link = network.getLinks().get(signal.getLinkId());
 	    			for (Id<Lane> laneId : signal.getLaneIds()) {
 	    				LaemmerLane laemmerLane = new LaemmerLane(link, lanes.getLanesToLinkAssignments().get(link.getId()).getLanes().get(laneId),
 	    						sg, signal, this);
 	    				laemmerLanes.add(laemmerLane);
-	    				flowSum += laemmerLane.getMaxOutflow();
+	    				maximumLaneOutflows.add(laemmerLane.getMaxOutflow());
 	    			}
 	    		}
 	    	}
     	}
-
+    	//sum the maximum n lanes for systems outflow maximum
+    	maximumSystemsOutflowSum=maximumLaneOutflows.stream().sorted(Comparator.comparingDouble(Double::doubleValue).reversed()).limit(this.estNumOfPhases).collect(Collectors.summingDouble(Double::doubleValue));
         //Phasen kombinatorisch erstellen
     	this.signalPhases = SignalUtils.createSignalPhasesFromSignalGroups(system, network, lanes);
         
     	if (laemmerConfig.isRemoveSubPhases()) {
     		this.signalPhases = SignalUtils.removeSubPhases(this.signalPhases);
-    		System.out.println("after remove subphases: " + this.signalPhases.size());
+    		if(debug)
+    			System.out.println("after remove subphases: " + this.signalPhases.size());
     	}
     	
         for (SignalPhase signalPhase : signalPhases) {
         	LaemmerPhase laemmerPhase = new LaemmerPhase(this, signalPhase);
-        	for (Id<SignalGroup> group : signalPhase.getGreenSignalGroups()) {
-        		this.system.scheduleDropping(simStartTimeSeconds, group);
-        	}
         	laemmerPhases.add(laemmerPhase);
 		}
     }
 
+    private void initializeSensoring() {
+        for (SignalGroup group : this.system.getSignalGroups().values()) {
+            for (Signal signal : group.getSignals().values()) {
+                if (signal.getLaneIds() != null && !(signal.getLaneIds().isEmpty())) {
+                    for (Id<Lane> laneId : signal.getLaneIds()) {
+                        this.sensorManager.registerNumberOfCarsOnLaneInDistanceMonitoring(signal.getLinkId(), laneId, 0.);
+                        this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoringOnLane(signal.getLinkId(), laneId, this.laemmerConfig.getLookBackTime(), this.laemmerConfig.getTimeBucketSize());
+                    }
+                }
+                //always register link in case only one lane is specified (-> no LaneEnter/Leave-Events?), xy
+                //moved this to next for-loop, unsure, if this is still needed, pschade Nov'17 
+                this.sensorManager.registerNumberOfCarsInDistanceMonitoring(signal.getLinkId(), 0.);
+                this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId(), this.laemmerConfig.getLookBackTime(), this.laemmerConfig.getTimeBucketSize());
+            }
+        }
+        //moved here from above, pschade Nov'17
+        for (Link link : this.network.getLinks().values()) {
+            this.sensorManager.registerNumberOfCarsInDistanceMonitoring(link.getId(), 0.);
+            this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(link.getId(), this.laemmerConfig.getLookBackTime(), this.laemmerConfig.getTimeBucketSize());
+        }
+        if (laemmerConfig.isCheckDownstream()){
+			downstreamSensor.registerDownstreamSensors(system);
+        }
+    }
     
     @Override
     public void updateState(double now) {
-        updateRepresentativeDriveways(now);
         if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
         		laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
             updateActiveRegulation(now);
         }
         updatePhasesAndLanes(now);
-        if ((laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
-        		laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING))
-        				&& regulationPhase == null && lanesForStabilization.size() > 0)
-        	regulationPhase = findBestPhaseForStabilization();
-        
         // TODO test what happens, when I move this up to the first line of this method. should save runtime. tt, dez'17
         // note: stabilization has still to be done to increment 'a'... tt, dez'17
-		// another note: if we move this up, new lanes which need to be stabilized will only be
-		// added to stabilization queue after processing a new request and won't be in
-		// the same order as they were added during the process. But the influence of it
-		// shouldn't be that big…, pschade, Dec'17
+        // another note: if we move this up, new lanes which need to be stabilized will only be
+        // added to stabilization queue after processing a new request and won't be in
+        // the same order as they were added during the process. But the influence of it
+        // shouldn't be that big…, pschade, Dec'17
         if(activeRequest != null && activeRequest.laemmerPhase.phase.getState().equals(SignalGroupState.GREEN)) {
-            double remainingMinG = activeRequest.onsetTime + laemmerConfig.getMinGreenTime() - now;
-            if (remainingMinG > 0) {
-            	//TODO	remove debug output
-            	//System.err.println("Not selecting new signal, remainingMinG="+remainingMinG);
-                return;
-            }
+        	double remainingMinG = activeRequest.onsetTime + laemmerConfig.getMinGreenTime() - now;
+        	if (remainingMinG > 0) {
+        		if (debug) {
+        			System.out.println("Not selecting new signal, remainingMinG="+remainingMinG);
+        		}
+        		return;
+        	}
+        }
+        if ((laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
+        		laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING))
+        				&& regulationPhase == null && lanesForStabilization.size() > 0) {
+        	regulationPhase = findBestPhaseForStabilization();
+        	calculateTidle(now);
+        	double extraTime = (lanesForStabilization.peek().getMaxOutflow() / this.maximumSystemsOutflowSum) * this.tIdle;
+        	lanesForStabilization.peek().extendRegulationTime(extraTime);
         }
         LaemmerPhase selection = selectSignal();
         processSelection(now, selection);
-        logQueueLengthToFile(now);
+        //TODO remove true
+        if (isAnalysisEnabled()||true) {
+        	logQueueLengthToFile(now);
+        }
     }
 
-    private void logQueueLengthToFile(double now) {
-		double currentQueueLengthSum = 0.0;
-    	if (now > 30.0*60.0 && now <= 90.0*60.0) {
-    		for (LaemmerLane l : laemmerLanes) {
-    			currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLane(now, l.getLink().getId(), l.getLane().getId());
-    		}
-    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-30.0*60.0+1.0); 
-    		this.averageWaitingCarCount	+= currentQueueLengthSum;
-    		this.averageWaitingCarCount /= (now - 30.0*60.0+1.0);
-    		this.lastAvgCarNumUpdate = now; 
-		} else if (now > 90.0*60.0 && !this.isAvgQueueLengthNumWritten) {
-		    try {
-		    	if (Files.notExists(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength.csv")))){
-		    		Files.createFile(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength.csv")));
-		    	}
-				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength.csv")), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
-				this.isAvgQueueLengthNumWritten  = true;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	@Override
-    public boolean isAnalysisEnabled() {
-    	return this.laemmerConfig.isAnalysisEnabled();
+    /**
+     * Calculate tIdle from
+     * 	(a) lane with highest load in regulationPhase and
+     *  (b) lanes with the highest load.
+     * Number of (b) according to the estimated number of phases for this signalSystem
+     * @param now
+     */
+    private void calculateTidle(double now) {
+        tIdle = laemmerConfig.getDesiredCycleTime();
+        //representive Lane for current selection
+        LaemmerLane representiveLane = laemmerLanes.parallelStream()
+        		.filter(ll -> regulationPhase.getPhase().getGreenSignalGroups().contains(ll.getSignalGroup().getId()))
+        		.max(Comparator.comparingDouble(LaemmerLane::getDeterminingLoad).reversed())
+        		.get();
+        tIdle -= Math.max(representiveLane.getDeterminingLoad() * laemmerConfig.getDesiredCycleTime() + laemmerConfig.getDefaultIntergreenTime(), laemmerConfig.getMinGreenTime());
+        //get all laemmerLanes and keep only the lanes which are not in the current phase
+        if (laemmerConfig.isDetermineMaxLoadForTIdleGroupedBySignals()) {
+        	//implementation of grouping by values adapted from https://marcin-chwedczuk.github.io/grouping-using-java-8-streams
+        	Collection<Double> maxLoadFromLaneForEachSignal = laemmerLanes.parallelStream()
+        		//filter by phases whos signalgroups are in current regulation phase
+        		.filter(ll->!regulationPhase.getPhase().getGreenSignalGroups().contains(ll.getSignalGroup().getId()))
+        		//grouping by signal and keeps the maximum determined load for each signal
+        		.collect(Collectors.groupingBy(LaemmerLane::getSignal,
+        				Collectors.mapping(LaemmerLane::getDeterminingLoad,
+        						//collect the max values and unbox Doubles from Optional
+        						Collectors.collectingAndThen(Collectors.maxBy(Double::compare), Optional::get))))
+        		.values();
+        tIdle -= maxLoadFromLaneForEachSignal.parallelStream()
+        		//sort the loads desc and keep only numOfPhases-1 values
+        		.sorted(Comparator.reverseOrder())
+        		.limit(this.estNumOfPhases-1)
+        		//sum the parts of tIdle
+        		.collect(Collectors.summingDouble(determinigLoad->
+        			Math.max(determinigLoad * laemmerConfig.getDesiredCycleTime()+laemmerConfig.getDefaultIntergreenTime(),laemmerConfig.getMinGreenTime())
+        			))
+        		.doubleValue();
+        }
+        else {
+            tIdle -= laemmerLanes.parallelStream()
+            		//filter by phases whos signalgroups are in current regulation phase
+            		.filter(ll->!regulationPhase.getPhase().getGreenSignalGroups().contains(ll.getSignalGroup().getId()))
+            		//sort by determining load and keep only the upper half of the list of lammerlanes
+            		.sorted(Comparator.comparingDouble(LaemmerLane::getDeterminingLoad).reversed())
+            		.limit(this.estNumOfPhases-1)
+            		//sum the parts of tIdle
+            		.collect(Collectors.summingDouble(ll->
+            			Math.max(ll.getDeterminingLoad() * laemmerConfig.getDesiredCycleTime()+laemmerConfig.getDefaultIntergreenTime(),laemmerConfig.getMinGreenTime())
+            			))
+            		.doubleValue();
+        }
+        tIdle = Math.max(0, tIdle);
     }
-    
+
     /**
 	 * Method will check if (a) currently a request is processed, (b) there is
 	 * currently a need for stabilization and (c) the current request equals the
@@ -260,269 +329,23 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
     		System.out.println("regTime: "+lanesForStabilization.peek().getRegulationTime() + ", passed: "+ (now -activeRequest.onsetTime));
     	}
         if (activeRequest != null && regulationPhase != null && regulationPhase.equals(activeRequest.laemmerPhase)) {
-            int n;
-            if (lanesForStabilization.peek().getLane() != null) {
-                n = getNumberOfExpectedVehiclesOnLane(now, lanesForStabilization.peek().getLink().getId(), lanesForStabilization.peek().getLane().getId());
-            } else {
-                n = getNumberOfExpectedVehiclesOnLink(now, lanesForStabilization.peek().getLink().getId());
-            }
-            if (lanesForStabilization.peek().getRegulationTime() + activeRequest.onsetTime - now <= 0 || n == 0) {
+            int n = 1;
+            //only end stabilization if at least minG has passed
+            if (now - activeRequest.onsetTime >= laemmerConfig.getMinGreenTime()) {
+				if (lanesForStabilization.peek().getLane() != null) {
+					n = getNumberOfExpectedVehiclesOnLane(now, lanesForStabilization.peek().getLink().getId(), lanesForStabilization.peek().getLane().getId());
+				} else {
+					n = getNumberOfExpectedVehiclesOnLink(now, lanesForStabilization.peek().getLink().getId());
+				} 
+			}
+			if (lanesForStabilization.peek().getRegulationTime() + activeRequest.onsetTime - now <= 0 || n == 0) {
                 //TODO remove debug output
             	if(debug) {
-            		System.out.println("regulation time over or link/lane empty, ending stabilization.");
+            		System.out.println("regulation time over or link/lane empty(n="+n+"), ending stabilization.");
             	}
            		endStabilization(now);
             }
         }
-    }
-
-    private LaemmerPhase selectSignal() {
-        LaemmerPhase max = null;
-        
-        //selection if stabilization is needed
-        if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)
-        		|| laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
-        	max = regulationPhase;
-        }
-
-        //selection for optimizing
-		if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)
-				|| laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING) && max == null) {
-			double index = 0;
-			for (LaemmerPhase phase : laemmerPhases) {
-				if (phase.index > index) {
-					// if downstream check enabled, only select signals that do not lead to occupied
-					// links
-					boolean isAllDownstramLinksEmpty = true;
-					if (!laemmerConfig.isCheckDownstream()) {
-						for (Id<SignalGroup> sg : phase.phase.getGreenSignalGroups()) {
-							isAllDownstramLinksEmpty &= downstreamSensor.allDownstreamLinksEmpty(system.getId(), sg);
-						}
-					}
-					if (isAllDownstramLinksEmpty) {
-						max = phase;
-						index = phase.index;
-					}
-				}
-			}
-		}
-		return max;
-	}
-
-    private void processSelection(double now, LaemmerPhase selection) {
-        if (activeRequest != null && ( selection == null || !selection.equals(activeRequest.laemmerPhase))) {
-        	/* quit the active request, when the next selection (max) is different from the current (activeRequest)
-    		 * or, when the next selection (max) is null
-    		 */
-        	if(activeRequest.onsetTime < now) {
-    			// do not schedule a dropping when the signal does not yet show green
-        		for (Id<SignalGroup> sg : activeRequest.laemmerPhase.phase.getGreenSignalGroups()) {
-        			// if there is an selection drop only the signals which not included in current (new) selection
-        			if (selection == null || selection != null && !selection.phase.getGreenSignalGroups().contains(sg)) {
-        				this.system.scheduleDropping(now, sg);
-        			}
-        		}
-        	} else {
-				// if selection changes before the former scheduled selection showed green the
-				// signals which were showing green before the former selection and still
-				// showing green, because they were included in the former selection has to be
-				// dropped
-         		for (Id<SignalGroup> sg : activeRequest.laemmerPhase.phase.getGreenSignalGroups()) {
-        			if (selection == null || selection != null && !selection.phase.getGreenSignalGroups().contains(sg) && system.getSignalGroups().get(sg).getState().equals(SignalGroupState.GREEN)) {
-        				this.system.scheduleDropping(now, sg);
-        			}
-         		}
-        	}
-        	
-            activeRequest = null;
-        }
-
-        if (activeRequest == null && selection != null) {
-            activeRequest = new Request(now + DEFAULT_INTERGREEN, selection);
-        }
-
-        if (activeRequest != null && activeRequest.isDue(now)) {
-           	for (Id<SignalGroup> sg : activeRequest.laemmerPhase.phase.getGreenSignalGroups()) {
-           		this.system.scheduleOnset(now, sg);
-           	}
-        }
-    }
-    
-    private LaemmerPhase findBestPhaseForStabilization() {
-    	if (this.debug ) {
-			System.out.println("tIdle: " + tIdle);
-			System.out.print("stabilizationQueue: ");
-			for (LaemmerLane ll : lanesForStabilization) {
-				System.out.print(ll.getLane().getId() + "(" + ll.getRegulationTime() + "), ");
-			}
-			System.out.print("\n");
-		}
-		LaemmerPhase max = null;
-    	 if (lanesForStabilization.size() > 0) {
-    		 if (laemmerConfig.getActiveStabilizationStrategy().equals(LaemmerConfig.StabilizationStrategy.HEURISTIC)) {
-					SignalPhase generatedPhase = new SignalPhase();
-					generatedPhase.addGreenSignalGroup(lanesForStabilization.peek().getSignalGroup());
-					if (lanesForStabilization.size() > 1) {
-						stabilisationLaneLoop:
-						for (LaemmerLane laemmerLane : ((List<LaemmerLane>) lanesForStabilization).subList(1, lanesForStabilization.size())) {
-							boolean addLane = true;
-							for (Id<SignalGroup> presentSignalGroup : generatedPhase.getGreenSignalGroups()) {
-								if (!SignalUtils.isConflictFreeCombination(this.system.getSignalGroups().get(presentSignalGroup), laemmerLane.getSignalGroup(), network, lanes)) {
-									addLane = false;
-									continue stabilisationLaneLoop;
-								}
-//								for (Signal presentSignal : system.getSignalGroups().get(presentSignalGroup)
-//										.getSignals().values()) {
-//									for (Id<Lane> presentSignalsLaneId : presentSignal.getLaneIds()) {
-//										Conflicts linkConflicts = (Conflicts) laemmerLane.getLink().getAttributes()
-//												.getAttribute("conflicts");
-//										Conflicts laneConflicts = (Conflicts) laemmerLane.getLane().getAttributes()
-//												.getAttribute("conflicts");
-//										if ((linkConflicts != null
-//												&& (linkConflicts.hasConflict(presentSignal.getLinkId())
-//														|| linkConflicts.hasConflict(presentSignal.getLinkId(),
-//																presentSignalsLaneId)))
-//												|| (laneConflicts != null
-//														&& (laneConflicts.hasConflict(presentSignal.getLinkId())
-//																|| laneConflicts.hasConflict(presentSignal.getLinkId(),
-//																		presentSignalsLaneId)))) {
-//											addLane = false;
-//											break;
-//										}
-//									}
-//								}
-							}
-							if (addLane) {
-								generatedPhase.addGreenSignalGroup(laemmerLane.getSignalGroup());
-							}
-						}
-					}
-					//add non-stabilizing signal groups if non-conflicting
-					//TODO add option to add nonPriorityAllowedConflicts
-					allSignalGroups: for (SignalGroup systemSignalGroup : system.getSignalGroups().values()) {
-						boolean addSg = true;
-						for (Id<SignalGroup> presentSignalGroupId : generatedPhase.getGreenSignalGroups()) {
-							if (systemSignalGroup.getId().equals(presentSignalGroupId))
-								continue allSignalGroups;
-							if(!SignalUtils.isConflictFreeCombination(systemSignalGroup, this.system.getSignalGroups().get(presentSignalGroupId), network, lanes)){
-								addSg=false;
-								continue allSignalGroups;
-							}
-//							should be replaced by PermutateSignalGroups.isConflictFreeCombination() above 
-//							for (Signal systemsSignal : systemSignalGroup.getSignals().values()) {
-//								for (Signal presentSignal : system.getSignalGroups().get(presentSignalGroupId).getSignals().values()) {
-//									if (!(systemsSignal.getLaneIds() == null) && !systemsSignal.getLaneIds().isEmpty()) {
-//										for (Id<Lane> systemsLane : systemsSignal.getLaneIds()) {
-//											for (Id<Lane> presentLane : presentSignal.getLaneIds()) {
-//												Conflicts systemsConflicts = (Conflicts) lanes.getLanesToLinkAssignments().get(systemsSignal.getLinkId()).getLanes()
-//														.get(systemsLane).getAttributes().getAttribute("conflicts");
-//												Conflicts presentConflicts = (Conflicts) lanes.getLanesToLinkAssignments().get(presentSignal.getLinkId()).getLanes()
-//														.get(presentLane).getAttributes().getAttribute("conflicts");
-//												if (systemsConflicts != null
-//														&& (systemsConflicts.hasConflict(presentSignal.getLinkId(), presentLane)
-//																|| systemsConflicts.hasAllowedConflictWithPriorityAgainst(presentSignal.getLinkId(), presentLane))
-//														|| presentConflicts != null && (presentConflicts.hasConflict(systemsSignal.getLinkId(), systemsLane)
-//																|| presentConflicts.hasAllowedConflictWithNonPriorityAgainst(systemsSignal.getLinkId(), systemsLane))) {
-//													addSg = false;
-//													break allSignalGroups;
-//												}
-//											}
-//										} 
-//									}
-//								}
-//							}
-						}
-						if(addSg)
-							generatedPhase.addGreenSignalGroup(systemSignalGroup);
-					}
-					if (debug) {
-						//TODO remove debug output
-						System.out.print("generated Phase: ");
-						for (Id<SignalGroup> sg : generatedPhase.getGreenSignalGroups()) {
-							System.out.print(sg + ", ");
-						}
-						System.out.print("\n");
-					}
-					return new LaemmerPhase(this, generatedPhase);
-				} else 	if (laemmerConfig.getActiveStabilizationStrategy().equals(LaemmerConfig.StabilizationStrategy.USE_MAX_LANECOUNT)) {
-					Map<LaemmerPhase, java.lang.Integer> stabilizationCandidatePhases = new HashMap<>();			
-//					Stream<LaemmerPhase> candidatePhases = laemmerPhases.stream().sequential()
-//							.filter(e -> e.phase.getGreenLanes().contains(stabilizeLane));
-					
-					List<LaemmerPhase> candidatePhases = new LinkedList<>();
-					for (LaemmerPhase laemmerPhase : laemmerPhases) {
-						if (laemmerPhase.phase.containsGreenLane(lanesForStabilization.peek().getLink().getId(), (lanesForStabilization.peek().getLane() == null ? null :lanesForStabilization.peek().getLane().getId()))) {
-							candidatePhases.add(laemmerPhase);
-						}
-					}
-					//calculate scores of each phase and memorize the highest score
-					//TODO Decide what to do with two phases with equal score, pschade Jan'18
-					int maxSelectionScore = 0;
-					for (LaemmerPhase candPhase : candidatePhases) {
-						//Phase get one scorepoint for each lane they set green
-						int selectionScore = candPhase.phase.getNumberOfGreenLanes();
-						for (Entry<Id<Link>, List<Id<Lane>>>  lanesToLink : candPhase.phase.getGreenLanesToLinks().entrySet())
-							for (LaemmerLane stabilizationLaneCandidate : lanesForStabilization) {
-								//TODO probabry nullcheck for lanesToLink.getValue() is needed, but unclear, what to do, is stabilizationLaneCandidate is not null but signalgroups lanes are
-								if (stabilizationLaneCandidate.getLink().getId().equals(lanesToLink.getKey()) &&
-										(stabilizationLaneCandidate.getLane() == null || lanesToLink.getValue().contains(stabilizationLaneCandidate.getLane().getId())))
-									/*
-									 * for lanes which can stabilized phases get 1000 scorepoints (1 above for
-									 * containing the lane, 999 here. So it's always better to containing a lane
-									 * which has to be stabilized, or an additional lane which should be stabilized,
-									 * than containing any (realistic) number of (green signaled) lanes which should
-									 * not. Only if two competing phases containing the same number of lanes the
-									 * lane with more lanes in total should be selected. Since above the lanes are
-									 * filtered to only that lanes containing the peek of stabilization queue, it
-									 * isn't needed to add 999 scorepoints for it. Alternatively, the stabilization
-									 * lanes can be ranked according to their position in the queue, so that its
-									 * always better to select the phase containing a higher positioning lane,
-									 * regardless of the number of lower-position lanes which also could be
-									 * stabilized in a competing phase. pschade, Dec'17
-									 */
-									selectionScore += 999;
-							}
-						stabilizationCandidatePhases.put(candPhase, new java.lang.Integer(selectionScore));
-						if (selectionScore > maxSelectionScore) {
-							max = candPhase;
-							maxSelectionScore = selectionScore;
-						}
-					}
-				}  else if (laemmerConfig.getActiveStabilizationStrategy().equals(LaemmerConfig.StabilizationStrategy.COMBINE_SIMILAR_REGULATIONTIME)) {
-				double minRegulationTimeDifference = Double.POSITIVE_INFINITY;
-//				Stream<LaemmerPhase> candidatePhases = laemmerPhases.stream().sequential()
-//						.filter(e -> e.phase.getGreenLanes().contains(peekStabilizeLane));
-				
-				List<LaemmerPhase> candidatePhases = new LinkedList<>();
-				for (LaemmerPhase laemmerPhase : laemmerPhases) {
-					if (laemmerPhase.phase.containsGreenLane(lanesForStabilization.peek().getLink().getId(), lanesForStabilization.peek().getLane().getId())) {
-						candidatePhases.add(laemmerPhase);
-					}
-				}
-				for (LaemmerPhase candPhase : candidatePhases) {
-					//Phase get one scorepoint for each lane they set green
-					double regulationTimeDifferenceSum = 0;
-					int laneCount = 0;
-					for (Entry<Id<Link>, List<Id<Lane>>> laneToLink : candPhase.phase.getGreenLanesToLinks().entrySet())
-						for (LaemmerLane stabilizationLaneCandidate : lanesForStabilization) {
-							if (stabilizationLaneCandidate.equals(lanesForStabilization.peek())) {
-								continue;
-							}
-							if (stabilizationLaneCandidate.getLink().getId().equals(laneToLink.getKey()) &&
-									(stabilizationLaneCandidate.getLane() == null || laneToLink.getValue().contains(stabilizationLaneCandidate.getLane().getId()) )) {
-								regulationTimeDifferenceSum += Math.abs(lanesForStabilization.peek().getRegulationTime()-stabilizationLaneCandidate.getRegulationTime());
-								laneCount++;
-							}
-						}
-					//determine the phase with the lowest average divergence
-					if (regulationTimeDifferenceSum/laneCount < minRegulationTimeDifference) {
-						minRegulationTimeDifference = regulationTimeDifferenceSum/laneCount;
-						max = candPhase;
-					}
-				}
-			}
-         }
-    	 return max;
     }
     
     /**
@@ -544,10 +367,10 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
     				//remove all Lanes from regulationQueue when their regulation time > regulationTime of regulationPhase
     				markedForRemove.add(ll);
     				if(debug) {
-    					System.out.println("removing "+ll.getLink()+"-"+ll.getLane());
+    					System.out.println("removing "+ll.getLink().getId().toString()+"-"+(ll.getLane() != null ? ll.getLane().getId().toString() : "null"));
     				}
     			} else {
-    				//substract regulationTime of all lanes if regulation time not > regulation time of current phase
+    				//Subtract regulationTime of all lanes if regulation time not > regulation time of current phase
     				ll.shortenRegulationTime(passedRegulationTime);
     				if(debug) {
     					System.out.println("shorten time for "+ll.getLink()+"-"+ll.getLane()+" by "+passedRegulationTime);
@@ -559,27 +382,100 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
     	//set regulationPhase null
     	regulationPhase = null;
     }
-
+    
     private void updatePhasesAndLanes(double now) {
-        for (LaemmerPhase phase : laemmerPhases) {
-            phase.updateAbortationPenaltyAndPriorityIndex(now);
-        }
-        for (LaemmerLane l : laemmerLanes) {
-        	l.updateStabilizationAndAddToQueueIfNeeded(now);
-        }
-    }
-
-    //TODO change name of method, probably "prepareStabilization", pschade Jan'18
-    private void updateRepresentativeDriveways(double now) {
-        tIdle = laemmerConfig.getDesiredCycleTime();
+    	if(regulationPhase == null && (laemmerConfig.getActiveRegime().equals(Regime.COMBINED) || laemmerConfig.getActiveRegime().equals(Regime.OPTIMIZING))) {
+    		for (LaemmerPhase phase : laemmerPhases) {
+    			phase.updateAbortationPenaltyAndPriorityIndex(now);
+    		}
+    	}
         
-        for (LaemmerLane l : laemmerLanes) {	
-        	l.calcLoadAndArrivalrate(now);
-        	tIdle -= Math.max(l.getDeterminingLoad() * laemmerConfig.getDesiredCycleTime() + DEFAULT_INTERGREEN, laemmerConfig.getMinGreenTime());
+        if(laemmerConfig.getActiveRegime().equals(Regime.COMBINED) || laemmerConfig.getActiveRegime().equals(Regime.STABILIZING)) {
+	        for (LaemmerLane l : laemmerLanes) {
+	        	l.calcLoadAndArrivalrate(now);
+	        	l.updateStabilization(now);
+	        }
+        }
+    }
+    
+    
+    private LaemmerPhase findBestPhaseForStabilization() {
+    	if (this.debug ) {
+			System.out.println("tIdle: " + tIdle);
+			System.out.print("stabilizationQueue: ");
+			for (LaemmerLane ll : lanesForStabilization) {
+				System.out.print(ll.getLink().getId()+"-"+(ll.getLane() != null ? ll.getLane().getId(): "null") + "(" + ll.getRegulationTime() + "), ");
+			}
+			System.out.print("\n");
+		}
+		LaemmerPhase max = stabilisator.determinePhase(lanesForStabilization, laemmerPhases, debug);
+    	return max;
+    }
+
+    private LaemmerPhase selectSignal() {
+        LaemmerPhase max = null;
+        
+        //selection if stabilization is needed
+        if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)
+        		|| laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
+        	max = regulationPhase;
         }
 
-        tIdle = Math.max(0, tIdle);
-    }
+        //selection for optimizing
+		if ((laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)
+				|| laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) && max == null) {
+			double index = 0;
+			for (LaemmerPhase phase : laemmerPhases) {
+				if (phase.index > index) {
+					// if downstream check enabled, only select signals that do not lead to occupied
+					// links
+					boolean isAllDownstramLinksEmpty = true;
+					if (laemmerConfig.isCheckDownstream()) {
+						for (Id<SignalGroup> sg : phase.phase.getGreenSignalGroups()) {
+							isAllDownstramLinksEmpty &= downstreamSensor.allDownstreamLinksEmpty(system.getId(), sg);
+						}
+					}
+					if (isAllDownstramLinksEmpty) {
+						max = phase;
+						index = phase.index;
+					}
+				}
+			}
+		}
+		return max;
+	}
+       
+    private void processSelection(double now, LaemmerPhase selection) {
+    	/* quit the active request, when the next selection is different from the current (activeRequest)
+    	 * or, when the next selection is null
+    	 */
+        if (activeRequest != null && ( selection == null || !selection.equals(activeRequest.laemmerPhase))) {
+        	// only schedule a dropping when the signals are already green, tthunig(?)
+        	// Since signals can show green during the intergreen-time when they are in two stabilization phases, they need to be dropped if their queue
+        	// is emptied before the intergreen time passed. So its necessary to schedule a drop always. pschade, Feb'18
+//        	if(activeRequest.onsetTime < now) {
+        		for (Id<SignalGroup> sg : activeRequest.laemmerPhase.phase.getGreenSignalGroups()) {
+        			// if there is an selection drop only the signals which not included in current (new) selection
+        			if (selection == null || !(selection.equals(regulationPhase) && selection.phase.getGreenSignalGroups().contains(sg))) {
+        				this.system.scheduleDropping(now, sg);
+        			} else if (debug) {
+        				System.err.println("not dropping "+sg.toString()+", "+(selection==null?"selection=null, ":"")+((selection == regulationPhase && selection.phase.getGreenSignalGroups().contains(sg))?"is in next regulation phase":""));
+        			}
+        		}
+//        	}
+            activeRequest = null;
+        }
+
+        if (activeRequest == null && selection != null) {
+            activeRequest = new Request(now + DEFAULT_INTERGREEN, selection);
+        }
+
+        if (activeRequest != null && activeRequest.isDue(now)) {
+           	for (Id<SignalGroup> sg : activeRequest.laemmerPhase.phase.getGreenSignalGroups()) {
+           		this.system.scheduleOnset(now, sg);
+           	}
+        }
+    }    
 
     int getNumberOfExpectedVehiclesOnLink(double now, Id<Link> linkId) {
         return this.sensorManager.getNumberOfCarsInDistance(linkId, 0., now);
@@ -618,36 +514,16 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
     public void reset(Integer iterationNumber) {
     }
 
-    private void initializeSensoring() {
-        for (SignalGroup group : this.system.getSignalGroups().values()) {
-            for (Signal signal : group.getSignals().values()) {
-                if (signal.getLaneIds() != null && !(signal.getLaneIds().isEmpty())) {
-                    for (Id<Lane> laneId : signal.getLaneIds()) {
-                        this.sensorManager.registerNumberOfCarsOnLaneInDistanceMonitoring(signal.getLinkId(), laneId, 0.);
-                        this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoringOnLane(signal.getLinkId(), laneId, this.laemmerConfig.getLookBackTime(), this.laemmerConfig.getTimeBucketSize());
-                    }
-                }
-                //always register link in case only one lane is specified (-> no LaneEnter/Leave-Events?), xy
-                //moved this to next for-loop, unsure, if this is still needed, pschade Nov'17 
-                this.sensorManager.registerNumberOfCarsInDistanceMonitoring(signal.getLinkId(), 0.);
-                this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId(), this.laemmerConfig.getLookBackTime(), this.laemmerConfig.getTimeBucketSize());
-            }
-        }
-        //moved here from above, pschade Nov'17
-        for (Link link : this.network.getLinks().values()) {
-            this.sensorManager.registerNumberOfCarsInDistanceMonitoring(link.getId(), 0.);
-            this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(link.getId(), this.laemmerConfig.getLookBackTime(), this.laemmerConfig.getTimeBucketSize());
-        }
-        if (laemmerConfig.isCheckDownstream()){
-			downstreamSensor.registerDownstreamSensors(system);
-        }
+	@Override
+    public boolean isAnalysisEnabled() {
+    	return this.laemmerConfig.isAnalysisEnabled();
     }
-
+    
     @Override
     public String getStatFields() {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("T_idle;selected;total delay;numOfLanesNeedsStabilize;");
+        builder.append("T_idle;selected;total delay;numOfLanesNeedsStabilize;stabilizationQueue;");
         for (LaemmerPhase laemmerPhase : laemmerPhases) {
             laemmerPhase.getStatFields(builder);
         }
@@ -666,6 +542,15 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
             selected = activeRequest.laemmerPhase.phase.getId().toString();
         }
         builder.append(tIdle + ";" + selected + ";" + delayCalculator.getTotalDelay() + ";"+this.lanesForStabilization.size()+";");
+        for (LaemmerLane ll : lanesForStabilization) {
+        	builder.append(ll.getLink().getId());
+        	if (ll.getLane() != null) {
+        		builder.append("-");
+        		builder.append(ll.getLane().getId());
+        	}
+        	builder.append(" ");
+        }
+    	builder.append(";");
         for (LaemmerPhase laemmerPhase : laemmerPhases) {
            //TODO test implementation of getStepStats
            laemmerPhase.getStepStats(builder, now);
@@ -676,21 +561,6 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
         }
         
         return builder.toString();
-    }
-
-    class Request {
-		/** time at which the laemmer signal is planned to show green */
-        final double onsetTime;
-        final LaemmerPhase laemmerPhase;
-
-        Request(double onsetTime, LaemmerPhase laemmerPhase) {
-            this.laemmerPhase = laemmerPhase;
-            this.onsetTime = onsetTime;
-        }
-
-        private boolean isDue(double now) {
-            return now == this.onsetTime;
-        }
     }
 
 	public SignalSystem getSystem() {
@@ -707,13 +577,69 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		return lanesForStabilization.contains(laemmerLane);
 	}
 
-	@Deprecated
-	//Lane should not be allowed to remove itself from stabilization. Method should be private or better removed. pschade, Jan'18
-	public void removeLaneForStabilization(LaemmerLane laemmerLane) {
-		lanesForStabilization.remove(laemmerLane);
-	}
-	
 	public LaemmerConfig getLaemmerConfig() {
 		return this.laemmerConfig;
 	}
+
+	public boolean getDebug() {
+		return debug;
+	}
+	
+	//helper functions
+    private void logQueueLengthToFile(double now) {
+		double currentQueueLengthSum = 0.0;
+    	if (now > 30.0*60.0 && now <= 90.0*60.0) {
+//       	if (now > 15.5*3600.0 && now <= 19.0*3600.0) {
+    		for (LaemmerLane l : laemmerLanes) {
+    			if (l.getLane() == null) {
+    				currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLink(now, l.getLink().getId());
+    			} else {
+    				currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLane(now, l.getLink().getId(), l.getLane().getId());
+    			}
+    		}
+    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-30.0*60.0+1.0); 
+//    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-15.5*3600.0+1.0); 
+    		this.averageWaitingCarCount	+= currentQueueLengthSum;
+    		this.averageWaitingCarCount /= (now - 30.0*60.0+1.0);
+//    		this.averageWaitingCarCount /= (now - 15.5*3600.0+1.0);
+    		this.lastAvgCarNumUpdate = now; 
+		} else if (now > 90.0*60.0 && !this.isAvgQueueLengthNumWritten) {
+//       	} else if (now > 19.0*3600.0 && !this.isAvgQueueLengthNumWritten) {
+			StringBuilder filename = new StringBuilder();
+			filename.append("avgQueueLength_");
+			filename.append("fullyAdaptive_");
+			filename.append(this.laemmerConfig.getActiveRegime()+"_");
+			filename.append(this.laemmerConfig.getActiveStabilizationStrategy()+"_");
+			filename.append("signalSystem-"+this.system.getId());
+			filename.append(".csv");
+		    try {
+		    	if (Files.notExists(Paths.get(this.config.controler().getOutputDirectory().concat("/../"+filename)))){
+		    		Files.createFile(Paths.get(this.config.controler().getOutputDirectory().concat("/../"+filename)));
+		    	}
+				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/../"+filename)), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
+				this.isAvgQueueLengthNumWritten  = true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+    
+    /** helper class for scheduling a new request 
+     * @author nkuehnel **/
+    class Request {
+		/** time at which the laemmer signal is planned to show green */
+        final double onsetTime;
+        final LaemmerPhase laemmerPhase;
+
+        Request(double onsetTime, LaemmerPhase laemmerPhase) {
+            this.laemmerPhase = laemmerPhase;
+            this.onsetTime = onsetTime;
+        }
+
+        private boolean isDue(double now) {
+            return now == this.onsetTime;
+        }
+    }
+	
 }

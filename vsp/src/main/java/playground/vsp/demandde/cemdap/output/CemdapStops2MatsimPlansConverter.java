@@ -42,23 +42,26 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
-import playground.vsp.demandde.corineLandcover.CorineLandCoverData;
-import playground.vsp.demandde.corineLandcover.GeometryUtils;
+import playground.vsp.corineLandcover.CorineLandCoverData;
+import playground.vsp.corineLandcover.GeometryUtils;
 
 /**
  * @author dziemke
  */
 public class CemdapStops2MatsimPlansConverter {
+
+	public static final String activityZoneId_attributeKey = "zoneId";
 	private static final Logger LOG = Logger.getLogger(CemdapStops2MatsimPlansConverter.class);
+	
 
 	public static void main(String[] args) throws IOException {
 		// Local use
-		String cemdapDataRoot = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_output/";
+		String cemdapDataRoot = "../../shared-svn/studies/countries/de/open_berlin_scenario/cemdap_output/";
 		int numberOfFirstCemdapOutputFile = 200;
-		int numberOfPlans = 5;
-		int numberOfPlansFile = 200;
-		String outputDirectory = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/matsim_initial/" + numberOfPlansFile + "/";
-		String zonalShapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+		int numberOfPlans = 1;
+		int numberOfPlansFile = 300;
+		String outputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial/" + numberOfPlansFile + "/";
+		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
 		String zoneIdTag = "NR";		
 		boolean allowVariousWorkAndEducationLocations = true;
 		boolean addStayHomePlan = true;
@@ -69,21 +72,23 @@ public class CemdapStops2MatsimPlansConverter {
 		boolean simplifyGeometries = false;
 		boolean assignCoordinatesToActivities = true; // if set to false, the zone id will be attached to activity types and a fake coordinate will be given.
 		boolean combiningGeoms = true;
+		int activityDurationThreshold_s = Integer.MIN_VALUE;
 		
 		// Server use
 		if (args.length != 0) {
-			cemdapDataRoot = args[6];
 			numberOfFirstCemdapOutputFile = Integer.parseInt(args[0]);
 			numberOfPlans = Integer.parseInt(args[1]);
 			allowVariousWorkAndEducationLocations = Boolean.parseBoolean(args[2]);
 			addStayHomePlan = Boolean.parseBoolean(args[3]);
 			outputDirectory = args[4];
 			zonalShapeFile = args[5];
+			cemdapDataRoot = args[6];
 			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
 			landCoverFile = args[8];
 			simplifyGeometries = Boolean.valueOf(args[9]);
 			combiningGeoms = Boolean.valueOf(args[10]);
 			assignCoordinatesToActivities = Boolean.valueOf(args[11]);
+			activityDurationThreshold_s = Integer.parseInt(args[12]);
 		}
 
 		Map<String, String> shapeFileToFeatureKey = new HashMap<>();
@@ -91,14 +96,16 @@ public class CemdapStops2MatsimPlansConverter {
 		
 		convert(cemdapDataRoot, numberOfFirstCemdapOutputFile, numberOfPlans, outputDirectory,
 				shapeFileToFeatureKey, allowVariousWorkAndEducationLocations, addStayHomePlan,
-				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries, combiningGeoms, assignCoordinatesToActivities);
+				useLandCoverData, landCoverFile, stopFile, activityFile, simplifyGeometries,
+				combiningGeoms, assignCoordinatesToActivities, activityDurationThreshold_s);
 	}
 
 	
 	public static void convert(String cemdapDataRoot, int numberOfFirstCemdapOutputFile, int numberOfPlans, String outputDirectory,
 			Map<String, String> shapeFileToFeatureKey, // ensures, unique shape files with same or different featureKey. Amit Nov'17
 							   boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
-			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms, boolean assignCoordinatesToActivities) throws IOException {
+			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms,
+			boolean assignCoordinatesToActivities, int activityDurationThreshold_s) throws IOException {
 
 		CorineLandCoverData corineLandCoverData = null;
 		// CORINE landcover
@@ -159,7 +166,9 @@ public class CemdapStops2MatsimPlansConverter {
 		Population population = scenario.getPopulation();
 		
 		for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
-			new CemdapStopsParser().parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber));
+			CemdapStopsParser cemdapStopsParser = new CemdapStopsParser();
+			cemdapStopsParser.setActivityDurationThreshold_s(activityDurationThreshold_s);
+			cemdapStopsParser.parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber));
 			
 			// Commenting this for the time being; it does not do anything if the activity file is not considered on top of the stops file, dz,aa, sep'17
 			// Add a stay-home plan for those people who have no stops (i.e. no travel) in current stop file
@@ -199,7 +208,8 @@ public class CemdapStops2MatsimPlansConverter {
 				feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, corineLandCoverData);
 			}
 		} else {
-			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");
+//			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");
+			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be stored with activity attributes.");
 			// for EXTRA LARGE scenario, one can assign coordinates after sampling which would be at least '1/sampleSize' times faster. Amit Oct'17
 			for (Person person : population.getPersons().values()) {
 				for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
@@ -212,7 +222,8 @@ public class CemdapStops2MatsimPlansConverter {
 							if (zoneId == null) {
 								throw new RuntimeException("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 							}
-							activity.setType(activityType+"_"+zoneId);
+//							activity.setType(activityType+"_"+zoneId);
+							activity.getAttributes().putAttribute(activityZoneId_attributeKey, zoneId);
 							activityIndex++;
 						}
 					}
@@ -232,7 +243,9 @@ public class CemdapStops2MatsimPlansConverter {
 
 				Plan stayHomePlan = population.getFactory().createPlan();
 				// Create new activity with type and coordinates (but without end time) and add it to stay-home plan
-				stayHomePlan.addActivity(population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord()));
+				Activity newActivity = population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord());
+				newActivity.getAttributes().putAttribute(activityZoneId_attributeKey, firstActivity.getAttributes().getAttribute(activityZoneId_attributeKey));
+				stayHomePlan.addActivity(newActivity);
 				person.addPlan(stayHomePlan);
 			}
 		}

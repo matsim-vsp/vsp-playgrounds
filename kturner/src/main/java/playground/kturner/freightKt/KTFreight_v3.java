@@ -44,7 +44,8 @@ import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
 import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeLoader;
-import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
+import org.matsim.contrib.freight.carrier.io.CarrierVehicleTypeReader;
+import org.matsim.contrib.freight.carrier.io.CarrierVehicleTypeReaderV1;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeWriter;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.contrib.freight.carrier.Carriers;
@@ -122,14 +123,15 @@ public class KTFreight_v3 {
 
 //	//Beginn Namesdefinition KT Für Berlin-Szenario 
 //	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
-//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/test/" ;
+//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Aldi_Base/" ;
 //	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 //	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 //
 //	//Dateinamen
 //	private static final String NETFILE_NAME = "network.xml" ;
 //	private static final String VEHTYPEFILE_NAME = "vehicleTypes.xml" ;
-//	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ;
+//	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ; //Hat keine Eletrofzg zur Verfügung
+////	private static final String CARRIERFILE_NAME = "carrier_aldi_with_electro.xml";  //Mit Elektro. Aber derzeit nur Aldi... TODO: Input mit Elektro für alle Supermarktketten erstellen.
 //	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
 //	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung
 //	private static final String TOLLAREAFILE_NAME = "toll_area.xml";  //Zonendefinition (Links) für anhand eines Maut-Files
@@ -137,9 +139,9 @@ public class KTFreight_v3 {
 //	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
 //	private static final String uccC_prefix = "UCC-";	
 //
-//	//All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-//	private static final ArrayList<String> retailerNames = null;
-////			new ArrayList<String>(Arrays.asList("aldi")); 
+//	//Select retailers/carriers for simulation. (begin of CarrierId); null if all should be used.
+//	private static final ArrayList<String> selectRetailers = //null;
+//			new ArrayList<String>(Arrays.asList("aldi")); 
 //	//Location of UCC
 //	private static final ArrayList<String> uccDepotsLinkIdsString = 
 //			new ArrayList<String>(Arrays.asList("6874", "3058", "5468")); 
@@ -152,7 +154,7 @@ public class KTFreight_v3 {
 
 	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/UCC/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/VehTypeReader/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
@@ -168,7 +170,7 @@ public class KTFreight_v3 {
 	//um die Analyse der MATSIMEvents einfacher zu gestalten (Dort ist "_" als Trennzeichen verwendet.
 	private static final String uccC_prefix = "UCC-";		
 	// All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-	private static final ArrayList<String> retailerNames = null ;
+	private static final ArrayList<String> selectRetailers = null ;
 //			new ArrayList<String>(Arrays.asList("gridCarrier3"));
 //		= new ArrayList<String>("gridCarrier", "gridCarrier1", "gridCarrier2", "gridCarrier3"); 
 	//Location of UCC
@@ -193,11 +195,11 @@ public class KTFreight_v3 {
 	// Einstellungen für den Run	
 	private static final boolean addingCongestion = false ;  //uses NetworkChangeEvents to reduce freespeed.
 	private static final boolean addingToll = false;  //added, kt. 07.08.2014
-	private static final boolean usingUCC = true;	 //Using Transshipment-Center, added kt 30.04.2015
+	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
 	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
 	private static final int MAX_JSPRIT_ITERATION = 10000;
-	private static final int NU_OF_TOTAL_RUNS = 10;	
+	private static final int NU_OF_TOTAL_RUNS = 1;	
 
 	//temporär zum Programmieren als Ausgabe
 	private static WriteTextToFile textInfofile; 
@@ -335,7 +337,7 @@ public class KTFreight_v3 {
 
 		Carriers carriers = createCarriers(vehicleTypes);
 
-		carriers = new UccCarrierCreator().extractCarriers(carriers, retailerNames);
+		carriers = new UccCarrierCreator().extractCarriers(carriers, selectRetailers);
 
 		/*
 		 * Wenn UCC verwendent werden, dann muss das Problem geteilt werden.
@@ -364,7 +366,7 @@ public class KTFreight_v3 {
 				}
 			}
 
-			UccCarrierCreator uccCarrierCreator = new UccCarrierCreator(carriers, vehicleTypes, TOLLAREAFILE, uccC_prefix, retailerNames, uccDepotsLinkIds, 0.0, 0.0 );
+			UccCarrierCreator uccCarrierCreator = new UccCarrierCreator(carriers, vehicleTypes, TOLLAREAFILE, uccC_prefix, selectRetailers, uccDepotsLinkIds, 0.0, 0.0 );
 			uccCarrierCreator.createSplittedUccCarrriers();
 			carriers = uccCarrierCreator.getSplittedCarriers();
 
@@ -384,7 +386,7 @@ public class KTFreight_v3 {
 			generateCarrierPlans(scenario.getNetwork(), nonUccCarriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs für die NonUCC-Carriers
 
 		} else {  // ohne UCCs 
-			carriers = new UccCarrierCreator().extractCarriers(carriers, retailerNames);
+			carriers = new UccCarrierCreator().extractCarriers(carriers, selectRetailers);
 			carriers = new UccCarrierCreator().renameVehId(carriers);
 			generateCarrierPlans(scenario.getNetwork(), carriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs
 		}
@@ -410,7 +412,7 @@ public class KTFreight_v3 {
 
 	private static CarrierVehicleTypes createVehicleTypes() {
 		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
-		new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPEFILE) ;
+		new CarrierVehicleTypeReader(vehicleTypes) ;
 		return vehicleTypes;
 	}
 

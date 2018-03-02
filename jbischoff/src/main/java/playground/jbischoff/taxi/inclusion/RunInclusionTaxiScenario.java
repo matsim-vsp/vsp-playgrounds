@@ -23,6 +23,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.*;
+import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
 import org.matsim.core.config.*;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -68,10 +69,9 @@ public class RunInclusionTaxiScenario
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         Controler controler = new Controler(scenario);
-        controler.addOverridingModule(new TaxiModule(JbTaxiOptimizerProvider.class));
+        controler.addOverridingModule(TaxiDvrpModules.create(JbTaxiOptimizerProvider.class));
+        controler.addOverridingModule(new TaxiModule());
         
-//        controler.addOverridingModule(new JbTaxiModule());
-
         if (otfvis) {
             controler.addOverridingModule(new OTFVisLiveModule());
         }

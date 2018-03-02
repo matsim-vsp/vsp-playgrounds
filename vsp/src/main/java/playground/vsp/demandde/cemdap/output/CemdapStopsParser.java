@@ -57,11 +57,14 @@ public class CemdapStopsParser {
 	private static final int ORIG_ZONE_ID = 9;
 //	private static final int TRIP_DIST = 10;
 	private static final int ACT_TYPE_AT_PREV_STOP = 11;
-		
+
 	private static final int TIME_OFFSET = 3*3600;
 	public static final String ZONE = "zone";
 
+	private int activityDurationThreshold_s = Integer.MIN_VALUE;
 
+	public static final String CEMDAP_STOP_DURATION_S_ATTRIBUTE_NAME = "cemdapStopDuration_s";
+	
 	public CemdapStopsParser() {
 	}
 
@@ -125,9 +128,15 @@ public class CemdapStopsParser {
 				String activityType = transformActType(Integer.parseInt(entries[ACT_TYPE]));
 				Activity activity = population.getFactory().createActivityFromCoord(activityType, DEFAULT_COORD);
 
-				double endTime = departureTime + Integer.parseInt(entries[TRAVEL_TIME_TO_STOP]) * 60 + Integer.parseInt(entries[STOP_DUR]) * 60;
+				int stopDuration = Integer.parseInt(entries[STOP_DUR]) * 60;
+				double endTime = departureTime + Integer.parseInt(entries[TRAVEL_TIME_TO_STOP]) * 60 + stopDuration;
+				activity.getAttributes().putAttribute(CEMDAP_STOP_DURATION_S_ATTRIBUTE_NAME, stopDuration);
 				if (endTime < 97200.) { // Set end time only if it is not the last activity of the day; 97200s = 24h+3h
-					activity.setEndTime(endTime);
+					if (stopDuration <= activityDurationThreshold_s) {
+						activity.setMaximumDuration(stopDuration);
+					} else {
+						activity.setEndTime(endTime);
+					}
 				}
 				
 				plan.addActivity(activity);
@@ -191,5 +200,10 @@ public class CemdapStopsParser {
 			population.getPersons().remove(personId);
 		}
 		LOG.info("In total " + idsOfPersonsToRemove.size() + " removed from the population.");
+	}
+	
+	
+	public void setActivityDurationThreshold_s (int activityDurationThreshold_s) {
+		this.activityDurationThreshold_s = activityDurationThreshold_s;
 	}
 }

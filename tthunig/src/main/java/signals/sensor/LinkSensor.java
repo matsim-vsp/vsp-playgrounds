@@ -146,9 +146,21 @@ public final class LinkSensor {
 			} else {
 				updateBucketsUntil(now);
 				//if we have less buckets collected than needed for lookback, we calculate the average only with the buckets we already have.
-				if (timeBuckets.size() > 0)
-					return timeBuckets.stream().mapToInt(AtomicInteger::intValue).sum()/(timeBuckets.size() * this.timeBucketCollectionDuration);
-				else return 0.0;
+				if (timeBuckets.size() > 0) {
+					double avgVehPerSecond = timeBuckets.stream().mapToInt(AtomicInteger::intValue).sum()/(timeBuckets.size() * this.timeBucketCollectionDuration);
+					//if there wasn't any vehicles in the lookback-time but now vehicles are measured, the number of vehicles is expected on the currend, not finished bucket.
+					if (avgVehPerSecond == 0.0 && currentBucket != null && currentBucket.get() > 0) {
+						return currentBucket.get()/(now-currentBucketStartTime);
+					} else {
+						return avgVehPerSecond;
+					}
+				} else if(timeBuckets.size() == 0 && currentBucket != null && currentBucket.get() > 0) {
+					//if there wasn't any vehicles since now but now vehicles are measured, the number of vehicles is expected on the currend, not finished bucket.
+					return currentBucket.get()/(now-currentBucketStartTime);
+				}
+				else {
+					return 0.0;
+				}
 			}
 		} else {
 			return 0.0;
@@ -232,6 +244,11 @@ public final class LinkSensor {
 		 * implementation and getting the avg. num of vehicles should probably not
 		 * return 0 again after it returns a value > 0 before. pschade, Dec '17
 		 */
+		/*
+		 * In my opinion, the sensor should detect cars that will arrive at the link end, i.e. the traffic signal.
+		 * Vehicles that leave traffic at the link will not reach the link end and should, therefore, not be counted here.
+		 * theresa, feb'17
+		 */
 		totalVehicles--;
 		if (this.doDistanceMonitoring){
 			for (Double distance : this.distanceMeterCarLocatorMap.keySet()){
@@ -245,14 +262,18 @@ public final class LinkSensor {
 	
 	public void handleEvent(VehicleEntersTrafficEvent event) {
 		this.vehiclesOnLink++;
-		/* the sensor so far does not work for doAverageVehiclesPerSecondMonitoring when vehicles enter traffic at this link.
-		 * the following is a quick suggestion how to fix it, but has to be tested. theresa, may'16
+		/* the sensor so far may not work for doAverageVehiclesPerSecondMonitoring when vehicles enter traffic at this link.
+		 * the following is a quick suggestion how to fix it, but has to be tested. theresa, may'16 */
 		if(this.doAverageVehiclesPerSecondMonitoring) {
+			if (lookBackTime != Double.POSITIVE_INFINITY) {
+				updateBucketsUntil(event.getTime());
+				currentBucket.incrementAndGet();
+			}
 			totalVehicles ++;
 			if(totalVehicles == 1) {
 				monitoringStartTime = event.getTime();
 			}
-		} */
+		}
 		if (this.doDistanceMonitoring){
 			// the vehicle leaves its first act on this link --> add a car locator
 			if (! this.link2WaitEventPerVehicleId.containsKey(event.getVehicleId())){ 

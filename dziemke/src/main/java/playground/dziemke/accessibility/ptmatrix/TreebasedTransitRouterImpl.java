@@ -40,15 +40,9 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.Facility;
-import org.matsim.pt.router.PreparedTransitSchedule;
-import org.matsim.pt.router.TransitLeastCostPathTree;
-import org.matsim.pt.router.TransitRouter;
-import org.matsim.pt.router.TransitRouterConfig;
-import org.matsim.pt.router.TransitRouterNetwork;
+import org.matsim.pt.router.*;
 import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkLink;
 import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkNode;
-import org.matsim.pt.router.TransitRouterNetworkTravelTimeAndDisutility;
-import org.matsim.pt.router.TransitTravelDisutility;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
@@ -61,7 +55,7 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
  *
  * @author mrieser, gthunig
  */
-public class TreebasedTransitRouterImpl implements TransitRouter {
+public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements TransitRouter {
 
     private final TransitRouterNetwork transitNetwork;
 
@@ -75,12 +69,14 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
     private Facility<?> fromFacility;
 
     public TreebasedTransitRouterImpl(final TransitRouterConfig config, final TransitSchedule schedule) {
+        super(config);
         this.preparedTransitSchedule = new PreparedTransitSchedule(schedule);
         TransitRouterNetworkTravelTimeAndDisutility transitRouterNetworkTravelTimeAndDisutility = new TransitRouterNetworkTravelTimeAndDisutility(config, preparedTransitSchedule);
         this.travelTime = transitRouterNetworkTravelTimeAndDisutility;
         this.config = config;
         this.travelDisutility = transitRouterNetworkTravelTimeAndDisutility;
         this.transitNetwork = TransitRouterNetwork.createFromSchedule(schedule, config.getBeelineWalkConnectionDistance());
+        this.setTransitTravelDisutility(travelDisutility);
     }
 
     public TreebasedTransitRouterImpl(
@@ -89,6 +85,7 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
             final TransitRouterNetwork routerNetwork,
             final TravelTime travelTime,
             final TransitTravelDisutility travelDisutility) {
+        super(config, travelDisutility);
         this.config = config;
         this.transitNetwork = routerNetwork;
         this.travelTime = travelTime;
@@ -112,14 +109,6 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
             wrappedNearestNodes.put(node, new InitialNode(initialCost, initialTime + departureTime));
         }
         return wrappedNearestNodes;
-    }
-
-    private double getWalkTime(Person person, Coord coord, Coord toCoord) {
-        return travelDisutility.getWalkTravelTime(person, coord, toCoord);
-    }
-
-    private double getWalkDisutility(Person person, Coord coord, Coord toCoord) {
-        return travelDisutility.getWalkTravelDisutility(person, coord, toCoord);
     }
 
     @Override
@@ -150,18 +139,6 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
             return this.createDirectWalkLegList(null, fromFacility.getCoord(), toFacility.getCoord());
         }
         return convertPathToLegList(departureTime, p, fromFacility.getCoord(), toFacility.getCoord(), person);
-    }
-
-    private List<Leg> createDirectWalkLegList(Person person, Coord fromCoord, Coord toCoord) {
-        List<Leg> legs = new ArrayList<>();
-        Leg leg = PopulationUtils.createLeg(TransportMode.transit_walk);
-        double walkTime = getWalkTime(person, fromCoord, toCoord);
-        leg.setTravelTime(walkTime);
-        Route walkRoute = RouteUtils.createGenericRouteImpl(null, null);
-        walkRoute.setTravelTime(walkTime);
-        leg.setRoute(walkRoute);
-        legs.add(leg);
-        return legs;
     }
 
     protected List<Leg> convertPathToLegList(double departureTime, Path path, Coord fromCoord, Coord toCoord, Person person) {
@@ -285,10 +262,6 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
 
     protected TransitRouterNetwork getTransitNetwork() {
         return transitNetwork;
-    }
-
-    protected TransitRouterConfig getConfig() {
-        return config;
     }
 
 }

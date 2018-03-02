@@ -22,16 +22,22 @@ package playground.michalm.taxi.run;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkTravelTimeModule;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.util.TravelTime;
 
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 
 import playground.michalm.taxi.optimizer.ETaxiOptimizerProvider;
 import playground.michalm.taxi.scheduler.ETaxiScheduler;
@@ -47,7 +53,6 @@ public class ETaxiOptimizerModules {
 			@Override
 			public void install() {
 				install(new DvrpModule(createModuleForQSimPlugin(), TaxiOptimizer.class));
-				install(new DvrpBenchmarkTravelTimeModule());
 			}
 		};
 	}
@@ -67,6 +72,14 @@ public class ETaxiOptimizerModules {
 			@Singleton
 			private MobsimTimer getTimer(QSim qSim) {
 				return qSim.getSimTimer();
+			}
+
+			@Provides
+			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER)
+			private TravelDisutility provideTravelDisutility(
+					@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
+					@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutilityFactory travelDisutilityFactory) {
+				return travelDisutilityFactory.createTravelDisutility(travelTime);
 			}
 		};
 	}

@@ -255,7 +255,12 @@ public class KNCALink {
 			@Override public double getSimulatedFlowCapacityPerTimeStep() {
 				return 0.5 ;
 			}
-
+			
+			@Override
+			public void recalcTimeVariantAttributes() {
+				throw new RuntimeException("not implemented") ;
+			}
+			
 			@Override public QVehicle getVehicle(Id<Vehicle> vehicleId) {
 				for ( int ii=MAXV ; ii<MAXV+LEN ; ii++ ) {
 					if ( array[ii]!=null && array[ii].qVehicle.getId().equals( vehicleId ) ) {
@@ -276,14 +281,24 @@ public class KNCALink {
 			@Override public void addTransitSlightlyUpstreamOfStop(QVehicle veh) {
 				throw new RuntimeException("not implemented") ;
 			}
-
-			@Override public void changeUnscaledFlowCapacityPerSecond(double val) {
-				throw new RuntimeException("not implemented") ;
+			
+			@Override
+			public void changeUnscaledFlowCapacityPerSecond(double val) {
+				throw new RuntimeException("not implemented");
+			}
+			
+			@Override
+			public void changeEffectiveNumberOfLanes(double val) {
+				throw new RuntimeException("not implemented");
 			}
 
-			@Override public void changeEffectiveNumberOfLanes(double val) {
-				throw new RuntimeException("not implemented") ;
-			}
+//			@Override public void changeUnscaledFlowCapacityPerSecond(double val) {
+//				throw new RuntimeException("not implemented") ;
+//			}
+//
+//			@Override public void changeEffectiveNumberOfLanes(double val) {
+//				throw new RuntimeException("not implemented") ;
+//			}
 
 			@Override public boolean doSimStep() {
 
@@ -399,9 +414,9 @@ public class KNCALink {
 				return false ;
 			}
 
-			@Override public void changeSpeedMetersPerSecond(double val) {
-				throw new RuntimeException("not implemented") ;
-			}
+//			@Override public void changeSpeedMetersPerSecond(double val) {
+//				throw new RuntimeException("not implemented") ;
+//			}
 
 			@Override public double getLoadIndicator() {
 				return 0.5 ;

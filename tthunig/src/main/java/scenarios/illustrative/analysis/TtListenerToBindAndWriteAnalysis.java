@@ -51,14 +51,14 @@ public class TtListenerToBindAndWriteAnalysis implements IterationEndsListener {
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		// write analyzed data
 		writer.writeIterationResults(event.getIteration());
-		runGnuplotScript("plot_routeDistribution", event.getIteration());
+		runGnuplotScript("plot_routeDistribution_byPass", event.getIteration());
 
 		// handle last iteration
 		if (event.getIteration() == scenario.getConfig().controler().getLastIteration()) {
 			// close overall writing stream
 			writer.closeAllStreams();
 			// plot overall iteration results
-			runGnuplotScript("plot_routesAndTTs", event.getIteration());
+			runGnuplotScript("plot_routesAndTTs_byPass", event.getIteration());
 		}
 	}
 	
