@@ -35,6 +35,7 @@ import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
@@ -46,7 +47,7 @@ import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalDistanceBinIdentifier>, PersonDepartureEventHandler,
-		PersonArrivalEventHandler, PersonStuckEvent {
+		PersonArrivalEventHandler, PersonStuckEventHandler {
 
 	private static final Logger log = Logger.getLogger(BeelineDistancePlansTranslatorBasedOnEvents.class);
 
@@ -158,8 +159,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 	@Override
 	public void handleEvent(PersonStuckEvent event) {
-		LOG.warn("Stuck event: "+ event);
-		LOG.warn("This means, all trips are not included in the output distance distribution.");
+		log.warn("Stuck event: "+ event);
+		log.warn("This means, all trips are not included in the output distance distribution.");
 	}
 
 	// ###################################################################################
