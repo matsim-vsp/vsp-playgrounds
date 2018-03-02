@@ -80,6 +80,8 @@ import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
 import scenarios.illustrative.analysis.TtAnalyzedResultsWriter;
 import scenarios.illustrative.analysis.TtListenerToBindAndWriteAnalysis;
 import scenarios.illustrative.braess.analysis.TtAnalyzeBraess;
+import scenarios.illustrative.braess.analysis.TtAnalyzeBraessWithByPass;
+import scenarios.illustrative.braess.analysis.TtListenerToBindAndWriteAnalysisForBraessWithByPass;
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes;
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes.LaneType;
 import scenarios.illustrative.braess.createInput.TtCreateBraessPopulation;
@@ -466,12 +468,15 @@ public final class RunBraessSimulation {
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
-//				this.bind(TtAnalyzeBraess.class).asEagerSingleton();
-//				this.addEventHandlerBinding().to(TtAnalyzeBraess.class);
-				this.bind(TtAbstractAnalysisTool.class).to(TtAnalyzeBraess.class).asEagerSingleton();
+				if (BYPASS) {
+					this.bind(TtAbstractAnalysisTool.class).to(TtAnalyzeBraessWithByPass.class).asEagerSingleton();
+					this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysisForBraessWithByPass.class);
+				} else {
+					this.bind(TtAbstractAnalysisTool.class).to(TtAnalyzeBraess.class).asEagerSingleton();
+					this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysis.class);
+				}
 				this.addEventHandlerBinding().to(TtAbstractAnalysisTool.class);
 				this.bind(TtAnalyzedResultsWriter.class);
-				this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysis.class);
 				
 				SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
 						SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
