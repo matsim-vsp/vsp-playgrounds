@@ -61,7 +61,7 @@ public class SplitActivityTypesBasedOnDuration {
 		splitAct.run(outputPopulationFile, outputConfigFile, timeBinSize_s, activities);	
 	}
 
-	private void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities) {
+	public void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities) {
 		
 		CemdapPopulationTools tools = new CemdapPopulationTools();
 		tools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(scenario.getPopulation(), timeBinSize_s);

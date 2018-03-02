@@ -49,6 +49,8 @@ import playground.vsp.corineLandcover.GeometryUtils;
  * @author dziemke
  */
 public class CemdapStops2MatsimPlansConverter {
+
+	public static final String activityZoneId_attributeKey = "zoneId";
 	private static final Logger LOG = Logger.getLogger(CemdapStops2MatsimPlansConverter.class);
 	
 
@@ -70,17 +72,17 @@ public class CemdapStops2MatsimPlansConverter {
 		boolean simplifyGeometries = false;
 		boolean assignCoordinatesToActivities = true; // if set to false, the zone id will be attached to activity types and a fake coordinate will be given.
 		boolean combiningGeoms = true;
-		int activityDurationThreshold_s = 1800;
+		int activityDurationThreshold_s = Integer.MIN_VALUE;
 		
 		// Server use
 		if (args.length != 0) {
-			cemdapDataRoot = args[6];
 			numberOfFirstCemdapOutputFile = Integer.parseInt(args[0]);
 			numberOfPlans = Integer.parseInt(args[1]);
 			allowVariousWorkAndEducationLocations = Boolean.parseBoolean(args[2]);
 			addStayHomePlan = Boolean.parseBoolean(args[3]);
 			outputDirectory = args[4];
 			zonalShapeFile = args[5];
+			cemdapDataRoot = args[6];
 			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
 			landCoverFile = args[8];
 			simplifyGeometries = Boolean.valueOf(args[9]);
@@ -221,7 +223,7 @@ public class CemdapStops2MatsimPlansConverter {
 								throw new RuntimeException("Person with ID " + person.getId() + ": Object attribute '" + CemdapStopsParser.ZONE + activityIndex + "' not found.");
 							}
 //							activity.setType(activityType+"_"+zoneId);
-							activity.getAttributes().putAttribute("zoneId", zoneId);
+							activity.getAttributes().putAttribute(activityZoneId_attributeKey, zoneId);
 							activityIndex++;
 						}
 					}
@@ -242,7 +244,7 @@ public class CemdapStops2MatsimPlansConverter {
 				Plan stayHomePlan = population.getFactory().createPlan();
 				// Create new activity with type and coordinates (but without end time) and add it to stay-home plan
 				Activity newActivity = population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord());
-				newActivity.getAttributes().putAttribute("zoneId", firstActivity.getAttributes().getAttribute("zoneId"));
+				newActivity.getAttributes().putAttribute(activityZoneId_attributeKey, firstActivity.getAttributes().getAttribute(activityZoneId_attributeKey));
 				stayHomePlan.addActivity(newActivity);
 				person.addPlan(stayHomePlan);
 			}

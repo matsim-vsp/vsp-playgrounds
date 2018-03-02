@@ -500,7 +500,7 @@ public class FundamentalDiagramDataGenerator {
 		LOG.info("=======================");
 
 		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
-			qSim.addMobsimEngine(new NetworkChangeEventsEngine());
+			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
 		}
 
 		//modification: Mobsim needs to know the different vehicle types (and their respective physical parameters)
