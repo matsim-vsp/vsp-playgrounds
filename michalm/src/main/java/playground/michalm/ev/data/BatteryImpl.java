@@ -52,7 +52,7 @@ public class BatteryImpl implements Battery {
 	@Override
 	public void discharge(double energy) {
 		if (energy < 0 || energy > soc) {
-			throw new IllegalStateException();
+			throw new IllegalStateException("energy=" + energy + ", SOC=" + soc);
 		}
 
 		soc -= energy;

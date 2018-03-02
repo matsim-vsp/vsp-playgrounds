@@ -34,7 +34,7 @@ import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.TaxiOutputModule;
+import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -91,7 +91,7 @@ public class OptAVModeChoiceTestIT {
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
 		
-		controler1.addOverridingModule(new TaxiOutputModule());
+		controler1.addOverridingModule(TaxiDvrpModules.create());
 		controler1.addOverridingModule(new TaxiModule());
 		controler1.addOverridingModule(new OptAVModule(scenario1));		
 		
@@ -131,7 +131,7 @@ public class OptAVModeChoiceTestIT {
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);
 		
-		controler2.addOverridingModule(new TaxiOutputModule());
+		controler2.addOverridingModule(TaxiDvrpModules.create());
 		controler2.addOverridingModule(new TaxiModule());
 		controler2.addOverridingModule(new OptAVModule(scenario2));		        
 		
@@ -195,7 +195,7 @@ public class OptAVModeChoiceTestIT {
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
 		
-		controler1.addOverridingModule(new TaxiOutputModule());
+		controler1.addOverridingModule(TaxiDvrpModules.create());
 		controler1.addOverridingModule(new TaxiModule());
 		controler1.addOverridingModule(new OptAVModule(scenario1));		
 		controler1.addOverridingModule(new PersonTripAnalysisModule());
@@ -236,7 +236,7 @@ public class OptAVModeChoiceTestIT {
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);
 		
-		controler2.addOverridingModule(new TaxiOutputModule());
+		controler2.addOverridingModule(TaxiDvrpModules.create());
 		controler2.addOverridingModule(new TaxiModule());
 		controler2.addOverridingModule(new OptAVModule(scenario2));		        
 		controler2.addOverridingModule(new PersonTripAnalysisModule());

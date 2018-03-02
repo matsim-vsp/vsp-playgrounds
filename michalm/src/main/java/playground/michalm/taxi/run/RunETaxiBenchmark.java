@@ -69,7 +69,7 @@ public class RunETaxiBenchmark {
 
 		Controler controler = new Controler(scenario);
 		controler.setModules(new DvrpBenchmarkControlerModule());
-		controler.addOverridingModule(new TaxiOutputModule());
+		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new EvModule(evData));
 
 		controler.addOverridingModule(ETaxiOptimizerModules.createBenchmarkModule());
@@ -88,7 +88,7 @@ public class RunETaxiBenchmark {
 	}
 
 	public static void main(String[] args) {
-		String cfg = "../../../shared-svn/projects/maciejewski/Mielec/2014_02_base_scenario/" + //
+		String cfg = "../../shared-svn/projects/maciejewski/Mielec/2014_02_base_scenario/" + //
 				"mielec_etaxi_benchmark_config.xml";
 		run(cfg, 1);
 	}

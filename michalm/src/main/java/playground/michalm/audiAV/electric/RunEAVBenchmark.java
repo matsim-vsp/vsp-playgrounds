@@ -74,7 +74,7 @@ public class RunEAVBenchmark {
 
 		Controler controler = new Controler(scenario);
 		controler.setModules(new DvrpBenchmarkControlerModule());
-		controler.addOverridingModule(new TaxiOutputModule());
+		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new EvModule(evData));
 
 		controler.addOverridingModule(ETaxiOptimizerModules.createBenchmarkModule());
