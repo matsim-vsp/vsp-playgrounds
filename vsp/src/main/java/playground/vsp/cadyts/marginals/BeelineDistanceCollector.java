@@ -26,8 +26,10 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -44,7 +46,7 @@ import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
  * Created by amit on 21.02.18.
  */
 
-public class BeelineDistanceCollector implements PersonDepartureEventHandler, PersonArrivalEventHandler {
+public class BeelineDistanceCollector implements PersonDepartureEventHandler, PersonArrivalEventHandler, PersonStuckEventHandler {
 
     private static final Logger LOG = Logger.getLogger(BeelineDistanceCollector.class);
 
@@ -122,5 +124,11 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
 
     public DistanceDistribution getOutputDistanceDistribution() {
         return outputDistanceDistribution;
+    }
+
+    @Override
+    public void handleEvent(PersonStuckEvent event) {
+        LOG.warn("Stuck event: "+ event);
+        LOG.warn("This means, all trips are not included in the output distance distribution.");
     }
 }

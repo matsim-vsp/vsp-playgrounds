@@ -25,12 +25,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import cadyts.demand.PlanBuilder;
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Person;
@@ -38,16 +40,13 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.network.NetworkUtils;
-
-import com.google.inject.Inject;
-
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
 class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalDistanceBinIdentifier>, PersonDepartureEventHandler,
-		PersonArrivalEventHandler {
+		PersonArrivalEventHandler, PersonStuckEvent {
 
 	private static final Logger log = Logger.getLogger(BeelineDistancePlansTranslatorBasedOnEvents.class);
 
@@ -155,6 +154,12 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 			// --> so any number between these two should return same. Amit Feb'18
 			tmpPlanStepFactory.addTurn( this.modalDistanceBinMap.get(mlId), (int) 1);
 		}
+	}
+
+	@Override
+	public void handleEvent(PersonStuckEvent event) {
+		LOG.warn("Stuck event: "+ event);
+		LOG.warn("This means, all trips are not included in the output distance distribution.");
 	}
 
 	// ###################################################################################
