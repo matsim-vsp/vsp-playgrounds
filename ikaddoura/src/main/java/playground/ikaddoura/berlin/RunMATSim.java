@@ -72,12 +72,12 @@ public class RunMATSim {
 			
 		} else {
 			
-			configFile = "../../runs-svn/incidents-longterm-shortterm/input/config-longterm.xml";
-			outputDirectory = "../../runs-svn/incidents-longterm-shortterm/output/test9/";
+			configFile = "../../runs-svn/xxx/config.xml";
+			outputDirectory = "../../runs-svn/xxx/";
 			runId = "test-run";
-			ascWalk = 0.;
-			ascPt = -1.;
 			ascCar = -2.;
+			ascPt = -1.;
+			ascWalk = 0.;
 			ascBicycle = -3.;
 		}
 		
