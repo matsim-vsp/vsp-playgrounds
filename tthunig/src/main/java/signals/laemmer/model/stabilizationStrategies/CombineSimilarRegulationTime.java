@@ -30,7 +30,8 @@ public class CombineSimilarRegulationTime extends AbstractStabilizationStrategy 
 		
 		List<LaemmerPhase> candidatePhases = new LinkedList<>();
 		for (LaemmerPhase laemmerPhase : laemmerPhases) {
-			if (laemmerPhase.getPhase().containsGreenLane(lanesForStabilization.peek().getLink().getId(), lanesForStabilization.peek().getLane().getId())) {
+			if (laemmerPhase.getPhase().containsGreenLane(lanesForStabilization.peek().getLink().getId(),
+					(lanesForStabilization.peek().getLane() == null ? null : lanesForStabilization.peek().getLane().getId()))) {
 				candidatePhases.add(laemmerPhase);
 			}
 		}
@@ -54,6 +55,9 @@ public class CombineSimilarRegulationTime extends AbstractStabilizationStrategy 
 				minRegulationTimeDifference = regulationTimeDifferenceSum/laneCount;
 				max = candPhase;
 			}
+		}
+		if (max==null) {
+			max = candidatePhases.get(0);
 		}
 		return max;
 	}
