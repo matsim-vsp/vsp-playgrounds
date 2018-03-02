@@ -53,7 +53,6 @@ public class ETaxiOptimizerModules {
 			@Override
 			public void install() {
 				install(new DvrpModule(createModuleForQSimPlugin(), TaxiOptimizer.class));
-				install(new DvrpBenchmarkTravelTimeModule());
 			}
 		};
 	}

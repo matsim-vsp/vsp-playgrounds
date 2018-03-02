@@ -81,6 +81,7 @@ public class RunETaxiBenchmark {
 				addMobsimListenerBinding().toProvider(ETaxiChargerOccupancyXYDataProvider.class);
 				addControlerListenerBinding().to(ETaxiBenchmarkStats.class).asEagerSingleton();
 				bind(Fleet.class).toInstance(fleet);// overrride the binding specified in TaxiModule
+				install(new DvrpBenchmarkTravelTimeModule());
 			}
 		});
 
