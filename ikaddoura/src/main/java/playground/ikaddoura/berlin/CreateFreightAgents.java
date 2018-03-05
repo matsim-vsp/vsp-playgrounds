@@ -177,7 +177,6 @@ public class CreateFreightAgents {
 			Point startP = getRandomPointInFeature(rnd, features.get("berlin"));
 			if ( startP==null ) log.warn("Point is null.");
 			Activity startActivity = popFactory.createActivityFromCoord(this.freightActivityType, MGC.point2Coord(startP) ) ;
-			plan.addActivity(startActivity);
 			
 			double startTime = calculateNormallyDistributedTime(12 * 3600, 6 * 3600.);  // approx. 2/3 between 6.00 and 18.00
 			startActivity.setEndTime(startTime);
