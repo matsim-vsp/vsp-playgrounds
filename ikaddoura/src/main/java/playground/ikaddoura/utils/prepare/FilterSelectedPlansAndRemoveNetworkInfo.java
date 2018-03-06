@@ -29,10 +29,9 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import playground.agarwalamit.utils.LoadMyScenarios;
 
 /**
 * @author ikaddoura
@@ -54,7 +53,9 @@ public class FilterSelectedPlansAndRemoveNetworkInfo {
 	public void run (final String inputPlans, final String outputPlans) {
 		
 		Scenario scOutput;
-		Scenario scInput = LoadMyScenarios.loadScenarioFromPlans(inputPlans);
+		Config config = ConfigUtils.createConfig();
+		config.plans().setInputFile(inputPlans);
+		Scenario scInput = ScenarioUtils.loadScenario(config);
 		scOutput = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		Population popOutput = scOutput.getPopulation();
 		
