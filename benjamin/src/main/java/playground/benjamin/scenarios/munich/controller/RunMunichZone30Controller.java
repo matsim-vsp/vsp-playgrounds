@@ -94,7 +94,9 @@ public class RunMunichZone30Controller extends AbstractController {
 	public void run() {
 		this.config.addConfigConsistencyChecker(new ConfigConsistencyCheckerImpl());
 		ControlerUtils.checkConfigConsistencyAndWriteToLog(this.config, "Complete config dump after reading the config file:");
-		this.setupOutputDirectory(config.controler().getOutputDirectory(), config.controler().getRunId(), OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+//		this.setupOutputDirectory(config.controler().getOutputDirectory(), config.controler().getRunId(), OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+		//FIXME: Line above does not work with MATSIM 0.11 snapshot.
+
 		this.network = this.scenario.getNetwork();
 		this.population = this.scenario.getPopulation();
 		this.eventsManager = EventsUtils.createEventsManager(config); 

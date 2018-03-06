@@ -82,7 +82,8 @@ public class KnSimplifiedController extends AbstractController {
 		// so this is really of less importance here.  kai, sep'12)
 		this.config.addConfigConsistencyChecker(new ConfigConsistencyCheckerImpl());
 		ControlerUtils.checkConfigConsistencyAndWriteToLog(this.config, "Complete config dump after reading the config file:");
-		this.setupOutputDirectory(config.controler().getOutputDirectory(), config.controler().getRunId(), OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+//		this.setupOutputDirectory(config.controler().getOutputDirectory(), config.controler().getRunId(), OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+//FIXME: Line above does not work with MATSIM 0.11 snapshot.
 		this.network = this.scenario.getNetwork();
 		this.population = this.scenario.getPopulation();
 		this.events = EventsUtils.createEventsManager(config); 

@@ -37,7 +37,6 @@ import org.matsim.vis.otfvis.OnTheFlyServer;
 class MyControler {
 	
 	public static void main ( String[] args ) {
-		ControlerUtils.initializeOutputLogging();
 		
 
 		Logger.getLogger("blabla").warn("here") ;
