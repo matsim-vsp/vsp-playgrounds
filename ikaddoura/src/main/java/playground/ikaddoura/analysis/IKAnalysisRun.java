@@ -40,6 +40,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
+import playground.ikaddoura.analysis.actDurations.ActDurationHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysis;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
@@ -108,12 +109,12 @@ public class IKAnalysisRun {
 			
 		String runDirectory;
 		String runId;
-		String runDirectoryToCompareWith;
-		String runIdToCompareWith;
-		String scenarioCRS;	
-		String shapeFileZones;
-		String zonesCRS;
-		String homeActivity;
+		String runDirectoryToCompareWith = null;
+		String runIdToCompareWith = null;
+		String scenarioCRS = null;	
+		String shapeFileZones = null;
+		String zonesCRS = null;
+		String homeActivity = null;
 		int scalingFactor;
 		
 		if (args.length > 0) {
@@ -136,21 +137,19 @@ public class IKAnalysisRun {
 		
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_c/";
-//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
 			runId = "policyCase";
 			
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne_berlin10pct/output/m_r_output_run0_baseCase/";	
-//			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
 			runIdToCompareWith = "baseCase";
 			
 			scenarioCRS = TransformationFactory.DHDN_GK4;	
 			
-//			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
-//			zonesCRS = TransformationFactory.DHDN_GK4;
-
-			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/greater-berlin-area_3000/greater-berlin-area_3000.shp";
+			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
 			zonesCRS = TransformationFactory.DHDN_GK4;
+
+//			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/greater-berlin-area_3000/greater-berlin-area_3000.shp";
+//			zonesCRS = TransformationFactory.DHDN_GK4;
 			
 //			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
 //			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
@@ -269,6 +268,7 @@ public class IKAnalysisRun {
 		DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis1 = null;
 		PersonMoneyLinkHandler personTripMoneyHandler1 = null;
 		MoneyExtCostHandler personMoneyHandler1 = null;
+		ActDurationHandler actHandler1 = null;
 
 		if (scenario1 != null) {
 			basicHandler1 = new BasicPersonTripAnalysisHandler();
@@ -285,6 +285,8 @@ public class IKAnalysisRun {
 			
 			personMoneyHandler1 = new MoneyExtCostHandler();
 			
+			actHandler1 = new ActDurationHandler();
+			
 			events1 = EventsUtils.createEventsManager();
 			events1.addHandler(basicHandler1);
 			events1.addHandler(delayAnalysis1);
@@ -292,6 +294,7 @@ public class IKAnalysisRun {
 			events1.addHandler(dynamicTrafficVolumeAnalysis1);
 			events1.addHandler(personTripMoneyHandler1);
 			events1.addHandler(personMoneyHandler1);
+			events1.addHandler(actHandler1);
 		}
 		
 		EventsManager events0 = null;
@@ -301,6 +304,7 @@ public class IKAnalysisRun {
 		DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis0 = null;
 		PersonMoneyLinkHandler personTripMoneyHandler0 = null;
 		MoneyExtCostHandler personMoneyHandler0 = null;
+		ActDurationHandler actHandler0 = null;
 		
 		if (scenario0 != null) {
 			basicHandler0 = new BasicPersonTripAnalysisHandler();
@@ -316,6 +320,8 @@ public class IKAnalysisRun {
 			personTripMoneyHandler0.setBasicHandler(basicHandler0);
 			
 			personMoneyHandler0 = new MoneyExtCostHandler();
+			
+			actHandler0 = new ActDurationHandler();
 
 			events0 = EventsUtils.createEventsManager();
 			events0.addHandler(basicHandler0);
@@ -324,6 +330,7 @@ public class IKAnalysisRun {
 			events0.addHandler(dynamicTrafficVolumeAnalysis0);
 			events0.addHandler(personTripMoneyHandler0);
 			events0.addHandler(personMoneyHandler0);
+			events0.addHandler(actHandler0);
 		}
 
 		// #####################################
@@ -341,10 +348,10 @@ public class IKAnalysisRun {
 		// #####################################
 
 		log.info("Printing results...");
-		if (scenario1 != null) printResults(scenario1, analysisOutputDirectory, personId2userBenefit1, basicHandler1, delayAnalysis1, personTripMoneyHandler1, trafficVolumeAnalysis1, dynamicTrafficVolumeAnalysis1, personMoneyHandler1);
+		if (scenario1 != null) printResults(scenario1, analysisOutputDirectory, personId2userBenefit1, basicHandler1, delayAnalysis1, personTripMoneyHandler1, trafficVolumeAnalysis1, dynamicTrafficVolumeAnalysis1, personMoneyHandler1, actHandler1);
 		
 		log.info("Printing results...");
-		if (scenario0 != null) printResults(scenario0, analysisOutputDirectory, personId2userBenefit2, basicHandler0, delayAnalysis0, personTripMoneyHandler0, trafficVolumeAnalysis0, dynamicTrafficVolumeAnalysis0, personMoneyHandler0);
+		if (scenario0 != null) printResults(scenario0, analysisOutputDirectory, personId2userBenefit2, basicHandler0, delayAnalysis0, personTripMoneyHandler0, trafficVolumeAnalysis0, dynamicTrafficVolumeAnalysis0, personMoneyHandler0, actHandler0);
 
 		// #####################################
 		// Scenario comparison
@@ -450,7 +457,8 @@ public class IKAnalysisRun {
 			PersonMoneyLinkHandler personTripMoneyHandler,
 			LinkDemandEventHandler trafficVolumeAnalysis,
 			DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis,
-			MoneyExtCostHandler personMoneyHandler) {
+			MoneyExtCostHandler personMoneyHandler,
+			ActDurationHandler actHandler) {
 		
 		// #####################################
 		// Print results: person / trip analysis
@@ -535,6 +543,15 @@ public class IKAnalysisRun {
 			String outputDirectoryWithPrefix = networkOutputDirectory + scenario.getConfig().controler().getRunId() + ".";
 			Network2Shape.exportNetwork2Shp(scenario, outputDirectoryWithPrefix, scenarioCRS, TransformationFactory.getCoordinateTransformation(scenarioCRS, scenarioCRS));
 		}
+		
+		// #####################################
+		// Print results: activity durations
+		// #####################################
+		String actDurationsOutputDirectory = analysisOutputDirectory + "activity-durations/";
+		createDirectory(actDurationsOutputDirectory);
+		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations.csv", Double.POSITIVE_INFINITY);
+		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations_below-900-sec.csv", 900.);
+
 	}
 	
 	private void createDirectory(String directory) {
