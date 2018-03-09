@@ -55,7 +55,8 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     @Inject private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
     @Inject private TripRouter tripRouter ;
     @Inject private Network network ;
-    // Documentation: "Guice injects ... fields of all values that are bound using toInstance(). These are injected at injector-creation time."
+	private final ObjectiveFunctionEvaluator.ObjectiveFunctionType objectiveFunctionType;
+	// Documentation: "Guice injects ... fields of all values that are bound using toInstance(). These are injected at injector-creation time."
     // https://github.com/google/guice/wiki/InjectionPoints
     // I read that as "the fields are injected (every time again) when the instance is injected".
     // This is the behavior that we want here.  kai, sep'16
@@ -68,8 +69,13 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     private final Map<StatType,Databins<String>> simStatsContainer = new TreeMap<>() ;
     private final Map<StatType,DataMap<String>> sumsContainer  = new TreeMap<>() ;
     private final Map<StatType,Databins<String>> refStatsContainer = new TreeMap<>() ;
-
-     public ModeChoiceObjectiveFunction(final DistanceDistribution distriInfo) {
+	
+	public ModeChoiceObjectiveFunction(final DistanceDistribution distriInfo) {
+		this( distriInfo, ObjectiveFunctionEvaluator.ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED ) ;
+	}
+	public ModeChoiceObjectiveFunction(final DistanceDistribution distriInfo,
+									   ObjectiveFunctionEvaluator.ObjectiveFunctionType objectiveFunctionType ) {
+		this.objectiveFunctionType = objectiveFunctionType;
         this.distriInfo = distriInfo;
         for ( StatType statType : StatType.values() ) {
             // define the bin boundaries:
@@ -108,7 +114,8 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
                     }
                 };
                 break;
-            default: throw new RuntimeException("not implemented");
+            default:
+                throw new RuntimeException("not implemented");
         }
     }
 
@@ -144,7 +151,7 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
             }
         }
 
-        ObjectiveFunctionEvaluator objectiveFunctionEvaluator = new ObjectiveFunctionEvaluator();
+        ObjectiveFunctionEvaluator objectiveFunctionEvaluator = new ObjectiveFunctionEvaluator(objectiveFunctionType);
         double objectiveFnValue = 0.;
 
         for ( Map.Entry<StatType, Databins<String>> entry : simStatsContainer.entrySet() ) {

@@ -35,11 +35,11 @@ import org.matsim.contrib.analysis.kai.Databins;
 @SuppressWarnings("DefaultFileTemplate")
 public class ObjectiveFunctionEvaluator {
 
-    private static final Logger LOG = Logger.getLogger(ObjectiveFunctionEvaluator.class);
+    private static final Logger log = Logger.getLogger(ObjectiveFunctionEvaluator.class);
     private final SortedMap<String, Double> mode2share = new TreeMap<>();
 
     public enum ObjectiveFunctionType {
-        SUM_ABS_DIFF, SUM_SQR_DIFF_NORMALIZED
+        SUM_ABS_DIFF, SUM_SQR_DIFF_NORMALIZED, SUM_SQRT_DIFF_NORMALIZED
     }
 
     private final ObjectiveFunctionType objectiveFunctionType;
@@ -71,10 +71,15 @@ public class ObjectiveFunctionEvaluator {
         double realValueSum = 0;
         for ( Map.Entry<String, double[]> theEntry : realCounts.entrySet() ) {
             String mode = theEntry.getKey() ;
+            log.info("generating objective function value for mode=" + mode ) ;
+
             double[] realValue = theEntry.getValue() ;
             double[] simValue = simCounts.get(mode);
-
-            mode2share.put(mode, Arrays.stream(simValue).sum());
+            
+			log.info("simValue=" + simValue );
+            
+            final double sum = Arrays.stream(simValue).sum();
+            mode2share.put(mode, sum);
 
             for ( int ii=0 ; ii < realValue.length ; ii++ ) {
                 double diff ;
@@ -86,6 +91,8 @@ public class ObjectiveFunctionEvaluator {
                             "i.e. one of the distance class is missing. The simulation is aborting, because not sure, which bin is missing.");
                 }
                 else diff = Math.abs( realValue[ii] - simValue[ii] ) ;
+	
+				realValueSum += realValue[ii];
 
                 switch (this.objectiveFunctionType) {
                     case SUM_ABS_DIFF:
@@ -93,25 +100,30 @@ public class ObjectiveFunctionEvaluator {
                         break;
                     case SUM_SQR_DIFF_NORMALIZED:
                         objective += diff * diff;
-                        realValueSum += realValue[ii];
                         break;
-                    default:
+					case SUM_SQRT_DIFF_NORMALIZED:
+						objective += Math.sqrt(Math.abs(diff)) ;
+						break;
+					default:
                         throw new RuntimeException("not implemented yet.");
                 }
             }
         }
         switch (this.objectiveFunctionType) {
             case SUM_ABS_DIFF:
-                LOG.error("This should be used with great caution, with Patna, it was not a good experience. See email from GF on 24.11.2016");
+                log.error("This should be used with great caution, with Patna, it was not a good experience. See email from GF on 24.11.2016");
                 break;
             case SUM_SQR_DIFF_NORMALIZED:
                 objective /= (realValueSum * realValueSum);
                 break;
-            default:
+			case SUM_SQRT_DIFF_NORMALIZED:
+				objective /= Math.sqrt( realValueSum ) ;
+				break;
+			default:
                 throw new RuntimeException("not implemented yet.");
         }
 
-        LOG.warn( "objective=" + objective );
+        log.warn( "objective=" + objective );
         return objective;
     }
 
