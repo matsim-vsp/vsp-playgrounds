@@ -1,9 +1,7 @@
 package playground.agarwalamit.opdyts;
 
-import com.sun.xml.internal.ws.api.streaming.XMLStreamReaderFactory;
 import floetteroed.opdyts.ObjectiveFunction;
 import floetteroed.opdyts.SimulatorState;
-import floetteroed.utilities.math.Vector;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
@@ -29,7 +27,6 @@ import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModu
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
 
 import java.io.PrintStream;
 import java.util.Map;
