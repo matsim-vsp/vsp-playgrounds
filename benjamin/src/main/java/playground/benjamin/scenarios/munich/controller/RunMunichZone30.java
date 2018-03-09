@@ -56,9 +56,9 @@ public class RunMunichZone30 {
 		RunMunichZone30Controller controler = new RunMunichZone30Controller(scenario);
 		
 		Scenario ptRoutingScenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
-		controler.setPtRoutingNetwork(ptRoutingScenario.getNetwork());
-		
-		controler.run();
+//		controler.setPtRoutingNetwork(ptRoutingScenario.getNetwork());
+//
+//		controler.run();
 	}
 
 	private static void setZone30(Network net, Collection<SimpleFeature> zone30) {
