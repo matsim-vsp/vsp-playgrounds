@@ -56,8 +56,11 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 	
 	public OffsetRandomizer(Scenario scenario) {
 		this.scenario = scenario;
+		
+		// fix the first signal system (to reduce complexity)
 		this.fixedSystemId = ((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().keySet().iterator().next();
-        this.opdytsConfigGroup = (OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME);
+        
+		this.opdytsConfigGroup = (OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME);
         if (opdytsConfigGroup.getDecisionVariableStepSize() < 1) {
         		throw new RuntimeException("for offset optimization we need an variation size of at least 1 second (otherwise nothing is changed by opdyts)");
         }
@@ -71,10 +74,11 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 		// iterate over all signal systems and vary offsets axially (except the first system, which is kept fixed)
 		for (Id<SignalSystem> systemId : oldOffsets.getSignalSystemControllerDataBySystemId().keySet()) {
 			if (systemId.equals(fixedSystemId)) {
-//			if (!systemId.equals(Id.create("SignalSystem4", SignalSystem.class))) {
 				continue;
 			}
-			int delta = random.nextInt((int)opdytsConfigGroup.getDecisionVariableStepSize()-1)+1;
+//			int delta = random.nextInt((int)opdytsConfigGroup.getDecisionVariableStepSize()-1)+1;
+			int delta = (int) opdytsConfigGroup.getDecisionVariableStepSize();
+			// TODO vary combination of signals: probability 1/(number of signals * degree of freedom)
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {

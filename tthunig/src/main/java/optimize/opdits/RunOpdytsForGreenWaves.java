@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -85,17 +86,24 @@ import analysis.signals.TtSignalAnalysisWriter;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
 import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
+import utils.OutputUtils;
 
 /**
  * @author tthunig
  */
 public class RunOpdytsForGreenWaves {
 
-	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOptForFirst_WorstForTwoOthers_stepSize30random_30it_tt";
-//	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/opdyts_StartOffsetOptForFirst_0ForTwoOthers_stepSize10random_20it_tt";
-//	private static String OUTPUT_DIR = "../../runs-svn/opdytsForSignals/greenWaveSingleStream_shortLinks_intervalDemand/offsets0-20/";
+	private static final Logger LOG = Logger.getLogger(RunOpdytsForGreenWaves.class);
+	
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/opdytsForSignals/";
+	private static String outputDir;
 
 	private static final boolean USE_OPDYTS = true;
+	
+	private static final InitialOffsets INITIAL_OFFSETS = InitialOffsets.FIRST_OPT_REST_WORST;
+	private enum InitialOffsets {
+		OPTIMAL, WORST, FIRST_OPT_REST_WORST, ALL_ZERO
+	}
 
 	public static void main(String[] args) {
 
@@ -108,16 +116,16 @@ public class RunOpdytsForGreenWaves {
 		if (USE_OPDYTS) {
 			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
 			opdytsConfigGroup.setNumberOfIterationsForAveraging(2); // 2
-			opdytsConfigGroup.setNumberOfIterationsForConvergence(5); // 5
+			opdytsConfigGroup.setNumberOfIterationsForConvergence(2); // this system has no stochasticity (agents do not change their plan)
+			opdytsConfigGroup.setNoisySystem(false); 
 
-			opdytsConfigGroup.setMaxIteration(30);
+			opdytsConfigGroup.setMaxIteration(20);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setDecisionVariableStepSize(30);
+			opdytsConfigGroup.setDecisionVariableStepSize(20);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
-			opdytsConfigGroup.setPopulationSize(1);
-			opdytsConfigGroup.setSelfTuningWeight(4); //1
-			
+			opdytsConfigGroup.setPopulationSize(2);
+			opdytsConfigGroup.setSelfTuningWeight(1); //1, 4
 			opdytsConfigGroup.setBinSize(10);
 
 			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
@@ -151,11 +159,11 @@ public class RunOpdytsForGreenWaves {
 						@Override
 						public void notifyShutdown(ShutdownEvent event) {
 							// post-process analysis
-							String opdytsConvergenceFile = OUTPUT_DIR + "/opdyts.con";
+							String opdytsConvergenceFile = outputDir + "/opdyts.con";
 							if (new File(opdytsConvergenceFile).exists()) {
 								OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
-								opdytsConvergencePlotter.readFile(OUTPUT_DIR + "/opdyts.con");
-								opdytsConvergencePlotter.plotData(OUTPUT_DIR + "/convergence.png");
+								opdytsConvergencePlotter.readFile(outputDir + "/opdyts.con");
+								opdytsConvergencePlotter.plotData(outputDir + "/convergence.png");
 							}
 						}
 					});
@@ -233,26 +241,29 @@ public class RunOpdytsForGreenWaves {
 			signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
 			signalControl.addSignalSystemControllerData(signalSystemControl);
 
-			// create a plan for the signal system (with defined cycle time and offset 0)
-			// optimal offsets:
-//			 int offset = 11;
-//			 if (i==1) offset = 21;
-//			 else if (i==2) offset = 31;
-			// worst offset for second system, when first two are optimal:
-//			 else if (i==2) offset = 231;
-			// worst offsets:
-//			 int offset = 211;
-//			 if (i==1) offset = 121;
-//			 else if (i==2) offset = 32;
-			 // first opt, second+third worst:
-			 int offset = 11;
-			 if (i==1) offset = 221;
-			 else if (i==2) offset = 131;
-			 // zero-offsets:
-//			int offset = 0;
-//			if (i==0) offset = 11;
-			SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 300, offset,
-					Id.create("SignalPlan", SignalPlan.class));
+			// create a plan for the signal system (with cycle time 300, 100 seconds green time and defined offset)
+			int offset = 0;
+			switch (INITIAL_OFFSETS) {
+			case OPTIMAL:
+				offset = 11;
+				if (i == 1) offset = 21;
+				else if (i == 2) offset = 31;
+				break;
+			case WORST:
+				offset = 211;
+				if (i==1) offset = 121;
+				else if (i==2) offset = 32;
+				break;
+			case FIRST_OPT_REST_WORST:
+				offset = 11;
+				if (i==1) offset = 221;
+				else if (i==2) offset = 131;
+				break;
+			default:
+				// offsets are all zero
+				break;
+			}
+			SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 300, offset, Id.create("SignalPlan", SignalPlan.class));
 			signalSystemControl.addSignalPlanData(signalPlan);
 			for (Id<SignalGroup> signalGroupId : signalGroups.getSignalGroupDataBySystemId(signalSystemId).keySet()) {
 				// there is only one element in this set
@@ -338,25 +349,23 @@ public class RunOpdytsForGreenWaves {
 
 	private static Config createConfig() {
 		Config config = ConfigUtils.createConfig();
+		
+		outputDir = OUTPUT_BASE_DIR + OutputUtils.getCurrentDateIncludingTime() + "/"; 
+		// create directory
+		new File(outputDir).mkdirs();
+		config.controler().setOutputDirectory(outputDir);
+		LOG.info("The output will be written to " + outputDir);
+		
 		int randomSeed = (new Random()).nextInt(9999);
 		config.global().setRandomSeed(randomSeed);
-		OUTPUT_DIR += "_seed" + randomSeed + "/";
-
-		config.controler().setOutputDirectory(OUTPUT_DIR);
+		
 		config.controler().setLastIteration(1);
 
 		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config,
 				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
 
-		// define strategies
-		// {
-		// StrategySettings strat = new StrategySettings();
-		// strat.setStrategyName(DefaultSelector.KeepLastSelected);
-		// strat.setWeight(1);
-		// strat.setDisableAfter(config.controler().getLastIteration());
-		// config.strategy().addStrategySettings(strat);
-		// }
+		// define strategies (there is only one route, so ReRoute always returns the same route)
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
@@ -391,10 +400,6 @@ public class RunOpdytsForGreenWaves {
 			config.planCalcScore().addActivityParams(dummyAct);
 			dummyAct.setScoringThisActivityAtAll(false);
 		}
-
-		// TODO try this out?!
-		// ModeParams carMode = config.planCalcScore().getOrCreateModeParams(TransportMode.car);
-		// carMode.setConstant(0);
 
 		return config;
 	}

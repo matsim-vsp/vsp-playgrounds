@@ -64,11 +64,10 @@ public class TravelTimeObjectiveFunction implements ObjectiveFunction {
             }
         }
 //        return -totalExpectedScore;
-//        return totalExpectedTT;
+        return totalExpectedTT;
 		
-//		return eventHandlerTT.getTotalTt();
-		// we have to use previous total travel time here, because reset(...) is called before opdyts calls value(...)
-		return eventHandlerTT.getPreviousTotalTT();
+		// we have to use previous total travel time (total travel time of the last measured iteration) here, because reset(...) is called before opdyts calls value(...)
+//		return eventHandlerTT.getPreviousTotalTT();
 	}
 
 }
