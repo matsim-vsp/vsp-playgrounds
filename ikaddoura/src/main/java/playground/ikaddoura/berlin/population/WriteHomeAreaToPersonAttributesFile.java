@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.ikaddoura.berlin.population;
 
 import java.util.Collection;
 import java.util.HashMap;

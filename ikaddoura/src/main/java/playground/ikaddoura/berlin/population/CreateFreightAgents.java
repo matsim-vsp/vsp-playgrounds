@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.ikaddoura.berlin.population;
 
 import java.io.IOException;
 import java.text.ParseException;

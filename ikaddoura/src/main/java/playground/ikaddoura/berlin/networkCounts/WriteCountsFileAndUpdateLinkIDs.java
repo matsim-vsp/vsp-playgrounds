@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.ikaddoura.berlin.networkCounts;
 
 import java.util.HashMap;
 import java.util.HashSet;

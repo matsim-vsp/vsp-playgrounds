@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.ikaddoura.berlin.config;
 
 import org.apache.log4j.Logger;
 import org.matsim.core.config.Config;

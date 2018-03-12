@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.ikaddoura.berlin.population;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,20 +28,20 @@ import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
 * @author ikaddoura
 */
 
-public class CorineForFreightAgents {
+public class CorineForCemdapPlans {
 	
 	public static void main(String[] args) {
-    		String corineLandCoverFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/corine_landcover_berlin-brandenburg/corine_lancover_berlin-brandenburg_GK4.shp";
+		String corineLandCoverFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/corine_landcover_berlin-brandenburg/corine_lancover_berlin-brandenburg_GK4.shp";
 
-	    String zoneFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
+	    String zoneFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
 	    String zoneIdTag = "NR";
 	
-	    String matsimPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/freight/freight-agents-berlin4.1_sampleSize0.1.xml.gz";
-	    String outPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/freight/freight-agents-berlin4.1_sampleSize0.1_corine-landcover_1.xml.gz";
+	    String matsimPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/plans_10pct.xml.gz";
+	    String outPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/pop_300ik1/plans_10pct_corine-landcover.xml.gz";
 	
 	    boolean simplifyGeom = false;
 	    boolean combiningGeoms = false;
-	    boolean sameHomeActivity = false;
+	    boolean sameHomeActivity = true;
 	    String homeActivityPrefix = "home";
 	
 	    Map<String, String> shapeFileToFeatureKey = new HashMap<>();

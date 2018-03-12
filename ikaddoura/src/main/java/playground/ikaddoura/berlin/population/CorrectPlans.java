@@ -17,11 +17,12 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.berlin;
+package playground.ikaddoura.berlin.population;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
@@ -36,20 +37,18 @@ import org.matsim.core.scenario.ScenarioUtils;
 * @author ikaddoura
 */
 
-public class UseDurationInsteadOfEndTime {
+public class CorrectPlans {
 	
-	private static final Logger log = Logger.getLogger(UseDurationInsteadOfEndTime.class);
+	private static final Logger log = Logger.getLogger(CorrectPlans.class);
 	
-	private final static String inputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_300_c_10pct_person_freight.selected_plans.xml.gz";
-	private final static String outputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_300_c_10pct_person_freight.selected_plans_duration7200.xml.gz";
+	private final static String inputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/population_300_person_freight_10pct.xml.gz";
+	private final static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/population_300_person_freight_10pct_correctedFreightAgents.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	
-	private final double durationThreshold = 7200.;
-	
 	public static void main(String[] args) {
 		
-		UseDurationInsteadOfEndTime filter = new UseDurationInsteadOfEndTime();
+		CorrectPlans filter = new CorrectPlans();
 		filter.run(inputPlans, outputPlans, attributes);
 	}
 	
@@ -81,34 +80,46 @@ public class UseDurationInsteadOfEndTime {
 			popOutput.addPerson(personNew);
 			
 			for (Plan plan : p.getPlans()) {
+				boolean previousElementIsActivity = false;
+				Activity previousActivity = null;
+				boolean deleteFirstActivity = false;
 				
 				for (PlanElement pE : plan.getPlanElements()) {
 					if (pE instanceof Activity) {
 						
 						Activity act = (Activity) pE;
 						
-						if (act.getEndTime() > 0. && act.getEndTime() <= 30 * 3600.) {
+						if (previousElementIsActivity) {
 							
-							if (act.getAttributes().getAttribute("cemdapStopDuration_s") != null) {
-								int cemdapDuration = (int) act.getAttributes().getAttribute("cemdapStopDuration_s");
-								
-								if (cemdapDuration <= durationThreshold) {
-									System.out.println("end time: " + act.getEndTime() + " --> " + Double.NEGATIVE_INFINITY);
-									act.setEndTime(Double.NEGATIVE_INFINITY);
-									
-									System.out.println("duration: " + act.getMaximumDuration() + " --> " + cemdapDuration);
-									act.setMaximumDuration(cemdapDuration);
-									
-								}
+							if (act.toString().equals(previousActivity.toString())) {
+								deleteFirstActivity = true;
+							} else {
+								throw new RuntimeException("Should be the same...");
 							}
-
-						} else {
-							// don't do anything
-						}						
+						}
+						
+						previousElementIsActivity = true;
+						previousActivity = act;
+						
+					} else if (pE instanceof Leg) {
+						previousElementIsActivity = false;
+					} else {
+						throw new RuntimeException("Unknown plan element. Aborting...");
 					}
 				}
 							
-			
+				if (deleteFirstActivity) {
+					
+					log.info("Before: ");
+					log.info(plan.toString());
+
+					plan.getPlanElements().remove(0);
+					
+					log.info("After: ");
+					log.info(plan.toString());
+
+				}
+				
 				personNew.addPlan(plan);
 			}
 						

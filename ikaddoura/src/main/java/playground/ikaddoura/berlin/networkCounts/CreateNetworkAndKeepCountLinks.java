@@ -19,7 +19,7 @@
 /**
  * 
  */
-package playground.ikaddoura.berlin;
+package playground.ikaddoura.berlin.networkCounts;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
