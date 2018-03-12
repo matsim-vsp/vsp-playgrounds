@@ -46,7 +46,8 @@ public class RunMATSimWithRaptor {
 	private static double ascCar;
 	private static double ascPt;
 	private static double ascWalk;
-	private static double ascBicycle;	
+	private static double ascBicycle;
+	private static double ascRide;	
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -71,6 +72,9 @@ public class RunMATSimWithRaptor {
 
 			ascBicycle = Double.parseDouble(args[6]);
 			log.info("ascBicycle: "+ ascBicycle);
+			
+			ascRide = Double.parseDouble(args[7]);
+			log.info("ascRide: "+ ascRide);
 
 			
 		} else {
@@ -78,10 +82,11 @@ public class RunMATSimWithRaptor {
 			configFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_3_ik/config_be_300_mode-choice_test.xml";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be_300_test_7/";
 			runId = "test-run";
-			ascCar = -2.;
+			ascCar = -1.;
 			ascPt = -1.;
 			ascWalk = 0.;
-			ascBicycle = -3.;
+			ascBicycle = -1.;
+			ascRide = -1.;
 		}
 		
 		RunMATSimWithRaptor runner = new RunMATSimWithRaptor();
@@ -100,6 +105,7 @@ public class RunMATSimWithRaptor {
 		config.planCalcScore().getModes().get(TransportMode.pt).setConstant(ascPt);
 		config.planCalcScore().getModes().get(TransportMode.walk).setConstant(ascWalk);
 		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
+		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
