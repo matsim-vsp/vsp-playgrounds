@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package optimize.opdits;
+package optimize.opdyts;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -18,7 +18,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package optimize.opdits;
+package optimize.opdyts;
 
 import java.io.File;
 import java.util.ArrayList;
