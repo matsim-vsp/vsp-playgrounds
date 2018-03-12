@@ -119,9 +119,9 @@ public class RunOpdytsForGreenWaves {
 			opdytsConfigGroup.setNumberOfIterationsForConvergence(2); // this system has no stochasticity (agents do not change their plan)
 			opdytsConfigGroup.setNoisySystem(false); 
 
-			opdytsConfigGroup.setMaxIteration(20);
+			opdytsConfigGroup.setMaxIteration(30);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setDecisionVariableStepSize(20);
+			opdytsConfigGroup.setDecisionVariableStepSize(10);
 			opdytsConfigGroup.setUseAllWarmUpIterations(false);
 			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
 			opdytsConfigGroup.setPopulationSize(2);

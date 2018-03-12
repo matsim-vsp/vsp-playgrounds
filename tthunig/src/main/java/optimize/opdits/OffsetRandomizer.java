@@ -49,17 +49,12 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 	private static final Logger LOG = Logger.getLogger(OffsetRandomizer.class);
 
 	private final Scenario scenario;
-	private final Id<SignalSystem> fixedSystemId;
     private final OpdytsConfigGroup opdytsConfigGroup;
 
     private final Random random = MatsimRandom.getRandom();
 	
 	public OffsetRandomizer(Scenario scenario) {
 		this.scenario = scenario;
-		
-		// fix the first signal system (to reduce complexity)
-		this.fixedSystemId = ((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalSystemsData().getSignalSystemData().keySet().iterator().next();
-        
 		this.opdytsConfigGroup = (OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME);
         if (opdytsConfigGroup.getDecisionVariableStepSize() < 1) {
         		throw new RuntimeException("for offset optimization we need an variation size of at least 1 second (otherwise nothing is changed by opdyts)");
@@ -70,15 +65,56 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 	public Collection<OffsetDecisionVariable> newRandomVariations(OffsetDecisionVariable decisionVariable) {
 		List<OffsetDecisionVariable> result = new ArrayList<>();
 		
+		int delta = (int) opdytsConfigGroup.getDecisionVariableStepSize();
 		SignalControlData oldOffsets = decisionVariable.getCurrentSignalControlData();
-		// iterate over all signal systems and vary offsets axially (except the first system, which is kept fixed)
+//		axiallyVariation(result, oldOffsets, delta);
+		for (int i=0; i<5; i++) {
+			randomVariation(result, oldOffsets, delta);
+		}
+		
+		LOG.warn("input decision variable:");
+        LOG.warn(decisionVariable.toString());
+
+        LOG.warn("giving the following new decision variables to opdyts:");
+        for (OffsetDecisionVariable var : result) {
+            LOG.warn(var.toString());
+        }
+		
+		return result;
+	}
+
+	/**
+	 * add just one new decision variable that varies each signal systems offset with a probability of 1/(number of signals * degree of freedom), which is 1/(number of signals)
+	 */
+	private void randomVariation(List<OffsetDecisionVariable> result, SignalControlData oldOffsets, int delta) {
+		SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
+		int numberOfSignalSystems = oldOffsets.getSignalSystemControllerDataBySystemId().size();
+
 		for (Id<SignalSystem> systemId : oldOffsets.getSignalSystemControllerDataBySystemId().keySet()) {
-			if (systemId.equals(fixedSystemId)) {
-				continue;
+			// vary combination of signals: probability 1/(number of signals * degree of freedom). degrees of freedom = 1 here (only offsets)
+			double nextRandom = random.nextDouble() * numberOfSignalSystems;
+			if (nextRandom < 0.5) {
+				// negative variation
+				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
+					plan.setOffset(plan.getOffset() - delta);
+				}
+			} else if (nextRandom < 1) {
+				// positive variation
+				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
+					plan.setOffset(plan.getOffset() + delta);
+				}
 			}
-//			int delta = random.nextInt((int)opdytsConfigGroup.getDecisionVariableStepSize()-1)+1;
-			int delta = (int) opdytsConfigGroup.getDecisionVariableStepSize();
-			// TODO vary combination of signals: probability 1/(number of signals * degree of freedom)
+		}
+		OffsetDecisionVariable variation = new OffsetDecisionVariable(newOffsets, scenario);
+		result.add(variation);
+	}
+
+	/**
+	 * add two new decision variables for all signal systems: one with positive, one with negative axially variation
+	 */
+	private void axiallyVariation(List<OffsetDecisionVariable> result, SignalControlData oldOffsets, int delta) {
+		for (Id<SignalSystem> systemId : oldOffsets.getSignalSystemControllerDataBySystemId().keySet()) {
+//			delta = random.nextInt((int)opdytsConfigGroup.getDecisionVariableStepSize()-1)+1;
 			{
 				SignalControlData newOffsets = SignalUtils.copySignalControlData(oldOffsets);
 				for (SignalPlanData plan : newOffsets.getSignalSystemControllerDataBySystemId().get(systemId).getSignalPlanData().values()) {
@@ -96,15 +132,6 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 				result.add(variation);
 			}
 		}
-		LOG.warn("input decision variable:");
-        LOG.warn(decisionVariable.toString());
-
-        LOG.warn("giving the following new decision variables to opdyts:");
-        for (OffsetDecisionVariable var : result) {
-            LOG.warn(var.toString());
-        }
-		
-		return result;
 	}
 
 }
