@@ -61,7 +61,7 @@ public class TtListenerToBindAndWriteAnalysis implements IterationEndsListener {
 			// close overall writing stream
 			writer.closeAllStreams();
 			// plot overall iteration results
-			runGnuplotScript("scriptNameRoutesAndTTs", event.getIteration());
+			runGnuplotScript(scriptNameRoutesAndTTs, event.getIteration());
 		}
 	}
 	
