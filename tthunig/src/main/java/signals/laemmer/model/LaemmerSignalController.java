@@ -158,9 +158,8 @@ public class LaemmerSignalController extends AbstractSignalController implements
         
         LaemmerSignal selection = selectSignal();
         processSelection(now, selection);
-        //TODO remove true
-        if (isAnalysisEnabled()||true) {
-        	logQueueLengthToFile(now);
+        if (isAnalysisEnabled()) {
+        		logQueueLengthToFile(now);
         }
     }
 
@@ -277,6 +276,9 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
     @Override
     public void reset(Integer iterationNumber) {
+    		laemmerSignals.clear();
+        activeRequest = null;
+        regulationQueue.clear();
     }
 
     private void initializeSensoring() {

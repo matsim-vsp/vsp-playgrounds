@@ -288,6 +288,7 @@ public final class LinkSensorManager implements LinkEnterEventHandler, LinkLeave
 	@Override
 	public void reset(int iteration) {
 		this.linkIdSensorMap.clear();
+		this.linkIdLaneIdSensorMap.clear();
 		this.linkFirstSecondDistanceMeterMap.clear();
 	}
 
