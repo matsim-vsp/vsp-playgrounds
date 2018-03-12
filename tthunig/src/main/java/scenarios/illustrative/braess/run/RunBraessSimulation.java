@@ -104,12 +104,11 @@ import utils.OutputUtils;
  */
 public final class RunBraessSimulation {
 
-	private static final Logger log = Logger
-			.getLogger(RunBraessSimulation.class);
+	private static final Logger log = Logger.getLogger(RunBraessSimulation.class);
 
 	/* population parameter */
 	
-	private static final int NUMBER_OF_PERSONS = 7200; // per hour
+	private static final int NUMBER_OF_PERSONS = 3600; // per hour
 	private static final int SIMULATION_PERIOD = 1; // in hours
 	private static final double SIMULATION_START_TIME = 0.0; // seconds from midnight
 	
@@ -120,13 +119,13 @@ public final class RunBraessSimulation {
 	// defines which kind of signals should be used. use 'SIGNAL_LOGIC = SignalControlLogic.NONE' if signals should not be used
 	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.SIGNAL4_X_SECOND_Z_V2Z;
 	// if SignalBasePlan SIGNAL4_X_Seconds_Z.. is used, SECONDS_Z_GREEN gives the green time for Z
-	private static final int SECONDS_Z_GREEN = 30;
+	private static final int SECONDS_Z_GREEN = 1;
 	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.NONE;
 	
 	// defines which kind of lanes should be used
 	private static final LaneType LANE_TYPE = LaneType.NONE;
 	// defines whether an alternative (upper bound; by-pass; bicycle etc.) route should exist
-	private static final boolean BYPASS = true;
+	private static final boolean BYPASS = false;
 	
 	// defines which kind of pricing should be used
 	private static final PricingType PRICING_TYPE = PricingType.INTERVALBASED;
@@ -140,7 +139,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/byPass/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/dagstuhl/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -188,6 +187,7 @@ public final class RunBraessSimulation {
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
 		config.travelTimeCalculator().setTraveltimeBinSize(60);
+//		config.travelTimeCalculator().setTraveltimeBinSize(10);
 //		config.travelTimeCalculator().setMaxTime((int) (3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 2)));
 		config.travelTimeCalculator().setMaxTime(3600 * 24);
 
@@ -277,7 +277,7 @@ public final class RunBraessSimulation {
 		// decongestion relevant parameters
 		DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
 		decongestionSettings.setWRITE_OUTPUT_ITERATION(1);
-		decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
+		decongestionSettings.setUPDATE_PRICE_INTERVAL(10);
 		decongestionSettings.setTOLL_BLEND_FACTOR(1.0);
 		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.05);
 		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
@@ -341,14 +341,15 @@ public final class RunBraessSimulation {
 			signalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
 			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
 			// TODO modify sylvia config parameter here if you like
-			sylviaConfig.setSignalGroupMaxGreenScale(1.5);
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+			sylviaConfig.setSignalGroupMaxGreenScale(2);
+			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
 			LaemmerConfig laemmerConfig = new LaemmerConfig();
 			// TODO modify laemmer config parameter here if you like
 			laemmerConfig.setMaxCycleTime(90);
 			laemmerConfig.setDesiredCycleTime(60);
 			laemmerConfig.setDefaultIntergreenTime(0);
+			laemmerConfig.setMinGreenTime(0);
 			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 			break;
