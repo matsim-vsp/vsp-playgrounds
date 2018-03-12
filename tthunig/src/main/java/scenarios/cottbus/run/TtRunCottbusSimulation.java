@@ -131,7 +131,7 @@ public class TtRunCottbusSimulation {
 	}
 	private final static boolean LONG_LANES = true;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MSidealNetV1_2;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MSNetV1_2;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -149,12 +149,14 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap1MSideal,
 		WoMines100itcap07MSidealNetV1_1, // stuck120 tbs900 network V1_1 with merged links at sys23.
 		WoMines100itcap1MSidealNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap1.0
-		WoMines100itcap07MSidealNetV1_2 // stuck120 tbs900 networkV1_2 with merged links around 10284. cap0.7
+		WoMines100itcap07MSidealNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap0.7
+		WoMines100itcap1MSNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap1.0
+		WoMines100itcap07MSNetV1_2 // stuck120 tbs900 networkV1_2 with merged links around 10284. cap0.7
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_NICO_GROUPS;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS;
 	public enum SignalType {
-		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
+		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_OPT_OFFSETS, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
 		ALL_MS_INSIDE_ENVELOPE_REST_GREEN, // all MS systems fixed-time, rest all green
 		ALL_MS_AS_SYLVIA_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as sylvia with MS basis, rest all green. note: green basis for sylvia does not work
@@ -187,7 +189,7 @@ public class TtRunCottbusSimulation {
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = .7;
+	private static final double SCALING_FACTOR = 1.;
 	
 	
 	public static void main(String[] args) {
@@ -384,6 +386,12 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap1MSidealNetV1_2:
 			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-02-22-10-52-5_100it_MSideal_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
+		case WoMines100itcap1MSNetV1_2:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-03-3-18-0-58_100it_MS_cap10_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MSNetV1_2:
+			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-03-3-17-58-41_100it_MS_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
+			break;
 		case GRID_LOCK_BTU:
 			// take these as initial plans
 			if (SIGNAL_TYPE.equals(SignalType.MS) || SIGNAL_TYPE.equals(SignalType.DOWNSTREAM_MS)){
@@ -467,7 +475,7 @@ public class TtRunCottbusSimulation {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
 				break;
-			case BTU_OPT:
+			case MS_OPT_OFFSETS:
 			case DOWNSTREAM_BTUOPT:
 				if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
 					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_opt.xml");
@@ -506,7 +514,11 @@ public class TtRunCottbusSimulation {
 		}
 		
 		// set brain exp beta
+//		TODO
 		config.planCalcScore().setBrainExpBeta( 2 );
+//		config.planCalcScore().setBrainExpBeta( 5 );
+//		config.planCalcScore().setBrainExpBeta( 10 );
+//		config.planCalcScore().setBrainExpBeta( 20 );
 
 		// choose between link to link and node to node routing
 		// (only has effect if lanes are used)
@@ -533,7 +545,7 @@ public class TtRunCottbusSimulation {
 			if (POP_TYPE.equals(PopulationType.BTU_POP_BTU_ROUTES))
 				strat.setWeight(0.0); // no ReRoute, fix route choice set
 			else
-				strat.setWeight(0.1);
+				strat.setWeight(0.01);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -809,7 +821,7 @@ public class TtRunCottbusSimulation {
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
 			// TODO change for sylvia
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
+			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 			sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
@@ -988,7 +1000,7 @@ public class TtRunCottbusSimulation {
 		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
 				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			switch (SIGNAL_TYPE){
-			case BTU_OPT:
+			case MS_OPT_OFFSETS:
 				runName += "_BtuOpt";
 				break;
 			case MS_RANDOM_OFFSETS:

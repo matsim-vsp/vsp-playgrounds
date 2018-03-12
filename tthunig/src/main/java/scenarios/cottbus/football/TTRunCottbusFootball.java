@@ -61,17 +61,17 @@ import utils.ModifyNetwork;
 public class TTRunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(TTRunCottbusFootball.class);
 	
-	// SYLVIA_IDEAL does not exist yet
 	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE};
-	private static final SignalControl CONTROL_TYPE = SignalControl.LAEMMER_DOUBLE;
+	private static final SignalControl CONTROL_TYPE = SignalControl.SYLVIA;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
-	private static final boolean LONG_LANES = true;
+	private static final boolean LONG_LANES = true;	
 	private static final double FLOW_CAP = 1.;
-	private static final int STUCK_TIME = 120;
-	private static final int TBS = 900;
-	private static final String SIGNALS_BASE_CASE = "MSideal"; // the signals that were used for the base case plans
-	private static final String NETWORK = "V1-2";
+	private static final int STUCK_TIME = 600;
+	private static final int TBS = 10;
+	private static final String SIGNALS_BASE_CASE = "MS"; // the signals that were used for the base case plans
+//	private static final String SIGNALS_BASE_CASE = "MSideal"; // the signals that were used for the base case plans
+	private static final String NETWORK = "V1"; //"V1-2";
 	private static final double EARLIEST_ARRIVAL_TIME_AT_STADIUM = 17 * 3600; // studies by DG and JB were made with 17. in contrast 16.5 will result in more interaction with the evening peak.
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {		
@@ -99,6 +99,7 @@ public class TTRunCottbusFootball {
 			break;
 		case SYLVIA_IDEAL:
 			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13_idealized.xml");
+			break;
 		case LAEMMER_NICO:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
 			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer.xml");
@@ -164,10 +165,10 @@ public class TTRunCottbusFootball {
 			baseOutputDirectory+= "fixedTime"; 
 			break;
 		case SYLVIA:
-			baseOutputDirectory+= "sylvia_maxExt1.5_fixedCycle";
+			baseOutputDirectory+= "sylvia_maxExt1.5_noFixedCycle";
 			break;
 		case SYLVIA_IDEAL:
-			baseOutputDirectory+= "sylviaIdeal_maxExt1.5_fixedCycle";
+			baseOutputDirectory+= "sylviaIdeal_maxExt1.5_noFixedCycle";
 			break;
 		case LAEMMER_NICO:
 			baseOutputDirectory+= "laemmer_nicoGroups";
@@ -212,9 +213,10 @@ public class TTRunCottbusFootball {
 			controler.addControlerListener(cbfbControllerListener);
 			//add the signals module
 			if (!CONTROL_TYPE.equals(SignalControl.NONE)) {
+				//TODO adapt here
 				CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 				DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
+				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 				sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 				sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setSylviaConfig(sylviaConfig);
