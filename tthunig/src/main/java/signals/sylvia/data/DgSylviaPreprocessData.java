@@ -134,7 +134,7 @@ public class DgSylviaPreprocessData {
 	 * Convert old, fixed time signal control data into new sylvia signal control data.
 	 * The sylvia signal control data will then contain the old fixed time signal control plan and the new shortened sylvia signal control plan.
 	 * 
-	 * @param controlData old, fixed time signal control
+	 * @param controlData old, fixed-time signal control
 	 * @param sylviaSignalControlData signal control object, where the sylvia signal control should be stored in
 	 */
 	public static void convertSignalControlData(final SignalControlData controlData, SignalControlData sylviaSignalControlData){
