@@ -21,10 +21,10 @@ package playground.ikaddoura.berlin;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -34,18 +34,18 @@ import org.matsim.core.scenario.ScenarioUtils;
 * @author ikaddoura
 */
 
-public class FilterSelectedPlans {
+public class AdjustModeForFreightAgents {
 	
-	private static final Logger log = Logger.getLogger(FilterSelectedPlans.class);
+	private static final Logger log = Logger.getLogger(AdjustModeForFreightAgents.class);
 	
-	private final static String inputPlans = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/be_400_c/be_400_c.output_plans.xml.gz";
-	private final static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
+	private final static String inputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
+	private final static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight_with-freight-mode.selected_plans.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	
 	public static void main(String[] args) {
 		
-		FilterSelectedPlans filter = new FilterSelectedPlans();
+		AdjustModeForFreightAgents filter = new AdjustModeForFreightAgents();
 		filter.run(inputPlans, outputPlans, attributes);
 	}
 	
@@ -56,31 +56,29 @@ public class FilterSelectedPlans {
 			log.info(attribute);
 		}
 		log.info("Other person attributes will not appear in the output plans file.");
-		
-		Scenario scOutput;
-		
+				
 		Config config = ConfigUtils.createConfig();
 		config.plans().setInputFile(inputPlans);
-		Scenario scInput = ScenarioUtils.loadScenario(config);
+		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
-		scOutput = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		Population popOutput = scOutput.getPopulation();
-		
-		for (Person p : scInput.getPopulation().getPersons().values()){
-			Plan selectedPlan = p.getSelectedPlan();
-			PopulationFactory factory = popOutput.getFactory();
-			Person personNew = factory.createPerson(p.getId());
-			
-			for (String attribute : attributes) {
-				personNew.getAttributes().putAttribute(attribute, p.getAttributes().getAttribute(attribute));
+		for (Person p : scenario.getPopulation().getPersons().values()){
+			if (p.getId().toString().startsWith("freight")) {
+				
+				for (Plan plan : p.getPlans()) {
+					
+					for (PlanElement pE : plan.getPlanElements()) {
+						if (pE instanceof Leg) {
+							Leg leg = (Leg) pE;
+							leg.setMode("freight");
+						}
+					}
+				}
 			}
-									
-			popOutput.addPerson(personNew);
-			personNew.addPlan(selectedPlan);
+						
 		}
 		
 		log.info("Writing population...");
-		new PopulationWriter(scOutput.getPopulation()).write(outputPlans);
+		new PopulationWriter(scenario.getPopulation()).write(outputPlans);
 		log.info("Writing population... Done.");
 	}
 

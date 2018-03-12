@@ -68,10 +68,10 @@ public class CreateFreightAgents {
 	
 	public static void main(String [] args) throws IOException, ParseException {
 
-		final String networkFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/network/network_berlin4.0_v1.xml.gz";
+		final String networkFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/network/network_300.xml.gz";
 		final String inputFileSHP = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_area/Berlin.shp";
 		
-		final String outputFilePopulation = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/freight-agents-berlin4.0_sampleSize0.1.xml.gz";
+		final String outputFilePopulation = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/freight/freight-agents-berlin4.1_sampleSize0.1.xml.gz";
 		final double sampleSize = 0.1;
 
 		CreateFreightAgents popGenerator = new CreateFreightAgents(networkFile, inputFileSHP);
@@ -182,7 +182,7 @@ public class CreateFreightAgents {
 			startActivity.setEndTime(startTime);
 			plan.addActivity(startActivity);
 
-			Leg leg1 = popFactory.createLeg(TransportMode.car);
+			Leg leg1 = popFactory.createLeg("freight");
 			plan.addLeg(leg1);
 
 			Activity endActivity = popFactory.createActivityFromCoord(this.freightActivityType, scenario.getNetwork().getLinks().get(linkId).getToNode().getCoord());
@@ -213,7 +213,7 @@ public class CreateFreightAgents {
 			startActivity.setEndTime(startTime);
 			plan.addActivity(startActivity);
 
-			Leg leg1 = popFactory.createLeg(TransportMode.car);
+			Leg leg1 = popFactory.createLeg("freight");
 			plan.addLeg(leg1);
 
 			Point endPoint = getRandomPointInFeature(rnd, features.get("berlin"));

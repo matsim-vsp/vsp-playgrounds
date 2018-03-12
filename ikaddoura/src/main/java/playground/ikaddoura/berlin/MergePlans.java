@@ -37,13 +37,13 @@ public class MergePlans {
 	public static void main(String[] args) {
 		
 		// subpopulation: persons
-		final String inputFile1 = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/plans_10pct_corine-landcover_adjusted-activity-types.xml.gz";
+		final String inputFile1 = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/pop_300/plans_10pct_corine-landcover_adjusted-activity-types.xml.gz";
 		
 		// subpopulation: freight
-		final String inputFile2 = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/freight-agents-berlin4.0_sampleSize0.1_corine-landcover.xml.gz";
+		final String inputFile2 = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/freight/freight-agents-berlin4.1_sampleSize0.1_corine-landcover_1.xml.gz";
 		
-		final String populationOutputFileName = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/population_berlin4.0_10pct_v1.xml.gz";
-		final String personAttributesOutputFileName = "../../shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/population/personAttributes_berlin4.0_10pct_v1.xml.gz";
+		final String populationOutputFileName = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/population_400_person_freight_10pct.xml.gz";
+		final String personAttributesOutputFileName = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_400_person_freight_10pct.xml.gz";
 
 		Config config1 = ConfigUtils.createConfig();
 		config1.plans().setInputFile(inputFile1);
