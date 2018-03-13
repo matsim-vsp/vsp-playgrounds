@@ -37,14 +37,14 @@ public class RunBerlinScenarioWoCalib {
 	public static void main(final String[] args) {
 		final Config config = ConfigUtils.loadConfig(args[0]);
 		
-		final Scenario scenario = prepareScenario(config, Boolean.parseBoolean(args[2]), Double.parseDouble(args[3]));
+		final Scenario scenario = prepareScenario(config, Boolean.parseBoolean(args[1]), Double.parseDouble(args[2]));
 		
 		final Controler controler = new Controler(scenario);
 
 		controler.run();
 		
-		if (args.length > 4) {
-			runAnalyses(config, args[4]);
+		if (args.length > 3) {
+			runAnalyses(config, args[3]);
 		}
 	}
 	
