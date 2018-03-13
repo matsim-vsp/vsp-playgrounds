@@ -40,8 +40,8 @@ public class UseDurationInsteadOfEndTime {
 	
 	private static final Logger log = Logger.getLogger(UseDurationInsteadOfEndTime.class);
 	
-	private final static String inputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_300_c_10pct_person_freight.selected_plans.xml.gz";
-	private final static String outputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_300_c_10pct_person_freight.selected_plans_duration7200.xml.gz";
+	private final static String inputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
+	private final static String outputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight_duration7200.selected_plans.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	
@@ -93,10 +93,10 @@ public class UseDurationInsteadOfEndTime {
 								int cemdapDuration = (int) act.getAttributes().getAttribute("cemdapStopDuration_s");
 								
 								if (cemdapDuration <= durationThreshold) {
-									System.out.println("end time: " + act.getEndTime() + " --> " + Double.NEGATIVE_INFINITY);
+									log.info("end time: " + act.getEndTime() + " --> " + Double.NEGATIVE_INFINITY);
 									act.setEndTime(Double.NEGATIVE_INFINITY);
 									
-									System.out.println("duration: " + act.getMaximumDuration() + " --> " + cemdapDuration);
+									log.info("duration: " + act.getMaximumDuration() + " --> " + cemdapDuration);
 									act.setMaximumDuration(cemdapDuration);
 									
 								}
