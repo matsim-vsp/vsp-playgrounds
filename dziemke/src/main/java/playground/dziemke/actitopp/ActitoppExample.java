@@ -10,7 +10,7 @@ import edu.kit.ifv.mobitopp.actitopp.InvalidPatternException;
 import edu.kit.ifv.mobitopp.actitopp.ModelFileBase;
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper;
 
-public class ActiToppExample {
+public class ActitoppExample {
 
 	private static ModelFileBase fileBase = new ModelFileBase();
 	private static RNGHelper randomgenerator = new RNGHelper(1234);

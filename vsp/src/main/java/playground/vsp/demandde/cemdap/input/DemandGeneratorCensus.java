@@ -61,9 +61,10 @@ public class DemandGeneratorCensus {
 	private ObjectAttributes municipalities;
 	private Map<String, Map<String, CommuterRelationV2>> relationsMap;
 	private String outputBase;
+	private List<Population> allPopulations = new ArrayList<>();
 	
 	// Optionally used storage objects (municipality id to lors/plz)
-	private final Map<String, List<String>> spatialRefinementZoneIds= new HashMap<>();
+	private final Map<String, List<String>> spatialRefinementZoneIds = new HashMap<>();
 	
 	// Parameters
 	private List<String> idsOfFederalStatesIncluded;
@@ -71,6 +72,7 @@ public class DemandGeneratorCensus {
 	private double defaultAdultsToEmployeesRatio;
 	private double defaultEmployeesToCommutersRatio;
 	boolean includeChildren = false;
+	boolean writeCemdapInputFiles = true; // Default is true for backwards compatibility
 	boolean writeMatsimPlanFiles = false;
 	
 	// Optionally used parameters
@@ -114,10 +116,10 @@ public class DemandGeneratorCensus {
 		
 		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp");
 		demandGeneratorCensus.setIdsOfMunicipalityForSpatialRefinement(Arrays.asList("11000000")); // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
-		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL"); //e.g., PLZ/LOR
+		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL"); // key of the features in shapefile used for spatial refinement
 
 		// municipality id (AGS)
-		String municipalityKeyInShapeFile = "NR";//not available in refinement shape for Berlin --> setting to null. Amit Nov'17
+		String municipalityKeyInShapeFile = "NR"; // not available in refinement shape for Berlin --> setting to null. Amit Nov'17
 		demandGeneratorCensus.setMunicipalityFeatureKeyInShapeFile(null);
 
 		demandGeneratorCensus.generateDemand();
@@ -308,19 +310,25 @@ public class DemandGeneratorCensus {
 		// Write output files
 		// to make sure that 'this.population' always have municipality IDs corresponding to location of work and location of school. Amit Dec'17
 		Population clonedPop = clonePopulation(this.population);
-		writeHouseholdsFile(this.households, this.outputBase + "households.dat.gz");
-		writePersonsFile(clonedPop, this.outputBase + "persons.dat.gz");
+		if (this.writeCemdapInputFiles) {
+			writeHouseholdsFile(this.households, this.outputBase + "households.dat.gz");
+			writePersonsFile(clonedPop, this.outputBase + "persons.dat.gz");
+		}
 		if (this.writeMatsimPlanFiles) {
 			writeMatsimPlansFile(clonedPop, this.outputBase + "plans.xml.gz");
 		}
+		allPopulations.add(clonedPop);
 
 		// Create copies of population, but with different work locations
 		for (int i = 1; i < numberOfPlansPerPerson; i++) { // "less than" because the plan consists already in the original
 			Population clonedPopulation = clonePopulation(this.population);
-			writePersonsFile(clonedPopulation, this.outputBase + "persons" + (i+1) + ".dat.gz");
+			if (this.writeCemdapInputFiles) {
+				writePersonsFile(clonedPopulation, this.outputBase + "persons" + (i+1) + ".dat.gz");
+			}
 			if (this.writeMatsimPlanFiles) {
 				writeMatsimPlansFile(clonedPopulation, this.outputBase + "plans" + (i+1) + ".xml.gz");
 			}
+			allPopulations.add(clonedPopulation);
 		}
 	}
 
@@ -720,16 +728,28 @@ public class DemandGeneratorCensus {
     	this.featureKeyInShapeFileForRefinement = featureKeyInShapeFileForRefinement;
     }
 
+    
 	public void setMunicipalityFeatureKeyInShapeFile(String municipalityFeatureKeyInShapeFile) {
 		this.municipalityFeatureKeyInShapeFile = municipalityFeatureKeyInShapeFile;
 	}
+	
+	
+	public void setWriteCemdapInputFiles(boolean writeCemdapInputFiles) {
+    	this.writeCemdapInputFiles = writeCemdapInputFiles;
+    }
 
+	
 	public void setWriteMatsimPlanFiles(boolean writeMatsimPlanFiles) {
     	this.writeMatsimPlanFiles = writeMatsimPlanFiles;
     }
     
-    
+	
     public void setIncludeChildren(boolean includeChildren) {
     	this.includeChildren = includeChildren;
-    }    
+    }
+    
+    
+    public List<Population> getAllPopulations() {
+    	return this.allPopulations;
+	}
 }
