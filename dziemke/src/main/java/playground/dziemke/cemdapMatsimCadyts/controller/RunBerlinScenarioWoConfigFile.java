@@ -44,7 +44,7 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 /**
  * @author dziemke
  */
-public class CemdapMatsimCadytsController {
+public class RunBerlinScenarioWoConfigFile {
 	
 	public static void main(String[] args) {
 		final Config config = ConfigUtils.createConfig();

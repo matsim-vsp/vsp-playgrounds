@@ -45,8 +45,10 @@ import playground.dziemke.analysis.TripAnalyzerV2Extended;
 
 /**
  * @author dziemke
+ * 
+ * This class used to be called "CemdapMatsimCadytsControllerConfig" until 2018-03-13
  */
-public class CemdapMatsimCadytsControllerConfig {
+public class RunBerlinScenario {
 	
 	public static void main(final String[] args) {
 		final Config config = ConfigUtils.loadConfig(args[0]);

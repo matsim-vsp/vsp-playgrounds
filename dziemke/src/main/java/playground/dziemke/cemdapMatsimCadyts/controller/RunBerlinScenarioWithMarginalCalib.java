@@ -51,7 +51,7 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 /**
  * @author dziemke, ikaddoura, aagarwal
  */
-public class CemdapMatsimCadytsControllerConfigNewApproach {
+public class RunBerlinScenarioWithMarginalCalib {
 	
 	public static void main(final String[] args) {
 		

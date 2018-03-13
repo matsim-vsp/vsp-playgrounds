@@ -48,8 +48,10 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 /**
  * @author dziemke
+ * 
+ * This class used to be called "CemdapMatsimCadytsControllerPt" until 2018-03-13
  */
-public class CemdapMatsimCadytsControllerPt {
+public class RunBerlinScenarioWoConfigFilePt {
 	
 	public static void main(String[] args) {
 		final Config config = ConfigUtils.createConfig();
