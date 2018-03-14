@@ -162,18 +162,22 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
         // add information concerning passed links to the object "Trip"
         Id<Trip> tripId = Id.create(personId + "_" + activityEndCount.get(personId), Trip.class);
-        if (trips.get(tripId).getLinks().isEmpty()) {
-            if (trips.get(tripId).getDepartureLinkId().equals(linkId)) {
-                trips.get(tripId).getLinks().add(linkId);
-                //System.out.println("Added first link to trip " + tripId);
+        FromMatsimTrip fromMatsimTrip = trips.get(tripId);
+        if (fromMatsimTrip != null) {
+        // without trip there was no activity that ended before, ergo this person is not of interest for the analysis
+            if (fromMatsimTrip.getLinks().isEmpty()) {
+                if (fromMatsimTrip.getDepartureLinkId().equals(linkId)) {
+                    fromMatsimTrip.getLinks().add(linkId);
+                    //System.out.println("Added first link to trip " + tripId);
+                } else {
+                    //System.err.println("First route link different from departure link!");
+                    throw new RuntimeException("First route link different from departure link!");
+                }
             } else {
-                //System.err.println("First route link different from departure link!");
-                throw new RuntimeException("First route link different from departure link!");
-            }
-        } else {
-            trips.get(tripId).getLinks().add(linkId);
+                fromMatsimTrip.getLinks().add(linkId);
 //			System.out.println("Added another link to trip " + tripId);
 //			System.out.println("List of trip " + tripId + " has now " + trips.get(tripId).getLinks().size() + " elements");
+            }
         }
     }
 
@@ -188,10 +192,14 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
         // add information concerning leg mode to the object "Trip"
         Id<Trip> tripId = Id.create(personId + "_" + activityEndCount.get(personId), Trip.class);
-        trips.get(tripId).setLegMode(legMode);
-        if (tripmodeWarn) {
-            log.warn("Trip mode = Arrival leg mode; assumed that every leg has the same legMode");
-            tripmodeWarn = false;
+        FromMatsimTrip fromMatsimTrip = trips.get(tripId);
+        if (fromMatsimTrip != null) {
+            // without trip there was no activity that ended before, ergo this person is not of interest for the analysis
+            fromMatsimTrip.setLegMode(legMode);
+            if (tripmodeWarn) {
+                log.warn("Trip mode = Arrival leg mode; assumed that every leg has the same legMode");
+                tripmodeWarn = false;
+            }
         }
 
     }
