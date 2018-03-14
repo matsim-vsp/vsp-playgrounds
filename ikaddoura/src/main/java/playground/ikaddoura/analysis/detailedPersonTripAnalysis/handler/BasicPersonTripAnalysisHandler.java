@@ -290,7 +290,9 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 					}
 				} else {
 					String legMode = event.getLegMode();
-					if((event.getLegMode().toString().equals(TransportMode.transit_walk))){
+					if((event.getLegMode().toString().equals(TransportMode.transit_walk)
+							|| event.getLegMode().toString().equals(TransportMode.access_walk)
+							|| event.getLegMode().toString().equals(TransportMode.egress_walk))){
 						legMode = TransportMode.pt;
 					}
 					tripNumber2legMode.put(personId2currentTripNumber.get(event.getPersonId()), legMode);
@@ -301,7 +303,9 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 				// the person's first trip
 				Map<Integer,String> tripNumber2legMode = new HashMap<Integer,String>();
 				String legMode = event.getLegMode();
-				if((event.getLegMode().toString().equals(TransportMode.transit_walk))){
+				if((event.getLegMode().toString().equals(TransportMode.transit_walk)
+						|| event.getLegMode().toString().equals(TransportMode.access_walk)
+						|| event.getLegMode().toString().equals(TransportMode.egress_walk))){
 					legMode = TransportMode.pt;
 				}
 				tripNumber2legMode.put(1, legMode);
