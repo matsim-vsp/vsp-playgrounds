@@ -65,5 +65,10 @@
 		<artifactId>actitopp</artifactId>
 		<version>master-SNAPSHOT</version>
 	</dependency>
+	  <dependency>
+		  <groupId>com.github.jfbischoff</groupId>
+		  <artifactId>matsim-sbb-extensions</artifactId>
+		  <version>master-SNAPSHOT</version>
+	  </dependency>
   </dependencies>
 </project>
