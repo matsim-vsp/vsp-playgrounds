@@ -1,4 +1,4 @@
-package playground.gleich.analyzer.exampleScenario;
+package playground.gleich.analysis.analysisRunner.exampleScenario;
 
 import java.util.Random;
 

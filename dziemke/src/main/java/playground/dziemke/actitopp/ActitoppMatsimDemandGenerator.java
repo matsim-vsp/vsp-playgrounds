@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -14,6 +15,9 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.api.internal.MatsimWriter;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.io.PopulationReader;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson;
@@ -24,54 +28,70 @@ import edu.kit.ifv.mobitopp.actitopp.ModelFileBase;
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper;
 import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
 
+/**
+ * @author dziemke
+ */
 public class ActitoppMatsimDemandGenerator {
 	private static final Logger LOG = Logger.getLogger(ActitoppMatsimDemandGenerator.class);
 	
 	private static ModelFileBase fileBase = new ModelFileBase();
 	private static RNGHelper randomgenerator = new RNGHelper(1234);
 	
+//	public static void main(String[] args) {
+//		// Input and output files		
+//		String commuterFileOutgoing1 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Berlin_2009/B2009Ga.txt";
+//		String commuterFileOutgoing2 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
+//		String commuterFileOutgoing3 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil2BR2009Ga.txt";
+//		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
+//		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
+//		String censusFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
+//		
+//		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/";
+//		
+//		// Parameters
+//		int numberOfPlansPerPerson = 1; // temporarily, to speed it up
+//		List<String> idsOfFederalStatesIncluded = Arrays.asList("12");
+//		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
+//		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
+//		double defaultCensusEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
+//		// Choosing this too high effects that too many commuter relations are created, which is uncritical as relative shares will still be correct.
+//		// Choosing this too low effects that employed people (according to the census) are left without workplace. Minimize this number!
+//
+//		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
+//				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio);
+//		
+//		demandGeneratorCensus.setWriteMatsimPlanFiles(true); // default is false
+//		demandGeneratorCensus.setWriteCemdapInputFiles(false); // default is true
+//		
+//		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp");
+//		demandGeneratorCensus.setIdsOfMunicipalityForSpatialRefinement(Arrays.asList("11000000")); // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
+//		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL"); //e.g., PLZ/LOR
+//
+//		// municipality id (AGS)
+//		String municipalityKeyInShapeFile = "NR";//not available in refinement shape for Berlin --> setting to null. Amit Nov'17
+//		demandGeneratorCensus.setMunicipalityFeatureKeyInShapeFile(null);
+//
+//		demandGeneratorCensus.generateDemand();
+//		
+//		List<Population> populations = demandGeneratorCensus.getAllPopulations();
+//		
+//		for (Population population : populations) {
+//			runActitopp(population);
+//			writeMatsimPlansFile(population, outputBase + "/plan_with_activities.xml.gz"); // TODO currently only works with one population file
+//		}
+//	}
+	
 	public static void main(String[] args) {
-		// Input and output files		
-		String commuterFileOutgoing1 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Berlin_2009/B2009Ga.txt";
-		String commuterFileOutgoing2 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
-		String commuterFileOutgoing3 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil2BR2009Ga.txt";
-		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
-		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
-		String censusFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		
+		// Input and output files
 		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/";
+		String plansFile = outputBase + "plans_small.xml.gz";
 		
-		// Parameters
-		int numberOfPlansPerPerson = 1; // temporarily, to speed it up
-		List<String> idsOfFederalStatesIncluded = Arrays.asList("12");
-		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
-		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
-		double defaultCensusEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
-		// Choosing this too high effects that too many commuter relations are created, which is uncritical as relative shares will still be correct.
-		// Choosing this too low effects that employed people (according to the census) are left without workplace. Minimize this number!
-
-		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
-				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio);
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		PopulationReader reader = new PopulationReader(scenario);
+		reader.readFile(plansFile);
 		
-		demandGeneratorCensus.setWriteMatsimPlanFiles(true); // default is false
-		demandGeneratorCensus.setWriteCemdapInputFiles(false); // default is true
-		
-		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp");
-		demandGeneratorCensus.setIdsOfMunicipalityForSpatialRefinement(Arrays.asList("11000000")); // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
-		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL"); //e.g., PLZ/LOR
-
-		// municipality id (AGS)
-		String municipalityKeyInShapeFile = "NR";//not available in refinement shape for Berlin --> setting to null. Amit Nov'17
-		demandGeneratorCensus.setMunicipalityFeatureKeyInShapeFile(null);
-
-		demandGeneratorCensus.generateDemand();
-		
-		List<Population> populations = demandGeneratorCensus.getAllPopulations();
-		
-		for (Population population : populations) {
-			runActitopp(population);
-			writeMatsimPlansFile(population, outputBase + "/plan_with_activities.xml.gz"); // TODO currently only works with one population file
-		}
+		runActitopp(scenario.getPopulation());
+		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_small_with_activities.xml.gz"); // TODO currently only works with one population file
 	}
 
 	
