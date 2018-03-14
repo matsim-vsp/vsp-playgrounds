@@ -2,7 +2,6 @@ package playground.sbraun.datastructure;
 
 /**
  * @author sbraun
- *
  */
 
 

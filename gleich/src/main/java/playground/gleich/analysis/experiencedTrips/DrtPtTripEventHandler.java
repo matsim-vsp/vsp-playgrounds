@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.gleich.av_bus.analysis;
+package playground.gleich.analysis.experiencedTrips;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,7 +112,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	private Map<Id<Vehicle>, Double> monitoredVeh2toMonitoredDistance = new HashMap<>();
 	private Map<Id<Vehicle>, Id<TransitRoute>> monitoredVeh2toTransitRoute = new HashMap<>();
 	private Set<String> monitoredModes = new HashSet<>();
-	private Set<Id<Link>> monitoredStartAndEndLinks = new HashSet<>(); // set to null if all links are to be monitored
+	private Set<Id<Link>> monitoredStartAndEndLinks; // set to null if all links are to be monitored
 	
 	/**
 	 * 
@@ -321,7 +321,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 			if(! (event.getActType().equals("pt interaction") || event.getActType().equals("drt interaction")) ){				
 				//Check if trip starts or ends in the monitored area, that means on the monitored start and end links
 				//monitoredStartAndEndLinks=null -> all links are to be monitored
-				if(monitoredStartAndEndLinks == null || 
+				if(monitoredStartAndEndLinks.size() == 0 || 
 						monitoredStartAndEndLinks.contains(event.getLinkId()) ||
 						monitoredStartAndEndLinks.contains(agent2CurrentTripStartLink.get(event.getPersonId()))){
 					if(!person2ExperiencedTrips.containsKey(event.getPersonId())){

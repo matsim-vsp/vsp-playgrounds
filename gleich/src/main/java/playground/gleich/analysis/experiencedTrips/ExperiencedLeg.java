@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.gleich.av_bus.analysis;
+package playground.gleich.analysis.experiencedTrips;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;

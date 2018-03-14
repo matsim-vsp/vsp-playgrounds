@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.gleich.analyzer.PtRoutes2PaxAnalysis;
+package playground.gleich.analysis.analysisRunner.PtRoutes2PaxAnalysis;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

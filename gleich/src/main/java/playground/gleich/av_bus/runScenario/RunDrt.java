@@ -25,9 +25,9 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
-import playground.gleich.av_bus.analysis.DrtEventsReader;
-import playground.gleich.av_bus.analysis.DrtPtTripEventHandler;
-import playground.gleich.av_bus.analysis.ExperiencedTripsWriter;
+import playground.gleich.analysis.experiencedTrips.DrtEventsReader;
+import playground.gleich.analysis.experiencedTrips.DrtPtTripEventHandler;
+import playground.gleich.analysis.experiencedTrips.ExperiencedTripsWriter;
 
 public class RunDrt {
 	public static void main(String[] args) {
