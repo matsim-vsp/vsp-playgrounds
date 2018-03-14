@@ -73,15 +73,17 @@ public class PlanFileModifier {
 		// Local use
 //		String inputPlansFile = "../../upretoria/data/capetown/scenario_2017/original/population.xml.gz";
 //		String outputPlansFile = "../../upretoria/data/capetown/scenario_2017/population_32734.xml.gz";
-		String inputPlansFile = "../../capetown/data/scenario_2017/population_32734.xml.gz";
-		String outputPlansFile = "../../capetown/data/scenario_2017/population_32734_1pct.xml.gz";
+//		String inputPlansFile = "../../capetown/data/scenario_2017/population_32734.xml.gz";
+//		String outputPlansFile = "../../capetown/data/scenario_2017/population_32734_1pct.xml.gz";
+		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/plans.xml.gz";
+		String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/plans_small_sample.xml.gz";
 //		double selectionProbability = 1.;
 		double selectionProbability = 0.1;
 		boolean onlyTransferSelectedPlan = false;
 		boolean considerHomeStayingAgents = true;
 		boolean includeStayHomePlans = true;
 		boolean onlyConsiderPeopleAlwaysGoingByCar = false;
-		int maxNumberOfAgentsConsidered = 10000000;
+		int maxNumberOfAgentsConsidered = 10000;
 		boolean removeLinksAndRoutes = false;
 //		String inputCRS = TransformationFactory.HARTEBEESTHOEK94_LO19;
 //		String outputCRS = "EPSG:32734";
@@ -181,9 +183,9 @@ public class PlanFileModifier {
 				// If selected according to all criteria, create a copy of the person and add it to new population
 				if (copyPerson) {
 					createPersonAndAddToPopulation(population2, person, selectedPlan);
+					agentCounter ++;
 				}
 			}
-			agentCounter ++;
 		}
 						
 		// Write population file
@@ -254,6 +256,11 @@ public class PlanFileModifier {
 					}
 					person2.addPlan(plan);
 				}
+			}
+			
+			// Keeping the attributes of a person
+			for (String attribute : attributesToKeep) {
+				person2.getAttributes().putAttribute(attribute, person.getAttributes().getAttribute(attribute));
 			}
 			
 			population.addPerson(person2);
