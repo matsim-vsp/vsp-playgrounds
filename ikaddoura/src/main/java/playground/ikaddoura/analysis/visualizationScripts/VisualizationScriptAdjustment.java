@@ -98,30 +98,34 @@ public class VisualizationScriptAdjustment {
 		content = content.replaceAll(runIdMarker, this.runId);
 		content = content.replaceAll(scaleFactorMarker, this.scalingFactor);
 		
-		if (this.scenarioCRS.equals(TransformationFactory.DHDN_GK4)) {
-			content = content.replaceAll(crsMarker,
-					  "  <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>" + 
-					  "  <srsid>2648</srsid>" + 
-					  "  <srid>31468</srid>" + 
-					  "  <authid>EPSG:31468</authid>" + 
-					  "  <description>DHDN / Gauss-Kruger zone 4</description>" + 
-					  "  <projectionacronym>tmerc</projectionacronym>" + 
-					  "  <ellipsoidacronym>bessel</ellipsoidacronym>" + 
-					  "  <geographicflag>false</geographicflag>");
-			
-		} else if (this.scenarioCRS.equals(TransformationFactory.DHDN_SoldnerBerlin)) {
-			content = content.replaceAll(crsMarker,
-				      "	 <proj4>+proj=cass +lat_0=52.41864827777778 +lon_0=13.62720366666667 +x_0=40000 +y_0=10000 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>" + 
-				      "	 <srsid>1031</srsid>" + 
-				      "	 <srid>3068</srid>" + 
-				      "	 <authid>EPSG:3068</authid>" + 
-				      "	 <description>DHDN / Soldner Berlin</description>" + 
-				      "  <projectionacronym>cass</projectionacronym>" + 
-				      "	 <ellipsoidacronym>bessel</ellipsoidacronym>" + 
-				      "	 <geographicflag>false</geographicflag>");
+		if (this.scenarioCRS != null) {
+			if (this.scenarioCRS.equals(TransformationFactory.DHDN_GK4)) {
+				content = content.replaceAll(crsMarker,
+						  "  <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>" + 
+						  "  <srsid>2648</srsid>" + 
+						  "  <srid>31468</srid>" + 
+						  "  <authid>EPSG:31468</authid>" + 
+						  "  <description>DHDN / Gauss-Kruger zone 4</description>" + 
+						  "  <projectionacronym>tmerc</projectionacronym>" + 
+						  "  <ellipsoidacronym>bessel</ellipsoidacronym>" + 
+						  "  <geographicflag>false</geographicflag>");
 				
+			} else if (this.scenarioCRS.equals(TransformationFactory.DHDN_SoldnerBerlin)) {
+				content = content.replaceAll(crsMarker,
+					      "	 <proj4>+proj=cass +lat_0=52.41864827777778 +lon_0=13.62720366666667 +x_0=40000 +y_0=10000 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>" + 
+					      "	 <srsid>1031</srsid>" + 
+					      "	 <srid>3068</srid>" + 
+					      "	 <authid>EPSG:3068</authid>" + 
+					      "	 <description>DHDN / Soldner Berlin</description>" + 
+					      "  <projectionacronym>cass</projectionacronym>" + 
+					      "	 <ellipsoidacronym>bessel</ellipsoidacronym>" + 
+					      "	 <geographicflag>false</geographicflag>");
+					
+			} else {
+				log.warn("The crs needs to be set manually via QGIS.");
+			}
 		} else {
-			log.warn("The crs needs to be set manually via QGIS.");
+			log.warn("No scenario crs provided. The crs needs to be set manually via QGIS.");
 		}
 		
 		try {

@@ -21,6 +21,7 @@ package playground.ikaddoura.analysis;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.actDurations.ActDurationHandler;
@@ -48,6 +50,8 @@ import playground.ikaddoura.analysis.dynamicLinkDemand.DynamicLinkDemandEventHan
 import playground.ikaddoura.analysis.gisAnalysis.GISAnalyzer;
 import playground.ikaddoura.analysis.gisAnalysis.MoneyExtCostHandler;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
+import playground.ikaddoura.analysis.modalSplitUserType.ModeAnalysis;
 import playground.ikaddoura.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
@@ -92,18 +96,20 @@ public class IKAnalysisRun {
 	private final String zonesCRS;
 	private final String homeActivity;
 	private final int scalingFactor;
-	
+		
 	// policy case
 	private final String runDirectory;
 	private final String runId;
 	private final Scenario scenario1;
+	private final List<AgentAnalysisFilter> filters1;
 	
 	// base case (optional)
 	private final String runDirectoryToCompareWith;
 	private final String runIdToCompareWith;
 	private final Scenario scenario0;
+	private final List<AgentAnalysisFilter> filters0;
 
-	private final String outputDirectoryName = "analysis-ik-v1";
+	private final String outputDirectoryName = "analysis-ik-v3";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -140,7 +146,7 @@ public class IKAnalysisRun {
 			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
 			runId = "policyCase";
 			
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc";
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc/";
 			runIdToCompareWith = "baseCase";
 			
 			scenarioCRS = TransformationFactory.DHDN_GK4;	
@@ -158,15 +164,22 @@ public class IKAnalysisRun {
 			scalingFactor = 10;			
 		}
 		
-		IKAnalysisRun analysis = new IKAnalysisRun(runDirectory,
-				runId,
-				runDirectoryToCompareWith,
-				runIdToCompareWith,
+		Scenario scenario1 = loadScenario(runDirectory, runId, null);
+		Scenario scenario0 = loadScenario(runDirectoryToCompareWith, runIdToCompareWith, null);
+		
+		List<AgentAnalysisFilter> filter1 = null;
+		List<AgentAnalysisFilter> filter0 = null;
+
+		IKAnalysisRun analysis = new IKAnalysisRun(
+				scenario1,
+				scenario0,
 				scenarioCRS,
 				shapeFileZones,
 				zonesCRS,
 				homeActivity,
-				scalingFactor);
+				scalingFactor,
+				filter1,
+				filter0);
 		analysis.run();
 	}
 	
@@ -189,53 +202,45 @@ public class IKAnalysisRun {
 		this.zonesCRS = null;
 		this.homeActivity = null;
 		this.scalingFactor = 0;
+		
+		this.filters0 = null;
+		this.filters1 = null;
 	}
 	
-	public IKAnalysisRun(Scenario scenario1, Scenario scenario2,
-			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor) {
+	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
+			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor,
+			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
 
 		String runDirectory = scenario1.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
 
-		String runDirectoryToCompareWith = scenario2.getConfig().controler().getOutputDirectory();
-		if (!runDirectoryToCompareWith.endsWith("/")) runDirectoryToCompareWith = runDirectoryToCompareWith + "/";
+		String runDirectoryToCompareWith = null;
+		if (scenario0 != null) {
+			runDirectoryToCompareWith = scenario0.getConfig().controler().getOutputDirectory();
+			if (!runDirectoryToCompareWith.endsWith("/")) runDirectoryToCompareWith = runDirectoryToCompareWith + "/";
+		}
 		
+		String runIdToCompareWith = null;
+		if (scenario0 != null) runIdToCompareWith = scenario0.getConfig().controler().getRunId();
+
 		this.scenario1 = scenario1;
 		this.runDirectory = runDirectory;
 		this.runId = scenario1.getConfig().controler().getRunId();
 
-		this.scenario0 = scenario2;
-		this.runDirectoryToCompareWith = runDirectoryToCompareWith;
-		this.runIdToCompareWith = scenario2.getConfig().controler().getRunId();
-		
-		this.scenarioCRS = scenarioCRS;
-		this.shapeFileZones = shapeFileZones;
-		this.zonesCRS = zonesCRS;
-		this.homeActivity = homeActivity;
-		this.scalingFactor = scalingFactor;
-	}
-
-	public IKAnalysisRun(String runDirectory, String runId, String runDirectoryToCompareWith, String runIdToCompareWith,
-			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor) {
-
-		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
-		if (runDirectoryToCompareWith!= null && !runDirectoryToCompareWith.endsWith("/")) runDirectoryToCompareWith = runDirectoryToCompareWith + "/";
-
-		this.runDirectory = runDirectory;
-		this.runId = runId;
-		this.scenario1 = loadScenario(runDirectory, runId);
-						
+		this.scenario0 = scenario0;
 		this.runDirectoryToCompareWith = runDirectoryToCompareWith;
 		this.runIdToCompareWith = runIdToCompareWith;
-		this.scenario0 = loadScenario(runDirectoryToCompareWith, runIdToCompareWith);
 		
 		this.scenarioCRS = scenarioCRS;
 		this.shapeFileZones = shapeFileZones;
 		this.zonesCRS = zonesCRS;
 		this.homeActivity = homeActivity;
 		this.scalingFactor = scalingFactor;
+		
+		this.filters0 = filters0;
+		this.filters1 = filters1;
 	}
-
+	
 	public void run() {
 		
 		String analysisOutputDirectory = runDirectory + outputDirectoryName + "/";
@@ -340,18 +345,43 @@ public class IKAnalysisRun {
 		if (scenario1 != null) readEventsFile(runDirectory, runId, events1);
 		if (scenario0 != null) readEventsFile(runDirectoryToCompareWith, runIdToCompareWith, events0);
 				
-		Map<Id<Person>, Double> personId2userBenefit1 = getPersonId2UserBenefit(scenario1);
-		Map<Id<Person>, Double> personId2userBenefit2 = getPersonId2UserBenefit(scenario0);
+		Map<Id<Person>, Double> personId2userBenefit1 = null;
+		Map<Id<Person>, Double> personId2userBenefit0 = null;
+		
+		List<ModeAnalysis> modeAnalysisList1 = new ArrayList<>();
+		List<ModeAnalysis> modeAnalysisList0 = new ArrayList<>();
+								
+		if (scenario1 != null) {
+			
+			personId2userBenefit1 = getPersonId2UserBenefit(scenario1);
+			
+			for (AgentAnalysisFilter filter : filters1) {
+				ModeAnalysis modeAnalysis1 = new ModeAnalysis(scenario1, filter);
+				modeAnalysis1.run();
+				modeAnalysisList1.add(modeAnalysis1);
+			}
+		}	
+		
+		if (scenario0 != null) {
+			
+			personId2userBenefit0 = getPersonId2UserBenefit(scenario0);
+			
+			for (AgentAnalysisFilter filter : filters0) {
+				ModeAnalysis modeAnalysis0 = new ModeAnalysis(scenario0, filter);
+				modeAnalysis0.run();
+				modeAnalysisList0.add(modeAnalysis0);
+			}
+		}	
 		
 		// #####################################
 		// Print the results
 		// #####################################
 
 		log.info("Printing results...");
-		if (scenario1 != null) printResults(scenario1, analysisOutputDirectory, personId2userBenefit1, basicHandler1, delayAnalysis1, personTripMoneyHandler1, trafficVolumeAnalysis1, dynamicTrafficVolumeAnalysis1, personMoneyHandler1, actHandler1);
+		if (scenario1 != null) printResults(scenario1, analysisOutputDirectory, personId2userBenefit1, basicHandler1, delayAnalysis1, personTripMoneyHandler1, trafficVolumeAnalysis1, dynamicTrafficVolumeAnalysis1, personMoneyHandler1, actHandler1, modeAnalysisList1);
 		
 		log.info("Printing results...");
-		if (scenario0 != null) printResults(scenario0, analysisOutputDirectory, personId2userBenefit2, basicHandler0, delayAnalysis0, personTripMoneyHandler0, trafficVolumeAnalysis0, dynamicTrafficVolumeAnalysis0, personMoneyHandler0, actHandler0);
+		if (scenario0 != null) printResults(scenario0, analysisOutputDirectory, personId2userBenefit0, basicHandler0, delayAnalysis0, personTripMoneyHandler0, trafficVolumeAnalysis0, dynamicTrafficVolumeAnalysis0, personMoneyHandler0, actHandler0, modeAnalysisList0);
 
 		// #####################################
 		// Scenario comparison
@@ -458,7 +488,8 @@ public class IKAnalysisRun {
 			LinkDemandEventHandler trafficVolumeAnalysis,
 			DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis,
 			MoneyExtCostHandler personMoneyHandler,
-			ActDurationHandler actHandler) {
+			ActDurationHandler actHandler,
+			List<ModeAnalysis> modeAnalysisList) {
 		
 		// #####################################
 		// Print results: person / trip analysis
@@ -547,11 +578,35 @@ public class IKAnalysisRun {
 		// #####################################
 		// Print results: activity durations
 		// #####################################
+		
 		String actDurationsOutputDirectory = analysisOutputDirectory + "activity-durations/";
 		createDirectory(actDurationsOutputDirectory);
 		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations.csv", Double.POSITIVE_INFINITY);
 		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations_below-900-sec.csv", 900.);
 
+		// #####################################
+		// Print results: mode statistics
+		// #####################################
+		
+		String modeAnalysisOutputDirectory = analysisOutputDirectory + "mode-statistics/";
+		createDirectory(modeAnalysisOutputDirectory);
+		for (ModeAnalysis modeAnalysis : modeAnalysisList) {
+			
+			modeAnalysis.writeModeShares(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".");
+			modeAnalysis.writeTripRouteDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".");
+			modeAnalysis.writeTripEuclideanDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".");
+			
+			List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
+			distanceGroups.add(new Tuple<>(0., 1000.));
+			distanceGroups.add(new Tuple<>(1000., 3000.));
+			distanceGroups.add(new Tuple<>(3000., 5000.));
+			distanceGroups.add(new Tuple<>(5000., 10000.));
+			distanceGroups.add(new Tuple<>(10000., 20000.));
+			distanceGroups.add(new Tuple<>(20000., 100000.));
+			modeAnalysis.writeTripRouteDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".", distanceGroups);
+			modeAnalysis.writeTripEuclideanDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".", distanceGroups);
+		}
+		
 	}
 	
 	private void createDirectory(String directory) {
@@ -559,15 +614,17 @@ public class IKAnalysisRun {
 		file.mkdirs();
 	}
 
-	private Scenario loadScenario(String runDirectory, String runId) {
+	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFileToReplaceOutputFile) {
 		
 		if (runDirectory == null) {
 			return null;
 			
 		} else {
-			
+			if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
+
 			String networkFile;
 			String populationFile;
+			String personAttributesFile;
 			String configFile;
 			
 			if (new File(runDirectory + runId + ".output_config.xml").exists()) {
@@ -576,11 +633,23 @@ public class IKAnalysisRun {
 				populationFile = runDirectory + runId + ".output_plans.xml.gz";
 				configFile = runDirectory + runId + ".output_config.xml";
 				
+				if (personAttributesFileToReplaceOutputFile == null) {
+					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
+				} else {
+					personAttributesFile = personAttributesFileToReplaceOutputFile;
+				}
+				
 			} else {
 				
 				networkFile = runDirectory + "output_network.xml.gz";
 				populationFile = runDirectory + "output_plans.xml.gz";
 				configFile = runDirectory + "output_config.xml";
+				
+				if (personAttributesFileToReplaceOutputFile == null) {
+					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+				} else {
+					personAttributesFile = personAttributesFileToReplaceOutputFile;
+				}
 			}
 
 			Config config = ConfigUtils.loadConfig(configFile);
@@ -592,10 +661,12 @@ public class IKAnalysisRun {
 			}
 
 			config.plans().setInputFile(populationFile);
+			config.plans().setInputPersonAttributeFile(personAttributesFile);
 			config.network().setInputFile(networkFile);
 			config.vehicles().setVehiclesFile(null);
-			config.plans().setInputPersonAttributeFile(null);
-
+			config.transit().setTransitScheduleFile(null);
+			config.transit().setVehiclesFile(null);
+			
 			return ScenarioUtils.loadScenario(config);
 		}
 	}
@@ -628,10 +699,13 @@ public class IKAnalysisRun {
 
 	private void readEventsFile(String runDirectory, String runId, EventsManager events) {
 		String eventsFile;
+		log.info("Trying to read " + runDirectory + runId + ".output_events.xml.gz" + "...");
 		if (new File(runDirectory + runId + ".output_events.xml.gz").exists()) {
 			eventsFile = runDirectory + runId + ".output_events.xml.gz";
 		} else {
+			log.info(runDirectory + runId + ".output_events.xml.gz not found. Trying to read file without runId prefix...");
 			eventsFile = runDirectory + "output_events.xml.gz";
+			log.info("Trying to read " + eventsFile + "...");
 		}
 		new CombinedPersonLinkMoneyEventsReader(events).readFile(eventsFile);
 	}
