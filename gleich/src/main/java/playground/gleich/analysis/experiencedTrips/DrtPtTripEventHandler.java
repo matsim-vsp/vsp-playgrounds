@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.gleich.av_bus.analysis;
+package playground.gleich.analysis.experiencedTrips;
 
 import java.util.ArrayList;
 import java.util.HashMap;

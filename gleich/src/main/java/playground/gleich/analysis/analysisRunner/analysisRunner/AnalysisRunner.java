@@ -1,4 +1,4 @@
-package playground.gleich.analyzer.analysisRunner;
+package playground.gleich.analysis.analysisRunner.analysisRunner;
 
 import java.io.BufferedWriter;
 import java.io.File;

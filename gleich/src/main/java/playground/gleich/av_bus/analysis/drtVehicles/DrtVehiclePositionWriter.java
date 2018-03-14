@@ -50,8 +50,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 
-import playground.gleich.av_bus.analysis.DrtEventsReader;
-import playground.gleich.av_bus.analysis.DrtPtTripEventHandler;
+import playground.gleich.analysis.experiencedTrips.DrtEventsReader;
+import playground.gleich.analysis.experiencedTrips.DrtPtTripEventHandler;
 
 
 /**

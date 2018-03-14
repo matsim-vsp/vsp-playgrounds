@@ -1,4 +1,4 @@
-package playground.gleich.analyzer.exampleScenario;
+package playground.gleich.analysis.analysisRunner.exampleScenario;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;

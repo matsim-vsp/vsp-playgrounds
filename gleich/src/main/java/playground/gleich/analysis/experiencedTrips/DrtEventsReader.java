@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.gleich.av_bus.analysis;
+package playground.gleich.analysis.experiencedTrips;
 
 import java.util.Map;
 import java.util.Stack;
