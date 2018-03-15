@@ -96,7 +96,7 @@ public class ModeAnalysis {
 		analysis.writeTripRouteDistances(outputDirectory);
 		analysis.writeTripEuclideanDistances(outputDirectory);
 		
-		List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
+		final List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
 		distanceGroups.add(new Tuple<>(0., 1000.));
 		distanceGroups.add(new Tuple<>(1000., 3000.));
 		distanceGroups.add(new Tuple<>(3000., 5000.));
@@ -280,65 +280,70 @@ public class ModeAnalysis {
 		}
 	}
 	
-	private void writeDistances(String outputDirectory, String outputFileName, List<Tuple<Double, Double>> distanceGroups, Map<String, List<Double>> mode2TripRouteDistancesFiltered) {
+	private void writeDistances(String outputDirectory, String outputFileName, List<Tuple<Double, Double>> distanceGroups, Map<String, List<Double>> mode2TripDistances) {
 		
-		SortedMap<Integer, Map<String, Integer>> distanceGroupIndex2mode2trips = new TreeMap<>();	
-		
-		// initialize
-		int index = 0;
-		for (Tuple<Double, Double> distanceGroup : distanceGroups) {
-			Map<String, Integer> mode2trips = new HashMap<>();
-
-			for (String mode : mode2TripRouteDistancesFiltered.keySet()) {
-				log.info("index: " + index + " - distance group: " + distanceGroup + " - mode: " + mode);
-
-				mode2trips.put(mode, 0);
-				distanceGroupIndex2mode2trips.put(index, mode2trips);
-			}
-			index++;
-		}
-
-		// fill
-		for (String mode : mode2TripRouteDistancesFiltered.keySet()) {
-			for (Double distance : mode2TripRouteDistancesFiltered.get(mode)) {
-				
-				for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
+		if (mode2TripDistances == null || mode2TripDistances.isEmpty()) {
+			log.info("mode2TripDistances is empty. " + outputDirectory + outputFileName + " will not be written.");
 			
-					if (distance >= distanceGroups.get(distanceGroupIndex).getFirst() && distance < distanceGroups.get(distanceGroupIndex).getSecond()) {
-						int tripsUpdated = distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode) + 1;
-						distanceGroupIndex2mode2trips.get(distanceGroupIndex).put(mode, tripsUpdated);
+		} else {
+			SortedMap<Integer, Map<String, Integer>> distanceGroupIndex2mode2trips = new TreeMap<>();	
+			
+			// initialize
+			int index = 0;
+			for (Tuple<Double, Double> distanceGroup : distanceGroups) {
+				Map<String, Integer> mode2trips = new HashMap<>();
+
+				for (String mode : mode2TripDistances.keySet()) {
+					log.info("index: " + index + " - distance group: " + distanceGroup + " - mode: " + mode);
+
+					mode2trips.put(mode, 0);
+					distanceGroupIndex2mode2trips.put(index, mode2trips);
+				}
+				index++;
+			}
+
+			// fill
+			for (String mode : mode2TripDistances.keySet()) {
+				for (Double distance : mode2TripDistances.get(mode)) {
+					
+					for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
+				
+						if (distance >= distanceGroups.get(distanceGroupIndex).getFirst() && distance < distanceGroups.get(distanceGroupIndex).getSecond()) {
+							int tripsUpdated = distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode) + 1;
+							distanceGroupIndex2mode2trips.get(distanceGroupIndex).put(mode, tripsUpdated);
+						}
 					}
 				}
 			}
-		}
 
-		// write
-		
-		File file = new File(outputDirectory + outputFileName);
-		
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			bw.write("trip distance group index ; distance - from [m] ; distance to [m] ");
+			// write
 			
-			for (String mode : distanceGroupIndex2mode2trips.get(0).keySet()) {
-				bw.write(" ; " + mode);
-			}
-			bw.newLine();
+			File file = new File(outputDirectory + outputFileName);
 			
-			for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
-				bw.write( distanceGroupIndex + " ; " + distanceGroups.get(distanceGroupIndex).getFirst() + " ; " + distanceGroups.get(distanceGroupIndex).getSecond() );
-
-				for (String mode : distanceGroupIndex2mode2trips.get(distanceGroupIndex).keySet()) {
-					bw.write(" ; " + distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode));
+			try {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+				bw.write("trip distance group index ; distance - from [m] ; distance to [m] ");
+				
+				for (String mode : distanceGroupIndex2mode2trips.get(0).keySet()) {
+					bw.write(" ; " + mode);
 				}
 				bw.newLine();
-			}
+				
+				for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
+					bw.write( distanceGroupIndex + " ; " + distanceGroups.get(distanceGroupIndex).getFirst() + " ; " + distanceGroups.get(distanceGroupIndex).getSecond() );
 
-			bw.close();
-			log.info("Output written.");	
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+					for (String mode : distanceGroupIndex2mode2trips.get(distanceGroupIndex).keySet()) {
+						bw.write(" ; " + distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode));
+					}
+					bw.newLine();
+				}
+
+				bw.close();
+				log.info("Output written.");	
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

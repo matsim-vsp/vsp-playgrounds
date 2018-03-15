@@ -378,10 +378,30 @@ public class IKAnalysisRun {
 		// #####################################
 
 		log.info("Printing results...");
-		if (scenario1 != null) printResults(scenario1, analysisOutputDirectory, personId2userBenefit1, basicHandler1, delayAnalysis1, personTripMoneyHandler1, trafficVolumeAnalysis1, dynamicTrafficVolumeAnalysis1, personMoneyHandler1, actHandler1, modeAnalysisList1);
+		if (scenario1 != null) printResults(
+				scenario1,
+				analysisOutputDirectory,
+				personId2userBenefit1, basicHandler1,
+				delayAnalysis1,
+				personTripMoneyHandler1,
+				trafficVolumeAnalysis1,
+				dynamicTrafficVolumeAnalysis1,
+				personMoneyHandler1,
+				actHandler1,
+				modeAnalysisList1);
 		
 		log.info("Printing results...");
-		if (scenario0 != null) printResults(scenario0, analysisOutputDirectory, personId2userBenefit0, basicHandler0, delayAnalysis0, personTripMoneyHandler0, trafficVolumeAnalysis0, dynamicTrafficVolumeAnalysis0, personMoneyHandler0, actHandler0, modeAnalysisList0);
+		if (scenario0 != null) printResults(scenario0,
+				analysisOutputDirectory,
+				personId2userBenefit0,
+				basicHandler0,
+				delayAnalysis0,
+				personTripMoneyHandler0,
+				trafficVolumeAnalysis0,
+				dynamicTrafficVolumeAnalysis0,
+				personMoneyHandler0,
+				actHandler0,
+				modeAnalysisList0);
 
 		// #####################################
 		// Scenario comparison
@@ -596,7 +616,7 @@ public class IKAnalysisRun {
 			modeAnalysis.writeTripRouteDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".");
 			modeAnalysis.writeTripEuclideanDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".");
 			
-			List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
+			final List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
 			distanceGroups.add(new Tuple<>(0., 1000.));
 			distanceGroups.add(new Tuple<>(1000., 3000.));
 			distanceGroups.add(new Tuple<>(3000., 5000.));

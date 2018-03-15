@@ -170,12 +170,29 @@ public class AgentAnalysisFilter implements AgentFilter {
 	
 	@Override
 	public String toFileName() {
-		String fileName;
-		if (zoneFile == null) {
-			fileName = "subpopulation=" + this.subpopulation + "_" + personAttributeName + "=" + personAttribute;
-		} else {
-			fileName = "subpopulation=" + this.subpopulation + "_" + "onlyConsideringAgentsWithRelevantActivityInZoneFile";
+		String fileName = "FILTER";
+		
+		boolean atLeastOneFilterApplied = false;
+		
+		if (zoneFile != null && this.relevantActivityTypePrefix != null) {
+			atLeastOneFilterApplied = true;
+			fileName = fileName + "_activityTypePrefix-" + this.relevantActivityTypePrefix + "-within-provided-zone-file";	
 		}
+		
+		if (this.subpopulation != null) {
+			atLeastOneFilterApplied = true;
+			fileName = fileName + "_subpopulation=" + this.subpopulation;
+		}
+		
+		if (this.personAttributeName != null) {
+			atLeastOneFilterApplied = true;
+			fileName = fileName + "_" + personAttributeName + "=" + personAttribute;
+		}
+		
+		if (atLeastOneFilterApplied == false) {
+			fileName = "";
+		}
+	
 		return fileName;
 	}
 
