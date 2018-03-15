@@ -59,10 +59,14 @@ public class ActDurationHandler implements ActivityStartEventHandler, ActivityEn
 	
 	@Override
 	public void reset(int iteration) {
-		personId2startTime.clear();
-		personId2actNr.clear();
-		person2actNr2duration.clear();
-		person2actNr2type.clear();
+		this.personId2startTime.clear();
+		this.personId2actNr.clear();
+		this.person2actNr2duration.clear();
+		this.person2actNr2type.clear();
+		this.personId2currentActivity.clear();
+		this.personId2actNr.clear();
+		this.personId2morningActDuration.clear();
+		this.personId2morningActType.clear();		
 	}
 
 	public void handleEvent(ActivityStartEvent event) {
@@ -190,7 +194,7 @@ public class ActDurationHandler implements ActivityStartEventHandler, ActivityEn
 								
 								if (duration < maxDurationToPrintOut) {
 									bw.write(person.getId().toString() + " ; "
-											+ lastActNr + 1 + " ; "
+											+ (lastActNr + 1) + " ; "
 											+ personId2currentActivity.get(person.getId()) + " ; "
 											+ duration
 											);
