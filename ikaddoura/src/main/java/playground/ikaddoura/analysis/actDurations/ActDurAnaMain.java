@@ -32,8 +32,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class ActDurAnaMain {
 
-	static String populationFile = "/Users/ihab/Desktop/plans.xml";
-	static String eventsFile = "/Users/ihab/Desktop/events.xml";
+	static String populationFile = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be300mt_47/be300mt_47.output_plans.xml.gz";
+	static String eventsFile = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be300mt_47/be300mt_47.output_events.xml.gz";
 				
 	public static void main(String[] args) {
 		ActDurAnaMain anaMain = new ActDurAnaMain();
@@ -50,7 +50,6 @@ public class ActDurAnaMain {
 		
 		ActDurationHandler handler1 = new ActDurationHandler();
 		events.addHandler(handler1);
-		// add more handlers here
 		
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
