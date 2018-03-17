@@ -40,14 +40,14 @@ public class IKAnalysisRunBerlin {
 			
 	public static void main(String[] args) throws IOException {
 			
-		final String runId = "be300mt_47";
+		final String runId = "be400mt_7";
 		final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/" + runId + "/";
 		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
 		final String shapeFileZones = null;
 		final String zonesCRS = null;
 		final String homeActivity = "home";
 		final int scalingFactor = 10;
-		final String personAttributesFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_300_person_freight_10pct.xml.gz";
+		final String personAttributesFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_400_person_freight_10pct.xml.gz";
 
 		Scenario scenario1 = loadScenario(runDirectory, runId, personAttributesFile);
 		
@@ -68,7 +68,6 @@ public class IKAnalysisRunBerlin {
 		filter1c.setSubpopulation("person");
 		filter1c.setPersonAttribute("brandenburg");
 		filter1c.setPersonAttributeName("home-activity-zone");
-		filter1c.preProcess(scenario1);
 		filter1c.preProcess(scenario1);
 		filters1.add(filter1c);
 
