@@ -35,6 +35,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.api.internal.MatsimWriter;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -54,6 +55,8 @@ import playground.vsp.demandde.cemdap.LogToOutputSaver;
  */
 public class DemandGeneratorCensus {
 	private static final Logger LOG = Logger.getLogger(DemandGeneratorCensus.class);
+	
+	private static final Random random = MatsimRandom.getLocalInstance(); // Make sure that stream of random variables is reproducible.
 
 	// Storage objects
 	private Population population;
@@ -96,7 +99,7 @@ public class DemandGeneratorCensus {
 		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
 		String censusFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/402/";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/400/";
 		
 		// Parameters
 		int numberOfPlansPerPerson = 1; // Note: Setting this higher to a value higher than 1 if spatial refinement is used.
@@ -505,7 +508,6 @@ public class DemandGeneratorCensus {
 
 
 	private static String getRandomLocationOfWorkFromCommuterRelationList(List<String> commuterRelationList) {
-		Random random = new Random();
 		int position = random.nextInt(commuterRelationList.size());
 		String workMunicipalityId = commuterRelationList.get(position);
 		commuterRelationList.remove(position);
@@ -525,19 +527,18 @@ public class DemandGeneratorCensus {
 
 
 	private String getSpatiallyRefinedZone(String municipalityId) {
-		Random random = new Random();
 		List<String> spatiallyRefinedZones = this.spatialRefinementZoneIds.get(municipalityId);
 		return spatiallyRefinedZones.get(random.nextInt(spatiallyRefinedZones.size()));
 	}
 
 
 	private static boolean getEmployed(double adultsToEmployeesRatio) {
-		return Math.random() * adultsToEmployeesRatio < 1;
+		return random.nextDouble() * adultsToEmployeesRatio < 1;
 	}
 	
 	
 	private static int getAgeInBounds(int lowerBound, int upperBound) {
-		return (int) (lowerBound + Math.random() * (upperBound - lowerBound + 1));
+		return (int) (lowerBound + random.nextDouble() * (upperBound - lowerBound + 1));
 	}
 
 
