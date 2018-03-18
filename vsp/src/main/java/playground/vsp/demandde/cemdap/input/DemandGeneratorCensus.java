@@ -103,7 +103,7 @@ public class DemandGeneratorCensus {
 		
 		// Parameters
 		int numberOfPlansPerPerson = 1; // Note: Setting this higher to a value higher than 1 if spatial refinement is used.
-		List<String> idsOfFederalStatesIncluded = Arrays.asList("12");
+		List<String> idsOfFederalStatesIncluded = Arrays.asList("11", "12"); // 11=Berlin, 12=Brandenburg
 		
 		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
 		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
@@ -116,11 +116,8 @@ public class DemandGeneratorCensus {
 		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
 		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/LOR_SHP_EPSG_25833/Planungsraum.shp");
 		demandGeneratorCensus.setIdsOfMunicipalitiesForSpatialRefinement(Arrays.asList("11000000")); // "Amtlicher Gemeindeschlüssel (AGS)" of Berlin is "11000000"
-		demandGeneratorCensus.setRefinementFeatureKeyInShapefile("PLN_ID"); // key of the features in shapefile used for spatial refinement
-
-		// municipality id (AGS)
-		String municipalityFeatureKeyInShapefile = "NR"; // not available in refinement shape for Berlin --> setting to null. Amit Nov'17
-		demandGeneratorCensus.setMunicipalityFeatureKeyInShapefile(null);
+		demandGeneratorCensus.setRefinementFeatureKeyInShapefile("PLN_ID"); // Key of the features in the shapefile used for spatial refinement
+		demandGeneratorCensus.setMunicipalityFeatureKeyInShapefile(null); // If spatial refinement only for one municipality, no distinction necessary
 
 		demandGeneratorCensus.generateDemand();
 	}
@@ -336,7 +333,7 @@ public class DemandGeneratorCensus {
 			if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString())) {
 				String locationOfWork = (String) person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString());
 				if (locationOfWork.length() == 8) {
-					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), getLocation(locationOfWork));
+					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), getExactLocation(locationOfWork));
 				} else if (locationOfWork.equals("-99")) {
 					throw new RuntimeException("This combination of attribute values is implausible.");
 				} else {
@@ -347,7 +344,7 @@ public class DemandGeneratorCensus {
 			if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString())) {
 				String locationOfSchool = (String) person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString());
 				if (locationOfSchool.length() == 8) {
-					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), getLocation(locationOfSchool));
+					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), getExactLocation(locationOfSchool));
 				} else if (locationOfSchool.equals("-99")) {
 					throw new RuntimeException("This combination of attribute values is implausible.");
 				} else {
@@ -362,7 +359,6 @@ public class DemandGeneratorCensus {
 
 	private void createHouseholdsAndPersons(int counter, String municipalityId, int numberOfPersons, int gender, int lowerAgeBound, int upperAgeBound, 
 			double adultsToEmployeesRatio, List<String> commuterRelationList) {
-		
 		for (int i = 0; i < numberOfPersons; i++) {
 			this.allPersons++;
 			Id<Household> householdId = Id.create((counter + i), Household.class);
@@ -370,7 +366,7 @@ public class DemandGeneratorCensus {
 			household.getAttributes().putAttribute("numberOfAdults", 1); // Always 1; no household structure
 			household.getAttributes().putAttribute("totalNumberOfHouseholdVehicles", 1);
 			// using spatially refined location directly for home locations. Amit Dec'17
-			household.getAttributes().putAttribute("homeTSZLocation", getLocation(municipalityId));
+			household.getAttributes().putAttribute("homeTSZLocation", getExactLocation(municipalityId));
 			household.getAttributes().putAttribute("numberOfChildren", 0); // None, ignore them in this version
 			household.getAttributes().putAttribute("householdStructure", 1); // 1 = single, no children
 			
@@ -398,7 +394,7 @@ public class DemandGeneratorCensus {
 					person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
 					person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), false);
 				} else {
-					String locationOfWork = getRandomLocationOfWorkFromCommuterRelationList(commuterRelationList); // municipality id
+					String locationOfWork = getWorkMunicipalityFromCommuterRelationList(commuterRelationList); // municipality id
 					if (locationOfWork.length() == 8 && !this.idsOfFederalStatesIncluded.contains(locationOfWork.substring(0,2))) { // TODO external commuter are currently treated as non workers
 						counterExternalCommuters++;
 						person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
@@ -507,7 +503,7 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private static String getRandomLocationOfWorkFromCommuterRelationList(List<String> commuterRelationList) {
+	private static String getWorkMunicipalityFromCommuterRelationList(List<String> commuterRelationList) {
 		int position = random.nextInt(commuterRelationList.size());
 		String workMunicipalityId = commuterRelationList.get(position);
 		commuterRelationList.remove(position);
@@ -515,7 +511,7 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private String getLocation(String municipalityId) {
+	private String getExactLocation(String municipalityId) {
 		String locationId;
 		if (this.idsOfMunicipalitiesForSpatialRefinement !=null && this.idsOfMunicipalitiesForSpatialRefinement.contains(municipalityId)) {
 			locationId = getSpatiallyRefinedZone(municipalityId);
