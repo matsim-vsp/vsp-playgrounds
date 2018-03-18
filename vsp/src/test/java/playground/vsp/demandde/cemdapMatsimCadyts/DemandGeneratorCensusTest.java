@@ -40,8 +40,8 @@ public class DemandGeneratorCensusTest {
 				numberOfPlansPerPerson, idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
 		
 		demandGeneratorCensus.setShapeFileForSpatialRefinement(utils.getInputDirectory() + "Bezirksregion_EPSG_25833.shp");
-		demandGeneratorCensus.setIdsOfMunicipalityForSpatialRefinement(Arrays.asList("11000000"));
-		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL");
+		demandGeneratorCensus.setIdsOfMunicipalitiesForSpatialRefinement(Arrays.asList("11000000"));
+		demandGeneratorCensus.setRefinementFeatureKeyInShapefile("SCHLUESSEL");
 
 		demandGeneratorCensus.generateDemand();
 		

@@ -60,13 +60,13 @@ public class DemandGeneratorCensus {
 	private Map<Id<Household>, Household> households;
 	private ObjectAttributes municipalities;
 	private Map<String, Map<String, CommuterRelationV2>> relationsMap;
-	private String outputBase;
 	private List<Population> allPopulations = new ArrayList<>();
-	
-	// Optionally used storage objects (municipality id to lors/plz)
+	// Optional (links municipality ID to LOR/PLZ IDs in that municipality)
 	private final Map<String, List<String>> spatialRefinementZoneIds = new HashMap<>();
+	private List<String> idsOfMunicipalitiesForSpatialRefinement;
 	
 	// Parameters
+	private String outputBase;
 	private List<String> idsOfFederalStatesIncluded;
 	private int numberOfPlansPerPerson;
 	private double defaultAdultsToEmployeesRatio;
@@ -74,12 +74,10 @@ public class DemandGeneratorCensus {
 	boolean includeChildren = false;
 	boolean writeCemdapInputFiles = true; // Default is true for backwards compatibility
 	boolean writeMatsimPlanFiles = false;
-	
-	// Optionally used parameters
+	// Optional
 	private String shapeFileForSpatialRefinement;
-	private List<String> idsOfMunicipalityForSpatialRefinement;
-	private String featureKeyInShapeFileForRefinement;
-	private String municipalityFeatureKeyInShapeFile;
+	private String refinementFeatureKeyInShapefile;
+	private String municipalityFeatureKeyInShapefile;
 
 	// Counters
 	private int counterMissingComRel = 0;
@@ -92,17 +90,18 @@ public class DemandGeneratorCensus {
 
 	public static void main(String[] args) {
 		// Input and output files
-		String commuterFileOutgoing1 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Berlin_2009/B2009Ga.txt";
-		String commuterFileOutgoing2 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
-		String commuterFileOutgoing3 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil2BR2009Ga.txt";
-		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
+		String commuterFileOutgoing1 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Berlin_2009/B2009Ga.txt";
+		String commuterFileOutgoing2 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
+		String commuterFileOutgoing3 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil2BR2009Ga.txt";
+		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
-		String censusFile = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String outputBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/syn_pop/100_test/";
+		String censusFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/402/";
 		
 		// Parameters
-		int numberOfPlansPerPerson = 5;
+		int numberOfPlansPerPerson = 1; // Note: Setting this higher to a value higher than 1 if spatial refinement is used.
 		List<String> idsOfFederalStatesIncluded = Arrays.asList("12");
+		
 		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
 		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
 		double defaultCensusEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
@@ -111,16 +110,14 @@ public class DemandGeneratorCensus {
 
 		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
 				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio);
-		
 		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
-		
-		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Bezirksregion_EPSG_25833.shp");
-		demandGeneratorCensus.setIdsOfMunicipalityForSpatialRefinement(Arrays.asList("11000000")); // "Amtliche Gemeindeschlüssel (AGS)" of Berlin is "11000000"
-		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL"); // key of the features in shapefile used for spatial refinement
+		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/LOR_SHP_EPSG_25833/Planungsraum.shp");
+		demandGeneratorCensus.setIdsOfMunicipalitiesForSpatialRefinement(Arrays.asList("11000000")); // "Amtlicher Gemeindeschlüssel (AGS)" of Berlin is "11000000"
+		demandGeneratorCensus.setRefinementFeatureKeyInShapefile("PLN_ID"); // key of the features in shapefile used for spatial refinement
 
 		// municipality id (AGS)
-		String municipalityKeyInShapeFile = "NR"; // not available in refinement shape for Berlin --> setting to null. Amit Nov'17
-		demandGeneratorCensus.setMunicipalityFeatureKeyInShapeFile(null);
+		String municipalityFeatureKeyInShapefile = "NR"; // not available in refinement shape for Berlin --> setting to null. Amit Nov'17
+		demandGeneratorCensus.setMunicipalityFeatureKeyInShapefile(null);
 
 		demandGeneratorCensus.generateDemand();
 	}
@@ -134,9 +131,8 @@ public class DemandGeneratorCensus {
 		this.numberOfPlansPerPerson = numberOfPlansPerPerson;
 		
 		this.idsOfFederalStatesIncluded = idsOfFederalStatesIncluded;
-		// adding a check for each id (length==2); since, that's what we are using in the end. Amit Aug'17
 		this.idsOfFederalStatesIncluded.stream().forEach(e -> {
-			if (e.length()!=2) throw new RuntimeException("Length of the id for each Federal State must be equal to 2. This is not the case for "+ e);
+			if (e.length()!=2) throw new RuntimeException("Length of the id for each federal state must be equal to 2. This is not the case for "+ e);
 		});
 
 		this.defaultAdultsToEmployeesRatio = defaultAdultsToEmployeesRatio;
@@ -160,21 +156,16 @@ public class DemandGeneratorCensus {
 
 	
 	public void generateDemand() {
-		if (this.shapeFileForSpatialRefinement != null && this.featureKeyInShapeFileForRefinement != null ) {
-//			this.spatialRefinementZoneIds = readShape();
-			//initialize with given municipality ids
-			// Technically, one can get the list of municipality IDs for spatial refinement from features in provided shape file.
-			// However, it is better to take IDs as argument to exclude some municipality from the given shape. Amit Nov'17
-			this.idsOfMunicipalityForSpatialRefinement.stream().forEach(e->spatialRefinementZoneIds.put(e, new ArrayList<>()));
-			readShape();
+		if (this.shapeFileForSpatialRefinement != null && this.refinementFeatureKeyInShapefile != null ) {
+			this.idsOfMunicipalitiesForSpatialRefinement.stream().forEach(e->spatialRefinementZoneIds.put(e, new ArrayList<>()));
+			readShapeForSpatialRefinement();
 		} else {
-			LOG.info("A shape file and/or and the attribute that contains the keys has not ben provided.");
+			LOG.info("A shape file and/or and the name of the attribute that contains the keys has not been provided.");
 		}
 
-		//some checks and initialization
-		if ( this.shapeFileForSpatialRefinement!=null && this.municipalityFeatureKeyInShapeFile ==null && this.idsOfMunicipalityForSpatialRefinement.size()>1 ) {
-			throw new RuntimeException("A shape file for spatial refinement is provided and number of Municipality IDs for spatial refinement is more than 1." +
-					"However, no feature Key is provided to differentiate the Municipalities.");
+		if (this.shapeFileForSpatialRefinement != null && this.municipalityFeatureKeyInShapefile == null && this.idsOfMunicipalitiesForSpatialRefinement.size() > 1) {
+			throw new RuntimeException("A shape file for spatial refinement is provided and the number of municipality IDs for spatial refinement is greater than 1." +
+					"However, no feature key is provided to distinguish between the municipalities.");
 		}
 
 		int counter = 1;
@@ -297,7 +288,6 @@ public class DemandGeneratorCensus {
 			}
 		}
 
-
 		// Write some relevant information on console
 		LOG.warn("There are " + this.counterMissingComRel + " employees who have been set to unemployed since no commuter relation could be assigned to them.");
 		LOG.warn("Share of employees that had to be set to unemployed due to lack of commuter relations: " + ((double) this.counterMissingComRel / (double) this.allEmployees));
@@ -308,41 +298,28 @@ public class DemandGeneratorCensus {
 		LOG.warn("Total number of students: " + this.allStudents);
 		
 		// Write output files
-		// to make sure that 'this.population' always have municipality IDs corresponding to location of work and location of school. Amit Dec'17
-		Population clonedPop = clonePopulation(this.population);
 		if (this.writeCemdapInputFiles) {
 			writeHouseholdsFile(this.households, this.outputBase + "households.dat.gz");
-			writePersonsFile(clonedPop, this.outputBase + "persons.dat.gz");
 		}
-		if (this.writeMatsimPlanFiles) {
-			writeMatsimPlansFile(clonedPop, this.outputBase + "plans.xml.gz");
-		}
-		allPopulations.add(clonedPop);
-
-		// Create copies of population, but with different work locations
-		for (int i = 1; i < numberOfPlansPerPerson; i++) { // "less than" because the plan consists already in the original
-			Population clonedPopulation = clonePopulation(this.population);
+		for (int i = 1; i <= numberOfPlansPerPerson; i++) {
+			Population clonedPopulation = clonePopulationAndAdjustLocations(this.population);
 			if (this.writeCemdapInputFiles) {
-				writePersonsFile(clonedPopulation, this.outputBase + "persons" + (i+1) + ".dat.gz");
+				writePersonsFile(clonedPopulation, this.outputBase + "persons" + i + ".dat.gz");
 			}
 			if (this.writeMatsimPlanFiles) {
-				writeMatsimPlansFile(clonedPopulation, this.outputBase + "plans" + (i+1) + ".xml.gz");
+				writeMatsimPlansFile(clonedPopulation, this.outputBase + "plans" + i + ".xml.gz");
 			}
 			allPopulations.add(clonedPopulation);
 		}
 	}
-
-	/**
-	 * Cloning all plans of each person in given population. Also copying all person attributes.
-	 * @param inputPopulation
-	 * @return
-	 */
-	private Population clonePopulation(Population inputPopulation){
+	
+	
+	private Population clonePopulationAndAdjustLocations(Population inputPopulation){
 		Population clonedPopulation = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
 		for (Person person : inputPopulation.getPersons().values()) {
 			Person clonedPerson = clonedPopulation.getFactory().createPerson(person.getId());
 			// copy plans
-			for (Plan plan : person.getPlans()) { // though only one plan exists, iterating for all plans
+			for (Plan plan : person.getPlans()) { // Although only one plan can exist at this point in time, iterating for all plans
 				Plan clonedPlan = clonedPopulation.getFactory().createPlan();
 				PopulationUtils.copyFromTo(plan, clonedPlan);
 				clonedPerson.addPlan(clonedPlan);
@@ -351,11 +328,11 @@ public class DemandGeneratorCensus {
 			for(CEMDAPPersonAttributes attributeKey : CEMDAPPersonAttributes.values()){
 				clonedPerson.getAttributes().putAttribute(attributeKey.toString(), person.getAttributes().getAttribute(attributeKey.toString()));
 			}
+			
 			// change locations or use spatially refined location
-
 			if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString())) {
 				String locationOfWork = (String) person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString());
-				if (locationOfWork.length()==8) {
+				if (locationOfWork.length() == 8) {
 					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), getLocation(locationOfWork));
 				} else if (locationOfWork.equals("-99")) {
 					throw new RuntimeException("This combination of attribute values is implausible.");
@@ -366,7 +343,7 @@ public class DemandGeneratorCensus {
 
 			if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString())) {
 				String locationOfSchool = (String) person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString());
-				if (locationOfSchool.length()==8) {
+				if (locationOfSchool.length() == 8) {
 					clonedPerson.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), getLocation(locationOfSchool));
 				} else if (locationOfSchool.equals("-99")) {
 					throw new RuntimeException("This combination of attribute values is implausible.");
@@ -396,17 +373,17 @@ public class DemandGeneratorCensus {
 			
 			Id<Person> personId = Id.create(householdId + "01", Person.class);
 			Person person = this.population.getFactory().createPerson(personId);
-			// The following attribute names inspired by "PersonUtils.java": "sex", "hasLicense", "carAvail", "employed", "age", "travelcards"
+
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.householdId.toString(), householdId.toString()); // toString() will enable writing it to person attributes
 			boolean employed = false;
-			if (lowerAgeBound < 65 && upperAgeBound > 17) { // younger and older people are never employed
+			if (lowerAgeBound < 65 && upperAgeBound > 17) { // Younger and older people are never employed
 				employed = getEmployed(adultsToEmployeesRatio);
 			}
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), employed);
 			
 			boolean student = false;
-			if (lowerAgeBound < 30 && upperAgeBound > 17 && !employed) { // younger and older people are never student; employed people neither
-				student = true; // TODO quite simple assumption, which may be improved later
+			if (lowerAgeBound < 30 && upperAgeBound > 17 && !employed) { // Younger and older people are never a student, employed people neither
+				student = true; // TODO quite simplistic assumption, which may be improved later
 				allStudents++;
 			}			
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.student.toString(), student);
@@ -418,8 +395,8 @@ public class DemandGeneratorCensus {
 					person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
 					person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), false);
 				} else {
-					String locationOfWork = getRandomWorkLocation(commuterRelationList);// municipality id
-					if (locationOfWork.length() == 8 && ! this.idsOfFederalStatesIncluded.contains(locationOfWork.substring(0,2))) { // TODO external commuter are currently treated as non workers
+					String locationOfWork = getRandomLocationOfWorkFromCommuterRelationList(commuterRelationList); // municipality id
+					if (locationOfWork.length() == 8 && !this.idsOfFederalStatesIncluded.contains(locationOfWork.substring(0,2))) { // TODO external commuter are currently treated as non workers
 						counterExternalCommuters++;
 						person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
 						person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), false);
@@ -526,12 +503,8 @@ public class DemandGeneratorCensus {
 		return commuterRelationsList;
 	}
 
-	/**
-	 * Spatial refinement is not considered here.
-	 * @param commuterRelationList
-	 * @return
-	 */
-	private static String getRandomWorkLocation(List<String> commuterRelationList) {
+
+	private static String getRandomLocationOfWorkFromCommuterRelationList(List<String> commuterRelationList) {
 		Random random = new Random();
 		int position = random.nextInt(commuterRelationList.size());
 		String workMunicipalityId = commuterRelationList.get(position);
@@ -542,8 +515,7 @@ public class DemandGeneratorCensus {
 
 	private String getLocation(String municipalityId) {
 		String locationId;
-		if ( this.idsOfMunicipalityForSpatialRefinement !=null
-				&& this.idsOfMunicipalityForSpatialRefinement.contains(municipalityId)) {
+		if (this.idsOfMunicipalitiesForSpatialRefinement !=null && this.idsOfMunicipalitiesForSpatialRefinement.contains(municipalityId)) {
 			locationId = getSpatiallyRefinedZone(municipalityId);
 		} else {
 			locationId = municipalityId;
@@ -569,14 +541,17 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private Map<String,List<String>> readShape() {
+	private Map<String,List<String>> readShapeForSpatialRefinement() {
 		Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(this.shapeFileForSpatialRefinement);
 
 		for (SimpleFeature feature : features) {
 			String municipality;
-			if (this.municipalityFeatureKeyInShapeFile ==null) municipality = this.idsOfMunicipalityForSpatialRefinement.get(0); // checked already that size must be 1 (e.g., Berlin). Amit Nov'17
-			else municipality = (String) feature.getAttribute(this.municipalityFeatureKeyInShapeFile);
-			String key = (String) feature.getAttribute(this.featureKeyInShapeFileForRefinement); //attributeKey --> SCHLUESSEL
+			if (this.municipalityFeatureKeyInShapefile == null) {
+				municipality = this.idsOfMunicipalitiesForSpatialRefinement.get(0); // checked already that size must be 1 (e.g., Berlin). Amit Nov'17
+			} else {
+				municipality = (String) feature.getAttribute(this.municipalityFeatureKeyInShapefile);
+			}
+			String key = (String) feature.getAttribute(this.refinementFeatureKeyInShapefile); //attributeKey --> SCHLUESSEL
 			spatialRefinementZoneIds.get(municipality).add(key);
 		}
 		return spatialRefinementZoneIds;
@@ -587,9 +562,6 @@ public class DemandGeneratorCensus {
 		BufferedWriter bufferedWriterHouseholds = null;
 
 		try {
-//            File householdsFile = new File(fileName);
-//    		FileWriter fileWriterHouseholds = new FileWriter(householdsFile);
-//    		bufferedWriterHouseholds = new BufferedWriter(fileWriterHouseholds);
 			bufferedWriterHouseholds = IOUtils.getBufferedWriter(fileName);
     		
     		for (Household household : households.values()) {
@@ -613,7 +585,6 @@ public class DemandGeneratorCensus {
     	} catch (IOException ex) {
             ex.printStackTrace();
         } finally {
-            //Close the BufferedWriter
             try {
                 if (bufferedWriterHouseholds != null) {
                     bufferedWriterHouseholds.flush();
@@ -631,9 +602,6 @@ public class DemandGeneratorCensus {
 		BufferedWriter bufferedWriterPersons = null;
 
 		try {
-//			File personFile = new File(fileName);
-//			FileWriter fileWriterPersons = new FileWriter(personFile);
-//			bufferedWriterPersons = new BufferedWriter(fileWriterPersons);
 			bufferedWriterPersons = IOUtils.getBufferedWriter(fileName);
 			    		    		
 			for (Person person : population.getPersons().values()) {
@@ -689,7 +657,6 @@ public class DemandGeneratorCensus {
 		} catch (IOException ex) {
 	        ex.printStackTrace();
 	    } finally {
-	        //Close the BufferedWriter
 	        try {
 	            if (bufferedWriterPersons != null) {
 	                bufferedWriterPersons.flush();
@@ -702,52 +669,45 @@ public class DemandGeneratorCensus {
 		LOG.info("Persons file " + fileName + " written.");
 	}
 
-
+	
 	private static void writeMatsimPlansFile(Population population, String fileName) {
 	    MatsimWriter popWriter = new PopulationWriter(population);
 	    popWriter.write(fileName);
 	}
 	
-
+	
+	// Getters and setters
     public Population getPopulation() {
     	return this.population;
 	}
-    
     
     public void setShapeFileForSpatialRefinement(String shapeFileForSpatialRefinement) {
     	this.shapeFileForSpatialRefinement = shapeFileForSpatialRefinement;
     }
     
-    
-    public void setIdsOfMunicipalityForSpatialRefinement(List<String> idsOfMunicipalityForSpatialRefinement) {
-    	this.idsOfMunicipalityForSpatialRefinement = idsOfMunicipalityForSpatialRefinement;
+    public void setIdsOfMunicipalitiesForSpatialRefinement(List<String> idsOfMunicipalitiesForSpatialRefinement) {
+    	this.idsOfMunicipalitiesForSpatialRefinement = idsOfMunicipalitiesForSpatialRefinement;
     }
     
-    
-    public void setFeatureKeyInShapeFileForRefinement(String featureKeyInShapeFileForRefinement) {
-    	this.featureKeyInShapeFileForRefinement = featureKeyInShapeFileForRefinement;
+    public void setRefinementFeatureKeyInShapefile(String refinementFeatureKeyInShapefile) {
+    	this.refinementFeatureKeyInShapefile = refinementFeatureKeyInShapefile;
     }
 
-    
-	public void setMunicipalityFeatureKeyInShapeFile(String municipalityFeatureKeyInShapeFile) {
-		this.municipalityFeatureKeyInShapeFile = municipalityFeatureKeyInShapeFile;
+	public void setMunicipalityFeatureKeyInShapefile(String municipalityFeatureKeyInShapefile) {
+		this.municipalityFeatureKeyInShapefile = municipalityFeatureKeyInShapefile;
 	}
-	
 	
 	public void setWriteCemdapInputFiles(boolean writeCemdapInputFiles) {
     	this.writeCemdapInputFiles = writeCemdapInputFiles;
     }
 
-	
 	public void setWriteMatsimPlanFiles(boolean writeMatsimPlanFiles) {
     	this.writeMatsimPlanFiles = writeMatsimPlanFiles;
     }
-    
-	
+
     public void setIncludeChildren(boolean includeChildren) {
     	this.includeChildren = includeChildren;
     }
-    
     
     public List<Population> getAllPopulations() {
     	return this.allPopulations;
