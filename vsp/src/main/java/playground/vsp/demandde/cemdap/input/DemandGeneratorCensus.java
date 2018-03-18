@@ -47,9 +47,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
 
 /**
- * This class is derived from "playground.dziemke.cemdapMatsimCadyts.oneperson.DemandGeneratorOnePersonV2.java"
- * In contrast to its predecessors, it creates a full population based on the Zensus 2001. People are assigned
- * commuter relations based on the Pendlerstatistik 2009.
+ * This class creates a full population of a study region (in Germany) based on the Zensus and the Pendlerstatistik. People are assigned
+ * places or residence and with demographic attributes based on the Zensus and with commuter relations based on the Pendlerstatistik.
  * 
  * @author dziemke
  */
@@ -76,6 +75,7 @@ public class DemandGeneratorCensus {
 	private double defaultEmployeesToCommutersRatio;
 	boolean includeChildren = false;
 	boolean writeCemdapInputFiles = true; // Default is true for backwards compatibility
+	boolean includeOptionalVariablesAndSetTheirValueToZero = true; // Default is true for backwards compatibility
 	boolean writeMatsimPlanFiles = false;
 	// Optional
 	private String shapeFileForSpatialRefinement;
@@ -114,6 +114,7 @@ public class DemandGeneratorCensus {
 		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
 				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio);
 		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
+		demandGeneratorCensus.setIncludeOptionalVariablesAndSetTheirValueToZero(false);
 		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/LOR_SHP_EPSG_25833/Planungsraum.shp");
 		demandGeneratorCensus.setIdsOfMunicipalitiesForSpatialRefinement(Arrays.asList("11000000")); // "Amtlicher Gemeindeschlüssel (AGS)" of Berlin is "11000000"
 		demandGeneratorCensus.setRefinementFeatureKeyInShapefile("PLN_ID"); // Key of the features in the shapefile used for spatial refinement
@@ -400,7 +401,6 @@ public class DemandGeneratorCensus {
 						person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), "-99");
 						person.getAttributes().putAttribute(CEMDAPPersonAttributes.employed.toString(), false);
 					} else {
-						// using municipality id in person attributes and loaction is refined spatially afterwards. Amit Dec'17
 						person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfWork.toString(), locationOfWork);
 					}
 				}
@@ -409,8 +409,7 @@ public class DemandGeneratorCensus {
 			}
 
 			if (student) {
-				// TODO quite simple assumption, which may be improved later
-				// using municipality id in person attributes and loaction is refined spatially afterwards. Amit Dec'17
+				// TODO This is a quite simple assumption (students study in their residential municipality), which may be improved later
 				person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), municipalityId);
 			} else {
 				person.getAttributes().putAttribute(CEMDAPPersonAttributes.locationOfSchool.toString(), "-99");
@@ -423,7 +422,7 @@ public class DemandGeneratorCensus {
 			
 			this.population.addPerson(person);
 			
-			List<Id<Person>> personIds = new ArrayList<>(); // does in current implementation (only 1 p/hh) not make much sense
+			List<Id<Person>> personIds = new ArrayList<>(); // Does in current implementation (only 1 p/hh) not make much sense
 			personIds.add(personId);
 			household.setMemberIds(personIds);
 			this.households.put(householdId, household);
@@ -569,13 +568,19 @@ public class DemandGeneratorCensus {
     			int numberOfChildren = (Integer) household.getAttributes().getAttribute("numberOfChildren");
     			int householdStructure = (Integer) household.getAttributes().getAttribute("householdStructure");
 
-    			// Altogether this creates 32 columns = number in query file
-    			bufferedWriterHouseholds.write(householdId + "\t" + numberOfAdults + "\t" + totalNumberOfHouseholdVehicles
-    					+ "\t" + homeTSZLocation + "\t" + numberOfChildren + "\t" + householdStructure + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0);
+    			if (includeOptionalVariablesAndSetTheirValueToZero) {
+	    			// Altogether this creates 32 columns = number in query file
+	    			bufferedWriterHouseholds.write(householdId + "\t" + numberOfAdults + "\t" + totalNumberOfHouseholdVehicles
+	    					+ "\t" + homeTSZLocation + "\t" + numberOfChildren + "\t" + householdStructure + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0);
+    			} else {
+    				// Only the 6 columns with the required variables
+	    			bufferedWriterHouseholds.write(householdId + "\t" + numberOfAdults + "\t" + totalNumberOfHouseholdVehicles
+	    					+ "\t" + homeTSZLocation + "\t" + numberOfChildren + "\t" + householdStructure);
+    			}
     			bufferedWriterHouseholds.newLine();
     		}
     		
@@ -595,7 +600,7 @@ public class DemandGeneratorCensus {
     }
 	
 	
-	private static void writePersonsFile(Population population, String fileName) {
+	private void writePersonsFile(Population population, String fileName) {
 		BufferedWriter bufferedWriterPersons = null;
 
 		try {
@@ -639,16 +644,23 @@ public class DemandGeneratorCensus {
 					parent = 0;
 				}
 				
-				// Altogether this creates 59 columns = number in query file
-				bufferedWriterPersons.write(householdId + "\t" + personId + "\t" + employed  + "\t" + student
-						+ "\t" + driversLicence + "\t" + locationOfWork + "\t" + locationOfSchool
-						+ "\t" + female + "\t" + age + "\t" + parent + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
-						+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
-						+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
-						+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
-						+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
-						+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
-						+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 );
+				if (includeOptionalVariablesAndSetTheirValueToZero) {
+					// Altogether this creates 59 columns = number in query file
+					bufferedWriterPersons.write(householdId + "\t" + personId + "\t" + employed  + "\t" + student
+							+ "\t" + driversLicence + "\t" + locationOfWork + "\t" + locationOfSchool
+							+ "\t" + female + "\t" + age + "\t" + parent + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
+							+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
+							+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
+							+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
+							+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
+							+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 
+							+ "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0  + "\t" + 0 );
+				} else {
+					// Only the 10 columns with the required variables
+					bufferedWriterPersons.write(householdId + "\t" + personId + "\t" + employed  + "\t" + student
+							+ "\t" + driversLicence + "\t" + locationOfWork + "\t" + locationOfSchool
+							+ "\t" + female + "\t" + age + "\t" + parent);
+				}
 				bufferedWriterPersons.newLine();
 			}
 		} catch (IOException ex) {
@@ -697,6 +709,10 @@ public class DemandGeneratorCensus {
 	public void setWriteCemdapInputFiles(boolean writeCemdapInputFiles) {
     	this.writeCemdapInputFiles = writeCemdapInputFiles;
     }
+	
+	public void setIncludeOptionalVariablesAndSetTheirValueToZero(boolean includeOptionalVariablesAndSetTheirValueToZero) {
+		this.includeOptionalVariablesAndSetTheirValueToZero = includeOptionalVariablesAndSetTheirValueToZero;
+	}
 
 	public void setWriteMatsimPlanFiles(boolean writeMatsimPlanFiles) {
     	this.writeMatsimPlanFiles = writeMatsimPlanFiles;
