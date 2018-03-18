@@ -132,7 +132,7 @@ public class DemandGeneratorCensusTest {
 		Assert.assertEquals("Wrong female75Plus count", female75PlusRef, female75Plus);
 		Assert.assertEquals("Wrong male65_74 count", male65_74Ref, male65_74);
 
-		Assert.assertTrue("", new File(utils.getOutputDirectory() + "persons.dat.gz").exists());
+		Assert.assertTrue("", new File(utils.getOutputDirectory() + "persons1.dat.gz").exists());
 
 	}
 
