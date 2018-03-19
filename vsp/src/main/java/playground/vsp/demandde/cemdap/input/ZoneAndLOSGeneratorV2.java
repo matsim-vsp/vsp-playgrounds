@@ -56,43 +56,35 @@ public class ZoneAndLOSGeneratorV2 {
 	private final String outputBase;
 	
 	// Parameters
-	private double defaultIntraZoneDistance = 1.72; // in miles; equals 2.76km.
+//	private double defaultIntraZoneDistance = 1.72; // in miles; equals 2.76km.
+	private double defaultIntraZoneDistance = 1.; // new, lower value
 	private double beelineDistanceFactor = 1.3;
-	private double durantionDistanceOffPeakRatio_min_mile = 1.6; // based on computations in sample dataset; equals ca. 60km/h
-	private double durantionDistancePeakRatio_min_mile = 1.9; // based on computations in sample dataset; equals ca. 50km/h
+//	private double durantionDistanceOffPeakRatio_min_mile = 1.6; // based on computations in sample dataset; equals ca. 60km/h
+	// assuming average speed of 24 kph in peak hr
+    // (see https://de.statista.com/statistik/daten/studie/37200/umfrage/durchschnittsgeschwindigkeit-in-den-15-groessten-staedten-der-welt-2009/)
+	private double durantionDistanceOffPeakRatio_min_mile = 3.2; // New, lower value, cf. NEMO; 3.2 --> 30kph // 1.6 --> 60kph (default value)
+//	private double durantionDistancePeakRatio_min_mile = 1.9; // based on computations in sample dataset; equals ca. 50km/h
+	private double durantionDistancePeakRatio_min_mile = 4.8; // New, lower value, cf. NEMO; 4.8 --> 20kph // 1.9 --> 50kph (default value)
 	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
 
 	// spatial refinement. Amit Nov'17
 	private List<String> zoneIdsForSpatialRefinement; // this is filled if shape file for spatial refinement is provided.
 	private double defaultIntraZoneDistanceForSpatialRefinement;
 	
+	
 	public static void main(String[] args) {
-//		// Input and output
-//		String commuterFileBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
-//		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
-//		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
-//		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
-//		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
-//		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
-//		String shapeFile = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
-//		String outputBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/cemdap_input/200/";
-//
-//		// Parameters
-//		String featureKeyInShapeFile = "NR";
-		
 		// Input and output
-		String commuterFileBase = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/pendlerstatistik/";
-		String commuterFileOutgoing1 = commuterFileBase + "051NRW2009Ga.txt";
-		String commuterFileOutgoing2 = commuterFileBase + "053NRW2009Ga.txt";
-		String commuterFileOutgoing3 = commuterFileBase + "055NRW2009Ga.txt";
-		String commuterFileOutgoing4 = commuterFileBase + "057NRW2009Ga.txt";
-		String commuterFileOutgoing5 = commuterFileBase + "059NRW2009Ga.txt";
-		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4, commuterFileOutgoing5};
-		String shapeFile = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/sourceShape_NRW/modified/dvg2gem_nw_mod.shp";
-		String outputBase = "../../shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/100_neu/";
+		String commuterFileBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
+		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
+		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
+		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
+		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
+		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
+		String shapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/gemeindenPlanungsraum.shp";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/cemdap_input/400/";
 
 		// Parameters
-		String featureKeyInShapeFile = "KN";
+		String featureKeyInShapeFile = "NR";
 		
 		ZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase, featureKeyInShapeFile);
 		zoneAndLOSGeneratorV2.generateSupply();
