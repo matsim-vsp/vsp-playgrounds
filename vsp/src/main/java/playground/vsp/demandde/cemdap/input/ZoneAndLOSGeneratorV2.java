@@ -72,7 +72,6 @@ public class ZoneAndLOSGeneratorV2 {
 	private List<String> zoneIdsForSpatialRefinement; // this is filled if shape file for spatial refinement is provided.
 	private double defaultIntraZoneDistanceForSpatialRefinement;
 	
-	
 	public static void main(String[] args) {
 		// Input and output
 		String commuterFileBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/";
@@ -92,7 +91,6 @@ public class ZoneAndLOSGeneratorV2 {
 		zoneAndLOSGeneratorV2.generateSupply();
 	}
 
-	
 	public ZoneAndLOSGeneratorV2(String[] commuterFilesOutgoing, String shapeFile, String outputBase, String featureKeyInShapefile) {
 		LogToOutputSaver.setOutputDirectory(outputBase);
 
@@ -102,16 +100,14 @@ public class ZoneAndLOSGeneratorV2 {
 		readShape(shapeFile, featureKeyInShapefile);
 	}
 	
-	
 	public void generateSupply() {
 		compareIdsInShapefileAndCommuterFiles();
 		computeAndStoreZone2ZoneDistances();
 		writeZone2ZoneFile();
 		writeZonesFile();
-		writeLOSOffPkAMFile();
-		writeLOSPeakAMFile();
+		writeLOSFile("losoffpkam", false);
+		writeLOSFile("lospeakam", true);
 	}
-	
 	
 	private void readMunicipalities(String[] commuterFilesOutgoing) {
 		for (String commuterFileOutgoing : commuterFilesOutgoing) {
@@ -121,7 +117,6 @@ public class ZoneAndLOSGeneratorV2 {
 		}
 	}
 
-	
 	private void readShape(String shapeFile, String featureKeyInShapeFile) {
 		Collection <SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
 		for (SimpleFeature feature : features) {
@@ -131,7 +126,6 @@ public class ZoneAndLOSGeneratorV2 {
 			this.zoneMap.put(id, geometry);
 		}
 	}
-	
 	
 	private void compareIdsInShapefileAndCommuterFiles() {
 		LOG.info("Municipality set has " + municipalities.size() + " elements.");
@@ -147,7 +141,6 @@ public class ZoneAndLOSGeneratorV2 {
 			}
 		}
 	}
-	
 	
 	private void computeAndStoreZone2ZoneDistances() {
 		LOG.info("Start distance and adjacency computations.");
@@ -199,7 +192,6 @@ public class ZoneAndLOSGeneratorV2 {
 		}
 		LOG.info("Finised distance and adjacency computations.");
 	}
-		
 	
 	private void writeZone2ZoneFile() {
 		BufferedWriter bufferedWriterZone2Zone = null;
@@ -234,7 +226,6 @@ public class ZoneAndLOSGeneratorV2 {
         }
 		System.out.println("Zone2Zone file written.");
     }
-	
 	
 	private void writeZonesFile() {
 		BufferedWriter bufferedWriterZones = null;
@@ -275,11 +266,10 @@ public class ZoneAndLOSGeneratorV2 {
 		System.out.println("Zones file written.");
     }
 	
-	
-	private void writeLOSOffPkAMFile() {
+	private void writeLOSFile(String filename, boolean isPeak) {
 		BufferedWriter bufferedWriterLos = null;
 		try {
-            File losFile = new File(this.outputBase + "losoffpkam.dat");
+            File losFile = new File(this.outputBase + filename + ".dat");
             FileWriter fileWriterLos = new FileWriter(losFile);
     		bufferedWriterLos = new BufferedWriter(fileWriterLos);
     		
@@ -296,7 +286,12 @@ public class ZoneAndLOSGeneratorV2 {
     				double distance_mi = this.zone2ZoneDistanceMap.get(originId).get(destinationId);
     				int adjacent = this.zone2ZoneAdjacencyMap.get(originId).get(destinationId);
     				
-    				double driveAloneIVTT_min = distance_mi * durantionDistanceOffPeakRatio_min_mile;
+    				double driveAloneIVTT_min;
+    				if (isPeak) {
+    					driveAloneIVTT_min = distance_mi * durantionDistancePeakRatio_min_mile;
+    				} else {
+        				driveAloneIVTT_min = distance_mi * durantionDistanceOffPeakRatio_min_mile;
+    				}
     				temp = Math.round(driveAloneIVTT_min * 100); // Round to two decimal places
     				driveAloneIVTT_min = temp / 100;
     				
@@ -326,61 +321,7 @@ public class ZoneAndLOSGeneratorV2 {
                 ex.printStackTrace();
             }
         }
-		System.out.println("LOSOffPkAM file written.");
-	}
-	
-	
-	private void writeLOSPeakAMFile() {
-		BufferedWriter bufferedWriterLos = null;
-		try {
-            File losFile = new File(this.outputBase + "lospeakam.dat");
-            FileWriter fileWriterLos = new FileWriter(losFile);
-    		bufferedWriterLos = new BufferedWriter(fileWriterLos);
-    		
-    		double temp = 0.0;
-    		
-    		for (String originId : this.zones) {
-    			for (String destinationId : this.zones) {
-    				
-    				int inSameZone = 0;
-    				if (originId.equals(destinationId)) {
-    					inSameZone = 1;
-    				}
-    				
-    				double distance_mi = this.zone2ZoneDistanceMap.get(originId).get(destinationId);
-    				int adjacent = this.zone2ZoneAdjacencyMap.get(originId).get(destinationId);
-    				
-    				double driveAloneIVTT_min = distance_mi * durantionDistancePeakRatio_min_mile;
-    				temp = Math.round(driveAloneIVTT_min * 100); // Round to two decimal places
-    				driveAloneIVTT_min = temp / 100;
-    				
-    				double driveAloneCost_USD = distance_mi * costDistanceRatio_USD_mile;
-    				temp = Math.round(driveAloneCost_USD * 100); // Round to two decimal places
-    				driveAloneCost_USD = temp / 100;
-    				
-    				// 14 columns
-    				bufferedWriterLos.write(Integer.parseInt(originId) + "\t" + destinationId + "\t" + inSameZone
-    						+ "\t" + adjacent + "\t" + distance_mi + "\t" + driveAloneIVTT_min + "\t" + 3.1
-    						+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + driveAloneCost_USD
-    						+ "\t" + driveAloneIVTT_min + "\t" + driveAloneCost_USD);
-        			bufferedWriterLos.newLine();
-        		}
-    		}
-    	} catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                if (bufferedWriterLos != null) {
-                    bufferedWriterLos.flush();
-                    bufferedWriterLos.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-		System.out.println("LOSPeakAM file written.");
+		System.out.println(filename + " file written.");
 	}
 
 	private double getIntraZonalDistance(String municipalityId){
@@ -409,16 +350,13 @@ public class ZoneAndLOSGeneratorV2 {
     	this.beelineDistanceFactor = beelineDistanceFactor;
     }
 	
-	
 	public void setDurantionDistanceOffPeakRatio_min_mile(double durantionDistanceOffPeakRatio_min_mile) {
     	this.durantionDistanceOffPeakRatio_min_mile = durantionDistanceOffPeakRatio_min_mile;
     }
 	
-	
 	public void setDurantionDistancePeakRatio_min_mile(double durantionDistancePeakRatio_min_mile) {
     	this.durantionDistancePeakRatio_min_mile = durantionDistancePeakRatio_min_mile;
     }
-	
 	
 	public void setCostDistanceRatio_USD_mile(double costDistanceRatio_USD_mile) {
     	this.costDistanceRatio_USD_mile = costDistanceRatio_USD_mile;
