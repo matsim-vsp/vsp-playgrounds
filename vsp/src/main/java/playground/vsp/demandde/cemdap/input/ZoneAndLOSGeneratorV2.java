@@ -36,6 +36,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.vsp.demandde.cemdap.LogToOutputSaver;
 
@@ -196,10 +197,7 @@ public class ZoneAndLOSGeneratorV2 {
 	private void writeZone2ZoneFile() {
 		BufferedWriter bufferedWriterZone2Zone = null;
 		try {
-            File zone2ZoneFile = new File(this.outputBase + "zone2zone.dat");
-    		FileWriter fileWriterZone2Zone = new FileWriter(zone2ZoneFile);
-    		bufferedWriterZone2Zone = new BufferedWriter(fileWriterZone2Zone);
-    		
+			bufferedWriterZone2Zone = IOUtils.getBufferedWriter(this.outputBase + "zone2zone.dat.gz");
     		for (String originId : this.zones) {
     			for (String destinationId : this.zones) {
     				double distance_mi = this.zone2ZoneDistanceMap.get(originId).get(destinationId);
@@ -230,10 +228,7 @@ public class ZoneAndLOSGeneratorV2 {
 	private void writeZonesFile() {
 		BufferedWriter bufferedWriterZones = null;
 		try {
-            File zonesFile = new File(this.outputBase + "zones.dat");
-    		FileWriter fileWriterZones = new FileWriter(zonesFile);
-    		bufferedWriterZones = new BufferedWriter(fileWriterZones);
-    		
+			bufferedWriterZones = IOUtils.getBufferedWriter(this.outputBase + "zones.dat.gz");
     		for (String zoneId : this.zones) {
     			if (includeOptionalVariablesAndSetTheirValueToZero) {
 	    			// 45 columns
@@ -269,12 +264,8 @@ public class ZoneAndLOSGeneratorV2 {
 	private void writeLOSFile(String filename, boolean isPeak) {
 		BufferedWriter bufferedWriterLos = null;
 		try {
-            File losFile = new File(this.outputBase + filename + ".dat");
-            FileWriter fileWriterLos = new FileWriter(losFile);
-    		bufferedWriterLos = new BufferedWriter(fileWriterLos);
-    		
+			bufferedWriterLos = IOUtils.getBufferedWriter(this.outputBase + filename + ".dat.gz");
     		double temp = 0.0;
-    		
     		for (String originId : this.zones) {
     			for (String destinationId : this.zones) {
     				
@@ -333,7 +324,7 @@ public class ZoneAndLOSGeneratorV2 {
 	}
 
 	/**
-	 * @param defaultIntraZoneDistance will be used for all intra zonal trips. A zone could be Municipality of LOR (for berlin) or Bezirke (PLZ).
+	 * @param defaultIntraZoneDistance will be used for all intrazonal trips. A zone could be Municipality of LOR (for berlin) or Bezirke (PLZ).
 	 */
 	public void setDefaultIntraZoneDistance(double defaultIntraZoneDistance) {
     	this.defaultIntraZoneDistance = defaultIntraZoneDistance;
