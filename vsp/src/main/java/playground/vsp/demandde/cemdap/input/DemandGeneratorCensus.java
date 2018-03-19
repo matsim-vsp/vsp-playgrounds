@@ -102,7 +102,7 @@ public class DemandGeneratorCensus {
 		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/400/";
 		
 		// Parameters
-		int numberOfPlansPerPerson = 1; // Note: Setting this higher to a value higher than 1 if spatial refinement is used.
+		int numberOfPlansPerPerson = 10; // Note: Set this higher to a value higher than 1 if spatial refinement is used.
 		List<String> idsOfFederalStatesIncluded = Arrays.asList("11", "12"); // 11=Berlin, 12=Brandenburg
 		
 		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
@@ -300,12 +300,12 @@ public class DemandGeneratorCensus {
 		
 		// Write output files
 		if (this.writeCemdapInputFiles) {
-			writeHouseholdsFile(this.households, this.outputBase + "households.dat.gz");
+			writeCemdapHouseholdsFile(this.households, this.outputBase + "households.dat.gz");
 		}
 		for (int i = 1; i <= numberOfPlansPerPerson; i++) {
 			Population clonedPopulation = clonePopulationAndAdjustLocations(this.population);
 			if (this.writeCemdapInputFiles) {
-				writePersonsFile(clonedPopulation, this.outputBase + "persons" + i + ".dat.gz");
+				writeCemdapPersonsFile(clonedPopulation, this.outputBase + "persons" + i + ".dat.gz");
 			}
 			if (this.writeMatsimPlanFiles) {
 				writeMatsimPlansFile(clonedPopulation, this.outputBase + "plans" + i + ".xml.gz");
@@ -554,7 +554,7 @@ public class DemandGeneratorCensus {
 	}
 	
 	
-	private void writeHouseholdsFile(Map<Id<Household>, Household> households, String fileName) {
+	private void writeCemdapHouseholdsFile(Map<Id<Household>, Household> households, String fileName) {
 		BufferedWriter bufferedWriterHouseholds = null;
 
 		try {
@@ -600,7 +600,7 @@ public class DemandGeneratorCensus {
     }
 	
 	
-	private void writePersonsFile(Population population, String fileName) {
+	private void writeCemdapPersonsFile(Population population, String fileName) {
 		BufferedWriter bufferedWriterPersons = null;
 
 		try {
