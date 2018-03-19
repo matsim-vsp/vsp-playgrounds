@@ -66,6 +66,7 @@ public class ZoneAndLOSGeneratorV2 {
 //	private double durantionDistancePeakRatio_min_mile = 1.9; // based on computations in sample dataset; equals ca. 50km/h
 	private double durantionDistancePeakRatio_min_mile = 4.8; // New, lower value, cf. NEMO; 4.8 --> 20kph // 1.9 --> 50kph (default value)
 	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
+	boolean includeOptionalVariablesAndSetTheirValueToZero = true; // Default is true for backwards compatibility
 
 	// spatial refinement. Amit Nov'17
 	private List<String> zoneIdsForSpatialRefinement; // this is filled if shape file for spatial refinement is provided.
@@ -74,30 +75,31 @@ public class ZoneAndLOSGeneratorV2 {
 	
 	public static void main(String[] args) {
 		// Input and output
-		String commuterFileBase = "../../shared-svn/studies/countries/de/berlin_scenario_2016/input/pendlerstatistik_2009/";
+		String commuterFileBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/";
 		String commuterFileOutgoing1 = commuterFileBase + "Berlin_2009/B2009Ga.txt";
 		String commuterFileOutgoing2 = commuterFileBase + "Brandenburg_2009/Teil1BR2009Ga.txt";
 		String commuterFileOutgoing3 = commuterFileBase + "Brandenburg_2009/Teil2BR2009Ga.txt";
 		String commuterFileOutgoing4 = commuterFileBase + "Brandenburg_2009/Teil3BR2009Ga.txt";
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
-		String shapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/gemeindenPlanungsraum.shp";
-		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/cemdap_input/400/";
+		String shapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/gemeinden_Planungsraum.shp";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/400/";
 
 		// Parameters
-		String featureKeyInShapeFile = "NR";
+		String featureKeyInShapefile = "ID";
 		
-		ZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase, featureKeyInShapeFile);
+		ZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase, featureKeyInShapefile);
+		zoneAndLOSGeneratorV2.setIncludeOptionalVariablesAndSetTheirValueToZero(false);
 		zoneAndLOSGeneratorV2.generateSupply();
 	}
 
 	
-	public ZoneAndLOSGeneratorV2(String[] commuterFilesOutgoing, String shapeFile, String outputBase, String featureKeyInShapeFile) {
+	public ZoneAndLOSGeneratorV2(String[] commuterFilesOutgoing, String shapeFile, String outputBase, String featureKeyInShapefile) {
 		LogToOutputSaver.setOutputDirectory(outputBase);
 
 		this.outputBase = outputBase;
 
 		readMunicipalities(commuterFilesOutgoing);
-		readShape(shapeFile, featureKeyInShapeFile);
+		readShape(shapeFile, featureKeyInShapefile);
 	}
 	
 	
@@ -151,12 +153,14 @@ public class ZoneAndLOSGeneratorV2 {
 		LOG.info("Start distance and adjacency computations.");
 		LOG.info(this.zones.size() * this.zones.size() + " computations will be performed.");
 		int counter = 0;
+		int denominator = 1;
 		for (String originId : this.zones) {
 			Map<String,Double> toZoneDistanceMap = new HashMap<>();
 			Map<String,Integer> toZoneAdjacencyMap = new HashMap<>();
 			for (String destinationId : this.zones) {
 				counter++;
-				if (counter%1000 == 0) {
+				if (counter%denominator == 0) {
+					denominator = denominator *2;
 					LOG.info(counter + " relations computed.");
 				}
 				int adjacent;
@@ -240,13 +244,18 @@ public class ZoneAndLOSGeneratorV2 {
     		bufferedWriterZones = new BufferedWriter(fileWriterZones);
     		
     		for (String zoneId : this.zones) {
-    			// 45 columns
-    			bufferedWriterZones.write(Integer.parseInt(zoneId) + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
+    			if (includeOptionalVariablesAndSetTheirValueToZero) {
+	    			// 45 columns
+	    			bufferedWriterZones.write(Integer.parseInt(zoneId) + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
+    			} else {
+    				// Only the 1 column with the required variable
+    				bufferedWriterZones.write(Integer.parseInt(zoneId));
+    			}
     			bufferedWriterZones.newLine();
     		}
         } catch (FileNotFoundException ex) {
@@ -423,5 +432,9 @@ public class ZoneAndLOSGeneratorV2 {
 				.map(feature -> feature.getAttribute(featureKeyInShapeFileForRefinement).toString())
 				.collect(Collectors.toList());
 		readShape(shapeFileForSpatialRefinement, featureKeyInShapeFileForRefinement);
+	}
+    
+	public void setIncludeOptionalVariablesAndSetTheirValueToZero(boolean includeOptionalVariablesAndSetTheirValueToZero) {
+		this.includeOptionalVariablesAndSetTheirValueToZero = includeOptionalVariablesAndSetTheirValueToZero;
 	}
 }
