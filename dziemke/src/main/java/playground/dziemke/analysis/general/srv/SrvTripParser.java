@@ -179,7 +179,9 @@ public class SrvTripParser {
     }
 
     private String getLegMode() {
-        if (getRide()) return TransportMode.ride;
+        if (getRide()) {
+            return TransportMode.ride;
+        }
         int hvm_4 = Integer.parseInt(entries[columnNumbers.get(SrvTripUtils.MODE)]);
         switch (hvm_4) {
             case 1:
@@ -196,8 +198,8 @@ public class SrvTripParser {
     }
 
     private boolean getRide() {
-        boolean rideWithHomeownCar = Boolean.parseBoolean(entries[columnNumbers.get(SrvTripUtils.USE_HOUSEHOLD_CAR_POOL)]);
-        boolean rideWithOtherCar = Boolean.parseBoolean(entries[columnNumbers.get(SrvTripUtils.USE_OTHER_CAR_POOL)]);
+        boolean rideWithHomeownCar = "1".equals(entries[columnNumbers.get(SrvTripUtils.USE_HOUSEHOLD_CAR_POOL)]);
+        boolean rideWithOtherCar = "1".equals(entries[columnNumbers.get(SrvTripUtils.USE_OTHER_CAR_POOL)]);
         return rideWithHomeownCar || rideWithOtherCar;
     }
 
