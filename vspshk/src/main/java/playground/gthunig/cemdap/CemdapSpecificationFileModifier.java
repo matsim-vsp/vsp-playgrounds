@@ -1,4 +1,4 @@
-package playground.gthunig.cemdapSpecificationFileModifier;
+package playground.gthunig.cemdap;
 
 import com.sun.xml.bind.v2.runtime.output.SAXOutput;
 
@@ -21,7 +21,7 @@ public class CemdapSpecificationFileModifier {
                 int id = Integer.parseInt(idString);
                 if ((id > 5 && id < 10000) ||
                     (id > 10009 && id < 20000) ||
-                    (id > 20009 && id < 30000)) {
+                    (id > 20000 && id < 30000)) {
                     System.out.println("Change line value with id " + id);
                     String[] lineSplit = line.split("value=\"");
                     StringBuilder newLine = new StringBuilder(lineSplit[0] + "value=\"" + "0");
