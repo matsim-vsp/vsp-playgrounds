@@ -239,8 +239,9 @@ public class ZoneAndLOSGeneratorV2 {
 	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
 	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
     			} else {
-    				// Only the 1 column with the required variable
-    				bufferedWriterZones.write(Integer.parseInt(zoneId));
+    				// Only the 10 columns with the required variables
+    				bufferedWriterZones.write(Integer.parseInt(zoneId) + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0
+	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
     			}
     			bufferedWriterZones.newLine();
     		}
