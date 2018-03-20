@@ -42,7 +42,7 @@ public class AnalyzeAndCompareTrips {
 	private static final String SRV_BASE_DIR = "../../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/input/";
 	private static final String SRV_PERSON_FILE_PATH = SRV_BASE_DIR + "P2008_Berlin2.dat";
 	private static final String SRV_TRIP_FILE_PATH = SRV_BASE_DIR + "W2008_Berlin_Weekday.dat";
-	private static String fromSrvOutputDirectory = "../../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/output/";
+	private static String fromSrvOutputDirectory = "../../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/output";
 	private static final String OUTPUT_POPULATION_FILE_PATH = fromSrvOutputDirectory + "testOutputPopulation.xml";
 	//	private static String fromSrvOutputDirectory = "../../../runs-svn/berlin_scenario_2016/" + RUN_ID + "/analysis_srv";
 //	private static String fromSrvOutputDirectory = "/Users/dominik/test-analysis";
@@ -94,7 +94,7 @@ public class AnalyzeAndCompareTrips {
 //		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
 
 		// Determine output directory
-		String srvOutputDirectory = srvTripFilter.adaptOutputDirectory("analysis_srv1");
+		String srvOutputDirectory = srvTripFilter.adaptOutputDirectory("analysis_srv");
 		String fromSrvOutputDirectoryFullPath = fromSrvOutputDirectory + "/" + srvOutputDirectory;
 		new File(fromSrvOutputDirectoryFullPath).mkdirs();
 
@@ -106,9 +106,9 @@ public class AnalyzeAndCompareTrips {
 		}
 
 		//Gnuplot
-//		String gnuplotScriptName = "plot_abs_path_run.gnu";
-//		String relativePathToGnuplotScript = "../../gnuplot/" + gnuplotScriptName;
-//		GnuplotUtils.runGnuplotScript(fromSrvOutputDirectory, relativePathToGnuplotScript, srvOutputDirectory);
+		String gnuplotScriptName = "plot_abs_path_run.gnu";
+		String relativePathToGnuplotScript = "../../gnuplot/" + gnuplotScriptName;
+		GnuplotUtils.runGnuplotScript(fromSrvOutputDirectory, relativePathToGnuplotScript, srvOutputDirectory);
 
 //		//Gnuplot
 //		String gnuplotScriptName = "plot_abs_path_run.gnu";
