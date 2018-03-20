@@ -194,8 +194,8 @@ public final class TtCreateBraessNetworkAndLanes {
 		l = fac.createLink(Id.createLinkId("1_2"),
 				net.getNodes().get(Id.createNodeId(1)),
 				net.getNodes().get(Id.createNodeId(2)));
-		// use the big link length here such that no spill back occurs on the first link and vehicles can use the by-pass without congestion
-		setLinkAttributes(l, capFirstLast, linkLengthBig, minimalLinkTT);	
+		// use a big link length here such that no spill back occurs on the first link and vehicles can use the by-pass without congestion
+		setLinkAttributes(l, capFirstLast, 5*linkLengthBig, minimalLinkTT);	
 		net.addLink(l);
 		
 		if (simulateInflowCap){

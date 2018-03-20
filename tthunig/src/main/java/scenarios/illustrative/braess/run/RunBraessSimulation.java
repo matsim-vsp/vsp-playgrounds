@@ -126,9 +126,10 @@ public final class RunBraessSimulation {
 	private static final LaneType LANE_TYPE = LaneType.NONE;
 	// defines whether an alternative (upper bound; by-pass; bicycle etc.) route should exist
 	private static final boolean BYPASS = false;
+	private static final double BYPASS_TT = 1200;
 	
 	// defines which kind of pricing should be used
-	private static final PricingType PRICING_TYPE = PricingType.INTERVALBASED;
+	private static final PricingType PRICING_TYPE = PricingType.NONE;
 	public enum PricingType{
 		NONE, V3, V4, V7, V8, V9, V10, FLOWBASED, GREGOR, INTERVALBASED
 	}
@@ -139,7 +140,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/dagstuhl/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/byPass/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -166,7 +167,7 @@ public final class RunBraessSimulation {
 		Config config = ConfigUtils.createConfig();
 
 		// set number of iterations
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(2000);
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
@@ -186,8 +187,8 @@ public final class RunBraessSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize(60);
-//		config.travelTimeCalculator().setTraveltimeBinSize(10);
+//		config.travelTimeCalculator().setTraveltimeBinSize(60);
+		config.travelTimeCalculator().setTraveltimeBinSize(10);
 //		config.travelTimeCalculator().setMaxTime((int) (3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 2)));
 		config.travelTimeCalculator().setMaxTime(3600 * 24);
 
@@ -198,11 +199,12 @@ public final class RunBraessSimulation {
 		config.timeAllocationMutator().setMutationRange(60);
 
 		// define strategies:
-		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
+//		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
+		config.strategy().setFractionOfIterationsToDisableInnovation(.9);
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
-			strat.setWeight(0.1);
+			strat.setWeight(0.01);
 //			strat.setDisableAfter(config.controler().getLastIteration() - 20);
 			config.strategy().addStrategySettings(strat);
 		}
@@ -223,7 +225,7 @@ public final class RunBraessSimulation {
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
-			strat.setWeight(0.9);
+			strat.setWeight(0.99);
 			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);
 		}
@@ -250,8 +252,8 @@ public final class RunBraessSimulation {
 
 		config.qsim().setStartTime(3600 * SIMULATION_START_TIME);
 		// set end time to shorten simulation run time: 2 hours after the last agent departs
-//		config.qsim().setEndTime(3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 2));
-		config.qsim().setEndTime(3600 * 24);
+		config.qsim().setEndTime(3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 5));
+//		config.qsim().setEndTime(3600 * 24);
 		
 		// adapt monetary distance cost rate (should be negative)
 		config.planCalcScore().getModes().get(TransportMode.car).setMonetaryDistanceRate(-0.0);
@@ -498,8 +500,9 @@ public final class RunBraessSimulation {
 		TtCreateBraessNetworkAndLanes netCreator = new TtCreateBraessNetworkAndLanes(scenario);
 //		netCreator.setUseBTUProperties( false );
 		netCreator.setSimulateInflowCap( false );
-		netCreator.setMiddleLinkExists( true );
+		netCreator.setMiddleLinkExists( false );
 		netCreator.setByPassExists( BYPASS );
+		netCreator.setByPassTT(BYPASS_TT);
 		
 //		netCreator.setCapFirstLast(3600); // default is numberOfPersons
 		netCreator.setCapZ(1800);
@@ -603,7 +606,7 @@ public final class RunBraessSimulation {
 		}
 		
 		if (BYPASS) {
-			runName += "_bypass";
+			runName += "_bypass" + BYPASS_TT;
 		}
 		
 		if (scenario.getNetwork().getNodes().containsKey(Id.createNodeId(23))){
