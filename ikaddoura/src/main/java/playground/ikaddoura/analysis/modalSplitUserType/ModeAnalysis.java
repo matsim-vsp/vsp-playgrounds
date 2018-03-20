@@ -31,6 +31,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -65,12 +66,12 @@ public class ModeAnalysis {
 
 	public static void main(String[] args) {
 		
-		final String runDirectory = "/Users/ihab/Desktop/test-run-directory/";
-		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis/";
+		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
+		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 		final String runId = "test";
 		
 		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file
-		final String personAttributesFile = "/Users/ihab/Desktop/test-run-directory/test.output_personAttributes.xml.gz";
+		final String personAttributesFile = "/Users/ihab/Desktop/test-run-directory_transit-walk/test.output_personAttributes.xml.gz";
 		
 		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile);
 		
@@ -96,7 +97,7 @@ public class ModeAnalysis {
 		analysis.writeTripRouteDistances(outputDirectory);
 		analysis.writeTripEuclideanDistances(outputDirectory);
 		
-		List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
+		final List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
 		distanceGroups.add(new Tuple<>(0., 1000.));
 		distanceGroups.add(new Tuple<>(1000., 3000.));
 		distanceGroups.add(new Tuple<>(3000., 5000.));
@@ -117,28 +118,34 @@ public class ModeAnalysis {
 			}
 			
 			if (filter == null || filter.considerAgent(person)) {
-				Leg previousMainModeLeg = null;
 				Activity previousRealActivity = null;
-				double previousLegTotalDistance = 0.;
+				
+				double currentLegTotalRouteDistance = 0.;
+				String currentLegMode = null;
 
 				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
 									
 					if (pE instanceof Leg) {
 						Leg leg = (Leg) pE;
 						
-						if (leg.getMode().equals("transit_walk") || leg.getMode().equals("egress_walk") || leg.getMode().equals("access_walk")) {
-							// skipping help leg modes
-							
+						currentLegTotalRouteDistance += leg.getRoute().getDistance();
+						
+						if (currentLegMode == null) {
+							currentLegMode = leg.getMode();
 						} else {
-							if (previousMainModeLeg == null) {
-								previousMainModeLeg = leg;
-								previousLegTotalDistance = leg.getRoute().getDistance();
+							if (currentLegMode.equals(leg.getMode())) {
+								// same mode
 							} else {
-								if (previousMainModeLeg.getMode().equals(leg.getMode())) {
-									previousMainModeLeg = leg;
-									previousLegTotalDistance = previousLegTotalDistance + leg.getRoute().getDistance();
+								if (currentLegMode.equals(TransportMode.pt) && leg.getMode().equals(TransportMode.transit_walk)
+										|| currentLegMode.equals(TransportMode.transit_walk) && leg.getMode().equals(TransportMode.pt)
+										|| currentLegMode.equals(TransportMode.pt) && leg.getMode().equals(TransportMode.access_walk)
+										|| currentLegMode.equals(TransportMode.access_walk) && leg.getMode().equals(TransportMode.pt)
+										|| currentLegMode.equals(TransportMode.pt) && leg.getMode().equals(TransportMode.egress_walk)
+										|| currentLegMode.equals(TransportMode.egress_walk) && leg.getMode().equals(TransportMode.pt)
+										) {
+									currentLegMode = TransportMode.pt;
 								} else {
-									throw new RuntimeException("Two different main leg modes found for the same trip: " + leg.getMode() + " and " + previousMainModeLeg.getMode() + ". Aborting...");
+									throw new RuntimeException("Two different leg modes found for the same trip: " + leg.getMode() + " and " + currentLegMode + ". Aborting...");
 								}
 							}
 						}
@@ -150,35 +157,35 @@ public class ModeAnalysis {
 							// the actual trip is not completed
 						} else {
 																				
-							if (previousMainModeLeg != null) {
+							if (currentLegMode != null) {
 								
 								totalTripsFiltered++;
 
-								if (mode2TripCounterFiltered.containsKey(previousMainModeLeg.getMode())) {
+								if (mode2TripCounterFiltered.containsKey(currentLegMode)) {
 									
-									mode2TripCounterFiltered.put(previousMainModeLeg.getMode(), mode2TripCounterFiltered.get(previousMainModeLeg.getMode()) + 1);
+									mode2TripCounterFiltered.put(currentLegMode, mode2TripCounterFiltered.get(currentLegMode) + 1);
 									
-									mode2TripRouteDistancesFiltered.get(previousMainModeLeg.getMode()).add(previousLegTotalDistance);
+									mode2TripRouteDistancesFiltered.get(currentLegMode).add(currentLegTotalRouteDistance);
 									
 									double euclideanDistance = CoordUtils.calcEuclideanDistance(previousRealActivity.getCoord(), activity.getCoord());
-									mode2TripEuclideanDistancesFiltered.get(previousMainModeLeg.getMode()).add(euclideanDistance);
+									mode2TripEuclideanDistancesFiltered.get(currentLegMode).add(euclideanDistance);
 									
 								} else {
 									
-									mode2TripCounterFiltered.put(previousMainModeLeg.getMode(), 1);
+									mode2TripCounterFiltered.put(currentLegMode, 1);
 									
 									List<Double> routeDistances = new ArrayList<>();
-									routeDistances.add(previousLegTotalDistance);
-									mode2TripRouteDistancesFiltered.put(previousMainModeLeg.getMode(), routeDistances);
+									routeDistances.add(currentLegTotalRouteDistance);
+									mode2TripRouteDistancesFiltered.put(currentLegMode, routeDistances);
 									
 									List<Double> euclideanDistances = new ArrayList<>();
 									double euclideanDistance = CoordUtils.calcEuclideanDistance(previousRealActivity.getCoord(), activity.getCoord());
 									euclideanDistances.add(euclideanDistance);
-									mode2TripEuclideanDistancesFiltered.put(previousMainModeLeg.getMode(), euclideanDistances);
+									mode2TripEuclideanDistancesFiltered.put(currentLegMode, euclideanDistances);
 								}
 								
-								previousMainModeLeg = null;
-								previousLegTotalDistance = 0.;
+								currentLegMode = null;
+								currentLegTotalRouteDistance = 0.;
 							}
 							
 							previousRealActivity = activity;
@@ -280,65 +287,70 @@ public class ModeAnalysis {
 		}
 	}
 	
-	private void writeDistances(String outputDirectory, String outputFileName, List<Tuple<Double, Double>> distanceGroups, Map<String, List<Double>> mode2TripRouteDistancesFiltered) {
+	private void writeDistances(String outputDirectory, String outputFileName, List<Tuple<Double, Double>> distanceGroups, Map<String, List<Double>> mode2TripDistances) {
 		
-		SortedMap<Integer, Map<String, Integer>> distanceGroupIndex2mode2trips = new TreeMap<>();	
-		
-		// initialize
-		int index = 0;
-		for (Tuple<Double, Double> distanceGroup : distanceGroups) {
-			Map<String, Integer> mode2trips = new HashMap<>();
-
-			for (String mode : mode2TripRouteDistancesFiltered.keySet()) {
-				log.info("index: " + index + " - distance group: " + distanceGroup + " - mode: " + mode);
-
-				mode2trips.put(mode, 0);
-				distanceGroupIndex2mode2trips.put(index, mode2trips);
-			}
-			index++;
-		}
-
-		// fill
-		for (String mode : mode2TripRouteDistancesFiltered.keySet()) {
-			for (Double distance : mode2TripRouteDistancesFiltered.get(mode)) {
-				
-				for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
+		if (mode2TripDistances == null || mode2TripDistances.isEmpty()) {
+			log.info("mode2TripDistances is empty. " + outputDirectory + outputFileName + " will not be written.");
 			
-					if (distance >= distanceGroups.get(distanceGroupIndex).getFirst() && distance < distanceGroups.get(distanceGroupIndex).getSecond()) {
-						int tripsUpdated = distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode) + 1;
-						distanceGroupIndex2mode2trips.get(distanceGroupIndex).put(mode, tripsUpdated);
+		} else {
+			SortedMap<Integer, Map<String, Integer>> distanceGroupIndex2mode2trips = new TreeMap<>();	
+			
+			// initialize
+			int index = 0;
+			for (Tuple<Double, Double> distanceGroup : distanceGroups) {
+				Map<String, Integer> mode2trips = new HashMap<>();
+
+				for (String mode : mode2TripDistances.keySet()) {
+					log.info("index: " + index + " - distance group: " + distanceGroup + " - mode: " + mode);
+
+					mode2trips.put(mode, 0);
+					distanceGroupIndex2mode2trips.put(index, mode2trips);
+				}
+				index++;
+			}
+
+			// fill
+			for (String mode : mode2TripDistances.keySet()) {
+				for (Double distance : mode2TripDistances.get(mode)) {
+					
+					for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
+				
+						if (distance >= distanceGroups.get(distanceGroupIndex).getFirst() && distance < distanceGroups.get(distanceGroupIndex).getSecond()) {
+							int tripsUpdated = distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode) + 1;
+							distanceGroupIndex2mode2trips.get(distanceGroupIndex).put(mode, tripsUpdated);
+						}
 					}
 				}
 			}
-		}
 
-		// write
-		
-		File file = new File(outputDirectory + outputFileName);
-		
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			bw.write("trip distance group index ; distance - from [m] ; distance to [m] ");
+			// write
 			
-			for (String mode : distanceGroupIndex2mode2trips.get(0).keySet()) {
-				bw.write(" ; " + mode);
-			}
-			bw.newLine();
+			File file = new File(outputDirectory + outputFileName);
 			
-			for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
-				bw.write( distanceGroupIndex + " ; " + distanceGroups.get(distanceGroupIndex).getFirst() + " ; " + distanceGroups.get(distanceGroupIndex).getSecond() );
-
-				for (String mode : distanceGroupIndex2mode2trips.get(distanceGroupIndex).keySet()) {
-					bw.write(" ; " + distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode));
+			try {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+				bw.write("trip distance group index ; distance - from [m] ; distance to [m] ");
+				
+				for (String mode : distanceGroupIndex2mode2trips.get(0).keySet()) {
+					bw.write(" ; " + mode);
 				}
 				bw.newLine();
-			}
+				
+				for (Integer distanceGroupIndex : distanceGroupIndex2mode2trips.keySet()) {
+					bw.write( distanceGroupIndex + " ; " + distanceGroups.get(distanceGroupIndex).getFirst() + " ; " + distanceGroups.get(distanceGroupIndex).getSecond() );
 
-			bw.close();
-			log.info("Output written.");	
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+					for (String mode : distanceGroupIndex2mode2trips.get(distanceGroupIndex).keySet()) {
+						bw.write(" ; " + distanceGroupIndex2mode2trips.get(distanceGroupIndex).get(mode));
+					}
+					bw.newLine();
+				}
+
+				bw.close();
+				log.info("Output written.");	
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

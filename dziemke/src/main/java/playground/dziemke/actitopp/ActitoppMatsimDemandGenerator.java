@@ -84,14 +84,14 @@ public class ActitoppMatsimDemandGenerator {
 	public static void main(String[] args) {
 		// Input and output files
 		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/";
-		String plansFile = outputBase + "plans_small.xml.gz";
+		String plansFile = outputBase + "plans_10000.xml.gz";
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		PopulationReader reader = new PopulationReader(scenario);
 		reader.readFile(plansFile);
 		
 		runActitopp(scenario.getPopulation());
-		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_small_with_activities.xml.gz"); // TODO currently only works with one population file
+		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_10000_w_act.xml.gz"); // TODO currently only works with one population file
 	}
 
 	
@@ -147,7 +147,7 @@ public class ActitoppMatsimDemandGenerator {
 				System.err.println("person involved: " + actitoppPerson.getPersIndex());
 			}
 		}
-		actitoppPerson.getWeekPattern().printAllActivitiesList();
+//		actitoppPerson.getWeekPattern().printAllActivitiesList();
 		
 		return actitoppPerson.getWeekPattern();
 	}

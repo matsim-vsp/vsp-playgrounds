@@ -19,6 +19,9 @@
 
 package playground.ikaddoura.berlin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -28,8 +31,11 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
+import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 
 /**
 * @author ikaddoura
@@ -49,6 +55,9 @@ public class RunMATSimWithRaptor {
 	private static double ascBicycle;
 	private static double ascRide;	
 	
+	private static double marginalUtilityOfDistanceBicycle = Double.POSITIVE_INFINITY;
+	private static double marginalUtilityOfDistanceWalk = Double.POSITIVE_INFINITY;
+
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			
@@ -75,6 +84,14 @@ public class RunMATSimWithRaptor {
 			
 			ascRide = Double.parseDouble(args[7]);
 			log.info("ascRide: "+ ascRide);
+			
+			if (args.length > 8) {
+				marginalUtilityOfDistanceBicycle = Double.parseDouble(args[8]);
+				log.info("marginalUtilityOfDistanceBicycle: "+ marginalUtilityOfDistanceBicycle);
+				
+				marginalUtilityOfDistanceWalk = Double.parseDouble(args[9]);
+				log.info("marginalUtilityOfDistanceWalk: "+ marginalUtilityOfDistanceWalk);
+			}
 
 			
 		} else {
@@ -107,6 +124,9 @@ public class RunMATSimWithRaptor {
 		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
 		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
 
+		if (marginalUtilityOfDistanceWalk < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.walk).setMarginalUtilityOfDistance(marginalUtilityOfDistanceWalk);
+		if (marginalUtilityOfDistanceBicycle < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get("bicycle").setMarginalUtilityOfDistance(marginalUtilityOfDistanceBicycle);
+	
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 		
@@ -118,6 +138,49 @@ public class RunMATSimWithRaptor {
 		});
 				
 		controler.run();
+		
+		log.info("Running analysis...");
+				
+		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
+		final String shapeFileZones = null;
+		final String zonesCRS = null;
+		final String homeActivity = "home";
+		final int scalingFactor = 10;
+		
+		List<AgentAnalysisFilter> filters = new ArrayList<>();
+
+		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
+		filter1.setSubpopulation("person");
+		filter1.setPersonAttribute("berlin");
+		filter1.setPersonAttributeName("home-activity-zone");
+		filter1.preProcess(scenario);
+		filters.add(filter1);
+		
+		AgentAnalysisFilter filter2 = new AgentAnalysisFilter(scenario);
+		filter2.preProcess(scenario);
+		filters.add(filter2);
+		
+		AgentAnalysisFilter filter3 = new AgentAnalysisFilter(scenario);
+		filter3.setSubpopulation("person");
+		filter3.setPersonAttribute("brandenburg");
+		filter3.setPersonAttributeName("home-activity-zone");
+		filter3.preProcess(scenario);
+		filter3.preProcess(scenario);
+		filters.add(filter3);
+
+		IKAnalysisRun analysis = new IKAnalysisRun(
+				scenario,
+				null,
+				scenarioCRS,
+				shapeFileZones,
+				zonesCRS,
+				homeActivity,
+				scalingFactor,
+				filters,
+				null);
+		analysis.run();
+	
+		log.info("Done.");
 		
 	}
 

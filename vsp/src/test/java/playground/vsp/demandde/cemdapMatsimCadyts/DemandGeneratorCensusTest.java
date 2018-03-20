@@ -40,8 +40,8 @@ public class DemandGeneratorCensusTest {
 				numberOfPlansPerPerson, idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
 		
 		demandGeneratorCensus.setShapeFileForSpatialRefinement(utils.getInputDirectory() + "Bezirksregion_EPSG_25833.shp");
-		demandGeneratorCensus.setIdsOfMunicipalityForSpatialRefinement(Arrays.asList("11000000"));
-		demandGeneratorCensus.setFeatureKeyInShapeFileForRefinement("SCHLUESSEL");
+		demandGeneratorCensus.setIdsOfMunicipalitiesForSpatialRefinement(Arrays.asList("11000000"));
+		demandGeneratorCensus.setRefinementFeatureKeyInShapefile("SCHLUESSEL");
 
 		demandGeneratorCensus.generateDemand();
 		
@@ -132,7 +132,7 @@ public class DemandGeneratorCensusTest {
 		Assert.assertEquals("Wrong female75Plus count", female75PlusRef, female75Plus);
 		Assert.assertEquals("Wrong male65_74 count", male65_74Ref, male65_74);
 
-		Assert.assertTrue("", new File(utils.getOutputDirectory() + "persons.dat.gz").exists());
+		Assert.assertTrue("", new File(utils.getOutputDirectory() + "persons1.dat.gz").exists());
 
 	}
 

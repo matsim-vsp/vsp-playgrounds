@@ -36,7 +36,19 @@ public class CommuterFileReaderV2 {
 	private static final Logger LOG = Logger.getLogger(CommuterFileReaderV2.class);
 	
 	private Map<String, Map<String, CommuterRelationV2>> relationsMap = new HashMap<>();
-			
+	
+	
+	public static void main(String[] args) {
+		String commuterFileOutgoing = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil1BR2009Ga.txt";
+		String delimiter = "\t";
+		
+		CommuterFileReaderV2 commuterFileReader = new CommuterFileReaderV2(commuterFileOutgoing, delimiter);
+		
+		String origin = "12051000"; // "Brandenburg an der Havel, St."
+		String destination = "11000000"; // "Berlin, Stadt"
+		LOG.info("Simple test: 1513 = " + commuterFileReader.getRelationsMap().get(origin).get(destination).getTrips());
+	}
+	
 	
 	public CommuterFileReaderV2(String commuterFileOutgoing, String delimiter) {
 		readFile(commuterFileOutgoing, delimiter);
@@ -56,12 +68,12 @@ public class CommuterFileReaderV2 {
             @Override
             public void startRow(String[] row) {
             	if (row.length > 2) {
-            		if (row[0].length() == 8) { // new origin
+            		if (row[0].length() == 8) { // New origin
             			origin = row[0];
             			LOG.info("New origin set to: " + origin);
             			return;
             			// Next check for destinations
-            		} else if (row[2].length() == 8) { // new destiantion
+            		} else if (row[2].length() == 8) { // New destiantion
             			destination = row[2];
             			LOG.info("New destination set to: " + destination);
             			LOG.info(origin + " -> " + destination + ": All commuters: " + row[4] + "; males: " + row[5] + "; females: " + row[6]);
@@ -82,7 +94,7 @@ public class CommuterFileReaderV2 {
 
             			process(origin, destination, Integer.parseInt(row[4]), tripsMale, tripsFemale);
             			return;
-            		} else { // line that is neither new origin nor new destination
+            		} else { // A line that is neither has a new origin nor a new destination
             			return;
             		}
             	}
