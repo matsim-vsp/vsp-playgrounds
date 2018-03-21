@@ -117,17 +117,30 @@ public class RunOpdytsForGreenWaves {
 			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
 			opdytsConfigGroup.setNumberOfIterationsForAveraging(2); // 2
 			opdytsConfigGroup.setNumberOfIterationsForConvergence(2); // this system has no stochasticity (agents do not change their plan)
-			opdytsConfigGroup.setNoisySystem(false); 
+			
+			// Gunnar: "true" now also works, meaning that opdyts identifies on its own the absence of noise.
+			opdytsConfigGroup.setNoisySystem(true); 
 
+			
 			opdytsConfigGroup.setMaxIteration(30);
 			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
 			opdytsConfigGroup.setDecisionVariableStepSize(10);
-			opdytsConfigGroup.setUseAllWarmUpIterations(false);
-			opdytsConfigGroup.setWarmUpIterations(2); // 1 this should be tested (parametrized).
-			opdytsConfigGroup.setPopulationSize(2);
+			
+			// Gunnar: Have a single warm-up iteration (and also use that one) is recommended default.
+			opdytsConfigGroup.setUseAllWarmUpIterations(true);
+			opdytsConfigGroup.setWarmUpIterations(1);
+			
+			// Gunnar: Two (+/-) variations for each of the tree intersections.
+			// Makes sense together with (complete) axial variations in OffsetRandomizer.
+			opdytsConfigGroup.setPopulationSize(3 * 2);
+
 			opdytsConfigGroup.setSelfTuningWeight(1); //1, 4
 			opdytsConfigGroup.setBinSize(10);
 
+			// Gunnar: binCount times binSize must be simulation duration!
+			opdytsConfigGroup.setBinCount((4 * 3600) / opdytsConfigGroup.getBinSize());
+			
+			
 			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
 
 			MATSimSimulator2<OffsetDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);

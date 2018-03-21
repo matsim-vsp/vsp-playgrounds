@@ -67,10 +67,13 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 		
 		int delta = (int) opdytsConfigGroup.getDecisionVariableStepSize();
 		SignalControlData oldOffsets = decisionVariable.getCurrentSignalControlData();
-//		axiallyVariation(result, oldOffsets, delta);
-		for (int i=0; i<5; i++) {
-			randomVariation(result, oldOffsets, delta);
-		}
+		
+		// Gunnar: Random is not a good choice in such a small setting. 
+		// And it may need a slightly different approach.
+		axiallyVariation(result, oldOffsets, delta);
+		// for (int i=0; i<5; i++) {
+		// randomVariation(result, oldOffsets, delta);
+		// }
 		
 		LOG.warn("input decision variable:");
         LOG.warn(decisionVariable.toString());
