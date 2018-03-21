@@ -62,6 +62,7 @@ public class DemandGeneratorCensus {
 	private Map<Id<Household>, Household> households;
 	private ObjectAttributes municipalities;
 	private Map<String, Map<String, CommuterRelationV2>> relationsMap;
+	private boolean memorizeAllPopulations = false; // default = false for backwards compatibility; false saves RAM
 	private List<Population> allPopulations = new ArrayList<>();
 	// Optional (links municipality ID to LOR/PLZ IDs in that municipality)
 	private final Map<String, List<String>> spatialRefinementZoneIds = new HashMap<>();
@@ -101,7 +102,7 @@ public class DemandGeneratorCensus {
 		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/400/";
 		
 		// Parameters
-		int numberOfPlansPerPerson = 3; // Note: Set this higher to a value higher than 1 if spatial refinement is used.
+		int numberOfPlansPerPerson = 10; // Note: Set this higher to a value higher than 1 if spatial refinement is used.
 		List<String> idsOfFederalStatesIncluded = Arrays.asList("11", "12"); // 11=Berlin, 12=Brandenburg
 		
 		// Default ratios are used for cases where information is missing, which is the case for smaller municipalities.
@@ -308,7 +309,9 @@ public class DemandGeneratorCensus {
 			if (this.writeMatsimPlanFiles) {
 				writeMatsimPlansFile(clonedPopulation, this.outputBase + "plans" + i + ".xml.gz");
 			}
-			allPopulations.add(clonedPopulation);
+			if (memorizeAllPopulations) {
+				allPopulations.add(clonedPopulation);
+			}
 		}
 	}
 	
@@ -704,6 +707,13 @@ public class DemandGeneratorCensus {
     }
     
     public List<Population> getAllPopulations() {
+    	if (!memorizeAllPopulations) {
+    		throw new RuntimeException("The corresponding container object has not been filles. 'memorizeAllPopulations' needs to be activated.");
+    	}
     	return this.allPopulations;
 	}
+    
+    public void setMemorizeAllPopulations(boolean memorizeAllPopulations) {
+    	this.memorizeAllPopulations = memorizeAllPopulations;
+    }
 }
