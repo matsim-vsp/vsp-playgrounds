@@ -38,9 +38,11 @@ import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsWriter20;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsWriter20;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup.TravelTimeCalculatorType;
@@ -55,6 +57,7 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.data.LanesWriter;
+import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
@@ -133,6 +136,8 @@ public final class RunBraessSimulation {
 	public enum PricingType{
 		NONE, V3, V4, V7, V8, V9, V10, FLOWBASED, GREGOR, INTERVALBASED
 	}
+	
+	private static final boolean VIS = false;
 
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
@@ -295,6 +300,13 @@ public final class RunBraessSimulation {
 		decongestionSettings.setKd(0.);
 		
 		config.addModule(decongestionSettings);
+		
+		if (VIS) {
+			OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
+			otfvisConfig.setDrawTime(true);
+			otfvisConfig.setAgentSize(80f);
+			config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+		}
 		
 		return config;
 	}
@@ -468,6 +480,10 @@ public final class RunBraessSimulation {
 			});
 		}
 		
+		if (VIS) {
+			controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+		}
+		
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
@@ -500,7 +516,7 @@ public final class RunBraessSimulation {
 		TtCreateBraessNetworkAndLanes netCreator = new TtCreateBraessNetworkAndLanes(scenario);
 //		netCreator.setUseBTUProperties( false );
 		netCreator.setSimulateInflowCap( false );
-		netCreator.setMiddleLinkExists( false );
+		netCreator.setMiddleLinkExists( true );
 		netCreator.setByPassExists( BYPASS );
 		netCreator.setByPassTT(BYPASS_TT);
 		
