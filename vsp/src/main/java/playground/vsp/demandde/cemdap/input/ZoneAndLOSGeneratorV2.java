@@ -67,7 +67,6 @@ public class ZoneAndLOSGeneratorV2 {
 //	private double durantionDistancePeakRatio_min_mile = 1.9; // based on computations in sample dataset; equals ca. 50km/h
 	private double durantionDistancePeakRatio_min_mile = 4.8; // New, lower value, cf. NEMO; 4.8 --> 20kph // 1.9 --> 50kph (default value)
 	private double costDistanceRatio_USD_mile = 0.072; // based on computations in sample dataset; equals 0.045USD/km
-	boolean includeOptionalVariablesAndSetTheirValueToZero = true; // Default is true for backwards compatibility
 
 	// spatial refinement. Amit Nov'17
 	private List<String> zoneIdsForSpatialRefinement; // this is filled if shape file for spatial refinement is provided.
@@ -88,7 +87,6 @@ public class ZoneAndLOSGeneratorV2 {
 		String featureKeyInShapefile = "ID";
 		
 		ZoneAndLOSGeneratorV2 zoneAndLOSGeneratorV2 = new ZoneAndLOSGeneratorV2(commuterFilesOutgoing, shapeFile, outputBase, featureKeyInShapefile);
-		zoneAndLOSGeneratorV2.setIncludeOptionalVariablesAndSetTheirValueToZero(false);
 		zoneAndLOSGeneratorV2.generateSupply();
 	}
 
@@ -230,19 +228,13 @@ public class ZoneAndLOSGeneratorV2 {
 		try {
 			bufferedWriterZones = IOUtils.getBufferedWriter(this.outputBase + "zones.dat.gz");
     		for (String zoneId : this.zones) {
-    			if (includeOptionalVariablesAndSetTheirValueToZero) {
-	    			// 45 columns
-	    			bufferedWriterZones.write(Integer.parseInt(zoneId) + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0
-	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 
-	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
-	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
-    			} else {
-    				// Only the 10 columns with the required variables
-    				bufferedWriterZones.write(Integer.parseInt(zoneId) + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0
-	    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
-    			}
+    			// 45 columns
+    			bufferedWriterZones.write(Integer.parseInt(zoneId) + "\t" + 0 + "\t" + 0  + "\t" + 0 + "\t" + 0
+    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 
+    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0
+    					+ "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0 + "\t" + 0);
     			bufferedWriterZones.newLine();
     		}
         } catch (FileNotFoundException ex) {
@@ -362,9 +354,5 @@ public class ZoneAndLOSGeneratorV2 {
 				.map(feature -> feature.getAttribute(featureKeyInShapeFileForRefinement).toString())
 				.collect(Collectors.toList());
 		readShape(shapeFileForSpatialRefinement, featureKeyInShapeFileForRefinement);
-	}
-    
-	public void setIncludeOptionalVariablesAndSetTheirValueToZero(boolean includeOptionalVariablesAndSetTheirValueToZero) {
-		this.includeOptionalVariablesAndSetTheirValueToZero = includeOptionalVariablesAndSetTheirValueToZero;
 	}
 }
