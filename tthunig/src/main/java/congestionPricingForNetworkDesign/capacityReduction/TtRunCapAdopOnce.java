@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package congestionPricing2CapacityAdoption;
+package congestionPricingForNetworkDesign.capacityReduction;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.TtStaticLinkFlowValuesPerHour;
-import congestionPricing2CapacityAdoption.TtRunCapAdopForBraessIterative.PricingType;
+import congestionPricingForNetworkDesign.capacityReduction.TtRunCapAdopForBraessIterative.PricingType;
 import playground.dziemke.utils.LogToOutputSaver;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;

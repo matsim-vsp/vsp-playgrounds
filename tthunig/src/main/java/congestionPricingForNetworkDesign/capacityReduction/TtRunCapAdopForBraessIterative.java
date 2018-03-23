@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package congestionPricing2CapacityAdoption;
+package congestionPricingForNetworkDesign.capacityReduction;
 
 import java.io.File;
 import java.io.FileNotFoundException;
