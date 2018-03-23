@@ -19,7 +19,7 @@
  * *********************************************************************** */
 package optimize.run;
 
-import optimize.convert.TtMatsim2KS2015;
+import optimize.cten.convert.TtMatsim2KS2015;
 import utils.OutputUtils;
 
 /**

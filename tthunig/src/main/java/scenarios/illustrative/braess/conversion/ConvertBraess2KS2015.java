@@ -22,7 +22,8 @@
 package scenarios.illustrative.braess.conversion;
 
 import java.util.Calendar;
-import optimize.convert.TtMatsim2KS2015;
+
+import optimize.cten.convert.TtMatsim2KS2015;
 
 /**
  * Class to convert the Braess scenario into KS format.
