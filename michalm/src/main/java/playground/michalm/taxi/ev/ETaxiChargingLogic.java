@@ -19,25 +19,28 @@
 
 package playground.michalm.taxi.ev;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.vsp.ev.charging.FixedSpeedChargingWithQueueingLogic;
-import org.matsim.vsp.ev.data.*;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vsp.ev.charging.FixedSpeedChargingWithQueueingLogic;
+import org.matsim.vsp.ev.data.Charger;
+import org.matsim.vsp.ev.data.ElectricVehicle;
 
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
 
 public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
-	// fast charging up to 80% of the battery capacity
-	private static final double MAX_RELATIVE_SOC = 0.8;
+	public static ETaxiChargingLogic create(Charger charger, double chargingSpeedFactor) {
+		return new ETaxiChargingLogic(charger, new ETaxiChargingStrategy(charger, chargingSpeedFactor));
+	}
 
+	private final ETaxiChargingStrategy chargingStrategy;
 	private final Map<Id<Vehicle>, ElectricVehicle> assignedVehicles = new HashMap<>();
-	private final double effectivePower;
 
-	public ETaxiChargingLogic(Charger charger, double chargingSpeedFactor) {
-		super(charger);
-		effectivePower = charger.getPower() * chargingSpeedFactor;
+	public ETaxiChargingLogic(Charger charger, ETaxiChargingStrategy chargingStrategy) {
+		super(charger, chargingStrategy);
+		this.chargingStrategy = chargingStrategy;
 	}
 
 	// at this point ETaxiChargingTask should point to Charger
@@ -50,12 +53,6 @@ public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
 		if (assignedVehicles.remove(ev.getId()) == null) {
 			throw new IllegalArgumentException();
 		}
-	}
-
-	@Override
-	protected boolean doStopCharging(ElectricVehicle ev) {
-		Battery b = ev.getBattery();
-		return b.getSoc() >= MAX_RELATIVE_SOC * b.getCapacity();
 	}
 
 	@Override
@@ -73,17 +70,6 @@ public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
 		((Ev)ev).getAtChargerActivity().chargingEnded(now);
 	}
 
-	public double getEnergyToCharge(ElectricVehicle ev) {
-		Battery b = ev.getBattery();
-		return Math.max(0, MAX_RELATIVE_SOC * b.getCapacity() - b.getSoc());
-	}
-
-	public double estimateChargeTime(ElectricVehicle ev) {
-		// System.err.println("energy to charge" + getEnergyToCharge(vehicle));
-		// System.err.println("effectivePower = " + effectivePower);
-		return getEnergyToCharge(ev) / effectivePower;
-	}
-
 	// TODO using task timing from schedules will be more accurate in predicting charge demand
 
 	// does not include further demand (AUX for queued vehs)
@@ -93,7 +79,7 @@ public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
 		}
 
 		double sum = sumEnergyToCharge(pluggedVehicles.values()) + sumEnergyToCharge(queuedVehicles);
-		return sum / effectivePower / charger.getPlugs();
+		return sum / chargingStrategy.getEffectivePower() / charger.getPlugs();
 	}
 
 	// does not include further demand (AUX for queued vehs; AUX+driving for dispatched vehs)
@@ -101,15 +87,19 @@ public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
 		double total = sumEnergyToCharge(pluggedVehicles.values()) //
 				+ sumEnergyToCharge(queuedVehicles) //
 				+ sumEnergyToCharge(assignedVehicles.values());
-		return total / effectivePower;
+		return total / chargingStrategy.getEffectivePower();
 	}
 
 	private double sumEnergyToCharge(Iterable<ElectricVehicle> evs) {
 		double energyToCharge = 0;
 		for (ElectricVehicle ev : evs) {
-			energyToCharge += getEnergyToCharge(ev);
+			energyToCharge += chargingStrategy.calcRemainingEnergyToCharge(ev);
 		}
 		return energyToCharge;
+	}
+
+	public double estimateChargeTime(ElectricVehicle ev) {
+		return chargingStrategy.calcRemainingTimeToCharge(ev);
 	}
 
 	public int getPluggedCount() {

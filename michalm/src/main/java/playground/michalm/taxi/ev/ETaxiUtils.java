@@ -20,11 +20,15 @@
 package playground.michalm.taxi.ev;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.contrib.dvrp.data.*;
+import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
-import org.matsim.vsp.ev.data.*;
-import org.matsim.vsp.ev.discharging.*;
+import org.matsim.vsp.ev.data.Charger;
+import org.matsim.vsp.ev.data.ElectricVehicle;
+import org.matsim.vsp.ev.data.EvData;
+import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption;
 import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
+import org.matsim.vsp.ev.discharging.OhdeSlaskiDriveEnergyConsumption;
 
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
@@ -35,7 +39,8 @@ public class ETaxiUtils {
 		double chargingSpeedFactor = 1.; // full speed
 
 		for (Charger c : evData.getChargers().values()) {
-			new ETaxiChargingLogic(c, chargingSpeedFactor);
+			ETaxiChargingLogic chargingLogic = ETaxiChargingLogic.create(c, chargingSpeedFactor);
+			c.setLogic(chargingLogic);
 		}
 
 		for (Vehicle v : fleet.getVehicles().values()) {
