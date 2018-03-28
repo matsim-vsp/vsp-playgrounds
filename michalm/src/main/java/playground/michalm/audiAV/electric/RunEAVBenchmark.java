@@ -22,15 +22,15 @@ package playground.michalm.audiAV.electric;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.data.*;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.vsp.ev.*;
+import org.matsim.vsp.ev.data.*;
+import org.matsim.vsp.ev.data.file.ChargerReader;
 import org.matsim.contrib.taxi.benchmark.*;
 import org.matsim.contrib.taxi.run.*;
 import org.matsim.core.config.*;
 import org.matsim.core.controler.*;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 
-import playground.michalm.ev.*;
-import playground.michalm.ev.data.*;
-import playground.michalm.ev.data.file.ChargerReader;
 import playground.michalm.taxi.data.file.EvrpVehicleReader;
 import playground.michalm.taxi.ev.*;
 import playground.michalm.taxi.run.*;

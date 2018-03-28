@@ -23,11 +23,11 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.dvrp.data.*;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.vsp.ev.data.*;
+import org.matsim.vsp.ev.discharging.*;
+import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 
-import playground.michalm.ev.data.*;
-import playground.michalm.ev.discharging.*;
-import playground.michalm.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;

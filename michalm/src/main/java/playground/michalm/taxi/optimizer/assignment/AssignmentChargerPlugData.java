@@ -19,12 +19,12 @@
 
 package playground.michalm.taxi.optimizer.assignment;
 
+import org.matsim.vsp.ev.data.Charger;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData.DestEntry;
 
 import com.google.common.collect.ImmutableList;
 
-import playground.michalm.ev.data.Charger;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
 
 class AssignmentChargerPlugData {

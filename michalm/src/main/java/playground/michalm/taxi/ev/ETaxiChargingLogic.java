@@ -22,10 +22,10 @@ package playground.michalm.taxi.ev;
 import java.util.*;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.vsp.ev.charging.FixedSpeedChargingWithQueueingLogic;
+import org.matsim.vsp.ev.data.*;
 import org.matsim.vehicles.Vehicle;
 
-import playground.michalm.ev.charging.FixedSpeedChargingWithQueueingLogic;
-import playground.michalm.ev.data.*;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
 
 public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {

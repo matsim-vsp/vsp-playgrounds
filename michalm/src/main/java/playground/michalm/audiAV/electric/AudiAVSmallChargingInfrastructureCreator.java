@@ -22,12 +22,11 @@ package playground.michalm.audiAV.electric;
 import java.util.*;
 
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.vsp.ev.data.*;
+import org.matsim.vsp.ev.data.file.*;
 import org.matsim.contrib.util.random.*;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-
-import playground.michalm.ev.data.*;
-import playground.michalm.ev.data.file.*;
 
 public class AudiAVSmallChargingInfrastructureCreator {
 	public static void main(String[] args) {

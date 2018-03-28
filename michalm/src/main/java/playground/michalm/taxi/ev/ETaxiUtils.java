@@ -22,10 +22,10 @@ package playground.michalm.taxi.ev;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.dvrp.data.*;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.vsp.ev.data.*;
+import org.matsim.vsp.ev.discharging.*;
+import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
 
-import playground.michalm.ev.data.*;
-import playground.michalm.ev.discharging.*;
-import playground.michalm.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
 

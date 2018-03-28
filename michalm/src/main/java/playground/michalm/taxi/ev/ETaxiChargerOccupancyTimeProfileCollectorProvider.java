@@ -20,14 +20,13 @@
 package playground.michalm.taxi.ev;
 
 import org.matsim.contrib.taxi.util.stats.TimeProfileCharts.ChartType;
+import org.matsim.vsp.ev.data.EvData;
 import org.matsim.contrib.taxi.util.stats.TimeProfileCollector;
 import org.matsim.contrib.taxi.util.stats.TimeProfileCollector.ProfileCalculator;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.mobsim.framework.listeners.MobsimListener;
 
 import com.google.inject.*;
-
-import playground.michalm.ev.data.EvData;
 
 public class ETaxiChargerOccupancyTimeProfileCollectorProvider implements Provider<MobsimListener> {
 	private final EvData evData;

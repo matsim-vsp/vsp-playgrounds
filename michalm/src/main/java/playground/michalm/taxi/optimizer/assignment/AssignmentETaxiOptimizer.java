@@ -30,6 +30,8 @@ import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.dvrp.util.LinkTimePair;
+import org.matsim.vsp.ev.data.Battery;
+import org.matsim.vsp.ev.data.EvData;
 import org.matsim.contrib.locationchoice.router.BackwardFastMultiNodeDijkstraFactory;
 import org.matsim.contrib.locationchoice.router.BackwardMultiNodePathCalculator;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
@@ -53,8 +55,6 @@ import org.matsim.core.router.util.TravelTime;
 
 import com.google.common.collect.Maps;
 
-import playground.michalm.ev.data.Battery;
-import playground.michalm.ev.data.EvData;
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;

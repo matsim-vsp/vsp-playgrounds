@@ -20,9 +20,8 @@
 package playground.michalm.taxi.ev;
 
 import org.matsim.contrib.taxi.util.stats.TimeProfileCollector.ProfileCalculator;
+import org.matsim.vsp.ev.data.*;
 import org.matsim.contrib.taxi.util.stats.TimeProfiles;
-
-import playground.michalm.ev.data.*;
 
 public class ETaxiChargerProfiles {
 	public static ProfileCalculator createChargerOccupancyCalculator(final EvData evData) {

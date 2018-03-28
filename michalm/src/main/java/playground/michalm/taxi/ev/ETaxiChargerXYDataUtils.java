@@ -20,8 +20,8 @@
 package playground.michalm.taxi.ev;
 
 import org.matsim.api.core.v01.Coord;
+import org.matsim.vsp.ev.data.*;
 
-import playground.michalm.ev.data.*;
 import playground.michalm.util.XYDataCollector.XYDataCalculator;
 
 public class ETaxiChargerXYDataUtils {

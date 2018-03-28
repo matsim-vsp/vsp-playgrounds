@@ -22,11 +22,10 @@ package playground.michalm.taxi.optimizer;
 import java.util.stream.Stream;
 
 import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.vsp.ev.data.Charger;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder;
 import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
 import org.matsim.contrib.util.LinkProvider;
-
-import playground.michalm.ev.data.Charger;
 
 /**
  * @author michalm

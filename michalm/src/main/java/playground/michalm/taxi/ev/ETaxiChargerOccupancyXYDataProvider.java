@@ -19,12 +19,12 @@
 
 package playground.michalm.taxi.ev;
 
+import org.matsim.vsp.ev.data.*;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.mobsim.framework.listeners.MobsimListener;
 
 import com.google.inject.*;
 
-import playground.michalm.ev.data.*;
 import playground.michalm.util.XYDataCollector;
 import playground.michalm.util.XYDataCollector.XYDataCalculator;
 

@@ -23,9 +23,9 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.*;
 import org.matsim.contrib.dvrp.data.*;
 import org.matsim.contrib.dvrp.data.file.*;
+import org.matsim.vsp.ev.EvUnitConversions;
 import org.xml.sax.Attributes;
 
-import playground.michalm.ev.EvUnitConversions;
 import playground.michalm.taxi.data.EvrpVehicle;
 
 public class EvrpVehicleReader extends VehicleReader {

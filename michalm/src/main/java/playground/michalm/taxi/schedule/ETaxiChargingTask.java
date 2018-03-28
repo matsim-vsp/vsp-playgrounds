@@ -20,9 +20,9 @@
 package playground.michalm.taxi.schedule;
 
 import org.matsim.contrib.dvrp.schedule.StayTaskImpl;
+import org.matsim.vsp.ev.data.Charger;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 
-import playground.michalm.ev.data.Charger;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
 

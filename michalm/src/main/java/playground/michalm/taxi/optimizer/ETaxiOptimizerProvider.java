@@ -25,6 +25,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
+import org.matsim.vsp.ev.data.EvData;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
@@ -36,7 +37,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
-import playground.michalm.ev.data.EvData;
 import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizer;
 import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizerParams;
 import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizer;
