@@ -63,13 +63,13 @@ public class ETaxiChargingLogic extends ChargingWithQueueingLogic {
 			return 0;
 		}
 
-		double sum = sumEnergyToCharge(getPluggedVehicles().values()) + sumEnergyToCharge(getQueuedVehicles());
+		double sum = sumEnergyToCharge(getPluggedVehicles()) + sumEnergyToCharge(getQueuedVehicles());
 		return sum / chargingStrategy.getEffectivePower() / charger.getPlugs();
 	}
 
 	// does not include further demand (AUX for queued vehs; AUX+driving for dispatched vehs)
 	public double estimateAssignedWorkload() {
-		double total = sumEnergyToCharge(getPluggedVehicles().values()) //
+		double total = sumEnergyToCharge(getPluggedVehicles()) //
 				+ sumEnergyToCharge(getQueuedVehicles()) //
 				+ sumEnergyToCharge(assignedVehicles.values());
 		return total / chargingStrategy.getEffectivePower();
