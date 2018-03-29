@@ -33,7 +33,6 @@ import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.dvrp.schedule.Schedules;
 import org.matsim.contrib.dvrp.schedule.Task;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
-import org.matsim.vsp.ev.data.Charger;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiStayTask;
@@ -42,6 +41,7 @@ import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
+import org.matsim.vsp.ev.data.Charger;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -54,8 +54,9 @@ import playground.michalm.taxi.schedule.ETaxiChargingTask;
 public class ETaxiScheduler extends TaxiScheduler {
 
 	@Inject
-	public ETaxiScheduler(TaxiConfigGroup taxiCfg, Fleet fleet, @Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network,
-			MobsimTimer timer, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
+	public ETaxiScheduler(TaxiConfigGroup taxiCfg, Fleet fleet,
+			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, MobsimTimer timer,
+			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
 			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility) {
 		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility);
 	}
@@ -83,6 +84,7 @@ public class ETaxiScheduler extends TaxiScheduler {
 		double chargingEndTime = vrpPath.getArrivalTime() + logic.estimateMaxWaitTimeOnArrival()
 				+ logic.estimateChargeTime(ev);
 		schedule.addTask(new ETaxiChargingTask(vrpPath.getArrivalTime(), chargingEndTime, charger, ev));
+		logic.addAssignedVehicle(ev);
 
 		appendStayTask(vehicle);
 	}
@@ -173,7 +175,8 @@ public class ETaxiScheduler extends TaxiScheduler {
 	@Override
 	protected void taskRemovedFromSchedule(Vehicle vehicle, TaxiTask task) {
 		if (task instanceof ETaxiChargingTask) {
-			((ETaxiChargingTask)task).removeFromChargerLogic();
+			ETaxiChargingTask chargingTask = ((ETaxiChargingTask)task);
+			chargingTask.getChargingLogic().removeAssignedVehicle(chargingTask.getEv());
 			vehiclesWithUnscheduledCharging.add(vehicle);
 		} else {
 			super.taskRemovedFromSchedule(vehicle, task);

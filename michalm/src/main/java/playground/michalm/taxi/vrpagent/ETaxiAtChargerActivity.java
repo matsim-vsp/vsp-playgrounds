@@ -29,7 +29,6 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	public static final String STAY_AT_CHARGER_ACTIVITY_TYPE = "ETaxiStayAtCharger";
 
 	private final ETaxiChargingTask chargingTask;
-
 	private double endTime = END_ACTIVITY_LATER;
 
 	private enum State {
@@ -63,7 +62,7 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	}
 
 	private void initialize(double now) {
-		ETaxiChargingLogic logic = chargingTask.getLogic();
+		ETaxiChargingLogic logic = chargingTask.getChargingLogic();
 		Ev ev = chargingTask.getEv();
 
 		logic.removeAssignedVehicle(ev);
@@ -77,7 +76,7 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	}
 
 	public void vehicleQueued(double now) {
-		ETaxiChargingLogic logic = chargingTask.getLogic();
+		ETaxiChargingLogic logic = chargingTask.getChargingLogic();
 		endTime = now + logic.estimateMaxWaitTimeOnArrival() + logic.estimateChargeTime(chargingTask.getEv());
 		state = State.queued;
 	}
@@ -85,7 +84,7 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	public void chargingStarted(double now) {
 		// if veh is fully charged we must add at least 1 second to make sure that there is
 		// at least 1 time step (1 second) between chargingStarted() and chargingEnded()
-		endTime = now + Math.max(1, chargingTask.getLogic().estimateChargeTime(chargingTask.getEv()));
+		endTime = now + Math.max(1, chargingTask.getChargingLogic().estimateChargeTime(chargingTask.getEv()));
 		state = State.plugged;
 		chargingTask.setChargingStartedTime(now);
 	}
