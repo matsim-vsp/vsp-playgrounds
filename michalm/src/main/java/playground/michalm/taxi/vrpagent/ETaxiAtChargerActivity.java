@@ -45,15 +45,15 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	@Override
 	public void doSimStep(double now) {
 		switch (state) {
+			case init:
+				initialize(now);
+				return;
+				
 			case queued:
 			case plugged:
 				if (endTime <= now) {
 					endTime = now + 1;
 				}
-				return;
-
-			case init:
-				initialize(now);
 				return;
 
 			default:
@@ -76,15 +76,10 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	}
 
 	public void vehicleQueued(double now) {
-		ETaxiChargingLogic logic = chargingTask.getChargingLogic();
-		endTime = now + logic.estimateMaxWaitTimeOnArrival() + logic.estimateChargeTime(chargingTask.getEv());
 		state = State.queued;
 	}
 
 	public void chargingStarted(double now) {
-		// if veh is fully charged we must add at least 1 second to make sure that there is
-		// at least 1 time step (1 second) between chargingStarted() and chargingEnded()
-		endTime = now + Math.max(1, chargingTask.getChargingLogic().estimateChargeTime(chargingTask.getEv()));
 		state = State.plugged;
 		chargingTask.setChargingStartedTime(now);
 	}
