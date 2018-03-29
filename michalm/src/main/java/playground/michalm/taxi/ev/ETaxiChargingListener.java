@@ -1,9 +1,8 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -19,28 +18,27 @@
 
 package playground.michalm.taxi.ev;
 
-import org.matsim.contrib.taxi.util.stats.TimeProfileCollector.ProfileCalculator;
-import org.matsim.vsp.ev.data.*;
-import org.matsim.contrib.taxi.util.stats.TimeProfiles;
+import org.matsim.vsp.ev.charging.ChargingListener;
+import org.matsim.vsp.ev.data.ElectricVehicle;
 
-public class ETaxiChargerProfiles {
-	public static ProfileCalculator createChargerOccupancyCalculator(final EvData evData) {
-		String[] header = { "plugged", "queued", "assigned" };
-		return new TimeProfiles.MultiValueProfileCalculator(header) {
-			@Override
-			public Integer[] calcValues() {
-				int plugged = 0;
-				int queued = 0;
-				int assigned = 0;
-				for (Charger c : evData.getChargers().values()) {
-					ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
-					plugged += logic.getPluggedVehicles().size();
-					queued += logic.getQueuedVehicles().size();
-					assigned += logic.getAssignedCount();
-				}
+import playground.michalm.taxi.data.EvrpVehicle.Ev;
 
-				return new Integer[] { plugged, queued, assigned };
-			}
-		};
+/**
+ * @author michalm
+ */
+public class ETaxiChargingListener implements ChargingListener {
+	@Override
+	public void notifyVehicleQueued(ElectricVehicle ev, double now) {
+		((Ev)ev).getAtChargerActivity().vehicleQueued(now);
+	}
+
+	@Override
+	public void notifyChargingStarted(ElectricVehicle ev, double now) {
+		((Ev)ev).getAtChargerActivity().chargingStarted(now);
+	}
+
+	@Override
+	public void notifyChargingEnded(ElectricVehicle ev, double now) {
+		((Ev)ev).getAtChargerActivity().chargingEnded(now);
 	}
 }

@@ -46,8 +46,8 @@ public class ETaxiChargerXYDataUtils {
 				ETaxiChargingLogic logic = (ETaxiChargingLogic)charger.getLogic();
 				int plugs = charger.getPlugs();
 				return new String[] { charger.getPlugs() + "", //
-						getValue(logic.getPluggedCount(), plugs, relative), //
-						getValue(logic.getQueuedCount(), plugs, relative), //
+						getValue(logic.getPluggedVehicles().size(), plugs, relative), //
+						getValue(logic.getQueuedVehicles().size(), plugs, relative), //
 						getValue(logic.getAssignedCount(), plugs, relative) };
 			}
 

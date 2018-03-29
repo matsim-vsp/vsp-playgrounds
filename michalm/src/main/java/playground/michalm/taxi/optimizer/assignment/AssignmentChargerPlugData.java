@@ -19,9 +19,9 @@
 
 package playground.michalm.taxi.optimizer.assignment;
 
-import org.matsim.vsp.ev.data.Charger;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData.DestEntry;
+import org.matsim.vsp.ev.data.Charger;
 
 import com.google.common.collect.ImmutableList;
 
@@ -46,8 +46,8 @@ class AssignmentChargerPlugData {
 			ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
 
 			int dispatched = logic.getAssignedCount();
-			int queued = logic.getQueuedCount();
-			int plugged = logic.getPluggedCount();
+			int queued = logic.getQueuedVehicles().size();
+			int plugged = logic.getPluggedVehicles().size();
 
 			int assignedVehicles = plugged + queued + dispatched;
 			if (assignedVehicles == 2 * c.getPlugs()) {

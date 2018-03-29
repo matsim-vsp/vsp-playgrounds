@@ -24,22 +24,22 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.vehicles.Vehicle;
-import org.matsim.vsp.ev.charging.FixedSpeedChargingWithQueueingLogic;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingLogic;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 
-import playground.michalm.taxi.data.EvrpVehicle.Ev;
-
-public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
+public class ETaxiChargingLogic extends ChargingWithQueueingLogic {
 	public static ETaxiChargingLogic create(Charger charger, double chargingSpeedFactor) {
 		return new ETaxiChargingLogic(charger, new ETaxiChargingStrategy(charger, chargingSpeedFactor));
 	}
 
+	private final Charger charger;
 	private final ETaxiChargingStrategy chargingStrategy;
 	private final Map<Id<Vehicle>, ElectricVehicle> assignedVehicles = new HashMap<>();
 
 	public ETaxiChargingLogic(Charger charger, ETaxiChargingStrategy chargingStrategy) {
-		super(charger, chargingStrategy);
+		super(charger, chargingStrategy, new ETaxiChargingListener());
+		this.charger = charger;
 		this.chargingStrategy = chargingStrategy;
 	}
 
@@ -55,37 +55,22 @@ public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
 		}
 	}
 
-	@Override
-	protected void notifyVehicleQueued(ElectricVehicle ev, double now) {
-		((Ev)ev).getAtChargerActivity().vehicleQueued(now);
-	}
-
-	@Override
-	protected void notifyChargingStarted(ElectricVehicle ev, double now) {
-		((Ev)ev).getAtChargerActivity().chargingStarted(now);
-	}
-
-	@Override
-	protected void notifyChargingEnded(ElectricVehicle ev, double now) {
-		((Ev)ev).getAtChargerActivity().chargingEnded(now);
-	}
-
 	// TODO using task timing from schedules will be more accurate in predicting charge demand
 
 	// does not include further demand (AUX for queued vehs)
 	public double estimateMaxWaitTimeOnArrival() {
-		if (pluggedVehicles.size() < charger.getPlugs()) {
+		if (getPluggedVehicles().size() < charger.getPlugs()) {
 			return 0;
 		}
 
-		double sum = sumEnergyToCharge(pluggedVehicles.values()) + sumEnergyToCharge(queuedVehicles);
+		double sum = sumEnergyToCharge(getPluggedVehicles().values()) + sumEnergyToCharge(getQueuedVehicles());
 		return sum / chargingStrategy.getEffectivePower() / charger.getPlugs();
 	}
 
 	// does not include further demand (AUX for queued vehs; AUX+driving for dispatched vehs)
 	public double estimateAssignedWorkload() {
-		double total = sumEnergyToCharge(pluggedVehicles.values()) //
-				+ sumEnergyToCharge(queuedVehicles) //
+		double total = sumEnergyToCharge(getPluggedVehicles().values()) //
+				+ sumEnergyToCharge(getQueuedVehicles()) //
 				+ sumEnergyToCharge(assignedVehicles.values());
 		return total / chargingStrategy.getEffectivePower();
 	}
@@ -100,14 +85,6 @@ public class ETaxiChargingLogic extends FixedSpeedChargingWithQueueingLogic {
 
 	public double estimateChargeTime(ElectricVehicle ev) {
 		return chargingStrategy.calcRemainingTimeToCharge(ev);
-	}
-
-	public int getPluggedCount() {
-		return pluggedVehicles.size();
-	}
-
-	public int getQueuedCount() {
-		return queuedVehicles.size();
 	}
 
 	public int getAssignedCount() {

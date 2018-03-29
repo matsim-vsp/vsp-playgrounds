@@ -18,7 +18,7 @@
 
 package playground.michalm.taxi.ev;
 
-import org.matsim.vsp.ev.charging.ChargingStrategy;
+import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
 import org.matsim.vsp.ev.data.Battery;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
@@ -26,38 +26,17 @@ import org.matsim.vsp.ev.data.ElectricVehicle;
 /**
  * @author michalm
  */
-public class ETaxiChargingStrategy implements ChargingStrategy {
-	// fast charging up to 80% of the battery capacity
+public class ETaxiChargingStrategy extends FixedSpeedChargingStrategy {
+	// linear (fast) charging up to 80% of the battery capacity
 	private static final double MAX_RELATIVE_SOC = 0.8;
 
-	private final double effectivePower;
-
 	public ETaxiChargingStrategy(Charger charger, double chargingSpeedFactor) {
-		this.effectivePower = chargingSpeedFactor * charger.getPower();
-	}
-
-	@Override
-	public void chargeVehicle(ElectricVehicle ev, double chargePeriod) {
-		ev.getBattery().charge(effectivePower * chargePeriod);
-	}
-
-	@Override
-	public boolean isChargingCompleted(ElectricVehicle ev) {
-		return calcRemainingEnergyToCharge(ev) <= 0;
+		super(charger, chargingSpeedFactor);
 	}
 
 	@Override
 	public double calcRemainingEnergyToCharge(ElectricVehicle ev) {
 		Battery b = ev.getBattery();
 		return MAX_RELATIVE_SOC * b.getCapacity() - b.getSoc();
-	}
-
-	@Override
-	public double calcRemainingTimeToCharge(ElectricVehicle ev) {
-		return calcRemainingEnergyToCharge(ev) / effectivePower;
-	}
-
-	double getEffectivePower() {
-		return effectivePower;
 	}
 }
