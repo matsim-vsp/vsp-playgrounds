@@ -21,11 +21,13 @@ package playground.michalm.taxi.optimizer.assignment;
 
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData.DestEntry;
+import org.matsim.vsp.ev.charging.ChargingEstimations;
 import org.matsim.vsp.ev.data.Charger;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 
-import playground.michalm.taxi.ev.ETaxiChargingLogic;
+import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
 
 class AssignmentChargerPlugData {
 	static class ChargerPlug {
@@ -43,7 +45,7 @@ class AssignmentChargerPlugData {
 
 		int idx = 0;
 		for (Charger c : chargers) {
-			ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
+			ChargingWithQueueingAndAssignmentLogic logic = (ChargingWithQueueingAndAssignmentLogic)c.getLogic();
 
 			int dispatched = logic.getAssignedVehicles().size();
 			int queued = logic.getQueuedVehicles().size();
@@ -70,7 +72,12 @@ class AssignmentChargerPlugData {
 				continue;
 			}
 
-			double chargeStart = currentTime + logic.estimateAssignedWorkload() / (c.getPlugs() - unassignedPlugs);
+			// does not include AUX+driving for assigned vehs
+			double assignedWorkload = ChargingEstimations.estimateTotalTimeToCharge(logic.getChargingStrategy(),
+					Streams.concat(logic.getPluggedVehicles().stream(), logic.getQueuedVehicles().stream(),
+							logic.getAssignedVehicles().stream()));
+
+			double chargeStart = currentTime + assignedWorkload / (c.getPlugs() - unassignedPlugs);
 			for (int p = unassignedPlugs; p < assignableVehicles; p++) {
 				ChargerPlug plug = new ChargerPlug(c, p);
 				builder.add(new DestEntry<ChargerPlug>(idx++, plug, c.getLink(), chargeStart));

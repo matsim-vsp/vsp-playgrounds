@@ -49,7 +49,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import playground.michalm.taxi.data.EvrpVehicle;
-import playground.michalm.taxi.ev.ETaxiChargingLogic;
+import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 public class ETaxiScheduler extends TaxiScheduler {
@@ -80,13 +80,13 @@ public class ETaxiScheduler extends TaxiScheduler {
 		Schedule schedule = vehicle.getSchedule();
 		divertOrAppendDrive(schedule, vrpPath);
 
-		ETaxiChargingLogic logic = (ETaxiChargingLogic)charger.getLogic();
+		ChargingWithQueueingAndAssignmentLogic logic = (ChargingWithQueueingAndAssignmentLogic)charger.getLogic();
 		ElectricVehicle ev = vehicle.getElectricVehicle();
 		double chargingEndTime = vrpPath.getArrivalTime()
 				+ ChargingEstimations.estimateMaxWaitTimeForNextVehicle(charger)// TODO not precise!!!
 				+ logic.getChargingStrategy().calcRemainingTimeToCharge(ev);
 		schedule.addTask(new ETaxiChargingTask(vrpPath.getArrivalTime(), chargingEndTime, charger, ev));
-		logic.addAssignedVehicle(ev);
+		logic.assignVehicle(ev);
 
 		appendStayTask(vehicle);
 	}
@@ -178,7 +178,7 @@ public class ETaxiScheduler extends TaxiScheduler {
 	protected void taskRemovedFromSchedule(Vehicle vehicle, TaxiTask task) {
 		if (task instanceof ETaxiChargingTask) {
 			ETaxiChargingTask chargingTask = ((ETaxiChargingTask)task);
-			chargingTask.getChargingLogic().removeAssignedVehicle(chargingTask.getElectricVehicle());
+			chargingTask.getChargingLogic().unassignVehicle(chargingTask.getElectricVehicle());
 			vehiclesWithUnscheduledCharging.add(vehicle);
 		} else {
 			super.taskRemovedFromSchedule(vehicle, task);

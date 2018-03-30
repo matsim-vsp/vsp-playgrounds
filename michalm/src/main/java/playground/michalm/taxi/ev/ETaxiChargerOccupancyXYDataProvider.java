@@ -53,7 +53,7 @@ public class ETaxiChargerOccupancyXYDataProvider implements Provider<MobsimListe
 				: new String[] { "plugs", "plugged", "queued", "assigned" };
 
 		return XYDataCollectors.createCalculator(header, charger -> {
-			ETaxiChargingLogic logic = (ETaxiChargingLogic)charger.getLogic();
+			ChargingWithQueueingAndAssignmentLogic logic = (ChargingWithQueueingAndAssignmentLogic)charger.getLogic();
 			int plugs = charger.getPlugs();
 			return new String[] { charger.getPlugs() + "", //
 					getValue(logic.getPluggedVehicles().size(), plugs, relative), //

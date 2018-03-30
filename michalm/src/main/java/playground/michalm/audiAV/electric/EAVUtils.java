@@ -34,7 +34,8 @@ import org.matsim.vsp.ev.discharging.OhdeSlaskiDriveEnergyConsumption;
 
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
-import playground.michalm.taxi.ev.ETaxiChargingLogic;
+import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
+import playground.michalm.taxi.ev.ETaxiChargingStrategy;
 
 public class EAVUtils {
 	public static void initEvData(Fleet fleet, EvData evData) {
@@ -42,7 +43,8 @@ public class EAVUtils {
 		double chargingSpeedFactor = 1.; // full speed
 
 		for (Charger c : evData.getChargers().values()) {
-			ETaxiChargingLogic chargingLogic = ETaxiChargingLogic.create(c, chargingSpeedFactor);
+			ChargingWithQueueingAndAssignmentLogic chargingLogic = new ChargingWithQueueingAndAssignmentLogic(c,
+					new ETaxiChargingStrategy(c, chargingSpeedFactor));
 			c.setLogic(chargingLogic);
 		}
 

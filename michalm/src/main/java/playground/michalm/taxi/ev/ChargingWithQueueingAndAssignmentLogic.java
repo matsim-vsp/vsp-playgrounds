@@ -25,40 +25,28 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.vsp.ev.charging.ChargingEstimations;
+import org.matsim.vsp.ev.charging.ChargingStrategy;
 import org.matsim.vsp.ev.charging.ChargingWithQueueingLogic;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 
-import com.google.common.collect.Streams;
-
-public class ETaxiChargingLogic extends ChargingWithQueueingLogic {
-	public static ETaxiChargingLogic create(Charger charger, double chargingSpeedFactor) {
-		return new ETaxiChargingLogic(charger, new ETaxiChargingStrategy(charger, chargingSpeedFactor));
-	}
-
+public class ChargingWithQueueingAndAssignmentLogic extends ChargingWithQueueingLogic {
 	private final Map<Id<ElectricVehicle>, ElectricVehicle> assignedVehicles = new LinkedHashMap<>();
 
-	public ETaxiChargingLogic(Charger charger, ETaxiChargingStrategy chargingStrategy) {
+	public ChargingWithQueueingAndAssignmentLogic(Charger charger, ChargingStrategy chargingStrategy) {
 		super(charger, chargingStrategy);
 	}
 
-	// at this point ETaxiChargingTask should point to Charger
-	public void addAssignedVehicle(ElectricVehicle ev) {
-		assignedVehicles.put(ev.getId(), ev);
-	}
-
-	// on deleting ETaxiChargingTask or vehicle arrival (the veh becomes plugged or queued)
-	public void removeAssignedVehicle(ElectricVehicle ev) {
-		if (assignedVehicles.remove(ev.getId()) == null) {
+	public void assignVehicle(ElectricVehicle ev) {
+		if (assignedVehicles.put(ev.getId(), ev) != null) {
 			throw new IllegalArgumentException();
 		}
 	}
 
-	// does not include AUX+driving for assigned vehs
-	public double estimateAssignedWorkload() {
-		return ChargingEstimations.estimateTotalTimeToCharge(getChargingStrategy(), Streams.concat(
-				getPluggedVehicles().stream(), getQueuedVehicles().stream(), assignedVehicles.values().stream()));
+	public void unassignVehicle(ElectricVehicle ev) {
+		if (assignedVehicles.remove(ev.getId()) == null) {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	private final Collection<ElectricVehicle> unmodifiableAssignedVehicles = Collections

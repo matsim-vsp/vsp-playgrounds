@@ -23,7 +23,7 @@ import org.matsim.contrib.dynagent.AbstractDynActivity;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 
 import playground.michalm.taxi.ev.ETaxiChargingListener;
-import playground.michalm.taxi.ev.ETaxiChargingLogic;
+import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 public class ETaxiAtChargerActivity extends AbstractDynActivity {
@@ -63,9 +63,9 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	}
 
 	private void initialize(double now) {
-		ETaxiChargingLogic logic = chargingTask.getChargingLogic();
+		ChargingWithQueueingAndAssignmentLogic logic = chargingTask.getChargingLogic();
 		ElectricVehicle ev = chargingTask.getElectricVehicle();
-		logic.removeAssignedVehicle(ev);
+		logic.unassignVehicle(ev);
 		logic.addVehicle(ev, new ETaxiChargingListener(this), now);
 	}
 

@@ -57,7 +57,7 @@ public class ETaxiChargerOccupancyTimeProfileCollectorProvider implements Provid
 			int queued = 0;
 			int assigned = 0;
 			for (Charger c : evData.getChargers().values()) {
-				ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
+				ChargingWithQueueingAndAssignmentLogic logic = (ChargingWithQueueingAndAssignmentLogic)c.getLogic();
 				plugged += logic.getPluggedVehicles().size();
 				queued += logic.getQueuedVehicles().size();
 				assigned += logic.getAssignedVehicles().size();

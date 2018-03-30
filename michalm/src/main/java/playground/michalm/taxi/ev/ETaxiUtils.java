@@ -39,7 +39,8 @@ public class ETaxiUtils {
 		double chargingSpeedFactor = 1.; // full speed
 
 		for (Charger c : evData.getChargers().values()) {
-			ETaxiChargingLogic chargingLogic = ETaxiChargingLogic.create(c, chargingSpeedFactor);
+			ChargingWithQueueingAndAssignmentLogic chargingLogic = new ChargingWithQueueingAndAssignmentLogic(c,
+					new ETaxiChargingStrategy(c, chargingSpeedFactor));
 			c.setLogic(chargingLogic);
 		}
 
