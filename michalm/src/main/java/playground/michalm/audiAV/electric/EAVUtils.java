@@ -24,6 +24,8 @@ import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
+import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 import org.matsim.vsp.ev.data.ElectricVehicleImpl;
@@ -34,8 +36,6 @@ import org.matsim.vsp.ev.discharging.OhdeSlaskiDriveEnergyConsumption;
 
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
-import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
-import playground.michalm.taxi.ev.ETaxiChargingStrategy;
 
 public class EAVUtils {
 	public static void initEvData(Fleet fleet, EvData evData) {
@@ -44,7 +44,7 @@ public class EAVUtils {
 
 		for (Charger c : evData.getChargers().values()) {
 			ChargingWithQueueingAndAssignmentLogic chargingLogic = new ChargingWithQueueingAndAssignmentLogic(c,
-					new ETaxiChargingStrategy(c, chargingSpeedFactor));
+					new FixedSpeedChargingStrategy(c.getPower() * chargingSpeedFactor, 0.8));
 			c.setLogic(chargingLogic);
 		}
 

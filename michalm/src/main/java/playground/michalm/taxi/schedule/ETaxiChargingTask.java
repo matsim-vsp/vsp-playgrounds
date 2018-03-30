@@ -21,10 +21,9 @@ package playground.michalm.taxi.schedule;
 
 import org.matsim.contrib.dvrp.schedule.StayTaskImpl;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
-
-import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
 
 public class ETaxiChargingTask extends StayTaskImpl implements TaxiTask {
 	private final ChargingWithQueueingAndAssignmentLogic chargingLogic;

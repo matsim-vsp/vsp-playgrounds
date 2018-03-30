@@ -28,6 +28,8 @@ import org.matsim.vsp.ev.EvModule;
 import org.matsim.vsp.ev.data.EvData;
 import org.matsim.vsp.ev.data.EvDataImpl;
 import org.matsim.vsp.ev.data.file.ChargerReader;
+import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
+import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
@@ -40,8 +42,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.michalm.taxi.data.file.EvrpVehicleReader;
-import playground.michalm.taxi.ev.ETaxiChargerOccupancyTimeProfileCollectorProvider;
-import playground.michalm.taxi.ev.ETaxiChargerOccupancyXYDataProvider;
 import playground.michalm.taxi.ev.ETaxiUtils;
 
 public class RunETaxiScenario {
@@ -77,8 +77,8 @@ public class RunETaxiScenario {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				addMobsimListenerBinding().toProvider(ETaxiChargerOccupancyTimeProfileCollectorProvider.class);
-				addMobsimListenerBinding().toProvider(ETaxiChargerOccupancyXYDataProvider.class);
+				addMobsimListenerBinding().toProvider(ChargerOccupancyTimeProfileCollectorProvider.class);
+				addMobsimListenerBinding().toProvider(ChargerOccupancyXYDataProvider.class);
 				bind(Fleet.class).toInstance(fleet);// overrride the binding specified in TaxiModule
 			}
 		});

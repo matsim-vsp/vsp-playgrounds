@@ -25,6 +25,8 @@ import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.vsp.ev.*;
 import org.matsim.vsp.ev.data.*;
 import org.matsim.vsp.ev.data.file.ChargerReader;
+import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
+import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
 import org.matsim.contrib.taxi.benchmark.*;
 import org.matsim.contrib.taxi.run.*;
 import org.matsim.core.config.*;
@@ -82,8 +84,8 @@ public class RunEAVBenchmark {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				addMobsimListenerBinding().toProvider(ETaxiChargerOccupancyTimeProfileCollectorProvider.class);
-				addMobsimListenerBinding().toProvider(ETaxiChargerOccupancyXYDataProvider.class);
+				addMobsimListenerBinding().toProvider(ChargerOccupancyTimeProfileCollectorProvider.class);
+				addMobsimListenerBinding().toProvider(ChargerOccupancyXYDataProvider.class);
 				addControlerListenerBinding().to(ETaxiBenchmarkStats.class).asEagerSingleton();
 				bind(Fleet.class).toInstance(fleet);// overrride the binding specified in TaxiModule
 			}

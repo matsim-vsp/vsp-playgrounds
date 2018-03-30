@@ -20,10 +20,10 @@
 package playground.michalm.taxi.vrpagent;
 
 import org.matsim.contrib.dynagent.AbstractDynActivity;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 
 import playground.michalm.taxi.ev.ETaxiChargingListener;
-import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 public class ETaxiAtChargerActivity extends AbstractDynActivity {

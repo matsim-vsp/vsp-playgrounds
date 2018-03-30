@@ -42,6 +42,7 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vsp.ev.charging.ChargingEstimations;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 
@@ -49,7 +50,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import playground.michalm.taxi.data.EvrpVehicle;
-import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 public class ETaxiScheduler extends TaxiScheduler {

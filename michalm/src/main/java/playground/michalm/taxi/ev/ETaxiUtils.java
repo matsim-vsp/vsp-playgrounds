@@ -22,6 +22,8 @@ package playground.michalm.taxi.ev;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
+import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 import org.matsim.vsp.ev.data.ElectricVehicleImpl;
@@ -40,7 +42,7 @@ public class ETaxiUtils {
 
 		for (Charger c : evData.getChargers().values()) {
 			ChargingWithQueueingAndAssignmentLogic chargingLogic = new ChargingWithQueueingAndAssignmentLogic(c,
-					new ETaxiChargingStrategy(c, chargingSpeedFactor));
+					new FixedSpeedChargingStrategy(c.getPower() * chargingSpeedFactor, 0.8));
 			c.setLogic(chargingLogic);
 		}
 

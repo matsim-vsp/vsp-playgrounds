@@ -19,9 +19,11 @@
 
 package playground.michalm.taxi.data;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.matsim.api.core.v01.*;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.facilities.Facility;

@@ -22,12 +22,11 @@ package playground.michalm.taxi.optimizer.assignment;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData.DestEntry;
 import org.matsim.vsp.ev.charging.ChargingEstimations;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
 import org.matsim.vsp.ev.data.Charger;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-
-import playground.michalm.taxi.ev.ChargingWithQueueingAndAssignmentLogic;
 
 class AssignmentChargerPlugData {
 	static class ChargerPlug {
