@@ -42,12 +42,12 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vsp.ev.data.Charger;
+import org.matsim.vsp.ev.data.ElectricVehicle;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import playground.michalm.taxi.data.EvrpVehicle;
-import playground.michalm.taxi.data.EvrpVehicle.Ev;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
@@ -80,7 +80,7 @@ public class ETaxiScheduler extends TaxiScheduler {
 		divertOrAppendDrive(schedule, vrpPath);
 
 		ETaxiChargingLogic logic = (ETaxiChargingLogic)charger.getLogic();
-		Ev ev = vehicle.getEv();
+		ElectricVehicle ev = vehicle.getElectricVehicle();
 		double chargingEndTime = vrpPath.getArrivalTime() + logic.estimateMaxWaitTimeOnArrival()
 				+ logic.estimateChargeTime(ev);
 		schedule.addTask(new ETaxiChargingTask(vrpPath.getArrivalTime(), chargingEndTime, charger, ev));
@@ -176,7 +176,7 @@ public class ETaxiScheduler extends TaxiScheduler {
 	protected void taskRemovedFromSchedule(Vehicle vehicle, TaxiTask task) {
 		if (task instanceof ETaxiChargingTask) {
 			ETaxiChargingTask chargingTask = ((ETaxiChargingTask)task);
-			chargingTask.getChargingLogic().removeAssignedVehicle(chargingTask.getEv());
+			chargingTask.getChargingLogic().removeAssignedVehicle(chargingTask.getElectricVehicle());
 			vehiclesWithUnscheduledCharging.add(vehicle);
 		} else {
 			super.taskRemovedFromSchedule(vehicle, task);

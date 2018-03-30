@@ -19,12 +19,12 @@
 
 package playground.michalm.taxi.ev;
 
-import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
+import org.matsim.vsp.ev.data.ElectricVehicleImpl;
 import org.matsim.vsp.ev.data.EvData;
 import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption;
 import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
@@ -44,14 +44,14 @@ public class ETaxiUtils {
 		}
 
 		for (Vehicle v : fleet.getVehicles().values()) {
-			Ev ev = ((EvrpVehicle)v).getEv();
+			ElectricVehicleImpl ev = (ElectricVehicleImpl)((EvrpVehicle)v).getElectricVehicle();
 			ev.setDriveEnergyConsumption(new OhdeSlaskiDriveEnergyConsumption());
 			ev.setAuxEnergyConsumption(new OhdeSlaskiAuxEnergyConsumption(ev, tempProvider, ETaxiUtils::isTurnedOn));
-			evData.addElectricVehicle(Id.createVehicleId(v.getId()), ev);
+			evData.addElectricVehicle(ev.getId(), ev);
 		}
 	}
 
 	private static boolean isTurnedOn(ElectricVehicle ev) {
-		return ((Ev)ev).getEvrpVehicle().getSchedule().getStatus() == ScheduleStatus.STARTED;
+		return ((Ev)ev).getDvrpVehicle().getSchedule().getStatus() == ScheduleStatus.STARTED;
 	}
 }

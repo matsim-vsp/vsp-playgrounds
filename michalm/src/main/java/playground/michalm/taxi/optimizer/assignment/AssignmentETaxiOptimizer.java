@@ -204,14 +204,14 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		// filter least charged vehicles
 		// assumption: all b.capacities are equal
 		List<? extends Vehicle> leastChargedVehicles = PartialSort.kSmallestElements(
-				pData.getSize(), vehiclesBelowMinSocLevel, v -> ((EvrpVehicle)v).getEv().getBattery().getSoc());
+				pData.getSize(), vehiclesBelowMinSocLevel, v -> ((EvrpVehicle)v).getElectricVehicle().getBattery().getSoc());
 
 		return new VehicleData(timer.getTimeOfDay(), eScheduler, leastChargedVehicles.stream());
 	}
 
 	// TODO MIN_RELATIVE_SOC should depend on %idle
 	private boolean isChargingSchedulable(Vehicle v, TaxiScheduleInquiry scheduleInquiry, double maxDepartureTime) {
-		Battery b = ((EvrpVehicle)v).getEv().getBattery();
+		Battery b = ((EvrpVehicle)v).getElectricVehicle().getBattery();
 		boolean undercharged = b.getSoc() < params.minRelativeSoc * b.getCapacity();
 		if (!undercharged || !scheduledForCharging.containsKey(v.getId())) {
 			return false;// not needed or already planned

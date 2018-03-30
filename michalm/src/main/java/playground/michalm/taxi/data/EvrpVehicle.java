@@ -34,7 +34,7 @@ public class EvrpVehicle extends VehicleImpl {
 			super(Id.create(id, ElectricVehicle.class), battery);
 		}
 
-		public EvrpVehicle getEvrpVehicle() {
+		public Vehicle getDvrpVehicle() {
 			return EvrpVehicle.this;
 		}
 	}
@@ -47,7 +47,7 @@ public class EvrpVehicle extends VehicleImpl {
 		ev = new Ev(id, new BatteryImpl(batteryCapacity, initialSoc));
 	}
 
-	public Ev getEv() {
+	public ElectricVehicle getElectricVehicle() {
 		return ev;
 	}
 }

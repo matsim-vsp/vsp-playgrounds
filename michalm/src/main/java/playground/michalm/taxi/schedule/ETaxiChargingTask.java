@@ -22,16 +22,16 @@ package playground.michalm.taxi.schedule;
 import org.matsim.contrib.dvrp.schedule.StayTaskImpl;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.vsp.ev.data.Charger;
+import org.matsim.vsp.ev.data.ElectricVehicle;
 
-import playground.michalm.taxi.data.EvrpVehicle.Ev;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
 
 public class ETaxiChargingTask extends StayTaskImpl implements TaxiTask {
 	private final ETaxiChargingLogic chargingLogic;
-	private final Ev ev;
+	private final ElectricVehicle ev;
 	private double chargingStartedTime;
 
-	public ETaxiChargingTask(double beginTime, double endTime, Charger charger, Ev ev) {
+	public ETaxiChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev) {
 		super(beginTime, endTime, charger.getLink());
 		this.chargingLogic = (ETaxiChargingLogic)charger.getLogic();
 		this.ev = ev;
@@ -41,7 +41,7 @@ public class ETaxiChargingTask extends StayTaskImpl implements TaxiTask {
 		return chargingLogic;
 	}
 
-	public Ev getEv() {
+	public ElectricVehicle getElectricVehicle() {
 		return ev;
 	}
 

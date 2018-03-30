@@ -20,8 +20,8 @@
 package playground.michalm.taxi.vrpagent;
 
 import org.matsim.contrib.dynagent.AbstractDynActivity;
+import org.matsim.vsp.ev.data.ElectricVehicle;
 
-import playground.michalm.taxi.data.EvrpVehicle.Ev;
 import playground.michalm.taxi.ev.ETaxiChargingListener;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
@@ -49,7 +49,7 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 			case init:
 				initialize(now);
 				return;
-				
+
 			case queued:
 			case plugged:
 				if (endTime <= now) {
@@ -64,7 +64,7 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 
 	private void initialize(double now) {
 		ETaxiChargingLogic logic = chargingTask.getChargingLogic();
-		Ev ev = chargingTask.getEv();
+		ElectricVehicle ev = chargingTask.getElectricVehicle();
 		logic.removeAssignedVehicle(ev);
 		logic.addVehicle(ev, new ETaxiChargingListener(this), now);
 	}
