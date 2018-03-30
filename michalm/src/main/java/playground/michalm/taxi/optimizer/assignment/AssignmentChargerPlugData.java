@@ -45,7 +45,7 @@ class AssignmentChargerPlugData {
 		for (Charger c : chargers) {
 			ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
 
-			int dispatched = logic.getAssignedCount();
+			int dispatched = logic.getAssignedVehicles().size();
 			int queued = logic.getQueuedVehicles().size();
 			int plugged = logic.getPluggedVehicles().size();
 

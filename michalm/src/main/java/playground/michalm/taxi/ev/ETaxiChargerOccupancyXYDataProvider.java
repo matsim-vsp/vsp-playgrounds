@@ -58,7 +58,7 @@ public class ETaxiChargerOccupancyXYDataProvider implements Provider<MobsimListe
 			return new String[] { charger.getPlugs() + "", //
 					getValue(logic.getPluggedVehicles().size(), plugs, relative), //
 					getValue(logic.getQueuedVehicles().size(), plugs, relative), //
-					getValue(logic.getAssignedCount(), plugs, relative) };
+					getValue(logic.getAssignedVehicles().size(), plugs, relative) };
 		});
 	}
 

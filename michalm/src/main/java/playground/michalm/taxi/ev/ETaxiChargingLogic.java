@@ -19,27 +19,28 @@
 
 package playground.michalm.taxi.ev;
 
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.vsp.ev.charging.ChargingEstimations;
 import org.matsim.vsp.ev.charging.ChargingWithQueueingLogic;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
+
+import com.google.common.collect.Streams;
 
 public class ETaxiChargingLogic extends ChargingWithQueueingLogic {
 	public static ETaxiChargingLogic create(Charger charger, double chargingSpeedFactor) {
 		return new ETaxiChargingLogic(charger, new ETaxiChargingStrategy(charger, chargingSpeedFactor));
 	}
 
-	private final Charger charger;
-	private final ETaxiChargingStrategy chargingStrategy;
-	private final Map<Id<ElectricVehicle>, ElectricVehicle> assignedVehicles = new HashMap<>();
+	private final Map<Id<ElectricVehicle>, ElectricVehicle> assignedVehicles = new LinkedHashMap<>();
 
 	public ETaxiChargingLogic(Charger charger, ETaxiChargingStrategy chargingStrategy) {
 		super(charger, chargingStrategy);
-		this.charger = charger;
-		this.chargingStrategy = chargingStrategy;
 	}
 
 	// at this point ETaxiChargingTask should point to Charger
@@ -54,39 +55,16 @@ public class ETaxiChargingLogic extends ChargingWithQueueingLogic {
 		}
 	}
 
-	// TODO using task timing from schedules will be more accurate in predicting charge demand
-
-	// does not include further demand (AUX for queued vehs)
-	public double estimateMaxWaitTimeOnArrival() {
-		if (getPluggedVehicles().size() < charger.getPlugs()) {
-			return 0;
-		}
-
-		double sum = sumEnergyToCharge(getPluggedVehicles()) + sumEnergyToCharge(getQueuedVehicles());
-		return sum / chargingStrategy.getEffectivePower() / charger.getPlugs();
-	}
-
-	// does not include further demand (AUX for queued vehs; AUX+driving for dispatched vehs)
+	// does not include AUX+driving for assigned vehs
 	public double estimateAssignedWorkload() {
-		double total = sumEnergyToCharge(getPluggedVehicles()) //
-				+ sumEnergyToCharge(getQueuedVehicles()) //
-				+ sumEnergyToCharge(assignedVehicles.values());
-		return total / chargingStrategy.getEffectivePower();
+		return ChargingEstimations.estimateTotalTimeToCharge(getChargingStrategy(), Streams.concat(
+				getPluggedVehicles().stream(), getQueuedVehicles().stream(), assignedVehicles.values().stream()));
 	}
 
-	private double sumEnergyToCharge(Iterable<ElectricVehicle> evs) {
-		double energyToCharge = 0;
-		for (ElectricVehicle ev : evs) {
-			energyToCharge += chargingStrategy.calcRemainingEnergyToCharge(ev);
-		}
-		return energyToCharge;
-	}
+	private final Collection<ElectricVehicle> unmodifiableAssignedVehicles = Collections
+			.unmodifiableCollection(assignedVehicles.values());
 
-	public double estimateChargeTime(ElectricVehicle ev) {
-		return chargingStrategy.calcRemainingTimeToCharge(ev);
-	}
-
-	public int getAssignedCount() {
-		return assignedVehicles.size();
+	public Collection<ElectricVehicle> getAssignedVehicles() {
+		return unmodifiableAssignedVehicles;
 	}
 }

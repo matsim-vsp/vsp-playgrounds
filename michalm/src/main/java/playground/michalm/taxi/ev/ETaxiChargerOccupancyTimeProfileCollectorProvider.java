@@ -60,7 +60,7 @@ public class ETaxiChargerOccupancyTimeProfileCollectorProvider implements Provid
 				ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
 				plugged += logic.getPluggedVehicles().size();
 				queued += logic.getQueuedVehicles().size();
-				assigned += logic.getAssignedCount();
+				assigned += logic.getAssignedVehicles().size();
 			}
 			return new Integer[] { plugged, queued, assigned };
 		});

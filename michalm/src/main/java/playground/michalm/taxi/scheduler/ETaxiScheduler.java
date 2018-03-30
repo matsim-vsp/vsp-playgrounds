@@ -41,6 +41,7 @@ import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
+import org.matsim.vsp.ev.charging.ChargingEstimations;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 
@@ -81,8 +82,9 @@ public class ETaxiScheduler extends TaxiScheduler {
 
 		ETaxiChargingLogic logic = (ETaxiChargingLogic)charger.getLogic();
 		ElectricVehicle ev = vehicle.getElectricVehicle();
-		double chargingEndTime = vrpPath.getArrivalTime() + logic.estimateMaxWaitTimeOnArrival()
-				+ logic.estimateChargeTime(ev);
+		double chargingEndTime = vrpPath.getArrivalTime()
+				+ ChargingEstimations.estimateMaxWaitTimeForNextVehicle(charger)// TODO not precise!!!
+				+ logic.getChargingStrategy().calcRemainingTimeToCharge(ev);
 		schedule.addTask(new ETaxiChargingTask(vrpPath.getArrivalTime(), chargingEndTime, charger, ev));
 		logic.addAssignedVehicle(ev);
 
