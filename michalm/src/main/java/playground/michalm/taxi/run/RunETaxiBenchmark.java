@@ -36,7 +36,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.EvModule;
 import org.matsim.vsp.ev.data.ChargingInfrastructureImpl;
-import org.matsim.vsp.ev.data.EvDataImpl;
+import org.matsim.vsp.ev.data.EvFleetImpl;
 import org.matsim.vsp.ev.data.file.ChargerReader;
 import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
 import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
@@ -77,13 +77,13 @@ public class RunETaxiBenchmark {
 		final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
 		new ChargerReader(scenario.getNetwork(), chargingInfrastructure)
 				.parse(evCfg.getChargersFileUrl(config.getContext()));
-		EvDataImpl evData = new EvDataImpl();
-		ETaxiUtils.initEvData(fleet, evData, chargingInfrastructure);
+		EvFleetImpl evFleet = new EvFleetImpl();
+		ETaxiUtils.initEvData(fleet, evFleet, chargingInfrastructure);
 
 		Controler controler = new Controler(scenario);
 		controler.setModules(new DvrpBenchmarkControlerModule());
 		controler.addOverridingModule(new TaxiModule());
-		controler.addOverridingModule(new EvModule(evData, chargingInfrastructure));
+		controler.addOverridingModule(new EvModule(evFleet, chargingInfrastructure));
 
 		controler.addOverridingModule(ETaxiOptimizerModules.createBenchmarkModule());
 
