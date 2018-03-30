@@ -65,10 +65,8 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	private void initialize(double now) {
 		ETaxiChargingLogic logic = chargingTask.getChargingLogic();
 		Ev ev = chargingTask.getEv();
-
 		logic.removeAssignedVehicle(ev);
-		ev.setAtChargerActivity(this);
-		logic.addVehicle(ev, new ETaxiChargingListener(), now);
+		logic.addVehicle(ev, new ETaxiChargingListener(this), now);
 	}
 
 	@Override
@@ -88,10 +86,5 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 	public void chargingEnded(double now) {
 		endTime = now;
 		state = State.unplugged;
-	}
-
-	@Override
-	public void finalizeAction(double now) {
-		chargingTask.getEv().setAtChargerActivity(null);
 	}
 }

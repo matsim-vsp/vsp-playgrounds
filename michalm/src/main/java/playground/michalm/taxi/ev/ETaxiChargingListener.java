@@ -21,24 +21,30 @@ package playground.michalm.taxi.ev;
 import org.matsim.vsp.ev.charging.ChargingListener;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 
-import playground.michalm.taxi.data.EvrpVehicle.Ev;
+import playground.michalm.taxi.vrpagent.ETaxiAtChargerActivity;
 
 /**
  * @author michalm
  */
 public class ETaxiChargingListener implements ChargingListener {
+	private final ETaxiAtChargerActivity atChargerActivity;
+
+	public ETaxiChargingListener(ETaxiAtChargerActivity atChargerActivity) {
+		this.atChargerActivity = atChargerActivity;
+	}
+
 	@Override
 	public void notifyVehicleQueued(ElectricVehicle ev, double now) {
-		((Ev)ev).getAtChargerActivity().vehicleQueued(now);
+		atChargerActivity.vehicleQueued(now);
 	}
 
 	@Override
 	public void notifyChargingStarted(ElectricVehicle ev, double now) {
-		((Ev)ev).getAtChargerActivity().chargingStarted(now);
+		atChargerActivity.chargingStarted(now);
 	}
 
 	@Override
 	public void notifyChargingEnded(ElectricVehicle ev, double now) {
-		((Ev)ev).getAtChargerActivity().chargingEnded(now);
+		atChargerActivity.chargingEnded(now);
 	}
 }

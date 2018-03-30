@@ -28,22 +28,12 @@ import playground.michalm.taxi.vrpagent.ETaxiAtChargerActivity;
 
 public class EvrpVehicle extends VehicleImpl {
 	public class Ev extends ElectricVehicleImpl {
-		private ETaxiAtChargerActivity atChargerActivity;
-
 		public Ev(Id<Vehicle> id, Battery battery) {
 			super(Id.createVehicleId(id), battery);
 		}
 
 		public EvrpVehicle getEvrpVehicle() {
 			return EvrpVehicle.this;
-		}
-
-		public ETaxiAtChargerActivity getAtChargerActivity() {
-			return atChargerActivity;
-		}
-
-		public void setAtChargerActivity(ETaxiAtChargerActivity atChargerActivity) {
-			this.atChargerActivity = atChargerActivity;
 		}
 	}
 
