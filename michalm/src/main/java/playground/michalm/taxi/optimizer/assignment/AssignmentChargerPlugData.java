@@ -39,7 +39,7 @@ class AssignmentChargerPlugData {
 		}
 	}
 
-	static AssignmentDestinationData<ChargerPlug> create(double currentTime, Iterable<Charger> chargers) {
+	static AssignmentDestinationData<ChargerPlug> create(double currentTime, Iterable<? extends Charger> chargers) {
 		ImmutableList.Builder<DestEntry<ChargerPlug>> builder = ImmutableList.builder();
 
 		int idx = 0;

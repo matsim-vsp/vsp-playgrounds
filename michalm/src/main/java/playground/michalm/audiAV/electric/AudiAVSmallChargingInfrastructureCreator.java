@@ -49,12 +49,12 @@ public class AudiAVSmallChargingInfrastructureCreator {
 			String s = scenarios[i];
 			int c = counts[i];
 
-			EvData data = new EvDataImpl();
-			new ChargerReader(network, data).readFile(chFilePrefix + c + "_" + s + ".xml");
+			final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
+			new ChargerReader(network, chargingInfrastructure).readFile(chFilePrefix + c + "_" + s + ".xml");
 
 			List<Charger> fractChargers = new ArrayList<>();
 			int totalPlugs = 0;
-			for (Charger ch : data.getChargers().values()) {
+			for (Charger ch : chargingInfrastructure.getChargers().values()) {
 				int plugs = (int)uniform.floorOrCeil(fraction * ch.getPlugs());
 				if (plugs > 0) {
 					fractChargers.add(new ChargerImpl(ch.getId(), ch.getPower(), plugs, ch.getLink()));

@@ -23,13 +23,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.FleetImpl;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.vsp.ev.EvConfigGroup;
-import org.matsim.vsp.ev.EvModule;
-import org.matsim.vsp.ev.data.EvData;
-import org.matsim.vsp.ev.data.EvDataImpl;
-import org.matsim.vsp.ev.data.file.ChargerReader;
-import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
-import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
@@ -40,6 +33,13 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import org.matsim.vsp.ev.EvConfigGroup;
+import org.matsim.vsp.ev.EvModule;
+import org.matsim.vsp.ev.data.ChargingInfrastructureImpl;
+import org.matsim.vsp.ev.data.EvDataImpl;
+import org.matsim.vsp.ev.data.file.ChargerReader;
+import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
+import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
 
 import playground.michalm.taxi.data.file.EvrpVehicleReader;
 import playground.michalm.taxi.ev.ETaxiUtils;
@@ -65,13 +65,15 @@ public class RunETaxiScenario {
 		// TODO bind Fleet and EvData
 		FleetImpl fleet = new FleetImpl();
 		new EvrpVehicleReader(scenario.getNetwork(), fleet).parse(taxiCfg.getTaxisFileUrl(config.getContext()));
-		EvData evData = new EvDataImpl();
-		new ChargerReader(scenario.getNetwork(), evData).parse(evCfg.getChargersFileUrl(config.getContext()));
-		ETaxiUtils.initEvData(fleet, evData);
+		final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
+		new ChargerReader(scenario.getNetwork(), chargingInfrastructure)
+				.parse(evCfg.getChargersFileUrl(config.getContext()));
+		EvDataImpl evData = new EvDataImpl();
+		ETaxiUtils.initEvData(fleet, evData, chargingInfrastructure);
 
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(new TaxiModule());
-		controler.addOverridingModule(new EvModule(evData));
+		controler.addOverridingModule(new EvModule(evData, chargingInfrastructure));
 		controler.addOverridingModule(ETaxiOptimizerModules.createDefaultModule());
 
 		controler.addOverridingModule(new AbstractModule() {

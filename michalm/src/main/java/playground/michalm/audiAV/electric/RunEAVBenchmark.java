@@ -20,22 +20,30 @@
 package playground.michalm.audiAV.electric;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.dvrp.data.*;
+import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.data.FleetImpl;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.vsp.ev.*;
-import org.matsim.vsp.ev.data.*;
+import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkControlerModule;
+import org.matsim.contrib.taxi.benchmark.RunTaxiBenchmark;
+import org.matsim.contrib.taxi.benchmark.TaxiBenchmarkConfigConsistencyChecker;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.TaxiModule;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.vsp.ev.EvConfigGroup;
+import org.matsim.vsp.ev.EvModule;
+import org.matsim.vsp.ev.data.ChargingInfrastructureImpl;
+import org.matsim.vsp.ev.data.EvDataImpl;
 import org.matsim.vsp.ev.data.file.ChargerReader;
 import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
 import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
-import org.matsim.contrib.taxi.benchmark.*;
-import org.matsim.contrib.taxi.run.*;
-import org.matsim.core.config.*;
-import org.matsim.core.controler.*;
-import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 
 import playground.michalm.taxi.data.file.EvrpVehicleReader;
-import playground.michalm.taxi.ev.*;
-import playground.michalm.taxi.run.*;
+import playground.michalm.taxi.run.ETaxiBenchmarkStats;
+import playground.michalm.taxi.run.ETaxiOptimizerModules;
 
 /**
  * For a fair and consistent benchmarking of taxi dispatching algorithms we assume that link travel times are
@@ -58,7 +66,7 @@ public class RunEAVBenchmark {
 		// TODO temp
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		DvrpConfigGroup.get(config).setNetworkMode(null);//to switch off network filtering
+		DvrpConfigGroup.get(config).setNetworkMode(null);// to switch off network filtering
 		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
 		EvConfigGroup evCfg = EvConfigGroup.get(config);
 		config.controler().setLastIteration(runs - 1);
@@ -70,14 +78,16 @@ public class RunEAVBenchmark {
 		// TODO bind Fleet and EvData
 		final FleetImpl fleet = new FleetImpl();
 		new EvrpVehicleReader(scenario.getNetwork(), fleet).parse(taxiCfg.getTaxisFileUrl(config.getContext()));
-		EvData evData = new EvDataImpl();
-		new ChargerReader(scenario.getNetwork(), evData).parse(evCfg.getChargersFileUrl(config.getContext()));
-		EAVUtils.initEvData(fleet, evData);
+		final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
+		new ChargerReader(scenario.getNetwork(), chargingInfrastructure)
+				.parse(evCfg.getChargersFileUrl(config.getContext()));
+		EvDataImpl evData = new EvDataImpl();
+		EAVUtils.initEvData(fleet, evData, chargingInfrastructure);
 
 		Controler controler = new Controler(scenario);
 		controler.setModules(new DvrpBenchmarkControlerModule());
 		controler.addOverridingModule(new TaxiModule());
-		controler.addOverridingModule(new EvModule(evData));
+		controler.addOverridingModule(new EvModule(evData, chargingInfrastructure));
 
 		controler.addOverridingModule(ETaxiOptimizerModules.createBenchmarkModule());
 
