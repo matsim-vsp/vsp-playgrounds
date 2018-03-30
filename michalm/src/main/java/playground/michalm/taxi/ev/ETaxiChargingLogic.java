@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.vehicles.Vehicle;
 import org.matsim.vsp.ev.charging.ChargingWithQueueingLogic;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
@@ -35,7 +34,7 @@ public class ETaxiChargingLogic extends ChargingWithQueueingLogic {
 
 	private final Charger charger;
 	private final ETaxiChargingStrategy chargingStrategy;
-	private final Map<Id<Vehicle>, ElectricVehicle> assignedVehicles = new HashMap<>();
+	private final Map<Id<ElectricVehicle>, ElectricVehicle> assignedVehicles = new HashMap<>();
 
 	public ETaxiChargingLogic(Charger charger, ETaxiChargingStrategy chargingStrategy) {
 		super(charger, chargingStrategy);

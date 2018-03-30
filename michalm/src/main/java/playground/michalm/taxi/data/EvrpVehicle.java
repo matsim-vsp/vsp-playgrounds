@@ -21,15 +21,17 @@ package playground.michalm.taxi.data;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.dvrp.data.*;
-import org.matsim.vsp.ev.data.*;
-
-import playground.michalm.taxi.vrpagent.ETaxiAtChargerActivity;
+import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.data.VehicleImpl;
+import org.matsim.vsp.ev.data.Battery;
+import org.matsim.vsp.ev.data.BatteryImpl;
+import org.matsim.vsp.ev.data.ElectricVehicle;
+import org.matsim.vsp.ev.data.ElectricVehicleImpl;
 
 public class EvrpVehicle extends VehicleImpl {
 	public class Ev extends ElectricVehicleImpl {
 		public Ev(Id<Vehicle> id, Battery battery) {
-			super(Id.createVehicleId(id), battery);
+			super(Id.create(id, ElectricVehicle.class), battery);
 		}
 
 		public EvrpVehicle getEvrpVehicle() {
