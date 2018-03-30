@@ -22,6 +22,7 @@ package playground.michalm.taxi.vrpagent;
 import org.matsim.contrib.dynagent.AbstractDynActivity;
 
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
+import playground.michalm.taxi.ev.ETaxiChargingListener;
 import playground.michalm.taxi.ev.ETaxiChargingLogic;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
@@ -67,7 +68,7 @@ public class ETaxiAtChargerActivity extends AbstractDynActivity {
 
 		logic.removeAssignedVehicle(ev);
 		ev.setAtChargerActivity(this);
-		logic.addVehicle(ev, now);
+		logic.addVehicle(ev, new ETaxiChargingListener(), now);
 	}
 
 	@Override

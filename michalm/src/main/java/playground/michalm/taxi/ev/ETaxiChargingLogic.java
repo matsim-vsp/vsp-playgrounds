@@ -38,7 +38,7 @@ public class ETaxiChargingLogic extends ChargingWithQueueingLogic {
 	private final Map<Id<Vehicle>, ElectricVehicle> assignedVehicles = new HashMap<>();
 
 	public ETaxiChargingLogic(Charger charger, ETaxiChargingStrategy chargingStrategy) {
-		super(charger, chargingStrategy, new ETaxiChargingListener());
+		super(charger, chargingStrategy);
 		this.charger = charger;
 		this.chargingStrategy = chargingStrategy;
 	}
