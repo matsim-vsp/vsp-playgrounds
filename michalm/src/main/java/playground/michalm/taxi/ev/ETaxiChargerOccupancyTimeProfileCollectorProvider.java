@@ -19,14 +19,17 @@
 
 package playground.michalm.taxi.ev;
 
-import org.matsim.vsp.ev.data.EvData;
-import org.matsim.contrib.util.timeprofile.TimeProfileCollector;
 import org.matsim.contrib.util.timeprofile.TimeProfileCharts.ChartType;
+import org.matsim.contrib.util.timeprofile.TimeProfileCollector;
 import org.matsim.contrib.util.timeprofile.TimeProfileCollector.ProfileCalculator;
+import org.matsim.contrib.util.timeprofile.TimeProfiles;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.mobsim.framework.listeners.MobsimListener;
+import org.matsim.vsp.ev.data.Charger;
+import org.matsim.vsp.ev.data.EvData;
 
-import com.google.inject.*;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class ETaxiChargerOccupancyTimeProfileCollectorProvider implements Provider<MobsimListener> {
 	private final EvData evData;
@@ -40,10 +43,26 @@ public class ETaxiChargerOccupancyTimeProfileCollectorProvider implements Provid
 
 	@Override
 	public MobsimListener get() {
-		ProfileCalculator calc = ETaxiChargerProfiles.createChargerOccupancyCalculator(evData);
+		ProfileCalculator calc = createChargerOccupancyCalculator(evData);
 		TimeProfileCollector collector = new TimeProfileCollector(calc, 300, "charger_occupancy_time_profiles",
 				matsimServices);
 		collector.setChartTypes(ChartType.Line, ChartType.StackedArea);
 		return collector;
+	}
+
+	public static ProfileCalculator createChargerOccupancyCalculator(final EvData evData) {
+		String[] header = { "plugged", "queued", "assigned" };
+		return TimeProfiles.createProfileCalculator(header, () -> {
+			int plugged = 0;
+			int queued = 0;
+			int assigned = 0;
+			for (Charger c : evData.getChargers().values()) {
+				ETaxiChargingLogic logic = (ETaxiChargingLogic)c.getLogic();
+				plugged += logic.getPluggedVehicles().size();
+				queued += logic.getQueuedVehicles().size();
+				assigned += logic.getAssignedCount();
+			}
+			return new Integer[] { plugged, queued, assigned };
+		});
 	}
 }
