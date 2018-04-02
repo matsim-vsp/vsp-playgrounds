@@ -20,8 +20,6 @@
 package playground.michalm.taxi.run;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.FleetImpl;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkControlerModule;
 import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkTravelTimeModule;
@@ -35,14 +33,8 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.EvModule;
-import org.matsim.vsp.ev.data.ChargingInfrastructureImpl;
-import org.matsim.vsp.ev.data.EvFleetImpl;
-import org.matsim.vsp.ev.data.file.ChargerReader;
 import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
 import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
-
-import playground.michalm.taxi.data.file.EvrpVehicleReader;
-import playground.michalm.taxi.ev.ETaxiUtils;
 
 /**
  * For a fair and consistent benchmarking of taxi dispatching algorithms we assume that link travel times are
@@ -64,26 +56,16 @@ public class RunETaxiBenchmark {
 	public static Controler createControler(Config config, int runs) {
 		DvrpConfigGroup.get(config).setNetworkMode(null);// to switch off network filtering
 		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
-		EvConfigGroup evCfg = EvConfigGroup.get(config);
 		config.controler().setLastIteration(runs - 1);
 		config.addConfigConsistencyChecker(new TaxiBenchmarkConfigConsistencyChecker());
 		config.checkConsistency();
 
 		Scenario scenario = RunTaxiBenchmark.loadBenchmarkScenario(config, 15 * 60, 30 * 3600);
 
-		// TODO bind Fleet and EvData
-		final FleetImpl fleet = new FleetImpl();
-		new EvrpVehicleReader(scenario.getNetwork(), fleet).parse(taxiCfg.getTaxisFileUrl(config.getContext()));
-		final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
-		new ChargerReader(scenario.getNetwork(), chargingInfrastructure)
-				.parse(evCfg.getChargersFileUrl(config.getContext()));
-		EvFleetImpl evFleet = new EvFleetImpl();
-		ETaxiUtils.initEvData(fleet, evFleet, chargingInfrastructure);
-
 		Controler controler = new Controler(scenario);
 		controler.setModules(new DvrpBenchmarkControlerModule());
 		controler.addOverridingModule(new TaxiModule());
-		controler.addOverridingModule(new EvModule(evFleet, chargingInfrastructure));
+		controler.addOverridingModule(new EvModule());
 
 		controler.addOverridingModule(ETaxiOptimizerModules.createBenchmarkModule());
 
@@ -93,7 +75,6 @@ public class RunETaxiBenchmark {
 				addMobsimListenerBinding().toProvider(ChargerOccupancyTimeProfileCollectorProvider.class);
 				addMobsimListenerBinding().toProvider(ChargerOccupancyXYDataProvider.class);
 				addControlerListenerBinding().to(ETaxiBenchmarkStats.class).asEagerSingleton();
-				bind(Fleet.class).toInstance(fleet);// overrride the binding specified in TaxiModule
 				install(new DvrpBenchmarkTravelTimeModule());
 			}
 		});

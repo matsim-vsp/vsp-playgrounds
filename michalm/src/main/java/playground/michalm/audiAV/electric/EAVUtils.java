@@ -19,36 +19,25 @@
 
 package playground.michalm.audiAV.electric;
 
+import java.util.function.DoubleSupplier;
+
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
-import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
-import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
-import org.matsim.vsp.ev.data.Charger;
-import org.matsim.vsp.ev.data.ChargingInfrastructure;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 import org.matsim.vsp.ev.data.ElectricVehicleImpl;
 import org.matsim.vsp.ev.data.EvFleetImpl;
 import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption;
-import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
 import org.matsim.vsp.ev.discharging.OhdeSlaskiDriveEnergyConsumption;
 
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
 
 public class EAVUtils {
-	public static void initEvData(Fleet fleet, EvFleetImpl evFleet, ChargingInfrastructure chargingInfrastructure) {
-		TemperatureProvider tempProvider = () -> 20;// aux power about 1 kW at 20oC
-		double chargingSpeedFactor = 1.; // full speed
-
-		for (Charger c : chargingInfrastructure.getChargers().values()) {
-			ChargingWithQueueingAndAssignmentLogic chargingLogic = new ChargingWithQueueingAndAssignmentLogic(c,
-					new FixedSpeedChargingStrategy(c.getPower() * chargingSpeedFactor, 0.8));
-			c.setLogic(chargingLogic);
-		}
-
+	public static void initEvData(Fleet fleet, EvFleetImpl evFleet) {
+		DoubleSupplier tempProvider = () -> 20;// aux power about 1 kW at 20oC
 		for (Vehicle v : fleet.getVehicles().values()) {
 			ElectricVehicleImpl ev = (ElectricVehicleImpl)((EvrpVehicle)v).getElectricVehicle();
 			ev.setDriveEnergyConsumption(new OhdeSlaskiDriveEnergyConsumption());

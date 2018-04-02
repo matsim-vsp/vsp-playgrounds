@@ -19,43 +19,52 @@
 
 package playground.michalm.taxi.ev;
 
+import java.util.function.DoubleSupplier;
+import java.util.function.Predicate;
+
+import javax.inject.Inject;
+
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
-import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
-import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
-import org.matsim.vsp.ev.data.Charger;
-import org.matsim.vsp.ev.data.ChargingInfrastructure;
 import org.matsim.vsp.ev.data.ElectricVehicle;
 import org.matsim.vsp.ev.data.ElectricVehicleImpl;
+import org.matsim.vsp.ev.data.EvFleet;
 import org.matsim.vsp.ev.data.EvFleetImpl;
 import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption;
-import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption.TemperatureProvider;
 import org.matsim.vsp.ev.discharging.OhdeSlaskiDriveEnergyConsumption;
+
+import com.google.inject.Provider;
 
 import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.data.EvrpVehicle.Ev;
 
-public class ETaxiUtils {
-	public static void initEvData(Fleet fleet, EvFleetImpl evFleet, ChargingInfrastructure chargingInfrastructure) {
-		TemperatureProvider tempProvider = () -> 20;// aux power about 1 kW at 20oC
-		double chargingSpeedFactor = 1.; // full speed
+public class EvFleetProvider implements Provider<EvFleet> {
+	@Inject
+	private Fleet fleet;
 
-		for (Charger c : chargingInfrastructure.getChargers().values()) {
-			ChargingWithQueueingAndAssignmentLogic chargingLogic = new ChargingWithQueueingAndAssignmentLogic(c,
-					new FixedSpeedChargingStrategy(c.getPower() * chargingSpeedFactor, 0.8));
-			c.setLogic(chargingLogic);
-		}
+	private final DoubleSupplier temperatureProvider;
+	private final Predicate<ElectricVehicle> isTurnedOnPredicate;
 
+	public EvFleetProvider(DoubleSupplier temperatureProvider, Predicate<ElectricVehicle> isTurnedOnPredicate) {
+		this.temperatureProvider = temperatureProvider;
+		this.isTurnedOnPredicate = isTurnedOnPredicate;
+	}
+
+	@Override
+	public EvFleet get() {
+		EvFleetImpl evFleet = new EvFleetImpl();
 		for (Vehicle v : fleet.getVehicles().values()) {
 			ElectricVehicleImpl ev = (ElectricVehicleImpl)((EvrpVehicle)v).getElectricVehicle();
 			ev.setDriveEnergyConsumption(new OhdeSlaskiDriveEnergyConsumption());
-			ev.setAuxEnergyConsumption(new OhdeSlaskiAuxEnergyConsumption(ev, tempProvider, ETaxiUtils::isTurnedOn));
+			ev.setAuxEnergyConsumption(
+					new OhdeSlaskiAuxEnergyConsumption(ev, temperatureProvider, isTurnedOnPredicate));
 			evFleet.addElectricVehicle(ev.getId(), ev);
 		}
+		return evFleet;
 	}
 
-	private static boolean isTurnedOn(ElectricVehicle ev) {
+	public static boolean isTurnedOn(ElectricVehicle ev) {
 		return ((Ev)ev).getDvrpVehicle().getSchedule().getStatus() == ScheduleStatus.STARTED;
 	}
 }

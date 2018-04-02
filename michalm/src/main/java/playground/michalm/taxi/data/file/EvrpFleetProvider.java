@@ -1,9 +1,8 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,29 +16,37 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer;
+package playground.michalm.taxi.data.file;
 
-import java.util.stream.Stream;
+import java.net.URL;
 
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.vsp.ev.data.Charger;
-import org.matsim.contrib.taxi.optimizer.BestDispatchFinder;
-import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
-import org.matsim.contrib.util.LinkProvider;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.data.FleetImpl;
+import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 /**
  * @author michalm
  */
-public class BestChargerFinder {
-	private static final LinkProvider<Charger> CHARGER_TO_LINK = charger -> charger.getLink();
+public class EvrpFleetProvider implements Provider<Fleet> {
+	@Inject
+	@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING)
+	private Network network;
 
-	private final BestDispatchFinder dispatchFinder;
+	private final URL url;
 
-	public BestChargerFinder(BestDispatchFinder dispatchFinder) {
-		this.dispatchFinder = dispatchFinder;
+	public EvrpFleetProvider(URL url) {
+		this.url = url;
 	}
 
-	public Dispatch<Charger> findBestChargerForVehicle(Vehicle veh, Stream<Charger> chargers) {
-		return dispatchFinder.findBestDestination(veh, chargers, CHARGER_TO_LINK);
+	@Override
+	public Fleet get() {
+		FleetImpl fleet = new FleetImpl();
+		new EvrpVehicleReader(network, fleet).parse(url);
+		return fleet;
 	}
 }

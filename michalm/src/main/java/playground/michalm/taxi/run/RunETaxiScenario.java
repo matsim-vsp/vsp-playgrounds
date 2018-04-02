@@ -20,8 +20,9 @@
 package playground.michalm.taxi.run;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.FleetImpl;
+import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
@@ -35,14 +36,18 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.EvModule;
-import org.matsim.vsp.ev.data.ChargingInfrastructureImpl;
-import org.matsim.vsp.ev.data.EvFleetImpl;
-import org.matsim.vsp.ev.data.file.ChargerReader;
+import org.matsim.vsp.ev.charging.ChargingLogic;
+import org.matsim.vsp.ev.data.ChargingInfrastructure;
+import org.matsim.vsp.ev.data.EvFleet;
 import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
 import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
 
-import playground.michalm.taxi.data.file.EvrpVehicleReader;
-import playground.michalm.taxi.ev.ETaxiUtils;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+
+import playground.michalm.taxi.data.file.EvrpFleetProvider;
+import playground.michalm.taxi.ev.ETaxiChargingLogicFactory;
+import playground.michalm.taxi.ev.EvFleetProvider;
 
 public class RunETaxiScenario {
 	private static final String CONFIG_FILE = "mielec_2014_02/mielec_etaxi_config.xml";
@@ -56,32 +61,32 @@ public class RunETaxiScenario {
 	public static Controler createControler(Config config, boolean otfvis) {
 		DvrpConfigGroup.get(config).setNetworkMode(null);// to switch off network filtering
 		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
-		EvConfigGroup evCfg = EvConfigGroup.get(config);
 		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		config.checkConsistency();
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
-		// TODO bind Fleet and EvData
-		FleetImpl fleet = new FleetImpl();
-		new EvrpVehicleReader(scenario.getNetwork(), fleet).parse(taxiCfg.getTaxisFileUrl(config.getContext()));
-		final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
-		new ChargerReader(scenario.getNetwork(), chargingInfrastructure)
-				.parse(evCfg.getChargersFileUrl(config.getContext()));
-		EvFleetImpl evFleet = new EvFleetImpl();
-		ETaxiUtils.initEvData(fleet, evFleet, chargingInfrastructure);
-
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(new TaxiModule());
-		controler.addOverridingModule(new EvModule(evFleet, chargingInfrastructure));
+		controler.addOverridingModule(new EvModule());
 		controler.addOverridingModule(ETaxiOptimizerModules.createDefaultModule());
 
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
+				bind(Network.class).annotatedWith(Names.named(ChargingInfrastructure.CHARGERS))//
+						.to(Key.get(Network.class, Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING)))
+						.asEagerSingleton();
+				bind(ChargingLogic.Factory.class).to(ETaxiChargingLogicFactory.class).asEagerSingleton();
+
+				bind(Fleet.class).toProvider(new EvrpFleetProvider(taxiCfg.getTaxisFileUrl(getConfig().getContext())))
+						.asEagerSingleton();
+
+				bind(EvFleet.class).toProvider(new EvFleetProvider(() -> 20, // aux power about 1 kW at 20oC
+						EvFleetProvider::isTurnedOn)).asEagerSingleton();
+
 				addMobsimListenerBinding().toProvider(ChargerOccupancyTimeProfileCollectorProvider.class);
 				addMobsimListenerBinding().toProvider(ChargerOccupancyXYDataProvider.class);
-				bind(Fleet.class).toInstance(fleet);// overrride the binding specified in TaxiModule
 			}
 		});
 

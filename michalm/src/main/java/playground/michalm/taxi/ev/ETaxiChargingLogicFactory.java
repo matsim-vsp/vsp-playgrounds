@@ -1,9 +1,8 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,29 +16,23 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer;
+package playground.michalm.taxi.ev;
 
-import java.util.stream.Stream;
-
-import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.vsp.ev.charging.ChargingLogic;
+import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
+import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
 import org.matsim.vsp.ev.data.Charger;
-import org.matsim.contrib.taxi.optimizer.BestDispatchFinder;
-import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
-import org.matsim.contrib.util.LinkProvider;
 
 /**
  * @author michalm
  */
-public class BestChargerFinder {
-	private static final LinkProvider<Charger> CHARGER_TO_LINK = charger -> charger.getLink();
+public class ETaxiChargingLogicFactory implements ChargingLogic.Factory {
+	private final double chargingSpeedFactor = 1.; // full speed
+	private final double maxRelativeSoc = 0.8;// up to 80% SoC
 
-	private final BestDispatchFinder dispatchFinder;
-
-	public BestChargerFinder(BestDispatchFinder dispatchFinder) {
-		this.dispatchFinder = dispatchFinder;
-	}
-
-	public Dispatch<Charger> findBestChargerForVehicle(Vehicle veh, Stream<Charger> chargers) {
-		return dispatchFinder.findBestDestination(veh, chargers, CHARGER_TO_LINK);
+	@Override
+	public ChargingLogic create(Charger charger) {
+		return new ChargingWithQueueingAndAssignmentLogic(charger,
+				new FixedSpeedChargingStrategy(charger.getPower() * chargingSpeedFactor, maxRelativeSoc));
 	}
 }
