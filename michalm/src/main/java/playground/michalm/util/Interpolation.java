@@ -45,20 +45,4 @@ public class Interpolation {
 		double weightedSum = weight0 * vals[idx0] + weight1 * vals[idx1];// int -> double
 		return weightedSum / timeInterval;
 	}
-
-	public static Interpolator createInterpolator(final int[] values, final int timeInterval) {
-		return new Interpolator() {
-			public double interpolate(double time) {
-				return Interpolation.interpolate(values, timeInterval, time);
-			}
-		};
-	}
-
-	public static Interpolator createInterpolator(final double[] values, final int timeInterval) {
-		return new Interpolator() {
-			public double interpolate(double time) {
-				return Interpolation.interpolate(values, timeInterval, time);
-			}
-		};
-	}
 }
