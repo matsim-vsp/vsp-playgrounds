@@ -56,19 +56,27 @@ public class CemdapStops2MatsimPlansConverter {
 
 	public static void main(String[] args) throws IOException {
 		// Local use
-		String cemdapDataRoot = "../../shared-svn/studies/countries/de/open_berlin_scenario/cemdap_output/";
-		int numberOfFirstCemdapOutputFile = 200;
+//		String cemdapDataRoot = "../../shared-svn/studies/countries/de/open_berlin_scenario/cemdap_output/";
+		String cemdapDataRoot = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_output/";
+//		int numberOfFirstCemdapOutputFile = 200;
+		int numberOfFirstCemdapOutputFile = 400;
+//		int numberOfPlans = 1;
 		int numberOfPlans = 1;
-		int numberOfPlansFile = 300;
-		String outputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial/" + numberOfPlansFile + "/";
-		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
-		String zoneIdTag = "NR";		
+//		int numberOfPlansFile = 300;
+		int numberOfPlansFile = 400;
+//		String outputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial/" + numberOfPlansFile + "/";
+		String outputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/matsim_initial//" + numberOfPlansFile + "/";
+//		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/gemeinden_Planungsraum.shp";
+		String zoneIdTag = "NR";
 		boolean allowVariousWorkAndEducationLocations = true;
 		boolean addStayHomePlan = true;
 		boolean useLandCoverData = false;
 		String landCoverFile = "CURRENTLY_JUST_A_PLACEHOLDER";
-		String stopFile = "Stops.out";
-		String activityFile = "Activity.out";
+//		String stopFile = "Stops.out";
+		String stopFile = "Stops.out.gz";
+//		String activityFile = "Activity.out";
+		String activityFile = "Activity.out.gz";
 		boolean simplifyGeometries = false;
 		boolean assignCoordinatesToActivities = true; // if set to false, the zone id will be attached to activity types and a fake coordinate will be given.
 		boolean combiningGeoms = true;
