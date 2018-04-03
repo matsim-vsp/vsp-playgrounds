@@ -16,23 +16,40 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.ev;
+package playground.michalm.taxi.run;
 
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
+import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.vsp.ev.charging.ChargingLogic;
 import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
 import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
-import org.matsim.vsp.ev.data.Charger;
+import org.matsim.vsp.ev.data.ChargingInfrastructure;
+import org.matsim.vsp.ev.discharging.AuxEnergyConsumption;
+
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+
+import playground.michalm.taxi.ev.ETaxiAuxConsumptionFactory;
 
 /**
  * @author michalm
  */
-public class ETaxiChargingLogicFactory implements ChargingLogic.Factory {
-	private final double chargingSpeedFactor = 1.; // full speed
-	private final double maxRelativeSoc = 0.8;// up to 80% SoC
+public class ETaxiModule extends AbstractModule {
+	private static final double CHARGING_SPEED_FACTOR = 1.; // full speed
+	private static final double MAX_RELATIVE_SOC = 0.8;// up to 80% SOC
+	private static final double TEMPERATURE = 20;// 20 oC
+
+	private static ChargingLogic.Factory ETAXI_CHARGING_LOGIC_FACTORY = charger -> new ChargingWithQueueingAndAssignmentLogic(
+			charger, new FixedSpeedChargingStrategy(charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC));
 
 	@Override
-	public ChargingLogic create(Charger charger) {
-		return new ChargingWithQueueingAndAssignmentLogic(charger,
-				new FixedSpeedChargingStrategy(charger.getPower() * chargingSpeedFactor, maxRelativeSoc));
+	public void install() {
+		bind(Network.class).annotatedWith(Names.named(ChargingInfrastructure.CHARGERS))//
+				.to(Key.get(Network.class, Names.named(DvrpRoutingNetworkProvider.DVRP_ROUTING))).asEagerSingleton();
+		bind(ChargingLogic.Factory.class).toInstance(ETAXI_CHARGING_LOGIC_FACTORY);
+		bind(AuxEnergyConsumption.Factory.class).toInstance(new ETaxiAuxConsumptionFactory(() -> TEMPERATURE,
+				vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED));
 	}
 }

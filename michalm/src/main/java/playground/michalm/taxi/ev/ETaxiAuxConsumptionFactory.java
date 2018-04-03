@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2014 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,28 +17,35 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.data.file;
+package playground.michalm.taxi.ev;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.*;
-import org.matsim.contrib.dvrp.data.*;
-import org.matsim.contrib.dvrp.data.file.*;
-import org.matsim.vsp.ev.EvUnitConversions;
-import org.xml.sax.Attributes;
+import java.util.function.DoubleSupplier;
+import java.util.function.Predicate;
 
-import playground.michalm.taxi.data.EvrpVehicle;
+import javax.inject.Inject;
 
-public class EvrpVehicleReader extends VehicleReader {
-	public EvrpVehicleReader(Network network, FleetImpl fleet) {
-		super(network, fleet);
+import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.vsp.ev.data.ElectricVehicle;
+import org.matsim.vsp.ev.discharging.AuxEnergyConsumption;
+import org.matsim.vsp.ev.discharging.OhdeSlaskiAuxEnergyConsumption;
+
+public class ETaxiAuxConsumptionFactory implements AuxEnergyConsumption.Factory {
+	@Inject
+	private Fleet fleet;
+
+	private final DoubleSupplier temperatureProvider;
+	private final Predicate<Vehicle> isTurnedOnPredicate;
+
+	public ETaxiAuxConsumptionFactory(DoubleSupplier temperatureProvider, Predicate<Vehicle> isTurnedOnPredicate) {
+		this.temperatureProvider = temperatureProvider;
+		this.isTurnedOnPredicate = isTurnedOnPredicate;
 	}
 
 	@Override
-	protected Vehicle createVehicle(Id<Vehicle> id, Link startLink, double capacity, double t0, double t1,
-			Attributes atts) {
-		double batteryCapacity_kWh = ReaderUtils.getDouble(atts, "battery_capacity", 20);
-		double initialSoc_kWh = ReaderUtils.getDouble(atts, "initial_soc", 0.8 * batteryCapacity_kWh);
-		return new EvrpVehicle(id, startLink, capacity, t0, t1, batteryCapacity_kWh * EvUnitConversions.J_PER_kWh,
-				initialSoc_kWh * EvUnitConversions.J_PER_kWh);
+	public AuxEnergyConsumption create(ElectricVehicle electricVehicle) {
+		Vehicle vehicle = fleet.getVehicles().get(electricVehicle.getId());
+		return new OhdeSlaskiAuxEnergyConsumption(electricVehicle, temperatureProvider,
+				ev -> isTurnedOnPredicate.test(vehicle));
 	}
 }

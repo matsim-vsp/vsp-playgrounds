@@ -49,7 +49,6 @@ import org.matsim.vsp.ev.data.ElectricVehicle;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import playground.michalm.taxi.data.EvrpVehicle;
 import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 public class ETaxiScheduler extends TaxiScheduler {
@@ -76,12 +75,11 @@ public class ETaxiScheduler extends TaxiScheduler {
 	// FIXME underestimated due to the ongoing AUX/drive consumption
 	// not a big issue for e-rule-based dispatching (no look ahead)
 	// more problematic for e-assignment dispatching
-	public void scheduleCharging(EvrpVehicle vehicle, Charger charger, VrpPathWithTravelData vrpPath) {
+	public void scheduleCharging(Vehicle vehicle, ElectricVehicle ev, Charger charger, VrpPathWithTravelData vrpPath) {
 		Schedule schedule = vehicle.getSchedule();
 		divertOrAppendDrive(schedule, vrpPath);
 
 		ChargingWithQueueingAndAssignmentLogic logic = (ChargingWithQueueingAndAssignmentLogic)charger.getLogic();
-		ElectricVehicle ev = vehicle.getElectricVehicle();
 		double chargingEndTime = vrpPath.getArrivalTime()
 				+ ChargingEstimations.estimateMaxWaitTimeForNextVehicle(charger)// TODO not precise!!!
 				+ logic.getChargingStrategy().calcRemainingTimeToCharge(ev);
