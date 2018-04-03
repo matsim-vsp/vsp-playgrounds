@@ -32,8 +32,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.discharging.AuxEnergyConsumption;
+import org.matsim.vsp.ev.dvrp.DvrpAuxConsumptionFactory;
 
-import playground.michalm.taxi.ev.ETaxiAuxConsumptionFactory;
 import playground.michalm.taxi.run.RunETaxiBenchmark;
 
 public class RunEAVBenchmark {
@@ -52,7 +52,7 @@ public class RunEAVBenchmark {
 			@Override
 			public void install() {
 				bind(AuxEnergyConsumption.Factory.class).toInstance(
-						new ETaxiAuxConsumptionFactory(() -> TEMPERATURE, RunEAVBenchmark::isServingCustomer));
+						new DvrpAuxConsumptionFactory(() -> TEMPERATURE, RunEAVBenchmark::isServingCustomer));
 			}
 		});
 

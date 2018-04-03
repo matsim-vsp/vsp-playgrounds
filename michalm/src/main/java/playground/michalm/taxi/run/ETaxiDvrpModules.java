@@ -42,18 +42,9 @@ import playground.michalm.taxi.optimizer.ETaxiOptimizerProvider;
 import playground.michalm.taxi.scheduler.ETaxiScheduler;
 import playground.michalm.taxi.vrpagent.ETaxiActionCreator;
 
-public class ETaxiOptimizerModules {
-	public static AbstractModule createDefaultModule() {
+public class ETaxiDvrpModules {
+	public static AbstractModule create() {
 		return new DvrpModule(createModuleForQSimPlugin(), TaxiOptimizer.class);
-	}
-
-	public static AbstractModule createBenchmarkModule() {
-		return new AbstractModule() {
-			@Override
-			public void install() {
-				install(new DvrpModule(createModuleForQSimPlugin(), TaxiOptimizer.class));
-			}
-		};
 	}
 
 	private static com.google.inject.AbstractModule createModuleForQSimPlugin() {

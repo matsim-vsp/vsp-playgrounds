@@ -19,46 +19,18 @@
 
 package playground.michalm.taxi.schedule;
 
-import org.matsim.contrib.dvrp.schedule.StayTaskImpl;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
-import org.matsim.vsp.ev.charging.ChargingWithQueueingAndAssignmentLogic;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ElectricVehicle;
+import org.matsim.vsp.ev.dvrp.ChargingTaskImpl;
 
-public class ETaxiChargingTask extends StayTaskImpl implements TaxiTask {
-	private final ChargingWithQueueingAndAssignmentLogic chargingLogic;
-	private final ElectricVehicle ev;
-	private double chargingStartedTime;
-
+public class ETaxiChargingTask extends ChargingTaskImpl implements TaxiTask {
 	public ETaxiChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev) {
-		super(beginTime, endTime, charger.getLink());
-		this.chargingLogic = (ChargingWithQueueingAndAssignmentLogic)charger.getLogic();
-		this.ev = ev;
-	}
-
-	public ChargingWithQueueingAndAssignmentLogic getChargingLogic() {
-		return chargingLogic;
-	}
-
-	public ElectricVehicle getElectricVehicle() {
-		return ev;
-	}
-
-	public void setChargingStartedTime(double chargingStartedTime) {
-		this.chargingStartedTime = chargingStartedTime;
-	}
-
-	public double getChargingStartedTime() {
-		return chargingStartedTime;
+		super(beginTime, endTime, charger, ev);
 	}
 
 	@Override
 	public TaxiTaskType getTaxiTaskType() {
 		return TaxiTaskType.STAY;
-	}
-
-	@Override
-	protected String commonToString() {
-		return "[CHARGING]" + super.commonToString();
 	}
 }

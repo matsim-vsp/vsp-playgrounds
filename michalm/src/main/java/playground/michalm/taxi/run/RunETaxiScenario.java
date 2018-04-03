@@ -21,6 +21,7 @@ package playground.michalm.taxi.run;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
@@ -32,9 +33,14 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.EvModule;
+import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
+import org.matsim.vsp.ev.dvrp.EvDvrpIntegrationModule;
 
 public class RunETaxiScenario {
 	private static final String CONFIG_FILE = "mielec_2014_02/mielec_etaxi_config.xml";
+	private static final double CHARGING_SPEED_FACTOR = 1.; // full speed
+	private static final double MAX_RELATIVE_SOC = 0.8;// up to 80% SOC
+	private static final double TEMPERATURE = 20;// oC
 
 	public static void run(String configFile, boolean otfvis) {
 		Config config = ConfigUtils.loadConfig(configFile, new TaxiConfigGroup(), new DvrpConfigGroup(),
@@ -52,14 +58,21 @@ public class RunETaxiScenario {
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new EvModule());
-		controler.addOverridingModule(ETaxiOptimizerModules.createDefaultModule());
-		controler.addOverridingModule(new ETaxiModule());
+		controler.addOverridingModule(ETaxiDvrpModules.create());
+		controler.addOverridingModule(createEvDvrpIntegrationModule());
 
 		if (otfvis) {
 			controler.addOverridingModule(new OTFVisLiveModule());
 		}
 
 		return controler;
+	}
+
+	public static EvDvrpIntegrationModule createEvDvrpIntegrationModule() {
+		return new EvDvrpIntegrationModule(
+				charger -> new FixedSpeedChargingStrategy(charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC),
+				() -> TEMPERATURE, //
+				vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED);
 	}
 
 	public static void main(String[] args) {

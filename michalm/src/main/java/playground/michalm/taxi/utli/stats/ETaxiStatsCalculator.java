@@ -22,11 +22,12 @@ package playground.michalm.taxi.utli.stats;
 import java.util.List;
 
 import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.schedule.*;
+import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.contrib.dvrp.schedule.Task;
 import org.matsim.contrib.taxi.util.stats.TaxiStatsCalculators;
+import org.matsim.vsp.ev.dvrp.ChargingTask;
 
-import playground.michalm.taxi.schedule.ETaxiChargingTask;
 import playground.michalm.taxi.utli.stats.ETaxiStats.ETaxiState;
 
 public class ETaxiStatsCalculator {
@@ -64,8 +65,8 @@ public class ETaxiStatsCalculator {
 		}
 
 		for (Task t : schedule.getTasks()) {
-			if (t instanceof ETaxiChargingTask) {
-				ETaxiChargingTask chargingTask = (ETaxiChargingTask)t;
+			if (t instanceof ChargingTask) {
+				ChargingTask chargingTask = (ChargingTask)t;
 
 				int arrivalTime = (int)t.getBeginTime();
 				int chargingStartTime = (int)chargingTask.getChargingStartedTime();
