@@ -7,7 +7,7 @@ import playground.dziemke.cemdapMatsimCadyts.Zone;
 /**
  * @author gthunig on 18.04.2017.
  */
-public class FromSrvTrip extends Trip {
+public class SrvTrip extends Trip {
 
     private Id<Zone> departureZoneId;
     private Id<Zone> arrivalZoneId;

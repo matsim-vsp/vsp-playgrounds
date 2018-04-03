@@ -31,7 +31,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
     public static final Logger log = Logger.getLogger(TripHandler.class);
     private static boolean tripmodeWarn = true;
 
-    private Map<Id<Trip>, FromMatsimTrip> trips = new HashMap<>();
+    private Map<Id<Trip>, MatsimTrip> trips = new HashMap<>();
 
     private Map<Id<Person>, Integer> activityEndCount = new HashMap <>();
     private Map<Id<Person>, Integer> activityStartCount = new HashMap <>();
@@ -66,7 +66,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
 
         // create an instance of the object "Trip"
-        FromMatsimTrip trip = new FromMatsimTrip();
+        MatsimTrip trip = new MatsimTrip();
         Id<Trip> tripId = Id.create(personId + "_" + activityEndCount.get(personId), Trip.class);
         trip.setTripId(tripId);
         trip.setPersonId(personId);
@@ -162,7 +162,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
         // add information concerning passed links to the object "Trip"
         Id<Trip> tripId = Id.create(personId + "_" + activityEndCount.get(personId), Trip.class);
-        FromMatsimTrip fromMatsimTrip = trips.get(tripId);
+        MatsimTrip fromMatsimTrip = trips.get(tripId);
         if (fromMatsimTrip != null) {
         // without trip there was no activity that ended before, ergo this person is not of interest for the analysis
             if (fromMatsimTrip.getLinks().isEmpty()) {
@@ -192,7 +192,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
         // add information concerning leg mode to the object "Trip"
         Id<Trip> tripId = Id.create(personId + "_" + activityEndCount.get(personId), Trip.class);
-        FromMatsimTrip fromMatsimTrip = trips.get(tripId);
+        MatsimTrip fromMatsimTrip = trips.get(tripId);
         if (fromMatsimTrip != null) {
             // without trip there was no activity that ended before, ergo this person is not of interest for the analysis
             fromMatsimTrip.setLegMode(legMode);
@@ -211,7 +211,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
     }
 
 
-    public Map<Id<Trip>, FromMatsimTrip> getTrips() {
+    public Map<Id<Trip>, MatsimTrip> getTrips() {
         return this.trips;
     }
 

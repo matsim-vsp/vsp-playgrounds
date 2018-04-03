@@ -21,7 +21,7 @@ public class Events2TripsParser {
     public static final Logger log = Logger.getLogger(Events2TripsParser.class);
 
     private Network network;
-    private List<FromMatsimTrip> trips;
+    private List<MatsimTrip> trips;
 
     private int noPreviousEndOfActivityCounter;
 
@@ -44,7 +44,7 @@ public class Events2TripsParser {
         MatsimNetworkReader networkReader = new MatsimNetworkReader(network);
         networkReader.readFile(networkFile);
 
-        List<FromMatsimTrip> trips = new ArrayList<>(tripHandler.getTrips().values());
+        List<MatsimTrip> trips = new ArrayList<>(tripHandler.getTrips().values());
 
         Config config = ConfigUtils.createConfig();
         ConfigReader configReader = new ConfigReader(config);
@@ -59,7 +59,7 @@ public class Events2TripsParser {
         return network;
     }
 
-    public List<FromMatsimTrip> getTrips() {
+    public List<MatsimTrip> getTrips() {
         return trips;
     }
 

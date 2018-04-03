@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author gthunig on 18.04.2017.
  */
-public class FromMatsimTrip extends Trip {
+public class MatsimTrip extends Trip {
 
     private Id<Link> departureLinkId;
     private List<Id<Link>> links = new LinkedList<>();

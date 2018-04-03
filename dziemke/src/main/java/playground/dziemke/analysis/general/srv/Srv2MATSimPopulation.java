@@ -13,7 +13,7 @@ public class Srv2MATSimPopulation {
     private final static Logger log = Logger.getLogger(Srv2MATSimPopulation.class);
 
     private Population population;
-    private List<FromSrvTrip> trips;
+    private List<SrvTrip> trips;
 
     public Srv2MATSimPopulation(String srvPersonFilePath, String srvTripFilePath) {
         parse(srvPersonFilePath, srvTripFilePath);
@@ -37,7 +37,7 @@ public class Srv2MATSimPopulation {
         return population;
     }
 
-    public List<FromSrvTrip> getTrips() {
+    public List<SrvTrip> getTrips() {
         return trips;
     }
 }

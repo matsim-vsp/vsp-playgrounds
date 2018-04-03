@@ -11,14 +11,14 @@ import java.util.List;
 /**
  * @author gthunig on 04.04.2017.
  */
-public class FromMatsimTripUtils {
-    private static final Logger log = Logger.getLogger(FromMatsimTripUtils.class);
+public class MatsimTripUtils {
+    private static final Logger log = Logger.getLogger(MatsimTripUtils.class);
 
-    static double getDurationByCalculation_s(FromMatsimTrip trip){
+    static double getDurationByCalculation_s(MatsimTrip trip){
         return trip.getArrivalTime_s() - trip.getDepartureTime_s();
     }
 
-    static double calculateBeelineDistance_m(FromMatsimTrip trip, Network network) {
+    static double calculateBeelineDistance_m(MatsimTrip trip, Network network) {
         Link departureLink = network.getLinks().get(trip.getDepartureLinkId());
         Link arrivalLink = network.getLinks().get(trip.getArrivalLinkId());
 
@@ -36,7 +36,7 @@ public class FromMatsimTripUtils {
                 + verticalDistance_m * verticalDistance_m);
     }
 
-    static double getDistanceRoutedByCalculation_m(FromMatsimTrip trip, Network network, Collection<String> networkModes) {
+    static double getDistanceRoutedByCalculation_m(MatsimTrip trip, Network network, Collection<String> networkModes) {
         double tripDistance_m = 0.;
         if (trip.getLinks().isEmpty() && networkModes.contains(trip.getLegMode())
                 && !trip.getDepartureLinkId().equals(trip.getArrivalLinkId())) {
