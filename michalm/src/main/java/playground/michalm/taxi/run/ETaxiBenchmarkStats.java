@@ -11,7 +11,7 @@ import org.matsim.core.controler.events.*;
 import com.google.common.collect.ObjectArrays;
 import com.google.inject.Inject;
 
-import playground.michalm.taxi.utli.stats.*;
+import playground.michalm.taxi.util.*;
 
 public class ETaxiBenchmarkStats extends TaxiBenchmarkStats {
 	public static final String[] HEADER = ObjectArrays.concat(TaxiBenchmarkStats.HEADER, "QueuedTimeRatio_fleetAvg");

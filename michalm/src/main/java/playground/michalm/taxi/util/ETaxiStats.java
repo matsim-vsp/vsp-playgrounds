@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,20 +17,26 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.schedule;
+package playground.michalm.taxi.util;
 
-import org.matsim.contrib.taxi.schedule.TaxiTask;
-import org.matsim.vsp.ev.data.Charger;
-import org.matsim.vsp.ev.data.ElectricVehicle;
-import org.matsim.vsp.ev.dvrp.ChargingTaskImpl;
+import org.matsim.contrib.util.*;
 
-public class ETaxiChargingTask extends ChargingTaskImpl implements TaxiTask {
-	public ETaxiChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev) {
-		super(beginTime, endTime, charger, ev);
+public class ETaxiStats {
+	public enum ETaxiState {
+		QUEUED, PLUGGED;
 	}
 
-	@Override
-	public TaxiTaskType getTaxiTaskType() {
-		return TaxiTaskType.STAY;
+	public final String id;
+
+	public final EnumAdder<ETaxiState, Long> stateTimeSumsByState = new LongEnumAdder<>(ETaxiState.class);
+
+	public ETaxiStats(String id) {
+		this.id = id;
+	}
+
+	public double getFleetQueuedTimeRatio() {
+		double queued = stateTimeSumsByState.get(ETaxiState.QUEUED);
+		double plugged = stateTimeSumsByState.get(ETaxiState.PLUGGED);
+		return queued / (queued + plugged);
 	}
 }

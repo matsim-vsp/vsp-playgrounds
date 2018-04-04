@@ -38,11 +38,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
+import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizer;
 import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizerParams;
 import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizer;
 import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizerParams;
-import playground.michalm.taxi.scheduler.ETaxiScheduler;
 
 public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	public static final String TYPE = "type";

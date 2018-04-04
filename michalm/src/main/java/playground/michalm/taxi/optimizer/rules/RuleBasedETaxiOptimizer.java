@@ -45,10 +45,10 @@ import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ChargingInfrastructure;
 import org.matsim.vsp.ev.data.ElectricFleet;
 
+import playground.michalm.taxi.ETaxiChargingTask;
+import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.BestChargerFinder;
 import playground.michalm.taxi.optimizer.ETaxi;
-import playground.michalm.taxi.schedule.ETaxiChargingTask;
-import playground.michalm.taxi.scheduler.ETaxiScheduler;
 
 public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,

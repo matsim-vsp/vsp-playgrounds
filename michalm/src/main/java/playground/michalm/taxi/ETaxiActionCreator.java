@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.vrpagent;
+package playground.michalm.taxi;
 
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
@@ -31,8 +31,6 @@ import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.vsp.ev.dvrp.ChargingActivity;
 
 import com.google.inject.Inject;
-
-import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 /**
  * @author michalm

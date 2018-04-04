@@ -38,9 +38,9 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import playground.michalm.taxi.ETaxiActionCreator;
+import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.ETaxiOptimizerProvider;
-import playground.michalm.taxi.scheduler.ETaxiScheduler;
-import playground.michalm.taxi.vrpagent.ETaxiActionCreator;
 
 public class ETaxiDvrpModules {
 	public static AbstractModule create() {

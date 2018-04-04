@@ -56,10 +56,10 @@ import org.matsim.vsp.ev.data.ElectricFleet;
 
 import com.google.common.collect.Maps;
 
+import playground.michalm.taxi.ETaxiChargingTask;
+import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.ETaxi;
 import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
-import playground.michalm.taxi.schedule.ETaxiChargingTask;
-import playground.michalm.taxi.scheduler.ETaxiScheduler;
 
 /**
  * Main assumptions:
