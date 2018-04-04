@@ -20,9 +20,7 @@
 package playground.vsp.openberlinscenario.cemdap.input;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -72,7 +70,7 @@ public class ZoneAndLOSGeneratorV2 {
 
 	// spatial refinement. Amit Nov'17
 	private List<String> zoneIdsForSpatialRefinement; // this is filled if shape file for spatial refinement is provided.
-	private double defaultIntraZoneDistanceForSpatialRefinement;
+	private double defaultIntraZoneDistanceForSpatialRefinement = Double.NaN;
 	
 	public static void main(String[] args) {
 		// Input and output
