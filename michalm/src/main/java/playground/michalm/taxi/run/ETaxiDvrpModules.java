@@ -27,6 +27,7 @@ import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
+import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.qsim.QSim;
@@ -38,9 +39,9 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import playground.michalm.taxi.ETaxiActionCreator;
+import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.ETaxiOptimizerProvider;
-import playground.michalm.taxi.scheduler.ETaxiScheduler;
-import playground.michalm.taxi.vrpagent.ETaxiActionCreator;
 
 public class ETaxiDvrpModules {
 	public static AbstractModule create() {
@@ -54,6 +55,7 @@ public class ETaxiDvrpModules {
 				bind(TaxiOptimizer.class).toProvider(ETaxiOptimizerProvider.class).asEagerSingleton();
 				bind(VrpOptimizer.class).to(TaxiOptimizer.class);
 				bind(ETaxiScheduler.class).asEagerSingleton();
+				bind(TaxiActionCreator.class).asEagerSingleton();
 				bind(DynActionCreator.class).to(ETaxiActionCreator.class).asEagerSingleton();
 				bind(PassengerRequestCreator.class).to(TaxiRequestCreator.class).asEagerSingleton();
 			}

@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.utli.stats;
+package playground.michalm.taxi.util;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ import org.matsim.contrib.dvrp.schedule.Task;
 import org.matsim.contrib.taxi.util.stats.TaxiStatsCalculators;
 import org.matsim.vsp.ev.dvrp.ChargingTask;
 
-import playground.michalm.taxi.utli.stats.ETaxiStats.ETaxiState;
+import playground.michalm.taxi.util.ETaxiStats.ETaxiState;
 
 public class ETaxiStatsCalculator {
 	private final int hours;

@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.scheduler;
+package playground.michalm.taxi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,8 +48,6 @@ import org.matsim.vsp.ev.data.ElectricVehicle;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
-import playground.michalm.taxi.schedule.ETaxiChargingTask;
 
 public class ETaxiScheduler extends TaxiScheduler {
 
