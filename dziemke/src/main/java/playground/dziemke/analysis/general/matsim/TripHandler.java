@@ -6,18 +6,8 @@ import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.ActivityEndEvent;
-import org.matsim.api.core.v01.events.ActivityStartEvent;
-import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
-import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
-import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.*;
+import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
@@ -27,7 +17,9 @@ import playground.dziemke.analysis.general.Trip;
 /**
  * @author on 04.04.2017.
  */
-public class TripHandler implements ActivityEndEventHandler, ActivityStartEventHandler, LinkLeaveEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, EventHandler {
+public class TripHandler implements ActivityEndEventHandler, ActivityStartEventHandler, LinkLeaveEventHandler,
+        PersonArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler,
+        PersonStuckEventHandler, EventHandler {
     public static final Logger log = Logger.getLogger(TripHandler.class);
     private static boolean tripmodeWarn = true;
 
@@ -37,6 +29,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
     private Map<Id<Person>, Integer> activityStartCount = new HashMap <>();
 
     private int noPreviousEndOfActivityCounter = 0;
+    private int personStuckCounter = 0;
 
     private Vehicle2DriverEventHandler vehicle2driver = new Vehicle2DriverEventHandler();
 
@@ -203,6 +196,18 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
         }
 
     }
+
+    @Override
+    public void handleEvent(PersonStuckEvent event) {
+
+        Id<Person> personId = event.getPersonId();
+
+        //person stuck, trip is not useful, delete
+        Id<Trip> tripId = Id.create(personId + "_" + activityEndCount.get(personId), Trip.class);
+        trips.remove(tripId);
+        personStuckCounter++;
+    }
+
 // --------------------------------------------------------------------------------------------------
 
 
@@ -218,6 +223,10 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
     public int getNoPreviousEndOfActivityCounter() {
         return this.noPreviousEndOfActivityCounter;
+    }
+
+    public int getPersonStuckCounter() {
+        return this.personStuckCounter;
     }
 
 

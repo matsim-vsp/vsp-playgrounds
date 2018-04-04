@@ -61,7 +61,7 @@ public class AnalyzeAndCompareTrips {
 	private static final String SRV_BASE_DIR = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/input/"; // THis folder needs to be checked out
 	private static final String SRV_PERSON_FILE_PATH = SRV_BASE_DIR + "P2008_Berlin2.dat";
 	private static final String SRV_TRIP_FILE_PATH = SRV_BASE_DIR + "W2008_Berlin_Weekday.dat";
-//	private static String srvOutputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/output2/"; // needs to be adjusted if applied
+//	private static String srvOutputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/output2/"; // needs nto be adjusted if applied
 //	private static final String OUTPUT_POPULATION_FILE_PATH = srvOutputDirectory + "testOutputPopulation.xml";
 
 
@@ -86,9 +86,10 @@ public class AnalyzeAndCompareTrips {
 
 		analysisOutputDirectory = matsimTripFilter.adaptOutputDirectory(analysisOutputDirectory);
 		new File(analysisOutputDirectory).mkdirs();
-		GeneralTripAnalyzer.analyze(filteredMatsimTrips, events2TripsParser.getNoPreviousEndOfActivityCounter(), analysisOutputDirectory);
+		GeneralTripAnalyzer.analyze(filteredMatsimTrips, events2TripsParser.getNoPreviousEndOfActivityCounter(),
+				events2TripsParser.getPersonStuckCounter(), analysisOutputDirectory);
 
-		
+
 		// SrV/Survey
 		Srv2MATSimPopulation srv2MATSimPopulation = new Srv2MATSimPopulation(SRV_PERSON_FILE_PATH, SRV_TRIP_FILE_PATH);
 //		srv2MATSimPopulation.writePopulation(OUTPUT_POPULATION_FILE_PATH);

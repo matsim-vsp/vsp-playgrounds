@@ -24,6 +24,7 @@ public class Events2TripsParser {
     private List<MatsimTrip> trips;
 
     private int noPreviousEndOfActivityCounter;
+    private int personStuckCounter;
 
     public Events2TripsParser(String configFile, String eventsFile, String networkFile) {
         parse(configFile, eventsFile, networkFile);
@@ -37,6 +38,7 @@ public class Events2TripsParser {
         MatsimEventsReader eventsReader = new MatsimEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
         noPreviousEndOfActivityCounter = tripHandler.getNoPreviousEndOfActivityCounter();
+        personStuckCounter = tripHandler.getPersonStuckCounter();
         log.info("Events file read!");
 
 	    /* Get network, which is needed to calculate distances */
@@ -65,5 +67,9 @@ public class Events2TripsParser {
 
     public int getNoPreviousEndOfActivityCounter() {
         return noPreviousEndOfActivityCounter;
+    }
+
+    public int getPersonStuckCounter() {
+        return personStuckCounter;
     }
 }
