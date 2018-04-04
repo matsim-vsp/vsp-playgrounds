@@ -210,16 +210,18 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
 // --------------------------------------------------------------------------------------------------
 
-
     @Override
     public void reset(int iteration) {
     }
 
-
     public Map<Id<Trip>, MatsimTrip> getTrips() {
+        cropTripsWithoutArrival();
         return this.trips;
     }
 
+    private void cropTripsWithoutArrival() {
+        trips.entrySet().removeIf(e -> e.getValue().getArrivalLinkId() == null );
+    }
 
     public int getNoPreviousEndOfActivityCounter() {
         return this.noPreviousEndOfActivityCounter;
@@ -229,12 +231,10 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
         return this.personStuckCounter;
     }
 
-
     @Override
     public void handleEvent(VehicleEntersTrafficEvent event) {
         vehicle2driver.handleEvent(event);
     }
-
 
     @Override
     public void handleEvent(VehicleLeavesTrafficEvent event) {
