@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.input;
+package playground.vsp.openberlinscenario.cemdap.input;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,12 +33,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Geometry;
+
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke

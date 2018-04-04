@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.output;
+package playground.vsp.openberlinscenario.cemdap.output;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.population.Activity;

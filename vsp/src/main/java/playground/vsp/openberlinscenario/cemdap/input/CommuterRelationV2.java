@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.vsp.demandde.cemdap.input;
+package playground.vsp.openberlinscenario.cemdap.input;
 
 /**
  * Storage object for commuter relations.

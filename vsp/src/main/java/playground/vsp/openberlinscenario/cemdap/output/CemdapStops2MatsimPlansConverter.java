@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.output;
+package playground.vsp.openberlinscenario.cemdap.output;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,9 +41,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
+
 import playground.vsp.corineLandcover.CorineLandCoverData;
 import playground.vsp.corineLandcover.GeometryUtils;
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke

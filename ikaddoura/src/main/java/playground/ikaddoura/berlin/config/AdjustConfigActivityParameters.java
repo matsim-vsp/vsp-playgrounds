@@ -25,7 +25,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 
-import playground.vsp.demandde.cemdap.output.ActivityTypes;
+import playground.vsp.openberlinscenario.cemdap.output.ActivityTypes;
 
 /**
 * @author ikaddoura

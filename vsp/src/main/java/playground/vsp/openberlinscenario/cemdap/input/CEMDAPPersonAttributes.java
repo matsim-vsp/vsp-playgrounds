@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.input;
+package playground.vsp.openberlinscenario.cemdap.input;
 
 /**
  * Created by amit on 02.12.17.

@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.output;
+package playground.vsp.openberlinscenario.cemdap.output;
 
 /**
  * @author dziemke

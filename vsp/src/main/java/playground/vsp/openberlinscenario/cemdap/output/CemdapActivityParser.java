@@ -17,11 +17,11 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.output;
+package playground.vsp.openberlinscenario.cemdap.output;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -32,26 +32,26 @@ import org.matsim.core.utils.io.IOUtils;
 /**
  * @author dziemke
  */
-@Deprecated
-public class CemdapPersonParser {
+public class CemdapActivityParser {
 
-	private final static Logger LOG = Logger.getLogger(CemdapPersonParser.class);
+	private final static Logger LOG = Logger.getLogger(CemdapActivityParser.class);
 
-	// Cemdap adults/children file columns
+	// Cemdap activity file columns
 //	private static final int HH_ID = 0;
 	private static final int P_ID = 1;
 //	...
+	private static final int ORIG_ZONE_ID = 5;
 	
 
-	public CemdapPersonParser() {
+	public CemdapActivityParser() {
 	}
 
 	
-	public final void parse(String cemdapPersonFile, List<Id<Person>> personsIds) {
+	public final void parse(String cemdapActivityFile, Map<Id<Person>, String> personHomeMap) {
 		int lineCount = 0;
 
 		try {
-			BufferedReader bufferedReader = IOUtils.getBufferedReader(cemdapPersonFile);
+			BufferedReader bufferedReader = IOUtils.getBufferedReader(cemdapActivityFile);
 			String currentLine = null;
 
 			while ((currentLine = bufferedReader.readLine()) != null) {
@@ -59,16 +59,18 @@ public class CemdapPersonParser {
 				lineCount++;
 				
 				if (lineCount % 1000000 == 0) {
-					LOG.info("Line " + lineCount + ": " + personsIds.size() + " persons stores so far.");
+					LOG.info("Line " + lineCount + ": " + personHomeMap.size() + " persons stored so far.");
 					Gbl.printMemoryUsage();
 				}
 				Id<Person> personId = Id.create(Integer.parseInt(entries[P_ID]), Person.class);
-				personsIds.add(personId);
+				if (!personHomeMap.containsKey(personId)) {
+					personHomeMap.put(personId, entries[ORIG_ZONE_ID]);
+				}
 			}
 		} catch (IOException e) {
 			LOG.error(e);
 		}
 		LOG.info(lineCount + " lines parsed.");
-		LOG.info(personsIds.size() + " persons stored.");
+		LOG.info(personHomeMap.size() + " persons stored.");
 	}
 }

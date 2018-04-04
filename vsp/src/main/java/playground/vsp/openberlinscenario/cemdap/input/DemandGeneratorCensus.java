@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.vsp.demandde.cemdap.input;
+package playground.vsp.openberlinscenario.cemdap.input;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -44,7 +44,8 @@ import org.matsim.households.Household;
 import org.matsim.households.HouseholdImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
+
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
  * This class creates a full population of a study region (in Germany) based on the Zensus and the Pendlerstatistik. People are assigned

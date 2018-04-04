@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.input;
+package playground.vsp.openberlinscenario.cemdap.input;
 
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;

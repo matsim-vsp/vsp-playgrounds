@@ -17,60 +17,89 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.demandde.cemdap.output;
+package playground.vsp.openberlinscenario.cemdap.output;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.utils.io.IOUtils;
 
 /**
  * @author dziemke
  */
-public class CemdapActivityParser {
+@Deprecated
+public class CemdapToursParser {
 
-	private final static Logger LOG = Logger.getLogger(CemdapActivityParser.class);
+	private final static Logger log = Logger.getLogger(CemdapToursParser.class);
 
-	// Cemdap activity file columns
-//	private static final int HH_ID = 0;
+	// cemdap tour file columns
+	private static final int HH_ID = 0;
 	private static final int P_ID = 1;
-//	...
-	private static final int ORIG_ZONE_ID = 5;
-	
+	private static final int TOUR_ID = 2;
+	//private static final int STOP_ID = 3;
+	private static final int TOUR_MODE = 4;
 
-	public CemdapActivityParser() {
+	
+	public CemdapToursParser() {
 	}
 
 	
-	public final void parse(String cemdapActivityFile, Map<Id<Person>, String> personHomeMap) {
+	// parse method
+	public final void parse(String cemdapToursFile, Map<String, String> tourAttributesMap) {
 		int lineCount = 0;
 
 		try {
-			BufferedReader bufferedReader = IOUtils.getBufferedReader(cemdapActivityFile);
+			BufferedReader bufferedReader = IOUtils.getBufferedReader(cemdapToursFile);
+			//String currentLine = bufferedReader.readLine();
 			String currentLine = null;
 
+			// data
 			while ((currentLine = bufferedReader.readLine()) != null) {
 				String[] entries = currentLine.split("\t", -1);
 				lineCount++;
 				
 				if (lineCount % 1000000 == 0) {
-					LOG.info("Line " + lineCount + ": " + personHomeMap.size() + " persons stored so far.");
+					log.info("line " + lineCount + ": parsed so far.");
 					Gbl.printMemoryUsage();
 				}
-				Id<Person> personId = Id.create(Integer.parseInt(entries[P_ID]), Person.class);
-				if (!personHomeMap.containsKey(personId)) {
-					personHomeMap.put(personId, entries[ORIG_ZONE_ID]);
-				}
+				
+				Integer householdId = Integer.parseInt(entries[HH_ID]);
+				Integer personId = Integer.parseInt(entries[P_ID]);
+				Integer tourId = Integer.parseInt(entries[TOUR_ID]);
+				String combinedId = householdId.toString() + "_" + personId.toString() + "_" + tourId.toString();
+				
+				//Integer tourMode = Integer.parseInt(entries[TOUR_MODE]);
+				
+				String modeType = transformModeType(Integer.parseInt(entries[TOUR_MODE]));
+				
+				//tourAttributesMap.put(combinedId, tourMode);
+				tourAttributesMap.put(combinedId, modeType);
 			}
 		} catch (IOException e) {
-			LOG.error(e);
+			log.error(e);
+			//Gbl.errorMsg(e);
 		}
-		LOG.info(lineCount + " lines parsed.");
-		LOG.info(personHomeMap.size() + " persons stored.");
+		log.info(lineCount+" lines parsed.");
+	}
+	
+	
+	private final String transformModeType(int modeTypeNumber) {
+		switch (modeTypeNumber) {
+		// TODO Check if this is correct
+		case 0: return "car";
+		case 1: return "car";
+		case 2: return "walk";
+		case 3: return "pt";
+		case 4: return "car";
+		case 5: return "car";
+		case 6: return "pt";
+		case 7: return "car";
+		default:
+			log.error(new IllegalArgumentException("modeTypeNo="+modeTypeNumber+" not allowed."));
+			return null;
+		}
 	}
 }

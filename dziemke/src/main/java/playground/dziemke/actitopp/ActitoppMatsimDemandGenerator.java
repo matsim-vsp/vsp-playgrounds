@@ -26,7 +26,7 @@ import edu.kit.ifv.mobitopp.actitopp.HWeekPattern;
 import edu.kit.ifv.mobitopp.actitopp.InvalidPatternException;
 import edu.kit.ifv.mobitopp.actitopp.ModelFileBase;
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper;
-import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
+import playground.vsp.openberlinscenario.cemdap.input.DemandGeneratorCensus;
 
 /**
  * @author dziemke

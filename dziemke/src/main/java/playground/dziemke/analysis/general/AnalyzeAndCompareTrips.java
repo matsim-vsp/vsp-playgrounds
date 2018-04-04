@@ -72,13 +72,13 @@ public class AnalyzeAndCompareTrips {
 		
 		// Set filters if desired
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
-		matsimTripFilter.activateMode(TransportMode.car);
+//		matsimTripFilter.activateMode(TransportMode.car);
 //		matsimTripFilter.activateMode("pt", "ptSlow");
-//		matsimTripFilter.activateMode(TransportMode.pt);
+		matsimTripFilter.activateMode(TransportMode.pt);
 //		matsimTripFilter.activateMode("ptSlow");
 //		matsimTripFilter.activateMode("bicycle");
 //		matsimTripFilter.activateMode(TransportMode.walk);
-//		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
+		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
 		matsimTripFilter.activateDist(0, 100);
 //		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
@@ -97,8 +97,8 @@ public class AnalyzeAndCompareTrips {
 		
 		// Set filters if desired
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
-		srvTripFilter.activateMode(TransportMode.car);
-//		srvTripFilter.activateMode(TransportMode.pt);
+//		srvTripFilter.activateMode(TransportMode.car);
+		srvTripFilter.activateMode(TransportMode.pt);
 //		srvTripFilter.activateMode(TransportMode.bike);
 //		srvTripFilter.activateMode(TransportMode.ride);
 		srvTripFilter.activateDist(0, 100);

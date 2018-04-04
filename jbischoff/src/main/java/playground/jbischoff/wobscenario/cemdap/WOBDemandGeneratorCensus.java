@@ -38,8 +38,9 @@ import org.matsim.households.Household;
 import org.matsim.households.HouseholdImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
-import playground.vsp.demandde.cemdap.input.CommuterRelationV2;
+
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
+import playground.vsp.openberlinscenario.cemdap.input.CommuterRelationV2;
 
 /**
  * This class is derived from "playground.dziemke.cemdapMatsimCadyts.oneperson.DemandGeneratorOnePersonV2.java"
