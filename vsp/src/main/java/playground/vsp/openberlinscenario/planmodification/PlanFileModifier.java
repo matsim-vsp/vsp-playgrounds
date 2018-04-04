@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dziemke.input;
+package playground.vsp.openberlinscenario.planmodification;
 
 import java.util.Arrays;
 import java.util.List;
