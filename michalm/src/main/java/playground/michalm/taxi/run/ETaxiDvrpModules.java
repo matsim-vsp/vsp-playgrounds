@@ -27,6 +27,7 @@ import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
+import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.qsim.QSim;
@@ -54,6 +55,7 @@ public class ETaxiDvrpModules {
 				bind(TaxiOptimizer.class).toProvider(ETaxiOptimizerProvider.class).asEagerSingleton();
 				bind(VrpOptimizer.class).to(TaxiOptimizer.class);
 				bind(ETaxiScheduler.class).asEagerSingleton();
+				bind(TaxiActionCreator.class).asEagerSingleton();
 				bind(DynActionCreator.class).to(ETaxiActionCreator.class).asEagerSingleton();
 				bind(PassengerRequestCreator.class).to(TaxiRequestCreator.class).asEagerSingleton();
 			}
