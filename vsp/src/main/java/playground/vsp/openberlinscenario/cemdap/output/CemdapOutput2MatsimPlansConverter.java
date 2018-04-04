@@ -49,10 +49,10 @@ import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 /**
  * @author dziemke
  */
-public class CemdapStops2MatsimPlansConverter {
+public class CemdapOutput2MatsimPlansConverter {
 
 	public static final String activityZoneId_attributeKey = "zoneId";
-	private static final Logger LOG = Logger.getLogger(CemdapStops2MatsimPlansConverter.class);
+	private static final Logger LOG = Logger.getLogger(CemdapOutput2MatsimPlansConverter.class);
 	
 
 	public static void main(String[] args) throws IOException {

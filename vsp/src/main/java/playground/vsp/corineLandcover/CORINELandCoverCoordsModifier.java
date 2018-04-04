@@ -27,7 +27,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
-import playground.vsp.openberlinscenario.cemdap.output.CemdapStops2MatsimPlansConverter;
+import playground.vsp.openberlinscenario.cemdap.output.CemdapOutput2MatsimPlansConverter;
 
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
@@ -179,7 +179,7 @@ public class CORINELandCoverCoordsModifier {
                         // during matsim plans generation, for home activities following fake coordinate is assigned.
                         if ( coord !=null && coord.equals(fakeCoord) ) {
                             String zoneId = (String) activity.getAttributes().getAttribute(
-                                    CemdapStops2MatsimPlansConverter.activityZoneId_attributeKey);
+                                    CemdapOutput2MatsimPlansConverter.activityZoneId_attributeKey);
 
                             if (homeLocationCoord==null) {
                                 if ( activityType.startsWith(this.homeActivityPrefix) ) {
