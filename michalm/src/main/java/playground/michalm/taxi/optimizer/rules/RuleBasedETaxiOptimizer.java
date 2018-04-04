@@ -48,7 +48,7 @@ import org.matsim.vsp.ev.data.ElectricFleet;
 import playground.michalm.taxi.ETaxiChargingTask;
 import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.BestChargerFinder;
-import playground.michalm.taxi.optimizer.ETaxi;
+import playground.michalm.taxi.optimizer.ETaxiVehicle;
 
 public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,
@@ -100,13 +100,13 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, params.socCheckTimeStep)) {
 			chargeIdleUnderchargedVehicles(
-					idleTaxiRegistry.vehicles().map(v -> ETaxi.create(v, evFleet)).filter(this::isUndercharged));
+					idleTaxiRegistry.vehicles().map(v -> ETaxiVehicle.create(v, evFleet)).filter(this::isUndercharged));
 		}
 
 		super.notifyMobsimBeforeSimStep(e);
 	}
 
-	private void chargeIdleUnderchargedVehicles(Stream<ETaxi> vehicles) {
+	private void chargeIdleUnderchargedVehicles(Stream<ETaxiVehicle> vehicles) {
 		vehicles.forEach(v -> {
 			Dispatch<Charger> eDispatch = eDispatchFinder.findBestChargerForVehicle(v,
 					chargingInfrastructure.getChargers().values().stream());
@@ -119,7 +119,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		super.nextTask(vehicle);
 
 		if (eScheduler.isIdle(vehicle)) {
-			ETaxi eTaxi = ETaxi.create(vehicle, evFleet);
+			ETaxiVehicle eTaxi = ETaxiVehicle.create(vehicle, evFleet);
 			if (isUndercharged(eTaxi)) {
 				chargeIdleUnderchargedVehicles(Stream.of(eTaxi));
 			}
@@ -131,7 +131,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		return task.getTaxiTaskType() == TaxiTaskType.STAY && !(task instanceof ETaxiChargingTask);
 	}
 
-	private boolean isUndercharged(ETaxi v) {
+	private boolean isUndercharged(ETaxiVehicle v) {
 		Battery b = v.getElectricVehicle().getBattery();
 		return b.getSoc() < params.minRelativeSoc * b.getCapacity();
 	}

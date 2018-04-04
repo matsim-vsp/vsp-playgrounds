@@ -28,17 +28,17 @@ import org.matsim.vsp.ev.data.ElectricVehicle;
 /**
  * @author michalm
  */
-public class ETaxi implements Vehicle {
-	public static ETaxi create(Vehicle vehicle, ElectricFleet evFleet) {
+public class ETaxiVehicle implements Vehicle {
+	public static ETaxiVehicle create(Vehicle vehicle, ElectricFleet evFleet) {
 		// return new ETaxi(vehicle, evFleet.getElectricVehicles().get(Id.create(vehicle.getId(),
 		// ElectricVehicle.class)));
-		return new ETaxi(vehicle, evFleet.getElectricVehicles().get(vehicle.getId()));
+		return new ETaxiVehicle(vehicle, evFleet.getElectricVehicles().get(vehicle.getId()));
 	}
 
 	private final Vehicle vehicle;
 	private final ElectricVehicle electricVehicle;
 
-	public ETaxi(Vehicle vehicle, ElectricVehicle electricVehicle) {
+	public ETaxiVehicle(Vehicle vehicle, ElectricVehicle electricVehicle) {
 		this.vehicle = vehicle;
 		this.electricVehicle = electricVehicle;
 	}

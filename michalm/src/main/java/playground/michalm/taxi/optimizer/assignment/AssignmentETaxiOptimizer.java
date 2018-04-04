@@ -58,7 +58,7 @@ import com.google.common.collect.Maps;
 
 import playground.michalm.taxi.ETaxiChargingTask;
 import playground.michalm.taxi.ETaxiScheduler;
-import playground.michalm.taxi.optimizer.ETaxi;
+import playground.michalm.taxi.optimizer.ETaxiVehicle;
 import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
 
 /**
@@ -176,7 +176,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		List<Dispatch<ChargerPlug>> assignments = eAssignmentProblem.findAssignments(vData, pData, cost);
 
 		for (Dispatch<ChargerPlug> a : assignments) {
-			ETaxi eTaxi = (ETaxi)a.vehicle;
+			ETaxiVehicle eTaxi = (ETaxiVehicle)a.vehicle;
 			eScheduler.scheduleCharging(eTaxi.getVehicle(), eTaxi.getElectricVehicle(), a.destination.charger, a.path);
 			if (scheduledForCharging.put(a.vehicle.getId(), a.vehicle) != null) {
 				throw new IllegalStateException();
@@ -203,19 +203,19 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		// (like with undersupply of taxis)
 		double chargingPlanningHorizon = 10 * 60;// 10 minutes (should be longer than socCheckTimeStep)
 		double maxDepartureTime = timer.getTimeOfDay() + chargingPlanningHorizon;
-		Stream<ETaxi> vehiclesBelowMinSocLevel = fleet.getVehicles().values().stream()
-				.map(v -> ETaxi.create(v, evFleet)).filter(v -> isChargingSchedulable(v, eScheduler, maxDepartureTime));
+		Stream<ETaxiVehicle> vehiclesBelowMinSocLevel = fleet.getVehicles().values().stream()
+				.map(v -> ETaxiVehicle.create(v, evFleet)).filter(v -> isChargingSchedulable(v, eScheduler, maxDepartureTime));
 
 		// filter least charged vehicles
 		// assumption: all b.capacities are equal
-		List<ETaxi> leastChargedVehicles = PartialSort.kSmallestElements(pData.getSize(), vehiclesBelowMinSocLevel,
+		List<ETaxiVehicle> leastChargedVehicles = PartialSort.kSmallestElements(pData.getSize(), vehiclesBelowMinSocLevel,
 				v -> v.getElectricVehicle().getBattery().getSoc());
 
 		return new VehicleData(timer.getTimeOfDay(), eScheduler, leastChargedVehicles.stream());
 	}
 
 	// TODO MIN_RELATIVE_SOC should depend on %idle
-	private boolean isChargingSchedulable(ETaxi eTaxi, TaxiScheduleInquiry scheduleInquiry, double maxDepartureTime) {
+	private boolean isChargingSchedulable(ETaxiVehicle eTaxi, TaxiScheduleInquiry scheduleInquiry, double maxDepartureTime) {
 		Battery b = eTaxi.getElectricVehicle().getBattery();
 		boolean undercharged = b.getSoc() < params.minRelativeSoc * b.getCapacity();
 		if (!undercharged || !scheduledForCharging.containsKey(eTaxi.getId())) {
