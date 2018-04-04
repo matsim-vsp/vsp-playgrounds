@@ -77,7 +77,7 @@ public class GeneralTripAnalyzer {
 
         /* Other information */
         otherInformationMap.put("Number of trips that have no previous activity", (double) noPreviousEndOfActivityCounter);
-        otherInformationMap.put("Number of stuck persons", /* TODO */ (double) personStuckCounter);
+        otherInformationMap.put("Number of stuck persons", (double) personStuckCounter);
         otherInformationMap.put("Aggregated weight of trips that have negative distance (beeline, from survey)", aggregatedWeightOfConsideredTrips - aggregatedWeightOfTripsWithNonNegativeDistanceBeeline);
         otherInformationMap.put("Aggregated weight of trips that have negative distance (routed, from survey)", aggregatedWeightOfConsideredTrips - aggregatedWeightOfTripsWithNonNegativeDistanceRouted);
         otherInformationMap.put("Aggregated weight of trips that have no calculable speed beeline", aggregatedWeightOfConsideredTrips - aggregatedWeightOfTripsWithCalculableSpeedBeeline);
