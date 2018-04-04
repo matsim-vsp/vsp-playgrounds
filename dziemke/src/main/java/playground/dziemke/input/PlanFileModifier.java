@@ -57,11 +57,13 @@ public class PlanFileModifier {
 	private boolean onlyTransferSelectedPlan;
 	private boolean considerHomeStayingAgents;
 	private boolean includeStayHomePlans;
-	private boolean onlyConsiderPeopleAlwaysGoingByCar;
+	private boolean onlyConsiderPeopleAlwaysGoingByCar; // TODO A leftover from an early, quite specific case; should be generalized
 	private int maxNumberOfAgentsConsidered;
 	private boolean removeLinksAndRoutes;
 	private CoordinateTransformation ct;
-	private List<String> attributesToKeep;
+	private List<String> attributesToKeep; // TODO Might be removed once handling of new, integrated attributes becomes more standard
+	
+	Random random = MatsimRandom.getLocalInstance();
 	
 	
 	public static void main(String[] args) {
@@ -115,7 +117,7 @@ public class PlanFileModifier {
 			attributesToKeep = Arrays.asList();
 		}
 		
-		// Server use, newer version with CRS transformation
+		// Server use, version with CRS transformation
 		if (args.length == 11) {
 			inputPlansFile = args[0];
 			outputPlansFile = args[1];
@@ -156,12 +158,7 @@ public class PlanFileModifier {
 		this.attributesToKeep = attributesToKeep;
 	}
 	
-	
-	public void modifyPlans() {
-//	public static void modifyPlans (String inputPlansFile, String outputPlansFile, double selectionProbability, boolean onlyTransferSelectedPlan,
-//			boolean considerHomeStayingAgents, boolean includeStayHomePlans, boolean onlyConsiderPeopleAlwaysGoingByCar,
-//			int maxNumberOfAgentsConsidered, boolean removeLinksAndRoutes, CoordinateTransformation ct) {
-		
+	public void modifyPlans() {		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new PopulationReader(scenario).readFile(inputPlansFile);
 		Population population = scenario.getPopulation();
@@ -171,14 +168,12 @@ public class PlanFileModifier {
 		
 		int agentCounter = 0;
 		
-		Random random = MatsimRandom.getLocalInstance();
 		
 		for (Person person : population.getPersons().values()) {
 			if (agentCounter < maxNumberOfAgentsConsidered) {
 				
 				Plan selectedPlan = person.getSelectedPlan();
-				boolean copyPerson = decideIfPersonWillBeCopied(selectionProbability, considerHomeStayingAgents,
-						onlyConsiderPeopleAlwaysGoingByCar, person, random, selectedPlan);
+				boolean copyPerson = decideIfPersonIsCopied(person, selectedPlan);
 				
 				// If selected according to all criteria, create a copy of the person and add it to new population
 				if (copyPerson) {
@@ -194,8 +189,7 @@ public class PlanFileModifier {
 		LOG.info("Modified plans file has been written to " + outputPlansFile);
 	}
 
-	private static boolean decideIfPersonWillBeCopied(double selectionProbability, boolean considerHomeStayingAgents,
-			boolean onlyConsiderPeopleAlwaysGoingByCar, Person person, Random random, Plan selectedPlan) {
+	private boolean decideIfPersonIsCopied(Person person, Plan selectedPlan) {
 		boolean copyPerson = true;
 		if (!considerHomeStayingAgents) {
 			if (selectedPlan.getPlanElements().size() <= 1) {
@@ -224,8 +218,6 @@ public class PlanFileModifier {
 	}
 
 	private void createPersonAndAddToPopulation(Population population, Person person, Plan selectedPlan) {
-//	private static void createPersonAndAddToPopulation(boolean onlyTransferSelectedPlan, boolean includeStayHomePlans,
-//			boolean removeLinksAndRoutes, Population population, Person person, Plan selectedPlan, CoordinateTransformation ct) {
 		Id<Person> id = person.getId();
 		Person person2 = population.getFactory().createPerson(id);
 		
