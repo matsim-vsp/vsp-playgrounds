@@ -37,7 +37,6 @@ import playground.vsp.openberlinscenario.cemdap.output.ActivityTypes;
 /**
 * @author ikaddoura
 */
-
 public class SplitActivityTypesBasedOnDuration {
 	private final Logger log = Logger.getLogger(SplitActivityTypesBasedOnDuration.class);
 
@@ -50,17 +49,15 @@ public class SplitActivityTypesBasedOnDuration {
 	}
 
 	public static void main(String[] args) {
-		
-		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/pop_300/plans_10pct_corine-landcover.xml.gz";
-		
-		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/pop_300/plans_10pct_corine-landcover_test.xml.gz";
-		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/pop_300/config_activity-parameters_test.xml";
+		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_10pct_clc.xml.gz";
+		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_10pct_clc_act-split.xml.gz";
+		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/config_act-split.xml";
 		
 		final double timeBinSize_s = 600.;
-		final String[] activities = {ActivityTypes.HOME, ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.LEISURE, ActivityTypes.SHOPPING, ActivityTypes.OTHER}; 
+		final String[] activityTypes = {ActivityTypes.HOME, ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.LEISURE, ActivityTypes.SHOPPING, ActivityTypes.OTHER}; 
 		
 		SplitActivityTypesBasedOnDuration splitAct = new SplitActivityTypesBasedOnDuration(inputPopulationFile);
-		splitAct.run(outputPopulationFile, outputConfigFile, timeBinSize_s, activities);	
+		splitAct.run(outputPopulationFile, outputConfigFile, timeBinSize_s, activityTypes);	
 	}
 
 	public void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities) {
@@ -71,8 +68,7 @@ public class SplitActivityTypesBasedOnDuration {
 		PopulationWriter writer = new PopulationWriter(scenario.getPopulation());
 		writer.write(outputPopulationFile);
 		
-		// config
-				
+		// Config
 		List<ActivityParams> initialActivityParams = new ArrayList<>();
 		
 		log.info("Initial activity parameters: ");
@@ -91,12 +87,8 @@ public class SplitActivityTypesBasedOnDuration {
 			
 			if (activityType.contains("interaction")) {
 				log.info("Skipping activity " + activityType + "...");
-				
 			} else {
-				
 				log.info("Splitting activity " + activityType + " in duration-specific activities.");
-
-//				double maximumDuration = 27 * 3600.;
 				double maximumDuration = tools.getMaxEndTime();
 				
 				for (double n = timeBinSize_s; n <= maximumDuration ; n = n + timeBinSize_s) {
@@ -119,10 +111,7 @@ public class SplitActivityTypesBasedOnDuration {
 		}
 		
 		log.info("Adding duration-specific activity types to config... Done.");
-		
 		ConfigWriter configWriter = new ConfigWriter(scenario.getConfig());
 		configWriter.write(outputConfigFile);
 	}
-
 }
-
