@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.openberlinscenario.cemdap.output;
+package playground.vsp.openberlinscenario.planrefinement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +31,8 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
 import org.matsim.core.population.io.PopulationWriter;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import playground.vsp.openberlinscenario.cemdap.output.ActivityTypes;
 
 /**
 * @author ikaddoura
