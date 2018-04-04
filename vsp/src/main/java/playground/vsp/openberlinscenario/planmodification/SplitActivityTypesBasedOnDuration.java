@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.openberlinscenario.planrefinement;
+package playground.vsp.openberlinscenario.planmodification;
 
 import java.util.ArrayList;
 import java.util.List;
