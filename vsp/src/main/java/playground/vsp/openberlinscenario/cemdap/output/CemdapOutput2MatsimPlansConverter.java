@@ -93,6 +93,8 @@ public class CemdapOutput2MatsimPlansConverter {
 			zonalShapeFile = args[5];
 			cemdapDataRoot = args[6];
 			useLandCoverData = Boolean.parseBoolean(args[7]); // I think, it is not necessary, one can provide landCoverFile or not. Amit Oct'17
+			// Not providing the landCoverFile, i.e. only assigning "", does cause trouble to the counting of the arguments -> IndexOutOfBoundException
+			// So, having the switched based on a filename that is there or not there, does not seem to be a good option either, dz, apr'18
 			landCoverFile = args[8];
 			simplifyGeometries = Boolean.valueOf(args[9]);
 			combiningGeoms = Boolean.valueOf(args[10]);
