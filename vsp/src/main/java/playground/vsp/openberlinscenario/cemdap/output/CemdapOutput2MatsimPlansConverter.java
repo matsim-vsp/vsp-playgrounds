@@ -242,7 +242,6 @@ public class CemdapOutput2MatsimPlansConverter {
 			}
 		}
 
-				
 		// If applicable, add a stay-home plan for everybody
 		if (addStayHomePlan) {
 			numberOfPlans++;
@@ -254,9 +253,9 @@ public class CemdapOutput2MatsimPlansConverter {
 
 				Plan stayHomePlan = population.getFactory().createPlan();
 				// Create new activity with type and coordinates (but without end time) and add it to stay-home plan
-				Activity newActivity = population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord());
-				newActivity.getAttributes().putAttribute(activityZoneId_attributeKey, firstActivity.getAttributes().getAttribute(activityZoneId_attributeKey));
-				stayHomePlan.addActivity(newActivity);
+				Activity Activity2 = population.getFactory().createActivityFromCoord(firstActivity.getType(), firstActivity.getCoord());
+				Activity2.getAttributes().putAttribute(activityZoneId_attributeKey, firstActivity.getAttributes().getAttribute(activityZoneId_attributeKey));
+				stayHomePlan.addActivity(Activity2);
 				person.addPlan(stayHomePlan);
 			}
 		}
