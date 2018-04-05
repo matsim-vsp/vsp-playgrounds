@@ -33,7 +33,6 @@ import org.matsim.contrib.drt.scheduler.DrtScheduleInquiry;
 import org.matsim.contrib.drt.scheduler.DrtScheduleTimingUpdater;
 import org.matsim.contrib.drt.scheduler.EmptyVehicleRelocator;
 import org.matsim.contrib.drt.scheduler.RequestInsertionScheduler;
-import org.matsim.contrib.drt.vrpagent.DrtActionCreator;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.run.DvrpModule;
@@ -45,6 +44,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.scenario.ScenarioUtils;
 
+import playground.michalm.drt.EDrtActionCreator;
 import playground.michalm.drt.optimizer.insertion.EDrtUnplannedRequestInserter;
 import playground.michalm.drt.schedule.EDrtTaskFactoryImpl;
 
@@ -77,17 +77,24 @@ public class EDrtControlerCreator {
 			protected void configure() {
 				bind(MobsimTimer.class).toProvider(MobsimTimerProvider.class).asEagerSingleton();
 				DvrpModule.bindTravelDisutilityForOptimizer(binder(), DefaultDrtOptimizer.DRT_OPTIMIZER);
+
 				bind(DrtOptimizer.class).to(DefaultDrtOptimizer.class).asEagerSingleton();
 				bind(VrpOptimizer.class).to(DrtOptimizer.class);
+
 				bind(EDrtUnplannedRequestInserter.class).asEagerSingleton();
 				bind(UnplannedRequestInserter.class).to(EDrtUnplannedRequestInserter.class);
+
 				bind(DrtTaskFactory.class).to(EDrtTaskFactoryImpl.class).asEagerSingleton();
+
 				bind(EmptyVehicleRelocator.class).asEagerSingleton();
 				bind(DrtScheduleInquiry.class).asEagerSingleton();
 				bind(RequestInsertionScheduler.class).asEagerSingleton();
 				bind(DrtScheduleTimingUpdater.class).asEagerSingleton();
-				bind(DynActionCreator.class).to(DrtActionCreator.class).asEagerSingleton();
+
+				bind(DynActionCreator.class).to(EDrtActionCreator.class).asEagerSingleton();
+
 				bind(PassengerRequestCreator.class).to(DrtRequestCreator.class).asEagerSingleton();
+
 				bind(ParallelPathDataProvider.class).asEagerSingleton();
 				bind(PrecalculatablePathDataProvider.class).to(ParallelPathDataProvider.class);
 			}
