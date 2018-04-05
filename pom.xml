@@ -9,7 +9,7 @@
 	<name>VSP-Playgrounds</name>
 
 	<scm>
-		<url>https://github.com/matsim-vsp/vsp-playgrounds</url>
+		<url>https://github.com/matsim-vsp/vsp-playgrounds.git</url>
 		<connection>scm:git:git://github.com/matsim-vsp/vsp-playgrounds.git</connection>
 		<developerConnection>scm:git:git@github.com:matsim-vsp/vsp-playgrounds.git</developerConnection>
 	</scm>
@@ -58,6 +58,9 @@
 					<target>1.8</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
