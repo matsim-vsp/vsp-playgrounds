@@ -39,8 +39,6 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeCleanupEvent;
 import org.matsim.core.mobsim.framework.listeners.MobsimBeforeCleanupListener;
-import org.matsim.vsp.ev.data.ElectricFleet;
-import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 
 import com.google.inject.Inject;
 
@@ -52,7 +50,6 @@ public class EDrtUnplannedRequestInserter implements UnplannedRequestInserter, M
 
 	private final DrtConfigGroup drtCfg;
 	private final Fleet fleet;
-	private ElectricFleet evFleet;
 	private final MobsimTimer mobsimTimer;
 	private final EventsManager eventsManager;
 	private final RequestInsertionScheduler insertionScheduler;
@@ -60,12 +57,11 @@ public class EDrtUnplannedRequestInserter implements UnplannedRequestInserter, M
 	private final ParallelMultiVehicleInsertionProblem insertionProblem;
 
 	@Inject
-	public EDrtUnplannedRequestInserter(DrtConfigGroup drtCfg, Fleet fleet, ElectricFleet evFleet,
-			MobsimTimer mobsimTimer, EventsManager eventsManager, RequestInsertionScheduler insertionScheduler,
+	public EDrtUnplannedRequestInserter(DrtConfigGroup drtCfg, Fleet fleet, MobsimTimer mobsimTimer,
+			EventsManager eventsManager, RequestInsertionScheduler insertionScheduler,
 			PrecalculatablePathDataProvider pathDataProvider) {
 		this.drtCfg = drtCfg;
 		this.fleet = fleet;
-		this.evFleet = evFleet;
 		this.mobsimTimer = mobsimTimer;
 		this.eventsManager = eventsManager;
 		this.insertionScheduler = insertionScheduler;
@@ -85,8 +81,7 @@ public class EDrtUnplannedRequestInserter implements UnplannedRequestInserter, M
 			return;
 		}
 
-		VehicleData vData = new VehicleData(mobsimTimer.getTimeOfDay(),
-				fleet.getVehicles().values().stream().map(v -> EvDvrpVehicle.create(v, evFleet)));
+		VehicleData vData = new VehicleData(mobsimTimer.getTimeOfDay(), fleet.getVehicles().values().stream());
 
 		Iterator<DrtRequest> reqIter = unplannedRequests.iterator();
 		while (reqIter.hasNext()) {

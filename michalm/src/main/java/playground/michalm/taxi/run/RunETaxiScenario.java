@@ -69,10 +69,12 @@ public class RunETaxiScenario {
 	}
 
 	public static EvDvrpIntegrationModule createEvDvrpIntegrationModule() {
-		return new EvDvrpIntegrationModule(
-				charger -> new FixedSpeedChargingStrategy(charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC),
-				() -> TEMPERATURE, //
-				vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED);
+		return new EvDvrpIntegrationModule()//
+				.setChargingStrategyFactory(charger -> new FixedSpeedChargingStrategy(
+						charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC))//
+				.setTemperatureProvider(() -> TEMPERATURE)//
+				.setIsTurnedOnPredicate(vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED)//
+				.setVehicleFileUrlGetter(cfg -> TaxiConfigGroup.get(cfg).getTaxisFileUrl(cfg.getContext()));
 	}
 
 	public static void main(String[] args) {

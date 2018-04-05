@@ -43,7 +43,6 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.vsp.ev.data.Battery;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ChargingInfrastructure;
-import org.matsim.vsp.ev.data.ElectricFleet;
 import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 
 import playground.michalm.taxi.ETaxiChargingTask;
@@ -51,18 +50,17 @@ import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.BestChargerFinder;
 
 public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
-	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,
-			ETaxiScheduler eScheduler, Network network, MobsimTimer timer, TravelTime travelTime,
-			TravelDisutility travelDisutility, RuleBasedETaxiOptimizerParams params,
-			ChargingInfrastructure chargingInfrastructure) {
-		return RuleBasedETaxiOptimizer.create(taxiCfg, fleet, evFleet, eScheduler, network, timer, travelTime,
-				travelDisutility, params, chargingInfrastructure, new SquareGridSystem(network, params.cellSize));
+	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ETaxiScheduler eScheduler,
+			Network network, MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility,
+			RuleBasedETaxiOptimizerParams params, ChargingInfrastructure chargingInfrastructure) {
+		return RuleBasedETaxiOptimizer.create(taxiCfg, fleet, eScheduler, network, timer, travelTime, travelDisutility,
+				params, chargingInfrastructure, new SquareGridSystem(network, params.cellSize));
 	}
 
-	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,
-			ETaxiScheduler eScheduler, Network network, MobsimTimer timer, TravelTime travelTime,
-			TravelDisutility travelDisutility, RuleBasedETaxiOptimizerParams params,
-			ChargingInfrastructure chargingInfrastructure, ZonalSystem zonalSystem) {
+	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ETaxiScheduler eScheduler,
+			Network network, MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility,
+			RuleBasedETaxiOptimizerParams params, ChargingInfrastructure chargingInfrastructure,
+			ZonalSystem zonalSystem) {
 		IdleTaxiZonalRegistry idleTaxiRegistry = new IdleTaxiZonalRegistry(zonalSystem, eScheduler);
 		UnplannedRequestZonalRegistry unplannedRequestRegistry = new UnplannedRequestZonalRegistry(zonalSystem);
 		BestDispatchFinder dispatchFinder = new BestDispatchFinder(eScheduler, network, timer, travelTime,
@@ -70,25 +68,22 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		RuleBasedRequestInserter requestInserter = new RuleBasedRequestInserter(eScheduler, timer, dispatchFinder,
 				params, idleTaxiRegistry, unplannedRequestRegistry);
 
-		return new RuleBasedETaxiOptimizer(taxiCfg, fleet, evFleet, eScheduler, chargingInfrastructure, params,
-				idleTaxiRegistry, unplannedRequestRegistry, dispatchFinder, requestInserter);
+		return new RuleBasedETaxiOptimizer(taxiCfg, fleet, eScheduler, chargingInfrastructure, params, idleTaxiRegistry,
+				unplannedRequestRegistry, dispatchFinder, requestInserter);
 	}
 
 	// TODO MIN_RELATIVE_SOC should depend on the weather and time of day
-	private final ElectricFleet evFleet;
 	private final RuleBasedETaxiOptimizerParams params;
 	private final ChargingInfrastructure chargingInfrastructure;
 	private final BestChargerFinder eDispatchFinder;
 	private final ETaxiScheduler eScheduler;
 	private final IdleTaxiZonalRegistry idleTaxiRegistry;
 
-	public RuleBasedETaxiOptimizer(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,
-			ETaxiScheduler eScheduler, ChargingInfrastructure chargingInfrastructure,
-			RuleBasedETaxiOptimizerParams params, IdleTaxiZonalRegistry idleTaxiRegistry,
-			UnplannedRequestZonalRegistry unplannedRequestRegistry, BestDispatchFinder dispatchFinder,
-			UnplannedRequestInserter requestInserter) {
+	public RuleBasedETaxiOptimizer(TaxiConfigGroup taxiCfg, Fleet fleet, ETaxiScheduler eScheduler,
+			ChargingInfrastructure chargingInfrastructure, RuleBasedETaxiOptimizerParams params,
+			IdleTaxiZonalRegistry idleTaxiRegistry, UnplannedRequestZonalRegistry unplannedRequestRegistry,
+			BestDispatchFinder dispatchFinder, UnplannedRequestInserter requestInserter) {
 		super(taxiCfg, fleet, eScheduler, params, idleTaxiRegistry, unplannedRequestRegistry, requestInserter);
-		this.evFleet = evFleet;
 		this.params = params;
 		this.chargingInfrastructure = chargingInfrastructure;
 		this.eScheduler = eScheduler;
@@ -99,8 +94,10 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, params.socCheckTimeStep)) {
-			chargeIdleUnderchargedVehicles(idleTaxiRegistry.vehicles().map(v -> EvDvrpVehicle.create(v, evFleet))
-					.filter(this::isUndercharged));
+			@SuppressWarnings("unchecked")
+			Stream<EvDvrpVehicle> eTaxis = (Stream<EvDvrpVehicle>)(Stream<? extends Vehicle>)idleTaxiRegistry
+					.vehicles();
+			chargeIdleUnderchargedVehicles(eTaxis.filter(this::isUndercharged));
 		}
 
 		super.notifyMobsimBeforeSimStep(e);
@@ -110,7 +107,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		vehicles.forEach(v -> {
 			Dispatch<Charger> eDispatch = eDispatchFinder.findBestChargerForVehicle(v,
 					chargingInfrastructure.getChargers().values().stream());
-			eScheduler.scheduleCharging(v.getVehicle(), v.getElectricVehicle(), eDispatch.destination, eDispatch.path);
+			eScheduler.scheduleCharging(v, v.getElectricVehicle(), eDispatch.destination, eDispatch.path);
 		});
 	}
 
@@ -119,7 +116,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		super.nextTask(vehicle);
 
 		if (eScheduler.isIdle(vehicle)) {
-			EvDvrpVehicle eTaxi = EvDvrpVehicle.create(vehicle, evFleet);
+			EvDvrpVehicle eTaxi = (EvDvrpVehicle)vehicle;
 			if (isUndercharged(eTaxi)) {
 				chargeIdleUnderchargedVehicles(Stream.of(eTaxi));
 			}

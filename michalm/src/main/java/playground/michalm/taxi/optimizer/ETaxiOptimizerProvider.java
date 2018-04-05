@@ -32,7 +32,6 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vsp.ev.data.ChargingInfrastructure;
-import org.matsim.vsp.ev.data.ElectricFleet;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -54,7 +53,6 @@ public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final TaxiConfigGroup taxiCfg;
 	private final Network network;
 	private final Fleet fleet;
-	private final ElectricFleet evFleet;
 	private final MobsimTimer timer;
 	private final TravelTime travelTime;
 	private final TravelDisutility travelDisutility;
@@ -62,14 +60,13 @@ public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final ChargingInfrastructure chargingInfrastructure;
 
 	@Inject
-	public ETaxiOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,
+	public ETaxiOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet,
 			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, MobsimTimer timer,
 			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
 			@Named(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) TravelDisutility travelDisutility,
 			ETaxiScheduler eScheduler, ChargingInfrastructure chargingInfrastructure) {
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
-		this.evFleet = evFleet;
 		this.network = network;
 		this.timer = timer;
 		this.travelTime = travelTime;
@@ -85,13 +82,12 @@ public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 
 		switch (type) {
 			case E_RULE_BASED:
-				return RuleBasedETaxiOptimizer.create(taxiCfg, fleet, evFleet, eScheduler, network, timer, travelTime,
+				return RuleBasedETaxiOptimizer.create(taxiCfg, fleet, eScheduler, network, timer, travelTime,
 						travelDisutility, new RuleBasedETaxiOptimizerParams(optimizerConfig), chargingInfrastructure);
 
 			case E_ASSIGNMENT:
-				return AssignmentETaxiOptimizer.create(taxiCfg, fleet, evFleet, network, timer, travelTime,
-						travelDisutility, eScheduler, chargingInfrastructure,
-						new AssignmentETaxiOptimizerParams(optimizerConfig));
+				return AssignmentETaxiOptimizer.create(taxiCfg, fleet, network, timer, travelTime, travelDisutility,
+						eScheduler, chargingInfrastructure, new AssignmentETaxiOptimizerParams(optimizerConfig));
 
 			default:
 				throw new RuntimeException();

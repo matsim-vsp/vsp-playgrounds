@@ -52,7 +52,6 @@ import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vsp.ev.data.Battery;
 import org.matsim.vsp.ev.data.ChargingInfrastructure;
-import org.matsim.vsp.ev.data.ElectricFleet;
 import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 
 import com.google.common.collect.Maps;
@@ -77,18 +76,17 @@ import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.Ch
  * </ul>
  */
 public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
-	public static AssignmentETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,
-			Network network, MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility,
-			ETaxiScheduler eScheduler, ChargingInfrastructure chargingInfrastructure,
-			AssignmentETaxiOptimizerParams params) {
+	public static AssignmentETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, Network network,
+			MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility, ETaxiScheduler eScheduler,
+			ChargingInfrastructure chargingInfrastructure, AssignmentETaxiOptimizerParams params) {
 		MultiNodePathCalculator multiNodeRouter = (MultiNodePathCalculator)new FastMultiNodeDijkstraFactory(true)
 				.createPathCalculator(network, travelDisutility, travelTime);
 		BackwardMultiNodePathCalculator backwardMultiNodeRouter = (BackwardMultiNodePathCalculator)new BackwardFastMultiNodeDijkstraFactory(
 				true).createPathCalculator(network, travelDisutility, travelTime);
 		LeastCostPathCalculator router = new FastAStarEuclideanFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
-		return new AssignmentETaxiOptimizer(taxiCfg, fleet, evFleet, timer, travelTime, eScheduler,
-				chargingInfrastructure, params, multiNodeRouter, backwardMultiNodeRouter, router);
+		return new AssignmentETaxiOptimizer(taxiCfg, fleet, timer, travelTime, eScheduler, chargingInfrastructure,
+				params, multiNodeRouter, backwardMultiNodeRouter, router);
 	}
 
 	private final AssignmentETaxiOptimizerParams params;
@@ -97,13 +95,12 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 	private final VehicleAssignmentProblem<ChargerPlug> eAssignmentProblem;
 	private final ETaxiScheduler eScheduler;
 	private final Fleet fleet;
-	private ElectricFleet evFleet;
 	private final MobsimTimer timer;
 
 	private final Map<Id<Vehicle>, Vehicle> scheduledForCharging;
 
-	public AssignmentETaxiOptimizer(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet, MobsimTimer timer,
-			TravelTime travelTime, ETaxiScheduler eScheduler, ChargingInfrastructure chargingInfrastructure,
+	public AssignmentETaxiOptimizer(TaxiConfigGroup taxiCfg, Fleet fleet, MobsimTimer timer, TravelTime travelTime,
+			ETaxiScheduler eScheduler, ChargingInfrastructure chargingInfrastructure,
 			AssignmentETaxiOptimizerParams params, MultiNodePathCalculator multiNodeRouter,
 			BackwardMultiNodePathCalculator backwardMultiNodeRouter, LeastCostPathCalculator router) {
 		super(taxiCfg, fleet, eScheduler, params, new AssignmentRequestInserter(fleet, timer, travelTime, eScheduler,
@@ -112,7 +109,6 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		this.chargingInfrastructure = chargingInfrastructure;
 		this.eScheduler = eScheduler;
 		this.fleet = fleet;
-		this.evFleet = evFleet;
 		this.timer = timer;
 
 		if (taxiCfg.isVehicleDiversion() && taxiCfg.isDestinationKnown()) {
@@ -177,7 +173,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 
 		for (Dispatch<ChargerPlug> a : assignments) {
 			EvDvrpVehicle eTaxi = (EvDvrpVehicle)a.vehicle;
-			eScheduler.scheduleCharging(eTaxi.getVehicle(), eTaxi.getElectricVehicle(), a.destination.charger, a.path);
+			eScheduler.scheduleCharging(eTaxi, eTaxi.getElectricVehicle(), a.destination.charger, a.path);
 			if (scheduledForCharging.put(a.vehicle.getId(), a.vehicle) != null) {
 				throw new IllegalStateException();
 			}
@@ -203,8 +199,8 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 		// (like with undersupply of taxis)
 		double chargingPlanningHorizon = 10 * 60;// 10 minutes (should be longer than socCheckTimeStep)
 		double maxDepartureTime = timer.getTimeOfDay() + chargingPlanningHorizon;
-		Stream<EvDvrpVehicle> vehiclesBelowMinSocLevel = fleet.getVehicles().values().stream()
-				.map(v -> EvDvrpVehicle.create(v, evFleet))
+		@SuppressWarnings("unchecked")
+		Stream<EvDvrpVehicle> vehiclesBelowMinSocLevel = ((Stream<EvDvrpVehicle>)fleet.getVehicles().values().stream())
 				.filter(v -> isChargingSchedulable(v, eScheduler, maxDepartureTime));
 
 		// filter least charged vehicles
@@ -224,7 +220,7 @@ public class AssignmentETaxiOptimizer extends AssignmentTaxiOptimizer {
 			return false;// not needed or already planned
 		}
 
-		LinkTimePair departure = scheduleInquiry.getImmediateDiversionOrEarliestIdleness(eTaxi.getVehicle());
+		LinkTimePair departure = scheduleInquiry.getImmediateDiversionOrEarliestIdleness(eTaxi);
 		return departure != null && departure.time <= maxDepartureTime;// schedulable within the time horizon
 	}
 }
