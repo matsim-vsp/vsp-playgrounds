@@ -20,7 +20,6 @@
 package playground.michalm.drt.run;
 
 import org.matsim.contrib.drt.run.DrtConfigGroup;
-import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -48,7 +47,7 @@ public class RunEDrtScenario {
 	public static Controler createControler(Config config, boolean otfvis) {
 		DvrpConfigGroup.get(config).setNetworkMode(null);// to switch off network filtering
 
-		Controler controler = DrtControlerCreator.createControler(config, otfvis);
+		Controler controler = EDrtControlerCreator.createControler(config, otfvis);
 		controler.addOverridingModule(new EvModule());
 		controler.addOverridingModule(createEvDvrpIntegrationModule());
 
