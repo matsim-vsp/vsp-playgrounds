@@ -44,11 +44,11 @@ import org.matsim.vsp.ev.data.Battery;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ChargingInfrastructure;
 import org.matsim.vsp.ev.data.ElectricFleet;
+import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 
 import playground.michalm.taxi.ETaxiChargingTask;
 import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.BestChargerFinder;
-import playground.michalm.taxi.optimizer.ETaxiVehicle;
 
 public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ElectricFleet evFleet,
@@ -99,14 +99,14 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, params.socCheckTimeStep)) {
-			chargeIdleUnderchargedVehicles(
-					idleTaxiRegistry.vehicles().map(v -> ETaxiVehicle.create(v, evFleet)).filter(this::isUndercharged));
+			chargeIdleUnderchargedVehicles(idleTaxiRegistry.vehicles().map(v -> EvDvrpVehicle.create(v, evFleet))
+					.filter(this::isUndercharged));
 		}
 
 		super.notifyMobsimBeforeSimStep(e);
 	}
 
-	private void chargeIdleUnderchargedVehicles(Stream<ETaxiVehicle> vehicles) {
+	private void chargeIdleUnderchargedVehicles(Stream<EvDvrpVehicle> vehicles) {
 		vehicles.forEach(v -> {
 			Dispatch<Charger> eDispatch = eDispatchFinder.findBestChargerForVehicle(v,
 					chargingInfrastructure.getChargers().values().stream());
@@ -119,7 +119,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		super.nextTask(vehicle);
 
 		if (eScheduler.isIdle(vehicle)) {
-			ETaxiVehicle eTaxi = ETaxiVehicle.create(vehicle, evFleet);
+			EvDvrpVehicle eTaxi = EvDvrpVehicle.create(vehicle, evFleet);
 			if (isUndercharged(eTaxi)) {
 				chargeIdleUnderchargedVehicles(Stream.of(eTaxi));
 			}
@@ -131,7 +131,7 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		return task.getTaxiTaskType() == TaxiTaskType.STAY && !(task instanceof ETaxiChargingTask);
 	}
 
-	private boolean isUndercharged(ETaxiVehicle v) {
+	private boolean isUndercharged(EvDvrpVehicle v) {
 		Battery b = v.getElectricVehicle().getBattery();
 		return b.getSoc() < params.minRelativeSoc * b.getCapacity();
 	}
