@@ -41,9 +41,9 @@ import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 * @author ikaddoura
 */
 
-public class RunMATSimWithRaptor {
+public class RunMATSim2 {
 
-	private static final Logger log = Logger.getLogger(RunMATSimWithRaptor.class);
+	private static final Logger log = Logger.getLogger(RunMATSim2.class);
 
 	private static String configFile;
 	private static String outputDirectory;
@@ -106,7 +106,7 @@ public class RunMATSimWithRaptor {
 			ascRide = -1.;
 		}
 		
-		RunMATSimWithRaptor runner = new RunMATSimWithRaptor();
+		RunMATSim2 runner = new RunMATSim2();
 		runner.run(configFile, outputDirectory, runId);
 	}
 
@@ -130,12 +130,21 @@ public class RunMATSimWithRaptor {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 		
+		// use the sbb pt raptor router
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
 				install(new SwissRailRaptorModule());
 			}
 		});
+		
+		// use the congested car router for the teleported ride mode
+		controler.addOverridingModule(new AbstractModule(){
+			@Override
+			public void install() {
+				addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
+				addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());        }
+	       });
 				
 		controler.run();
 		

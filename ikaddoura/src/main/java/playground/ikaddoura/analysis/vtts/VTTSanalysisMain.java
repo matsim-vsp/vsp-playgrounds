@@ -49,7 +49,7 @@ public class VTTSanalysisMain {
 			log.info("run Id: " + runId);
 			
 		} else {
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
 			runId = "run0";
 		}
 		
@@ -67,7 +67,6 @@ public class VTTSanalysisMain {
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile);	
-		int iteration = config.controler().getLastIteration();
 				
 		String populationFile = null;
 		String networkFile = null;
@@ -76,6 +75,9 @@ public class VTTSanalysisMain {
 		config.plans().setInputFile(populationFile);
 		config.network().setInputFile(networkFile);
 		config.plans().setInputPersonAttributeFile(null);
+		config.transit().setTransitScheduleFile(null);
+		config.transit().setVehiclesFile(null);
+		config.vehicles().setVehiclesFile(null);
 		
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
@@ -83,12 +85,14 @@ public class VTTSanalysisMain {
 		VTTSHandler vttsHandler = new VTTSHandler(scenario);
 		events.addHandler(vttsHandler);
 			
-		String eventsFile;
+		String outputDirectoryWithRunId;
 		if (runId == null) {
-			eventsFile = runDirectory + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
+			outputDirectoryWithRunId = runDirectory;
 		} else {
-			eventsFile = runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + ".events.xml.gz";
+			outputDirectoryWithRunId = runDirectory + runId + ".";
 		}
+		
+		String eventsFile = outputDirectoryWithRunId + "output_events.xml.gz";
 
 		log.info("Reading the events file...");
 		MatsimEventsReader reader = new MatsimEventsReader(events);
@@ -96,10 +100,10 @@ public class VTTSanalysisMain {
 		log.info("Reading the events file... Done.");
 		
 		vttsHandler.computeFinalVTTS();
-				
-		vttsHandler.printVTTS(runDirectory + "ITERS/it." + iteration + "/" + iteration + ".VTTS.csv");
-		vttsHandler.printCarVTTS(runDirectory + "ITERS/it." + iteration + "/" + iteration + ".VTTS_car.csv");
-		vttsHandler.printAvgVTTSperPerson(runDirectory + "ITERS/it." + iteration + "/" + iteration + ".avgVTTS.csv"); 
+		
+		vttsHandler.printVTTS(outputDirectoryWithRunId + "VTTS_allTrips.csv");
+		vttsHandler.printCarVTTS(outputDirectoryWithRunId + "VTTS_carTrips.csv");
+		vttsHandler.printAvgVTTSperPerson(outputDirectoryWithRunId + "VTTS_avgPerPerson.csv"); 
 	}
 			 
 }

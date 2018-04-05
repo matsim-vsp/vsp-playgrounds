@@ -40,9 +40,11 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
@@ -64,7 +66,7 @@ import playground.vsp.congestion.handlers.MarginalSumScoringFunction;
  * @author ikaddoura
  *
  */
-public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventHandler, PersonDepartureEventHandler {
+public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventHandler, PersonDepartureEventHandler, TransitDriverStartsEventHandler {
 
 	private final static Logger log = Logger.getLogger(VTTSHandler.class);
 	private static int incompletedPlanWarning = 0;
@@ -75,6 +77,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	private final Scenario scenario;
 	private int currentIteration;
 	
+	private final Set<Id<Person>> transitDriverIds = new HashSet<>();
 	private final Set<Id<Person>> departedPersonIds = new HashSet<>();
 	private final Map<Id<Person>, Double> personId2currentActivityStartTime = new HashMap<>();
 	private final Map<Id<Person>, Double> personId2firstActivityEndTime = new HashMap<>();
@@ -120,6 +123,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		incompletedPlanWarning = 0;
 		noCarVTTSWarning = 0;
 		
+		this.transitDriverIds.clear();
 		this.departedPersonIds.clear();
 		this.personId2currentActivityStartTime.clear();
 		this.personId2firstActivityEndTime.clear();
@@ -134,57 +138,76 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		
 		this.personId2TripNr2DepartureTime.clear();
 	}
+	
+	@Override
+	public void handleEvent(TransitDriverStartsEvent event) {
+		transitDriverIds.add(event.getDriverId());
+	}
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		this.departedPersonIds.add(event.getPersonId());
 		
-		this.personId2currentTripMode.put(event.getPersonId(), event.getLegMode());
-		
-		if (this.personId2currentTripNr.containsKey(event.getPersonId())){
-			this.personId2currentTripNr.put(event.getPersonId(), this.personId2currentTripNr.get(event.getPersonId()) + 1);
-			
+		if (this.transitDriverIds.contains(event.getPersonId())) {
+			// skip transit driver
 		} else {
-			this.personId2currentTripNr.put(event.getPersonId(), 1);
-		}
-		
-		if (this.personId2TripNr2DepartureTime.containsKey(event.getPersonId())) {
-			this.personId2TripNr2DepartureTime.get(event.getPersonId()).put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
+			this.departedPersonIds.add(event.getPersonId());
 			
-		} else {
-			Map<Integer, Double> tripNr2departureTime = new HashMap<>();
-			tripNr2departureTime.put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
-			this.personId2TripNr2DepartureTime.put(event.getPersonId(), tripNr2departureTime);
+			this.personId2currentTripMode.put(event.getPersonId(), event.getLegMode());
+			
+			if (this.personId2currentTripNr.containsKey(event.getPersonId())){
+				this.personId2currentTripNr.put(event.getPersonId(), this.personId2currentTripNr.get(event.getPersonId()) + 1);
+				
+			} else {
+				this.personId2currentTripNr.put(event.getPersonId(), 1);
+			}
+			
+			if (this.personId2TripNr2DepartureTime.containsKey(event.getPersonId())) {
+				this.personId2TripNr2DepartureTime.get(event.getPersonId()).put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
+				
+			} else {
+				Map<Integer, Double> tripNr2departureTime = new HashMap<>();
+				tripNr2departureTime.put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
+				this.personId2TripNr2DepartureTime.put(event.getPersonId(), tripNr2departureTime);
+			}
 		}
 	}
 	
 	@Override
-	public void handleEvent(ActivityStartEvent event) {		
-		this.personId2currentActivityStartTime.put(event.getPersonId(), event.getTime());
-		this.personId2currentActivityType.put(event.getPersonId(), event.getActType());
+	public void handleEvent(ActivityStartEvent event) {	
+		
+		if (this.transitDriverIds.contains(event.getPersonId())) {
+			// skip transit driver
+		} else {
+			this.personId2currentActivityStartTime.put(event.getPersonId(), event.getTime());
+			this.personId2currentActivityType.put(event.getPersonId(), event.getActType());
+		}
 	}
 
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
 		
-		if (this.personId2currentActivityStartTime.containsKey(event.getPersonId())) {
-			// This is not the first activity...
-						
-			// ... now process all congestion events thrown during the trip to the activity which has just ended, ...
-			computeVTTS(event.getPersonId(), event.getTime(), event.getLinkId());
-			
-			// ... update the status of the 'current' activity...
-			this.personId2currentActivityType.remove(event.getPersonId());
-			this.personId2currentActivityStartTime.remove(event.getPersonId());
-			
-			// ... and remove all processed congestion events. 
-			this.departedPersonIds.remove(event.getPersonId());
-	
+		if (this.transitDriverIds.contains(event.getPersonId())) {
+			// skip transit driver
 		} else {
-			// This is the first activity. The first and last / overnight activity are / is considered in a final step.
-			// Therefore, the relevant information has to be stored.
-			this.personId2firstActivityEndTime.put(event.getPersonId(), event.getTime());
-			this.personId2firstActivityType.put(event.getPersonId(), event.getActType());
+			if (this.personId2currentActivityStartTime.containsKey(event.getPersonId())) {
+				// This is not the first activity...
+							
+				// ... now process all congestion events thrown during the trip to the activity which has just ended, ...
+				computeVTTS(event.getPersonId(), event.getTime(), event.getLinkId());
+				
+				// ... update the status of the 'current' activity...
+				this.personId2currentActivityType.remove(event.getPersonId());
+				this.personId2currentActivityStartTime.remove(event.getPersonId());
+				
+				// ... and remove all processed congestion events. 
+				this.departedPersonIds.remove(event.getPersonId());
+		
+			} else {
+				// This is the first activity. The first and last / overnight activity are / is considered in a final step.
+				// Therefore, the relevant information has to be stored.
+				this.personId2firstActivityEndTime.put(event.getPersonId(), event.getTime());
+				this.personId2firstActivityType.put(event.getPersonId(), event.getActType());
+			}
 		}
 	}
 
