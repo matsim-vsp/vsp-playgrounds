@@ -55,9 +55,8 @@ public class RunMATSim2 {
 	private static double ascBicycle;
 	private static double ascRide;	
 	
-	private static double marginalUtilityOfDistanceBicycle = Double.POSITIVE_INFINITY;
-	private static double marginalUtilityOfDistanceWalk = Double.POSITIVE_INFINITY;
-
+	private static double monetaryDistanceRateRide = Double.POSITIVE_INFINITY;
+	
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			
@@ -86,11 +85,8 @@ public class RunMATSim2 {
 			log.info("ascRide: "+ ascRide);
 			
 			if (args.length > 8) {
-				marginalUtilityOfDistanceBicycle = Double.parseDouble(args[8]);
-				log.info("marginalUtilityOfDistanceBicycle: "+ marginalUtilityOfDistanceBicycle);
-				
-				marginalUtilityOfDistanceWalk = Double.parseDouble(args[9]);
-				log.info("marginalUtilityOfDistanceWalk: "+ marginalUtilityOfDistanceWalk);
+				monetaryDistanceRateRide = Double.parseDouble(args[8]);
+				log.info("monetaryDistanceRateRide: "+ monetaryDistanceRateRide);
 			}
 
 			
@@ -124,9 +120,8 @@ public class RunMATSim2 {
 		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
 		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
 
-		if (marginalUtilityOfDistanceWalk < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.walk).setMarginalUtilityOfDistance(marginalUtilityOfDistanceWalk);
-		if (marginalUtilityOfDistanceBicycle < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get("bicycle").setMarginalUtilityOfDistance(marginalUtilityOfDistanceBicycle);
-	
+		if (monetaryDistanceRateRide < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.ride).setMonetaryDistanceRate(monetaryDistanceRateRide);
+
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 		
