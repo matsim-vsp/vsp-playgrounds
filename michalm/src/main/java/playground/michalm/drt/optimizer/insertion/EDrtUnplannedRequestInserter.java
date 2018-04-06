@@ -42,6 +42,8 @@ import org.matsim.core.mobsim.framework.listeners.MobsimBeforeCleanupListener;
 
 import com.google.inject.Inject;
 
+import playground.michalm.drt.optimizer.EVehicleDataEntryFactory;
+
 /**
  * @author michalm
  */
@@ -81,7 +83,8 @@ public class EDrtUnplannedRequestInserter implements UnplannedRequestInserter, M
 			return;
 		}
 
-		VehicleData vData = new VehicleData(mobsimTimer.getTimeOfDay(), fleet.getVehicles().values().stream());
+		VehicleData vData = new VehicleData(mobsimTimer.getTimeOfDay(), fleet.getVehicles().values().stream(),
+				new EVehicleDataEntryFactory(0.2));
 
 		Iterator<DrtRequest> reqIter = unplannedRequests.iterator();
 		while (reqIter.hasNext()) {
