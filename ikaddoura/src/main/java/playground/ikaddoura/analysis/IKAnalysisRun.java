@@ -53,6 +53,7 @@ import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModeAnalysis;
 import playground.ikaddoura.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
+import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
@@ -270,6 +271,7 @@ public class IKAnalysisRun {
 		// #####################################
 
 		EventsManager events1 = null;
+		
 		BasicPersonTripAnalysisHandler basicHandler1 = null;
 		DelayAnalysis delayAnalysis1 = null;
 		LinkDemandEventHandler trafficVolumeAnalysis1 = null;
@@ -310,6 +312,7 @@ public class IKAnalysisRun {
 		}
 		
 		EventsManager events0 = null;
+		
 		BasicPersonTripAnalysisHandler basicHandler0 = null;
 		DelayAnalysis delayAnalysis0 = null;
 		LinkDemandEventHandler trafficVolumeAnalysis0 = null;
@@ -660,6 +663,21 @@ public class IKAnalysisRun {
 		vttsHandler.printCarVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_carTrips.csv");
 		vttsHandler.printAvgVTTSperPerson(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_avgPerPerson.csv"); 
 		
+		// #####################################
+		// Print leg histogram videos
+		// #####################################
+		
+		String legHistogramOutputDirectory = analysisOutputDirectory + "legHistograms/";
+		createDirectory(legHistogramOutputDirectory);
+		
+		for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
+			try {
+				MATSimVideoUtils.createVideo(analysisOutputDirectory, scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 	
 	private void createDirectory(String directory) {

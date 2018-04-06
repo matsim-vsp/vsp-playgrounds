@@ -49,8 +49,8 @@ public class VTTSanalysisMain {
 			log.info("run Id: " + runId);
 			
 		} else {
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
-			runId = "run0";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
+			runId = "run1";
 		}
 		
 		VTTSanalysisMain analysis = new VTTSanalysisMain();
