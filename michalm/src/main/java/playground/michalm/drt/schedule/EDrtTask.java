@@ -19,10 +19,10 @@
 package playground.michalm.drt.schedule;
 
 import org.matsim.contrib.drt.schedule.DrtTask;
+import org.matsim.vsp.ev.dvrp.ETask;
 
 /**
  * @author michalm
  */
-public interface EDrtTask extends DrtTask {
-	double getTotalEnergy();
+public interface EDrtTask extends DrtTask, ETask {
 }

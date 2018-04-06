@@ -36,32 +36,40 @@ import org.matsim.contrib.dynagent.DynAgent;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.vsp.ev.dvrp.ChargingActivity;
 import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
+import org.matsim.vsp.ev.dvrp.tracker.OfflineETaskTracker;
+import org.matsim.vsp.ev.dvrp.tracker.OnlineEDriveTaskTracker;
 
 import com.google.inject.Inject;
-
-import playground.michalm.drt.tracker.OnlineEDriveTaskTracker;
 
 /**
  * @author michalm
  */
 public class EDrtActionCreator implements VrpAgentLogic.DynActionCreator {
 	private final DrtActionCreator drtActionCreator;
+	private final MobsimTimer timer;
 
 	@Inject
 	public EDrtActionCreator(PassengerEngine passengerEngine, VrpOptimizer optimizer, MobsimTimer timer) {
-		this.drtActionCreator = new DrtActionCreator(passengerEngine, //
-				v -> createWithOnlineTracker(v, optimizer, timer));
+		this.timer = timer;
+		drtActionCreator = new DrtActionCreator(passengerEngine, v -> createLeg(v, optimizer, timer));
 	}
 
 	@Override
 	public DynAction createAction(DynAgent dynAgent, Vehicle vehicle, double now) {
 		Task task = vehicle.getSchedule().getCurrentTask();
-		return task instanceof EDrtChargingTask //
-				? new ChargingActivity((EDrtChargingTask)task) //
-				: drtActionCreator.createAction(dynAgent, vehicle, now);
+		if (task instanceof EDrtChargingTask) {
+			task.initTaskTracker(new OfflineETaskTracker((EvDvrpVehicle)vehicle, timer));
+			return new ChargingActivity((EDrtChargingTask)task);
+		} else {
+			DynAction dynAction = drtActionCreator.createAction(dynAgent, vehicle, now);
+			if (task.getTaskTracker() == null) {
+				task.initTaskTracker(new OfflineETaskTracker((EvDvrpVehicle)vehicle, timer));
+			}
+			return dynAction;
+		}
 	}
 
-	private static VrpLeg createWithOnlineTracker(Vehicle vehicle, VrpOptimizer optimizer, MobsimTimer timer) {
+	private static VrpLeg createLeg(Vehicle vehicle, VrpOptimizer optimizer, MobsimTimer timer) {
 		DriveTask driveTask = (DriveTask)vehicle.getSchedule().getCurrentTask();
 		VrpLeg leg = new VrpLeg(driveTask.getPath());
 		OnlineDriveTaskTracker onlineTracker = new OnlineDriveTaskTrackerImpl(vehicle, leg,
@@ -71,5 +79,4 @@ public class EDrtActionCreator implements VrpAgentLogic.DynActionCreator {
 		TaskTrackers.initOnlineDriveTaskTracking(vehicle, leg, onlineETracker);
 		return leg;
 	}
-
 }
