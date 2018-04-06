@@ -48,6 +48,7 @@
 	<module name="ev">
 		<param name="chargeTimeStep" value="5" />
 		<param name="auxDischargeTimeStep" value="60" />
+		<param name="auxDischargingSimulation" value="seperateAuxDischargingHandler" />
 
 		<param name="chargersFile" value="chargers-2-plugs-2.xml" />
 		<param name="vehiclesFile" value="etaxis-25.xml" />
@@ -77,7 +78,7 @@
 	</module>
 
 	<module name="controler">
-		<param name="outputDirectory" value="test/output/mielec_2014_02" />
+		<param name="outputDirectory" value="test/output/mielec_etaxi_2014_02" />
 		<param name="overwriteFiles" value="deleteDirectoryIfExists" />
 		<param name="firstIteration" value="0" />
 		<param name="lastIteration" value="0" />

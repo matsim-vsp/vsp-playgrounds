@@ -21,7 +21,6 @@ package playground.michalm.drt.run;
 
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -65,7 +64,6 @@ public class RunEDrtScenario {
 				.setChargingStrategyFactory(charger -> new FixedSpeedChargingStrategy(
 						charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC))//
 				.setTemperatureProvider(() -> TEMPERATURE) //
-				.setIsTurnedOnPredicate(vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED)//
 				.setVehicleFileUrlGetter(cfg -> DrtConfigGroup.get(cfg).getVehiclesFileUrl(cfg.getContext()));
 	}
 

@@ -29,6 +29,7 @@ import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vsp.ev.EvConfigGroup;
@@ -45,6 +46,7 @@ public class RunETaxiScenario {
 	public static void run(String configFile, boolean otfvis) {
 		Config config = ConfigUtils.loadConfig(configFile, new TaxiConfigGroup(), new DvrpConfigGroup(),
 				new OTFVisConfigGroup(), new EvConfigGroup());
+		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 		createControler(config, otfvis).run();
 	}
 
@@ -73,7 +75,7 @@ public class RunETaxiScenario {
 				.setChargingStrategyFactory(charger -> new FixedSpeedChargingStrategy(
 						charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC))//
 				.setTemperatureProvider(() -> TEMPERATURE)//
-				.setIsTurnedOnPredicate(vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED)//
+				.setTurnedOnPredicate(vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED)//
 				.setVehicleFileUrlGetter(cfg -> TaxiConfigGroup.get(cfg).getTaxisFileUrl(cfg.getContext()));
 	}
 
