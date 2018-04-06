@@ -10,14 +10,14 @@ import java.util.List;
  */
 class TripInformationCalculator {
 
-    static void calculateInformation(List<FromMatsimTrip> trips, Network network, Collection<String> networkModes) {
-        for (FromMatsimTrip trip : trips)
+    static void calculateInformation(List<MatsimTrip> trips, Network network, Collection<String> networkModes) {
+        for (MatsimTrip trip : trips)
             calculateInformation(trip, network, networkModes);
     }
 
-    private static void calculateInformation(FromMatsimTrip trip, Network network, Collection<String> networkModes) {
-        trip.setDuration_s(FromMatsimTripUtils.getDurationByCalculation_s(trip));
-        trip.setDistanceBeeline_m(FromMatsimTripUtils.calculateBeelineDistance_m(trip, network));
-        trip.setDistanceRouted_m(FromMatsimTripUtils.getDistanceRoutedByCalculation_m(trip, network, networkModes));
+    private static void calculateInformation(MatsimTrip trip, Network network, Collection<String> networkModes) {
+        trip.setDuration_s(MatsimTripUtils.getDurationByCalculation_s(trip));
+        trip.setDistanceBeeline_m(MatsimTripUtils.calculateBeelineDistance_m(trip, network));
+        trip.setDistanceRouted_m(MatsimTripUtils.getDistanceRoutedByCalculation_m(trip, network, networkModes));
     }
 }

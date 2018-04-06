@@ -45,7 +45,7 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke

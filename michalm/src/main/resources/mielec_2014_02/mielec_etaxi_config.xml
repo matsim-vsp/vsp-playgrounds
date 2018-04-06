@@ -12,7 +12,7 @@
 		<param name="dropoffDuration" value="60" />
 		<param name="onlineVehicleTracker" value="false" />
 
-		<param name="taxisFile" value="etaxis-25.xml" />
+		<param name="taxisFile" value="taxis-25.xml" />
 		<!-- param name="taxisFile" value="etaxis-50.xml" / -->
 
 		<param name="timeProfiles" value="true" />
@@ -50,13 +50,13 @@
 		<param name="auxDischargeTimeStep" value="60" />
 
 		<param name="chargersFile" value="chargers-2-plugs-2.xml" />
+		<param name="vehiclesFile" value="etaxis-25.xml" />
+
 		<param name="timeProfiles" value="true" />
 	</module>
 
 	<module name="network">
 		<param name="inputNetworkFile" value="network.xml" />
-		<!-- param name="timeVariantNetwork" value="false" / if timeVariantNetwork -->
-		<!-- param name="inputChangeEventsFile" value=""/ if timeVariantNetwork -->
 	</module>
 
 	<module name="plans">

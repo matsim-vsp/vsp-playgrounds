@@ -44,7 +44,7 @@ public class SrvTripFilterImpl implements TripFilter {
     private double minDepartureTime_s;
     private double maxDepartureTime_s;
 
-    public void activateModeChoice(String mode) {
+    public void activateMode(String mode) {
         onlyAnalyzeTripsWithMode = true;
         this.modes.add(mode);
     }
@@ -90,12 +90,12 @@ public class SrvTripFilterImpl implements TripFilter {
 
     public List<? extends Trip> filter(List<? extends Trip> inputTrips) {
         log.info("Unfiltered trips size: " + inputTrips.size());
-        List<FromSrvTrip> filteredTrips = new LinkedList<>();
+        List<SrvTrip> filteredTrips = new LinkedList<>();
         boolean printedWarn1 = false;
         boolean printedWarn2 = false;
 
         for (Trip currentTrip : inputTrips) {
-            FromSrvTrip trip = (FromSrvTrip)currentTrip;
+            SrvTrip trip = (SrvTrip)currentTrip;
             // Choose if trip will be considered
             if (onlyAnalyzeTripInteriorOfArea || onlyAnalyzeTripsStartingOrEndingInArea) {
                 boolean startingInArea = Arrays.asList(areaIds).contains(trip.getDepartureZoneId().toString());

@@ -33,8 +33,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.EvModule;
-import org.matsim.vsp.ev.stats.ChargerOccupancyTimeProfileCollectorProvider;
-import org.matsim.vsp.ev.stats.ChargerOccupancyXYDataProvider;
 
 /**
  * For a fair and consistent benchmarking of taxi dispatching algorithms we assume that link travel times are
@@ -55,7 +53,6 @@ public class RunETaxiBenchmark {
 
 	public static Controler createControler(Config config, int runs) {
 		DvrpConfigGroup.get(config).setNetworkMode(null);// to switch off network filtering
-		TaxiConfigGroup taxiCfg = TaxiConfigGroup.get(config);
 		config.controler().setLastIteration(runs - 1);
 		config.addConfigConsistencyChecker(new TaxiBenchmarkConfigConsistencyChecker());
 		config.checkConsistency();
@@ -66,14 +63,12 @@ public class RunETaxiBenchmark {
 		controler.setModules(new DvrpBenchmarkControlerModule());
 		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new EvModule());
-
-		controler.addOverridingModule(ETaxiOptimizerModules.createBenchmarkModule());
+		controler.addOverridingModule(ETaxiDvrpModules.create());
+		controler.addOverridingModule(RunETaxiScenario.createEvDvrpIntegrationModule());
 
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				addMobsimListenerBinding().toProvider(ChargerOccupancyTimeProfileCollectorProvider.class);
-				addMobsimListenerBinding().toProvider(ChargerOccupancyXYDataProvider.class);
 				addControlerListenerBinding().to(ETaxiBenchmarkStats.class).asEagerSingleton();
 				install(new DvrpBenchmarkTravelTimeModule());
 			}

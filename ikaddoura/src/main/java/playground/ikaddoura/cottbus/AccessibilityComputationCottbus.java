@@ -44,7 +44,7 @@ import org.matsim.facilities.ActivityFacilities;
 import com.vividsolutions.jts.geom.Envelope;
 
 import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke, ikaddoura

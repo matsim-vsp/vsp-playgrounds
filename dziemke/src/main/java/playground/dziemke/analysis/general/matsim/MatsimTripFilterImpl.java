@@ -48,7 +48,7 @@ public class MatsimTripFilterImpl implements TripFilter {
     private Network network;
     private Geometry areaGeometry;
 
-    public void activateModeChoice(String... mode) {
+    public void activateMode(String... mode) {
         onlyAnalyzeTripsWithMode = true;
         this.modes = Arrays.asList(mode);
     }
@@ -105,12 +105,12 @@ public class MatsimTripFilterImpl implements TripFilter {
     }
 
     public List<? extends Trip> filter(List<? extends Trip> tripMap) {
-        List<FromMatsimTrip> trips = new LinkedList<>();
+        List<MatsimTrip> trips = new LinkedList<>();
         boolean printedWarn1 = false;
         boolean printedWarn2 = false;
 
         for (Trip currentTrip : tripMap) {
-            FromMatsimTrip trip = (FromMatsimTrip)currentTrip;
+            MatsimTrip trip = (MatsimTrip)currentTrip;
             // Choose if trip will be considered
             if (onlyAnalyzeTripInteriorOfArea || onlyAnalyzeTripsStartingOrEndingInArea) {
                 // get coordinates of links

@@ -11,7 +11,8 @@ import org.junit.Test;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.testcases.MatsimTestUtils;
-import playground.vsp.demandde.cemdap.input.DemandGeneratorCensus;
+
+import playground.vsp.openberlinscenario.cemdap.input.DemandGeneratorCensus;
 
 /**
  * @author GabrielT on 15.11.2016.

@@ -53,8 +53,10 @@ import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModeAnalysis;
 import playground.ikaddoura.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
+import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
+import playground.ikaddoura.analysis.vtts.VTTSHandler;
 import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
@@ -82,10 +84,12 @@ import playground.ikaddoura.decongestion.handler.DelayAnalysis;
  * 
  * mode switch analysis
  * 
+ * modal split for different population filters
+ * 
  * writes out the network as a shapefile.
  * 
  *
- * used packages: linkDemand, dynamicLinkDemand, detailedPersonTripAnalysis, decongestion.delayAnalysis, gisAnalysis, modeSwitchAnalysis
+ * used packages: linkDemand, dynamicLinkDemand, detailedPersonTripAnalysis, decongestion.delayAnalysis, gisAnalysis, modeSwitchAnalysis, modalSplitUserType, vtts
  * 
  */
 public class IKAnalysisRun {
@@ -109,7 +113,7 @@ public class IKAnalysisRun {
 	private final Scenario scenario0;
 	private final List<AgentAnalysisFilter> filters0;
 
-	private final String outputDirectoryName = "analysis-ik-v3";
+	private final String outputDirectoryName = "analysis-ik-v1.0";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -263,10 +267,11 @@ public class IKAnalysisRun {
 		log.info("Run ID to compare with: " + runIdToCompareWith);
 	
 		// #####################################
-		// Create and add the analysis handlers
+		// Create and add the event handlers
 		// #####################################
 
 		EventsManager events1 = null;
+		
 		BasicPersonTripAnalysisHandler basicHandler1 = null;
 		DelayAnalysis delayAnalysis1 = null;
 		LinkDemandEventHandler trafficVolumeAnalysis1 = null;
@@ -274,6 +279,7 @@ public class IKAnalysisRun {
 		PersonMoneyLinkHandler personTripMoneyHandler1 = null;
 		MoneyExtCostHandler personMoneyHandler1 = null;
 		ActDurationHandler actHandler1 = null;
+		VTTSHandler vttsHandler1 = null;
 
 		if (scenario1 != null) {
 			basicHandler1 = new BasicPersonTripAnalysisHandler();
@@ -292,6 +298,8 @@ public class IKAnalysisRun {
 			
 			actHandler1 = new ActDurationHandler();
 			
+			vttsHandler1 = new VTTSHandler(scenario1);
+			
 			events1 = EventsUtils.createEventsManager();
 			events1.addHandler(basicHandler1);
 			events1.addHandler(delayAnalysis1);
@@ -300,9 +308,11 @@ public class IKAnalysisRun {
 			events1.addHandler(personTripMoneyHandler1);
 			events1.addHandler(personMoneyHandler1);
 			events1.addHandler(actHandler1);
+			events1.addHandler(vttsHandler1);
 		}
 		
 		EventsManager events0 = null;
+		
 		BasicPersonTripAnalysisHandler basicHandler0 = null;
 		DelayAnalysis delayAnalysis0 = null;
 		LinkDemandEventHandler trafficVolumeAnalysis0 = null;
@@ -310,6 +320,7 @@ public class IKAnalysisRun {
 		PersonMoneyLinkHandler personTripMoneyHandler0 = null;
 		MoneyExtCostHandler personMoneyHandler0 = null;
 		ActDurationHandler actHandler0 = null;
+		VTTSHandler vttsHandler0 = null;
 		
 		if (scenario0 != null) {
 			basicHandler0 = new BasicPersonTripAnalysisHandler();
@@ -327,6 +338,8 @@ public class IKAnalysisRun {
 			personMoneyHandler0 = new MoneyExtCostHandler();
 			
 			actHandler0 = new ActDurationHandler();
+			
+			vttsHandler0 = new VTTSHandler(scenario0);
 
 			events0 = EventsUtils.createEventsManager();
 			events0.addHandler(basicHandler0);
@@ -336,15 +349,20 @@ public class IKAnalysisRun {
 			events0.addHandler(personTripMoneyHandler0);
 			events0.addHandler(personMoneyHandler0);
 			events0.addHandler(actHandler0);
+			events0.addHandler(vttsHandler0);
 		}
 
 		// #####################################
-		// Read the events file and plans file
+		// Read the events file
 		// #####################################
 		
 		if (scenario1 != null) readEventsFile(runDirectory, runId, events1);
 		if (scenario0 != null) readEventsFile(runDirectoryToCompareWith, runIdToCompareWith, events0);
 				
+		// #####################################
+		// Post process and read plans file
+		// #####################################
+		
 		Map<Id<Person>, Double> personId2userBenefit1 = null;
 		Map<Id<Person>, Double> personId2userBenefit0 = null;
 		
@@ -360,6 +378,8 @@ public class IKAnalysisRun {
 				modeAnalysis1.run();
 				modeAnalysisList1.add(modeAnalysis1);
 			}
+			
+			vttsHandler1.computeFinalVTTS();
 		}	
 		
 		if (scenario0 != null) {
@@ -371,6 +391,8 @@ public class IKAnalysisRun {
 				modeAnalysis0.run();
 				modeAnalysisList0.add(modeAnalysis0);
 			}
+			
+			vttsHandler0.computeFinalVTTS();
 		}	
 		
 		// #####################################
@@ -388,7 +410,8 @@ public class IKAnalysisRun {
 				dynamicTrafficVolumeAnalysis1,
 				personMoneyHandler1,
 				actHandler1,
-				modeAnalysisList1);
+				modeAnalysisList1,
+				vttsHandler1);
 		
 		log.info("Printing results...");
 		if (scenario0 != null) printResults(scenario0,
@@ -401,7 +424,8 @@ public class IKAnalysisRun {
 				dynamicTrafficVolumeAnalysis0,
 				personMoneyHandler0,
 				actHandler0,
-				modeAnalysisList0);
+				modeAnalysisList0,
+				vttsHandler0);
 
 		// #####################################
 		// Scenario comparison
@@ -509,7 +533,8 @@ public class IKAnalysisRun {
 			DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis,
 			MoneyExtCostHandler personMoneyHandler,
 			ActDurationHandler actHandler,
-			List<ModeAnalysis> modeAnalysisList) {
+			List<ModeAnalysis> modeAnalysisList,
+			VTTSHandler vttsHandler) {
 		
 		// #####################################
 		// Print results: person / trip analysis
@@ -627,6 +652,32 @@ public class IKAnalysisRun {
 			modeAnalysis.writeTripEuclideanDistances(modeAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".", distanceGroups);
 		}
 		
+		// #####################################
+		// Print results: VTTS
+		// #####################################
+		
+		String vttsOutputDirectory = analysisOutputDirectory + "vtts/";
+		createDirectory(vttsOutputDirectory);
+
+		vttsHandler.printVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_allTrips.csv");
+		vttsHandler.printCarVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_carTrips.csv");
+		vttsHandler.printAvgVTTSperPerson(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_avgPerPerson.csv"); 
+		
+		// #####################################
+		// Print leg histogram videos
+		// #####################################
+		
+		String legHistogramOutputDirectory = analysisOutputDirectory + "legHistograms/";
+		createDirectory(legHistogramOutputDirectory);
+		
+		for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
+			try {
+				MATSimVideoUtils.createVideo(analysisOutputDirectory, scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 	
 	private void createDirectory(String directory) {

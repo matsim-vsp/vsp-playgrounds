@@ -43,11 +43,11 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.vsp.ev.data.Battery;
 import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ChargingInfrastructure;
+import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 
-import playground.michalm.taxi.data.EvrpVehicle;
+import playground.michalm.taxi.ETaxiChargingTask;
+import playground.michalm.taxi.ETaxiScheduler;
 import playground.michalm.taxi.optimizer.BestChargerFinder;
-import playground.michalm.taxi.schedule.ETaxiChargingTask;
-import playground.michalm.taxi.scheduler.ETaxiScheduler;
 
 public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ETaxiScheduler eScheduler,
@@ -94,17 +94,20 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent e) {
 		if (isNewDecisionEpoch(e, params.socCheckTimeStep)) {
-			chargeIdleUnderchargedVehicles(idleTaxiRegistry.vehicles().filter(this::isUndercharged));
+			@SuppressWarnings("unchecked")
+			Stream<EvDvrpVehicle> eTaxis = (Stream<EvDvrpVehicle>)(Stream<? extends Vehicle>)idleTaxiRegistry
+					.vehicles();
+			chargeIdleUnderchargedVehicles(eTaxis.filter(this::isUndercharged));
 		}
 
 		super.notifyMobsimBeforeSimStep(e);
 	}
 
-	private void chargeIdleUnderchargedVehicles(Stream<Vehicle> vehicles) {
+	private void chargeIdleUnderchargedVehicles(Stream<EvDvrpVehicle> vehicles) {
 		vehicles.forEach(v -> {
 			Dispatch<Charger> eDispatch = eDispatchFinder.findBestChargerForVehicle(v,
 					chargingInfrastructure.getChargers().values().stream());
-			eScheduler.scheduleCharging((EvrpVehicle)v, eDispatch.destination, eDispatch.path);
+			eScheduler.scheduleCharging(v, v.getElectricVehicle(), eDispatch.destination, eDispatch.path);
 		});
 	}
 
@@ -112,8 +115,11 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public void nextTask(Vehicle vehicle) {
 		super.nextTask(vehicle);
 
-		if (eScheduler.isIdle(vehicle) && isUndercharged(vehicle)) {
-			chargeIdleUnderchargedVehicles(Stream.of(vehicle));
+		if (eScheduler.isIdle(vehicle)) {
+			EvDvrpVehicle eTaxi = (EvDvrpVehicle)vehicle;
+			if (isUndercharged(eTaxi)) {
+				chargeIdleUnderchargedVehicles(Stream.of(eTaxi));
+			}
 		}
 	}
 
@@ -122,8 +128,8 @@ public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 		return task.getTaxiTaskType() == TaxiTaskType.STAY && !(task instanceof ETaxiChargingTask);
 	}
 
-	private boolean isUndercharged(Vehicle v) {
-		Battery b = ((EvrpVehicle)v).getElectricVehicle().getBattery();
+	private boolean isUndercharged(EvDvrpVehicle v) {
+		Battery b = v.getElectricVehicle().getBattery();
 		return b.getSoc() < params.minRelativeSoc * b.getCapacity();
 	}
 }
