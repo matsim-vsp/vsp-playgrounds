@@ -24,5 +24,5 @@ import org.matsim.contrib.drt.schedule.DrtTask;
  * @author michalm
  */
 public interface EDrtTask extends DrtTask {
-	double getConsumedEnergy();
+	double getTotalEnergy();
 }

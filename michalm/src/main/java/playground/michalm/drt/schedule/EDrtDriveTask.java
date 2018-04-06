@@ -34,7 +34,7 @@ public class EDrtDriveTask extends DrtDriveTask implements EDrtTask {
 	}
 
 	@Override
-	public double getConsumedEnergy() {
+	public double getTotalEnergy() {
 		return consumedEnergy;
 	}
 }

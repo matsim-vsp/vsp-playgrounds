@@ -34,7 +34,7 @@ public class EDrtStopTask extends DrtStopTask implements EDrtTask {
 	}
 
 	@Override
-	public double getConsumedEnergy() {
+	public double getTotalEnergy() {
 		return consumedEnergy;
 	}
 }

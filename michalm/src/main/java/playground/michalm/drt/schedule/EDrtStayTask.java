@@ -34,7 +34,7 @@ public class EDrtStayTask extends DrtStayTask implements EDrtTask {
 	}
 
 	@Override
-	public double getConsumedEnergy() {
+	public double getTotalEnergy() {
 		return consumedEnergy;
 	}
 }
