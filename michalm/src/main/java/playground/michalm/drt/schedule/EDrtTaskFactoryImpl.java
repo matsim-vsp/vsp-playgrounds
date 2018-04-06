@@ -33,19 +33,19 @@ public class EDrtTaskFactoryImpl implements DrtTaskFactory {
 	@Override
 	public EDrtDriveTask createDriveTask(Vehicle vehicle, VrpPathWithTravelData path) {
 		ElectricVehicle ev = ((EvDvrpVehicle)vehicle).getElectricVehicle();
-		double totalEnergy = TaskEnergyConsumptions.calcTotalEnergyConsumption(ev, path);// FIXME obtain EV
+		double totalEnergy = TaskEnergyConsumptions.calcTotalEnergyConsumption(ev, path);
 		return new EDrtDriveTask(path, totalEnergy);
 	}
 
 	@Override
 	public EDrtStopTask createStopTask(Vehicle vehicle, double beginTime, double endTime, Link link) {
 		ElectricVehicle ev = ((EvDvrpVehicle)vehicle).getElectricVehicle();
-		double auxEnergy = TaskEnergyConsumptions.calcAuxEnergy(ev, beginTime, endTime);// FIXME obtain EV
+		double auxEnergy = TaskEnergyConsumptions.calcAuxEnergy(ev, beginTime, endTime);
 		return new EDrtStopTask(beginTime, endTime, link, auxEnergy);
 	}
 
 	@Override
 	public EDrtStayTask createStayTask(Vehicle vehicle, double beginTime, double endTime, Link link) {
-		return new EDrtStayTask(beginTime, endTime, link, 0);
+		return new EDrtStayTask(beginTime, endTime, link, 0);// no energy consumption during STAY
 	}
 }

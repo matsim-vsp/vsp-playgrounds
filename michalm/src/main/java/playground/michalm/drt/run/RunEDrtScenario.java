@@ -20,7 +20,12 @@
 package playground.michalm.drt.run;
 
 import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.schedule.DrtTask;
+import org.matsim.contrib.drt.schedule.DrtTask.DrtTaskType;
+import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.schedule.Schedule;
+import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -64,7 +69,17 @@ public class RunEDrtScenario {
 				.setChargingStrategyFactory(charger -> new FixedSpeedChargingStrategy(
 						charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC))//
 				.setTemperatureProvider(() -> TEMPERATURE) //
+				.setTurnedOnPredicate(RunEDrtScenario::isTurnedOn)//
 				.setVehicleFileUrlGetter(cfg -> DrtConfigGroup.get(cfg).getVehiclesFileUrl(cfg.getContext()));
+	}
+
+	private static boolean isTurnedOn(Vehicle vehicle) {
+		Schedule schedule = vehicle.getSchedule();
+		if (schedule.getStatus() == ScheduleStatus.STARTED) {
+			DrtTaskType currentTaskType = ((DrtTask)schedule.getCurrentTask()).getDrtTaskType();
+			return currentTaskType != DrtTaskType.STAY;// turned on only if DRIVE or STOP
+		}
+		return false;
 	}
 
 	public static void main(String[] args) {
