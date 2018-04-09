@@ -12,7 +12,7 @@ import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 
-class PlanStrategyProviderIK implements Provider<PlanStrategy> {
+public class PlanStrategyProviderIK implements Provider<PlanStrategy> {
 
 	@Inject private GlobalConfigGroup globalConfigGroup;
 	@Inject private TimeAllocationMutatorConfigGroup timeAllocationMutatorConfigGroup;
