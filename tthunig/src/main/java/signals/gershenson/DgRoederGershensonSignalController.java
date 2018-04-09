@@ -49,16 +49,17 @@ import signals.sensor.LinkSensorManager;
 /**
  * Implement Gershenson-Controller as outlined in "Self-Organizing Traffic Lights at
  * Multiple-Street Intersections" (Gershenson/Rosenblueth 2011). 
- * NULL-Status: All Groups are RED if nobody approaches the SignalSystem. 
+ * NULL-State: All Groups are RED if nobody approaches the SignalSystem. 
  * 
  * default values:
- * d=50m 
- * r=25m 
- * t_min = 4s 
- * m= 2 veh 
- * n= 13.33 veh*s   (sbraun Feb.18)
+ * interGreenTime=0
+ * (monitoredDistance) d=50m   
+ * (monitoredPlatoonTail) r=25m 
+ * (minimumGREENtime) t_min = 4s 
+ * (lengthOfPlatoonTails) m= 2 veh 
+ * (threshold) n= 13.33 veh*s   (sbraun Feb.18)
  * 
- * @author dgrether
+ * @author dgrether, sbraun, droeder
  *
  */
 public class DgRoederGershensonSignalController implements SignalController {
@@ -120,7 +121,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	protected int lengthOfPlatoonTails = 2;
 	protected int minimumGREENtime = 4;  //TODO should be higher maybe 20
 	protected double monitoredPlatoonTail = 25.;
-	protected double d = 50.;
+	protected double monitoredDistance = 50.;
 	protected double minmumDistanceBehindIntersection =10.;
 	
 	//protected boolean outLinkJam;
@@ -155,7 +156,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 				this.sensorManager.registerNumberOfCarsMonitoring(inLink.getId());
 				log.info("Register Inlink "+ inLink.getId().toString());
 				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), monitoredPlatoonTail);
-				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), d);
+				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), monitoredDistance);
 			}
 		}	
 	}
@@ -257,7 +258,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		}
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getInLinks()) {
 			//Integer cars = this.sensorManager.getNumberOfCarsOnLink(link.getId());
-			Integer cars = this.sensorManager.getNumberOfCarsInDistance(link.getId(), d, now); 
+			Integer cars = this.sensorManager.getNumberOfCarsInDistance(link.getId(), monitoredDistance, now); 
 			approachingVehiclesMap.get(group.getId()).put(link.getId(), cars);
 		} 
 	}
