@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.timeAllocationMutatorIK;
+package playground.ikaddoura.durationBasedTimeAllocationMutator;
 
 import java.util.Random;
 
@@ -37,7 +37,7 @@ import org.matsim.core.utils.misc.Time;
  * 
  * @author ikaddoura
  */
-public final class PlanMutateTimeAllocationSimplifiedIK implements PlanAlgorithm {
+public final class DurationBasedPlanMutateTimeAllocationSimplified implements PlanAlgorithm {
 
 	private final StageActivityTypes blackList;
 	private final double mutationRange;
@@ -52,7 +52,7 @@ public final class PlanMutateTimeAllocationSimplifiedIK implements PlanAlgorithm
 	 * @param affectingDuration
 	 * @param random
 	 */
-	public PlanMutateTimeAllocationSimplifiedIK(final StageActivityTypes blackList, final double mutationRange, boolean affectingDuration, final Random random) {
+	public DurationBasedPlanMutateTimeAllocationSimplified(final StageActivityTypes blackList, final double mutationRange, boolean affectingDuration, final Random random) {
 		this.blackList = blackList;
 		this.mutationRange = mutationRange;
 		this.affectingDuration = affectingDuration;

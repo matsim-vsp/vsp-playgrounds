@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.timeAllocationMutatorIK;
+package playground.ikaddoura.durationBasedTimeAllocationMutator;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -33,12 +33,14 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.testcases.MatsimTestUtils;
 
-public class RunTimeAllocationIKTestIT {
+import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
+
+public class RunDurationBasedTimeAllocationTestIT {
 	
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 	
-	private static final String STRATEGY_NAME = "timeMutatorIK";
+	private static final String STRATEGY_NAME = "durationBasedTimeMutator";
 
 	@Test
 	public final void test1() {
@@ -60,7 +62,7 @@ public class RunTimeAllocationIKTestIT {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				addPlanStrategyBinding(STRATEGY_NAME).toProvider(PlanStrategyProviderIK.class);
+				addPlanStrategyBinding(STRATEGY_NAME).toProvider(DurationBasedTimeAllocationPlanStrategyProvider.class);
 			}
 		});
 				

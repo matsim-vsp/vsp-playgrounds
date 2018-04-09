@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.timeAllocationMutatorIK;
+package playground.ikaddoura.durationBasedTimeAllocationMutator;
 
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -28,7 +28,7 @@ import org.matsim.core.controler.OutputDirectoryLogging;
 
 public class RunExample {
 	
-	private static final String STRATEGY_NAME = "timeMutatorIK";
+	private static final String STRATEGY_NAME = "durationBasedTimeMutator";
 
 	public static void main(final String[] args) {
 		OutputDirectoryLogging.catchLogEntries();
@@ -52,7 +52,7 @@ public class RunExample {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				addPlanStrategyBinding(STRATEGY_NAME).toProvider(PlanStrategyProviderIK.class);
+				addPlanStrategyBinding(STRATEGY_NAME).toProvider(DurationBasedTimeAllocationPlanStrategyProvider.class);
 			}
 		});
 				

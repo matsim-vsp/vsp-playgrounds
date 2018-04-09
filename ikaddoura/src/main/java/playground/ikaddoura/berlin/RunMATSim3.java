@@ -37,7 +37,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
-import playground.ikaddoura.timeAllocationMutatorIK.PlanStrategyProviderIK;
+import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
 
 /**
 * @author ikaddoura
@@ -123,7 +123,7 @@ public class RunMATSim3 {
 
 		if (monetaryDistanceRateRide < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.ride).setMonetaryDistanceRate(monetaryDistanceRateRide);
 
-		final String STRATEGY_NAME = "timeMutatorIK";
+		final String STRATEGY_NAME = "durationBasedTimeMutator";
 
 		StrategySettings stratSets = new StrategySettings();
 		stratSets.setStrategyName(STRATEGY_NAME);
@@ -134,19 +134,19 @@ public class RunMATSim3 {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 		
+		// add own time allocation mutator strategy
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addPlanStrategyBinding(STRATEGY_NAME).toProvider(DurationBasedTimeAllocationPlanStrategyProvider.class);
+			}
+		});
+		
 		// use the sbb pt raptor router
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
 				install(new SwissRailRaptorModule());
-			}
-		});
-		
-		// add own time allocation mutator strategy
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addPlanStrategyBinding(STRATEGY_NAME).toProvider(PlanStrategyProviderIK.class);
 			}
 		});
 		

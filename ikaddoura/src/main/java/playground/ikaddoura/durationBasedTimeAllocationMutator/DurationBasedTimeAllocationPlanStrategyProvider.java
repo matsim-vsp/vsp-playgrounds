@@ -1,4 +1,4 @@
-package playground.ikaddoura.timeAllocationMutatorIK;
+package playground.ikaddoura.durationBasedTimeAllocationMutator;
 
 
 import javax.inject.Inject;
@@ -12,7 +12,7 @@ import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 
-public class PlanStrategyProviderIK implements Provider<PlanStrategy> {
+public class DurationBasedTimeAllocationPlanStrategyProvider implements Provider<PlanStrategy> {
 
 	@Inject private GlobalConfigGroup globalConfigGroup;
 	@Inject private TimeAllocationMutatorConfigGroup timeAllocationMutatorConfigGroup;
@@ -24,7 +24,7 @@ public class PlanStrategyProviderIK implements Provider<PlanStrategy> {
 	public PlanStrategy get() {
 		PlanStrategyImpl.Builder builder = new PlanStrategyImpl.Builder(new RandomPlanSelector<>());
 
-		TimeAllocationMutatorIK mod = new TimeAllocationMutatorIK(this.tripRouterProvider, 
+		DurationBasedTimeAllocationMutator mod = new DurationBasedTimeAllocationMutator(this.tripRouterProvider, 
 				this.plansConfigGroup, this.timeAllocationMutatorConfigGroup, this.globalConfigGroup, population);
 		builder.addStrategyModule(mod);
 

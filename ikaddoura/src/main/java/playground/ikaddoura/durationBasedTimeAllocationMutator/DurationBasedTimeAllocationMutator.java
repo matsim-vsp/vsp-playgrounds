@@ -1,4 +1,4 @@
-package playground.ikaddoura.timeAllocationMutatorIK;
+package playground.ikaddoura.durationBasedTimeAllocationMutator;
 
 import javax.inject.Provider;
 
@@ -11,13 +11,13 @@ import org.matsim.core.population.algorithms.PlanAlgorithm;
 import org.matsim.core.replanning.modules.AbstractMultithreadedModule;
 import org.matsim.core.router.TripRouter;
 
-class TimeAllocationMutatorIK extends AbstractMultithreadedModule {  	
+class DurationBasedTimeAllocationMutator extends AbstractMultithreadedModule {  	
 	private final Provider<TripRouter> tripRouterProvider;
 	private final boolean affectingDuration;
 	private final PlansConfigGroup.ActivityDurationInterpretation activityDurationInterpretation;
 	private final double mutationRange;
   	
-	public TimeAllocationMutatorIK(Provider<TripRouter> tripRouterProvider, PlansConfigGroup plansConfigGroup, TimeAllocationMutatorConfigGroup timeAllocationMutatorConfigGroup, GlobalConfigGroup globalConfigGroup,
+	public DurationBasedTimeAllocationMutator(Provider<TripRouter> tripRouterProvider, PlansConfigGroup plansConfigGroup, TimeAllocationMutatorConfigGroup timeAllocationMutatorConfigGroup, GlobalConfigGroup globalConfigGroup,
 			final Population population) {
 		super(globalConfigGroup);
 		
@@ -34,7 +34,7 @@ class TimeAllocationMutatorIK extends AbstractMultithreadedModule {
 		case minOfDurationAndEndTime:
 			throw new RuntimeException("Not yet implemented. Aborting...");
 		default:
-			pmta = new PlanMutateTimeAllocationSimplifiedIK(
+			pmta = new DurationBasedPlanMutateTimeAllocationSimplified(
 					this.tripRouterProvider.get().getStageActivityTypes(), this.mutationRange, this.affectingDuration, MatsimRandom.getLocalInstance());
 		}
 		return pmta;	}
