@@ -27,12 +27,12 @@ import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
 public class RunCorineLandCoverCoordsModifier {
 	
 	public static void main(String[] args) {
-		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_10pct.xml.gz";
-	    String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_10pct_clc.xml.gz";
+	    String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_500-10-1_10pct.xml.gz";
+	    String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_500-10-1_10pct_clc.xml.gz";
 	    
 		String corineLandCoverFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/corine_landcover/corine_lancover_berlin-brandenburg_GK4.shp";
 
-	    String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+	    String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/gemeinden_Planungsraum.shp";
 	    String zoneIdTag = "NR";
 	
 	    boolean simplifyGeom = false;
