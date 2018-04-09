@@ -110,30 +110,30 @@ public class DgRoederGershensonSignalController implements SignalController {
 
 	
 	//TODO fuer Setter in Config-Datei
-	protected int tGreenMin =  0; // time in seconds
-	protected int minCarsTime = 0; //
+	//protected int tGreenMin =  0; // time in seconds
+	//protected int minCarsTime = 0; //
 	protected double storageCapacityOutlinkJam = 0.8;
-	protected double maxRedTime = 15.0;
-	protected double interGreenTime = 0;
-	protected double threshold = 13.33;
+	//protected double maxRedTime = 15.0;
+	protected double interGreenTime = 0.; //TODO default should be at least 2
+	protected double threshold = 13.33; //TODO should be higher
 	
 	protected int lengthOfPlatoonTails = 2;
-	protected int minimumGREENtime = 4;
+	protected int minimumGREENtime = 4;  //TODO should be higher maybe 20
 	protected double monitoredPlatoonTail = 25.;
 	protected double d = 50.;
 	protected double minmumDistanceBehindIntersection =10.;
 	
-	protected boolean outLinkJam;
-	protected boolean maxRedTimeActive = false;
-	protected double compGreenTime;
-	protected double approachingRed;
-	protected double approachingGreenLink;
-	protected double approachingGreenLane;
-	protected double carsOnRefLinkTime;
-	protected boolean compGroupsGreen;
-	protected SignalGroupState oldState;
+	//protected boolean outLinkJam;
+	//protected boolean maxRedTimeActive = false;
+	//protected double compGreenTime;
+	//protected double approachingRed;
+	//protected double approachingGreenLink;
+	//protected double approachingGreenLane;
+	//protected double carsOnRefLinkTime;
+	//protected boolean compGroupsGreen;
+	//protected SignalGroupState oldState;
 	
-	protected double signalgrouptimecounter = 0.0;
+	//protected double signalgrouptimecounter = 0.0;
 	private LinkSensorManager sensorManager;
 	private Scenario scenario;
 	private Map<Id<SignalGroup>, SignalGroupMetadata> signalGroupIdMetadataMap;	
@@ -230,19 +230,20 @@ public class DgRoederGershensonSignalController implements SignalController {
 	
 	private void switchlight(SignalGroup group, double timeSeconds) {
 		if (group.getState() == null) {
-			timecounter.put(group.getId(), 0);
+			timecounter.put(group.getId(), 0.);
 			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
 			this.system.scheduleDropping(timeSeconds, group.getId());
 		} else {
-			timecounter.put(group.getId(), 0);
+			
 			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
 		
 			if (group.getState().equals(SignalGroupState.RED)){
 				this.system.scheduleOnset(timeSeconds + interGreenTime, group.getId());
+				timecounter.put(group.getId(), -interGreenTime);
 				activeSignalGroup = group;
 			} else {
 				this.system.scheduleDropping(timeSeconds, group.getId());
-				
+				timecounter.put(group.getId(), 0.);
 			}
 		}	
 	}
@@ -311,7 +312,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		for(SignalGroup group : this.system.getSignalGroups().values()) {
 			if (timecounter.containsKey(group.getId()) && approachingVehiclesGroupMap.containsKey(group.getId())){
 					
-					counter.put(group.getId(), (double) timecounter.get(group.getId())*approachingVehiclesGroupMap.get(group.getId()));
+					counter.put(group.getId(), timecounter.get(group.getId())*approachingVehiclesGroupMap.get(group.getId()));
 				
 			}
 		}
@@ -364,7 +365,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	private Map<Id<SignalGroup>, Map<Id<Link>, Integer> > approachingVehiclesMap = new HashMap<Id<SignalGroup>, Map<Id<Link>, Integer>>();
 	private Map<Id<SignalGroup>, Integer> approachingVehiclesGroupMap = new HashMap<Id<SignalGroup>, Integer>();
 	private Map<Id<SignalGroup>, Map<Id<Link>, Boolean> > jammedOutLinkMap = new HashMap<Id<SignalGroup>, Map<Id<Link>, Boolean>>();	
-	private Map<Id<SignalGroup>, Integer>  timecounter = new HashMap<Id<SignalGroup>, Integer>();	
+	private Map<Id<SignalGroup>, Double>  timecounter = new HashMap<Id<SignalGroup>, Double>();	
 	private Map<Id<SignalGroup>, Double> counter = new HashMap<Id<SignalGroup>, Double>();	
 	private Map<Id<SignalGroup>, Boolean> jammedSignalGroup = new HashMap<Id<SignalGroup>,Boolean>();
 	private SignalGroup activeSignalGroup = null;
@@ -382,6 +383,10 @@ public class DgRoederGershensonSignalController implements SignalController {
 //			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString() + approachingVehiclesGroupMap.toString());
 //		}
 		
+		for (SignalGroup group : this.system.getSignalGroups().values()){
+			timecounter.merge(group.getId(), 0., (a,b) -> a+1.);
+		}
+		
 		if( activeSignalGroup ==null|| activeSignalGroup.getState().equals(SignalGroupState.GREEN)) {
 			
 			
@@ -392,7 +397,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 			
 			
 			for (SignalGroup group : this.system.getSignalGroups().values()){
-				timecounter.merge(group.getId(), 0, (a,b) -> a+1);
+				//timecounter.merge(group.getId(), 0., (a,b) -> a+1.);
 				//fills approachingVehiclesMap
 				carsOnInLinks(group,timeSeconds);
 				//fills jammedOutLinkMap
@@ -494,6 +499,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 										//log.info("Envoke Rule 1. Rule 2,3,4 are not violated. Switch " + groupR1.getId());
 										for (SignalGroup group : this.system.getSignalGroups().values()) {	
 											if (group.getState().equals(SignalGroupState.GREEN)) switchlight(group,timeSeconds);
+											if (group.equals(activeSignalGroup)) switchlight(group,timeSeconds);
 											if (group.equals(groupR1)) switchlight(group,timeSeconds);
 										}
 									}
