@@ -3,7 +3,6 @@ package optimize.cten.convert.Restrictions2Matsim;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -53,8 +52,8 @@ public class Restriction2ConflictData {
 			Id<SignalSystem> signalSystemId = nodeId2signalSystemId.get(nodeIdFullNetwork); 
 			
 			// create ConflictingDirections for system and add to conflictData
-			ConflictingDirections conflictingDirections = conflictData.getFactory().createConflictingDirectionsContainerForSignalSystem(signalSystemId);
-			conflictData.addConflictingDirectionsForSignalSystem(signalSystemId, conflictingDirections);
+			ConflictingDirections conflictingDirections = conflictData.getFactory().createConflictingDirectionsContainerForIntersection(signalSystemId, nodeIdFullNetwork);
+			conflictData.addConflictingDirectionsForIntersection(signalSystemId, nodeIdFullNetwork, conflictingDirections);
 			
 			// fill the restrictions
 			for (TtRestriction restriction : crossing.getRestrictions().values()) {
@@ -62,7 +61,7 @@ public class Restriction2ConflictData {
 				// identify from and to link for this direction/light
 				Tuple<Id<Link>, Id<Link>> fromToLinkIdTupleFullNetwork = identifyFromAndToLinkForThisDirection(light, nodeIdFullNetwork);
 				// create direction object for this light
-				Direction direction = conflictData.getFactory().createDirection(signalSystemId, 
+				Direction direction = conflictData.getFactory().createDirection(signalSystemId, nodeIdFullNetwork,
 						fromToLinkIdTupleFullNetwork.getFirst(), fromToLinkIdTupleFullNetwork.getSecond(), 
 						Id.create(restriction.getLightId(), Direction.class));
 				conflictingDirections.addDirection(direction);
@@ -90,7 +89,7 @@ public class Restriction2ConflictData {
 					}
 				}
 				if (!restriction.getRlightsOn().isEmpty()) {
-					throw new RuntimeException("not yet implemented. would need to be in the same signals group.");
+					throw new RuntimeException("not yet implemented. would need to be in the same signal group.");
 				}
 			}
 		}
