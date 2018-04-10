@@ -23,6 +23,7 @@ import java.util.List;
 import org.matsim.contrib.drt.optimizer.VehicleData.Entry;
 import org.matsim.contrib.drt.optimizer.VehicleData.EntryFactory;
 import org.matsim.contrib.drt.optimizer.VehicleDataEntryFactoryImpl;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
@@ -49,15 +50,16 @@ public class EDrtVehicleDataEntryFactory implements EntryFactory {
 	}
 
 	private final double minimumRelativeSoc;
-	private final EntryFactory entryFactory = new VehicleDataEntryFactoryImpl();
+	private final VehicleDataEntryFactoryImpl entryFactory;
 
-	public EDrtVehicleDataEntryFactory(double minimumRelativeSoc) {
+	public EDrtVehicleDataEntryFactory(DrtConfigGroup drtCfg, double minimumRelativeSoc) {
 		this.minimumRelativeSoc = minimumRelativeSoc;
+		entryFactory = new VehicleDataEntryFactoryImpl(drtCfg);
 	}
 
 	@Override
 	public Entry create(Vehicle vehicle, double currentTime) {
-		if (!VehicleDataEntryFactoryImpl.isOperating(vehicle, currentTime)) {
+		if (!entryFactory.isEligibleForRequestInsertion(vehicle, currentTime)) {
 			return null;
 		}
 

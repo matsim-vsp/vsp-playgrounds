@@ -84,7 +84,7 @@ public class EDrtUnplannedRequestInserter implements UnplannedRequestInserter, M
 		}
 
 		VehicleData vData = new VehicleData(mobsimTimer.getTimeOfDay(), fleet.getVehicles().values().stream(),
-				new EDrtVehicleDataEntryFactory(0.2));
+				new EDrtVehicleDataEntryFactory(drtCfg, 0.2));
 
 		Iterator<DrtRequest> reqIter = unplannedRequests.iterator();
 		while (reqIter.hasNext()) {
