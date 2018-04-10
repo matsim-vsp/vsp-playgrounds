@@ -22,6 +22,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.drt.analysis.DrtAnalysisModule;
 import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.drt.optimizer.DrtOptimizer;
+import org.matsim.contrib.drt.optimizer.depot.DepotFinder;
 import org.matsim.contrib.drt.optimizer.insertion.ParallelPathDataProvider;
 import org.matsim.contrib.drt.optimizer.insertion.PrecalculatablePathDataProvider;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
@@ -40,13 +41,17 @@ import org.matsim.contrib.dvrp.run.DvrpModule.MobsimTimerProvider;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.michalm.drt.EDrtActionCreator;
+import playground.michalm.drt.optimizer.EDrtOptimizer;
+import playground.michalm.drt.optimizer.depot.NearestChargerAsDepot;
 import playground.michalm.drt.optimizer.insertion.EDrtUnplannedRequestInserter;
 import playground.michalm.drt.schedule.EDrtTaskFactoryImpl;
+import playground.michalm.drt.scheduler.EmptyVehicleChargingScheduler;
 
 /**
  * @author michalm
@@ -65,6 +70,12 @@ public class EDrtControlerCreator {
 				DrtOptimizer.class, EDrtUnplannedRequestInserter.class, ParallelPathDataProvider.class));
 		controler.addOverridingModule(new DrtModule());
 		controler.addOverridingModule(new DrtAnalysisModule());
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				bind(DepotFinder.class).to(NearestChargerAsDepot.class);
+			}
+		});
 		if (otfvis) {
 			controler.addOverridingModule(new OTFVisLiveModule());
 		}
@@ -78,8 +89,11 @@ public class EDrtControlerCreator {
 				bind(MobsimTimer.class).toProvider(MobsimTimerProvider.class).asEagerSingleton();
 				DvrpModule.bindTravelDisutilityForOptimizer(binder(), DefaultDrtOptimizer.DRT_OPTIMIZER);
 
-				bind(DrtOptimizer.class).to(DefaultDrtOptimizer.class).asEagerSingleton();
+				bind(DrtOptimizer.class).to(EDrtOptimizer.class).asEagerSingleton();
 				bind(VrpOptimizer.class).to(DrtOptimizer.class);
+				bind(DefaultDrtOptimizer.class).asEagerSingleton();
+
+				bind(EmptyVehicleChargingScheduler.class).asEagerSingleton();
 
 				bind(EDrtUnplannedRequestInserter.class).asEagerSingleton();
 				bind(UnplannedRequestInserter.class).to(EDrtUnplannedRequestInserter.class);
