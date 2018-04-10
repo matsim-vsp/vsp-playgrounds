@@ -21,12 +21,17 @@ package playground.michalm.taxi.run;
 
 import java.util.Map;
 
-import org.matsim.api.core.v01.*;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.taxi.run.*;
+import org.matsim.contrib.taxi.run.RunTaxiScenario;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.util.PopulationUtils;
-import org.matsim.core.config.*;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
@@ -57,7 +62,7 @@ class KNTaxi {
 		Controler controler = RunTaxiScenario.createControler(config, otfvis);
 
 		if (removeNonPassengers) {
-			PopulationUtils.removePersonsNotUsingMode(TaxiModule.TAXI_MODE, controler.getScenario());
+			PopulationUtils.removePersonsNotUsingMode(TransportMode.taxi, controler.getScenario());
 		}
 
 		if (endActivitiesAtTimeZero) {

@@ -28,7 +28,6 @@ import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
-import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
@@ -84,8 +83,8 @@ public class OptAVModule extends AbstractModule {
 		}
 		
 		ModeParams taxiModeParams = null;
-		if (this.getConfig().planCalcScore().getModes().get(TaxiModule.TAXI_MODE) != null) {
-			taxiModeParams = this.getConfig().planCalcScore().getModes().get(TaxiModule.TAXI_MODE);
+		if (this.getConfig().planCalcScore().getModes().get(TransportMode.taxi) != null) {
+			taxiModeParams = this.getConfig().planCalcScore().getModes().get(TransportMode.taxi);
 		} else {
 			throw new RuntimeException("There is no 'taxi' mode in the planCalcScore config group.");
 		}
@@ -173,7 +172,7 @@ public class OptAVModule extends AbstractModule {
 		// dvrp / taxi
 		// #############################
 
-		DvrpConfigGroup.get(this.getConfig()).setMode(TaxiModule.TAXI_MODE);
+		DvrpConfigGroup.get(this.getConfig()).setMode(TransportMode.taxi);
 		DvrpConfigGroup.get(this.getConfig()).setNetworkMode(TransportMode.car);
 		this.getConfig().addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		this.getConfig().checkConsistency();

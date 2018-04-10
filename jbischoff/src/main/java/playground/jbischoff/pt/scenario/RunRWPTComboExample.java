@@ -23,6 +23,7 @@
 package playground.jbischoff.pt.scenario;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
 import org.matsim.contrib.av.intermodal.router.config.*;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
@@ -69,7 +70,7 @@ public class RunRWPTComboExample {
 		config.transitRouter().setSearchRadius(3000);
 		config.transitRouter().setExtensionRadius(0);
 		
-		DvrpConfigGroup.get(config).setMode(TaxiModule.TAXI_MODE);
+		DvrpConfigGroup.get(config).setMode(TransportMode.taxi);
        config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
        config.checkConsistency();
 
