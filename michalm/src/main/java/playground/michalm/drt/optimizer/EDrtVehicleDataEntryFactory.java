@@ -27,7 +27,9 @@ import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.dvrp.schedule.Task;
+import org.matsim.contrib.dvrp.schedule.Task.TaskStatus;
 import org.matsim.vsp.ev.data.Battery;
+import org.matsim.vsp.ev.dvrp.ChargingTask;
 import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 import org.matsim.vsp.ev.dvrp.tracker.ETaskTracker;
 
@@ -36,7 +38,7 @@ import playground.michalm.drt.schedule.EDrtTask;
 /**
  * @author michalm
  */
-public class EVehicleDataEntryFactory implements EntryFactory {
+public class EDrtVehicleDataEntryFactory implements EntryFactory {
 	public static class EVehicleEntry extends Entry {
 		public final double socBeforeFinalStay;
 
@@ -49,7 +51,7 @@ public class EVehicleDataEntryFactory implements EntryFactory {
 	private final double minimumRelativeSoc;
 	private final EntryFactory entryFactory = new VehicleDataEntryFactoryImpl();
 
-	public EVehicleDataEntryFactory(double minimumRelativeSoc) {
+	public EDrtVehicleDataEntryFactory(double minimumRelativeSoc) {
 		this.minimumRelativeSoc = minimumRelativeSoc;
 	}
 
@@ -59,8 +61,16 @@ public class EVehicleDataEntryFactory implements EntryFactory {
 			return null;
 		}
 
-		Battery battery = ((EvDvrpVehicle)vehicle).getElectricVehicle().getBattery();
 		Schedule schedule = vehicle.getSchedule();
+		int taskCount = schedule.getTaskCount();
+		if (taskCount > 1) {
+			Task oneBeforeLast = schedule.getTasks().get(taskCount - 2);
+			if (oneBeforeLast.getStatus() != TaskStatus.PERFORMED && oneBeforeLast instanceof ChargingTask) {
+				return null;
+			}
+		}
+
+		Battery battery = ((EvDvrpVehicle)vehicle).getElectricVehicle().getBattery();
 		int nextTaskIdx;
 		double socBeforeNextTask;
 		if (schedule.getStatus() == ScheduleStatus.PLANNED) {
