@@ -16,7 +16,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.run;
+package playground.michalm.edrt.run;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.drt.analysis.DrtAnalysisModule;
@@ -46,12 +46,12 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.michalm.drt.EDrtActionCreator;
-import playground.michalm.drt.optimizer.EDrtOptimizer;
-import playground.michalm.drt.optimizer.depot.NearestChargerAsDepot;
-import playground.michalm.drt.optimizer.insertion.EDrtUnplannedRequestInserter;
-import playground.michalm.drt.schedule.EDrtTaskFactoryImpl;
-import playground.michalm.drt.scheduler.EmptyVehicleChargingScheduler;
+import playground.michalm.edrt.EDrtActionCreator;
+import playground.michalm.edrt.optimizer.EDrtOptimizer;
+import playground.michalm.edrt.optimizer.depot.NearestChargerAsDepot;
+import playground.michalm.edrt.optimizer.insertion.EDrtUnplannedRequestInserter;
+import playground.michalm.edrt.schedule.EDrtTaskFactoryImpl;
+import playground.michalm.edrt.scheduler.EmptyVehicleChargingScheduler;
 
 /**
  * @author michalm

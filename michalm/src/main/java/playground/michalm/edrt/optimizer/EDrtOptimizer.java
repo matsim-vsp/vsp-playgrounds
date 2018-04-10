@@ -16,7 +16,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.optimizer;
+package playground.michalm.edrt.optimizer;
 
 import javax.inject.Inject;
 
@@ -30,7 +30,7 @@ import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 
-import playground.michalm.drt.scheduler.EmptyVehicleChargingScheduler;
+import playground.michalm.edrt.scheduler.EmptyVehicleChargingScheduler;
 
 /**
  * @author michalm

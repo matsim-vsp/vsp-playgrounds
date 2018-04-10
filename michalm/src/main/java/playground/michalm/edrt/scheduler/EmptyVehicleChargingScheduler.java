@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.scheduler;
+package playground.michalm.edrt.scheduler;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,7 +41,7 @@ import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import playground.michalm.drt.schedule.EDrtTaskFactoryImpl;
+import playground.michalm.edrt.schedule.EDrtTaskFactoryImpl;
 
 /**
  * @author michalm

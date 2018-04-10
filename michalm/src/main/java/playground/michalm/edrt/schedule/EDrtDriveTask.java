@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,19 +17,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.schedule;
+package playground.michalm.edrt.schedule;
 
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.drt.schedule.DrtStayTask;
+import org.matsim.contrib.drt.schedule.DrtDriveTask;
+import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 
 /**
  * @author michalm
  */
-public class EDrtStayTask extends DrtStayTask implements EDrtTask {
+public class EDrtDriveTask extends DrtDriveTask implements EDrtTask {
 	private final double consumedEnergy;
 
-	public EDrtStayTask(double beginTime, double endTime, Link link, double consumedEnergy) {
-		super(beginTime, endTime, link);
+	public EDrtDriveTask(VrpPathWithTravelData path, double consumedEnergy) {
+		super(path);
 		this.consumedEnergy = consumedEnergy;
 	}
 

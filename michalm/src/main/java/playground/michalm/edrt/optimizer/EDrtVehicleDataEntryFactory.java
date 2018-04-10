@@ -16,7 +16,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.optimizer;
+package playground.michalm.edrt.optimizer;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ import org.matsim.vsp.ev.dvrp.ChargingTask;
 import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 import org.matsim.vsp.ev.dvrp.tracker.ETaskTracker;
 
-import playground.michalm.drt.schedule.EDrtTask;
+import playground.michalm.edrt.schedule.EDrtTask;
 
 /**
  * @author michalm

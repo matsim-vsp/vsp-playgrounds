@@ -1,8 +1,9 @@
 /* *********************************************************************** *
  * project: org.matsim.*
+ *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2018 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,13 +17,20 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.schedule;
+package playground.michalm.edrt.schedule;
 
 import org.matsim.contrib.drt.schedule.DrtTask;
-import org.matsim.vsp.ev.dvrp.ETask;
+import org.matsim.vsp.ev.data.Charger;
+import org.matsim.vsp.ev.data.ElectricVehicle;
+import org.matsim.vsp.ev.dvrp.ChargingTaskImpl;
 
-/**
- * @author michalm
- */
-public interface EDrtTask extends DrtTask, ETask {
+public class EDrtChargingTask extends ChargingTaskImpl implements DrtTask {
+	public EDrtChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev, double totalEnergy) {
+		super(beginTime, endTime, charger, ev, totalEnergy);
+	}
+
+	@Override
+	public DrtTaskType getDrtTaskType() {
+		return DrtTaskType.STAY;
+	}
 }

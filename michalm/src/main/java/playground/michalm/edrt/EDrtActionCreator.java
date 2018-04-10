@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt;
+package playground.michalm.edrt;
 
 import org.matsim.contrib.drt.vrpagent.DrtActionCreator;
 import org.matsim.contrib.dvrp.data.Vehicle;
@@ -41,7 +41,7 @@ import org.matsim.vsp.ev.dvrp.tracker.OnlineEDriveTaskTracker;
 
 import com.google.inject.Inject;
 
-import playground.michalm.drt.schedule.EDrtChargingTask;
+import playground.michalm.edrt.schedule.EDrtChargingTask;
 
 /**
  * @author michalm

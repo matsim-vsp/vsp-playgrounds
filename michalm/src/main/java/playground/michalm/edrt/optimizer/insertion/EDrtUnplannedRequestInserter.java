@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.optimizer.insertion;
+package playground.michalm.edrt.optimizer.insertion;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -42,7 +42,7 @@ import org.matsim.core.mobsim.framework.listeners.MobsimBeforeCleanupListener;
 
 import com.google.inject.Inject;
 
-import playground.michalm.drt.optimizer.EDrtVehicleDataEntryFactory;
+import playground.michalm.edrt.optimizer.EDrtVehicleDataEntryFactory;
 
 /**
  * @author michalm
