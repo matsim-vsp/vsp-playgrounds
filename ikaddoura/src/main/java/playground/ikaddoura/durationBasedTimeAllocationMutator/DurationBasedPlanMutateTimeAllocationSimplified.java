@@ -31,9 +31,8 @@ import org.matsim.core.utils.misc.Time;
 
 /**
  * Mutates the duration of activities randomly within a specified range.
- * Similar to {@Link PlanMutateTimeAllocationSimplified} except that mutation ranges are taken from activity attributes:
- * 		- If there is an activity duration attribute: The mutation range is set to the minimum of the duration in the activity attribute and the mutation range provided in the config.
- * 		- If there is no activity duration attribute: The mutation range is set to the mutation range in the config.
+ * Similar to {@Link PlanMutateTimeAllocationSimplified} except that for activities with a maximum duration the mutation range is set to the minimum of maximum duration and mutation range set in the config.
+ * In case an activity has an end time and no maximum duration, the end time is shifted using the mutation range set in the config.
  * 
  * @author ikaddoura
  */
@@ -44,8 +43,6 @@ public final class DurationBasedPlanMutateTimeAllocationSimplified implements Pl
 	private final Random random;
 	private final boolean affectingDuration;
 	
-	private final String durationActivityAttribute = "cemdapStopDuration_s";
-
 	/**
 	 * Initializes an instance mutating all non-stage activities in a plan
 	 * @param mutationRange
@@ -63,51 +60,28 @@ public final class DurationBasedPlanMutateTimeAllocationSimplified implements Pl
 	public void run(final Plan plan) {
 		for ( Activity act : TripStructureUtils.getActivities( plan , blackList ) ) {
 			
-			if (act.getAttributes().getAttribute(this.durationActivityAttribute) == null) {				
-				if (act.getEndTime() != Time.UNDEFINED_TIME) {
-					act.setEndTime(mutateTime(act.getEndTime()));
-				}
-				if ( affectingDuration ) {
-					if (act.getMaximumDuration() != Time.UNDEFINED_TIME) {
-						act.setMaximumDuration(mutateTime(act.getMaximumDuration()));
+			if (!Time.isUndefinedTime(act.getEndTime())) {
+				act.setEndTime(mutateTime(act.getEndTime(), this.mutationRange));
+			}
+			if ( affectingDuration ) {
+				if (!Time.isUndefinedTime(act.getMaximumDuration())) {
+					
+					double mutationRangeToBeUsed;
+					if (act.getMaximumDuration() > this.mutationRange) {
+						mutationRangeToBeUsed = this.mutationRange;
+					} else {
+						mutationRangeToBeUsed = act.getMaximumDuration();
 					}
-				}
-				
-			} else {
-				if (act.getEndTime() != Time.UNDEFINED_TIME) {
-					act.setEndTime(mutateTime(act.getEndTime(), (int) act.getAttributes().getAttribute("cemdapStopDuration_s")));
-				}
-				if ( affectingDuration ) {
-					if (act.getMaximumDuration() != Time.UNDEFINED_TIME) {
-						act.setMaximumDuration(mutateTime(act.getMaximumDuration(), (int) act.getAttributes().getAttribute("cemdapStopDuration_s")));
-					}
+					
+					act.setMaximumDuration(mutateTime(act.getMaximumDuration(), mutationRangeToBeUsed));
 				}
 			}
 		}
 	}
 
-	private double mutateTime(final double time) {
+	private double mutateTime(final double time, final double mutationRange) {
 		double t = time;
-		t = t + (int)((this.random.nextDouble() * 2.0 - 1.0) * this.mutationRange);
-
-		if (t < 0) {
-			t = 0;
-		}
-		
-		return t;
-	}
-	
-	private double mutateTime(final double time, final int duration) {
-		
-		double mutationRangeToBeUsed;
-		if (duration > this.mutationRange) {
-			mutationRangeToBeUsed = this.mutationRange;
-		} else {
-			mutationRangeToBeUsed = duration;
-		}
-				
-		double t = time;
-		t = t + (int)((this.random.nextDouble() * 2.0 - 1.0) * mutationRangeToBeUsed);
+		t = t + (int)((this.random.nextDouble() * 2.0 - 1.0) * mutationRange);
 
 		if (t < 0) {
 			t = 0;
