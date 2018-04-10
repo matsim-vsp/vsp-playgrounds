@@ -17,14 +17,16 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.run;
+package playground.kai.run;
 
 import org.junit.Test;
+
+import playground.kai.run.KNTaxi;
 
 public class KNTaxiIT {
 	@Test
 	public void testRun() {
-		String configFile = "src/main/resources/mielec_2014_02/KN_config.xml";
+		String configFile = "mielec_2014_02/mielec_taxi_config.xml";
 		KNTaxi.run(configFile, true, true, false);
 	}
 }

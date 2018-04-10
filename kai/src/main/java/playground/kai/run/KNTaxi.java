@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.run;
+package playground.kai.run;
 
 import java.util.Map;
 
@@ -81,6 +81,6 @@ class KNTaxi {
 	}
 
 	public static void main(String... args) {
-		run("src/main/resources/mielec_2014_02/KN_config.xml", true, false, true);
+		run("mielec_2014_02/mielec_taxi_config.xml", true, false, false);
 	}
 }
