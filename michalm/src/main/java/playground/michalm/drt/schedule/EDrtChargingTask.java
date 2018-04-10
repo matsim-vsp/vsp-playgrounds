@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt;
+package playground.michalm.drt.schedule;
 
 import org.matsim.contrib.drt.schedule.DrtTask;
 import org.matsim.vsp.ev.data.Charger;
@@ -25,8 +25,8 @@ import org.matsim.vsp.ev.data.ElectricVehicle;
 import org.matsim.vsp.ev.dvrp.ChargingTaskImpl;
 
 public class EDrtChargingTask extends ChargingTaskImpl implements DrtTask {
-	public EDrtChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev) {
-		super(beginTime, endTime, charger, ev);
+	public EDrtChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev, double totalEnergy) {
+		super(beginTime, endTime, charger, ev, totalEnergy);
 	}
 
 	@Override
