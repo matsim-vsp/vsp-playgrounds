@@ -1,9 +1,8 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,26 +16,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.util;
+package playground.michalm.etaxi.run;
 
-import org.matsim.contrib.util.*;
+import org.junit.Test;
 
-public class ETaxiStats {
-	public enum ETaxiState {
-		QUEUED, PLUGGED;
-	}
+import playground.michalm.etaxi.run.RunETaxiScenario;
 
-	public final String id;
-
-	public final EnumAdder<ETaxiState, Long> stateTimeSumsByState = new LongEnumAdder<>(ETaxiState.class);
-
-	public ETaxiStats(String id) {
-		this.id = id;
-	}
-
-	public double getFleetQueuedTimeRatio() {
-		double queued = stateTimeSumsByState.get(ETaxiState.QUEUED);
-		double plugged = stateTimeSumsByState.get(ETaxiState.PLUGGED);
-		return queued / (queued + plugged);
+/**
+ * @author michalm
+ */
+public class RunETaxiScenarioIT {
+	@Test
+	public void test() {
+		String configFile = "mielec_2014_02/mielec_etaxi_config.xml";
+		RunETaxiScenario.run(configFile, false);
 	}
 }

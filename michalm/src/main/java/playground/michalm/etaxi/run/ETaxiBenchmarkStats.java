@@ -1,4 +1,4 @@
-package playground.michalm.taxi.run;
+package playground.michalm.etaxi.run;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.matsim.contrib.dvrp.data.Fleet;
@@ -11,7 +11,7 @@ import org.matsim.core.controler.events.*;
 import com.google.common.collect.ObjectArrays;
 import com.google.inject.Inject;
 
-import playground.michalm.taxi.util.*;
+import playground.michalm.etaxi.util.*;
 
 public class ETaxiBenchmarkStats extends TaxiBenchmarkStats {
 	public static final String[] HEADER = ObjectArrays.concat(TaxiBenchmarkStats.HEADER, "QueuedTimeRatio_fleetAvg");

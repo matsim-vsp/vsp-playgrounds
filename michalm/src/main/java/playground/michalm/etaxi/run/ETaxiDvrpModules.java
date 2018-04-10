@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.run;
+package playground.michalm.etaxi.run;
 
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
@@ -31,9 +31,9 @@ import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 
-import playground.michalm.taxi.ETaxiActionCreator;
-import playground.michalm.taxi.ETaxiScheduler;
-import playground.michalm.taxi.optimizer.ETaxiOptimizerProvider;
+import playground.michalm.etaxi.ETaxiActionCreator;
+import playground.michalm.etaxi.ETaxiScheduler;
+import playground.michalm.etaxi.optimizer.ETaxiOptimizerProvider;
 
 public class ETaxiDvrpModules {
 	public static AbstractModule create() {

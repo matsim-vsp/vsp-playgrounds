@@ -17,34 +17,27 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi;
+package playground.michalm.etaxi.optimizer.assignment;
 
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.contrib.dvrp.schedule.Task;
-import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
-import org.matsim.contrib.dynagent.DynAction;
-import org.matsim.contrib.dynagent.DynAgent;
-import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
-import org.matsim.vsp.ev.dvrp.ChargingActivity;
+import org.apache.commons.configuration.Configuration;
+import org.matsim.contrib.taxi.optimizer.assignment.AssignmentTaxiOptimizerParams;
 
-import com.google.inject.Inject;
+public class AssignmentETaxiOptimizerParams extends AssignmentTaxiOptimizerParams {
+	public static final String MIN_RELATIVE_SOC = "minRelativeSoc";
+	public static final String SOC_CHECK_TIME_STEP = "socCheckTimeStep";
 
-/**
- * @author michalm
- */
-public class ETaxiActionCreator implements VrpAgentLogic.DynActionCreator {
-	private final TaxiActionCreator taxiActionCreator;
+	public final double minRelativeSoc;// XXX or absolute?
+	public final int socCheckTimeStep;
 
-	@Inject
-	public ETaxiActionCreator(TaxiActionCreator taxiActionCreator) {
-		this.taxiActionCreator = taxiActionCreator;
-	}
+	public AssignmentETaxiOptimizerParams(Configuration optimizerConfig) {
+		super(optimizerConfig);
 
-	@Override
-	public DynAction createAction(DynAgent dynAgent, Vehicle vehicle, double now) {
-		Task task = vehicle.getSchedule().getCurrentTask();
-		return task instanceof ETaxiChargingTask //
-				? new ChargingActivity((ETaxiChargingTask)task) //
-				: taxiActionCreator.createAction(dynAgent, vehicle, now);
+		// 30% SOC (=6 kWh) is enough to travel 40 km (all AUX off);
+		// alternatively, in cold winter, it is enough to travel for 1 hour
+		// (for approx. 20 km => 3kWh) with 3 kW-heating on
+		minRelativeSoc = optimizerConfig.getDouble(MIN_RELATIVE_SOC, 0.3);
+
+		// in cold winter, 3kW heating consumes 1.25% SOC every 5 min
+		socCheckTimeStep = optimizerConfig.getInt(SOC_CHECK_TIME_STEP, 300);
 	}
 }

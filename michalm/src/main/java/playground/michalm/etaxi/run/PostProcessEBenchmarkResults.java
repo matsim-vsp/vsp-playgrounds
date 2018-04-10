@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2013 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,27 +17,35 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.rules;
+package playground.michalm.etaxi.run;
 
-import org.apache.commons.configuration.Configuration;
-import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
+import org.matsim.contrib.taxi.benchmark.TaxiBenchmarkPostProcessor;
 
-public class RuleBasedETaxiOptimizerParams extends RuleBasedTaxiOptimizerParams {
-	public static final String MIN_RELATIVE_SOC = "minRelativeSoc";
-	public static final String SOC_CHECK_TIME_STEP = "socCheckTimeStep";
+public class PostProcessEBenchmarkResults {
+	public static void processNewMielec(String type) {
+		String dir = "d:/eclipse/shared-svn/projects/maciejewski/Mielec/2016_06_euro2016_runs/";
+		String subDirPrefix = "";
 
-	public final double minRelativeSoc;
-	public final int socCheckTimeStep;
+		new TaxiBenchmarkPostProcessor(ETaxiBenchmarkStats.HEADER, //
+				"1.0", //
+				"1.5", //
+				"2.0", //
+				"2.5", //
+				"3.0", //
+				"3.5", //
+				"4.0"//
+		).process(dir + type, subDirPrefix, "ebenchmark_stats");
+	}
 
-	public RuleBasedETaxiOptimizerParams(Configuration optimizerConfig) {
-		super(optimizerConfig);
+	public static void main(String[] args) {
+		// processMielec();
 
-		// 30% SOC (=6 kWh) is enough to travel 40 km (all AUX off);
-		// alternatively, in cold winter, it is enough to travel for 1 hour
-		// (for approx. 20 km => 3kWh) with 3 kW-heating on
-		minRelativeSoc = optimizerConfig.getDouble(MIN_RELATIVE_SOC, 0.3);
+		// String variant = "";
+		String variant = "plugs-2and0";
+		// String variant ="plugs-2and1";
+		// String variant = "plugs-2and2";
 
-		// in cold winter, 3kW heating consumes 1.25% SOC every 5 min
-		socCheckTimeStep = optimizerConfig.getInt(SOC_CHECK_TIME_STEP, 300);
+		processNewMielec("E_ASSIGNMENT_" + variant + "_");
+		processNewMielec("E_RULE_BASED_" + variant + "_");
 	}
 }

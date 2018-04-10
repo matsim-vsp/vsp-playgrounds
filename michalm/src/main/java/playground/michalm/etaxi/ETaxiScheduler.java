@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi;
+package playground.michalm.etaxi;
 
 import java.util.ArrayList;
 import java.util.List;

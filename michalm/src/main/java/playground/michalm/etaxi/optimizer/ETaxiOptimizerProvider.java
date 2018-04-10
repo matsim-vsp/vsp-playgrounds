@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer;
+package playground.michalm.etaxi.optimizer;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
@@ -37,11 +37,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
-import playground.michalm.taxi.ETaxiScheduler;
-import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizer;
-import playground.michalm.taxi.optimizer.assignment.AssignmentETaxiOptimizerParams;
-import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizer;
-import playground.michalm.taxi.optimizer.rules.RuleBasedETaxiOptimizerParams;
+import playground.michalm.etaxi.ETaxiScheduler;
+import playground.michalm.etaxi.optimizer.assignment.AssignmentETaxiOptimizer;
+import playground.michalm.etaxi.optimizer.assignment.AssignmentETaxiOptimizerParams;
+import playground.michalm.etaxi.optimizer.rules.RuleBasedETaxiOptimizer;
+import playground.michalm.etaxi.optimizer.rules.RuleBasedETaxiOptimizerParams;
 
 public class ETaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	public static final String TYPE = "type";

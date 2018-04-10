@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.rules;
+package playground.michalm.etaxi.optimizer.rules;
 
 import java.util.stream.Stream;
 
@@ -45,9 +45,9 @@ import org.matsim.vsp.ev.data.Charger;
 import org.matsim.vsp.ev.data.ChargingInfrastructure;
 import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 
-import playground.michalm.taxi.ETaxiChargingTask;
-import playground.michalm.taxi.ETaxiScheduler;
-import playground.michalm.taxi.optimizer.BestChargerFinder;
+import playground.michalm.etaxi.ETaxiChargingTask;
+import playground.michalm.etaxi.ETaxiScheduler;
+import playground.michalm.etaxi.optimizer.BestChargerFinder;
 
 public class RuleBasedETaxiOptimizer extends RuleBasedTaxiOptimizer {
 	public static RuleBasedETaxiOptimizer create(TaxiConfigGroup taxiCfg, Fleet fleet, ETaxiScheduler eScheduler,

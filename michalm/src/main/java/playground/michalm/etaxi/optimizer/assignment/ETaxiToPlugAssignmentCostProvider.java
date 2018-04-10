@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.assignment;
+package playground.michalm.etaxi.optimizer.assignment;
 
 import org.matsim.contrib.dvrp.path.OneToManyPathSearch.PathData;
 import org.matsim.contrib.taxi.optimizer.VehicleData;
@@ -26,7 +26,7 @@ import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData;
 import org.matsim.contrib.taxi.optimizer.assignment.AssignmentDestinationData.DestEntry;
 import org.matsim.contrib.taxi.optimizer.assignment.VehicleAssignmentProblem.AssignmentCost;
 
-import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
+import playground.michalm.etaxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
 
 public class ETaxiToPlugAssignmentCostProvider {
 	public enum Mode {

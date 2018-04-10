@@ -17,29 +17,26 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer;
+package playground.michalm.etaxi.util;
 
-import java.util.stream.Stream;
+import org.matsim.contrib.util.*;
 
-import org.matsim.contrib.dvrp.data.Vehicle;
-import org.matsim.vsp.ev.data.Charger;
-import org.matsim.contrib.taxi.optimizer.BestDispatchFinder;
-import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
-import org.matsim.contrib.util.LinkProvider;
-
-/**
- * @author michalm
- */
-public class BestChargerFinder {
-	private static final LinkProvider<Charger> CHARGER_TO_LINK = charger -> charger.getLink();
-
-	private final BestDispatchFinder dispatchFinder;
-
-	public BestChargerFinder(BestDispatchFinder dispatchFinder) {
-		this.dispatchFinder = dispatchFinder;
+public class ETaxiStats {
+	public enum ETaxiState {
+		QUEUED, PLUGGED;
 	}
 
-	public Dispatch<Charger> findBestChargerForVehicle(Vehicle veh, Stream<Charger> chargers) {
-		return dispatchFinder.findBestDestination(veh, chargers, CHARGER_TO_LINK);
+	public final String id;
+
+	public final EnumAdder<ETaxiState, Long> stateTimeSumsByState = new LongEnumAdder<>(ETaxiState.class);
+
+	public ETaxiStats(String id) {
+		this.id = id;
+	}
+
+	public double getFleetQueuedTimeRatio() {
+		double queued = stateTimeSumsByState.get(ETaxiState.QUEUED);
+		double plugged = stateTimeSumsByState.get(ETaxiState.PLUGGED);
+		return queued / (queued + plugged);
 	}
 }

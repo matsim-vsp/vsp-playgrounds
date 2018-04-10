@@ -34,7 +34,7 @@ import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.discharging.AuxEnergyConsumption;
 import org.matsim.vsp.ev.dvrp.DvrpAuxConsumptionFactory;
 
-import playground.michalm.taxi.run.RunETaxiBenchmark;
+import playground.michalm.etaxi.run.RunETaxiBenchmark;
 
 public class RunEAVBenchmark {
 	private static final double TEMPERATURE = 20;// 20 oC

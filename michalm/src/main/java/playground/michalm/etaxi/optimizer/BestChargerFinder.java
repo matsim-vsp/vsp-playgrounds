@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,35 +17,29 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.run;
+package playground.michalm.etaxi.optimizer;
 
-import org.matsim.contrib.taxi.benchmark.TaxiBenchmarkPostProcessor;
+import java.util.stream.Stream;
 
-public class PostProcessEBenchmarkResults {
-	public static void processNewMielec(String type) {
-		String dir = "d:/eclipse/shared-svn/projects/maciejewski/Mielec/2016_06_euro2016_runs/";
-		String subDirPrefix = "";
+import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.vsp.ev.data.Charger;
+import org.matsim.contrib.taxi.optimizer.BestDispatchFinder;
+import org.matsim.contrib.taxi.optimizer.BestDispatchFinder.Dispatch;
+import org.matsim.contrib.util.LinkProvider;
 
-		new TaxiBenchmarkPostProcessor(ETaxiBenchmarkStats.HEADER, //
-				"1.0", //
-				"1.5", //
-				"2.0", //
-				"2.5", //
-				"3.0", //
-				"3.5", //
-				"4.0"//
-		).process(dir + type, subDirPrefix, "ebenchmark_stats");
+/**
+ * @author michalm
+ */
+public class BestChargerFinder {
+	private static final LinkProvider<Charger> CHARGER_TO_LINK = charger -> charger.getLink();
+
+	private final BestDispatchFinder dispatchFinder;
+
+	public BestChargerFinder(BestDispatchFinder dispatchFinder) {
+		this.dispatchFinder = dispatchFinder;
 	}
 
-	public static void main(String[] args) {
-		// processMielec();
-
-		// String variant = "";
-		String variant = "plugs-2and0";
-		// String variant ="plugs-2and1";
-		// String variant = "plugs-2and2";
-
-		processNewMielec("E_ASSIGNMENT_" + variant + "_");
-		processNewMielec("E_RULE_BASED_" + variant + "_");
+	public Dispatch<Charger> findBestChargerForVehicle(Vehicle veh, Stream<Charger> chargers) {
+		return dispatchFinder.findBestDestination(veh, chargers, CHARGER_TO_LINK);
 	}
 }

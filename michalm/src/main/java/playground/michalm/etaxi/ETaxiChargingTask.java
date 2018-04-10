@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi;
+package playground.michalm.etaxi;
 
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.vsp.ev.data.Charger;

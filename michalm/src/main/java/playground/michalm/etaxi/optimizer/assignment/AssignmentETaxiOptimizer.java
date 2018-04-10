@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.optimizer.assignment;
+package playground.michalm.etaxi.optimizer.assignment;
 
 import java.util.List;
 import java.util.Map;
@@ -56,9 +56,9 @@ import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 
 import com.google.common.collect.Maps;
 
-import playground.michalm.taxi.ETaxiChargingTask;
-import playground.michalm.taxi.ETaxiScheduler;
-import playground.michalm.taxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
+import playground.michalm.etaxi.ETaxiChargingTask;
+import playground.michalm.etaxi.ETaxiScheduler;
+import playground.michalm.etaxi.optimizer.assignment.AssignmentChargerPlugData.ChargerPlug;
 
 /**
  * Main assumptions:

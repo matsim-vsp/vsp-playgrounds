@@ -17,72 +17,71 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.taxi.run;
+package playground.michalm.etaxi.run;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
-import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
+import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkControlerModule;
+import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkTravelTimeModule;
+import org.matsim.contrib.taxi.benchmark.RunTaxiBenchmark;
+import org.matsim.contrib.taxi.benchmark.TaxiBenchmarkConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vsp.ev.EvConfigGroup;
 import org.matsim.vsp.ev.EvModule;
-import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
-import org.matsim.vsp.ev.dvrp.EvDvrpIntegrationModule;
 
-public class RunETaxiScenario {
-	private static final String CONFIG_FILE = "mielec_2014_02/mielec_etaxi_config.xml";
-	private static final double CHARGING_SPEED_FACTOR = 1.; // full speed
-	private static final double MAX_RELATIVE_SOC = 0.8;// up to 80% SOC
-	private static final double TEMPERATURE = 20;// oC
-
-	public static void run(String configFile, boolean otfvis) {
+/**
+ * For a fair and consistent benchmarking of taxi dispatching algorithms we assume that link travel times are
+ * deterministic. To simulate this property, we remove (1) all other traffic, and (2) link capacity constraints (e.g. by
+ * increasing the capacities by 100+ times), as a result all vehicles move with the free-flow speed (which is the
+ * effective speed).
+ * <p>
+ * </p>
+ * To model the impact of traffic, we can use a time-variant network, where we specify different free-flow speeds for
+ * each link over time. The default approach is to specify free-flow speeds in each time interval (usually 15 minutes).
+ */
+public class RunETaxiBenchmark {
+	public static void run(String configFile, int runs) {
 		Config config = ConfigUtils.loadConfig(configFile, new TaxiConfigGroup(), new DvrpConfigGroup(),
-				new OTFVisConfigGroup(), new EvConfigGroup());
+				new EvConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
-		createControler(config, otfvis).run();
+		createControler(config, runs).run();
 	}
 
-	public static Controler createControler(Config config, boolean otfvis) {
+	public static Controler createControler(Config config, int runs) {
 		DvrpConfigGroup.get(config).setNetworkMode(null);// to switch off network filtering
-		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
+		config.controler().setLastIteration(runs - 1);
+		config.addConfigConsistencyChecker(new TaxiBenchmarkConfigConsistencyChecker());
 		config.checkConsistency();
 
-		Scenario scenario = ScenarioUtils.loadScenario(config);
+		Scenario scenario = RunTaxiBenchmark.loadBenchmarkScenario(config, 15 * 60, 30 * 3600);
 
 		Controler controler = new Controler(scenario);
+		controler.setModules(new DvrpBenchmarkControlerModule());
 		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new EvModule());
 		controler.addOverridingModule(ETaxiDvrpModules.create());
-		controler.addOverridingModule(createEvDvrpIntegrationModule());
+		controler.addOverridingModule(RunETaxiScenario.createEvDvrpIntegrationModule());
 
-		if (otfvis) {
-			controler.addOverridingModule(new OTFVisLiveModule());
-		}
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addControlerListenerBinding().to(ETaxiBenchmarkStats.class).asEagerSingleton();
+				install(new DvrpBenchmarkTravelTimeModule());
+			}
+		});
 
 		return controler;
 	}
 
-	public static EvDvrpIntegrationModule createEvDvrpIntegrationModule() {
-		return new EvDvrpIntegrationModule()//
-				.setChargingStrategyFactory(charger -> new FixedSpeedChargingStrategy(
-						charger.getPower() * CHARGING_SPEED_FACTOR, MAX_RELATIVE_SOC))//
-				.setTemperatureProvider(() -> TEMPERATURE)//
-				.setTurnedOnPredicate(vehicle -> vehicle.getSchedule().getStatus() == ScheduleStatus.STARTED)//
-				.setVehicleFileUrlGetter(cfg -> TaxiConfigGroup.get(cfg).getTaxisFileUrl(cfg.getContext()));
-	}
-
 	public static void main(String[] args) {
-		// String configFile = "./src/main/resources/one_etaxi/one_etaxi_config.xml";
-		// String configFile =
-		// "../../shared-svn/projects/maciejewski/Mielec/2014_02_base_scenario/mielec_etaxi_config.xml";
-		RunETaxiScenario.run(CONFIG_FILE, false);
+		String cfg = "../../shared-svn/projects/maciejewski/Mielec/2014_02_base_scenario/" + //
+				"mielec_etaxi_benchmark_config.xml";
+		run(cfg, 1);
 	}
 }
