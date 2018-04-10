@@ -65,13 +65,13 @@ public class MATSimVideoUtils {
 			outputDirectory = outputDirectory + "/";
 		}
 		
-		String runDirectoryWithRunId;
+		String configFile;
 		String outputDirectoryWithRunId;
 		if (runId != null) {
-			runDirectoryWithRunId = runDirectory + runId + ".";
+			configFile = runDirectory + runId + ".output_config.xml";
 			outputDirectoryWithRunId = outputDirectory + runId + ".";
 		} else {
-			runDirectoryWithRunId = runDirectory;
+			configFile = runDirectory + "output_config.xml";
 			outputDirectoryWithRunId = outputDirectory;
 		}
 		
@@ -79,16 +79,22 @@ public class MATSimVideoUtils {
 		SequenceEncoder enc = new SequenceEncoder(new File(outputFile));
 			
 		Config config;
-		if (new File(runDirectoryWithRunId + "output_config.xml").exists()) {
-			config = ConfigUtils.loadConfig(runDirectoryWithRunId + "output_config.xml");
+		
+		if (new File(configFile).exists()) {
+			config = ConfigUtils.loadConfig(configFile);		
+		} else if (new File(runDirectory + "output_config.xml").exists()) {
+			config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");			
 		} else {
-			throw new RuntimeException("No (output) config file. Aborting...");
+			throw new RuntimeException("No (output) config file: " + configFile + ". Aborting...");
 		}
 
 		int counter = 0;
 		for (int i = config.controler().getFirstIteration(); i<= config.controler().getLastIteration(); i++) {
 			
 			if (counter % interval == 0) {
+				
+				if (counter % 10 == 0) log.info("Creating frame for iteration " + counter);
+				
 				String pngFile = null;
 				BufferedImage image = null;
 				
@@ -101,24 +107,20 @@ public class MATSimVideoUtils {
 					image = ImageIO.read(new File(pngFile));
 
 				} catch (IOException e) {
-					
+
 					try {
-						if (runId == null) {
-							pngFile = runDirectory + "ITERS/it." + i + "/" + pngFileName + ".png";
-						} else {
-							pngFile = runDirectory + "ITERS/it." + i + "/" + runId + "." + pngFileName + ".png";
-						}
+						pngFile = runDirectory + "ITERS/it." + i + "/" + i + "." + pngFileName + ".png";
 						image = ImageIO.read(new File(pngFile));
 
 					} catch (IOException e2){
-						log.warn("Skipping...");
+						log.warn("Couldn't find png for iteration " + i + "." );
 					}
 				}
 								
 				if (image != null) {
 					enc.encodeImage(image);
 				} else {
-					log.warn("Skipping...");
+//					log.warn("Skipping image...");
 				}
 			}
 			counter++;

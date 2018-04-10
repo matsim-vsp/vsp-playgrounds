@@ -113,7 +113,7 @@ public class IKAnalysisRun {
 	private final Scenario scenario0;
 	private final List<AgentAnalysisFilter> filters0;
 
-	private final String outputDirectoryName = "analysis-ik-v1.0";
+	private final String outputDirectoryName = "analysis-ik-v1.1";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -165,7 +165,7 @@ public class IKAnalysisRun {
 //			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
 			
 			homeActivity = "home";
-			scalingFactor = 10;			
+			scalingFactor = 100;			
 		}
 		
 		Scenario scenario1 = loadScenario(runDirectory, runId, null);
@@ -373,10 +373,12 @@ public class IKAnalysisRun {
 			
 			personId2userBenefit1 = getPersonId2UserBenefit(scenario1);
 			
-			for (AgentAnalysisFilter filter : filters1) {
-				ModeAnalysis modeAnalysis1 = new ModeAnalysis(scenario1, filter);
-				modeAnalysis1.run();
-				modeAnalysisList1.add(modeAnalysis1);
+			if (filters1 != null) {
+				for (AgentAnalysisFilter filter : filters1) {
+					ModeAnalysis modeAnalysis1 = new ModeAnalysis(scenario1, filter);
+					modeAnalysis1.run();
+					modeAnalysisList1.add(modeAnalysis1);
+				}
 			}
 			
 			vttsHandler1.computeFinalVTTS();
@@ -386,10 +388,12 @@ public class IKAnalysisRun {
 			
 			personId2userBenefit0 = getPersonId2UserBenefit(scenario0);
 			
-			for (AgentAnalysisFilter filter : filters0) {
-				ModeAnalysis modeAnalysis0 = new ModeAnalysis(scenario0, filter);
-				modeAnalysis0.run();
-				modeAnalysisList0.add(modeAnalysis0);
+			if (filters0 != null) {
+				for (AgentAnalysisFilter filter : filters0) {
+					ModeAnalysis modeAnalysis0 = new ModeAnalysis(scenario0, filter);
+					modeAnalysis0.run();
+					modeAnalysisList0.add(modeAnalysis0);
+				}
 			}
 			
 			vttsHandler0.computeFinalVTTS();
@@ -670,9 +674,19 @@ public class IKAnalysisRun {
 		String legHistogramOutputDirectory = analysisOutputDirectory + "legHistograms/";
 		createDirectory(legHistogramOutputDirectory);
 		
+		log.info("Creating leg histogram video for all modes...");
+		try {
+			MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_all");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		log.info("Creating leg histogram video for all modes... Done.");
+
 		for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
 			try {
-				MATSimVideoUtils.createVideo(analysisOutputDirectory, scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+				log.info("Creating leg histogram video for mode " + mode);
+				MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+				log.info("Creating leg histogram video for mode " + mode + " Done.");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -731,6 +745,7 @@ public class IKAnalysisRun {
 				config.controler().setRunId(runId);
 			}
 
+			config.controler().setOutputDirectory(runDirectory);
 			config.plans().setInputFile(populationFile);
 			config.plans().setInputPersonAttributeFile(personAttributesFile);
 			config.network().setInputFile(networkFile);
