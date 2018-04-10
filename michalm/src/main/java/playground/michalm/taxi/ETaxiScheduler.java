@@ -80,8 +80,9 @@ public class ETaxiScheduler extends TaxiScheduler {
 		ChargingWithQueueingAndAssignmentLogic logic = (ChargingWithQueueingAndAssignmentLogic)charger.getLogic();
 		double chargingEndTime = vrpPath.getArrivalTime()
 				+ ChargingEstimations.estimateMaxWaitTimeForNextVehicle(charger)// TODO not precise!!!
-				+ logic.getChargingStrategy().calcRemainingTimeToCharge(ev);
-		schedule.addTask(new ETaxiChargingTask(vrpPath.getArrivalTime(), chargingEndTime, charger, ev));
+				+ logic.getChargingStrategy().calcRemainingTimeToCharge(ev);// TODO not precise !!! (SOC will be lower)
+		schedule.addTask(new ETaxiChargingTask(vrpPath.getArrivalTime(), chargingEndTime, charger, ev,
+				- logic.getChargingStrategy().calcRemainingEnergyToCharge(ev)));// TODO not precise !!! (ditto)
 		logic.assignVehicle(ev);
 
 		appendStayTask(vehicle);

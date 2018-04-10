@@ -25,8 +25,9 @@ import org.matsim.vsp.ev.data.ElectricVehicle;
 import org.matsim.vsp.ev.dvrp.ChargingTaskImpl;
 
 public class ETaxiChargingTask extends ChargingTaskImpl implements TaxiTask {
-	public ETaxiChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev) {
-		super(beginTime, endTime, charger, ev);
+	public ETaxiChargingTask(double beginTime, double endTime, Charger charger, ElectricVehicle ev,
+			double totalEnergy) {
+		super(beginTime, endTime, charger, ev, totalEnergy);
 	}
 
 	@Override
