@@ -20,9 +20,9 @@
 package playground.michalm.etaxi.run;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.dvrp.benchmark.DvrpBenchmarkControlerModule;
+import org.matsim.contrib.dvrp.benchmark.DvrpBenchmarkTravelTimeModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkControlerModule;
-import org.matsim.contrib.taxi.benchmark.DvrpBenchmarkTravelTimeModule;
 import org.matsim.contrib.taxi.benchmark.RunTaxiBenchmark;
 import org.matsim.contrib.taxi.benchmark.TaxiBenchmarkConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
