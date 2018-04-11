@@ -18,6 +18,8 @@
 
 package playground.michalm.edrt.run;
 
+import java.util.Arrays;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.drt.analysis.DrtAnalysisModule;
 import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
@@ -67,7 +69,7 @@ public class EDrtControlerCreator {
 	private static Controler createControlerImpl(boolean otfvis, Scenario scenario) {
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(new DvrpModule(EDrtControlerCreator::createModuleForQSimPlugin,
-				DrtOptimizer.class, EDrtUnplannedRequestInserter.class, ParallelPathDataProvider.class));
+				Arrays.asList(DrtOptimizer.class, EDrtUnplannedRequestInserter.class, ParallelPathDataProvider.class)));
 		controler.addOverridingModule(new DrtModule());
 		controler.addOverridingModule(new DrtAnalysisModule());
 		controler.addOverridingModule(new AbstractModule() {
