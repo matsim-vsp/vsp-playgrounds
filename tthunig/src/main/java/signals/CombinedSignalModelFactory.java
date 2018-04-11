@@ -43,6 +43,7 @@ import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.gershenson.DgRoederGershensonSignalController;
+import signals.gershenson.GershensonConfig;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerSignalController;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
@@ -51,6 +52,7 @@ import signals.sylvia.controler.DgSylviaConfig;
 import signals.sylvia.data.DgSylviaPreprocessData;
 import signals.sylvia.model.DgSylviaSignalPlan;
 import signals.sylvia.model.SylviaSignalController;
+
 
 /**
  * combined signal model factory that works for all provided signal controller, so far: planbased, sylvia, downstream, laemmer, gershenson
@@ -68,13 +70,13 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 	
 	@Inject
 	public CombinedSignalModelFactory(Scenario scenario, LaemmerConfig laemmerConfig, DgSylviaConfig sylviaConfig, 
-			LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, TtTotalDelay delayCalculator) {
+			LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, TtTotalDelay delayCalculator, GershensonConfig gershensonConfig) {
 		// prepare signal controller provider
 		signalControlProvider.put(SylviaSignalController.IDENTIFIER, new SylviaSignalController.SignalControlProvider(sylviaConfig, sensorManager, downstreamSensor));
 		signalControlProvider.put(DownstreamPlanbasedSignalController.IDENTIFIER, new DownstreamPlanbasedSignalController.SignalControlProvider(downstreamSensor));
 		signalControlProvider.put(LaemmerSignalController.IDENTIFIER, new LaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
 		signalControlProvider.put(FullyAdaptiveLaemmerSignalController.IDENTIFIER, new FullyAdaptiveLaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
-		signalControlProvider.put(DgRoederGershensonSignalController.IDENTIFIER, new DgRoederGershensonSignalController.SignalControlProvider(sensorManager, scenario));
+		signalControlProvider.put(DgRoederGershensonSignalController.IDENTIFIER, new DgRoederGershensonSignalController.SignalControlProvider(sensorManager, scenario, gershensonConfig));
 		signalControlProvider.put(AdvancedPlanBasedSignalSystemController.IDENTIFIER, new AdvancedPlanBasedSignalSystemController.SignalControlProvider(sensorManager, delayCalculator, scenario));
 	}
 
