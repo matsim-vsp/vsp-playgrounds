@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Link;
@@ -100,7 +101,14 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
     @Override
     public void handleEvent(ActivityStartEvent event) {
         //if its pt interaction, skip it
-        if (event.getActType().equals(PT_INTERACTION)) return;
+        if (event.getActType().equals(PT_INTERACTION)) {
+            Id<Person> personId = event.getPersonId();
+            Id<Trip> tripId = Id.create(personId + "_" + activityStartCount.get(personId), Trip.class);
+            MatsimTrip matsimTrip = trips.get(tripId);
+            matsimTrip.setLegMode(TransportMode.pt);
+            matsimTrip.setLegModeLock(true);
+            return;
+        }
 
         // store information from event to variables and print the information on console
         //String eventType = event.getEventType();
