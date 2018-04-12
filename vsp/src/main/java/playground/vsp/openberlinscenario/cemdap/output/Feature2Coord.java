@@ -30,7 +30,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
-import playground.vsp.corineLandcover.CorineLandCoverData;
+import playground.vsp.corineLandcover.LandCoverData;
 import playground.vsp.corineLandcover.LandCoverUtils;
 
 /**
@@ -43,7 +43,7 @@ public class Feature2Coord {
     }
 
     public final void assignCoords(Population population, int planNumber, ObjectAttributes personZoneAttributes, Map<String, Geometry> zones,
-                                   Map<Id<Person>, Coord> homeZones, boolean allowVariousWorkAndEducationLocations, CorineLandCoverData corineLandCoverData) {
+                                   Map<Id<Person>, Coord> homeZones, boolean allowVariousWorkAndEducationLocations, LandCoverData corineLandCoverData) {
         int counter = 0;
         LOG.info("Start assigning (non-home) coordinates. Plan number is " + planNumber + ".");
         for (Person person : population.getPersons().values()) {
@@ -101,7 +101,7 @@ public class Feature2Coord {
         LOG.info("Finished assigning non-home coordinates.");
     }
 
-    private Coord getCoord(CorineLandCoverData corineLandCoverData, Geometry geometry, String activityType) {
+    private Coord getCoord(LandCoverData corineLandCoverData, Geometry geometry, String activityType) {
         Coord coord;
         if (corineLandCoverData == null) {
             coord = Cemdap2MatsimUtils.getRandomCoordinate(geometry);
@@ -113,7 +113,7 @@ public class Feature2Coord {
     }
 
 
-    public final void assignHomeCoords(Population population, ObjectAttributes personZoneAttributes, Map<String, Geometry> zones, Map<Id<Person>, Coord> homeZones, CorineLandCoverData corineLandCoverData) {
+    public final void assignHomeCoords(Population population, ObjectAttributes personZoneAttributes, Map<String, Geometry> zones, Map<Id<Person>, Coord> homeZones, LandCoverData corineLandCoverData) {
         int counter = 0;
         LOG.info("Start assigning home coordinates.");
         for (Person person : population.getPersons().values()) {

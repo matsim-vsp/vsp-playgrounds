@@ -26,6 +26,7 @@ import java.util.Map;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
 import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
 import playground.vsp.openberlinscenario.cemdap.output.CemdapOutput2MatsimPlansConverter;
 
@@ -72,7 +73,7 @@ public class CORINELandCoverCoordsModifier {
     private static final Logger LOG = Logger.getLogger(CORINELandCoverCoordsModifier.class);
     private static final Coord fakeCoord = new Coord(-1, -1);
 
-    private final CorineLandCoverData corineLandCoverData;
+    private final LandCoverData corineLandCoverData;
     private final Population population;
 
     private final Map<String, Geometry> zoneFeatures = new HashMap<>();
@@ -82,7 +83,7 @@ public class CORINELandCoverCoordsModifier {
 
     public CORINELandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
                                          boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix) {
-        this.corineLandCoverData = new CorineLandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms);
+        this.corineLandCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, DataSource.Corine);
         LOG.info("Loading population from plans file " + matsimPlans);
         this.population = getPopulation(matsimPlans);
 

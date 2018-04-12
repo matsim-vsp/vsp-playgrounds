@@ -45,7 +45,7 @@ import playground.vsp.openberlinscenario.cemdap.output.ActivityTypes;
 import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
 import playground.vsp.openberlinscenario.cemdap.output.CemdapActivityParser;
 import playground.vsp.openberlinscenario.cemdap.output.CemdapStopsParser;
-import playground.vsp.corineLandcover.CorineLandCoverData;
+import playground.vsp.corineLandcover.LandCoverData;
 
 /**
  * @author dziemke
@@ -62,10 +62,10 @@ public class CemdapStops2MatsimPlansConverter {
 			String zonalShapeFile, String zoneIdTag,String zonalShapeFile2, String zoneIdTag2, boolean allowVariousWorkAndEducationLocations, boolean addStayHomePlan,
 			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms, boolean assignCoordinatesToActivities) throws IOException {
 
-		CorineLandCoverData corineLandCoverData = null;
+		LandCoverData corineLandCoverData = null;
 		// CORINE landcover
 		if (landCoverFile!=null && useLandCoverData) {
-			corineLandCoverData = new CorineLandCoverData(landCoverFile, simplifyGeometries, combiningGeoms);
+			corineLandCoverData = new LandCoverData(landCoverFile, simplifyGeometries, combiningGeoms);
 		}
 
 		LogToOutputSaver.setOutputDirectory(outputDirectory);
