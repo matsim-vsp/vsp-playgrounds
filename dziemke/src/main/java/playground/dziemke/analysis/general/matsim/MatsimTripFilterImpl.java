@@ -48,6 +48,14 @@ public class MatsimTripFilterImpl implements TripFilter {
     private Network network;
     private Geometry areaGeometry;
 
+
+    private long tripCounter = 0;
+    private long nextCounterMsg = 1;
+
+    public MatsimTripFilterImpl() {
+        log.info("Create Matsim Trip Filter");
+    }
+
     public void activateMode(String... mode) {
         onlyAnalyzeTripsWithMode = true;
         this.modes = Arrays.asList(mode);
@@ -109,7 +117,12 @@ public class MatsimTripFilterImpl implements TripFilter {
         boolean printedWarn1 = false;
         boolean printedWarn2 = false;
 
+        log.info("# of trips: " + tripMap.size());
+
         for (Trip currentTrip : tripMap) {
+
+            processCounter(tripMap.size());
+
             MatsimTrip trip = (MatsimTrip)currentTrip;
             // Choose if trip will be considered
             if (onlyAnalyzeTripInteriorOfArea || onlyAnalyzeTripsStartingOrEndingInArea) {
@@ -184,7 +197,21 @@ public class MatsimTripFilterImpl implements TripFilter {
             trips.add(trip);
         }
 
+        log.info("Number of filtered trips: " + trips.size() + " ~ "
+                + (double)Math.round((((double)trips.size()/tripMap.size())*100)*100)/100 + "% ");
+
         return trips;
+    }
+
+    private void processCounter(long tripSize) {
+        this.tripCounter++;
+        if (this.tripCounter == this.nextCounterMsg) {
+            this.nextCounterMsg *= 4;
+            Runtime rt = Runtime.getRuntime();
+            log.info(" trip # " + this.tripCounter + " ~ "
+                    + (double)Math.round((((double)tripCounter/tripSize)*100)*100)/100 + "% "
+                    + "Allocated Memory: " + rt.totalMemory() / 1000000 + " MB");
+        }
     }
 
     public String adaptOutputDirectory(String outputDirectory) {

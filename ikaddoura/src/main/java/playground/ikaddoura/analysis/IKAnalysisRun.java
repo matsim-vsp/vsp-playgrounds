@@ -53,6 +53,7 @@ import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModeAnalysis;
 import playground.ikaddoura.analysis.modeSwitchAnalysis.PersonTripScenarioComparison;
+import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
@@ -112,7 +113,7 @@ public class IKAnalysisRun {
 	private final Scenario scenario0;
 	private final List<AgentAnalysisFilter> filters0;
 
-	private final String outputDirectoryName = "analysis-ik-v1.0";
+	private final String outputDirectoryName = "analysis-ik-v1.1";
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -164,7 +165,7 @@ public class IKAnalysisRun {
 //			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
 			
 			homeActivity = "home";
-			scalingFactor = 10;			
+			scalingFactor = 100;			
 		}
 		
 		Scenario scenario1 = loadScenario(runDirectory, runId, null);
@@ -270,6 +271,7 @@ public class IKAnalysisRun {
 		// #####################################
 
 		EventsManager events1 = null;
+		
 		BasicPersonTripAnalysisHandler basicHandler1 = null;
 		DelayAnalysis delayAnalysis1 = null;
 		LinkDemandEventHandler trafficVolumeAnalysis1 = null;
@@ -310,6 +312,7 @@ public class IKAnalysisRun {
 		}
 		
 		EventsManager events0 = null;
+		
 		BasicPersonTripAnalysisHandler basicHandler0 = null;
 		DelayAnalysis delayAnalysis0 = null;
 		LinkDemandEventHandler trafficVolumeAnalysis0 = null;
@@ -370,10 +373,12 @@ public class IKAnalysisRun {
 			
 			personId2userBenefit1 = getPersonId2UserBenefit(scenario1);
 			
-			for (AgentAnalysisFilter filter : filters1) {
-				ModeAnalysis modeAnalysis1 = new ModeAnalysis(scenario1, filter);
-				modeAnalysis1.run();
-				modeAnalysisList1.add(modeAnalysis1);
+			if (filters1 != null) {
+				for (AgentAnalysisFilter filter : filters1) {
+					ModeAnalysis modeAnalysis1 = new ModeAnalysis(scenario1, filter);
+					modeAnalysis1.run();
+					modeAnalysisList1.add(modeAnalysis1);
+				}
 			}
 			
 			vttsHandler1.computeFinalVTTS();
@@ -383,10 +388,12 @@ public class IKAnalysisRun {
 			
 			personId2userBenefit0 = getPersonId2UserBenefit(scenario0);
 			
-			for (AgentAnalysisFilter filter : filters0) {
-				ModeAnalysis modeAnalysis0 = new ModeAnalysis(scenario0, filter);
-				modeAnalysis0.run();
-				modeAnalysisList0.add(modeAnalysis0);
+			if (filters0 != null) {
+				for (AgentAnalysisFilter filter : filters0) {
+					ModeAnalysis modeAnalysis0 = new ModeAnalysis(scenario0, filter);
+					modeAnalysis0.run();
+					modeAnalysisList0.add(modeAnalysis0);
+				}
 			}
 			
 			vttsHandler0.computeFinalVTTS();
@@ -460,6 +467,18 @@ public class IKAnalysisRun {
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
 			script.setRunId(this.runId);
 			script.setRunIdToCompareWith(this.runIdToCompareWith);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.scenarioCRS);
+			script.write();
+		}
+		
+		// absolute traffic volumes policy case
+		if (scenario1 != null) {
+			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute_noCRS.qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute_" + runId + ".qgs";
+			
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
 			script.setScalingFactor(String.valueOf(this.scalingFactor));
 			script.setCRS(this.scenarioCRS);
 			script.write();
@@ -660,6 +679,31 @@ public class IKAnalysisRun {
 		vttsHandler.printCarVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_carTrips.csv");
 		vttsHandler.printAvgVTTSperPerson(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_avgPerPerson.csv"); 
 		
+		// #####################################
+		// Print leg histogram videos
+		// #####################################
+		
+		String legHistogramOutputDirectory = analysisOutputDirectory + "legHistograms/";
+		createDirectory(legHistogramOutputDirectory);
+		
+		log.info("Creating leg histogram video for all modes...");
+		try {
+			MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_all");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		log.info("Creating leg histogram video for all modes... Done.");
+
+		for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
+			try {
+				log.info("Creating leg histogram video for mode " + mode);
+				MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+				log.info("Creating leg histogram video for mode " + mode + " Done.");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 	}
 	
 	private void createDirectory(String directory) {
@@ -713,6 +757,7 @@ public class IKAnalysisRun {
 				config.controler().setRunId(runId);
 			}
 
+			config.controler().setOutputDirectory(runDirectory);
 			config.plans().setInputFile(populationFile);
 			config.plans().setInputPersonAttributeFile(personAttributesFile);
 			config.network().setInputFile(networkFile);

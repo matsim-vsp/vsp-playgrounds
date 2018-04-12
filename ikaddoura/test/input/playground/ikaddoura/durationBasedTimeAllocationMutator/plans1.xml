@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v6.dtd">
+
+<population>
+
+<person id="1">
+	<plan score="0.0" selected="yes">
+		<activity type="h" x="-25000" y="0" link="1" end_time="06:00:00" />
+		<leg mode="car">
+			<route type = "links" start_link="1" end_link="12" >2 7 12</route>
+		</leg>
+		<activity type="w" x="10000" y="0" link="20" max_dur="00:00:10">
+		</activity>
+		<leg mode="car">
+			<route type = "links" start_link="13" end_link="1" >13 14 15 1</route>
+		</leg>
+		<activity type="h" x="-25000" y="0" link="1" >
+		</activity>
+	</plan>
+</person>
+
+</population>

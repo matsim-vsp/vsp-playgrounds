@@ -20,6 +20,7 @@
 package playground.jbischoff.taxi.inclusion;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.*;
@@ -52,7 +53,7 @@ public class RunInclusionTaxiScenario
         config.controler().setRunId("veh250_"+i);
         config.plans().setInputFile("itaxi_"+i+".xml.gz");
 //        config.plans().setInputFile("itaxi_"+0+".xml.gz");
-        DvrpConfigGroup.get(config).setMode(TaxiModule.TAXI_MODE);
+        DvrpConfigGroup.get(config).setMode(TransportMode.taxi);
         config.qsim().setEndTime(36*3600);
         TaxiConfigGroup taxi = (TaxiConfigGroup) config.getModules().get(TaxiConfigGroup.GROUP_NAME);
         taxi.setTaxisFile("hc_vehicles"+250+".xml.gz");

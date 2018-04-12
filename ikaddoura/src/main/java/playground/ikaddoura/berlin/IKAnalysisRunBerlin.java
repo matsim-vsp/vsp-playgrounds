@@ -40,9 +40,10 @@ public class IKAnalysisRunBerlin {
 			
 	public static void main(String[] args) throws IOException {
 			
-		final String runId = "be400mt_58_v6";
-		final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/" + runId + "/";
-		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
+		final String runId = "b400_85_v10";
+		final String runDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/";
+//		final String scenarioCRS = TransformationFactory.DHDN_GK4;
+		final String scenarioCRS = null;	
 		final String shapeFileZones = null;
 		final String zonesCRS = null;
 		final String homeActivity = "home";

@@ -26,7 +26,7 @@ public final class KNTaxiBus {
 
 	public static void main(String[] args) {
 		
-		Config config = ConfigUtils.loadConfig("drt_example/drtconfig.xml", new DrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
+		Config config = ConfigUtils.loadConfig("drt_example/drtconfig_door2door.xml", new DrtConfigGroup(), new DvrpConfigGroup(), new OTFVisConfigGroup());
 		config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.kinematicWaves);
 		config.addConfigConsistencyChecker(new DrtConfigConsistencyChecker());

@@ -21,10 +21,11 @@ package playground.michalm.euro2016;
 
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.vsp.ev.EvConfigGroup;
+
+import playground.michalm.etaxi.run.RunETaxiBenchmark;
+
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.*;
-
-import playground.michalm.taxi.run.RunETaxiBenchmark;
 
 public class RunETaxiEuro2016 {
 	public static void run(String configFile, int runs, String demand) {
