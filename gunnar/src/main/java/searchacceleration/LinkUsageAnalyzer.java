@@ -10,7 +10,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -20,6 +19,9 @@ import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.Vehicle;
 
+import floetteroed.utilities.DynamicData;
+import floetteroed.utilities.TimeDiscretization;
+import searchacceleration.datastructures.IndicatorNumerics;
 import searchacceleration.datastructures.SpaceTimeIndicatorVectorListbased;
 import searchacceleration.examples.matsimdummy.DummyPSim;
 
@@ -34,14 +36,22 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 
 	private final LinkUsageListener physicalMobsimUsageListener;
 
+	private final double meanLambda;
+
+	private final double delta;
+
 	private final Set<Id<Person>> replannerIds = new LinkedHashSet<>();
 
 	private final Map<Id<Person>, Plan> personId2newPlan = new LinkedHashMap<>();
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public LinkUsageAnalyzer(final LinkUsageListener physicalMobsimLinkUsageListener) {
+	public LinkUsageAnalyzer(final LinkUsageListener physicalMobsimLinkUsageListener, final double meanLambda,
+			final double delta) {
 		this.physicalMobsimUsageListener = physicalMobsimLinkUsageListener;
+		this.meanLambda = meanLambda; // TODO this should be allowed to vary
+										// during runtime
+		this.delta = delta;
 	}
 
 	// -------------------- FUNCTIONALITY --------------------
@@ -101,7 +111,44 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		 * generated plans are selected in the next MATSim iteration.
 		 */
 
-		// TODO Insert implementation.
+		final DynamicData<Id<Link>> currentCounts = IndicatorNumerics
+				.newCounts(this.physicalMobsimUsageListener.getTimeDiscretization(), vehId2physicalLinkUsage.values());
+		final DynamicData<Id<Link>> upcomingCounts = IndicatorNumerics
+				.newCounts(pSimLinkUsageListener.getTimeDiscretization(), vehId2physicalLinkUsage.values());
+
+		final double currentCountsSumOfSquares = IndicatorNumerics.sumOfSquareCounts(currentCounts);
+		final double deltaCountsSumOfSquares = IndicatorNumerics.sumOfSquareDeltaCounts(currentCounts, upcomingCounts);
+		final double w = this.meanLambda / (1.0 - this.meanLambda) * (deltaCountsSumOfSquares + this.delta)
+				/ currentCountsSumOfSquares;
+
+		final DynamicData<Id<Link>> interactionResiduals = IndicatorNumerics.newInteractionResidual(currentCounts,
+				upcomingCounts, this.meanLambda);
+		final DynamicData<Id<Link>> inertiaResiduals = IndicatorNumerics.newInertiaResidual(currentCounts,
+				this.meanLambda);
+		double regularizationResidual = this.meanLambda * currentCountsSumOfSquares;
+
+		final Set<Id<Vehicle>> allVehicleIds = new LinkedHashSet<>(vehId2physicalLinkUsage.keySet());
+		allVehicleIds.addAll(vehId2pSimLinkUsage.keySet());
+		final Set<Id<Vehicle>> replanningVehicleIds = new LinkedHashSet<>();
+		for (Id<Vehicle> vehId : allVehicleIds) {
+
+			final IndicatorNumerics<Id<Link>> numerics = new IndicatorNumerics<>(vehId2physicalLinkUsage.get(vehId),
+					vehId2pSimLinkUsage.get(vehId), this.meanLambda, currentCounts, currentCountsSumOfSquares, w,
+					this.delta, interactionResiduals, inertiaResiduals, regularizationResidual);
+
+			// TODO randomization option; consider delta -> inf !
+
+			final double newLambda;
+			if (numerics.getScoreChangeIfOne() <= numerics.getScoreChangeIfZero()) {
+				newLambda = 1.0;
+				replanningVehicleIds.add(vehId);
+			} else {
+				newLambda = 0.0;
+			}
+
+			numerics.updateDynamicDataResiduals(newLambda);
+			regularizationResidual = numerics.getRegularizationResidual();
+		}
 
 		/*
 		 * Now, it needs to be memorized which agents get to switch to their
@@ -113,7 +160,7 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		 */
 
 		this.replannerIds.clear();
-		// TODO ... and add selected re-planners.
+		// TODO ... and add selected re-planners based on replanningVehicleIds.
 
 	}
 
@@ -134,7 +181,9 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		final LinkUsageListener linkUsageListener = new LinkUsageListener(timeDiscr);
 		controler.getEvents().addHandler(linkUsageListener);
 
-		final LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener);
+		final double meanLambda = 0.1;
+		final double delta = 1.0;
+		final LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener, meanLambda, delta);
 		controler.addControlerListener(linkUsageAnalyzer);
 
 		controler.run();

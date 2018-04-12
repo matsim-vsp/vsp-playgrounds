@@ -13,7 +13,8 @@ public class SpaceTimeIndicatorVectorListbased<L> {
 
 	// -------------------- MEMBERS --------------------
 
-	final List<List<L>> data;
+	// TODO encapsulate
+	public final List<List<L>> data;
 
 	// -------------------- CONSTRUCTION --------------------
 

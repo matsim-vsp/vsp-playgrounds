@@ -1,7 +1,6 @@
 package searchacceleration.examples.matsimdummy;
 
-import org.matsim.contrib.opdyts.utils.TimeDiscretization;
-
+import floetteroed.utilities.TimeDiscretization;
 import searchacceleration.LinkUsageAnalyzer;
 import searchacceleration.LinkUsageListener;
 
@@ -21,7 +20,7 @@ public class RunExample {
 		 */
 
 		LinkUsageListener linkUsageListener = new LinkUsageListener(new TimeDiscretization(0, 3600, 24));
-		LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener);
+		LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener, 0.1, 1.0);
 
 		/*
 		 * Insert this into the controller and run the simulation. The
