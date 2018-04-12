@@ -15,6 +15,7 @@ public class Trip {
     private double departureTime_s;
     private double arrivalTime_s;
     private String legMode;
+    private boolean legModeLock = false;
     private double distanceBeeline_m;
     private double distanceRouted_m;
     private double duration_s;
@@ -74,7 +75,15 @@ public class Trip {
     }
 
     public void setLegMode(String legMode) {
-        this.legMode = legMode;
+        if (!legModeLock) this.legMode = legMode;
+    }
+
+    public boolean isLegModeLock() {
+        return legModeLock;
+    }
+
+    public void setLegModeLock(boolean legModeLock) {
+        this.legModeLock = legModeLock;
     }
 
     public double getDistanceBeeline_m() {

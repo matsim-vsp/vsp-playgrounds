@@ -197,7 +197,8 @@ public class MatsimTripFilterImpl implements TripFilter {
             trips.add(trip);
         }
 
-        log.info("Number of filtered trips: " + trips.size());
+        log.info("Number of filtered trips: " + trips.size() + " ~ "
+                + (double)Math.round((((double)trips.size()/tripMap.size())*100)*100)/100 + "% ");
 
         return trips;
     }

@@ -472,6 +472,18 @@ public class IKAnalysisRun {
 			script.write();
 		}
 		
+		// absolute traffic volumes policy case
+		if (scenario1 != null) {
+			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute_noCRS.qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute_" + runId + ".qgs";
+			
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.scenarioCRS);
+			script.write();
+		}
+		
 		// spatial zone-based analysis
 		if (scenario1 != null & scenario0 != null) {
 			String visScriptTemplateFile = "./visualization-scripts/zone-based-analysis_welfare_modes.qgs";
