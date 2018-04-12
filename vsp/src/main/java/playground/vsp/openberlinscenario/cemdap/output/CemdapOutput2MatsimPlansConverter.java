@@ -42,7 +42,8 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
 
-import playground.vsp.corineLandcover.CorineLandCoverData;
+import playground.vsp.corineLandcover.LandCoverData;
+import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
 import playground.vsp.corineLandcover.GeometryUtils;
 import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
@@ -118,10 +119,10 @@ public class CemdapOutput2MatsimPlansConverter {
 			boolean useLandCoverData, String landCoverFile, String stopFile, String activityFile, boolean simplifyGeometries, boolean combiningGeoms,
 			boolean assignCoordinatesToActivities, int activityDurationThreshold_s) throws IOException {
 
-		CorineLandCoverData corineLandCoverData = null;
+		LandCoverData LandCoverData = null;
 		// CORINE landcover
 		if (landCoverFile!=null && useLandCoverData) {
-			corineLandCoverData = new CorineLandCoverData(landCoverFile, simplifyGeometries, combiningGeoms);
+			LandCoverData = new LandCoverData(landCoverFile, simplifyGeometries, combiningGeoms, DataSource.Corine);
 		}
 
 		LogToOutputSaver.setOutputDirectory(outputDirectory);
@@ -212,11 +213,11 @@ public class CemdapOutput2MatsimPlansConverter {
 					personZoneAttributesMap.get(0),
 					zones,
 					homeZones,
-					corineLandCoverData);
+					LandCoverData);
 
 			// Assign coordinates to all other activities
 			for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
-				feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, corineLandCoverData);
+				feature2Coord.assignCoords(population, planNumber, personZoneAttributesMap.get(planNumber), zones, homeZones, allowVariousWorkAndEducationLocations, LandCoverData);
 			}
 		} else {
 //			LOG.warn("No coordinate will be assigned to activities. The zone id for each activity will be concatenated at the end of activityType seperated by '_'.");

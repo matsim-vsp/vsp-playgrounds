@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+
+import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.gbl.Gbl;
@@ -36,23 +39,25 @@ import org.opengis.feature.simple.SimpleFeature;
  * Created by amit on 31.07.17.
  */
 
-public class CorineLandCoverData {
+public class LandCoverData {
 
-    public static final Logger LOGGER = Logger.getLogger(CorineLandCoverData.class);
+    public static final Logger LOGGER = Logger.getLogger(LandCoverData.class);
 
     private final Map<LandCoverUtils.LandCoverActivityType, Geometry> activityType2CombinedLandcoverZone = new HashMap<>();
     Map<LandCoverUtils.LandCoverActivityType, List<Geometry>> activityTypes2ListOfLandCoverZones = new HashMap<>();
 
 
     private int warnCnt = 0;
-    private final LandCoverUtils landCoverUtils = new LandCoverUtils();
+    private final LandCoverUtils landCoverUtils;
 
     private final boolean simplifyGeometries;
     private final  boolean combiningGeom;
 
-    public CorineLandCoverData( String corineLandCoverShapeFile, boolean simplifyGeometries, boolean combiningGeom) {
+    public LandCoverData( String corineLandCoverShapeFile, boolean simplifyGeometries, boolean combiningGeom, DataSource dataSource) {
 
-        LOGGER.info("Reading CORINE landcover shape file . . .");
+    	landCoverUtils = new LandCoverUtils(dataSource);
+    	
+        LOGGER.info("Reading " + dataSource.toString() + " landcover shape file . . .");
         Collection<SimpleFeature> landCoverFeatures = ShapeFileReader.getAllFeatures(corineLandCoverShapeFile);
 
         this.simplifyGeometries = simplifyGeometries;
@@ -60,7 +65,7 @@ public class CorineLandCoverData {
                 "This is likely to speed up the process.");
 
         for (SimpleFeature landCoverZone : landCoverFeatures) {
-            int landCoverId = Integer.valueOf( (String) landCoverZone.getAttribute(LandCoverUtils.CORINE_LANDCOVER_TAG_ID));
+            int landCoverId = Integer.valueOf( (String) landCoverZone.getAttribute(landCoverUtils.getLandCoverShapeFileAttributeID()));
             List<LandCoverUtils.LandCoverActivityType> acts = landCoverUtils.getActivityTypesFromZone(landCoverId);
 
             for (LandCoverUtils.LandCoverActivityType activityTypeFromLandCover : acts ) {
@@ -90,15 +95,15 @@ public class CorineLandCoverData {
         }
     }
 
-    public CorineLandCoverData(final String corineLandCoverShapeFile) {
-        this(corineLandCoverShapeFile, false, false);
+    public LandCoverData(final String landCoverShapeFile, DataSource dataSource) {
+        this(landCoverShapeFile, false, false, dataSource);
     }
 
     // An example
     public static void main(String[] args) {
         String landcoverFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/CORINE_landcover_nrw/corine_nrw_src_clc12.shp";
         String zoneFile = "../../repos/shared-svn/projects/nemo_mercator/30_Scenario/cemdap_input/shapeFiles/sourceShape_NRW/dvg2gem_nw.shp";
-        CorineLandCoverData landCoverInformer = new CorineLandCoverData(landcoverFile, true, false);
+        LandCoverData landCoverInformer = new LandCoverData(landcoverFile, true, false, DataSource.Corine);
 //        landCoverInformer.getRandomPoint(...);
     }
 
@@ -126,20 +131,20 @@ public class CorineLandCoverData {
 
         Geometry landUseGeom ;
         Collection<Geometry> landUseGeoms ;
-        if (activityType.equals(LandCoverUtils.LandCoverActivityType.home) ) {
-            landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
-            landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
-        } else {
-            if (! activityType.equals(LandCoverUtils.LandCoverActivityType.other) && warnCnt < 1) {
-                LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
-                LOGGER.warn(Gbl.ONLYONCE);
-                warnCnt++;
-            }
-
+        if(		this.landCoverUtils.getDataSource().equals(DataSource.Corine)
+        		&& ! activityType.equals(LandCoverUtils.LandCoverActivityType.other)
+        		&& ! activityType.equals(LandCoverUtils.LandCoverActivityType.home)        				
+        		&& warnCnt < 5) {
+        	
+            LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
+            if(warnCnt >= 4) LOGGER.warn(Gbl.FUTURE_SUPPRESSED);
+            warnCnt++;
             landUseGeom =  this.activityType2CombinedLandcoverZone.get(LandCoverUtils.LandCoverActivityType.other) ;
             landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(LandCoverUtils.LandCoverActivityType.other);
+        } else {
+        	landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
+        	landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
         }
-
         if (this.combiningGeom) return GeometryUtils.getPointInteriorToGeometry( landUseGeom, zoneGeom );
         else return GeometryUtils.getPointInteriorToGeometriesWithFallback( landUseGeoms, zoneGeom );
     }
