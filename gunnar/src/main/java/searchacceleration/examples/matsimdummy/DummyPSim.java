@@ -18,10 +18,17 @@ public class DummyPSim {
 	}
 
 	public Map<Id<Person>, Plan> getNewPlanForAllAgents() {
+		/*
+		 * TODO This should implement the same plan strategies as defined in the
+		 * original MATSim configuration.
+		 */
 		return null;
 	}
 
-	public void executeNewPlans(final EventHandler eventHandler) {
+	public void executePlans(final Map<Id<Person>, Plan> plans, final EventHandler eventHandler) {
+		/*
+		 * TODO run the PSim, feed the event handler.
+		 */
 	}
 
 }

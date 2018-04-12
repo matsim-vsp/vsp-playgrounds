@@ -20,20 +20,20 @@ public class RunExample {
 		 * All PSEUDOSIM-related functionality is in the LinkUsageAnalyzer.
 		 */
 
-		TimeDiscretization timeDiscr = new TimeDiscretization(0, 3600, 24);
-		LinkUsageListener linkUsageListener = new LinkUsageListener(timeDiscr);
+		LinkUsageListener linkUsageListener = new LinkUsageListener(new TimeDiscretization(0, 3600, 24));
 		LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener);
 
 		/*
-		 * Insert this into the controller and run the simulation.
-		 * 
-		 * TODO: One needs to somehow take over the re-planning logic here (as
-		 * explained further in DummyController.run().
+		 * Insert this into the controller and run the simulation. The
+		 * DummyPlanStrategy makes (somehow...) sure that the re-planning
+		 * decided in the LinkUsageAnalyzer is taken over into the MATSim
+		 * re-planning.
 		 */
 
 		DummyController controler = new DummyController();
 		controler.addEventHandler(linkUsageListener);
 		controler.addIterationStartsListener(linkUsageAnalyzer);
+		controler.setPlanStrategyThatOverridesAllOthers(new DummyPlanStrategy(linkUsageAnalyzer));
 		controler.run();
 
 	}

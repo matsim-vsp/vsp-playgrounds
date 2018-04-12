@@ -1,6 +1,9 @@
 package searchacceleration;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -31,10 +34,24 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 
 	private final LinkUsageListener physicalMobsimUsageListener;
 
+	private final Set<Id<Person>> replannerIds = new LinkedHashSet<>();
+
+	private final Map<Id<Person>, Plan> personId2newPlan = new LinkedHashMap<>();
+
 	// -------------------- CONSTRUCTION --------------------
 
 	public LinkUsageAnalyzer(final LinkUsageListener physicalMobsimLinkUsageListener) {
 		this.physicalMobsimUsageListener = physicalMobsimLinkUsageListener;
+	}
+
+	// -------------------- FUNCTIONALITY --------------------
+
+	public boolean isAllowedToReplan(final Id<Person> personId) {
+		return this.replannerIds.contains(personId);
+	}
+
+	public Plan getNewPlan(final Id<Person> personId) {
+		return this.personId2newPlan.get(personId);
 	}
 
 	// --------------- IMPLEMENTATION OF IterationStartsListener ---------------
@@ -50,26 +67,24 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		/*
 		 * PSEUDOSIM
 		 * 
-		 * (1) Let every agent re-plan once. Memorize the new plan.
-		 * 
-		 * (2) Execute all new plans in the pSim.
-		 * 
-		 * The newly generated plans need to be somehow kept track of but must
-		 * not yet enter the regular MATSim logic. This is so because the search
-		 * acceleration logic has not yet decided which agents are allowed to
-		 * re-plan (in which case their new plan is to be accepted) and which
-		 * are no not allowed to re-plan (in which case their new plan is
-		 * discarded).
+		 * Let every agent re-plan once. Memorize the new plan.
 		 */
 
 		final DummyPSim pSim = new DummyPSim();
 
-		final Map<Id<Person>, Plan> person2newPlan = pSim.getNewPlanForAllAgents();
+		this.personId2newPlan.clear();
+		this.personId2newPlan.putAll(pSim.getNewPlanForAllAgents());
+
+		/*
+		 * PSEUDOSIM
+		 * 
+		 * Execute all new plans in the pSim.
+		 */
 
 		final LinkUsageListener pSimLinkUsageListener = new LinkUsageListener(
 				this.physicalMobsimUsageListener.getTimeDiscretization());
-		pSim.executeNewPlans(pSimLinkUsageListener);
-		
+		pSim.executePlans(this.personId2newPlan, pSimLinkUsageListener);
+
 		// This data structure represents what happened in the network during
 		// the most recent real network loading.
 		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListbased<Id<Link>>> vehId2pSimLinkUsage = pSimLinkUsageListener
@@ -82,20 +97,23 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		 * re-planning rate if network congestion did not change
 		 * (vehId2pSimLinkUsage).
 		 *
-		 * TODO Now, the actual search acceleration is run. It decides which
-		 * newly generated plans are selected in the next MATSim iteration.
+		 * Now, the actual search acceleration is run. It decides which newly
+		 * generated plans are selected in the next MATSim iteration.
 		 */
 
+		// TODO Insert implementation.
+
 		/*
-		 * TODO Now, it needs to be somehow memorized which agents get to switch
-		 * to their newly generated plans, and which must stick to their most
-		 * recently selected plan.
-		 * 
-		 * TODO For this, the vehicle-specific link usage information from the
-		 * mobility simulation(s) needs to be related to the person-specific
-		 * re-planning information, meaning that one somehow needs to figure out
-		 * who the drivers of all vehicles were.
+		 * Now, it needs to be memorized which agents get to switch to their
+		 * newly generated plans, and which must stick to their most recently
+		 * selected plan. For this, the vehicle-specific link usage information
+		 * from the mobility simulation(s) needs to be related to the
+		 * person-specific re-planning information, meaning that one somehow
+		 * needs to figure out who the drivers of all vehicles were.
 		 */
+
+		this.replannerIds.clear();
+		// TODO ... and add selected re-planners.
 
 	}
 

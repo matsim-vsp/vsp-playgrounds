@@ -5,6 +5,7 @@ import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.events.handler.EventHandler;
+import org.matsim.core.replanning.PlanStrategy;
 
 /**
  * 
@@ -25,6 +26,8 @@ public class DummyController {
 
 	private VehicleEntersTrafficEventHandler vehicleEntersTrafficEventHandler;
 
+	private PlanStrategy overridingPlanStragety;
+	
 	public void addIterationStartsListener(IterationStartsListener iterationStartsListener) {
 		this.iterationStartsListener = iterationStartsListener;
 	}
@@ -34,6 +37,10 @@ public class DummyController {
 		this.vehicleEntersTrafficEventHandler = (VehicleEntersTrafficEventHandler) eventHandler;
 	}
 
+	public void setPlanStrategyThatOverridesAllOthers(PlanStrategy overridingPlanStrategy) {
+		this.overridingPlanStragety = overridingPlanStrategy;
+	}
+	
 	public void run() {
 
 		callIterationStartsListener(0);
@@ -48,7 +55,7 @@ public class DummyController {
 			 * TODO: The re-planning must do nothing but take over the plan
 			 * choice decisions computed by the during the last call to the
 			 * iterationStartsListener that is implemented by an instance of
-			 * LinkUsageAnalyzer.
+			 * LinkUsageAnalyzer. Hence the "overridinPlanStrategy".
 			 */
 			replanning();
 
@@ -76,6 +83,7 @@ public class DummyController {
 	}
 
 	private void replanning() {
+		// TODO use overridingPlanStrategy
 	}
 
 }
