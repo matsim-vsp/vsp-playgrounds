@@ -184,7 +184,18 @@ public class LaemmerSignalController extends AbstractSignalController implements
     private LaemmerSignal selectSignal() {
         LaemmerSignal max = null;
         if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
-            max = regulationQueue.peek();
+        		/*
+			 * peek the first element for which the stabilization criterion is still active.
+			 * this has to be done if a signal/lane is included in more than one group
+			 * because all groups, a determining lane belongs to, are added to the
+			 * stabilization queue if this lane fulfills the stabilization criterion.
+			 * theresa, apr'18
+			 */
+        		max = regulationQueue.peek();
+            while (max != null && max.n < max.calcNCrit()) {
+            		regulationQueue.poll();
+            		max = regulationQueue.peek();
+            }
         }
         if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
             if (max == null) {
@@ -387,6 +398,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
         private double a = DEFAULT_INTERGREEN;
         private double regulationTime = 0;
+        private double n = 0;
 
         private Id<Lane> determiningLane;
         private Id<Link> determiningLink;
@@ -551,7 +563,6 @@ public class LaemmerSignalController extends AbstractSignalController implements
                 return;
             }
 
-            double n = 0;
             if (determiningLane != null) {
                 n = getNumberOfExpectedVehiclesOnLane(now, determiningLink, determiningLane);
             } else {
@@ -571,11 +582,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
             this.regulationTime = 0;
             this.stabilize = false;
-            double nCrit = determiningArrivalRate * laemmerConfig.getDesiredCycleTime()
-                    * ((laemmerConfig.getMaxCycleTime() - (a / (1 - determiningLoad)))
-                    / (laemmerConfig.getMaxCycleTime() - laemmerConfig.getDesiredCycleTime()));
-
-            if (n >= nCrit) {
+            if (n >= calcNCrit()) {
             	/* TODO actually, this is the wrong place to check downstream conditions, since situation can change until the group has moved up to the queue front. 
             	 * a better moment would be while polling from the queue: poll the first element with downstream empty. but we would need a linked list instead of queue for this
             	 * and could no longer check for empty regulationQueue to decide for stabilization vs optimization... I would prefer to have some tests before! theresa, jul'17 */
@@ -588,6 +595,12 @@ public class LaemmerSignalController extends AbstractSignalController implements
 				}
             }
         }
+
+		private double calcNCrit() {
+			return determiningArrivalRate * laemmerConfig.getDesiredCycleTime()
+                    * ((laemmerConfig.getMaxCycleTime() - (a / (1 - determiningLoad)))
+                    / (laemmerConfig.getMaxCycleTime() - laemmerConfig.getDesiredCycleTime()));
+		}
 
         public void getStatFields(StringBuilder builder) {
             builder.append("state_" + this.group.getId() +";");
