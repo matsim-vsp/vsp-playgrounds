@@ -642,8 +642,14 @@ public class IKAnalysisRun {
 		
 		String actDurationsOutputDirectory = analysisOutputDirectory + "activity-durations/";
 		createDirectory(actDurationsOutputDirectory);
+		
+		List<String> skippedPersonIdStrings = new ArrayList<>();
+		skippedPersonIdStrings.add("freight");
+		actHandler.process(scenario.getPopulation(), skippedPersonIdStrings);
+		
 		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations.csv", Double.POSITIVE_INFINITY);
 		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations_below-900-sec.csv", 900.);
+		actHandler.writeSummary(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations_summary.csv");
 
 		// #####################################
 		// Print results: mode statistics
