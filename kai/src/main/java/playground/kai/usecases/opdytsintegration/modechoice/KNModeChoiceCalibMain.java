@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
+import floetteroed.utilities.TimeDiscretization;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
@@ -12,7 +13,6 @@ import org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer;
 import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
-import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -28,7 +28,7 @@ import playground.kairuns.run.KNBerlinControler.A100;
 /**
  * 
  * @author Kai Nagel based on Gunnar Flötteröd
- * 
+ *
  */
 class KNModeChoiceCalibMain {
 	public static void main(String[] args) {
@@ -40,7 +40,6 @@ class KNModeChoiceCalibMain {
 		final Config config = KNBerlinControler.prepareConfig(args, assignment, equil, modeChoice, A100.base ) ;
 		
 		config.transitRouter().setDirectWalkFactor(1.e7);
-		
 		String outputDirectory = "" ;
 		if ( calib ) {
 			if ( equil ) {
