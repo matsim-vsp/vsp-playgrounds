@@ -32,7 +32,7 @@ public class RunExample {
 		DummyController controler = new DummyController();
 		controler.addEventHandler(linkUsageListener);
 		controler.addIterationStartsListener(linkUsageAnalyzer);
-		controler.setPlanStrategyThatOverridesAllOthers(new DummyPlanStrategy(linkUsageAnalyzer));
+//		controler.setPlanStrategyThatOverridesAllOthers(new DummyPlanStrategy(linkUsageAnalyzer)); // FIXME
 		controler.run();
 
 	}
