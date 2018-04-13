@@ -57,7 +57,11 @@ public class RunMATSim4 {
 	private static double ascBicycle;
 	private static double ascRide;	
 	
-	private static double monetaryDistanceRateRide = Double.POSITIVE_INFINITY;
+	private static double marginalUtilityTravelingCar = Double.POSITIVE_INFINITY;
+	private static double marginalUtilityTravelingPt = Double.POSITIVE_INFINITY;
+	private static double marginalUtilityTravelingWalk = Double.POSITIVE_INFINITY;
+	private static double marginalUtilityTravelingBicycle = Double.POSITIVE_INFINITY;
+	private static double marginalUtilityTravelingRide = Double.POSITIVE_INFINITY;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -87,8 +91,20 @@ public class RunMATSim4 {
 			log.info("ascRide: "+ ascRide);
 			
 			if (args.length > 8) {
-				monetaryDistanceRateRide = Double.parseDouble(args[8]);
-				log.info("monetaryDistanceRateRide: "+ monetaryDistanceRateRide);
+				marginalUtilityTravelingCar = Double.parseDouble(args[8]);
+				log.info("marginalUtilityTravelingCar: "+ marginalUtilityTravelingCar);
+				
+				marginalUtilityTravelingPt = Double.parseDouble(args[9]);
+				log.info("marginalUtilityTravelingPt: "+ marginalUtilityTravelingPt);
+				
+				marginalUtilityTravelingWalk = Double.parseDouble(args[10]);
+				log.info("marginalUtilityTravelingWalk: "+ marginalUtilityTravelingWalk);
+				
+				marginalUtilityTravelingBicycle = Double.parseDouble(args[11]);
+				log.info("marginalUtilityTravelingBicycle: "+ marginalUtilityTravelingBicycle);
+				
+				marginalUtilityTravelingRide = Double.parseDouble(args[12]);
+				log.info("marginalUtilityTravelingRide: "+ marginalUtilityTravelingRide);
 			}
 
 			
@@ -122,8 +138,13 @@ public class RunMATSim4 {
 		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
 		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
 
-		if (monetaryDistanceRateRide < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.ride).setMonetaryDistanceRate(monetaryDistanceRateRide);
+		if (marginalUtilityTravelingCar < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.car).setMarginalUtilityOfTraveling(marginalUtilityTravelingCar);
+		if (marginalUtilityTravelingPt < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.pt).setMarginalUtilityOfTraveling(marginalUtilityTravelingPt);
+		if (marginalUtilityTravelingWalk < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.walk).setMarginalUtilityOfTraveling(marginalUtilityTravelingWalk);
+		if (marginalUtilityTravelingBicycle < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get("bicycle").setMarginalUtilityOfTraveling(marginalUtilityTravelingBicycle);
+		if (marginalUtilityTravelingRide < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.ride).setMarginalUtilityOfTraveling(marginalUtilityTravelingRide);
 
+		// own time allocation mutator strategy
 		final String STRATEGY_NAME = "durationBasedTimeMutator";
 
 		StrategySettings stratSets = new StrategySettings();
