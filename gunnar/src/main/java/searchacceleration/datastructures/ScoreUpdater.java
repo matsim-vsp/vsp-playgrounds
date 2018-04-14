@@ -2,7 +2,6 @@ package searchacceleration.datastructures;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,17 +10,27 @@ import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.Tuple;
 
 /**
+ * The "score" this class refers to is the anticipated change of the search
+ * acceleration objective function resulting from setting a single agent's 0/1
+ * re-planning indicator.
+ * 
+ * Implements the greedy heuristic of Merz, P. and Freisleben, B. (2002).
+ * "Greedy and local search heuristics for unconstrained binary quadratic
+ * programming." Journal of Heuristics 8:197–213.
  * 
  * @author Gunnar Flötteröd
+ * 
+ * @param L
+ *            the space coordinate type
  *
  */
-public class IndicatorNumerics<L> {
+public class ScoreUpdater<L> {
 
 	// -------------------- MEMBERS --------------------
 
-	private final SpaceTimeIndicatorVectorListbased<L> currentIndicators;
+	private final SpaceTimeIndicatorVectorListBased<L> currentIndicators;
 
-	private final SpaceTimeIndicatorVectorListbased<L> upcomingIndicators;
+	private final SpaceTimeIndicatorVectorListBased<L> upcomingIndicators;
 
 	private final double meanLambda;
 
@@ -41,8 +50,8 @@ public class IndicatorNumerics<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public IndicatorNumerics(final SpaceTimeIndicatorVectorListbased<L> currentIndicators,
-			final SpaceTimeIndicatorVectorListbased<L> upcomingIndicators, final double meanLambda,
+	public ScoreUpdater(final SpaceTimeIndicatorVectorListBased<L> currentIndicators,
+			final SpaceTimeIndicatorVectorListBased<L> upcomingIndicators, final double meanLambda,
 			final DynamicData<L> currentCounts, final double currentCountsSumOfSquares, final double w,
 			final double delta, final DynamicData<L> interactionResidual, final DynamicData<L> inertiaResidual,
 			final double regularizationResidual) {
@@ -68,19 +77,18 @@ public class IndicatorNumerics<L> {
 		double changeTimesInteractionResiduals = 0.0;
 		double currentTimesCurrentPlusInertiaResiduals = 0.0;
 		{
-			final SpaceTimeVectorMapbased<L> currentTmp = new SpaceTimeVectorMapbased<>(this.currentIndicators);
-			final SpaceTimeVectorMapbased<L> upcomingTmp = new SpaceTimeVectorMapbased<>(this.upcomingIndicators);
-			final SpaceTimeVectorMapbased<L> deltaTmp = upcomingTmp.newDeepCopy();
+			final SpaceTimeVectorMapBased<L> currentTmp = new SpaceTimeVectorMapBased<>(this.currentIndicators);
+			final SpaceTimeVectorMapBased<L> deltaTmp = new SpaceTimeVectorMapBased<>(this.upcomingIndicators);
 			deltaTmp.subtract(currentTmp);
 
-			for (Map.Entry<Tuple<L, Integer>, Double> changeEntry : deltaTmp.data.entrySet()) {
+			for (Map.Entry<Tuple<L, Integer>, Integer> changeEntry : deltaTmp.getEntryView()) {
 				final double changeValue = changeEntry.getValue();
 				changeSumOfSquares += changeValue * changeValue;
 				changeTimesInteractionResiduals += changeValue
 						* interactionResidual.getBinValue(changeEntry.getKey().getA(), changeEntry.getKey().getB());
 			}
 
-			for (Map.Entry<Tuple<L, Integer>, Double> currentEntry : currentTmp.data.entrySet()) {
+			for (Map.Entry<Tuple<L, Integer>, Integer> currentEntry : currentTmp.getEntryView()) {
 				final double currentValue = currentEntry.getValue();
 				final L currentSpaceObj = currentEntry.getKey().getA();
 				final Integer currentTimeBin = currentEntry.getKey().getB();
@@ -104,16 +112,12 @@ public class IndicatorNumerics<L> {
 	// -------------------- IMPLEMENTATION --------------------
 
 	public static <L> DynamicData<L> newCounts(final TimeDiscretization timeDiscr,
-			final Collection<SpaceTimeIndicatorVectorListbased<L>> allIndicators) {
+			final Collection<SpaceTimeIndicatorVectorListBased<L>> allIndicators) {
 		final DynamicData<L> result = new DynamicData<L>(timeDiscr);
-		for (SpaceTimeIndicatorVectorListbased<L> indicators : allIndicators) {
+		for (SpaceTimeIndicatorVectorListBased<L> indicators : allIndicators) {
 			for (int bin = 0; bin < timeDiscr.getBinCnt(); bin++) {
-				for (List<L> locObjList : indicators.data) {
-					if (locObjList != null) {
-						for (L locObj : locObjList) {
-							result.add(locObj, bin, 1.0);
-						}
-					}
+				for (L locObj : indicators.getVisitedSpaceObjects(bin)) {
+					result.add(locObj, bin, 1.0);
 				}
 			}
 		}
@@ -181,19 +185,15 @@ public class IndicatorNumerics<L> {
 		this.residualsUpdated = true;
 
 		final double deltaLambda = newLambda - this.meanLambda;
-		for (int bin = 0; bin < this.currentIndicators.data.size(); bin++) {
-			if (this.upcomingIndicators.data.get(bin) != null) {
-				for (L currentSpaceObj : this.upcomingIndicators.data.get(bin)) {
-					this.interactionResidual.add(currentSpaceObj, bin, +deltaLambda);
-				}
+		for (int bin = 0; bin < this.currentIndicators.getTimeBinCnt(); bin++) {
+			for (L currentSpaceObj : this.upcomingIndicators.getVisitedSpaceObjects(bin)) {
+				this.interactionResidual.add(currentSpaceObj, bin, +deltaLambda);
 			}
-			if (this.currentIndicators.data.get(bin) != null) {
-				for (L currentSpaceObj : this.currentIndicators.data.get(bin)) {
-					this.interactionResidual.add(currentSpaceObj, bin, -deltaLambda);
-					this.inertiaResidual.add(currentSpaceObj, bin, -deltaLambda);
-				}
+			for (L currentSpaceObj : this.currentIndicators.getVisitedSpaceObjects(bin)) {
+				this.interactionResidual.add(currentSpaceObj, bin, -deltaLambda);
+				this.inertiaResidual.add(currentSpaceObj, bin, -deltaLambda);
 			}
-			for (L currentSpaceObj : this.upcomingIndicators.data.get(bin)) {
+			for (L currentSpaceObj : this.upcomingIndicators.getVisitedSpaceObjects(bin)) {
 				this.regularizationResidual += deltaLambda * this.currentCounts.getBinValue(currentSpaceObj, bin);
 			}
 		}

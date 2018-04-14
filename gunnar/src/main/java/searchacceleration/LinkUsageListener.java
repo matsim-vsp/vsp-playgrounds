@@ -18,7 +18,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.Vehicle;
 
 import floetteroed.utilities.TimeDiscretization;
-import searchacceleration.datastructures.SpaceTimeIndicatorVectorListbased;
+import searchacceleration.datastructures.SpaceTimeIndicatorVectorListBased;
 
 /**
  * 
@@ -31,7 +31,7 @@ public class LinkUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	private final TimeDiscretization timeDiscretization;
 
-	private Map<Id<Vehicle>, SpaceTimeIndicatorVectorListbased<Id<Link>>> veh2indicators = new LinkedHashMap<>();
+	private Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> veh2indicators = new LinkedHashMap<>();
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -47,18 +47,18 @@ public class LinkUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	}
 
 	private void registerLinkEntry(final Id<Link> linkId, final Id<Vehicle> vehicleId, final double time_s) {
-		SpaceTimeIndicatorVectorListbased<Id<Link>> indicators = this.veh2indicators.get(vehicleId);
+		SpaceTimeIndicatorVectorListBased<Id<Link>> indicators = this.veh2indicators.get(vehicleId);
 		if (indicators == null) {
-			indicators = new SpaceTimeIndicatorVectorListbased<Id<Link>>(this.timeDiscretization.getBinCnt());
+			indicators = new SpaceTimeIndicatorVectorListBased<Id<Link>>(this.timeDiscretization.getBinCnt());
 			this.veh2indicators.put(vehicleId, indicators);
 		}
-		indicators.add(linkId, this.timeDiscretization.getBin(time_s));
+		indicators.visit(linkId, this.timeDiscretization.getBin(time_s));
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	Map<Id<Vehicle>, SpaceTimeIndicatorVectorListbased<Id<Link>>> getAndResetIndicators() {
-		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListbased<Id<Link>>> result = this.veh2indicators;
+	Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> getAndResetIndicators() {
+		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> result = this.veh2indicators;
 		this.veh2indicators = new LinkedHashMap<>();
 		return result;
 	}

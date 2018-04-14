@@ -21,8 +21,8 @@ import org.matsim.vehicles.Vehicle;
 
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.TimeDiscretization;
-import searchacceleration.datastructures.IndicatorNumerics;
-import searchacceleration.datastructures.SpaceTimeIndicatorVectorListbased;
+import searchacceleration.datastructures.ScoreUpdater;
+import searchacceleration.datastructures.SpaceTimeIndicatorVectorListBased;
 import searchacceleration.examples.matsimdummy.DummyPSim;
 
 /**
@@ -71,7 +71,7 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 
 		// This data structure represents what happened in the network during
 		// the most recent real network loading.
-		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListbased<Id<Link>>> vehId2physicalLinkUsage = this.physicalMobsimUsageListener
+		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> vehId2physicalLinkUsage = this.physicalMobsimUsageListener
 				.getAndResetIndicators();
 
 		/*
@@ -97,7 +97,7 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 
 		// This data structure represents what happened in the network during
 		// the most recent real network loading.
-		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListbased<Id<Link>>> vehId2pSimLinkUsage = pSimLinkUsageListener
+		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> vehId2pSimLinkUsage = pSimLinkUsageListener
 				.getAndResetIndicators();
 
 		/*
@@ -111,19 +111,19 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		 * generated plans are selected in the next MATSim iteration.
 		 */
 
-		final DynamicData<Id<Link>> currentCounts = IndicatorNumerics
+		final DynamicData<Id<Link>> currentCounts = ScoreUpdater
 				.newCounts(this.physicalMobsimUsageListener.getTimeDiscretization(), vehId2physicalLinkUsage.values());
-		final DynamicData<Id<Link>> upcomingCounts = IndicatorNumerics
+		final DynamicData<Id<Link>> upcomingCounts = ScoreUpdater
 				.newCounts(pSimLinkUsageListener.getTimeDiscretization(), vehId2physicalLinkUsage.values());
 
-		final double currentCountsSumOfSquares = IndicatorNumerics.sumOfSquareCounts(currentCounts);
-		final double deltaCountsSumOfSquares = IndicatorNumerics.sumOfSquareDeltaCounts(currentCounts, upcomingCounts);
+		final double currentCountsSumOfSquares = ScoreUpdater.sumOfSquareCounts(currentCounts);
+		final double deltaCountsSumOfSquares = ScoreUpdater.sumOfSquareDeltaCounts(currentCounts, upcomingCounts);
 		final double w = this.meanLambda / (1.0 - this.meanLambda) * (deltaCountsSumOfSquares + this.delta)
 				/ currentCountsSumOfSquares;
 
-		final DynamicData<Id<Link>> interactionResiduals = IndicatorNumerics.newInteractionResidual(currentCounts,
+		final DynamicData<Id<Link>> interactionResiduals = ScoreUpdater.newInteractionResidual(currentCounts,
 				upcomingCounts, this.meanLambda);
-		final DynamicData<Id<Link>> inertiaResiduals = IndicatorNumerics.newInertiaResidual(currentCounts,
+		final DynamicData<Id<Link>> inertiaResiduals = ScoreUpdater.newInertiaResidual(currentCounts,
 				this.meanLambda);
 		double regularizationResidual = this.meanLambda * currentCountsSumOfSquares;
 
@@ -132,7 +132,7 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		final Set<Id<Vehicle>> replanningVehicleIds = new LinkedHashSet<>();
 		for (Id<Vehicle> vehId : allVehicleIds) {
 
-			final IndicatorNumerics<Id<Link>> numerics = new IndicatorNumerics<>(vehId2physicalLinkUsage.get(vehId),
+			final ScoreUpdater<Id<Link>> numerics = new ScoreUpdater<>(vehId2physicalLinkUsage.get(vehId),
 					vehId2pSimLinkUsage.get(vehId), this.meanLambda, currentCounts, currentCountsSumOfSquares, w,
 					this.delta, interactionResiduals, inertiaResiduals, regularizationResidual);
 
