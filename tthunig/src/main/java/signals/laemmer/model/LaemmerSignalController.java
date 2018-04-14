@@ -361,10 +361,10 @@ public class LaemmerSignalController extends AbstractSignalController implements
     	} else if (now > 90.0*60.0 && !this.isAvgQueueLengthNumWritten) {
 //       	} else if (now > 19.0*3600.0 && !this.isAvgQueueLengthNumWritten) {
 		    try {
-		    	if (Files.notExists(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")))){
-		    		Files.createFile(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")));
+		    	if (Files.notExists(Paths.get(this.config.controler().getOutputDirectory().concat("/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")))){
+		    		Files.createFile(Paths.get(this.config.controler().getOutputDirectory().concat("/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")));
 		    	}
-				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
+				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
 				this.isAvgQueueLengthNumWritten  = true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
