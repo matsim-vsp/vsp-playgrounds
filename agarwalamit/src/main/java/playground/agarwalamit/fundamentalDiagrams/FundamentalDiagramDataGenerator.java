@@ -25,8 +25,14 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -36,7 +42,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.otfvis.OTFVis;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -47,16 +53,9 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
-import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.MobsimDriverAgent;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
-import org.matsim.core.mobsim.qsim.interfaces.Netsim;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
 import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.utils.io.IOUtils;
@@ -65,9 +64,10 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.vis.otfvis.OTFClientLive;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import org.matsim.vis.otfvis.OnTheFlyServer;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation.DynamicPCUUpdator;
 
 /**
@@ -82,7 +82,7 @@ public class FundamentalDiagramDataGenerator {
 
 	private String runDir ;
 
-	private boolean isUsingLiveOTFVis = false;
+	static boolean isUsingLiveOTFVis = false;
 
 	private int flowUnstableWarnCount [] ;
 	private int speedUnstableWarnCount [] ;
@@ -91,10 +91,11 @@ public class FundamentalDiagramDataGenerator {
 	private final Scenario scenario;
 
 	private static GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
-	private static FDNetworkGenerator fdNetworkGenerator;
+	
+	static FDNetworkGenerator fdNetworkGenerator;
 
 	private final Map<String, TravelModesFlowDynamicsUpdator> mode2FlowData = new HashMap<>();
-	private final Map<Id<Person>, String> person2Mode = new HashMap<>();
+//	private final Map<Id<Person>, String> person2Mode = new HashMap<>();
 
 	private Integer[] startingPoint;
 	private Integer [] maxAgentDistribution;
@@ -356,17 +357,25 @@ public class FundamentalDiagramDataGenerator {
 	}
 
 	private void singleRun(List<Integer> pointToRun) {
-		person2Mode.clear();
+//		person2Mode.clear();
+		Population population = scenario.getPopulation();
 		for (int i=0; i<travelModes.length; i++){
 			for (int ii = 0; ii < pointToRun.get(i); ii++){
-				Id<Person> personId = Id.createPersonId(person2Mode.size());
-				person2Mode.put(personId,travelModes[i]);
+				Id<Person> personId = Id.createPersonId(population.getPersons().size());
+//				person2Mode.put(personId,travelModes[i]);
+				Person person = population.getFactory().createPerson(personId);
+				// a blank plan is necessary otherwise VspPlansCleaner will throw a NPE. Amit Apr'18
+				person.addPlan(population.getFactory().createPlan());
+				population.addPerson(person);
+				population.getPersonAttributes().putAttribute(personId.toString(), FDQSimProvider.PERSON_MODE_ATTRIBUTE_KEY, travelModes[i]);
 			}
 
 			this.mode2FlowData.get(travelModes[i]).setnumberOfAgents(pointToRun.get(i).intValue());
 		}
 
-		EventsManager events = EventsUtils.createEventsManager();
+//		EventsManager events = EventsUtils.createEventsManager();
+		
+		Controler controler = new Controler( scenario ) ;
 
 		globalFlowDynamicsUpdator = new GlobalFlowDynamicsUpdator(
 				this.mode2FlowData,
@@ -377,36 +386,72 @@ public class FundamentalDiagramDataGenerator {
 				fdNetworkGenerator.getFirstLinkIdOfTrack(),
 				fdNetworkGenerator.getLastLinkIdOfTrack(),
 				fdNetworkGenerator.getLengthOfTrack());
-
-		events.addHandler(globalFlowDynamicsUpdator);
-		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
 		
-		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
-			events.addHandler(new DynamicPCUUpdator(
-					this.scenario,
-					fdNetworkGenerator.getFirstLinkIdOfTrack(),
-					fdNetworkGenerator.getLastLinkIdOfTrack(),
-					fdNetworkGenerator.getLengthOfTrack()));
-		}
-
-		EventWriterXML eventWriter = null;
-
+		EventWriterXML eventWriter = null ;
 		if(fundamentalDiagramConfigGroup.isWritingEvents()){
 			String eventsDir = runDir+"/events/";
-
 			if (! new File(eventsDir).exists() ) new File(eventsDir).mkdir();
-
 			eventWriter = new EventWriterXML(eventsDir+"/events"+pointToRun.toString()+".xml");
-			events.addHandler(eventWriter);
 		}
+		
+		DynamicPCUUpdator dynamicPCU = null ;
+		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
+			dynamicPCU = new DynamicPCUUpdator(this.scenario,
+					fdNetworkGenerator.getFirstLinkIdOfTrack(),
+					fdNetworkGenerator.getLastLinkIdOfTrack(),
+					fdNetworkGenerator.getLengthOfTrack());
+		}
+		
+		final EventWriterXML eventsWriter = eventWriter;
+		final DynamicPCUUpdator dynamicPCUUpdator = dynamicPCU;
+		
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addEventHandlerBinding().toInstance(globalFlowDynamicsUpdator);
+				
+				if(travelModes.length > 1)	addEventHandlerBinding().toInstance(passingEventsUpdator);
+				
+				if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
+					addEventHandlerBinding().toInstance(dynamicPCUUpdator);
+				}
+				
+				if(fundamentalDiagramConfigGroup.isWritingEvents()){
+					addEventHandlerBinding().toInstance(eventsWriter);
+				}
+			}
+		});
+//		events.addHandler(globalFlowDynamicsUpdator);
+		
+//		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
+		
+//		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
+//			events.addHandler(new DynamicPCUUpdator(
+//					this.scenario,
+//					fdNetworkGenerator.getFirstLinkIdOfTrack(),
+//					fdNetworkGenerator.getLastLinkIdOfTrack(),
+//					fdNetworkGenerator.getLengthOfTrack()));
+//		}
 
-		Controler controler = new Controler( scenario ) ;
+		
 
-		final Netsim qSim = createModifiedQSim(this.scenario, events);
+//		if(fundamentalDiagramConfigGroup.isWritingEvents()){
+//			String eventsDir = runDir+"/events/";
+//
+//			if (! new File(eventsDir).exists() ) new File(eventsDir).mkdir();
+//
+//			eventWriter = new EventWriterXML(eventsDir+"/events"+pointToRun.toString()+".xml");
+//			events.addHandler(eventWriter);
+//		}
+
+		
+
+//		final Netsim qSim = createModifiedQSim(this.scenario, events);
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
 			public void install() {
-				this.bindMobsim().toInstance( qSim );
+//				this.bindMobsim().toInstance( qSim );
+				this.bindMobsim().toProvider(FDQSimProvider.class);
 			}
 		});
 
@@ -492,62 +537,62 @@ public class FundamentalDiagramDataGenerator {
 		}
 	}
 
-	private Netsim createModifiedQSim(Scenario sc, EventsManager events) {
-		final QSim qSim = new QSim(sc, events);
-		ActivityEngine activityEngine = new ActivityEngine(events, qSim.getAgentCounter());
-		qSim.addMobsimEngine(activityEngine);
-		qSim.addActivityHandler(activityEngine);
-
-		QNetsimEngine netsimEngine  = new QNetsimEngine(qSim);
-
-		qSim.addMobsimEngine(netsimEngine);
-		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
-
-		LOG.info("=======================");
-		LOG.info("Mobsim agents' are directly added to AgentSource.");
-		LOG.info("=======================");
-
-		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
-			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
-		}
-
-		//modification: Mobsim needs to know the different vehicle types (and their respective physical parameters)
-		final Map<String, VehicleType> travelModesTypes =
-				mode2FlowData
-						.entrySet()
-						.stream()
-						.collect( Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getVehicleType()) );
-
-		AgentSource agentSource = new AgentSource() {
-			@Override
-			public void insertAgentsIntoMobsim() {
-
-				for ( Id<Person> personId : person2Mode.keySet()) {
-					String travelMode = person2Mode.get(personId);
-					double randDouble = MatsimRandom.getRandom().nextDouble();
-					double actEndTime = randDouble * MAX_ACT_END_TIME;
-
-					MobsimAgent agent = new MySimplifiedRoundAndRoundAgent(personId, actEndTime, travelMode);
-					qSim.insertAgentIntoMobsim(agent);
-
-					final Vehicle vehicle = VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), travelModesTypes.get(travelMode));
-					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
-					qSim.createAndParkVehicleOnLink(vehicle, linkId4VehicleInsertion);
-				}
-			}
-		};
-
-		qSim.addAgentSource(agentSource);
-
-		if ( isUsingLiveOTFVis ) {
-			// otfvis configuration.  There is more you can do here than via file!
-			final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
-			otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
-			OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(sc.getConfig(), sc, events, qSim);
-			OTFClientLive.run(sc.getConfig(), server);
-		}
-		return qSim;
-	}
+//	private Netsim createModifiedQSim(Scenario sc, EventsManager events) {
+//		final QSim qSim = new QSim(sc, events);
+//		ActivityEngine activityEngine = new ActivityEngine(events, qSim.getAgentCounter());
+//		qSim.addMobsimEngine(activityEngine);
+//		qSim.addActivityHandler(activityEngine);
+//
+//		QNetsimEngine netsimEngine  = new QNetsimEngine(qSim);
+//
+//		qSim.addMobsimEngine(netsimEngine);
+//		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
+//
+//		LOG.info("=======================");
+//		LOG.info("Mobsim agents' are directly added to AgentSource.");
+//		LOG.info("=======================");
+//
+//		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
+//			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
+//		}
+//
+//		//modification: Mobsim needs to know the different vehicle types (and their respective physical parameters)
+//		final Map<String, VehicleType> travelModesTypes =
+//				mode2FlowData
+//						.entrySet()
+//						.stream()
+//						.collect( Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getVehicleType()) );
+//
+//		AgentSource agentSource = new AgentSource() {
+//			@Override
+//			public void insertAgentsIntoMobsim() {
+//
+//				for ( Id<Person> personId : person2Mode.keySet()) {
+//					String travelMode = person2Mode.get(personId);
+//					double randDouble = MatsimRandom.getRandom().nextDouble();
+//					double actEndTime = randDouble * MAX_ACT_END_TIME;
+//
+//					MobsimAgent agent = new MySimplifiedRoundAndRoundAgent(personId, actEndTime, travelMode);
+//					qSim.insertAgentIntoMobsim(agent);
+//
+//					final Vehicle vehicle = VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), travelModesTypes.get(travelMode));
+//					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
+//					qSim.createAndParkVehicleOnLink(vehicle, linkId4VehicleInsertion);
+//				}
+//			}
+//		};
+//
+//		qSim.addAgentSource(agentSource);
+//
+//		if ( isUsingLiveOTFVis ) {
+//			// otfvis configuration.  There is more you can do here than via file!
+//			final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
+//			otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
+//			OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(sc.getConfig(), sc, events, qSim);
+//			OTFClientLive.run(sc.getConfig(), server);
+//		}
+//		return qSim;
+//	}
 
 	private void updateTransimFileNameAndDir(List<Integer> runningPoint) {
 		String outputDir = scenario.getConfig().controler().getOutputDirectory();

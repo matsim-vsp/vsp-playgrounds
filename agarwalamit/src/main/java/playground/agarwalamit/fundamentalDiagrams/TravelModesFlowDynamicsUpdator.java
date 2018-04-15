@@ -191,8 +191,7 @@ final class TravelModesFlowDynamicsUpdator {
 			this.flowStability = false;
 		}
 	}
-
-	//ZZ_TODO : following two methods can be combined together ?? amit nov 15
+	
 	void initDynamicVariables() {
 		//numberOfAgents for each mode should be initialized at this point
 		this.decideSpeedTableSize();
@@ -217,12 +216,6 @@ final class TravelModesFlowDynamicsUpdator {
 		this.permanentFlow = 0.;
 	}
 
-	void reset(){
-		this.speedTable.clear();
-		this.speedStability = false;
-		this.flowStability = false;
-	}
-
 	private void decideSpeedTableSize() {
 		//Ensures a significant speed sampling for every mode size
 		//Is pretty empirical and can be changed if necessary (ssix, 16.10.13)
@@ -242,7 +235,6 @@ final class TravelModesFlowDynamicsUpdator {
 	}
 
 	void saveDynamicVariables(){
-		//NB: Should not be called upon a modeData without a vehicleType, as this.vehicleType will be null and will throw an exception.
 		this.permanentDensity = this.numberOfAgents / (lengthOfTrack) *1000 * this.vehicleType.getPcuEquivalents();
 		this.permanentAverageVelocity = this.getActualAverageVelocity();
 		FundamentalDiagramDataGenerator.LOG.info("Calculated permanent Speed from "+modeId+"'s lastXSpeeds : "+speedTable+"\nResult is : "+this.permanentAverageVelocity);

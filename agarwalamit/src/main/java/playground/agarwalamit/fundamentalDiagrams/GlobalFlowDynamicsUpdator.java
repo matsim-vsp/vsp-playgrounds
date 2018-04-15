@@ -75,14 +75,11 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 	}
 
 	@Override
-	public void reset(int iteration) {
-		for (String vehTyp : travelModesFlowData.keySet()){
-			this.travelModesFlowData.get(vehTyp).reset();
-		}
-		this.globalFlowData.reset();
-		this.permanentRegime = false;
+	public void reset(int iteration) {		
 		this.delegate.reset(iteration);
+		this.person2Mode.clear();
 	}
+	
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
 		person2Mode.put(event.getPersonId(), event.getLegMode());
@@ -158,7 +155,7 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 	@Override
 	public void handleEvent(VehicleLeavesTrafficEvent event) {
 		this.delegate.handleEvent(event);
-		this.travelModesFlowData.get(person2Mode.get(event.getPersonId())).handle(event);
+		this.travelModesFlowData.get(person2Mode.remove(event.getPersonId())).handle(event);
 	}
 
 	boolean isPermanent(){
