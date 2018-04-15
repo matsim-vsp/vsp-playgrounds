@@ -357,7 +357,7 @@ public class FundamentalDiagramDataGenerator {
 		return pointsToRun;
 	}
 	
-	public void addOverridingModule(AbstractModule abstractModule) {
+	public void addOverridingModules(AbstractModule abstractModule) {
 		this.abstractModules.add( abstractModule );
 	}
 
