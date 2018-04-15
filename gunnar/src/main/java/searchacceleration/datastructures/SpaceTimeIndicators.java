@@ -18,7 +18,7 @@ import floetteroed.utilities.EmptyIterable;
  * @param <L>
  *            the space coordinate type
  */
-public class SpaceTimeIndicatorVectorListBased<L> {
+public class SpaceTimeIndicators<L> {
 
 	// -------------------- MEMBERS --------------------
 
@@ -26,7 +26,7 @@ public class SpaceTimeIndicatorVectorListBased<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SpaceTimeIndicatorVectorListBased(final int timeBinCnt) {
+	public SpaceTimeIndicators(final int timeBinCnt) {
 		this.data = new ArrayList<List<L>>(timeBinCnt);
 		for (int bin = 0; bin < timeBinCnt; bin++) {
 			this.data.add(null);
