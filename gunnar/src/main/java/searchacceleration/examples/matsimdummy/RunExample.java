@@ -1,6 +1,7 @@
 package searchacceleration.examples.matsimdummy;
 
 import floetteroed.utilities.TimeDiscretization;
+import searchacceleration.ConstantReplanningParameters;
 import searchacceleration.LinkUsageAnalyzer;
 import searchacceleration.LinkUsageListener;
 
@@ -20,7 +21,8 @@ public class RunExample {
 		 */
 
 		LinkUsageListener linkUsageListener = new LinkUsageListener(new TimeDiscretization(0, 3600, 24));
-		LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener, 0.1, 1.0);
+		LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener,
+				new ConstantReplanningParameters(0.1, 1.0));
 
 		/*
 		 * Insert this into the controller and run the simulation. The
@@ -34,7 +36,5 @@ public class RunExample {
 		controler.addIterationStartsListener(linkUsageAnalyzer);
 		controler.setPlanStrategyThatOverridesAllOthers(new DummyPlanStrategy(linkUsageAnalyzer));
 		controler.run();
-
 	}
-
 }

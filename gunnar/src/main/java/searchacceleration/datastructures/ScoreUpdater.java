@@ -116,7 +116,7 @@ public class ScoreUpdater<L> {
 
 	// -------------------- GETTERS --------------------
 
-	public double getRegularizationResidual() {
+	public double getUpdatedRegularizationResidual() {
 		if (!this.residualsUpdated) {
 			throw new RuntimeException("Residuals have not yet updated.");
 		}
