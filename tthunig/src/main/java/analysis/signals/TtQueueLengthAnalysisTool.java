@@ -43,6 +43,7 @@ import org.matsim.core.mobsim.framework.events.MobsimInitializedEvent;
 import org.matsim.core.mobsim.framework.listeners.MobsimBeforeSimStepListener;
 import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
 import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.data.Lanes;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -61,6 +62,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 	private final SignalsData signals;
 	private final LinkSensorManager sensorManager;
 	private final int noSystems;
+	private final Lanes lanes;
 	
 	private Map<Id<Signal>, Double> totalWaitingTimePerSignal = new HashMap<>();
 	private Map<Id<SignalSystem>, Double> totalWaitingTimePerSystem = new HashMap<>();
@@ -81,6 +83,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 		this.sensorManager = sensorManager;
 		this.signals = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		this.noSystems = signals.getSignalSystemsData().getSignalSystemData().keySet().size();
+		this.lanes = scenario.getLanes();
 		
 		this.lastIteration = scenario.getConfig().controler().getLastIteration();
 		this.lastItDir = scenario.getConfig().controler().getOutputDirectory() + "/ITERS/it." + this.lastIteration + "/";
@@ -120,7 +123,8 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 				for (SignalData signal : system.getSignalData().values()) {
 					long signalQueueLength = 0;
 					// no lane events are thrown for links with only one lane -> use link events
-					if (signal.getLaneIds() != null && signal.getLaneIds().size() > 1) {
+					if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty() && 
+							lanes.getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().size() > 1) {
 						for (Id<Lane> laneId : signal.getLaneIds()) {
 							signalQueueLength += sensorManager.getNumberOfCarsInDistanceOnLane(signal.getLinkId(),
 									laneId, 0., event.getSimulationTime());
@@ -202,7 +206,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 			runGnuplotScript("plot_totalQueueLengthOverTime", lastItOutputDir);
 //			runGnuplotScript("plot_queueLengthPerSystemOverTime", lastItOutputDir); // TODO one file with all system queue length
 //			runGnuplotScript("plot_queueLengthPerSignalOverTime", lastItOutputDirPerSystem); // TODO file per system
-//			runGnuplotScript("plot_waitingTimePerSystem", lastItOutputDir);
+			runGnuplotScript("plot_waitingTimePerSystem", lastItOutputDir);
 //			runGnuplotScript("plot_waitingTimePerSignal", lastItOutputDirPerSystem); // TODO file per system
 		}
 	}
