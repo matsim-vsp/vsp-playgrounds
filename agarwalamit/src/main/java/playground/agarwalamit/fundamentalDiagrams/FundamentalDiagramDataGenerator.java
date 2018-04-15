@@ -104,6 +104,8 @@ public class FundamentalDiagramDataGenerator {
 	private Double[] modalShareInPCU;
 
 	private FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
+	
+	private List<AbstractModule> abstractModules = new ArrayList<>();
 
 	public FundamentalDiagramDataGenerator( final Scenario scenario){
 		fundamentalDiagramConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FundamentalDiagramConfigGroup.class);
@@ -354,6 +356,10 @@ public class FundamentalDiagramDataGenerator {
 		}
 		return pointsToRun;
 	}
+	
+	public void addOverridingModule(AbstractModule abstractModule) {
+		this.abstractModules.add( abstractModule );
+	}
 
 	private void singleRun(List<Integer> pointToRun) {
 		person2Mode.clear();
@@ -409,6 +415,8 @@ public class FundamentalDiagramDataGenerator {
 				this.bindMobsim().toInstance( qSim );
 			}
 		});
+		
+		this.abstractModules.forEach(a -> controler.addOverridingModule(a));
 
 		controler.run();
 
