@@ -371,15 +371,16 @@ public class FundamentalDiagramDataGenerator {
 				fdNetworkGenerator.getLastLinkIdOfTrack(),
 				fdNetworkGenerator.getLengthOfTrack());
 
-		DynamicPCUUpdator dynamicPCUUpdator = new DynamicPCUUpdator(
-				this.scenario,
-				fdNetworkGenerator.getFirstLinkIdOfTrack(),
-				fdNetworkGenerator.getLastLinkIdOfTrack(),
-				fdNetworkGenerator.getLengthOfTrack());
-
 		events.addHandler(globalFlowDynamicsUpdator);
 		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
-		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) events.addHandler(dynamicPCUUpdator);
+		
+		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
+			events.addHandler(new DynamicPCUUpdator(
+					this.scenario,
+					fdNetworkGenerator.getFirstLinkIdOfTrack(),
+					fdNetworkGenerator.getLastLinkIdOfTrack(),
+					fdNetworkGenerator.getLengthOfTrack()));
+		}
 
 		EventWriterXML eventWriter = null;
 
