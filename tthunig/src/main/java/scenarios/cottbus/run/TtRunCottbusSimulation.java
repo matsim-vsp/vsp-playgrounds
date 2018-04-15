@@ -80,6 +80,7 @@ import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.TtTotalTravelTime;
+import analysis.signals.TtQueueLengthAnalysisTool;
 import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
@@ -119,19 +120,20 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V1_2;
+	private final static NetworkType NETWORK_TYPE = NetworkType.V1_3;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
 		V1_1, // same as V1 except merged links 6724 and 6708. should only have effect on sensor prediction for adaptive signals but not on fixed time signals
 		V1_2, // same as V1 except merged links 10284-8747-8745 and reverse
+		V1_3, // all links infront of signals merged if possible (see mergedLinksForV1-3.xls)
 		V2, // add missing highway part, add missing links, correct directions, add missing signal
 		V21, // add missing lanes
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MSNetV1_2;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MSNetV1_3;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -151,10 +153,14 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap1MSidealNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap1.0
 		WoMines100itcap07MSidealNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap0.7
 		WoMines100itcap1MSNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap1.0
-		WoMines100itcap07MSNetV1_2 // stuck120 tbs900 networkV1_2 with merged links around 10284. cap0.7
+		WoMines100itcap07MSNetV1_2, // stuck120 tbs900 networkV1_2 with merged links around 10284. cap0.7
+		WoMines100itcap1MSNetV1_3,
+		WoMines100itcap07MSNetV1_3,
+		WoMines100itcap05MSNetV1_3,
+		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_DOUBLE_GROUPS_14GREEN;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_OPT_OFFSETS, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -165,8 +171,10 @@ public class TtRunCottbusSimulation {
 		ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_GREEN, // all systems inside envelope downstream with green basis
 		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with green basis, rest all green
 		LAEMMER_NICO_GROUPS, // laemmer with the fixed signal groups, that nico defined in his MA. except: bug fix in system 1 and 5 (1905 was included twice, 1902 forgotten; 1802 included twice, 1803 forgotten)
+		LAEMMER_NICO_GROUPS_14GREEN, // the same as LAEMMER_NICO_GROUPS but without signal 1107 at system 14 (i.e. all green)
 		LAEMMER_DOUBLE_GROUPS, // laemmer with fixed signal groups, where signals can be included more than once, i.e. alternative groups can be modeled
 		LAEMMER_DOUBLE_GROUPS_SYS17, // as above but two additional possible groups at system 17, such that opposing traffic can have green at the same time
+		LAEMMER_DOUBLE_GROUPS_14GREEN, // the same as LAEMMER_DOUBLE_GROUPS but without signal 1107 at system 14 (i.e. all green)
 		MS_IDEAL // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 	}
 	
@@ -183,7 +191,7 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/laemmer/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ewgt/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
@@ -220,67 +228,68 @@ public class TtRunCottbusSimulation {
 		Scenario scenario = prepareScenario( config );
 		
 		if (USE_OPDYTS) {
-			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
-			
-			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
-			opdytsConfigGroup.setNumberOfIterationsForConvergence(10); // 5
-
-			// TODO set useMSA flag
-			opdytsConfigGroup.setMaxIteration(opdytsIt);
-			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
-			opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
-			opdytsConfigGroup.setUseAllWarmUpIterations(false);
-			opdytsConfigGroup.setWarmUpIterations(warmUpIt); // 1 this should be tested (parametrized).
-			opdytsConfigGroup.setPopulationSize(1);
-			opdytsConfigGroup.setSelfTuningWeight(selfTunWt);
-
-			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
-
-			MATSimSimulator2<OffsetDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
-			simulator.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					// this can later be accessed by TravelTimeObjectiveFunction, because it is bind inside MATSimSimulator2
-					bind(TtTotalTravelTime.class).asEagerSingleton();
-					addEventHandlerBinding().to(TtTotalTravelTime.class);
-
-					// bind amits analysis
-					bind(ModalTripTravelTimeHandler.class);
-					addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
-
-					// bind general analysis
-					this.bind(TtGeneralAnalysis.class);
-					this.bind(TtAnalyzedGeneralResultsWriter.class);
-					this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
-
-					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
-
-					this.addControlerListenerBinding().to(OpdytsOffsetStatsControlerListener.class);
-					
-					// plot only after one opdyts transition:
-					addControlerListenerBinding().toInstance(new ShutdownListener() { 
-						@Override
-						public void notifyShutdown(ShutdownEvent event) {
-							// post-process analysis
-							String opdytsConvergenceFile = config.controler().getOutputDirectory() + "/opdyts.con";
-							if (new File(opdytsConvergenceFile).exists()) {
-								OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
-								opdytsConvergencePlotter.readFile(config.controler().getOutputDirectory() + "/opdyts.con");
-								opdytsConvergencePlotter.plotData(config.controler().getOutputDirectory() + "/convergence.png");
-							}
-						}
-					});
-				}
-			});
-			simulator.addOverridingModule(new SignalsModule());
-			runner.addNetworkModeOccupancyAnalyzr(simulator);
-
-			runner.run(simulator, new OffsetRandomizer(scenario), new OffsetDecisionVariable(
-					((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalControlData(),
-					scenario), new TravelTimeObjectiveFunction());
+			throw new UnsupportedOperationException("this code has to be adapted to changes in opdyts");
+//			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
+//			
+//			opdytsConfigGroup.setNumberOfIterationsForAveraging(5); // 2
+//			opdytsConfigGroup.setNumberOfIterationsForConvergence(10); // 5
+//
+//			// TODO set useMSA flag
+//			opdytsConfigGroup.setMaxIteration(opdytsIt);
+//			opdytsConfigGroup.setOutputDirectory(scenario.getConfig().controler().getOutputDirectory());
+//			opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
+//			opdytsConfigGroup.setUseAllWarmUpIterations(false);
+//			opdytsConfigGroup.setWarmUpIterations(warmUpIt); // 1 this should be tested (parametrized).
+//			opdytsConfigGroup.setPopulationSize(1);
+//			opdytsConfigGroup.setSelfTuningWeight(selfTunWt);
+//
+//			MATSimOpdytsControler<OffsetDecisionVariable> runner = new MATSimOpdytsControler<>(scenario);
+//
+//			MATSimSimulator2<OffsetDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
+//			simulator.addOverridingModule(new AbstractModule() {
+//				@Override
+//				public void install() {
+//					// this can later be accessed by TravelTimeObjectiveFunction, because it is bind inside MATSimSimulator2
+//					bind(TtTotalTravelTime.class).asEagerSingleton();
+//					addEventHandlerBinding().to(TtTotalTravelTime.class);
+//
+//					// bind amits analysis
+//					bind(ModalTripTravelTimeHandler.class);
+//					addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+//
+//					// bind general analysis
+//					this.bind(TtGeneralAnalysis.class);
+//					this.bind(TtAnalyzedGeneralResultsWriter.class);
+//					this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
+//
+//					// bind tool to analyze signals
+//					this.bind(TtSignalAnalysisTool.class);
+//					this.bind(TtSignalAnalysisWriter.class);
+//					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+//
+//					this.addControlerListenerBinding().to(OpdytsOffsetStatsControlerListener.class);
+//					
+//					// plot only after one opdyts transition:
+//					addControlerListenerBinding().toInstance(new ShutdownListener() { 
+//						@Override
+//						public void notifyShutdown(ShutdownEvent event) {
+//							// post-process analysis
+//							String opdytsConvergenceFile = config.controler().getOutputDirectory() + "/opdyts.con";
+//							if (new File(opdytsConvergenceFile).exists()) {
+//								OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
+//								opdytsConvergencePlotter.readFile(config.controler().getOutputDirectory() + "/opdyts.con");
+//								opdytsConvergencePlotter.plotData(config.controler().getOutputDirectory() + "/convergence.png");
+//							}
+//						}
+//					});
+//				}
+//			});
+//			simulator.addOverridingModule(new SignalsModule());
+//			runner.addNetworkModeOccupancyAnalyzr(simulator);
+//
+//			runner.run(simulator, new OffsetRandomizer(scenario), new OffsetDecisionVariable(
+//					((SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME)).getSignalControlData(),
+//					scenario), new TravelTimeObjectiveFunction());
 		} else {
 			// start a normal matsim run without opdyts:
 			Controler controler = prepareController( scenario );
@@ -314,8 +323,12 @@ public class TtRunCottbusSimulation {
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_link10284andReverseMerged.xml");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_link10284merged.xml");
 			break;
+		case V1_3:
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v1-3.xml");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v1-3.xml");
+			break;
 		case V2:
-			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v2.xml");
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v2.xml.gz");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes.xml");
 			break;
 		case V21:
@@ -323,7 +336,7 @@ public class TtRunCottbusSimulation {
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v2.1.xml");
 			break;
 		case V3:
-			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v3.xml");
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v3.xml.gz");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v3.xml");
 			break;
 		}
@@ -392,6 +405,18 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap07MSNetV1_2:
 			config.plans().setInputFile("../../runs-svn/cottbus/laemmer/2018-03-3-17-58-41_100it_MS_cap07_stuck120_tbs900_netV1-2/1000.output_plans.xml.gz");
 			break;
+		case WoMines100itcap1MSNetV1_3:
+			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-12-56-38_v1-3_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MSNetV1_3:
+			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-12-57-3_v1-3_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap05MSNetV1_3:
+			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-17-37-25_v1-3_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
+			break;
+		case NicoOutputPlans:
+			config.plans().setInputFile("../../runs-svn/cottbus/NicoMA/OutputFixedLongLanes/output_plans.xml.gz");
+			break;
 		case GRID_LOCK_BTU:
 			// take these as initial plans
 			if (SIGNAL_TYPE.equals(SignalType.MS) || SIGNAL_TYPE.equals(SignalType.DOWNSTREAM_MS)){
@@ -411,7 +436,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(0);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
@@ -426,6 +451,7 @@ public class TtRunCottbusSimulation {
 			case V1:
 			case V1_1:
 			case V1_2:
+			case V1_3:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13.xml");
 				break;
 			case BTU_NET:
@@ -435,9 +461,12 @@ public class TtRunCottbusSimulation {
 			case V2:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v2.xml");
 				break;
-			default:
+			case V21:
+			case V3:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v2.1.xml");
 				break;
+			default:
+				throw new RuntimeException("Network type not specified!");
 			}			
 			// set signal group
 			if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
@@ -488,6 +517,10 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
 				break;
+			case LAEMMER_DOUBLE_GROUPS_14GREEN:
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases_14allGreen1107.xml");
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;
 			case LAEMMER_DOUBLE_GROUPS_SYS17:
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases17.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
@@ -497,7 +530,11 @@ public class TtRunCottbusSimulation {
 //				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases_6.xml");
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
-				break;				
+				break;	
+			case LAEMMER_NICO_GROUPS_14GREEN:
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14allGreen1107.xml");
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;	
 			case MS_IDEAL:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_idealized.xml");
 				break;
@@ -542,10 +579,10 @@ public class TtRunCottbusSimulation {
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
-			if (POP_TYPE.equals(PopulationType.BTU_POP_BTU_ROUTES))
+			if (POP_TYPE.equals(PopulationType.BTU_POP_BTU_ROUTES) || POP_TYPE.equals(PopulationType.NicoOutputPlans))
 				strat.setWeight(0.0); // no ReRoute, fix route choice set
 			else
-				strat.setWeight(0.01);
+				strat.setWeight(0.1);
 			config.strategy().addStrategySettings(strat);
 		}
 		{
@@ -581,6 +618,7 @@ public class TtRunCottbusSimulation {
 			config.strategy().setMaxAgentPlanMemorySize( 5 );
 
 		// TODO
+//		config.qsim().setStuckTime( 10 );
 		config.qsim().setStuckTime( 120 );
 //		config.qsim().setStuckTime( 600 );
 //		config.qsim().setStuckTime( 3600 ); // default ist 10s
@@ -930,6 +968,8 @@ public class TtRunCottbusSimulation {
 					this.bind(TtSignalAnalysisTool.class);
 					this.bind(TtSignalAnalysisWriter.class);
 					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.addControlerListenerBinding().to(TtQueueLengthAnalysisTool.class);
+					this.addMobsimListenerBinding().to(TtQueueLengthAnalysisTool.class);
 				}
 			}
 		});

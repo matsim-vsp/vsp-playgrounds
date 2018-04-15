@@ -18,9 +18,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.Vehicle;
 
 import floetteroed.utilities.TimeDiscretization;
-import searchacceleration.datastructures.SpaceTimeIndicatorVectorListBased;
+import searchacceleration.datastructures.SpaceTimeIndicators;
 
 /**
+ * Keeps track of when every single vehicle enters which link.
  * 
  * @author Gunnar Flötteröd
  *
@@ -31,7 +32,7 @@ public class LinkUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	private final TimeDiscretization timeDiscretization;
 
-	private Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> veh2indicators = new LinkedHashMap<>();
+	private final Map<Id<Vehicle>, SpaceTimeIndicators<Id<Link>>> veh2indicators = new LinkedHashMap<>();
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -41,53 +42,46 @@ public class LinkUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	// -------------------- INTERNALS --------------------
 
-	private boolean relevant(final double time_s) {
-		return ((time_s >= this.timeDiscretization.getStartTime_s())
-				&& (time_s < this.timeDiscretization.getBinStartTime_s(this.timeDiscretization.getBinCnt())));
-	}
-
 	private void registerLinkEntry(final Id<Link> linkId, final Id<Vehicle> vehicleId, final double time_s) {
-		SpaceTimeIndicatorVectorListBased<Id<Link>> indicators = this.veh2indicators.get(vehicleId);
-		if (indicators == null) {
-			indicators = new SpaceTimeIndicatorVectorListBased<Id<Link>>(this.timeDiscretization.getBinCnt());
-			this.veh2indicators.put(vehicleId, indicators);
+		if ((time_s >= this.timeDiscretization.getStartTime_s()) && (time_s < this.timeDiscretization.getEndTime_s())) {
+			SpaceTimeIndicators<Id<Link>> indicators = this.veh2indicators.get(vehicleId);
+			if (indicators == null) {
+				indicators = new SpaceTimeIndicators<Id<Link>>(this.timeDiscretization.getBinCnt());
+				this.veh2indicators.put(vehicleId, indicators);
+			}
+			indicators.visit(linkId, this.timeDiscretization.getBin(time_s));
 		}
-		indicators.visit(linkId, this.timeDiscretization.getBin(time_s));
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> getAndResetIndicators() {
-		final Map<Id<Vehicle>, SpaceTimeIndicatorVectorListBased<Id<Link>>> result = this.veh2indicators;
-		this.veh2indicators = new LinkedHashMap<>();
-		return result;
-	}
-
 	public TimeDiscretization getTimeDiscretization() {
 		return this.timeDiscretization;
 	}
-	
-	// ---------- IMPLEMENTATION OF *EventHandler INTERFACES ----------
+
+	Map<Id<Vehicle>, SpaceTimeIndicators<Id<Link>>> getAndClearIndicators() {
+		final Map<Id<Vehicle>, SpaceTimeIndicators<Id<Link>>> result = new LinkedHashMap<>(this.veh2indicators);
+		this.veh2indicators.clear();
+		return result;
+	}
+
+	// --------------- IMPLEMENTATION OF EventHandler INTERFACES ---------------
 
 	@Override
 	public void reset(int iteration) {
 		if (this.veh2indicators.size() > 0) {
-			throw new RuntimeException("should have been cleared");
+			throw new RuntimeException("veh2indicators should be empty");
 		}
 	}
 
 	@Override
 	public void handleEvent(final VehicleEntersTrafficEvent event) {
-		if (this.relevant(event.getTime())) {
 		this.registerLinkEntry(event.getLinkId(), event.getVehicleId(), event.getTime());
-		}
 	}
 
 	@Override
 	public void handleEvent(final LinkEnterEvent event) {
-		if (this.relevant(event.getTime())) {
-			this.registerLinkEntry(event.getLinkId(), event.getVehicleId(), event.getTime());
-		}
+		this.registerLinkEntry(event.getLinkId(), event.getVehicleId(), event.getTime());
 	}
 
 	// -------------------- MAIN-FUNCTION, ONLY FOR TESTING --------------------

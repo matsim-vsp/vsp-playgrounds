@@ -22,7 +22,7 @@ import floetteroed.utilities.Tuple;
  *            the space coordinate type
  *
  */
-class SpaceTimeVectorMapBased<L> {
+class SpaceTimeCounts<L> {
 
 	// -------------------- MEMBERS --------------------
 
@@ -31,7 +31,7 @@ class SpaceTimeVectorMapBased<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	SpaceTimeVectorMapBased(final SpaceTimeIndicatorVectorListBased<L> parent) {
+	SpaceTimeCounts(final SpaceTimeIndicators<L> parent) {
 		if (parent != null) {
 			for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
 				for (L spaceObj : parent.getVisitedSpaceObjects(timeBin)) {
@@ -71,11 +71,11 @@ class SpaceTimeVectorMapBased<L> {
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	Set<Map.Entry<Tuple<L, Integer>, Integer>> getEntryView() {
+	Set<Map.Entry<Tuple<L, Integer>, Integer>> entriesView() {
 		return Collections.unmodifiableSet(this.data.entrySet());
 	}
 
-	void subtract(final SpaceTimeVectorMapBased<L> other) {
+	void subtract(final SpaceTimeCounts<L> other) {
 		for (Map.Entry<Tuple<L, Integer>, Integer> entry : other.data.entrySet()) {
 			this.set(entry.getKey(), this.get(entry.getKey()) - entry.getValue());
 		}
