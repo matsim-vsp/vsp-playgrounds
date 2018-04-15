@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.util.Arrays;
 import java.util.Collection;

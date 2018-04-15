@@ -1,4 +1,4 @@
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ import org.matsim.vis.otfvis.OnTheFlyServer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import playground.agarwalamit.fundamentalDiagrams.FundamentalDiagramDataGenerator.MySimplifiedRoundAndRoundAgent;
+import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator.MySimplifiedRoundAndRoundAgent;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	

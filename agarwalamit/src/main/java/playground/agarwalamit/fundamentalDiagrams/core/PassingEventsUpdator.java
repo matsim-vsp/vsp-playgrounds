@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.util.*;
 import org.matsim.api.core.v01.Id;

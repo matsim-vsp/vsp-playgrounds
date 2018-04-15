@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.util.HashMap;
 import java.util.Map;
