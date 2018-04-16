@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 public class ExperiencedTripsWriter {
@@ -166,9 +167,9 @@ public class ExperiencedTripsWriter {
 					convertSecondsToTimeString(leg.getStartTime()) + sep + 
 					convertSecondsToTimeString(leg.getEndTime()) + sep + 
 					leg.getMode() + sep + leg.getWaitTime() + sep + leg.getGrossWaitTime() + sep +
-					leg.getInVehicleTime() + sep + leg.getDistance() + sep + leg.getTransitRouteId().toString());
+					leg.getInVehicleTime() + sep + leg.getDistance() + sep + String.valueOf(leg.getTransitRouteId()));
 			if (leg.getMode().equals(TransportMode.pt)) {
-				bw.write( sep + leg.getPtFromStop().toString() + sep + leg.getPtToStop().toString());
+				bw.write( sep + String.valueOf(leg.getPtFromStop()) + sep + String.valueOf(leg.getPtToStop()));
 			} else {
 				bw.write( sep + "no pt" + sep + "no pt");
 			}
@@ -179,7 +180,7 @@ public class ExperiencedTripsWriter {
 	}
 	
 	public static String convertSecondsToTimeString(double seconds) {
-		int s = (int) seconds;
-		return String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
+		return Time.writeTime(seconds);
+
 	}
 }

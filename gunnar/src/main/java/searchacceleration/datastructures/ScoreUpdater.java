@@ -10,9 +10,9 @@ import floetteroed.utilities.Tuple;
  * acceleration objective function resulting from setting a single agent's 0/1
  * re-planning indicator.
  * 
- * Implements the greedy heuristic of Merz, P. and Freisleben, B. (2002).
- * "Greedy and local search heuristics for unconstrained binary quadratic
- * programming." Journal of Heuristics 8:197–213.
+ * Implements the score used in the greedy heuristic of Merz, P. and Freisleben,
+ * B. (2002). "Greedy and local search heuristics for unconstrained binary
+ * quadratic programming." Journal of Heuristics 8:197–213.
  * 
  * @author Gunnar Flötteröd
  * 
@@ -31,8 +31,6 @@ public class ScoreUpdater<L> {
 	private final SpaceTimeCounts<L> currentIndividualCounts;
 
 	private final SpaceTimeCounts<L> deltaIndividualCounts;
-
-	private final double meanLambda;
 
 	private final DynamicData<L> currentCounts;
 
@@ -59,7 +57,6 @@ public class ScoreUpdater<L> {
 		this.currentIndicators = currentIndicators;
 		this.upcomingIndicators = upcomingIndicators;
 
-		this.meanLambda = meanLambda;
 		this.currentCounts = currentTotalCounts;
 
 		this.interactionResidual = interactionResidual;
@@ -82,22 +79,28 @@ public class ScoreUpdater<L> {
 			this.deltaIndividualCounts = new SpaceTimeCounts<>(this.upcomingIndicators);
 			this.deltaIndividualCounts.subtract(this.currentIndividualCounts);
 
-			for (Map.Entry<Tuple<L, Integer>, Integer> changeEntry : this.deltaIndividualCounts.entriesView()) {
-				final double changeValue = changeEntry.getValue();
+			for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.deltaIndividualCounts.entriesView()) {
+				final L spaceObj = entry.getKey().getA();
+				final int timeBin = entry.getKey().getB();
+				final double changeValue = entry.getValue();
 				sumOfIndividualChangeSquare += changeValue * changeValue;
 				sumOfIndividualChangeTimesInteractionResidual += changeValue
-						* interactionResidual.getBinValue(changeEntry.getKey().getA(), changeEntry.getKey().getB());
+						* interactionResidual.getBinValue(spaceObj, timeBin);
+				this.interactionResidual.add(spaceObj, timeBin, -meanLambda * changeValue);
 			}
 
-			for (Map.Entry<Tuple<L, Integer>, Integer> currentEntry : this.currentIndividualCounts.entriesView()) {
-				final double currentIndividualCnt = currentEntry.getValue();
-				final L currentSpaceObj = currentEntry.getKey().getA();
-				final Integer currentTimeBin = currentEntry.getKey().getB();
+			for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.currentIndividualCounts.entriesView()) {
+				final double currentIndividualCnt = entry.getValue();
+				final L spaceObj = entry.getKey().getA();
+				final Integer timeBin = entry.getKey().getB();
 				sumOfCurrentIndividualCntSquare += currentIndividualCnt * currentIndividualCnt;
 				sumOfCurrentIndividualCntTimesCurrentTotalCnt += currentIndividualCnt
-						* currentTotalCounts.getBinValue(currentSpaceObj, currentTimeBin);
+						* currentTotalCounts.getBinValue(spaceObj, timeBin);
 				sumOfCurrentIndividualCntTimesInertiaResidual += currentIndividualCnt
-						* inertiaResidual.getBinValue(currentSpaceObj, currentTimeBin);
+						* inertiaResidual.getBinValue(spaceObj, timeBin);
+				this.inertiaResidual.add(spaceObj, timeBin, -(1.0 - meanLambda) * entry.getValue());
+				this.regularizationResidual -= meanLambda * this.currentCounts.getBinValue(spaceObj, timeBin)
+						* currentIndividualCnt;
 			}
 		}
 
@@ -139,19 +142,17 @@ public class ScoreUpdater<L> {
 		}
 		this.residualsUpdated = true;
 
-		final double deltaLambda = newLambda - this.meanLambda;
-
 		for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.deltaIndividualCounts.entriesView()) {
 			final L spaceObj = entry.getKey().getA();
 			final int timeBin = entry.getKey().getB();
-			this.interactionResidual.add(spaceObj, timeBin, deltaLambda * entry.getValue());
-
+			this.interactionResidual.add(spaceObj, timeBin, newLambda * entry.getValue());
 		}
+
 		for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.currentIndividualCounts.entriesView()) {
 			final L spaceObj = entry.getKey().getA();
 			final int timeBin = entry.getKey().getB();
-			this.inertiaResidual.add(spaceObj, timeBin, -deltaLambda * entry.getValue());
-			this.regularizationResidual += deltaLambda * this.currentCounts.getBinValue(spaceObj, timeBin)
+			this.inertiaResidual.add(spaceObj, timeBin, (1.0 - newLambda) * entry.getValue());
+			this.regularizationResidual += newLambda * this.currentCounts.getBinValue(spaceObj, timeBin)
 					* entry.getValue();
 		}
 	}
