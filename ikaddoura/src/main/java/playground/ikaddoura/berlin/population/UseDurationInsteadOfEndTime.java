@@ -40,8 +40,8 @@ public class UseDurationInsteadOfEndTime {
 	
 	private static final Logger log = Logger.getLogger(UseDurationInsteadOfEndTime.class);
 	
-	private final static String inputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
-	private final static String outputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight_duration7200.selected_plans.xml.gz";
+	private final static String inputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/plans_500_10-1_10pct_clc_act-split.xml.gz";
+	private final static String outputPlans = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/plans_500_10-1_10pct_clc_act-split_duration7200.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	
