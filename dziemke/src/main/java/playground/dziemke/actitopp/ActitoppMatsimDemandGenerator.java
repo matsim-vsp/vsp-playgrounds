@@ -83,7 +83,7 @@ public class ActitoppMatsimDemandGenerator {
 	
 	public static void main(String[] args) {
 		// Input and output files
-		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_6/population/";
 		String plansFile = outputBase + "plans_10000.xml.gz";
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -91,7 +91,7 @@ public class ActitoppMatsimDemandGenerator {
 		reader.readFile(plansFile);
 		
 		runActitopp(scenario.getPopulation());
-		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_10000_w_act.xml.gz"); // TODO currently only works with one population file
+		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_10000_2_w_act.xml.gz"); // TODO currently only works with one population file
 	}
 
 	
