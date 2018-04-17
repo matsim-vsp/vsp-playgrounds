@@ -93,10 +93,10 @@ public class UseDurationInsteadOfEndTime {
 								int cemdapDuration = (int) act.getAttributes().getAttribute("cemdapStopDuration_s");
 								
 								if (cemdapDuration <= durationThreshold) {
-									log.info("end time: " + act.getEndTime() + " --> " + Double.NEGATIVE_INFINITY);
+//									log.info("end time: " + act.getEndTime() + " --> " + Double.NEGATIVE_INFINITY);
 									act.setEndTime(Double.NEGATIVE_INFINITY);
 									
-									log.info("duration: " + act.getMaximumDuration() + " --> " + cemdapDuration);
+//									log.info("duration: " + act.getMaximumDuration() + " --> " + cemdapDuration);
 									act.setMaximumDuration(cemdapDuration);
 									
 								}
