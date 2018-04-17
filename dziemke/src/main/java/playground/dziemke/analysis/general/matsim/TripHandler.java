@@ -102,11 +102,18 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
     public void handleEvent(ActivityStartEvent event) {
         //if its pt interaction, skip it
         if (event.getActType().equals(PT_INTERACTION)) {
+
             Id<Person> personId = event.getPersonId();
-            Id<Trip> tripId = Id.create(personId + "_" + activityStartCount.get(personId), Trip.class);
+            int currentActivityStartCount = 1;
+            if (activityStartCount.containsKey(personId)) {
+                currentActivityStartCount = activityStartCount.get(personId);
+            }
+            Id<Trip> tripId = Id.create(personId + "_" + currentActivityStartCount, Trip.class);
             MatsimTrip matsimTrip = trips.get(tripId);
-            matsimTrip.setLegMode(TransportMode.pt);
-            matsimTrip.setLegModeLock(true);
+            if (matsimTrip != null) {
+                matsimTrip.setLegMode(TransportMode.pt);
+                matsimTrip.setLegModeLock(true);
+            }
             return;
         }
 
