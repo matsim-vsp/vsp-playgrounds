@@ -164,7 +164,7 @@ public class ActitoppMatsimDemandGenerator {
 		int age = Integer.parseInt(matsimPerson.getAttributes().getAttribute("age").toString());
 		int employment = getEmploymentClass(
 				Boolean.parseBoolean(matsimPerson.getAttributes().getAttribute("employed").toString()),
-				Boolean.parseBoolean(matsimPerson.getAttributes().getAttribute("employed").toString()));
+				Boolean.parseBoolean(matsimPerson.getAttributes().getAttribute("student").toString()));
 		int gender = getGenderClass(Integer.parseInt(matsimPerson.getAttributes().getAttribute("gender").toString()));
 		int areaType = getAreaType(); // TODO
 		int numberOfCarsInHousehold = getNumberOfCarsInHousehold(); // TODO
@@ -187,6 +187,7 @@ public class ActitoppMatsimDemandGenerator {
 		int employmentClass = -1;
 		if (employment) {
 			employmentClass = 1; // TODO distinguish between full- and half-time occupation
+			// Tim, Michael H. also estimate this in a model for people outside Karlsruhe
 		} else {
 			employmentClass = 3;
 		}
@@ -214,6 +215,7 @@ public class ActitoppMatsimDemandGenerator {
 		return genderClass;
 	}
 
+	// PKW-Besitzquote pro Gemeinde
 	private static int getNumberOfCarsInHousehold() {
 		return 0;
 	}
@@ -221,6 +223,12 @@ public class ActitoppMatsimDemandGenerator {
 	
 	// Information from "https://github.com/mobitopp/actitopp"
 	// 1 = rural; 2 = provincial; 3 = cityoutskirt; 4 = metropolitan; 5 = conurbation
+	// 5 = >500000 im Regionkern
+	// 4 = 50000-500000 im Regionskern
+	// 3 = >50000 am Regionsrand
+	// 2 = 5000-50000
+	// 1 = < 5000
+	// Based on BIK regions, cf. MOP
 	private static int getAreaType() {
 		// TODO Right now everybody is "metropolitan"
 		return 4;
