@@ -98,7 +98,7 @@ public class FundamentalDiagramDataGenerator {
 	private String[] travelModes;
 	private Double[] modalShareInPCU;
 
-	private FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
+	private final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
 
 	public FundamentalDiagramDataGenerator( final Scenario scenario){
 		fundamentalDiagramConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FundamentalDiagramConfigGroup.class);
@@ -157,6 +157,7 @@ public class FundamentalDiagramDataGenerator {
 			}
 		}
 
+		//TODO following should go to 'singleRun' method because, we would like to instantiate it for every run.
 		for (String travelMode : travelModes) {
 			Id<VehicleType> vehicleTypeId = Id.create(travelMode, VehicleType.class);
 			VehicleType vehicleType = scenario.getVehicles().getVehicleTypes().get(vehicleTypeId);
@@ -367,7 +368,7 @@ public class FundamentalDiagramDataGenerator {
 				population.getPersonAttributes().putAttribute(personId.toString(), FDQSimProvider.PERSON_MODE_ATTRIBUTE_KEY, travelModes[i]);
 			}
 
-			this.mode2FlowData.get(travelModes[i]).setnumberOfAgents(pointToRun.get(i).intValue());
+			this.mode2FlowData.get(travelModes[i]).setnumberOfAgents(pointToRun.get(i));
 		}
 		
 		Controler controler = new Controler( scenario ) ;
@@ -584,7 +585,7 @@ public class FundamentalDiagramDataGenerator {
 	private static String arraytostring(Integer[] list){
 		String str = "";
 		for (Integer aList : list) {
-			str += aList.intValue();
+			str += aList;
 			str += " ";
 		}
 		return str;
