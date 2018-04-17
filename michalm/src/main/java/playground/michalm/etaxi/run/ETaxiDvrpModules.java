@@ -19,15 +19,19 @@
 
 package playground.michalm.etaxi.run;
 
+import java.util.Collections;
+
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.run.DvrpModule;
-import org.matsim.contrib.dvrp.run.DvrpModule.MobsimTimerProvider;
+import org.matsim.contrib.dvrp.run.MobsimTimerProvider;
+import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelDisutilityProvider;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
 import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
+import org.matsim.core.config.Config;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 
@@ -37,15 +41,15 @@ import playground.michalm.etaxi.optimizer.ETaxiOptimizerProvider;
 
 public class ETaxiDvrpModules {
 	public static AbstractModule create() {
-		return new DvrpModule(createModuleForQSimPlugin(), TaxiOptimizer.class);
+		return new DvrpModule(ETaxiDvrpModules::createModuleForQSimPlugin, Collections.singleton(TaxiOptimizer.class));
 	}
 
-	private static com.google.inject.AbstractModule createModuleForQSimPlugin() {
+	private static com.google.inject.AbstractModule createModuleForQSimPlugin(Config cfg) {
 		return new com.google.inject.AbstractModule() {
 			@Override
 			protected void configure() {
 				bind(MobsimTimer.class).toProvider(MobsimTimerProvider.class).asEagerSingleton();
-				DvrpModule.bindTravelDisutilityForOptimizer(binder(), DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER);
+				DvrpTravelDisutilityProvider.bindTravelDisutilityForOptimizer(binder(), DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER);
 				bind(TaxiOptimizer.class).toProvider(ETaxiOptimizerProvider.class).asEagerSingleton();
 				bind(VrpOptimizer.class).to(TaxiOptimizer.class);
 				bind(ETaxiScheduler.class).asEagerSingleton();

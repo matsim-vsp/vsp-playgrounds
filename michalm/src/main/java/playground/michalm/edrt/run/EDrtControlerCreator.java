@@ -18,6 +18,8 @@
 
 package playground.michalm.edrt.run;
 
+import java.util.Arrays;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.drt.analysis.DrtAnalysisModule;
 import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
@@ -37,7 +39,8 @@ import org.matsim.contrib.drt.scheduler.RequestInsertionScheduler;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.run.DvrpModule;
-import org.matsim.contrib.dvrp.run.DvrpModule.MobsimTimerProvider;
+import org.matsim.contrib.dvrp.run.MobsimTimerProvider;
+import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelDisutilityProvider;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
@@ -67,7 +70,7 @@ public class EDrtControlerCreator {
 	private static Controler createControlerImpl(boolean otfvis, Scenario scenario) {
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(new DvrpModule(EDrtControlerCreator::createModuleForQSimPlugin,
-				DrtOptimizer.class, EDrtUnplannedRequestInserter.class, ParallelPathDataProvider.class));
+				Arrays.asList(DrtOptimizer.class, EDrtUnplannedRequestInserter.class, ParallelPathDataProvider.class)));
 		controler.addOverridingModule(new DrtModule());
 		controler.addOverridingModule(new DrtAnalysisModule());
 		controler.addOverridingModule(new AbstractModule() {
@@ -87,7 +90,7 @@ public class EDrtControlerCreator {
 			@Override
 			protected void configure() {
 				bind(MobsimTimer.class).toProvider(MobsimTimerProvider.class).asEagerSingleton();
-				DvrpModule.bindTravelDisutilityForOptimizer(binder(), DefaultDrtOptimizer.DRT_OPTIMIZER);
+				DvrpTravelDisutilityProvider.bindTravelDisutilityForOptimizer(binder(), DefaultDrtOptimizer.DRT_OPTIMIZER);
 
 				bind(DrtOptimizer.class).to(EDrtOptimizer.class).asEagerSingleton();
 				bind(VrpOptimizer.class).to(DrtOptimizer.class);

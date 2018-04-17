@@ -472,6 +472,18 @@ public class IKAnalysisRun {
 			script.write();
 		}
 		
+		// absolute traffic volumes policy case
+		if (scenario1 != null) {
+			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute_noCRS.qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute_" + runId + ".qgs";
+			
+			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
+			script.setRunId(this.runId);
+			script.setScalingFactor(String.valueOf(this.scalingFactor));
+			script.setCRS(this.scenarioCRS);
+			script.write();
+		}
+		
 		// spatial zone-based analysis
 		if (scenario1 != null & scenario0 != null) {
 			String visScriptTemplateFile = "./visualization-scripts/zone-based-analysis_welfare_modes.qgs";
@@ -630,8 +642,14 @@ public class IKAnalysisRun {
 		
 		String actDurationsOutputDirectory = analysisOutputDirectory + "activity-durations/";
 		createDirectory(actDurationsOutputDirectory);
+		
+		List<String> skippedPersonIdStrings = new ArrayList<>();
+		skippedPersonIdStrings.add("freight");
+		actHandler.process(scenario.getPopulation(), skippedPersonIdStrings);
+		
 		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations.csv", Double.POSITIVE_INFINITY);
 		actHandler.writeOutput(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations_below-900-sec.csv", 900.);
+		actHandler.writeSummary(scenario.getPopulation(), actDurationsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "activity-durations_summary.csv");
 
 		// #####################################
 		// Print results: mode statistics

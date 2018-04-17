@@ -44,6 +44,7 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.gbl.MatsimRandom;
@@ -185,6 +186,12 @@ public class FundamentalDiagramDataGenerator {
 		this.fundamentalDiagramConfigGroup.setModalShareInPCU(
 				Arrays.stream(this.modalShareInPCU).map(String::valueOf).collect(Collectors.joining(","))
 		);
+		
+		if (scenario.getConfig().controler().getOverwriteFileSetting().equals(OverwriteFileSetting.deleteDirectoryIfExists)) {
+			LOG.warn("Overwrite file setting is set to "+scenario.getConfig().controler().getOverwriteFileSetting() 
+					+ ", which will also remove the fundament diagram data file. Setting it back to "+OverwriteFileSetting.overwriteExistingFiles);
+			scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+		}
 	}
 
 	private void setUpConfig() {
@@ -371,15 +378,16 @@ public class FundamentalDiagramDataGenerator {
 				fdNetworkGenerator.getLastLinkIdOfTrack(),
 				fdNetworkGenerator.getLengthOfTrack());
 
-		DynamicPCUUpdator dynamicPCUUpdator = new DynamicPCUUpdator(
-				this.scenario,
-				fdNetworkGenerator.getFirstLinkIdOfTrack(),
-				fdNetworkGenerator.getLastLinkIdOfTrack(),
-				fdNetworkGenerator.getLengthOfTrack());
-
 		events.addHandler(globalFlowDynamicsUpdator);
 		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
-		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) events.addHandler(dynamicPCUUpdator);
+		
+		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
+			events.addHandler(new DynamicPCUUpdator(
+					this.scenario,
+					fdNetworkGenerator.getFirstLinkIdOfTrack(),
+					fdNetworkGenerator.getLastLinkIdOfTrack(),
+					fdNetworkGenerator.getLengthOfTrack()));
+		}
 
 		EventWriterXML eventWriter = null;
 

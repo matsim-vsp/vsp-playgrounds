@@ -27,6 +27,7 @@ package playground.ikaddoura.analysis.actDurations;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
@@ -51,18 +52,25 @@ public class ActDurationHandler implements ActivityStartEventHandler, ActivityEn
 	private Map<Id<Person>,String> personId2currentActivity = new HashMap<>();
 	private Map<Id<Person>, Integer> personId2actNr = new HashMap<>();
 	
-	private Map<Id<Person>, Map<Integer, Double>> person2actNr2duration = new HashMap<>(); // skipping the morning activity
-	private Map<Id<Person>, Map<Integer, String>> person2actNr2type = new HashMap<>(); // skipping the morning activity
+	private Map<Id<Person>, Map<Integer, Double>> person2actNr2durationWithoutMorningAct = new HashMap<>(); // skipping the morning activity
+	private Map<Id<Person>, Map<Integer, String>> person2actNr2typeWithoutMorningAct = new HashMap<>(); // skipping the morning activity
 	
 	private Map<Id<Person>, Double> personId2morningActDuration = new HashMap<>();
 	private Map<Id<Person>, String> personId2morningActType = new HashMap<>();
+	
+	private Map<Id<Person>, Map<Integer, Double>> personId2actNr2duration = new HashMap<>();
+	private Map<Id<Person>, Map<Integer, String>> personId2actNr2type = new HashMap<>();
+	
+	private boolean dataProcessed = false;
+	
+	private final double endOfDay = 24 * 3600.;
 	
 	@Override
 	public void reset(int iteration) {
 		this.personId2startTime.clear();
 		this.personId2actNr.clear();
-		this.person2actNr2duration.clear();
-		this.person2actNr2type.clear();
+		this.person2actNr2durationWithoutMorningAct.clear();
+		this.person2actNr2typeWithoutMorningAct.clear();
 		this.personId2currentActivity.clear();
 		this.personId2actNr.clear();
 		this.personId2morningActDuration.clear();
@@ -79,11 +87,11 @@ public class ActDurationHandler implements ActivityStartEventHandler, ActivityEn
 				personId2actNr.put(event.getPersonId(), 2);
 				
 				Map<Integer, Double> actNr2duration = new HashMap<>();
-				person2actNr2duration.put(event.getPersonId(), actNr2duration);
+				person2actNr2durationWithoutMorningAct.put(event.getPersonId(), actNr2duration);
 				
 				Map<Integer, String> actNr2type = new HashMap<>();
 				actNr2type.put(personId2actNr.get(event.getPersonId()), event.getActType());
-				person2actNr2type.put(event.getPersonId(), actNr2type);
+				person2actNr2typeWithoutMorningAct.put(event.getPersonId(), actNr2type);
 				
 			} else {
 				Integer newActNumber = personId2actNr.get(event.getPersonId()) + 1;
@@ -105,8 +113,8 @@ public class ActDurationHandler implements ActivityStartEventHandler, ActivityEn
 				
 				int actNr = personId2actNr.get(event.getPersonId());
 				
-				person2actNr2duration.get(event.getPersonId()).put(actNr, duration);
-				person2actNr2type.get(event.getPersonId()).put(actNr, event.getActType());
+				person2actNr2durationWithoutMorningAct.get(event.getPersonId()).put(actNr, duration);
+				person2actNr2typeWithoutMorningAct.get(event.getPersonId()).put(actNr, event.getActType());
 				
 			} else {
 				// morning activity	
@@ -121,98 +129,22 @@ public class ActDurationHandler implements ActivityStartEventHandler, ActivityEn
 
 	public void writeOutput(Population population, String filename, double maxDurationToPrintOut) {
 				
+		if (dataProcessed == false) {
+			process(population, null);
+		}
+		
 		BufferedWriter bw = IOUtils.getBufferedWriter(filename);
 
 		try {
 			bw.write("person Id ; activity number ; activity type ; activity duration [sec]");
 			bw.newLine();
-		
-			for (Person person : population.getPersons().values()) {
-				
-				if (person.getId().toString().contains("freight")) {
-					// skipping freight agents
-					
-				} else {
-
-					if (person2actNr2duration.get(person.getId()) != null) {
-						
-						int lastActNr = 0;
-						
-						for (Integer actNr : person2actNr2duration.get(person.getId()).keySet()) {
-							
-							double duration = person2actNr2duration.get(person.getId()).get(actNr);
-							
-							if (duration < maxDurationToPrintOut) {
-								bw.write(person.getId().toString() + " ; "
-										+ actNr + " ; "
-										+ person2actNr2type.get(person.getId()).get(actNr) + " ; "
-										+ duration
-										);
+			
+			for (Id<Person> personId : this.personId2actNr2duration.keySet()) {
 								
-								bw.newLine();
-							}
-							
-							if (actNr > lastActNr) lastActNr = actNr;
-						}
-						
-						// handling overnight activity
-						double endOfDay = 24 * 3600.;
-						
-						if (personId2startTime.get(person.getId()) != null && personId2currentActivity.get(person.getId()) != null) {
-							
-							double duration = endOfDay - personId2startTime.get(person.getId());
-							
-							if (personId2morningActType.get(person.getId()).equals(personId2currentActivity.get(person.getId()))) {
-								// merge durations
-								
-								double mergedDuration = duration + personId2morningActDuration.get(person.getId());
-								
-								if (mergedDuration < maxDurationToPrintOut) {
-									bw.write(person.getId().toString() + " ; "
-										+ (lastActNr + 1) + " ; "
-										+ personId2morningActType.get(person.getId()) + " ; "
-										+ mergedDuration
-										);
-								
-									bw.newLine();
-								}
-								
-
-							} else {
-								
-								double morningDuration = personId2morningActDuration.get(person.getId());
-								
-								if (morningDuration < maxDurationToPrintOut) {
-									bw.write(person.getId().toString() + " ; "
-											+ 1 + " ; "
-											+ personId2morningActType.get(person.getId()) + " ; "
-											+ personId2morningActDuration.get(person.getId())
-											);
-									
-									bw.newLine();
-								}
-								
-								if (duration < maxDurationToPrintOut) {
-									bw.write(person.getId().toString() + " ; "
-											+ (lastActNr + 1) + " ; "
-											+ personId2currentActivity.get(person.getId()) + " ; "
-											+ duration
-											);
-									
-									bw.newLine();
-								}
-								
-							}							
-						}
-						
-					} else {
-						// person does not appear in the events, probably a stay home person
-						double duration = 24 * 3600.;
-						
-						if (duration < maxDurationToPrintOut) {
-							bw.write(person.getId().toString() + " ; 1 ; " + " probably-a-stay-home-plan ; " + duration);
-							bw.newLine();
-						}
+				for (Integer actNr : this.personId2actNr2duration.get(personId).keySet()) {
+					if (this.personId2actNr2duration.get(personId).get(actNr) < maxDurationToPrintOut) {
+						bw.write(personId.toString() + " ; " + actNr + " ; " + this.personId2actNr2type.get(personId).get(actNr) + " ; " + this.personId2actNr2duration.get(personId).get(actNr));
+						bw.newLine();
 					}
 				}
 			}
@@ -222,6 +154,149 @@ public class ActDurationHandler implements ActivityStartEventHandler, ActivityEn
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void writeSummary(Population population, String filename) {
+		
+		if (dataProcessed == false) {
+			process(population, null);
+		}
+		
+		BufferedWriter bw = IOUtils.getBufferedWriter(filename);
+
+		try {
+			bw.write(" activity duration from ; activity duration to ; number of activities");
+			bw.newLine();
+			
+			bw.write("0 ; 1 ; " + computeNumberOfActivities(0, 1));
+			bw.newLine();
+			
+			bw.write("1 ; 900 ; " + computeNumberOfActivities(1, 900));
+			bw.newLine();
+
+			bw.write("900 ; 3600 ; " + computeNumberOfActivities(900, 3600));
+			bw.newLine();
+
+			bw.write("3600 ; 7200 ; " + computeNumberOfActivities(3600, 7200));
+			bw.newLine();
+
+			bw.write("7200 ; 99999999 ; " + computeNumberOfActivities(7200, 99999999));
+			bw.newLine();
+			
+			bw.flush();
+			bw.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private int computeNumberOfActivities(int from, int to) {
+		int counter = 0;
+		for (Id<Person> personId : this.personId2actNr2duration.keySet()) {
+			
+			for (Integer actNr : this.personId2actNr2duration.get(personId).keySet()) {
+				double duration = this.personId2actNr2duration.get(personId).get(actNr);
+				
+				if (duration >= from && duration < to) {
+					counter++;
+				}
+			}
+		}
+		return counter;
+	}
+
+	public void process(Population population, List<String> skippedPersonIdStrings) {
+
+		this.dataProcessed = true;
+		
+		for (Person person : population.getPersons().values()) {
+
+			boolean proceedWithThisAgent = true;
+
+			if (skippedPersonIdStrings != null) {
+				for (String skipString : skippedPersonIdStrings) {
+					if (person.getId().toString().contains(skipString)) {
+						proceedWithThisAgent = false;
+					}
+				}
+			}
+			
+			if (proceedWithThisAgent) {
+
+				if (person2actNr2durationWithoutMorningAct.get(person.getId()) != null) {
+					
+					int lastActNr = 0;
+					
+					Map<Integer, Double> actNr2duration = new HashMap<>();
+					this.personId2actNr2duration.put(person.getId(), actNr2duration);
+					
+					Map<Integer, String> actNr2type = new HashMap<>();
+					this.personId2actNr2type.put(person.getId(), actNr2type);
+					
+					for (Integer actNr : person2actNr2durationWithoutMorningAct.get(person.getId()).keySet()) {
+						
+						double duration = person2actNr2durationWithoutMorningAct.get(person.getId()).get(actNr);
+						
+						this.personId2actNr2duration.get(person.getId()).put(actNr, duration);
+						this.personId2actNr2type.get(person.getId()).put(actNr, person2actNr2typeWithoutMorningAct.get(person.getId()).get(actNr));
+						
+						if (actNr > lastActNr) lastActNr = actNr;
+					}
+					
+					// handling overnight activity
+					
+					if (personId2startTime.get(person.getId()) != null && personId2currentActivity.get(person.getId()) != null) {
+						
+						double duration = endOfDay - personId2startTime.get(person.getId());
+						
+						if (personId2morningActType.get(person.getId()).equals(personId2currentActivity.get(person.getId()))) {
+							// merge durations
+							
+							double mergedDuration = duration + personId2morningActDuration.get(person.getId());
+							int actNr = lastActNr + 1;
+			
+							this.personId2actNr2duration.get(person.getId()).put(actNr, mergedDuration);
+							this.personId2actNr2type.get(person.getId()).put(actNr, personId2morningActType.get(person.getId()));
+			
+						} else {
+							
+							{
+								double morningDuration = personId2morningActDuration.get(person.getId());
+								int actNr = 1;
+								
+								this.personId2actNr2duration.get(person.getId()).put(actNr, morningDuration);
+								this.personId2actNr2type.get(person.getId()).put(actNr, personId2morningActType.get(person.getId()));
+							}
+							
+							{
+								double eveningDuration = duration;
+								int actNr = lastActNr + 1;
+								
+								this.personId2actNr2duration.get(person.getId()).put(actNr, eveningDuration);
+								this.personId2actNr2type.get(person.getId()).put(actNr, personId2currentActivity.get(person.getId()));
+							}
+							
+						}							
+					}
+					
+				} else {
+					// person does not appear in the events, probably a stay home person
+					double duration = this.endOfDay;
+					int actNr = 1;
+					
+					Map<Integer, Double> actNr2duration = new HashMap<>();
+					actNr2duration.put(actNr, duration);
+					
+					this.personId2actNr2duration.put(person.getId(), actNr2duration);
+					
+					Map<Integer, String> actNr2type = new HashMap<>();
+					actNr2type.put(actNr, "stay-home-plan");
+					this.personId2actNr2type.put(person.getId(), actNr2type);
+				}
+			}
 		}
 	}
 
