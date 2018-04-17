@@ -352,6 +352,11 @@ public class FundamentalDiagramDataGenerator {
 
 	private void singleRun(List<Integer> pointToRun) {
 		Population population = scenario.getPopulation();
+
+		//remove existing persons and person attributes
+		population.getPersons().clear();
+		population.getPersonAttributes().clear();
+
 		for (int i=0; i<travelModes.length; i++){
 			for (int ii = 0; ii < pointToRun.get(i); ii++){
 				Id<Person> personId = Id.createPersonId(population.getPersons().size());
