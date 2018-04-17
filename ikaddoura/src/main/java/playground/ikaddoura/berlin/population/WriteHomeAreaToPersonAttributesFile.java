@@ -50,12 +50,14 @@ public class WriteHomeAreaToPersonAttributesFile {
 	public static void main(String[] args) {
 		
 		// subpopulation: persons
-		final String inputPlansFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
-		final String inputPersonAttributesFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_400_person_freight_10pct.xml.gz";
-		final String zoneFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp"; // needs to be in the same CRS
+		final String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/plans_500_10pct.xml.gz";
+		final String inputPersonAttributesFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/personAttributes_500_10pct.xml.gz";
+		final String zoneFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp"; // needs to be in the same CRS
+		final String homeZoneAttributeInside = "berlin";
+		final String homeZoneAttributeOutside = "brandenburg";
 		final String homeActivityPrefix = "home";
 		
-		final String outputPersonAttributesFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_with-home-area_400_person_freight_10pct.xml.gz";
+		final String outputPersonAttributesFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/personAttributes_500_10pct_with-home-area.xml.gz";
 		
 		Config config = ConfigUtils.createConfig();
 		config.plans().setInputFile(inputPlansFile);
@@ -99,9 +101,9 @@ public class WriteHomeAreaToPersonAttributesFile {
 			
 			if (personId2homeCoord.get(person.getId()) != null) {
 				if (isInsideArea(zoneFeatures, personId2homeCoord.get(person.getId()))) {
-					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "home-activity-in-berlin", true);
+					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "home-activity-zone", homeZoneAttributeInside);
 				} else {
-					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "home-activity-in-berlin", false);
+					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), "home-activity-zone", homeZoneAttributeOutside);
 				}
 			}
 			counter++;
