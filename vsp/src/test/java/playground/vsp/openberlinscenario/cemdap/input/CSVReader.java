@@ -1,4 +1,4 @@
-package playground.vsp.demandde.cemdapMatsimCadyts;
+package playground.vsp.openberlinscenario.cemdap.input;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

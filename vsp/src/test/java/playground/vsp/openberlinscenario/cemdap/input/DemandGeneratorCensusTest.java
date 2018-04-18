@@ -1,4 +1,4 @@
-package playground.vsp.demandde.cemdapMatsimCadyts;
+package playground.vsp.openberlinscenario.cemdap.input;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.testcases.MatsimTestUtils;
 
+import playground.vsp.openberlinscenario.Gender;
 import playground.vsp.openberlinscenario.cemdap.input.DemandGeneratorCensus;
 
 /**
@@ -88,7 +89,7 @@ public class DemandGeneratorCensusTest {
 			String locationOfWork = (String) person.getAttributes().getAttribute("locationOfWork");
 			boolean employed = (boolean) person.getAttributes().getAttribute("employed");
 			int age = (Integer) person.getAttributes().getAttribute("age");
-			int female = (Integer) person.getAttributes().getAttribute("gender"); // assumes that female = 1
+			Gender gender = Gender.valueOf((String) person.getAttributes().getAttribute("gender")); // assumes that female = 1
 
 			//assert
 //			Assert.assertEquals("Wrong municipality", "12060034", householdId.toString().substring(0,8));
@@ -97,7 +98,7 @@ public class DemandGeneratorCensusTest {
 			} else if (locationOfWork.length() != 6) {
 				Assert.assertTrue("Wrong locationOfWork", possibleLocationsOfWork.contains(locationOfWork));
 			}
-			if (female == 0) {
+			if (gender == Gender.male) {
 				if (isBetween(age, 18, 24)) male18_24++;
 				if (isBetween(age, 25, 29)) male25_29++;
 				if (isBetween(age, 30, 39)) male30_39++;
@@ -105,7 +106,7 @@ public class DemandGeneratorCensusTest {
 				if (isBetween(age, 50, 64)) male50_64++;
 				if (isBetween(age, 65, 74)) male65_74++;
 				if (age > 74) male75Plus++;
-			} else if (female == 1){
+			} else if (gender == Gender.female){
 				if (isBetween(age, 18, 24)) female18_24++;
 				if (isBetween(age, 25, 29)) female25_29++;
 				if (isBetween(age, 30, 39)) female30_39++;
