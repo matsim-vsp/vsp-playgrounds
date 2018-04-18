@@ -321,7 +321,7 @@ public class FundamentalDiagramDataGenerator {
 			pointsToRun.add(Arrays.asList(newPoint));
 			LOG.info("Just added point "+ Arrays.toString(iterationModule.getPoint()) +" to the collection.");
 			if (i<numberOfPoints-1){
-				iterationModule.add1();
+				iterationModule.addPoint();
 			}
 		}
 		return pointsToRun;
