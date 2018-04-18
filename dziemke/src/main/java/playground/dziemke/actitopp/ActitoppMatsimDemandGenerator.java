@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.DefaultActivityTypes;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
@@ -174,6 +175,7 @@ public class ActitoppMatsimDemandGenerator {
 	
 	// Information from "https://github.com/mobitopp/actitopp"
 	// 1 = full-time occupied; 2 = half-time occupied; 3 = not occupied; 4 = student (school or university); 5 = worker in vocational program; 7 = retired person / pensioner
+	@Deprecated // please use enums (or boolean)
 	private static int getEmploymentClass(boolean employment, boolean student) {
 		int employmentClass = -1;
 		if (employment) {
@@ -191,6 +193,7 @@ public class ActitoppMatsimDemandGenerator {
 	
 	// Information from "https://github.com/mobitopp/actitopp"
 	// 1 = male; 2 = female
+	@Deprecated // please use enums
 	private static int getGenderClass(Integer cemdapGenderIdentifier) {
 		// CEMDAP: 0 = Male, 1 = Female
 		// ActiTopp: 1 = Male, 2 = Female
@@ -244,9 +247,9 @@ public class ActitoppMatsimDemandGenerator {
 	// Information from "https://github.com/mobitopp/actitopp/blob/master/src/main/java/edu/kit/ifv/mobitopp/actitopp/Configuration.java"
 	private static String transformActType(char activityTypeLetter) {
 		if (activityTypeLetter == 'H') {
-			return ActiToppActivityTypes.home.toString();
+			return DefaultActivityTypes.home ;
 		} else if (activityTypeLetter == 'W') {
-			return ActiToppActivityTypes.work.toString();
+			return DefaultActivityTypes.work ;
 		} else if (activityTypeLetter == 'E') {
 			return ActiToppActivityTypes.education.toString();
 		} else if (activityTypeLetter == 'L') {
