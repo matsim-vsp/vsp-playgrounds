@@ -25,6 +25,7 @@ import edu.kit.ifv.mobitopp.actitopp.HWeekPattern;
 import edu.kit.ifv.mobitopp.actitopp.InvalidPatternException;
 import edu.kit.ifv.mobitopp.actitopp.ModelFileBase;
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper;
+import playground.vsp.openberlinscenario.cemdap.input.CEMDAPPersonAttributes;
 
 /**
  * @author dziemke
@@ -155,16 +156,16 @@ public class ActitoppMatsimDemandGenerator {
 		int personIndex = Integer.parseInt(matsimPerson.getId().toString());
 		int childrenFrom0To10 = getChildrenFrom0To10(); // TODO
 		int childrenUnder18 = getChildrenUnder18(); // TODO
-		int age = (int) matsimPerson.getAttributes().getAttribute("age");
-		int employment = getEmploymentClass((boolean) matsimPerson.getAttributes().getAttribute("employed"), 
-				(boolean) matsimPerson.getAttributes().getAttribute("student"));
-		int gender = getGenderClass(Integer.parseInt(matsimPerson.getAttributes().getAttribute("gender").toString()));
+		int age = (int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.age.toString());
+		int employment = getEmploymentClass((boolean) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString()), 
+				(boolean) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString()));
+		int gender = getGenderClass(Integer.parseInt(matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.gender.toString()).toString()));
 		int areaType = getAreaType(); // TODO
 		int numberOfCarsInHousehold = getNumberOfCarsInHousehold(); // TODO
-		double commutingDistanceToWork = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute("householdId"),
-				(int) matsimPerson.getAttributes().getAttribute("locationOfWork"));
-		double commutingDistanceToEducation = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute("householdId"),
-				(int) matsimPerson.getAttributes().getAttribute("locationOfSchool"));
+		double commutingDistanceToWork = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()),
+				(int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString()));
+		double commutingDistanceToEducation = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()),
+				(int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString()));
 		
 		ActitoppPerson actitoppPerson = new ActitoppPerson(personIndex, childrenFrom0To10, childrenUnder18, age, employment, gender, areaType,
 				numberOfCarsInHousehold, commutingDistanceToWork, commutingDistanceToEducation);
@@ -243,17 +244,17 @@ public class ActitoppMatsimDemandGenerator {
 	// Information from "https://github.com/mobitopp/actitopp/blob/master/src/main/java/edu/kit/ifv/mobitopp/actitopp/Configuration.java"
 	private static String transformActType(char activityTypeLetter) {
 		if (activityTypeLetter == 'H') {
-			return "home";
+			return ActiToppActivityTypes.home.toString();
 		} else if (activityTypeLetter == 'W') {
-			return "work";
+			return ActiToppActivityTypes.work.toString();
 		} else if (activityTypeLetter == 'E') {
-			return "eudation";
+			return ActiToppActivityTypes.education.toString();
 		} else if (activityTypeLetter == 'L') {
-			return "leisure";
+			return ActiToppActivityTypes.leisure.toString();
 		} else if (activityTypeLetter == 'S') {
-			return "shopping";
+			return ActiToppActivityTypes.shopping.toString();
 		} else if (activityTypeLetter == 'T') {
-			return "other";
+			return ActiToppActivityTypes.other.toString();
 		} else {
 			LOG.error(new IllegalArgumentException("Activity type " + activityTypeLetter + " not allowed."));
 			return null;

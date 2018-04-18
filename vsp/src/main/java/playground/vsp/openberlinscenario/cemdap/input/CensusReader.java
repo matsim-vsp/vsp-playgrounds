@@ -42,7 +42,7 @@ public class CensusReader {
 		String delimiter = ";";
 		
 		CensusReader censusReader = new CensusReader(censusFile, delimiter);
-		LOG.info("Simple test: 434 = " + censusReader.getMunicipalities().getAttribute("16077039", "marriedMale"));
+		LOG.info("Simple test: 434 = " + censusReader.getMunicipalities().getAttribute("16077039", CensusAttributes.marriedMale.toString()));
 	}
 			
 	
@@ -74,7 +74,7 @@ public class CensusReader {
         				population = 0;
         			}
         			LOG.info("population = " + population);
-        			municipalities.putAttribute(municipality, "population", population);
+        			municipalities.putAttribute(municipality, CensusAttributes.population.toString(), population);
 
         			Integer populationMale;
         			if (!row[10].equals("-")) {
@@ -83,7 +83,7 @@ public class CensusReader {
         				populationMale = 0;
         			}
         			LOG.info("populationMale = " + populationMale);
-        			municipalities.putAttribute(municipality, "populationMale", populationMale);
+        			municipalities.putAttribute(municipality, CensusAttributes.populationMale.toString(), populationMale);
 
         			Integer populationFemale;
         			if (!row[11].equals("-")) {
@@ -92,7 +92,7 @@ public class CensusReader {
         				populationFemale = 0;
         			}
         			LOG.info("populationFemale = " + populationFemale);
-        			municipalities.putAttribute(municipality, "populationFemale", populationFemale);
+        			municipalities.putAttribute(municipality, CensusAttributes.populationfemale.toString(), populationFemale);
 
         			Integer marriedMale;
         			if (!row[19].equals("-")) {
@@ -101,7 +101,7 @@ public class CensusReader {
         				marriedMale = 0;
         			}
         			LOG.info("marriedMale = " + marriedMale);
-        			municipalities.putAttribute(municipality, "marriedMale", marriedMale);
+        			municipalities.putAttribute(municipality, CensusAttributes.marriedMale.toString(), marriedMale);
 
         			Integer marriedFemale;
         			if (!row[20].equals("-")) {
@@ -110,7 +110,7 @@ public class CensusReader {
         				marriedFemale = 0;
         			}
         			LOG.info("marriedFemale = " + marriedFemale);
-        			municipalities.putAttribute(municipality, "marriedFemale", marriedFemale);
+        			municipalities.putAttribute(municipality, CensusAttributes.marriedFemale.toString(), marriedFemale);
 
         			// ##############
 					// 0-2
@@ -122,7 +122,7 @@ public class CensusReader {
         				pop0_2 = 0;
         			}
         			LOG.info("pop0_2 = " + pop0_2);
-        			municipalities.putAttribute(municipality, "pop0-2", pop0_2);
+        			municipalities.putAttribute(municipality, CensusAttributes.pop0_2.toString(), pop0_2);
 
         			Integer pop0_2Male;
         			if (!row[73].equals("-")) {
@@ -131,7 +131,7 @@ public class CensusReader {
         				pop0_2Male = 0;
         			}
         			LOG.info("pop0_2Male = " + pop0_2Male);
-        			municipalities.putAttribute(municipality, "pop0_2Male", pop0_2Male);
+        			municipalities.putAttribute(municipality, CensusAttributes.pop0_2Male.toString(), pop0_2Male);
 
         			Integer pop0_2Female;
         			if (!row[74].equals("-")) {
@@ -140,7 +140,7 @@ public class CensusReader {
         				pop0_2Female = 0;
         			}
         			LOG.info("pop0_2Female = " + pop0_2Female);
-        			municipalities.putAttribute(municipality, "pop0_2Female", pop0_2Female);
+        			municipalities.putAttribute(municipality, CensusAttributes.pop0_2Female.toString(), pop0_2Female);
 
 					// ###############
 					// 3-5
@@ -152,7 +152,7 @@ public class CensusReader {
 						pop3_5 = 0;
 					}
 					LOG.info("pop3_5 = " + pop3_5);
-					municipalities.putAttribute(municipality, "pop3_5", pop3_5);
+					municipalities.putAttribute(municipality, CensusAttributes.pop3_5.toString(), pop3_5);
 
 					Integer pop3_5Male;
 					if (!row[76].equals("-")) {
@@ -161,7 +161,7 @@ public class CensusReader {
 						pop3_5Male = 0;
 					}
 					LOG.info("pop3_5Male = " + pop3_5Male);
-					municipalities.putAttribute(municipality, "pop3_5Male", pop3_5Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop3_5Male.toString(), pop3_5Male);
 
 					Integer pop3_5Female;
 					if (!row[77].equals("-")) {
@@ -170,7 +170,7 @@ public class CensusReader {
 						pop3_5Female = 0;
 					}
 					LOG.info("pop3_5Female = " + pop3_5Female);
-					municipalities.putAttribute(municipality, "pop3_5Female", pop3_5Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop3_5Female.toString(), pop3_5Female);
 
 					// ###############
 					// 6-14
@@ -182,7 +182,7 @@ public class CensusReader {
 						pop6_14 = 0;
 					}
 					LOG.info("pop6_14 = " + pop6_14);
-					municipalities.putAttribute(municipality, "pop6_14", pop6_14);
+					municipalities.putAttribute(municipality, CensusAttributes.pop6_14.toString(), pop6_14);
 
 					Integer pop6_14Male;
 					if (!row[79].equals("-")) {
@@ -191,7 +191,7 @@ public class CensusReader {
 						pop6_14Male = 0;
 					}
 					LOG.info("pop6_14Male = " + pop6_14Male);
-					municipalities.putAttribute(municipality, "pop6_14Male", pop6_14Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop6_14Male.toString(), pop6_14Male);
 
 					Integer pop6_14Female;
 					if (!row[80].equals("-")) {
@@ -200,7 +200,7 @@ public class CensusReader {
 						pop6_14Female = 0;
 					}
 					LOG.info("pop6_14Female = " + pop6_14Female);
-					municipalities.putAttribute(municipality, "pop6_14Female", pop6_14Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop6_14Female.toString(), pop6_14Female);
 
 					// ###############
 					// 15-17
@@ -212,7 +212,7 @@ public class CensusReader {
 						pop15_17 = 0;
 					}
 					LOG.info("pop15_17 = " + pop15_17);
-					municipalities.putAttribute(municipality, "pop15_17", pop15_17);
+					municipalities.putAttribute(municipality, CensusAttributes.pop15_17.toString(), pop15_17);
 
 					Integer pop15_17Male;
 					if (!row[82].equals("-")) {
@@ -221,7 +221,7 @@ public class CensusReader {
 						pop15_17Male = 0;
 					}
 					LOG.info("pop15_17Male = " + pop15_17Male);
-					municipalities.putAttribute(municipality, "pop15_17Male", pop15_17Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop15_17Male.toString(), pop15_17Male);
 
 					Integer pop15_17Female;
 					if (!row[83].equals("-")) {
@@ -230,7 +230,7 @@ public class CensusReader {
 						pop15_17Female = 0;
 					}
 					LOG.info("pop15_17Female = " + pop15_17Female);
-					municipalities.putAttribute(municipality, "pop15_17Female", pop15_17Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop15_17Female.toString(), pop15_17Female);
 
 					// ###############
 					// 18-24
@@ -242,7 +242,7 @@ public class CensusReader {
 						pop18_24 = 0;
 					}
 					LOG.info("pop18_24 = " + pop18_24);
-					municipalities.putAttribute(municipality, "pop18_24", pop18_24);
+					municipalities.putAttribute(municipality, CensusAttributes.pop18_24.toString(), pop18_24);
 
 					Integer pop18_24Male;
 					if (!row[85].equals("-")) {
@@ -251,7 +251,7 @@ public class CensusReader {
 						pop18_24Male = 0;
 					}
 					LOG.info("pop18_24Male = " + pop18_24Male);
-					municipalities.putAttribute(municipality, "pop18_24Male", pop18_24Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop18_24Male.toString(), pop18_24Male);
 
 					Integer pop18_24Female;
 					if (!row[86].equals("-")) {
@@ -260,7 +260,7 @@ public class CensusReader {
 						pop18_24Female = 0;
 					}
 					LOG.info("pop18_24Female = " + pop18_24Female);
-					municipalities.putAttribute(municipality, "pop18_24Female", pop18_24Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop18_24Female.toString(), pop18_24Female);
 
 					// ###############
 					// 25-29
@@ -272,7 +272,7 @@ public class CensusReader {
 						pop25_29 = 0;
 					}
 					LOG.info("pop25_29 = " + pop25_29);
-					municipalities.putAttribute(municipality, "pop25_29", pop25_29);
+					municipalities.putAttribute(municipality, CensusAttributes.pop25_29.toString(), pop25_29);
 
 					Integer pop25_29Male;
 					if (!row[88].equals("-")) {
@@ -281,7 +281,7 @@ public class CensusReader {
 						pop25_29Male = 0;
 					}
 					LOG.info("pop25_29Male = " + pop25_29Male);
-					municipalities.putAttribute(municipality, "pop25_29Male", pop25_29Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop25_29Male.toString(), pop25_29Male);
 
 					Integer pop25_29Female;
 					if (!row[89].equals("-")) {
@@ -290,7 +290,7 @@ public class CensusReader {
 						pop25_29Female = 0;
 					}
 					LOG.info("pop25_29Female = " + pop25_29Female);
-					municipalities.putAttribute(municipality, "pop25_29Female", pop25_29Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop25_29Female.toString(), pop25_29Female);
 
 					// ###############
 					// 30-39
@@ -302,7 +302,7 @@ public class CensusReader {
 						pop30_39 = 0;
 					}
 					LOG.info("pop30_39 = " + pop30_39);
-					municipalities.putAttribute(municipality, "pop30_39", pop30_39);
+					municipalities.putAttribute(municipality, CensusAttributes.pop30_39.toString(), pop30_39);
 
 					Integer pop30_39Male;
 					if (!row[91].equals("-")) {
@@ -311,7 +311,7 @@ public class CensusReader {
 						pop30_39Male = 0;
 					}
 					LOG.info("pop30_39Male = " + pop30_39Male);
-					municipalities.putAttribute(municipality, "pop30_39Male", pop30_39Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop30_39Male.toString(), pop30_39Male);
 
 					Integer pop30_39Female;
 					if (!row[92].equals("-")) {
@@ -320,7 +320,7 @@ public class CensusReader {
 						pop30_39Female = 0;
 					}
 					LOG.info("pop30_39Female = " + pop30_39Female);
-					municipalities.putAttribute(municipality, "pop30_39Female", pop30_39Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop30_39Female.toString(), pop30_39Female);
 
 					// ###############
 					// 40-49
@@ -332,7 +332,7 @@ public class CensusReader {
 						pop40_49 = 0;
 					}
 					LOG.info("pop40_49 = " + pop40_49);
-					municipalities.putAttribute(municipality, "pop40_49", pop40_49);
+					municipalities.putAttribute(municipality, CensusAttributes.pop40_49.toString(), pop40_49);
 
 					Integer pop40_49Male;
 					if (!row[94].equals("-")) {
@@ -341,7 +341,7 @@ public class CensusReader {
 						pop40_49Male = 0;
 					}
 					LOG.info("pop40_49Male = " + pop40_49Male);
-					municipalities.putAttribute(municipality, "pop40_49Male", pop40_49Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop40_49Male.toString(), pop40_49Male);
 
 					Integer pop40_49Female;
 					if (!row[95].equals("-")) {
@@ -350,7 +350,7 @@ public class CensusReader {
 						pop40_49Female = 0;
 					}
 					LOG.info("pop40_49Female = " + pop40_49Female);
-					municipalities.putAttribute(municipality, "pop40_49Female", pop40_49Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop40_49Female.toString(), pop40_49Female);
 
 					// ###############
 					// 50-64
@@ -362,7 +362,7 @@ public class CensusReader {
 						pop50_64 = 0;
 					}
 					LOG.info("pop50_64 = " + pop50_64);
-					municipalities.putAttribute(municipality, "pop50_64", pop50_64);
+					municipalities.putAttribute(municipality, CensusAttributes.pop50_64.toString(), pop50_64);
 
 					Integer pop50_64Male;
 					if (!row[97].equals("-")) {
@@ -371,7 +371,7 @@ public class CensusReader {
 						pop50_64Male = 0;
 					}
 					LOG.info("pop50_64Male = " + pop50_64Male);
-					municipalities.putAttribute(municipality, "pop50_64Male", pop50_64Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop50_64Male.toString(), pop50_64Male);
 
 					Integer pop50_64Female;
 					if (!row[98].equals("-")) {
@@ -380,7 +380,7 @@ public class CensusReader {
 						pop50_64Female = 0;
 					}
 					LOG.info("pop50_64Female = " + pop50_64Female);
-					municipalities.putAttribute(municipality, "pop50_64Female", pop50_64Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop50_64Female.toString(), pop50_64Female);
 
 					// ###############
 					// 65-74
@@ -392,7 +392,7 @@ public class CensusReader {
 						pop65_74 = 0;
 					}
 					LOG.info("pop65_74 = " + pop65_74);
-					municipalities.putAttribute(municipality, "pop65_74", pop65_74);
+					municipalities.putAttribute(municipality, CensusAttributes.pop65_74.toString(), pop65_74);
 
 					Integer pop65_74Male;
 					if (!row[100].equals("-")) {
@@ -401,7 +401,7 @@ public class CensusReader {
 						pop65_74Male = 0;
 					}
 					LOG.info("pop65_74Male = " + pop65_74Male);
-					municipalities.putAttribute(municipality, "pop65_74Male", pop65_74Male);
+					municipalities.putAttribute(municipality, CensusAttributes.pop65_74Male.toString(), pop65_74Male);
 
 					Integer pop65_74Female;
 					if (!row[101].equals("-")) {
@@ -410,7 +410,7 @@ public class CensusReader {
 						pop65_74Female = 0;
 					}
 					LOG.info("pop65_74Female = " + pop65_74Female);
-					municipalities.putAttribute(municipality, "pop65_74Female", pop65_74Female);
+					municipalities.putAttribute(municipality, CensusAttributes.pop65_74Female.toString(), pop65_74Female);
 
 					// ###############
 					// 75Plus
@@ -422,7 +422,7 @@ public class CensusReader {
 						pop75Plus = 0;
 					}
 					LOG.info("pop75Plus = " + pop75Plus);
-					municipalities.putAttribute(municipality, "pop75Plus", pop75Plus);
+					municipalities.putAttribute(municipality, CensusAttributes.pop75Plus.toString(), pop75Plus);
 
 					Integer pop75PlusMale;
 					if (!row[103].equals("-")) {
@@ -431,7 +431,7 @@ public class CensusReader {
 						pop75PlusMale = 0;
 					}
 					LOG.info("pop75PlusMale = " + pop75PlusMale);
-					municipalities.putAttribute(municipality, "pop75PlusMale", pop75PlusMale);
+					municipalities.putAttribute(municipality, CensusAttributes.pop75PlusMale.toString(), pop75PlusMale);
 
 					Integer pop75PlusFemale;
 					if (!row[104].equals("-")) {
@@ -440,7 +440,7 @@ public class CensusReader {
 						pop75PlusFemale = 0;
 					}
 					LOG.info("pop75PlusFemale = " + pop75PlusFemale);
-					municipalities.putAttribute(municipality, "pop75PlusFemale", pop75PlusFemale);
+					municipalities.putAttribute(municipality, CensusAttributes.pop75PlusFemale.toString(), pop75PlusFemale);
 
 					// ###############
 					// Employees
@@ -452,7 +452,7 @@ public class CensusReader {
         				employedMale = 0;
         			}
         			LOG.info("employedMale = " + employedMale);
-        			municipalities.putAttribute(municipality, "employedMale", employedMale);
+        			municipalities.putAttribute(municipality, CensusAttributes.employedMale.toString(), employedMale);
 
         			Integer employedFemale;
         			if (row.length > 123) { // Note: Length of row has to be considered here
@@ -461,7 +461,7 @@ public class CensusReader {
         				employedFemale = 0;
         			}
         			LOG.info("employedFemale = " + employedFemale);
-        			municipalities.putAttribute(municipality, "employedFemale", employedFemale);
+        			municipalities.putAttribute(municipality, CensusAttributes.employedFemale.toString(), employedFemale);
         			
         			// ###############
 					// Students
@@ -473,7 +473,7 @@ public class CensusReader {
         				studying = 0;
         			}
         			LOG.info("studying = " + studying);
-        			municipalities.putAttribute(municipality, "studying", studying);
+        			municipalities.putAttribute(municipality, CensusAttributes.studying.toString(), studying);
 
         			LOG.info("----------");
         		}

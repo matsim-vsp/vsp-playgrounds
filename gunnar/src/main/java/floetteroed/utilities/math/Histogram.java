@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Gunnar Flötteröd
+ * Copyright 2018 Gunnar Flötteröd
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * contact: gunnar.floetteroed@abe.kth.se
+ * contact: gunnar.flotterod@gmail.com
  *
- */
+ */ 
 package floetteroed.utilities.math;
 
 import java.util.Arrays;
