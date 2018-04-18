@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.function.IntUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,11 +90,7 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 		groupRebalancableVehicles(rebalancableVehiclesMap.values());
 		groupSoonIdleVehicles(time);
 
-		Map<String, SupplyData> supplyPerZone = calculateSupplyPerZone();
-		Map<String, DemandData> demandPerZone = calculateDemandPerZone(time, 0.5, 0.5);
-
-		List<Triple<String, String, Integer>> interZonalRelocations = solveTransportProblem(supplyPerZone,
-				demandPerZone);
+		List<Triple<String, String, Integer>> interZonalRelocations = solveTransportProblem(time, this::estimateTarget);
 
 		return calcRelocations(interZonalRelocations);
 	}
@@ -128,72 +124,20 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 		}
 	}
 
-	private static class SupplyData {
-		private final String zone;
-		private final int rebalancable;
-		private final int soonIdle;// TODO or soonRebalancable????
-
-		public SupplyData(String zone, int rebalancable, int soonIdle) {
-			this.zone = zone;
-			this.rebalancable = rebalancable;
-			this.soonIdle = soonIdle;
-		}
-	}
-
-	private Map<String, SupplyData> calculateSupplyPerZone() {
-		Map<String, SupplyData> supplyData = new HashMap<>();
-		for (String z : zonalSystem.getZones().keySet()) {
-			int rebalancable = rebalancableVehiclesPerZone.getOrDefault(z, Collections.emptyList()).size();
-			int soonIdle = soonIdleVehiclesPerZone.getOrDefault(z, Collections.emptyList()).size();
-			if (rebalancable + soonIdle > 0) {
-				supplyData.put(z, new SupplyData(z, rebalancable, soonIdle));
-			}
-		}
-		return supplyData;
-	}
-
-	private static class DemandData {
-		private final String zone;
-		private final int target;// TODO probably we could split them into accepted and rejected and give the rejected
-									// ones a higher weight
-
-		public DemandData(String zone, int target) {
-			this.zone = zone;
-			this.target = target;
-		}
-	}
-
-	private Map<String, DemandData> calculateDemandPerZone(double time, double alpha, double beta) {
-		Map<String, DemandData> demandData = new HashMap<>();
-
+	private List<Triple<String, String, Integer>> solveTransportProblem(double time, IntUnaryOperator targetEstimator) {
 		// XXX this "time+60" means probably "in the next time bin"
-		for (Entry<String, MutableInt> e : demandAggregator.getExpectedDemandForTimeBin(time + 60).entrySet()) {
-			int count = e.getValue().intValue();
-			if (count > 0) {
-				String z = e.getKey();
-				// targets should be calculated more intelligently
-
-				// for larger zones we may assume that target is at least 1
-				// if we have many small zones
-
-				demandData.put(z, new DemandData(z, (int)Math.round(alpha * count + beta)));
-			}
-		}
-		return demandData;
-	}
-
-	private List<Triple<String, String, Integer>> solveTransportProblem(Map<String, SupplyData> supply,
-			Map<String, DemandData> demand) {
-		SupplyData noSupply = new SupplyData(null, 0, 0);
-		DemandData noDemand = new DemandData(null, 0);
-
+		Map<String, MutableInt> expectedDemandMap = demandAggregator.getExpectedDemandForTimeBin(time + 60);
 		List<Pair<String, Integer>> producers = new ArrayList<>();
 		List<Pair<String, Integer>> consumers = new ArrayList<>();
 
 		for (String z : zonalSystem.getZones().keySet()) {
-			SupplyData s = supply.getOrDefault(z, noSupply);
-			DemandData d = demand.getOrDefault(z, noDemand);
-			int delta = Math.min(s.rebalancable + s.soonIdle - d.target, s.rebalancable);
+			int rebalancable = rebalancableVehiclesPerZone.getOrDefault(z, Collections.emptyList()).size();
+			int soonIdle = soonIdleVehiclesPerZone.getOrDefault(z, Collections.emptyList()).size();
+
+			MutableInt expectedDemand = expectedDemandMap.get(z);
+			int target = expectedDemand == null ? 0 : targetEstimator.applyAsInt(expectedDemand.intValue());
+
+			int delta = Math.min(rebalancable + soonIdle - target, rebalancable);
 			if (delta < 0) {
 				consumers.add(Pair.of(z, -delta));
 			} else if (delta > 0) {
@@ -202,6 +146,16 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 		}
 
 		return new TransportProblem<String, String>(this::calcStraightLineDistance).solve(producers, consumers);
+	}
+
+	// FIXME targets should be calculated more intelligently
+	private int estimateTarget(int expectedDemand) {
+		if (expectedDemand == 0) {
+			return 0; // for larger zones we may assume that target is at least 1 ??????
+		}
+		double alpha = 0.5;
+		double beta = 0.5;
+		return (int)Math.round(alpha * expectedDemand + beta);
 	}
 
 	private int calcStraightLineDistance(String zone1, String zone2) {
