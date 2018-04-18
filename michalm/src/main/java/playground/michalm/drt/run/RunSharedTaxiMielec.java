@@ -33,9 +33,11 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
+import playground.michalm.drt.rebalancing.AggregatedMinCostRelocationCalculator;
 import playground.michalm.drt.rebalancing.LinearRebalancingTargetCalculator;
 import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy;
 import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy.RebalancingTargetCalculator;
+import playground.michalm.drt.rebalancing.MinCostRelocationCalculator;
 
 public class RunSharedTaxiMielec {
 	public static void main(String[] args) {
@@ -66,6 +68,8 @@ public class RunSharedTaxiMielec {
 					bind(DrtZonalSystem.class).toInstance(zones);
 					bind(RebalancingStrategy.class).to(MinCostFlowRebalancingStrategy.class).asEagerSingleton();
 					bind(RebalancingTargetCalculator.class).to(LinearRebalancingTargetCalculator.class)
+							.asEagerSingleton();
+					bind(MinCostRelocationCalculator.class).to(AggregatedMinCostRelocationCalculator.class)
 							.asEagerSingleton();
 					bind(ZonalDemandAggregator.class).asEagerSingleton();
 				}
