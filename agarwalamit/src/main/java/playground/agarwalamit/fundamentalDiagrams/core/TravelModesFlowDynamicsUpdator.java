@@ -112,14 +112,14 @@ final class TravelModesFlowDynamicsUpdator {
 	}
 
 	void updateFlow900(double nowTime, double pcuPerson){
-		if (nowTime == this.flowTime.doubleValue()){//Still measuring the flow of the same second
+		if (nowTime == this.flowTime){//Still measuring the flow of the same second
 			Double nowFlow = this.flowTable900.get(0);
-			this.flowTable900.set(0, nowFlow.doubleValue()+pcuPerson);
+			this.flowTable900.set(0, nowFlow +pcuPerson);
 		} else {//Need to offset the new flow table from existing flow table.
-			int timeDifference = (int) (nowTime-this.flowTime.doubleValue());
+			int timeDifference = (int) (nowTime- this.flowTime);
 			if (timeDifference<900){
 				for (int i=899-timeDifference; i>=0; i--){
-					this.flowTable900.set(i+timeDifference, this.flowTable900.get(i).doubleValue());
+					this.flowTable900.set(i+timeDifference, this.flowTable900.get(i));
 				}
 				if (timeDifference > 1){
 					for (int i = 1; i<timeDifference; i++){
@@ -138,7 +138,7 @@ final class TravelModesFlowDynamicsUpdator {
 	private void updateLastXFlows900(){
 		Double nowFlow = this.getCurrentHourlyFlow();
 		for (int i=NUMBER_OF_MEMORIZED_FLOWS-2; i>=0; i--){
-			this.lastXHourlyFlows.set(i+1, this.lastXHourlyFlows.get(i).doubleValue());
+			this.lastXHourlyFlows.set(i+1, this.lastXHourlyFlows.get(i));
 		}
 		this.lastXHourlyFlows.set(0, nowFlow);
 	}
@@ -148,7 +148,7 @@ final class TravelModesFlowDynamicsUpdator {
 			double lastSeenTime = lastSeenOnStudiedLinkEnter.get(personId);
 			double speed = this.lengthOfTrack / (nowTime-lastSeenTime);//in m/s!!
 			for (int i=speedTableSize-2; i>=0; i--){
-				this.speedTable.set(i+1, this.speedTable.get(i).doubleValue());
+				this.speedTable.set(i+1, this.speedTable.get(i));
 			}
 			this.speedTable.set(0, speed);
 
@@ -162,7 +162,7 @@ final class TravelModesFlowDynamicsUpdator {
 		double relativeDeviances = 0.;
 		double averageSpeed = ListUtils.doubleMean(this.speedTable);
 		for (int i=0; i<this.speedTableSize; i++){
-			relativeDeviances += Math.pow( (this.speedTable.get(i).doubleValue() - averageSpeed) / averageSpeed, 2);
+			relativeDeviances += Math.pow( (this.speedTable.get(i) - averageSpeed) / averageSpeed, 2);
 		}
 		relativeDeviances /= this.noOfModes;//taking dependence on number of modes away
 		if (relativeDeviances < 0.0005){
