@@ -27,13 +27,10 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -63,7 +60,6 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
-
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation.DynamicPCUUpdator;
 
 /**
@@ -90,7 +86,7 @@ public class FundamentalDiagramDataGenerator {
 	
 	static FDNetworkGenerator fdNetworkGenerator;
 
-	private final Map<String, Double> mode2PCUs = new HashMap<>();
+	private Map<String, Double> mode2PCUs = null;
 
 	private Integer[] startingPoint;
 	private Integer [] maxAgentDistribution;
@@ -140,8 +136,7 @@ public class FundamentalDiagramDataGenerator {
 
 		if(fundamentalDiagramConfigGroup.isWritingEvents()) Log.warn("This will write one event file corresponding to each iteration and thus ");
 
-		Collection<String> mainModes = scenario.getConfig().qsim().getMainModes();
-		travelModes = mainModes.toArray(new String[mainModes.size()]);
+		travelModes = scenario.getConfig().qsim().getMainModes().toArray(new String[0]);
 
 		if (scenario.getVehicles().getVehicleTypes().isEmpty()) {
 			if (travelModes.length==1 && travelModes [0].equals("car")) {
@@ -152,13 +147,16 @@ public class FundamentalDiagramDataGenerator {
             	car.setPcuEquivalents(1.0);
             	car.setMaximumVelocity( fundamentalDiagramConfigGroup.getTrackLinkSpeed() );
             	scenario.getVehicles().addVehicleType(car);
-
 			} else {
 				throw new RuntimeException("Vehicle type information for modes "+ Arrays.toString(travelModes)+" is not provided. Aborting...");
 			}
 		}
 
-		mode2PCUs.putAll(scenario.getVehicles().getVehicleTypes().values().stream().collect(Collectors.toMap(v->v.getId().toString(),VehicleType::getPcuEquivalents)));
+		mode2PCUs = scenario.getVehicles()
+							.getVehicleTypes()
+							.values()
+							.stream()
+							.collect(Collectors.toMap(v -> v.getId().toString(), VehicleType::getPcuEquivalents));
 
 		flowUnstableWarnCount = new int [travelModes.length];
 		speedUnstableWarnCount = new int [travelModes.length];
@@ -166,9 +164,7 @@ public class FundamentalDiagramDataGenerator {
 		if (this.modalShareInPCU==null) {
 			LOG.warn("No modal split is provided for mode(s) : " + Arrays.toString(this.travelModes)+". Using equla modal split in PCU.");
 			this.modalShareInPCU = new Double[this.travelModes.length];
-			for (int index = 0; index< this.travelModes.length; index++){
-				this.modalShareInPCU[index] = 1.0;
-			}
+			Arrays.fill(this.modalShareInPCU, 1.0);
 		} else if (this.modalShareInPCU.length != this.travelModes.length) {
 			LOG.warn("Number of modes is not equal to the provided modal share (in PCU). Running for equal modal share");
 			this.modalShareInPCU = new Double[this.travelModes.length];
@@ -180,7 +176,7 @@ public class FundamentalDiagramDataGenerator {
 		
 		if (scenario.getConfig().controler().getOverwriteFileSetting().equals(OverwriteFileSetting.deleteDirectoryIfExists)) {
 			LOG.warn("Overwrite file setting is set to "+scenario.getConfig().controler().getOverwriteFileSetting() 
-					+ ", which will also remove the fundament diagram data file. Setting it back to "+OverwriteFileSetting.overwriteExistingFiles);
+					+ ", which will also remove the fundamental diagram data file. Setting it back to "+OverwriteFileSetting.overwriteExistingFiles);
 			scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 		}
 	}
@@ -257,7 +253,7 @@ public class FundamentalDiagramDataGenerator {
 		int numberOfPoints = (int) Math.ceil( networkDensity / sumOfPCUInEachStep ) + 5 ;
 
 		List<List<Integer>> pointsToRun = new ArrayList<>();
-		for (int m=1; m<numberOfPoints; m++){
+		for ( int m=1; m<numberOfPoints; m++ ){
 			List<Integer> pointToRun = new ArrayList<>();
 			for (int i=0; i<travelModes.length; i++){
 				pointToRun.add(minSteps.get(i)*m);
@@ -281,24 +277,18 @@ public class FundamentalDiagramDataGenerator {
 		this.startingPoint = new Integer [travelModes.length];
 		this.stepSize = new Integer [travelModes.length];
 
-		for(int ii=0;ii<travelModes.length;ii++){
-			this.startingPoint [ii] =0;
-			this.stepSize [ii] = this.fundamentalDiagramConfigGroup.getReduceDataPointsByFactor();
-		}
-		this.startingPoint = new Integer[] {1,1};
+		Arrays.fill(this.stepSize, this.fundamentalDiagramConfigGroup.getReduceDataPointsByFactor());
+		Arrays.fill(this.startingPoint, 1);
 
-		maxAgentDistribution = new Integer [travelModes.length];
+		this.maxAgentDistribution = new Integer [travelModes.length];
 		double cellSizePerPCU = this.scenario.getNetwork().getEffectiveCellSize();
 		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 
-		for(int ii=0;ii<maxAgentDistribution.length;ii++){
-			double pcu = this.mode2PCUs.get(travelModes[ii]);
-			int maxNumberOfVehicle = (int) Math.floor(networkDensity/pcu)+1;
-			maxAgentDistribution[ii] = maxNumberOfVehicle;
-		}
+		IntStream.range(0, travelModes.length)
+				 .forEach(index -> this.maxAgentDistribution[index] = (int) Math.floor(networkDensity / this.mode2PCUs.get(
+						 travelModes[index])) + 1);
 
 		List<List<Integer>> pointsToRun = this.createPointsToRun();
-
 		for (List<Integer> pointToRun : pointsToRun) {
 			double density = IntStream.range(0, travelModes.length)
 									  .mapToDouble(index -> pointToRun.get(index) * this.mode2PCUs.get(travelModes[index]))
@@ -329,8 +319,7 @@ public class FundamentalDiagramDataGenerator {
 			Integer[] newPoint = new Integer[maxAgentDistribution.length];
 			System.arraycopy(iterationModule.getPoint(), 0, newPoint, 0, newPoint.length);
 			pointsToRun.add(Arrays.asList(newPoint));
-			String point = arraytostring(iterationModule.getPoint());
-			LOG.info("Just added point "+point+" to the collection.");
+			LOG.info("Just added point "+ Arrays.toString(iterationModule.getPoint()) +" to the collection.");
 			if (i<numberOfPoints-1){
 				iterationModule.add1();
 			}
@@ -361,7 +350,6 @@ public class FundamentalDiagramDataGenerator {
 				population.addPerson(person);
 				population.getPersonAttributes().putAttribute(personId.toString(), FDQSimProvider.PERSON_MODE_ATTRIBUTE_KEY, travelModes[i]);
 			}
-
 			mode2FlowData.get(travelModes[i]).setnumberOfAgents(pointToRun.get(i));
 		}
 
@@ -535,25 +523,16 @@ public class FundamentalDiagramDataGenerator {
 			throw new RuntimeException(e);
 		}
 		writer.print("n \t");
-		for (String travelMode : travelModes) {
-			String strn = "n_" + travelMode;
-			writer.print(strn + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print("n_" + travelMode + "\t"));
+
 		writer.print("k \t");
-		for (String travelMode : travelModes) {
-			String strk = "k_" + travelMode;
-			writer.print(strk + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print("k_" + travelMode + "\t"));
+
 		writer.print("q \t");
-		for (String travelMode : travelModes) {
-			String strq = "q_" + travelMode;
-			writer.print(strq + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print(("q_" + travelMode) + "\t"));
+
 		writer.print("v \t");
-		for (String travelMode : travelModes) {
-			String strv = "v_" + travelMode;
-			writer.print(strv + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print(("v_" + travelMode) + "\t"));
 
 		if( travelModes.length > 1 ) {
 			writer.print("noOfCarsPerkm \t");
@@ -561,25 +540,13 @@ public class FundamentalDiagramDataGenerator {
 			writer.print("avgBikePassingRatePerkm \t");
 		}
 		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
-			for (String travelMode : travelModes) {
-				String str = "pcu_"+travelMode;
-				writer.print(str + "\t");
-			}
+			Arrays.stream(travelModes).forEach(travelMode -> writer.print(("pcu_" + travelMode) + "\t"));
 		}
 		writer.print("\n");
 	}
 
 	private void closeFile() {
 		writer.close();
-	}
-
-	private static String arraytostring(Integer[] list){
-		String str = "";
-		for (Integer aList : list) {
-			str += aList;
-			str += " ";
-		}
-		return str;
 	}
 
 	private int getGCD(int a, int b){
