@@ -21,7 +21,9 @@ package playground.vsp.openberlinscenario.cemdap.input;
 /**
  * @author dziemke
  */
-public enum CensusAttributes {population, populationMale, populationfemale, marriedMale, marriedFemale,
+public enum CensusAttributes {
+	population, populationMale, populationfemale,
+	marriedMale, marriedFemale,
 	pop0_2, pop0_2Male, pop0_2Female,
 	pop3_5, pop3_5Male, pop3_5Female,
 	pop6_14, pop6_14Male, pop6_14Female,
