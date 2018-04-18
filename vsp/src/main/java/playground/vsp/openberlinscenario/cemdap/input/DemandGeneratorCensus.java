@@ -68,6 +68,7 @@ public class DemandGeneratorCensus {
 	// Optional (links municipality ID to LOR/PLZ IDs in that municipality)
 	private final Map<String, List<String>> spatialRefinementZoneIds = new HashMap<>();
 	private List<String> idsOfMunicipalitiesForSpatialRefinement;
+	enum CommuterRelationAttributes {male, female}
 	
 	// Parameters
 	private String outputBase;
@@ -175,7 +176,7 @@ public class DemandGeneratorCensus {
 			Map<String, CommuterRelationV2> relationsFromMunicipality = relationsMap.get(munId);
 
 			// Employees in census are all employees, not only socially-secured employees
-			if (this.municipalities.getAttribute(munId, "employedMale") == null || this.municipalities.getAttribute(munId, "employedFemale") == null) {
+			if (this.municipalities.getAttribute(munId, CensusAttributes.employedMale.toString()) == null || this.municipalities.getAttribute(munId, CensusAttributes.employedFemale.toString()) == null) {
 				LOG.warn("Employed male (and possibly other) information is not available in the census data for munId "+ munId + ". Skipping this municipality.");
 				continue;
 			}
@@ -184,8 +185,8 @@ public class DemandGeneratorCensus {
 			int employeesFemale = (int) this.municipalities.getAttribute(munId, CensusAttributes.employedFemale.toString());
 
 			scaleRelations(relationsFromMunicipality, employeesMale, employeesFemale, this.defaultEmployeesToCommutersRatio);
-			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, "male"); // TODO
-			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, "female"); // TODO
+			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, CommuterRelationAttributes.male.toString());
+			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, CommuterRelationAttributes.female.toString());
 
 			int pop0_2Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop0_2Male.toString());
 			int pop3_5Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop3_5Male.toString());
@@ -373,7 +374,7 @@ public class DemandGeneratorCensus {
 			household.getAttributes().putAttribute(CEMDAPHouseholdAttributes.numberOfChildren.toString(), 0); // None, ignore them in this version
 			household.getAttributes().putAttribute(CEMDAPHouseholdAttributes.householdStructure.toString(), 1); // 1 = single, no children
 			
-			Id<Person> personId = Id.create(householdId + "01", Person.class);
+			Id<Person> personId = Id.create(householdId + "01", Person.class); // TODO Currently only singel-person households
 			Person person = this.population.getFactory().createPerson(personId);
 
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.householdId.toString(), householdId.toString()); // toString() will enable writing it to person attributes
@@ -486,15 +487,12 @@ public class DemandGeneratorCensus {
 		List<String> commuterRelationsList = new ArrayList<>();
 		for (String destination : relationsFromMunicipality.keySet()) {
 			int trips;
-			switch (gender) {
-				case "male":
-					trips = relationsFromMunicipality.get(destination).getTripsMale();
-					break;
-				case "female":
-					trips = relationsFromMunicipality.get(destination).getTripsFemale();
-					break;
-				default:
-					throw new IllegalArgumentException("Must either be male or female.");
+			if (gender.equals(CommuterRelationAttributes.male.toString())) {
+				trips = relationsFromMunicipality.get(destination).getTripsMale();
+			} else if (gender.equals(CommuterRelationAttributes.female.toString())) {
+				trips = relationsFromMunicipality.get(destination).getTripsFemale();
+			} else {
+				throw new IllegalArgumentException("Must either be male or female.");
 			}
 			for (int i = 0; i < trips ; i++) {
 				commuterRelationsList.add(destination);
