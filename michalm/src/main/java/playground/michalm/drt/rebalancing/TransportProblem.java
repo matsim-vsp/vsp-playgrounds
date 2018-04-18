@@ -96,7 +96,7 @@ public class TransportProblem<P, C> {
 				}
 			}
 		}
-		
+
 		return flows;
 	}
 }
