@@ -18,7 +18,6 @@
  * *********************************************************************** */
 package playground.vsp.openberlinscenario.planmodification;
 
-import java.util.List;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
@@ -60,7 +59,6 @@ public class PlanFileModifier {
 	private int maxNumberOfAgentsConsidered;
 	private boolean removeLinksAndRoutes;
 	private CoordinateTransformation ct;
-	private List<String> attributesToKeep; // TODO Might be removed once handling of new, integrated attributes becomes more standard
 	
 	Random random = MatsimRandom.getLocalInstance();
 	
