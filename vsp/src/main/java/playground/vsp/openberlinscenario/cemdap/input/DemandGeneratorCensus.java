@@ -101,7 +101,7 @@ public class DemandGeneratorCensus {
 		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
 		String censusFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/400/";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/500/";
 		
 		// Parameters
 		int numberOfPlansPerPerson = 10; // Note: Set this higher to a value higher than 1 if spatial refinement is used.
