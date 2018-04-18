@@ -33,7 +33,9 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
+import playground.michalm.drt.rebalancing.LinearRebalancingTargetCalculator;
 import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy;
+import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy.RebalancingTargetCalculator;
 
 public class RunSharedTaxiMielec {
 	public static void main(String[] args) {
@@ -55,8 +57,6 @@ public class RunSharedTaxiMielec {
 		Controler controler = DrtControlerCreator.createControler(config, otfvis);
 
 		if (rebalancing == true) {
-			System.err.println("Rebalancing Online");
-
 			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 1000);
 
 			controler.addOverridingModule(new DrtZonalModule());
@@ -65,6 +65,8 @@ public class RunSharedTaxiMielec {
 				public void install() {
 					bind(DrtZonalSystem.class).toInstance(zones);
 					bind(RebalancingStrategy.class).to(MinCostFlowRebalancingStrategy.class).asEagerSingleton();
+					bind(RebalancingTargetCalculator.class).to(LinearRebalancingTargetCalculator.class)
+							.asEagerSingleton();
 					bind(ZonalDemandAggregator.class).asEagerSingleton();
 				}
 			});

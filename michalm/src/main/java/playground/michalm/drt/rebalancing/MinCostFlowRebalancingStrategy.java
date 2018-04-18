@@ -20,22 +20,20 @@ package playground.michalm.drt.rebalancing;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntUnaryOperator;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
-import org.matsim.contrib.drt.analysis.zonal.ZonalDemandAggregator;
 import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
@@ -55,18 +53,22 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author michalm
  */
 public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
+	public interface RebalancingTargetCalculator {
+		int estimate(String zone, double time);
+	}
+
 	private static final double MAX_REMAINING_TIME_TO_IDLENESS = 1800;// for soon-idle vehicles
 	private static final double MIN_REMAINING_SERVICE_TIME = 3600;// for idle vehicles
 
-	private ZonalDemandAggregator demandAggregator;
-	private DrtZonalSystem zonalSystem;
-	private Network network;
-	private Fleet fleet;
+	private final RebalancingTargetCalculator rebalancingTargetCalculator;
+	private final DrtZonalSystem zonalSystem;
+	private final Network network;
+	private final Fleet fleet;
 
 	@Inject
-	public MinCostFlowRebalancingStrategy(ZonalDemandAggregator demandAggregator, DrtZonalSystem zonalSystem,
-			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, Fleet fleet) {
-		this.demandAggregator = demandAggregator;
+	public MinCostFlowRebalancingStrategy(RebalancingTargetCalculator rebalancingTargetCalculator,
+			DrtZonalSystem zonalSystem, @Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, Fleet fleet) {
+		this.rebalancingTargetCalculator = rebalancingTargetCalculator;
 		this.zonalSystem = zonalSystem;
 		this.network = network;
 		this.fleet = fleet;
@@ -80,7 +82,7 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 		}
 		Map<String, List<Vehicle>> soonIdleVehiclesPerZone = groupSoonIdleVehicles(time);
 
-		List<Triple<String, String, Integer>> interZonalRelocations = solveTransportProblem(time, this::estimateTarget,
+		List<Triple<String, String, Integer>> interZonalRelocations = solveTransportProblem(time,
 				rebalancableVehiclesPerZone, soonIdleVehiclesPerZone);
 		return calcRelocations(rebalancableVehiclesPerZone, interZonalRelocations);
 	}
@@ -117,20 +119,16 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 		return soonIdleVehiclesPerZone;
 	}
 
-	private List<Triple<String, String, Integer>> solveTransportProblem(double time, IntUnaryOperator targetEstimator,
+	private List<Triple<String, String, Integer>> solveTransportProblem(double time,
 			Map<String, List<Vehicle>> rebalancableVehiclesPerZone,
 			Map<String, List<Vehicle>> soonIdleVehiclesPerZone) {
-		// XXX this "time+60" means probably "in the next time bin"
-		Map<String, MutableInt> expectedDemandMap = demandAggregator.getExpectedDemandForTimeBin(time + 60);
 		List<Pair<String, Integer>> producers = new ArrayList<>();
 		List<Pair<String, Integer>> consumers = new ArrayList<>();
 
 		for (String z : zonalSystem.getZones().keySet()) {
 			int rebalancable = rebalancableVehiclesPerZone.getOrDefault(z, Collections.emptyList()).size();
 			int soonIdle = soonIdleVehiclesPerZone.getOrDefault(z, Collections.emptyList()).size();
-
-			MutableInt expectedDemand = expectedDemandMap.get(z);
-			int target = expectedDemand == null ? 0 : targetEstimator.applyAsInt(expectedDemand.intValue());
+			int target = rebalancingTargetCalculator.estimate(z, time);
 
 			int delta = Math.min(rebalancable + soonIdle - target, rebalancable);
 			if (delta < 0) {
@@ -141,16 +139,6 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 		}
 
 		return new TransportProblem<String, String>(this::calcStraightLineDistance).solve(producers, consumers);
-	}
-
-	// FIXME targets should be calculated more intelligently
-	private int estimateTarget(int expectedDemand) {
-		if (expectedDemand == 0) {
-			return 0; // for larger zones we may assume that target is at least 1 ??????
-		}
-		double alpha = 0.5;
-		double beta = 0.5;
-		return (int)Math.round(alpha * expectedDemand + beta);
 	}
 
 	private int calcStraightLineDistance(String zone1, String zone2) {
@@ -171,6 +159,7 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 
 			int flow = r.getRight();
 			for (int f = 0; f < flow; f++) {
+				// TODO use BestDispatchFinder (needs to be moved from taxi to dvrp) instead
 				Vehicle nearestVehicle = findNearestVehicle(rebalancableVehicles, destinationLink);
 				relocations.add(new Relocation(nearestVehicle, destinationLink));
 				rebalancableVehicles.remove(nearestVehicle);// TODO use map to have O(1) removal
@@ -180,19 +169,8 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 	}
 
 	private Vehicle findNearestVehicle(List<Vehicle> rebalancableVehicles, Link destinationLink) {
-		double closestDistance = Double.MAX_VALUE;
-		Vehicle closestVeh = null;
-		for (Vehicle v : rebalancableVehicles) {
-			Link vl = Schedules.getLastLinkInSchedule(v);
-			if (vl != null) {
-				double distance = DistanceUtils.calculateDistance(vl.getCoord(),
-						destinationLink.getFromNode().getCoord());
-				if (distance < closestDistance) {
-					closestDistance = distance;
-					closestVeh = v;
-				}
-			}
-		}
-		return closestVeh;
+		Coord toCoord = destinationLink.getFromNode().getCoord();
+		return rebalancableVehicles.stream().min(Comparator.comparing(v -> DistanceUtils.calculateSquaredDistance(//
+				Schedules.getLastLinkInSchedule(v).getToNode().getCoord(), toCoord))).get();
 	}
 }
