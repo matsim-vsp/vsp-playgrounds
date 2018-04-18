@@ -407,7 +407,7 @@ public class KTFreight_v3 {
 
 	private static CarrierVehicleTypes createVehicleTypes() {
 		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
-		new CarrierVehicleTypeReader(vehicleTypes) ;
+		new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPEFILE) ;
 		return vehicleTypes;
 	}
 
