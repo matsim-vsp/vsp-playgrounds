@@ -68,7 +68,7 @@ public class AnalyzeAndCompareTrips {
 
 	public static void main(String[] args) {
 		// MATSim/Simulation
-		Events2TripsParser events2TripsParser = new Events2TripsParser(CONFIG_FILE, EVENTS_FILE, NETWORK_FILE);
+		Events2TripsParser events2TripsParser = new Events2TripsParser(CONFIG_FILE, EVENTS_FILE, NETWORK_FILE, true);
 		List<MatsimTrip> matsimTrips = events2TripsParser.getTrips();
 		
 		// Set filters if desired
