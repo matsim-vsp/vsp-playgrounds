@@ -1,6 +1,5 @@
 package playground.dziemke.actitopp;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -26,7 +25,7 @@ import edu.kit.ifv.mobitopp.actitopp.HWeekPattern;
 import edu.kit.ifv.mobitopp.actitopp.InvalidPatternException;
 import edu.kit.ifv.mobitopp.actitopp.ModelFileBase;
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper;
-import playground.vsp.openberlinscenario.cemdap.input.DemandGeneratorCensus;
+import playground.vsp.openberlinscenario.cemdap.input.CEMDAPPersonAttributes;
 
 /**
  * @author dziemke
@@ -83,7 +82,7 @@ public class ActitoppMatsimDemandGenerator {
 	
 	public static void main(String[] args) {
 		// Input and output files
-		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_6/population/";
 		String plansFile = outputBase + "plans_10000.xml.gz";
 		
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -91,9 +90,8 @@ public class ActitoppMatsimDemandGenerator {
 		reader.readFile(plansFile);
 		
 		runActitopp(scenario.getPopulation());
-		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_10000_w_act.xml.gz"); // TODO currently only works with one population file
+		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_10000_2_w_act.xml.gz"); // TODO currently only works with one population file
 	}
-
 	
 	private static void runActitopp(Population population) {
 		for (Person matsimPerson : population.getPersons().values()) {
@@ -104,7 +102,6 @@ public class ActitoppMatsimDemandGenerator {
 			matsimPerson.addPlan(createMatsimPlan(weekPattern, populationFactory));
 		}
 	}
-
 
 	private static Plan createMatsimPlan(HWeekPattern weekPattern, PopulationFactory populationFactory) {
 		Plan matsimPlan = populationFactory.createPlan();
@@ -133,7 +130,6 @@ public class ActitoppMatsimDemandGenerator {
 		return matsimPlan;
 	}
 
-
 	private static HWeekPattern createActitoppWeekPattern(ActitoppPerson actitoppPerson) {
 		boolean scheduleOK = false;
 		while (!scheduleOK)	{
@@ -152,7 +148,6 @@ public class ActitoppMatsimDemandGenerator {
 		return actitoppPerson.getWeekPattern();
 	}
 
-
 	private static ActitoppPerson createActitoppPerson(Person matsimPerson) {
 		// Attributes contained in the population are "age", "employed", "gender", "hasLicense", "householdId", "locationOfSchool",
 		// "locationOfWork", "parent", and "student"
@@ -161,25 +156,21 @@ public class ActitoppMatsimDemandGenerator {
 		int personIndex = Integer.parseInt(matsimPerson.getId().toString());
 		int childrenFrom0To10 = getChildrenFrom0To10(); // TODO
 		int childrenUnder18 = getChildrenUnder18(); // TODO
-		int age = Integer.parseInt(matsimPerson.getAttributes().getAttribute("age").toString());
-		int employment = getEmploymentClass(
-				Boolean.parseBoolean(matsimPerson.getAttributes().getAttribute("employed").toString()),
-				Boolean.parseBoolean(matsimPerson.getAttributes().getAttribute("employed").toString()));
-		int gender = getGenderClass(Integer.parseInt(matsimPerson.getAttributes().getAttribute("gender").toString()));
+		int age = (int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.age.toString());
+		int employment = getEmploymentClass((boolean) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString()), 
+				(boolean) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString()));
+		int gender = getGenderClass(Integer.parseInt(matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.gender.toString()).toString()));
 		int areaType = getAreaType(); // TODO
 		int numberOfCarsInHousehold = getNumberOfCarsInHousehold(); // TODO
-		double commutingDistanceToWork = getDistanceEstimate(
-				Integer.parseInt(matsimPerson.getAttributes().getAttribute("householdId").toString()),
-				Integer.parseInt(matsimPerson.getAttributes().getAttribute("locationOfWork").toString()));
-		double commutingDistanceToEducation = getDistanceEstimate(
-				Integer.parseInt(matsimPerson.getAttributes().getAttribute("householdId").toString()),
-				Integer.parseInt(matsimPerson.getAttributes().getAttribute("locationOfSchool").toString()));
+		double commutingDistanceToWork = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()),
+				(int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString()));
+		double commutingDistanceToEducation = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()),
+				(int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString()));
 		
 		ActitoppPerson actitoppPerson = new ActitoppPerson(personIndex, childrenFrom0To10, childrenUnder18, age, employment, gender, areaType,
 				numberOfCarsInHousehold, commutingDistanceToWork, commutingDistanceToEducation);
 		return actitoppPerson;
 	}
-	
 	
 	// Information from "https://github.com/mobitopp/actitopp"
 	// 1 = full-time occupied; 2 = half-time occupied; 3 = not occupied; 4 = student (school or university); 5 = worker in vocational program; 7 = retired person / pensioner
@@ -187,6 +178,7 @@ public class ActitoppMatsimDemandGenerator {
 		int employmentClass = -1;
 		if (employment) {
 			employmentClass = 1; // TODO distinguish between full- and half-time occupation
+			// Tim, Michael H. also estimate this in a model for people outside Karlsruhe
 		} else {
 			employmentClass = 3;
 		}
@@ -196,7 +188,6 @@ public class ActitoppMatsimDemandGenerator {
 		// TODO "worker in vocational program" and "retired person / pensioner" is not yet considered
 		return employmentClass;
 	}
-	
 	
 	// Information from "https://github.com/mobitopp/actitopp"
 	// 1 = male; 2 = female
@@ -214,25 +205,29 @@ public class ActitoppMatsimDemandGenerator {
 		return genderClass;
 	}
 
+	// PKW-Besitzquote pro Gemeinde
 	private static int getNumberOfCarsInHousehold() {
 		return 0;
 	}
 
-	
 	// Information from "https://github.com/mobitopp/actitopp"
 	// 1 = rural; 2 = provincial; 3 = cityoutskirt; 4 = metropolitan; 5 = conurbation
+	// 5 = >500000 im Regionkern
+	// 4 = 50000-500000 im Regionskern
+	// 3 = >50000 am Regionsrand
+	// 2 = 5000-50000
+	// 1 = < 5000
+	// Based on BIK regions, cf. MOP
 	private static int getAreaType() {
 		// TODO Right now everybody is "metropolitan"
 		return 4;
 	}
 
-	
 	private static int getChildrenUnder18() {
 		// TODO Right now nobody has a child
 		return 0;
 	}
 
-	
 	private static int getChildrenFrom0To10() {
 		// TODO Right now nobody has a child
 		return 0;
@@ -246,27 +241,25 @@ public class ActitoppMatsimDemandGenerator {
 		return 5.;
 	}
 	
-	
 	// Information from "https://github.com/mobitopp/actitopp/blob/master/src/main/java/edu/kit/ifv/mobitopp/actitopp/Configuration.java"
 	private static String transformActType(char activityTypeLetter) {
 		if (activityTypeLetter == 'H') {
-			return "home";
+			return ActiToppActivityTypes.home.toString();
 		} else if (activityTypeLetter == 'W') {
-			return "work";
+			return ActiToppActivityTypes.work.toString();
 		} else if (activityTypeLetter == 'E') {
-			return "eudation";
+			return ActiToppActivityTypes.education.toString();
 		} else if (activityTypeLetter == 'L') {
-			return "leisure";
+			return ActiToppActivityTypes.leisure.toString();
 		} else if (activityTypeLetter == 'S') {
-			return "shopping";
+			return ActiToppActivityTypes.shopping.toString();
 		} else if (activityTypeLetter == 'T') {
-			return "other";
+			return ActiToppActivityTypes.other.toString();
 		} else {
 			LOG.error(new IllegalArgumentException("Activity type " + activityTypeLetter + " not allowed."));
 			return null;
 		}
 	}
-	
 	
 	private static void writeMatsimPlansFile(Population population, String fileName) {
 	    MatsimWriter popWriter = new PopulationWriter(population);

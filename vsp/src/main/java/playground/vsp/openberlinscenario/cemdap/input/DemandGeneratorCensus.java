@@ -68,6 +68,7 @@ public class DemandGeneratorCensus {
 	// Optional (links municipality ID to LOR/PLZ IDs in that municipality)
 	private final Map<String, List<String>> spatialRefinementZoneIds = new HashMap<>();
 	private List<String> idsOfMunicipalitiesForSpatialRefinement;
+	enum CommuterRelationAttributes {male, female}
 	
 	// Parameters
 	private String outputBase;
@@ -100,7 +101,7 @@ public class DemandGeneratorCensus {
 		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
 		String censusFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_input/400/";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/500/";
 		
 		// Parameters
 		int numberOfPlansPerPerson = 10; // Note: Set this higher to a value higher than 1 if spatial refinement is used.
@@ -175,41 +176,41 @@ public class DemandGeneratorCensus {
 			Map<String, CommuterRelationV2> relationsFromMunicipality = relationsMap.get(munId);
 
 			// Employees in census are all employees, not only socially-secured employees
-			if (this.municipalities.getAttribute(munId, "employedMale") == null || this.municipalities.getAttribute(munId, "employedFemale") == null) {
+			if (this.municipalities.getAttribute(munId, CensusAttributes.employedMale.toString()) == null || this.municipalities.getAttribute(munId, CensusAttributes.employedFemale.toString()) == null) {
 				LOG.warn("Employed male (and possibly other) information is not available in the census data for munId "+ munId + ". Skipping this municipality.");
 				continue;
 			}
 
-			int employeesMale = (int) this.municipalities.getAttribute(munId, "employedMale");
-			int employeesFemale = (int) this.municipalities.getAttribute(munId, "employedFemale");
+			int employeesMale = (int) this.municipalities.getAttribute(munId, CensusAttributes.employedMale.toString());
+			int employeesFemale = (int) this.municipalities.getAttribute(munId, CensusAttributes.employedFemale.toString());
 
 			scaleRelations(relationsFromMunicipality, employeesMale, employeesFemale, this.defaultEmployeesToCommutersRatio);
-			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, "male");
-			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, "female");
+			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, CommuterRelationAttributes.male.toString());
+			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, CommuterRelationAttributes.female.toString());
 
-			int pop0_2Male = (int) this.municipalities.getAttribute(munId, "pop0_2Male");
-			int pop3_5Male = (int) this.municipalities.getAttribute(munId, "pop3_5Male");
-			int pop6_14Male = (int) this.municipalities.getAttribute(munId, "pop6_14Male");
-			int pop15_17Male = (int) this.municipalities.getAttribute(munId, "pop15_17Male");
-			int pop18_24Male = (int) this.municipalities.getAttribute(munId, "pop18_24Male");
-			int pop25_29Male = (int) this.municipalities.getAttribute(munId, "pop25_29Male");
-			int pop30_39Male = (int) this.municipalities.getAttribute(munId, "pop30_39Male");
-			int pop40_49Male = (int) this.municipalities.getAttribute(munId, "pop40_49Male");
-			int pop50_64Male = (int) this.municipalities.getAttribute(munId, "pop50_64Male");
-			int pop65_74Male = (int) this.municipalities.getAttribute(munId, "pop65_74Male");
-			int pop75PlusMale = (int) this.municipalities.getAttribute(munId, "pop75PlusMale");
+			int pop0_2Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop0_2Male.toString());
+			int pop3_5Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop3_5Male.toString());
+			int pop6_14Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop6_14Male.toString());
+			int pop15_17Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop15_17Male.toString());
+			int pop18_24Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop18_24Male.toString());
+			int pop25_29Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop25_29Male.toString());
+			int pop30_39Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop30_39Male.toString());
+			int pop40_49Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop40_49Male.toString());
+			int pop50_64Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop50_64Male.toString());
+			int pop65_74Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop65_74Male.toString());
+			int pop75PlusMale = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop75PlusMale.toString());
 
-			int pop0_2Female = (int) this.municipalities.getAttribute(munId, "pop0_2Female");
-			int pop3_5Female = (int) this.municipalities.getAttribute(munId, "pop3_5Female");
-			int pop6_14Female = (int) this.municipalities.getAttribute(munId, "pop6_14Female");
-			int pop15_17Female = (int) this.municipalities.getAttribute(munId, "pop15_17Female");
-			int pop18_24Female = (int) this.municipalities.getAttribute(munId, "pop18_24Female");
-			int pop25_29Female = (int) this.municipalities.getAttribute(munId, "pop25_29Female");
-			int pop30_39Female = (int) this.municipalities.getAttribute(munId, "pop30_39Female");
-			int pop40_49Female = (int) this.municipalities.getAttribute(munId, "pop40_49Female");
-			int pop50_64Female = (int) this.municipalities.getAttribute(munId, "pop50_64Female");
-			int pop65_74Female = (int) this.municipalities.getAttribute(munId, "pop65_74Female");
-			int pop75PlusFemale = (int) this.municipalities.getAttribute(munId, "pop75PlusFemale");
+			int pop0_2Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop0_2Female.toString());
+			int pop3_5Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop3_5Female.toString());
+			int pop6_14Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop6_14Female.toString());
+			int pop15_17Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop15_17Female.toString());
+			int pop18_24Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop18_24Female.toString());
+			int pop25_29Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop25_29Female.toString());
+			int pop30_39Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop30_39Female.toString());
+			int pop40_49Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop40_49Female.toString());
+			int pop50_64Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop50_64Female.toString());
+			int pop65_74Female = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop65_74Female.toString());
+			int pop75PlusFemale = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop75PlusFemale.toString());
 
 			int adultsMale = pop18_24Male + pop25_29Male + pop30_39Male + pop40_49Male + pop50_64Male;
 			int adultsFemale = pop18_24Female + pop25_29Female + pop30_39Female + pop40_49Female + pop50_64Female;
@@ -340,7 +341,7 @@ public class DemandGeneratorCensus {
 				} else if (locationOfWork.equals("-99")) {
 					throw new RuntimeException("This combination of attribute values is implausible.");
 				} else {
-					throw new RuntimeException("The identifier of the work location ("+locationOfWork+") cannot have a length other than 8.");
+					throw new RuntimeException("The identifier of the work location (" + locationOfWork + ") cannot have a length other than 8.");
 				}
 			}
 
@@ -351,7 +352,7 @@ public class DemandGeneratorCensus {
 				} else if (locationOfSchool.equals("-99")) {
 					throw new RuntimeException("This combination of attribute values is implausible.");
 				} else {
-					throw new RuntimeException("The identifier of the work location ("+locationOfSchool+") cannot have a length other than 8.");
+					throw new RuntimeException("The identifier of the work location (" + locationOfSchool + ") cannot have a length other than 8.");
 				}
 			}
 			clonedPopulation.addPerson(clonedPerson);
@@ -366,14 +367,14 @@ public class DemandGeneratorCensus {
 			this.allPersons++;
 			Id<Household> householdId = Id.create((counter + i), Household.class);
 			HouseholdImpl household = new HouseholdImpl(householdId); // TODO Or use factory?
-			household.getAttributes().putAttribute("numberOfAdults", 1); // Always 1; no household structure
-			household.getAttributes().putAttribute("totalNumberOfHouseholdVehicles", 1);
+			household.getAttributes().putAttribute(CEMDAPHouseholdAttributes.numberOfAdults.toString(), 1); // Always 1; no household structure
+			household.getAttributes().putAttribute(CEMDAPHouseholdAttributes.totalNumberOfHouseholdVehicles.toString(), 1);
 			// using spatially refined location directly for home locations. Amit Dec'17
-			household.getAttributes().putAttribute("homeTSZLocation", getExactLocation(municipalityId));
-			household.getAttributes().putAttribute("numberOfChildren", 0); // None, ignore them in this version
-			household.getAttributes().putAttribute("householdStructure", 1); // 1 = single, no children
+			household.getAttributes().putAttribute(CEMDAPHouseholdAttributes.homeTSZLocation.toString(), getExactLocation(municipalityId));
+			household.getAttributes().putAttribute(CEMDAPHouseholdAttributes.numberOfChildren.toString(), 0); // None, ignore them in this version
+			household.getAttributes().putAttribute(CEMDAPHouseholdAttributes.householdStructure.toString(), 1); // 1 = single, no children
 			
-			Id<Person> personId = Id.create(householdId + "01", Person.class);
+			Id<Person> personId = Id.create(householdId + "01", Person.class); // TODO Currently only singel-person households
 			Person person = this.population.getFactory().createPerson(personId);
 
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.householdId.toString(), householdId.toString()); // toString() will enable writing it to person attributes
@@ -486,15 +487,12 @@ public class DemandGeneratorCensus {
 		List<String> commuterRelationsList = new ArrayList<>();
 		for (String destination : relationsFromMunicipality.keySet()) {
 			int trips;
-			switch (gender) {
-				case "male":
-					trips = relationsFromMunicipality.get(destination).getTripsMale();
-					break;
-				case "female":
-					trips = relationsFromMunicipality.get(destination).getTripsFemale();
-					break;
-				default:
-					throw new IllegalArgumentException("Must either be male or female.");
+			if (gender.equals(CommuterRelationAttributes.male.toString())) {
+				trips = relationsFromMunicipality.get(destination).getTripsMale();
+			} else if (gender.equals(CommuterRelationAttributes.female.toString())) {
+				trips = relationsFromMunicipality.get(destination).getTripsFemale();
+			} else {
+				throw new IllegalArgumentException("Must either be male or female.");
 			}
 			for (int i = 0; i < trips ; i++) {
 				commuterRelationsList.add(destination);

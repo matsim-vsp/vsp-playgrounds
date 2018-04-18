@@ -49,9 +49,9 @@ public class SplitActivityTypesBasedOnDuration {
 	}
 
 	public static void main(String[] args) {
-		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_10pct_clc.xml.gz";
-		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/plans_10pct_clc_act-split.xml.gz";
-		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500/config_act-split.xml";
+		final String inputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/plans_500_10-1_10pct_clc.xml.gz";
+		final String outputPopulationFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/plans_500_10-1_10pct_clc_act-split.xml.gz";
+		final String outputConfigFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/config_act-split.xml";
 		
 		final double timeBinSize_s = 600.;
 		final String[] activityTypes = {ActivityTypes.HOME, ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.LEISURE, ActivityTypes.SHOPPING, ActivityTypes.OTHER}; 

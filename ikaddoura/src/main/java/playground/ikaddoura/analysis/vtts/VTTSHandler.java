@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.math.stat.StatUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -50,6 +51,7 @@ import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scoring.functions.ScoringParameters;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
 
 import playground.vsp.congestion.handlers.MarginalSumScoringFunction;
@@ -93,7 +95,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	// to get the trip number for any given time
 	private final Map<Id<Person>, Map<Integer, Double>> personId2TripNr2DepartureTime = new HashMap<>();
 		
-	private final MarginalSumScoringFunction marginaSumScoringFunction;
+	private final MarginalSumScoringFunction marginalSumScoringFunction;
 	private final double defaultVTTS_moneyPerHour; // for the car mode!
 	
 	public VTTSHandler(Scenario scenario) {
@@ -108,7 +110,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				+ this.scenario.getConfig().planCalcScore().getModes().get( TransportMode.car ).getMarginalUtilityOfTraveling() * (-1.0)
 				) / this.scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
 
-		this.marginaSumScoringFunction =
+		this.marginalSumScoringFunction =
 				new MarginalSumScoringFunction(
 						new ScoringParameters.Builder(scenario.getConfig().planCalcScore(), scenario.getConfig().planCalcScore().getScoringParameters(null), scenario.getConfig().scenario()).build());
 
@@ -149,21 +151,19 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		
 		if (this.transitDriverIds.contains(event.getPersonId())) {
 			// skip transit driver
+		
 		} else {
 			this.departedPersonIds.add(event.getPersonId());
-			
 			this.personId2currentTripMode.put(event.getPersonId(), event.getLegMode());
 			
 			if (this.personId2currentTripNr.containsKey(event.getPersonId())){
 				this.personId2currentTripNr.put(event.getPersonId(), this.personId2currentTripNr.get(event.getPersonId()) + 1);
-				
 			} else {
 				this.personId2currentTripNr.put(event.getPersonId(), 1);
 			}
 			
 			if (this.personId2TripNr2DepartureTime.containsKey(event.getPersonId())) {
-				this.personId2TripNr2DepartureTime.get(event.getPersonId()).put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
-				
+				this.personId2TripNr2DepartureTime.get(event.getPersonId()).put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());	
 			} else {
 				Map<Integer, Double> tripNr2departureTime = new HashMap<>();
 				tripNr2departureTime.put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
@@ -188,6 +188,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		
 		if (this.transitDriverIds.contains(event.getPersonId())) {
 			// skip transit driver
+			
 		} else {
 			if (this.personId2currentActivityStartTime.containsKey(event.getPersonId())) {
 				// This is not the first activity...
@@ -216,7 +217,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	 */
 	public void computeFinalVTTS() {
 		for (Id<Person> affectedPersonId : this.departedPersonIds) {
-			computeVTTS(affectedPersonId, Time.UNDEFINED_TIME, null);
+			computeVTTS(affectedPersonId, Time.getUndefinedTime(), null);
 		}
 	}
 	
@@ -228,7 +229,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		if (this.personId2currentActivityType.containsKey(personId) && this.personId2currentActivityStartTime.containsKey(personId)) {
 			// Yes, the plan seems to be completed.
 			
-			if (activityEndTime == Time.UNDEFINED_TIME) {
+			if (activityEndTime == Time.getUndefinedTime()) {
 				// The end time is undefined...
 											
 				// ... now handle the first and last OR overnight activity. This is figured out by the scoring function itself (depending on the activity types).
@@ -239,7 +240,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				Activity activityEvening = PopulationUtils.createActivityFromLinkId(this.personId2currentActivityType.get(personId), linkId);
 				activityEvening.setStartTime(this.personId2currentActivityStartTime.get(personId));
 					
-				activityDelayDisutilityOneSec = marginaSumScoringFunction.getOvernightActivityDelayDisutility(activityMorning, activityEvening, 1.0);
+				activityDelayDisutilityOneSec = marginalSumScoringFunction.getOvernightActivityDelayDisutility(activityMorning, activityEvening, 1.0);
 				
 			} else {
 				// The activity has an end time indicating a 'normal' activity.
@@ -247,7 +248,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				Activity activity = PopulationUtils.createActivityFromLinkId(this.personId2currentActivityType.get(personId), linkId);
 				activity.setStartTime(this.personId2currentActivityStartTime.get(personId));
 				activity.setEndTime(activityEndTime);	
-				activityDelayDisutilityOneSec = marginaSumScoringFunction.getNormalActivityDelayDisutility(activity, 1.);
+				activityDelayDisutilityOneSec = marginalSumScoringFunction.getNormalActivityDelayDisutility(activity, 1.);
 			}
 			
 		} else {
@@ -340,6 +341,10 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	}
 	
 	public void printCarVTTS(String fileName) {
+		printVTTS(fileName, TransportMode.car);
+	}
+	
+	public void printVTTS(String fileName, String mode) {
 		
 		File file = new File(fileName);
 		
@@ -350,7 +355,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 			
 			for (Id<Person> personId : this.personId2TripNr2VTTSh.keySet()){
 				for (Integer tripNr : this.personId2TripNr2VTTSh.get(personId).keySet()){
-					if (this.personId2TripNr2Mode.get(personId).get(tripNr).equals("car")) {
+					if (this.personId2TripNr2Mode.get(personId).get(tripNr).equals(mode)) {
 						bw.write(personId + ";" + tripNr + ";" + this.personId2TripNr2Mode.get(personId).get(tripNr) + ";" + this.personId2TripNr2VTTSh.get(personId).get(tripNr));
 						bw.newLine();			
 					}
@@ -531,5 +536,76 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				throw new RuntimeException("This is not the initial iteration and there is no information available from the previous iteration. Aborting...");
 			}
 		}
+	}
+
+	public void printVTTSdistribution(String fileName, String mode, Tuple<Double, Double> fromToTime_sec) {
+		
+		List<Double> vttsFiltered = new ArrayList<>();
+		
+		for (Id<Person> personId : this.personId2TripNr2VTTSh.keySet()){
+			for (Integer tripNr : this.personId2TripNr2VTTSh.get(personId).keySet()){
+				
+				boolean considerTrip = true;
+				
+				if (mode != null) {
+					if (this.personId2TripNr2Mode.get(personId).get(tripNr).equals(mode)) {
+						// consider this trip
+					} else {
+						considerTrip = false;
+					}
+				}
+				
+				if (fromToTime_sec != null) {
+					if (this.personId2TripNr2DepartureTime.get(personId).get(tripNr) >= fromToTime_sec.getFirst()
+							&& this.personId2TripNr2DepartureTime.get(personId).get(tripNr) < fromToTime_sec.getSecond()) {
+						// consider this trip
+					} else {
+						considerTrip = false;
+					}
+				}
+				
+				if (considerTrip) {
+					vttsFiltered.add(this.personId2TripNr2VTTSh.get(personId).get(tripNr));
+				}
+				
+			}
+		}
+			
+		double[] vttsArray = new double[vttsFiltered.size()];
+		
+		int counter = 0;
+		for (Double vtts : vttsFiltered) {
+			vttsArray[counter] = vtts;
+			counter++;
+		}
+				
+		File file = new File(fileName);
+		
+		try {
+			
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+
+			bw.write("5% percentile ; " + StatUtils.percentile(vttsArray, 5.0));
+			bw.newLine();
+
+			bw.write("25% percentile ; " + StatUtils.percentile(vttsArray, 25.0));
+			bw.newLine();
+
+			bw.write("50% percentile (median) ; " + StatUtils.percentile(vttsArray, 50.0));
+			bw.newLine();
+
+			bw.write("75% percentile ; " + StatUtils.percentile(vttsArray, 75.0));
+			bw.newLine();
+
+			bw.write("95% percentile ; " + StatUtils.percentile(vttsArray, 95.0));
+			bw.newLine();
+
+			bw.close();
+			log.info("Output written to " + fileName);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 }
