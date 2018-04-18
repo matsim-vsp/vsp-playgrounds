@@ -19,13 +19,11 @@
 package playground.michalm.drt.rebalancing;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.IntUnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -34,7 +32,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
@@ -66,9 +63,6 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 	private Network network;
 	private Fleet fleet;
 
-	private Map<String, List<Vehicle>> rebalancableVehiclesPerZone;
-	private Map<String, List<Vehicle>> soonIdleVehiclesPerZone;
-
 	@Inject
 	public MinCostFlowRebalancingStrategy(ZonalDemandAggregator demandAggregator, DrtZonalSystem zonalSystem,
 			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, Fleet fleet) {
@@ -80,36 +74,34 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 
 	@Override
 	public List<Relocation> calcRelocations(Stream<? extends Vehicle> rebalancableVehicles, double time) {
-		Map<Id<Vehicle>, Vehicle> rebalancableVehiclesMap = rebalancableVehicles
-				.filter(v -> v.getServiceEndTime() > time + MIN_REMAINING_SERVICE_TIME)
-				.collect(Collectors.toMap(v -> v.getId(), v -> v));
-		if (rebalancableVehiclesMap.isEmpty()) {
+		Map<String, List<Vehicle>> rebalancableVehiclesPerZone = groupRebalancableVehicles(rebalancableVehicles, time);
+		if (rebalancableVehiclesPerZone.isEmpty()) {
 			return Collections.emptyList();
 		}
+		Map<String, List<Vehicle>> soonIdleVehiclesPerZone = groupSoonIdleVehicles(time);
 
-		groupRebalancableVehicles(rebalancableVehiclesMap.values());
-		groupSoonIdleVehicles(time);
-
-		List<Triple<String, String, Integer>> interZonalRelocations = solveTransportProblem(time, this::estimateTarget);
-
-		return calcRelocations(interZonalRelocations);
+		List<Triple<String, String, Integer>> interZonalRelocations = solveTransportProblem(time, this::estimateTarget,
+				rebalancableVehiclesPerZone, soonIdleVehiclesPerZone);
+		return calcRelocations(rebalancableVehiclesPerZone, interZonalRelocations);
 	}
 
-	private void groupRebalancableVehicles(Collection<Vehicle> rebalancableVehicles) {
-		rebalancableVehiclesPerZone = new HashMap<>();
-		for (Vehicle v : rebalancableVehicles) {
+	private Map<String, List<Vehicle>> groupRebalancableVehicles(Stream<? extends Vehicle> rebalancableVehicles,
+			double time) {
+		Map<String, List<Vehicle>> rebalancableVehiclesPerZone = new HashMap<>();
+		rebalancableVehicles.filter(v -> v.getServiceEndTime() > time + MIN_REMAINING_SERVICE_TIME).forEach(v -> {
 			Link link = ((StayTask)v.getSchedule().getCurrentTask()).getLink();
 			String zone = zonalSystem.getZoneForLinkId(link.getId());
 			if (zone != null) {
 				// zonePerVehicle.put(v.getId(), zone);
 				rebalancableVehiclesPerZone.computeIfAbsent(zone, z -> new ArrayList<>()).add(v);
 			}
-		}
+		});
+		return rebalancableVehiclesPerZone;
 	}
 
 	// also include vehicles being right now relocated or recharged
-	private void groupSoonIdleVehicles(double time) {
-		soonIdleVehiclesPerZone = new HashMap<>();
+	private Map<String, List<Vehicle>> groupSoonIdleVehicles(double time) {
+		Map<String, List<Vehicle>> soonIdleVehiclesPerZone = new HashMap<>();
 		for (Vehicle v : fleet.getVehicles().values()) {
 			Schedule s = v.getSchedule();
 			StayTask stayTask = (StayTask)Schedules.getLastTask(s);
@@ -122,9 +114,12 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 				}
 			}
 		}
+		return soonIdleVehiclesPerZone;
 	}
 
-	private List<Triple<String, String, Integer>> solveTransportProblem(double time, IntUnaryOperator targetEstimator) {
+	private List<Triple<String, String, Integer>> solveTransportProblem(double time, IntUnaryOperator targetEstimator,
+			Map<String, List<Vehicle>> rebalancableVehiclesPerZone,
+			Map<String, List<Vehicle>> soonIdleVehiclesPerZone) {
 		// XXX this "time+60" means probably "in the next time bin"
 		Map<String, MutableInt> expectedDemandMap = demandAggregator.getExpectedDemandForTimeBin(time + 60);
 		List<Pair<String, Integer>> producers = new ArrayList<>();
@@ -163,7 +158,8 @@ public class MinCostFlowRebalancingStrategy implements RebalancingStrategy {
 				zonalSystem.getZoneCentroid(zone2));
 	}
 
-	private List<Relocation> calcRelocations(List<Triple<String, String, Integer>> interZonalRelocations) {
+	private List<Relocation> calcRelocations(Map<String, List<Vehicle>> rebalancableVehiclesPerZone,
+			List<Triple<String, String, Integer>> interZonalRelocations) {
 		List<Relocation> relocations = new ArrayList<>();
 		for (Triple<String, String, Integer> r : interZonalRelocations) {
 			List<Vehicle> rebalancableVehicles = rebalancableVehiclesPerZone.get(r.getLeft());
