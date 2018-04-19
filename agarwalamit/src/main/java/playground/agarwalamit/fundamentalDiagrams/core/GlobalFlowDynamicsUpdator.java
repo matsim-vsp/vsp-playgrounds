@@ -109,7 +109,7 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 						System.out.println("Checking speed stability in global data for: "+this.globalData.getSpeedTable());
 					}*/
 					if (!(this.globalFlowData.isFlowStable())){
-						this.globalFlowData.checkFlowStability900();
+						this.globalFlowData.checkFlowStability15Min();
 					}
 
 					//Checking modes stability

@@ -99,7 +99,7 @@ final class TravelModesFlowDynamicsUpdator {
 					this.checkSpeedStability();
 				}
 				if (!(this.flowStability)){
-					this.checkFlowStability900();
+					this.checkFlowStability15Min();
 				}
 			}
 		}
@@ -175,7 +175,7 @@ final class TravelModesFlowDynamicsUpdator {
 		}
 	}
 
-	void checkFlowStability900(){
+	void checkFlowStability15Min(){
 //		double relativeDeviances = 0.;
 //		double avgFlow = ListUtils.doubleMean(this.lastXHourlyFlows);
 //		for(int i=0;i<this.NUMBER_OF_MEMORIZED_FLOWS;i++){
@@ -184,7 +184,11 @@ final class TravelModesFlowDynamicsUpdator {
 //		relativeDeviances /= this.NUMBER_OF_MEMORIZED_FLOWS;
 
 		double absoluteDeviances = this.lastXHourlyFlows.get(this.lastXHourlyFlows.size()-1) - this.lastXHourlyFlows.get(0);
-		if (Math.abs(absoluteDeviances) < 1){
+		if (Math.abs(absoluteDeviances) < 1 ){
+			// probably, one could make it dependent on PCU of vehicle so that effectively,
+			// it is stability of flow in #vehicles/h rather than stability of flow in PCU/h.
+			// for e.g., "if (Math.abs(absoluteDeviances) < 1 / (this.vehicleType != null ? this.vehicleType.getPcuEquivalents() :1 ) )" Amit Apr'18
+
 //		if(relativeDeviances < 0.05){
 			this.flowStability = true;
 			if(modeId==null) FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain flow stability for global flow.");
