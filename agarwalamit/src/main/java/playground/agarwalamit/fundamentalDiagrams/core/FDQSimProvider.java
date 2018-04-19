@@ -1,9 +1,9 @@
 package playground.agarwalamit.fundamentalDiagrams.core;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -26,31 +26,23 @@ import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator.MySimplifiedRoundAndRoundAgent;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
 	public static final String PERSON_MODE_ATTRIBUTE_KEY = "travelMode";
 	
-	private Scenario scenario;
-	private EventsManager events;
-	private QNetworkFactory qnetworkFactory;
+	private final Scenario scenario;
+	private final EventsManager events;
+	private final QNetworkFactory qnetworkFactory;
 	
-	private Map<String, VehicleType> modeToVehicleTypes = new HashMap<>();
+	private final Map<String, VehicleType> modeToVehicleTypes ;
 	
 	@Inject
 	private FDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory) {
 		this.scenario = scenario;
 		this.events = events;
 		this.qnetworkFactory = qnetworkFactory;
-		init();
-	}
-	
-	private void init() {
 		this.modeToVehicleTypes = this.scenario.getVehicles().getVehicleTypes().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue() ));
 	}
 	
