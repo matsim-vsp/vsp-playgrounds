@@ -80,7 +80,7 @@ public class RunMATSim2 {
 		
 		Config config = ConfigUtils.loadConfig(configFile);
 		
-		config.vspExperimental().setVTTSanalysisInterval(1);
+//		config.vspExperimental().setVTTSanalysisInterval(1);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
 		config.controler().setOutputDirectory(outputDirectory);
