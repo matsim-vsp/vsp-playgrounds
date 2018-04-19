@@ -22,6 +22,8 @@ package playground.agarwalamit.fundamentalDiagrams;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
 import playground.agarwalamit.utils.FileUtils;
 
 /**

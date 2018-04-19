@@ -18,15 +18,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -36,8 +40,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.otfvis.OTFVis;
-import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -45,18 +48,10 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
-import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.MobsimDriverAgent;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
-import org.matsim.core.mobsim.qsim.interfaces.Netsim;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
 import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.utils.io.IOUtils;
@@ -65,9 +60,6 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
-import org.matsim.vis.otfvis.OTFClientLive;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import org.matsim.vis.otfvis.OnTheFlyServer;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation.DynamicPCUUpdator;
 
 /**
@@ -82,7 +74,7 @@ public class FundamentalDiagramDataGenerator {
 
 	private String runDir ;
 
-	private boolean isUsingLiveOTFVis = false;
+	static boolean isUsingLiveOTFVis = false;
 
 	private int flowUnstableWarnCount [] ;
 	private int speedUnstableWarnCount [] ;
@@ -91,10 +83,10 @@ public class FundamentalDiagramDataGenerator {
 	private final Scenario scenario;
 
 	private static GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
-	private static FDNetworkGenerator fdNetworkGenerator;
+	
+	static FDNetworkGenerator fdNetworkGenerator;
 
-	private final Map<String, TravelModesFlowDynamicsUpdator> mode2FlowData = new HashMap<>();
-	private final Map<Id<Person>, String> person2Mode = new HashMap<>();
+	private Map<String, Double> mode2PCUs = null;
 
 	private Integer[] startingPoint;
 	private Integer [] maxAgentDistribution;
@@ -103,7 +95,7 @@ public class FundamentalDiagramDataGenerator {
 	private String[] travelModes;
 	private Double[] modalShareInPCU;
 
-	private FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
+	private final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
 
 	public FundamentalDiagramDataGenerator( final Scenario scenario){
 		fundamentalDiagramConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FundamentalDiagramConfigGroup.class);
@@ -144,8 +136,7 @@ public class FundamentalDiagramDataGenerator {
 
 		if(fundamentalDiagramConfigGroup.isWritingEvents()) Log.warn("This will write one event file corresponding to each iteration and thus ");
 
-		Collection<String> mainModes = scenario.getConfig().qsim().getMainModes();
-		travelModes = mainModes.toArray(new String[mainModes.size()]);
+		travelModes = scenario.getConfig().qsim().getMainModes().toArray(new String[0]);
 
 		if (scenario.getVehicles().getVehicleTypes().isEmpty()) {
 			if (travelModes.length==1 && travelModes [0].equals("car")) {
@@ -156,18 +147,16 @@ public class FundamentalDiagramDataGenerator {
             	car.setPcuEquivalents(1.0);
             	car.setMaximumVelocity( fundamentalDiagramConfigGroup.getTrackLinkSpeed() );
             	scenario.getVehicles().addVehicleType(car);
-
 			} else {
 				throw new RuntimeException("Vehicle type information for modes "+ Arrays.toString(travelModes)+" is not provided. Aborting...");
 			}
 		}
 
-		for (String travelMode : travelModes) {
-			Id<VehicleType> vehicleTypeId = Id.create(travelMode, VehicleType.class);
-			VehicleType vehicleType = scenario.getVehicles().getVehicleTypes().get(vehicleTypeId);
-			mode2FlowData.put(travelMode, new TravelModesFlowDynamicsUpdator(vehicleType, travelModes.length,
-					fdNetworkGenerator.getFirstLinkIdOfTrack(), fdNetworkGenerator.getLengthOfTrack()));
-		}
+		mode2PCUs = scenario.getVehicles()
+							.getVehicleTypes()
+							.values()
+							.stream()
+							.collect(Collectors.toMap(v -> v.getId().toString(), VehicleType::getPcuEquivalents));
 
 		flowUnstableWarnCount = new int [travelModes.length];
 		speedUnstableWarnCount = new int [travelModes.length];
@@ -175,9 +164,7 @@ public class FundamentalDiagramDataGenerator {
 		if (this.modalShareInPCU==null) {
 			LOG.warn("No modal split is provided for mode(s) : " + Arrays.toString(this.travelModes)+". Using equla modal split in PCU.");
 			this.modalShareInPCU = new Double[this.travelModes.length];
-			for (int index = 0; index< this.travelModes.length; index++){
-				this.modalShareInPCU[index] = 1.0;
-			}
+			Arrays.fill(this.modalShareInPCU, 1.0);
 		} else if (this.modalShareInPCU.length != this.travelModes.length) {
 			LOG.warn("Number of modes is not equal to the provided modal share (in PCU). Running for equal modal share");
 			this.modalShareInPCU = new Double[this.travelModes.length];
@@ -189,7 +176,7 @@ public class FundamentalDiagramDataGenerator {
 		
 		if (scenario.getConfig().controler().getOverwriteFileSetting().equals(OverwriteFileSetting.deleteDirectoryIfExists)) {
 			LOG.warn("Overwrite file setting is set to "+scenario.getConfig().controler().getOverwriteFileSetting() 
-					+ ", which will also remove the fundament diagram data file. Setting it back to "+OverwriteFileSetting.overwriteExistingFiles);
+					+ ", which will also remove the fundamental diagram data file. Setting it back to "+OverwriteFileSetting.overwriteExistingFiles);
 			scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 		}
 	}
@@ -223,15 +210,10 @@ public class FundamentalDiagramDataGenerator {
 	private void parametricRunAccordingToGivenModalSplit(){
 		//	Creating minimal configuration respecting modal split in PCU and integer agent numbers
 		List<Double> pcus = Arrays.stream(travelModes)
-								  .mapToDouble(travelMode -> this.mode2FlowData.get(travelMode)
-																			   .getVehicleType()
-																			   .getPcuEquivalents())
-								  .boxed()
+								  .map(this.mode2PCUs::get)
 								  .collect(Collectors.toList());
 
-		List<Integer> minSteps = Arrays.stream(modalShareInPCU)
-									   .mapToDouble(modalSplit -> modalSplit)
-									   .mapToObj(modalSplit -> ((int) modalSplit * 100))
+		List<Integer> minSteps = Arrays.stream(modalShareInPCU).map(modalSplit -> (int) (modalSplit * 100))
 									   .collect(Collectors.toList());
 
 		int commonMultiplier = 1;
@@ -264,15 +246,14 @@ public class FundamentalDiagramDataGenerator {
 		//set up number of Points to run.
 		double cellSizePerPCU = scenario.getNetwork().getEffectiveCellSize();
 		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
-		double sumOfPCUInEachStep = 0;
+		double sumOfPCUInEachStep = IntStream.range(0, travelModes.length)
+											 .mapToDouble(index -> minSteps.get(index) * this.mode2PCUs.get(travelModes[index]))
+											 .sum();
 
-		for(int index=0;index<travelModes.length;index++){
-			sumOfPCUInEachStep +=  minSteps.get(index) * this.mode2FlowData.get(travelModes[index]).getVehicleType().getPcuEquivalents();
-		}
-		int numberOfPoints = (int) Math.ceil(networkDensity/sumOfPCUInEachStep) +5;
+		int numberOfPoints = (int) Math.ceil( networkDensity / sumOfPCUInEachStep ) + 5 ;
 
 		List<List<Integer>> pointsToRun = new ArrayList<>();
-		for (int m=1; m<numberOfPoints; m++){
+		for ( int m=1; m<numberOfPoints; m++ ){
 			List<Integer> pointToRun = new ArrayList<>();
 			for (int i=0; i<travelModes.length; i++){
 				pointToRun.add(minSteps.get(i)*m);
@@ -296,30 +277,22 @@ public class FundamentalDiagramDataGenerator {
 		this.startingPoint = new Integer [travelModes.length];
 		this.stepSize = new Integer [travelModes.length];
 
-		for(int ii=0;ii<travelModes.length;ii++){
-			this.startingPoint [ii] =0;
-			this.stepSize [ii] = this.fundamentalDiagramConfigGroup.getReduceDataPointsByFactor();
-		}
-		this.startingPoint = new Integer[] {1,1};
+		Arrays.fill(this.stepSize, this.fundamentalDiagramConfigGroup.getReduceDataPointsByFactor());
+		Arrays.fill(this.startingPoint, 1);
 
-		maxAgentDistribution = new Integer [travelModes.length];
+		this.maxAgentDistribution = new Integer [travelModes.length];
 		double cellSizePerPCU = this.scenario.getNetwork().getEffectiveCellSize();
 		double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 
-		for(int ii=0;ii<maxAgentDistribution.length;ii++){
-			double pcu = this.mode2FlowData.get(travelModes[ii]).getVehicleType().getPcuEquivalents();
-			int maxNumberOfVehicle = (int) Math.floor(networkDensity/pcu)+1;
-			maxAgentDistribution[ii] = maxNumberOfVehicle;
-		}
+		IntStream.range(0, travelModes.length)
+				 .forEach(index -> this.maxAgentDistribution[index] = (int) Math.floor(networkDensity / this.mode2PCUs.get(
+						 travelModes[index])) + 1);
 
 		List<List<Integer>> pointsToRun = this.createPointsToRun();
-
 		for (List<Integer> pointToRun : pointsToRun) {
-			double density = 0;
-			for (int jj = 0; jj < travelModes.length; jj++) {
-				double pcu = this.mode2FlowData.get(travelModes[jj]).getVehicleType().getPcuEquivalents();
-				density += pcu * pointToRun.get(jj);
-			}
+			double density = IntStream.range(0, travelModes.length)
+									  .mapToDouble(index -> pointToRun.get(index) * this.mode2PCUs.get(travelModes[index]))
+									  .sum();
 
 			if (density <= networkDensity + 5) {
 				LOG.info("Going into run " + pointToRun);
@@ -330,11 +303,9 @@ public class FundamentalDiagramDataGenerator {
 
 	private List<List<Integer>> createPointsToRun() {
 
-		int numberOfPoints = 1;
-
-		for(int jj=0;jj<travelModes.length;jj++){
-			numberOfPoints *= (int) Math.floor((maxAgentDistribution[jj]-startingPoint[jj])/stepSize[jj])+1;
-		}
+		int numberOfPoints = IntStream.range(0, travelModes.length)
+									  .map(jj -> (int) Math.floor((maxAgentDistribution[jj] - startingPoint[jj]) / stepSize[jj]) + 1)
+									  .reduce(1, (a, b) -> a * b);
 
 		if(numberOfPoints > 1000) LOG.warn("Total number of points to run is "+numberOfPoints+". This may take long time. "
 				+ "For lesser time to get the data reduce data points by some factor.");
@@ -346,30 +317,45 @@ public class FundamentalDiagramDataGenerator {
 			Integer[] newPoint = new Integer[maxAgentDistribution.length];
 			System.arraycopy(iterationModule.getPoint(), 0, newPoint, 0, newPoint.length);
 			pointsToRun.add(Arrays.asList(newPoint));
-			String point = arraytostring(iterationModule.getPoint());
-			LOG.info("Just added point "+point+" to the collection.");
+			LOG.info("Just added point "+ Arrays.toString(iterationModule.getPoint()) +" to the collection.");
 			if (i<numberOfPoints-1){
-				iterationModule.add1();
+				iterationModule.addPoint();
 			}
 		}
 		return pointsToRun;
 	}
 
 	private void singleRun(List<Integer> pointToRun) {
-		person2Mode.clear();
+		Population population = scenario.getPopulation();
+
+		//remove existing persons and person attributes
+		population.getPersons().clear();
+		population.getPersonAttributes().clear();
+
+		Map<String, TravelModesFlowDynamicsUpdator> mode2FlowData = Arrays.stream(travelModes).map(mode -> {
+			VehicleType vehicleType = scenario.getVehicles().getVehicleTypes().get(Id.create(mode, VehicleType.class));
+			return new TravelModesFlowDynamicsUpdator(vehicleType, travelModes.length,
+				fdNetworkGenerator.getFirstLinkIdOfTrack(), fdNetworkGenerator.getLengthOfTrack());
+		}).collect(Collectors.toMap(m->m.getModeId().toString(), m->m));
+
+
 		for (int i=0; i<travelModes.length; i++){
 			for (int ii = 0; ii < pointToRun.get(i); ii++){
-				Id<Person> personId = Id.createPersonId(person2Mode.size());
-				person2Mode.put(personId,travelModes[i]);
+				Id<Person> personId = Id.createPersonId(population.getPersons().size());
+				Person person = population.getFactory().createPerson(personId);
+				// a blank plan is necessary otherwise VspPlansCleaner will throw a NPE. Amit Apr'18
+				person.addPlan(population.getFactory().createPlan());
+				population.addPerson(person);
+				population.getPersonAttributes().putAttribute(personId.toString(), FDQSimProvider.PERSON_MODE_ATTRIBUTE_KEY, travelModes[i]);
 			}
-
-			this.mode2FlowData.get(travelModes[i]).setnumberOfAgents(pointToRun.get(i).intValue());
+			mode2FlowData.get(travelModes[i]).setnumberOfAgents(pointToRun.get(i));
 		}
 
-		EventsManager events = EventsUtils.createEventsManager();
+		
+		Controler controler = new Controler( scenario ) ;
 
 		globalFlowDynamicsUpdator = new GlobalFlowDynamicsUpdator(
-				this.mode2FlowData,
+				mode2FlowData,
 				fdNetworkGenerator.getFirstLinkIdOfTrack() ,
 				fdNetworkGenerator.getLengthOfTrack());
 		PassingEventsUpdator passingEventsUpdator = new PassingEventsUpdator(
@@ -377,36 +363,46 @@ public class FundamentalDiagramDataGenerator {
 				fdNetworkGenerator.getFirstLinkIdOfTrack(),
 				fdNetworkGenerator.getLastLinkIdOfTrack(),
 				fdNetworkGenerator.getLengthOfTrack());
-
-		events.addHandler(globalFlowDynamicsUpdator);
-		if(travelModes.length > 1)	events.addHandler(passingEventsUpdator);
 		
-		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
-			events.addHandler(new DynamicPCUUpdator(
-					this.scenario,
-					fdNetworkGenerator.getFirstLinkIdOfTrack(),
-					fdNetworkGenerator.getLastLinkIdOfTrack(),
-					fdNetworkGenerator.getLengthOfTrack()));
-		}
-
-		EventWriterXML eventWriter = null;
-
+		EventWriterXML eventWriter = null ;
 		if(fundamentalDiagramConfigGroup.isWritingEvents()){
 			String eventsDir = runDir+"/events/";
-
 			if (! new File(eventsDir).exists() ) new File(eventsDir).mkdir();
-
 			eventWriter = new EventWriterXML(eventsDir+"/events"+pointToRun.toString()+".xml");
-			events.addHandler(eventWriter);
 		}
-
-		Controler controler = new Controler( scenario ) ;
-
-		final Netsim qSim = createModifiedQSim(this.scenario, events);
+		
+		DynamicPCUUpdator dynamicPCU = null ;
+		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
+			dynamicPCU = new DynamicPCUUpdator(this.scenario,
+					fdNetworkGenerator.getFirstLinkIdOfTrack(),
+					fdNetworkGenerator.getLastLinkIdOfTrack(),
+					fdNetworkGenerator.getLengthOfTrack());
+		}
+		
+		final EventWriterXML eventsWriter = eventWriter;
+		final DynamicPCUUpdator dynamicPCUUpdator = dynamicPCU;
+		
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addEventHandlerBinding().toInstance(globalFlowDynamicsUpdator);
+				
+				if(travelModes.length > 1)	addEventHandlerBinding().toInstance(passingEventsUpdator);
+				
+				if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
+					addEventHandlerBinding().toInstance(dynamicPCUUpdator);
+				}
+				
+				if(fundamentalDiagramConfigGroup.isWritingEvents()){
+					addEventHandlerBinding().toInstance(eventsWriter);
+				}
+			}
+		});
+		
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
 			public void install() {
-				this.bindMobsim().toInstance( qSim );
+				this.bindMobsim().toProvider(FDQSimProvider.class);
 			}
 		});
 
@@ -454,19 +450,19 @@ public class FundamentalDiagramDataGenerator {
 		if( stableState ) {
 			writer.format("%d\t",globalFlowDynamicsUpdator.getGlobalData().getnumberOfAgents());
 			for (String travelMode : travelModes) {
-				writer.format("%d\t", this.mode2FlowData.get(travelMode).getnumberOfAgents());
+				writer.format("%d\t", mode2FlowData.get(travelMode).getnumberOfAgents());
 			}
 			writer.format("%.2f\t", globalFlowDynamicsUpdator.getGlobalData().getPermanentDensity());
 			for (String travelMode : travelModes) {
-				writer.format("%.2f\t", this.mode2FlowData.get(travelMode).getPermanentDensity());
+				writer.format("%.2f\t", mode2FlowData.get(travelMode).getPermanentDensity());
 			}
 			writer.format("%.2f\t", globalFlowDynamicsUpdator.getGlobalData().getPermanentFlow());
 			for (String travelMode : travelModes) {
-				writer.format("%.2f\t", this.mode2FlowData.get(travelMode).getPermanentFlow());
+				writer.format("%.2f\t", mode2FlowData.get(travelMode).getPermanentFlow());
 			}
 			writer.format("%.2f\t", globalFlowDynamicsUpdator.getGlobalData().getPermanentAverageVelocity());
 			for (String travelMode : travelModes) {
-				writer.format("%.2f\t", this.mode2FlowData.get(travelMode).getPermanentAverageVelocity());
+				writer.format("%.2f\t", mode2FlowData.get(travelMode).getPermanentAverageVelocity());
 			}
 
 			if( travelModes.length > 1 ) {
@@ -490,63 +486,6 @@ public class FundamentalDiagramDataGenerator {
 			assert eventWriter != null;
 			eventWriter.closeFile();
 		}
-	}
-
-	private Netsim createModifiedQSim(Scenario sc, EventsManager events) {
-		final QSim qSim = new QSim(sc, events);
-		ActivityEngine activityEngine = new ActivityEngine(events, qSim.getAgentCounter());
-		qSim.addMobsimEngine(activityEngine);
-		qSim.addActivityHandler(activityEngine);
-
-		QNetsimEngine netsimEngine  = new QNetsimEngine(qSim);
-
-		qSim.addMobsimEngine(netsimEngine);
-		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
-
-		LOG.info("=======================");
-		LOG.info("Mobsim agents' are directly added to AgentSource.");
-		LOG.info("=======================");
-
-		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
-			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
-		}
-
-		//modification: Mobsim needs to know the different vehicle types (and their respective physical parameters)
-		final Map<String, VehicleType> travelModesTypes =
-				mode2FlowData
-						.entrySet()
-						.stream()
-						.collect( Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getVehicleType()) );
-
-		AgentSource agentSource = new AgentSource() {
-			@Override
-			public void insertAgentsIntoMobsim() {
-
-				for ( Id<Person> personId : person2Mode.keySet()) {
-					String travelMode = person2Mode.get(personId);
-					double randDouble = MatsimRandom.getRandom().nextDouble();
-					double actEndTime = randDouble * MAX_ACT_END_TIME;
-
-					MobsimAgent agent = new MySimplifiedRoundAndRoundAgent(personId, actEndTime, travelMode);
-					qSim.insertAgentIntoMobsim(agent);
-
-					final Vehicle vehicle = VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), travelModesTypes.get(travelMode));
-					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
-					qSim.createAndParkVehicleOnLink(vehicle, linkId4VehicleInsertion);
-				}
-			}
-		};
-
-		qSim.addAgentSource(agentSource);
-
-		if ( isUsingLiveOTFVis ) {
-			// otfvis configuration.  There is more you can do here than via file!
-			final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
-			otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
-			OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(sc.getConfig(), sc, events, qSim);
-			OTFClientLive.run(sc.getConfig(), server);
-		}
-		return qSim;
 	}
 
 	private void updateTransimFileNameAndDir(List<Integer> runningPoint) {
@@ -582,29 +521,16 @@ public class FundamentalDiagramDataGenerator {
 			throw new RuntimeException(e);
 		}
 		writer.print("n \t");
-		for (String travelMode : travelModes) {
-			String str = this.mode2FlowData.get(travelMode).getModeId().toString();
-			String strn = "n_" + str;
-			writer.print(strn + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print("n_" + travelMode + "\t"));
+
 		writer.print("k \t");
-		for (String travelMode : travelModes) {
-			String str = this.mode2FlowData.get(travelMode).getModeId().toString();
-			String strk = "k_" + str;
-			writer.print(strk + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print("k_" + travelMode + "\t"));
+
 		writer.print("q \t");
-		for (String travelMode : travelModes) {
-			String str = this.mode2FlowData.get(travelMode).getModeId().toString();
-			String strq = "q_" + str;
-			writer.print(strq + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print(("q_" + travelMode) + "\t"));
+
 		writer.print("v \t");
-		for (String travelMode : travelModes) {
-			String str = this.mode2FlowData.get(travelMode).getModeId().toString();
-			String strv = "v_" + str;
-			writer.print(strv + "\t");
-		}
+		Arrays.stream(travelModes).forEach(travelMode -> writer.print(("v_" + travelMode) + "\t"));
 
 		if( travelModes.length > 1 ) {
 			writer.print("noOfCarsPerkm \t");
@@ -612,25 +538,13 @@ public class FundamentalDiagramDataGenerator {
 			writer.print("avgBikePassingRatePerkm \t");
 		}
 		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
-			for (String travelMode : travelModes) {
-				String str = "pcu_"+travelMode;
-				writer.print(str + "\t");
-			}
+			Arrays.stream(travelModes).forEach(travelMode -> writer.print(("pcu_" + travelMode) + "\t"));
 		}
 		writer.print("\n");
 	}
 
 	private void closeFile() {
 		writer.close();
-	}
-
-	private static String arraytostring(Integer[] list){
-		String str = "";
-		for (Integer aList : list) {
-			str += aList.intValue();
-			str += " ";
-		}
-		return str;
 	}
 
 	private int getGCD(int a, int b){
