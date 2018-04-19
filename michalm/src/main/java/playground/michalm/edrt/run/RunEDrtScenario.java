@@ -29,6 +29,7 @@ import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
@@ -37,10 +38,13 @@ import org.matsim.vsp.ev.EvModule;
 import org.matsim.vsp.ev.charging.FixedSpeedChargingStrategy;
 import org.matsim.vsp.ev.dvrp.EvDvrpIntegrationModule;
 
+import playground.michalm.edrt.optimizer.EDrtVehicleDataEntryFactory.EDrtVehicleDataEntryFactoryProvider;
+
 public class RunEDrtScenario {
 	private static final String CONFIG_FILE = "mielec_2014_02/mielec_edrt_config.xml";
 	private static final double CHARGING_SPEED_FACTOR = 1.; // full speed
-	private static final double MAX_RELATIVE_SOC = 0.8;// up to 80% SOC
+	private static final double MAX_RELATIVE_SOC = 0.8;// charge up to 80% SOC
+	private static final double MIN_RELATIVE_SOC = 0.2;// send to chargers vehicles below 20% SOC
 	private static final double TEMPERATURE = 20;// oC
 
 	public static void run(String configFile, boolean otfvis) {
@@ -56,6 +60,13 @@ public class RunEDrtScenario {
 		Controler controler = EDrtControlerCreator.createControler(config, otfvis);
 		controler.addOverridingModule(new EvModule());
 		controler.addOverridingModule(createEvDvrpIntegrationModule());
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				bind(EDrtVehicleDataEntryFactoryProvider.class)
+						.toInstance(new EDrtVehicleDataEntryFactoryProvider(MIN_RELATIVE_SOC));
+			}
+		});
 
 		if (otfvis) {
 			controler.addOverridingModule(new OTFVisLiveModule());

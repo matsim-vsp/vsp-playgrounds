@@ -59,7 +59,7 @@ public class RunSharedTaxiMielec {
 		Controler controler = DrtControlerCreator.createControler(config, otfvis);
 
 		if (rebalancing == true) {
-			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 1000);
+			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 500);
 
 			controler.addOverridingModule(new DrtZonalModule());
 			controler.addOverridingModule(new AbstractModule() {

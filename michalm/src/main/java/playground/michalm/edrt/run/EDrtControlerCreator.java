@@ -24,7 +24,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.drt.analysis.DrtAnalysisModule;
 import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.drt.optimizer.DrtOptimizer;
+import org.matsim.contrib.drt.optimizer.VehicleData;
 import org.matsim.contrib.drt.optimizer.depot.DepotFinder;
+import org.matsim.contrib.drt.optimizer.insertion.DefaultUnplannedRequestInserter;
 import org.matsim.contrib.drt.optimizer.insertion.ParallelPathDataProvider;
 import org.matsim.contrib.drt.optimizer.insertion.PrecalculatablePathDataProvider;
 import org.matsim.contrib.drt.optimizer.insertion.UnplannedRequestInserter;
@@ -51,8 +53,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.michalm.edrt.EDrtActionCreator;
 import playground.michalm.edrt.optimizer.EDrtOptimizer;
+import playground.michalm.edrt.optimizer.EDrtVehicleDataEntryFactory.EDrtVehicleDataEntryFactoryProvider;
 import playground.michalm.edrt.optimizer.depot.NearestChargerAsDepot;
-import playground.michalm.edrt.optimizer.insertion.EDrtUnplannedRequestInserter;
 import playground.michalm.edrt.schedule.EDrtTaskFactoryImpl;
 import playground.michalm.edrt.scheduler.EmptyVehicleChargingScheduler;
 
@@ -69,8 +71,8 @@ public class EDrtControlerCreator {
 
 	private static Controler createControlerImpl(boolean otfvis, Scenario scenario) {
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(new DvrpModule(EDrtControlerCreator::createModuleForQSimPlugin,
-				Arrays.asList(DrtOptimizer.class, EDrtUnplannedRequestInserter.class, ParallelPathDataProvider.class)));
+		controler.addOverridingModule(new DvrpModule(EDrtControlerCreator::createModuleForQSimPlugin, Arrays
+				.asList(DrtOptimizer.class, DefaultUnplannedRequestInserter.class, ParallelPathDataProvider.class)));
 		controler.addOverridingModule(new DrtModule());
 		controler.addOverridingModule(new DrtAnalysisModule());
 		controler.addOverridingModule(new AbstractModule() {
@@ -90,7 +92,8 @@ public class EDrtControlerCreator {
 			@Override
 			protected void configure() {
 				bind(MobsimTimer.class).toProvider(MobsimTimerProvider.class).asEagerSingleton();
-				DvrpTravelDisutilityProvider.bindTravelDisutilityForOptimizer(binder(), DefaultDrtOptimizer.DRT_OPTIMIZER);
+				DvrpTravelDisutilityProvider.bindTravelDisutilityForOptimizer(binder(),
+						DefaultDrtOptimizer.DRT_OPTIMIZER);
 
 				bind(DrtOptimizer.class).to(EDrtOptimizer.class).asEagerSingleton();
 				bind(VrpOptimizer.class).to(DrtOptimizer.class);
@@ -98,8 +101,10 @@ public class EDrtControlerCreator {
 
 				bind(EmptyVehicleChargingScheduler.class).asEagerSingleton();
 
-				bind(EDrtUnplannedRequestInserter.class).asEagerSingleton();
-				bind(UnplannedRequestInserter.class).to(EDrtUnplannedRequestInserter.class);
+				bind(DefaultUnplannedRequestInserter.class).asEagerSingleton();
+				bind(UnplannedRequestInserter.class).to(DefaultUnplannedRequestInserter.class);
+				bind(VehicleData.EntryFactory.class).toProvider(EDrtVehicleDataEntryFactoryProvider.class)
+						.asEagerSingleton();
 
 				bind(DrtTaskFactory.class).to(EDrtTaskFactoryImpl.class).asEagerSingleton();
 
@@ -117,5 +122,4 @@ public class EDrtControlerCreator {
 			}
 		};
 	}
-
 }

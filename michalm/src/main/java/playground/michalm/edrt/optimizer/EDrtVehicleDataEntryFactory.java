@@ -20,6 +20,8 @@ package playground.michalm.edrt.optimizer;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.matsim.contrib.drt.optimizer.VehicleData.Entry;
 import org.matsim.contrib.drt.optimizer.VehicleData.EntryFactory;
 import org.matsim.contrib.drt.optimizer.VehicleDataEntryFactoryImpl;
@@ -33,6 +35,8 @@ import org.matsim.vsp.ev.data.Battery;
 import org.matsim.vsp.ev.dvrp.ChargingTask;
 import org.matsim.vsp.ev.dvrp.EvDvrpVehicle;
 import org.matsim.vsp.ev.dvrp.tracker.ETaskTracker;
+
+import com.google.inject.Provider;
 
 import playground.michalm.edrt.schedule.EDrtTask;
 
@@ -96,5 +100,21 @@ public class EDrtVehicleDataEntryFactory implements EntryFactory {
 
 		Entry entry = entryFactory.create(vehicle, currentTime);
 		return entry == null ? null : new EVehicleEntry(entry, socBeforeNextTask);
+	}
+
+	public static class EDrtVehicleDataEntryFactoryProvider implements Provider<EDrtVehicleDataEntryFactory> {
+		private final double minimumRelativeSoc;
+
+		@Inject
+		private DrtConfigGroup drtCfg;
+
+		public EDrtVehicleDataEntryFactoryProvider(double minimumRelativeSoc) {
+			this.minimumRelativeSoc = minimumRelativeSoc;
+		}
+
+		@Override
+		public EDrtVehicleDataEntryFactory get() {
+			return new EDrtVehicleDataEntryFactory(drtCfg, minimumRelativeSoc);
+		}
 	}
 }
