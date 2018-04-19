@@ -205,7 +205,31 @@ public class IKAnalysisRun {
 		this.shapeFileZones = null;
 		this.zonesCRS = null;
 		this.homeActivity = null;
-		this.scalingFactor = 0;
+		this.scalingFactor = 1;
+		
+		this.filters0 = null;
+		this.filters1 = null;
+	}
+	
+	public IKAnalysisRun(Scenario scenario, String scenarioCRS, int scalingFactor) {
+		
+		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
+		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
+
+		this.scenario1 = scenario;
+		this.runDirectory = runDirectory;
+		this.runId = scenario.getConfig().controler().getRunId();
+		
+		// scenario 0 will not be analyzed
+		this.scenario0 = null;
+		this.runDirectoryToCompareWith = null;
+		this.runIdToCompareWith = null;
+		
+		this.scenarioCRS = scenarioCRS;
+		this.shapeFileZones = null;
+		this.zonesCRS = null;
+		this.homeActivity = null;
+		this.scalingFactor = scalingFactor;
 		
 		this.filters0 = null;
 		this.filters1 = null;
@@ -475,7 +499,7 @@ public class IKAnalysisRun {
 		// absolute traffic volumes policy case
 		if (scenario1 != null) {
 			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute_noCRS.qgs";
-			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute_" + runId + ".qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + runId + ".traffic-volume_absolute.qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
 			script.setRunId(this.runId);
