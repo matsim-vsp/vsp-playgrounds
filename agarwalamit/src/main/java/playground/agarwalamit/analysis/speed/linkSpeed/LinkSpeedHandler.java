@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.analysis.linkSpeed;
+package playground.agarwalamit.analysis.speed.linkSpeed;
 
 import java.util.HashMap;
 import java.util.List;
