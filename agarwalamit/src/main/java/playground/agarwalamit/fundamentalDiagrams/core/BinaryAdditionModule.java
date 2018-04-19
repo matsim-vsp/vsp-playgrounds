@@ -1,6 +1,7 @@
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * @author ssix
@@ -19,26 +20,21 @@ final class BinaryAdditionModule {
 	}
 
 	private boolean furtherAdditionPossible() {
-		for (int i=0; i<point.length; i++){
-			if ( (point[i].intValue()+this.steps.get(i).intValue()) <= this.maxValues.get(i).intValue() ){
-				return true;
-			}
-		}
-		return false;
+		return IntStream.range(0, point.length).anyMatch(i -> (point[i] + this.steps.get(i)) <= this.maxValues.get(i));
 	}
 
-	public void add1(){
-		add1To(point, point.length-1);
+	void addPoint(){
+		addTo(point, point.length-1);
 	}
 
-	private void add1To(Integer[] point, int index){
+	private void addTo(Integer[] point, int index){
 		if (furtherAdditionPossible()){
-			if ( ! ((point[index].intValue()+this.steps.get(index).intValue()) > this.maxValues.get(index).intValue())){
-				Integer newIndexValue = Integer.valueOf(point[index].intValue() + this.steps.get(index).intValue());
+			if ( ! ((point[index] + this.steps.get(index)) > this.maxValues.get(index))){
+				Integer newIndexValue = point[index] + this.steps.get(index);
 				point[index] = newIndexValue;
 			} else {
-				point[index] = Integer.valueOf(0);
-				add1To(point, index-1);
+				point[index] = 0;
+				addTo(point, index-1);
 			}
 		} else {
 			FundamentalDiagramDataGenerator.LOG.info("Already tried too many combinations!!!");

@@ -18,12 +18,14 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -58,7 +60,7 @@ final class TravelModesFlowDynamicsUpdator {
 	private int speedTableSize;
 	private List<Double> speedTable;
 	private Double flowTime;
-	private List<Double> flowTable900;
+	private List<Double> flowTable15Min;
 	private List<Double> lastXHourlyFlows;//recording a number of flows to ensure stability
 	private boolean speedStability;
 	private boolean flowStability;
@@ -85,7 +87,7 @@ final class TravelModesFlowDynamicsUpdator {
 			Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
 			double nowTime = event.getTime();
 
-			this.updateFlow900(nowTime, this.vehicleType.getPcuEquivalents());
+			this.updateFlow15Min(nowTime, this.vehicleType.getPcuEquivalents());
 			this.updateSpeedTable(nowTime, personId);
 
 			//Checking for stability
@@ -97,7 +99,7 @@ final class TravelModesFlowDynamicsUpdator {
 					this.checkSpeedStability();
 				}
 				if (!(this.flowStability)){
-					this.checkFlowStability900();
+					this.checkFlowStability15Min();
 				}
 			}
 		}
@@ -111,24 +113,24 @@ final class TravelModesFlowDynamicsUpdator {
 		this.delegate.handleEvent(event);
 	}
 
-	void updateFlow900(double nowTime, double pcuPerson){
-		if (nowTime == this.flowTime.doubleValue()){//Still measuring the flow of the same second
-			Double nowFlow = this.flowTable900.get(0);
-			this.flowTable900.set(0, nowFlow.doubleValue()+pcuPerson);
+	void updateFlow15Min(double nowTime, double pcuVehicle){
+		if (nowTime == this.flowTime){//Still measuring the flow of the same second
+			Double nowFlow = this.flowTable15Min.get(0);
+			this.flowTable15Min.set(0, nowFlow +pcuVehicle);
 		} else {//Need to offset the new flow table from existing flow table.
-			int timeDifference = (int) (nowTime-this.flowTime.doubleValue());
+			int timeDifference = (int) (nowTime- this.flowTime);
 			if (timeDifference<900){
 				for (int i=899-timeDifference; i>=0; i--){
-					this.flowTable900.set(i+timeDifference, this.flowTable900.get(i).doubleValue());
+					this.flowTable15Min.set(i+timeDifference, this.flowTable15Min.get(i));
 				}
 				if (timeDifference > 1){
 					for (int i = 1; i<timeDifference; i++){
-						this.flowTable900.set(i, 0.);
+						this.flowTable15Min.set(i, 0.);
 					}
 				}
-				this.flowTable900.set(0, pcuPerson);
+				this.flowTable15Min.set(0, pcuVehicle);
 			} else {
-				flowTableReset();
+				this.flowTable15Min = new LinkedList<>(Collections.nCopies(900,0.));
 			}
 			this.flowTime = nowTime;
 		}
@@ -138,7 +140,7 @@ final class TravelModesFlowDynamicsUpdator {
 	private void updateLastXFlows900(){
 		Double nowFlow = this.getCurrentHourlyFlow();
 		for (int i=NUMBER_OF_MEMORIZED_FLOWS-2; i>=0; i--){
-			this.lastXHourlyFlows.set(i+1, this.lastXHourlyFlows.get(i).doubleValue());
+			this.lastXHourlyFlows.set(i+1, this.lastXHourlyFlows.get(i));
 		}
 		this.lastXHourlyFlows.set(0, nowFlow);
 	}
@@ -148,7 +150,7 @@ final class TravelModesFlowDynamicsUpdator {
 			double lastSeenTime = lastSeenOnStudiedLinkEnter.get(personId);
 			double speed = this.lengthOfTrack / (nowTime-lastSeenTime);//in m/s!!
 			for (int i=speedTableSize-2; i>=0; i--){
-				this.speedTable.set(i+1, this.speedTable.get(i).doubleValue());
+				this.speedTable.set(i+1, this.speedTable.get(i));
 			}
 			this.speedTable.set(0, speed);
 
@@ -159,11 +161,11 @@ final class TravelModesFlowDynamicsUpdator {
 	}
 
 	void checkSpeedStability(){
-		double relativeDeviances = 0.;
 		double averageSpeed = ListUtils.doubleMean(this.speedTable);
-		for (int i=0; i<this.speedTableSize; i++){
-			relativeDeviances += Math.pow( (this.speedTable.get(i).doubleValue() - averageSpeed) / averageSpeed, 2);
-		}
+		double relativeDeviances = IntStream.range(0, this.speedTableSize)
+											.mapToDouble(i -> Math.pow((this.speedTable.get(i) - averageSpeed) / averageSpeed,
+													2))
+											.sum();
 		relativeDeviances /= this.noOfModes;//taking dependence on number of modes away
 		if (relativeDeviances < 0.0005){
 			this.speedStability = true;
@@ -173,7 +175,7 @@ final class TravelModesFlowDynamicsUpdator {
 		}
 	}
 
-	void checkFlowStability900(){
+	void checkFlowStability15Min(){
 //		double relativeDeviances = 0.;
 //		double avgFlow = ListUtils.doubleMean(this.lastXHourlyFlows);
 //		for(int i=0;i<this.NUMBER_OF_MEMORIZED_FLOWS;i++){
@@ -182,7 +184,11 @@ final class TravelModesFlowDynamicsUpdator {
 //		relativeDeviances /= this.NUMBER_OF_MEMORIZED_FLOWS;
 
 		double absoluteDeviances = this.lastXHourlyFlows.get(this.lastXHourlyFlows.size()-1) - this.lastXHourlyFlows.get(0);
-		if (Math.abs(absoluteDeviances) < 1){
+		if (Math.abs(absoluteDeviances) < 1 ){
+			// probably, one could make it dependent on PCU of vehicle so that effectively,
+			// it is stability of flow in #vehicles/h rather than stability of flow in PCU/h.
+			// for e.g., "if (Math.abs(absoluteDeviances) < 1 / (this.vehicleType != null ? this.vehicleType.getPcuEquivalents() :1 ) )" Amit Apr'18
+
 //		if(relativeDeviances < 0.05){
 			this.flowStability = true;
 			if(modeId==null) FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain flow stability for global flow.");
@@ -191,36 +197,23 @@ final class TravelModesFlowDynamicsUpdator {
 			this.flowStability = false;
 		}
 	}
-
-	//ZZ_TODO : following two methods can be combined together ?? amit nov 15
+	
 	void initDynamicVariables() {
 		//numberOfAgents for each mode should be initialized at this point
 		this.decideSpeedTableSize();
-		this.speedTable = new LinkedList<>();
-		for (int i=0; i<this.speedTableSize; i++){
-			this.speedTable.add(0.);
-		}
+		this.speedTable = new LinkedList<>(Collections.nCopies(this.speedTableSize, 0.));
+
 		this.flowTime = 0.;
-		this.flowTable900 = new LinkedList<>();
+		this.flowTable15Min = new LinkedList<>(Collections.nCopies(900,0.));
 
-		flowTableReset();
+		this.lastXHourlyFlows = new LinkedList<>(Collections.nCopies(this.NUMBER_OF_MEMORIZED_FLOWS, 0.));
 
-		this.lastXHourlyFlows = new LinkedList<>();
-		for (int i=0; i<NUMBER_OF_MEMORIZED_FLOWS; i++){
-			this.lastXHourlyFlows.add(0.);
-		}
 		this.speedStability = false;
 		this.flowStability = false;
 		this.lastSeenOnStudiedLinkEnter = new TreeMap<>();
 		this.permanentDensity = 0.;
 		this.permanentAverageVelocity =0.;
 		this.permanentFlow = 0.;
-	}
-
-	void reset(){
-		this.speedTable.clear();
-		this.speedStability = false;
-		this.flowStability = false;
 	}
 
 	private void decideSpeedTableSize() {
@@ -235,14 +228,7 @@ final class TravelModesFlowDynamicsUpdator {
 		}
 	}
 
-	private void flowTableReset() {
-		for (int i=0; i<900; i++){
-			this.flowTable900.add(0.);
-		}
-	}
-
 	void saveDynamicVariables(){
-		//NB: Should not be called upon a modeData without a vehicleType, as this.vehicleType will be null and will throw an exception.
 		this.permanentDensity = this.numberOfAgents / (lengthOfTrack) *1000 * this.vehicleType.getPcuEquivalents();
 		this.permanentAverageVelocity = this.getActualAverageVelocity();
 		FundamentalDiagramDataGenerator.LOG.info("Calculated permanent Speed from "+modeId+"'s lastXSpeeds : "+speedTable+"\nResult is : "+this.permanentAverageVelocity);
@@ -263,8 +249,7 @@ final class TravelModesFlowDynamicsUpdator {
 	}
 
 	double getCurrentHourlyFlow(){
-		double nowFlow = this.flowTable900.stream().mapToDouble(i->i).sum();
-		return nowFlow*4;
+		return this.flowTable15Min.stream().mapToDouble(i->i).sum() * 4;
 	}
 
 	double getSlidingAverageOfLastXHourlyFlows(){

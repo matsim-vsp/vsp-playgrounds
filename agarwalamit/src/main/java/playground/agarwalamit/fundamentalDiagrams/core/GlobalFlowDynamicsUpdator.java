@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,14 +75,11 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 	}
 
 	@Override
-	public void reset(int iteration) {
-		for (String vehTyp : travelModesFlowData.keySet()){
-			this.travelModesFlowData.get(vehTyp).reset();
-		}
-		this.globalFlowData.reset();
-		this.permanentRegime = false;
+	public void reset(int iteration) {		
 		this.delegate.reset(iteration);
+		this.person2Mode.clear();
 	}
+	
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
 		person2Mode.put(event.getPersonId(), event.getLegMode());
@@ -100,7 +97,7 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 			//Aggregated data update
 			double nowTime = event.getTime();
 			if (event.getLinkId().equals(flowDynamicsUpdateLink)){
-				this.globalFlowData.updateFlow900(nowTime, pcuPerson);
+				this.globalFlowData.updateFlow15Min(nowTime, pcuPerson);
 				this.globalFlowData.updateSpeedTable(nowTime,personId);
 				//Waiting for all agents to be on the track before studying stability
 				if ((this.globalFlowData.getNumberOfDrivingAgents() == this.globalFlowData.getnumberOfAgents()) && (nowTime > FundamentalDiagramDataGenerator.MAX_ACT_END_TIME * 2)){
@@ -112,7 +109,7 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 						System.out.println("Checking speed stability in global data for: "+this.globalData.getSpeedTable());
 					}*/
 					if (!(this.globalFlowData.isFlowStable())){
-						this.globalFlowData.checkFlowStability900();
+						this.globalFlowData.checkFlowStability15Min();
 					}
 
 					//Checking modes stability
@@ -158,7 +155,7 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 	@Override
 	public void handleEvent(VehicleLeavesTrafficEvent event) {
 		this.delegate.handleEvent(event);
-		this.travelModesFlowData.get(person2Mode.get(event.getPersonId())).handle(event);
+		this.travelModesFlowData.get(person2Mode.remove(event.getPersonId())).handle(event);
 	}
 
 	boolean isPermanent(){
