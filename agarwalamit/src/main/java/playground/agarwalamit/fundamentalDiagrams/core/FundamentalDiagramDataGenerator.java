@@ -303,11 +303,9 @@ public class FundamentalDiagramDataGenerator {
 
 	private List<List<Integer>> createPointsToRun() {
 
-		int numberOfPoints = 1;
-
-		for(int jj=0;jj<travelModes.length;jj++){
-			numberOfPoints *= (int) Math.floor((maxAgentDistribution[jj]-startingPoint[jj])/stepSize[jj])+1;
-		}
+		int numberOfPoints = IntStream.range(0, travelModes.length)
+									  .map(jj -> (int) Math.floor((maxAgentDistribution[jj] - startingPoint[jj]) / stepSize[jj]) + 1)
+									  .reduce(1, (a, b) -> a * b);
 
 		if(numberOfPoints > 1000) LOG.warn("Total number of points to run is "+numberOfPoints+". This may take long time. "
 				+ "For lesser time to get the data reduce data points by some factor.");

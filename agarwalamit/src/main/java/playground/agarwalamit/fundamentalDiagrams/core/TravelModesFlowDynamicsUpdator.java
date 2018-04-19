@@ -20,10 +20,12 @@
 
 package playground.agarwalamit.fundamentalDiagrams.core;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.IntStream;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -128,7 +130,7 @@ final class TravelModesFlowDynamicsUpdator {
 				}
 				this.flowTable900.set(0, pcuPerson);
 			} else {
-				flowTableReset();
+				this.flowTable900 = new LinkedList<>(Collections.nCopies(900,0.));
 			}
 			this.flowTime = nowTime;
 		}
@@ -159,11 +161,11 @@ final class TravelModesFlowDynamicsUpdator {
 	}
 
 	void checkSpeedStability(){
-		double relativeDeviances = 0.;
 		double averageSpeed = ListUtils.doubleMean(this.speedTable);
-		for (int i=0; i<this.speedTableSize; i++){
-			relativeDeviances += Math.pow( (this.speedTable.get(i) - averageSpeed) / averageSpeed, 2);
-		}
+		double relativeDeviances = IntStream.range(0, this.speedTableSize)
+											.mapToDouble(i -> Math.pow((this.speedTable.get(i) - averageSpeed) / averageSpeed,
+													2))
+											.sum();
 		relativeDeviances /= this.noOfModes;//taking dependence on number of modes away
 		if (relativeDeviances < 0.0005){
 			this.speedStability = true;
@@ -195,19 +197,13 @@ final class TravelModesFlowDynamicsUpdator {
 	void initDynamicVariables() {
 		//numberOfAgents for each mode should be initialized at this point
 		this.decideSpeedTableSize();
-		this.speedTable = new LinkedList<>();
-		for (int i=0; i<this.speedTableSize; i++){
-			this.speedTable.add(0.);
-		}
+		this.speedTable = new LinkedList<>(Collections.nCopies(this.speedTableSize, 0.));
+
 		this.flowTime = 0.;
-		this.flowTable900 = new LinkedList<>();
+		this.flowTable900 = new LinkedList<>(Collections.nCopies(900,0.));
 
-		flowTableReset();
+		this.lastXHourlyFlows = new LinkedList<>(Collections.nCopies(this.NUMBER_OF_MEMORIZED_FLOWS, 0.));
 
-		this.lastXHourlyFlows = new LinkedList<>();
-		for (int i=0; i<NUMBER_OF_MEMORIZED_FLOWS; i++){
-			this.lastXHourlyFlows.add(0.);
-		}
 		this.speedStability = false;
 		this.flowStability = false;
 		this.lastSeenOnStudiedLinkEnter = new TreeMap<>();
@@ -225,12 +221,6 @@ final class TravelModesFlowDynamicsUpdator {
 		else if (this.numberOfAgents >  0) this.speedTableSize = this.numberOfAgents;
 		else { //case no agents in mode
 			this.speedTableSize = 1;
-		}
-	}
-
-	private void flowTableReset() {
-		for (int i=0; i<900; i++){
-			this.flowTable900.add(0.);
 		}
 	}
 
@@ -255,8 +245,7 @@ final class TravelModesFlowDynamicsUpdator {
 	}
 
 	double getCurrentHourlyFlow(){
-		double nowFlow = this.flowTable900.stream().mapToDouble(i->i).sum();
-		return nowFlow*4;
+		return this.flowTable900.stream().mapToDouble(i->i).sum() * 4;
 	}
 
 	double getSlidingAverageOfLastXHourlyFlows(){
