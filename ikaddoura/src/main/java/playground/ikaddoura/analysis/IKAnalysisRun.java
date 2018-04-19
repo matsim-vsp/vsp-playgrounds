@@ -205,7 +205,31 @@ public class IKAnalysisRun {
 		this.shapeFileZones = null;
 		this.zonesCRS = null;
 		this.homeActivity = null;
-		this.scalingFactor = 0;
+		this.scalingFactor = 1;
+		
+		this.filters0 = null;
+		this.filters1 = null;
+	}
+	
+	public IKAnalysisRun(Scenario scenario, String scenarioCRS, int scalingFactor) {
+		
+		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
+		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
+
+		this.scenario1 = scenario;
+		this.runDirectory = runDirectory;
+		this.runId = scenario.getConfig().controler().getRunId();
+		
+		// scenario 0 will not be analyzed
+		this.scenario0 = null;
+		this.runDirectoryToCompareWith = null;
+		this.runIdToCompareWith = null;
+		
+		this.scenarioCRS = scenarioCRS;
+		this.shapeFileZones = null;
+		this.zonesCRS = null;
+		this.homeActivity = null;
+		this.scalingFactor = scalingFactor;
 		
 		this.filters0 = null;
 		this.filters1 = null;
@@ -475,7 +499,7 @@ public class IKAnalysisRun {
 		// absolute traffic volumes policy case
 		if (scenario1 != null) {
 			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute_noCRS.qgs";
-			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute_" + runId + ".qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + runId + ".traffic-volume_absolute.qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
 			script.setRunId(this.runId);
@@ -684,6 +708,13 @@ public class IKAnalysisRun {
 		vttsHandler.printVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_allTrips.csv");
 		vttsHandler.printCarVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_carTrips.csv");
 		vttsHandler.printAvgVTTSperPerson(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_avgPerPerson.csv"); 
+		
+		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles.csv", null, null);
+		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_car.csv", "car", null);
+
+		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_car_7-9.csv", "car", new Tuple<Double, Double>(7.0 * 3600., 9. * 3600.));
+		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_car_11-13.csv", "car", new Tuple<Double, Double>(11.0 * 3600., 13. * 3600.));
+		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_16-18.csv", "car", new Tuple<Double, Double>(16.0 * 3600., 18. * 3600.));
 		
 		// #####################################
 		// Print leg histogram videos

@@ -1,12 +1,27 @@
+/*
+ * Copyright 2018 Gunnar Flötteröd
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * contact: gunnar.flotterod@gmail.com
+ *
+ */ 
 package searchacceleration.datastructures;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import floetteroed.utilities.DynamicData;
-import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.Tuple;
 
 /**
@@ -14,9 +29,9 @@ import floetteroed.utilities.Tuple;
  * acceleration objective function resulting from setting a single agent's 0/1
  * re-planning indicator.
  * 
- * Implements the greedy heuristic of Merz, P. and Freisleben, B. (2002).
- * "Greedy and local search heuristics for unconstrained binary quadratic
- * programming." Journal of Heuristics 8:197–213.
+ * Implements the score used in the greedy heuristic of Merz, P. and Freisleben,
+ * B. (2002). "Greedy and local search heuristics for unconstrained binary
+ * quadratic programming." Journal of Heuristics 8:197–213.
  * 
  * @author Gunnar Flötteröd
  * 
@@ -28,11 +43,13 @@ public class ScoreUpdater<L> {
 
 	// -------------------- MEMBERS --------------------
 
-	private final SpaceTimeIndicatorVectorListBased<L> currentIndicators;
+	private final SpaceTimeIndicators<L> currentIndicators;
 
-	private final SpaceTimeIndicatorVectorListBased<L> upcomingIndicators;
+	private final SpaceTimeIndicators<L> upcomingIndicators;
 
-	private final double meanLambda;
+	private final SpaceTimeCounts<L> currentIndividualCounts;
+
+	private final SpaceTimeCounts<L> deltaIndividualCounts;
 
 	private final DynamicData<L> currentCounts;
 
@@ -50,158 +67,81 @@ public class ScoreUpdater<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public ScoreUpdater(final SpaceTimeIndicatorVectorListBased<L> currentIndicators,
-			final SpaceTimeIndicatorVectorListBased<L> upcomingIndicators, final double meanLambda,
-			final DynamicData<L> currentCounts, final double currentCountsSumOfSquares, final double w,
-			final double delta, final DynamicData<L> interactionResidual, final DynamicData<L> inertiaResidual,
+	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
+			final double meanLambda, final DynamicData<L> currentTotalCounts,
+			final double sumOfCurrentTotalCountsSquare, final double w, final double delta,
+			final DynamicData<L> interactionResidual, final DynamicData<L> inertiaResidual,
 			final double regularizationResidual) {
 
 		this.currentIndicators = currentIndicators;
 		this.upcomingIndicators = upcomingIndicators;
 
-		this.meanLambda = meanLambda;
-		this.currentCounts = currentCounts;
+		this.currentCounts = currentTotalCounts;
 
 		this.interactionResidual = interactionResidual;
 		this.inertiaResidual = inertiaResidual;
 		this.regularizationResidual = regularizationResidual;
 
 		/*
-		 * One has to go beyond 0/1 indicator arithmetics here because the same
-		 * vehicle may enter the same link multiple times during one time bin.
-		 * Hence the change of data structure.
+		 * One has to go beyond 0/1 indicator arithmetics in the following
+		 * because the same vehicle may enter the same link multiple times
+		 * during one time bin.
 		 */
-		double changeSumOfSquares = 0.0;
-		double currentSumOfSquares = 0.0;
-		double currentTimesCounts = 0.0;
-		double changeTimesInteractionResiduals = 0.0;
-		double currentTimesCurrentPlusInertiaResiduals = 0.0;
+
+		double sumOfIndividualChangeSquare = 0.0;
+		double sumOfCurrentIndividualCntSquare = 0.0;
+		double sumOfCurrentIndividualCntTimesCurrentTotalCnt = 0.0;
+		double sumOfIndividualChangeTimesInteractionResidual = 0.0;
+		double sumOfCurrentIndividualCntTimesInertiaResidual = 0.0;
 		{
-			final SpaceTimeVectorMapBased<L> currentTmp = new SpaceTimeVectorMapBased<>(this.currentIndicators);
-			final SpaceTimeVectorMapBased<L> deltaTmp = new SpaceTimeVectorMapBased<>(this.upcomingIndicators);
-			deltaTmp.subtract(currentTmp);
+			this.currentIndividualCounts = new SpaceTimeCounts<>(this.currentIndicators);
+			this.deltaIndividualCounts = new SpaceTimeCounts<>(this.upcomingIndicators);
+			this.deltaIndividualCounts.subtract(this.currentIndividualCounts);
 
-			for (Map.Entry<Tuple<L, Integer>, Integer> changeEntry : deltaTmp.getEntryView()) {
-				final double changeValue = changeEntry.getValue();
-				changeSumOfSquares += changeValue * changeValue;
-				changeTimesInteractionResiduals += changeValue
-						* interactionResidual.getBinValue(changeEntry.getKey().getA(), changeEntry.getKey().getB());
+			for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.deltaIndividualCounts.entriesView()) {
+				final L spaceObj = entry.getKey().getA();
+				final int timeBin = entry.getKey().getB();
+				final double changeValue = entry.getValue();
+				sumOfIndividualChangeSquare += changeValue * changeValue;
+				sumOfIndividualChangeTimesInteractionResidual += changeValue
+						* interactionResidual.getBinValue(spaceObj, timeBin);
+				this.interactionResidual.add(spaceObj, timeBin, -meanLambda * changeValue);
 			}
 
-			for (Map.Entry<Tuple<L, Integer>, Integer> currentEntry : currentTmp.getEntryView()) {
-				final double currentValue = currentEntry.getValue();
-				final L currentSpaceObj = currentEntry.getKey().getA();
-				final Integer currentTimeBin = currentEntry.getKey().getB();
-				currentSumOfSquares += currentValue * currentValue;
-				currentTimesCounts += currentValue * currentCounts.getBinValue(currentSpaceObj, currentTimeBin);
-				currentTimesCurrentPlusInertiaResiduals += currentValue
-						* (currentValue + inertiaResidual.getBinValue(currentSpaceObj, currentTimeBin));
-			}
-		}
-
-		final double fact1 = (changeSumOfSquares + w * currentSumOfSquares
-				+ delta * currentTimesCounts / (currentCountsSumOfSquares * currentCountsSumOfSquares));
-		final double fact2 = 2.0 * (changeTimesInteractionResiduals - w * currentTimesCurrentPlusInertiaResiduals
-				+ delta * regularizationResidual * currentTimesCounts
-						/ (currentCountsSumOfSquares * currentCountsSumOfSquares));
-
-		this.scoreChangeIfOne = (1.0 - meanLambda * meanLambda) * fact1 + (1.0 - meanLambda) * fact2;
-		this.scoreChangeIfZero = (0.0 - meanLambda * meanLambda) * fact1 + (0.0 - meanLambda) * fact2;
-	}
-
-	// -------------------- IMPLEMENTATION --------------------
-
-	public static <L> DynamicData<L> newCounts(final TimeDiscretization timeDiscr,
-			final Collection<SpaceTimeIndicatorVectorListBased<L>> allIndicators) {
-		final DynamicData<L> result = new DynamicData<L>(timeDiscr);
-		for (SpaceTimeIndicatorVectorListBased<L> indicators : allIndicators) {
-			for (int bin = 0; bin < timeDiscr.getBinCnt(); bin++) {
-				for (L locObj : indicators.getVisitedSpaceObjects(bin)) {
-					result.add(locObj, bin, 1.0);
-				}
+			for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.currentIndividualCounts.entriesView()) {
+				final double currentIndividualCnt = entry.getValue();
+				final L spaceObj = entry.getKey().getA();
+				final Integer timeBin = entry.getKey().getB();
+				sumOfCurrentIndividualCntSquare += currentIndividualCnt * currentIndividualCnt;
+				sumOfCurrentIndividualCntTimesCurrentTotalCnt += currentIndividualCnt
+						* currentTotalCounts.getBinValue(spaceObj, timeBin);
+				sumOfCurrentIndividualCntTimesInertiaResidual += currentIndividualCnt
+						* inertiaResidual.getBinValue(spaceObj, timeBin);
+				this.inertiaResidual.add(spaceObj, timeBin, -(1.0 - meanLambda) * entry.getValue());
+				this.regularizationResidual -= meanLambda * this.currentCounts.getBinValue(spaceObj, timeBin)
+						* currentIndividualCnt;
 			}
 		}
-		return result;
-	}
 
-	// TODO extract generic functionality into DynamicData
-	public static <L> double sumOfSquareCounts(final DynamicData<L> counts) {
-		double result = 0.0;
-		for (L locObj : counts.keySet()) {
-			for (int bin = 0; bin < counts.getBinCnt(); bin++) {
-				final double val = counts.getBinValue(locObj, bin);
-				result += val * val;
-			}
-		}
-		return result;
-	}
+		final double factor1 = (sumOfIndividualChangeSquare + w * sumOfCurrentIndividualCntSquare + delta
+				* (sumOfCurrentIndividualCntTimesCurrentTotalCnt * sumOfCurrentIndividualCntTimesCurrentTotalCnt)
+				/ (sumOfCurrentTotalCountsSquare * sumOfCurrentTotalCountsSquare));
 
-	public static <L> double sumOfSquareDeltaCounts(final DynamicData<L> counts1, final DynamicData<L> counts2) {
-		double result = 0.0;
-		final Set<L> allLocObj = new LinkedHashSet<>(counts1.keySet());
-		allLocObj.addAll(counts2.keySet());
-		for (L locObj : allLocObj) {
-			for (int bin = 0; bin < counts1.getBinCnt(); bin++) {
-				final double delta = counts1.getBinValue(locObj, bin) - counts2.getBinValue(locObj, bin);
-				result += delta * delta;
-			}
-		}
-		return result;
-	}
+		final double factor2 = 2.0 * (sumOfIndividualChangeTimesInteractionResidual
+				- w * (sumOfCurrentIndividualCntSquare + sumOfCurrentIndividualCntTimesInertiaResidual)
+				+ delta * regularizationResidual * sumOfCurrentIndividualCntTimesCurrentTotalCnt
+						/ (sumOfCurrentTotalCountsSquare * sumOfCurrentTotalCountsSquare));
 
-	// TODO extract generic functionality into DynamicData
-	public static <L> DynamicData<L> newInteractionResidual(final DynamicData<L> currentCounts,
-			final DynamicData<L> newCounts, final double meanLambda) {
-		final DynamicData<L> result = new DynamicData<L>(currentCounts.getStartTime_s(), currentCounts.getBinSize_s(),
-				currentCounts.getBinCnt());
-		final Set<L> allLocObjs = new LinkedHashSet<>(currentCounts.keySet());
-		allLocObjs.addAll(newCounts.keySet());
-		for (L locObj : allLocObjs) {
-			for (int bin = 0; bin < currentCounts.getBinCnt(); bin++) {
-				result.put(locObj, bin,
-						meanLambda * (newCounts.getBinValue(locObj, bin) - currentCounts.getBinValue(locObj, bin)));
-			}
-		}
-		return result;
-	}
-
-	// TODO extract generic functionality into DynamicData
-	public static <L> DynamicData<L> newInertiaResidual(final DynamicData<L> currentCounts, final double meanLambda) {
-		final DynamicData<L> result = new DynamicData<L>(currentCounts.getStartTime_s(), currentCounts.getBinSize_s(),
-				currentCounts.getBinCnt());
-		for (L locObj : currentCounts.keySet()) {
-			for (int bin = 0; bin < currentCounts.getBinCnt(); bin++) {
-				result.put(locObj, bin, (1.0 - meanLambda) * currentCounts.getBinValue(locObj, bin));
-			}
-		}
-		return result;
-	}
-
-	public void updateDynamicDataResiduals(final double newLambda) {
-
-		if (this.residualsUpdated) {
-			throw new RuntimeException("Residuals have already been updated.");
-		}
-		this.residualsUpdated = true;
-
-		final double deltaLambda = newLambda - this.meanLambda;
-		for (int bin = 0; bin < this.currentIndicators.getTimeBinCnt(); bin++) {
-			for (L currentSpaceObj : this.upcomingIndicators.getVisitedSpaceObjects(bin)) {
-				this.interactionResidual.add(currentSpaceObj, bin, +deltaLambda);
-			}
-			for (L currentSpaceObj : this.currentIndicators.getVisitedSpaceObjects(bin)) {
-				this.interactionResidual.add(currentSpaceObj, bin, -deltaLambda);
-				this.inertiaResidual.add(currentSpaceObj, bin, -deltaLambda);
-			}
-			for (L currentSpaceObj : this.upcomingIndicators.getVisitedSpaceObjects(bin)) {
-				this.regularizationResidual += deltaLambda * this.currentCounts.getBinValue(currentSpaceObj, bin);
-			}
-		}
+		this.scoreChangeIfOne = (1.0 - meanLambda * meanLambda) * factor1 + (1.0 - meanLambda) * factor2;
+		this.scoreChangeIfZero = (0.0 - meanLambda * meanLambda) * factor1 + (0.0 - meanLambda) * factor2;
 	}
 
 	// -------------------- GETTERS --------------------
 
-	public double getRegularizationResidual() {
+	public double getUpdatedRegularizationResidual() {
+		if (!this.residualsUpdated) {
+			throw new RuntimeException("Residuals have not yet updated.");
+		}
 		return this.regularizationResidual;
 	}
 
@@ -211,5 +151,28 @@ public class ScoreUpdater<L> {
 
 	public double getScoreChangeIfZero() {
 		return this.scoreChangeIfZero;
+	}
+
+	// -------------------- IMPLEMENTATION --------------------
+
+	public void updateDynamicDataResiduals(final double newLambda) {
+		if (this.residualsUpdated) {
+			throw new RuntimeException("Residuals have already been updated.");
+		}
+		this.residualsUpdated = true;
+
+		for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.deltaIndividualCounts.entriesView()) {
+			final L spaceObj = entry.getKey().getA();
+			final int timeBin = entry.getKey().getB();
+			this.interactionResidual.add(spaceObj, timeBin, newLambda * entry.getValue());
+		}
+
+		for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.currentIndividualCounts.entriesView()) {
+			final L spaceObj = entry.getKey().getA();
+			final int timeBin = entry.getKey().getB();
+			this.inertiaResidual.add(spaceObj, timeBin, (1.0 - newLambda) * entry.getValue());
+			this.regularizationResidual += newLambda * this.currentCounts.getBinValue(spaceObj, timeBin)
+					* entry.getValue();
+		}
 	}
 }

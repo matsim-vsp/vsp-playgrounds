@@ -45,12 +45,14 @@ import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 
 /**
  * @author dgrether
  *
  */
+@Singleton
 public final class LinkSensorManager implements LinkEnterEventHandler, LinkLeaveEventHandler, 
 	VehicleLeavesTrafficEventHandler, VehicleEntersTrafficEventHandler, LaneEnterEventHandler, LaneLeaveEventHandler{
 

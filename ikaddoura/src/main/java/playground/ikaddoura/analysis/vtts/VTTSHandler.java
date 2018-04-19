@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.math.stat.StatUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -45,23 +46,20 @@ import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scoring.functions.ScoringParameters;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
 
 import playground.vsp.congestion.handlers.MarginalSumScoringFunction;
 
 
 /**
- * This handler calculates the value of travel time savings (VTTS) for each agent and each trip.
- * The idea is to repeat the scoring for an earlier arrival time (or shorter travel time) and compute the score difference.
- * The score difference is used to compute the agent's trip-specific VTTS.
- * 
- * In some cases, a VTTS cannot be computed, for example in case of an agent stuck event. In these cases, the default VTTS is returned.
- * 
+ * This analysis computes the effective value of travel time savings (VTTS) for each agent and each trip.
+ * The basic idea is to repeat the scoring for an earlier arrival time (or shorter travel time) and to compute the score difference.
+ * The score difference is used to compute the agent's trip-specific VTTS applying a linearization.
  * 
  * @author ikaddoura
  *
@@ -77,7 +75,10 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	private final Scenario scenario;
 	private int currentIteration;
 	
-	private final Set<Id<Person>> transitDriverIds = new HashSet<>();
+	private final Set<Id<Person>> personIdsToBeIgnored = new HashSet<>();
+	private String[] activitiesToBeSkipped = {"pt interaction"};
+	private String[] modesToBeSkipped = {"transit_walk", "access_walk", "egress_walk"};
+	
 	private final Set<Id<Person>> departedPersonIds = new HashSet<>();
 	private final Map<Id<Person>, Double> personId2currentActivityStartTime = new HashMap<>();
 	private final Map<Id<Person>, Double> personId2firstActivityEndTime = new HashMap<>();
@@ -93,7 +94,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	// to get the trip number for any given time
 	private final Map<Id<Person>, Map<Integer, Double>> personId2TripNr2DepartureTime = new HashMap<>();
 		
-	private final MarginalSumScoringFunction marginaSumScoringFunction;
+	private final MarginalSumScoringFunction marginalSumScoringFunction;
 	private final double defaultVTTS_moneyPerHour; // for the car mode!
 	
 	public VTTSHandler(Scenario scenario) {
@@ -108,7 +109,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				+ this.scenario.getConfig().planCalcScore().getModes().get( TransportMode.car ).getMarginalUtilityOfTraveling() * (-1.0)
 				) / this.scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
 
-		this.marginaSumScoringFunction =
+		this.marginalSumScoringFunction =
 				new MarginalSumScoringFunction(
 						new ScoringParameters.Builder(scenario.getConfig().planCalcScore(), scenario.getConfig().planCalcScore().getScoringParameters(null), scenario.getConfig().scenario()).build());
 
@@ -123,7 +124,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		incompletedPlanWarning = 0;
 		noCarVTTSWarning = 0;
 		
-		this.transitDriverIds.clear();
+		this.personIdsToBeIgnored.clear();
 		this.departedPersonIds.clear();
 		this.personId2currentActivityStartTime.clear();
 		this.personId2firstActivityEndTime.clear();
@@ -141,29 +142,27 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	
 	@Override
 	public void handleEvent(TransitDriverStartsEvent event) {
-		transitDriverIds.add(event.getDriverId());
+		personIdsToBeIgnored.add(event.getDriverId());
 	}
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
 		
-		if (this.transitDriverIds.contains(event.getPersonId())) {
-			// skip transit driver
+		if (isModeToBeSkipped(event.getLegMode()) || this.personIdsToBeIgnored.contains(event.getPersonId())) {
+			// skip
+		
 		} else {
 			this.departedPersonIds.add(event.getPersonId());
-			
 			this.personId2currentTripMode.put(event.getPersonId(), event.getLegMode());
 			
 			if (this.personId2currentTripNr.containsKey(event.getPersonId())){
 				this.personId2currentTripNr.put(event.getPersonId(), this.personId2currentTripNr.get(event.getPersonId()) + 1);
-				
 			} else {
 				this.personId2currentTripNr.put(event.getPersonId(), 1);
 			}
 			
 			if (this.personId2TripNr2DepartureTime.containsKey(event.getPersonId())) {
-				this.personId2TripNr2DepartureTime.get(event.getPersonId()).put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
-				
+				this.personId2TripNr2DepartureTime.get(event.getPersonId()).put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());	
 			} else {
 				Map<Integer, Double> tripNr2departureTime = new HashMap<>();
 				tripNr2departureTime.put(this.personId2currentTripNr.get(event.getPersonId()), event.getTime());
@@ -175,8 +174,8 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	@Override
 	public void handleEvent(ActivityStartEvent event) {	
 		
-		if (this.transitDriverIds.contains(event.getPersonId())) {
-			// skip transit driver
+		if (isActivityToBeSkipped(event.getActType()) || this.personIdsToBeIgnored.contains(event.getPersonId())) {
+			// skip
 		} else {
 			this.personId2currentActivityStartTime.put(event.getPersonId(), event.getTime());
 			this.personId2currentActivityType.put(event.getPersonId(), event.getActType());
@@ -186,14 +185,14 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
 		
-		if (this.transitDriverIds.contains(event.getPersonId())) {
-			// skip transit driver
+		if (isActivityToBeSkipped(event.getActType()) || this.personIdsToBeIgnored.contains(event.getPersonId())) {
+			// skip			
 		} else {
 			if (this.personId2currentActivityStartTime.containsKey(event.getPersonId())) {
 				// This is not the first activity...
 							
 				// ... now process all congestion events thrown during the trip to the activity which has just ended, ...
-				computeVTTS(event.getPersonId(), event.getTime(), event.getLinkId());
+				computeVTTS(event.getPersonId(), event.getTime());
 				
 				// ... update the status of the 'current' activity...
 				this.personId2currentActivityType.remove(event.getPersonId());
@@ -216,11 +215,11 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	 */
 	public void computeFinalVTTS() {
 		for (Id<Person> affectedPersonId : this.departedPersonIds) {
-			computeVTTS(affectedPersonId, Time.UNDEFINED_TIME, null);
+			computeVTTS(affectedPersonId, Time.getUndefinedTime());
 		}
 	}
 	
-	private void computeVTTS(Id<Person> personId, double activityEndTime, Id<Link> linkId) {
+	private void computeVTTS(Id<Person> personId, double activityEndTime) {
 		
 		double activityDelayDisutilityOneSec = 0.;
 		
@@ -228,26 +227,26 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		if (this.personId2currentActivityType.containsKey(personId) && this.personId2currentActivityStartTime.containsKey(personId)) {
 			// Yes, the plan seems to be completed.
 			
-			if (activityEndTime == Time.UNDEFINED_TIME) {
+			if (activityEndTime == Time.getUndefinedTime()) {
 				// The end time is undefined...
 											
 				// ... now handle the first and last OR overnight activity. This is figured out by the scoring function itself (depending on the activity types).
 					
-				Activity activityMorning = PopulationUtils.createActivityFromLinkId(this.personId2firstActivityType.get(personId), linkId);
+				Activity activityMorning = PopulationUtils.createActivityFromLinkId(this.personId2firstActivityType.get(personId), null);
 				activityMorning.setEndTime(this.personId2firstActivityEndTime.get(personId));
 				
-				Activity activityEvening = PopulationUtils.createActivityFromLinkId(this.personId2currentActivityType.get(personId), linkId);
+				Activity activityEvening = PopulationUtils.createActivityFromLinkId(this.personId2currentActivityType.get(personId), null);
 				activityEvening.setStartTime(this.personId2currentActivityStartTime.get(personId));
 					
-				activityDelayDisutilityOneSec = marginaSumScoringFunction.getOvernightActivityDelayDisutility(activityMorning, activityEvening, 1.0);
+				activityDelayDisutilityOneSec = marginalSumScoringFunction.getOvernightActivityDelayDisutility(activityMorning, activityEvening, 1.0);
 				
 			} else {
 				// The activity has an end time indicating a 'normal' activity.
 				
-				Activity activity = PopulationUtils.createActivityFromLinkId(this.personId2currentActivityType.get(personId), linkId);
+				Activity activity = PopulationUtils.createActivityFromLinkId(this.personId2currentActivityType.get(personId), null);
 				activity.setStartTime(this.personId2currentActivityStartTime.get(personId));
 				activity.setEndTime(activityEndTime);	
-				activityDelayDisutilityOneSec = marginaSumScoringFunction.getNormalActivityDelayDisutility(activity, 1.);
+				activityDelayDisutilityOneSec = marginalSumScoringFunction.getNormalActivityDelayDisutility(activity, 1.0);
 			}
 			
 		} else {
@@ -268,26 +267,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 		
 		// Calculate the agent's trip delay disutility.
 		// (Could be done similar to the activity delay disutility. As long as it is computed linearly, the following should be okay.)
-		double tripDelayDisutilityOneSec = 0.;
-		
-		if (this.personId2currentTripMode.get(personId).equals("car")) {
-			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() * (-1);
-			
-		} else if (this.personId2currentTripMode.get(personId).equals("walk")) {
-			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(TransportMode.walk).getMarginalUtilityOfTraveling() * (-1);
-
-		} else if (this.personId2currentTripMode.get(personId).equals("pt")) {
-			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(TransportMode.pt).getMarginalUtilityOfTraveling() * (-1);
-
-		} else if (this.personId2currentTripMode.get(personId).equals("bicycle")) {
-			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get("bicycle").getMarginalUtilityOfTraveling() * (-1);
-		
-		} else if (this.personId2currentTripMode.get(personId).equals("ptSlow")) {
-			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get("ptSlow").getMarginalUtilityOfTraveling() * (-1);
-		
-		} else {
-			tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(TransportMode.other).getMarginalUtilityOfTraveling() * (-1);
-		}
+		double tripDelayDisutilityOneSec = (1.0 / 3600.) * this.scenario.getConfig().planCalcScore().getModes().get(this.personId2currentTripMode.get(personId)).getMarginalUtilityOfTraveling() * (-1);
 		
 		// Translate the disutility into monetary units.
 		double delayCostPerSec_usingActivityDelayOneSec = (activityDelayDisutilityOneSec + tripDelayDisutilityOneSec) / this.scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
@@ -340,6 +320,10 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	}
 	
 	public void printCarVTTS(String fileName) {
+		printVTTS(fileName, TransportMode.car);
+	}
+	
+	public void printVTTS(String fileName, String mode) {
 		
 		File file = new File(fileName);
 		
@@ -350,7 +334,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 			
 			for (Id<Person> personId : this.personId2TripNr2VTTSh.keySet()){
 				for (Integer tripNr : this.personId2TripNr2VTTSh.get(personId).keySet()){
-					if (this.personId2TripNr2Mode.get(personId).get(tripNr).equals("car")) {
+					if (this.personId2TripNr2Mode.get(personId).get(tripNr).equals(mode)) {
 						bw.write(personId + ";" + tripNr + ";" + this.personId2TripNr2Mode.get(personId).get(tripNr) + ";" + this.personId2TripNr2VTTSh.get(personId).get(tripNr));
 						bw.newLine();			
 					}
@@ -531,5 +515,94 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				throw new RuntimeException("This is not the initial iteration and there is no information available from the previous iteration. Aborting...");
 			}
 		}
+	}
+
+	public void printVTTSdistribution(String fileName, String mode, Tuple<Double, Double> fromToTime_sec) {
+		
+		List<Double> vttsFiltered = new ArrayList<>();
+		
+		for (Id<Person> personId : this.personId2TripNr2VTTSh.keySet()){
+			for (Integer tripNr : this.personId2TripNr2VTTSh.get(personId).keySet()){
+				
+				boolean considerTrip = true;
+				
+				if (mode != null) {
+					if (this.personId2TripNr2Mode.get(personId).get(tripNr).equals(mode)) {
+						// consider this trip
+					} else {
+						considerTrip = false;
+					}
+				}
+				
+				if (fromToTime_sec != null) {
+					if (this.personId2TripNr2DepartureTime.get(personId).get(tripNr) >= fromToTime_sec.getFirst()
+							&& this.personId2TripNr2DepartureTime.get(personId).get(tripNr) < fromToTime_sec.getSecond()) {
+						// consider this trip
+					} else {
+						considerTrip = false;
+					}
+				}
+				
+				if (considerTrip) {
+					vttsFiltered.add(this.personId2TripNr2VTTSh.get(personId).get(tripNr));
+				}
+				
+			}
+		}
+			
+		double[] vttsArray = new double[vttsFiltered.size()];
+		
+		int counter = 0;
+		for (Double vtts : vttsFiltered) {
+			vttsArray[counter] = vtts;
+			counter++;
+		}
+				
+		File file = new File(fileName);
+		
+		try {
+			
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+
+			bw.write("5% percentile ; " + StatUtils.percentile(vttsArray, 5.0));
+			bw.newLine();
+
+			bw.write("25% percentile ; " + StatUtils.percentile(vttsArray, 25.0));
+			bw.newLine();
+
+			bw.write("50% percentile (median) ; " + StatUtils.percentile(vttsArray, 50.0));
+			bw.newLine();
+
+			bw.write("75% percentile ; " + StatUtils.percentile(vttsArray, 75.0));
+			bw.newLine();
+
+			bw.write("95% percentile ; " + StatUtils.percentile(vttsArray, 95.0));
+			bw.newLine();
+
+			bw.close();
+			log.info("Output written to " + fileName);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private boolean isModeToBeSkipped(String legMode) {
+		for (String modeToBeSkipped : this.modesToBeSkipped) {
+			if (legMode.equals(modeToBeSkipped)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isActivityToBeSkipped(String actType) {
+		for (String activityToBeSkipped : this.activitiesToBeSkipped) {
+			if (actType.equals(activityToBeSkipped)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

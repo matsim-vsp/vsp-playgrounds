@@ -48,6 +48,7 @@ public class AnalyzeAndCompareTrips {
 
 	// Parameters
 	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
+//	private static final String RUN_ID = "be_253"; // To be adjusted
 	private static final String RUN_ID = "be400mt_58_v6"; // To be adjusted
 
 	// Input and output
@@ -67,7 +68,7 @@ public class AnalyzeAndCompareTrips {
 
 	public static void main(String[] args) {
 		// MATSim/Simulation
-		Events2TripsParser events2TripsParser = new Events2TripsParser(CONFIG_FILE, EVENTS_FILE, NETWORK_FILE);
+		Events2TripsParser events2TripsParser = new Events2TripsParser(CONFIG_FILE, EVENTS_FILE, NETWORK_FILE, true);
 		List<MatsimTrip> matsimTrips = events2TripsParser.getTrips();
 		
 		// Set filters if desired
