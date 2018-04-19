@@ -60,7 +60,7 @@ final class TravelModesFlowDynamicsUpdator {
 	private int speedTableSize;
 	private List<Double> speedTable;
 	private Double flowTime;
-	private List<Double> flowTable900;
+	private List<Double> flowTable15Min;
 	private List<Double> lastXHourlyFlows;//recording a number of flows to ensure stability
 	private boolean speedStability;
 	private boolean flowStability;
@@ -87,7 +87,7 @@ final class TravelModesFlowDynamicsUpdator {
 			Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
 			double nowTime = event.getTime();
 
-			this.updateFlow900(nowTime, this.vehicleType.getPcuEquivalents());
+			this.updateFlow15Min(nowTime, this.vehicleType.getPcuEquivalents());
 			this.updateSpeedTable(nowTime, personId);
 
 			//Checking for stability
@@ -113,24 +113,24 @@ final class TravelModesFlowDynamicsUpdator {
 		this.delegate.handleEvent(event);
 	}
 
-	void updateFlow900(double nowTime, double pcuPerson){
+	void updateFlow15Min(double nowTime, double pcuVehicle){
 		if (nowTime == this.flowTime){//Still measuring the flow of the same second
-			Double nowFlow = this.flowTable900.get(0);
-			this.flowTable900.set(0, nowFlow +pcuPerson);
+			Double nowFlow = this.flowTable15Min.get(0);
+			this.flowTable15Min.set(0, nowFlow +pcuVehicle);
 		} else {//Need to offset the new flow table from existing flow table.
 			int timeDifference = (int) (nowTime- this.flowTime);
 			if (timeDifference<900){
 				for (int i=899-timeDifference; i>=0; i--){
-					this.flowTable900.set(i+timeDifference, this.flowTable900.get(i));
+					this.flowTable15Min.set(i+timeDifference, this.flowTable15Min.get(i));
 				}
 				if (timeDifference > 1){
 					for (int i = 1; i<timeDifference; i++){
-						this.flowTable900.set(i, 0.);
+						this.flowTable15Min.set(i, 0.);
 					}
 				}
-				this.flowTable900.set(0, pcuPerson);
+				this.flowTable15Min.set(0, pcuVehicle);
 			} else {
-				this.flowTable900 = new LinkedList<>(Collections.nCopies(900,0.));
+				this.flowTable15Min = new LinkedList<>(Collections.nCopies(900,0.));
 			}
 			this.flowTime = nowTime;
 		}
@@ -200,7 +200,7 @@ final class TravelModesFlowDynamicsUpdator {
 		this.speedTable = new LinkedList<>(Collections.nCopies(this.speedTableSize, 0.));
 
 		this.flowTime = 0.;
-		this.flowTable900 = new LinkedList<>(Collections.nCopies(900,0.));
+		this.flowTable15Min = new LinkedList<>(Collections.nCopies(900,0.));
 
 		this.lastXHourlyFlows = new LinkedList<>(Collections.nCopies(this.NUMBER_OF_MEMORIZED_FLOWS, 0.));
 
@@ -245,7 +245,7 @@ final class TravelModesFlowDynamicsUpdator {
 	}
 
 	double getCurrentHourlyFlow(){
-		return this.flowTable900.stream().mapToDouble(i->i).sum() * 4;
+		return this.flowTable15Min.stream().mapToDouble(i->i).sum() * 4;
 	}
 
 	double getSlidingAverageOfLastXHourlyFlows(){

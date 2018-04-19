@@ -97,7 +97,7 @@ final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDe
 			//Aggregated data update
 			double nowTime = event.getTime();
 			if (event.getLinkId().equals(flowDynamicsUpdateLink)){
-				this.globalFlowData.updateFlow900(nowTime, pcuPerson);
+				this.globalFlowData.updateFlow15Min(nowTime, pcuPerson);
 				this.globalFlowData.updateSpeedTable(nowTime,personId);
 				//Waiting for all agents to be on the track before studying stability
 				if ((this.globalFlowData.getNumberOfDrivingAgents() == this.globalFlowData.getnumberOfAgents()) && (nowTime > FundamentalDiagramDataGenerator.MAX_ACT_END_TIME * 2)){
