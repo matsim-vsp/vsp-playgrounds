@@ -715,12 +715,16 @@ public class IKAnalysisRun {
 		vttsHandler.printCarVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_carTrips.csv");
 		vttsHandler.printAvgVTTSperPerson(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_avgPerPerson.csv"); 
 		
-		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles.csv", null, null);
-		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_car.csv", "car", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_all-modes.csv", null, null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car.csv", "car", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_pt.csv", "pt", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_walk.csv", "walk", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_bicycle.csv", "bicycle", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_ride.csv", "ride", null);
 
-		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_car_7-9.csv", "car", new Tuple<Double, Double>(7.0 * 3600., 9. * 3600.));
-		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_car_11-13.csv", "car", new Tuple<Double, Double>(11.0 * 3600., 13. * 3600.));
-		vttsHandler.printVTTSdistribution(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_percentiles_16-18.csv", "car", new Tuple<Double, Double>(16.0 * 3600., 18. * 3600.));
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car_7-9.csv", "car", new Tuple<Double, Double>(7.0 * 3600., 9. * 3600.));
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car_11-13.csv", "car", new Tuple<Double, Double>(11.0 * 3600., 13. * 3600.));
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car_16-18.csv", "car", new Tuple<Double, Double>(16.0 * 3600., 18. * 3600.));
 		
 		// #####################################
 		// Print leg histogram videos
