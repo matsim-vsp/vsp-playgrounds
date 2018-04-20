@@ -29,8 +29,10 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.utils.io.IOUtils;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.NumberUtils;
+import playground.agarwalamit.utils.PersonFilter;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
 /**
@@ -42,18 +44,20 @@ public class TripAnalyzer extends AbstractAnalysisModule {
     private final PersonTripHandler tripHandler ;
     private final String eventsFile;
 
+    private final PersonFilter personFilter = new MunichPersonFilter();
+
     public TripAnalyzer(Network network, String eventsFile) {
         super(TripAnalyzer.class.getSimpleName());
         this.tripHandler = new PersonTripHandler(network);
         this.eventsFile = eventsFile;
     }
 
-
     public static void main(String[] args) {
-        String outfile = "";
+        String outfile = "../../runs-svn/detEval/emissionCongestionInternalization/iatbr/output/baseCase/analysis/personTripInfo.txt";
 
-        String eventsFile = "";
-        String networkFile = "";
+        String eventsFile = "../../runs-svn/detEval/emissionCongestionInternalization/iatbr/output/baseCase/ITERS/it.1000/1000.events.xml.gz";
+        String networkFile = "../../runs-svn/detEval/emissionCongestionInternalization/iatbr/output/baseCase/output_network.xml.gz";
+
         Network network = LoadMyScenarios.loadScenarioFromNetwork(networkFile).getNetwork();
 
         TripAnalyzer tripAnalyzer = new TripAnalyzer(network, eventsFile);
@@ -61,7 +65,6 @@ public class TripAnalyzer extends AbstractAnalysisModule {
         tripAnalyzer.postProcessData();
         tripAnalyzer.writeResults(outfile);
     }
-
 
     @Override
     public List<EventHandler> getEventHandler() {
@@ -84,10 +87,11 @@ public class TripAnalyzer extends AbstractAnalysisModule {
     @Override
     public void writeResults(String outputFile) {
         try(BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)){
-            writer.write("personId\ttripIndex\ttripMode\ttripDistanceInKm\ttripTravelTimeInHr\ttripSpeedInKPH\n");
+            writer.write("personId\tuserGroup\ttripIndex\ttripMode\ttripDistanceInKm\ttripTravelTimeInHr\ttripSpeedInKPH\n");
             for(List<Trip> trips: this.tripHandler.getPersonToTrip().values()){
                 for (Trip  trip : trips){
                     writer.write(trip.getPersonId()+"\t");
+                    writer.write(this.personFilter.getUserGroupAsStringFromPersonId(trip.getPersonId())+"\t");
                     writer.write(trip.getTripIndex()+"\t");
                     writer.write(trip.getTripMode()+"\t");
                     writer.write(NumberUtils.round(trip.getDistance()/1000, 3) +"\t");

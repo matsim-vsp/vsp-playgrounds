@@ -65,7 +65,7 @@ public class Trip {
      * @return travel time in sec.
      */
     public double getTravelTime(){
-        return this.tripStartTime - this.tripStartTime;
+        return this.tripEndTime - this.tripStartTime;
     }
 
     /**
