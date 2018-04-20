@@ -1,6 +1,7 @@
 package playground.vsp.demandde.counts;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -41,20 +42,33 @@ public class TSBASt2Count {
 	
 	private static final Logger logger = Logger.getLogger(TSBASt2Count.class);
 
-	private final static String bastInputFile = "C:/Users/Tille/WORK/BASt/2013_A_S.txt";
+	private final static String bastInputFile = "C:/Users/Work/VSP/BASt/2016_A_S.txt";
 	
 	//note: should end with .gz since it is probably quite big
-	private final static String OUTPUTDIR = "C:/Users/Tille/WORK/BASt/2013_A_S_TUE_THU_WKEND.xml.gz";
+	private final static String OUTPUTDIR = "C:/Users/Work/VSP/BASt/2016_A_S_TUE_THU_KFZ.xml.gz";
 	
 	private final static int BEGINNING_WEEKDAY = 2;
 	private final static int ENDING_WEEKDAY = 4;
 	
-	private final static boolean CALC_WEEKENDS = true;
+	private final static boolean CALC_WEEKENDS = false;
 	
 	public static void main(String[] args) throws IOException, ParseException, FactoryException {
 		
-		Map<String,BastHourlyCountData> allCounts = new HashMap<String,BastHourlyCountData>();
+		Map<String,BastHourlyCountData> allCountData = new HashMap<String,BastHourlyCountData>();
 		
+		readBAStInputFile(allCountData);
+
+		convertDataToMATSimCounts(allCountData);
+	}
+
+	/**
+	 * @param allCountData
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	private static void readBAStInputFile(Map<String, BastHourlyCountData> allCountData)
+			throws FileNotFoundException, IOException, ParseException {
 		logger.info("Loading bast counts...");
 		BufferedReader reader = new BufferedReader(new FileReader(bastInputFile));
 		
@@ -90,8 +104,9 @@ public class TSBASt2Count {
 				int stationNumber = format.parse(tokens[indexCountNr]).intValue();
 				
 				Day day = (isConsideredWeekDay) ? Day.WEEKDAY : Day.WEEKEND;
-				String identifier = "" + stationNumber + "-" + day;
-				BastHourlyCountData data = allCounts.get(identifier);
+				String identifier = "" + stationNumber;
+				if(CALC_WEEKENDS) identifier += "-" + day;
+				BastHourlyCountData data = allCountData.get(identifier);
 				if(data == null){
 					data = new BastHourlyCountData(identifier, day);
 				}
@@ -109,7 +124,7 @@ public class TSBASt2Count {
 				case "k":	
 					data.computeAndSetVolume(false, hour, format.parse(tokens[indexVolumeD2].trim()).doubleValue());
 				}
-				allCounts.put(identifier, data);
+				allCountData.put(identifier, data);
 			}
 			if(lineNr % 100000 == 0){
 				logger.info("read line " + lineNr);
@@ -117,7 +132,12 @@ public class TSBASt2Count {
 			lineNr ++;
 		}
 		reader.close();
+	}
 
+	/**
+	 * @param allCounts
+	 */
+	private static void convertDataToMATSimCounts(Map<String, BastHourlyCountData> allCounts) {
 		logger.info("start converting to MATSim counts..");
 		
 		Counts result = new Counts();
