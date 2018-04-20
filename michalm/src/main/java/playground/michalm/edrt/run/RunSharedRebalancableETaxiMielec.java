@@ -17,20 +17,20 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.michalm.drt.run;
+package playground.michalm.edrt.run;
 
 import org.matsim.contrib.drt.analysis.zonal.DrtZonalModule;
 import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.analysis.zonal.ZonalDemandAggregator;
 import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
-import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import org.matsim.vsp.ev.EvConfigGroup;
 
 import playground.michalm.drt.rebalancing.AggregatedMinCostRelocationCalculator;
 import playground.michalm.drt.rebalancing.LinearRebalancingTargetCalculator;
@@ -38,15 +38,15 @@ import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy;
 import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy.RebalancingTargetCalculator;
 import playground.michalm.drt.rebalancing.MinCostRelocationCalculator;
 
-public class RunSharedTaxiMielec {
+public class RunSharedRebalancableETaxiMielec {
 	public static void main(String[] args) {
-		String configFile = "mielec_2014_02/mielec_drt_config.xml";
-		RunSharedTaxiMielec.run(configFile, false, true);
+		String configFile = "mielec_2014_02/mielec_edrt_config.xml";
+		RunSharedRebalancableETaxiMielec.run(configFile, false, true);
 	}
 
 	public static void run(String configFile, boolean otfvis, boolean rebalancing) {
 		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
-				new OTFVisConfigGroup());
+				new OTFVisConfigGroup(), new EvConfigGroup());
 
 		DrtConfigGroup drtCfg = DrtConfigGroup.get(config);
 		// drtCfg.setMaxWaitTime(maxWaitTime);
@@ -54,8 +54,9 @@ public class RunSharedTaxiMielec {
 		drtCfg.setRebalancingInterval(600);
 		config.controler().setLastIteration(1);
 		config.controler().setWriteEventsInterval(1);
+		config.controler().setOutputDirectory("d:/temp/mielec-rebalancing/electric");
 
-		Controler controler = DrtControlerCreator.createControler(config, otfvis);
+		Controler controler = RunEDrtScenario.createControler(config, otfvis);
 
 		if (rebalancing == true) {
 			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 500);
