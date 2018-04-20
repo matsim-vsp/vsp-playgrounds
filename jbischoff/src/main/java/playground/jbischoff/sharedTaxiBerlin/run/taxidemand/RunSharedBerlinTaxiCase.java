@@ -23,7 +23,6 @@
 package playground.jbischoff.sharedTaxiBerlin.run.taxidemand;
 
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingModule;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
@@ -35,9 +34,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 /**
  * @author  jbischoff
- *
- */
-/**
  *
  */
 public class RunSharedBerlinTaxiCase {
@@ -64,9 +60,7 @@ public class RunSharedBerlinTaxiCase {
 			config.controler().setOutputDirectory("D:/runs-svn/sharedTaxi/testReb");
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 			org.matsim.core.controler.Controler controler = DrtControlerCreator.createControler(config, false);
-			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 2000);
-
-			controler.addOverridingModule(new MinCostFlowRebalancingModule(zones));
+			controler.addOverridingModule(new MinCostFlowRebalancingModule(2000));
 			controler.run();
 		
 	}

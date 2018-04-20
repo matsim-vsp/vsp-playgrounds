@@ -19,7 +19,6 @@
 
 package playground.michalm.drt.run;
 
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
 import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingModule;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -51,8 +50,7 @@ public class RunSharedRebalancableETaxiMielec {
 		Controler controler = RunEDrtScenario.createControler(config, otfvis);
 
 		if (rebalancing == true) {
-			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 500);
-			controler.addOverridingModule(new MinCostFlowRebalancingModule(zones));
+			controler.addOverridingModule(new MinCostFlowRebalancingModule(500));
 		}
 
 		controler.run();
