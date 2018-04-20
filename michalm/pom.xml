@@ -17,7 +17,7 @@
 			<url>https://packagecloud.io/matsim-vsp/ev/maven2</url>
 		</repository>
 		<repository>
-			<id>matsim-vsp-ev</id>
+			<id>matsim-vsp-edvrp</id>
 			<url>https://packagecloud.io/matsim-vsp/edvrp/maven2</url>
 		</repository>
 	</repositories>
