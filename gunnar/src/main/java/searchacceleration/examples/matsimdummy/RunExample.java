@@ -19,6 +19,13 @@
  */ 
 package searchacceleration.examples.matsimdummy;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+
 import floetteroed.utilities.TimeDiscretization;
 import searchacceleration.ConstantReplanningParameters;
 import searchacceleration.LinkUsageAnalyzer;
@@ -33,6 +40,16 @@ public class RunExample {
 
 	public static void main(String[] args) {
 
+		final Scenario scenario = null; // should be a proper MATSim scenario
+		
+		final Map<Id<Link>, Double> linkWeights = new LinkedHashMap<>();
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			if (link.getCapacity() <= 0.0) {
+				throw new RuntimeException("link " + link.getId() + " has capacity " + link.getCapacity());
+			}
+			linkWeights.put(link.getId(), 1.0 / link.getCapacity());
+		}
+		
 		/*
 		 * Set up the convergence acceleration infrastructure.
 		 * 
@@ -41,7 +58,7 @@ public class RunExample {
 
 		LinkUsageListener linkUsageListener = new LinkUsageListener(new TimeDiscretization(0, 3600, 24));
 		LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener,
-				new ConstantReplanningParameters(0.1, 1.0));
+				new ConstantReplanningParameters(0.1, 1.0), linkWeights);
 
 		/*
 		 * Insert this into the controller and run the simulation. The
@@ -50,7 +67,7 @@ public class RunExample {
 		 * re-planning.
 		 */
 
-		DummyController controler = new DummyController();
+		DummyController controler = new DummyController(scenario);
 		controler.addEventHandler(linkUsageListener);
 		controler.addIterationStartsListener(linkUsageAnalyzer);
 		controler.setPlanStrategyThatOverridesAllOthers(new DummyPlanStrategy(linkUsageAnalyzer));

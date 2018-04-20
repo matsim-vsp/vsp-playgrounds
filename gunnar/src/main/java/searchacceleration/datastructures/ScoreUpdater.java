@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration.datastructures;
 
 import java.util.Map;
@@ -51,7 +51,7 @@ public class ScoreUpdater<L> {
 
 	private final SpaceTimeCounts<L> deltaIndividualCounts;
 
-	private final DynamicData<L> currentCounts;
+	private final DynamicData<L> currentWeightedCounts;
 
 	private final DynamicData<L> interactionResidual;
 
@@ -68,15 +68,15 @@ public class ScoreUpdater<L> {
 	// -------------------- CONSTRUCTION --------------------
 
 	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
-			final double meanLambda, final DynamicData<L> currentTotalCounts,
-			final double sumOfCurrentTotalCountsSquare, final double w, final double delta,
+			final double meanLambda, final DynamicData<L> currentWeightedCounts,
+			final double sumOfCurrentWeightedCounts2, final double w, final double delta,
 			final DynamicData<L> interactionResidual, final DynamicData<L> inertiaResidual,
-			final double regularizationResidual) {
+			final double regularizationResidual, final Map<L, Double> linkWeights) {
 
 		this.currentIndicators = currentIndicators;
 		this.upcomingIndicators = upcomingIndicators;
 
-		this.currentCounts = currentTotalCounts;
+		this.currentWeightedCounts = currentWeightedCounts;
 
 		this.interactionResidual = interactionResidual;
 		this.inertiaResidual = inertiaResidual;
@@ -88,11 +88,12 @@ public class ScoreUpdater<L> {
 		 * during one time bin.
 		 */
 
-		double sumOfIndividualChangeSquare = 0.0;
-		double sumOfCurrentIndividualCntSquare = 0.0;
-		double sumOfCurrentIndividualCntTimesCurrentTotalCnt = 0.0;
-		double sumOfIndividualChangeTimesInteractionResidual = 0.0;
-		double sumOfCurrentIndividualCntTimesInertiaResidual = 0.0;
+		double sumOfWeightedIndividualChangeSquare = 0.0;
+		double sumOfWeightedCurrentIndividualCount2 = 0.0;
+		double sumOfWeightedCurrentIndividualCountTimesWeightedCurrentTotalCount = 0.0;
+		double sumOfWeightedIndividualChangeTimesInteractionResidual = 0.0;
+		double sumOfWeightedCurrentIndividualCntTimesInertiaResidual = 0.0;
+
 		{
 			this.currentIndividualCounts = new SpaceTimeCounts<>(this.currentIndicators);
 			this.deltaIndividualCounts = new SpaceTimeCounts<>(this.upcomingIndicators);
@@ -101,36 +102,37 @@ public class ScoreUpdater<L> {
 			for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.deltaIndividualCounts.entriesView()) {
 				final L spaceObj = entry.getKey().getA();
 				final int timeBin = entry.getKey().getB();
-				final double changeValue = entry.getValue();
-				sumOfIndividualChangeSquare += changeValue * changeValue;
-				sumOfIndividualChangeTimesInteractionResidual += changeValue
+				final double weightedChangeValue = linkWeights.get(spaceObj) * entry.getValue();
+				sumOfWeightedIndividualChangeSquare += weightedChangeValue * weightedChangeValue;
+				sumOfWeightedIndividualChangeTimesInteractionResidual += weightedChangeValue
 						* interactionResidual.getBinValue(spaceObj, timeBin);
-				this.interactionResidual.add(spaceObj, timeBin, -meanLambda * changeValue);
+				this.interactionResidual.add(spaceObj, timeBin, -meanLambda * weightedChangeValue);
 			}
 
 			for (Map.Entry<Tuple<L, Integer>, Integer> entry : this.currentIndividualCounts.entriesView()) {
-				final double currentIndividualCnt = entry.getValue();
 				final L spaceObj = entry.getKey().getA();
 				final Integer timeBin = entry.getKey().getB();
-				sumOfCurrentIndividualCntSquare += currentIndividualCnt * currentIndividualCnt;
-				sumOfCurrentIndividualCntTimesCurrentTotalCnt += currentIndividualCnt
-						* currentTotalCounts.getBinValue(spaceObj, timeBin);
-				sumOfCurrentIndividualCntTimesInertiaResidual += currentIndividualCnt
+				final double weightedCurrentIndividualCnt = linkWeights.get(spaceObj) * entry.getValue();
+				sumOfWeightedCurrentIndividualCount2 += weightedCurrentIndividualCnt * weightedCurrentIndividualCnt;
+				sumOfWeightedCurrentIndividualCountTimesWeightedCurrentTotalCount += weightedCurrentIndividualCnt
+						* currentWeightedCounts.getBinValue(spaceObj, timeBin);
+				sumOfWeightedCurrentIndividualCntTimesInertiaResidual += weightedCurrentIndividualCnt
 						* inertiaResidual.getBinValue(spaceObj, timeBin);
-				this.inertiaResidual.add(spaceObj, timeBin, -(1.0 - meanLambda) * entry.getValue());
-				this.regularizationResidual -= meanLambda * this.currentCounts.getBinValue(spaceObj, timeBin)
-						* currentIndividualCnt;
+				this.inertiaResidual.add(spaceObj, timeBin, -(1.0 - meanLambda) * weightedCurrentIndividualCnt);
+				this.regularizationResidual -= meanLambda * this.currentWeightedCounts.getBinValue(spaceObj, timeBin)
+						* weightedCurrentIndividualCnt;
 			}
 		}
 
-		final double factor1 = (sumOfIndividualChangeSquare + w * sumOfCurrentIndividualCntSquare + delta
-				* (sumOfCurrentIndividualCntTimesCurrentTotalCnt * sumOfCurrentIndividualCntTimesCurrentTotalCnt)
-				/ (sumOfCurrentTotalCountsSquare * sumOfCurrentTotalCountsSquare));
+		final double factor1 = (sumOfWeightedIndividualChangeSquare + w * sumOfWeightedCurrentIndividualCount2
+				+ delta * (sumOfWeightedCurrentIndividualCountTimesWeightedCurrentTotalCount
+						* sumOfWeightedCurrentIndividualCountTimesWeightedCurrentTotalCount)
+						/ (sumOfCurrentWeightedCounts2 * sumOfCurrentWeightedCounts2));
 
-		final double factor2 = 2.0 * (sumOfIndividualChangeTimesInteractionResidual
-				- w * (sumOfCurrentIndividualCntSquare + sumOfCurrentIndividualCntTimesInertiaResidual)
-				+ delta * regularizationResidual * sumOfCurrentIndividualCntTimesCurrentTotalCnt
-						/ (sumOfCurrentTotalCountsSquare * sumOfCurrentTotalCountsSquare));
+		final double factor2 = 2.0 * (sumOfWeightedIndividualChangeTimesInteractionResidual
+				- w * (sumOfWeightedCurrentIndividualCount2 + sumOfWeightedCurrentIndividualCntTimesInertiaResidual)
+				+ delta * regularizationResidual * sumOfWeightedCurrentIndividualCountTimesWeightedCurrentTotalCount
+						/ (sumOfCurrentWeightedCounts2 * sumOfCurrentWeightedCounts2));
 
 		this.scoreChangeIfOne = (1.0 - meanLambda * meanLambda) * factor1 + (1.0 - meanLambda) * factor2;
 		this.scoreChangeIfZero = (0.0 - meanLambda * meanLambda) * factor1 + (0.0 - meanLambda) * factor2;
@@ -171,7 +173,7 @@ public class ScoreUpdater<L> {
 			final L spaceObj = entry.getKey().getA();
 			final int timeBin = entry.getKey().getB();
 			this.inertiaResidual.add(spaceObj, timeBin, (1.0 - newLambda) * entry.getValue());
-			this.regularizationResidual += newLambda * this.currentCounts.getBinValue(spaceObj, timeBin)
+			this.regularizationResidual += newLambda * this.currentWeightedCounts.getBinValue(spaceObj, timeBin)
 					* entry.getValue();
 		}
 	}

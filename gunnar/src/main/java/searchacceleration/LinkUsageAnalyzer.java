@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration;
 
 import java.util.LinkedHashMap;
@@ -60,14 +60,17 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 
 	private final ReplanningParameterProvider replanningParameters;
 
+	private final Map<Id<Link>, Double> linkWeights;
+
 	private final Map<Id<Person>, Plan> replannerId2newPlan = new LinkedHashMap<>();
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public LinkUsageAnalyzer(final LinkUsageListener physicalMobsimLinkUsageListener,
-			final ReplanningParameterProvider replanningParameters) {
+			final ReplanningParameterProvider replanningParameters, final Map<Id<Link>, Double> linkWeights) {
 		this.physicalMobsimUsageListener = physicalMobsimLinkUsageListener;
 		this.replanningParameters = replanningParameters;
+		this.linkWeights = linkWeights;
 	}
 
 	// -------------------- RESULT ACCESS --------------------
@@ -130,30 +133,33 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		final double meanLambda = this.replanningParameters.getMeanLambda(event.getIteration());
 		final double delta = this.replanningParameters.getDelta(event.getIteration());
 
-		final DynamicData<Id<Link>> currentCounts = CountIndicatorUtils
-				.newCounts(this.physicalMobsimUsageListener.getTimeDiscretization(), vehId2physicalLinkUsage.values());
-		final DynamicData<Id<Link>> upcomingCounts = CountIndicatorUtils
-				.newCounts(pSimLinkUsageListener.getTimeDiscretization(), vehId2pSimLinkUsage.values());
+		final DynamicData<Id<Link>> currentWeightedCounts = CountIndicatorUtils.newWeightedCounts(
+				this.physicalMobsimUsageListener.getTimeDiscretization(), vehId2physicalLinkUsage.values(),
+				this.linkWeights);
+		final DynamicData<Id<Link>> upcomingWeightedCounts = CountIndicatorUtils.newWeightedCounts(
+				pSimLinkUsageListener.getTimeDiscretization(), vehId2pSimLinkUsage.values(), this.linkWeights);
 
-		final double sumOfCurrentCounts2 = CountIndicatorUtils.sumOfCounts2(currentCounts);
-		if (sumOfCurrentCounts2 < 1e-6) {
+		final double sumOfCurrentWeightedCounts2 = CountIndicatorUtils.sumOfEntries2(currentWeightedCounts);
+		if (sumOfCurrentWeightedCounts2 < 1e-6) {
 			throw new RuntimeException("There is no traffic on the network.");
 		}
-		final double sumOfDeltaCounts2 = CountIndicatorUtils.sumOfCountDifferences2(currentCounts, upcomingCounts);
-		final double w = meanLambda / (1.0 - meanLambda) * (sumOfDeltaCounts2 + delta) / sumOfCurrentCounts2;
+		final double sumOfWeightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(currentWeightedCounts,
+				upcomingWeightedCounts);
+		final double w = meanLambda / (1.0 - meanLambda) * (sumOfWeightedCountDifferences2 + delta)
+				/ sumOfCurrentWeightedCounts2;
 
 		// Initialize score residuals.
 
-		final DynamicData<Id<Link>> interactionResiduals = CountIndicatorUtils.newInteractionResiduals(currentCounts,
-				upcomingCounts, meanLambda);
-		final DynamicData<Id<Link>> inertiaResiduals = new DynamicData<>(currentCounts.getStartTime_s(),
-				currentCounts.getBinSize_s(), currentCounts.getBinCnt());
-		for (Id<Link> locObj : currentCounts.keySet()) {
-			for (int bin = 0; bin < currentCounts.getBinCnt(); bin++) {
-				inertiaResiduals.put(locObj, bin, (1.0 - meanLambda) * currentCounts.getBinValue(locObj, bin));
+		final DynamicData<Id<Link>> interactionResiduals = CountIndicatorUtils
+				.newInteractionResiduals(currentWeightedCounts, upcomingWeightedCounts, meanLambda);
+		final DynamicData<Id<Link>> inertiaResiduals = new DynamicData<>(currentWeightedCounts.getStartTime_s(),
+				currentWeightedCounts.getBinSize_s(), currentWeightedCounts.getBinCnt());
+		for (Id<Link> locObj : currentWeightedCounts.keySet()) {
+			for (int bin = 0; bin < currentWeightedCounts.getBinCnt(); bin++) {
+				inertiaResiduals.put(locObj, bin, (1.0 - meanLambda) * currentWeightedCounts.getBinValue(locObj, bin));
 			}
 		}
-		double regularizationResidual = meanLambda * sumOfCurrentCounts2;
+		double regularizationResidual = meanLambda * sumOfCurrentWeightedCounts2;
 
 		// Go through all vehicles and decide who gets to re-plan.
 
@@ -164,8 +170,8 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		for (Id<Vehicle> vehId : allVehicleIds) {
 
 			final ScoreUpdater<Id<Link>> scoreUpdater = new ScoreUpdater<>(vehId2physicalLinkUsage.get(vehId),
-					vehId2pSimLinkUsage.get(vehId), meanLambda, currentCounts, sumOfCurrentCounts2, w, delta,
-					interactionResiduals, inertiaResiduals, regularizationResidual);
+					vehId2pSimLinkUsage.get(vehId), meanLambda, currentWeightedCounts, sumOfCurrentWeightedCounts2, w,
+					delta, interactionResiduals, inertiaResiduals, regularizationResidual, this.linkWeights);
 
 			final double newLambda;
 			if (scoreUpdater.getScoreChangeIfOne() < scoreUpdater.getScoreChangeIfZero()) {
@@ -199,6 +205,14 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
+		final Map<Id<Link>, Double> linkWeights = new LinkedHashMap<>();
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			if (link.getCapacity() <= 0.0) {
+				throw new RuntimeException("link " + link.getId() + " has capacity " + link.getCapacity());
+			}
+			linkWeights.put(link.getId(), 1.0 / link.getCapacity());
+		}
+
 		final Controler controler = new Controler(scenario);
 
 		final TimeDiscretization timeDiscr = new TimeDiscretization(0, 3600, 24);
@@ -217,7 +231,7 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 					public double getDelta(int iteration) {
 						return 1.0;
 					}
-				});
+				}, linkWeights);
 		controler.addControlerListener(linkUsageAnalyzer);
 
 		controler.run();

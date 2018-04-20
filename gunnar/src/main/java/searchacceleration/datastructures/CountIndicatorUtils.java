@@ -16,11 +16,12 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration.datastructures;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import floetteroed.utilities.DynamicData;
@@ -36,20 +37,20 @@ public class CountIndicatorUtils {
 	private CountIndicatorUtils() {
 	}
 
-	public static <L> DynamicData<L> newCounts(final TimeDiscretization timeDiscr,
-			final Collection<SpaceTimeIndicators<L>> allIndicators) {
+	public static <L> DynamicData<L> newWeightedCounts(final TimeDiscretization timeDiscr,
+			final Collection<SpaceTimeIndicators<L>> allIndicators, final Map<L, Double> weights) {
 		final DynamicData<L> result = new DynamicData<L>(timeDiscr);
 		for (SpaceTimeIndicators<L> indicators : allIndicators) {
 			for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
 				for (L locObj : indicators.getVisitedSpaceObjects(bin)) {
-					result.add(locObj, bin, 1.0);
+					result.add(locObj, bin, weights.get(locObj));
 				}
 			}
 		}
 		return result;
 	}
 
-	public static <L> double sumOfCounts2(final DynamicData<L> counts) {
+	public static <L> double sumOfEntries2(final DynamicData<L> counts) {
 		double result = 0.0;
 		for (L locObj : counts.keySet()) {
 			for (int bin = 0; bin < counts.getBinCnt(); bin++) {
@@ -60,7 +61,7 @@ public class CountIndicatorUtils {
 		return result;
 	}
 
-	public static <L> double sumOfCountDifferences2(final DynamicData<L> counts1, final DynamicData<L> counts2) {
+	public static <L> double sumOfDifferences2(final DynamicData<L> counts1, final DynamicData<L> counts2) {
 		double result = 0.0;
 		final Set<L> allLocObj = new LinkedHashSet<>(counts1.keySet());
 		allLocObj.addAll(counts2.keySet());
@@ -73,16 +74,16 @@ public class CountIndicatorUtils {
 		return result;
 	}
 
-	public static <L> DynamicData<L> newInteractionResiduals(final DynamicData<L> currentCounts,
-			final DynamicData<L> newCounts, final double meanLambda) {
-		final DynamicData<L> result = new DynamicData<L>(currentCounts.getStartTime_s(), currentCounts.getBinSize_s(),
-				currentCounts.getBinCnt());
-		final Set<L> allLocObjs = new LinkedHashSet<>(currentCounts.keySet());
-		allLocObjs.addAll(newCounts.keySet());
+	public static <L> DynamicData<L> newInteractionResiduals(final DynamicData<L> currentWeightedCounts,
+			final DynamicData<L> newWeightedCounts, final double meanLambda) {
+		final DynamicData<L> result = new DynamicData<L>(currentWeightedCounts.getStartTime_s(),
+				currentWeightedCounts.getBinSize_s(), currentWeightedCounts.getBinCnt());
+		final Set<L> allLocObjs = new LinkedHashSet<>(currentWeightedCounts.keySet());
+		allLocObjs.addAll(newWeightedCounts.keySet());
 		for (L locObj : allLocObjs) {
-			for (int bin = 0; bin < currentCounts.getBinCnt(); bin++) {
-				result.put(locObj, bin,
-						meanLambda * (newCounts.getBinValue(locObj, bin) - currentCounts.getBinValue(locObj, bin)));
+			for (int bin = 0; bin < currentWeightedCounts.getBinCnt(); bin++) {
+				result.put(locObj, bin, meanLambda * (newWeightedCounts.getBinValue(locObj, bin)
+						- currentWeightedCounts.getBinValue(locObj, bin)));
 			}
 		}
 		return result;
