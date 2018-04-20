@@ -81,7 +81,9 @@ public class TransportProblem<P, C> {
 		}
 
 		// solve min cost flow problem
-		MinCostFlow.minCostFlow(graph, 0, N - 1, Math.min(totalSupply, totalDemand), false);
+		int[] res = MinCostFlow.minCostFlow(graph, 0, N - 1, Math.min(totalSupply, totalDemand), false);
+		System.out.println("flow=" + res[0]);
+		System.out.println("flowCost=" + res[1]);
 
 		// extract flows
 		List<Triple<P, C, Integer>> flows = new ArrayList<>();

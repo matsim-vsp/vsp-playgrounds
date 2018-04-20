@@ -54,6 +54,7 @@ public class RunSharedTaxiMielec {
 		drtCfg.setRebalancingInterval(600);
 		config.controler().setLastIteration(1);
 		config.controler().setWriteEventsInterval(1);
+		config.controler().setOutputDirectory("d:/temp/mielec-rebalancing/zone_0500_target_a_50_b_00");
 
 		Controler controler = DrtControlerCreator.createControler(config, otfvis);
 
