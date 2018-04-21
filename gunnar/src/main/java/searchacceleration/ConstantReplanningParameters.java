@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration;
 
 /**
@@ -36,12 +36,12 @@ public class ConstantReplanningParameters implements ReplanningParameterProvider
 	}
 
 	@Override
-	public double getMeanLambda(int iteration) {
+	public double getMeanLambda(final int iteration) {
 		return this.meanLambda;
 	}
 
 	@Override
-	public double getDelta(int iteration) {
+	public double getDelta(final int iteration) {
 		return this.delta;
 	}
 }

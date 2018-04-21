@@ -27,6 +27,7 @@ import java.util.Set;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.config.Config;
@@ -64,6 +65,8 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 
 	private final Map<Id<Person>, Plan> replannerId2newPlan = new LinkedHashMap<>();
 
+	private boolean firstCall = true;
+
 	// -------------------- CONSTRUCTION --------------------
 
 	public LinkUsageAnalyzer(final LinkUsageListener physicalMobsimLinkUsageListener,
@@ -71,6 +74,25 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		this.physicalMobsimUsageListener = physicalMobsimLinkUsageListener;
 		this.replanningParameters = replanningParameters;
 		this.linkWeights = linkWeights;
+	}
+
+	public static Map<Id<Link>, Double> newUniformLinkWeights(final Network network) {
+		final Map<Id<Link>, Double> result = new LinkedHashMap<>();
+		for (Link link : network.getLinks().values()) {
+			result.put(link.getId(), 1.0);
+		}
+		return result;
+	}
+
+	public static Map<Id<Link>, Double> newOneOverCapacityLinkWeights(final Network network) {
+		final Map<Id<Link>, Double> result = new LinkedHashMap<>();
+		for (Link link : network.getLinks().values()) {
+			if (link.getCapacity() <= 1e-6) {
+				throw new RuntimeException("link " + link.getId() + " has capacity " + link.getCapacity());
+			}
+			result.put(link.getId(), 1.0 / link.getCapacity());
+		}
+		return result;
 	}
 
 	// -------------------- RESULT ACCESS --------------------
@@ -92,8 +114,18 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		 * Receive information about what happened in the network during the
 		 * most recent real network loading.
 		 */
-		final Map<Id<Vehicle>, SpaceTimeIndicators<Id<Link>>> vehId2physicalLinkUsage = this.physicalMobsimUsageListener
+		final Map<Id<Vehicle>, SpaceTimeIndicators<Id<Link>>> vehicleId2physicalLinkUsage = this.physicalMobsimUsageListener
 				.getAndClearIndicators();
+		final Map<Id<Vehicle>, Id<Person>> vehicleId2personId = this.physicalMobsimUsageListener.getAndClearDrivers();
+
+		/*
+		 * The first call to this method occurs before the first physical mobsim
+		 * execution, so it is skipped.
+		 */
+		if (this.firstCall) {
+			this.firstCall = false;
+			return;
+		}
 
 		/*
 		 * PSEUDOSIM
@@ -116,7 +148,7 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		final LinkUsageListener pSimLinkUsageListener = new LinkUsageListener(
 				this.physicalMobsimUsageListener.getTimeDiscretization());
 		pSim.executePlans(this.replannerId2newPlan, pSimLinkUsageListener);
-		final Map<Id<Vehicle>, SpaceTimeIndicators<Id<Link>>> vehId2pSimLinkUsage = pSimLinkUsageListener
+		final Map<Id<Vehicle>, SpaceTimeIndicators<Id<Link>>> vehicleId2pSimLinkUsage = pSimLinkUsageListener
 				.getAndClearIndicators();
 
 		/*
@@ -134,10 +166,10 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		final double delta = this.replanningParameters.getDelta(event.getIteration());
 
 		final DynamicData<Id<Link>> currentWeightedCounts = CountIndicatorUtils.newWeightedCounts(
-				this.physicalMobsimUsageListener.getTimeDiscretization(), vehId2physicalLinkUsage.values(),
+				this.physicalMobsimUsageListener.getTimeDiscretization(), vehicleId2physicalLinkUsage.values(),
 				this.linkWeights);
 		final DynamicData<Id<Link>> upcomingWeightedCounts = CountIndicatorUtils.newWeightedCounts(
-				pSimLinkUsageListener.getTimeDiscretization(), vehId2pSimLinkUsage.values(), this.linkWeights);
+				pSimLinkUsageListener.getTimeDiscretization(), vehicleId2pSimLinkUsage.values(), this.linkWeights);
 
 		final double sumOfCurrentWeightedCounts2 = CountIndicatorUtils.sumOfEntries2(currentWeightedCounts);
 		if (sumOfCurrentWeightedCounts2 < 1e-6) {
@@ -161,37 +193,37 @@ public class LinkUsageAnalyzer implements IterationStartsListener {
 		}
 		double regularizationResidual = meanLambda * sumOfCurrentWeightedCounts2;
 
-		// Go through all vehicles and decide who gets to re-plan.
+		/*
+		 * Go through all vehicles and decide which driver gets to re-plan (by
+		 * removing the non-replanners from replannerId2newPlan.
+		 */
 
-		final Set<Id<Vehicle>> allVehicleIds = new LinkedHashSet<>(vehId2physicalLinkUsage.keySet());
-		allVehicleIds.addAll(vehId2pSimLinkUsage.keySet());
-		final Set<Id<Vehicle>> replanningVehicleIds = new LinkedHashSet<>();
+		final Set<Id<Vehicle>> allVehicleIds = new LinkedHashSet<>(vehicleId2physicalLinkUsage.keySet());
+		allVehicleIds.addAll(vehicleId2pSimLinkUsage.keySet());
 
 		for (Id<Vehicle> vehId : allVehicleIds) {
 
-			final ScoreUpdater<Id<Link>> scoreUpdater = new ScoreUpdater<>(vehId2physicalLinkUsage.get(vehId),
-					vehId2pSimLinkUsage.get(vehId), meanLambda, currentWeightedCounts, sumOfCurrentWeightedCounts2, w,
-					delta, interactionResiduals, inertiaResiduals, regularizationResidual, this.linkWeights);
+			final Id<Person> driverId = vehicleId2personId.get(vehId);
+			if (driverId == null) {
+				throw new RuntimeException("Vehicle " + vehId + " has no (null) driver!");
+			}
+
+			final ScoreUpdater<Id<Link>> scoreUpdater = new ScoreUpdater<>(vehicleId2physicalLinkUsage.get(vehId),
+					vehicleId2pSimLinkUsage.get(vehId), meanLambda, currentWeightedCounts, sumOfCurrentWeightedCounts2,
+					w, delta, interactionResiduals, inertiaResiduals, regularizationResidual, this.linkWeights);
 
 			final double newLambda;
 			if (scoreUpdater.getScoreChangeIfOne() < scoreUpdater.getScoreChangeIfZero()) {
 				newLambda = 1.0;
-				replanningVehicleIds.add(vehId);
 			} else {
 				newLambda = 0.0;
+				this.replannerId2newPlan.remove(driverId);
 			}
 
-			scoreUpdater.updateDynamicDataResiduals(newLambda);
+			scoreUpdater.updateResiduals(newLambda);
+			// Interaction- and inertiaResiduals are updated by reference.
 			regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
 		}
-
-		/*
-		 * TODO
-		 * 
-		 * Identify the drivers of the re-planning vehicles identified in
-		 * replanningVehicleIds and retain these and only these in
-		 * replannerId2newPlan.
-		 */
 	}
 
 	// -------------------- MAIN-FUNCTION, ONLY FOR TESTING --------------------

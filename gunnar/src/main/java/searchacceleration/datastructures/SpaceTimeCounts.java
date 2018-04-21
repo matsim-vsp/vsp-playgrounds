@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration.datastructures;
 
 import java.util.Collections;
@@ -31,9 +31,8 @@ import floetteroed.utilities.Tuple;
  * tuples. "Space" is represented by the generic class L (e.g. a network link).
  * 
  * This minimal class exists only to speed up numerical operations in
- * {@link ScoreUpdater} that require iterating over all map entries. For a
- * less memory-intensive implementation, see
- * {@link SpaceTimeIndicatorVectorListBase}.
+ * {@link ScoreUpdater} that require iterating over all map entries. For a less
+ * memory-intensive implementation, see {@link SpaceTimeIndicators}.
  * 
  * @author Gunnar Flötteröd
  * 

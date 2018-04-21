@@ -50,11 +50,11 @@ public class CountIndicatorUtils {
 		return result;
 	}
 
-	public static <L> double sumOfEntries2(final DynamicData<L> counts) {
+	public static <L> double sumOfEntries2(final DynamicData<L> data) {
 		double result = 0.0;
-		for (L locObj : counts.keySet()) {
-			for (int bin = 0; bin < counts.getBinCnt(); bin++) {
-				final double val = counts.getBinValue(locObj, bin);
+		for (L locObj : data.keySet()) {
+			for (int bin = 0; bin < data.getBinCnt(); bin++) {
+				final double val = data.getBinValue(locObj, bin);
 				result += val * val;
 			}
 		}
@@ -62,11 +62,15 @@ public class CountIndicatorUtils {
 	}
 
 	public static <L> double sumOfDifferences2(final DynamicData<L> counts1, final DynamicData<L> counts2) {
+		if (counts1.getBinCnt() != counts2.getBinCnt()) {
+			throw new RuntimeException(
+					"counts1 has " + counts1.getBinCnt() + " bins; counts2 has " + counts2.getBinCnt() + " bins.");
+		}
 		double result = 0.0;
 		final Set<L> allLocObj = new LinkedHashSet<>(counts1.keySet());
 		allLocObj.addAll(counts2.keySet());
 		for (L locObj : allLocObj) {
-			for (int bin = 0; bin < Math.min(counts1.getBinCnt(), counts2.getBinCnt()); bin++) {
+			for (int bin = 0; bin < counts1.getBinCnt(); bin++) {
 				final double diff = counts1.getBinValue(locObj, bin) - counts2.getBinValue(locObj, bin);
 				result += diff * diff;
 			}
@@ -76,6 +80,10 @@ public class CountIndicatorUtils {
 
 	public static <L> DynamicData<L> newInteractionResiduals(final DynamicData<L> currentWeightedCounts,
 			final DynamicData<L> newWeightedCounts, final double meanLambda) {
+		if (currentWeightedCounts.getBinCnt() != newWeightedCounts.getBinCnt()) {
+			throw new RuntimeException("currentWeightedCounts has " + currentWeightedCounts.getBinCnt()
+					+ " bins; newWeightedCounts has " + newWeightedCounts.getBinCnt() + " bins.");
+		}
 		final DynamicData<L> result = new DynamicData<L>(currentWeightedCounts.getStartTime_s(),
 				currentWeightedCounts.getBinSize_s(), currentWeightedCounts.getBinCnt());
 		final Set<L> allLocObjs = new LinkedHashSet<>(currentWeightedCounts.keySet());

@@ -26,8 +26,8 @@ package searchacceleration;
  */
 public interface ReplanningParameterProvider {
 
-	public double getMeanLambda(final int iteration);
+	public double getMeanLambda(int iteration);
 
-	public double getDelta(final int iteration);
+	public double getDelta(int iteration);
 
 }
