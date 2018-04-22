@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration.datastructures;
 
 import java.util.ArrayList;
@@ -25,11 +25,11 @@ import java.util.List;
 import floetteroed.utilities.EmptyIterable;
 
 /**
- * Stores 0/1 indicator data ("visits") that are indexed by (space, time)
+ * Stores 0/1 indicator data ("visits") that are indexed by (space, time) key
  * tuples. The same key may be set multiple times, meaning that one can store
- * multiple ones per key. This class constructed to minimize memory usage for
- * very sparse data. "Space" is represented by the generic class L (e.g. a
- * network link).
+ * multiple indicators per key. This class is constructed to minimize memory
+ * usage for very sparse data. "Space" is represented by the generic class L
+ * (e.g. a network link).
  * 
  * 
  * @author Gunnar Flötteröd
@@ -41,6 +41,7 @@ public class SpaceTimeIndicators<L> {
 
 	// -------------------- MEMBERS --------------------
 
+	// outer list: time bins; inner list: space references
 	private final List<List<L>> data;
 
 	// -------------------- CONSTRUCTION --------------------

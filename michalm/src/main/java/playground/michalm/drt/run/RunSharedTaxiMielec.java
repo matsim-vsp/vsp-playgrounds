@@ -19,25 +19,14 @@
 
 package playground.michalm.drt.run;
 
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalModule;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
-import org.matsim.contrib.drt.analysis.zonal.ZonalDemandAggregator;
-import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy;
+import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingModule;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
-import playground.michalm.drt.rebalancing.AggregatedMinCostRelocationCalculator;
-import playground.michalm.drt.rebalancing.LinearRebalancingTargetCalculator;
-import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy;
-import playground.michalm.drt.rebalancing.MinCostFlowRebalancingStrategy.RebalancingTargetCalculator;
-import playground.michalm.drt.rebalancing.MinCostRelocationCalculator;
 
 public class RunSharedTaxiMielec {
 	public static void main(String[] args) {
@@ -47,7 +36,7 @@ public class RunSharedTaxiMielec {
 
 	public static void run(String configFile, boolean otfvis, boolean rebalancing) {
 		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
-				new OTFVisConfigGroup(), new TaxiFareConfigGroup());
+				new OTFVisConfigGroup());
 
 		DrtConfigGroup drtCfg = DrtConfigGroup.get(config);
 		// drtCfg.setMaxWaitTime(maxWaitTime);
@@ -55,25 +44,12 @@ public class RunSharedTaxiMielec {
 		drtCfg.setRebalancingInterval(600);
 		config.controler().setLastIteration(1);
 		config.controler().setWriteEventsInterval(1);
+		config.controler().setOutputDirectory("d:/temp/mielec-rebalancing/zone_0500_target_a_50_b_00");
 
 		Controler controler = DrtControlerCreator.createControler(config, otfvis);
 
 		if (rebalancing == true) {
-			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 1000);
-
-			controler.addOverridingModule(new DrtZonalModule());
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					bind(DrtZonalSystem.class).toInstance(zones);
-					bind(RebalancingStrategy.class).to(MinCostFlowRebalancingStrategy.class).asEagerSingleton();
-					bind(RebalancingTargetCalculator.class).to(LinearRebalancingTargetCalculator.class)
-							.asEagerSingleton();
-					bind(MinCostRelocationCalculator.class).to(AggregatedMinCostRelocationCalculator.class)
-							.asEagerSingleton();
-					bind(ZonalDemandAggregator.class).asEagerSingleton();
-				}
-			});
+			controler.addOverridingModule(new MinCostFlowRebalancingModule(500));
 		}
 
 		controler.run();

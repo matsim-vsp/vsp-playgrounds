@@ -16,8 +16,10 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration.examples.matsimdummy;
+
+import org.matsim.api.core.v01.Scenario;
 
 import floetteroed.utilities.TimeDiscretization;
 import searchacceleration.ConstantReplanningParameters;
@@ -33,6 +35,8 @@ public class RunExample {
 
 	public static void main(String[] args) {
 
+		final Scenario scenario = null; // should be a proper MATSim scenario
+
 		/*
 		 * Set up the convergence acceleration infrastructure.
 		 * 
@@ -41,7 +45,8 @@ public class RunExample {
 
 		LinkUsageListener linkUsageListener = new LinkUsageListener(new TimeDiscretization(0, 3600, 24));
 		LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(linkUsageListener,
-				new ConstantReplanningParameters(0.1, 1.0));
+				new ConstantReplanningParameters(0.1, 1.0),
+				LinkUsageAnalyzer.newOneOverCapacityLinkWeights(scenario.getNetwork()));
 
 		/*
 		 * Insert this into the controller and run the simulation. The
@@ -50,7 +55,7 @@ public class RunExample {
 		 * re-planning.
 		 */
 
-		DummyController controler = new DummyController();
+		DummyController controler = new DummyController(scenario);
 		controler.addEventHandler(linkUsageListener);
 		controler.addIterationStartsListener(linkUsageAnalyzer);
 		controler.setPlanStrategyThatOverridesAllOthers(new DummyPlanStrategy(linkUsageAnalyzer));

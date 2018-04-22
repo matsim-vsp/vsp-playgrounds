@@ -50,7 +50,7 @@ public class VTTSanalysisMain {
 			log.info("run Id: " + runId);
 			
 		} else {
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc/";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/detEval/emissionCongestionInternalization/iatbr/output/bau/";
 			runId = null;
 		}
 		
@@ -105,12 +105,17 @@ public class VTTSanalysisMain {
 		vttsHandler.printCarVTTS(outputDirectoryWithRunId + "VTTS_carTrips.csv");
 		vttsHandler.printAvgVTTSperPerson(outputDirectoryWithRunId + "VTTS_avgPerPerson.csv");
 		
-		vttsHandler.printVTTSdistribution(outputDirectoryWithRunId + "VTTS_percentiles.csv", null, null);
-		vttsHandler.printVTTSdistribution(outputDirectoryWithRunId + "VTTS_percentiles_car.csv", "car", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_all-modes.csv", null, null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_car.csv", "car", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_pt.csv", "pt", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_bicycle.csv", "bicycle", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_walk.csv", "walk", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_ride.csv", "ride", null);
 
-		vttsHandler.printVTTSdistribution(outputDirectoryWithRunId + "VTTS_percentiles_car_7-9.csv", "car", new Tuple<Double, Double>(7.0 * 3600., 9. * 3600.));
-		vttsHandler.printVTTSdistribution(outputDirectoryWithRunId + "VTTS_percentiles_car_11-13.csv", "car", new Tuple<Double, Double>(11.0 * 3600., 13. * 3600.));
-		vttsHandler.printVTTSdistribution(outputDirectoryWithRunId + "VTTS_percentiles_16-18.csv", "car", new Tuple<Double, Double>(16.0 * 3600., 18. * 3600.));
+
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_car_7-9.csv", "car", new Tuple<Double, Double>(7.0 * 3600., 9. * 3600.));
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_car_11-13.csv", "car", new Tuple<Double, Double>(11.0 * 3600., 13. * 3600.));
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_16-18.csv", "car", new Tuple<Double, Double>(16.0 * 3600., 18. * 3600.));
 	}
 			 
 }
