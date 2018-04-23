@@ -38,12 +38,19 @@ public class FilterSelectedPlans {
 	
 	private static final Logger log = Logger.getLogger(FilterSelectedPlans.class);
 	
-	private final static String inputPlans = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/be_400_c/be_400_c.output_plans.xml.gz";
-	private final static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
+	private static String inputPlans = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/be_500_c/be_500_c.output_plans.xml.gz";
+	private static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/be_500_c_10pct.selected_plans.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	
 	public static void main(String[] args) {
+		
+		if (args.length > 0) {
+			inputPlans = args[0];
+			outputPlans = args[1];		
+			log.info("input plans: " + inputPlans);
+			log.info("output plans: " + outputPlans);
+		}
 		
 		FilterSelectedPlans filter = new FilterSelectedPlans();
 		filter.run(inputPlans, outputPlans, attributes);
