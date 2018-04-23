@@ -94,7 +94,6 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	// to get the trip number for any given time
 	private final Map<Id<Person>, Map<Integer, Double>> personId2TripNr2DepartureTime = new HashMap<>();
 		
-	private final MarginalSumScoringFunction marginalSumScoringFunction;
 	private final double defaultVTTS_moneyPerHour; // for the car mode!
 	
 	public VTTSHandler(Scenario scenario) {
@@ -108,11 +107,6 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 				(this.scenario.getConfig().planCalcScore().getPerforming_utils_hr()
 				+ this.scenario.getConfig().planCalcScore().getModes().get( TransportMode.car ).getMarginalUtilityOfTraveling() * (-1.0)
 				) / this.scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
-
-		this.marginalSumScoringFunction =
-				new MarginalSumScoringFunction(
-						new ScoringParameters.Builder(scenario.getConfig().planCalcScore(), scenario.getConfig().planCalcScore().getScoringParameters(null), scenario.getConfig().scenario()).build());
-
 	}
 
 	@Override
@@ -229,7 +223,16 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 			
 			// First, check if the plan completed is completed, i.e. if the agent has arrived at an activity
 			if (this.personId2currentActivityType.containsKey(personId) && this.personId2currentActivityStartTime.containsKey(personId)) {
-				// Yes, the plan seems to be completed.
+				
+				String subpop = null;
+
+				if (this.scenario.getPopulation().getPersonAttributes().getAttribute(personId.toString(), this.scenario.getConfig().plans().getSubpopulationAttributeName()) != null) {					
+					subpop = (String) this.scenario.getPopulation().getPersonAttributes().getAttribute(personId.toString(), this.scenario.getConfig().plans().getSubpopulationAttributeName());
+				}
+								
+				final MarginalSumScoringFunction marginalSumScoringFunction =
+						new MarginalSumScoringFunction(
+								new ScoringParameters.Builder(scenario.getConfig().planCalcScore(), scenario.getConfig().planCalcScore().getScoringParameters(subpop), scenario.getConfig().scenario()).build());
 				
 				if (activityEndTime == Time.getUndefinedTime()) {
 					// The end time is undefined...

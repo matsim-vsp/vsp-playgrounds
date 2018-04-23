@@ -50,8 +50,8 @@ public class VTTSanalysisMain {
 			log.info("run Id: " + runId);
 			
 		} else {
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/detEval/emissionCongestionInternalization/iatbr/output/bau/";
-			runId = null;
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/vw_rufbus/vw219/";
+			runId = "vw219";
 		}
 		
 		VTTSanalysisMain analysis = new VTTSanalysisMain();
@@ -61,10 +61,13 @@ public class VTTSanalysisMain {
 	private void run() {
 		
 		String configFile;
+		String attributesFile;
 		if (runId == null) {
 			configFile = runDirectory + "output_config.xml";
+			attributesFile = runDirectory + "output_personAttributes.xml.gz";
 		} else {
 			configFile = runDirectory + runId + ".output_config.xml";
+			attributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile);	
@@ -74,7 +77,7 @@ public class VTTSanalysisMain {
 		
 		config.plans().setInputFile(populationFile);
 		config.network().setInputFile(networkFile);
-		config.plans().setInputPersonAttributeFile(null);
+		config.plans().setInputPersonAttributeFile(attributesFile);
 		config.transit().setTransitScheduleFile(null);
 		config.transit().setVehiclesFile(null);
 		config.vehicles().setVehiclesFile(null);
