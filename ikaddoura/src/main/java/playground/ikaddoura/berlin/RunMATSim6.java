@@ -49,7 +49,8 @@ public class RunMATSim6 {
 
 	private static String configFile;
 	private static String outputDirectory;
-	private static String runId;	
+	private static String runId;
+	private static String visualizationScriptInputDirectory;
 	
 	private static double ascCar;
 	private static double ascPt;
@@ -65,6 +66,8 @@ public class RunMATSim6 {
 	private static double marginalUtilityTravelingBicycle = Double.POSITIVE_INFINITY;
 	private static double marginalUtilityTravelingRide = Double.POSITIVE_INFINITY;
 	
+	private static boolean useCongestedCarRouterForRide;
+	
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			
@@ -77,45 +80,48 @@ public class RunMATSim6 {
 			runId = args[2];
 			log.info("runId: "+ runId);
 			
-			ascCar = Double.parseDouble(args[3]);
+			visualizationScriptInputDirectory = args[3];
+			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
+			
+			ascCar = Double.parseDouble(args[4]);
 			log.info("ascCar: "+ ascCar);
 
-			ascPt = Double.parseDouble(args[4]);
+			ascPt = Double.parseDouble(args[5]);
 			log.info("ascPt: "+ ascPt);
 			
-			ascTransitWalk = Double.parseDouble(args[5]);
+			ascTransitWalk = Double.parseDouble(args[6]);
 			log.info("ascTransitWalk: "+ ascTransitWalk);
 
-			ascWalk = Double.parseDouble(args[6]);
+			ascWalk = Double.parseDouble(args[7]);
 			log.info("ascWalk: "+ ascWalk);
 
-			ascBicycle = Double.parseDouble(args[7]);
+			ascBicycle = Double.parseDouble(args[8]);
 			log.info("ascBicycle: "+ ascBicycle);
 			
-			ascRide = Double.parseDouble(args[8]);
+			ascRide = Double.parseDouble(args[9]);
 			log.info("ascRide: "+ ascRide);
 			
-			if (args.length > 9) {
-				marginalUtilityTravelingCar = Double.parseDouble(args[9]);
-				log.info("marginalUtilityTravelingCar: "+ marginalUtilityTravelingCar);
-				
-				marginalUtilityTravelingPt = Double.parseDouble(args[10]);
-				log.info("marginalUtilityTravelingPt: "+ marginalUtilityTravelingPt);
-				
-				marginalUtilityTravelingTransitWalk = Double.parseDouble(args[11]);
-				log.info("marginalUtilityTravelingTransitWalk: "+ marginalUtilityTravelingTransitWalk);
-				
-				marginalUtilityTravelingWalk = Double.parseDouble(args[12]);
-				log.info("marginalUtilityTravelingWalk: "+ marginalUtilityTravelingWalk);
-				
-				marginalUtilityTravelingBicycle = Double.parseDouble(args[13]);
-				log.info("marginalUtilityTravelingBicycle: "+ marginalUtilityTravelingBicycle);
-				
-				marginalUtilityTravelingRide = Double.parseDouble(args[14]);
-				log.info("marginalUtilityTravelingRide: "+ marginalUtilityTravelingRide);
-			}
-
+			marginalUtilityTravelingCar = Double.parseDouble(args[10]);
+			log.info("marginalUtilityTravelingCar: "+ marginalUtilityTravelingCar);
 			
+			marginalUtilityTravelingPt = Double.parseDouble(args[11]);
+			log.info("marginalUtilityTravelingPt: "+ marginalUtilityTravelingPt);
+			
+			marginalUtilityTravelingTransitWalk = Double.parseDouble(args[12]);
+			log.info("marginalUtilityTravelingTransitWalk: "+ marginalUtilityTravelingTransitWalk);
+			
+			marginalUtilityTravelingWalk = Double.parseDouble(args[13]);
+			log.info("marginalUtilityTravelingWalk: "+ marginalUtilityTravelingWalk);
+			
+			marginalUtilityTravelingBicycle = Double.parseDouble(args[14]);
+			log.info("marginalUtilityTravelingBicycle: "+ marginalUtilityTravelingBicycle);
+			
+			marginalUtilityTravelingRide = Double.parseDouble(args[15]);
+			log.info("marginalUtilityTravelingRide: "+ marginalUtilityTravelingRide);
+			
+			useCongestedCarRouterForRide = Boolean.getBoolean(args[16]);
+			log.info("useCongestedCarRouterForRide: "+ useCongestedCarRouterForRide);
+
 		} else {
 			
 			configFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_3_ik/config_be_300_mode-choice_test.xml";
@@ -147,12 +153,12 @@ public class RunMATSim6 {
 		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
 		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
 
-		if (marginalUtilityTravelingCar < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.car).setMarginalUtilityOfTraveling(marginalUtilityTravelingCar);
-		if (marginalUtilityTravelingPt < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.pt).setMarginalUtilityOfTraveling(marginalUtilityTravelingPt);
-		if (marginalUtilityTravelingTransitWalk < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.transit_walk).setMarginalUtilityOfTraveling(marginalUtilityTravelingTransitWalk);
-		if (marginalUtilityTravelingWalk < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.walk).setMarginalUtilityOfTraveling(marginalUtilityTravelingWalk);
-		if (marginalUtilityTravelingBicycle < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get("bicycle").setMarginalUtilityOfTraveling(marginalUtilityTravelingBicycle);
-		if (marginalUtilityTravelingRide < Double.POSITIVE_INFINITY) config.planCalcScore().getModes().get(TransportMode.ride).setMarginalUtilityOfTraveling(marginalUtilityTravelingRide);
+		config.planCalcScore().getModes().get(TransportMode.car).setMarginalUtilityOfTraveling(marginalUtilityTravelingCar);
+		config.planCalcScore().getModes().get(TransportMode.pt).setMarginalUtilityOfTraveling(marginalUtilityTravelingPt);
+		config.planCalcScore().getModes().get(TransportMode.transit_walk).setMarginalUtilityOfTraveling(marginalUtilityTravelingTransitWalk);
+		config.planCalcScore().getModes().get(TransportMode.walk).setMarginalUtilityOfTraveling(marginalUtilityTravelingWalk);
+		config.planCalcScore().getModes().get("bicycle").setMarginalUtilityOfTraveling(marginalUtilityTravelingBicycle);
+		config.planCalcScore().getModes().get(TransportMode.ride).setMarginalUtilityOfTraveling(marginalUtilityTravelingRide);
 
 		// own time allocation mutator strategy
 		final String STRATEGY_NAME = "durationBasedTimeMutator";
@@ -182,13 +188,15 @@ public class RunMATSim6 {
 			}
 		});
 		
-		// use the congested car router for the teleported ride mode
-		controler.addOverridingModule(new AbstractModule(){
-			@Override
-			public void install() {
-				addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
-				addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());        }
-	       });
+		if (useCongestedCarRouterForRide) {
+			// use the congested car router for the teleported ride mode
+			controler.addOverridingModule(new AbstractModule(){
+				@Override
+				public void install() {
+					addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
+					addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());        }
+		    });
+		}
 				
 		controler.run();
 		
@@ -199,7 +207,6 @@ public class RunMATSim6 {
 		final String zonesCRS = null;
 		final String homeActivity = "home";
 		final int scalingFactor = 10;
-		final String visualizationScriptInputDirectory = scenario.getConfig().controler().getOutputDirectory() + "/../";
 		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
