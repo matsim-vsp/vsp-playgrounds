@@ -19,6 +19,8 @@
 
 package playground.ikaddoura.analysis.vtts;
 
+import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -50,8 +52,17 @@ public class VTTSanalysisMain {
 			log.info("run Id: " + runId);
 			
 		} else {
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/vw_rufbus/vw219/";
-			runId = "vw219";
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/vw_rufbus/vw219/";
+//			runId = "vw219";
+			
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/berlin_equal_vs_different_VTTS/output/baseCase/";
+//			runId = null;
+			
+//			runDirectory = "/Users/ihab/Desktop/v2b/v2b/santiago/output/baseCase10pct/";
+//			runId = null;
+			
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cottbus/laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/";
+			runId = "1000";
 		}
 		
 		VTTSanalysisMain analysis = new VTTSanalysisMain();
@@ -77,10 +88,15 @@ public class VTTSanalysisMain {
 		
 		config.plans().setInputFile(populationFile);
 		config.network().setInputFile(networkFile);
-		config.plans().setInputPersonAttributeFile(attributesFile);
+		if (new File(attributesFile).exists()) {
+			config.plans().setInputPersonAttributeFile(attributesFile);
+		} else {
+			config.plans().setInputPersonAttributeFile(null);
+		}
 		config.transit().setTransitScheduleFile(null);
 		config.transit().setVehiclesFile(null);
 		config.vehicles().setVehiclesFile(null);
+		config.network().setLaneDefinitionsFile(null);
 		
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
