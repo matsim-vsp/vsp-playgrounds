@@ -35,6 +35,8 @@ import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.io.algorithm.VehicleRoutingAlgorithms;
+import com.graphhopper.jsprit.io.problem.VrpXMLWriter;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -149,8 +151,8 @@ public class KTFreight_v3 {
 
 	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/VehTypeReader/" ;
-	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/VehTypeReader1/" ;
+	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/testing/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
 	
@@ -437,7 +439,8 @@ public class KTFreight_v3 {
 			VehicleRoutingAlgorithm algorithm = VehicleRoutingAlgorithms.readAndCreateAlgorithm(vrp, ALGORITHMFILE);
 			algorithm.setMaxIterations(MAX_JSPRIT_ITERATION);
 
-			VehicleRoutingProblemSolution solution = Solutions.bestOf(algorithm.searchSolutions());
+			Collection<VehicleRoutingProblemSolution> solutions = (algorithm.searchSolutions()); 
+			VehicleRoutingProblemSolution solution = Solutions.bestOf(solutions);
 			CarrierPlan newPlan = MatsimJspritFactory.createPlan(carrier, solution) ;
 
 			NetworkRouter.routePlan(newPlan,netBasedCosts) ;
@@ -450,6 +453,9 @@ public class KTFreight_v3 {
 
 			//Ausgabe der Ergebnisse auf der Console
 			//SolutionPrinter.print(vrp,solution,Print.VERBOSE);
+			
+			//Write the VRP with the best solution of jsprit
+			new VrpXMLWriter(vrp, solutions, true).write(TEMP_DIR + RUN + runIndex + "/jsprit_vrp_with_solution_"+ carrier.getId().toString() +".xml");
 
 		}
 	}
@@ -715,6 +721,7 @@ public class KTFreight_v3 {
 		new CarrierPlanXmlWriterV2(carriers).write( config.controler().getOutputDirectory() + "/output_carriers.xml.gz") ;
 		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml");
 		new CarrierVehicleTypeWriter(CarrierVehicleTypes.getVehicleTypes(carriers)).write(config.controler().getOutputDirectory() + "/output_vehicleTypes.xml.gz");
+		
 		
 		//TODO: Wirte all InputFiles in an "Input"-Directory with the Run-dir?
 	}
