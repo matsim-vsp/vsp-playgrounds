@@ -126,9 +126,13 @@ public class MATSimVideoUtils {
 			counter++;
 		}
 		
-		enc.finish();
-		
-		log.info("Generating a video using a png sequence... Done. Video written to " + outputFile);
+		try { 
+			enc.finish();
+			log.info("Generating a video using a png sequence... Done. Video written to " + outputFile);
+
+		} catch (IOException e) {
+			log.warn("Couldn't create a video." );
+		}
 	}
 
 }
