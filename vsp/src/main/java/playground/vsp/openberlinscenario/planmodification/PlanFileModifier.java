@@ -244,7 +244,7 @@ public class PlanFileModifier {
 			}
 			
 			// Keeping the attributes of a person
-			for (String attributeKey : person.getAttributes().getKeys()) {
+			for (String attributeKey : person.getAttributes().getAsMap().keySet()) {
 				person2.getAttributes().putAttribute(attributeKey, person.getAttributes().getAttribute(attributeKey));
 			}
 			
