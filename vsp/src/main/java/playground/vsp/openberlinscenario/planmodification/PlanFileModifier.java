@@ -18,8 +18,6 @@
  * *********************************************************************** */
 package playground.vsp.openberlinscenario.planmodification;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
@@ -61,7 +59,6 @@ public class PlanFileModifier {
 	private int maxNumberOfAgentsConsidered;
 	private boolean removeLinksAndRoutes;
 	private CoordinateTransformation ct;
-	private List<String> attributesToKeep; // TODO Might be removed once handling of new, integrated attributes becomes more standard
 	
 	Random random = MatsimRandom.getLocalInstance();
 	
@@ -77,8 +74,8 @@ public class PlanFileModifier {
 //		String outputPlansFile = "../../upretoria/data/capetown/scenario_2017/population_32734.xml.gz";
 //		String inputPlansFile = "../../capetown/data/scenario_2017/population_32734.xml.gz";
 //		String outputPlansFile = "../../capetown/data/scenario_2017/population_32734_1pct.xml.gz";
-		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/plans.xml.gz";
-		String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_x/population_2/plans_small_sample.xml.gz";
+		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/502/plans1.xml.gz";
+		String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_6/population/plans_10000.xml.gz";
 //		double selectionProbability = 1.;
 		double selectionProbability = 0.1;
 		boolean onlyTransferSelectedPlan = false;
@@ -91,7 +88,6 @@ public class PlanFileModifier {
 //		String outputCRS = "EPSG:32734";
 		String inputCRS = null;
 		String outputCRS = null;
-		List<String> attributesToKeep = Arrays.asList("age", "employed", "gender", "hasLicense", "householdId", "locationOfSchool", "locationOfWork", "parent", "student");
 
 		
 		CoordinateTransformation ct;
@@ -114,7 +110,6 @@ public class PlanFileModifier {
 			removeLinksAndRoutes = Boolean.parseBoolean(args[8]);
 			inputCRS = null;
 			outputCRS = null;
-			attributesToKeep = Arrays.asList();
 		}
 		
 		// Server use, version with CRS transformation
@@ -130,12 +125,11 @@ public class PlanFileModifier {
 			removeLinksAndRoutes = Boolean.parseBoolean(args[8]);
 			inputCRS = args[9];
 			outputCRS = args[10];
-			attributesToKeep = Arrays.asList();
 		}
 		
 		PlanFileModifier planFileModifier = new PlanFileModifier(inputPlansFile, outputPlansFile, selectionProbability, onlyTransferSelectedPlan,
 				considerHomeStayingAgents, includeStayHomePlans, onlyConsiderPeopleAlwaysGoingByCar,
-				maxNumberOfAgentsConsidered, removeLinksAndRoutes, ct, attributesToKeep);
+				maxNumberOfAgentsConsidered, removeLinksAndRoutes, ct);
 		
 		planFileModifier.modifyPlans();
 	}
@@ -143,7 +137,7 @@ public class PlanFileModifier {
 	
 	public PlanFileModifier(String inputPlansFile, String outputPlansFile, double selectionProbability, boolean onlyTransferSelectedPlan,
 			boolean considerHomeStayingAgents, boolean includeStayHomePlans, boolean onlyConsiderPeopleAlwaysGoingByCar,
-			int maxNumberOfAgentsConsidered, boolean removeLinksAndRoutes, CoordinateTransformation ct, List<String> attributesToKeep) {
+			int maxNumberOfAgentsConsidered, boolean removeLinksAndRoutes, CoordinateTransformation ct) {
 		this.inputPlansFile = inputPlansFile;
 		this.outputPlansFile = outputPlansFile;
 		this.selectionProbability = selectionProbability;
@@ -155,7 +149,6 @@ public class PlanFileModifier {
 		this.removeLinksAndRoutes = removeLinksAndRoutes;
 		this.onlyTransferSelectedPlan = onlyTransferSelectedPlan;
 		this.ct = ct;
-		this.attributesToKeep = attributesToKeep;
 	}
 	
 	public void modifyPlans() {		
@@ -251,8 +244,8 @@ public class PlanFileModifier {
 			}
 			
 			// Keeping the attributes of a person
-			for (String attribute : attributesToKeep) {
-				person2.getAttributes().putAttribute(attribute, person.getAttributes().getAttribute(attribute));
+			for (String attributeKey : person.getAttributes().getKeys()) {
+				person2.getAttributes().putAttribute(attributeKey, person.getAttributes().getAttribute(attributeKey));
 			}
 			
 			population.addPerson(person2);

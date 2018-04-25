@@ -16,11 +16,12 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package searchacceleration.datastructures;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import floetteroed.utilities.DynamicData;
@@ -36,36 +37,40 @@ public class CountIndicatorUtils {
 	private CountIndicatorUtils() {
 	}
 
-	public static <L> DynamicData<L> newCounts(final TimeDiscretization timeDiscr,
-			final Collection<SpaceTimeIndicators<L>> allIndicators) {
+	public static <L> DynamicData<L> newWeightedCounts(final TimeDiscretization timeDiscr,
+			final Collection<SpaceTimeIndicators<L>> allIndicators, final Map<L, Double> weights) {
 		final DynamicData<L> result = new DynamicData<L>(timeDiscr);
 		for (SpaceTimeIndicators<L> indicators : allIndicators) {
 			for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
 				for (L locObj : indicators.getVisitedSpaceObjects(bin)) {
-					result.add(locObj, bin, 1.0);
+					result.add(locObj, bin, weights.get(locObj));
 				}
 			}
 		}
 		return result;
 	}
 
-	public static <L> double sumOfCounts2(final DynamicData<L> counts) {
+	public static <L> double sumOfEntries2(final DynamicData<L> data) {
 		double result = 0.0;
-		for (L locObj : counts.keySet()) {
-			for (int bin = 0; bin < counts.getBinCnt(); bin++) {
-				final double val = counts.getBinValue(locObj, bin);
+		for (L locObj : data.keySet()) {
+			for (int bin = 0; bin < data.getBinCnt(); bin++) {
+				final double val = data.getBinValue(locObj, bin);
 				result += val * val;
 			}
 		}
 		return result;
 	}
 
-	public static <L> double sumOfCountDifferences2(final DynamicData<L> counts1, final DynamicData<L> counts2) {
+	public static <L> double sumOfDifferences2(final DynamicData<L> counts1, final DynamicData<L> counts2) {
+		if (counts1.getBinCnt() != counts2.getBinCnt()) {
+			throw new RuntimeException(
+					"counts1 has " + counts1.getBinCnt() + " bins; counts2 has " + counts2.getBinCnt() + " bins.");
+		}
 		double result = 0.0;
 		final Set<L> allLocObj = new LinkedHashSet<>(counts1.keySet());
 		allLocObj.addAll(counts2.keySet());
 		for (L locObj : allLocObj) {
-			for (int bin = 0; bin < Math.min(counts1.getBinCnt(), counts2.getBinCnt()); bin++) {
+			for (int bin = 0; bin < counts1.getBinCnt(); bin++) {
 				final double diff = counts1.getBinValue(locObj, bin) - counts2.getBinValue(locObj, bin);
 				result += diff * diff;
 			}
@@ -73,16 +78,20 @@ public class CountIndicatorUtils {
 		return result;
 	}
 
-	public static <L> DynamicData<L> newInteractionResiduals(final DynamicData<L> currentCounts,
-			final DynamicData<L> newCounts, final double meanLambda) {
-		final DynamicData<L> result = new DynamicData<L>(currentCounts.getStartTime_s(), currentCounts.getBinSize_s(),
-				currentCounts.getBinCnt());
-		final Set<L> allLocObjs = new LinkedHashSet<>(currentCounts.keySet());
-		allLocObjs.addAll(newCounts.keySet());
+	public static <L> DynamicData<L> newInteractionResiduals(final DynamicData<L> currentWeightedCounts,
+			final DynamicData<L> newWeightedCounts, final double meanLambda) {
+		if (currentWeightedCounts.getBinCnt() != newWeightedCounts.getBinCnt()) {
+			throw new RuntimeException("currentWeightedCounts has " + currentWeightedCounts.getBinCnt()
+					+ " bins; newWeightedCounts has " + newWeightedCounts.getBinCnt() + " bins.");
+		}
+		final DynamicData<L> result = new DynamicData<L>(currentWeightedCounts.getStartTime_s(),
+				currentWeightedCounts.getBinSize_s(), currentWeightedCounts.getBinCnt());
+		final Set<L> allLocObjs = new LinkedHashSet<>(currentWeightedCounts.keySet());
+		allLocObjs.addAll(newWeightedCounts.keySet());
 		for (L locObj : allLocObjs) {
-			for (int bin = 0; bin < currentCounts.getBinCnt(); bin++) {
-				result.put(locObj, bin,
-						meanLambda * (newCounts.getBinValue(locObj, bin) - currentCounts.getBinValue(locObj, bin)));
+			for (int bin = 0; bin < currentWeightedCounts.getBinCnt(); bin++) {
+				result.put(locObj, bin, meanLambda * (newWeightedCounts.getBinValue(locObj, bin)
+						- currentWeightedCounts.getBinValue(locObj, bin)));
 			}
 		}
 		return result;

@@ -27,13 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.core.api.internal.MatsimWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.PopulationUtils;
@@ -43,8 +43,10 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.households.Household;
 import org.matsim.households.HouseholdImpl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 import org.opengis.feature.simple.SimpleFeature;
 
+import playground.vsp.openberlinscenario.Gender;
 import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
@@ -68,7 +70,6 @@ public class DemandGeneratorCensus {
 	// Optional (links municipality ID to LOR/PLZ IDs in that municipality)
 	private final Map<String, List<String>> spatialRefinementZoneIds = new HashMap<>();
 	private List<String> idsOfMunicipalitiesForSpatialRefinement;
-	enum CommuterRelationAttributes {male, female}
 	
 	// Parameters
 	private String outputBase;
@@ -101,7 +102,7 @@ public class DemandGeneratorCensus {
 		String commuterFileOutgoing4 = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/pendlerstatistik_2009/Brandenburg_2009/Teil3BR2009Ga.txt";
 		String[] commuterFilesOutgoing = {commuterFileOutgoing1, commuterFileOutgoing2, commuterFileOutgoing3, commuterFileOutgoing4};
 		String censusFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/zensus_2011/bevoelkerung/csv_Bevoelkerung/Zensus11_Datensatz_Bevoelkerung_BE_BB.csv";
-		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/500/";
+		String outputBase = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/505/";
 		
 		// Parameters
 		int numberOfPlansPerPerson = 10; // Note: Set this higher to a value higher than 1 if spatial refinement is used.
@@ -134,7 +135,7 @@ public class DemandGeneratorCensus {
 		
 		this.idsOfFederalStatesIncluded = idsOfFederalStatesIncluded;
 		this.idsOfFederalStatesIncluded.stream().forEach(e -> {
-			if (e.length()!=2) throw new RuntimeException("Length of the id for each federal state must be equal to 2. This is not the case for "+ e);
+			if (e.length()!=2) throw new IllegalArgumentException("Length of the id for each federal state must be equal to 2. This is not the case for "+ e);
 		});
 
 		this.defaultAdultsToEmployeesRatio = defaultAdultsToEmployeesRatio;
@@ -185,8 +186,8 @@ public class DemandGeneratorCensus {
 			int employeesFemale = (int) this.municipalities.getAttribute(munId, CensusAttributes.employedFemale.toString());
 
 			scaleRelations(relationsFromMunicipality, employeesMale, employeesFemale, this.defaultEmployeesToCommutersRatio);
-			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, CommuterRelationAttributes.male.toString());
-			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, CommuterRelationAttributes.female.toString());
+			List<String> commuterRelationListMale = createRelationList(relationsFromMunicipality, Gender.male);
+			List<String> commuterRelationListFemale = createRelationList(relationsFromMunicipality, Gender.female);
 
 			int pop0_2Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop0_2Male.toString());
 			int pop3_5Male = (int) this.municipalities.getAttribute(munId, CensusAttributes.pop3_5Male.toString());
@@ -230,51 +231,51 @@ public class DemandGeneratorCensus {
 			}
 
 			if (includeChildren) {
-				createHouseholdsAndPersons(counter, munId, pop0_2Male, 0, 0, 2, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				createHouseholdsAndPersons(counter, munId, pop0_2Male, Gender.male, 0, 2, adultsToEmployeesMaleRatio, commuterRelationListMale);
 				counter += pop0_2Male;
-				createHouseholdsAndPersons(counter, munId, pop0_2Female, 1, 0, 2, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				createHouseholdsAndPersons(counter, munId, pop0_2Female, Gender.female, 0, 2, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 				counter += pop0_2Female;
-				createHouseholdsAndPersons(counter, munId, pop3_5Male, 0, 3, 5, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				createHouseholdsAndPersons(counter, munId, pop3_5Male, Gender.male, 3, 5, adultsToEmployeesMaleRatio, commuterRelationListMale);
 				counter += pop3_5Male;
-				createHouseholdsAndPersons(counter, munId, pop3_5Female, 1, 3, 5, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				createHouseholdsAndPersons(counter, munId, pop3_5Female, Gender.female, 3, 5, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 				counter += pop3_5Female;
-				createHouseholdsAndPersons(counter, munId, pop6_14Male, 0, 6, 14, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				createHouseholdsAndPersons(counter, munId, pop6_14Male, Gender.male, 6, 14, adultsToEmployeesMaleRatio, commuterRelationListMale);
 				counter += pop6_14Male;
-				createHouseholdsAndPersons(counter, munId, pop6_14Female, 1, 6, 14, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				createHouseholdsAndPersons(counter, munId, pop6_14Female, Gender.female, 6, 14, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 				counter += pop6_14Female;
-				createHouseholdsAndPersons(counter, munId, pop15_17Male, 0, 15, 17, adultsToEmployeesMaleRatio, commuterRelationListMale);
+				createHouseholdsAndPersons(counter, munId, pop15_17Male, Gender.male, 15, 17, adultsToEmployeesMaleRatio, commuterRelationListMale);
 				counter += pop15_17Male;
-				createHouseholdsAndPersons(counter, munId, pop15_17Female, 1, 15, 17, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+				createHouseholdsAndPersons(counter, munId, pop15_17Female, Gender.female, 15, 17, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 				counter += pop15_17Female;
 			}
-			createHouseholdsAndPersons(counter, munId, pop18_24Male, 0, 18, 24, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			createHouseholdsAndPersons(counter, munId, pop18_24Male, Gender.male, 18, 24, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop18_24Male;
-			createHouseholdsAndPersons(counter, munId, pop18_24Female, 1, 18, 24, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			createHouseholdsAndPersons(counter, munId, pop18_24Female, Gender.female, 18, 24, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop18_24Female;
-			createHouseholdsAndPersons(counter, munId, pop25_29Male, 0, 25, 29, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			createHouseholdsAndPersons(counter, munId, pop25_29Male, Gender.male, 25, 29, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop25_29Male;
-			createHouseholdsAndPersons(counter, munId, pop25_29Female, 1, 25, 29, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			createHouseholdsAndPersons(counter, munId, pop25_29Female, Gender.female, 25, 29, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop25_29Female;
-			createHouseholdsAndPersons(counter, munId, pop30_39Male, 0, 30, 39, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			createHouseholdsAndPersons(counter, munId, pop30_39Male, Gender.male, 30, 39, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop30_39Male;
-			createHouseholdsAndPersons(counter, munId, pop30_39Female, 1, 30, 39, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			createHouseholdsAndPersons(counter, munId, pop30_39Female, Gender.female, 30, 39, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop30_39Female;
-			createHouseholdsAndPersons(counter, munId, pop40_49Male, 0, 40, 49, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			createHouseholdsAndPersons(counter, munId, pop40_49Male, Gender.male, 40, 49, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop40_49Male;
-			createHouseholdsAndPersons(counter, munId, pop40_49Female, 1, 40, 49, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			createHouseholdsAndPersons(counter, munId, pop40_49Female, Gender.female, 40, 49, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop40_49Female;
-			createHouseholdsAndPersons(counter, munId, pop50_64Male, 0, 50, 64, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			createHouseholdsAndPersons(counter, munId, pop50_64Male, Gender.male, 50, 64, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop50_64Male;
-			createHouseholdsAndPersons(counter, munId, pop50_64Female, 1, 50, 64, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			createHouseholdsAndPersons(counter, munId, pop50_64Female, Gender.female, 50, 64, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop50_64Female;
-			createHouseholdsAndPersons(counter, munId, pop65_74Male, 0, 65, 74, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			createHouseholdsAndPersons(counter, munId, pop65_74Male, Gender.male, 65, 74, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop65_74Male;
-			createHouseholdsAndPersons(counter, munId, pop65_74Female, 1, 65, 74, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			createHouseholdsAndPersons(counter, munId, pop65_74Female, Gender.female, 65, 74, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop65_74Female;
 			// 90 years as the upper bound is a simplifying assumption!
-			createHouseholdsAndPersons(counter, munId, pop75PlusMale, 0, 75, 90, adultsToEmployeesMaleRatio, commuterRelationListMale);
+			createHouseholdsAndPersons(counter, munId, pop75PlusMale, Gender.male, 75, 90, adultsToEmployeesMaleRatio, commuterRelationListMale);
 			counter += pop75PlusMale;
-			createHouseholdsAndPersons(counter, munId, pop75PlusFemale, 1, 75, 90, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
+			createHouseholdsAndPersons(counter, munId, pop75PlusFemale, Gender.female, 75, 90, adultsToEmployeesFemaleRatio, commuterRelationListFemale);
 			counter += pop75PlusFemale;
 
 			// Information on unassigned commuter relations
@@ -361,7 +362,7 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private void createHouseholdsAndPersons(int counter, String municipalityId, int numberOfPersons, int gender, int lowerAgeBound, int upperAgeBound, 
+	private void createHouseholdsAndPersons(int counter, String municipalityId, int numberOfPersons, Gender gender, int lowerAgeBound, int upperAgeBound, 
 			double adultsToEmployeesRatio, List<String> commuterRelationList) {
 		for (int i = 0; i < numberOfPersons; i++) {
 			this.allPersons++;
@@ -419,7 +420,7 @@ public class DemandGeneratorCensus {
 			}
 			
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.hasLicense.toString(), true); // for CEMDAP's "driversLicence" variable
-			person.getAttributes().putAttribute(CEMDAPPersonAttributes.gender.toString(), gender); // for CEMDAP's "female" variable
+			person.getAttributes().putAttribute(CEMDAPPersonAttributes.gender.toString(), gender.name()); // for CEMDAP's "female" variable
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.age.toString(), getAgeInBounds(lowerAgeBound, upperAgeBound));
 			person.getAttributes().putAttribute(CEMDAPPersonAttributes.parent.toString(), false);
 			
@@ -483,13 +484,13 @@ public class DemandGeneratorCensus {
 	}
 
 
-	private static List<String>  createRelationList(Map<String, CommuterRelationV2> relationsFromMunicipality, String gender) {
+	private static List<String>  createRelationList(Map<String, CommuterRelationV2> relationsFromMunicipality, Gender gender) {
 		List<String> commuterRelationsList = new ArrayList<>();
 		for (String destination : relationsFromMunicipality.keySet()) {
 			int trips;
-			if (gender.equals(CommuterRelationAttributes.male.toString())) {
+			if (gender.equals(Gender.male)) {
 				trips = relationsFromMunicipality.get(destination).getTripsMale();
-			} else if (gender.equals(CommuterRelationAttributes.female.toString())) {
+			} else if (gender.equals(Gender.female)) {
 				trips = relationsFromMunicipality.get(destination).getTripsFemale();
 			} else {
 				throw new IllegalArgumentException("Must either be male or female.");
@@ -562,11 +563,11 @@ public class DemandGeneratorCensus {
     		
     		for (Household household : households.values()) {
     			int householdId = Integer.parseInt(household.getId().toString());
-    			int numberOfAdults = (Integer) household.getAttributes().getAttribute("numberOfAdults");
-    			int totalNumberOfHouseholdVehicles = (Integer) household.getAttributes().getAttribute("totalNumberOfHouseholdVehicles");
-				int homeTSZLocation = Integer.valueOf( household.getAttributes().getAttribute("homeTSZLocation").toString() );
-    			int numberOfChildren = (Integer) household.getAttributes().getAttribute("numberOfChildren");
-    			int householdStructure = (Integer) household.getAttributes().getAttribute("householdStructure");
+    			int numberOfAdults = (Integer) household.getAttributes().getAttribute(CEMDAPHouseholdAttributes.numberOfAdults.toString());
+    			int totalNumberOfHouseholdVehicles = (Integer) household.getAttributes().getAttribute(CEMDAPHouseholdAttributes.totalNumberOfHouseholdVehicles.toString());
+				int homeTSZLocation = Integer.valueOf( household.getAttributes().getAttribute(CEMDAPHouseholdAttributes.homeTSZLocation.toString()).toString() );
+    			int numberOfChildren = (Integer) household.getAttributes().getAttribute(CEMDAPHouseholdAttributes.numberOfChildren.toString());
+    			int householdStructure = (Integer) household.getAttributes().getAttribute(CEMDAPHouseholdAttributes.householdStructure.toString());
 
     			// Altogether this creates 32 columns = number in query file
     			bufferedWriterHouseholds.write(householdId + "\t" + numberOfAdults + "\t" + totalNumberOfHouseholdVehicles
@@ -601,38 +602,47 @@ public class DemandGeneratorCensus {
 			bufferedWriterPersons = IOUtils.getBufferedWriter(fileName);
 			    		    		
 			for (Person person : population.getPersons().values()) {
-				int householdId = Integer.parseInt(person.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()).toString());
+				Attributes attr = person.getAttributes();
+				int householdId = Integer.parseInt(attr.getAttribute(CEMDAPPersonAttributes.householdId.toString()).toString());
 				int personId = Integer.parseInt(person.getId().toString());
 				
 				int employed;
-				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString())) {
+				if ((boolean) attr.getAttribute(CEMDAPPersonAttributes.employed.toString())) {
 					employed = 1;
 				} else {
 					employed = 0;
 				}
 				
 				int student;
-				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString())) {
+				if ((boolean) attr.getAttribute(CEMDAPPersonAttributes.student.toString())) {
 					student = 1;
 				} else {
 					student = 0;
 				}
 				
 				int driversLicence;
-				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.hasLicense.toString())) {
+				if ((boolean) attr.getAttribute(CEMDAPPersonAttributes.hasLicense.toString())) {
 					driversLicence = 1;
 				} else {
 					driversLicence = 0;
 				}
 				
-				int locationOfWork = Integer.parseInt( person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString()).toString() );
-				int locationOfSchool = Integer.parseInt( person.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString()).toString() );
+				int locationOfWork = Integer.parseInt(attr.getAttribute(CEMDAPPersonAttributes.locationOfWork.toString()).toString());
+				int locationOfSchool = Integer.parseInt(attr.getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString()).toString());
 				
-				int female = (Integer) person.getAttributes().getAttribute(CEMDAPPersonAttributes.gender.toString()); // assumes that female = 1
-				int age = (Integer) person.getAttributes().getAttribute(CEMDAPPersonAttributes.age.toString());
+				int female;
+				if (Gender.valueOf((String) attr.getAttribute(CEMDAPPersonAttributes.gender.toString())) == Gender.male) {
+					female = 0;
+				} else if (Gender.valueOf((String) attr.getAttribute(CEMDAPPersonAttributes.gender.toString())) == Gender.female) {
+					female = 1;
+				} else {
+					throw new IllegalArgumentException("Gender must either be male or female.");
+				}
+				
+				int age = (Integer) attr.getAttribute(CEMDAPPersonAttributes.age.toString());
 				
 				int parent;
-				if ((boolean) person.getAttributes().getAttribute(CEMDAPPersonAttributes.parent.toString())) {
+				if ((boolean) attr.getAttribute(CEMDAPPersonAttributes.parent.toString())) {
 					parent = 1;
 				} else {
 					parent = 0;
@@ -667,7 +677,7 @@ public class DemandGeneratorCensus {
 
 	
 	private static void writeMatsimPlansFile(Population population, String fileName) {
-	    MatsimWriter popWriter = new PopulationWriter(population);
+		PopulationWriter popWriter = new PopulationWriter(population);
 	    popWriter.write(fileName);
 	}
 	

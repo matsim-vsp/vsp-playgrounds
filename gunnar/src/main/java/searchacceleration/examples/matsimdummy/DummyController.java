@@ -19,6 +19,7 @@
  */ 
 package searchacceleration.examples.matsimdummy;
 
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.core.controler.events.IterationStartsEvent;
@@ -44,6 +45,9 @@ public class DummyController {
 
 	private PlanStrategy overridingPlanStragety;
 
+	public DummyController(Scenario scenario) {
+	}
+	
 	public void addIterationStartsListener(IterationStartsListener iterationStartsListener) {
 		this.iterationStartsListener = iterationStartsListener;
 	}

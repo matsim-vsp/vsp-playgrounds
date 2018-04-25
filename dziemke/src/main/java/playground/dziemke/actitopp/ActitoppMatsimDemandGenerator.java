@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.DefaultActivityTypes;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
@@ -13,11 +14,11 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.core.api.internal.MatsimWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson;
 import edu.kit.ifv.mobitopp.actitopp.HActivity;
@@ -25,6 +26,7 @@ import edu.kit.ifv.mobitopp.actitopp.HWeekPattern;
 import edu.kit.ifv.mobitopp.actitopp.InvalidPatternException;
 import edu.kit.ifv.mobitopp.actitopp.ModelFileBase;
 import edu.kit.ifv.mobitopp.actitopp.RNGHelper;
+import playground.vsp.openberlinscenario.Gender;
 import playground.vsp.openberlinscenario.cemdap.input.CEMDAPPersonAttributes;
 
 /**
@@ -90,7 +92,7 @@ public class ActitoppMatsimDemandGenerator {
 		reader.readFile(plansFile);
 		
 		runActitopp(scenario.getPopulation());
-		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plan_10000_2_w_act.xml.gz"); // TODO currently only works with one population file
+		writeMatsimPlansFile(scenario.getPopulation(), outputBase + "plans_10000_w_act.xml.gz"); // TODO currently only works with one population file
 	}
 	
 	private static void runActitopp(Population population) {
@@ -154,18 +156,20 @@ public class ActitoppMatsimDemandGenerator {
 		
 		// CEMDAPPersonAttributes: householdId, age, employed, gender, hasLicense, locationOfSchool, locationOfWork, parent, student
 		int personIndex = Integer.parseInt(matsimPerson.getId().toString());
+		Attributes attr = matsimPerson.getAttributes();
+		
 		int childrenFrom0To10 = getChildrenFrom0To10(); // TODO
 		int childrenUnder18 = getChildrenUnder18(); // TODO
-		int age = (int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.age.toString());
-		int employment = getEmploymentClass((boolean) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.employed.toString()), 
-				(boolean) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.student.toString()));
-		int gender = getGenderClass(Integer.parseInt(matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.gender.toString()).toString()));
+		int age = (int) attr.getAttribute(CEMDAPPersonAttributes.age.toString());
+		int employment = getEmploymentClass((boolean) attr.getAttribute(CEMDAPPersonAttributes.employed.toString()), 
+				(boolean) attr.getAttribute(CEMDAPPersonAttributes.student.toString()));
+		int gender = getGenderClass(Gender.valueOf((String) attr.getAttribute(CEMDAPPersonAttributes.gender.toString())));
 		int areaType = getAreaType(); // TODO
 		int numberOfCarsInHousehold = getNumberOfCarsInHousehold(); // TODO
-		double commutingDistanceToWork = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()),
-				(int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfWork.toString()));
-		double commutingDistanceToEducation = getDistanceEstimate((int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.householdId.toString()),
-				(int) matsimPerson.getAttributes().getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString()));
+		double commutingDistanceToWork = getDistanceEstimate(Integer.parseInt((String) attr.getAttribute(CEMDAPPersonAttributes.householdId.toString())),
+				Integer.parseInt((String) attr.getAttribute(CEMDAPPersonAttributes.locationOfWork.toString())));
+		double commutingDistanceToEducation = getDistanceEstimate(Integer.parseInt((String) attr.getAttribute(CEMDAPPersonAttributes.householdId.toString())),
+				Integer.parseInt((String) attr.getAttribute(CEMDAPPersonAttributes.locationOfSchool.toString())));
 		
 		ActitoppPerson actitoppPerson = new ActitoppPerson(personIndex, childrenFrom0To10, childrenUnder18, age, employment, gender, areaType,
 				numberOfCarsInHousehold, commutingDistanceToWork, commutingDistanceToEducation);
@@ -191,16 +195,14 @@ public class ActitoppMatsimDemandGenerator {
 	
 	// Information from "https://github.com/mobitopp/actitopp"
 	// 1 = male; 2 = female
-	private static int getGenderClass(Integer cemdapGenderIdentifier) {
-		// CEMDAP: 0 = Male, 1 = Female
-		// ActiTopp: 1 = Male, 2 = Female
+	private static int getGenderClass(Gender gender) {
 		int genderClass = -1;
-		if (cemdapGenderIdentifier == 0) {
+		if (Gender.male == gender) {
 			genderClass = 1;
-		} else if (cemdapGenderIdentifier == 1) {
+		} else if (Gender.female == gender) {
 			genderClass = 2;
 		} else {
-			throw new IllegalArgumentException("Gender (in CEMDAP classification, which is used here) can't have a value other than 0 or 1.");
+			throw new IllegalArgumentException("Gender must either be male or female, but is " + gender + ".");
 		}
 		return genderClass;
 	}
@@ -244,9 +246,9 @@ public class ActitoppMatsimDemandGenerator {
 	// Information from "https://github.com/mobitopp/actitopp/blob/master/src/main/java/edu/kit/ifv/mobitopp/actitopp/Configuration.java"
 	private static String transformActType(char activityTypeLetter) {
 		if (activityTypeLetter == 'H') {
-			return ActiToppActivityTypes.home.toString();
+			return DefaultActivityTypes.home ;
 		} else if (activityTypeLetter == 'W') {
-			return ActiToppActivityTypes.work.toString();
+			return DefaultActivityTypes.work ;
 		} else if (activityTypeLetter == 'E') {
 			return ActiToppActivityTypes.education.toString();
 		} else if (activityTypeLetter == 'L') {
@@ -262,7 +264,7 @@ public class ActitoppMatsimDemandGenerator {
 	}
 	
 	private static void writeMatsimPlansFile(Population population, String fileName) {
-	    MatsimWriter popWriter = new PopulationWriter(population);
+		PopulationWriter popWriter = new PopulationWriter(population);
 	    popWriter.write(fileName);
 	}
 }

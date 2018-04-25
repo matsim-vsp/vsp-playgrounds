@@ -114,6 +114,8 @@ public class IKAnalysisRun {
 	private final List<AgentAnalysisFilter> filters0;
 
 	private final String outputDirectoryName = "analysis-ik-v1.1";
+
+	private final String visualizationScriptInputDirectory;
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -121,6 +123,7 @@ public class IKAnalysisRun {
 		String runId;
 		String runDirectoryToCompareWith = null;
 		String runIdToCompareWith = null;
+		String visualizationScriptInputDirectory = null;
 		String scenarioCRS = null;	
 		String shapeFileZones = null;
 		String zonesCRS = null;
@@ -145,6 +148,8 @@ public class IKAnalysisRun {
 			homeActivity = args[7];
 			scalingFactor = Integer.valueOf(args[8]);
 		
+			visualizationScriptInputDirectory = "./visualization-scripts/";
+			
 		} else {
 			
 			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
@@ -152,6 +157,8 @@ public class IKAnalysisRun {
 			
 			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc/";
 			runIdToCompareWith = "baseCase";
+			
+			visualizationScriptInputDirectory = "./visualization-scripts/";
 			
 			scenarioCRS = TransformationFactory.DHDN_GK4;	
 			
@@ -177,6 +184,7 @@ public class IKAnalysisRun {
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
 				scenario0,
+				visualizationScriptInputDirectory,
 				scenarioCRS,
 				shapeFileZones,
 				zonesCRS,
@@ -187,7 +195,17 @@ public class IKAnalysisRun {
 		analysis.run();
 	}
 	
+	@Deprecated
 	public IKAnalysisRun(Scenario scenario, String scenarioCRS) {
+		this(scenario, scenarioCRS, 1);
+	}
+	
+	@Deprecated
+	public IKAnalysisRun(Scenario scenario, String scenarioCRS, int scalingFactor) {
+		this(scenario, "./visualization-scripts/", scenarioCRS, scalingFactor);
+	}
+	
+	public IKAnalysisRun(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor) {
 		
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
@@ -201,18 +219,28 @@ public class IKAnalysisRun {
 		this.runDirectoryToCompareWith = null;
 		this.runIdToCompareWith = null;
 		
+		this.visualizationScriptInputDirectory = visualizationScriptInputDirectory;
+		
 		this.scenarioCRS = scenarioCRS;
 		this.shapeFileZones = null;
 		this.zonesCRS = null;
 		this.homeActivity = null;
-		this.scalingFactor = 0;
+		this.scalingFactor = scalingFactor;
 		
 		this.filters0 = null;
 		this.filters1 = null;
 	}
 	
+	@Deprecated
 	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
 			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor,
+			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
+		
+		this(scenario1, scenario0, "./visualization-scripts/", scenarioCRS, shapeFileZones, zonesCRS, homeActivity, scalingFactor, filters1, filters0);
+	}
+	
+	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
+			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor,
 			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
 
 		String runDirectory = scenario1.getConfig().controler().getOutputDirectory();
@@ -235,6 +263,8 @@ public class IKAnalysisRun {
 		this.runDirectoryToCompareWith = runDirectoryToCompareWith;
 		this.runIdToCompareWith = runIdToCompareWith;
 		
+		this.visualizationScriptInputDirectory = visualizationScriptInputDirectory;
+		
 		this.scenarioCRS = scenarioCRS;
 		this.shapeFileZones = shapeFileZones;
 		this.zonesCRS = zonesCRS;
@@ -244,7 +274,7 @@ public class IKAnalysisRun {
 		this.filters0 = filters0;
 		this.filters1 = filters1;
 	}
-	
+
 	public void run() {
 		
 		String analysisOutputDirectory = runDirectory + outputDirectoryName + "/";
@@ -461,7 +491,7 @@ public class IKAnalysisRun {
 
 		// traffic volumes
 		if (scenario1 != null & scenario0 != null) {
-			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute-difference_noCRS.qgs";
+			String visScriptTemplateFile = visualizationScriptInputDirectory + "traffic-volume_absolute-difference_noCRS.qgs";
 			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute-difference_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
@@ -474,8 +504,8 @@ public class IKAnalysisRun {
 		
 		// absolute traffic volumes policy case
 		if (scenario1 != null) {
-			String visScriptTemplateFile = "./visualization-scripts/traffic-volume_absolute_noCRS.qgs";
-			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + "traffic-volume_absolute_" + runId + ".qgs";
+			String visScriptTemplateFile = visualizationScriptInputDirectory + "traffic-volume_absolute_noCRS.qgs";
+			String visScriptOutputFile = analysisOutputDirectory + "link-volume-analysis/" + runId + ".traffic-volume_absolute.qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
 			script.setRunId(this.runId);
@@ -486,7 +516,7 @@ public class IKAnalysisRun {
 		
 		// spatial zone-based analysis
 		if (scenario1 != null & scenario0 != null) {
-			String visScriptTemplateFile = "./visualization-scripts/zone-based-analysis_welfare_modes.qgs";
+			String visScriptTemplateFile = visualizationScriptInputDirectory + "zone-based-analysis_welfare_modes.qgs";
 			String visScriptOutputFile = analysisOutputDirectory + "zone-based-analysis_welfare_modes/" + "zone-based-analysis_welfare_modes_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
@@ -499,7 +529,7 @@ public class IKAnalysisRun {
 		
 		// scenario comparison: person-specific mode-shift effects
 		if (scenario1 != null & scenario0 != null) {
-			String visScriptTemplateFile = "./visualization-scripts/scenario-comparison_person-specific-mode-switch-effects.qgs";
+			String visScriptTemplateFile = visualizationScriptInputDirectory + "scenario-comparison_person-specific-mode-switch-effects.qgs";
 			String visScriptOutputFile = personTripScenarioComparisonOutputDirectory + "scenario-comparison_person-specific-mode-switch-effects_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
@@ -512,7 +542,7 @@ public class IKAnalysisRun {
 		
 		// scenario comparison: person-specific winner-loser analysis
 		if (scenario1 != null & scenario0 != null) {
-			String visScriptTemplateFile = "./visualization-scripts/scenario-comparison_person-specific-winner-loser.qgs";
+			String visScriptTemplateFile = visualizationScriptInputDirectory + "scenario-comparison_person-specific-winner-loser.qgs";
 			String visScriptOutputFile = personTripScenarioComparisonOutputDirectory + "scenario-comparison_person-specific-winner-loser_" + runId + "-vs-" + runIdToCompareWith + ".qgs";
 			
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
@@ -525,7 +555,7 @@ public class IKAnalysisRun {
 	
 		// externality-specific toll payments
 		{
-			String visScriptTemplateFile = "./visualization-scripts/extCostPerTimeOfDay-cne_percentages.R";
+			String visScriptTemplateFile = visualizationScriptInputDirectory + "extCostPerTimeOfDay-cne_percentages.R";
 			String visScriptOutputFile = analysisOutputDirectory + "person-trip-welfare-analysis/" + "extCostPerTimeOfDay-cne_percentages_" + runId + ".R";
 					
 			VisualizationScriptAdjustment script = new VisualizationScriptAdjustment(visScriptTemplateFile, visScriptOutputFile);
@@ -684,6 +714,17 @@ public class IKAnalysisRun {
 		vttsHandler.printVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_allTrips.csv");
 		vttsHandler.printCarVTTS(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_carTrips.csv");
 		vttsHandler.printAvgVTTSperPerson(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_avgPerPerson.csv"); 
+		
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_all-modes.csv", null, null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car.csv", "car", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_pt.csv", "pt", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_walk.csv", "walk", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_bicycle.csv", "bicycle", null);
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_ride.csv", "ride", null);
+
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car_7-9.csv", "car", new Tuple<Double, Double>(7.0 * 3600., 9. * 3600.));
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car_11-13.csv", "car", new Tuple<Double, Double>(11.0 * 3600., 13. * 3600.));
+		vttsHandler.printVTTSstatistics(vttsOutputDirectory + scenario.getConfig().controler().getRunId() + "." + "VTTS_statistics_car_16-18.csv", "car", new Tuple<Double, Double>(16.0 * 3600., 18. * 3600.));
 		
 		// #####################################
 		// Print leg histogram videos

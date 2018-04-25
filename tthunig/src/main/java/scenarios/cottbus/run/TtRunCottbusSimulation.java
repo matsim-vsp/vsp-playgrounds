@@ -120,20 +120,21 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V1_3;
+	private final static NetworkType NETWORK_TYPE = NetworkType.V1;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
 		V1_1, // same as V1 except merged links 6724 and 6708. should only have effect on sensor prediction for adaptive signals but not on fixed time signals
 		V1_2, // same as V1 except merged links 10284-8747-8745 and reverse
-		V1_3, // all links infront of signals merged if possible (see mergedLinksForV1-3.xls)
+		V1_3, // some links infront of signals merged (see mergedLinksForV1-34.xls)
+		V1_4, // 6 more links merged than in V1_3 (see mergedLinksForV1-34.xls)
 		V2, // add missing highway part, add missing links, correct directions, add missing signal
 		V21, // add missing lanes
 		V3 // double flow capacities of all signalized links and lanes
 	}
 	private final static boolean LONG_LANES = true;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap1MSNetV1_3;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MS;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -157,10 +158,14 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap1MSNetV1_3,
 		WoMines100itcap07MSNetV1_3,
 		WoMines100itcap05MSNetV1_3,
+		WoMines100itcap13MSNetV1_4,
+		WoMines100itcap1MSNetV1_4,
+		WoMines100itcap07MSNetV1_4,
+		WoMines100itcap05MSNetV1_4,
 		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_DOUBLE_GROUPS_14GREEN;
+	private final static SignalType SIGNAL_TYPE = SignalType.NONE;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_OPT_OFFSETS, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -172,6 +177,7 @@ public class TtRunCottbusSimulation {
 		ALL_MS_AS_DOWNSTREAM_BASIS_GREEN_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as downstream with green basis, rest all green
 		LAEMMER_NICO_GROUPS, // laemmer with the fixed signal groups, that nico defined in his MA. except: bug fix in system 1 and 5 (1905 was included twice, 1902 forgotten; 1802 included twice, 1803 forgotten)
 		LAEMMER_NICO_GROUPS_14GREEN, // the same as LAEMMER_NICO_GROUPS but without signal 1107 at system 14 (i.e. all green)
+		LAEMMER_NICO_GROUPS_14RE, // same as LAEMMER_NICO_GROUPS but with different phases at system 14: left turns together, straight together
 		LAEMMER_DOUBLE_GROUPS, // laemmer with fixed signal groups, where signals can be included more than once, i.e. alternative groups can be modeled
 		LAEMMER_DOUBLE_GROUPS_SYS17, // as above but two additional possible groups at system 17, such that opposing traffic can have green at the same time
 		LAEMMER_DOUBLE_GROUPS_14GREEN, // the same as LAEMMER_DOUBLE_GROUPS but without signal 1107 at system 14 (i.e. all green)
@@ -327,6 +333,10 @@ public class TtRunCottbusSimulation {
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v1-3.xml");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v1-3.xml");
 			break;
+		case V1_4:
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v1-4.xml");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v1-4.xml");
+			break;
 		case V2:
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v2.xml.gz");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes.xml");
@@ -414,6 +424,18 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap05MSNetV1_3:
 			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-13-17-37-25_v1-3_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
 			break;
+		case WoMines100itcap13MSNetV1_4:
+			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-20-59-8_v1-4_MS_100it_BaseCase_cap13/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap1MSNetV1_4:
+			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-14-54-29_v1-4_MS_100it_BaseCase_cap10/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap07MSNetV1_4:
+			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-14-57-21_v1-4_MS_100it_BaseCase_cap07/1000.output_plans.xml.gz");
+			break;
+		case WoMines100itcap05MSNetV1_4:
+			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-19-16-28_v1-4_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
+			break;
 		case NicoOutputPlans:
 			config.plans().setInputFile("../../runs-svn/cottbus/NicoMA/OutputFixedLongLanes/output_plans.xml.gz");
 			break;
@@ -452,6 +474,7 @@ public class TtRunCottbusSimulation {
 			case V1_1:
 			case V1_2:
 			case V1_3:
+			case V1_4:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13.xml");
 				break;
 			case BTU_NET:
@@ -535,6 +558,10 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14allGreen1107.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
 				break;	
+			case LAEMMER_NICO_GROUPS_14RE:
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases.xml");
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				break;
 			case MS_IDEAL:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_idealized.xml");
 				break;
