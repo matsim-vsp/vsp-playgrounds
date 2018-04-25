@@ -119,7 +119,7 @@ public class RunMATSim6 {
 			marginalUtilityTravelingRide = Double.parseDouble(args[15]);
 			log.info("marginalUtilityTravelingRide: "+ marginalUtilityTravelingRide);
 			
-			useCongestedCarRouterForRide = Boolean.getBoolean(args[16]);
+			useCongestedCarRouterForRide = Boolean.parseBoolean(args[16]);
 			log.info("useCongestedCarRouterForRide: "+ useCongestedCarRouterForRide);
 
 		} else {

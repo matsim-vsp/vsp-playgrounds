@@ -71,13 +71,13 @@ public class RunOpenBerlinScenario {
 			visualizationScriptInputDirectory = args[3];
 			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
 			
-			useCarTravelTimeForRide = Boolean.getBoolean(args[4]);
+			useCarTravelTimeForRide = Boolean.parseBoolean(args[4]);
 			log.info("useCarTravelTimeForRide: "+ useCarTravelTimeForRide);
 			
-			useSBBptRouter = Boolean.getBoolean(args[5]);
+			useSBBptRouter = Boolean.parseBoolean(args[5]);
 			log.info("useSBBptRouter: "+ useSBBptRouter);
 			
-			useDurationBasedTimeAllocationMutator = Boolean.getBoolean(args[6]);
+			useDurationBasedTimeAllocationMutator = Boolean.parseBoolean(args[6]);
 			log.info("useDurationBasedTimeAllocationMutator: "+ useDurationBasedTimeAllocationMutator);
 
 		} else {
