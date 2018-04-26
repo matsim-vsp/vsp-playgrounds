@@ -40,14 +40,16 @@ public class IKAnalysisRunBerlin {
 			
 	public static void main(String[] args) throws IOException {
 			
-		final String runId = "be400mt_7";
-		final String runDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/" + runId + "/";
-		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
+		final String runId = "b400_85_v10";
+		final String runDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/";
+//		final String scenarioCRS = TransformationFactory.DHDN_GK4;
+		final String scenarioCRS = null;	
 		final String shapeFileZones = null;
 		final String zonesCRS = null;
 		final String homeActivity = "home";
 		final int scalingFactor = 10;
-		final String personAttributesFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_400_person_freight_10pct.xml.gz";
+		final String personAttributesFile = null;
+//		final String personAttributesFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_400_person_freight_10pct.xml.gz";
 
 		Scenario scenario1 = loadScenario(runDirectory, runId, personAttributesFile);
 		

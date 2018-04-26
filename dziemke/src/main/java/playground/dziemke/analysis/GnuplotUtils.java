@@ -13,7 +13,7 @@ import java.util.List;
  * @author dziemke, tthunig, gthunig
  */
 public class GnuplotUtils {
-	public static final Logger log = Logger.getLogger(GnuplotUtils.class);
+	public static final Logger LOG = Logger.getLogger(GnuplotUtils.class);
 
 	public static void runGnuplotScript(String pathToSpecificAnalysisDir, String relativePathToGnuplotScript) {
 		runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript, "");
@@ -34,11 +34,11 @@ public class GnuplotUtils {
 
 			[gthunig]
 		*/
-		log.info("Analysis directory is = " + pathToSpecificAnalysisDir);
-		log.info("Relative path from analysis directory to directory with gnuplot script is = " + relativePathToGnuplotScript);
+		LOG.info("Analysis directory is = " + pathToSpecificAnalysisDir);
+		LOG.info("Relative path from analysis directory to directory with gnuplot script is = " + relativePathToGnuplotScript);
 		
 		String osName = System.getProperty("os.name");
-		log.info("OS name is = " + osName);
+		LOG.info("OS name is = " + osName);
 		
 		/*String allArgumentsAsString = "";
 		for (int i=0; i < gnuplotArguments.length ; i++) {
@@ -73,12 +73,12 @@ public class GnuplotUtils {
 			
 			// If OS is Linux --- example (benjamin) // os.arch=amd64 // os.name=Linux	// os.version=3.13.0-45-generic
 			} else if ( osName.contains("Lin") || osName.contains("lin") ) {
-				log.warn("This implemenation has not yet been tested for Linux. Please report if you use this.");
+				LOG.warn("This implemenation has not yet been tested for Linux. Please report if you use this.");
 				processBuilder = new ProcessBuilder("bash", "-c", "(cd " + pathToSpecificAnalysisDir + " && /usr/local/bin/gnuplot " + relativePathToGnuplotScript + ")");
 			
 			// If OS is neither Win nor Mac nor Linux
 			} else {
-				log.error("Not implemented for os.arch=" + System.getProperty("os.arch") );
+				LOG.error("Not implemented for os.arch=" + System.getProperty("os.arch") );
 			}
 
 			assert processBuilder != null;
@@ -89,15 +89,15 @@ public class GnuplotUtils {
 			String line;
 			
 			while ((line = reader.readLine()) != null) {
-				log.info("input stream: " + line);
+				LOG.info("input stream: " + line);
 			}			
 
 			reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 			while ((line = reader.readLine()) != null) {
-				log.warn(": " + line);
+				LOG.warn(": " + line);
 			}
 		} catch (IOException e) {
-			log.error("ERROR while executing gnuplot command.");
+			LOG.error("ERROR while executing gnuplot command.");
 			e.printStackTrace();
 		}
 	}

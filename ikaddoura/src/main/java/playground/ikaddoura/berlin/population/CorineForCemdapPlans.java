@@ -31,7 +31,7 @@ import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
 public class CorineForCemdapPlans {
 	
 	public static void main(String[] args) {
-		String corineLandCoverFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/corine_landcover_berlin-brandenburg/corine_lancover_berlin-brandenburg_GK4.shp";
+		String corineLandCoverFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/corine_landcover/corine_lancover_berlin-brandenburg_GK4.shp";
 
 	    String zoneFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
 	    String zoneIdTag = "NR";

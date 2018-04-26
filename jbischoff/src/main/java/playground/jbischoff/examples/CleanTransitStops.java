@@ -35,7 +35,7 @@ public class CleanTransitStops {
 	public static void main(String[] args) {
 	
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		new TransitScheduleReader(scenario).readFile("C:/Users/Joschka/Documents/shared-svn/projects/ptrouting/niedersachsen_sample_scenario/vw214.output_transitSchedule.xml.gz");
+		new TransitScheduleReader(scenario).readFile("D:/melbourne2046/25pct/lastmile_robotaxi_2046_25pct_input/output_transitSchedule.xml.gz");
 		final Set<Id<TransitStopFacility>> stops2keep = new HashSet<>();
 		for (TransitLine l : scenario.getTransitSchedule().getTransitLines().values()) {
 			for (TransitRoute r : l.getRoutes().values()) {
@@ -54,6 +54,6 @@ public class CleanTransitStops {
 			TransitStopFacility s = scenario.getTransitSchedule().getFacilities().get(stop);
 			scenario.getTransitSchedule().removeStopFacility(s);
 		}
-		new TransitScheduleWriter(scenario.getTransitSchedule()).writeFile("C:/Users/Joschka/Documents/shared-svn/projects/ptrouting/niedersachsen_sample_scenario/cleanedSchedule.xml.gz");
+		new TransitScheduleWriter(scenario.getTransitSchedule()).writeFile("D:/melbourne2046/25pct/lastmile_robotaxi_2046_25pct_input/output_transitSchedule.xml.gz");
 	}
 }

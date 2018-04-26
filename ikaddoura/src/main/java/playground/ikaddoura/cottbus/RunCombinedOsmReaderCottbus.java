@@ -33,7 +33,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.facilities.Facility;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke, ikaddoura

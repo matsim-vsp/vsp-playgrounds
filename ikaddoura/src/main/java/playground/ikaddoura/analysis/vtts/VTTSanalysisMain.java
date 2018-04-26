@@ -19,6 +19,8 @@
 
 package playground.ikaddoura.analysis.vtts;
 
+import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -27,10 +29,11 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.collections.Tuple;
 
 /**
  *
- * Analyze the actual VTTS for each trip (applying a linearization for each activity) 
+ * Computes the effective VTTS for each person and trip (applying a linearization for each trip/activity).
  * 
  * @author ikaddoura
  */
@@ -49,8 +52,17 @@ public class VTTSanalysisMain {
 			log.info("run Id: " + runId);
 			
 		} else {
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
-			runId = "run0";
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/vw_rufbus/vw219/";
+//			runId = "vw219";
+			
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/berlin_equal_vs_different_VTTS/output/baseCase/";
+//			runId = null;
+			
+//			runDirectory = "/Users/ihab/Desktop/v2b/v2b/santiago/output/baseCase10pct/";
+//			runId = null;
+			
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cottbus/laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/";
+			runId = "1000";
 		}
 		
 		VTTSanalysisMain analysis = new VTTSanalysisMain();
@@ -60,22 +72,31 @@ public class VTTSanalysisMain {
 	private void run() {
 		
 		String configFile;
+		String attributesFile;
 		if (runId == null) {
 			configFile = runDirectory + "output_config.xml";
+			attributesFile = runDirectory + "output_personAttributes.xml.gz";
 		} else {
 			configFile = runDirectory + runId + ".output_config.xml";
+			attributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile);	
-		int iteration = config.controler().getLastIteration();
 				
 		String populationFile = null;
 		String networkFile = null;
-//		String networkFile = runDirectory + "output_network.xml.gz";
 		
 		config.plans().setInputFile(populationFile);
 		config.network().setInputFile(networkFile);
-		config.plans().setInputPersonAttributeFile(null);
+		if (new File(attributesFile).exists()) {
+			config.plans().setInputPersonAttributeFile(attributesFile);
+		} else {
+			config.plans().setInputPersonAttributeFile(null);
+		}
+		config.transit().setTransitScheduleFile(null);
+		config.transit().setVehiclesFile(null);
+		config.vehicles().setVehiclesFile(null);
+		config.network().setLaneDefinitionsFile(null);
 		
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
@@ -83,12 +104,14 @@ public class VTTSanalysisMain {
 		VTTSHandler vttsHandler = new VTTSHandler(scenario);
 		events.addHandler(vttsHandler);
 			
-		String eventsFile;
+		String outputDirectoryWithRunId;
 		if (runId == null) {
-			eventsFile = runDirectory + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
+			outputDirectoryWithRunId = runDirectory;
 		} else {
-			eventsFile = runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + ".events.xml.gz";
+			outputDirectoryWithRunId = runDirectory + runId + ".";
 		}
+		
+		String eventsFile = outputDirectoryWithRunId + "output_events.xml.gz";
 
 		log.info("Reading the events file...");
 		MatsimEventsReader reader = new MatsimEventsReader(events);
@@ -96,10 +119,22 @@ public class VTTSanalysisMain {
 		log.info("Reading the events file... Done.");
 		
 		vttsHandler.computeFinalVTTS();
-				
-		vttsHandler.printVTTS(runDirectory + "ITERS/it." + iteration + "/" + iteration + ".VTTS.csv");
-		vttsHandler.printCarVTTS(runDirectory + "ITERS/it." + iteration + "/" + iteration + ".VTTS_car.csv");
-		vttsHandler.printAvgVTTSperPerson(runDirectory + "ITERS/it." + iteration + "/" + iteration + ".avgVTTS.csv"); 
+		
+		vttsHandler.printVTTS(outputDirectoryWithRunId + "VTTS_allTrips.csv");
+		vttsHandler.printCarVTTS(outputDirectoryWithRunId + "VTTS_carTrips.csv");
+		vttsHandler.printAvgVTTSperPerson(outputDirectoryWithRunId + "VTTS_avgPerPerson.csv");
+		
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_all-modes.csv", null, null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_car.csv", "car", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_pt.csv", "pt", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_bicycle.csv", "bicycle", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_walk.csv", "walk", null);
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_ride.csv", "ride", null);
+
+
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_car_7-9.csv", "car", new Tuple<Double, Double>(7.0 * 3600., 9. * 3600.));
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_car_11-13.csv", "car", new Tuple<Double, Double>(11.0 * 3600., 13. * 3600.));
+		vttsHandler.printVTTSstatistics(outputDirectoryWithRunId + "VTTS_statistics_16-18.csv", "car", new Tuple<Double, Double>(16.0 * 3600., 18. * 3600.));
 	}
 			 
 }

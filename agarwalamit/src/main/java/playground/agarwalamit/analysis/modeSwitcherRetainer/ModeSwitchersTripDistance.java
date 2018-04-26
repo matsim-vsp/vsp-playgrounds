@@ -19,7 +19,13 @@
 package playground.agarwalamit.analysis.modeSwitcherRetainer;
 
 import java.io.BufferedWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -32,7 +38,7 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.analysis.tripDistance.LegModeBeelineDistanceDistributionHandler;
 import playground.agarwalamit.analysis.tripDistance.TripDistanceHandler;
 import playground.agarwalamit.analysis.tripDistance.TripDistanceType;
-import playground.agarwalamit.utils.FileUtils;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.PersonFilter;
 
@@ -71,11 +77,11 @@ public class ModeSwitchersTripDistance {
             Comparator.comparing(Tuple::toString));
 
 	public static void main(String[] args) {
-		String dir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/otherRuns/output/1pct/run9/";
-		String runCases[] ={"baseCaseCtd","ei","ci","eci"};
+		String dir = "../../runs-svn/detEval/emissionCongestionInternalization/hEART/output/";
+		String runCases[] ={"bau","ei","5ei","10ei"};
 
 		for(String runCase : runCases){
-			ModeSwitchersTripDistance mstd = new ModeSwitchersTripDistance();
+			ModeSwitchersTripDistance mstd = new ModeSwitchersTripDistance(MunichPersonFilter.MunichUserGroup.Rev_Commuter.toString(), new MunichPersonFilter(), TripDistanceType.BEELINE_DISTANCE);
 			Scenario sc = LoadMyScenarios.loadScenarioFromNetworkAndConfig(dir+runCase+"/output_network.xml.gz", dir+runCase+"/output_config.xml");
 			sc.getConfig().controler().setOutputDirectory(dir+runCase);
 			mstd.processEventsFiles(sc);
@@ -192,7 +198,12 @@ public class ModeSwitchersTripDistance {
 	}
 
 	public void writeResults(final String outputFolder){
-		String outFile = outputFolder+"modeSwitchersTripDistances_"+this.tripDistanceType+".txt";
+		String outFile = outputFolder+"modeSwitchersTripDistances_"+this.tripDistanceType;
+		if (this.userGroup==null) {
+			outFile += ".txt";
+		} else {
+			outFile += "_"+this.userGroup+".txt";
+		}
 		BufferedWriter writer =  IOUtils.getBufferedWriter(outFile);
 		try {
 			writer.write("firstMode \t lastMode \t numberOfLegs \t totalTripDistancesForFirstIterationInKm \t totalTripDistancesForLastIterationInKm \n");

@@ -30,11 +30,12 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.output.ActivityTypes;
-import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
-import playground.vsp.demandde.cemdap.output.CemdapStopsParser;
+
 import playground.vsp.corineLandcover.CorineLandCoverData;
 import playground.vsp.corineLandcover.LandCoverUtils;
+import playground.vsp.openberlinscenario.cemdap.output.ActivityTypes;
+import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
+import playground.vsp.openberlinscenario.cemdap.output.CemdapStopsParser;
 
 /**
  * @author dziemke

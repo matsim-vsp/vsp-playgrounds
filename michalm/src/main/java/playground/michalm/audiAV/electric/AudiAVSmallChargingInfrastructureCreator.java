@@ -22,12 +22,11 @@ package playground.michalm.audiAV.electric;
 import java.util.*;
 
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.vsp.ev.data.*;
+import org.matsim.vsp.ev.data.file.*;
 import org.matsim.contrib.util.random.*;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-
-import playground.michalm.ev.data.*;
-import playground.michalm.ev.data.file.*;
 
 public class AudiAVSmallChargingInfrastructureCreator {
 	public static void main(String[] args) {
@@ -50,12 +49,12 @@ public class AudiAVSmallChargingInfrastructureCreator {
 			String s = scenarios[i];
 			int c = counts[i];
 
-			EvData data = new EvDataImpl();
-			new ChargerReader(network, data).readFile(chFilePrefix + c + "_" + s + ".xml");
+			final ChargingInfrastructureImpl chargingInfrastructure = new ChargingInfrastructureImpl();
+			new ChargerReader(network, chargingInfrastructure).readFile(chFilePrefix + c + "_" + s + ".xml");
 
 			List<Charger> fractChargers = new ArrayList<>();
 			int totalPlugs = 0;
-			for (Charger ch : data.getChargers().values()) {
+			for (Charger ch : chargingInfrastructure.getChargers().values()) {
 				int plugs = (int)uniform.floorOrCeil(fraction * ch.getPlugs());
 				if (plugs > 0) {
 					fractChargers.add(new ChargerImpl(ch.getId(), ch.getPower(), plugs, ch.getLink()));

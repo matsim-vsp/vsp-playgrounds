@@ -39,11 +39,12 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.LogToOutputSaver;
-import playground.vsp.demandde.cemdap.output.ActivityTypes;
-import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
-import playground.vsp.demandde.cemdap.output.CemdapActivityParser;
-import playground.vsp.demandde.cemdap.output.CemdapStopsParser;
+
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
+import playground.vsp.openberlinscenario.cemdap.output.ActivityTypes;
+import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
+import playground.vsp.openberlinscenario.cemdap.output.CemdapActivityParser;
+import playground.vsp.openberlinscenario.cemdap.output.CemdapStopsParser;
 import playground.vsp.corineLandcover.CorineLandCoverData;
 
 /**

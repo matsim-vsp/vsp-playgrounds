@@ -29,7 +29,7 @@ import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 
-import playground.vsp.demandde.cemdap.input.CommuterRelationV2;
+import playground.vsp.openberlinscenario.cemdap.input.CommuterRelationV2;
 
 /**
  * @author dziemke

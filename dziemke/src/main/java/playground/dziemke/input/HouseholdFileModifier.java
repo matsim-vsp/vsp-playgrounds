@@ -43,7 +43,7 @@ import org.matsim.utils.objectattributes.attributeconverters.CoordConverter;
  */
 public class HouseholdFileModifier {
 
-private final static Logger LOG = Logger.getLogger(PlanFileModifier.class);
+private final static Logger LOG = Logger.getLogger(HouseholdFileModifier.class);
 	
 	public static void main(String[] args) {
 		// Check if args has an interpretable length

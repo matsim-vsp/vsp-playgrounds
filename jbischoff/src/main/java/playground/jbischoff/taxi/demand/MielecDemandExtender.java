@@ -30,7 +30,7 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.michalm.demand.taxi.PersonCreatorWithRandomTaxiMode;
+import playground.michalm.demand.PersonCreatorWithRandomTaxiMode;
 
 
 /**

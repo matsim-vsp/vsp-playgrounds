@@ -21,12 +21,20 @@ package playground.michalm.mielec;
 
 import java.util.List;
 
-import org.matsim.api.core.v01.*;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.taxi.run.TaxiModule;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.util.CSVReaders;
-import org.matsim.core.config.*;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -65,7 +73,7 @@ public class MielecTaxiPassengerPopulationCreator {
 			Activity act = pf.createActivityFromLinkId("dummy", fromLinkId);
 			act.setEndTime(departureTime);
 			plan.addActivity(act);
-			Leg leg = pf.createLeg(TaxiModule.TAXI_MODE);
+			Leg leg = pf.createLeg(TransportMode.taxi);
 			leg.setRoute(RouteUtils.createGenericRouteImpl(fromLinkId, toLinkId));
 			plan.addLeg(leg);
 			plan.addActivity(pf.createActivityFromLinkId("dummy", toLinkId));

@@ -25,6 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+
+import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
+import playground.vsp.openberlinscenario.cemdap.output.CemdapOutput2MatsimPlansConverter;
+
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
@@ -40,8 +44,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.vsp.demandde.cemdap.output.Cemdap2MatsimUtils;
-import playground.vsp.demandde.cemdap.output.CemdapStops2MatsimPlansConverter;
 
 /**
  * Created by amit on 24.10.17.
@@ -177,7 +179,7 @@ public class CORINELandCoverCoordsModifier {
                         // during matsim plans generation, for home activities following fake coordinate is assigned.
                         if ( coord !=null && coord.equals(fakeCoord) ) {
                             String zoneId = (String) activity.getAttributes().getAttribute(
-                                    CemdapStops2MatsimPlansConverter.activityZoneId_attributeKey);
+                                    CemdapOutput2MatsimPlansConverter.activityZoneId_attributeKey);
 
                             if (homeLocationCoord==null) {
                                 if ( activityType.startsWith(this.homeActivityPrefix) ) {

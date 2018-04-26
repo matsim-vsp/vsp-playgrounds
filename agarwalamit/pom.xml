@@ -14,11 +14,6 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
-		<repository>
-			<id>Conveyal</id>
-			<name>Conveyal Maven Repository</name>
-			<url>http://maven.conveyal.com/</url>
-		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
@@ -26,23 +21,17 @@
 			<artifactId>benjamin</artifactId>
 			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>playground</groupId>
-			<artifactId>gunnar</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
-		</dependency>
-		 -->
 		<dependency>
 			<groupId>vsp-playground</groupId>
 			<artifactId>kai</artifactId>
 			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.matsim.contrib</groupId>
-			<artifactId>evacuation</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<groupId>com.github.matsim-org</groupId>
+			<artifactId>evacuation-gui</artifactId>
+			<version>-SNAPSHOT</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
@@ -52,7 +41,7 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>cadytsIntegration</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
@@ -65,22 +54,7 @@
 			<artifactId>jsch</artifactId>
 			<version>0.1.54</version>
 		</dependency>
-		
-		<!--<dependency>-->
-		<!--<groupId>com.github.gunnarfloetteroed</groupId>-->
-		<!--<artifactId>java</artifactId>-->
-		<!--<version>master-SNAPSHOT</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.github.mobitopp</groupId>-->
-			<!--<artifactId>connection-scan</artifactId>-->
-			<!--<version>master-SNAPSHOT</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>org.opentripplanner</groupId>-->
-			<!--<artifactId>otp</artifactId>-->
-			<!--<version>0.19.0</version>-->
-		<!--</dependency>-->
+
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
 		<dependency>
 			<groupId>org.apache.spark</groupId>
@@ -99,5 +73,4 @@
 			<version>2.1.2</version>
 		</dependency>
 	</dependencies>
-
 </project>

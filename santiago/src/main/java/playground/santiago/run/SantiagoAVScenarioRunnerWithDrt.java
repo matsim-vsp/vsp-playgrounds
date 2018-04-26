@@ -39,15 +39,9 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
-import org.matsim.contrib.drt.analysis.DrtAnalysisModule;
-import org.matsim.contrib.drt.optimizer.DrtOptimizer;
-import org.matsim.contrib.drt.optimizer.insertion.DefaultUnplannedRequestInserter;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
-import org.matsim.contrib.drt.run.DrtModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.run.DvrpModule;
-import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -130,7 +124,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 
 		Controler controler = new Controler(scenario);
 
-		addTaxis(controler);
+		DrtControlerCreator.addDrtToControler(controler, false);
 
 		// adding other network modes than car requires some router; here, the same values as for car are used
 		setNetworkModeRouting(controler);
@@ -194,18 +188,6 @@ public class SantiagoAVScenarioRunnerWithDrt {
 		// Run!
 		controler.run();
 
-	}
-
-	private static void addTaxis(Controler controler) {
-		controler.addOverridingModule(new DvrpModule(DrtControlerCreator::createModuleForQSimPlugin,
-				DrtOptimizer.class, DefaultUnplannedRequestInserter.class));
-		controler.addOverridingModule(new DrtModule());
-		controler.addOverridingModule(new DrtAnalysisModule());
-
-		boolean otfvis = false;
-		if (otfvis) {
-			controler.addOverridingModule(new OTFVisLiveModule());
-		}
 	}
 
 	private static void mapActivities2properLinks(Scenario scenario) {

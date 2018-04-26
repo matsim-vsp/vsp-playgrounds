@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
@@ -33,7 +34,6 @@ import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
-import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 
@@ -54,7 +54,7 @@ public class SAVPassengerTrackerTest {
 
 		SAVPassengerTracker handler = new SAVPassengerTracker();
 		handler.handleEvent(new ActivityEndEvent(1., Id.createPersonId("taxiDriver1"), Id.createLinkId("link1"), null, VrpAgentLogic.BEFORE_SCHEDULE_ACTIVITY_TYPE));
-		handler.handleEvent(new PersonDepartureEvent(2. ,passengerId, Id.createLinkId("link1"), TaxiModule.TAXI_MODE));
+		handler.handleEvent(new PersonDepartureEvent(2. ,passengerId, Id.createLinkId("link1"), TransportMode.taxi));
 	
 		Assert.assertEquals(true, handler.isTaxiPassenger(passengerId) == true);
 
@@ -76,7 +76,7 @@ public class SAVPassengerTrackerTest {
 		
 		Assert.assertEquals(true, handler.isTaxiPassenger(passengerId) == true);
 
-		handler.handleEvent(new PersonArrivalEvent(21., passengerId, Id.createLinkId("link1"), TaxiModule.TAXI_MODE));
+		handler.handleEvent(new PersonArrivalEvent(21., passengerId, Id.createLinkId("link1"), TransportMode.taxi));
 
 		Assert.assertEquals(true, handler.isTaxiPassenger(passengerId) == false);
 
