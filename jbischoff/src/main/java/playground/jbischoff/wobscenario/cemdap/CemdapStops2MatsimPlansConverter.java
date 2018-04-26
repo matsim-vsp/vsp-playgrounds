@@ -46,6 +46,7 @@ import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
 import playground.vsp.openberlinscenario.cemdap.output.CemdapActivityParser;
 import playground.vsp.openberlinscenario.cemdap.output.CemdapStopsParser;
 import playground.vsp.corineLandcover.LandCoverData;
+import playground.vsp.corineLandcover.LandCoverUtils;
 
 /**
  * @author dziemke
@@ -65,7 +66,7 @@ public class CemdapStops2MatsimPlansConverter {
 		LandCoverData corineLandCoverData = null;
 		// CORINE landcover
 		if (landCoverFile!=null && useLandCoverData) {
-			corineLandCoverData = new LandCoverData(landCoverFile, simplifyGeometries, combiningGeoms);
+			corineLandCoverData = new LandCoverData(landCoverFile, simplifyGeometries, combiningGeoms, LandCoverUtils.DataSource.Corine);
 		}
 
 		LogToOutputSaver.setOutputDirectory(outputDirectory);
