@@ -47,7 +47,7 @@ public class CtenRestrictionXMLParser extends MatsimXmlParser {
 	private final static String LIGHT = "light"; // as ID and start tag
 	private final static String ALLOWED = "allowed";
 	private final static String RESTRICTION = "restriction";
-	private final static String CROSSING = "restriction";
+	private final static String CROSSING = "crossing";
 	private final static String RESTRICTED_LIGHT = "rlight";
 	private final static String ON = "on";
 	private final static String OFF = "off";
@@ -59,6 +59,10 @@ public class CtenRestrictionXMLParser extends MatsimXmlParser {
 	
 	private DgCrossing currentCrossing;
 	private TtRestriction currentRestriction;
+	
+	public CtenRestrictionXMLParser() {
+		this.setValidating(false);
+	}
 	
 	@Override
 	public void endTag(String arg0, String arg1, Stack<String> arg2) {

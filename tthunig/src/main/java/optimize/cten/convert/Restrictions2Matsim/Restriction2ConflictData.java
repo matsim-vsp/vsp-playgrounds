@@ -26,14 +26,12 @@ public class Restriction2ConflictData {
 	
 	private DgIdConverter idConverter;
 
-	private Network networkSimplifiedAndSpatiallyExpanded;
 	private Network fullNetwork;
 	
 	private Map<Id<Node>, Id<SignalSystem>> nodeId2signalSystemId = new HashMap<>();
 	
-	public Restriction2ConflictData(DgIdPool idPool, Network networkSimplifiedAndSpatiallyExpanded, Network fullNetwork, SignalSystemsData signalSystemsFullNetwork){
+	public Restriction2ConflictData(DgIdPool idPool, Network fullNetwork, SignalSystemsData signalSystemsFullNetwork){
 		this.idConverter = new DgIdConverter(idPool);
-		this.networkSimplifiedAndSpatiallyExpanded = networkSimplifiedAndSpatiallyExpanded;
 		this.fullNetwork = fullNetwork;
 		
 		// initialize nodeId2signalSystemId map:
@@ -47,49 +45,55 @@ public class Restriction2ConflictData {
 
 	public void convertConflicts(ConflictData conflictData, Map<Id<DgCrossing>, DgCrossing> crossings) {
 		for (DgCrossing crossing : crossings.values()) {
-			// identify signal system id
-			Id<Node> nodeIdFullNetwork = idConverter.convertCrossingId2NodeId(crossing.getId());
-			Id<SignalSystem> signalSystemId = nodeId2signalSystemId.get(nodeIdFullNetwork); 
-			
-			// create ConflictingDirections for system and add to conflictData
-			ConflictingDirections conflictingDirections = conflictData.getFactory().createConflictingDirectionsContainerForIntersection(signalSystemId, nodeIdFullNetwork);
-			conflictData.addConflictingDirectionsForIntersection(signalSystemId, nodeIdFullNetwork, conflictingDirections);
-			
-			// fill the restrictions
-			for (TtRestriction restriction : crossing.getRestrictions().values()) {
-				DgStreet light = crossing.getLights().get(restriction.getLightId());
-				// identify from and to link for this direction/light
-				Tuple<Id<Link>, Id<Link>> fromToLinkIdTupleFullNetwork = identifyFromAndToLinkForThisDirection(light, nodeIdFullNetwork);
-				// create direction object for this light
-				Direction direction = conflictData.getFactory().createDirection(signalSystemId, nodeIdFullNetwork,
-						fromToLinkIdTupleFullNetwork.getFirst(), fromToLinkIdTupleFullNetwork.getSecond(), 
-						Id.create(restriction.getLightId(), Direction.class));
-				conflictingDirections.addDirection(direction);
-				
-				// add all directions as conflicting or non-conflicting
-				for (Id<DgStreet> rlightId : restriction.getRlightsAllowed()) {
-					if (restriction.isAllowed()) {
-						addAsNonConflicting(direction, rlightId);
-					} else {
-						addAsConflict(direction, rlightId);
-					}
-				}
-				for (Id<DgStreet> lightId : restriction.getRlightsOff()) {
-					addAsConflict(direction, lightId);
-				}
-				// add all remaining lights as conflicting (if 'allowed') or as non-conflicting (if '!allowed')
-				for (Id<DgStreet> lightId : crossing.getLights().keySet()) {
-					if (!direction.getConflictingDirections().contains(lightId)
-							&& !direction.getNonConflictingDirections().contains(lightId)) {
+			// only consider crossings with restrictions
+			if (!crossing.getRestrictions().isEmpty()) {
+				// identify signal system id
+				Id<Node> nodeIdFullNetwork = idConverter.convertCrossingId2NodeId(crossing.getId());
+				Id<SignalSystem> signalSystemId = nodeId2signalSystemId.get(nodeIdFullNetwork);
+
+				// create ConflictingDirections for system and add to conflictData
+				ConflictingDirections conflictingDirections = conflictData.getFactory()
+						.createConflictingDirectionsContainerForIntersection(signalSystemId, nodeIdFullNetwork);
+				conflictData.addConflictingDirectionsForIntersection(signalSystemId, nodeIdFullNetwork,
+						conflictingDirections);
+
+				// fill the restrictions
+				for (TtRestriction restriction : crossing.getRestrictions().values()) {
+					DgStreet light = crossing.getLights().get(restriction.getLightId());
+					// identify from and to link for this direction/light
+					Tuple<Id<Link>, Id<Link>> fromToLinkIdTupleFullNetwork = identifyFromAndToLinkForThisDirection(
+							light, nodeIdFullNetwork);
+					// create direction object for this light
+					Direction direction = conflictData.getFactory().createDirection(signalSystemId, nodeIdFullNetwork,
+							fromToLinkIdTupleFullNetwork.getFirst(), fromToLinkIdTupleFullNetwork.getSecond(),
+							Id.create(restriction.getLightId(), Direction.class));
+					conflictingDirections.addDirection(direction);
+
+					// add all directions as conflicting or non-conflicting
+					for (Id<DgStreet> rlightId : restriction.getRlightsAllowed()) {
 						if (restriction.isAllowed()) {
-							addAsConflict(direction, lightId);
+							addAsNonConflicting(direction, rlightId);
 						} else {
-							addAsNonConflicting(direction, lightId);
+							addAsConflict(direction, rlightId);
 						}
 					}
-				}
-				if (!restriction.getRlightsOn().isEmpty()) {
-					throw new RuntimeException("not yet implemented. would need to be in the same signal group.");
+					for (Id<DgStreet> lightId : restriction.getRlightsOff()) {
+						addAsConflict(direction, lightId);
+					}
+					// add all remaining lights as conflicting (if 'allowed') or as non-conflicting (if '!allowed')
+					for (Id<DgStreet> lightId : crossing.getLights().keySet()) {
+						if (!direction.getConflictingDirections().contains(lightId)
+								&& !direction.getNonConflictingDirections().contains(lightId)) {
+							if (restriction.isAllowed()) {
+								addAsConflict(direction, lightId);
+							} else {
+								addAsNonConflicting(direction, lightId);
+							}
+						}
+					}
+					if (!restriction.getRlightsOn().isEmpty()) {
+						throw new RuntimeException("not yet implemented. would need to be in the same signal group.");
+					}
 				}
 			}
 		}
@@ -107,33 +111,18 @@ public class Restriction2ConflictData {
 		direction.addConflictingDirection(conflictingDirectionId);
 	}
 
-	private Tuple<Id<Link>, Id<Link>> identifyFromAndToLinkForThisDirection(DgStreet light, Id<Node> nodeId) {
-		Id<Link> lightLinkId = idConverter.convertStreetId2LinkId(light.getId()); // alternatively: idConverter.convertToCrossingNodeId2LinkId(toCrossingNodeId)
-		Link lightLink = networkSimplifiedAndSpatiallyExpanded.getLinks().get(lightLinkId);
-		// find corresponding from and to link in the spatially expanded network
-		Id<Link> fromLinkIdExpandedNetwork = null;
-		Id<Link> toLinkIdExpandedNetwork = null;
-		if (lightLink.getFromNode().getInLinks().size() > 1) {
-			throw new RuntimeException("There should always only be one ingoing link for every ingoing crossing node in the spatially expanded network.");
-		}
-		for (Link inLink : lightLink.getFromNode().getInLinks().values()) {
-			fromLinkIdExpandedNetwork = inLink.getId();
-			break;
-		}
-		if (lightLink.getToNode().getOutLinks().size() > 1) {
-			throw new RuntimeException("There should always only be one outgoing link for every outgoing crossing node in the spatially expanded network.");
-		}
-		for (Link inLink : lightLink.getToNode().getOutLinks().values()) {
-			toLinkIdExpandedNetwork = inLink.getId();
-			break;
-		}
+	private Tuple<Id<Link>, Id<Link>> identifyFromAndToLinkForThisDirection(DgStreet light, Id<Node> matsimNodeId) {
+		// get from and to links of this light from the ids of the crossing nodes
+		Id<Link> fromLinkIdExpandedNetwork = idConverter.convertToCrossingNodeId2LinkId(light.getFromNode().getId());
+		Id<Link> toLinkIdExpandedNetwork = idConverter.convertFromCrossingNodeId2LinkId(light.getToNode().getId());
+		
 		// find corresponding link in the full network 
 		Id<Link> fromLinkIdFullNetwork = null;
 		Id<Link> toLinkIdFullNetwork = null;
 		if (fullNetwork.getLinks().containsKey(fromLinkIdExpandedNetwork)) {
 			fromLinkIdFullNetwork = fromLinkIdExpandedNetwork;
 		} else {
-			for (Id<Link> inLinkIdFullNetwork : fullNetwork.getNodes().get(nodeId).getInLinks().keySet()) {
+			for (Id<Link> inLinkIdFullNetwork : fullNetwork.getNodes().get(matsimNodeId).getInLinks().keySet()) {
 				// look for the id corresponding to the end of the expanded network id (link concatenation merges ids via '-')
 				if (fromLinkIdExpandedNetwork.toString().endsWith(inLinkIdFullNetwork.toString())) {
 					fromLinkIdFullNetwork = inLinkIdFullNetwork;
@@ -143,7 +132,7 @@ public class Restriction2ConflictData {
 		if (fullNetwork.getLinks().containsKey(toLinkIdExpandedNetwork)) {
 			toLinkIdFullNetwork = toLinkIdExpandedNetwork;
 		} else {
-			for (Id<Link> outLinkIdFullNetwork : fullNetwork.getNodes().get(nodeId).getOutLinks().keySet()) {
+			for (Id<Link> outLinkIdFullNetwork : fullNetwork.getNodes().get(matsimNodeId).getOutLinks().keySet()) {
 				// look for the id corresponding to the beginning of the expanded network id (link concatenation merges ids via '-')
 				if (toLinkIdExpandedNetwork.toString().startsWith(outLinkIdFullNetwork.toString())) {
 					toLinkIdFullNetwork = outLinkIdFullNetwork;
