@@ -20,10 +20,8 @@
 package playground.michalm.euro2016;
 
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.vsp.edvrp.etaxi.run.RunETaxiBenchmark;
 import org.matsim.vsp.ev.EvConfigGroup;
-
-import playground.michalm.etaxi.run.RunETaxiBenchmark;
-
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.*;
 

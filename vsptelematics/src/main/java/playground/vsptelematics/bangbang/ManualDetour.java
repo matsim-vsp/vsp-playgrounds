@@ -33,6 +33,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 import org.matsim.core.mobsim.framework.listeners.MobsimBeforeSimStepListener;
@@ -63,8 +64,11 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 	private final Scenario scenario;
 
 	private List<Id<Link>> alternativeLinks;
-
-	private Id<Link> returnId = Id.createLinkId("4706699_26662459_26662476");
+	
+	/**
+	 * ID of link where original route and detour merge again
+	 */
+	private static final Id<Link> mergeLinkId = Id.createLinkId("4706699_26662459_26662476");
 
 	private class AvoidAccidentTravelTimeAndDisutility implements TravelTime, TravelDisutility {
 		FreespeedTravelTimeAndDisutility delegate = new FreespeedTravelTimeAndDisutility(-1.0, 0.0, 0.0);
@@ -91,25 +95,31 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 	ManualDetour(Scenario scenario, LeastCostPathCalculatorFactory pathAlgoFactory ) {
 		this.scenario = scenario ;
 
-		AvoidAccidentTravelTimeAndDisutility fff = new AvoidAccidentTravelTimeAndDisutility() ;
-		alternativeLinks = computeRouteLinkIds(pathAlgoFactory, fff, fff) ;
+		alternativeLinks = computeAlternativeRouteLinkIds(pathAlgoFactory) ;
 
 	}
+	
+	/**
+	 * compute link IDs for alternative route
+	 */
+	private List<Id<Link>> computeAlternativeRouteLinkIds(LeastCostPathCalculatorFactory pathAlgoFactory) {
 
-	private List<Id<Link>> computeRouteLinkIds(LeastCostPathCalculatorFactory pathAlgoFactory, TravelTime tt,
-			TravelDisutility td) {
-		// it feels like one should have the following infrastructure as fields.  However, since it is only called once, at initialization,
-		// can as well leave it local here. kai, apr'16
-
-		LeastCostPathCalculator routeAlgo = pathAlgoFactory.createPathCalculator( scenario.getNetwork(), td, tt);
+		// make accident link very expensive:
+		AvoidAccidentTravelTimeAndDisutility fff = new AvoidAccidentTravelTimeAndDisutility() ;
+		LeastCostPathCalculator routeAlgo = pathAlgoFactory.createPathCalculator( scenario.getNetwork(), fff, fff);
 		final RoutingModule routingModule = DefaultRoutingModules.createPureNetworkRouter(TransportMode.car, scenario.getPopulation().getFactory(), 
 				scenario.getNetwork(), routeAlgo);
-		// (yy could probably use the "computer science" algorithm directly in the above. kai, apr'16)
+		// (yy could probably use the "computer science" algorithm directly. kai, apr'16)
 
 		List<Id<Link>> links = null ;
+		
+		Gbl.assertIf( KNAccidentScenario.replanningLinkIds.size()==1);
+		// (yyyyyy because this is the reason why it works without hick-ups. kai, apr'18)
+		
 		for ( Id<Link> currentId : KNAccidentScenario.replanningLinkIds ) {
+			
 			Facility<ActivityFacility> fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
-			Facility<ActivityFacility> toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(returnId));
+			Facility<ActivityFacility> toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(mergeLinkId));
 
 			final Leg leg = (Leg) routingModule.calcRoute(fromFacility, toFacility, 0, null).get(0);
 			links = ((NetworkRoute)leg.getRoute()).getLinkIds() ;
@@ -128,21 +138,19 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 //		if ( 8.*3600 + 40*60 + duration < now && now < 8.*3600+50*60 ) return ;
 //		if ( 8.*3600 + 50*60 + duration < now  ) return ;
 
-		Collection<MobsimAgent> agentsToReplan = WithinDayReRouteMobsimListener.getAgentsToReplan( (Netsim) event.getQueueSimulation() ); 
+		Collection<MobsimAgent> agentsToReplan = WithinDayReRouteMobsimListener.getAgentsToReplan( (Netsim) event.getQueueSimulation() );
 
 		for (MobsimAgent ma : agentsToReplan) {
 			doReplanning(ma);
 		}
 	}
 
-	private boolean doReplanning(MobsimAgent agent ) {
-
-		Plan plan = WithinDayAgentUtils.getModifiablePlan( agent ) ; 
-
-		if ( !WithinDayAgentUtils.isOnReplannableCarLeg(agent) ) {
-			return false ;
-		}
-
+	private void doReplanning(MobsimAgent agent ) {
+		
+		Gbl.assertIf( WithinDayAgentUtils.isOnReplannableCarLeg(agent) ) ;
+		
+		Plan plan = WithinDayAgentUtils.getModifiablePlan( agent ) ;
+		
 		final Integer planElementsIndex = WithinDayAgentUtils.getCurrentPlanElementIndex(agent);
 
 		// ---
@@ -154,9 +162,9 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 
 		final int idx = WithinDayAgentUtils.getCurrentRouteLinkIdIndex(agent);
 
-		if ( oldRoute.getLinkIds().contains( this.returnId ) ) {
+		if ( oldRoute.getLinkIds().contains( this.mergeLinkId) ) {
 			List<Id<Link>> copy = new ArrayList<>( oldRoute.getLinkIds() ) ;
-			while (  !copy.get( idx ).equals( this.returnId )  ) {
+			while (  !copy.get( idx ).equals( this.mergeLinkId)  ) {
 				copy.remove( idx ) ;
 			}
 			copy.addAll( idx, this.alternativeLinks ) ;
@@ -177,7 +185,6 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 		// finally reset the cached Values of the PersonAgent - they may have changed!
 		WithinDayAgentUtils.resetCaches(agent);
 
-		return true;
 	}
 
 }

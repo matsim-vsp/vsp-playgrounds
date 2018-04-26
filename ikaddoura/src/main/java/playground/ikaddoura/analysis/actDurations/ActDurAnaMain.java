@@ -20,6 +20,9 @@
 
 package playground.ikaddoura.analysis.actDurations;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -32,8 +35,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class ActDurAnaMain {
 
-	static String populationFile = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be300mt_47/be300mt_47.output_plans.xml.gz";
-	static String eventsFile = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be300mt_47/be300mt_47.output_events.xml.gz";
+	static String populationFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/b400_85_v10/b400_85_v10.output_plans.xml.gz";
+	static String eventsFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/b400_85_v10/b400_85_v10.output_events.xml.gz";
 				
 	public static void main(String[] args) {
 		ActDurAnaMain anaMain = new ActDurAnaMain();
@@ -54,8 +57,14 @@ public class ActDurAnaMain {
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
 		
+		List<String> skippedPersonIdStrings = new ArrayList<>();
+		skippedPersonIdStrings.add("freight");
+		handler1.process(scenario.getPopulation(), skippedPersonIdStrings);
+		
 		handler1.writeOutput(scenario.getPopulation(), "/Users/ihab/Desktop/act-duration.csv", Double.POSITIVE_INFINITY);
 		handler1.writeOutput(scenario.getPopulation(), "/Users/ihab/Desktop/act-duration-short-activities.csv", 900.);
+		handler1.writeSummary(scenario.getPopulation(), "/Users/ihab/Desktop/act-duration-summary.csv");
+
 					
 	}
 			 

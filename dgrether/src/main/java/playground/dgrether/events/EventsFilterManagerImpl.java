@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.events.Event;
-import org.matsim.core.events.EventsManagerImpl;
+import org.matsim.core.api.experimental.events.EventsManager;
 
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.handler.EventHandler;
 import playground.dgrether.events.filters.EventFilter;
 
 
@@ -32,16 +34,17 @@ import playground.dgrether.events.filters.EventFilter;
  * @author dgrether
  *
  */
-public class EventsFilterManagerImpl extends EventsManagerImpl implements EventsFilterManager {
-
+public class EventsFilterManagerImpl implements EventsFilterManager {
+	
+	private final EventsManager delegate = EventsUtils.createEventsManager() ;
 	private List<EventFilter> filters = new ArrayList<EventFilter>();
-
-
+	
+	
 	@Override
 	public void addFilter(EventFilter filter) {
-		this.filters.add(filter);
+		EventsFilterManagerImpl.this.filters.add(filter);
 	}
-
+	
 	/**
 	 * Delegates to List.remove() and returns the appropriate value
 	 * @param filter
@@ -49,9 +52,33 @@ public class EventsFilterManagerImpl extends EventsManagerImpl implements Events
 	 */
 	@Override
 	public boolean removeFilter(EventFilter filter) {
-		return this.filters.remove(filter);
+		return EventsFilterManagerImpl.this.filters.remove(filter);
 	}
-
+	
+	public void addHandler(final EventHandler handler) {
+		delegate.addHandler(handler);
+	}
+	
+	public void removeHandler(final EventHandler handler) {
+		delegate.removeHandler(handler);
+	}
+	
+	public void resetHandlers(final int iteration) {
+		delegate.resetHandlers(iteration);
+	}
+	
+	public void initProcessing() {
+		delegate.initProcessing();
+	}
+	
+	public void afterSimStep(double time) {
+		delegate.afterSimStep(time);
+	}
+	
+	public void finishProcessing() {
+		delegate.finishProcessing();
+	}
+	
 	/**
 	 * If all filters set in this class are returning true on the
 	 * event given as parameter the Events.processEvent() method is called.
@@ -60,15 +87,14 @@ public class EventsFilterManagerImpl extends EventsManagerImpl implements Events
 	@Override
 	public void processEvent(final Event event) {
 		boolean doProcess = true;
-		for (EventFilter f : this.filters) {
+		for (EventFilter f : EventsFilterManagerImpl.this.filters) {
 			if (!f.doProcessEvent(event)) {
 				doProcess = false;
 				break;
 			}
 		}
 		if (doProcess) {
-			super.processEvent(event);
+			delegate.processEvent(event);
 		}
 	}
-
 }
