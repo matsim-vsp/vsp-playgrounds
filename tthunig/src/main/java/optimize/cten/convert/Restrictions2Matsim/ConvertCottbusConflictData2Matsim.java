@@ -76,6 +76,7 @@ public class ConvertCottbusConflictData2Matsim {
 		String btuMainDir = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 		
 		new ConvertCottbusConflictData2Matsim().convertConflictData(btuMainDir, btuRestrDir, "model_new.xml");
+//		new ConvertCottbusConflictData2Matsim().convertConflictData(btuMainDir, btuRestrDir, "model.xml");
 	}
 	
 }
