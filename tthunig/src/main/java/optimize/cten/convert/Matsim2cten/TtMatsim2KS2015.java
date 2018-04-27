@@ -1,7 +1,7 @@
 /**
  * 
  */
-package optimize.cten.convert;
+package optimize.cten.convert.Matsim2cten;
 
 import java.io.File;
 
@@ -13,7 +13,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.misc.Time;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import optimize.run.Cottbus2KS2010;
 import playground.dgrether.koehlerstrehlersignal.demand.PopulationToOd;
 import playground.dgrether.koehlerstrehlersignal.demand.ZoneBuilder;
 import playground.dgrether.koehlerstrehlersignal.network.NetLanesSignalsShrinker;

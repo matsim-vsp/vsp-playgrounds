@@ -17,9 +17,8 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package optimize.run;
+package optimize.cten.convert.Matsim2cten;
 
-import optimize.cten.convert.TtMatsim2KS2015;
 import utils.OutputUtils;
 
 /**

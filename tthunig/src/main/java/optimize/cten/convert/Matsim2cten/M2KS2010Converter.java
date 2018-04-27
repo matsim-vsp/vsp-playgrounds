@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package optimize.cten.convert;
+package optimize.cten.convert.Matsim2cten;
 
 import java.io.IOException;
 import java.util.HashSet;
