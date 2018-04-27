@@ -26,7 +26,7 @@ import playground.dgrether.utils.zones.DgZones;
  */
 public final class TtMatsim2KS2015 {
 
-	private static final Logger log = Logger.getLogger(Cottbus2KS2010.class);
+	private static final Logger log = Logger.getLogger(RunCottbus2Cten.class);
 
 	private static final String shapeFileDirectoryName = "shapes/";
 	

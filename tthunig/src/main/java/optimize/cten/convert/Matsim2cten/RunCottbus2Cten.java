@@ -29,7 +29,7 @@ import utils.OutputUtils;
  * @author tthunig
  * 
  */
-public class Cottbus2KS2010 {
+public class RunCottbus2Cten {
 
 	public static void main(String[] args) throws Exception {
 		// input files
