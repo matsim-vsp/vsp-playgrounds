@@ -610,6 +610,13 @@ public class TtRunCottbusSimulation {
 				}
 				break;
 			}
+			
+			// add data about conflicting directions
+			if (NETWORK_TYPE.equals(NetworkType.V4)) {
+				signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR + "conflictData_fromBtu2018-04-25_basedOnMSconflicts_v4.xml");
+			} else {
+				signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR + "conflictData_fromBtu2018-04-25_basedOnMSconflicts.xml");				
+			}
 		}
 		if (PRICING_TYPE.toString().startsWith("CORDON_")){
 			RoadPricingConfigGroup roadPricingCG = ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
