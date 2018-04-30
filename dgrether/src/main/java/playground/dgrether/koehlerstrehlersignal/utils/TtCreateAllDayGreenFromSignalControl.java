@@ -28,7 +28,7 @@ public class TtCreateAllDayGreenFromSignalControl {
 	private static void convertAndWriteSignalControl(
 			String outputSignalControl, String signalControlFilename) {
 		
-		Scenario readSignalControl = DgScenarioUtils.loadScenario(null, null, null, null,
+		Scenario readSignalControl = DgScenarioUtils.loadScenario(null, null, null, null, null,
 				null, signalControlFilename);
 		SignalsData signals = (SignalsData) readSignalControl
 				.getScenarioElement(SignalsData.ELEMENT_NAME);
