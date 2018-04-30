@@ -134,10 +134,8 @@ public class CreateNetworkAndKeepCountLinks {
 
 			log.info("start parsing from osm file " + INPUT_OSMFILE);
 	
-			OsmNetworkReader networkReader = new OsmNetworkReader(network,ct);
-			
-			networkReader.setUseVspAdjustments(true);
-			
+			OsmNetworkReader networkReader = new OsmNetworkReader(network,ct, true, true);
+						
 			if (keepPaths) {
 				networkReader.setKeepPaths(true);
 			} else {
