@@ -85,7 +85,7 @@ public class CreateNetworkAndKeepCountLinks {
 	public static void main(String[] args) {
 		String osmfile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/network/osm/berlin-brandenburg-network_2018-02-20.osm";
 		
-		String prefix = "berlin-car_be5_withVspAdjustments" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+		String prefix = "berlin-car_be_5_withVspAdjustments" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		String outDir = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/";
 
 		boolean keepCountsOSMnodes = true;
@@ -185,7 +185,7 @@ public class CreateNetworkAndKeepCountLinks {
 		}
 		
 		if (doCleaning){
-			outnetworkPrefix += "_cleaned";
+//			outnetworkPrefix += "_cleaned";
 				/*
 				 * Clean the Network. Cleaning means removing disconnected components, so that afterwards there is a route from every link
 				 * to every other link. This may not be the case in the initial network converted from OpenStreetMap.
