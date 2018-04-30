@@ -49,14 +49,15 @@ public class AnalyzeAndCompareTrips {
 	// Parameters
 	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
 //	private static final String RUN_ID = "be_253"; // To be adjusted
-	private static final String RUN_ID = "be400mt_58_v6"; // To be adjusted
+//	private static final String RUN_ID = "be400mt_58_v6"; // To be adjusted
+	private static final String RUN_ID = "be_500_c"; // To be adjusted
 
 	// Input and output
 	private static final String NETWORK_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_network.xml.gz";
 	private static final String CONFIG_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_config.xml";
 	private static final String EVENTS_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_events.xml.gz";
 	private static final String AREA_SHAPE_FILE = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
-	private static String analysisOutputDirectory = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/analysis";
+	private static String analysisOutputDirectory = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/analysis_neu";
 
 	// SrV parameters
 	private static final String SRV_BASE_DIR = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/input/"; // THis folder needs to be checked out
@@ -73,9 +74,9 @@ public class AnalyzeAndCompareTrips {
 		
 		// Set filters if desired
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
-//		matsimTripFilter.activateMode(TransportMode.car);
+		matsimTripFilter.activateMode(TransportMode.car);
 //		matsimTripFilter.activateMode("pt", "ptSlow");
-		matsimTripFilter.activateMode(TransportMode.pt);
+//		matsimTripFilter.activateMode(TransportMode.pt);
 //		matsimTripFilter.activateMode("ptSlow");
 //		matsimTripFilter.activateMode("bicycle");
 //		matsimTripFilter.activateMode(TransportMode.walk);
@@ -98,8 +99,8 @@ public class AnalyzeAndCompareTrips {
 		
 		// Set filters if desired
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
-//		srvTripFilter.activateMode(TransportMode.car);
-		srvTripFilter.activateMode(TransportMode.pt);
+		srvTripFilter.activateMode(TransportMode.car);
+//		srvTripFilter.activateMode(TransportMode.pt);
 //		srvTripFilter.activateMode(TransportMode.bike);
 //		srvTripFilter.activateMode(TransportMode.ride);
 		srvTripFilter.activateDist(0, 100);
