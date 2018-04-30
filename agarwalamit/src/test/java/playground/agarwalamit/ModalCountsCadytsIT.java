@@ -85,11 +85,6 @@ public class ModalCountsCadytsIT {
 		config.qsim().setMainModes(mainModes );
 		config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
-//		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
-		// I switched this off for this piece of code since the vehicles are added as mode vehicles directly into the agent source.  
-		// modeVehicleTypesFromVehiclesData could be achieved by instead inserting them into the vehicles container
-		// from the scenario.  This might be preferred, but I don't want to modify the test here.  kai, nov'16
-
 		config.controler().setLastIteration(lastIteration);
 
 		config.planCalcScore().setBrainExpBeta(beta);
