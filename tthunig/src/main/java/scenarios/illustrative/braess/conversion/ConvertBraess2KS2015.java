@@ -77,7 +77,7 @@ public class ConvertBraess2KS2015 {
 		String scenarioDescription = "braess with 3600 agents, capacity 1800 and one all green signal";
 
 		TtMatsim2KS2015.convertMatsim2KS(signalSystemsFilename,
-				signalGroupsFilename, signalControlFilename, networkFilename,
+				signalGroupsFilename, signalControlFilename, null, networkFilename,
 				lanesFilename, populationFilename, startTime, endTime,
 				signalsBoundingBoxOffset, cuttingBoundingBoxOffset,
 				freeSpeedFilter, useFreeSpeedTravelTime, maximalLinkLength,

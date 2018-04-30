@@ -62,7 +62,7 @@ public final class TtMatsim2KS2015 {
 	 */
 	public static void convertMatsim2KS(String signalSystemsFilename,
 			String signalGroupsFilename, String signalControlFilename,
-			String networkFilename, String lanesFilename,
+			String signalConflictsFilename, String networkFilename, String lanesFilename,
 			String populationFilename, double startTime, double endTime,
 			double signalsBoundingBoxOffset, double cuttingBoundingBoxOffset,
 			double freeSpeedFilter, boolean useFreeSpeedTravelTime,
@@ -86,7 +86,7 @@ public final class TtMatsim2KS2015 {
 		String shapeFileDirectory = createShapeFileDirectory(outputDirectory);
 		Scenario fullScenario = DgScenarioUtils.loadScenario(networkFilename,
 				populationFilename, lanesFilename, signalSystemsFilename,
-				signalGroupsFilename, signalControlFilename);
+				signalGroupsFilename, signalControlFilename, signalConflictsFilename);
 
 		// reduce the size of the scenario
 		NetLanesSignalsShrinker scenarioShrinker = new NetLanesSignalsShrinker(
