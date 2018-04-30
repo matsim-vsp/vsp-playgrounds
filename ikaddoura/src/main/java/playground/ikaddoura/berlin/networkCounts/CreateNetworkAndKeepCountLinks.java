@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -84,13 +83,13 @@ public class CreateNetworkAndKeepCountLinks {
 	private String outnetworkPrefix ;
 	
 	public static void main(String[] args) {
-		String osmfile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/network/berlin-brandenburg-network_2018-02-20.osm";
+		String osmfile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/network/osm/berlin-brandenburg-network_2018-02-20.osm";
 		
-		String prefix = "berlin_brandenburg_berlin4.0_v1_" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-		String outDir = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/network/";
+		String prefix = "berlin-car_be5_withVspAdjustments" + new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+		String outDir = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/";
 
 		boolean keepCountsOSMnodes = true;
-		List<String> inputCountNodeMappingFiles = Arrays.asList("/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/berlin_4.0/counts/counts_OSM-nodes.csv");
+		List<String> inputCountNodeMappingFiles = Arrays.asList("/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/counts/counts_OSM-nodes.csv");
 		
 		String crs = TransformationFactory.DHDN_GK4;
 		CreateNetworkAndKeepCountLinks berlinNetworkCreator = new CreateNetworkAndKeepCountLinks(osmfile, inputCountNodeMappingFiles, crs , outDir, prefix);
@@ -136,17 +135,20 @@ public class CreateNetworkAndKeepCountLinks {
 			log.info("start parsing from osm file " + INPUT_OSMFILE);
 	
 			OsmNetworkReader networkReader = new OsmNetworkReader(network,ct);
+			
+			networkReader.setUseVspAdjustments(true);
+			
 			if (keepPaths) {
 				networkReader.setKeepPaths(true);
 			} else {
 				networkReader.setKeepPaths(false);
 			}
-			outnetworkPrefix += "_keepPaths-" + keepPaths;
+//			outnetworkPrefix += "_keepPaths-" + keepPaths;
 
 			if (keepCountOSMnodes) {
 				networkReader.setNodeIDsToKeep(nodeIDsToKeep);
 			}
-			outnetworkPrefix += "_keepCountOSMnodeIDs-" + keepCountOSMnodes;
+//			outnetworkPrefix += "_keepCountOSMnodeIDs-" + keepCountOSMnodes;
 
 			networkReader.parse(INPUT_OSMFILE);
 			log.info("finished parsing osm file");
@@ -206,28 +208,6 @@ public class CreateNetworkAndKeepCountLinks {
 			}
 		}
 		
-		log.info("Adjusting links applying KN's method (reduce speed on links with capacity below 1000 veh/h; double capacity on links shorter than 100 meters)...");
-		reduceSpeedKN(network);
-		
-	}
-	
-	private static void reduceSpeedKN(Network network){
-		
-		for ( Link link : network.getLinks().values() ) {
-			// primary und drunter --> Zettel!
-			// Kapazität: motorway, trunk: bleiben bei 2000; motorway_link und trunk_link bleiben bei 1500; primary: 1000; primary_link: 1000; secondary_*: 800
-				
-			if ( link.getFreespeed() < 77/3.6 ) {
-				if ( link.getCapacity() >= 1001. ) { // cap >= 1000 is nearly everything 
-					link.setFreespeed( 1. * link.getFreespeed() );
-				} else {
-					link.setFreespeed( 0.5 * link.getFreespeed() );
-				}
-			}
-			if ( link.getLength() < 100 ) {
-				link.setCapacity( 2. * link.getCapacity() ); // double capacity on short links, often roundabouts or short u-turns, etc., with the usual problem
-			}
-		}		
 	}
 	
 	/**
