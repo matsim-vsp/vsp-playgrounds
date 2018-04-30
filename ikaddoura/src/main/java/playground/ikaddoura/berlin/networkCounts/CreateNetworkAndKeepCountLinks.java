@@ -214,6 +214,9 @@ public class CreateNetworkAndKeepCountLinks {
 	private static void reduceSpeedKN(Network network){
 		
 		for ( Link link : network.getLinks().values() ) {
+			// primary und drunter --> Zettel!
+			// Kapazität: motorway, trunk: bleiben bei 2000; motorway_link und trunk_link bleiben bei 1500; primary: 1000; primary_link: 1000; secondary_*: 800
+				
 			if ( link.getFreespeed() < 77/3.6 ) {
 				if ( link.getCapacity() >= 1001. ) { // cap >= 1000 is nearly everything 
 					link.setFreespeed( 1. * link.getFreespeed() );
