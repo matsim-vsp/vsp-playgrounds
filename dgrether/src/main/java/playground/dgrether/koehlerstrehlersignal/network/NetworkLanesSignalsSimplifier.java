@@ -34,15 +34,17 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.conflicts.ConflictingDirections;
+import org.matsim.contrib.signals.data.conflicts.Direction;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
+import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCalcTopoType;
 import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 import org.matsim.lanes.data.LanesToLinkAssignment;
-import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
-import org.matsim.contrib.signals.model.SignalSystem;
 
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
 
@@ -194,6 +196,31 @@ public class NetworkLanesSignalsSimplifier {
 											signalsData.getSignalSystemsData().getSignalSystemData().remove(signalSystemId);
 											signalsData.getSignalGroupsData().getSignalGroupDataBySignalSystemId().remove(signalSystemId);
 											signalsData.getSignalControlData().getSignalSystemControllerDataBySystemId().remove(signalSystemId);
+										}
+									}
+									
+									if (signalsData.getConflictingDirectionsData() != null) {
+										// correct conflicting directions data at from node of inlink and tonode of outlink
+										ConflictingDirections fromNodeConflictData = signalsData.getConflictingDirectionsData().getConflictsPerNode().get(inLink.getFromNode().getId());
+										if (fromNodeConflictData != null) {
+											for (Direction dir : fromNodeConflictData.getDirections().values()) {
+												if (dir.getToLink().equals(inLink.getId())) {
+													dir.setToLink(newLink.getId());
+												}
+											}
+										}
+										ConflictingDirections toNodeConflictData = signalsData.getConflictingDirectionsData().getConflictsPerNode().get(outLink.getToNode().getId());
+										if (toNodeConflictData != null) {
+											for (Direction dir : toNodeConflictData.getDirections().values()) {
+												if (dir.getFromLink().equals(outLink.getId())) {
+													dir.setFromLink(newLink.getId());
+												}
+											}
+										}
+										
+										// delete conflicting directions data at the node in between, if they exist
+										if (signalsData.getConflictingDirectionsData().getConflictsPerNode().containsKey(inLink.getToNode().getId())) {
+											signalsData.getConflictingDirectionsData().removeConflictingDirectionsForNode(inLink.getToNode().getId());
 										}
 									}
 								}
