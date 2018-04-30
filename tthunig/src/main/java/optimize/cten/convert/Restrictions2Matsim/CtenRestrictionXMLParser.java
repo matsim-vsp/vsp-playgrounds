@@ -86,9 +86,7 @@ public class CtenRestrictionXMLParser extends MatsimXmlParser {
 			this.currentCrossing.addRestriction(currentRestriction);
 		} else if (name.equals(RESTRICTED_LIGHT)) {
 			if (atts.getValue(LIGHT) != null) {
-				this.currentRestriction.addAllowedLight(Id.create(atts.getValue(LIGHT), DgStreet.class));
-				LOG.warn("Note: before and after tags are not parsed yet. \nThis restriction: before=" 
-						+ atts.getValue(BEFORE) + " after=" + atts.getValue(AFTER) + ".");
+				this.currentRestriction.addAllowedLight(Id.create(atts.getValue(LIGHT), DgStreet.class), Integer.valueOf(atts.getValue(BEFORE)), Integer.valueOf(atts.getValue(AFTER)));
 			} else if (atts.getValue(ON) != null) {
 				this.currentRestriction.addOnLight(Id.create(atts.getValue(ON), DgStreet.class));
 			} else if (atts.getValue(OFF) != null) {

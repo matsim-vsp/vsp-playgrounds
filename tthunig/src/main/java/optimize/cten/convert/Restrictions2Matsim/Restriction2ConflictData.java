@@ -70,7 +70,7 @@ public class Restriction2ConflictData {
 					conflictingDirections.addDirection(direction);
 
 					// add all directions as conflicting or non-conflicting
-					for (Id<DgStreet> rlightId : restriction.getRlightsAllowed()) {
+					for (Id<DgStreet> rlightId : restriction.getRlightsAllowed().keySet()) {
 						if (restriction.isAllowed()) {
 							addAsNonConflicting(direction, rlightId);
 						} else {
