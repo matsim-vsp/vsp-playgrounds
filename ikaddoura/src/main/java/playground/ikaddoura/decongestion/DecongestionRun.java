@@ -28,6 +28,11 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.IntegralApproach;
+import org.matsim.contrib.decongestion.DecongestionModule;
+import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -37,9 +42,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripBasicAnalysisRun;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.IntegralApproach;
-import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 
 /**
  * Starts an interval-based decongestion pricing simulation run.
