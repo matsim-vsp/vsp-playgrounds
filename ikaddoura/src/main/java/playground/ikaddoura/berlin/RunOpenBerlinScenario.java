@@ -43,30 +43,18 @@ import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTime
 * @author ikaddoura
 */
 
-public class RunMATSim6 {
+public class RunOpenBerlinScenario {
 
-	private static final Logger log = Logger.getLogger(RunMATSim6.class);
+	private static final Logger log = Logger.getLogger(RunOpenBerlinScenario.class);
 
 	private static String configFile;
 	private static String outputDirectory;
 	private static String runId;
 	private static String visualizationScriptInputDirectory;
 	
-	private static double ascCar;
-	private static double ascPt;
-	private static double ascTransitWalk;
-	private static double ascWalk;
-	private static double ascBicycle;
-	private static double ascRide;	
-	
-	private static double marginalUtilityTravelingCar = Double.POSITIVE_INFINITY;
-	private static double marginalUtilityTravelingPt = Double.POSITIVE_INFINITY;
-	private static double marginalUtilityTravelingTransitWalk = Double.POSITIVE_INFINITY;
-	private static double marginalUtilityTravelingWalk = Double.POSITIVE_INFINITY;
-	private static double marginalUtilityTravelingBicycle = Double.POSITIVE_INFINITY;
-	private static double marginalUtilityTravelingRide = Double.POSITIVE_INFINITY;
-	
-	private static boolean useCongestedCarRouterForRide;
+	private static boolean useCarTravelTimeForRide;
+	private static boolean useSBBptRouter;
+	private static boolean useDurationBasedTimeAllocationMutator;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -83,62 +71,27 @@ public class RunMATSim6 {
 			visualizationScriptInputDirectory = args[3];
 			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
 			
-			ascCar = Double.parseDouble(args[4]);
-			log.info("ascCar: "+ ascCar);
-
-			ascPt = Double.parseDouble(args[5]);
-			log.info("ascPt: "+ ascPt);
+			useCarTravelTimeForRide = Boolean.parseBoolean(args[4]);
+			log.info("useCarTravelTimeForRide: "+ useCarTravelTimeForRide);
 			
-			ascTransitWalk = Double.parseDouble(args[6]);
-			log.info("ascTransitWalk: "+ ascTransitWalk);
-
-			ascWalk = Double.parseDouble(args[7]);
-			log.info("ascWalk: "+ ascWalk);
-
-			ascBicycle = Double.parseDouble(args[8]);
-			log.info("ascBicycle: "+ ascBicycle);
+			useSBBptRouter = Boolean.parseBoolean(args[5]);
+			log.info("useSBBptRouter: "+ useSBBptRouter);
 			
-			ascRide = Double.parseDouble(args[9]);
-			log.info("ascRide: "+ ascRide);
-			
-			marginalUtilityTravelingCar = Double.parseDouble(args[10]);
-			log.info("marginalUtilityTravelingCar: "+ marginalUtilityTravelingCar);
-			
-			marginalUtilityTravelingPt = Double.parseDouble(args[11]);
-			log.info("marginalUtilityTravelingPt: "+ marginalUtilityTravelingPt);
-			
-			marginalUtilityTravelingTransitWalk = Double.parseDouble(args[12]);
-			log.info("marginalUtilityTravelingTransitWalk: "+ marginalUtilityTravelingTransitWalk);
-			
-			marginalUtilityTravelingWalk = Double.parseDouble(args[13]);
-			log.info("marginalUtilityTravelingWalk: "+ marginalUtilityTravelingWalk);
-			
-			marginalUtilityTravelingBicycle = Double.parseDouble(args[14]);
-			log.info("marginalUtilityTravelingBicycle: "+ marginalUtilityTravelingBicycle);
-			
-			marginalUtilityTravelingRide = Double.parseDouble(args[15]);
-			log.info("marginalUtilityTravelingRide: "+ marginalUtilityTravelingRide);
-			
-			useCongestedCarRouterForRide = Boolean.parseBoolean(args[16]);
-			log.info("useCongestedCarRouterForRide: "+ useCongestedCarRouterForRide);
+			useDurationBasedTimeAllocationMutator = Boolean.parseBoolean(args[6]);
+			log.info("useDurationBasedTimeAllocationMutator: "+ useDurationBasedTimeAllocationMutator);
 
 		} else {
 			
 			configFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_3_ik/config_be_300_mode-choice_test.xml";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be_300_test_7/";
 			runId = "test-run";
-			ascCar = -1.;
-			ascPt = -1.;
-			ascWalk = 0.;
-			ascBicycle = -1.;
-			ascRide = -1.;
 		}
 		
-		RunMATSim6 runner = new RunMATSim6();
-		runner.run(configFile, outputDirectory, runId);
+		RunOpenBerlinScenario runner = new RunOpenBerlinScenario();
+		runner.run();
 	}
 
-	public void run(String configFile, String outputDirectory, String runId) {
+	public void run() {
 		
 		Config config = ConfigUtils.loadConfig(configFile);
 		
@@ -146,50 +99,42 @@ public class RunMATSim6 {
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
 		
-		config.planCalcScore().getModes().get(TransportMode.car).setConstant(ascCar);
-		config.planCalcScore().getModes().get(TransportMode.pt).setConstant(ascPt);
-		config.planCalcScore().getModes().get(TransportMode.transit_walk).setConstant(ascTransitWalk);
-		config.planCalcScore().getModes().get(TransportMode.walk).setConstant(ascWalk);
-		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
-		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
-
-		config.planCalcScore().getModes().get(TransportMode.car).setMarginalUtilityOfTraveling(marginalUtilityTravelingCar);
-		config.planCalcScore().getModes().get(TransportMode.pt).setMarginalUtilityOfTraveling(marginalUtilityTravelingPt);
-		config.planCalcScore().getModes().get(TransportMode.transit_walk).setMarginalUtilityOfTraveling(marginalUtilityTravelingTransitWalk);
-		config.planCalcScore().getModes().get(TransportMode.walk).setMarginalUtilityOfTraveling(marginalUtilityTravelingWalk);
-		config.planCalcScore().getModes().get("bicycle").setMarginalUtilityOfTraveling(marginalUtilityTravelingBicycle);
-		config.planCalcScore().getModes().get(TransportMode.ride).setMarginalUtilityOfTraveling(marginalUtilityTravelingRide);
-
-		// own time allocation mutator strategy
 		final String STRATEGY_NAME = "durationBasedTimeMutator";
 
-		StrategySettings stratSets = new StrategySettings();
-		stratSets.setStrategyName(STRATEGY_NAME);
-		stratSets.setWeight(0.1);
-		stratSets.setSubpopulation("person");
-		config.strategy().addStrategySettings(stratSets);
+		if (useDurationBasedTimeAllocationMutator) {
+			// add own time allocation mutator strategy to config
+			StrategySettings stratSets = new StrategySettings();
+			stratSets.setStrategyName(STRATEGY_NAME);
+			stratSets.setWeight(0.1);
+			stratSets.setSubpopulation("person");
+			config.strategy().addStrategySettings(stratSets);
+		}
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 		
-		// add own time allocation mutator strategy
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addPlanStrategyBinding(STRATEGY_NAME).toProvider(DurationBasedTimeAllocationPlanStrategyProvider.class);
-			}
-		});
+		if (useDurationBasedTimeAllocationMutator) {
+			// add own time allocation mutator strategy to controler
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					addPlanStrategyBinding(STRATEGY_NAME).toProvider(DurationBasedTimeAllocationPlanStrategyProvider.class);
+				}
+			});
+		}
 		
-		// use the sbb pt raptor router
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				install(new SwissRailRaptorModule());
-			}
-		});
+		if (useSBBptRouter) {
+			// use the sbb pt raptor router
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					install(new SwissRailRaptorModule());
+				}
+			});
+		}
 		
-		if (useCongestedCarRouterForRide) {
-			// use the congested car router for the teleported ride mode
+		if (useCarTravelTimeForRide) {
+			// use the (congested) car travel time for the teleported ride mode
 			controler.addOverridingModule(new AbstractModule(){
 				@Override
 				public void install() {
@@ -225,7 +170,6 @@ public class RunMATSim6 {
 		filter3.setSubpopulation("person");
 		filter3.setPersonAttribute("brandenburg");
 		filter3.setPersonAttributeName("home-activity-zone");
-		filter3.preProcess(scenario);
 		filter3.preProcess(scenario);
 		filters.add(filter3);
 
