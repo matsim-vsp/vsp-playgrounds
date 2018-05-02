@@ -49,6 +49,7 @@ import signals.laemmer.model.SignalAnalyzer;
 import signals.sensor.LinkSensorManager;
 import signals.sensor.SensorBasedSignalControlerListener;
 import signals.sylvia.controler.DgSylviaConfig;
+import signals.gershenson.GershensonConfig;
 
 /**
  * Add this module if you want to simulate fixed-time signals, sylvia, laemmer, gershenson or the downstream signals or different control schemes together at different intersections (i.e. systems) in
@@ -62,6 +63,7 @@ public class CombinedSignalsModule extends AbstractModule {
 	private boolean alwaysSameMobsimSeed = false;
 	private DgSylviaConfig sylviaConfig = new DgSylviaConfig();
 	private LaemmerConfig laemmerConfig = new LaemmerConfig();
+	private GershensonConfig gershensonConfig = new GershensonConfig();
 	
 	@Override
 	public void install() {
@@ -79,6 +81,7 @@ public class CombinedSignalsModule extends AbstractModule {
 		if ((boolean) ConfigUtils.addOrGetModule(getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			bind(DgSylviaConfig.class).toInstance(sylviaConfig);
 			bind(LaemmerConfig.class).toInstance(laemmerConfig);
+			bind(GershensonConfig.class).toInstance(gershensonConfig);
 			bind(TtTotalDelay.class).asEagerSingleton();
 			bind(SignalModelFactory.class).to(CombinedSignalModelFactory.class);
 			addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
@@ -124,5 +127,9 @@ public class CombinedSignalsModule extends AbstractModule {
 
 	public void setLaemmerConfig(LaemmerConfig laemmerConfig) {
 		this.laemmerConfig = laemmerConfig;
+	}
+	
+	public void setGershensonConfig(GershensonConfig gershensonConfig) {
+		this.gershensonConfig = gershensonConfig;
 	}
 }

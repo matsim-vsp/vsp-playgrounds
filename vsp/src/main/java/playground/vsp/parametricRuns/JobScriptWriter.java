@@ -17,14 +17,17 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.parametricRuns;
+package playground.vsp.parametricRuns;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpException;
 import org.apache.log4j.Logger;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.utils.FileUtils;
 
 /**
  * Created by amit on 04.10.17.
@@ -57,8 +60,8 @@ public class JobScriptWriter {
 
     //main example
     public static void main(String[] args) {
-        String fileName = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/test.sh";
-        String locationOfClusterLogFile = FileUtils.RUNS_SVN+"/opdyts/equil/car,bicycle/testCalib/";
+        String fileName = "../../runs-svn/opdyts/equil/car,bicycle/testCalib/test.sh";
+        String locationOfClusterLogFile = "../../runs-svn/opdyts/equil/car,bicycle/testCalib/";
         String jobName = "run00";
         String [] additionalLines = {
                 "echo \"========================\"",
