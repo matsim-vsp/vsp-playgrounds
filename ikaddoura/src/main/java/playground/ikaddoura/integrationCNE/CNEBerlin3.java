@@ -27,6 +27,8 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
@@ -39,8 +41,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
 import playground.vsp.airPollution.exposure.GridTools;

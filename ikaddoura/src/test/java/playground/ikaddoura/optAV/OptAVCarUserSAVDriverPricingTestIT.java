@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -44,7 +45,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.ikaddoura.optAV.OptAVConfigGroup.TollingApproach;
 
 /**

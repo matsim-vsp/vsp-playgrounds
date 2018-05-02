@@ -23,6 +23,9 @@ package utils;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionModule;
+import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -33,10 +36,6 @@ import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionModule;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
-import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;

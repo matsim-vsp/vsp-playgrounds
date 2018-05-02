@@ -28,6 +28,18 @@ import org.junit.Test;
 import org.matsim.analysis.ScoreStatsControlerListener.ScoreItem;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
+import org.matsim.contrib.decongestion.DecongestionControlerListener;
+import org.matsim.contrib.decongestion.DecongestionModule;
+import org.matsim.contrib.decongestion.data.DecongestionInfo;
+import org.matsim.contrib.decongestion.handler.DelayAnalysis;
+import org.matsim.contrib.decongestion.handler.IntervalBasedTolling;
+import org.matsim.contrib.decongestion.handler.PersonVehicleTracker;
+import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
+import org.matsim.contrib.decongestion.tollSetting.DecongestionTollSetting;
+import org.matsim.contrib.decongestion.tollSetting.DecongestionTollingBangBang;
+import org.matsim.contrib.decongestion.tollSetting.DecongestionTollingPID;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -35,17 +47,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
-
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
-import playground.ikaddoura.decongestion.data.DecongestionInfo;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTolling;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTollingAll;
-import playground.ikaddoura.decongestion.handler.PersonVehicleTracker;
-import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.decongestion.tollSetting.DecongestionTollSetting;
-import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingBangBang;
-import playground.ikaddoura.decongestion.tollSetting.DecongestionTollingPID;
 
 /**
  * 

@@ -30,6 +30,7 @@ import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.Config;
@@ -43,7 +44,6 @@ import org.matsim.facilities.ActivityFacilities;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**

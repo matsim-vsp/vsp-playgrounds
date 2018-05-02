@@ -30,14 +30,14 @@ import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.decongestion.data.DecongestionInfo;
+import org.matsim.contrib.decongestion.handler.IntervalBasedTolling;
 import org.matsim.contrib.noise.personLinkMoneyEvents.PersonLinkMoneyEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.decongestion.data.DecongestionInfo;
-import playground.ikaddoura.decongestion.handler.IntervalBasedTolling;
 import playground.ikaddoura.optAV.OptAVConfigGroup;
 import playground.ikaddoura.optAV.SAVPassengerTracker;
 

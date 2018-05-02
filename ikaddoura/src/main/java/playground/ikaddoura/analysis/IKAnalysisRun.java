@@ -32,6 +32,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.contrib.noise.personLinkMoneyEvents.CombinedPersonLinkMoneyEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -57,7 +58,6 @@ import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
  * 
