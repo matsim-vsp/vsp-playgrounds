@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
@@ -38,7 +39,6 @@ import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
-import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.vehicles.Vehicle;
 
 /**
@@ -75,14 +75,14 @@ public class SAVPassengerTracker implements PersonDepartureEventHandler, PersonA
 	
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		if (event.getLegMode().equals(TaxiModule.TAXI_MODE)) {
+		if (event.getLegMode().equals(TransportMode.taxi)) {
 			currentTaxiPassengers.add(event.getPersonId());
 		}
 	}
 	
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
-		if (event.getLegMode().equals(TaxiModule.TAXI_MODE)) {
+		if (event.getLegMode().equals(TransportMode.taxi)) {
 			currentTaxiPassengers.remove(event.getPersonId());
 		}
 	}

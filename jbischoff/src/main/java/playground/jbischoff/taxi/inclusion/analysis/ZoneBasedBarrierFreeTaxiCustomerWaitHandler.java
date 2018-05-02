@@ -29,7 +29,6 @@ import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.*;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.taxi.run.*;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -80,7 +79,7 @@ public class ZoneBasedBarrierFreeTaxiCustomerWaitHandler implements PersonDepart
 	    @Override
 	    public void handleEvent(PersonDepartureEvent event){
 	    	
-	        if (!event.getLegMode().equals(TaxiModule.TAXI_MODE))
+	        if (!event.getLegMode().equals(TransportMode.taxi))
 	            return;
 	        if (onlyBarrierFreeRequests){
 	        	if (!event.getPersonId().toString().startsWith("hc_")){

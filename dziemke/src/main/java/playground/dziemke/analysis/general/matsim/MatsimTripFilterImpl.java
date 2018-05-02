@@ -36,6 +36,9 @@ public class MatsimTripFilterImpl implements TripFilter {
     private String activityTypeBeforeTrip;
     private boolean onlyAnalyzeTripsWithActivityTypeAfterTrip;
     private String activityTypeAfterTrip;
+    
+    private boolean excludeActivityType;
+    private String excludedActivityType;
 
     private boolean onlyAnalyzeTripsDoneByPeopleInAgeRange; // "age"; this requires setting a CEMDAP file
     private int minAge = -1; // typically "x0"
@@ -47,6 +50,14 @@ public class MatsimTripFilterImpl implements TripFilter {
 
     private Network network;
     private Geometry areaGeometry;
+
+
+    private long tripCounter = 0;
+    private long nextCounterMsg = 1;
+
+    public MatsimTripFilterImpl() {
+        log.info("Create Matsim Trip Filter");
+    }
 
     public void activateMode(String... mode) {
         onlyAnalyzeTripsWithMode = true;
@@ -103,13 +114,24 @@ public class MatsimTripFilterImpl implements TripFilter {
         this.minDepartureTime_s = minDepartureTime_s;
         this.maxDepartureTime_s = maxDepartureTime_s;
     }
+    
+
+	public void activateExcludeActivityType(String excludedActivityType) {
+		excludeActivityType = true;
+		this.excludedActivityType = excludedActivityType;
+	}
 
     public List<? extends Trip> filter(List<? extends Trip> tripMap) {
         List<MatsimTrip> trips = new LinkedList<>();
         boolean printedWarn1 = false;
         boolean printedWarn2 = false;
 
+        log.info("# of trips: " + tripMap.size());
+
         for (Trip currentTrip : tripMap) {
+
+            processCounter(tripMap.size());
+
             MatsimTrip trip = (MatsimTrip)currentTrip;
             // Choose if trip will be considered
             if (onlyAnalyzeTripInteriorOfArea || onlyAnalyzeTripsStartingOrEndingInArea) {
@@ -172,7 +194,11 @@ public class MatsimTripFilterImpl implements TripFilter {
                     continue;
                 }
             }
-            
+            if (excludeActivityType) {
+                if (trip.getActivityTypeAfterTrip().equals(excludedActivityType) || trip.getActivityTypeBeforeTrip().equals(excludedActivityType)) {
+                    continue;
+                }
+            }
             if (onlyAnalyzeTripsInDepartureTimeWindow && (trip.getDepartureTime_s()) > maxDepartureTime_s) {
                 continue;
             }
@@ -184,7 +210,21 @@ public class MatsimTripFilterImpl implements TripFilter {
             trips.add(trip);
         }
 
+        log.info("Number of filtered trips: " + trips.size() + " ~ "
+                + (double)Math.round((((double)trips.size()/tripMap.size())*100)*100)/100 + "% ");
+
         return trips;
+    }
+
+    private void processCounter(long tripSize) {
+        this.tripCounter++;
+        if (this.tripCounter == this.nextCounterMsg) {
+            this.nextCounterMsg *= 4;
+            Runtime rt = Runtime.getRuntime();
+            log.info(" trip # " + this.tripCounter + " ~ "
+                    + (double)Math.round((((double)tripCounter/tripSize)*100)*100)/100 + "% "
+                    + "Allocated Memory: " + rt.totalMemory() / 1000000 + " MB");
+        }
     }
 
     public String adaptOutputDirectory(String outputDirectory) {
@@ -207,6 +247,9 @@ public class MatsimTripFilterImpl implements TripFilter {
         }
         if (onlyAnalyzeTripsWithActivityTypeAfterTrip) {
             outputDirectory = outputDirectory + "_act-aft-" + activityTypeAfterTrip;
+        }
+        if (excludeActivityType) {
+            outputDirectory = outputDirectory + "_no-act-" + excludedActivityType;
         }
         if (onlyAnalyzeTripsDoneByPeopleInAgeRange) {
             outputDirectory = outputDirectory + "_age-" + minAge + "-" + maxAge;
@@ -248,5 +291,9 @@ public class MatsimTripFilterImpl implements TripFilter {
 
     private boolean isOnlyAnalyzeTripsDoneByPeopleInAgeRangeActivated(String identifier) {
         return identifier.contains("_age-");
+    }
+    
+    private boolean isExcludedActivityType(String identifier) {
+        return identifier.contains("_no-act-");
     }
 }

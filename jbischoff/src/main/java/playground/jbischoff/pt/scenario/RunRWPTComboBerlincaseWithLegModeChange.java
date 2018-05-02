@@ -23,6 +23,7 @@
 package playground.jbischoff.pt.scenario;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.intermodal.router.config.*;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.dvrp.data.FleetImpl;
@@ -61,7 +62,7 @@ public class RunRWPTComboBerlincaseWithLegModeChange {
 		Config config = ConfigUtils.loadConfig(configfile, new TaxiConfigGroup(), new DvrpConfigGroup(), new TaxiFareConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		DvrpConfigGroup.get(config).setMode(TaxiModule.TAXI_MODE);
+		DvrpConfigGroup.get(config).setMode(TransportMode.taxi);
 
 		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		config.checkConsistency();

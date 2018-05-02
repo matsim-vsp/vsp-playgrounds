@@ -19,7 +19,13 @@
 
 package playground.agarwalamit.opdyts.teleportationModes;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.math.Vector;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -32,7 +38,6 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.opdyts.MATSimCountingStateAnalyzer;
 import org.matsim.contrib.opdyts.SimulationStateAnalyzerProvider;
-import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.events.handler.EventHandler;
 
 /**

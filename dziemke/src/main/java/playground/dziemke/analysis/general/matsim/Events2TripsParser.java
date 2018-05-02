@@ -26,14 +26,15 @@ public class Events2TripsParser {
     private int noPreviousEndOfActivityCounter;
     private int personStuckCounter;
 
-    public Events2TripsParser(String configFile, String eventsFile, String networkFile) {
-        parse(configFile, eventsFile, networkFile);
+    public Events2TripsParser(String configFile, String eventsFile, String networkFile, boolean aggregateActivityByMainType) {
+        parse(configFile, eventsFile, networkFile, aggregateActivityByMainType);
     }
 
-    private void parse(String configFile, String eventsFile, String networkFile) {
+    private void parse(String configFile, String eventsFile, String networkFile, boolean aggregateActivityByMainType) {
         /* Events infrastructure and reading the events file */
         EventsManager eventsManager = EventsUtils.createEventsManager();
         TripHandler tripHandler = new TripHandler();
+        tripHandler.setAggregateActivityByMainType(aggregateActivityByMainType);
         eventsManager.addHandler(tripHandler);
         MatsimEventsReader eventsReader = new MatsimEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
@@ -52,7 +53,9 @@ public class Events2TripsParser {
         ConfigReader configReader = new ConfigReader(config);
         configReader.readFile(configFile);
 
-        TripInformationCalculator.calculateInformation(trips, network, config.plansCalcRoute().getNetworkModes());
+        log.info("Start calculating additional Information for Trips (f.e.: beeline distance)");
+        new TripInformationCalculator().calculateInformation(trips, network, config.plansCalcRoute().getNetworkModes());
+        log.info("Finished calculating additional Information for Trips (f.e.: beeline distance)");
 
         this.trips = trips;
     }

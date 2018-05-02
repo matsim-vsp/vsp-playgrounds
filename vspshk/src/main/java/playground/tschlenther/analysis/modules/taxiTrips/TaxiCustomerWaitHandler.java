@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.taxi.run.*;
 
 public class TaxiCustomerWaitHandler implements PersonDepartureEventHandler, PersonEntersVehicleEventHandler {
 
@@ -32,7 +32,7 @@ public class TaxiCustomerWaitHandler implements PersonDepartureEventHandler, Per
 	    
 	    @Override
 	    public void handleEvent(PersonDepartureEvent event){
-	        if (!event.getLegMode().equals(TaxiModule.TAXI_MODE))
+	        if (!event.getLegMode().equals(TransportMode.taxi))
 	            return;
 	        this.personsTaxiCallTime.put(event.getPersonId(), event.getTime());
 	    }

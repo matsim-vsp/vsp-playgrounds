@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Link;
@@ -33,9 +34,23 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
     private Vehicle2DriverEventHandler vehicle2driver = new Vehicle2DriverEventHandler();
 
+    private static final String PT_INTERACTION = "pt interaction";
+
+    private boolean aggregateActivityByMainType = false;
+
+    public void setAggregateActivityByMainType(boolean aggregateActivityByMainType) {
+        this.aggregateActivityByMainType = aggregateActivityByMainType;
+    }
+
+    private String aggregateActivityByMainType(String activity) {
+        return activity.split("_")[0];
+    }
 
     @Override
     public void handleEvent(ActivityEndEvent event) {
+        //if its pt interaction, skip it
+        if (event.getActType().equals(PT_INTERACTION)) return;
+
         // store information from event to variables and print the information on console
         //String eventType = event.getEventType();
         Id<Link> linkId = event.getLinkId();
@@ -43,6 +58,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
         Id<Person> personId = event.getPersonId();
         double time_s = event.getTime();
         String actType = event.getActType();
+        if (aggregateActivityByMainType) actType = aggregateActivityByMainType(actType);
         //Id facilityId =	event.getFacilityId();
         //System.out.println("Type: " + eventType + " - LinkId: " + linkShortened + " - PersonId: " + personId.toString()
         //		+ " - Time: " + time/60/60 + " - ActType: " + actType + " - FacilityId: " + facilityId);
@@ -95,6 +111,19 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
     @Override
     public void handleEvent(ActivityStartEvent event) {
+        //if its pt interaction, skip it
+        if (event.getActType().equals(PT_INTERACTION)) {
+
+            Id<Person> personId = event.getPersonId();
+            Id<Trip> tripId = Id.create(personId + "_" + activityEndCount.get(personId), Trip.class);
+            MatsimTrip matsimTrip = trips.get(tripId);
+            if (matsimTrip != null) {
+                matsimTrip.setLegMode(TransportMode.pt);
+                matsimTrip.setLegModeLock(true);
+            }
+            return;
+        }
+
         // store information from event to variables and print the information on console
         //String eventType = event.getEventType();
         Id<Link> linkId = event.getLinkId();
@@ -102,6 +131,7 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
         Id<Person> personId = event.getPersonId();
         double time_s = event.getTime();
         String actType = event.getActType();
+        if (aggregateActivityByMainType) actType = aggregateActivityByMainType(actType);
         //Id facilityId =	event.getFacilityId();
         //System.out.println("Type: " + eventType + " - LinkId: " + linkShortened + " - PersonId: " + personId.toString()
         //		+ " - Time: " + time/60/60 + " - ActType: " + actType + " - FacilityId: " + facilityId);
@@ -119,11 +149,12 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
 
         // add information to the object "Trip"
         Id<Trip> tripId = Id.create(personId + "_" + activityStartCount.get(personId), Trip.class);
-        if (trips.get(tripId) != null) {
-            trips.get(tripId).setArrivalLinkId(linkId);
-            trips.get(tripId).setArrivalTime_s(time_s);
+        MatsimTrip matsimTrip = trips.get(tripId);
+        if (matsimTrip != null) {
+            matsimTrip.setArrivalLinkId(linkId);
+            matsimTrip.setArrivalTime_s(time_s);
             //trips.get(tripId).setArrivalLegMode(legMode);
-            trips.get(tripId).setActivityTypeAfterTrip(actType);
+            matsimTrip.setActivityTypeAfterTrip(actType);
         } else {
             log.warn("No previous end of activity!");
             this.noPreviousEndOfActivityCounter++;
@@ -188,6 +219,9 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
         MatsimTrip fromMatsimTrip = trips.get(tripId);
         if (fromMatsimTrip != null) {
             // without trip there was no activity that ended before, ergo this person is not of interest for the analysis
+            if (legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.egress_walk) || legMode.equals(TransportMode.access_walk)) {
+                legMode = TransportMode.walk;
+            }
             fromMatsimTrip.setLegMode(legMode);
             if (tripmodeWarn) {
                 log.warn("Trip mode = Arrival leg mode; assumed that every leg has the same legMode");

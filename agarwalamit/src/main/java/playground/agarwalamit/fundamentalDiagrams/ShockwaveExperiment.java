@@ -36,6 +36,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
+
+import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
 import playground.agarwalamit.utils.FileUtils;
 
 /**
