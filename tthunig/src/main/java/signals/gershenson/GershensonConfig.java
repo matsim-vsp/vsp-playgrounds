@@ -3,11 +3,11 @@ package signals.gershenson;
 public class GershensonConfig {
 	private double storageCapacityOutlinkJam = 0.8;
 	//protected double maxRedTime = 15.0;
-	private double interGreenTime = 0.; //TODO default should be at least 2
+	private double interGreenTime = 5.; //TODO default should be at least 2
 	private double threshold = 13.33; //TODO should be higher
 	
 	private int lengthOfPlatoonTails = 2;
-	private double minimumGREENtime = 4;  //TODO should be higher maybe 20
+	private double minimumGREENtime = 5;  //TODO should be higher maybe 20
 	
 	//These are attributes for the Sensor
 	private double monitoredPlatoonTail = 25.;
