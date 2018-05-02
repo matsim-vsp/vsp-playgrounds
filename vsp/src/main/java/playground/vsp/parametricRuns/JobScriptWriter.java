@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.parametricRuns;
+package playground.vsp.parametricRuns;
 
 import java.io.*;
 import com.jcraft.jsch.ChannelSftp;
