@@ -48,13 +48,6 @@
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
 			<version>-SNAPSHOT</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
-		<dependency>
-			<groupId>com.jcraft</groupId>
-			<artifactId>jsch</artifactId>
-			<version>0.1.54</version>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
 		<dependency>
 			<groupId>org.apache.spark</groupId>
