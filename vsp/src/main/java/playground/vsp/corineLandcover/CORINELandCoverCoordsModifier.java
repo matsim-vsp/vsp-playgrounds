@@ -82,8 +82,9 @@ public class CORINELandCoverCoordsModifier {
     private final String homeActivityPrefix;
 
     public CORINELandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
-                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix) {
-        this.corineLandCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, DataSource.UrbanAtlas);
+                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix, String dataSource) {
+
+    	this.corineLandCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, DataSource.valueOf(dataSource));
         LOG.info("Loading population from plans file " + matsimPlans);
         this.population = getPopulation(matsimPlans);
 
@@ -126,6 +127,7 @@ public class CORINELandCoverCoordsModifier {
         boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
         String homeActivityPrefix = "home";
+        String dataSource = DataSource.UrbanAtlas.toString();
 
         if (args.length > 0) {
             corineLandCoverFile = args[0];
@@ -139,6 +141,7 @@ public class CORINELandCoverCoordsModifier {
             sameHomeActivity = Boolean.valueOf(args[8]);
             homeActivityPrefix = args[9];
             outPlans = args[10];
+            dataSource = args[11];
         }
 
         Map<String, String> shapeFileToFeatureKey = new HashMap<>();
@@ -151,7 +154,9 @@ public class CORINELandCoverCoordsModifier {
                 simplifyGeom,
                 combiningGeoms,
                 sameHomeActivity,
-                homeActivityPrefix);
+                homeActivityPrefix,
+                dataSource);
+        
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
     }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
+import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
 
 public class RunCorineLandCoverCoordsModifier {
 	
@@ -44,7 +45,7 @@ public class RunCorineLandCoverCoordsModifier {
 	    shapeFileToFeatureKey.put(zonalShapeFile, zoneIdTag);
 	
 	    CORINELandCoverCoordsModifier plansFilterForCORINELandCover = new CORINELandCoverCoordsModifier(inputPlansFile, shapeFileToFeatureKey,
-	            corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity, homeActivityPrefix);
+	            corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity, homeActivityPrefix, DataSource.Corine.toString());
 	    plansFilterForCORINELandCover.process();
 	    plansFilterForCORINELandCover.writePlans(outputPlansFile);
     }
