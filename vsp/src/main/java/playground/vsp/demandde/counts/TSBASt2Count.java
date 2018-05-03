@@ -42,10 +42,10 @@ public class TSBASt2Count {
 	
 	private static final Logger logger = Logger.getLogger(TSBASt2Count.class);
 
-	private final static String bastInputFile = "C:/Users/Work/VSP/BASt/2016_A_S.txt";
+	private final static String bastInputFile = "C:/Users/Work/VSP/BASt/2016_B_S.txt";
 	
 	//note: should end with .gz since it is probably quite big
-	private final static String OUTPUTDIR = "C:/Users/Work/VSP/BASt/2016_A_S_TUE_THU_KFZ.xml.gz";
+	private final static String OUTPUTDIR = "C:/Users/Work/VSP/BASt/2016_B_S_TUE_THU_KFZ.xml.gz";
 	
 	private final static int BEGINNING_WEEKDAY = 2;
 	private final static int ENDING_WEEKDAY = 4;
