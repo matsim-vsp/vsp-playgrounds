@@ -172,7 +172,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private final AbstractQLink.QLinkInternalInterface qLink;
 	private final Id<Lane> id;
 	private static int spaceCapWarningCount = 0;
-	final static double HOLE_SPEED_KM_H = 20.0;
+	final static double HOLE_SPEED_KM_H = 15.0 ;//+ MatsimRandom.getRandom().nextDouble() * 5;
 
 	private final double length ;
 	private double unscaledFlowCapacity_s = Double.NaN ;
