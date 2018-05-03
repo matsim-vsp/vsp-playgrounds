@@ -188,7 +188,7 @@ public class KNAccidentScenario {
 				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
 //				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
 //				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
-				this.addMobsimListenerBinding().to( WithinDayReRouteMobsimListener.class );
+//				this.addMobsimListenerBinding().to( WithinDayReRouteMobsimListener.class );
 
 			}
 		}) ;
