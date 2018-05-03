@@ -30,10 +30,10 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.contrib.signals.data.ambertimes.v10.IntergreenTimesData;
-import org.matsim.contrib.signals.data.ambertimes.v10.IntergreensForSignalSystemData;
+import org.matsim.contrib.signals.data.intergreens.v10.IntergreenTimesData;
 import org.matsim.contrib.signals.data.intergreens.v10.IntergreenTimesDataImpl;
 import org.matsim.contrib.signals.data.intergreens.v10.IntergreenTimesWriter10;
+import org.matsim.contrib.signals.data.intergreens.v10.IntergreensForSignalSystemData;
 import org.matsim.contrib.signals.data.intergreens.v10.IntergreensForSignalSystemDataImpl;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataImpl;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlReader20;
