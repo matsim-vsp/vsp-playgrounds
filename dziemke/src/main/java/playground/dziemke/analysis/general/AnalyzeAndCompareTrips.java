@@ -49,7 +49,8 @@ public class AnalyzeAndCompareTrips {
 	// Parameters
 	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
 //	private static final String RUN_ID = "be_253"; // To be adjusted
-	private static final String RUN_ID = "be400mt_58_v6"; // To be adjusted
+//	private static final String RUN_ID = "be400mt_58_v6"; // To be adjusted
+	private static final String RUN_ID = "b500_2h"; // To be adjusted
 
 	// Input and output
 	private static final String NETWORK_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_network.xml.gz";
@@ -73,14 +74,15 @@ public class AnalyzeAndCompareTrips {
 		
 		// Set filters if desired
 		MatsimTripFilterImpl matsimTripFilter = new MatsimTripFilterImpl();
-//		matsimTripFilter.activateMode(TransportMode.car);
+		matsimTripFilter.activateMode(TransportMode.car);
 //		matsimTripFilter.activateMode("pt", "ptSlow");
-		matsimTripFilter.activateMode(TransportMode.pt);
+//		matsimTripFilter.activateMode(TransportMode.pt);
 //		matsimTripFilter.activateMode("ptSlow");
 //		matsimTripFilter.activateMode("bicycle");
 //		matsimTripFilter.activateMode(TransportMode.walk);
 		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
 		matsimTripFilter.activateDist(0, 100);
+		matsimTripFilter.activateExcludeActivityType("freight");
 //		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
 		List<Trip> filteredMatsimTrips = TripFilter.castTrips(matsimTripFilter.filter(matsimTrips));
@@ -98,10 +100,11 @@ public class AnalyzeAndCompareTrips {
 		
 		// Set filters if desired
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
-//		srvTripFilter.activateMode(TransportMode.car);
-		srvTripFilter.activateMode(TransportMode.pt);
+		srvTripFilter.activateMode(TransportMode.car);
+//		srvTripFilter.activateMode(TransportMode.pt);
 //		srvTripFilter.activateMode(TransportMode.bike);
 //		srvTripFilter.activateMode(TransportMode.ride);
+//		srvTripFilter.activateMode(TransportMode.walk);
 		srvTripFilter.activateDist(0, 100);
 //		srvTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);

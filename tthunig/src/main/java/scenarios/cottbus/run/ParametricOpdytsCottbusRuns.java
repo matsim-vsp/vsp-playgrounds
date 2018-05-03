@@ -20,7 +20,7 @@
  */
 package scenarios.cottbus.run;
 
-import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
+import playground.vsp.parametricRuns.PrepareParametricRuns;
 
 /**
  * @author tthunig

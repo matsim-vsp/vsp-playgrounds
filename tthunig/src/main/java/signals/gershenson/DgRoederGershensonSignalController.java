@@ -43,6 +43,7 @@ import org.matsim.lanes.data.LanesToLinkAssignment;
 
 import com.google.inject.Provider;
 
+import signals.laemmer.model.LaemmerConfig;
 import signals.sensor.LinkSensorManager;
 
 
@@ -67,18 +68,22 @@ public class DgRoederGershensonSignalController implements SignalController {
 	
 	public final static String IDENTIFIER = "gretherRoederGershensonSignalControl";
 	
+	
+	
 	public final static class SignalControlProvider implements Provider<SignalController> {
 		private final LinkSensorManager sensorManager;
 		private final Scenario scenario;
-
-		public SignalControlProvider(LinkSensorManager sensorManager, Scenario scenario) {
+		private final GershensonConfig gershensonConfig;
+		
+		public SignalControlProvider(LinkSensorManager sensorManager, Scenario scenario, GershensonConfig gershensonConfig) {
 			this.sensorManager = sensorManager;
 			this.scenario = scenario;
+			this.gershensonConfig = gershensonConfig;
 		}
 
 		@Override
 		public SignalController get() {
-			return new DgRoederGershensonSignalController(scenario, sensorManager);
+			return new DgRoederGershensonSignalController(scenario, sensorManager, gershensonConfig);
 		}
 	}
 	
@@ -113,16 +118,17 @@ public class DgRoederGershensonSignalController implements SignalController {
 	//TODO fuer Setter in Config-Datei
 	//protected int tGreenMin =  0; // time in seconds
 	//protected int minCarsTime = 0; //
-	protected double storageCapacityOutlinkJam = 0.8;
-	//protected double maxRedTime = 15.0;
-	protected double interGreenTime = 0.; //TODO default should be at least 2
-	protected double threshold = 13.33; //TODO should be higher
 	
-	protected int lengthOfPlatoonTails = 2;
-	protected int minimumGREENtime = 4;  //TODO should be higher maybe 20
-	protected double monitoredPlatoonTail = 25.;
-	protected double monitoredDistance = 50.;
-	protected double minmumDistanceBehindIntersection =10.;
+	//protected double storageCapacityOutlinkJam = 0.8;
+
+	//protected double interGreenTime = 0.; //TODO default should be at least 2
+	//protected double threshold = 13.33; //TODO should be higher
+	
+	//protected int lengthOfPlatoonTails = 2;
+	//protected int minimumGREENtime = 4;  //TODO should be higher maybe 20
+	//protected double monitoredPlatoonTail = 25.;
+	//protected double monitoredDistance = 50.;
+	//protected double minmumDistanceBehindIntersection =10.;
 	
 	//protected boolean outLinkJam;
 	//protected boolean maxRedTimeActive = false;
@@ -137,11 +143,14 @@ public class DgRoederGershensonSignalController implements SignalController {
 	//protected double signalgrouptimecounter = 0.0;
 	private LinkSensorManager sensorManager;
 	private Scenario scenario;
+	private GershensonConfig gershensonConfig;
+	
 	private Map<Id<SignalGroup>, SignalGroupMetadata> signalGroupIdMetadataMap;	
 	
-	private DgRoederGershensonSignalController(Scenario scenario, LinkSensorManager sensorManager) {
+	private DgRoederGershensonSignalController(Scenario scenario, LinkSensorManager sensorManager, GershensonConfig gershensonConfig) {
 		this.scenario = scenario;
 		this.sensorManager = sensorManager;
+		this.gershensonConfig = gershensonConfig;
 	}
 
 	private void registerAndInitializeSensorManager() {
@@ -155,8 +164,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 			for (Link inLink : metadata.getInLinks()){
 				this.sensorManager.registerNumberOfCarsMonitoring(inLink.getId());
 				log.info("Register Inlink "+ inLink.getId().toString());
-				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), monitoredPlatoonTail);
-				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), monitoredDistance);
+				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), gershensonConfig.getMonitoredPlatoonTail());
+				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), gershensonConfig.getMonitoredDistance());
 			}
 		}	
 	}
@@ -239,8 +248,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
 		
 			if (group.getState().equals(SignalGroupState.RED)){
-				this.system.scheduleOnset(timeSeconds + interGreenTime, group.getId());
-				timecounter.put(group.getId(), -interGreenTime);
+				this.system.scheduleOnset(timeSeconds + gershensonConfig.getInterGreenTime(), group.getId());
+				timecounter.put(group.getId(), - gershensonConfig.getInterGreenTime());
 				activeSignalGroup = group;
 			} else {
 				this.system.scheduleDropping(timeSeconds, group.getId());
@@ -258,7 +267,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		}
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getInLinks()) {
 			//Integer cars = this.sensorManager.getNumberOfCarsOnLink(link.getId());
-			Integer cars = this.sensorManager.getNumberOfCarsInDistance(link.getId(), monitoredDistance, now); 
+			Integer cars = this.sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredDistance(), now); 
 			approachingVehiclesMap.get(group.getId()).put(link.getId(), cars);
 		} 
 	}
@@ -269,9 +278,9 @@ public class DgRoederGershensonSignalController implements SignalController {
 		}
 
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getOutLinks()) {
-			double storageCap = ((link.getLength()-minmumDistanceBehindIntersection) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
+			double storageCap = ((link.getLength()- gershensonConfig.getMinmumDistanceBehindIntersection()) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
 			boolean jammed = false;
-			if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * this.storageCapacityOutlinkJam)){
+			if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * gershensonConfig.getStorageCapacityOutlinkJam())){
 				jammed = true;
 			}
 			jammedOutLinkMap.get(group.getId()).put(link.getId(), jammed);
@@ -324,8 +333,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 		Boolean VehInR = false;
 		for (Link link : signalGroupIdMetadataMap.get(signal).getInLinks()) {
 			if(!VehInR) {
-				if(sensorManager.getNumberOfCarsInDistance(link.getId(), monitoredPlatoonTail, time) < lengthOfPlatoonTails && 
-						sensorManager.getNumberOfCarsInDistance(link.getId(), monitoredPlatoonTail, time) > 0) {
+				if(sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredPlatoonTail(), time) < gershensonConfig.getLengthOfPlatoonTails() && 
+						sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredPlatoonTail(), time) > 0) {
 					VehInR = true;
 					//log.info("There were Vehicles in R in " + signal + " at time " +time + "s on link " + link.getId() );
 				}
@@ -480,13 +489,13 @@ public class DgRoederGershensonSignalController implements SignalController {
 		//the minimal green time yet - Dont't switch
 								int counterRule2 = 0;
 								for (SignalGroup group : this.system.getSignalGroups().values()) {
-									if (group.getState().equals(SignalGroupState.GREEN) && timecounter.get(group.getId())<minimumGREENtime) counterRule2++;
+									if (group.getState().equals(SignalGroupState.GREEN) && timecounter.get(group.getId())< gershensonConfig.getMinimumGREENtime()) counterRule2++;
 								}
 								if (counterRule2==0) {
 		//Rule 1
 									LinkedList<SignalGroup> potentialRule1 = new LinkedList<SignalGroup>();
 									for (SignalGroup group : this.system.getSignalGroups().values()) {
-										if (group.getState().equals(SignalGroupState.RED) && counter.get(group.getId())>threshold) {
+										if (group.getState().equals(SignalGroupState.RED) && counter.get(group.getId())>gershensonConfig.getThreshold()) {
 											potentialRule1.add(group);
 										}
 									}
