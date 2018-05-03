@@ -8,7 +8,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.data.conflicts.ConflictData;
-import org.matsim.contrib.signals.data.conflicts.ConflictingDirections;
+import org.matsim.contrib.signals.data.conflicts.IntersectionDirections;
 import org.matsim.contrib.signals.data.conflicts.Direction;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
@@ -52,7 +52,7 @@ public class Restriction2ConflictData {
 				Id<SignalSystem> signalSystemId = nodeId2signalSystemId.get(nodeIdFullNetwork);
 
 				// create ConflictingDirections for system and add to conflictData
-				ConflictingDirections conflictingDirections = conflictData.getFactory()
+				IntersectionDirections conflictingDirections = conflictData.getFactory()
 						.createConflictingDirectionsContainerForIntersection(signalSystemId, nodeIdFullNetwork);
 				conflictData.addConflictingDirectionsForIntersection(signalSystemId, nodeIdFullNetwork,
 						conflictingDirections);

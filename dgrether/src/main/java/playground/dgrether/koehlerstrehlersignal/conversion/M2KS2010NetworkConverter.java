@@ -30,14 +30,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.conflicts.ConflictingDirections;
+import org.matsim.contrib.signals.data.conflicts.IntersectionDirections;
 import org.matsim.contrib.signals.data.conflicts.Direction;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
@@ -207,7 +206,7 @@ public class M2KS2010NetworkConverter {
 			}
 			if (signalsData.getConflictingDirectionsData() != null) {
 				// create restrictions based on data about conflicting directions
-				ConflictingDirections conflictsOfThisSystem = signalsData.getConflictingDirectionsData().getConflictsPerSignalSystem().get(system.getId());
+				IntersectionDirections conflictsOfThisSystem = signalsData.getConflictingDirectionsData().getConflictsPerSignalSystem().get(system.getId());
 				for (Direction dir : conflictsOfThisSystem.getDirections().values()) {
 					// directions are defined between from and to links. lights in the ks network are also defined between from and to links. i.e. every direction corresponds to exactly one light
 					Id<DgStreet> lightId = fromToLink2LightRelation.get(new Tuple<Id<Link>, Id<Link>>(dir.getFromLink(), dir.getToLink()));
@@ -262,7 +261,7 @@ public class M2KS2010NetworkConverter {
 								} else {
 									// different group - do not allow green at the same time (as for Nicos Laemmer implementation)
 									// i.e. add all corresponding lights as rlight with allowed=false
-									restriction.addAllowedLight(otherLightId);
+									restriction.addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
 								}
 							}
 						}

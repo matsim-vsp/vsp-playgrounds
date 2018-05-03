@@ -35,7 +35,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.conflicts.ConflictingDirections;
+import org.matsim.contrib.signals.data.conflicts.IntersectionDirections;
 import org.matsim.contrib.signals.data.conflicts.Direction;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
@@ -201,7 +201,7 @@ public class NetworkLanesSignalsSimplifier {
 									
 									if (signalsData.getConflictingDirectionsData() != null) {
 										// correct conflicting directions data at from node of inlink and tonode of outlink
-										ConflictingDirections fromNodeConflictData = signalsData.getConflictingDirectionsData().getConflictsPerNode().get(inLink.getFromNode().getId());
+										IntersectionDirections fromNodeConflictData = signalsData.getConflictingDirectionsData().getConflictsPerNode().get(inLink.getFromNode().getId());
 										if (fromNodeConflictData != null) {
 											for (Direction dir : fromNodeConflictData.getDirections().values()) {
 												if (dir.getToLink().equals(inLink.getId())) {
@@ -209,7 +209,7 @@ public class NetworkLanesSignalsSimplifier {
 												}
 											}
 										}
-										ConflictingDirections toNodeConflictData = signalsData.getConflictingDirectionsData().getConflictsPerNode().get(outLink.getToNode().getId());
+										IntersectionDirections toNodeConflictData = signalsData.getConflictingDirectionsData().getConflictsPerNode().get(outLink.getToNode().getId());
 										if (toNodeConflictData != null) {
 											for (Direction dir : toNodeConflictData.getDirections().values()) {
 												if (dir.getFromLink().equals(outLink.getId())) {
