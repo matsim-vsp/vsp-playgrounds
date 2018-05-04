@@ -392,7 +392,7 @@ public class FundamentalDiagramDataGenerator {
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
 			public void install() {
-				this.bindMobsim().toProvider(DynamicPCUFDQSimProvider.class);
+				this.bindMobsim().toProvider(FDQSimProvider.class);
 			}
 		});
 
