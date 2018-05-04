@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -51,7 +52,7 @@ import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGen
 
 public class RunDynamicPCUExample {
 
-    public static final String VEHICLE_SPEED = "vehicleSpeed";
+    static final String VEHICLE_SPEED = "vehicleSpeed";
 
     public static void main(String[] args) {
 
@@ -109,11 +110,14 @@ public class RunDynamicPCUExample {
             this.linkEnterTime.clear();
         }
 
+        //todo may be just get track speed and then put it to vehicle type....
         @Override
         public void handleEvent(LinkLeaveEvent event) {
-            double speed = network.getLinks().get(event.getLinkId()).getLength() / (event.getTime()-this.linkEnterTime.get(event.getVehicleId()));
+            Link l = network.getLinks().get(event.getLinkId());
+            double speed = l.getLength() / (event.getTime()-this.linkEnterTime.get(event.getVehicleId()));
             //TODO this means, the speed on last link ...not on the current link.
             vehicles.getVehicleAttributes().putAttribute(event.getVehicleId().toString(), VEHICLE_SPEED, speed );
+            l.getAttributes().putAttribute(event.getVehicleId().toString(), speed);
         }
 
         @Override

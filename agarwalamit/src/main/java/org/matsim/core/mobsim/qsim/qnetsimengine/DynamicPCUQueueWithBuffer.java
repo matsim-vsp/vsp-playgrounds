@@ -234,7 +234,6 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private void addToBuffer(final QVehicle veh) {
 		// yy might make sense to just accumulate to "zero" and go into negative when something is used up.
 		// kai/mz/amit, mar'12
-
 		double now = context.getSimTimer().getTimeOfDay() ;
 		flowcap_accumulate.addValue(-veh.getFlowCapacityConsumptionInEquivalents(), now);
 
