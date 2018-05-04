@@ -21,7 +21,6 @@ package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 import java.util.Map;
 import org.matsim.api.core.v01.Customizable;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.core.scenario.CustomizableUtils;
 import org.matsim.utils.objectattributes.attributable.Attributable;
 import org.matsim.utils.objectattributes.attributable.Attributes;
