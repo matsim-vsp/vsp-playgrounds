@@ -117,7 +117,7 @@ public class RunDynamicPCUExample {
         public void handleEvent(LinkLeaveEvent event) {
             if (event.getLinkId().equals( this.fdNetworkGenerator.getLastLinkIdOfTrack())) {
                 double speed = this.fdNetworkGenerator.getLengthOfTrack() / (event.getTime() - this.linkEnterTime.get(event.getVehicleId()));
-                ((AmitQVehicle)vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute(VEHICLE_SPEED, speed);
+                ((AttributableVehicle)vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute(VEHICLE_SPEED, speed);
             }
         }
 

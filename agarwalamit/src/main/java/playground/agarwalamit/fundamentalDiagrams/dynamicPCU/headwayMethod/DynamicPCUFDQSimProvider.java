@@ -15,12 +15,11 @@ import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine;
-import org.matsim.core.mobsim.qsim.qnetsimengine.AttributableQVehicle;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDTrackMobsimAgent;
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
@@ -87,13 +86,15 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 					agent.setGlobalFlowDynamicsUpdator(globalFlowDynamicsUpdator);
 					qSim.insertAgentIntoMobsim(agent);
 
-					final AttributableQVehicle vehicle = new AttributableQVehicle(VehicleUtils.getFactory()
-																							  .createVehicle(Id.create(agent.getId(), Vehicle.class),
-																									  modeToVehicleTypes.get(travelMode)));
+					final QVehicle vehicle = new QVehicle(
+//							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class),
+							new AttributableVehicle(Id.create(agent.getId(), Vehicle.class),
+									modeToVehicleTypes.get(travelMode)));
 					vehicle.setDriver(agent);
+					scenario.getVehicles().removeVehicle(vehicle.getId());
+					scenario.getVehicles().addVehicle(vehicle.getVehicle());
 					agent.setVehicle(vehicle);
 					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
-//					qSim.createAndParkVehicleOnLink(vehicle.getVehicle(), linkId4VehicleInsertion);
 					qSim.addParkedVehicle(vehicle, linkId4VehicleInsertion);
 				}
 			}
