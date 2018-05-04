@@ -582,6 +582,10 @@ public class FundamentalDiagramDataGenerator {
 		LOG.addAppender(appender);
 	}
 
+	public static FDNetworkGenerator getFdNetworkGenerator() {
+		return fdNetworkGenerator;
+	}
+
 	static class MySimplifiedRoundAndRoundAgent implements MobsimAgent, MobsimDriverAgent {
 
 		private static final Id<Link> FIRST_LINK_ID_OF_MIDDEL_BRANCH_OF_TRACK = fdNetworkGenerator.getFirstLinkIdOfMiddleLinkOfTrack();
