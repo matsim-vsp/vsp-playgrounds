@@ -17,18 +17,20 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
 import playground.agarwalamit.utils.FileUtils;
@@ -87,6 +89,12 @@ public class RunRaceTrackDynamicPCUExample {
         scenario.getConfig().controler().setOutputDirectory(outDir+outFolder);
 
         FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator( scenario);
+        fundamentalDiagramDataGenerator.addOverridingModules(new AbstractModule() {
+			@Override
+			public void install() {
+				addEventHandlerBinding().to(ChandraSikdarPCUUpdator.class);
+			}
+		});
         fundamentalDiagramDataGenerator.run();
     }
 }

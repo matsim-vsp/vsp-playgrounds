@@ -33,6 +33,10 @@ import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+
+import com.google.inject.Inject;
+
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
 import playground.agarwalamit.utils.NumberUtils;
 
@@ -51,14 +55,15 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     private final Map<Id<Vehicle>,String> vehicleId2Mode = new HashMap<>();
 
     private final Map<String, Double> vehicleTypeToLastNotedSpeed = new HashMap<>();
-    private final Map<String, Double> vehicleTypeToProjectedAreaRatio = new HashMap<>();
+    private final Map<String, Double> vehicleTypeToProjectedAreaRatio = new HashMap<>(); 
 
-    public ChandraSikdarPCUUpdator(final Scenario scenario, final Id<Link> trackingStartLink, final Id<Link> trackingEndLink, final double lengthOfTrack){
+    @Inject
+    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator){
         this.scenario = scenario;
-        this.trackingStartLink = trackingStartLink;
-        this.trackingEndLink = trackingEndLink;
+        this.trackingStartLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
+        this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
         this.resetVehicleTypeToSpeedMap();
-        this.lengthOfTrack = lengthOfTrack;
+        this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
     }
 
     @Override

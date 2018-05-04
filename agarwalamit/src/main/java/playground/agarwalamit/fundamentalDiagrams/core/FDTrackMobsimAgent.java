@@ -54,7 +54,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
 
     private GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
 
-    FDTrackMobsimAgent(Id<Person> agentId, double actEndTime, String travelMode, FDNetworkGenerator fdNetworkGenerator) {
+    public FDTrackMobsimAgent(Id<Person> agentId, double actEndTime, String travelMode, FDNetworkGenerator fdNetworkGenerator) {
         personId = agentId;
         mode = travelMode;
         this.actEndTime = actEndTime;
@@ -70,7 +70,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
         this.currentLinkId = originLinkId;
     }
 
-    void setGlobalFlowDynamicsUpdator(GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator){
+    public void setGlobalFlowDynamicsUpdator(GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator){
         this.globalFlowDynamicsUpdator = globalFlowDynamicsUpdator;
     }
 

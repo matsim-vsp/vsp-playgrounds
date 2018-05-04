@@ -91,6 +91,7 @@ public class RunDynamicPCUExample {
             @Override
             public void install() {
                 bind(QNetworkFactory.class).to(DynamicPCUQNetworkFactory.class);
+                bindMobsim().toProvider(DynamicPCUFDQSimProvider.class);
                 addEventHandlerBinding().to(SpeedHandler.class); // put speeds in attributes
             }
         });
@@ -116,7 +117,7 @@ public class RunDynamicPCUExample {
         public void handleEvent(LinkLeaveEvent event) {
             if (event.getLinkId().equals( this.fdNetworkGenerator.getLastLinkIdOfTrack())) {
                 double speed = this.fdNetworkGenerator.getLengthOfTrack() / (event.getTime() - this.linkEnterTime.get(event.getVehicleId()));
-                vehicles.getVehicleAttributes().putAttribute(event.getVehicleId().toString(), VEHICLE_SPEED, speed );
+                ((AmitQVehicle)vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute(VEHICLE_SPEED, speed);
             }
         }
 

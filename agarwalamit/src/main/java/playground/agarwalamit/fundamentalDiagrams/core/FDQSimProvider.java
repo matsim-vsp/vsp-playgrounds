@@ -90,7 +90,7 @@ public class FDQSimProvider implements Provider<Mobsim> {
 
 					final QVehicle vehicle = new QVehicle(VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode)));
 					agent.setVehicle(vehicle);
-					final Id<Link> linkId4VehicleInsertion = FundamentalDiagramDataGenerator.fdNetworkGenerator.getTripDepartureLinkId();
+					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
 					qSim.createAndParkVehicleOnLink(vehicle.getVehicle(), linkId4VehicleInsertion);
 				}
 			}

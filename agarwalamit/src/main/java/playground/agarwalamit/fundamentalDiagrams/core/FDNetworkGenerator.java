@@ -179,7 +179,7 @@ public final class FDNetworkGenerator {
 		return lastLinkOfTrack;
 	}
 
-	Id<Link> getTripDepartureLinkId(){
+	public Id<Link> getTripDepartureLinkId(){
 		return this.startLinkId;
 	}
 

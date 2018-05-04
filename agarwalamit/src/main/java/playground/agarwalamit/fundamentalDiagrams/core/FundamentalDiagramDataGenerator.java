@@ -54,7 +54,7 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod.DynamicPCUFDQSimProvider;
 
 /**
  * @author amit after ssix
@@ -371,16 +371,7 @@ public class FundamentalDiagramDataGenerator {
 			eventWriter = new EventWriterXML(eventsDir+"/events"+pointToRun.toString()+".xml");
 		}
 
-		ChandraSikdarPCUUpdator dynamicPCU = null ;
-		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
-			dynamicPCU = new ChandraSikdarPCUUpdator(this.scenario,
-					fdNetworkGenerator.getFirstLinkIdOfTrack(),
-					fdNetworkGenerator.getLastLinkIdOfTrack(),
-					fdNetworkGenerator.getLengthOfTrack());
-		}
-
 		final EventWriterXML eventsWriter = eventWriter;
-		final ChandraSikdarPCUUpdator dynamicPCUUpdator = dynamicPCU;
 
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
@@ -392,10 +383,6 @@ public class FundamentalDiagramDataGenerator {
 
 				if(travelModes.length > 1)	addEventHandlerBinding().toInstance(passingEventsUpdator);
 
-				if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
-					addEventHandlerBinding().toInstance(dynamicPCUUpdator);
-				}
-
 				if(fundamentalDiagramConfigGroup.isWritingEvents()){
 					addEventHandlerBinding().toInstance(eventsWriter);
 				}
@@ -405,7 +392,7 @@ public class FundamentalDiagramDataGenerator {
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
 			public void install() {
-				this.bindMobsim().toProvider(FDQSimProvider.class);
+				this.bindMobsim().toProvider(DynamicPCUFDQSimProvider.class);
 			}
 		});
 
@@ -477,12 +464,12 @@ public class FundamentalDiagramDataGenerator {
 				writer.format("%.2f\t", passingEventsUpdator.getAvgBikesPassingRate());
 			}
 
-			if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
-				for (String travelMode : travelModes) {
-					String str = String.valueOf( scenario.getVehicles().getVehicleTypes().get(Id.create(travelMode,VehicleType.class)).getPcuEquivalents() );
-					writer.print(str + "\t");
-				}
-			}
+//			if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
+//				for (String travelMode : travelModes) {
+//					String str = String.valueOf( scenario.getVehicles().getVehicleTypes().get(Id.create(travelMode,VehicleType.class)).getPcuEquivalents() );
+//					writer.print(str + "\t");
+//				}
+//			}
 
 			writer.print("\n");
 		}
@@ -542,9 +529,9 @@ public class FundamentalDiagramDataGenerator {
 
 			writer.print("avgBikePassingRatePerkm \t");
 		}
-		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
-			Arrays.stream(travelModes).forEach(travelMode -> writer.print(("pcu_" + travelMode) + "\t"));
-		}
+//		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
+//			Arrays.stream(travelModes).forEach(travelMode -> writer.print(("pcu_" + travelMode) + "\t"));
+//		}
 		writer.print("\n");
 	}
 
