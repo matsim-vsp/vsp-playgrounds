@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
+package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 import java.util.Map;
 import org.matsim.api.core.v01.Customizable;
@@ -31,12 +31,12 @@ import org.matsim.vehicles.Vehicle;
  * Created by amit on 04.05.18.
  */
 
-public class AmitQVehicle extends QVehicle implements Attributable, Customizable {
+public class AttributableQVehicle extends QVehicle implements Attributable, Customizable {
 
     private final Attributes attributes = new Attributes();
     private Customizable customizableDelegate;
 
-    public AmitQVehicle(Vehicle basicVehicle) {
+    public AttributableQVehicle(Vehicle basicVehicle) {
         super(basicVehicle);
     }
 
