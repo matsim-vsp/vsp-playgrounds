@@ -134,7 +134,11 @@ public class SubPopMunichControler {
 					@Override
 					public PlanStrategy get() {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
-						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+						double probaForChangeSingleTripMode=0.;
+						if ( true ) {
+							throw new RuntimeException("maybe set the probaForChangeSingleTripMode to something larger than zero (talk to Ihab or Joschka).  kai, may'18") ;
+						}
+						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, probaForChangeSingleTripMode, tripRouterProvider));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}

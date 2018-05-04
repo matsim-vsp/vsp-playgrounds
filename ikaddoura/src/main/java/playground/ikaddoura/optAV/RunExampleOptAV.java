@@ -183,11 +183,18 @@ public class RunExampleOptAV {
 						
 						log.info("SubtourModeChoice_" + subpopulation + " - available modes: " + availableModes.toString());
 						final String[] chainBasedModes = {"car", "bicycle"};
-
+						
+						double probaForChangeSingleTripMode=0.;
+						if ( true ) {
+							throw new RuntimeException("maybe set the probaForChangeSingleTripMode to something larger than zero (talk to Ihab or Joschka).  kai, may'18") ;
+						}
+						
+						
+						
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
 								.global()
-								.getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+								.getNumberOfThreads(), availableModes, chainBasedModes, false, probaForChangeSingleTripMode, tripRouterProvider));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}

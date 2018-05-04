@@ -40,7 +40,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
@@ -54,14 +53,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 
-import playground.agarwalamit.analysis.modalShare.ModalShareExample;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.santiago.SantiagoScenarioConstants;
 import playground.santiago.colectivos.PostProcessModalShare;
 import playground.santiago.colectivos.router.ColectivoModule;
-import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
-import playground.vsp.congestion.handlers.TollHandler;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -286,7 +281,7 @@ public class SantiagoScenarioRunnerFelix {
 			Log.info("Available modes are " + availableModes);
 			Log.info("Chain-based modes are " + chainBasedModes);
 			final Builder builder = new Builder(new RandomPlanSelector<Plan, Person>());
-			builder.addStrategyModule(new SubtourModeChoice(scenario.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+			builder.addStrategyModule(new SubtourModeChoice(scenario.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, probaForChangeSingleTripMode, tripRouterProvider));
 			builder.addStrategyModule(new ReRoute(scenario, tripRouterProvider));
 			return builder.build();
 		}
