@@ -204,68 +204,79 @@ public class M2KS2010NetworkConverter {
 				// only add restrictions for crossings with type flexible
 				continue;
 			}
-			if (signalsData.getConflictingDirectionsData() != null) {
-				// create restrictions based on data about conflicting directions
-				IntersectionDirections conflictsOfThisSystem = signalsData.getConflictingDirectionsData().getConflictsPerSignalSystem().get(system.getId());
-				for (Direction dir : conflictsOfThisSystem.getDirections().values()) {
-					// directions are defined between from and to links. lights in the ks network are also defined between from and to links. i.e. every direction corresponds to exactly one light
-					Id<DgStreet> lightId = fromToLink2LightRelation.get(new Tuple<Id<Link>, Id<Link>>(dir.getFromLink(), dir.getToLink()));
-					if (lightId == null) {
-						throw new RuntimeException("No light exists for direction " + dir.getId() + " with from Link " + dir.getFromLink() + " and to link " + dir.getToLink() + ", i.e. the turn is not allowed.");
-					}
-					TtRestriction r = new TtRestriction(lightId, false);
-					crossing.addRestriction(r);
-					for (Id<Direction> otherDirId : dir.getConflictingDirections()) {
-						Direction otherDir = conflictsOfThisSystem.getDirections().get(otherDirId);
-						Id<DgStreet> otherLightId = fromToLink2LightRelation.get(new Tuple<Id<Link>, Id<Link>>(otherDir.getFromLink(), otherDir.getToLink()));
-						if (otherLightId == null) {
-							throw new RuntimeException("No light exists for direction " + dir.getId() + " with from Link " + otherDir.getFromLink() + " and to link " + otherDir.getToLink() + ", i.e. the turn is not allowed.");
-						}
-						r.addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);						
-					}
-					// TODO add other information, if cten-format has been extended (right of way, must yield)
+			// fill on- and off-light information based on signal groups
+			Map<Id<SignalGroup>, SignalGroupData> groupsOfThisSystem = signalsData.getSignalGroupsData()
+					.getSignalGroupDataBySystemId(system.getId());
+			// preprocessing: look for groups of signals of this system
+			Map<Id<Signal>, Id<SignalGroup>> signalToGroupMap = new HashMap<>();
+			for (SignalGroupData group : groupsOfThisSystem.values()) {
+				for (Id<Signal> signalId : group.getSignalIds()) {
+					signalToGroupMap.put(signalId, group.getId());
 				}
-			} else {
-				// create restrictions based on signal groups
-				Map<Id<SignalGroup>, SignalGroupData> groupsOfThisSystem = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(system.getId());
-				// preprocessing: look for groups of signals of this system
-				Map<Id<Signal>, Id<SignalGroup>> signalToGroupMap = new HashMap<>();
-				for (SignalGroupData group : groupsOfThisSystem.values()) {
-					for (Id<Signal> signalId : group.getSignalIds()) {
-						signalToGroupMap.put(signalId, group.getId());
+			}
+			for (Id<Signal> signalId : system.getSignalData().keySet()) {
+				SignalGroupData groupOfThisSignal = groupsOfThisSystem.get(signalToGroupMap.get(signalId));
+				// a signal in MATSim can correspond to more than one light in the ks network (if different turns are allowed)
+				for (Id<DgStreet> lightId : signalToLightsMap.get(signalId)) {
+					if (crossing.getRestrictions().containsKey(lightId)) {
+						LOG.info("restrictions for this light are already processed");
+						// note: this assumes that signals leading to the same light belong to the same group
+						continue;
 					}
-				}
-				for (Id<Signal> signalId : system.getSignalData().keySet()) {
-					SignalGroupData groupOfThisSignal = groupsOfThisSystem.get(signalToGroupMap.get(signalId));
-					// a signal in MATSim can correspond to more than one light in the (over time unexpanded) ks network
-					for (Id<DgStreet> lightId : signalToLightsMap.get(signalId)) {
-						// TODO adapt this when more flexible signal groups (other than Nicos Laemmer groups) should be allowed
-						if (crossing.getRestrictions().containsKey(lightId)) {
-							LOG.info("restrictions for this light are already processed");
-							// note: this assumes that signals leading to the same light belong to the same group
-							continue;
-						}
-						TtRestriction restriction = new TtRestriction(lightId, false);
-						crossing.addRestriction(restriction);
-						for (Id<Signal> otherSignalId : system.getSignalData().keySet()) {
-							for (Id<DgStreet> otherLightId : signalToLightsMap.get(otherSignalId)) {
-								if (lightId.equals(otherLightId)) {
-									// found itself
-									continue;
-								}
-								if (groupOfThisSignal.getSignalIds().contains(otherSignalId)) {
-									// same group - add all corresponding lights to "on" and "off" rlight
-									restriction.addOnLight(otherLightId);
-									restriction.addOffLight(otherLightId);
+					TtRestriction restriction = new TtRestriction(lightId, false);
+					crossing.addRestriction(restriction);
+					for (Id<Signal> otherSignalId : system.getSignalData().keySet()) {
+						for (Id<DgStreet> otherLightId : signalToLightsMap.get(otherSignalId)) {
+							if (lightId.equals(otherLightId)) {
+								// found itself
+								continue;
+							}
+							if (groupOfThisSignal.getSignalIds().contains(otherSignalId)) {
+								// same group - add all corresponding lights to "on" and "off" rlight
+								restriction.addOnLight(otherLightId);
+								restriction.addOffLight(otherLightId);
 
-								} else {
-									// different group - do not allow green at the same time (as for Nicos Laemmer implementation)
-									// i.e. add all corresponding lights as rlight with allowed=false
-									restriction.addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
-								}
+							} else if (signalsData.getConflictingDirectionsData() == null) {
+								// different group and no conflict data exists - do not allow green at the same
+								// time (as for Nicos Laemmer implementation) 
+								// i.e. add all corresponding lights as rlight with allowed=false
+								restriction.addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
 							}
 						}
 					}
+				}
+			}
+			// if conflict data exists, fill restriction information based on conflicting directions
+			if (signalsData.getConflictingDirectionsData() != null) {
+				// create restrictions based on data about conflicting directions
+				IntersectionDirections directionsOfThisSystem = signalsData.getConflictingDirectionsData()
+						.getConflictsPerSignalSystem().get(system.getId());
+				for (Direction dir : directionsOfThisSystem.getDirections().values()) {
+					// directions are defined between from and to links. lights in the ks network
+					// are also defined between from and to links. i.e. every direction corresponds
+					// to exactly one light
+					Id<DgStreet> lightId = fromToLink2LightRelation
+							.get(new Tuple<Id<Link>, Id<Link>>(dir.getFromLink(), dir.getToLink()));
+					if (lightId == null) {
+						throw new RuntimeException(
+								"No light exists for direction " + dir.getId() + " with from Link " + dir.getFromLink()
+										+ " and to link " + dir.getToLink() + ", i.e. the turn is not allowed.");
+					}
+					TtRestriction r = crossing.getRestrictions().get(lightId);
+					// add all conflicting directions as restrictions
+					for (Id<Direction> otherDirId : dir.getConflictingDirections()) {
+						Direction otherDir = directionsOfThisSystem.getDirections().get(otherDirId);
+						Id<DgStreet> otherLightId = fromToLink2LightRelation
+								.get(new Tuple<Id<Link>, Id<Link>>(otherDir.getFromLink(), otherDir.getToLink()));
+						if (otherLightId == null) {
+							throw new RuntimeException("No light exists for direction " + dir.getId()
+									+ " with from Link " + otherDir.getFromLink() + " and to link "
+									+ otherDir.getToLink() + ", i.e. the turn is not allowed.");
+						}
+						r.addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
+					}
+					// here, one could add other information, if cten-format has been extended
+					// (right of way, must yield...)
 				}
 			}
 		}

@@ -80,7 +80,7 @@ public class RunCottbus2Cten {
 		int cellsX = 5; // = default value
 		int cellsY = 5; // = default value
 		/* other parameters */
-		String scenarioDescription = "changed: Dreifertstrasse and Wilhem-Kuelz_Str. run 100it 0.7cap output plans between 05:30 and 09:30";
+		String scenarioDescription = "changed: lights grouped; Dreifertstrasse and Wilhem-Kuelz_Str. run 100it 0.7cap output plans between 05:30 and 09:30";
 		// String scenarioDescription =
 		// "run run1728 output plans between 13:30 and 18:30";
 
