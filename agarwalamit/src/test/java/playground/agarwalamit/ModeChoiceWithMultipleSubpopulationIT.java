@@ -17,7 +17,6 @@ package playground.agarwalamit;/* **********************************************
  *                                                                         *
  * *********************************************************************** */
 
-import java.io.File;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -138,7 +137,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 					public PlanStrategy get() {
 						final PlanStrategyImpl.Builder builder = new PlanStrategyImpl.Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new TripsToLegsModule(tripRouterProvider, sc.getConfig().global()));
-						builder.addStrategyModule(new ChangeLegMode(sc.getConfig().global().getNumberOfThreads(), availableModes, true));
+						builder.addStrategyModule(new ChangeLegMode(sc.getConfig().global().getNumberOfThreads(), availableModes, true, false));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}
