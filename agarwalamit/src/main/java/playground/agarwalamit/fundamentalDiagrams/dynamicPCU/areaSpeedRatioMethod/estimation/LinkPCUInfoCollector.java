@@ -17,14 +17,34 @@
  *                                                                         *
  * *********************************************************************** */
 
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation;
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 
 /**
  * Created by amit on 29.06.17.
+ *
+ * update pcu at the end of track, eventually, this will also have effect on flow capacity
+ *
  */
-public enum VehicleProjectedAreaMarker {
 
-    BEGIN_VEHILCE_PROJECTED_AREA, END_VEHILCE_PROJECTED_AREA
+
+public class LinkPCUInfoCollector {
+
+    private final Id<Link> linkId;
+    private final double timeBin;
+
+    private double pcu;
+
+    LinkPCUInfoCollector (final Id<Link> linkId, final double timeBin) {
+        this.linkId = linkId;
+        this.timeBin = timeBin;
+    }
+
+    public double getPCU () {
+        return this.pcu;
+    }
+
 
 }

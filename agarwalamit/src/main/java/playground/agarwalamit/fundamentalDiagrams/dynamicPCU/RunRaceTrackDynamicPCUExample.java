@@ -29,8 +29,8 @@ import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea.VehicleProjectedAreaMarker;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea.VehicleProjectedAreaRatio;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
 import playground.agarwalamit.utils.FileUtils;
 
 /**

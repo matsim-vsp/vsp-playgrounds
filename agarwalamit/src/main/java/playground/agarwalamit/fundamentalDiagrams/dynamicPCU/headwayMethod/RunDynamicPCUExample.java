@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package org.matsim.core.mobsim.qsim.qnetsimengine;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,19 +30,20 @@ import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicPCUQNetworkFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
 
@@ -58,7 +59,7 @@ public class RunDynamicPCUExample {
 
         Config config = ConfigUtils.createConfig();
         
-        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/equalModalSplit_holeSpeedRandom15_20KPH/");
+        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/equalModalSplit_holeSpeed15KPH/");
 //        config.controler().setOutputDirectory("../svnit/outputFiles/carBicycleSeepage_equalModalShare_holeSpeed15kph/branch18Apr/");
         config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
@@ -70,7 +71,7 @@ public class RunDynamicPCUExample {
         
         FundamentalDiagramConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FundamentalDiagramConfigGroup.class);
         fdConfigGroup.setModalShareInPCU("1.0");
-        fdConfigGroup.setReduceDataPointsByFactor(1);
+        fdConfigGroup.setReduceDataPointsByFactor(5);
         
         Scenario scenario = ScenarioUtils.loadScenario(config);
         
@@ -100,29 +101,30 @@ public class RunDynamicPCUExample {
 
         @Inject
         private Vehicles vehicles;
-        @Inject
-        private Network network;
 
-        private Map<Id<Vehicle>, Double> linkEnterTime = new HashMap<>();
+        @Inject
+        private FDNetworkGenerator fdNetworkGenerator;
+
+        private final Map<Id<Vehicle>, Double> linkEnterTime = new HashMap<>();
 
         @Override
         public void reset(int iteration){
             this.linkEnterTime.clear();
         }
 
-        //todo may be just get track speed and then put it to vehicle type....
         @Override
         public void handleEvent(LinkLeaveEvent event) {
-            Link l = network.getLinks().get(event.getLinkId());
-            double speed = l.getLength() / (event.getTime()-this.linkEnterTime.get(event.getVehicleId()));
-            //TODO this means, the speed on last link ...not on the current link.
-            vehicles.getVehicleAttributes().putAttribute(event.getVehicleId().toString(), VEHICLE_SPEED, speed );
-            l.getAttributes().putAttribute(event.getVehicleId().toString(), speed);
+            if (event.getLinkId().equals( this.fdNetworkGenerator.getLastLinkIdOfTrack())) {
+                double speed = this.fdNetworkGenerator.getLengthOfTrack() / (event.getTime() - this.linkEnterTime.get(event.getVehicleId()));
+                vehicles.getVehicleAttributes().putAttribute(event.getVehicleId().toString(), VEHICLE_SPEED, speed );
+            }
         }
 
         @Override
         public void handleEvent(LinkEnterEvent event) {
-            this.linkEnterTime.put(event.getVehicleId(), event.getTime());
+            if (event.getLinkId().equals(this.fdNetworkGenerator.getFirstLinkIdOfTrack())) {
+                this.linkEnterTime.put(event.getVehicleId(), event.getTime());
+            }
         }
     }
 }

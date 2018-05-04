@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2017 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,39 +17,40 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.scenario.ScenarioUtils;
-
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.utils.FileUtils;
+import java.util.Map;
+import org.matsim.api.core.v01.Customizable;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
+import org.matsim.core.scenario.CustomizableUtils;
+import org.matsim.utils.objectattributes.attributable.Attributable;
+import org.matsim.utils.objectattributes.attributable.Attributes;
+import org.matsim.vehicles.Vehicle;
 
 /**
- * Created by amit on 16/02/2017.
+ * Created by amit on 04.05.18.
  */
 
-public class RunFDDataExample {
+public class AmitQVehicle extends QVehicle implements Attributable, Customizable {
 
-    public static void main(String[] args) {
+    private final Attributes attributes = new Attributes();
+    private Customizable customizableDelegate;
 
-        boolean runUsingConfig = true;
+    public AmitQVehicle(Vehicle basicVehicle) {
+        super(basicVehicle);
+    }
 
-        Scenario scenario ;
 
-        if (runUsingConfig ) {
-            String configFile = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml";
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
-        } else {
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
+    @Override
+    public Attributes getAttributes() {
+        return this.attributes;
+    }
+
+    @Override
+    public Map<String, Object> getCustomAttributes() {
+        if (this.customizableDelegate == null) {
+            this.customizableDelegate = CustomizableUtils.createCustomizable();
         }
-
-        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/test";
-        String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
-
-        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(scenario);
-        fundamentalDiagramDataGenerator.run();
+        return this.customizableDelegate.getCustomAttributes();
     }
 }

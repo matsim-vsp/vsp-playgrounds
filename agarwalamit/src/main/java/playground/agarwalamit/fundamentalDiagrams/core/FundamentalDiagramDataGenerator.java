@@ -37,7 +37,6 @@ import org.apache.log4j.PatternLayout;
 import org.jfree.util.Log;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -49,18 +48,13 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.events.algorithms.EventWriterXML;
-import org.matsim.core.mobsim.framework.MobsimAgent;
-import org.matsim.core.mobsim.framework.MobsimDriverAgent;
-import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.facilities.Facility;
-import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation.DynamicPCUUpdator;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
 
 /**
  * @author amit after ssix
@@ -70,7 +64,7 @@ public class FundamentalDiagramDataGenerator {
 
 	public static final Logger LOG = Logger.getLogger(FundamentalDiagramDataGenerator.class);
 
-	static final double MAX_ACT_END_TIME = 1800.;
+	public static final double MAX_ACT_END_TIME = 1800.;
 
 	private String runDir ;
 
@@ -377,20 +371,23 @@ public class FundamentalDiagramDataGenerator {
 			eventWriter = new EventWriterXML(eventsDir+"/events"+pointToRun.toString()+".xml");
 		}
 
-		DynamicPCUUpdator dynamicPCU = null ;
+		ChandraSikdarPCUUpdator dynamicPCU = null ;
 		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU()) {
-			dynamicPCU = new DynamicPCUUpdator(this.scenario,
+			dynamicPCU = new ChandraSikdarPCUUpdator(this.scenario,
 					fdNetworkGenerator.getFirstLinkIdOfTrack(),
 					fdNetworkGenerator.getLastLinkIdOfTrack(),
 					fdNetworkGenerator.getLengthOfTrack());
 		}
 
 		final EventWriterXML eventsWriter = eventWriter;
-		final DynamicPCUUpdator dynamicPCUUpdator = dynamicPCU;
+		final ChandraSikdarPCUUpdator dynamicPCUUpdator = dynamicPCU;
 
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
+				bind(FDNetworkGenerator.class).toInstance(fdNetworkGenerator); // required for FDTrackMobsimAgent
+				bind(GlobalFlowDynamicsUpdator.class).toInstance(globalFlowDynamicsUpdator); // required for FDTrackMobsimAgent
+
 				addEventHandlerBinding().toInstance(globalFlowDynamicsUpdator);
 
 				if(travelModes.length > 1)	addEventHandlerBinding().toInstance(passingEventsUpdator);
@@ -588,160 +585,5 @@ public class FundamentalDiagramDataGenerator {
 			throw new RuntimeException("File "+filename+" not found.");
 		}
 		LOG.addAppender(appender);
-	}
-
-	public static FDNetworkGenerator getFdNetworkGenerator() {
-		return fdNetworkGenerator;
-	}
-
-	static class MySimplifiedRoundAndRoundAgent implements MobsimAgent, MobsimDriverAgent {
-
-		private static final Id<Link> FIRST_LINK_ID_OF_MIDDEL_BRANCH_OF_TRACK = fdNetworkGenerator.getFirstLinkIdOfMiddleLinkOfTrack();
-		private static final Id<Link> LAST_LINK_ID_OF_BASE = fdNetworkGenerator.getLastLinkIdOfBase();
-		private static final Id<Link> LAST_LINK_ID_OF_TRACK = fdNetworkGenerator.getLastLinkIdOfTrack();
-		private static final Id<Link> FIRST_LINK_LINK_ID_OF_BASE =  fdNetworkGenerator.getFirstLinkIdOfTrack();
-		private static final Id<Link> ORIGIN_LINK_ID = fdNetworkGenerator.getTripDepartureLinkId();
-		private static final Id<Link> DESTINATION_LINK_ID = fdNetworkGenerator.getTripArrivalLinkId();
-
-		private final Id<Person> personId;
-		private final Id<Vehicle> plannedVehicleId;
-		private final String mode;
-		private final double actEndTime;
-
-		private MobsimVehicle vehicle ;
-		private boolean isArriving= false;
-
-		MySimplifiedRoundAndRoundAgent(Id<Person> agentId, double actEndTime, String travelMode) {
-			personId = agentId;
-			mode = travelMode;
-			this.actEndTime = actEndTime;
-			this.plannedVehicleId = Id.create(agentId, Vehicle.class);
-		}
-
-		private Id<Link> currentLinkId = ORIGIN_LINK_ID;
-		private State agentState= State.ACTIVITY;
-
-		@Override
-		public Id<Link> getCurrentLinkId() {
-			return this.currentLinkId;
-		}
-
-		@Override
-		public Id<Link> getDestinationLinkId() {
-			return DESTINATION_LINK_ID;
-		}
-
-		@Override
-		public Id<Person> getId() {
-			return this.personId;
-		}
-
-		@Override
-		public Id<Link> chooseNextLinkId() {
-
-			if (FundamentalDiagramDataGenerator.globalFlowDynamicsUpdator.isPermanent()){
-				isArriving = true;
-			}
-
-			if( LAST_LINK_ID_OF_TRACK.equals(this.currentLinkId) || ORIGIN_LINK_ID.equals(this.currentLinkId)){
-				//person departing from home OR last link of the track
-				return FIRST_LINK_LINK_ID_OF_BASE;
-			} else if(LAST_LINK_ID_OF_BASE.equals(this.currentLinkId)){
-				if ( isArriving) {
-					return DESTINATION_LINK_ID ;
-				} else {
-					return FIRST_LINK_ID_OF_MIDDEL_BRANCH_OF_TRACK ;
-				}
-			}  else if (DESTINATION_LINK_ID.equals(this.currentLinkId)){
-				return null;// this will send agent for arrival
-			} else {
-				// TODO: if the link ids are not consecutive numbers, this will not work.
-				Id<Link> existingLInkId = this.currentLinkId;
-				return Id.createLinkId(Integer.valueOf(existingLInkId.toString())+1);
-			}
-		}
-
-		@Override
-		public void notifyMoveOverNode(Id<Link> newLinkId) {
-			this.currentLinkId = newLinkId;
-		}
-
-		@Override
-		public boolean isWantingToArriveOnCurrentLink() {
-			return this.chooseNextLinkId()==null ;
-		}
-
-		@Override
-		public void setVehicle(MobsimVehicle veh) {
-			this.vehicle = veh ;
-		}
-
-		@Override
-		public MobsimVehicle getVehicle() {
-			return this.vehicle ;
-		}
-
-		@Override
-		public Id<Vehicle> getPlannedVehicleId() {
-			return this.plannedVehicleId;
-		}
-
-		@Override
-		public State getState() {
-			return agentState;
-		}
-
-		@Override
-		public double getActivityEndTime() {
-			if(isArriving && this.agentState.equals(State.ACTIVITY)) {
-				return Double.POSITIVE_INFINITY; // let agent go to sleep.
-			}
-			return this.actEndTime;
-		}
-
-		@Override
-		public void endActivityAndComputeNextState(double now) {
-			agentState= State.LEG;
-		}
-
-		@Override
-		public void endLegAndComputeNextState(double now) {
-			agentState= State.ACTIVITY;
-		}
-
-		@Override
-		public void setStateToAbort(double now) {
-			throw new RuntimeException("not implemented");
-		}
-
-		@Override
-		public Double getExpectedTravelTime() {
-			throw new RuntimeException("not implemented");
-		}
-
-		@Override
-		public Double getExpectedTravelDistance() {
-			throw new RuntimeException("not implemented");
-		}
-
-		@Override
-		public String getMode() {
-			return mode;
-		}
-
-		@Override
-		public void notifyArrivalOnLinkByNonNetworkMode(Id<Link> linkId) {
-			throw new RuntimeException("not implemented");
-		}
-
-		@Override
-		public Facility<? extends Facility<?>> getCurrentFacility() {
-			throw new RuntimeException("not implemented") ;
-		}
-
-		@Override
-		public Facility<? extends Facility<?>> getDestinationFacility() {
-			throw new RuntimeException("not implemented") ;
-		}
 	}
 }
