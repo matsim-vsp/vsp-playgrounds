@@ -38,8 +38,8 @@ public class AdjustModeForFreightAgents {
 	
 	private static final Logger log = Logger.getLogger(AdjustModeForFreightAgents.class);
 	
-	private final static String inputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
-	private final static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight_with-freight-mode.selected_plans.xml.gz";
+	private final static String inputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/be_500_c_10pct.selected_plans.xml.gz";
+	private final static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/be_500_c_10pct.selected_plans_with-freight-as-mode.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	

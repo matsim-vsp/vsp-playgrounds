@@ -14,19 +14,18 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator.MySimplifiedRoundAndRoundAgent;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
@@ -37,13 +36,23 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	private final QNetworkFactory qnetworkFactory;
 	
 	private final Map<String, VehicleType> modeToVehicleTypes ;
+	private final FDNetworkGenerator fdNetworkGenerator;
+	private final GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
 	
 	@Inject
-	private FDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory) {
+	private FDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
+						   FDNetworkGenerator fdNetworkGenerator, GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator) {
 		this.scenario = scenario;
 		this.events = events;
 		this.qnetworkFactory = qnetworkFactory;
-		this.modeToVehicleTypes = this.scenario.getVehicles().getVehicleTypes().entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue() ));
+		this.modeToVehicleTypes = this.scenario.getVehicles()
+											   .getVehicleTypes()
+											   .entrySet()
+											   .stream()
+											   .collect(Collectors.toMap(e -> e.getKey().toString(),
+													   Map.Entry::getValue));
+		this.fdNetworkGenerator = fdNetworkGenerator;
+		this.globalFlowDynamicsUpdator = globalFlowDynamicsUpdator;
 	}
 	
 	@Override
@@ -75,12 +84,15 @@ public class FDQSimProvider implements Provider<Mobsim> {
 					double randDouble = MatsimRandom.getRandom().nextDouble();
 					double actEndTime = randDouble * FundamentalDiagramDataGenerator.MAX_ACT_END_TIME;
 
-					MobsimAgent agent = new MySimplifiedRoundAndRoundAgent(person.getId(), actEndTime, travelMode);
+					FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
+					agent.setGlobalFlowDynamicsUpdator(globalFlowDynamicsUpdator);
 					qSim.insertAgentIntoMobsim(agent);
 
-					final Vehicle vehicle = VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
-					final Id<Link> linkId4VehicleInsertion = FundamentalDiagramDataGenerator.fdNetworkGenerator.getTripDepartureLinkId();
-					qSim.createAndParkVehicleOnLink(vehicle, linkId4VehicleInsertion);
+					final QVehicle vehicle = new QVehicle(VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode)));
+					agent.setVehicle(vehicle);
+					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
+//					qSim.createAndParkVehicleOnLink(vehicle.getVehicle(), linkId4VehicleInsertion);
+					qSim.addParkedVehicle(vehicle, linkId4VehicleInsertion);
 				}
 			}
 		};

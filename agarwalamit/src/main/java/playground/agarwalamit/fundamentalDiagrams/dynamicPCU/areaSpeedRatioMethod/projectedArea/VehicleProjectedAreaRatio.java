@@ -17,34 +17,42 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea;
 
 /**
  * Created by amit on 29.06.17.
  *
- * update pcu at the end of track, eventually, this will also have effect on flow capacity
- *
+ * see ChandraKumar2003EffctLaneWidthMxdTrfc for details about the projected area.
  */
 
+public enum VehicleProjectedAreaRatio {
 
-public class LinkPCUInfoCollector {
+    // vehicleType (ratio with respect to car), // area
+    car (1.0), // 5.39
+    bicycle (0.16), // 0.85
+    bike (0.16), // 0.85
+    motorbike (0.22), // 1.2
+    truck (3.27), // 17.62
+    bus(4.59), // 24.74
+    tractor (3.02), // 16.28
+    cycleRickshaw (0.48) ;// 2.56
 
-    private final Id<Link> linkId;
-    private final double timeBin;
+    private final double projectedAreaRatio;
 
-    private double pcu;
-
-    LinkPCUInfoCollector (final Id<Link> linkId, final double timeBin) {
-        this.linkId = linkId;
-        this.timeBin = timeBin;
+    public double getProjectedAreaRatio() {
+        return this.projectedAreaRatio;
     }
 
-    public double getPCU () {
-        return this.pcu;
+    public static double getProjectedAreaRatio (final String vehicleType) {
+        double ratio =0.;
+        for (VehicleProjectedAreaRatio vpar : VehicleProjectedAreaRatio.values()) {
+            if (vehicleType.equals(vpar.toString())) return vpar.getProjectedAreaRatio();
+        }
+        return ratio;
     }
 
+    private VehicleProjectedAreaRatio (double projectedAreaRatio) {
+        this.projectedAreaRatio = projectedAreaRatio;
+    }
 
 }

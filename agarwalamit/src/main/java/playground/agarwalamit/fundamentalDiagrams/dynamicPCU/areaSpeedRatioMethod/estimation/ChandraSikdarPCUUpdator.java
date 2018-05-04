@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.estimation;
+package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,14 +33,18 @@ import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.projectedArea.VehicleProjectedAreaMarker;
+
+import com.google.inject.Inject;
+
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
 import playground.agarwalamit.utils.NumberUtils;
 
 /**
  * Created by amit on 29.06.17.
  */
 
-public class DynamicPCUUpdator implements VehicleEntersTrafficEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler {
+public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler {
 
     private final Scenario scenario;
     private final Id<Link> trackingStartLink;
@@ -51,14 +55,15 @@ public class DynamicPCUUpdator implements VehicleEntersTrafficEventHandler, Link
     private final Map<Id<Vehicle>,String> vehicleId2Mode = new HashMap<>();
 
     private final Map<String, Double> vehicleTypeToLastNotedSpeed = new HashMap<>();
-    private final Map<String, Double> vehicleTypeToProjectedAreaRatio = new HashMap<>();
+    private final Map<String, Double> vehicleTypeToProjectedAreaRatio = new HashMap<>(); 
 
-    public DynamicPCUUpdator(final Scenario scenario, final Id<Link> trackingStartLink, final Id<Link> trackingEndLink, final double lengthOfTrack){
+    @Inject
+    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator){
         this.scenario = scenario;
-        this.trackingStartLink = trackingStartLink;
-        this.trackingEndLink = trackingEndLink;
+        this.trackingStartLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
+        this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
         this.resetVehicleTypeToSpeedMap();
-        this.lengthOfTrack = lengthOfTrack;
+        this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
     }
 
     @Override

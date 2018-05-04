@@ -197,6 +197,10 @@ public class ModeAnalysis {
 		}
 	}
 	
+	public Map<String, Integer> getMode2TripCounterFiltered() {
+		return mode2TripCounterFiltered;
+	}
+
 	public void writeModeShares(String outputDirectory) {		
 		String outputFileName;
 		if (filter == null) {

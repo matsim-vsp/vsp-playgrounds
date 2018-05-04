@@ -36,6 +36,9 @@ public class MatsimTripFilterImpl implements TripFilter {
     private String activityTypeBeforeTrip;
     private boolean onlyAnalyzeTripsWithActivityTypeAfterTrip;
     private String activityTypeAfterTrip;
+    
+    private boolean excludeActivityType;
+    private String excludedActivityType;
 
     private boolean onlyAnalyzeTripsDoneByPeopleInAgeRange; // "age"; this requires setting a CEMDAP file
     private int minAge = -1; // typically "x0"
@@ -111,6 +114,12 @@ public class MatsimTripFilterImpl implements TripFilter {
         this.minDepartureTime_s = minDepartureTime_s;
         this.maxDepartureTime_s = maxDepartureTime_s;
     }
+    
+
+	public void activateExcludeActivityType(String excludedActivityType) {
+		excludeActivityType = true;
+		this.excludedActivityType = excludedActivityType;
+	}
 
     public List<? extends Trip> filter(List<? extends Trip> tripMap) {
         List<MatsimTrip> trips = new LinkedList<>();
@@ -185,7 +194,11 @@ public class MatsimTripFilterImpl implements TripFilter {
                     continue;
                 }
             }
-            
+            if (excludeActivityType) {
+                if (trip.getActivityTypeAfterTrip().equals(excludedActivityType) || trip.getActivityTypeBeforeTrip().equals(excludedActivityType)) {
+                    continue;
+                }
+            }
             if (onlyAnalyzeTripsInDepartureTimeWindow && (trip.getDepartureTime_s()) > maxDepartureTime_s) {
                 continue;
             }
@@ -235,6 +248,9 @@ public class MatsimTripFilterImpl implements TripFilter {
         if (onlyAnalyzeTripsWithActivityTypeAfterTrip) {
             outputDirectory = outputDirectory + "_act-aft-" + activityTypeAfterTrip;
         }
+        if (excludeActivityType) {
+            outputDirectory = outputDirectory + "_no-act-" + excludedActivityType;
+        }
         if (onlyAnalyzeTripsDoneByPeopleInAgeRange) {
             outputDirectory = outputDirectory + "_age-" + minAge + "-" + maxAge;
         }
@@ -275,5 +291,9 @@ public class MatsimTripFilterImpl implements TripFilter {
 
     private boolean isOnlyAnalyzeTripsDoneByPeopleInAgeRangeActivated(String identifier) {
         return identifier.contains("_age-");
+    }
+    
+    private boolean isExcludedActivityType(String identifier) {
+        return identifier.contains("_no-act-");
     }
 }

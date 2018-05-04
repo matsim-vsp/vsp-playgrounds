@@ -30,7 +30,7 @@ import org.matsim.api.core.v01.network.Node;
  * Created by amit on 16/02/2017.
  */
 
-final class FDNetworkGenerator {
+public final class FDNetworkGenerator {
 
 	private final int noOfSides = 3;
 	private final Id<Link> startLinkId = Id.createLinkId("home");
@@ -163,7 +163,7 @@ final class FDNetworkGenerator {
 		return fundamentalDiagramConfigGroup.getTrackLinkLength()* noOfSides;
 	}
 
-	Id<Link> getFirstLinkIdOfTrack() {
+	public Id<Link> getFirstLinkIdOfTrack() {
 		return firstLinkOfTrack;
 	}
 
@@ -175,11 +175,11 @@ final class FDNetworkGenerator {
 		return firstLinkOfMiddleSide;
 	}
 
-	Id<Link> getLastLinkIdOfTrack() {
+	public Id<Link> getLastLinkIdOfTrack() {
 		return lastLinkOfTrack;
 	}
 
-	Id<Link> getTripDepartureLinkId(){
+	public Id<Link> getTripDepartureLinkId(){
 		return this.startLinkId;
 	}
 

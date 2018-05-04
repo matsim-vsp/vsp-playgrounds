@@ -15,11 +15,11 @@ public class ProgressLogger extends Logger {
     }
 
     public static ProgressLogger getLogger(String name) {
-        return (ProgressLogger)LogManager.getLogger(name);
+        return new ProgressLogger(name);
     }
 
     public static ProgressLogger getLogger(Class clazz) {
-        return (ProgressLogger)LogManager.getLogger(clazz.getName());
+        return new ProgressLogger(clazz.getName());
     }
 
     public void initializeProgress(String subject, long currentSize) {

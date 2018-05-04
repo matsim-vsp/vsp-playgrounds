@@ -44,7 +44,7 @@ import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
  * velocity for each velocity group.
  */
 
-final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDepartureEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+public final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, PersonDepartureEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 
 	private final Map<String, TravelModesFlowDynamicsUpdator> travelModesFlowData;
 	private final TravelModesFlowDynamicsUpdator globalFlowData;

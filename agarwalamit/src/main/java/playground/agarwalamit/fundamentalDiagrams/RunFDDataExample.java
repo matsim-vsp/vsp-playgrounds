@@ -45,7 +45,7 @@ public class RunFDDataExample {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/output";
+        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/test";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
 

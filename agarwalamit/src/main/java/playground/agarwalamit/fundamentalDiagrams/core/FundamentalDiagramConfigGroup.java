@@ -70,10 +70,6 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
     private boolean isRunningDistribution = false;
     private static final String RUNNIG_DISTRIBUTION_CMT = "set to true if all possible combinations for all possible modal share should be executed. Default is false.";
 
-    private static final String DYNAMIC_PCU = "isUsingDynamicPCU";
-    private boolean isUsingDynamicPCU = false;
-    private static final String DYNAMIC_PCU_CMT = "set to true if pcu should be updated dynamically. It is experimental. Default is false.";
-
     private static final String MODAL_SHARE_PCU = "modalShareInPCU";
     private Collection<Double> modalShareInPCU = Arrays.asList(1.0);
     private static final String MODAL_SHARE_PCU_CMT = "comma seperated modal share in PCU. By default, equal modal share will be used.";
@@ -158,16 +154,6 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
         isRunningDistribution = runningDistribution;
     }
 
-    @StringGetter(DYNAMIC_PCU)
-    public boolean isUsingDynamicPCU() {
-        return isUsingDynamicPCU;
-    }
-
-    @StringSetter(DYNAMIC_PCU)
-    public void setUsingDynamicPCU(boolean usingDynamicPCU) {
-        isUsingDynamicPCU = usingDynamicPCU;
-    }
-
     @StringGetter(MODAL_SHARE_PCU)
     public String getModalShareInPCUAsString() {
         return this.modalShareInPCU.stream().map(String::valueOf).collect(Collectors.joining(","));
@@ -196,7 +182,6 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
         map.put(REDUCE_DATA_POINTS_BY_FACTOR, REDUCE_DATA_POINTS_BY_FACTOR_CMT);
         map.put(WRITING_EVENTS, WRITING_EVENTS_CMT);
         map.put(RUNNIG_DISTRIBUTION, RUNNIG_DISTRIBUTION_CMT);
-        map.put(DYNAMIC_PCU, DYNAMIC_PCU_CMT);
         map.put(MODAL_SHARE_PCU, MODAL_SHARE_PCU_CMT);
         return map;
     }

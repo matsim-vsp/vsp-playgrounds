@@ -219,8 +219,8 @@ public class TripHandler implements ActivityEndEventHandler, ActivityStartEventH
         MatsimTrip fromMatsimTrip = trips.get(tripId);
         if (fromMatsimTrip != null) {
             // without trip there was no activity that ended before, ergo this person is not of interest for the analysis
-            if (legMode.equals(TransportMode.transit_walk)) {
-                legMode = TransportMode.pt;
+            if (legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.egress_walk) || legMode.equals(TransportMode.access_walk)) {
+                legMode = TransportMode.walk;
             }
             fromMatsimTrip.setLegMode(legMode);
             if (tripmodeWarn) {
