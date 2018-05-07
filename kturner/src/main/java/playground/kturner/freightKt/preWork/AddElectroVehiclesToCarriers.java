@@ -102,9 +102,9 @@ class AddElectroVehiclesToCarriers {
 
 		new CarrierVehicleTypeLoader(carriers).loadVehicleTypes(vehicleTypes) ;
 
-		Carriers extractedCarriers = extractCarriers(carriers, CARRIERS_2EXTRACT); //Step 2a: Extrahieren einzelner Carrier (alle, die mit dem RetailerNamen beginnen)		
+		Carriers extractedCarriers = extractCarriers(carriers, CARRIERS_2EXTRACT); //Step 2: Extrahieren einzelner Carrier (alle, die mit dem RetailerNamen beginnen)		
 
-		addElectroVehiclesToCarriers(extractedCarriers, vehicleTypes);
+		addElectroVehiclesToCarriers(extractedCarriers, vehicleTypes);			//Step 3: Schauen welche Kombinationen aus Depot und Zeitfenster für jeden Carrier vorhanden sind und entsprechen Electrofzg in Flotte hinzufügen.
 		
 		//Ohne Aufteileung anhand UCCs
 		extractedCarriers = renameVehId(extractedCarriers); 							//Step4: VehId je Carrier einzigartig machen, da sonst weitere Vorkommen ingnoriert werden (und somit nicht alle Depots genutzt werden).
@@ -113,7 +113,7 @@ class AddElectroVehiclesToCarriers {
 	}
 	
 
-	/** (Step2a)
+	/** (Step2)
 	 * Extrahieren einzelner Retailer (alle, die mit dem RetailerNamen beginnen)
 	 * @param carriers
 	 * @param retailerNamesSelection:  Array of all retailer/carrier to extract. (begin of CarrierId) Null, if all carriers shoud remain
@@ -138,29 +138,34 @@ class AddElectroVehiclesToCarriers {
 	
 	
 	/**
-	 * Für jede Link / Zeitfensterkombination die Elektrofahrzeuge erschaffen so noch nicht erledigt.
+	 * Step 3:
+	 * Für jede Depot- / Zeitfensterkombination die Fahrzeugflotte um die Elektrofahrzeuge erweitern.
 	 * @param carriers
 	 * @param vehicleTypes
 	 */
 	private static Carriers addElectroVehiclesToCarriers(Carriers carriers, CarrierVehicleTypes vehicleTypes) {
-		Carriers carriersWithElectro = carriers;
-		for (Carrier carrier : carriersWithElectro.getCarriers().values()) {
+		Carriers carriersWithElectro = new Carriers();
+		for (Carrier carrier : carriers.getCarriers().values()) {
 			List<DepotTimeWindow> depotTimeWindows = new ArrayList<DepotTimeWindow>();
-			for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles()) { //TODO: Hier kracht es, weil er immer das selbe Array modifiziert (den Carrier -> alles in neuen Carrier übertragen... //May 18 KMt
+			for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles()) { 	//Prüfe für jedes Fzg des Carriers ob das Zeitfenster ebreits bekannt: Ja: mache nichts, Nein-> Erweitere Fzg flotte.
 				Id<Link> depotLocation = carrierVehicle.getLocation();
-				TimeWindow tw = TimeWindow.newInstance(carrierVehicle.getEarliestStartTime(), carrierVehicle.getLatestEndTime());
+				TimeWindow tw_vehicle = TimeWindow.newInstance(carrierVehicle.getEarliestStartTime(), carrierVehicle.getLatestEndTime());
 				boolean alreadyDone = false;
-				for (DepotTimeWindow dtw :depotTimeWindows) {
-					if (dtw.getDepot().equals(depotLocation)) {
-						if (dtw.getTw().equals(tw)) {
-							alreadyDone = true;
-						} 
+				for (DepotTimeWindow dtw : depotTimeWindows) {
+					if (dtw.getDepot().equals(depotLocation) && dtw.getTw().getStart() == tw_vehicle.getStart() && dtw.getTw().getEnd() == tw_vehicle.getEnd()) {
+						alreadyDone = true;
+						log.debug("Carrier: " + carrier.getId().toString() + " --> Already exisiting DepotTimeWindow " + dtw.toString());
 					} 
-				}	
-				if (!alreadyDone) {
-					addElectroVehicles(carrier, vehicleTypes, depotLocation, tw); //TODO: Hier kracht es, weil er immer das selbe Array modifiziert (den Carrier -> alles in neuen Carrier übertragen... //May 18 KMt
-					depotTimeWindows.add(DepotTimeWindow.newInstance(depotLocation, tw));
 				}
+				if (!alreadyDone) { //Combination of DepotLocation and TimeWindow not handled yet.
+					DepotTimeWindow dtwToAdd = DepotTimeWindow.newInstance(depotLocation, tw_vehicle);
+					depotTimeWindows.add(dtwToAdd);
+					log.info("Carrier: " + carrier.getId().toString() + " --> Added DepotTimeWindow: " + dtwToAdd.toString());
+				}
+			}
+			carriersWithElectro.addCarrier(carrier);
+			for (DepotTimeWindow dtw : depotTimeWindows) {
+				addElectroVehicles(carriersWithElectro.getCarriers().get(carrier.getId()), vehicleTypes, dtw.getDepot(), dtw.getTw());
 			}
 		}
 		return carriersWithElectro;
