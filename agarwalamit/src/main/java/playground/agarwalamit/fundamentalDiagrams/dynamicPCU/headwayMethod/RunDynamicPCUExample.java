@@ -53,8 +53,6 @@ import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGen
 
 public class RunDynamicPCUExample {
 
-    static final String VEHICLE_SPEED = "vehicleSpeed";
-
     public static void main(String[] args) {
 
         Config config = ConfigUtils.createConfig();
@@ -79,11 +77,13 @@ public class RunDynamicPCUExample {
         VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
         car.setPcuEquivalents(1.0);
         car.setMaximumVelocity(60/3.6);
+        car.setLength(7.5);
         vehicles.addVehicleType(car);
         
         VehicleType bicycle = VehicleUtils.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
         bicycle.setPcuEquivalents(0.25);
         bicycle.setMaximumVelocity(15/3.6);
+        bicycle.setLength(7.5/2);
         vehicles.addVehicleType(bicycle);
 
         FundamentalDiagramDataGenerator fd = new FundamentalDiagramDataGenerator(scenario);
@@ -117,7 +117,9 @@ public class RunDynamicPCUExample {
         public void handleEvent(LinkLeaveEvent event) {
             if (event.getLinkId().equals( this.fdNetworkGenerator.getLastLinkIdOfTrack())) {
                 double speed = this.fdNetworkGenerator.getLengthOfTrack() / (event.getTime() - this.linkEnterTime.get(event.getVehicleId()));
-                ((AttributableVehicle)vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute(VEHICLE_SPEED, speed);
+                Vehicle veh = vehicles.getVehicles().get(event.getVehicleId());
+                double pcu = getReactionTime() + veh.getType().getLength() / speed ; //it is better to estimate here so that it can be logged too.
+                ((AttributableVehicle)vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute("vehicle_pcu", pcu);
             }
         }
 
@@ -127,5 +129,10 @@ public class RunDynamicPCUExample {
                 this.linkEnterTime.put(event.getVehicleId(), event.getTime());
             }
         }
+    }
+
+    static double getReactionTime(){
+        //TODO could be mode (driver) specific
+        return 1.5;
     }
 }

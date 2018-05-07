@@ -86,10 +86,11 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 					agent.setGlobalFlowDynamicsUpdator(globalFlowDynamicsUpdator);
 					qSim.insertAgentIntoMobsim(agent);
 
+					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
+					attributableVehicle.getAttributes().putAttribute("vehicle_pcu", modeToVehicleTypes.get(travelMode).getPcuEquivalents() ); //initialize
 					final QVehicle vehicle = new QVehicle(
 //							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class),
-							new AttributableVehicle(Id.create(agent.getId(), Vehicle.class),
-									modeToVehicleTypes.get(travelMode)));
+							attributableVehicle);
 					vehicle.setDriver(agent);
 					scenario.getVehicles().removeVehicle(vehicle.getId());
 					scenario.getVehicles().addVehicle(vehicle.getVehicle());

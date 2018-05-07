@@ -52,6 +52,7 @@ import org.matsim.lanes.data.Lane;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.VisVehicle;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod.AttributableVehicle;
 
 /**
  * Separating out the "lane" functionality from the "link" functionality.
@@ -223,7 +224,8 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	public final void addFromWait(final QVehicle veh) {
 		//To protect against calling addToBuffer() without calling hasFlowCapacityLeft() first.
 		//This only could happen for addFromWait(), because it can be called from outside QueueWithBuffer
-		if (flowcap_accumulate.getValue() <= 0.0 && veh.getVehicle().getType().getPcuEquivalents() > context.qsimConfig
+//		if (flowcap_accumulate.getValue() <= 0.0 && (AttributableVehicle(veh.getVehicle()).getType().getPcuEquivalents() > context.qsimConfig
+		if (flowcap_accumulate.getValue() <= 0.0 && (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") > context.qsimConfig
 				.getPcuThresholdForFlowCapacityEasing()) {
 			throw new IllegalStateException("Buffer of link " + this.id + " has no space left!");
 		}
@@ -235,7 +237,8 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 		// yy might make sense to just accumulate to "zero" and go into negative when something is used up.
 		// kai/mz/amit, mar'12
 		double now = context.getSimTimer().getTimeOfDay() ;
-		flowcap_accumulate.addValue(-veh.getFlowCapacityConsumptionInEquivalents(), now);
+//		flowcap_accumulate.addValue(-veh.getFlowCapacityConsumptionInEquivalents(), now);
+		flowcap_accumulate.addValue(- (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu"), now);
 
 		buffer.add(veh);
 		if (buffer.size() == 1) {
@@ -262,8 +265,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 			updateFastFlowAccumulation();
 		}
 
-		return flowcap_accumulate.getValue() > 0.0 || veh.getVehicle().getType()
-				.getPcuEquivalents() <= context.qsimConfig.getPcuThresholdForFlowCapacityEasing();
+		return flowcap_accumulate.getValue() > 0.0 || (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") <= context.qsimConfig.getPcuThresholdForFlowCapacityEasing();
 	}
 
 	private void updateFastFlowAccumulation(){
@@ -525,7 +527,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				&& context.qsimConfig.getSeepModes().contains(veh.getVehicle().getType().getId().toString()) ){
 			// do nothing
 		} else {
-			usedStorageCapacity -= veh.getSizeInEquivalents();
+			usedStorageCapacity -= (double)((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
 		}
 
 		switch (context.qsimConfig.getTrafficDynamics()) {
@@ -551,7 +553,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				//			double ttimeOfHoles = 0.1 * this.storageCapacity/this.flowCapacityPerTimeStep/nLanes ;
 
 				hole.setEarliestLinkExitTime( now + 1.0*ttimeOfHoles + 0.0*MatsimRandom.getRandom().nextDouble()*ttimeOfHoles ) ;
-				hole.setSizeInEquivalents(veh2Remove.getSizeInEquivalents());
+				hole.setSizeInEquivalents( (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") );
 				holes.add( hole ) ;
 				break;
 			default: throw new RuntimeException("The traffic dynmics "+context.qsimConfig.getTrafficDynamics()+" is not implemented yet.");
@@ -770,7 +772,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 		if(context.qsimConfig.isSeepModeStorageFree() && context.qsimConfig.getSeepModes().contains( veh.getVehicle().getType().getId().toString() ) ){
 			// do nothing
 		} else {
-			usedStorageCapacity += veh.getSizeInEquivalents();
+			usedStorageCapacity += (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
 		}
 
 		// compute and set earliest link exit time:
@@ -797,11 +799,12 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 			case queue:
 				break;
 			case withHoles:
-				this.remainingHolesStorageCapacity -= veh.getSizeInEquivalents();
+				this.remainingHolesStorageCapacity -= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
+//						veh.getSizeInEquivalents();
 				break;
 			case kinematicWaves:
-				this.remainingHolesStorageCapacity -= veh.getSizeInEquivalents();
-				this.accumulatedInflowCap -= veh.getFlowCapacityConsumptionInEquivalents() ;
+				this.remainingHolesStorageCapacity -= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
+				this.accumulatedInflowCap -= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") ;
 				break;
 			default: throw new RuntimeException("The traffic dynmics "+context.qsimConfig.getTrafficDynamics()+" is not implemented yet.");
 		}

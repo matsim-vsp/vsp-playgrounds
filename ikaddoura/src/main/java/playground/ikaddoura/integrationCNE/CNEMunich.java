@@ -181,7 +181,9 @@ public class CNEMunich {
 							final Builder builder = new Builder(new RandomPlanSelector<>());
 							builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
 									.global()
-									.getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+									.getNumberOfThreads(), availableModes, chainBasedModes, false, 
+									0.0, //value 0.0 for backward compatibility.
+									tripRouterProvider));
 							builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 							return builder.build();
 						}
