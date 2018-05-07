@@ -187,7 +187,9 @@ public class RunExampleOptAV {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
 								.global()
-								.getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+								.getNumberOfThreads(), availableModes, chainBasedModes, false, 
+								0.0, // using value 0.0 (= default) to fix compile error
+								tripRouterProvider));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}
