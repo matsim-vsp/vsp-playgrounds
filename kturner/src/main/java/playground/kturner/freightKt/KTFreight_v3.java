@@ -120,15 +120,15 @@ public class KTFreight_v3 {
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Base/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Base_Ia/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 
 	//Dateinamen
 	private static final String NETFILE_NAME = "network.xml" ;
 	private static final String VEHTYPEFILE_NAME = "vehicleTypes.xml" ;
-	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ; //Hat keine Eletrofzg zur Verfügung
-//	private static final String CARRIERFILE_NAME = "carrier_aldi_with_electro.xml";  //Mit Elektro. Aber derzeit nur Aldi... TODO: Input mit Elektro für alle Supermarktketten erstellen.
+//	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ; //Hat keine Eletrofzg zur Verfügung
+	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet_withElectro.xml"; // With elektrovehicles available.
 	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
 	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung
 	private static final String TOLLAREAFILE_NAME = "toll_area.xml";  //Zonendefinition (Links) für anhand eines Maut-Files
