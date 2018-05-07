@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -48,8 +49,8 @@ import playground.agarwalamit.utils.NumberUtils;
 
 public class BeelineDistanceDistributionGenerator {
 
-	private final String dir = "../../repos/runs-svn/patnaIndia/run108/jointDemand/calibration/"+PatnaUtils.PCU_2W+"pcu/afterCadyts/c203_14/";
-	private final int iterationNumber = 1200;
+	private final String dir = "../../runs-svn/patnaIndia/run108/jointDemand/policies/"+PatnaUtils.PCU_2W+"pcu/BT-b/";
+	private final int iterationNumber = 1400;
 	private final String plansFile = dir+"/ITERS/it."+iterationNumber+"/"+iterationNumber+".plans.xml.gz";
 	private final String personAttributeFile = dir+ "output_personAttributes.xml.gz";
 
@@ -69,7 +70,7 @@ public class BeelineDistanceDistributionGenerator {
 		distanceClass2Labels.put(10000.0, "8-10");
 		distanceClass2Labels.put(Double.MAX_VALUE, "10+");
 		
-		LegModeBeelineDistanceDistributionFromPlansAnalyzer beelineCalculator = new LegModeBeelineDistanceDistributionFromPlansAnalyzer();
+		LegModeBeelineDistanceDistributionFromPlansAnalyzer beelineCalculator = new LegModeBeelineDistanceDistributionFromPlansAnalyzer(new PatnaPersonFilter());
 
 		Config config = ConfigUtils.createConfig();
 		config.plans().setInputFile(plansFile);
@@ -81,7 +82,7 @@ public class BeelineDistanceDistributionGenerator {
 		beelineCalculator.preProcessData();
 		beelineCalculator.postProcessData();
 
-		SortedMap<String, Map<Id<Person>, List<Double>>>mode2id2dists = beelineCalculator.getMode2PersonId2RouteDistances();
+		SortedMap<String, Map<Id<Person>, List<Double>>> mode2id2dists = beelineCalculator.getMode2PersonId2RouteDistances();
 		SortedMap<String,SortedMap<Double,Integer>> mode2class2count = new TreeMap<>();
 
 		// initialize
@@ -127,21 +128,28 @@ public class BeelineDistanceDistributionGenerator {
 
 		// income dependent
 		Map<Id<Person>, Double> person2income = new HashMap<>();
-		for (Person p : sc.getPopulation().getPersons().values()){
-			if ( ! PatnaPersonFilter.isPersonBelongsToUrban(p.getId()) ) continue;
-			double inc = (double) sc.getPopulation().getPersonAttributes().getAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE);
-			person2income.put(p.getId(), inc);
-		}
+		sc.getPopulation()
+		  .getPersons()
+		  .values()
+		  .stream()
+		  .filter(p -> PatnaPersonFilter.isPersonBelongsToUrban(p.getId()))
+		  .forEach(p -> {
+			  double inc = (double) sc.getPopulation()
+									  .getPersonAttributes()
+									  .getAttribute(p.getId().toString(), PatnaUtils.INCOME_ATTRIBUTE);
+			  person2income.put(p.getId(), inc);
+		  });
 
 		SortedMap<String, SortedMap<Double, SortedMap<Double, Integer>>> mode2inc2distcounter = new TreeMap<>();
 		// initialize
 		for(String mode : PatnaUtils.URBAN_ALL_MODES) {
 			SortedMap<Double, SortedMap<Double,Integer>> inc2dist2count = new TreeMap<>();
 			for( Double inc : person2income.values()) {
-				SortedMap<Double, Integer> dist2count = new TreeMap<>();
-				for (Double dist : distanceClasses) {
-					dist2count.put(dist, 0);
-				}
+				SortedMap<Double, Integer> dist2count = distanceClasses.stream()
+																	   .collect(Collectors.toMap(dist -> dist,
+																			   dist -> 0,
+																			   (a, b) -> b,
+																			   TreeMap::new));
 				inc2dist2count.put(inc, dist2count);
 			}
 			mode2inc2distcounter.put(mode, inc2dist2count);
@@ -154,12 +162,10 @@ public class BeelineDistanceDistributionGenerator {
 				double inc = person2income.get(pId);
 				for (Double d : mode2id2dists.get(mode).get(pId)){
 					SortedMap<Double, Integer> clas2count = mode2inc2distcounter.get(mode).get(inc);
-					for(Double dClass : distanceClasses) {
-						if (d <= dClass ) {
-							clas2count.put(dClass, clas2count.get(dClass)+1);
-							break;
-						}
-					}
+					distanceClasses.stream()
+								   .filter(dClass -> d <= dClass)
+								   .findFirst()
+								   .ifPresent(dClass -> clas2count.put(dClass, clas2count.get(dClass) + 1));
 				}
 			}
 		}
