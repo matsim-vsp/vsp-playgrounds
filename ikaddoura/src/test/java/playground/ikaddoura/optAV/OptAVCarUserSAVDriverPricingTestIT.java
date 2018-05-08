@@ -132,15 +132,15 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config, DecongestionConfigGroup.class);
 			decongestionSettings.setMsa(true);
-			decongestionSettings.setTOLL_BLEND_FACTOR(0.);
+			decongestionSettings.setTollBlendFactor(0.);
 			decongestionSettings.setKd(0.);
 			decongestionSettings.setKi(0.);
 			decongestionSettings.setKp(999.);
-			decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
-			decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.0);
-			decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
+			decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+			decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
+			decongestionSettings.setUpdatePriceInterval(1);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setRunFinalAnalysis(false);
 			
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
@@ -185,15 +185,15 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config, DecongestionConfigGroup.class);
 			decongestionSettings.setMsa(true);
-			decongestionSettings.setTOLL_BLEND_FACTOR(0.);
+			decongestionSettings.setTollBlendFactor(0.);
 			decongestionSettings.setKd(0.);
 			decongestionSettings.setKi(0.);
 			decongestionSettings.setKp(999.);
-			decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
-			decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.0);
-			decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
+			decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+			decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
+			decongestionSettings.setUpdatePriceInterval(1);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setRunFinalAnalysis(false);
 			
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
@@ -238,15 +238,15 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config, DecongestionConfigGroup.class);
 			decongestionSettings.setMsa(true);
-			decongestionSettings.setTOLL_BLEND_FACTOR(0.);
+			decongestionSettings.setTollBlendFactor(0.);
 			decongestionSettings.setKd(0.);
 			decongestionSettings.setKi(0.);
 			decongestionSettings.setKp(999.);
-			decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
-			decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.0);
-			decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
+			decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+			decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
+			decongestionSettings.setUpdatePriceInterval(1);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setRunFinalAnalysis(false);
 			
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);

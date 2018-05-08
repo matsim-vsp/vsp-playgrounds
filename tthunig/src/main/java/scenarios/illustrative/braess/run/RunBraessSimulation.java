@@ -283,18 +283,18 @@ public final class RunBraessSimulation {
 
 		// decongestion relevant parameters
 		DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
-		decongestionSettings.setWRITE_OUTPUT_ITERATION(1);
-		decongestionSettings.setUPDATE_PRICE_INTERVAL(10);
-		decongestionSettings.setTOLL_BLEND_FACTOR(1.0);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.05);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
-		decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(2);
-		decongestionSettings.setWRITE_LINK_INFO_CHARTS(true);
+		decongestionSettings.setWriteOutputIteration(1);
+		decongestionSettings.setUpdatePriceInterval(10);
+		decongestionSettings.setTollBlendFactor(1.0);
+		decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.05);
+		decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+		decongestionSettings.setToleratedAverageDelaySec(2);
+		decongestionSettings.setWriteLinkInfoCharts(true);
 		decongestionSettings.setMsa(true);
 		
 		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
-		decongestionSettings.setTOLL_ADJUSTMENT(1);
-		decongestionSettings.setINITIAL_TOLL(1);
+		decongestionSettings.setTollAdjustment(1);
+		decongestionSettings.setInitialToll(1);
 		decongestionSettings.setKp(0.1);
 		decongestionSettings.setKi(0.);
 		decongestionSettings.setKd(0.);

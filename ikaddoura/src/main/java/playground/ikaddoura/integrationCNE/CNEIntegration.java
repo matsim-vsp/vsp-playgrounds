@@ -219,11 +219,11 @@ public class CNEIntegration {
 				
 				log.info("Analyzing the delay per link and time bin.");
 				
-				decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-				decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-				decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(1.0);
-				decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(0.0);
-				decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
+				decongestionSettings.setRunFinalAnalysis(false);
+				decongestionSettings.setWriteLinkInfoCharts(false);
+				decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(1.0);
+				decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(0.0);
+				decongestionSettings.setWriteOutputIteration(controler.getConfig().controler().getLastIteration());
 				
 				controler.addOverridingModule(new DecongestionAnalysisModule());
 			}

@@ -235,7 +235,7 @@ public class CNETestIT {
 		// (congestion +) air pollution + noise pricing
 		Scenario scenario4 = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile, new NoiseConfigGroup(), new EmissionsConfigGroup(), new DecongestionConfigGroup()));
 		DecongestionConfigGroup decongestionConfigGroup4 = (DecongestionConfigGroup) scenario4.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
-		decongestionConfigGroup4.setRUN_FINAL_ANALYSIS(false);
+		decongestionConfigGroup4.setRunFinalAnalysis(false);
 		scenario4.getConfig().controler().setOutputDirectory(testUtils.getOutputDirectory() + "cne/");
 		Controler controler4 = new Controler(scenario4);
 		CNEIntegration cneIntegration4 = new CNEIntegration(controler4, gt, rgt );

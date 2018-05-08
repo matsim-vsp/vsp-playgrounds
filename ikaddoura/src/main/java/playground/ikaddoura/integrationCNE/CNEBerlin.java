@@ -241,21 +241,21 @@ public class CNEBerlin {
 			
 			decongestionSettings.setMsa(true);
 			
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setToleratedAverageDelaySec(30.);
 
 		} else if (congestionTollingApproach.toString().equals(CongestionTollingApproach.DecongestionBangBang.toString())) {
 
 			decongestionSettings.setDecongestionApproach(DecongestionApproach.BangBang);
-			decongestionSettings.setINITIAL_TOLL(0.01);
-			decongestionSettings.setTOLL_ADJUSTMENT(1.0);
+			decongestionSettings.setInitialToll(0.01);
+			decongestionSettings.setTollAdjustment(1.0);
 			
 			decongestionSettings.setMsa(false);
 			
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setToleratedAverageDelaySec(30.);
 			
 		} else {
 			// for V3, V9 and V10: no additional settings

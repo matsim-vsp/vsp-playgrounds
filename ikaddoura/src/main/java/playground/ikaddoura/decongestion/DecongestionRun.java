@@ -80,12 +80,12 @@ public class DecongestionRun {
 	private void run() throws IOException {
 
 		final DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
-		decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.0);
-		decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
+		decongestionSettings.setToleratedAverageDelaySec(30.);
+		decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+		decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
+		decongestionSettings.setUpdatePriceInterval(1);
 		decongestionSettings.setMsa(false);
-		decongestionSettings.setTOLL_BLEND_FACTOR(1.0);
+		decongestionSettings.setTollBlendFactor(1.0);
 		
 		decongestionSettings.setDecongestionApproach(DecongestionApproach.P_MC);
 //		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
@@ -97,8 +97,8 @@ public class DecongestionRun {
 		decongestionSettings.setIntegralApproachUnusedHeadwayFactor(10.0);
 		decongestionSettings.setIntegralApproachAverageAlpha(0.0);
 		
-		decongestionSettings.setTOLL_ADJUSTMENT(0.0);
-		decongestionSettings.setINITIAL_TOLL(0.0);
+		decongestionSettings.setTollAdjustment(0.0);
+		decongestionSettings.setInitialToll(0.0);
 		
 		Config config = ConfigUtils.loadConfig(configFile);
 		config.addModule(decongestionSettings);
@@ -121,17 +121,17 @@ public class DecongestionRun {
 				"_timeRange" + config.timeAllocationMutator().getMutationRange();
 		
 		outputDirectory = outputDirectory
-					+ "_priceUpdate" + decongestionSettings.getUPDATE_PRICE_INTERVAL() + "_it"
-					+ "_toleratedDelay" + decongestionSettings.getTOLERATED_AVERAGE_DELAY_SEC()
-					+ "_start" + decongestionSettings.getFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT()
-					+ "_end" + decongestionSettings.getFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT()
+					+ "_priceUpdate" + decongestionSettings.getUpdatePriceInterval() + "_it"
+					+ "_toleratedDelay" + decongestionSettings.getToleratedAverageDelaySec()
+					+ "_start" + decongestionSettings.getFractionOfIterationsToStartPriceAdjustment()
+					+ "_end" + decongestionSettings.getFractionOfIterationsToEndPriceAdjustment()
 					+ "_tollMSA" + decongestionSettings.isMsa()
-					+ "_blendFactor" + decongestionSettings.getTOLL_BLEND_FACTOR();
+					+ "_blendFactor" + decongestionSettings.getTollBlendFactor();
 		
 		if (decongestionSettings.getDecongestionApproach().toString().equals(DecongestionApproach.BangBang.toString())) {
 			outputDirectory = outputDirectory + 
-					"_init" + decongestionSettings.getINITIAL_TOLL() +
-					"_adj" + decongestionSettings.getTOLL_ADJUSTMENT();
+					"_init" + decongestionSettings.getInitialToll() +
+					"_adj" + decongestionSettings.getTollAdjustment();
 		
 		} else if (decongestionSettings.getDecongestionApproach().toString().equals(DecongestionApproach.PID.toString())) {
 			outputDirectory = outputDirectory +
