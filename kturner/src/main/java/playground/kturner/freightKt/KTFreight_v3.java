@@ -130,7 +130,8 @@ public class KTFreight_v3 {
 //	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ; //Hat keine Eletrofzg zur Verfügung
 	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet_withElectro.xml"; // With elektrovehicles available.
 	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
-	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung
+	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung (Fzgtypen unten auswählen "onlytollVehTypes"
+//	private static final String TOLLFILE_NAME = "toll_cordon1000.xml";		//Maut zur Sperrung der Innenstadt (Fzgtypen unten auswählen "onlytollVehTypes"
 	
 	private static final String LEZAREAFILE_NAME = "lez_area.xml";  //Zonendefinition (Links) für Umweltzone anhand eines Maut-Files -> Services hier werden im UCC-Case von den UCC beliefert. !File dient NICHT der Mautberechnung
 	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
