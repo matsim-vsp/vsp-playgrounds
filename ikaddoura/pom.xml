@@ -72,6 +72,12 @@
   		<version>0.11.0-SNAPSHOT</version>
   		<scope>compile</scope>
   	  </dependency>
+  	  <dependency>
+		<groupId>org.matsim.contrib</groupId>
+		<artifactId>decongestion</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+		<scope>compile</scope>
+	  </dependency>
   	
   	<dependency>
   		<groupId>vsp-playground</groupId>
