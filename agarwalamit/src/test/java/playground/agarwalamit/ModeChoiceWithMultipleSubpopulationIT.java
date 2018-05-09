@@ -138,7 +138,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 					public PlanStrategy get() {
 						final PlanStrategyImpl.Builder builder = new PlanStrategyImpl.Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new TripsToLegsModule(tripRouterProvider, sc.getConfig().global()));
-						builder.addStrategyModule(new ChangeLegMode(sc.getConfig().global().getNumberOfThreads(), availableModes, true));
+						builder.addStrategyModule(new ChangeLegMode(sc.getConfig().global().getNumberOfThreads(), availableModes, true, true));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}
