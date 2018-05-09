@@ -14,6 +14,11 @@ script:
   - mvn test -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
   - mvn failsafe:integration-test failsafe:verify -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
 
+deploy:
+  provider: script
+  script: "mvn --settings .travis.settings.xml -DskipTests=true -B clean deploy"
+  skip_cleanup: true
+
 env:
   global:
     - MAVEN_OPTS="-Xmx2g"

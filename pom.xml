@@ -267,6 +267,17 @@
 			</build>
 		</profile>
 	</profiles>
+	
+	<distributionManagement>
+		<repository>
+			<id>packagecloud-matsim-vsp</id>
+			<url>packagecloud+https://packagecloud.io/matsim-vsp/vsp-playgrounds</url>
+		</repository>
+		<snapshotRepository>
+			<id>packagecloud-matsim-vsp</id>
+			<url>packagecloud+https://packagecloud.io/matsim-vsp/vsp-playgrounds</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<dependencyManagement>
 		<dependencies>
