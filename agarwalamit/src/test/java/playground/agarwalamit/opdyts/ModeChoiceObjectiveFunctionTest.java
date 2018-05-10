@@ -1,5 +1,6 @@
 package playground.agarwalamit.opdyts;
 
+import static playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.*;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.TreeMap;
@@ -60,10 +61,10 @@ public class ModeChoiceObjectiveFunctionTest {
 					return OpdytsScenario.PATNA_1Pct;
 				}
 			};
-			ObjectiveFunctionEvaluator.ObjectiveFunctionType objectiveFunctionType =
-					ObjectiveFunctionEvaluator.ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED ;
-			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction(distriInfo, objectiveFunctionType);
-			
+			ObjectiveFunctionType objectiveFunctionType =
+					ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED ;
+			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction();
+
 			final Config config = ConfigUtils.createConfig();
 			config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 			Scenario scenario = ScenarioUtils.createScenario(config);
@@ -100,6 +101,10 @@ public class ModeChoiceObjectiveFunctionTest {
 					install(new ControlerDefaultCoreListenersModule());
 					install(new ControlerDefaultsModule());
 					install(new ScenarioByInstanceModule(scenario));
+
+					bind(DistanceDistribution.class).toInstance(distriInfo);
+					bind(ObjectiveFunctionType.class).toInstance(objectiveFunctionType);
+
 					this.bind(ObjectiveFunction.class).toInstance(objective);
 				}
 			});

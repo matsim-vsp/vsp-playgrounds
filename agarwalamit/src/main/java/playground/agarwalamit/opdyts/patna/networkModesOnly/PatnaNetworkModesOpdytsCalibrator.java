@@ -192,12 +192,13 @@ public class PatnaNetworkModesOpdytsCalibrator {
 						bestSolutionVsDecisionVariableChart.plotData(finalOUT_DIR +"/decisionVariableVsASC.png");
 					}
 				});
+				bind(DistanceDistribution.class).toInstance(referenceStudyDistri);
 			}
 		});
 
 		// this is the objective Function which returns the value for given SimulatorState
 		// in my case, this will be the distance based modal split
-		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(referenceStudyDistri);
+		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction();
 
 		//search algorithm
 		// randomize the decision variables (for e.g.\ utility parameters for modes)

@@ -20,7 +20,7 @@
 package playground.agarwalamit.opdyts;
 
 import java.util.*;
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import floetteroed.opdyts.ObjectiveFunction;
 import floetteroed.opdyts.SimulatorState;
 import org.apache.log4j.Logger;
@@ -38,6 +38,7 @@ import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
 import playground.agarwalamit.opdyts.equil.EquilMixedTrafficObjectiveFunctionPenalty;
 
 /**
@@ -50,12 +51,15 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     private static final Logger log = Logger.getLogger( ModeChoiceObjectiveFunction.class );
 
     private final MainModeIdentifier mainModeIdentifier ;
-    private final DistanceDistribution distriInfo ;
+
+    @Inject private DistanceDistribution distriInfo ;
 
     @Inject private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
     @Inject private TripRouter tripRouter ;
     @Inject private Network network ;
-	private final ObjectiveFunctionEvaluator.ObjectiveFunctionType objectiveFunctionType;
+
+    @Inject(optional=true)
+    private ObjectiveFunctionType objectiveFunctionType = ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED;
 	// Documentation: "Guice injects ... fields of all values that are bound using toInstance(). These are injected at injector-creation time."
     // https://github.com/google/guice/wiki/InjectionPoints
     // I read that as "the fields are injected (every time again) when the instance is injected".
@@ -70,11 +74,10 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     private final Map<StatType,DataMap<String>> sumsContainer  = new TreeMap<>() ;
     private final Map<StatType,Databins<String>> refStatsContainer = new TreeMap<>() ;
 	
-	public ModeChoiceObjectiveFunction(final DistanceDistribution distriInfo) {
-		this( distriInfo, ObjectiveFunctionEvaluator.ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED ) ;
-	}
-	public ModeChoiceObjectiveFunction(final DistanceDistribution distriInfo,
-									   ObjectiveFunctionEvaluator.ObjectiveFunctionType objectiveFunctionType ) {
+	public ModeChoiceObjectiveFunction(
+//	        final DistanceDistribution distriInfo,
+//									   ObjectiveFunctionType objectiveFunctionType
+    ) {
 		this.objectiveFunctionType = objectiveFunctionType;
         this.distriInfo = distriInfo;
         for ( StatType statType : StatType.values() ) {
