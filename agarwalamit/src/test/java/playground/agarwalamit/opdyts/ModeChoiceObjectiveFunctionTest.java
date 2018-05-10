@@ -1,5 +1,8 @@
 package playground.agarwalamit.opdyts;
 
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.TreeMap;
 import floetteroed.opdyts.ObjectiveFunction;
 import floetteroed.opdyts.SimulatorState;
 import org.apache.log4j.Logger;
@@ -27,12 +30,6 @@ import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModu
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-
-import java.io.PrintStream;
-import java.util.Map;
-import java.util.TreeMap;
-
-import static org.junit.Assert.*;
 
 public class ModeChoiceObjectiveFunctionTest {
 	private static final Logger log = Logger.getLogger(ModeChoiceObjectiveFunctionTest.class ) ;
@@ -64,7 +61,7 @@ public class ModeChoiceObjectiveFunctionTest {
 				}
 			};
 			ObjectiveFunctionEvaluator.ObjectiveFunctionType objectiveFunctionType =
-					ObjectiveFunctionEvaluator.ObjectiveFunctionType.SUM_SQRT_DIFF_NORMALIZED ;
+					ObjectiveFunctionEvaluator.ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED ;
 			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction(distriInfo, objectiveFunctionType);
 			
 			final Config config = ConfigUtils.createConfig();
