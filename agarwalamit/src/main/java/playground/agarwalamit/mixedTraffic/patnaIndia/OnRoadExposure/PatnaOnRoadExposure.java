@@ -42,7 +42,6 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -163,7 +162,7 @@ public class PatnaOnRoadExposure {
         }
 
         {
-            Map<Id<Person>, Tuple<String, String>> person2homeCoord = getXYForHomeLocationsOfPersons();
+            Map<Id<Person>, Coord> person2homeCoord = getXYForHomeLocationsOfPersons();
             Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
             String outFile = outputFilesDir+"/personToOnRoadExposure.txt";
             BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
@@ -174,11 +173,11 @@ public class PatnaOnRoadExposure {
                 }
                 writer.newLine();
                 for (Id<Person> personId : personToInhaledMass.keySet()) {
-                    Tuple<String, String> coords = person2homeCoord.get(personId);
+                    Coord coord = person2homeCoord.get(personId);
                     String zoneId;
-                    if (coords.getFirst().equals("NA")) zoneId = "NA";
-                    else zoneId = getZoneId(new Coord(Double.valueOf(coords.getFirst()), Double.valueOf(coords.getSecond())));
-                    writer.write(personId+"\t"+zoneId+"\t"+coords.getFirst()+"\t"+coords.getSecond()+"\t");
+                    if (coord==null) zoneId = "NA";
+                    else zoneId = getZoneId( coord );
+                    writer.write(personId+"\t"+zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
                     for (String poll : pollutants){
                         writer.write( personToInhaledMass.get(personId).get(poll) + "\t");
                     }
@@ -216,16 +215,16 @@ public class PatnaOnRoadExposure {
        onRoadExposureHandler.reset(0);
     }
 
-    private static Map<Id<Person>, Tuple<String, String>> getXYForHomeLocationsOfPersons(){
+    private static Map<Id<Person>, Coord> getXYForHomeLocationsOfPersons(){
         String plansFile = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_plans.xml.gz";
         Population population = LoadMyScenarios.loadScenarioFromPlans(plansFile).getPopulation();
-        Map<Id<Person>, Tuple<String, String>> person2homeCoord = new HashMap<>();
+        Map<Id<Person>, Coord> person2homeCoord = new HashMap<>();
         for (Person person : population.getPersons().values()) {
             Coord cord = ((Activity) person.getSelectedPlan().getPlanElements().get(0)).getCoord();
             if (cord!=null){
-                person2homeCoord.put(person.getId(), new Tuple<>(String.valueOf(cord.getX()),String.valueOf(cord.getY())));
+                person2homeCoord.put(person.getId(), cord);
             } else{
-                person2homeCoord.put(person.getId(), new Tuple<>("NA","NA"));
+                person2homeCoord.put(person.getId(),null);
             }
         }
         return person2homeCoord;

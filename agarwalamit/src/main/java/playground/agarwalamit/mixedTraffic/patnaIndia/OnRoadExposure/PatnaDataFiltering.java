@@ -22,14 +22,10 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.OnRoadExposure;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
-import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.PersonFilter;
@@ -41,25 +37,26 @@ import playground.agarwalamit.utils.PersonFilter;
 public class PatnaDataFiltering {
 
     private static final String wardsFile = FileUtils.SHARED_SVN+"/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
-    private static final Collection<SimpleFeature> simpleFeatureCollection = ShapeFileReader.getAllFeatures(wardsFile);
+//    private static final Collection<SimpleFeature> simpleFeatureCollection = ShapeFileReader.getAllFeatures(wardsFile);
 
     public static void main(String[] args) {
+
+        PersonFilter personFilter = new PatnaPersonFilter();
 
         String inputFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/analysis/personToOnRoadExposure.txt";
         String outputFile = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/analysis/personToOnRoadExposure_urbanPersonOnly.txt";
 
-        BufferedReader reader = IOUtils.getBufferedReader(inputFile);
-        BufferedWriter writer = IOUtils.getBufferedWriter(outputFile);
         Map<String, String> zoneId2Data = new HashMap<>();
 
-        try {
+        try (BufferedReader reader = IOUtils.getBufferedReader(inputFile);
+             BufferedWriter writer = IOUtils.getBufferedWriter(outputFile);) {
             String line = reader.readLine();
             while (line!=null){
                 if (line.startsWith("personId")) writer.write(line+"\n");
                 else {
                     String parts [] = line.split("\t");
                     String personId = parts[0];
-                    if (isConcernedPerson(personId)) {
+                    if ( personFilter.includePerson(Id.createPersonId(personId)) ) {
                         writer.write(line+"\n");
                     }
                 }
@@ -70,11 +67,5 @@ public class PatnaDataFiltering {
         } catch (IOException e) {
             throw new RuntimeException("Data is not written/read. Reason : " + e);
         }
-    }
-
-    private static boolean isConcernedPerson(String personId) {
-        Id<Person> person = Id.createPersonId(personId);
-        PersonFilter patnaPersonFilter = new PatnaPersonFilter();
-        return patnaPersonFilter.getUserGroupAsStringFromPersonId(person).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString());
     }
 }
