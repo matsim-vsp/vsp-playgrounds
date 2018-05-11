@@ -23,7 +23,7 @@
 package playground.jbischoff.sharedTaxiBerlin.run.taxidemand;
 
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingModule;
+import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingParams;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -39,8 +39,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 public class RunSharedBerlinTaxiCase {
 
 	public static void main(String[] args) {
-
-		
 			String runId = "testreb";
 			String configFile = "../../../shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt/config0.1.xml";
 			Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
@@ -53,18 +51,16 @@ public class RunSharedBerlinTaxiCase {
 			drt.setNumberOfThreads(7);
 			drt.setMaxTravelTimeAlpha(5);
 			drt.setMaxTravelTimeBeta(3000);
-			drt.setRebalancingInterval(1800);
+			
+			MinCostFlowRebalancingParams rebalancingParams = drt.getMinCostFlowRebalancing();
+			rebalancingParams.setInterval(1800);
+			rebalancingParams.setCellSize(2000);
 			
 			config.controler().setRunId(runId);
 			config.controler().setLastIteration(5);
 			config.controler().setOutputDirectory("D:/runs-svn/sharedTaxi/testReb");
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 			org.matsim.core.controler.Controler controler = DrtControlerCreator.createControler(config, false);
-			controler.addOverridingModule(new MinCostFlowRebalancingModule(2000));
 			controler.run();
-		
 	}
-		
-		
-	
 }
