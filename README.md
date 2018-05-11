@@ -11,11 +11,11 @@ Please note, that this code is not designated stable.
 
 For the main MATSim project, see https://github.com/matsim-org
 
-## Use in external projects
+## Use in external project
 
-To use vsp-playgrounds as dependencies in an external maven project, update the external project's `pom.xml` in the following way:
+To use vsp-playgrounds as a dependency in an external maven project update the latter project's `pom.xml` in the following way:
 
-1. Add the vsp-playgrounds packagecloud repository in the `repositories` section:
+1. Add the packagecloud repository to the `repositories` section:
 
 ```
 <repositories>
@@ -26,7 +26,7 @@ To use vsp-playgrounds as dependencies in an external maven project, update the 
 </repositories>
 ```
 
-2. Add a dependency for each used playground in the `dependencies` section:
+2. Add dependency to the selected playgrounds in the `dependencies` section: 
 
 ```
 <dependencies>
