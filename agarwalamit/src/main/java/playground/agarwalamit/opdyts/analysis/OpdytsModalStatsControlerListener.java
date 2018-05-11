@@ -47,6 +47,7 @@ import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
 import playground.agarwalamit.analysis.tripDistance.LegModeBeelineDistanceDistributionFromPlansAnalyzer;
 import playground.agarwalamit.opdyts.DistanceDistribution;
 import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
 import playground.agarwalamit.opdyts.equil.EquilMixedTrafficObjectiveFunctionPenalty;
 
 /**
@@ -57,6 +58,8 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
 
     @Inject
     private Scenario scenario;
+    @Inject
+    private ObjectiveFunctionType objectiveFunctionType;
 
     public static final String OPDYTS_STATS_LABEL_STARTER = "iterationNr";
     public static final String OPDYTS_STATS_FILE_NAME = "opdyts_modalStats";
@@ -93,11 +96,11 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
 
         StringBuilder stringBuilder = new StringBuilder(OPDYTS_STATS_LABEL_STARTER + "\t");
         stringBuilder.append("fromStateObjFunValue"+"\t");
-        mode2consider.stream().forEach(mode -> stringBuilder.append("legs_").append(mode).append("\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("asc_").append(mode).append("\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("util_trav_").append(mode).append("\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("util_dist_").append(mode).append("\t"));
-        mode2consider.stream().forEach(mode -> stringBuilder.append("money_dist_rate_").append(mode).append("\t"));
+        mode2consider.forEach(mode -> stringBuilder.append("legs_").append(mode).append("\t"));
+        mode2consider.forEach(mode -> stringBuilder.append("asc_").append(mode).append("\t"));
+        mode2consider.forEach(mode -> stringBuilder.append("util_trav_").append(mode).append("\t"));
+        mode2consider.forEach(mode -> stringBuilder.append("util_dist_").append(mode).append("\t"));
+        mode2consider.forEach(mode -> stringBuilder.append("money_dist_rate_").append(mode).append("\t"));
         stringBuilder.append("objectiveFunctionValue"+"\t");
         stringBuilder.append("penaltyForObjectiveFunction"+"\t");
         stringBuilder.append("totalObjectiveFunctionValue");
@@ -148,21 +151,16 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
 
                 StringBuilder stringBuilder = new StringBuilder(iteration + "\t");
                 stringBuilder.append(String.valueOf(fromStateObjFunValue)).append("\t"); // useful only to check if all decision variables start at the same point.
-                mode2consider.stream()
-                             .forEach(mode -> stringBuilder.append(mode2Legs.containsKey(mode) ? mode2Legs.get(mode) + "\t" : String
+                mode2consider.forEach(mode -> stringBuilder.append(mode2Legs.containsKey(mode) ? mode2Legs.get(mode) + "\t" : String
                                      .valueOf(0) + "\t"));
-                mode2consider.stream()
-                             .forEach(mode -> stringBuilder.append(mode2Params.get(mode).getConstant()).append("\t"));
-                mode2consider.stream()
-                             .forEach(mode -> stringBuilder.append(mode2Params.get(mode)
+                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode).getConstant()).append("\t"));
+                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
                                                                               .getMarginalUtilityOfTraveling())
                                                            .append("\t"));
-                mode2consider.stream()
-                             .forEach(mode -> stringBuilder.append(mode2Params.get(mode)
+                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
                                                                               .getMarginalUtilityOfDistance())
                                                            .append("\t"));
-                mode2consider.stream()
-                             .forEach(mode -> stringBuilder.append(mode2Params.get(mode)
+                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
                                                                               .getMonetaryDistanceRate()).append("\t"));
                 stringBuilder.append(objectiveFunctionValue).append("\t");
                 stringBuilder.append(penalty).append("\t");
@@ -211,9 +209,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
     }
 
     private double getValueOfObjFun (final LegModeBeelineDistanceDistributionFromPlansAnalyzer beelineDistanceDistributionHandler){
-        // evaluate objective function value
-        ObjectiveFunctionEvaluator objectiveFunctionEvaluator = new ObjectiveFunctionEvaluator();
-
+        ObjectiveFunctionEvaluator objectiveFunctionEvaluator = new ObjectiveFunctionEvaluator(objectiveFunctionType);
         Map<String, double[]> simCounts = new TreeMap<>();
 
         // initialize simcounts array for each mode
