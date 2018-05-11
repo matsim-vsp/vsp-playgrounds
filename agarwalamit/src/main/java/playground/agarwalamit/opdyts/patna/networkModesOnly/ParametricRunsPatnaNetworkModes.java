@@ -19,6 +19,7 @@
 
 package playground.agarwalamit.opdyts.patna.networkModesOnly;
 
+import playground.agarwalamit.opdyts.ModeChoiceRandomizer.ASCRandomizerStyle;
 import playground.vsp.parametricRuns.PrepareParametricRuns;
 
 /**
@@ -32,17 +33,19 @@ public class ParametricRunsPatnaNetworkModes {
     public static void main(String[] args) {
         int runCounter= 237;
 
-        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/";
-        String matsimDir = "r_3c41b2cb04b40b41ad17a0f3675ff5820b2b539f_patnaOpdyts_11May2018";
+        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output_selectExpBeta/";
+        String matsimDir = "r_be1612f22a81b149418391f84c5dc9c4cbd70437_patnaOpdyts_11May2018";
 
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
 
-        String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixedVariation","diagonal_fixedVariation"};
+        String ascStyles [] = {ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.diagonal_randomVariation.toString(),
+                ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.diagonal_fixedVariation.toString()};
+
         double [] stepSizes = {0.5, 0.75, 1.0};
         Integer [] convIterations = {600};
         double [] selfTuningWts = {1.0};
-        Integer [] warmUpIts = {1, 5};
+        Integer [] warmUpIts = {5, 1};
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts")
               .append(PrepareParametricRuns.newLine);
@@ -68,9 +71,9 @@ public class ParametricRunsPatnaNetworkModes {
                                     "java -Djava.awt.headless=true -Xmx58G -cp agarwalamit-0.11.0-SNAPSHOT.jar " +
                                             "playground/agarwalamit/opdyts/patna/networkModesOnly/PatnaNetworkModesOpdytsCalibrator " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/inputs/config_networkModesOnly.xml " +
-                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/"+jobName+"/ " +
-                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/relaxedPlans/output/output_plans.xml.gz "+
-                                            params+" "
+                                            baseOutDir+"/"+jobName+"/ " +
+                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/relaxedPlans/output_selectExpBeta/output_plans.xml.gz "+
+                                            params+" true"
                             };
 
                             parametricRuns.appendJobParameters("-l mem_free=15G");// 4 cores with 15G each

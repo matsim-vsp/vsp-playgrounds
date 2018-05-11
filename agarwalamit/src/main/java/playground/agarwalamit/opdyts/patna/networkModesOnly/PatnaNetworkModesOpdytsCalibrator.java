@@ -53,6 +53,7 @@ import playground.agarwalamit.opdyts.DistanceDistribution;
 import playground.agarwalamit.opdyts.ModeChoiceDecisionVariable;
 import playground.agarwalamit.opdyts.ModeChoiceObjectiveFunction;
 import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator;
 import playground.agarwalamit.opdyts.OpdytsScenario;
 import playground.agarwalamit.opdyts.RandomizedUtilityParametersChoser;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
@@ -192,6 +193,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 						bestSolutionVsDecisionVariableChart.plotData(finalOUT_DIR +"/decisionVariableVsASC.png");
 					}
 				});
+				bind(ObjectiveFunctionEvaluator.ObjectiveFunctionType.class).toInstance(ObjectiveFunctionEvaluator.ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED);
 			}
 		});
 
