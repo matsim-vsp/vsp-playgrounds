@@ -12,13 +12,15 @@ stages:
   - deploy
 
 script:
+  - mvn install --also-make --projects ${MODULE} -DskipTests -Dmaven.javadoc.skip
   - cd ${TRAVIS_BUILD_DIR}/${MODULE}
   - mvn test -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
-#  - mvn failsafe:integration-test failsafe:verify -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
+#  - mvn failsafe:integration-test failsafe:verify -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
 
 jobs:
   include:
     - stage: package
+      script: mvn package -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
     - stage: deploy
       script: "mvn --settings .travis.settings.xml -DskipTests=true -B clean deploy"
       skip_cleanup: true
@@ -27,9 +29,25 @@ env:
   global:
     - MAVEN_OPTS="-Xmx2g"
   matrix:
-    - MODULE=michalm                        
-    - MODULE=jbischoff                        
-
+    - MODULE=vsp
+    - MODULE=agarwalamit
+    - MODULE=benjamin
+    - MODULE=dgrether
+    - MODULE=dziemke
+    - MODULE=gleich
+    - MODULE=gunnar
+    - MODULE=ikaddoura
+    - MODULE=jbischoff
+    - MODULE=kai
+    - MODULE=kairuns
+    - MODULE=kturner
+    - MODULE=michalm
+    - MODULE=santiago
+    - MODULE=stockholm
+    - MODULE=tthunig
+    - MODULE=vspshk
+    - MODULE=vsptelematics
+    
 cache:
   directories:
   - $HOME/.m2
