@@ -30,10 +30,10 @@ import playground.vsp.parametricRuns.PrepareParametricRuns;
 public class ParametricRunsPatnaNetworkModes {
 
     public static void main(String[] args) {
-        int runCounter= 201;
+        int runCounter= 237;
 
         String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/";
-        String matsimDir = "r_87b4237ac664bb1068965f2e8797e6bd3cfa7e1f_patnaOpdyts_25Oct";
+        String matsimDir = "r_3c41b2cb04b40b41ad17a0f3675ff5820b2b539f_patnaOpdyts_11May2018";
 
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
@@ -42,7 +42,7 @@ public class ParametricRunsPatnaNetworkModes {
         double [] stepSizes = {0.5, 0.75, 1.0};
         Integer [] convIterations = {600};
         double [] selfTuningWts = {1.0};
-        Integer [] warmUpIts = {1, 5, 10};
+        Integer [] warmUpIts = {1, 5};
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts")
               .append(PrepareParametricRuns.newLine);
@@ -65,7 +65,7 @@ public class ParametricRunsPatnaNetworkModes {
                                     "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
                                     PrepareParametricRuns.newLine,
 
-                                    "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
+                                    "java -Djava.awt.headless=true -Xmx58G -cp agarwalamit-0.11.0-SNAPSHOT.jar " +
                                             "playground/agarwalamit/opdyts/patna/networkModesOnly/PatnaNetworkModesOpdytsCalibrator " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/inputs/config_networkModesOnly.xml " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/"+jobName+"/ " +
@@ -73,6 +73,7 @@ public class ParametricRunsPatnaNetworkModes {
                                             params+" "
                             };
 
+                            parametricRuns.appendJobParameters("-l mem_free=15G");// 4 cores with 15G each
                             parametricRuns.run(additionalLines, baseOutDir, jobName);
                             buffer.append(jobName)
                                   .append("\t")

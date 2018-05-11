@@ -32,6 +32,7 @@ import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
 import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
 import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
 import playground.agarwalamit.opdyts.OpdytsScenario;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.utils.FileUtils;
@@ -52,7 +53,7 @@ class PatnaNetworkModesPlansRelaxor {
 			outDir = args[1];
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/inputs/config_networkModesOnly.xml";
-			outDir = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output/";
+			outDir = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output_selectExpBeta/";
 		}
 
 		Config config= ConfigUtils.loadConfig(configFile);
@@ -80,6 +81,8 @@ class PatnaNetworkModesPlansRelaxor {
 				this.addControlerListenerBinding().toInstance(
 						new OpdytsModalStatsControlerListener(modes2consider, new PatnaNetworkModesOneBinDistanceDistribution(
 						OpdytsScenario.PATNA_1Pct)));
+
+				this.bind(ObjectiveFunctionType.class).toInstance(ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED);
 			}
 		});
 

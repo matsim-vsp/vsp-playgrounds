@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
@@ -58,8 +58,9 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
 
     @Inject
     private Scenario scenario;
-    @Inject
-    private ObjectiveFunctionType objectiveFunctionType;
+
+    @Inject(optional=true)
+    private ObjectiveFunctionType objectiveFunctionType = ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED;
 
     public static final String OPDYTS_STATS_LABEL_STARTER = "iterationNr";
     public static final String OPDYTS_STATS_FILE_NAME = "opdyts_modalStats";
