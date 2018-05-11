@@ -52,7 +52,7 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
 
     private final MainModeIdentifier mainModeIdentifier ;
 
-    @Inject private DistanceDistribution distriInfo ;
+    private DistanceDistribution distriInfo ;
 
     @Inject private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
     @Inject private TripRouter tripRouter ;
@@ -75,10 +75,10 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     private final Map<StatType,Databins<String>> refStatsContainer = new TreeMap<>() ;
 	
 	public ModeChoiceObjectiveFunction(
-//	        final DistanceDistribution distriInfo,
-//									   ObjectiveFunctionType objectiveFunctionType
+	        final DistanceDistribution distriInfo
+//									   ,ObjectiveFunctionType objectiveFunctionType
     ) {
-		this.objectiveFunctionType = objectiveFunctionType;
+//		this.objectiveFunctionType = objectiveFunctionType;
         this.distriInfo = distriInfo;
         for ( StatType statType : StatType.values() ) {
             // define the bin boundaries:

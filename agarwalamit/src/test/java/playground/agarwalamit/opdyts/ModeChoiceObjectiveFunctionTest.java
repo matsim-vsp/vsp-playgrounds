@@ -63,7 +63,7 @@ public class ModeChoiceObjectiveFunctionTest {
 			};
 			ObjectiveFunctionType objectiveFunctionType =
 					ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED ;
-			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction();
+			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction(distriInfo);
 
 			final Config config = ConfigUtils.createConfig();
 			config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
@@ -102,7 +102,6 @@ public class ModeChoiceObjectiveFunctionTest {
 					install(new ControlerDefaultsModule());
 					install(new ScenarioByInstanceModule(scenario));
 
-					bind(DistanceDistribution.class).toInstance(distriInfo);
 					bind(ObjectiveFunctionType.class).toInstance(objectiveFunctionType);
 
 					this.bind(ObjectiveFunction.class).toInstance(objective);
