@@ -24,8 +24,10 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.contrib.analysis.kai.Databins;
+import org.matsim.core.config.groups.StrategyConfigGroup;
 
 /**
  * Created by amit on 28/11/2016.
@@ -46,21 +48,23 @@ public class ObjectiveFunctionEvaluator {
 //        SUM_SQRT_DIFF_NORMALIZED
     }
 
-    private final ObjectiveFunctionType objectiveFunctionType;
+    @Inject(optional=true)
+    private final ObjectiveFunctionType objectiveFunctionType = ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED;
+
+    @Inject
+    private StrategyConfigGroup strategyConfigGroup;
+
     private final double probOfRandomReplanning;
 
-    public ObjectiveFunctionEvaluator(){
-        this(ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED, 1.0);
-    }
-
-    public ObjectiveFunctionEvaluator(final ObjectiveFunctionType objectiveFunctionType) {
-        this(objectiveFunctionType, 1.0);
-    }
-
-    public ObjectiveFunctionEvaluator(final ObjectiveFunctionType objectiveFunctionType, final double probOfRandomReplanning) {
-        this.objectiveFunctionType = objectiveFunctionType;
-        this.probOfRandomReplanning = probOfRandomReplanning;
-        log.info("using "+objectiveFunctionType + "objective function and probability of random re-planing as "+ probOfRandomReplanning +".");
+    public ObjectiveFunctionEvaluator() {
+        //injected items should be available during
+        log.info("using "+objectiveFunctionType + "objective function.");
+        if(this.objectiveFunctionType.equals(ObjectiveFunctionType.SUM_SCALED) || this.objectiveFunctionType.equals(ObjectiveFunctionType.SUM_SCALED_LOG)) {
+            this.probOfRandomReplanning = OpdytsModeChoiceUtils.getProabilityOfRandomReplanning(this.strategyConfigGroup);
+            log.warn("The probability of random replanning is ="+ this.probOfRandomReplanning);
+        } else {
+            probOfRandomReplanning = 0.0; // value 0 corresponds to ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED.
+        }
     }
 
     public double getObjectiveFunctionValue(final Databins<String> realCounts, final Databins<String> simCounts){
@@ -155,7 +159,7 @@ public class ObjectiveFunctionEvaluator {
         return objective;
     }
 
-    public Map<String,Double> getModeToShare(){
+    Map<String,Double> getModeToShare(){
         double sumShare = mode2share.values().stream().mapToDouble(Number::doubleValue).sum();
         return mode2share.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() / sumShare ));
     }

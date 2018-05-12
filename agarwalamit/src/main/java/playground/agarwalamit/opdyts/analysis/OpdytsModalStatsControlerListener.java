@@ -22,6 +22,7 @@ package playground.agarwalamit.opdyts.analysis;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -47,8 +48,9 @@ import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
 import playground.agarwalamit.analysis.tripDistance.LegModeBeelineDistanceDistributionFromPlansAnalyzer;
 import playground.agarwalamit.opdyts.DistanceDistribution;
 import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator;
-import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
 import playground.agarwalamit.opdyts.equil.EquilMixedTrafficObjectiveFunctionPenalty;
+import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
+import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 
 /**
  * Created by amit on 20/09/16.
@@ -59,8 +61,8 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
     @Inject
     private Scenario scenario;
 
-    @Inject(optional=true)
-    private ObjectiveFunctionType objectiveFunctionType = ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED;
+    @Inject
+    private ObjectiveFunctionEvaluator objectiveFunctionEvaluator;
 
     public static final String OPDYTS_STATS_LABEL_STARTER = "iterationNr";
     public static final String OPDYTS_STATS_FILE_NAME = "opdyts_modalStats";
@@ -72,7 +74,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
     private final SortedMap<String, SortedMap<Double, Integer>> initialMode2DistanceClass2LegCount = new TreeMap<>();
 
     private BufferedWriter writer;
-    private final Collection<String> mode2consider;
+    private final Collection<String> modes2consider;
 
     /*
      * after every 10/20/50 iterations, distance distribution will be written out.
@@ -82,7 +84,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
     private double fromStateObjFunValue = 0.; // useful only to check if all decision variables start at the same point.
 
     public OpdytsModalStatsControlerListener(final Collection<String> modes2consider, final DistanceDistribution referenceStudyDistri) {
-        this.mode2consider = modes2consider;
+        this.modes2consider = modes2consider;
         this.referenceStudyDistri = referenceStudyDistri;
         this.dists = Arrays.stream(this.referenceStudyDistri.getDistClasses()).boxed().collect(Collectors.toList());
         this.realCounts = this.referenceStudyDistri.getMode2DistanceBasedLegs();
@@ -97,11 +99,11 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
 
         StringBuilder stringBuilder = new StringBuilder(OPDYTS_STATS_LABEL_STARTER + "\t");
         stringBuilder.append("fromStateObjFunValue"+"\t");
-        mode2consider.forEach(mode -> stringBuilder.append("legs_").append(mode).append("\t"));
-        mode2consider.forEach(mode -> stringBuilder.append("asc_").append(mode).append("\t"));
-        mode2consider.forEach(mode -> stringBuilder.append("util_trav_").append(mode).append("\t"));
-        mode2consider.forEach(mode -> stringBuilder.append("util_dist_").append(mode).append("\t"));
-        mode2consider.forEach(mode -> stringBuilder.append("money_dist_rate_").append(mode).append("\t"));
+        modes2consider.forEach(mode -> stringBuilder.append("legs_").append(mode).append("\t"));
+        modes2consider.forEach(mode -> stringBuilder.append("asc_").append(mode).append("\t"));
+        modes2consider.forEach(mode -> stringBuilder.append("util_trav_").append(mode).append("\t"));
+        modes2consider.forEach(mode -> stringBuilder.append("util_dist_").append(mode).append("\t"));
+        modes2consider.forEach(mode -> stringBuilder.append("money_dist_rate_").append(mode).append("\t"));
         stringBuilder.append("objectiveFunctionValue"+"\t");
         stringBuilder.append("penaltyForObjectiveFunction"+"\t");
         stringBuilder.append("totalObjectiveFunctionValue");
@@ -141,7 +143,6 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
                     break;
                 case EQUIL_MIXEDTRAFFIC:
                     double ascBicycle = config.planCalcScore().getModes().get("bicycle").getConstant();
-//                double bicycleShare = objectiveFunctionEvaluator.getModeToShare().get("bicycle");
                     double bicycleShare = beelineDistanceDistributionFromPlansAnalyzer.getModeToShare().get("bicycle");
                     penalty = EquilMixedTrafficObjectiveFunctionPenalty.getPenalty(bicycleShare, ascBicycle);
             }
@@ -152,17 +153,17 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
 
                 StringBuilder stringBuilder = new StringBuilder(iteration + "\t");
                 stringBuilder.append(String.valueOf(fromStateObjFunValue)).append("\t"); // useful only to check if all decision variables start at the same point.
-                mode2consider.forEach(mode -> stringBuilder.append(mode2Legs.containsKey(mode) ? mode2Legs.get(mode) + "\t" : String
+                modes2consider.forEach(mode -> stringBuilder.append(mode2Legs.containsKey(mode) ? mode2Legs.get(mode) + "\t" : String
                                      .valueOf(0) + "\t"));
-                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode).getConstant()).append("\t"));
-                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
-                                                                              .getMarginalUtilityOfTraveling())
-                                                           .append("\t"));
-                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
-                                                                              .getMarginalUtilityOfDistance())
-                                                           .append("\t"));
-                mode2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
-                                                                              .getMonetaryDistanceRate()).append("\t"));
+                modes2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode).getConstant()).append("\t"));
+                modes2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
+                                                                               .getMarginalUtilityOfTraveling())
+                                                            .append("\t"));
+                modes2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
+                                                                               .getMarginalUtilityOfDistance())
+                                                            .append("\t"));
+                modes2consider.forEach(mode -> stringBuilder.append(mode2Params.get(mode)
+                                                                               .getMonetaryDistanceRate()).append("\t"));
                 stringBuilder.append(objectiveFunctionValue).append("\t");
                 stringBuilder.append(penalty).append("\t");
                 stringBuilder.append(String.valueOf(objectiveFunctionValue + penalty));
@@ -199,6 +200,19 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
         } catch (IOException e) {
             throw new RuntimeException("File not found.");
         }
+
+        String outDir = event.getServices().getControlerIO().getOutputPath();
+
+        // post-process
+        String opdytsConvergencefile = outDir +"/opdyts.con";
+        if (new File(opdytsConvergencefile).exists()) {
+            OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
+            opdytsConvergencePlotter.readFile(outDir +"/opdyts.con");
+            opdytsConvergencePlotter.plotData(outDir +"/convergence.png");
+        }
+        BestSolutionVsDecisionVariableChart bestSolutionVsDecisionVariableChart = new BestSolutionVsDecisionVariableChart(new ArrayList<>(modes2consider));
+        bestSolutionVsDecisionVariableChart.readFile(outDir +"/opdyts.log");
+        bestSolutionVsDecisionVariableChart.plotData(outDir +"/decisionVariableVsASC.png");
     }
 
     private LegModeBeelineDistanceDistributionFromPlansAnalyzer getBeelineDistanceDistributionHandler(){
@@ -210,7 +224,6 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
     }
 
     private double getValueOfObjFun (final LegModeBeelineDistanceDistributionFromPlansAnalyzer beelineDistanceDistributionHandler){
-        ObjectiveFunctionEvaluator objectiveFunctionEvaluator = new ObjectiveFunctionEvaluator(objectiveFunctionType);
         Map<String, double[]> simCounts = new TreeMap<>();
 
         // initialize simcounts array for each mode
