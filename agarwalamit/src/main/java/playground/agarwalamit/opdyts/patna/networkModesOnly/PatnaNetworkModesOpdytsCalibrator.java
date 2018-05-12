@@ -142,7 +142,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 
 				this.bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
 
-				this.bind(ObjectiveFunctionType.class).toInstance(ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED);
+				this.bind(ObjectiveFunctionType.class).toInstance(ObjectiveFunctionType.SUM_SCALED_LOG);
 				this.bind(ObjectiveFunctionEvaluator.class).asEagerSingleton();
 
 				this.addControlerListenerBinding().toInstance(OpdytsModeChoiceUtils.copyVectorFilesToParentDirAndRemoveITERSDir(true));
