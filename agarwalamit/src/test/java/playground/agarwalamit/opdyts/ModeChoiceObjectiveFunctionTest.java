@@ -102,7 +102,8 @@ public class ModeChoiceObjectiveFunctionTest {
 					install(new ControlerDefaultsModule());
 					install(new ScenarioByInstanceModule(scenario));
 
-					bind(ObjectiveFunctionType.class).toInstance(objectiveFunctionType);
+					this.bind(ObjectiveFunctionType.class).toInstance(objectiveFunctionType);
+					this.bind(ObjectiveFunctionEvaluator.class).asEagerSingleton();
 
 					this.bind(ObjectiveFunction.class).toInstance(objective);
 				}

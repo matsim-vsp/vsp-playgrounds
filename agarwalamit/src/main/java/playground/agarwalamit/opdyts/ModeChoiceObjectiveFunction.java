@@ -54,7 +54,6 @@ import playground.agarwalamit.opdyts.equil.EquilMixedTrafficObjectiveFunctionPen
  *
  */
 public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
-    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger( ModeChoiceObjectiveFunction.class );
 
     private final MainModeIdentifier mainModeIdentifier ;
