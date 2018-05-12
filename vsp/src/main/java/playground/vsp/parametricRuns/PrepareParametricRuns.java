@@ -82,62 +82,6 @@ public class PrepareParametricRuns {
                 +"\nHere is a list of parameters: http://www.math.tu-berlin.de/iuk/forschungsrechnerbereich/service/cluster_nutzung/parameter/en/");
     }
 
-    public static void main(String[] args) {
-        int runCounter= 100;
-
-        String baseDir = "/net/ils4/agarwal/equilOpdyts/carPt/output/";
-        String matsimDir = "r_d24e170ecef8172430381b23c72f39e3f9e79ea1_opdyts_22Oct";
-
-        StringBuilder buffer = new StringBuilder();
-
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
-
-        String ascStyles [] = {"axial_fixedVariation","axial_randomVariation"};
-        double [] stepSizes = {0.25, 0.5, 1.0};
-        Integer [] convIterations = {300};
-        double [] selfTuningWts = {1.0};
-        Integer [] warmUpIts = {1, 5, 10};
-
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+newLine);
-
-        for (String ascStyle : ascStyles ) {
-            for(double stepSize :stepSizes){
-                for (int conIts : convIterations) {
-                    for (double selfTunWt : selfTuningWts) {
-                        for (int warmUpIt : warmUpIts) {
-
-                            String arg = ascStyle + " "+ stepSize + " " + conIts + " " + selfTunWt + " " + warmUpIt;
-                            String jobName = "run"+String.valueOf(runCounter++);
-
-                            String [] additionalLines = {
-                                    "echo \"========================\"",
-                                    "echo \" "+matsimDir+" \" ",
-                                    "echo \"========================\"",
-                                    newLine,
-
-                                    "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
-                                    newLine,
-
-                                    "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
-                                            "playground/agarwalamit/opdyts/equil/MatsimOpdytsEquilIntegration " +
-                                            "/net/ils4/agarwal/equilOpdyts/carPt/inputs/ " +
-                                            "/net/ils4/agarwal/equilOpdyts/carPt/output/"+jobName+"/ " +
-                                            "/net/ils4/agarwal/equilOpdyts/carPt/relaxedPlans/output_plans.xml.gz "+
-                                            arg+" "
-                            };
-
-                            parametricRuns.run(additionalLines, baseDir, jobName);
-                            buffer.append(runCounter+"\t" + arg.replace(' ','\t') + newLine);
-                        }
-                    }
-                }
-            }
-        }
-
-        parametricRuns.writeNewOrAppendToRemoteFile(buffer, baseDir+"/runInfo.txt");
-        parametricRuns.close();
-    }
-
     public void writeNewOrAppendToRemoteFile(final StringBuilder buffer, final String file) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -149,9 +93,7 @@ public class PrepareParametricRuns {
 
             w.close();
             baos.close();
-        } catch (SftpException e) {
-            throw new RuntimeException("Data is not written/read. Reason : " + e);
-        } catch (IOException e) {
+        } catch (SftpException | IOException e) {
             throw new RuntimeException("Data is not written/read. Reason : " + e);
         }
     }
