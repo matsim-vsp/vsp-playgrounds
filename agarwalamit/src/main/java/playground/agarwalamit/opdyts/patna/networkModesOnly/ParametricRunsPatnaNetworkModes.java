@@ -31,10 +31,10 @@ import playground.vsp.parametricRuns.PrepareParametricRuns;
 public class ParametricRunsPatnaNetworkModes {
 
     public static void main(String[] args) {
-        int runCounter= 237;
+        int runCounter= 261;
 
-        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output_selectExpBeta/";
-        String matsimDir = "r_be1612f22a81b149418391f84c5dc9c4cbd70437_patnaOpdyts_11May2018";
+        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output_selectExpBeta_scaleLogObjFn/";
+        String matsimDir = "r_5e7329bc8f872c03b0bf515066411c46dd3bd019_patnaOpdyts_12May2018";
 
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");

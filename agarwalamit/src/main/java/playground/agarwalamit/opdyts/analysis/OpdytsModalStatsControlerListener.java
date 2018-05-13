@@ -201,7 +201,8 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
             throw new RuntimeException("File not found.");
         }
 
-        String outDir = event.getServices().getControlerIO().getOutputPath();
+        // opdyts files are not in OPDYTS_TRANSITION folders
+        String outDir = new File(event.getServices().getControlerIO().getOutputPath()).getParent()+"/";
 
         // post-process
         String opdytsConvergencefile = outDir +"/opdyts.con";
