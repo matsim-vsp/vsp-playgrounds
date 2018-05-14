@@ -33,6 +33,8 @@ import optimize.cten.convert.SignalPlans2Matsim.data.CtenCrossingSolution;
 import optimize.cten.convert.SignalPlans2Matsim.data.FixCrossingSolution;
 import optimize.cten.convert.SignalPlans2Matsim.data.FlexCrossingSolution;
 import optimize.cten.convert.SignalPlans2Matsim.data.FlexibleLight;
+import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
+import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
 import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
 
 /**
@@ -52,7 +54,7 @@ public class CtenSignalPlanXMLParser extends MatsimXmlParser {
 	private final static String GREEN_END = "greenEnd";
 	
 	
-	private Map<Id<CtenCrossingSolution>, CtenCrossingSolution> crossings = new HashMap<>();
+	private Map<Id<DgCrossing>, CtenCrossingSolution> crossings = new HashMap<>();
 	
 	private FlexCrossingSolution currentFlexCrossing;
 	
@@ -69,21 +71,21 @@ public class CtenSignalPlanXMLParser extends MatsimXmlParser {
 		if (name.equals(FIXEDCROSSING)) {
 			// read the crossings program offset
 			FixCrossingSolution fixCrossing = new FixCrossingSolution(
-					Id.create(atts.getValue(ID), CtenCrossingSolution.class), 
+					Id.create(atts.getValue(ID), DgCrossing.class), 
 					Integer.parseInt(atts.getValue(OFFSET)),
 					Id.create(atts.getValue(PROG), DgProgram.class));
 			crossings.put(fixCrossing.getId(), fixCrossing);
 		} else if (name.equals(FLEXCROSSING)) {
-			currentFlexCrossing = new FlexCrossingSolution(Id.create(atts.getValue(ID), CtenCrossingSolution.class));
+			currentFlexCrossing = new FlexCrossingSolution(Id.create(atts.getValue(ID), DgCrossing.class));
 			crossings.put(currentFlexCrossing.getId(), currentFlexCrossing);
 		} else if (name.equals(LIGHT)) {
-			FlexibleLight light = new FlexibleLight(Id.create(atts.getValue(ID), FlexibleLight.class), 
+			FlexibleLight light = new FlexibleLight(Id.create(atts.getValue(ID), DgGreen.class), 
 					Integer.parseInt(atts.getValue(GREEN_START)), Integer.parseInt(atts.getValue(GREEN_END)));
 			currentFlexCrossing.addLight(light);
 		}
 	}
 	
-	public Map<Id<CtenCrossingSolution>, CtenCrossingSolution> getCrossings() {
+	public Map<Id<DgCrossing>, CtenCrossingSolution> getCrossings() {
 		return crossings;
 	}
 
