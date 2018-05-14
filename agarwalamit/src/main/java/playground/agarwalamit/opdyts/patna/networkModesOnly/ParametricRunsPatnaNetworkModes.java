@@ -34,7 +34,7 @@ public class ParametricRunsPatnaNetworkModes {
         int runCounter= 261;
 
         String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output_selectExpBeta_scaleLogObjFn/";
-        String matsimDir = "r_5e7329bc8f872c03b0bf515066411c46dd3bd019_patnaOpdyts_12May2018";
+        String matsimDir = "r_65a41d0f53e3d1aaf0639d445a17a152a42a5af1_patnaOpdyts_13May2018";
 
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
