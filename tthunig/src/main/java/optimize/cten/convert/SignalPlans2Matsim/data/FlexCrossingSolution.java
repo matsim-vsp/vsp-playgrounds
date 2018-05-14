@@ -25,20 +25,22 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 
+import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
+
 /**
  * @author tthunig
  */
 public class FlexCrossingSolution implements CtenCrossingSolution {
 
-	private Id<CtenCrossingSolution> id;
+	private Id<DgCrossing> id;
 	private Map<Id<FlexibleLight>, FlexibleLight> lightsOfThisCrossing = new HashMap<>();
 	
-	public FlexCrossingSolution(Id<CtenCrossingSolution> id) {
+	public FlexCrossingSolution(Id<DgCrossing> id) {
 		this.id = id;
 	}
 	
 	@Override
-	public Id<CtenCrossingSolution> getId() {
+	public Id<DgCrossing> getId() {
 		return this.id;
 	}
 	

@@ -22,8 +22,10 @@ package optimize.cten.convert.SignalPlans2Matsim.data;
 
 import org.matsim.api.core.v01.Id;
 
+import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
+
 public interface CtenCrossingSolution {
 	
-	public Id<CtenCrossingSolution> getId();
+	public Id<DgCrossing> getId();
 	
 }

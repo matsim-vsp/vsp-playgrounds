@@ -22,6 +22,7 @@ package optimize.cten.convert.SignalPlans2Matsim.data;
 
 import org.matsim.api.core.v01.Id;
 
+import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
 
 /**
@@ -29,18 +30,18 @@ import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
  */
 public class FixCrossingSolution implements CtenCrossingSolution {
 
-	private Id<CtenCrossingSolution> id;
+	private Id<DgCrossing> id;
 	private int offset;
 	private Id<DgProgram> programId;	
 	
-	public FixCrossingSolution(Id<CtenCrossingSolution> id, int offset, Id<DgProgram> programId) {
+	public FixCrossingSolution(Id<DgCrossing> id, int offset, Id<DgProgram> programId) {
 		this.id = id;
 		this.offset = offset;
 		this.programId = programId;
 	}
 	
 	@Override
-	public Id<CtenCrossingSolution> getId() {
+	public Id<DgCrossing> getId() {
 		return this.id;
 	}
 
