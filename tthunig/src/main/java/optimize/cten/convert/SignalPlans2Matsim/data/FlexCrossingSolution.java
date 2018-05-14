@@ -47,5 +47,9 @@ public class FlexCrossingSolution implements CtenCrossingSolution {
 	public void addLight(FlexibleLight light) {
 		lightsOfThisCrossing.put(light.getId(), light);
 	}
+	
+	public Map<Id<FlexibleLight>, FlexibleLight> getLights() {
+		return this.lightsOfThisCrossing;
+	}
 
 }
