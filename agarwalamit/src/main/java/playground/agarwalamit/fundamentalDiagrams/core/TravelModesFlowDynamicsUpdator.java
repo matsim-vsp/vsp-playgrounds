@@ -44,7 +44,7 @@ import playground.agarwalamit.utils.ListUtils;
  * as well as methods to store and update this data.
  */
 
-final class TravelModesFlowDynamicsUpdator {
+public final class TravelModesFlowDynamicsUpdator {
 
 	private final int NUMBER_OF_MEMORIZED_FLOWS = 10;
 	private Id<VehicleType> modeId;
@@ -272,7 +272,7 @@ final class TravelModesFlowDynamicsUpdator {
 		this.numberOfAgents = n;
 	}
 
-	double getPermanentDensity(){
+	public double getPermanentDensity(){
 		return this.permanentDensity;
 	}
 
@@ -280,7 +280,7 @@ final class TravelModesFlowDynamicsUpdator {
 		this.permanentDensity = permanentDensity;
 	}
 
-	double getPermanentAverageVelocity(){
+	public double getPermanentAverageVelocity(){
 		return this.permanentAverageVelocity;
 	}
 
@@ -288,7 +288,7 @@ final class TravelModesFlowDynamicsUpdator {
 		this.permanentAverageVelocity = permanentAverageVelocity;
 	}
 
-	double getPermanentFlow(){
+	public double getPermanentFlow(){
 		return this.permanentFlow;
 	}
 
@@ -298,5 +298,9 @@ final class TravelModesFlowDynamicsUpdator {
 
 	int getNumberOfDrivingAgents() {
 		return this.lastSeenOnStudiedLinkEnter.size();
+	}
+
+	public int getSpeedTableSize() {
+		return speedTableSize;
 	}
 }

@@ -20,16 +20,8 @@
 package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
@@ -39,11 +31,9 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicPCUQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
 
@@ -57,15 +47,16 @@ public class RunDynamicPCUExample {
 
         Config config = ConfigUtils.createConfig();
         
-        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/equalModalSplit_holeSpeed15KPH/");
+        config.controler().setOutputDirectory("../../svnit/outputFiles/car/DP_tau_0.5sec/");
 //        config.controler().setOutputDirectory("../svnit/outputFiles/carBicycleSeepage_equalModalShare_holeSpeed15kph/branch18Apr/");
         config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
-        qsim.setMainModes(Arrays.asList("car","bicycle"));
-        qsim.setTrafficDynamics(TrafficDynamics.withHoles);
-        qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
-        qsim.setSeepModes(Collections.singletonList("bicycle"));
+//        qsim.setMainModes(Arrays.asList("car","bicycle"));
+        qsim.setMainModes(Arrays.asList("car"));
+        qsim.setTrafficDynamics(TrafficDynamics.queue);
+//        qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+//        qsim.setSeepModes(Collections.singletonList("bicycle"));
         
         FundamentalDiagramConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FundamentalDiagramConfigGroup.class);
         fdConfigGroup.setModalShareInPCU("1.0");
@@ -80,59 +71,24 @@ public class RunDynamicPCUExample {
         car.setLength(7.5);
         vehicles.addVehicleType(car);
         
-        VehicleType bicycle = VehicleUtils.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
-        bicycle.setPcuEquivalents(0.25);
-        bicycle.setMaximumVelocity(15/3.6);
-        bicycle.setLength(7.5/2);
-        vehicles.addVehicleType(bicycle);
+//        VehicleType bicycle = VehicleUtils.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
+//        bicycle.setPcuEquivalents(0.25);
+//        bicycle.setMaximumVelocity(15/3.6);
+//        bicycle.setLength(7.5/2);
+//        vehicles.addVehicleType(bicycle);
 
         FundamentalDiagramDataGenerator fd = new FundamentalDiagramDataGenerator(scenario);
+        HeadwayHandler headwayHandler = new HeadwayHandler();
         fd.addOverridingModules(new AbstractModule() {
             @Override
             public void install() {
                 bind(QNetworkFactory.class).to(DynamicPCUQNetworkFactory.class);
                 bindMobsim().toProvider(DynamicPCUFDQSimProvider.class);
-                addEventHandlerBinding().to(SpeedHandler.class); // put speeds in attributes
+                addEventHandlerBinding().toInstance(headwayHandler); // put speeds in attributes
+                addControlerListenerBinding().toInstance(headwayHandler);
             }
         });
         fd.run();
     }
 
-    static class SpeedHandler implements LinkEnterEventHandler, LinkLeaveEventHandler {
-
-        @Inject
-        private Vehicles vehicles;
-
-        @Inject
-        private FDNetworkGenerator fdNetworkGenerator;
-
-        private final Map<Id<Vehicle>, Double> linkEnterTime = new HashMap<>();
-
-        @Override
-        public void reset(int iteration){
-            this.linkEnterTime.clear();
-        }
-
-        @Override
-        public void handleEvent(LinkLeaveEvent event) {
-            if (event.getLinkId().equals( this.fdNetworkGenerator.getLastLinkIdOfTrack())) {
-                double speed = this.fdNetworkGenerator.getLengthOfTrack() / (event.getTime() - this.linkEnterTime.get(event.getVehicleId()));
-                Vehicle veh = vehicles.getVehicles().get(event.getVehicleId());
-                double pcu = getReactionTime() + veh.getType().getLength() / speed ; //it is better to estimate here so that it can be logged too.
-                ((AttributableVehicle)vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute("vehicle_pcu", pcu);
-            }
-        }
-
-        @Override
-        public void handleEvent(LinkEnterEvent event) {
-            if (event.getLinkId().equals(this.fdNetworkGenerator.getFirstLinkIdOfTrack())) {
-                this.linkEnterTime.put(event.getVehicleId(), event.getTime());
-            }
-        }
-    }
-
-    static double getReactionTime(){
-        //TODO could be mode (driver) specific
-        return 1.5;
-    }
 }
