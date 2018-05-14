@@ -22,22 +22,24 @@ package optimize.cten.convert.SignalPlans2Matsim.data;
 
 import org.matsim.api.core.v01.Id;
 
+import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
+
 /**
  * @author tthunig
  */
 public class FlexibleLight {
 
-	private Id<FlexibleLight> id;
+	private Id<DgGreen> id;
 	private int greenStart;
 	private int greenEnd;
 	
-	public FlexibleLight(Id<FlexibleLight> id, int greenStart, int greenEnd) {
+	public FlexibleLight(Id<DgGreen> id, int greenStart, int greenEnd) {
 		this.id = id;
 		this.greenStart = greenStart;
 		this.greenEnd = greenEnd;
 	}
 
-	public Id<FlexibleLight> getId() {
+	public Id<DgGreen> getId() {
 		return id;
 	}
 
