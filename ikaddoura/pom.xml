@@ -99,18 +99,10 @@
 	</dependency>
 	
 	<dependency>
-		<groupId>com.github.jfbischoff</groupId>
-	    <artifactId>matsim-sbb-extensions</artifactId>
-	    <version>master-SNAPSHOT</version>
+		<groupId>com.github.SchweizerischeBundesbahnen</groupId>
+		<artifactId>matsim-sbb-extensions</artifactId>
+		<version>0.9.1</version>
 	</dependency>
-	
-	<!--
-	<dependency>
-		<groupId>ch.sbb</groupId>
-		<artifactId>matsim-sbb-extension</artifactId>
-		<version>0.10.0</version>
-	</dependency>
-	-->
 	
   </dependencies>
 </project>
