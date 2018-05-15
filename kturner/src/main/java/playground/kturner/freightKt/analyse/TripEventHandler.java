@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -17,9 +17,12 @@ import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.freight.carrier.CarrierVehicleType;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
+import org.matsim.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.vehicles.VehicleType;
 
 
@@ -62,8 +65,9 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 
 	private void readVehicleTypeCapabilities() {
 		for (CarrierVehicleType vehType : vehicleTypes.getVehicleTypes().values()){
-		//Emissionswerte nicht über Eigenschaften einlesbar :(	
-			double emissionsPerMeter = -99999.0;			//TODO: log.warn wenn vehType nochjt definiert ist... kmt feb/18
+		//TODO: Emissionswerte nicht über Eigenschaften einlesbar :(	
+			log.warn("Note: emissionsPerMeter are currently not read in from vehicleTypes-file. Watch " + this.getClass().getName() + " for values."); //TODO: Read-in vehTypes from file, KMT mai/18 
+			double emissionsPerMeter = -99999.0;			//TODO: log.warn wenn vehType noch nicht definiert ist... kmt feb/18
 			switch (vehType.getId().toString()) {
 			case "heavy40t" : emissionsPerMeter = 0.917;
 				break;
@@ -83,6 +87,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 				break;
 			case "light8telectro_frozen" : emissionsPerMeter = 0.524;
 			}
+			log.warn(vehType.getId().toString() + " : No values for emissions defined. Using " + emissionsPerMeter + " instead!");
 				
 			VehicleTypeSpezificCapabilities vehTypeCapabilities = 
 					new VehicleTypeSpezificCapabilities(vehType.getVehicleCostInformation().fix, 
@@ -311,5 +316,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		
 	}
 
-
 }
+
+ 
