@@ -26,10 +26,10 @@ import org.matsim.roadpricing.RoadPricingSchemeImpl;
 import org.matsim.vehicles.VehicleType;
 
 
-class TripEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
+class FreightAnalyseKmtEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
 PersonDepartureEventHandler, PersonArrivalEventHandler {
 
-	private final static Logger log = Logger.getLogger(TripEventHandler.class);
+	private final static Logger log = Logger.getLogger(FreightAnalyseKmtEventHandler.class);
 
 	private Scenario scenario;
 	private CarrierVehicleTypes vehicleTypes;
@@ -57,7 +57,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	private Map<Id<Person>,Double> driverId2totalDistance = new HashMap<Id<Person>,Double>();
 
 	
-	public TripEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes) {
+	public FreightAnalyseKmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes) {
 		this.scenario = scenario;
 		this.vehicleTypes = vehicleTypes;
 		readVehicleTypeCapabilities();
@@ -315,6 +315,21 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	/**
+	 * ##### Copied from UccCarrierCreator: einlesen der LEZ-Files		
+	 * 
+	 * //Read zonefile
+			final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+			RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
+			try {
+				rpReader.readFile(zonefile);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+
+			Set<Id<Link>> lezLinkIds = scheme.getTolledLinkIds();  //Link-Ids der Umweltzone (LEZ)
+	 */
 
 }
 
