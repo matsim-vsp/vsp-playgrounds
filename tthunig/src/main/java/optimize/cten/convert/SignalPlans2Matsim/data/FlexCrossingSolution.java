@@ -26,6 +26,7 @@ import java.util.Map;
 import org.matsim.api.core.v01.Id;
 
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
+import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
 
 /**
  * @author tthunig
@@ -33,7 +34,7 @@ import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 public class FlexCrossingSolution implements CtenCrossingSolution {
 
 	private Id<DgCrossing> id;
-	private Map<Id<FlexibleLight>, FlexibleLight> lightsOfThisCrossing = new HashMap<>();
+	private Map<Id<DgGreen>, FlexibleLight> lightsOfThisCrossing = new HashMap<>();
 	
 	public FlexCrossingSolution(Id<DgCrossing> id) {
 		this.id = id;
@@ -48,7 +49,7 @@ public class FlexCrossingSolution implements CtenCrossingSolution {
 		lightsOfThisCrossing.put(light.getId(), light);
 	}
 	
-	public Map<Id<FlexibleLight>, FlexibleLight> getLights() {
+	public Map<Id<DgGreen>, FlexibleLight> getLights() {
 		return this.lightsOfThisCrossing;
 	}
 
