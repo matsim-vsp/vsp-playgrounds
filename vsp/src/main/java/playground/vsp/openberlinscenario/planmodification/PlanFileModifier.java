@@ -31,6 +31,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.io.PopulationReader;
@@ -54,7 +55,7 @@ public class PlanFileModifier {
 	private double selectionProbability;
 	private boolean onlyTransferSelectedPlan;
 	private boolean considerHomeStayingAgents;
-	private boolean includeStayHomePlans;
+	private boolean includeNonSelectedStayHomePlans;
 	private boolean onlyConsiderPeopleAlwaysGoingByCar; // TODO A leftover from an early, quite specific case; should be generalized
 	private int maxNumberOfAgentsConsidered;
 	private boolean removeLinksAndRoutes;
@@ -80,7 +81,7 @@ public class PlanFileModifier {
 		double selectionProbability = 0.1;
 		boolean onlyTransferSelectedPlan = false;
 		boolean considerHomeStayingAgents = true;
-		boolean includeStayHomePlans = true;
+		boolean includeNonSelectedStayHomePlans = true;
 		boolean onlyConsiderPeopleAlwaysGoingByCar = false;
 		int maxNumberOfAgentsConsidered = 10000;
 		boolean removeLinksAndRoutes = false;
@@ -104,7 +105,7 @@ public class PlanFileModifier {
 			selectionProbability = Double.parseDouble(args[2]);
 			onlyTransferSelectedPlan = Boolean.parseBoolean(args[3]);
 			considerHomeStayingAgents = Boolean.parseBoolean(args[4]);
-			includeStayHomePlans = Boolean.parseBoolean(args[5]);
+			includeNonSelectedStayHomePlans = Boolean.parseBoolean(args[5]);
 			onlyConsiderPeopleAlwaysGoingByCar = Boolean.parseBoolean(args[6]);
 			maxNumberOfAgentsConsidered = Integer.parseInt(args[7]);
 			removeLinksAndRoutes = Boolean.parseBoolean(args[8]);
@@ -119,7 +120,7 @@ public class PlanFileModifier {
 			selectionProbability = Double.parseDouble(args[2]);
 			onlyTransferSelectedPlan = Boolean.parseBoolean(args[3]);
 			considerHomeStayingAgents = Boolean.parseBoolean(args[4]);
-			includeStayHomePlans = Boolean.parseBoolean(args[5]);
+			includeNonSelectedStayHomePlans = Boolean.parseBoolean(args[5]);
 			onlyConsiderPeopleAlwaysGoingByCar = Boolean.parseBoolean(args[6]);
 			maxNumberOfAgentsConsidered = Integer.parseInt(args[7]);
 			removeLinksAndRoutes = Boolean.parseBoolean(args[8]);
@@ -128,7 +129,7 @@ public class PlanFileModifier {
 		}
 		
 		PlanFileModifier planFileModifier = new PlanFileModifier(inputPlansFile, outputPlansFile, selectionProbability, onlyTransferSelectedPlan,
-				considerHomeStayingAgents, includeStayHomePlans, onlyConsiderPeopleAlwaysGoingByCar,
+				considerHomeStayingAgents, includeNonSelectedStayHomePlans, onlyConsiderPeopleAlwaysGoingByCar,
 				maxNumberOfAgentsConsidered, removeLinksAndRoutes, ct);
 		
 		planFileModifier.modifyPlans();
@@ -136,22 +137,22 @@ public class PlanFileModifier {
 	
 	
 	public PlanFileModifier(String inputPlansFile, String outputPlansFile, double selectionProbability, boolean onlyTransferSelectedPlan,
-			boolean considerHomeStayingAgents, boolean includeStayHomePlans, boolean onlyConsiderPeopleAlwaysGoingByCar,
+			boolean considerHomeStayingAgents, boolean includeNonSelectedStayHomePlans, boolean onlyConsiderPeopleAlwaysGoingByCar,
 			int maxNumberOfAgentsConsidered, boolean removeLinksAndRoutes, CoordinateTransformation ct) {
 		this.inputPlansFile = inputPlansFile;
 		this.outputPlansFile = outputPlansFile;
 		this.selectionProbability = selectionProbability;
 		this.onlyTransferSelectedPlan = onlyTransferSelectedPlan;
 		this.considerHomeStayingAgents = considerHomeStayingAgents;
-		this.includeStayHomePlans = includeStayHomePlans;
+		this.includeNonSelectedStayHomePlans = includeNonSelectedStayHomePlans;
 		this.onlyConsiderPeopleAlwaysGoingByCar = onlyConsiderPeopleAlwaysGoingByCar;
 		this.maxNumberOfAgentsConsidered = maxNumberOfAgentsConsidered;
 		this.removeLinksAndRoutes = removeLinksAndRoutes;
 		this.onlyTransferSelectedPlan = onlyTransferSelectedPlan;
 		this.ct = ct;
 	}
-	
-	public void modifyPlans() {		
+
+	public void modifyPlans() {
 		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new PopulationReader(scenario).readFile(inputPlansFile);
 		Population population = scenario.getPopulation();
@@ -215,20 +216,23 @@ public class PlanFileModifier {
 		Person person2 = population.getFactory().createPerson(id);
 		
 		if (onlyTransferSelectedPlan) {
+
 			transformCoordinates(selectedPlan);
 			if (removeLinksAndRoutes) {
 				removeLinksAndRoutes(selectedPlan);
 			}
 			person2.addPlan(selectedPlan);
+			person2.setSelectedPlan(selectedPlan);
 			population.addPerson(person2);
+
 		} else {
 			for (int i=0; i < person.getPlans().size(); i++) {
 				boolean considerPlan = true;
 				
 				Plan plan = person.getPlans().get(i);
 				int numberOfPlanElements = plan.getPlanElements().size();
-				
-				if (!includeStayHomePlans) {
+
+				if (!plan.equals(selectedPlan) && !includeNonSelectedStayHomePlans) {
 					if (numberOfPlanElements <= 1) {
 						considerPlan = false;
 					}
@@ -242,7 +246,9 @@ public class PlanFileModifier {
 					person2.addPlan(plan);
 				}
 			}
-			
+
+			person2.setSelectedPlan(selectedPlan);
+
 			// Keeping the attributes of a person
 			for (String attributeKey : person.getAttributes().getAsMap().keySet()) {
 				person2.getAttributes().putAttribute(attributeKey, person.getAttributes().getAttribute(attributeKey));
