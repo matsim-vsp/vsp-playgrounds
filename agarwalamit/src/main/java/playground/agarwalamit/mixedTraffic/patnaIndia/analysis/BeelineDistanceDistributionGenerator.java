@@ -63,11 +63,11 @@ public class BeelineDistanceDistributionGenerator {
 
 	private void run(){
 
-		distanceClass2Labels.put(2000.0, "0-2");
-		distanceClass2Labels.put(4000.0, "2-4");
-		distanceClass2Labels.put(6000.0, "4-6");
-		distanceClass2Labels.put(8000.0, "6-8");
-		distanceClass2Labels.put(10000.0, "8-10");
+		distanceClass2Labels.put(2000.0, "0--2");
+		distanceClass2Labels.put(4000.0, "2--4");
+		distanceClass2Labels.put(6000.0, "4--6");
+		distanceClass2Labels.put(8000.0, "6--8");
+		distanceClass2Labels.put(10000.0, "8--10");
 		distanceClass2Labels.put(Double.MAX_VALUE, "10+");
 		
 		LegModeBeelineDistanceDistributionFromPlansAnalyzer beelineCalculator = new LegModeBeelineDistanceDistributionFromPlansAnalyzer(new PatnaPersonFilter());
@@ -171,16 +171,20 @@ public class BeelineDistanceDistributionGenerator {
 		}
 
 		// write it
-		try (BufferedWriter writer = IOUtils.getBufferedWriter(dir+"/analysis/modalIncomeDistanceDistribution.it."+iterationNumber+".txt")) {
-			writer.write("mode\tincomeClass\tdistanceClass\tcount\n");
+		try (BufferedWriter incomeDistanceWriter = IOUtils.getBufferedWriter(dir+"/analysis/modalIncomeDistanceDistribution.it."+iterationNumber+".txt");
+			 BufferedWriter incomeWriter = IOUtils.getBufferedWriter(dir+"/analysis/modalIncomeDistribution.it."+iterationNumber+".txt");
+		) {
+			incomeDistanceWriter.write("mode\tincomeClass\tdistanceClass\tcount\n");
 			for(String mode : mode2inc2distcounter.keySet()){
 				for (Double inc : mode2inc2distcounter.get(mode).keySet()) {
+					incomeWriter.write(mode+"\t"+Math.round(inc/PatnaUtils.INR_USD_RATE)+"\t"+MapUtils.intValueSum(mode2inc2distcounter.get(mode).get(inc))+"\n");
 					for(Double d  : mode2inc2distcounter.get(mode).get(inc).keySet()){
-						writer.write(mode+"\t"+Math.round(inc/PatnaUtils.INR_USD_RATE)+"\t"+distanceClass2Labels.get(d)+"\t"+mode2inc2distcounter.get(mode).get(inc).get(d)+"\n");					
+						incomeDistanceWriter.write(mode+"\t"+Math.round(inc/PatnaUtils.INR_USD_RATE)+"\t"+distanceClass2Labels.get(d)+"\t"+mode2inc2distcounter.get(mode).get(inc).get(d)+"\n");
 					}
 				}
 			}
-			writer.close();
+			incomeDistanceWriter.close();
+			incomeDistanceWriter.close();
 		} catch (Exception e) {
 			throw new RuntimeException("Data is not written. Reason :"+e);
 		}

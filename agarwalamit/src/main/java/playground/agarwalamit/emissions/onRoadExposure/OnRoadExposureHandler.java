@@ -176,6 +176,8 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
             if(event instanceof VehicleEntersTrafficEvent) {
 
                 VehicleEntersTrafficEvent vehicleEntersTrafficEvent = (VehicleEntersTrafficEvent) event;
+                createOnRoadExporureTrip(vehicleEntersTrafficEvent);
+
                 driverAgents.put(vehicleEntersTrafficEvent.getVehicleId(), new Tuple<>(vehicleEntersTrafficEvent.getPersonId(), vehicleEntersTrafficEvent.getNetworkMode()));
                 registerReceptor(vehicleEntersTrafficEvent.getVehicleId(), vehicleEntersTrafficEvent.getLinkId(), vehicleEntersTrafficEvent.getTime());
 
@@ -219,6 +221,10 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     }
 
     // >>>> register - deregister >>>>
+
+    private void createOnRoadExporureTrip(VehicleEntersTrafficEvent event){
+        this.onRoadExposureTable.createTripAndAddInfo(event.getPersonId(), event.getLinkId(), event.getNetworkMode(), event.getTime());
+    }
 
     private void registerReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(vehicleId,

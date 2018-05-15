@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -45,7 +46,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.ikaddoura.optAV.OptAVConfigGroup.TollingApproach;
 
 /**
@@ -272,15 +272,15 @@ public class OptAVTestIT {
 		
 		final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config2, DecongestionConfigGroup.class);
 		decongestionSettings.setMsa(true);
-		decongestionSettings.setTOLL_BLEND_FACTOR(0.);
+		decongestionSettings.setTollBlendFactor(0.);
 		decongestionSettings.setKd(0.);
 		decongestionSettings.setKi(0.);
 		decongestionSettings.setKp(999.);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.0);
-		decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
-		decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-		decongestionSettings.setRUN_FINAL_ANALYSIS(false);
+		decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+		decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
+		decongestionSettings.setUpdatePriceInterval(1);
+		decongestionSettings.setWriteLinkInfoCharts(false);
+		decongestionSettings.setRunFinalAnalysis(false);
 		
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);

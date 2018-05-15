@@ -49,7 +49,6 @@ public final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, P
 	private final Map<String, TravelModesFlowDynamicsUpdator> travelModesFlowData;
 	private final TravelModesFlowDynamicsUpdator globalFlowData;
 	private final Map<Id<Person>, String> person2Mode = new HashMap<>();
-
 	private final Id<Link> flowDynamicsUpdateLink;
 	private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 
@@ -158,11 +157,15 @@ public final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, P
 		this.travelModesFlowData.get(person2Mode.remove(event.getPersonId())).handle(event);
 	}
 
-	boolean isPermanent(){
+	public boolean isPermanent(){
 		return permanentRegime;
 	}
 
-	TravelModesFlowDynamicsUpdator getGlobalData(){
+	public TravelModesFlowDynamicsUpdator getGlobalData(){
 		return this.globalFlowData;
+	}
+
+	public int getSpeedTableSie(String mode){
+		return this.travelModesFlowData.get(mode).getSpeedTableSize();
 	}
 }

@@ -19,7 +19,7 @@
 
 package playground.michalm.drt.run;
 
-import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingModule;
+import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingParams;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -31,26 +31,25 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 public class RunSharedTaxiMielec {
 	public static void main(String[] args) {
 		String configFile = "mielec_2014_02/mielec_drt_config.xml";
-		RunSharedTaxiMielec.run(configFile, false, true);
+		RunSharedTaxiMielec.run(configFile, false);
 	}
 
-	public static void run(String configFile, boolean otfvis, boolean rebalancing) {
+	public static void run(String configFile, boolean otfvis) {
 		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
 				new OTFVisConfigGroup());
 
 		DrtConfigGroup drtCfg = DrtConfigGroup.get(config);
 		// drtCfg.setMaxWaitTime(maxWaitTime);
 
-		drtCfg.setRebalancingInterval(600);
+		MinCostFlowRebalancingParams rebalancingParams = drtCfg.getMinCostFlowRebalancing();
+		rebalancingParams.setInterval(600);
+		rebalancingParams.setCellSize(500);
+
 		config.controler().setLastIteration(1);
 		config.controler().setWriteEventsInterval(1);
 		config.controler().setOutputDirectory("d:/temp/mielec-rebalancing/zone_0500_target_a_50_b_00");
 
 		Controler controler = DrtControlerCreator.createControler(config, otfvis);
-
-		if (rebalancing == true) {
-			controler.addOverridingModule(new MinCostFlowRebalancingModule(500));
-		}
 
 		controler.run();
 	}

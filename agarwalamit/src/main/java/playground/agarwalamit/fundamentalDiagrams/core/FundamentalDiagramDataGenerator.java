@@ -54,7 +54,6 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod.DynamicPCUFDQSimProvider;
 
 /**
  * @author amit after ssix
@@ -386,6 +385,8 @@ public class FundamentalDiagramDataGenerator {
 				if(fundamentalDiagramConfigGroup.isWritingEvents()){
 					addEventHandlerBinding().toInstance(eventsWriter);
 				}
+
+				bind(PrintStream.class).toInstance(writer);
 			}
 		});
 
@@ -440,6 +441,8 @@ public class FundamentalDiagramDataGenerator {
 		}
 
 		if( stableState ) {
+			writer.print("\n"); //always stats with a new line
+
 			writer.format("%d\t",globalFlowDynamicsUpdator.getGlobalData().getnumberOfAgents());
 			for (String travelMode : travelModes) {
 				writer.format("%d\t", mode2FlowData.get(travelMode).getnumberOfAgents());
@@ -470,8 +473,6 @@ public class FundamentalDiagramDataGenerator {
 //					writer.print(str + "\t");
 //				}
 //			}
-
-			writer.print("\n");
 		}
 
 		if(fundamentalDiagramConfigGroup.isWritingEvents()) {
@@ -532,7 +533,7 @@ public class FundamentalDiagramDataGenerator {
 //		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
 //			Arrays.stream(travelModes).forEach(travelMode -> writer.print(("pcu_" + travelMode) + "\t"));
 //		}
-		writer.print("\n");
+//		writer.print("\n");
 	}
 
 	private void closeFile() {

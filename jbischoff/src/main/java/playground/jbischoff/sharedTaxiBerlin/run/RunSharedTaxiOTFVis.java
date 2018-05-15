@@ -23,7 +23,6 @@
 package playground.jbischoff.sharedTaxiBerlin.run;
 
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalModule;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -62,10 +61,6 @@ public class RunSharedTaxiOTFVis {
 			config.controler().setRunId(runId);
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 			Controler controler = DrtControlerCreator.createControler(config, true);
-			controler.addOverridingModule(new DrtZonalModule());
 			controler.run();
-		
-		
-		
 	}
 }

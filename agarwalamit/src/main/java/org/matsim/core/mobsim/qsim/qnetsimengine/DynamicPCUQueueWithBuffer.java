@@ -527,7 +527,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				&& context.qsimConfig.getSeepModes().contains(veh.getVehicle().getType().getId().toString()) ){
 			// do nothing
 		} else {
-			usedStorageCapacity -= (double)((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
+			usedStorageCapacity -= veh.getSizeInEquivalents();
 		}
 
 		switch (context.qsimConfig.getTrafficDynamics()) {
@@ -553,7 +553,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				//			double ttimeOfHoles = 0.1 * this.storageCapacity/this.flowCapacityPerTimeStep/nLanes ;
 
 				hole.setEarliestLinkExitTime( now + 1.0*ttimeOfHoles + 0.0*MatsimRandom.getRandom().nextDouble()*ttimeOfHoles ) ;
-				hole.setSizeInEquivalents( (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") );
+				hole.setSizeInEquivalents(veh2Remove.getSizeInEquivalents());
 				holes.add( hole ) ;
 				break;
 			default: throw new RuntimeException("The traffic dynmics "+context.qsimConfig.getTrafficDynamics()+" is not implemented yet.");
@@ -772,7 +772,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 		if(context.qsimConfig.isSeepModeStorageFree() && context.qsimConfig.getSeepModes().contains( veh.getVehicle().getType().getId().toString() ) ){
 			// do nothing
 		} else {
-			usedStorageCapacity += (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
+			usedStorageCapacity += veh.getSizeInEquivalents();
 		}
 
 		// compute and set earliest link exit time:
@@ -799,12 +799,11 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 			case queue:
 				break;
 			case withHoles:
-				this.remainingHolesStorageCapacity -= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
-//						veh.getSizeInEquivalents();
+				this.remainingHolesStorageCapacity -= veh.getSizeInEquivalents();
 				break;
 			case kinematicWaves:
-				this.remainingHolesStorageCapacity -= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
-				this.accumulatedInflowCap -= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") ;
+				this.remainingHolesStorageCapacity -= veh.getSizeInEquivalents();
+				this.accumulatedInflowCap -= (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
 				break;
 			default: throw new RuntimeException("The traffic dynmics "+context.qsimConfig.getTrafficDynamics()+" is not implemented yet.");
 		}
