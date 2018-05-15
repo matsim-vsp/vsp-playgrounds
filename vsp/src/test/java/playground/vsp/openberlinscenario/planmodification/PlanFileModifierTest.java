@@ -115,7 +115,7 @@ public class PlanFileModifierTest {
 
         boolean atLeastOneHomeStayingPerson = false;
         for (Person copy : modifiedPopulationCase2.getPersons().values()) {
-            if (copy.getSelectedPlan().getPlanElements().size() <= 1)
+            if (copy.getSelectedPlan().getPlanElements().size() == 1)
                 atLeastOneHomeStayingPerson = true;
         }
         Assert.assertTrue("No home staying person found", atLeastOneHomeStayingPerson);
