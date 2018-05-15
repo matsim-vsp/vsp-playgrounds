@@ -2,6 +2,7 @@ package playground.vsp.openberlinscenario.planmodification;
 
 import org.apache.log4j.Logger;
 import org.junit.*;
+import org.junit.rules.ExternalResource;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
@@ -18,57 +19,56 @@ import org.matsim.testcases.MatsimTestUtils;
 public class PlanFileModifierTest {
     private final static Logger LOG = Logger.getLogger(PlanFileModifierTest.class);
 
-//    private final static String ORIGINAL_INPUT_PLANS_FILE = "C:\\Users\\gthunig\\Desktop\\Vsp\\PlanFileModifierTest\\testPlans.xml";
-    private final static String FORMATED_INPUT_PLANS_FILE = "C:\\Users\\gthunig\\Desktop\\Vsp\\PlanFileModifierTest\\testPlansFormated.xml";
-    private final static String OUTPUT_PLANS_FILE = "C:\\Users\\gthunig\\Desktop\\Vsp\\PlanFileModifierTest\\testPlansModified.xml";
-    private final static String OUTPUT_PLANS_FILE_2 = "C:\\Users\\gthunig\\Desktop\\Vsp\\PlanFileModifierTest\\testPlansModified2.xml";
+    @Rule
+    public MatsimTestUtils utils = new MatsimTestUtils();
 
     private static double SELECTION_PROBABILITY = 0.70;
     private static CoordinateTransformation ct = new IdentityTransformation();
 
-    private static Population originalPopulationCase1;
+    private static Population originalPopulationCase;
     private static Population modifiedPopulationCase1;
-    private static Population originalPopulationCase2;
     private static Population modifiedPopulationCase2;
 
+    private static boolean setUpDone = false;
 
-//    public formatPlans() {
-//        Population population = readPopulationFromFile("C:\\Users\\gthunig\\Desktop\\Vsp\\PlanFileModifierTest\\testPlansFormated.xml");
-//
-//        // Write population file
-//        new PopulationWriter(population, null).write(FORMATED_INPUT_PLANS_FILE);
-//        LOG.info("Modified plans file has been written to " + FORMATED_INPUT_PLANS_FILE);
-//    }
+    @Before
+    public void initializeTestPopulations() {
 
-    @BeforeClass
-    public static void initializeTestPopulations() {
-        PlanFileModifier planFileModifier = new PlanFileModifier(FORMATED_INPUT_PLANS_FILE, OUTPUT_PLANS_FILE,
+        if (setUpDone) return;
+        setUpDone = true;
+
+        String formatedInputPlansFile = utils.getClassInputDirectory() + "testPlansFormated.xml";
+        String outputplansfile1 = utils.getOutputDirectory() + "testPlansModified.xml";
+        String outputPlansFile2 = utils.getOutputDirectory() + "testPlansModified2.xml";
+
+        PlanFileModifier planFileModifier = new PlanFileModifier(
+                formatedInputPlansFile, outputplansfile1,
                 SELECTION_PROBABILITY, false, false,
                 true, false,
                 10000/* not tested*/, false, ct);
         planFileModifier.modifyPlans();
 
-        originalPopulationCase1 = readPopulationFromFile(FORMATED_INPUT_PLANS_FILE);
-        modifiedPopulationCase1 = readPopulationFromFile(OUTPUT_PLANS_FILE);
+        originalPopulationCase = readPopulationFromFile(formatedInputPlansFile);
+        modifiedPopulationCase1 = readPopulationFromFile(outputplansfile1);
 
-        PlanFileModifier planFileModifier2 = new PlanFileModifier(FORMATED_INPUT_PLANS_FILE, OUTPUT_PLANS_FILE_2,
+        PlanFileModifier planFileModifier2 = new PlanFileModifier(
+                formatedInputPlansFile, outputPlansFile2,
                 SELECTION_PROBABILITY, true, true,
                 false, true, 10000,
                 true, ct);
         planFileModifier2.modifyPlans();
 
-        originalPopulationCase2 = readPopulationFromFile(FORMATED_INPUT_PLANS_FILE);
-        modifiedPopulationCase2 = readPopulationFromFile(OUTPUT_PLANS_FILE_2);
+        modifiedPopulationCase2 = readPopulationFromFile(outputPlansFile2);
     }
 
     @Test
     public void testSelectionProbability() {
 
-        LOG.info("OriginalPopulationCase1 size: " + originalPopulationCase1.getPersons().size());
+        LOG.info("OriginalPopulationCase1 size: " + originalPopulationCase.getPersons().size());
         LOG.info("ModifiedPopulationCase1 size: " + modifiedPopulationCase1.getPersons().size());
         LOG.info("selection probability: " + SELECTION_PROBABILITY);
         LOG.info("real selection probability: " +
-                ((double)modifiedPopulationCase1.getPersons().size()/originalPopulationCase1.getPersons().size()));
+                ((double)modifiedPopulationCase1.getPersons().size()/ originalPopulationCase.getPersons().size()));
         Assert.assertEquals("Selection probability was not correctly applied",
                 11, modifiedPopulationCase1.getPersons().size(),
                 MatsimTestUtils.EPSILON);
@@ -78,7 +78,7 @@ public class PlanFileModifierTest {
     public void testEveryPersonCopiedExistsInOriginal() {
 
         for (Person copy : modifiedPopulationCase1.getPersons().values()) {
-            Person original = originalPopulationCase1.getPersons().get(copy.getId());
+            Person original = originalPopulationCase.getPersons().get(copy.getId());
             Assert.assertTrue("Person " + copy.getId() + " does not exist in the original file",
                     original != null);
         }
@@ -88,7 +88,7 @@ public class PlanFileModifierTest {
     public void testOnlyTransferSelectedPlan() {
 
         for (Person copy : modifiedPopulationCase2.getPersons().values()) {
-            Person original = originalPopulationCase2.getPersons().get(copy.getId());
+            Person original = originalPopulationCase.getPersons().get(copy.getId());
             Assert.assertEquals("More than 1 plan", 1, copy.getPlans().size());
             comparePlansWithoutRoutes(original.getSelectedPlan(), copy.getSelectedPlan());
         }
@@ -99,7 +99,7 @@ public class PlanFileModifierTest {
         //also tests if all plans were copied correctly
 
         for (Person copy : modifiedPopulationCase1.getPersons().values()) {
-            Person original = originalPopulationCase1.getPersons().get(copy.getId());
+            Person original = originalPopulationCase.getPersons().get(copy.getId());
             Assert.assertEquals("Not the same amount of plans",
                     original.getPlans().size(), copy.getPlans().size());
             comparePlans(original.getSelectedPlan(), copy.getSelectedPlan());
