@@ -63,12 +63,12 @@
 	<dependency>
 		<groupId>com.github.mobitopp</groupId>
 		<artifactId>actitopp</artifactId>
-		<version>master-SNAPSHOT</version>
+		<version>LATEST</version>
 	</dependency>
 	  <dependency>
 		  <groupId>com.github.jfbischoff</groupId>
 		  <artifactId>matsim-sbb-extensions</artifactId>
-		  <version>master-SNAPSHOT</version>
+		  <version>LATEST</version>
 	  </dependency>
   </dependencies>
 </project>
