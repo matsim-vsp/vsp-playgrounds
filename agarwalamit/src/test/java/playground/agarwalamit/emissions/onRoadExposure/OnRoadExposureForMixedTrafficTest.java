@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -34,6 +35,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
@@ -97,7 +99,7 @@ public class OnRoadExposureForMixedTrafficTest {
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = (OnRoadExposureConfigGroup) ConfigUtils.addOrGetModule( sc.getConfig(), OnRoadExposureConfigGroup.class);
         OnRoadExposureHandler onRoadExposureEventHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, sc.getNetwork());
 
-        EmissionAggregator emissionAggregator = new EmissionAggregator();
+        EmissionAggregator emissionAggregator = new EmissionAggregator(sc.getNetwork());
 
         controler.addOverridingModule(new AbstractModule() {
 
@@ -268,6 +270,11 @@ public class OnRoadExposureForMixedTrafficTest {
         private Map<String, Map<String, Double>> warmEmissions = new HashMap<>();
 
         private final EmissionUtilsExtended emissionUtilsExtended = new EmissionUtilsExtended();
+        private final Network network;
+
+        EmissionAggregator(Network network){
+            this.network = network;
+        }
 
         @Override
         public void reset(int iteration){
@@ -279,7 +286,13 @@ public class OnRoadExposureForMixedTrafficTest {
 
         @Override
         public void handleEvent(ColdEmissionEvent event) {
-            Map<String, Double> emiss = emissionUtilsExtended.convertColdPollutantMap2String(event.getColdEmissions());
+            Map<String, Double> emiss = emissionUtilsExtended.convertColdPollutantMap2String(event.getColdEmissions())
+                                                             .entrySet()
+                                                             .stream()
+                                                             .collect(Collectors.toMap(e -> e.getKey(),
+                                                                     e -> e.getValue() / this.network.getLinks()
+                                                                                                     .get(event.getLinkId())
+                                                                                                     .getLength()));
             if (    (event.getLinkId().toString().equals("12") && event.getTime()==21595.0) || // self exposed bicycle
                     (event.getLinkId().toString().equals("45") && event.getTime()==50995.0) //self exposed bicycle
                     ) {
@@ -302,7 +315,13 @@ public class OnRoadExposureForMixedTrafficTest {
 
         @Override
         public void handleEvent(WarmEmissionEvent event) {
-            Map<String, Double> emiss = emissionUtilsExtended.convertWarmPollutantMap2String(event.getWarmEmissions());
+            Map<String, Double> emiss = emissionUtilsExtended.convertWarmPollutantMap2String(event.getWarmEmissions())
+                                                             .entrySet()
+                                                             .stream()
+                                                             .collect(Collectors.toMap(e -> e.getKey(),
+                                                                     e -> e.getValue() / this.network.getLinks()
+                                                                                                     .get(event.getLinkId())
+                                                                                                     .getLength()));
             //when car leave link 23 at 21674.0, bicycle is on the link,--> exposed
             // car leave link 56 at 51038, bicycle is on the link, --> exposed
             if  ( (event.getLinkId().toString().equals("23") && event.getTime()==21674.0 ) || // car emissions--> bicycle exposed.
