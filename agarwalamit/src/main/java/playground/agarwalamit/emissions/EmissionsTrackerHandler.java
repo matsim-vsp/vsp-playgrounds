@@ -19,15 +19,6 @@
 
 package playground.agarwalamit.emissions;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.emissions.events.ColdEmissionEvent;
-import org.matsim.contrib.emissions.events.WarmEmissionEvent;
-import org.matsim.vehicles.Vehicle;
-
 /**
  * The problems are:
  * <ul>
@@ -45,35 +36,35 @@ import org.matsim.vehicles.Vehicle;
  */
 
 public class EmissionsTrackerHandler {
-    private final double DISTANCE_CAP_FOR_COLD_EMISSIONS = 1000.0; // >1000m is the cap. (see line 107 and 100 in ColdEmissionHandler
-        private final Id<Vehicle> vehicleId;
-
-        private LinkedHashMap<Id<Link>, ColdEmissionEvent> coldEmissionEventMap = new LinkedHashMap<>(); // no fixed size
-        private LinkedList<WarmEmissionEvent> warmEmissionEventLinkedList = new LinkedList<>(); // FIFO queue; at most 2 events should be sufficient
-
-        private double dist = 0.;
-
-        public EmissionsTrackerHandler(Id<Vehicle> vehicleId){
-            this.vehicleId = vehicleId;
-        }
-
-        public Map<Id<Link>, ColdEmissionEvent> getColdEmissionEventMap() {
-            return coldEmissionEventMap;
-        }
-
-        public WarmEmissionEvent getAndAddWarmEmissionEvent(WarmEmissionEvent event) {
-            warmEmissionEventLinkedList.addLast(event);
-            return warmEmissionEventLinkedList.pollFirst(); // null if list is empty
-        }
-
-        public boolean clearColdEmissionMap(double distance){
-            dist =+ distance;
-            if (dist > DISTANCE_CAP_FOR_COLD_EMISSIONS) { // see line 100 in ColdEmissionHandler
-                this.coldEmissionEventMap.clear(); // cold emission info is not required anymore
-                return true;
-            } else {
-                return false;
-            }
-        }
+//    private final double DISTANCE_CAP_FOR_COLD_EMISSIONS = 1000.0; // >1000m is the cap. (see line 107 and 100 in ColdEmissionHandler
+//        private final Id<Vehicle> vehicleId;
+//
+//        private LinkedHashMap<Id<Link>, ColdEmissionEvent> coldEmissionEventMap = new LinkedHashMap<>(); // no fixed size
+//        private LinkedList<WarmEmissionEvent> warmEmissionEventLinkedList = new LinkedList<>(); // FIFO queue; at most 2 events should be sufficient
+//
+//        private double dist = 0.;
+//
+//        public EmissionsTrackerHandler(Id<Vehicle> vehicleId){
+//            this.vehicleId = vehicleId;
+//        }
+//
+//        public Map<Id<Link>, ColdEmissionEvent> getColdEmissionEventMap() {
+//            return coldEmissionEventMap;
+//        }
+//
+//        public WarmEmissionEvent getAndAddWarmEmissionEvent(WarmEmissionEvent event) {
+//            warmEmissionEventLinkedList.addLast(event);
+//            return warmEmissionEventLinkedList.pollFirst(); // null if list is empty
+//        }
+//
+//        public boolean clearColdEmissionMap(double distance){
+//            dist =+ distance;
+//            if (dist > DISTANCE_CAP_FOR_COLD_EMISSIONS) { // see line 100 in ColdEmissionHandler
+//                this.coldEmissionEventMap.clear(); // cold emission info is not required anymore
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        }
 
 }

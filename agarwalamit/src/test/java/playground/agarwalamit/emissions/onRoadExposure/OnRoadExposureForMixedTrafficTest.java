@@ -95,7 +95,7 @@ public class OnRoadExposureForMixedTrafficTest {
         Controler controler = getControler(sc, equilTestSetUp);
 
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = (OnRoadExposureConfigGroup) ConfigUtils.addOrGetModule( sc.getConfig(), OnRoadExposureConfigGroup.class);
-        OnRoadExposureHandler onRoadExposureEventHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup);
+        OnRoadExposureHandler onRoadExposureEventHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, sc.getNetwork());
 
         EmissionAggregator emissionAggregator = new EmissionAggregator();
 

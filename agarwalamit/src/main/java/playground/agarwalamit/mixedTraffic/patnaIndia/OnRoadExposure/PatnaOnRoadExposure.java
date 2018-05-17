@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -61,8 +62,9 @@ import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 public class PatnaOnRoadExposure {
 
-    private static final String wardsFile = FileUtils.SHARED_SVN+"/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
+    private static final String wardsFile = "../../shared-svn/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
     private static final Collection<SimpleFeature> simpleFeatureCollection = ShapeFileReader.getAllFeatures(wardsFile);
+    private static final String networkFile = "";
 
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
@@ -73,22 +75,25 @@ public class PatnaOnRoadExposure {
 
         {
             String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
+            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
 
             if (writeEmissionEventsFirst) {
-                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
                 String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
                 String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
 
                 PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
                 PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
             }
-            patnaOnRoadExposure.run(outputDir+"/output/output_events.xml.gz", outputDir+"/analysis/");
+
+            patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+                    outputDir + "/analysis/",
+                    LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork());
         }
         {
             String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
+            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
 
             if (writeEmissionEventsFirst) {
-                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
                 String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
                 String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
 
@@ -96,11 +101,13 @@ public class PatnaOnRoadExposure {
                 PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
             }
 
-            patnaOnRoadExposure.run(outputDir+"/output/output_events.xml.gz",outputDir+"/analysis/");
+            patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+                    outputDir + "/analysis/",
+                    LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork());
         }
     }
 
-    private void run(String eventsFile, String outputFilesDir){
+    private void run(String eventsFile, String outputFilesDir, Network network){
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = new OnRoadExposureConfigGroup();
         onRoadExposureConfigGroup.setUsingMicroGramUnits(true);
 
@@ -127,7 +134,7 @@ public class PatnaOnRoadExposure {
         EventsManager eventsManager = EventsUtils.createEventsManager();
 
         // this will include exposure to agent which leave in the same time step.
-        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup);
+        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, network);
         eventsManager.addHandler(onRoadExposureHandler);
 
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
