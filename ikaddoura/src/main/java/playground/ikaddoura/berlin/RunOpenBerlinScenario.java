@@ -55,6 +55,7 @@ public class RunOpenBerlinScenario {
 	private static boolean useCarTravelTimeForRide;
 	private static boolean useSBBptRouter;
 	private static boolean useDurationBasedTimeAllocationMutator;
+	private static double probaForRandomSingleTripMode;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -79,6 +80,9 @@ public class RunOpenBerlinScenario {
 			
 			useDurationBasedTimeAllocationMutator = Boolean.parseBoolean(args[6]);
 			log.info("useDurationBasedTimeAllocationMutator: "+ useDurationBasedTimeAllocationMutator);
+			
+			probaForRandomSingleTripMode = Double.parseDouble(args[7]);
+			log.info("probaForRandomSingleTripMode: "+ probaForRandomSingleTripMode);
 
 		} else {
 			
@@ -109,6 +113,8 @@ public class RunOpenBerlinScenario {
 			stratSets.setSubpopulation("person");
 			config.strategy().addStrategySettings(stratSets);
 		}
+		
+		config.subtourModeChoice().setProbaForRandomSingleTripMode(probaForRandomSingleTripMode);
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
