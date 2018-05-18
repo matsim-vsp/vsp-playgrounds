@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -218,14 +219,12 @@ public class M2KS2010NetworkConverter {
 				SignalGroupData groupOfThisSignal = groupsOfThisSystem.get(signalToGroupMap.get(signalId));
 				// a signal in MATSim can correspond to more than one light in the ks network (if different turns are allowed)
 				for (Id<DgStreet> lightId : signalToLightsMap.get(signalId)) {
-					if (crossing.getRestrictions().containsKey(lightId)) {
-						LOG.info("restrictions for this light are already processed");
-						// note: this assumes that signals leading to the same light belong to the same group
-						// TODO this is not the case in the cottbus scenario!! -> if not exist, add empty. if exist: Get and fill/add additional info
-						continue;
+					if (!crossing.getRestrictions().containsKey(lightId)) {
+						crossing.addRestriction(new TtRestriction(lightId, false));
+						/* note: we have to continue, also if the restriction already exists, because signals leading 
+						 * to the same light do not necessarily belong to the same group in the Cottbus scenario */
 					}
-					TtRestriction restriction = new TtRestriction(lightId, false);
-					crossing.addRestriction(restriction);
+					TtRestriction restriction = crossing.getRestrictions().get(lightId);
 					// go through all other lights of the system and check whether they belong together (on/off-light)
 					for (Id<Signal> otherSignalId : system.getSignalData().keySet()) {
 						for (Id<DgStreet> otherLightId : signalToLightsMap.get(otherSignalId)) {
@@ -265,20 +264,24 @@ public class M2KS2010NetworkConverter {
 										+ " and to link " + dir.getToLink() + ", i.e. the turn is not allowed.");
 					}
 					TtRestriction r = crossing.getRestrictions().get(lightId);
-					// add all conflicting directions as restrictions
+					// add all conflicting directions as restrictions - not only to the direction itself, but also to all on- and off-lights
 					for (Id<Direction> otherDirId : dir.getConflictingDirections()) {
 						Direction otherDir = directionsOfThisSystem.getDirections().get(otherDirId);
 						Id<DgStreet> otherLightId = fromToLink2LightRelation
 								.get(new Tuple<Id<Link>, Id<Link>>(otherDir.getFromLink(), otherDir.getToLink()));
 						if (otherLightId == null) {
-							throw new RuntimeException("No light exists for direction " + dir.getId()
+							throw new RuntimeException("No light exists for direction " + otherDir.getId()
 									+ " with from Link " + otherDir.getFromLink() + " and to link "
 									+ otherDir.getToLink() + ", i.e. the turn is not allowed.");
 						}
 						r.addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
+						// add restriction also to all on- and off-lights (such that on- and off-lights always have the same restrictions)
+						for (Id<DgStreet> onOffLight : r.getRlightsOn()) {
+							if (r.getRlightsOff().contains(onOffLight)) {
+								crossing.getRestrictions().get(onOffLight).addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
+							}
+						}
 					}
-					// here, one could add other information, if cten-format has been extended
-					// (right of way, must yield...)
 				}
 			}
 		}
@@ -693,7 +696,31 @@ public class M2KS2010NetworkConverter {
 				return outLink;
 			}
 		}
+		// no back link has been found - check whether there exists one with similar angle
+		for (Link outLink : link.getToNode().getOutLinks().values()) {
+			if (angle(link, outLink) < Math.PI/9) {
+//				Log.warn("in-back link pair: " + link.getId() + ", " + outLink.getId());
+				// the angle between the links is less than 20 degrees. consider it as the back link
+				return outLink;
+			}
+		}
 		return null;
+	}
+
+	private double angle(Link inLink, Link outLink) {
+		double inVector_x = inLink.getFromNode().getCoord().getX() - inLink.getToNode().getCoord().getX();
+		double inVector_y = inLink.getFromNode().getCoord().getY() - inLink.getToNode().getCoord().getY();
+		double outVector_x = outLink.getToNode().getCoord().getX() - outLink.getFromNode().getCoord().getX();
+		double outVector_y = outLink.getToNode().getCoord().getY() - outLink.getFromNode().getCoord().getY();
+		
+		double lengthIn = Math.sqrt(Math.pow(inVector_x, 2) + Math.pow(inVector_y, 2));
+		double lengthOut = Math.sqrt(Math.pow(outVector_x, 2) + Math.pow(outVector_y, 2));
+		
+		double skalarInOut = inVector_x * outVector_x + inVector_y * outVector_y;
+		
+		double cosAngle = skalarInOut / (lengthIn * lengthOut);
+		
+		return Math.acos(cosAngle);
 	}
 
 	private List<Id<Link>> getTurningMoves4LinkWoLanes(Link link) {
