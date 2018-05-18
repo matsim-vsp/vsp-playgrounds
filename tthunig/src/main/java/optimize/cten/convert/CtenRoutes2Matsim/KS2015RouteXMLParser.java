@@ -1,4 +1,4 @@
-package playground.dgrether.koehlerstrehlersignal.solutionconverter;
+package optimize.cten.convert.CtenRoutes2Matsim;
 
 import java.util.ArrayList;
 import java.util.List;

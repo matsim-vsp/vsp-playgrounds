@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.dgrether.koehlerstrehlersignal.run;
+package optimize.cten.convert.CtenRoutes2Matsim;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,6 @@ import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.data.TtPath;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
-import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2015RouteXMLParser;
 
 /**
  * Class to convert commodities with paths given by the BTU model to MATSim 
