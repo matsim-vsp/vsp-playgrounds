@@ -221,10 +221,12 @@ public class M2KS2010NetworkConverter {
 					if (crossing.getRestrictions().containsKey(lightId)) {
 						LOG.info("restrictions for this light are already processed");
 						// note: this assumes that signals leading to the same light belong to the same group
+						// TODO this is not the case in the cottbus scenario!! -> if not exist, add empty. if exist: Get and fill/add additional info
 						continue;
 					}
 					TtRestriction restriction = new TtRestriction(lightId, false);
 					crossing.addRestriction(restriction);
+					// go through all other lights of the system and check whether they belong together (on/off-light)
 					for (Id<Signal> otherSignalId : system.getSignalData().keySet()) {
 						for (Id<DgStreet> otherLightId : signalToLightsMap.get(otherSignalId)) {
 							if (lightId.equals(otherLightId)) {

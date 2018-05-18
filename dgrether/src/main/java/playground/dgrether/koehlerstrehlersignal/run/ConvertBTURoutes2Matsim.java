@@ -76,7 +76,7 @@ import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2015RouteXM
  * The BTU model splits the commodities into different paths which might have 
  * fractional flow values. To solve the assignment problem of BTU paths and
  * MATSim agents, this class assigns all the paths of a commodity to its agents
- * as a route choice set. The idea is to switch of rerouting and let the agents
+ * as a route choice set. The idea is to switch off rerouting and let the agents
  * find the best of this routes.
  * 
  * To be able to compare the simulation results of this route choice set with a 
@@ -423,15 +423,18 @@ public class ConvertBTURoutes2Matsim {
 	public static void main(String[] args) {
 
 		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
-				+ "2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+//				+ "2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+				+ "2018-05-4_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 
-		String btuRoutesFilename = "routeComparison/paths.xml";
+//		String btuRoutesFilename = "routeComparison/paths.xml";
+		String btuRoutesFilename = "btu/btu_solution.xml";
 		String networkFilename = "network_small_simplified.xml.gz";
 		String populationFile = "trip_plans_from_morning_peak_ks_commodities_minFlow50.0.xml";
 
 		String[] filenameAttributes = btuRoutesFilename.split("/");
 		String outputFilename = directory
-				+ "routeComparison/2015-03-10_sameEndTimes_ksOptTripPlans_" 
+//				+ "routeComparison/2015-03-10_sameEndTimes_ksOptTripPlans_"
+				+ "btu/2018-05-17_sameEndTimes_ksOptTripPlans_"
 				+ filenameAttributes[filenameAttributes.length - 1];
 		
 		new ConvertBTURoutes2Matsim().startConversion(directory,
