@@ -81,8 +81,8 @@ public class KS2015RouteXMLParser extends MatsimXmlParser{
 
 	@Override
 	public void startTag(String elementName, Attributes atts, Stack<String> context) {
-		// save the commodity information
-		if (elementName.equals(COMMODITY)){
+		// save the commodity information (check for FROMNODE necessary because there are two different COMMODITY-tags)
+		if (elementName.equals(COMMODITY) && atts.getValue(FROMNODE) != null){
 			this.currentCommodityId = Id.create(atts.getValue(ID), DgCommodity.class);
 			this.currentFromNodeId = Id.create(atts.getValue(FROMNODE), DgCrossingNode.class);
 			this.currentToNodeId = Id.create(atts.getValue(TONODE), DgCrossingNode.class);
