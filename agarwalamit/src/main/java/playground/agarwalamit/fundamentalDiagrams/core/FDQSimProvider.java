@@ -37,11 +37,11 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	
 	private final Map<String, VehicleType> modeToVehicleTypes ;
 	private final FDNetworkGenerator fdNetworkGenerator;
-	private final GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
+	private final StabilityTester stabilityTester;
 	
 	@Inject
 	private FDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
-						   FDNetworkGenerator fdNetworkGenerator, GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator) {
+						   FDNetworkGenerator fdNetworkGenerator, StabilityTester stabilityTester) {
 		this.scenario = scenario;
 		this.events = events;
 		this.qnetworkFactory = qnetworkFactory;
@@ -52,7 +52,7 @@ public class FDQSimProvider implements Provider<Mobsim> {
 											   .collect(Collectors.toMap(e -> e.getKey().toString(),
 													   Map.Entry::getValue));
 		this.fdNetworkGenerator = fdNetworkGenerator;
-		this.globalFlowDynamicsUpdator = globalFlowDynamicsUpdator;
+		this.stabilityTester = stabilityTester;
 	}
 	
 	@Override
@@ -85,7 +85,7 @@ public class FDQSimProvider implements Provider<Mobsim> {
 					double actEndTime = randDouble * FundamentalDiagramDataGenerator.MAX_ACT_END_TIME;
 
 					FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
-					agent.setGlobalFlowDynamicsUpdator(globalFlowDynamicsUpdator);
+					agent.setStabilityTester(stabilityTester);
 					qSim.insertAgentIntoMobsim(agent);
 
 					final QVehicle vehicle = new QVehicle(VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode)));

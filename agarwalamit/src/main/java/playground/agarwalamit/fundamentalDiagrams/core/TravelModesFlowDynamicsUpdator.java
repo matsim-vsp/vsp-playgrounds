@@ -71,19 +71,13 @@ public final class TravelModesFlowDynamicsUpdator {
 	private final double lengthOfTrack;
 	private final Id<Link> startOfTheLink;
 
-	private Scenario scenario;
-
-	TravelModesFlowDynamicsUpdator(final int noOfModes, final Id<Link> startOfTheLink,final double lengthOfTrack, Scenario scenario){
-		this(null, noOfModes, startOfTheLink, lengthOfTrack, scenario);
-	}
-
-	TravelModesFlowDynamicsUpdator(final VehicleType vT, final int noOfModes, final Id<Link> startOfTheLink, final double lengthOfTrack, Scenario scenario){
+	TravelModesFlowDynamicsUpdator(final VehicleType vT, Scenario scenario, FDNetworkGenerator fdNetworkGenerator){
 		this.vehicleType = vT;
 		if(this.vehicleType != null) this.modeId = this.vehicleType.getId();
-		this.noOfModes = noOfModes;
-		this.lengthOfTrack = lengthOfTrack;
-		this.startOfTheLink = startOfTheLink;
-		this.scenario = scenario;
+
+		this.noOfModes = scenario.getConfig().qsim().getMainModes().size();
+		this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
+		this.startOfTheLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
 	}
 
 	void handle(LinkEnterEvent event){
@@ -165,7 +159,7 @@ public final class TravelModesFlowDynamicsUpdator {
 		}
 	}
 
-	void checkSpeedStability(){
+	private void checkSpeedStability(){
 		double averageSpeed = ListUtils.doubleMean(this.speedTable);
 		double relativeDeviances = IntStream.range(0, this.speedTableSize)
 											.mapToDouble(i -> Math.pow((this.speedTable.get(i) - averageSpeed) / averageSpeed,
@@ -203,7 +197,7 @@ public final class TravelModesFlowDynamicsUpdator {
 		}
 	}
 	
-	void initDynamicVariables() {
+	void resetBins() {
 		//numberOfAgents for each mode should be initialized at this point
 		this.decideSpeedTableSize();
 		this.speedTable = new LinkedList<>(Collections.nCopies(this.speedTableSize, 0.));
@@ -257,7 +251,7 @@ public final class TravelModesFlowDynamicsUpdator {
 		return this.flowTable15Min.stream().mapToDouble(i->i).sum() * 4;
 	}
 
-	double getSlidingAverageOfLastXHourlyFlows(){
+	private double getSlidingAverageOfLastXHourlyFlows(){
 		return this.lastXHourlyFlows.stream().mapToDouble(i->i).average().orElse(0.);
 	}
 
@@ -273,7 +267,7 @@ public final class TravelModesFlowDynamicsUpdator {
 		return this.numberOfAgents ;
 	}
 
-	void setnumberOfAgents(int n){
+	public void setnumberOfAgents(int n){
 		this.numberOfAgents = n;
 	}
 

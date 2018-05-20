@@ -19,6 +19,7 @@
 package playground.agarwalamit.fundamentalDiagrams.passingEvents;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,8 +47,10 @@ import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
+import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.GlobalFlowDynamicsUpdator;
+import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
 
 /**
  * @author amit
@@ -78,12 +81,14 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 
 	private final double lengthOfTrack ;
 
-	private GlobalFlowDynamicsUpdator flowDynamicsUpdator;
+	private final FDDataContainer fdDataContainer;
+	private final StabilityTester tester;
 	private String outputDir;
 
 	@Inject
 	PassingEventsUpdator(QSimConfigGroup qSimConfigGroup, FDNetworkGenerator fdNetworkGenerator,
-						 GlobalFlowDynamicsUpdator flowDynamicsUpdator, ControlerConfigGroup config) {
+						 FDDataContainer fdDataContainer, ControlerConfigGroup config,
+						 StabilityTester tester) {
 		this.seepModes = qSimConfigGroup.getSeepModes();
 		this.personId2TrackEnterTime = new HashMap<>();
 		this.personId2LinkEnterTime = new HashMap<>();
@@ -93,8 +98,9 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 		this.trackingStartLink =  fdNetworkGenerator.getFirstLinkIdOfTrack();
 		this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
 		this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
-		this.flowDynamicsUpdator = flowDynamicsUpdator;
+		this.fdDataContainer = fdDataContainer;
 		this.outputDir = config.getOutputDirectory();
+		this.tester = tester;
 	}
 
 	@Override
@@ -204,16 +210,21 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		//arrival only possible once stability is achieved
-		if (flowDynamicsUpdator.isPermanent()  ){
+		if (tester.isStabilityAchieved() ){
 			writeResults(this.outputDir + "/modeToPassingRates.txt");
 		}
 	}
 
 	private void writeResults(String outFile){
+		boolean writeHeaders = !(new File(outFile).exists());
 		try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
-			writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentDensity()+"\t");
-			writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentAverageVelocity()+"\t");
-			writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentFlow()+"\t");
+			if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
+			else{
+				FundamentalDiagramDataGenerator.LOG.warn("Appending data to the existing file.");
+			}
+			writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
+			writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
+			writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
 			writer.write(getNoOfCarsPerKm()+"\t"+getAvgBikesPassingRate()+"\n");
 		} catch (IOException e) {
 			throw new RuntimeException("Data is not written/read. Reason : " + e);

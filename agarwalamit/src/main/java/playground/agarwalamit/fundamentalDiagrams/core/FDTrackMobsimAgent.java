@@ -52,7 +52,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
     private Id<Link> currentLinkId ;
     private MobsimAgent.State agentState= State.ACTIVITY;
 
-    private GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
+    private StabilityTester stabilityTester;
 
     public FDTrackMobsimAgent(Id<Person> agentId, double actEndTime, String travelMode, FDNetworkGenerator fdNetworkGenerator) {
         personId = agentId;
@@ -70,8 +70,8 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
         this.currentLinkId = originLinkId;
     }
 
-    public void setGlobalFlowDynamicsUpdator(GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator){
-        this.globalFlowDynamicsUpdator = globalFlowDynamicsUpdator;
+    public void setStabilityTester(StabilityTester stabilityTester){
+        this.stabilityTester = stabilityTester;
     }
 
     @Override
@@ -92,9 +92,9 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
     @Override
     public Id<Link> chooseNextLinkId() {
 
-        if (this.globalFlowDynamicsUpdator==null){
+        if (this.stabilityTester==null){
             throw new RuntimeException("No global flow dynamics updator is available.");
-        } else if (this.globalFlowDynamicsUpdator.isPermanent()){
+        } else if (this.stabilityTester.isStabilityAchieved()){
             isArriving = true;
         }
 
@@ -111,6 +111,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
             return null;// this will send agent for arrival
         } else {
             // TODO: if the link ids are not consecutive numbers, this will not work.
+            // Probably, store the consecutive link Ids...then get the index of current link and then return next link..
             Id<Link> existingLInkId = this.currentLinkId;
             return Id.createLinkId(Integer.valueOf(existingLInkId.toString())+1);
         }

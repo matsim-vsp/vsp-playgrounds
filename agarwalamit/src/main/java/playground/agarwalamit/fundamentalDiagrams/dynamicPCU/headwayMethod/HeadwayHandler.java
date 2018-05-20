@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -41,8 +40,10 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
+import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.GlobalFlowDynamicsUpdator;
+import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
 
 /**
  * Created by amit on 14.05.18.
@@ -50,19 +51,11 @@ import playground.agarwalamit.fundamentalDiagrams.core.GlobalFlowDynamicsUpdator
 
 public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, IterationEndsListener {
 
-    private static final Logger log = Logger.getLogger(HeadwayHandler.class);
-
-    @Inject
-    private Vehicles vehicles;
-
-    @Inject
-    private FDNetworkGenerator fdNetworkGenerator;
-
-    @Inject
-    private GlobalFlowDynamicsUpdator flowDynamicsUpdator;
-
-    @Inject
-    private ControlerConfigGroup config;
+    @Inject private Vehicles vehicles;
+    @Inject private FDNetworkGenerator fdNetworkGenerator;
+    @Inject private StabilityTester stabilityTester;
+    @Inject private FDDataContainer fdDataContainer;
+    @Inject private ControlerConfigGroup config;
 
     private final Map<String, List<Double>> modeToPCUList = new TreeMap<>();
     private final Map<Id<Vehicle>, Double> linkEnterTime = new HashMap<>();
@@ -85,7 +78,10 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
             String mode = veh.getType().getId().toString();
             List<Double> pcus = this.modeToPCUList.get(mode);
 
-            if (pcus == null) pcus = new ArrayList<>(Collections.nCopies(flowDynamicsUpdator.getSpeedTableSie(mode), 0.));
+            if (pcus == null) {
+                pcus = new ArrayList<>(Collections.nCopies(fdDataContainer.getTravelModesFlowData().get(mode).getSpeedTableSize(), 0.));
+            }
+
             pcus.remove(0);//remove from top
             pcus.add(pcu); // add to end of list
             this.modeToPCUList.put(mode, pcus);
@@ -102,23 +98,23 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     @Override
     public void notifyIterationEnds(IterationEndsEvent event) {
         //arrival only possible once stability is achieved
-        if (flowDynamicsUpdator.isPermanent()  ){
-            writeResults(config.getOutputDirectory() + "/modeToDynamicPCUs.txt");
+        if ( stabilityTester.isStabilityAchieved() ){
+            writeResults(config.getOutputDirectory() + "/modeToDynamicHeadways.txt");
         }
     }
 
     private void writeResults(String outFile){
         boolean writeHeaders = !(new File(outFile).exists());
-        try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+        try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
             if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
             else{
-                log.warn("Appending data to the existing file.");
+                FundamentalDiagramDataGenerator.LOG.warn("Appending data to the existing file.");
             }
             for (String mode : this.modeToPCUList.keySet()){
                 for (Double d : this.modeToPCUList.get(mode)) {
-                    writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentDensity()+"\t");
-                    writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentAverageVelocity()+"\t");
-                    writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentFlow()+"\t");
+                    writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
+                    writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
+                    writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
                     writer.write(mode+"\t"+d+"\n");
                 }
             }

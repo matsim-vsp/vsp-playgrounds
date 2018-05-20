@@ -23,7 +23,7 @@ import org.matsim.vehicles.VehicleType;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDTrackMobsimAgent;
 import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.GlobalFlowDynamicsUpdator;
+import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
 
 public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 
@@ -35,11 +35,11 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 
 	private final Map<String, VehicleType> modeToVehicleTypes ;
 	private final FDNetworkGenerator fdNetworkGenerator;
-	private final GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
+	private final StabilityTester stabilityTester;
 
 	@Inject
-	private DynamicPCUFDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
-                                     FDNetworkGenerator fdNetworkGenerator, GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator) {
+	DynamicPCUFDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
+                                     FDNetworkGenerator fdNetworkGenerator, StabilityTester stabilityTester) {
 		this.scenario = scenario;
 		this.events = events;
 		this.qnetworkFactory = qnetworkFactory;
@@ -50,7 +50,7 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 											   .collect(Collectors.toMap(e -> e.getKey().toString(),
 													   Map.Entry::getValue));
 		this.fdNetworkGenerator = fdNetworkGenerator;
-		this.globalFlowDynamicsUpdator = globalFlowDynamicsUpdator;
+		this.stabilityTester = stabilityTester;
 	}
 	
 	@Override
@@ -83,7 +83,7 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 					double actEndTime = randDouble * FundamentalDiagramDataGenerator.MAX_ACT_END_TIME;
 
 					FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
-					agent.setGlobalFlowDynamicsUpdator(globalFlowDynamicsUpdator);
+					agent.setStabilityTester(stabilityTester);
 					qSim.insertAgentIntoMobsim(agent);
 
 					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
