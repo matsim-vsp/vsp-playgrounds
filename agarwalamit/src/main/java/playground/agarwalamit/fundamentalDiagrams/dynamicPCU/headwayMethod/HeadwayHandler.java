@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.inject.Inject;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -48,6 +49,8 @@ import playground.agarwalamit.fundamentalDiagrams.core.GlobalFlowDynamicsUpdator
  */
 
 public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, IterationEndsListener {
+
+    private static final Logger log = Logger.getLogger(HeadwayHandler.class);
 
     @Inject
     private Vehicles vehicles;
@@ -106,8 +109,11 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
 
     private void writeResults(String outFile){
         boolean writeHeaders = !(new File(outFile).exists());
-        try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
+        try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
             if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
+            else{
+                log.warn("Appending data to the existing file.");
+            }
             for (String mode : this.modeToPCUList.keySet()){
                 for (Double d : this.modeToPCUList.get(mode)) {
                     writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentDensity()+"\t");
@@ -116,7 +122,6 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
                     writer.write(mode+"\t"+d+"\n");
                 }
             }
-            writer.close();
         } catch (IOException e) {
             throw new RuntimeException("Data is not written/read. Reason : " + e);
         }

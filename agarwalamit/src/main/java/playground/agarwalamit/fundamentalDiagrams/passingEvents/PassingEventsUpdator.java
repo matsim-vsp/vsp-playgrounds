@@ -19,7 +19,6 @@
 package playground.agarwalamit.fundamentalDiagrams.passingEvents;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -91,7 +90,7 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 		this.personId2LegMode = new HashMap<>();
 		this.bikesPassedByEachCarPerKm = new ArrayList<>();
 		this.carsPerKm = new ArrayList<>();
-		this.trackingStartLink =  fdNetworkGenerator.getFirstLinkIdOfTrack();;
+		this.trackingStartLink =  fdNetworkGenerator.getFirstLinkIdOfTrack();
 		this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
 		this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
 		this.flowDynamicsUpdator = flowDynamicsUpdator;
@@ -174,15 +173,15 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 										+"("+this.personId2LegMode.get(leavingPersonId)+")"+" have entered the track at "+ this.personId2TrackEnterTime.get(personId)+ ", "
 										+ this.personId2TrackEnterTime.get(leavingPersonId)+" respectively. However, the later agent is leaving first. These persons entered on the current link at "
 										+ this.personId2LinkEnterTime.get(personId) + ", "+ this.personId2LinkEnterTime.get(leavingPersonId) +" respectively." );
-					} else {
+					} /*else {
 						// do nothing.
-					}
+					}*/
 				} else {
 					overtakenBicycles++;
 				}
-			} else {
+			} /*else {
 				// do nothing; no overtaking occured.
-			}
+			}*/
 		}
 		return overtakenBicycles;
 	}
@@ -206,23 +205,16 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		//arrival only possible once stability is achieved
 		if (flowDynamicsUpdator.isPermanent()  ){
-			writeResults(this.outputDir + "/modeToDynamicPCUs.txt");
+			writeResults(this.outputDir + "/modeToPassingRates.txt");
 		}
 	}
 
 	private void writeResults(String outFile){
-		boolean writeHeaders = !(new File(outFile).exists());
 		try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
-			if (writeHeaders) writer.write("density\tspeed\tflow\tnoOfCarsPerKm\tavgBikePassingRatePerkm\n");
-//			for (String mode : this.modeToPCUList.keySet()){
-//				for (Double d : this.modeToPCUList.get(mode)) {
-					writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentDensity()+"\t");
-					writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentAverageVelocity()+"\t");
-					writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentFlow()+"\t");
-					writer.write(getNoOfCarsPerKm()+"\t"+getAvgBikesPassingRate()+"\n");
-//				}
-//			}
-			writer.close();
+			writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentDensity()+"\t");
+			writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentAverageVelocity()+"\t");
+			writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentFlow()+"\t");
+			writer.write(getNoOfCarsPerKm()+"\t"+getAvgBikesPassingRate()+"\n");
 		} catch (IOException e) {
 			throw new RuntimeException("Data is not written/read. Reason : " + e);
 		}
