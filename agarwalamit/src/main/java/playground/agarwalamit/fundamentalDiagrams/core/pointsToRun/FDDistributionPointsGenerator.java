@@ -37,9 +37,9 @@ import org.matsim.vehicles.VehicleType;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDQSimProvider;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramConfigGroup;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 /**
  * Created by amit on 20.05.18.
@@ -47,7 +47,7 @@ import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
 
 public class FDDistributionPointsGenerator implements  IterationStartsListener, TerminationCriterion {
 
-    private final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
+    private final FDConfigGroup FDConfigGroup;
     private final FDNetworkGenerator fdNetworkGenerator;
     private final String[] travelModes;
     private final Map<String, Double> mode2PCUs;
@@ -57,8 +57,8 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
 
     @Inject
     FDDistributionPointsGenerator(FDNetworkGenerator fdNetworkGenerator, Scenario scenario,
-                                  FDDataContainer fdDataContainer, StabilityTester stabilityTester){
-        this.fundamentalDiagramConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FundamentalDiagramConfigGroup.class);
+                                  FDDataContainer fdDataContainer, FDStabilityTester stabilityTester){
+        this.FDConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
         this.fdNetworkGenerator = fdNetworkGenerator;
         this.fdDataContainer = fdDataContainer;
         this.travelModes = scenario.getConfig().qsim().getMainModes().toArray(new String[0]);
@@ -68,18 +68,18 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
                                  .stream()
                                  .collect(Collectors.toMap(v -> v.getId().toString(), VehicleType::getPcuEquivalents));
 
-        Double[] modalShareInPCU = this.fundamentalDiagramConfigGroup.getModalShareInPCU().toArray(new Double[0]);
+        Double[] modalShareInPCU = this.FDConfigGroup.getModalShareInPCU().toArray(new Double[0]);
 
         if (modalShareInPCU.length != this.travelModes.length) {
-            FundamentalDiagramDataGenerator.LOG.warn("Number of modes is not equal to the provided modal share (in PCU). Running for equal modal share");
+            FDModule.LOG.warn("Number of modes is not equal to the provided modal share (in PCU). Running for equal modal share");
             modalShareInPCU = new Double[this.travelModes.length];
             Arrays.fill(modalShareInPCU, 1.0);
-            this.fundamentalDiagramConfigGroup.setModalShareInPCU(
+            this.FDConfigGroup.setModalShareInPCU(
                     Arrays.stream(modalShareInPCU).map(String::valueOf).collect(Collectors.joining(","))
             );
         }
 
-        FundamentalDiagramDataGenerator.LOG.warn("The modal share in PCU is : " + modalShareInPCU);
+        FDModule.LOG.warn("The modal share in PCU is : " + modalShareInPCU);
         this.scenario= scenario;
 
         init();
@@ -91,11 +91,11 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
         Integer [] maxAgentDistribution = new Integer [travelModes.length];
         Integer [] stepSize = new Integer [travelModes.length];
 
-        Arrays.fill(stepSize, this.fundamentalDiagramConfigGroup.getReduceDataPointsByFactor());
+        Arrays.fill(stepSize, this.FDConfigGroup.getReduceDataPointsByFactor());
         Arrays.fill(startingPoint, 1);
 
         double cellSizePerPCU = this.scenario.getNetwork().getEffectiveCellSize();
-        double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
+        double networkDensity = fdNetworkGenerator.getLengthOfTrack() * FDConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 
 
         IntStream.range(0, travelModes.length)
@@ -106,7 +106,7 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
                                       .map(jj -> (int) Math.floor((maxAgentDistribution[jj] - startingPoint[jj]) / stepSize[jj]) + 1)
                                       .reduce(1, (a, b) -> a * b);
 
-        if(numberOfPoints > 1000) FundamentalDiagramDataGenerator.LOG.warn("Total number of points to run is "+numberOfPoints+". This may take long time. "
+        if(numberOfPoints > 1000) FDModule.LOG.warn("Total number of points to run is "+numberOfPoints+". This may take long time. "
                 + "For lesser time to get the data reduce data points by some factor.");
 
         //Actually going through the n-dimensional grid
@@ -115,7 +115,7 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
             Integer[] newPoint = new Integer[maxAgentDistribution.length];
             System.arraycopy(iterationModule.getPoint(), 0, newPoint, 0, newPoint.length);
             fdDataContainer.getListOfPointsToRun().add(Arrays.asList(newPoint));
-            FundamentalDiagramDataGenerator.LOG.info("Just added point "+ Arrays.toString(iterationModule.getPoint()) +" to the collection.");
+            FDModule.LOG.info("Just added point "+ Arrays.toString(iterationModule.getPoint()) +" to the collection.");
             if (i<numberOfPoints-1){
                 iterationModule.addPoint();
             }
@@ -131,16 +131,16 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
                                   .sum();
 
         double cellSizePerPCU = this.scenario.getNetwork().getEffectiveCellSize();
-        double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
+        double networkDensity = fdNetworkGenerator.getLengthOfTrack() * FDConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 
         if ( density > networkDensity + 5) {
             return;
         }
 
-        FundamentalDiagramDataGenerator.LOG.info("===============");
-        FundamentalDiagramDataGenerator.LOG.info("Going into run where number of Agents are - \t"+pointToRun);
-        FundamentalDiagramDataGenerator.LOG.info("Further, " + (fdDataContainer.getListOfPointsToRun().size()) +" combinations will be simulated.");
-        FundamentalDiagramDataGenerator.LOG.info("===============");
+        FDModule.LOG.info("===============");
+        FDModule.LOG.info("Going into run where number of Agents are - \t"+pointToRun);
+        FDModule.LOG.info("Further, " + (fdDataContainer.getListOfPointsToRun().size()) +" combinations will be simulated.");
+        FDModule.LOG.info("===============");
 
         Population population = scenario.getPopulation();
 

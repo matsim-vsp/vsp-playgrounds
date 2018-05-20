@@ -24,12 +24,13 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.FDUtils;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
@@ -88,13 +89,16 @@ public class RunRaceTrackDynamicPCUExample {
         String outFolder ="/"+scenario.getConfig().qsim().getTrafficDynamics()+"_"+scenario.getConfig().qsim().getLinkDynamics()+"/";
         scenario.getConfig().controler().setOutputDirectory(outDir+outFolder);
 
-        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator( scenario);
-        fundamentalDiagramDataGenerator.addOverridingModules(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(ChandraSikdarPCUUpdator.class);
-			}
-		});
-        fundamentalDiagramDataGenerator.run();
+        Controler controler = new Controler(scenario);
+        controler.addOverridingModule(new FDModule(scenario));
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                addEventHandlerBinding().to(ChandraSikdarPCUUpdator.class);
+            }
+        });
+        controler.run();
+
+        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
     }
 }

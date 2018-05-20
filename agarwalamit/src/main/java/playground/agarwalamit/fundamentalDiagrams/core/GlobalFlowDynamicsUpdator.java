@@ -41,7 +41,7 @@ import org.matsim.vehicles.VehicleType;
 
 /**
  * @author ssix, amit
- * A class supposed to go attached to the {@link FundamentalDiagramDataGenerator}.
+ * A class supposed to go attached to the {@link FDModule}.
  * It aims at analyzing the flow of events in order to detect:
  * The permanent regime of the system and the following searched values:
  * the permanent flow, the permanent density and the permanent average
@@ -57,14 +57,14 @@ public final class GlobalFlowDynamicsUpdator implements
 	private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 
 	private final FDDataContainer fdDataContainer;
-	private final StabilityTester stabilityTester;
+	private final FDStabilityTester stabilityTester;
 
 	/**
 	 * container to store static properties of vehicles and dynamic flow properties during simulation
 	 */
 	@Inject
 	GlobalFlowDynamicsUpdator(Scenario scenario, FDDataContainer fdDataContainer,
-							  StabilityTester stabilityTester, FDNetworkGenerator fdNetworkGenerator){
+							  FDStabilityTester stabilityTester, FDNetworkGenerator fdNetworkGenerator){
 
 		this.fdDataContainer = fdDataContainer;
 		this.stabilityTester = stabilityTester;
@@ -114,7 +114,7 @@ public final class GlobalFlowDynamicsUpdator implements
 				this.fdDataContainer.getGlobalData().updateFlow15Min(nowTime, pcuPerson);
 				this.fdDataContainer.getGlobalData().updateSpeedTable(nowTime,personId);
 				//Waiting for all agents to be on the track before studying stability
-				if ((this.fdDataContainer.getGlobalData().getNumberOfDrivingAgents() == this.fdDataContainer.getGlobalData().getnumberOfAgents()) && (nowTime > FundamentalDiagramDataGenerator.MAX_ACT_END_TIME * 2)){
+				if ((this.fdDataContainer.getGlobalData().getNumberOfDrivingAgents() == this.fdDataContainer.getGlobalData().getnumberOfAgents()) && (nowTime > FDModule.MAX_ACT_END_TIME * 2)){
 					/*//Taking speed check out, as it is not reliable on the global speed table
 					 *  Maybe making a list of moving averages could be smart,
 					 *  but there is no reliable converging process even in that case. (ssix, 25.10.13)
@@ -139,7 +139,7 @@ public final class GlobalFlowDynamicsUpdator implements
 					if (modesStable){
 						//Checking global stability
 						if ( /*this.globalFlowData.isSpeedStable() &&*/ this.fdDataContainer.getGlobalData().isFlowStable() ){
-							FundamentalDiagramDataGenerator.LOG.info("========== Global permanent regime is attained");
+							FDModule.LOG.info("========== Global permanent regime is attained");
 							for (String vehTyp : fdDataContainer.getTravelModesFlowData().keySet()){
 								this.fdDataContainer.getTravelModesFlowData().get(vehTyp).saveDynamicVariables();
 							}

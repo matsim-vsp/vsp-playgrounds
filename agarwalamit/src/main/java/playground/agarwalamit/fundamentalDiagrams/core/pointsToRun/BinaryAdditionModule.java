@@ -2,7 +2,7 @@ package playground.agarwalamit.fundamentalDiagrams.core.pointsToRun;
 
 import java.util.List;
 import java.util.stream.IntStream;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 
 /**
  * @author ssix
@@ -38,7 +38,7 @@ final class BinaryAdditionModule {
 				addTo(point, index-1);
 			}
 		} else {
-			FundamentalDiagramDataGenerator.LOG.info("Already tried too many combinations!!!");
+			FDModule.LOG.info("Already tried too many combinations!!!");
 		}
 	}
 

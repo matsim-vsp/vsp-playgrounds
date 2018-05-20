@@ -29,9 +29,9 @@ import org.matsim.core.config.ReflectiveConfigGroup;
  * Created by amit on 03.07.17.
  */
 
-public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
+public class FDConfigGroup extends ReflectiveConfigGroup {
 
-    public FundamentalDiagramConfigGroup() {
+    public FDConfigGroup() {
         super(GROUP_NAME);
     }
 

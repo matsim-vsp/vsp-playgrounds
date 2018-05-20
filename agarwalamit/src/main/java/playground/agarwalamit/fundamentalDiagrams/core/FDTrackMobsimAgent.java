@@ -52,7 +52,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
     private Id<Link> currentLinkId ;
     private MobsimAgent.State agentState= State.ACTIVITY;
 
-    private StabilityTester stabilityTester;
+    private FDStabilityTester stabilityTester;
 
     public FDTrackMobsimAgent(Id<Person> agentId, double actEndTime, String travelMode, FDNetworkGenerator fdNetworkGenerator) {
         personId = agentId;
@@ -70,7 +70,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
         this.currentLinkId = originLinkId;
     }
 
-    public void setStabilityTester(StabilityTester stabilityTester){
+    public void setStabilityTester(FDStabilityTester stabilityTester){
         this.stabilityTester = stabilityTester;
     }
 

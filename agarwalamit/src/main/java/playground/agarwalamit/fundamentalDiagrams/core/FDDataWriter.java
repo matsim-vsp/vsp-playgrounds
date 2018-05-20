@@ -38,23 +38,23 @@ public class FDDataWriter implements IterationEndsListener, ShutdownListener {
     private PrintStream writer;
 
     private final FDDataContainer fdDataContainer;
-    private final StabilityTester stabilityTester;
+    private final FDStabilityTester stabilityTester;
     private final Scenario scenario;
     private final FDNetworkGenerator fdNetworkGenerator;
-    private final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
+    private final FDConfigGroup FDConfigGroup;
 
     private String travelModes [] ;
 
     @Inject
     FDDataWriter(Scenario scenario, FDDataContainer fdDataContainer,
-                 StabilityTester stabilityTester, FDNetworkGenerator fdNetworkGenerator,
-                 FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup){
+                 FDStabilityTester stabilityTester, FDNetworkGenerator fdNetworkGenerator,
+                 FDConfigGroup FDConfigGroup){
 
         this.scenario = scenario;
         this.fdDataContainer = fdDataContainer;
         this.stabilityTester = stabilityTester;
         this.fdNetworkGenerator = fdNetworkGenerator;
-        this.fundamentalDiagramConfigGroup = fundamentalDiagramConfigGroup;
+        this.FDConfigGroup = FDConfigGroup;
 
         travelModes = scenario.getConfig().qsim().getMainModes().toArray(new String[0]);
 
@@ -90,7 +90,7 @@ public class FDDataWriter implements IterationEndsListener, ShutdownListener {
                 stableState = false;
                 int existingCount = flowUnstableWarnCount[index]; existingCount++;
                 flowUnstableWarnCount[index] = existingCount;
-                FundamentalDiagramDataGenerator.LOG.warn("Flow stability is not reached for travel mode "+ veh
+                FDModule.LOG.warn("Flow stability is not reached for travel mode "+ veh
                         +" and simulation end time is reached. Output data sheet will have all zeros for such runs."
                         + "This is " + flowUnstableWarnCount[index]+ "th warning.");
             }
@@ -99,7 +99,7 @@ public class FDDataWriter implements IterationEndsListener, ShutdownListener {
                 stableState = false;
                 int existingCount = speedUnstableWarnCount[index]; existingCount++;
                 speedUnstableWarnCount[index] = existingCount;
-                FundamentalDiagramDataGenerator.LOG.warn("Speed stability is not reached for travel mode "+ veh
+                FDModule.LOG.warn("Speed stability is not reached for travel mode "+ veh
                         +" and simulation end time is reached. Output data sheet will have all zeros for such runs."
                         + "This is " + speedUnstableWarnCount[index]+ "th warning.");
             }
@@ -108,7 +108,7 @@ public class FDDataWriter implements IterationEndsListener, ShutdownListener {
 
         // sometimes higher density points are also executed (stuck time), to exclude them density check.
         double cellSizePerPCU = scenario.getNetwork().getEffectiveCellSize();
-        double networkDensity = fdNetworkGenerator.getLengthOfTrack() * fundamentalDiagramConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
+        double networkDensity = fdNetworkGenerator.getLengthOfTrack() * FDConfigGroup.getTrackLinkLanes() / cellSizePerPCU;
 
         if(stableState){
             double globalLinkDensity = fdDataContainer.getGlobalData().getPermanentDensity();

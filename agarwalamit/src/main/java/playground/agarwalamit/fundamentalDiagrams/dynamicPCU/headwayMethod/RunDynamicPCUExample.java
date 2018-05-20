@@ -27,6 +27,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicPCUQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
@@ -34,8 +35,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramConfigGroup;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.FDUtils;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 
 /**
  * Created by amit on 14.04.18.
@@ -47,22 +49,21 @@ public class RunDynamicPCUExample {
 
         Config config = ConfigUtils.createConfig();
         
-        config.controler().setOutputDirectory("../../svnit/outputFiles/car/DP_tau_0.5sec_updateFlowCap_2/");
-//        config.controler().setOutputDirectory("../svnit/outputFiles/carBicycleSeepage_equalModalShare_holeSpeed15kph/branch18Apr/");
+        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/equalModalSplit_holeSpeed15KPH/");
         config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
-//        qsim.setMainModes(Arrays.asList("car","bicycle"));
-        qsim.setMainModes(Arrays.asList("car"));
-        qsim.setTrafficDynamics(TrafficDynamics.queue);
-//        qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+        qsim.setMainModes(Arrays.asList("car","bicycle"));
+//        qsim.setMainModes(Arrays.asList("car"));
+        qsim.setTrafficDynamics(TrafficDynamics.withHoles);
+        qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 //        qsim.setSeepModes(Collections.singletonList("bicycle"));
 
-        qsim.setStuckTime(100*3600.); // --> complete grid lock.
+//        qsim.setStuckTime(100*3600.); // --> complete grid lock.
 
-        FundamentalDiagramConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FundamentalDiagramConfigGroup.class);
+        FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
         fdConfigGroup.setModalShareInPCU("1.0");
-        fdConfigGroup.setReduceDataPointsByFactor(5);
+        fdConfigGroup.setReduceDataPointsByFactor(1);
 //        fdConfigGroup.setTrackLinkCapacity(3600.);
         
         Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -74,15 +75,17 @@ public class RunDynamicPCUExample {
         car.setLength(7.5);
         vehicles.addVehicleType(car);
         
-//        VehicleType bicycle = VehicleUtils.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
-//        bicycle.setPcuEquivalents(0.25);
-//        bicycle.setMaximumVelocity(15/3.6);
-//        bicycle.setLength(7.5/2);
-//        vehicles.addVehicleType(bicycle);
+        VehicleType bicycle = VehicleUtils.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
+        bicycle.setPcuEquivalents(0.25);
+        bicycle.setMaximumVelocity(15/3.6);
+        bicycle.setLength(7.5/2);
+        vehicles.addVehicleType(bicycle);
 
-        FundamentalDiagramDataGenerator fd = new FundamentalDiagramDataGenerator(scenario);
+        Controler controler = new Controler(scenario);
+        controler.addOverridingModule(new FDModule(scenario));
+
         HeadwayHandler headwayHandler = new HeadwayHandler();
-        fd.addOverridingModules(new AbstractModule() {
+        controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
                 bind(QNetworkFactory.class).to(DynamicPCUQNetworkFactory.class);
@@ -91,7 +94,10 @@ public class RunDynamicPCUExample {
                 addControlerListenerBinding().toInstance(headwayHandler);
             }
         });
-        fd.run();
+
+        controler.run();
+
+        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
     }
 
 }

@@ -22,8 +22,8 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDTrackMobsimAgent;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 
@@ -35,11 +35,11 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 
 	private final Map<String, VehicleType> modeToVehicleTypes ;
 	private final FDNetworkGenerator fdNetworkGenerator;
-	private final StabilityTester stabilityTester;
+	private final FDStabilityTester stabilityTester;
 
 	@Inject
 	DynamicPCUFDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
-                                     FDNetworkGenerator fdNetworkGenerator, StabilityTester stabilityTester) {
+                                     FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester) {
 		this.scenario = scenario;
 		this.events = events;
 		this.qnetworkFactory = qnetworkFactory;
@@ -65,9 +65,9 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 		qSim.addMobsimEngine(netsimEngine);
 		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
 
-		FundamentalDiagramDataGenerator.LOG.info("=======================");
-		FundamentalDiagramDataGenerator.LOG.info("Mobsim agents' are directly added to AgentSource.");
-		FundamentalDiagramDataGenerator.LOG.info("=======================");
+		FDModule.LOG.info("=======================");
+		FDModule.LOG.info("Mobsim agents' are directly added to AgentSource.");
+		FDModule.LOG.info("=======================");
 
 		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
 			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
@@ -80,7 +80,7 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 				for (Person person : scenario.getPopulation().getPersons().values()) {
 					String travelMode = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), PERSON_MODE_ATTRIBUTE_KEY);
 					double randDouble = MatsimRandom.getRandom().nextDouble();
-					double actEndTime = randDouble * FundamentalDiagramDataGenerator.MAX_ACT_END_TIME;
+					double actEndTime = randDouble * FDModule.MAX_ACT_END_TIME;
 
 					FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
 					agent.setStabilityTester(stabilityTester);

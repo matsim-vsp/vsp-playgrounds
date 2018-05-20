@@ -93,7 +93,7 @@ public final class TravelModesFlowDynamicsUpdator {
 			//Making sure all agents are on the track before testing stability
 			//Also waiting half an hour to let the database build itself.
 
-			if ((this.getNumberOfDrivingAgents() == this.numberOfAgents) && (nowTime > FundamentalDiagramDataGenerator.MAX_ACT_END_TIME * 2)){
+			if ((this.getNumberOfDrivingAgents() == this.numberOfAgents) && (nowTime > FDModule.MAX_ACT_END_TIME * 2)){
 				if (!(this.speedStability)){
 					this.checkSpeedStability();
 				}
@@ -168,7 +168,7 @@ public final class TravelModesFlowDynamicsUpdator {
 		relativeDeviances /= this.noOfModes;//taking dependence on number of modes away
 		if (relativeDeviances < 0.0005){
 			this.speedStability = true;
-			FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain speed stability in mode: "+modeId);
+			FDModule.LOG.info("========== Reaching a certain speed stability in mode: "+modeId);
 		} else {
 			this.speedStability = false;
 		}
@@ -190,8 +190,8 @@ public final class TravelModesFlowDynamicsUpdator {
 
 //		if(relativeDeviances < 0.05){
 			this.flowStability = true;
-			if(modeId==null) FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain flow stability for global flow.");
-			else FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain flow stability in mode: "+modeId.toString());
+			if(modeId==null) FDModule.LOG.info("========== Reaching a certain flow stability for global flow.");
+			else FDModule.LOG.info("========== Reaching a certain flow stability in mode: "+modeId.toString());
 		} else {
 			this.flowStability = false;
 		}
@@ -230,9 +230,9 @@ public final class TravelModesFlowDynamicsUpdator {
 	void saveDynamicVariables(){
 		this.permanentDensity = this.numberOfAgents / (lengthOfTrack) *1000 * this.vehicleType.getPcuEquivalents();
 		this.permanentAverageVelocity = this.getActualAverageVelocity();
-		FundamentalDiagramDataGenerator.LOG.info("Calculated permanent Speed from "+modeId+"'s lastXSpeeds : "+speedTable+"\nResult is : "+this.permanentAverageVelocity);
+		FDModule.LOG.info("Calculated permanent Speed from "+modeId+"'s lastXSpeeds : "+speedTable+"\nResult is : "+this.permanentAverageVelocity);
 		this.permanentFlow = this.getSlidingAverageOfLastXHourlyFlows();
-		FundamentalDiagramDataGenerator.LOG.info("Calculated permanent Flow from "+modeId+"'s lastXFlows900 : "+lastXHourlyFlows+"\nResult is :"+this.permanentFlow);
+		FDModule.LOG.info("Calculated permanent Flow from "+modeId+"'s lastXFlows900 : "+lastXHourlyFlows+"\nResult is :"+this.permanentFlow);
 	}
 
 	VehicleType getVehicleType(){

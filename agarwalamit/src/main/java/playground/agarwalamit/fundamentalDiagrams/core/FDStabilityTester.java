@@ -23,7 +23,7 @@ package playground.agarwalamit.fundamentalDiagrams.core;
  * Created by amit on 20.05.18.
  */
 
-public class StabilityTester {
+public class FDStabilityTester {
 
     private boolean stabilityAchieved = false;
 

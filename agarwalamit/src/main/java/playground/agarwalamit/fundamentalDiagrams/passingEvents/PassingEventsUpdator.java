@@ -49,8 +49,8 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 /**
  * @author amit
@@ -82,13 +82,13 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 	private final double lengthOfTrack ;
 
 	private final FDDataContainer fdDataContainer;
-	private final StabilityTester tester;
+	private final FDStabilityTester tester;
 	private String outputDir;
 
 	@Inject
 	PassingEventsUpdator(QSimConfigGroup qSimConfigGroup, FDNetworkGenerator fdNetworkGenerator,
 						 FDDataContainer fdDataContainer, ControlerConfigGroup config,
-						 StabilityTester tester) {
+						 FDStabilityTester tester) {
 		this.seepModes = qSimConfigGroup.getSeepModes();
 		this.personId2TrackEnterTime = new HashMap<>();
 		this.personId2LinkEnterTime = new HashMap<>();
@@ -220,7 +220,7 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 		try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
 			if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
 			else{
-				FundamentalDiagramDataGenerator.LOG.warn("Appending data to the existing file.");
+				FDModule.LOG.warn("Appending data to the existing file.");
 			}
 			writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
 			writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");

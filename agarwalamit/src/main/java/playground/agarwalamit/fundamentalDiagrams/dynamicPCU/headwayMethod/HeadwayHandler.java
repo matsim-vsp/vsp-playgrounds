@@ -42,8 +42,8 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.StabilityTester;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 /**
  * Created by amit on 14.05.18.
@@ -53,7 +53,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
 
     @Inject private Vehicles vehicles;
     @Inject private FDNetworkGenerator fdNetworkGenerator;
-    @Inject private StabilityTester stabilityTester;
+    @Inject private FDStabilityTester stabilityTester;
     @Inject private FDDataContainer fdDataContainer;
     @Inject private ControlerConfigGroup config;
 
@@ -108,7 +108,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
         try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
             if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
             else{
-                FundamentalDiagramDataGenerator.LOG.warn("Appending data to the existing file.");
+                FDModule.LOG.warn("Appending data to the existing file.");
             }
             for (String mode : this.modeToPCUList.keySet()){
                 for (Double d : this.modeToPCUList.get(mode)) {

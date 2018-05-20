@@ -17,14 +17,13 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.passingEvents;
+package playground.agarwalamit.fundamentalDiagrams.snapshot;
 
+import java.util.Collections;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.agarwalamit.fundamentalDiagrams.FDUtils;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.utils.FileUtils;
 
@@ -32,7 +31,7 @@ import playground.agarwalamit.utils.FileUtils;
  * Created by amit on 16/02/2017.
  */
 
-public class RunFDPassingEventsExample {
+public class RunFDSnapshotExample {
 
     public static void main(String[] args) {
 
@@ -41,27 +40,23 @@ public class RunFDPassingEventsExample {
         Scenario scenario ;
 
         if (runUsingConfig ) {
-            String configFile = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml";
+            String configFile = FileUtils.RUNS_SVN+"/test/raceTrack/input/config.xml";
             scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
         } else {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/test";
+        String myDir = FileUtils.RUNS_SVN+"/test/raceTrack/test";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
+        scenario.getConfig().controler().setWriteEventsInterval(1);// write events for each combination
+        scenario.getConfig().controler().setSnapshotFormat(Collections.singletonList("transims"));
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new FDModule(scenario));
-        controler.addOverridingModule(new AbstractModule() {
-            @Override
-            public void install() {
-                addEventHandlerBinding().to(PassingEventsUpdator.class);
-                addControlerListenerBinding().to(PassingEventsUpdator.class);
-            }
-        });
         controler.run();
 
-        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+        //see FDUtils.update...() method...for updating transim files...
+
     }
 }
