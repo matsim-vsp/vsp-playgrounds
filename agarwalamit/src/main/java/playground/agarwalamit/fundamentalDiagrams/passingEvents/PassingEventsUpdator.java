@@ -16,22 +16,46 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.fundamentalDiagrams.core;
+package playground.agarwalamit.fundamentalDiagrams.passingEvents;
 
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.events.*;
-import org.matsim.api.core.v01.events.handler.*;
+import org.matsim.api.core.v01.events.LinkEnterEvent;
+import org.matsim.api.core.v01.events.LinkLeaveEvent;
+import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
+import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.GlobalFlowDynamicsUpdator;
 
 /**
  * @author amit
  */
 
-class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler,
+		VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, IterationEndsListener {
 
 	private final Map<Id<Person>, Double> personId2TrackEnterTime;
 
@@ -55,16 +79,23 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 
 	private final double lengthOfTrack ;
 
-	public PassingEventsUpdator(final Collection<String> seepModes, final Id<Link> trackingStartLink, final Id<Link> trackingEndLink, final double legnthOfTrack) {
-		this.seepModes = seepModes;
+	private GlobalFlowDynamicsUpdator flowDynamicsUpdator;
+	private String outputDir;
+
+	@Inject
+	PassingEventsUpdator(QSimConfigGroup qSimConfigGroup, FDNetworkGenerator fdNetworkGenerator,
+						 GlobalFlowDynamicsUpdator flowDynamicsUpdator, ControlerConfigGroup config) {
+		this.seepModes = qSimConfigGroup.getSeepModes();
 		this.personId2TrackEnterTime = new HashMap<>();
 		this.personId2LinkEnterTime = new HashMap<>();
 		this.personId2LegMode = new HashMap<>();
 		this.bikesPassedByEachCarPerKm = new ArrayList<>();
 		this.carsPerKm = new ArrayList<>();
-		this.trackingStartLink = trackingStartLink;
-		this.trackingEndLink = trackingEndLink;
-		this.lengthOfTrack = legnthOfTrack;
+		this.trackingStartLink =  fdNetworkGenerator.getFirstLinkIdOfTrack();;
+		this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
+		this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
+		this.flowDynamicsUpdator = flowDynamicsUpdator;
+		this.outputDir = config.getOutputDirectory();
 	}
 
 	@Override
@@ -171,11 +202,37 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 		driverAgents.remove(event.getVehicleId());
 	}
 
-	public double getAvgBikesPassingRate(){
+	@Override
+	public void notifyIterationEnds(IterationEndsEvent event) {
+		//arrival only possible once stability is achieved
+		if (flowDynamicsUpdator.isPermanent()  ){
+			writeResults(this.outputDir + "/modeToDynamicPCUs.txt");
+		}
+	}
+
+	private void writeResults(String outFile){
+		boolean writeHeaders = !(new File(outFile).exists());
+		try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
+			if (writeHeaders) writer.write("density\tspeed\tflow\tnoOfCarsPerKm\tavgBikePassingRatePerkm\n");
+//			for (String mode : this.modeToPCUList.keySet()){
+//				for (Double d : this.modeToPCUList.get(mode)) {
+					writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentDensity()+"\t");
+					writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentAverageVelocity()+"\t");
+					writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentFlow()+"\t");
+					writer.write(getNoOfCarsPerKm()+"\t"+getAvgBikesPassingRate()+"\n");
+//				}
+//			}
+			writer.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Data is not written/read. Reason : " + e);
+		}
+	}
+
+	private double getAvgBikesPassingRate(){
 		return this.bikesPassedByEachCarPerKm.stream().mapToDouble(i -> i).average().orElse(0.0);
 	}
 
-	public double getNoOfCarsPerKm(){
+	private double getNoOfCarsPerKm(){
 		return this.carsPerKm.stream().mapToDouble(i -> i).average().orElse(0.0);
 	}
 }

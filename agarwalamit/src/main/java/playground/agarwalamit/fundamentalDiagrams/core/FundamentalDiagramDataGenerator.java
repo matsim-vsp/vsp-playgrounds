@@ -357,12 +357,7 @@ public class FundamentalDiagramDataGenerator {
 				mode2FlowData,
 				fdNetworkGenerator.getFirstLinkIdOfTrack() ,
 				fdNetworkGenerator.getLengthOfTrack());
-		PassingEventsUpdator passingEventsUpdator = new PassingEventsUpdator(
-				scenario.getConfig().qsim().getSeepModes(),
-				fdNetworkGenerator.getFirstLinkIdOfTrack(),
-				fdNetworkGenerator.getLastLinkIdOfTrack(),
-				fdNetworkGenerator.getLengthOfTrack());
-		
+
 		EventWriterXML eventWriter = null ;
 		if(fundamentalDiagramConfigGroup.isWritingEvents()){
 			String eventsDir = runDir+"/events/";
@@ -379,8 +374,6 @@ public class FundamentalDiagramDataGenerator {
 				bind(GlobalFlowDynamicsUpdator.class).toInstance(globalFlowDynamicsUpdator); // required for FDTrackMobsimAgent
 
 				addEventHandlerBinding().toInstance(globalFlowDynamicsUpdator);
-
-				if(travelModes.length > 1)	addEventHandlerBinding().toInstance(passingEventsUpdator);
 
 				if(fundamentalDiagramConfigGroup.isWritingEvents()){
 					addEventHandlerBinding().toInstance(eventsWriter);
@@ -459,20 +452,6 @@ public class FundamentalDiagramDataGenerator {
 			for (String travelMode : travelModes) {
 				writer.format("%.2f\t", mode2FlowData.get(travelMode).getPermanentAverageVelocity());
 			}
-
-			if( travelModes.length > 1 ) {
-
-				writer.format("%.2f\t", passingEventsUpdator.getNoOfCarsPerKm());
-
-				writer.format("%.2f\t", passingEventsUpdator.getAvgBikesPassingRate());
-			}
-
-//			if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
-//				for (String travelMode : travelModes) {
-//					String str = String.valueOf( scenario.getVehicles().getVehicleTypes().get(Id.create(travelMode,VehicleType.class)).getPcuEquivalents() );
-//					writer.print(str + "\t");
-//				}
-//			}
 		}
 
 		if(fundamentalDiagramConfigGroup.isWritingEvents()) {
@@ -525,15 +504,6 @@ public class FundamentalDiagramDataGenerator {
 		writer.print("v \t");
 		Arrays.stream(travelModes).forEach(travelMode -> writer.print(("v_" + travelMode) + "\t"));
 
-		if( travelModes.length > 1 ) {
-			writer.print("noOfCarsPerkm \t");
-
-			writer.print("avgBikePassingRatePerkm \t");
-		}
-//		if (fundamentalDiagramConfigGroup.isUsingDynamicPCU() ) {
-//			Arrays.stream(travelModes).forEach(travelMode -> writer.print(("pcu_" + travelMode) + "\t"));
-//		}
-//		writer.print("\n");
 	}
 
 	private void closeFile() {
