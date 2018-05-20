@@ -132,6 +132,7 @@ public class FDModule extends AbstractModule {
 		if(this.travelModes.length==1 && this.travelModes[0].equals("car")) scenario.getConfig().qsim().setStuckTime(60.);
 		else  if (this.travelModes.length==1 && this.travelModes[0].equals("truck")) scenario.getConfig().qsim().setStuckTime(180.);
 
+		//TODO probably, following is not required anymore.
 		if ( scenario.getConfig().network().isTimeVariantNetwork() ) {
 			Network netImpl = scenario.getNetwork();
 			netImpl.getFactory().setLinkFactory(new VariableIntervalTimeVariantLinkFactory());
