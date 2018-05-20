@@ -22,7 +22,9 @@ package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -53,6 +55,7 @@ public final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, P
 	private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 
 	private boolean permanentRegime;
+	@Inject private Scenario scenario;
 
 	/**
 	 * @param travelModeFlowDataContainer
@@ -66,7 +69,7 @@ public final class GlobalFlowDynamicsUpdator implements LinkEnterEventHandler, P
 			this.travelModesFlowData.get(vehTyp).initDynamicVariables();
 			totalAgents += this.travelModesFlowData.get(vehTyp).getnumberOfAgents();
 		}
-		this.globalFlowData = new TravelModesFlowDynamicsUpdator(this.travelModesFlowData.size(), startLinkOfTrack,  lengthOfTrack);
+		this.globalFlowData = new TravelModesFlowDynamicsUpdator(this.travelModesFlowData.size(), startLinkOfTrack,  lengthOfTrack, scenario);
 		this.globalFlowData.setnumberOfAgents(totalAgents);
 		this.globalFlowData.initDynamicVariables();
 		this.permanentRegime = false;

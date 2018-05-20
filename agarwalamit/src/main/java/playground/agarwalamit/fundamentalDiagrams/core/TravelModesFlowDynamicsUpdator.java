@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
@@ -70,16 +71,19 @@ public final class TravelModesFlowDynamicsUpdator {
 	private final double lengthOfTrack;
 	private final Id<Link> startOfTheLink;
 
-	TravelModesFlowDynamicsUpdator(final int noOfModes, final Id<Link> startOfTheLink,final double lengthOfTrack){
-		this(null, noOfModes, startOfTheLink, lengthOfTrack);
+	private Scenario scenario;
+
+	TravelModesFlowDynamicsUpdator(final int noOfModes, final Id<Link> startOfTheLink,final double lengthOfTrack, Scenario scenario){
+		this(null, noOfModes, startOfTheLink, lengthOfTrack, scenario);
 	}
 
-	TravelModesFlowDynamicsUpdator(final VehicleType vT, final int noOfModes, final Id<Link> startOfTheLink, final double lengthOfTrack){
+	TravelModesFlowDynamicsUpdator(final VehicleType vT, final int noOfModes, final Id<Link> startOfTheLink, final double lengthOfTrack, Scenario scenario){
 		this.vehicleType = vT;
 		if(this.vehicleType != null) this.modeId = this.vehicleType.getId();
 		this.noOfModes = noOfModes;
 		this.lengthOfTrack = lengthOfTrack;
 		this.startOfTheLink = startOfTheLink;
+		this.scenario = scenario;
 	}
 
 	void handle(LinkEnterEvent event){
@@ -88,6 +92,7 @@ public final class TravelModesFlowDynamicsUpdator {
 			double nowTime = event.getTime();
 
 			this.updateFlow15Min(nowTime, this.vehicleType.getPcuEquivalents());
+//			this.updateFlow15Min(nowTime, (double) ((AttributableVehicle)scenario.getVehicles().getVehicles().get(event.getVehicleId())).getAttributes().getAttribute("vehicle_pcu"));
 			this.updateSpeedTable(nowTime, personId);
 
 			//Checking for stability

@@ -334,7 +334,7 @@ public class FundamentalDiagramDataGenerator {
 		Map<String, TravelModesFlowDynamicsUpdator> mode2FlowData = Arrays.stream(travelModes).map(mode -> {
 			VehicleType vehicleType = scenario.getVehicles().getVehicleTypes().get(Id.create(mode, VehicleType.class));
 			return new TravelModesFlowDynamicsUpdator(vehicleType, travelModes.length,
-				fdNetworkGenerator.getFirstLinkIdOfTrack(), fdNetworkGenerator.getLengthOfTrack());
+				fdNetworkGenerator.getFirstLinkIdOfTrack(), fdNetworkGenerator.getLengthOfTrack(), scenario);
 		}).collect(Collectors.toMap(m->m.getModeId().toString(), m->m));
 
 

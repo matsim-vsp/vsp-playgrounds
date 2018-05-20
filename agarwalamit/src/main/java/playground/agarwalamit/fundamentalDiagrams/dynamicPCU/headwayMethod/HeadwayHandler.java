@@ -107,7 +107,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     private void writeResults(String outFile){
         boolean writeHeaders = !(new File(outFile).exists());
         try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
-            if (writeHeaders) writer.write("density\tspeed\tflow\tmode\tpcu\n");
+            if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
             for (String mode : this.modeToPCUList.keySet()){
                 for (Double d : this.modeToPCUList.get(mode)) {
                     writer.write(this.flowDynamicsUpdator.getGlobalData().getPermanentDensity()+"\t");

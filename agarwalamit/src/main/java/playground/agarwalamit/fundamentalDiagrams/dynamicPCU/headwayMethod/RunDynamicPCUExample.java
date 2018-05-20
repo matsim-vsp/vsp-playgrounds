@@ -47,7 +47,7 @@ public class RunDynamicPCUExample {
 
         Config config = ConfigUtils.createConfig();
         
-        config.controler().setOutputDirectory("../../svnit/outputFiles/car/DP_tau_0.5sec/");
+        config.controler().setOutputDirectory("../../svnit/outputFiles/car/DP_tau_0.5sec_updateFlowCap_2/");
 //        config.controler().setOutputDirectory("../svnit/outputFiles/carBicycleSeepage_equalModalShare_holeSpeed15kph/branch18Apr/");
         config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
@@ -57,10 +57,13 @@ public class RunDynamicPCUExample {
         qsim.setTrafficDynamics(TrafficDynamics.queue);
 //        qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 //        qsim.setSeepModes(Collections.singletonList("bicycle"));
-        
+
+        qsim.setStuckTime(100*3600.); // --> complete grid lock.
+
         FundamentalDiagramConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FundamentalDiagramConfigGroup.class);
         fdConfigGroup.setModalShareInPCU("1.0");
         fdConfigGroup.setReduceDataPointsByFactor(5);
+//        fdConfigGroup.setTrackLinkCapacity(3600.);
         
         Scenario scenario = ScenarioUtils.loadScenario(config);
         
