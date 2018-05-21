@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
+package playground.agarwalamit.fundamentalDiagrams.headwayMethod;
 
 import java.util.Arrays;
 import org.matsim.api.core.v01.Id;
@@ -25,11 +25,10 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicPCUQNetworkFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicHeadwayQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
@@ -43,7 +42,7 @@ import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
  * Created by amit on 14.04.18.
  */
 
-public class RunDynamicPCUExample {
+public class RunDynamicHeadwayExample {
 
     public static void main(String[] args) {
 
@@ -55,7 +54,7 @@ public class RunDynamicPCUExample {
         QSimConfigGroup qsim = config.qsim();
         qsim.setMainModes(Arrays.asList("car","bicycle"));
 //        qsim.setMainModes(Arrays.asList("car"));
-        qsim.setTrafficDynamics(TrafficDynamics.withHoles);
+        qsim.setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 //        qsim.setSeepModes(Collections.singletonList("bicycle"));
 
@@ -88,8 +87,8 @@ public class RunDynamicPCUExample {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                bind(QNetworkFactory.class).to(DynamicPCUQNetworkFactory.class);
-                bindMobsim().toProvider(DynamicPCUFDQSimProvider.class);
+                bind(QNetworkFactory.class).to(DynamicHeadwayQNetworkFactory.class);
+                bindMobsim().toProvider(DynamicHeadwayFDQSimProvider.class);
                 addEventHandlerBinding().toInstance(headwayHandler); // put speeds in attributes
                 addControlerListenerBinding().toInstance(headwayHandler);
             }

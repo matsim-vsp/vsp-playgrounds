@@ -1,4 +1,4 @@
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
+package playground.agarwalamit.fundamentalDiagrams.headwayMethod;
 
 import java.util.Map;
 import java.util.stream.Collectors;

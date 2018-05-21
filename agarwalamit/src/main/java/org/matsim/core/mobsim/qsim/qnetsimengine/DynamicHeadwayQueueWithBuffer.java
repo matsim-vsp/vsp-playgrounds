@@ -52,7 +52,7 @@ import org.matsim.lanes.data.Lane;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.VisVehicle;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod.AttributableVehicle;
+import playground.agarwalamit.fundamentalDiagrams.headwayMethod.AttributableVehicle;
 
 /**
  * Separating out the "lane" functionality from the "link" functionality.
