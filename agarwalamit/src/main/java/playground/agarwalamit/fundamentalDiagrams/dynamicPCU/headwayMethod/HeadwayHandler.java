@@ -37,6 +37,7 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
@@ -57,13 +58,13 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     @Inject private FDDataContainer fdDataContainer;
     @Inject private ControlerConfigGroup config;
 
-    private final Map<String, List<Double>> modeToPCUList = new TreeMap<>();
+    private final Map<String, List<Double>> modeToHeadwayList = new TreeMap<>();
     private final Map<Id<Vehicle>, Double> linkEnterTime = new HashMap<>();
 
     @Override
     public void reset(int iteration){
         this.linkEnterTime.clear();
-        this.modeToPCUList.clear();
+        this.modeToHeadwayList.clear();
     }
 
     @Override
@@ -71,20 +72,20 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
         if (event.getLinkId().equals( this.fdNetworkGenerator.getLastLinkIdOfTrack())) {
             double speed = this.fdNetworkGenerator.getLengthOfTrack() / (event.getTime() - this.linkEnterTime.get(event.getVehicleId()));
             Vehicle veh = vehicles.getVehicles().get(event.getVehicleId());
-            double pcu = getReactionTime() + veh.getType().getLength() / speed ; //it is better to estimate here so that it can be logged too.
-            ((AttributableVehicle) vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute("vehicle_pcu", pcu);
+            double headway = getReactionTime() + veh.getType().getLength() / speed ; //it is better to estimate here so that it can be logged too.
+            ((AttributableVehicle) vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute("headway", headway);
 
-            // store PCUs
+            // store headways
             String mode = veh.getType().getId().toString();
-            List<Double> pcus = this.modeToPCUList.get(mode);
+            List<Double> headways = this.modeToHeadwayList.get(mode);
 
-            if (pcus == null) {
-                pcus = new ArrayList<>(Collections.nCopies(fdDataContainer.getTravelModesFlowData().get(mode).getSpeedTableSize(), 0.));
+            if (headways == null) {
+                headways = new ArrayList<>(Collections.nCopies(fdDataContainer.getTravelModesFlowData().get(mode).getSpeedTableSize(), 0.));
             }
 
-            pcus.remove(0);//remove from top
-            pcus.add(pcu); // add to end of list
-            this.modeToPCUList.put(mode, pcus);
+            headways.remove(0);//remove from top
+            headways.add(headway); // add to end of list
+            this.modeToHeadwayList.put(mode, headways);
         }
     }
 
@@ -98,20 +99,26 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     @Override
     public void notifyIterationEnds(IterationEndsEvent event) {
         //arrival only possible once stability is achieved
+        String file = config.getOutputDirectory() + "/modeToDynamicHeadways.txt";
+        if (event.getIteration()==config.getFirstIteration()){
+            if ( new File(file).delete() ){
+                FDModule.LOG.warn("Removing existing file: "+file);
+            }
+        }
         if ( stabilityTester.isStabilityAchieved() ){
-            writeResults(config.getOutputDirectory() + "/modeToDynamicHeadways.txt");
+            writeResults(file);
         }
     }
 
     private void writeResults(String outFile){
-        boolean writeHeaders = !(new File(outFile).exists());
+        boolean writeHeaders = ! (new File(outFile).exists());
         try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
-            if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
+            if (writeHeaders) writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\theadway\n");
             else{
                 FDModule.LOG.warn("Appending data to the existing file.");
             }
-            for (String mode : this.modeToPCUList.keySet()){
-                for (Double d : this.modeToPCUList.get(mode)) {
+            for (String mode : this.modeToHeadwayList.keySet()){
+                for (Double d : this.modeToHeadwayList.get(mode)) {
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
@@ -125,6 +132,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
 
     private static double getReactionTime(){
         //TODO could be mode (driver) specific
-        return 0.5;
+        return 0.5 + 0.7 * MatsimRandom.getRandom().nextDouble(); //between 1.0 and 1.8
+//        return 1.0;
     }
 }

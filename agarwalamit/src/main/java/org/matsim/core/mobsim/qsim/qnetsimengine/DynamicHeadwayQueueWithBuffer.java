@@ -71,8 +71,8 @@ import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod.Attri
  *
  * @author nagel
  */
-final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
-	private static final Logger log = Logger.getLogger( DynamicPCUQueueWithBuffer.class ) ;
+final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
+	private static final Logger log = Logger.getLogger( DynamicHeadwayQueueWithBuffer.class ) ;
 
 	static final class Builder implements LaneFactory {
 		private VehicleQ<QVehicle> vehicleQueue = new FIFOVehicleQ() ;
@@ -93,13 +93,13 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 		void setLength(Double length) { this.length = length; }
 		void setEffectiveNumberOfLanes(Double effectiveNumberOfLanes) { this.effectiveNumberOfLanes = effectiveNumberOfLanes; }
 		void setFlowCapacity_s(Double flowCapacity_s) { this.flowCapacity_s = flowCapacity_s; }
-		@Override public DynamicPCUQueueWithBuffer createLane(AbstractQLink qLink ) {
+		@Override public DynamicHeadwayQueueWithBuffer createLane(AbstractQLink qLink ) {
 			// a number of things I cannot configure before I have the qlink:
 			if ( id==null ) { id = Id.create( qLink.getLink().getId() , Lane.class ) ; }
 			if ( length==null ) { length = qLink.getLink().getLength() ; }
 			if ( effectiveNumberOfLanes==null ) { effectiveNumberOfLanes = qLink.getLink().getNumberOfLanes() ; }
 			if ( flowCapacity_s==null ) { flowCapacity_s = ((Link)qLink.getLink()).getFlowCapacityPerSec() ; }
-			return new DynamicPCUQueueWithBuffer( qLink.getInternalInterface(), vehicleQueue, id, length, effectiveNumberOfLanes, flowCapacity_s, context ) ;
+			return new DynamicHeadwayQueueWithBuffer( qLink.getInternalInterface(), vehicleQueue, id, length, effectiveNumberOfLanes, flowCapacity_s, context ) ;
 		}
 	}
 
@@ -145,7 +145,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private double flowCapacityPerTimeStep;
 	private double remainingHolesStorageCapacity = 0.0 ;
 
-	private final Queue<DynamicPCUQueueWithBuffer.Hole> holes = new LinkedList<>();
+	private final Queue<DynamicHeadwayQueueWithBuffer.Hole> holes = new LinkedList<>();
 
 	/** the last time-step the front-most vehicle in the buffer was moved. Used for detecting dead-locks. */
 	private double bufferLastMovedTime = Time.getUndefinedTime() ;
@@ -173,7 +173,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private final AbstractQLink.QLinkInternalInterface qLink;
 	private final Id<Lane> id;
 	private static int spaceCapWarningCount = 0;
-	final static double HOLE_SPEED_KM_H = 15.0 ;//+ MatsimRandom.getRandom().nextDouble() * 5;
+	final static double HOLE_SPEED_KM_H = 15.0;
 
 	private final double length ;
 	private double unscaledFlowCapacity_s = Double.NaN ;
@@ -186,8 +186,8 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 
 	private double accumulatedInflowCap = 1. ;
 
-	private DynamicPCUQueueWithBuffer(AbstractQLink.QLinkInternalInterface qlink, final VehicleQ<QVehicle> vehicleQueue, Id<Lane> laneId,
-                                      double length, double effectiveNumberOfLanes, double flowCapacity_s, final NetsimEngineContext context) {
+	private DynamicHeadwayQueueWithBuffer(AbstractQLink.QLinkInternalInterface qlink, final VehicleQ<QVehicle> vehicleQueue, Id<Lane> laneId,
+										  double length, double effectiveNumberOfLanes, double flowCapacity_s, final NetsimEngineContext context) {
 		// the general idea is to give this object no longer access to "everything".  Objects get back pointers (here qlink), but they
 		// do not present the back pointer to the outside.  In consequence, this object can go up to qlink, but not any further. kai, mar'16
 		// Now I am even trying to get rid of the full qLink back pointer (since it allows, e.g., going back to Link). kai, feb'18
@@ -224,8 +224,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	public final void addFromWait(final QVehicle veh) {
 		//To protect against calling addToBuffer() without calling hasFlowCapacityLeft() first.
 		//This only could happen for addFromWait(), because it can be called from outside QueueWithBuffer
-//		if (flowcap_accumulate.getValue() <= 0.0 && (AttributableVehicle(veh.getVehicle()).getType().getPcuEquivalents() > context.qsimConfig
-		if (flowcap_accumulate.getValue() <= 0.0 && (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") > context.qsimConfig
+		if (flowcap_accumulate.getValue() <= 0.0 && veh.getVehicle().getType().getPcuEquivalents() > context.qsimConfig
 				.getPcuThresholdForFlowCapacityEasing()) {
 			throw new IllegalStateException("Buffer of link " + this.id + " has no space left!");
 		}
@@ -236,9 +235,9 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private void addToBuffer(final QVehicle veh) {
 		// yy might make sense to just accumulate to "zero" and go into negative when something is used up.
 		// kai/mz/amit, mar'12
+
 		double now = context.getSimTimer().getTimeOfDay() ;
-//		flowcap_accumulate.addValue(-veh.getFlowCapacityConsumptionInEquivalents(), now);
-		flowcap_accumulate.addValue(- (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu"), now);
+		flowcap_accumulate.addValue(-veh.getFlowCapacityConsumptionInEquivalents(), now);
 
 		buffer.add(veh);
 		if (buffer.size() == 1) {
@@ -265,7 +264,8 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 			updateFastFlowAccumulation();
 		}
 
-		return flowcap_accumulate.getValue() > 0.0 || (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu") <= context.qsimConfig.getPcuThresholdForFlowCapacityEasing();
+		return flowcap_accumulate.getValue() > 0.0 || veh.getVehicle().getType()
+				.getPcuEquivalents() <= context.qsimConfig.getPcuThresholdForFlowCapacityEasing();
 	}
 
 	private void updateFastFlowAccumulation(){
@@ -375,13 +375,13 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 		// interpreted, but it means that the link will act as an infinite sink.  kai, nov'10
 
 		if (storageCapacity < tempStorageCapacity) {
-			if (DynamicPCUQueueWithBuffer.spaceCapWarningCount <= 10) {
+			if (DynamicHeadwayQueueWithBuffer.spaceCapWarningCount <= 10) {
 				log.warn("Link " + this.id + " too small: enlarge storage capacity from: " + storageCapacity
 						+ " Vehicles to: " + tempStorageCapacity + " Vehicles.  This is not fatal, but modifies the traffic flow dynamics.");
-				if (DynamicPCUQueueWithBuffer.spaceCapWarningCount == 10) {
+				if (DynamicHeadwayQueueWithBuffer.spaceCapWarningCount == 10) {
 					log.warn("Additional warnings of this type are suppressed.");
 				}
-				DynamicPCUQueueWithBuffer.spaceCapWarningCount++;
+				DynamicHeadwayQueueWithBuffer.spaceCapWarningCount++;
 			}
 			storageCapacity = tempStorageCapacity;
 		}
@@ -413,7 +413,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				if ( storageCapacity < minStorCapForHoles ) {
 					if ( spaceCapWarningCount <= 10 ) {
 						log.warn("storage capacity not sufficient for holes; increasing from " + storageCapacity + " to " + minStorCapForHoles ) ;
-						DynamicPCUQueueWithBuffer.spaceCapWarningCount++;
+						DynamicHeadwayQueueWithBuffer.spaceCapWarningCount++;
 					}
 					storageCapacity = minStorCapForHoles ;
 				}
@@ -498,8 +498,13 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				continue;
 			}
 
-			/* is there still room left in the buffer? */
+			/* is there still any flow capacity left? */
 			if (!hasFlowCapacityLeft(veh) ) {
+				return;
+			}
+
+			// check for headways
+			if (! moveVehicleBasedOnHeadway(veh)){
 				return;
 			}
 
@@ -511,6 +516,17 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				noOfSeepModeBringFwd++;
 			}
 		} // end while
+	}
+
+	private double lastVehMoveTime = 0.;
+	private boolean moveVehicleBasedOnHeadway(QVehicle veh){
+		double now = context.getSimTimer().getTimeOfDay();
+		boolean test = (now-lastVehMoveTime) >= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("headway");
+		if ( test ){
+			lastVehMoveTime = now;
+			return true;
+		}
+		return false;
 	}
 
 	private void removeVehicleFromQueue(final QVehicle veh2Remove) {
@@ -535,7 +551,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				break;
 			case withHoles:
 			case kinematicWaves:
-				DynamicPCUQueueWithBuffer.Hole hole = new DynamicPCUQueueWithBuffer.Hole() ;
+				DynamicHeadwayQueueWithBuffer.Hole hole = new DynamicHeadwayQueueWithBuffer.Hole() ;
 				double ttimeOfHoles = length*3600./HOLE_SPEED_KM_H/1000. ;
 
 				//			double offset = this.storageCapacity/this.flowCapacityPerTimeStep ;
@@ -803,7 +819,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 				break;
 			case kinematicWaves:
 				this.remainingHolesStorageCapacity -= veh.getSizeInEquivalents();
-				this.accumulatedInflowCap -= (double) ((AttributableVehicle) veh.getVehicle()).getAttributes().getAttribute("vehicle_pcu");
+				this.accumulatedInflowCap -= veh.getFlowCapacityConsumptionInEquivalents() ;
 				break;
 			default: throw new RuntimeException("The traffic dynmics "+context.qsimConfig.getTrafficDynamics()+" is not implemented yet.");
 		}
@@ -818,7 +834,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 	}
 
 	@Override
-	public final VisData getVisData() {
+	public final QLaneI.VisData getVisData() {
 		return this.visData  ;
 	}
 
@@ -902,7 +918,7 @@ final class DynamicPCUQueueWithBuffer implements QLaneI, SignalizeableItem {
 		}
 	}
 
-	class VisDataImpl implements VisData {
+	class VisDataImpl implements QLaneI.VisData {
 		private Coord upstreamCoord;
 		private Coord downstreamCoord;
 

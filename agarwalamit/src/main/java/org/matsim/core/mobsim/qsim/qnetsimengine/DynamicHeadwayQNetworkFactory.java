@@ -40,7 +40,7 @@ import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
  * 
  * @see DefaultQNetworkFactory
  */
-public final class DynamicPCUQNetworkFactory  extends QNetworkFactory {
+public final class DynamicHeadwayQNetworkFactory extends QNetworkFactory {
 
 	private QSimConfigGroup qsimConfig ;
 	private EventsManager events ;
@@ -52,7 +52,7 @@ public final class DynamicPCUQNetworkFactory  extends QNetworkFactory {
 	private TurnAcceptanceLogic turnAcceptanceLogic = new DefaultTurnAcceptanceLogic() ;
 
 	@Inject
-	public DynamicPCUQNetworkFactory(EventsManager events, Scenario scenario ) {
+	public DynamicHeadwayQNetworkFactory(EventsManager events, Scenario scenario ) {
 		this.events = events;
 		this.scenario = scenario;
 		this.network = scenario.getNetwork();
@@ -73,7 +73,7 @@ public final class DynamicPCUQNetworkFactory  extends QNetworkFactory {
 	}
 	@Override
 	QLinkI createNetsimLink(final Link link, final QNodeI toQueueNode) {
-		DynamicPCUQueueWithBuffer.Builder laneFactory = new DynamicPCUQueueWithBuffer.Builder(context) ;
+		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context) ;
 
 		QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine) ;
 		linkBuilder.setLaneFactory(laneFactory);
