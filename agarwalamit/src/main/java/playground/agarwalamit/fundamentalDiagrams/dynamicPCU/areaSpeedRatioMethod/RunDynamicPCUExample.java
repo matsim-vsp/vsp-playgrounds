@@ -19,75 +19,75 @@
 
 package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod;
 
+import java.util.Arrays;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.fundamentalDiagrams.FDUtils;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
-import playground.agarwalamit.utils.FileUtils;
+import playground.agarwalamit.fundamentalDiagrams.headwayMethod.HeadwayHandler;
 
 /**
  * Created by amit on 29.06.17.
  */
 
 
-public class RunRaceTrackDynamicPCUExample {
+public class RunDynamicPCUExample {
 
     public static void main(String[] args) {
 
-        boolean isRunningOnServer = args.length > 0;
+        Config config = ConfigUtils.createConfig();
 
-        String outDir ;
-        Config config = null;
+        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/areaSpeedRatio/equalModalSplit_holeSpeed15KPH/");
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
-        if ( isRunningOnServer ) {
-            outDir = args[0];
-            if (args.length>1) {
-                config = ConfigUtils.loadConfig(args[1]);
-            }
-        } else {
-            config = ConfigUtils.loadConfig(FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml");
-            outDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/output/run002/";
-        }
+        QSimConfigGroup qsim = config.qsim();
+        qsim.setMainModes(Arrays.asList("car","bicycle"));
+//        qsim.setMainModes(Arrays.asList("car"));
+        qsim.setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
+        qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+//        qsim.setSeepModes(Collections.singletonList("bicycle"));
 
-        Scenario scenario;
-        if (config== null) {
-            scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-            Vehicles vehicles = scenario.getVehicles();
-            {
-                VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
-                car.setPcuEquivalents(1.0);
-                car.setMaximumVelocity(60.0/3.6);
-                vehicles.addVehicleType(car);
-            }
-            {
-                VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create("bike",VehicleType.class));
-                bike.setPcuEquivalents(0.25);
-                bike.setMaximumVelocity(15.0/3.6);
-                vehicles.addVehicleType(bike);
-            }
-        } else scenario = ScenarioUtils.loadScenario(config); // network and plans will anywaye be generated internally
+//        qsim.setStuckTime(100*3600.); // --> complete grid lock.
+
+        FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
+        fdConfigGroup.setModalShareInPCU("1.0");
+        fdConfigGroup.setReduceDataPointsByFactor(5);
+//        fdConfigGroup.setTrackLinkCapacity(3600.);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config);
 
         Vehicles vehicles = scenario.getVehicles();
-        vehicles.getVehicleTypes().values().forEach(vt -> {
-            vt.setDescription(
-                VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA
-                        + String.valueOf( VehicleProjectedAreaRatio.getProjectedAreaRatio(vt.getId().toString())  )
-                        +VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA);
-        });
+        VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create("car",VehicleType.class));
+        car.setPcuEquivalents(1.0);
+        car.setMaximumVelocity(60/3.6);
+        car.setLength(3.72);
+        car.setDescription(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA
+                + String.valueOf( VehicleProjectedAreaRatio.getProjectedAreaRatio(car.getId().toString())  )
+                +VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA);
+        vehicles.addVehicleType(car);
 
-        String outFolder ="/"+scenario.getConfig().qsim().getTrafficDynamics()+"_"+scenario.getConfig().qsim().getLinkDynamics()+"/";
-        scenario.getConfig().controler().setOutputDirectory(outDir+outFolder);
+        VehicleType bicycle = VehicleUtils.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
+        bicycle.setPcuEquivalents(0.25);
+        bicycle.setMaximumVelocity(15/3.6);
+        bicycle.setLength(1.9);
+        bicycle.setDescription(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA
+                + String.valueOf( VehicleProjectedAreaRatio.getProjectedAreaRatio(bicycle.getId().toString())  )
+                +VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA);
+        vehicles.addVehicleType(bicycle);
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new FDModule(scenario));
@@ -95,6 +95,10 @@ public class RunRaceTrackDynamicPCUExample {
             @Override
             public void install() {
                 addEventHandlerBinding().to(ChandraSikdarPCUUpdator.class);
+                addControlerListenerBinding().to(ChandraSikdarPCUUpdator.class);
+
+                addEventHandlerBinding().to(HeadwayHandler.class); // just to see the variation in headways
+                addControlerListenerBinding().to(HeadwayHandler.class);
             }
         });
         controler.run();

@@ -22,10 +22,10 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
+import playground.agarwalamit.fundamentalDiagrams.headwayMethod.AttributableVehicle;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
@@ -88,7 +88,14 @@ public class FDQSimProvider implements Provider<Mobsim> {
 					agent.setStabilityTester(stabilityTester);
 					qSim.insertAgentIntoMobsim(agent);
 
-					final QVehicle vehicle = new QVehicle(VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode)));
+					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
+					final QVehicle vehicle = new QVehicle(
+//							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode))
+							attributableVehicle
+					);
+					vehicle.setDriver(agent);
+					scenario.getVehicles().removeVehicle(vehicle.getId());
+					scenario.getVehicles().addVehicle(vehicle.getVehicle());
 					agent.setVehicle(vehicle);
 					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
 //					qSim.createAndParkVehicleOnLink(vehicle.getVehicle(), linkId4VehicleInsertion);

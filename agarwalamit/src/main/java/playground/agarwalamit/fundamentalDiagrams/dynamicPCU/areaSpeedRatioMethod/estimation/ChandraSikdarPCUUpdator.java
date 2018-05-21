@@ -19,8 +19,12 @@
 
 package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -31,20 +35,25 @@ import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-
-import com.google.inject.Inject;
-
+import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
 import playground.agarwalamit.utils.NumberUtils;
 
 /**
  * Created by amit on 29.06.17.
  */
 
-public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler {
+public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler,
+        LinkEnterEventHandler, LinkLeaveEventHandler, IterationEndsListener {
 
     private final Scenario scenario;
     private final Id<Link> trackingStartLink;
@@ -55,11 +64,17 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     private final Map<Id<Vehicle>,String> vehicleId2Mode = new HashMap<>();
 
     private final Map<String, Double> vehicleTypeToLastNotedSpeed = new HashMap<>();
-    private final Map<String, Double> vehicleTypeToProjectedAreaRatio = new HashMap<>(); 
+    private final Map<String, Double> vehicleTypeToProjectedAreaRatio = new HashMap<>();
+
+    private final FDDataContainer fdDataContainer;
+    private final FDStabilityTester fdStabilityTester;
 
     @Inject
-    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator){
+    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator
+    , FDDataContainer fdDataContainer, FDStabilityTester fdStabilityTester){
         this.scenario = scenario;
+        this.fdDataContainer = fdDataContainer;
+        this.fdStabilityTester = fdStabilityTester;
         this.trackingStartLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
         this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
         this.resetVehicleTypeToSpeedMap();
@@ -119,8 +134,13 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
 
             if (vehicleType.getDescription()==null ||
                     (! vehicleType.getDescription().contains(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString()))  ) {
-                throw new RuntimeException("Vehicle projected area ratio is not provided in the vehicle description. This is required if using dynamic PCU settings. Aborting...");
+//                throw new RuntimeException("Vehicle projected area ratio is not provided in the vehicle description. This is required if using dynamic PCU settings. Aborting...");
+            FDModule.LOG.warn("Vehicle projecte area ratio is not provided, setting it to default values.");
+                vehicleType.setDescription(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA
+                        + String.valueOf( VehicleProjectedAreaRatio.getProjectedAreaRatio(vehicleType.getId().toString())  )
+                        +VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA);
             }
+
 
             int startIndex = vehicleType.getDescription().indexOf(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString()) + VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString().length();
             int endIndex = vehicleType.getDescription().lastIndexOf(VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA.toString());
@@ -132,5 +152,35 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
         }
     }
 
+    @Override
+    public void notifyIterationEnds(IterationEndsEvent event) {
+        //arrival only possible once stability is achieved
+        if (this.fdStabilityTester.isStabilityAchieved() ){
+            writeResults(this.scenario.getConfig().controler().getOutputDirectory() + "/modeToDynamicPCUs.txt");
+        }
+    }
 
+    private void writeResults(String outFile){
+        boolean writeHeaders = !(new File(outFile).exists());
+        try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
+            if (writeHeaders) {
+                writer.write("density\tspeed\tflow\t");
+                for (VehicleType vt : scenario.getVehicles().getVehicleTypes().values()) {
+                    writer.write("pcu_" + vt.getId().toString()+"\t");
+                }
+                writer.newLine();
+            } else{
+                FDModule.LOG.warn("Appending data to the existing file.");
+            }
+            writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
+            writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
+            writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
+            for (VehicleType vt : scenario.getVehicles().getVehicleTypes().values()) {
+                writer.write( vt.getPcuEquivalents()+"\t");
+            }
+            writer.newLine();
+        } catch (IOException e) {
+            throw new RuntimeException("Data is not written/read. Reason : " + e);
+        }
+    }
 }
