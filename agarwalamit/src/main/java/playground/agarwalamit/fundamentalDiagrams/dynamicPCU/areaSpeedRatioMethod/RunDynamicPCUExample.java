@@ -20,6 +20,8 @@
 package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod;
 
 import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -48,30 +50,30 @@ public class RunDynamicPCUExample {
 
     public static void main(String[] args) {
 
+        String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/1_3/";
         Config config = ConfigUtils.createConfig();
 
-        config.controler().setOutputDirectory("../../svnit/outputFiles/mixedModes/passing/staticPCU/carMotorbike/");
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
-        qsim.setMainModes(Arrays.asList("car","motorbike"));
-//        qsim.setMainModes(Arrays.asList("car"));
+        List<String> mainModes = Arrays.asList("car", "truck");
+        qsim.setMainModes(mainModes);
         qsim.setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
-//        qsim.setSeepModes(Collections.singletonList("veh2"));
-
 //        qsim.setStuckTime(100*3600.); // --> complete grid lock.
 
+        config.controler().setOutputDirectory(parentDir+StringUtils.join(mainModes,'_')+"/");
+
         FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
-        fdConfigGroup.setModalShareInPCU("1.0,1.0");
-        fdConfigGroup.setReduceDataPointsByFactor(2);
+        fdConfigGroup.setModalShareInPCU("1.0,3.0");
+        if (! mainModes.contains("truck")) fdConfigGroup.setReduceDataPointsByFactor(2);
 //        fdConfigGroup.setTrackLinkCapacity(3600.);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         Vehicles vehicles = scenario.getVehicles();
 
-        for (String mode : config.qsim().getMainModes()){
+        for (String mode : mainModes){
             VehicleType veh = VehicleUtils.getFactory().createVehicleType(Id.create(mode,VehicleType.class));
             veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
             veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
