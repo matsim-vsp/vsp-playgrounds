@@ -59,6 +59,13 @@ public class RunOpenBerlinScenario {
 	private static double probaForRandomSingleTripMode;
 	private static boolean useVSPdefaults;
 	
+	private static double ascCar;
+	private static double ascPt;
+	private static double ascTransitWalk;
+	private static double ascWalk;
+	private static double ascBicycle;
+	private static double ascRide;
+	
 	public static void main(String[] args) {
 		if (args.length > 0) {
 			
@@ -88,6 +95,24 @@ public class RunOpenBerlinScenario {
 			
 			useVSPdefaults = Boolean.parseBoolean(args[8]);
 			log.info("useVSPdefaults: "+ useVSPdefaults);
+			
+			ascCar = Double.parseDouble(args[9]);
+			log.info("ascCar: "+ ascCar);
+
+			ascPt = Double.parseDouble(args[10]);
+			log.info("ascPt: "+ ascPt);
+			
+			ascTransitWalk = Double.parseDouble(args[11]);
+			log.info("ascTransitWalk: "+ ascTransitWalk);
+
+			ascWalk = Double.parseDouble(args[12]);
+			log.info("ascWalk: "+ ascWalk);
+
+			ascBicycle = Double.parseDouble(args[13]);
+			log.info("ascBicycle: "+ ascBicycle);
+			
+			ascRide = Double.parseDouble(args[14]);
+			log.info("ascRide: "+ ascRide);
 
 		} else {
 			
@@ -126,6 +151,13 @@ public class RunOpenBerlinScenario {
 			config.qsim().setUsingTravelTimeCheckInTeleportation(true);
 			config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
 		}
+		
+		config.planCalcScore().getModes().get(TransportMode.car).setConstant(ascCar);
+		config.planCalcScore().getModes().get(TransportMode.pt).setConstant(ascPt);
+		config.planCalcScore().getModes().get(TransportMode.transit_walk).setConstant(ascTransitWalk);
+		config.planCalcScore().getModes().get(TransportMode.walk).setConstant(ascWalk);
+		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
+		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
