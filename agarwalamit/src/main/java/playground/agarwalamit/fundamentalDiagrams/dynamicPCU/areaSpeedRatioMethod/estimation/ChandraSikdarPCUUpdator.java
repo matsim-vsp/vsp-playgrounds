@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import com.google.inject.Inject;
+import org.apache.commons.lang3.EnumUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -41,6 +42,7 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+import playground.agarwalamit.fundamentalDiagrams.AttributableVehicleType;
 import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
@@ -57,6 +59,9 @@ import playground.agarwalamit.utils.NumberUtils;
 
 public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler,
         LinkEnterEventHandler, LinkLeaveEventHandler, IterationEndsListener {
+
+
+    public static final String projected_area_ratio = "projected_area_ratio";
 
     private final Scenario scenario;
     private final Id<Link> trackingStartLink;
@@ -172,8 +177,21 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
                         .get(Id.create(TransportMode.car, VehicleType.class))
                         .getMaximumVelocity()) / this.vehicleTypeToLastNotedSpeed.getOrDefault(mode,
                 scenario.getVehicles().getVehicleTypes().get(Id.create(mode, VehicleType.class)).getMaximumVelocity());
-        double areaRatio = VehicleProjectedAreaRatio.getProjectedAreaRatio(TransportMode.car) / VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
+        double areaRatio = getAreaRatio(TransportMode.car) / getAreaRatio(mode);
         return speedRatio / areaRatio ;
+    }
+
+    private double getAreaRatio(String mode){
+        if (EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode)){
+            return (double) ((AttributableVehicleType) scenario.getVehicles()
+                                                               .getVehicleTypes()
+                                                               .get(Id.create(mode, VehicleType.class))).getAttributes()
+                                                                                                        .getAttribute(
+                                                                                                                projected_area_ratio);
+        } else {
+            VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
+        }
+        return 0;
     }
 
     @Override
