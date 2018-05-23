@@ -41,6 +41,7 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
@@ -75,13 +76,14 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
 
     private HeadwayHandler delegate;
     private final Map<String, VehicleTypeToPCU> modeToPCU = new TreeMap<>();
+    private final double qsimDefaultHeadway;
 
     //a local field, should be configurable
     private boolean updatePCU =false;
 
     @Inject
     public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator
-    , FDDataContainer fdDataContainer, FDStabilityTester fdStabilityTester){
+    , FDDataContainer fdDataContainer, FDStabilityTester fdStabilityTester, FDConfigGroup fdConfigGroup){
         this.scenario = scenario;
         this.fdDataContainer = fdDataContainer;
         this.fdStabilityTester = fdStabilityTester;
@@ -89,6 +91,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
         this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
         this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
         this.delegate = new HeadwayHandler(scenario.getVehicles(), fdNetworkGenerator, fdStabilityTester, fdDataContainer, scenario.getConfig().controler());
+        this.qsimDefaultHeadway = 3600. / fdConfigGroup.getTrackLinkCapacity();
     }
 
     @Override
@@ -140,8 +143,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     }
 
     private void addVehicleTypeToPCU(String mode, PCUMethod pcuMethod, double pcu){
-        VehicleTypeToPCU vehicleTypeToPCU=  this.modeToPCU.get(mode);
-        if (vehicleTypeToPCU==null) vehicleTypeToPCU = new VehicleTypeToPCU(mode);
+        VehicleTypeToPCU vehicleTypeToPCU=  this.modeToPCU.getOrDefault(mode, new VehicleTypeToPCU(mode));
         vehicleTypeToPCU.pcuMethodToPCU.put(pcuMethod,pcu);
         modeToPCU.put(mode, vehicleTypeToPCU);
     }
@@ -160,15 +162,16 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
 
     private double calculateHeadwayPCU(final String mode){
         Map<String, Double> headwayMap = this.delegate.getModeToAverageHeadway();
-        return headwayMap.get(mode) / headwayMap.get(TransportMode.car);
+        return headwayMap.getOrDefault(mode, qsimDefaultHeadway) / headwayMap.getOrDefault(TransportMode.car, qsimDefaultHeadway);
     }
 
     private double calculateAreaSpeedPCU(final String mode) {
-        if (this.vehicleTypeToLastNotedSpeed.get(mode)==null) {
-            this.vehicleTypeToLastNotedSpeed.put(mode, scenario.getVehicles().getVehicleTypes().get(Id.create(mode, VehicleType.class)).getMaximumVelocity());
-        }
-
-        double speedRatio = this.vehicleTypeToLastNotedSpeed.get(TransportMode.car) / this.vehicleTypeToLastNotedSpeed.get(mode) ;
+        double speedRatio = this.vehicleTypeToLastNotedSpeed.getOrDefault(TransportMode.car,
+                scenario.getVehicles()
+                        .getVehicleTypes()
+                        .get(Id.create(TransportMode.car, VehicleType.class))
+                        .getMaximumVelocity()) / this.vehicleTypeToLastNotedSpeed.getOrDefault(mode,
+                scenario.getVehicles().getVehicleTypes().get(Id.create(mode, VehicleType.class)).getMaximumVelocity());
         double areaRatio = VehicleProjectedAreaRatio.getProjectedAreaRatio(TransportMode.car) / VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
         return speedRatio / areaRatio ;
     }
