@@ -31,21 +31,18 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.TerminationCriterion;
-import org.matsim.core.controler.events.IterationStartsEvent;
-import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.vehicles.VehicleType;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDQSimProvider;
-import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
-import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 
 /**
  * Created by amit on 20.05.18.
  */
 
-public class FDPointsGenerator implements IterationStartsListener, TerminationCriterion {
+public class FDAgentsGeneratorImpl implements FDAgentsGenerator {
 
     private final FDConfigGroup FDConfigGroup;
     private final FDNetworkGenerator fdNetworkGenerator;
@@ -57,7 +54,7 @@ public class FDPointsGenerator implements IterationStartsListener, TerminationCr
     private final FDDataContainer fdDataContainer;
 
     @Inject
-    FDPointsGenerator(FDNetworkGenerator fdNetworkGenerator, Scenario scenario, FDDataContainer fdDataContainer){
+    FDAgentsGeneratorImpl(FDNetworkGenerator fdNetworkGenerator, Scenario scenario, FDDataContainer fdDataContainer){
         this.FDConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
         this.fdNetworkGenerator = fdNetworkGenerator;
         this.fdDataContainer = fdDataContainer;
@@ -140,7 +137,7 @@ public class FDPointsGenerator implements IterationStartsListener, TerminationCr
     }
 
     @Override
-    public void notifyIterationStarts(IterationStartsEvent event) {
+    public void createPersons() {
         List<Integer> pointToRun = fdDataContainer.getListOfPointsToRun().remove(0);
 
         FDModule.LOG.info("===============");
@@ -166,11 +163,6 @@ public class FDPointsGenerator implements IterationStartsListener, TerminationCr
             this.fdDataContainer.getTravelModesFlowData().get(travelModes[i]).setnumberOfAgents(pointToRun.get(i));
         }
         this.fdDataContainer.getGlobalData().setnumberOfAgents(population.getPersons().size());
-    }
-
-    @Override
-    public boolean continueIterations(int iteration) {
-        return ! this.fdDataContainer.getListOfPointsToRun().isEmpty();
     }
 
     private int getGCD(int a, int b){

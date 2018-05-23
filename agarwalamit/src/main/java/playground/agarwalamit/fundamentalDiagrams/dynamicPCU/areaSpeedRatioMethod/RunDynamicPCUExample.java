@@ -50,7 +50,7 @@ public class RunDynamicPCUExample {
 
     public static void main(String[] args) {
 
-        String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/1_3/";
+        String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/equalModalShare/";
         Config config = ConfigUtils.createConfig();
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
@@ -65,7 +65,7 @@ public class RunDynamicPCUExample {
         config.controler().setOutputDirectory(parentDir+StringUtils.join(mainModes,'_')+"/");
 
         FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
-        fdConfigGroup.setModalShareInPCU("1.0,3.0");
+        fdConfigGroup.setModalShareInPCU("1.0,1.0");
         if (! mainModes.contains("truck")) fdConfigGroup.setReduceDataPointsByFactor(2);
 //        fdConfigGroup.setTrackLinkCapacity(3600.);
 

@@ -42,8 +42,10 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
-import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDDistributionPointsGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDPointsGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDAgentsGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDAgentsGeneratorControlerListner;
+import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDDistributionAgentsGeneratorImpl;
+import playground.agarwalamit.fundamentalDiagrams.core.pointsToRun.FDAgentsGeneratorImpl;
 
 /**
  * @author amit after ssix
@@ -151,18 +153,20 @@ public class FDModule extends AbstractModule {
 
 		this.bindMobsim().toProvider(FDQSimProvider.class);
 
-		bind(GlobalFlowDynamicsUpdator.class); // necessary to access constructor arguments
+		bind(GlobalFlowDynamicsUpdator.class).asEagerSingleton(); //provide same instance everywhere
 		addEventHandlerBinding().to(GlobalFlowDynamicsUpdator.class);
 
 		if (FDConfigGroup.isRunningDistribution()) {
-			addControlerListenerBinding().to(FDDistributionPointsGenerator.class);
-			bind(TerminationCriterion.class).to(FDDistributionPointsGenerator.class);
+			bind(FDAgentsGenerator.class).to(FDDistributionAgentsGeneratorImpl.class);
 		} else {
-			addControlerListenerBinding().to(FDPointsGenerator.class);
-			bind(TerminationCriterion.class).to(FDPointsGenerator.class);
+			bind(FDAgentsGenerator.class).to(FDAgentsGeneratorImpl.class);
 		}
 
-		bind(FDDataWriter.class);// necessary to access constructor arguments
+		bind(FDAgentsGeneratorControlerListner.class).asEagerSingleton(); //probably, not really necessary, since there is no shared information whereever it is required.
+		addControlerListenerBinding().to(FDAgentsGeneratorControlerListner.class);
+		bind(TerminationCriterion.class).to(FDAgentsGeneratorControlerListner.class);
+
+		bind(FDDataWriter.class).asEagerSingleton();// necessary to access constructor arguments
 		addControlerListenerBinding().to(FDDataWriter.class);
 
 		bind(FDStabilityTester.class).asEagerSingleton();

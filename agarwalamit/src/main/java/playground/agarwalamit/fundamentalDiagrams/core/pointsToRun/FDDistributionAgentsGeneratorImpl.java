@@ -30,22 +30,19 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.TerminationCriterion;
-import org.matsim.core.controler.events.IterationStartsEvent;
-import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.vehicles.VehicleType;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDQSimProvider;
-import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
-import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 /**
  * Created by amit on 20.05.18.
  */
 
-public class FDDistributionPointsGenerator implements  IterationStartsListener, TerminationCriterion {
+public class FDDistributionAgentsGeneratorImpl implements  FDAgentsGenerator {
 
     private final FDConfigGroup FDConfigGroup;
     private final FDNetworkGenerator fdNetworkGenerator;
@@ -56,8 +53,8 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
     private final FDDataContainer fdDataContainer;
 
     @Inject
-    FDDistributionPointsGenerator(FDNetworkGenerator fdNetworkGenerator, Scenario scenario,
-                                  FDDataContainer fdDataContainer, FDStabilityTester stabilityTester){
+    FDDistributionAgentsGeneratorImpl(FDNetworkGenerator fdNetworkGenerator, Scenario scenario,
+                                      FDDataContainer fdDataContainer, FDStabilityTester stabilityTester){
         this.FDConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
         this.fdNetworkGenerator = fdNetworkGenerator;
         this.fdDataContainer = fdDataContainer;
@@ -123,7 +120,7 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
     }
 
     @Override
-    public void notifyIterationStarts(IterationStartsEvent event) {
+    public void createPersons() {
         List<Integer> pointToRun = fdDataContainer.getListOfPointsToRun().remove(0);
 
         double density = IntStream.range(0, travelModes.length)
@@ -181,10 +178,5 @@ public class FDDistributionPointsGenerator implements  IterationStartsListener, 
             a = gcd;
         }
         return gcd;
-    }
-
-    @Override
-    public boolean continueIterations(int iteration) {
-        return ! this.fdDataContainer.getListOfPointsToRun().isEmpty();
     }
 }
