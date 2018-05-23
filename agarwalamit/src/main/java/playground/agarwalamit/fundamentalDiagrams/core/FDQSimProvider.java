@@ -25,7 +25,7 @@ import org.matsim.vehicles.VehicleType;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
-import playground.agarwalamit.fundamentalDiagrams.headwayMethod.AttributableVehicle;
+import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
