@@ -35,6 +35,7 @@ import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.fundamentalDiagrams.FDUtils;
 import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.PCUMethod;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
@@ -51,7 +52,7 @@ public class RunDynamicPCUExample {
 
         Config config = ConfigUtils.createConfig();
 
-        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/areaSpeedRatio/equalModalSplit_holeSpeed15KPH/");
+        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/staticPCU/equalModalSplit_holes/");
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
@@ -64,7 +65,7 @@ public class RunDynamicPCUExample {
 //        qsim.setStuckTime(100*3600.); // --> complete grid lock.
 
         FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
-        fdConfigGroup.setModalShareInPCU("1.0");
+        fdConfigGroup.setModalShareInPCU("1.0,1.0");
         fdConfigGroup.setReduceDataPointsByFactor(5);
 //        fdConfigGroup.setTrackLinkCapacity(3600.);
 
@@ -94,11 +95,16 @@ public class RunDynamicPCUExample {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
+
+                bind(ChandraSikdarPCUUpdator.class).asEagerSingleton();
                 addEventHandlerBinding().to(ChandraSikdarPCUUpdator.class);
                 addControlerListenerBinding().to(ChandraSikdarPCUUpdator.class);
 
-                addEventHandlerBinding().to(HeadwayHandler.class); // just to see the variation in headways
+                bind(HeadwayHandler.class).asEagerSingleton();
+                addEventHandlerBinding().to(HeadwayHandler.class);
                 addControlerListenerBinding().to(HeadwayHandler.class);
+
+                bind(PCUMethod.class).toInstance(PCUMethod.SPEED_AREA_RATIO);
             }
         });
         controler.run();

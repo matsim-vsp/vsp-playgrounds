@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -37,14 +38,14 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
-import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
-import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
+import playground.agarwalamit.utils.ListUtils;
 
 /**
  * Created by amit on 14.05.18.
@@ -52,11 +53,20 @@ import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, IterationEndsListener {
 
-    @Inject private Vehicles vehicles;
-    @Inject private FDNetworkGenerator fdNetworkGenerator;
-    @Inject private FDStabilityTester stabilityTester;
-    @Inject private FDDataContainer fdDataContainer;
-    @Inject private ControlerConfigGroup config;
+    @Inject
+    public HeadwayHandler(Vehicles vehicles, FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester, FDDataContainer fdDataContainer, ControlerConfigGroup config) {
+        this.vehicles = vehicles;
+        this.fdNetworkGenerator = fdNetworkGenerator;
+        this.stabilityTester = stabilityTester;
+        this.fdDataContainer = fdDataContainer;
+        this.config = config;
+    }
+
+    private Vehicles vehicles;
+    private FDNetworkGenerator fdNetworkGenerator;
+    private FDStabilityTester stabilityTester;
+    private FDDataContainer fdDataContainer;
+    private ControlerConfigGroup config;
 
     private final Map<String, List<Double>> modeToHeadwayList = new TreeMap<>();
     private final Map<Id<Vehicle>, Double> linkEnterTime = new HashMap<>();
@@ -110,6 +120,14 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
         }
     }
 
+    public Map<String, Double> getModeToAverageHeadway(){
+        return this.modeToHeadwayList.keySet()
+                                     .stream()
+                                     .collect(Collectors.toMap(e -> e,
+                                             e -> ListUtils.doubleMean(this.modeToHeadwayList.get(e)),
+                                             (a, b) -> b));
+    }
+
     private void writeResults(String outFile){
         boolean writeHeaders = ! (new File(outFile).exists());
         try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
@@ -132,7 +150,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
 
     private static double getReactionTime(){
         //TODO could be mode (driver) specific
-        return 0.5 + 0.7 * MatsimRandom.getRandom().nextDouble(); //between 1.0 and 1.8
-//        return 1.0;
+//        return 0.5 + 0.7 * MatsimRandom.getRandom().nextDouble(); //between 0.5 and 1.2
+        return 0.5;
     }
 }

@@ -83,14 +83,15 @@ public class RunDynamicHeadwayExample {
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new FDModule(scenario));
 
-        HeadwayHandler headwayHandler = new HeadwayHandler();
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
                 bind(QNetworkFactory.class).to(DynamicHeadwayQNetworkFactory.class);
                 bindMobsim().toProvider(DynamicHeadwayFDQSimProvider.class);
-                addEventHandlerBinding().toInstance(headwayHandler); // put speeds in attributes
-                addControlerListenerBinding().toInstance(headwayHandler);
+
+                bind(HeadwayHandler.class).asEagerSingleton();
+                addEventHandlerBinding().to(HeadwayHandler.class); // put speeds in attributes
+                addControlerListenerBinding().to(HeadwayHandler.class);
             }
         });
 
