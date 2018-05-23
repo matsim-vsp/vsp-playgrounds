@@ -195,16 +195,20 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
         boolean writeHeaders = !(new File(outFile).exists());
         try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
             if (writeHeaders) {
-                writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\tpcu_method\tpcu_value\n");
+                writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\tmodeDensity\tmodeSpeed\tmodeFlow\tpcu_method\tpcu_value\n");
             } else{
                 FDModule.LOG.warn("Appending data to the existing file.");
             }
+            //writing data in melted form
             for (String mode :this.modeToPCU.keySet()) {
                 for (PCUMethod pcuMethod : PCUMethod.values()){
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
                     writer.write(mode+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentDensity()+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentAverageVelocity()+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentFlow()+"\t");
                     writer.write(pcuMethod+"\t");
                     writer.write(this.modeToPCU.get(mode).pcuMethodToPCU.get(pcuMethod)+"\n");
                 }
