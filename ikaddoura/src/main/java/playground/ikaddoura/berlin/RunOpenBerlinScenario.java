@@ -27,6 +27,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -56,6 +57,7 @@ public class RunOpenBerlinScenario {
 	private static boolean useSBBptRouter;
 	private static boolean useDurationBasedTimeAllocationMutator;
 	private static double probaForRandomSingleTripMode;
+	private static boolean useVSPdefaults;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -83,6 +85,9 @@ public class RunOpenBerlinScenario {
 			
 			probaForRandomSingleTripMode = Double.parseDouble(args[7]);
 			log.info("probaForRandomSingleTripMode: "+ probaForRandomSingleTripMode);
+			
+			useVSPdefaults = Boolean.parseBoolean(args[8]);
+			log.info("useVSPdefaults: "+ useVSPdefaults);
 
 		} else {
 			
@@ -115,6 +120,12 @@ public class RunOpenBerlinScenario {
 		}
 		
 		config.subtourModeChoice().setProbaForRandomSingleTripMode(probaForRandomSingleTripMode);
+		
+		if (useVSPdefaults) {
+			config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+			config.qsim().setUsingTravelTimeCheckInTeleportation(true);
+			config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
+		}
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
