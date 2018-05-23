@@ -115,7 +115,7 @@ public class FDDataWriter implements IterationEndsListener, ShutdownListener {
             if(globalLinkDensity > networkDensity / 3 + 10 ) stableState =false; //+10; since we still need some points at max density to show zero speed.
         }
 
-        if( stableState ) {
+        if( stableState || this.FDConfigGroup.isWriteDataIfNoStability()) {
             writer.print("\n"); //always stats with a new line
 
             writer.format("%d\t",fdDataContainer.getGlobalData().getnumberOfAgents());

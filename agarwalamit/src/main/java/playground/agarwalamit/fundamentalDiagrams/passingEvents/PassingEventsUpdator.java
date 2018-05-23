@@ -47,9 +47,10 @@ import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
-import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 /**
@@ -85,10 +86,12 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 	private final FDStabilityTester tester;
 	private String outputDir;
 
+	private final FDConfigGroup fdConfigGroup;
+
 	@Inject
 	PassingEventsUpdator(QSimConfigGroup qSimConfigGroup, FDNetworkGenerator fdNetworkGenerator,
 						 FDDataContainer fdDataContainer, ControlerConfigGroup config,
-						 FDStabilityTester tester) {
+						 FDStabilityTester tester, FDConfigGroup fdConfigGroup) {
 		this.seepModes = qSimConfigGroup.getSeepModes();
 		this.personId2TrackEnterTime = new HashMap<>();
 		this.personId2LinkEnterTime = new HashMap<>();
@@ -101,6 +104,7 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 		this.fdDataContainer = fdDataContainer;
 		this.outputDir = config.getOutputDirectory();
 		this.tester = tester;
+		this.fdConfigGroup = fdConfigGroup;
 	}
 
 	@Override
@@ -210,7 +214,7 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		//arrival only possible once stability is achieved
-		if (tester.isStabilityAchieved() ){
+		if (tester.isStabilityAchieved() || this.fdConfigGroup.isWriteDataIfNoStability() ){
 			writeResults(this.outputDir + "/modeToPassingRates.txt");
 		}
 	}

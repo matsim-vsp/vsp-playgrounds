@@ -86,6 +86,8 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     //a local field, should be configurable
     private boolean updatePCU =false;
 
+    private final FDConfigGroup fdConfigGroup;
+
     @Inject
     public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator
     , FDDataContainer fdDataContainer, FDStabilityTester fdStabilityTester, FDConfigGroup fdConfigGroup){
@@ -95,8 +97,9 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
         this.trackingStartLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
         this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
         this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
-        this.delegate = new HeadwayHandler(scenario.getVehicles(), fdNetworkGenerator, fdStabilityTester, fdDataContainer, scenario.getConfig().controler());
+        this.delegate = new HeadwayHandler(scenario.getVehicles(), fdNetworkGenerator, fdStabilityTester, fdDataContainer, scenario.getConfig().controler(), fdConfigGroup);
         this.qsimDefaultHeadway = 3600. / fdConfigGroup.getTrackLinkCapacity();
+        this.fdConfigGroup = fdConfigGroup;
     }
 
     @Override
@@ -204,7 +207,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
                 FDModule.LOG.warn("Removing existing file: "+file);
             }
         }
-        if (this.fdStabilityTester.isStabilityAchieved() ){
+        if (this.fdStabilityTester.isStabilityAchieved() || this.fdConfigGroup.isWriteDataIfNoStability()){
             writeResults(file);
         }
     }

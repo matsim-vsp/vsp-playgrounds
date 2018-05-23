@@ -42,6 +42,7 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
@@ -55,12 +56,14 @@ import playground.agarwalamit.utils.ListUtils;
 public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHandler, IterationEndsListener {
 
     @Inject
-    public HeadwayHandler(Vehicles vehicles, FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester, FDDataContainer fdDataContainer, ControlerConfigGroup config) {
+    public HeadwayHandler(Vehicles vehicles, FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester,
+                          FDDataContainer fdDataContainer, ControlerConfigGroup config, FDConfigGroup fdConfigGroup) {
         this.vehicles = vehicles;
         this.fdNetworkGenerator = fdNetworkGenerator;
         this.stabilityTester = stabilityTester;
         this.fdDataContainer = fdDataContainer;
         this.config = config;
+        this.fdConfigGroup = fdConfigGroup;
     }
 
     private Vehicles vehicles;
@@ -68,6 +71,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     private FDStabilityTester stabilityTester;
     private FDDataContainer fdDataContainer;
     private ControlerConfigGroup config;
+    private FDConfigGroup fdConfigGroup;
 
     private final Map<String, List<Double>> modeToHeadwayList = new TreeMap<>();
     private final Map<Id<Vehicle>, Double> linkEnterTime = new HashMap<>();
@@ -116,7 +120,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
                 FDModule.LOG.warn("Removing existing file: "+file);
             }
         }
-        if ( stabilityTester.isStabilityAchieved() ){
+        if ( stabilityTester.isStabilityAchieved() || this.fdConfigGroup.isWriteDataIfNoStability()){
             writeResults(file);
         }
     }

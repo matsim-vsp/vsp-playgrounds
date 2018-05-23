@@ -71,6 +71,7 @@ public class RunSurveyData {
             fdConfigGroup.setTrackLinkLanes(3.0);
             fdConfigGroup.setTrackLinkSpeed(100.0/3.6);
             fdConfigGroup.setTrackLinkLength(1000.0);
+            fdConfigGroup.setWriteDataIfNoStability(true);
 
             Scenario scenario = ScenarioUtils.loadScenario(config);
             Vehicles vehicles = scenario.getVehicles();
