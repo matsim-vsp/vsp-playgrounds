@@ -27,6 +27,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -51,11 +52,21 @@ public class RunSurveyData {
 
         String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/surveyData/";
         String file = "../../svnit/surveyData/vehiclesData.txt";
-        QSimConfigGroup.TrafficDynamics trafficDynamics = QSimConfigGroup.TrafficDynamics.kinematicWaves;
+        TrafficDynamics trafficDynamics = TrafficDynamics.queue;
+        double trackLinkLength = 6000.0;
+
+        if (args.length>0) {
+            parentDir = args[0];
+            file = args[1];
+            trafficDynamics = TrafficDynamics.valueOf(args[2]);
+            trackLinkLength = Double.valueOf(args[3]);
+        }
 
         Config config = ConfigUtils.createConfig();
 
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        if (args.length==0){
+            config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        }
 
         QSimConfigGroup qsim = config.qsim();
         List<String> mainModes = SurveyDataUtils.modes;
@@ -64,13 +75,14 @@ public class RunSurveyData {
         qsim.setTrafficDynamics(trafficDynamics);
         qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 
-        config.controler().setOutputDirectory(parentDir+trafficDynamics+"/");
+        config.controler().setOutputDirectory(parentDir+trafficDynamics+"/trackLinkLength_"+trackLinkLength+"m/");
 
         FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
         fdConfigGroup.setTrackLinkCapacity(6300.0);
         fdConfigGroup.setTrackLinkLanes(3.0);
         fdConfigGroup.setTrackLinkSpeed(80.0/3.6);
-        fdConfigGroup.setTrackLinkLength(1000.0);
+        // max density is about 2410 pcu/km for 3 lanes i.e., 803 pcu/km/lane--> length must be 6km
+        fdConfigGroup.setTrackLinkLength(trackLinkLength);
         fdConfigGroup.setWriteDataIfNoStability(true);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -88,6 +100,7 @@ public class RunSurveyData {
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new FDModule(scenario));
+        final String inputFile = file;
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
@@ -95,7 +108,7 @@ public class RunSurveyData {
 //                    bind(String.class)
 //                            .annotatedWith(Names.named(FDAgentsGeneratorForGivenSetOfAgentsImpl.survey_data_file_place_holder))
 //                            .toInstance(file);
-                bind(Key.get(String.class, Names.named(FDAgentsGeneratorForGivenSetOfAgentsImpl.survey_data_file_place_holder))).toInstance(file);
+                bind(Key.get(String.class, Names.named(FDAgentsGeneratorForGivenSetOfAgentsImpl.survey_data_file_place_holder))).toInstance(inputFile);
                 bind(FDAgentsGenerator.class).to(FDAgentsGeneratorForGivenSetOfAgentsImpl.class);
 
                 bind(ChandraSikdarPCUUpdator.class).asEagerSingleton();
