@@ -51,63 +51,63 @@ public class RunSurveyData {
 
         String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/surveyData/";
         String file = "../../svnit/surveyData/vehiclesData.txt";
+        QSimConfigGroup.TrafficDynamics trafficDynamics = QSimConfigGroup.TrafficDynamics.kinematicWaves;
 
-        for (QSimConfigGroup.TrafficDynamics trafficDynamics : QSimConfigGroup.TrafficDynamics.values()){
-            Config config = ConfigUtils.createConfig();
+        Config config = ConfigUtils.createConfig();
 
-            config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
-            QSimConfigGroup qsim = config.qsim();
-            List<String> mainModes = SurveyDataUtils.modes;
+        QSimConfigGroup qsim = config.qsim();
+        List<String> mainModes = SurveyDataUtils.modes;
 
-            qsim.setMainModes(mainModes);
-            qsim.setTrafficDynamics(trafficDynamics);
-            qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+        qsim.setMainModes(mainModes);
+        qsim.setTrafficDynamics(trafficDynamics);
+        qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 
-            config.controler().setOutputDirectory(parentDir+trafficDynamics+"/");
+        config.controler().setOutputDirectory(parentDir+trafficDynamics+"/");
 
-            FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
-            fdConfigGroup.setTrackLinkCapacity(6300.0);
-            fdConfigGroup.setTrackLinkLanes(3.0);
-            fdConfigGroup.setTrackLinkSpeed(100.0/3.6);
-            fdConfigGroup.setTrackLinkLength(1000.0);
-            fdConfigGroup.setWriteDataIfNoStability(true);
+        FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
+        fdConfigGroup.setTrackLinkCapacity(6300.0);
+        fdConfigGroup.setTrackLinkLanes(3.0);
+        fdConfigGroup.setTrackLinkSpeed(80.0/3.6);
+        fdConfigGroup.setTrackLinkLength(1000.0);
+        fdConfigGroup.setWriteDataIfNoStability(true);
 
-            Scenario scenario = ScenarioUtils.loadScenario(config);
-            Vehicles vehicles = scenario.getVehicles();
+        Scenario scenario = ScenarioUtils.loadScenario(config);
+        Vehicles vehicles = scenario.getVehicles();
 
-            for (String mode : mainModes){
-                AttributableVehicleType veh = new AttributableVehicleType(Id.create(mode,VehicleType.class));
+        for (String mode : mainModes){
+            AttributableVehicleType veh = new AttributableVehicleType(Id.create(mode,VehicleType.class));
 
-                veh.setPcuEquivalents(SurveyDataUtils.getPCU(mode));
-                veh.setMaximumVelocity(SurveyDataUtils.getSpeed(mode));
-                veh.setLength(SurveyDataUtils.getLength(mode));
-                veh.getAttributes().putAttribute(ChandraSikdarPCUUpdator.projected_area_ratio, SurveyDataUtils.getProjectedArea(mode));
-                vehicles.addVehicleType(veh);
-            }
+            veh.setPcuEquivalents(SurveyDataUtils.getPCU(mode));
+            veh.setMaximumVelocity(SurveyDataUtils.getSpeed(mode));
+            veh.setLength(SurveyDataUtils.getLength(mode));
+            veh.getAttributes().putAttribute(ChandraSikdarPCUUpdator.projected_area_ratio, SurveyDataUtils.getProjectedArea(mode));
+            vehicles.addVehicleType(veh);
+        }
 
-            Controler controler = new Controler(scenario);
-            controler.addOverridingModule(new FDModule(scenario));
-            controler.addOverridingModule(new AbstractModule() {
-                @Override
-                public void install() {
+        Controler controler = new Controler(scenario);
+        controler.addOverridingModule(new FDModule(scenario));
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
 
 //                    bind(String.class)
 //                            .annotatedWith(Names.named(FDAgentsGeneratorForGivenSetOfAgentsImpl.survey_data_file_place_holder))
 //                            .toInstance(file);
-                    bind(Key.get(String.class, Names.named(FDAgentsGeneratorForGivenSetOfAgentsImpl.survey_data_file_place_holder))).toInstance(file);
-                    bind(FDAgentsGenerator.class).to(FDAgentsGeneratorForGivenSetOfAgentsImpl.class);
+                bind(Key.get(String.class, Names.named(FDAgentsGeneratorForGivenSetOfAgentsImpl.survey_data_file_place_holder))).toInstance(file);
+                bind(FDAgentsGenerator.class).to(FDAgentsGeneratorForGivenSetOfAgentsImpl.class);
 
-                    bind(ChandraSikdarPCUUpdator.class).asEagerSingleton();
-                    addEventHandlerBinding().to(ChandraSikdarPCUUpdator.class);
-                    addControlerListenerBinding().to(ChandraSikdarPCUUpdator.class);
+                bind(ChandraSikdarPCUUpdator.class).asEagerSingleton();
+                addEventHandlerBinding().to(ChandraSikdarPCUUpdator.class);
+                addControlerListenerBinding().to(ChandraSikdarPCUUpdator.class);
 
-                    bind(PCUMethod.class).toInstance(PCUMethod.SPEED_AREA_RATIO);
-                }
-            });
-            controler.run();
+                bind(PCUMethod.class).toInstance(PCUMethod.SPEED_AREA_RATIO);
+            }
+        });
+        controler.run();
 
-            FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
-        }
+        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+
     }
 }

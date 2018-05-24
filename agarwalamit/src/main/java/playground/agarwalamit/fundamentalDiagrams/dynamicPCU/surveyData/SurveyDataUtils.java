@@ -35,25 +35,31 @@ class SurveyDataUtils {
         switch(mode){
             case "car": return 1.0;
             case "big_car": return 1.5;
-            case "bus": return 3.0;
+            case "bus": return 4.0;
             case "3W": return 1.5;
             case "2W": return 0.25;
         }
         throw new RuntimeException(mode + " not implemented yet.");
     }
+
+    /**
+     * Source paper: MeenaEtcCapacitySixLaneAndSEF (Table 2a)
+     * @param mode
+     * @return
+     */
     static double getSpeed(String mode){
         switch(mode){
-            case "car": return 60.67/3.6;
+            case "car": return 70.0/3.6; //60.67
             case "big_car": return 55.67/3.6;
             case "bus": return 37.50/3.6;
             case "3W": return 39.27/3.6;
-            case "2W": return 67.70/3.6;
+            case "2W": return 69.70/3.6;
         }
         throw new RuntimeException(mode + " not implemented yet.");
     }
 
     /**
-     * Source paper: MeenaEtcCapacitySixLaneAndSEF
+     * Source paper: MeenaEtcCapacitySixLaneAndSEF (Table 1a)
      * @param mode
      * @return
      */
@@ -69,7 +75,7 @@ class SurveyDataUtils {
     }
 
     /**
-     * Source paper: MeenaEtcCapacitySixLaneAndSEF
+     * Source paper: MeenaEtcCapacitySixLaneAndSEF (Table 1a)
      * @param mode
      * @return
      */
