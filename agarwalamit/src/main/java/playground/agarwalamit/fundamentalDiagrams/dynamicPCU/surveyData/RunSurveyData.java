@@ -64,9 +64,7 @@ public class RunSurveyData {
 
         Config config = ConfigUtils.createConfig();
 
-        if (args.length==0){
-            config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-        }
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
         List<String> mainModes = SurveyDataUtils.modes;
@@ -75,7 +73,7 @@ public class RunSurveyData {
         qsim.setTrafficDynamics(trafficDynamics);
         qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 
-        config.controler().setOutputDirectory(parentDir+trafficDynamics+"/trackLinkLength_"+trackLinkLength+"m/");
+        config.controler().setOutputDirectory( parentDir+trafficDynamics+"/trackLinkLength_"+(int) trackLinkLength+"m/" );
 
         FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
         fdConfigGroup.setTrackLinkCapacity(6300.0);
