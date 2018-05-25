@@ -440,8 +440,7 @@ public class KTFreight_v3 {
 			VehicleRoutingAlgorithm algorithm = VehicleRoutingAlgorithms.readAndCreateAlgorithm(vrp, ALGORITHMFILE);
 			algorithm.setMaxIterations(MAX_JSPRIT_ITERATION);
 
-			Collection<VehicleRoutingProblemSolution> solutions = (algorithm.searchSolutions()); 
-			VehicleRoutingProblemSolution solution = Solutions.bestOf(solutions);
+			VehicleRoutingProblemSolution solution = Solutions.bestOf(algorithm.searchSolutions());
 			CarrierPlan newPlan = MatsimJspritFactory.createPlan(carrier, solution) ;
 
 			NetworkRouter.routePlan(newPlan,netBasedCosts) ;
@@ -454,9 +453,6 @@ public class KTFreight_v3 {
 
 			//Ausgabe der Ergebnisse auf der Console
 			//SolutionPrinter.print(vrp,solution,Print.VERBOSE);
-			
-			//Write the VRP with the best solution of jsprit
-			new VrpXMLWriter(vrp, solutions, true).write(TEMP_DIR + RUN + runIndex + "/jsprit_vrp_with_solution_"+ carrier.getId().toString() +".xml");
 
 		}
 	}
