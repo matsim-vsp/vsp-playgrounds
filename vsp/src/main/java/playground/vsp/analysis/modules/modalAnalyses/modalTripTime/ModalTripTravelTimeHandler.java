@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.analysis.tripTime;
+package playground.vsp.analysis.modules.modalAnalyses.modalTripTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
