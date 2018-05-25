@@ -116,15 +116,26 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 
 	@Override
 	public void handleEvent(LinkEnterEvent event) {
-		double linkLength = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getLength();
+		Id<Link> linkId = event.getLinkId();
+		double linkLength = this.scenario.getNetwork().getLinks().get(linkId).getLength();
 		
+		// collect distance traveled of driver 
 		if(driverId2totalDistance.containsKey(event.getVehicleId())){
 			driverId2totalDistance.put(Id.createPersonId(event.getVehicleId()),driverId2totalDistance.get(Id.createPersonId(event.getVehicleId())) + linkLength);
 		} else {
 			driverId2totalDistance.put(Id.createPersonId(event.getVehicleId()),linkLength);
 		}
-		//TODO: nochmal für inLEZ
 		
+		// // collect distance traveled of driver  within LEZ
+		if(lezLinkIds.contains(linkId)) {
+			if(driverId2totalDistanceInLEZ.containsKey(event.getVehicleId())){
+				driverId2totalDistanceInLEZ.put(Id.createPersonId(event.getVehicleId()),driverId2totalDistanceInLEZ.get(Id.createPersonId(event.getVehicleId())) + linkLength);
+			} else {
+				driverId2totalDistanceInLEZ.put(Id.createPersonId(event.getVehicleId()),linkLength);
+			}
+		}	
+		
+		//TODO: Auch für withinLEZ? 
 		// updating the trip Length
 		int tripNumber = personId2currentTripNumber.get(event.getVehicleId());
 		double distanceBefore = personId2tripNumber2tripDistance.get(event.getVehicleId()).get(tripNumber);
