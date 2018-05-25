@@ -2,8 +2,11 @@ package playground.kturner.freightKt.analyse;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
@@ -18,6 +21,8 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.UncheckedIOException;
+import org.matsim.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.roadpricing.RoadPricingSchemeImpl;
 
 public class FreightAnalyseKMT {
 
@@ -70,8 +75,20 @@ public class FreightAnalyseKMT {
 			
 			Carriers carriers = new Carriers() ;
 			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile.getAbsolutePath()) ;
+			
+			//TODO: Add switch with/without LEZ 
+			//reading in lowEmissionZone
+			final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+			RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
+			try {
+				rpReader.readFile(lezZonefile.getAbsolutePath());
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 
-			FreightAnalyseKmtEventHandler tripHandler = new FreightAnalyseKmtEventHandler(scenario, vehicleTypes);
+			Set<Id<Link>> lezLinkIds = scheme.getTolledLinkIds();  //Link-Ids der Umweltzone (LEZ)
+
+			FreightAnalyseKmtEventHandler tripHandler = new FreightAnalyseKmtEventHandler(scenario, vehicleTypes, lezLinkIds);
 			eventsManager.addHandler(tripHandler);
 					
 			int iteration = config.controler().getLastIteration();

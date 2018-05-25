@@ -32,42 +32,41 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	private final static Logger log = Logger.getLogger(FreightAnalyseKmtEventHandler.class);
 
 	private Scenario scenario;
-	private CarrierVehicleTypes vehicleTypes;
+	private CarrierVehicleTypes vehicleTypes; //TODO: Warum ist das hier im Handler? Wird doch erst bei der Berechnung der Werte (im Writer benutzt) (?)... kmt, mai'18
+	private Set<Id<Link>> lezLinkIds;
 
-	private Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> vehTypId2Capabilities = new HashMap<Id<VehicleType>, VehicleTypeSpezificCapabilities>();
-
-	
-	Scenario getScenario() {
-		return scenario;
-	}
-
-	CarrierVehicleTypes getVehicleTypes() {
-		return vehicleTypes;
-	}
-
-	Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> getVehTypId2Capabilities() {
-		return vehTypId2Capabilities;
-	}
+	private Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> vehTypId2Capabilities = new HashMap<Id<VehicleType>, VehicleTypeSpezificCapabilities>(); //TODO: Warum ist das hier im Handler? Wird doch erst bei der Berechnung der Werte (im Writer benutzt) (?)... kmt, mai'18
 
 	private Map<Id<Person>,Integer> personId2currentTripNumber = new HashMap<Id<Person>, Integer>();
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2departureTime = new HashMap<Id<Person>, Map<Integer,Double>>();
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistance = new HashMap<Id<Person>, Map<Integer,Double>>();
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2travelTime = new HashMap<Id<Person>, Map<Integer,Double>>();
-	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2amount = new HashMap<Id<Person>, Map<Integer,Double>>();
-	private Map<Id<Person>,Double> driverId2totalDistance = new HashMap<Id<Person>,Double>();
+	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistanceInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>();	//Distance within LowEmissionZone
+	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2travelTimeInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>(); //TravelTime within LowEmissionZone
+	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2amount = new HashMap<Id<Person>, Map<Integer,Double>>();	//TODO: Add functionality kmt, mai'18
+	private Map<Id<Person>,Double> driverId2totalDistance = new HashMap<Id<Person>,Double>(); //TODO: Auch nochmal mit within LEZ ? kmt mai 18
+	private Map<Id<Person>,Double> driverId2totalDistanceInLEZ = new HashMap<Id<Person>,Double>(); //Distance within LowEmissionZone
 
 	
 	public FreightAnalyseKmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes) {
 		this.scenario = scenario;
 		this.vehicleTypes = vehicleTypes;
+		this.lezLinkIds = null;
+		readVehicleTypeCapabilities();
+	}
+	
+	public FreightAnalyseKmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes, Set<Id<Link>> lezLinkIds) {
+		this.scenario = scenario;
+		this.vehicleTypes = vehicleTypes;
+		this.lezLinkIds = lezLinkIds;
 		readVehicleTypeCapabilities();
 	}
 
 	private void readVehicleTypeCapabilities() {
 		for (CarrierVehicleType vehType : vehicleTypes.getVehicleTypes().values()){
 		//TODO: Emissionswerte nicht über Eigenschaften einlesbar :(	
-			log.warn("Note: emissionsPerMeter are currently not read in from vehicleTypes-file. Watch " + this.getClass().getName() + " for values."); //TODO: Read-in vehTypes from file, KMT mai/18 
-			double emissionsPerMeter = -99999.0;			//TODO: log.warn wenn vehType noch nicht definiert ist... kmt feb/18
+			log.warn("Note: emissionsPerMeter are currently not read in from vehicleTypes-file. Watch " + this.getClass().getName() + " for values."); //TODO: Reading in vehTypes from file, KMT mai/18 
+			double emissionsPerMeter = -99999.0;			
 			switch (vehType.getId().toString()) {
 			case "heavy40t" : emissionsPerMeter = 0.917;
 				break;
@@ -108,9 +107,11 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		personId2tripNumber2departureTime.clear();
 		personId2tripNumber2tripDistance.clear();
 		personId2tripNumber2travelTime.clear();
+		personId2tripNumber2tripDistanceInLEZ.clear();
+		personId2tripNumber2travelTimeInLEZ.clear();
 		personId2tripNumber2amount.clear();
 		driverId2totalDistance.clear();
-		
+		driverId2totalDistanceInLEZ.clear();
 	}
 
 	@Override
@@ -122,7 +123,8 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		} else {
 			driverId2totalDistance.put(Id.createPersonId(event.getVehicleId()),linkLength);
 		}
-
+		//TODO: nochmal für inLEZ
+		
 		// updating the trip Length
 		int tripNumber = personId2currentTripNumber.get(event.getVehicleId());
 		double distanceBefore = personId2tripNumber2tripDistance.get(event.getVehicleId()).get(tripNumber);
@@ -183,6 +185,11 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		int currentTripNumber = this.personId2currentTripNumber.get(event.getPersonId());
 		tripNumber2travelTime.put(currentTripNumber, event.getTime() - this.personId2tripNumber2departureTime.get(event.getPersonId()).get(currentTripNumber));
 		this.personId2tripNumber2travelTime.put(event.getPersonId(), tripNumber2travelTime);
+	}
+	
+	@Override
+	public void handleEvent(PersonDepartureEvent event) {
+		// TODO Auto-generated method stub
 	}
 	
 	public Map<Id<Person>,List<Double>> getPersonId2listOfDistances(String carrierIdString) {
@@ -310,26 +317,18 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return vehTypeId2VehicleNumber;
 	}
 
-	@Override
-	public void handleEvent(PersonDepartureEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
 	
-	/**
-	 * ##### Copied from UccCarrierCreator: einlesen der LEZ-Files		
-	 * 
-	 * //Read zonefile
-			final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
-			RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
-			try {
-				rpReader.readFile(zonefile);
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+	Scenario getScenario() {
+		return scenario;
+	}
 
-			Set<Id<Link>> lezLinkIds = scheme.getTolledLinkIds();  //Link-Ids der Umweltzone (LEZ)
-	 */
+	CarrierVehicleTypes getVehicleTypes() {
+		return vehicleTypes;
+	}
+
+	Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> getVehTypId2Capabilities() {
+		return vehTypId2Capabilities;
+	}
 
 }
 
