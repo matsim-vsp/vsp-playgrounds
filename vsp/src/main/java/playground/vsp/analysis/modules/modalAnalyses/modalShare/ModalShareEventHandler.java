@@ -113,11 +113,7 @@ public class ModalShareEventHandler implements PersonDepartureEventHandler, Tran
 	}
 
 	private void storeMode(String legMode) {
-		if(mode2numberOflegs.containsKey(legMode)){
-			mode2numberOflegs.put(legMode, mode2numberOflegs.get(legMode) + 1 );
-		} else {
-			mode2numberOflegs.put(legMode, 1);
-		}
+		mode2numberOflegs.merge(legMode, 1, (a, b) -> a + b);
 	}
 
 	public void handleRemainingTransitUsers(){
