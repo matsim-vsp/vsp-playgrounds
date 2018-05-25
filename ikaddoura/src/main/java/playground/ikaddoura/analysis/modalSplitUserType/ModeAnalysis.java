@@ -144,6 +144,14 @@ public class ModeAnalysis {
 										|| currentLegMode.equals(TransportMode.egress_walk) && leg.getMode().equals(TransportMode.pt)
 										) {
 									currentLegMode = TransportMode.pt;
+									
+								} else if (currentLegMode.equals(TransportMode.car) && leg.getMode().equals(TransportMode.access_walk)
+										|| currentLegMode.equals(TransportMode.access_walk) && leg.getMode().equals(TransportMode.car)
+										|| currentLegMode.equals(TransportMode.car) && leg.getMode().equals(TransportMode.egress_walk)
+										|| currentLegMode.equals(TransportMode.egress_walk) && leg.getMode().equals(TransportMode.car)
+										) {
+									currentLegMode = TransportMode.car;
+									
 								} else {
 									throw new RuntimeException("Two different leg modes found for the same trip: " + leg.getMode() + " and " + currentLegMode + ". Aborting...");
 								}
