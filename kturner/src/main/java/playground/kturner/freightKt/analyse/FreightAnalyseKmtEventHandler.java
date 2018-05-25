@@ -41,11 +41,11 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2departureTime = new HashMap<Id<Person>, Map<Integer,Double>>();
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistance = new HashMap<Id<Person>, Map<Integer,Double>>();
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2travelTime = new HashMap<Id<Person>, Map<Integer,Double>>();
-	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistanceInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>();	//Distance within LowEmissionZone
-	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2travelTimeInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>(); //TravelTime within LowEmissionZone
+	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistanceInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>();	//Distance within LowEmissionZone //TODO Add getter kmt, mai'18
+	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2travelTimeInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>(); //TravelTime within LowEmissionZone //TODO Add getter kmt, mai'18
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2amount = new HashMap<Id<Person>, Map<Integer,Double>>();	//TODO: Add functionality kmt, mai'18
 	private Map<Id<Person>,Double> driverId2totalDistance = new HashMap<Id<Person>,Double>(); //TODO: Auch nochmal mit within LEZ ? kmt mai 18
-	private Map<Id<Person>,Double> driverId2totalDistanceInLEZ = new HashMap<Id<Person>,Double>(); //Distance within LowEmissionZone
+	private Map<Id<Person>,Double> driverId2totalDistanceInLEZ = new HashMap<Id<Person>,Double>(); //Distance within LowEmissionZone //TODO Add getter kmt, mai'18
 
 	
 	public FreightAnalyseKmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes) {
@@ -126,7 +126,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			driverId2totalDistance.put(Id.createPersonId(event.getVehicleId()),linkLength);
 		}
 		
-		// // collect distance traveled of driver  within LEZ
+		// collect distance traveled of driver within LEZ
 		if(lezLinkIds.contains(linkId)) {
 			if(driverId2totalDistanceInLEZ.containsKey(event.getVehicleId())){
 				driverId2totalDistanceInLEZ.put(Id.createPersonId(event.getVehicleId()),driverId2totalDistanceInLEZ.get(Id.createPersonId(event.getVehicleId())) + linkLength);
@@ -145,6 +145,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		personId2tripNumber2tripDistance.put(Id.createPersonId(event.getVehicleId()), tripNumber2tripDistance);		
 	}
 
+	//TODO: Noch für withinLEZ anpassen
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
 		if (personId2currentTripNumber.containsKey(event.getPersonId())) {
@@ -182,6 +183,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		
 	}
 	
+	//TODO: Noch für withinLEZ anpassen
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
 		
@@ -203,6 +205,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		// TODO Auto-generated method stub
 	}
 	
+	//TODO: Noch für withinLEZ anpassen
 	public Map<Id<Person>,List<Double>> getPersonId2listOfDistances(String carrierIdString) {
 		Map<Id<Person>,List<Double>> personId2listOfDistances = new HashMap<Id<Person>, List<Double>>();
 		for(Id<Person> personId: personId2tripNumber2tripDistance.keySet()){
@@ -219,7 +222,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return personId2listOfDistances;
 	}
 	
-	//new KT
+	//TODO: Noch für withinLEZ anpassen
 	public Map<Id<Person>,Double> getPersonId2TourDistances(String carrierIdString) {
 		Map<Id<Person>,Double> personId2listOfTourDistances = new HashMap<Id<Person>, Double>();
 		for(Id<Person> personId: personId2tripNumber2tripDistance.keySet()){
@@ -307,7 +310,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return vehTypeId2TravelTimes;
 	}
 	
-	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
+	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres Fahrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
 	public Map<Id<VehicleType>, Integer> getVehTypId2VehicleNumber(Id<VehicleType> vehTypeId) {
 		Map<Id<VehicleType>,Integer> vehTypeId2VehicleNumber = new HashMap<Id<VehicleType>, Integer>();
 		for(Id<Person> personId : personId2tripNumber2travelTime.keySet()){
