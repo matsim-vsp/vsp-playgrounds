@@ -35,7 +35,7 @@ public class OnRoadExposureCalculator {
     private final OnRoadExposureConfigGroup config;
 
     @Inject
-    private OnRoadExposureCalculator(OnRoadExposureConfigGroup onRoadExposureConfigGroup) {
+    public OnRoadExposureCalculator(OnRoadExposureConfigGroup onRoadExposureConfigGroup) {
         this.config = onRoadExposureConfigGroup;
     }
 

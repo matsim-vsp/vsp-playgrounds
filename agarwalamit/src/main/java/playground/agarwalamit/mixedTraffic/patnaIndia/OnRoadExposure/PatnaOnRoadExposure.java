@@ -70,55 +70,75 @@ public class PatnaOnRoadExposure {
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
 
+    private static final String data_dates [] = {"none"};//{"_22Nov2017","_22Jan2018","22Mar2018"};
+
     public static void main(String[] args) {
 
-        PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
+        for (String date : data_dates) {
+            PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
 
-        {
-            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
-            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
+            {
+                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
+                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
 
-            if (writeEmissionEventsFirst) {
-                String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
-                String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
+                if (writeEmissionEventsFirst) {
+                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
 
-                PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
-                PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                }
+
+                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+                        outputDir + "/analysis/",
+                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
             }
+            {
+                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
+                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
 
-            patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
-                    outputDir + "/analysis/",
-                    LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork());
-        }
-        {
-            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
-            String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+                if (writeEmissionEventsFirst) {
+                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
 
-            if (writeEmissionEventsFirst) {
-                String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
-                String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
+                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                }
 
-                PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
-                PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+                        outputDir + "/analysis/",
+                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
             }
-
-            patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
-                    outputDir + "/analysis/",
-                    LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork());
         }
     }
 
-    private void run(String eventsFile, String outputFilesDir, Network network){
-
-        String suffix = "_22Nov2017";
+    private void run(String eventsFile, String outputFilesDir, Network network, String data_date){
 
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = new OnRoadExposureConfigGroup();
         onRoadExposureConfigGroup.setUsingMicroGramUnits(true);
 
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 217.36 * Math.pow(10,-6));
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1410.0* Math.pow(10,-6));
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 116.79* Math.pow(10,-6));
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 21.44* Math.pow(10,-6));
+        if(data_date.equals("_22Nov2017")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 217.36 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1410.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 116.79* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 21.44* Math.pow(10,-6));
+        } else if (data_date.equals("_22Jan2018")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 201.16 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 3470.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 44.70* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 49.82* Math.pow(10,-6));
+        } else if (data_date.equals("_22Mar2018")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 174.79 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 2140.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 24.48* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 52.57* Math.pow(10,-6));
+        } else {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 0.);
+            data_date = "_withoutBackgroundConc";
+        }
 
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("motorbike");
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("truck");
@@ -150,7 +170,7 @@ public class PatnaOnRoadExposure {
         if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {
             Map<String, Map<String, Double>> modeToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
-            String outFile = outputFilesDir+"/modeToOnRoadExposure"+suffix+".txt";
+            String outFile = outputFilesDir+"/modeToOnRoadExposure"+ data_date +".txt";
             try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("mode\t");
                 for (String poll : pollutants){
@@ -173,7 +193,7 @@ public class PatnaOnRoadExposure {
         {
             Map<Id<Person>, Coord> person2homeCoord = getXYForHomeLocationsOfPersons();
             Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
-            String outFile = outputFilesDir+"/personToOnRoadExposure"+suffix+".txt";
+            String outFile = outputFilesDir+"/personToOnRoadExposure"+ data_date +".txt";
             try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("personId\tzoneId\tX\tY\t");
                 for (String poll : pollutants){
@@ -201,7 +221,7 @@ public class PatnaOnRoadExposure {
         }
         {
             Map<Id<Link>, Map<String, Double>> linkToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getLinkToInhaledMass();
-            String outFile = outputFilesDir+"/linkToOnRoadExposure"+suffix+".txt";
+            String outFile = outputFilesDir+"/linkToOnRoadExposure"+ data_date +".txt";
             try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("linkId\t");
                 for (String poll : pollutants){
