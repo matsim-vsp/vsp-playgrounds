@@ -70,7 +70,7 @@ public class PatnaOnRoadExposure {
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
 
-    private static final String data_dates [] = {"none"};//{"_22Nov2017","_22Jan2018","22Mar2018"};
+    private static final String data_dates [] = {/*"none","_22Nov2017","_22Jan2018","_22Mar2018",*/"_22May2018"};
 
     public static void main(String[] args) {
 
@@ -132,6 +132,11 @@ public class PatnaOnRoadExposure {
             onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 2140.0* Math.pow(10,-6));
             onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 24.48* Math.pow(10,-6));
             onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 52.57* Math.pow(10,-6));
+        } else if (data_date.equals("_22May2018")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 86.54 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1120.0 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 7.65 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 43.58 * Math.pow(10,-6));
         } else {
             onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 0.);
             onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 0.);

@@ -57,8 +57,8 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 
 	private static final Logger LOGGER = Logger.getLogger(ModalTripTravelTimeHandler.class);
 	private static final int MAX_STUCK_AND_ABORT_WARNINGS = 5;
-	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2TravelTimes;
-	private final Map<Id<Person>, Double> personId2DepartureTime;
+	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2TravelTimes = new TreeMap<>();
+	private final Map<Id<Person>, Double> personId2DepartureTime = new HashMap<>();
 	private int warnCount = 0;
 	private final List<Id<Person>> transitDriverPersons = new ArrayList<>();
 	// agents who first departs with transitWalk and their subsequent modes are stored here until it starts a regular act (home/work/leis/shop)
@@ -67,8 +67,6 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 	private final Map<Id<Person>, Double> transitUserArrivalTime = new HashMap<>(); 
 
 	public ModalTripTravelTimeHandler() {
-		this.mode2PersonId2TravelTimes = new TreeMap<>();
-		this.personId2DepartureTime = new HashMap<>();
 		LOGGER.warn("Excluding the departure and arrivals of transit drivers.");
 	}
 
