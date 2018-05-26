@@ -64,6 +64,7 @@ public class PatnaOnRoadExposure {
 
     private static final String wardsFile = "../../shared-svn/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
     private static final Collection<SimpleFeature> simpleFeatureCollection = ShapeFileReader.getAllFeatures(wardsFile);
+    private static final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
     private static final String networkFile = "";
 
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
@@ -108,13 +109,16 @@ public class PatnaOnRoadExposure {
     }
 
     private void run(String eventsFile, String outputFilesDir, Network network){
+
+        String suffix = "_22Nov2017";
+
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = new OnRoadExposureConfigGroup();
         onRoadExposureConfigGroup.setUsingMicroGramUnits(true);
 
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.PM.toString(), 236.0);
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.CO.toString(), 1690.0);
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.NO2.toString(), 93.8);
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.SO2.toString(), 5.1);
+        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 217.36 * Math.pow(10,-6));
+        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1410.0* Math.pow(10,-6));
+        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 116.79* Math.pow(10,-6));
+        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 21.44* Math.pow(10,-6));
 
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("motorbike");
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("truck");
@@ -146,9 +150,8 @@ public class PatnaOnRoadExposure {
         if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {
             Map<String, Map<String, Double>> modeToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
-            String outFile = outputFilesDir+"/modeToOnRoadExposure.txt";
-            BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
-            try {
+            String outFile = outputFilesDir+"/modeToOnRoadExposure"+suffix+".txt";
+            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("mode\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
@@ -161,7 +164,6 @@ public class PatnaOnRoadExposure {
                     }
                     writer.newLine();
                 }
-                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException("Data is not written/read. Reason : " + e);
             }
@@ -171,9 +173,8 @@ public class PatnaOnRoadExposure {
         {
             Map<Id<Person>, Coord> person2homeCoord = getXYForHomeLocationsOfPersons();
             Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
-            String outFile = outputFilesDir+"/personToOnRoadExposure.txt";
-            BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
-            try {
+            String outFile = outputFilesDir+"/personToOnRoadExposure"+suffix+".txt";
+            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("personId\tzoneId\tX\tY\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
@@ -182,15 +183,17 @@ public class PatnaOnRoadExposure {
                 for (Id<Person> personId : personToInhaledMass.keySet()) {
                     Coord coord = person2homeCoord.get(personId);
                     String zoneId;
-                    if (coord==null) zoneId = "NA";
-                    else zoneId = getZoneId( coord );
-                    writer.write(personId+"\t"+zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
+                    if (coord==null) {
+                        writer.write(personId+"\t"+"NA"+"\t"+ "NA"+"\t"+"NA"+"\t");
+                    } else {
+                        zoneId = getZoneId( coord );
+                        writer.write(personId+"\t"+zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
+                    }
                     for (String poll : pollutants){
                         writer.write( personToInhaledMass.get(personId).get(poll) + "\t");
                     }
                     writer.newLine();
                 }
-                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException("Data is not written/read. Reason : " + e);
             }
@@ -198,9 +201,8 @@ public class PatnaOnRoadExposure {
         }
         {
             Map<Id<Link>, Map<String, Double>> linkToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getLinkToInhaledMass();
-            String outFile = outputFilesDir+"/linkToOnRoadExposure.txt";
-            BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
-            try {
+            String outFile = outputFilesDir+"/linkToOnRoadExposure"+suffix+".txt";
+            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("linkId\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
@@ -213,7 +215,6 @@ public class PatnaOnRoadExposure {
                     }
                     writer.newLine();
                 }
-                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException("Data is not written/read. Reason : " + e);
             }
@@ -239,7 +240,6 @@ public class PatnaOnRoadExposure {
 
     private static String getZoneId (Coord cord){
         for(SimpleFeature simpleFeature : simpleFeatureCollection){
-            CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
             cord = ct.transform(cord);
             Point point = new GeometryFactory().createPoint(new Coordinate(cord.getX(), cord.getY()));
             if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains(point ) ) {

@@ -35,7 +35,7 @@ public class OnRoadExposureCalculator {
     private final OnRoadExposureConfigGroup config;
 
     @Inject
-    public OnRoadExposureCalculator(OnRoadExposureConfigGroup onRoadExposureConfigGroup) {
+    private OnRoadExposureCalculator(OnRoadExposureConfigGroup onRoadExposureConfigGroup) {
         this.config = onRoadExposureConfigGroup;
     }
 
@@ -66,7 +66,7 @@ public class OnRoadExposureCalculator {
      * <p>t --> travelTime</p>
      */
     private double calculateForSinglePollutant(String pollutant, double pollutantValue, String mode, double travelTime) {
-        double val = (config.getPollutantToBackgroundConcentration().get(pollutant)
+        double val = (config.getPollutantToBackgroundConcentration_gm().get(pollutant)
                 * config.getModeToOccupancy().get(mode)
                 * config.getModeToBreathingRate().get(mode)
                 * config.getPollutantToPenetrationRate(mode).get(pollutant)
