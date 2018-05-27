@@ -51,6 +51,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
@@ -70,7 +71,7 @@ public class PatnaOnRoadExposure {
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
 
-    private static final String data_dates [] = {/*"none","_22Nov2017","_22Jan2018","_22Mar2018",*/"_22May2018"};
+    private static final String data_dates [] = {"none","_22Nov2017","_22Jan2018","_22Mar2018","_22May2018"};
 
     public static void main(String[] args) {
 
@@ -198,7 +199,7 @@ public class PatnaOnRoadExposure {
         {
             Map<Id<Person>, Coord> person2homeCoord = getXYForHomeLocationsOfPersons();
             Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
-            String outFile = outputFilesDir+"/personToOnRoadExposure"+ data_date +".txt";
+            String outFile = outputFilesDir+"/personToOnRoadExposure"+ data_date +"_urban.txt";
             try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("personId\tzoneId\tX\tY\t");
                 for (String poll : pollutants){
@@ -206,6 +207,8 @@ public class PatnaOnRoadExposure {
                 }
                 writer.newLine();
                 for (Id<Person> personId : personToInhaledMass.keySet()) {
+                    if (! PatnaPersonFilter.isPersonBelongsToUrban(personId)) continue;
+
                     Coord coord = person2homeCoord.get(personId);
                     String zoneId;
                     if (coord==null) {
@@ -264,10 +267,10 @@ public class PatnaOnRoadExposure {
     }
 
     private static String getZoneId (Coord cord){
+        Coord cord_transform = ct.transform(cord);
         for(SimpleFeature simpleFeature : simpleFeatureCollection){
-            cord = ct.transform(cord);
-            Point point = new GeometryFactory().createPoint(new Coordinate(cord.getX(), cord.getY()));
-            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains(point ) ) {
+            Point point = new GeometryFactory().createPoint(new Coordinate(cord_transform.getX(), cord_transform.getY()));
+            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains( point ) ) {
                 return String.valueOf(simpleFeature.getAttribute("ID1"));
             }
         }
