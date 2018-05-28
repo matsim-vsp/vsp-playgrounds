@@ -44,7 +44,7 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 public class ModalDistanceDistributionControlerListener implements StartupListener, IterationEndsListener {
     private static final Logger LOG = Logger.getLogger(ModalDistanceDistributionControlerListener.class);
 
-    private static final String fileName_avg = "multiMode_distanceDistributionCounts_average.txt";
+    public static final String fileName_avg = "multiMode_distanceDistributionCounts_average.txt";
     private static final String fileName_abs = "multiMode_distanceDistributionCounts_absolute.txt";
 
     private final ControlerConfigGroup controlerConfigGroup;

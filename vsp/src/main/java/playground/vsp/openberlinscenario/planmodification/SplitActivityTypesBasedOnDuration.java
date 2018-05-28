@@ -64,7 +64,7 @@ public class SplitActivityTypesBasedOnDuration {
 		
 		CemdapPopulationTools tools = new CemdapPopulationTools();
 		tools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(scenario.getPopulation(), timeBinSize_s,
-				0.0);
+				dayStartTime);
 		
 		PopulationWriter writer = new PopulationWriter(scenario.getPopulation());
 		writer.write(outputPopulationFile);

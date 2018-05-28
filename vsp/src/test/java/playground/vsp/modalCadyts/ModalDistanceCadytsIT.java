@@ -75,7 +75,7 @@ public class ModalDistanceCadytsIT {
         );
 
         //
-        String outputFile =  outDir+"ITERS/it."+lastIteration+"/"+lastIteration+ "."+ ModalDistanceDistributionControlerListener.fileName;
+        String outputFile =  outDir+"ITERS/it."+lastIteration+"/"+lastIteration+ "."+ ModalDistanceDistributionControlerListener.fileName_avg;
         BufferedReader reader = IOUtils.getBufferedReader(outputFile);
         try {
             String line = reader.readLine();
