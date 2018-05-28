@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import javax.management.InvalidAttributeValueException;
+
+import com.google.inject.Inject;
 import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
@@ -43,6 +45,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
@@ -72,15 +75,21 @@ import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerUtils;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.OutputDirectoryLogging;
+import org.matsim.core.controler.events.ReplanningEvent;
+import org.matsim.core.controler.listener.ReplanningListener;
+import org.matsim.core.network.LinkFactory;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.replanning.GenericStrategyManager;
+import org.matsim.core.router.util.TravelTime;
+import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.SumScoringFunction;
@@ -272,13 +281,13 @@ public class KTFreight_v3 {
 
 		// ### scenario stuff: ###
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-
+		
 		if ( addingCongestion ) {
 			configureTimeDependentNetwork(scenario);
 		}
 
 		//Building the Carriers with jsprit, incl jspritOutput KT 03.12.2014
-		Carriers carriers = jspritRun(config, scenario);			
+		Carriers carriers = jspritRun(config, scenario.getNetwork());
 
 		if ( runMatsim){
 			matsimRun(scenario, carriers);	//final MATSim configurations and start of the MATSim-Run
@@ -329,7 +338,7 @@ public class KTFreight_v3 {
 		return config;
 	}  //End createConfig
 
-	private static Carriers jspritRun(Config config, Scenario scenario) throws InvalidAttributeValueException {
+	private static Carriers jspritRun(Config config, Network network) throws InvalidAttributeValueException {
 		CarrierVehicleTypes vehicleTypes = createVehicleTypes();
 
 		Carriers carriers = createCarriers(vehicleTypes);
@@ -356,7 +365,7 @@ public class KTFreight_v3 {
 			}
 			
 			for (String linkId : uccDepotsLinkIdsString){
-				if (scenario.getNetwork().getLinks().containsKey(Id.createLinkId(linkId))){
+				if (network.getLinks().containsKey(Id.createLinkId(linkId))){
 					uccDepotsLinkIds.add(Id.createLinkId(linkId));
 				} else {
 					throw new InvalidAttributeValueException("UCC-Location is not part of the network: " + linkId);
@@ -376,16 +385,16 @@ public class KTFreight_v3 {
 					nonUccCarriers.addCarrier(c);
 				};
 			}
-			generateCarrierPlans(scenario.getNetwork(), uccCarriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs für die UCC-Carriers
+			generateCarrierPlans(network, uccCarriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs für die UCC-Carriers
 
 			// Services für die Belieferung der Umschlagpunkte erstellen
 			nonUccCarriers = uccCarrierCreator.createServicesToUCC(uccCarriers, nonUccCarriers);  
-			generateCarrierPlans(scenario.getNetwork(), nonUccCarriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs für die NonUCC-Carriers
+			generateCarrierPlans(network, nonUccCarriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs für die NonUCC-Carriers
 
 		} else {  // ohne UCCs 
 			carriers = new UccCarrierCreator().extractCarriers(carriers, selectRetailers);
 			carriers = new UccCarrierCreator().renameVehId(carriers);
-			generateCarrierPlans(scenario.getNetwork(), carriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs
+			generateCarrierPlans(network, carriers, vehicleTypes, config); // Hier erfolgt Lösung des VRPs
 		}
 
 		checkServiceAssignment(carriers);
@@ -554,6 +563,42 @@ public class KTFreight_v3 {
 		CarrierModule listener = new CarrierModule(carriers, planStrategyManagerFactory, scoringFunctionFactory) ;
 		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
+		
+		controler.addOverridingModule(new AbstractModule() {
+			@Override public void install() {
+				
+				this.addControlerListenerBinding().toInstance( new ReplanningListener(){
+					@Inject Config config ;
+					@Inject Network originalNetwork ;
+					@Inject TravelTime travelTime ;
+					@Override
+					public void notifyReplanning(ReplanningEvent event) {
+						
+						Network network = NetworkUtils.createNetwork( config ) ;
+						
+						for ( Node node : originalNetwork.getNodes().values() ) {
+							network.addNode(node); // careful, is not a copy; uses the original node; do not modify!!
+						}
+						for ( Link link : originalNetwork.getLinks().values() ){
+							Link newLink = new MyLink( link, travelTime ) ;
+							network.addLink( newLink );
+						}
+						
+						// copy originalNetwork into that new network somehow.
+						
+						try {
+							Carriers carriers = jspritRun(config, network);
+						} catch (InvalidAttributeValueException e) {
+							e.printStackTrace();
+						}
+						
+						// TODO yyyyyy somehow get the generated carriers back into matsim
+						
+					}
+				}) ;
+
+			}
+		});
 
 		controler.run();
 	}
