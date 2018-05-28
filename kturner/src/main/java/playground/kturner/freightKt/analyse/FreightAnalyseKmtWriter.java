@@ -180,7 +180,6 @@ public class FreightAnalyseKmtWriter {
 	 * des Carriers für jeden FahrzeugTyp einzeln auf und bildet auch Gesamtsumme.
 	 * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
 	 */
-	
 	public void writeResultsPerVehicleTypes() {
 		
 		String fileName = this.outputFolder + "total_infos_per_vehicleType.csv";

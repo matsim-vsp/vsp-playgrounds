@@ -288,6 +288,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	
 	//TODO: erstellen mai/18
 	public Map<Id<VehicleType>, Double> getVehTypId2TourDistancesInLEZ(Id<VehicleType> vehicleTypeId) {
+		log.warn("Hier fehlen noch die Inhalte fuer Distance in LEZ");
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -318,6 +319,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	
 	//TODO: erstellen  mai/18
 	public Map<Id<VehicleType>, Double> getVehTypId2TravelTimesInLEZ(Id<VehicleType> vehicleTypeId) {
+		log.warn("Hier fehlen noch die Inhalte fuer TT in LEZ");
 		// TODO Auto-generated method stub
 		return null;
 	}

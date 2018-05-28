@@ -100,6 +100,7 @@ public class FreightAnalyseKMT {
 			log.info("Reading the event file... Done.");
 			
 			FreightAnalyseKmtWriter tripWriter = new FreightAnalyseKmtWriter(tripHandler, OUTPUT_DIR);
+			//TODO: Writer hat Werte fuer innerhalb der LEZ bisher noch nicht fur die ganzen Carrier.
 			for (Carrier carrier : carriers.getCarriers().values()){
 				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
 				tripWriter.writeVehicleResultsSingleCarrier(carrier.getId().toString());
