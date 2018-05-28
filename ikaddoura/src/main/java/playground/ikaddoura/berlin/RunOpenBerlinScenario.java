@@ -38,7 +38,10 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
+import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 
 /**
 * @author ikaddoura
@@ -191,10 +194,24 @@ public class RunOpenBerlinScenario {
 					addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());        }
 		    });
 		}
+		
+		// some online analysis
+		
+		controler.addOverridingModule(new AbstractModule() {
+			
+			@Override
+			public void install() {
+				this.bind(ModalShareEventHandler.class);
+				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+				
+				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
+			}
+		});
+		
 				
 		controler.run();
 		
-		log.info("Running analysis...");
+		log.info("Running offline analysis...");
 				
 		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
 		final String shapeFileZones = null;
