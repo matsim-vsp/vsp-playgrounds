@@ -105,7 +105,7 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
         else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
             beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
         } else{
-            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
+            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.3");
         }
         double beelineDistance = beelineDistanceFactor *
                 NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
