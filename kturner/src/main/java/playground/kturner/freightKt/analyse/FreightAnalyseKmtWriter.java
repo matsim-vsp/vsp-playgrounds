@@ -270,19 +270,18 @@ public class FreightAnalyseKmtWriter {
 					totalDistance + ";" +
 					totalDistance/1000 + ";" +
 					totalTravelTime + ";" +
-					totalFuelConsumtion + ";" +  // Spritverbrauch in Liter		//TODO: Rate oder Wert? Mai/18
-					totalEmissions + ";" +	// CO2-Ausstoss in t				//TODO: Rate oder Wert? Mai/18
+					totalFuelConsumtion + ";" +  // Spritverbrauch in Liter		
+					totalEmissions + ";" +	// CO2-Ausstoss in t				
 					";;"+					//Raten für gesamtflotte nicht gegeben. 
 					//values within LEZ
 					totalDistanceInLEZ + ";" +
 					totalDistanceInLEZ/1000 + ";" +
 					totalTravelTimeInLEZ + ";" +
-					totalFuelConsumtionInLEZ + ";" +  // Spritverbrauch in Liter	//TODO: Rate oder Wert? Mai/18
-					totalEmissionsInLEZ	// CO2-Ausstoss in t						//TODO: Rate oder Wert? Mai/18
+					totalFuelConsumtionInLEZ + ";" +  // Spritverbrauch in Liter	
+					totalEmissionsInLEZ	// CO2-Ausstoss in t						
 					);
 			bw.newLine();
 			
-			//TODO hier noch anpassen auf within LEZ
 			// Werte der einzelnen Fahrzeugtypen (alle Carrier)
 			for (Id<VehicleType> vehTypeId : vehTypeId2TourDistances.keySet()) {
 
