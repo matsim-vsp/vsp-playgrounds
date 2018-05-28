@@ -261,7 +261,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return personId2listOfTravelTimes;
 	}
 	
-	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
+	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres Fahrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
 	public Map<Id<VehicleType>,Double> getVehTypId2TourDistances(Id<VehicleType> vehTypeId) {
 		log.info("Calculate distances for vehicleTyp " + vehTypeId.toString());
 		Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new HashMap<Id<VehicleType>, Double>();
@@ -286,6 +286,12 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return vehTypeId2TourDistances;
 	}
 	
+	//TODO: erstellen mai/18
+	public Map<Id<VehicleType>, Double> getVehTypId2TourDistancesInLEZ(Id<VehicleType> vehicleTypeId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
 	public Map<Id<VehicleType>, Double> getVehTypId2TravelTimes(Id<VehicleType> vehTypeId) {
 		Map<Id<VehicleType>,Double> vehTypeId2TravelTimes = new HashMap<Id<VehicleType>, Double>();
@@ -308,6 +314,12 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			}
 		}
 		return vehTypeId2TravelTimes;
+	}
+	
+	//TODO: erstellen  mai/18
+	public Map<Id<VehicleType>, Double> getVehTypId2TravelTimesInLEZ(Id<VehicleType> vehicleTypeId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres Fahrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)

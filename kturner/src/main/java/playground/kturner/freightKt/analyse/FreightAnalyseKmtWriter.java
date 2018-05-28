@@ -61,6 +61,7 @@ public class FreightAnalyseKmtWriter {
  * Schreibt die Informationen (TripDistance, diastance Tour) des Carriers für jeden Trip einzeln auf.
  * TODO: TravelTime, 
  * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
+ * TODO: fuer wihtinLEZ, mai/18
  * @param carrierIdString
  */
 	public void writeDetailedResultsSingleCarrier(String carrierIdString) {
@@ -119,6 +120,7 @@ public class FreightAnalyseKmtWriter {
 	/**
 	 * Schreibt die Informationen (tour distance, tour travelTime) des Carriers für jede Tour (= jedes Fzg) einzeln auf.
 	 * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
+	 * TODO: fuer wihtinLEZ, mai/18
 	 * @param carrierIdString
 	 */
 	public void writeVehicleResultsSingleCarrier(String carrierIdString) {
@@ -192,15 +194,16 @@ public class FreightAnalyseKmtWriter {
 			bw.newLine();
 
 //			bw.write("departure time [sec];person Id;amount per trip [monetary units];distance [m];travel time [sec]");
-			bw.write("vehType Id;#ofVehicles;distance [m] ; distance [km] ;TravelTime [s]  ; " +
-					"FuelConsumption[l]; Emission [t Co2];  FuelConsumptionRate[l/100m]; " +
-					"EmissionRate [g/m]; ");
+			bw.write("vehType Id;#ofVehicles;distance [m] ; distance [km] ;TravelTime [s] ; FuelConsumption[l]; Emission [t Co2]; FuelConsumptionRate[l/100m]; EmissionRate [g/m]; " 
+					+ "distanceInLEZ [m] ; distanceInLEZ [km] ;TravelTimeInLEZ [s] ; FuelConsumptioninLEZ[l]; EmissionInLEZ [t Co2]; FuelConsumptionRate[l/100m]; EmissionRate [g/m]; \" ");
 			bw.newLine();
 	
 		
 //			KT:
 			Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new TreeMap<Id<VehicleType>,Double>();
 			Map<Id<VehicleType>,Double> vehTypeId2TravelTimes = new TreeMap<Id<VehicleType>,Double>();
+			Map<Id<VehicleType>,Double> vehTypeId2TourDistancesInLEZ = new TreeMap<Id<VehicleType>,Double>();
+			Map<Id<VehicleType>,Double> vehTypeId2TravelTimesInLEZ = new TreeMap<Id<VehicleType>,Double>();
 			Map<Id<VehicleType>,Integer> vehTypeId2NumberOfVehicles = new TreeMap<Id<VehicleType>,Integer>();
 			Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> vehTypId2Capabilities = new TreeMap<Id<VehicleType>, VehicleTypeSpezificCapabilities>();
 			
@@ -212,14 +215,22 @@ public class FreightAnalyseKmtWriter {
 				} else { //TODO: umschreiben, dass nur die Werte bestimmt werden... oder man die Map einmal bestimmt.
 					log.debug(vehicleTypeId + " added mit Entfernung " +  this.handler.getVehTypId2TourDistances(vehicleTypeId).get(vehicleTypeId));
 					Double distance = this.handler.getVehTypId2TourDistances(vehicleTypeId).get(vehicleTypeId);
+					Double distanceInLEZ = this.handler.getVehTypId2TourDistancesInLEZ(vehicleTypeId).get(vehicleTypeId);			
 					Double travelTime = this.handler.getVehTypId2TravelTimes(vehicleTypeId).get(vehicleTypeId);
+					Double travelTimeInLEZ = this.handler.getVehTypId2TravelTimesInLEZ(vehicleTypeId).get(vehicleTypeId);
 					Integer nuOfVeh = this.handler.getVehTypId2VehicleNumber(vehicleTypeId).get(vehicleTypeId);
 					VehicleTypeSpezificCapabilities capabilities = this.handler.getVehTypId2Capabilities().get(vehicleTypeId);
 					if (distance != null) {
 						vehTypeId2TourDistances.put(vehicleTypeId, distance );
 					}
+					if (distanceInLEZ != null) {
+						vehTypeId2TourDistancesInLEZ.put(vehicleTypeId, distance );
+					}
 					if (travelTime != null){
 						vehTypeId2TravelTimes.put(vehicleTypeId, travelTime);
+					}
+					if (travelTimeInLEZ != null){
+						vehTypeId2TravelTimesInLEZ.put(vehicleTypeId, travelTime);
 					}
 					if (nuOfVeh != null){
 						vehTypeId2NumberOfVehicles.put(vehicleTypeId, nuOfVeh);
@@ -233,16 +244,24 @@ public class FreightAnalyseKmtWriter {
 			
 			//Gesamtsumme
 			Double totalDistance = 0.0;
+			Double totalDistanceInLEZ = 0.0;
 			Double totalTravelTime = 0.0;
+			Double totalTravelTimeInLEZ = 0.0;
 			Integer totalNumberofVehicles = 0;
 			Double totalFuelConsumtion = 0.0;
+			Double totalFuelConsumtionInLEZ = 0.0;
 			Double totalEmissions = 0.0;
+			Double totalEmissionsInLEZ = 0.0;
 			for (Id<VehicleType> vehTypeId : vehTypeId2TourDistances.keySet()) {
 				totalDistance = totalDistance + vehTypeId2TourDistances.get(vehTypeId);
+				totalDistanceInLEZ = totalDistanceInLEZ + vehTypeId2TourDistancesInLEZ.get(vehTypeId);
 				totalTravelTime = totalTravelTime + vehTypeId2TravelTimes.get(vehTypeId);
+				totalTravelTimeInLEZ = totalTravelTimeInLEZ + vehTypeId2TravelTimesInLEZ.get(vehTypeId);
 				totalNumberofVehicles = totalNumberofVehicles + vehTypeId2NumberOfVehicles.get(vehTypeId);
 				totalFuelConsumtion = totalFuelConsumtion + vehTypeId2TourDistances.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getFuelConsumtion()/100;
+				totalFuelConsumtionInLEZ = totalFuelConsumtionInLEZ + vehTypeId2TourDistancesInLEZ.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getFuelConsumtion()/100;
 				totalEmissions = totalEmissions + vehTypeId2TourDistances.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getEmissionsPerMeter()/1000000;
+				totalEmissionsInLEZ = totalEmissions + vehTypeId2TourDistancesInLEZ.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getEmissionsPerMeter()/1000000;
 			}
 			
 			// Gesamtsumme
@@ -251,16 +270,26 @@ public class FreightAnalyseKmtWriter {
 					totalDistance + ";" +
 					totalDistance/1000 + ";" +
 					totalTravelTime + ";" +
-					totalFuelConsumtion + ";" +  // Spritverbrauch in Liter
-					totalEmissions	// CO2-Ausstoss in t
+					totalFuelConsumtion + ";" +  // Spritverbrauch in Liter		//TODO: Rate oder Wert? Mai/18
+					totalEmissions + ";" +	// CO2-Ausstoss in t				//TODO: Rate oder Wert? Mai/18
+					";;"+					//Raten für gesamtflotte nicht gegeben. 
+					//values within LEZ
+					totalDistanceInLEZ + ";" +
+					totalDistanceInLEZ/1000 + ";" +
+					totalTravelTimeInLEZ + ";" +
+					totalFuelConsumtionInLEZ + ";" +  // Spritverbrauch in Liter	//TODO: Rate oder Wert? Mai/18
+					totalEmissionsInLEZ	// CO2-Ausstoss in t						//TODO: Rate oder Wert? Mai/18
 					);
 			bw.newLine();
 			
+			//TODO hier noch anpassen auf within LEZ
 			// Werte der einzelnen Fahrzeugtypen (alle Carrier)
 			for (Id<VehicleType> vehTypeId : vehTypeId2TourDistances.keySet()) {
 
 				Double tourDistance = vehTypeId2TourDistances.get(vehTypeId);
+				Double tourDistanceInLEZ = vehTypeId2TourDistancesInLEZ.get(vehTypeId);
 				Double tourTravelTime = vehTypeId2TravelTimes.get(vehTypeId);
+				Double tourTravelTimeInLEZ = vehTypeId2TravelTimesInLEZ.get(vehTypeId);
 				Integer numberofVehicles = vehTypeId2NumberOfVehicles.get(vehTypeId);
 				VehicleTypeSpezificCapabilities capabilites = vehTypId2Capabilities.get(vehTypeId);
 				
@@ -271,6 +300,13 @@ public class FreightAnalyseKmtWriter {
 						tourTravelTime + ";" + 
 						tourDistance*capabilites.getFuelConsumtion()/100 + ";" +  // Spritverbrauch in Liter (Faktor wg l/100km als Grundangabe)
 						tourDistance*capabilites.getEmissionsPerMeter()/1000000 +";" + 	// CO2-Ausstoss in t (= 1Mio g)
+						capabilites.getFuelConsumtion() + ";" + 
+						capabilites.getEmissionsPerMeter() + ";" + 
+						tourDistanceInLEZ + ";" + 
+						tourDistanceInLEZ/1000 + ";" + 
+						tourTravelTimeInLEZ + ";" + 
+						tourDistanceInLEZ*capabilites.getFuelConsumtion()/100 + ";" +  // Spritverbrauch in Liter (Faktor wg l/100km als Grundangabe)
+						tourDistanceInLEZ*capabilites.getEmissionsPerMeter()/1000000 +";" + 	// CO2-Ausstoss in t (= 1Mio g)
 						capabilites.getFuelConsumtion() + ";" + 
 						capabilites.getEmissionsPerMeter() 
 						);
