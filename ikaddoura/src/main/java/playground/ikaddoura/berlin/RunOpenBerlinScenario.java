@@ -119,8 +119,8 @@ public class RunOpenBerlinScenario {
 
 		} else {
 			
-			configFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_3_ik/config_be_300_mode-choice_test.xml";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be_300_test_7/";
+			configFile = "/Users/ihab/Documents/workspace/matsim-project/examples/scenarios/equil/config.xml";
+			outputDirectory = "/Users/ihab/Desktop/test-run-equil/";
 			runId = "test-run";
 		}
 		
