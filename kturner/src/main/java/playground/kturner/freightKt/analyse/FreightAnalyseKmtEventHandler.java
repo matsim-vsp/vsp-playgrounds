@@ -286,11 +286,29 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return vehTypeId2TourDistances;
 	}
 	
-	//TODO: erstellen mai/18
-	public Map<Id<VehicleType>, Double> getVehTypId2TourDistancesInLEZ(Id<VehicleType> vehicleTypeId) {
+	public Map<Id<VehicleType>, Double> getVehTypId2TourDistancesInLEZ(Id<VehicleType> vehTypeId) {
 		log.warn("Hier fehlen noch die Inhalte fuer Distance in LEZ");
-		// TODO Auto-generated method stub
-		return null;
+		log.info("Calculate distances in LEZ for vehicleTyp " + vehTypeId.toString());
+		Map<Id<VehicleType>,Double> vehTypeId2TourDistancesInLEZ = new HashMap<Id<VehicleType>, Double>();
+		for(Id<Person> personId: personId2tripNumber2tripDistanceInLEZ.keySet()){
+			for(int i : personId2tripNumber2tripDistanceInLEZ.get(personId).keySet()){
+				if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+					if (vehTypeId.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
+						double distance = personId2tripNumber2tripDistanceInLEZ.get(personId).get(i);
+						if (vehTypeId2TourDistancesInLEZ.containsKey(vehTypeId)){
+							vehTypeId2TourDistancesInLEZ.put(vehTypeId, vehTypeId2TourDistancesInLEZ.get(vehTypeId) + distance);
+							log.debug("Aktuelle Distance in LEZ für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+						} else {
+							vehTypeId2TourDistancesInLEZ.put(vehTypeId, distance);
+							log.debug("Distance für Person  in LEZ" + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+						}
+					}
+				}else{
+					//do nothing
+				}
+			}
+		}
+		return vehTypeId2TourDistancesInLEZ;
 	}
 	
 	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
