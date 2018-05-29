@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import com.google.inject.Inject;
-import org.apache.commons.lang3.EnumUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -49,7 +48,6 @@ import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.PCUMethod;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
 import playground.agarwalamit.fundamentalDiagrams.headwayMethod.HeadwayHandler;
 import playground.agarwalamit.utils.NumberUtils;
 
@@ -185,16 +183,15 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     }
 
     private double getAreaRatio(String mode){
-        if (EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode)){
+//        if (  EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode) ){
+//            return VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
+//        } else {
             return (double) ((AttributableVehicleType) scenario.getVehicles()
                                                                .getVehicleTypes()
                                                                .get(Id.create(mode, VehicleType.class))).getAttributes()
                                                                                                         .getAttribute(
                                                                                                                 projected_area_ratio);
-        } else {
-            VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
-        }
-        return 0;
+//        }
     }
 
     @Override

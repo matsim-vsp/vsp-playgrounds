@@ -51,7 +51,7 @@ public class RunSurveyData {
     public static void main(String[] args) {
 
         String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/surveyData/";
-        String file = "../../svnit/surveyData/vehiclesData.txt";
+        String file = "../../svnit/surveyData/inputFiles/vehiclesData.txt";
         TrafficDynamics trafficDynamics = TrafficDynamics.queue;
         double trackLinkLength = 6000.0;
 
@@ -79,7 +79,7 @@ public class RunSurveyData {
         fdConfigGroup.setTrackLinkCapacity(6300.0);
         fdConfigGroup.setTrackLinkLanes(3.0);
         fdConfigGroup.setTrackLinkSpeed(80.0/3.6);
-        // max density is about 2410 pcu/km for 3 lanes i.e., 803 pcu/km/lane--> length must be 6km
+        // max density is more than 2410 pcu/km for 3 lanes i.e., 803 pcu/km/lane--> length must be higher than 6km
         fdConfigGroup.setTrackLinkLength(trackLinkLength);
         fdConfigGroup.setWriteDataIfNoStability(true);
 
