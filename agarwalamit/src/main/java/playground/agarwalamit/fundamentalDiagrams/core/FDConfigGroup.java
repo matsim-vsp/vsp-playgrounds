@@ -29,9 +29,9 @@ import org.matsim.core.config.ReflectiveConfigGroup;
  * Created by amit on 03.07.17.
  */
 
-public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
+public class FDConfigGroup extends ReflectiveConfigGroup {
 
-    public FundamentalDiagramConfigGroup() {
+    public FDConfigGroup() {
         super(GROUP_NAME);
     }
 
@@ -62,13 +62,9 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
     static final String REDUCE_DATA_POINTS_BY_FACTOR_CMT = "a factor by which the number of data points will be reduced to get quick results. \n" +
             " By default, all possible combinations for given modal share will be executed.";
 
-    private static final String WRITING_EVENTS = "isWritingEvents";
-    private boolean isWritingEvents = false;
-    static final String WRITING_EVENTS_CMT = "set to true, if events must be written for every combination. Default is false.";
-
-    private static final String RUNNIG_DISTRIBUTION = "isRunningDistribution";
+    private static final String RUNNING_DISTRIBUTION = "isRunningDistribution";
     private boolean isRunningDistribution = false;
-    private static final String RUNNIG_DISTRIBUTION_CMT = "set to true if all possible combinations for all possible modal share should be executed. Default is false.";
+    private static final String RUNNING_DISTRIBUTION_CMT = "set to true if all possible combinations for all possible modal share should be executed. Default is false.";
 
     private static final String MODAL_SHARE_PCU = "modalShareInPCU";
     private Collection<Double> modalShareInPCU = Arrays.asList(1.0);
@@ -134,22 +130,12 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
         this.reduceDataPointsByFactor = reduceDataPointsByFactor;
     }
 
-    @StringGetter(WRITING_EVENTS)
-    public boolean isWritingEvents() {
-        return isWritingEvents;
-    }
-
-    @StringSetter(WRITING_EVENTS)
-    public void setWritingEvents(boolean writingEvents) {
-        isWritingEvents = writingEvents;
-    }
-
-    @StringGetter(RUNNIG_DISTRIBUTION)
+    @StringGetter(RUNNING_DISTRIBUTION)
     public boolean isRunningDistribution() {
         return isRunningDistribution;
     }
 
-    @StringSetter(RUNNIG_DISTRIBUTION)
+    @StringSetter(RUNNING_DISTRIBUTION)
     public void setRunningDistribution(boolean runningDistribution) {
         isRunningDistribution = runningDistribution;
     }
@@ -180,9 +166,19 @@ public class FundamentalDiagramConfigGroup extends ReflectiveConfigGroup {
         map.put(TRACK_LINK_LANES, TRACK_LINK_LANES_CMT);
         map.put(TRACK_LINK_DIVISON_FACTOR, TRACK_LINK_DIVISON_FACTOR_CMT);
         map.put(REDUCE_DATA_POINTS_BY_FACTOR, REDUCE_DATA_POINTS_BY_FACTOR_CMT);
-        map.put(WRITING_EVENTS, WRITING_EVENTS_CMT);
-        map.put(RUNNIG_DISTRIBUTION, RUNNIG_DISTRIBUTION_CMT);
+        map.put(RUNNING_DISTRIBUTION, RUNNING_DISTRIBUTION_CMT);
         map.put(MODAL_SHARE_PCU, MODAL_SHARE_PCU_CMT);
         return map;
+    }
+
+    //
+    private boolean writeDataIfNoStability = false;
+
+    public boolean isWriteDataIfNoStability() {
+        return writeDataIfNoStability;
+    }
+
+    public void setWriteDataIfNoStability(boolean writeDataIfNoStability) {
+        this.writeDataIfNoStability = writeDataIfNoStability;
     }
 }

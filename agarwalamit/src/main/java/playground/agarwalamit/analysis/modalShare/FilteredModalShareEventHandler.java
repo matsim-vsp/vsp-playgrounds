@@ -31,6 +31,7 @@ import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 
 import playground.agarwalamit.utils.PersonFilter;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 
 /**
  * @author amit

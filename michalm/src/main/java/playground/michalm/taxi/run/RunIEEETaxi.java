@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2018 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,29 +17,13 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
+package playground.michalm.taxi.run;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.utils.objectattributes.attributable.Attributable;
-import org.matsim.utils.objectattributes.attributable.Attributes;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleImpl;
-import org.matsim.vehicles.VehicleType;
+import org.matsim.contrib.taxi.run.RunTaxiScenario;
 
-/**
- * Created by amit on 04.05.18.
- */
-
-public class AttributableVehicle extends VehicleImpl implements Attributable {
-
-    private final Attributes attributes = new Attributes();
-
-    public AttributableVehicle(Id<Vehicle> id, VehicleType type) {
-        super(id, type);
-    }
-
-    @Override
-    public Attributes getAttributes() {
-        return this.attributes;
-    }
+public class RunIEEETaxi {
+	public static void main(String[] args) {
+		String configFile = "d:\\temp\\old_IEEE_rerun\\config.xml ";
+		RunTaxiScenario.run(configFile, false);
+	}
 }

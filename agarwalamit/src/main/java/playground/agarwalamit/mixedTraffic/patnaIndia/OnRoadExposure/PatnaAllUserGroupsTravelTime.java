@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2017 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,14 +17,24 @@
  *                                                                         *
  * *********************************************************************** */
 
+package playground.agarwalamit.mixedTraffic.patnaIndia.OnRoadExposure;
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea;
+import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
 
 /**
- * Created by amit on 29.06.17.
+ * Created by amit on 26.05.18.
  */
-public enum VehicleProjectedAreaMarker {
 
-    BEGIN_VEHILCE_PROJECTED_AREA, END_VEHILCE_PROJECTED_AREA
+public class PatnaAllUserGroupsTravelTime {
 
+    public static void main(String[] args) {
+
+        String eventsFile = "../../runs-svn/patnaIndia/run111/onRoadExposure/bauLastItr/output/output_events.xml.gz";
+        String outFile = "../../runs-svn/patnaIndia/run111/onRoadExposure/bauLastItr/analysis/allUsersTravelTime.txt";
+
+        ModalTravelTimeAnalyzer analyzer = new ModalTravelTimeAnalyzer(eventsFile);
+        analyzer.run();
+        analyzer.writeResults(outFile);
+
+    }
 }

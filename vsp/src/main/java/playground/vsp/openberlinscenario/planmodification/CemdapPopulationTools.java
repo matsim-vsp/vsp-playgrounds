@@ -37,13 +37,13 @@ public class CemdapPopulationTools {
 
 	private static final Logger log = Logger.getLogger(CemdapPopulationTools.class);
 
-	public void setActivityTypesAccordingToDurationAndMergeOvernightActivities(Population population, double timeCategorySize) {
+	public void setActivityTypesAccordingToDurationAndMergeOvernightActivities(Population population, double timeCategorySize, double dayStartTime) {
 		log.info("First, setting activity types according to duration (time bin size: " + timeCategorySize + ")");				
 		log.info("Second, merging evening and morning activity if they have the same (base) type.");
 
 		for (Person person : population.getPersons().values()) {
 			for (Plan plan : person.getPlans()) {
-				setActivityTypesAccordingToDuration(plan, timeCategorySize);
+				setActivityTypesAccordingToDuration(plan, timeCategorySize, dayStartTime);
 				mergeOvernightActivities(plan);				
 			}
 		}
@@ -72,7 +72,7 @@ public class CemdapPopulationTools {
 		}	
 	}
 
-	private static void setActivityTypesAccordingToDuration(Plan plan, double timeCategorySize) {
+	private static void setActivityTypesAccordingToDuration(Plan plan, double timeCategorySize, double dayStartTime) {
 		boolean firstActivity = true;
 		
 		for (PlanElement pE : plan.getPlanElements()) {
@@ -84,7 +84,7 @@ public class CemdapPopulationTools {
 					// first activity (or stay home plan)
 					if (act.getEndTime() > 0. && act.getEndTime() <= 24. * 3600) {
 						// first activity (end time specified via an end time)
-						duration = act.getEndTime();
+						duration = act.getEndTime() - dayStartTime;
 					} else if (act.getMaximumDuration() > 0. && act.getMaximumDuration() <= 24. * 3600) {
 						// first activity (end time specified via a duration)
 						duration = act.getMaximumDuration();

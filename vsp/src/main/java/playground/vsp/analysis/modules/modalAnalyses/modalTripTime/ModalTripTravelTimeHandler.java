@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.analysis.tripTime;
+package playground.vsp.analysis.modules.modalAnalyses.modalTripTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,8 +57,8 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 
 	private static final Logger LOGGER = Logger.getLogger(ModalTripTravelTimeHandler.class);
 	private static final int MAX_STUCK_AND_ABORT_WARNINGS = 5;
-	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2TravelTimes;
-	private final Map<Id<Person>, Double> personId2DepartureTime;
+	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2TravelTimes = new TreeMap<>();
+	private final Map<Id<Person>, Double> personId2DepartureTime = new HashMap<>();
 	private int warnCount = 0;
 	private final List<Id<Person>> transitDriverPersons = new ArrayList<>();
 	// agents who first departs with transitWalk and their subsequent modes are stored here until it starts a regular act (home/work/leis/shop)
@@ -67,8 +67,6 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 	private final Map<Id<Person>, Double> transitUserArrivalTime = new HashMap<>(); 
 
 	public ModalTripTravelTimeHandler() {
-		this.mode2PersonId2TravelTimes = new TreeMap<>();
-		this.personId2DepartureTime = new HashMap<>();
 		LOGGER.warn("Excluding the departure and arrivals of transit drivers.");
 	}
 
@@ -85,7 +83,6 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 	public void handleEvent(PersonArrivalEvent event) {
 		Id<Person> personId = event.getPersonId();
 		String legMode = event.getLegMode();
-		double arrivalTime = event.getTime();
 
 		if(transitDriverPersons.remove(personId)) {
 			// exclude arrivals of transit drivers ;
@@ -94,7 +91,7 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 			if( legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ){
 				transitUserArrivalTime.put(personId, event.getTime()); // store the arrival time
 			} else { // rest of the modes
-				double travelTime = arrivalTime - this.personId2DepartureTime.remove(personId);
+				double travelTime = event.getTime() - this.personId2DepartureTime.remove(personId);
 				storeData(personId, legMode, travelTime);
 			}
 		}
@@ -111,15 +108,10 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 		} else {
 			if (legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ) { 
 				// transit_walk - transit_walk || transit_walk - pt
-				if(modesForTransitUsers.containsKey(personId)) {
-					List<String> modes = modesForTransitUsers.get(personId);
-					modes.add(legMode);
-				} else {
-					List<String> modes = new ArrayList<>();
-					modes.add(legMode);
-					modesForTransitUsers.put(personId, modes);
-					transitUserDepartureTime.put(personId, event.getTime()); // store the departure time, when agent is left after a regular activity
-				}
+				List<String> modes = modesForTransitUsers.getOrDefault(personId, new ArrayList<>());
+				modes.add(legMode);
+				modesForTransitUsers.put(personId, modes);
+				transitUserDepartureTime.put(personId, event.getTime()); // store the departure time, when agent is left after a regular activity
 			} else {
 				this.personId2DepartureTime.put(personId, deartureTime);
 			}
@@ -165,18 +157,12 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 	}
 
 	private void storeData(final Id<Person> personId, final String legMode, final double travelTime){
-		if(this.mode2PersonId2TravelTimes.containsKey(legMode)){
+		if( this.mode2PersonId2TravelTimes.get(legMode)!=null ){
 			Map<Id<Person>, List<Double>> personId2TravelTimes = this.mode2PersonId2TravelTimes.get(legMode);
-			if(personId2TravelTimes.containsKey(personId)){
-				List<Double> travelTimes = personId2TravelTimes.get(personId);
-				travelTimes.add(travelTime);
-				personId2TravelTimes.put(personId, travelTimes);
-			} else {
-				List<Double> travelTimes = new ArrayList<>();
-				travelTimes.add(travelTime);
-				personId2TravelTimes.put(personId, travelTimes);
-			}
-		} else { 
+			List<Double> travelTimes = personId2TravelTimes.getOrDefault(personId, new ArrayList<>());
+			travelTimes.add(travelTime);
+			personId2TravelTimes.put(personId, travelTimes);
+		} else {
 			Map<Id<Person>, List<Double>> personId2TravelTimes = new HashMap<>();
 			List<Double> travelTimes = new ArrayList<>();
 			travelTimes.add(travelTime);

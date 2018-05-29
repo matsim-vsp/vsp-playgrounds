@@ -1,4 +1,4 @@
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.headwayMethod;
+package playground.agarwalamit.fundamentalDiagrams.headwayMethod;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,6 +9,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.Mobsim;
@@ -20,12 +21,14 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDTrackMobsimAgent;
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.GlobalFlowDynamicsUpdator;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
-public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
+public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 
 	public static final String PERSON_MODE_ATTRIBUTE_KEY = "travelMode";
 
@@ -35,11 +38,11 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 
 	private final Map<String, VehicleType> modeToVehicleTypes ;
 	private final FDNetworkGenerator fdNetworkGenerator;
-	private final GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
+	private final FDStabilityTester stabilityTester;
 
 	@Inject
-	private DynamicPCUFDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
-                                     FDNetworkGenerator fdNetworkGenerator, GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator) {
+	DynamicHeadwayFDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
+								 FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester) {
 		this.scenario = scenario;
 		this.events = events;
 		this.qnetworkFactory = qnetworkFactory;
@@ -50,7 +53,7 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 											   .collect(Collectors.toMap(e -> e.getKey().toString(),
 													   Map.Entry::getValue));
 		this.fdNetworkGenerator = fdNetworkGenerator;
-		this.globalFlowDynamicsUpdator = globalFlowDynamicsUpdator;
+		this.stabilityTester = stabilityTester;
 	}
 	
 	@Override
@@ -65,13 +68,15 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 		qSim.addMobsimEngine(netsimEngine);
 		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
 
-		FundamentalDiagramDataGenerator.LOG.info("=======================");
-		FundamentalDiagramDataGenerator.LOG.info("Mobsim agents' are directly added to AgentSource.");
-		FundamentalDiagramDataGenerator.LOG.info("=======================");
+		FDModule.LOG.info("=======================");
+		FDModule.LOG.info("Mobsim agents' are directly added to AgentSource.");
+		FDModule.LOG.info("=======================");
 
 		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
 			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
 		}
+
+		FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
 
 		AgentSource agentSource = new AgentSource() {
 			@Override
@@ -80,14 +85,14 @@ public class DynamicPCUFDQSimProvider implements Provider<Mobsim> {
 				for (Person person : scenario.getPopulation().getPersons().values()) {
 					String travelMode = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), PERSON_MODE_ATTRIBUTE_KEY);
 					double randDouble = MatsimRandom.getRandom().nextDouble();
-					double actEndTime = randDouble * FundamentalDiagramDataGenerator.MAX_ACT_END_TIME;
+					double actEndTime = randDouble * FDModule.MAX_ACT_END_TIME;
 
 					FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
-					agent.setGlobalFlowDynamicsUpdator(globalFlowDynamicsUpdator);
+					agent.setStabilityTester(stabilityTester);
 					qSim.insertAgentIntoMobsim(agent);
 
 					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
-					attributableVehicle.getAttributes().putAttribute("vehicle_pcu", modeToVehicleTypes.get(travelMode).getPcuEquivalents() ); //initialize
+					attributableVehicle.getAttributes().putAttribute("headway", 3600./fdConfigGroup.getTrackLinkCapacity() ); //initialize
 					final QVehicle vehicle = new QVehicle(
 //							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class),
 							attributableVehicle);

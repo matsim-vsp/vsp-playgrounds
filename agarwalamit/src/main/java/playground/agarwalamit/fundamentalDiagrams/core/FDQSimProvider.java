@@ -22,10 +22,10 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
+import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
@@ -37,11 +37,11 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	
 	private final Map<String, VehicleType> modeToVehicleTypes ;
 	private final FDNetworkGenerator fdNetworkGenerator;
-	private final GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator;
+	private final FDStabilityTester stabilityTester;
 	
 	@Inject
 	private FDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
-						   FDNetworkGenerator fdNetworkGenerator, GlobalFlowDynamicsUpdator globalFlowDynamicsUpdator) {
+						   FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester) {
 		this.scenario = scenario;
 		this.events = events;
 		this.qnetworkFactory = qnetworkFactory;
@@ -52,7 +52,7 @@ public class FDQSimProvider implements Provider<Mobsim> {
 											   .collect(Collectors.toMap(e -> e.getKey().toString(),
 													   Map.Entry::getValue));
 		this.fdNetworkGenerator = fdNetworkGenerator;
-		this.globalFlowDynamicsUpdator = globalFlowDynamicsUpdator;
+		this.stabilityTester = stabilityTester;
 	}
 	
 	@Override
@@ -67,9 +67,9 @@ public class FDQSimProvider implements Provider<Mobsim> {
 		qSim.addMobsimEngine(netsimEngine);
 		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
 
-		FundamentalDiagramDataGenerator.LOG.info("=======================");
-		FundamentalDiagramDataGenerator.LOG.info("Mobsim agents' are directly added to AgentSource.");
-		FundamentalDiagramDataGenerator.LOG.info("=======================");
+		FDModule.LOG.info("=======================");
+		FDModule.LOG.info("Mobsim agents' are directly added to AgentSource.");
+		FDModule.LOG.info("=======================");
 
 		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
 			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
@@ -82,13 +82,20 @@ public class FDQSimProvider implements Provider<Mobsim> {
 				for (Person person : scenario.getPopulation().getPersons().values()) {
 					String travelMode = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), PERSON_MODE_ATTRIBUTE_KEY);
 					double randDouble = MatsimRandom.getRandom().nextDouble();
-					double actEndTime = randDouble * FundamentalDiagramDataGenerator.MAX_ACT_END_TIME;
+					double actEndTime = randDouble * FDModule.MAX_ACT_END_TIME;
 
 					FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
-					agent.setGlobalFlowDynamicsUpdator(globalFlowDynamicsUpdator);
+					agent.setStabilityTester(stabilityTester);
 					qSim.insertAgentIntoMobsim(agent);
 
-					final QVehicle vehicle = new QVehicle(VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode)));
+					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
+					final QVehicle vehicle = new QVehicle(
+//							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode))
+							attributableVehicle
+					);
+					vehicle.setDriver(agent);
+					scenario.getVehicles().removeVehicle(vehicle.getId());
+					scenario.getVehicles().addVehicle(vehicle.getVehicle());
 					agent.setVehicle(vehicle);
 					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
 //					qSim.createAndParkVehicleOnLink(vehicle.getVehicle(), linkId4VehicleInsertion);
@@ -99,7 +106,7 @@ public class FDQSimProvider implements Provider<Mobsim> {
 
 		qSim.addAgentSource(agentSource);
 
-		if ( FundamentalDiagramDataGenerator.isUsingLiveOTFVis ) {
+		if ( FDModule.isUsingLiveOTFVis ) {
 			// otfvis configuration.  There is more you can do here than via file!
 			final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
 			otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work

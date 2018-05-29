@@ -44,7 +44,8 @@ import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 public class ModalDistanceDistributionControlerListener implements StartupListener, IterationEndsListener {
     private static final Logger LOG = Logger.getLogger(ModalDistanceDistributionControlerListener.class);
 
-    public static final String fileName = "multiMode_distanceDistributionCounts.txt";
+    public static final String fileName_avg = "multiMode_distanceDistributionCounts_average.txt";
+    private static final String fileName_abs = "multiMode_distanceDistributionCounts_absolute.txt";
 
     private final ControlerConfigGroup controlerConfigGroup;
     private final CountsConfigGroup config;
@@ -54,7 +55,6 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
     private int iterationsUsed = 0;
 
     private final DistanceDistribution stats = new DistanceDistribution();
-
 
     @Inject
     private ModalDistanceDistributionControlerListener(
@@ -87,7 +87,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
         if ( event.getIteration() == controlerConfigGroup.getFirstIteration() ) {
             // write the data for first iteration too
             addCounts(beelineDistanceCollector.getOutputDistanceDistribution());
-            writeData(event, this.stats);
+            writeData(event, this.stats, fileName_abs);
             reset();
         } else if (this.config.getWriteCountsInterval() > 0) {
             if (useStatsOfIteration(event.getIteration(), controlerConfigGroup.getFirstIteration())) {
@@ -109,14 +109,15 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
                     averages = this.stats;
                 }
 
-                writeData(event, averages);
+                writeData(event, averages, fileName_avg);
+                writeData(event, beelineDistanceCollector.getOutputDistanceDistribution(), fileName_abs);
 
                 reset();
             }
         }
     }
 
-    private void writeData(final IterationEndsEvent event, DistanceDistribution averages) {
+    private void writeData(final IterationEndsEvent event, DistanceDistribution averages, String fileName) {
         String filename = controlerIO.getIterationFilename(event.getIteration(),
                 fileName);
         try (BufferedWriter writer = IOUtils.getBufferedWriter(filename)) {
@@ -184,6 +185,4 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
                                     value));
         return sortedMap;
     }
-
-
 }

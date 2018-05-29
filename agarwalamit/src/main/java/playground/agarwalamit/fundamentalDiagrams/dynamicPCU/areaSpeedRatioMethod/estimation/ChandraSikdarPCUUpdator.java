@@ -19,8 +19,13 @@
 
 package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -31,20 +36,30 @@ import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-
-import com.google.inject.Inject;
-
+import playground.agarwalamit.fundamentalDiagrams.AttributableVehicleType;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
+import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaMarker;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
+import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.PCUMethod;
+import playground.agarwalamit.fundamentalDiagrams.headwayMethod.HeadwayHandler;
 import playground.agarwalamit.utils.NumberUtils;
 
 /**
  * Created by amit on 29.06.17.
  */
 
-public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler {
+public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler,
+        LinkEnterEventHandler, LinkLeaveEventHandler, IterationEndsListener {
+
+
+    public static final String projected_area_ratio = "projected_area_ratio";
 
     private final Scenario scenario;
     private final Id<Link> trackingStartLink;
@@ -55,15 +70,43 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     private final Map<Id<Vehicle>,String> vehicleId2Mode = new HashMap<>();
 
     private final Map<String, Double> vehicleTypeToLastNotedSpeed = new HashMap<>();
-    private final Map<String, Double> vehicleTypeToProjectedAreaRatio = new HashMap<>(); 
+
+    private final FDDataContainer fdDataContainer;
+    private final FDStabilityTester fdStabilityTester;
+
+    @Inject(optional=true)
+    private PCUMethod pcuMethod = PCUMethod.SPEED_AREA_RATIO;
+
+    private HeadwayHandler delegate;
+    private final Map<String, VehicleTypeToPCU> modeToPCU = new TreeMap<>();
+    private final double qsimDefaultHeadway;
+
+    //a local field, should be configurable
+    private boolean updatePCU =false;
+
+    private final FDConfigGroup fdConfigGroup;
 
     @Inject
-    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator){
+    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator
+    , FDDataContainer fdDataContainer, FDStabilityTester fdStabilityTester, FDConfigGroup fdConfigGroup){
         this.scenario = scenario;
+        this.fdDataContainer = fdDataContainer;
+        this.fdStabilityTester = fdStabilityTester;
         this.trackingStartLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
         this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
-        this.resetVehicleTypeToSpeedMap();
         this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
+        this.delegate = new HeadwayHandler(scenario.getVehicles(), fdNetworkGenerator, fdStabilityTester, fdDataContainer, scenario.getConfig().controler(), fdConfigGroup);
+        this.qsimDefaultHeadway = 3600. / fdConfigGroup.getTrackLinkCapacity();
+        this.fdConfigGroup = fdConfigGroup;
+    }
+
+    @Override
+    public void reset(int iteration) {
+        this.delegate.reset(iteration);
+        this.vehicleId2EnterTime.clear();
+        this.modeToPCU.clear();
+        this.vehicleId2Mode.clear();
+        this.vehicleTypeToLastNotedSpeed.clear();
     }
 
     @Override
@@ -73,6 +116,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
 
     @Override
     public void handleEvent(LinkLeaveEvent event) {
+        this.delegate.handleEvent(event);
         if (event.getLinkId().equals(trackingEndLink)) {
             if (vehicleId2EnterTime.containsKey(event.getVehicleId())) {
                 double enterTime = vehicleId2EnterTime.remove(event.getVehicleId());
@@ -81,23 +125,38 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
                 String mode = this.vehicleId2Mode.get(event.getVehicleId());
                 this.vehicleTypeToLastNotedSpeed.put(mode, speed);
 
-                double pcu = NumberUtils.round( calculatePCU(mode) , 3);
-                scenario.getVehicles().getVehicleTypes().get(Id.create(mode, VehicleType.class)).setPcuEquivalents(pcu);
+                {
+                    // AREA_SPEED_RATIO_method
+                    double pcu = NumberUtils.round(calculateAreaSpeedPCU(mode), 3);
+                    addVehicleTypeToPCU(mode, PCUMethod.SPEED_AREA_RATIO, pcu);
+                }
+                {
+                    // AREA_SPEED_RATIO_method
+                    double pcu = NumberUtils.round(calculateHeadwayPCU(mode), 3);
+                    addVehicleTypeToPCU(mode, PCUMethod.HEADWAY_RATIO, pcu);
+
+                }
+                if (updatePCU) {
+                    scenario.getVehicles()
+                            .getVehicleTypes()
+                            .get(Id.create(mode, VehicleType.class))
+                            .setPcuEquivalents(modeToPCU.get(mode).pcuMethodToPCU.get(pcuMethod));
+                }
             } else {
                 // link leave after departure event, exclude such agents.
             }
         }
     }
 
-    @Override
-    public void reset(int iteration) {
-        this.vehicleId2EnterTime.clear();
-        this.resetVehicleTypeToSpeedMap();
+    private void addVehicleTypeToPCU(String mode, PCUMethod pcuMethod, double pcu){
+        VehicleTypeToPCU vehicleTypeToPCU=  this.modeToPCU.getOrDefault(mode, new VehicleTypeToPCU(mode));
+        vehicleTypeToPCU.pcuMethodToPCU.put(pcuMethod,pcu);
+        modeToPCU.put(mode, vehicleTypeToPCU);
     }
-
 
     @Override
     public void handleEvent(LinkEnterEvent event) {
+        this.delegate.handleEvent(event);
         if (event.getLinkId().equals( trackingStartLink) ) {
             if(vehicleId2EnterTime.containsKey(event.getVehicleId())) {
                 throw new RuntimeException("no enter time should be stored. Event: "+ event.toString());
@@ -107,30 +166,73 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
         }
     }
 
-    private double calculatePCU (final String mode) {
-        double speedRatio = this.vehicleTypeToLastNotedSpeed.get(TransportMode.car) / this.vehicleTypeToLastNotedSpeed.get(mode) ;
-        double areaRatio = this.vehicleTypeToProjectedAreaRatio.get(TransportMode.car) / this.vehicleTypeToProjectedAreaRatio.get(mode);
+    private double calculateHeadwayPCU(final String mode){
+        Map<String, Double> headwayMap = this.delegate.getModeToAverageHeadway();
+        return headwayMap.getOrDefault(mode, qsimDefaultHeadway) / headwayMap.getOrDefault(TransportMode.car, qsimDefaultHeadway);
+    }
+
+    private double calculateAreaSpeedPCU(final String mode) {
+        double speedRatio = this.vehicleTypeToLastNotedSpeed.getOrDefault(TransportMode.car,
+                scenario.getVehicles()
+                        .getVehicleTypes()
+                        .get(Id.create(TransportMode.car, VehicleType.class))
+                        .getMaximumVelocity()) / this.vehicleTypeToLastNotedSpeed.getOrDefault(mode,
+                scenario.getVehicles().getVehicleTypes().get(Id.create(mode, VehicleType.class)).getMaximumVelocity());
+        double areaRatio = getAreaRatio(TransportMode.car) / getAreaRatio(mode);
         return speedRatio / areaRatio ;
     }
 
-    private void resetVehicleTypeToSpeedMap(){
-        for (VehicleType vehicleType : scenario.getVehicles().getVehicleTypes().values() ) {
-            vehicleTypeToLastNotedSpeed.put(vehicleType.getId().toString(), vehicleType.getMaximumVelocity());
+    private double getAreaRatio(String mode){
+//        if (  EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode) ){
+//            return VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
+//        } else {
+            return (double) ((AttributableVehicleType) scenario.getVehicles()
+                                                               .getVehicleTypes()
+                                                               .get(Id.create(mode, VehicleType.class))).getAttributes()
+                                                                                                        .getAttribute(
+                                                                                                                projected_area_ratio);
+//        }
+    }
 
-            if (vehicleType.getDescription()==null ||
-                    (! vehicleType.getDescription().contains(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString()))  ) {
-                throw new RuntimeException("Vehicle projected area ratio is not provided in the vehicle description. This is required if using dynamic PCU settings. Aborting...");
+    @Override
+    public void notifyIterationEnds(IterationEndsEvent event) {
+        this.delegate.notifyIterationEnds(event);
+        //arrival only possible once stability is achieved
+        String file = this.scenario.getConfig().controler().getOutputDirectory() + "/modeToDynamicPCUs.txt";
+        if (event.getIteration()==this.scenario.getConfig().controler().getFirstIteration()){
+            if ( new File(file).delete() ){
+                FDModule.LOG.warn("Removing existing file: "+file);
             }
-
-            int startIndex = vehicleType.getDescription().indexOf(VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString()) + VehicleProjectedAreaMarker.BEGIN_VEHILCE_PROJECTED_AREA.toString().length();
-            int endIndex = vehicleType.getDescription().lastIndexOf(VehicleProjectedAreaMarker.END_VEHILCE_PROJECTED_AREA.toString());
-
-            double projectedAreaRatio = Double.valueOf( vehicleType.getDescription().substring(startIndex, endIndex) );
-
-            vehicleTypeToLastNotedSpeed.put(vehicleType.getId().toString(), vehicleType.getMaximumVelocity());
-            vehicleTypeToProjectedAreaRatio.put(vehicleType.getId().toString(), projectedAreaRatio);
+        }
+        if (this.fdStabilityTester.isStabilityAchieved() || this.fdConfigGroup.isWriteDataIfNoStability()){
+            writeResults(file);
         }
     }
 
-
+    private void writeResults(String outFile){
+        boolean writeHeaders = !(new File(outFile).exists());
+        try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
+            if (writeHeaders) {
+                writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\tmodeDensity\tmodeSpeed\tmodeFlow\tpcu_method\tpcu_value\n");
+            } else{
+                FDModule.LOG.warn("Appending data to the existing file.");
+            }
+            //writing data in melted form
+            for (String mode :this.modeToPCU.keySet()) {
+                for (PCUMethod pcuMethod : PCUMethod.values()){
+                    writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
+                    writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
+                    writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
+                    writer.write(mode+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentDensity()+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentAverageVelocity()+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentFlow()+"\t");
+                    writer.write(pcuMethod+"\t");
+                    writer.write(this.modeToPCU.get(mode).pcuMethodToPCU.get(pcuMethod)+"\n");
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Data is not written/read. Reason : " + e);
+        }
+    }
 }

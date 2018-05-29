@@ -66,13 +66,18 @@ public class ModeAnalysis {
 
 	public static void main(String[] args) {
 		
-		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
-		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
-		final String runId = "test";
+//		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
+//		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
+//		final String runId = "test";
+
+		final String runId = "b5_36";
+		final String runDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/";
+		final String outputDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/modal-split-analysis/";
 		
 		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file
-		final String personAttributesFile = "/Users/ihab/Desktop/test-run-directory_transit-walk/test.output_personAttributes.xml.gz";
-		
+//		final String personAttributesFile = "/Users/ihab/Desktop/test-run-directory_transit-walk/test.output_personAttributes.xml.gz";
+		final String personAttributesFile = null;
+
 		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile);
 		
 		AgentAnalysisFilter filter = new AgentAnalysisFilter(scenario);
@@ -123,6 +128,7 @@ public class ModeAnalysis {
 				double currentLegTotalRouteDistance = 0.;
 				String currentLegMode = null;
 
+				// own approach
 				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
 									
 					if (pE instanceof Leg) {
@@ -144,6 +150,14 @@ public class ModeAnalysis {
 										|| currentLegMode.equals(TransportMode.egress_walk) && leg.getMode().equals(TransportMode.pt)
 										) {
 									currentLegMode = TransportMode.pt;
+									
+								} else if (currentLegMode.equals(TransportMode.car) && leg.getMode().equals(TransportMode.access_walk)
+										|| currentLegMode.equals(TransportMode.access_walk) && leg.getMode().equals(TransportMode.car)
+										|| currentLegMode.equals(TransportMode.car) && leg.getMode().equals(TransportMode.egress_walk)
+										|| currentLegMode.equals(TransportMode.egress_walk) && leg.getMode().equals(TransportMode.car)
+										) {
+									currentLegMode = TransportMode.car;
+									
 								} else {
 									throw new RuntimeException("Two different leg modes found for the same trip: " + leg.getMode() + " and " + currentLegMode + ". Aborting...");
 								}

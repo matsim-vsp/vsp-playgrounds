@@ -32,6 +32,7 @@ import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.PersonFilter;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 
 /**
  * @author amit

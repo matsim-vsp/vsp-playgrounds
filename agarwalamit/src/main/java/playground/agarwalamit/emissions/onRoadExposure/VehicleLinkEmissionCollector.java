@@ -63,19 +63,17 @@ public class VehicleLinkEmissionCollector {
         travelTime += time;
     }
 
-    void addColdEmissions(Map<ColdPollutant, Double> coldEmissions) {
+    void addColdEmissions(Map<ColdPollutant, Double> coldEmissions, double linkLength) {
         this.emissions.entrySet()
                       .stream()
                       .filter(e -> ColdPollutant.getValue(e.getKey())!=null)
                       .forEach(e -> this.emissions.put(e.getKey(),
-                              e.getValue() + coldEmissions.get(ColdPollutant.valueOf(e.getKey()))));
+                              e.getValue() + coldEmissions.get(ColdPollutant.valueOf(e.getKey()))/linkLength ));
     }
 
-    void addWarmEmissions(Map<WarmPollutant, Double> warmEmissions) {
-        this.emissions.entrySet()
-                     .stream()
-                     .forEach(e -> this.emissions.put(e.getKey(),
-                             e.getValue() + warmEmissions.get(WarmPollutant.valueOf(e.getKey()))));
+    void addWarmEmissions(Map<WarmPollutant, Double> warmEmissions, double linkLength) {
+        this.emissions.forEach((key, value) -> this.emissions.put(key,
+                value + warmEmissions.get(WarmPollutant.valueOf(key)) / linkLength));
     }
 
     Map<String, Double> getInhaledMass(OnRoadExposureConfigGroup config) {

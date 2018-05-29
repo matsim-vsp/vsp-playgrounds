@@ -28,14 +28,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -43,6 +41,7 @@ import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
@@ -50,6 +49,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
@@ -61,53 +61,88 @@ import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 public class PatnaOnRoadExposure {
 
-    private static final String wardsFile = FileUtils.SHARED_SVN+"/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
+    private static final String wardsFile = "../../shared-svn/projects/patnaIndia/inputs/raw/others/wardFile/Wards.shp";
     private static final Collection<SimpleFeature> simpleFeatureCollection = ShapeFileReader.getAllFeatures(wardsFile);
+    private static final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
+    private static final String networkFile = "";
 
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
 
+    private static final String data_dates [] = {"none","_22Nov2017","_22Jan2018","_22Mar2018","_22May2018"};
+
     public static void main(String[] args) {
 
-        PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
+        for (String date : data_dates) {
+            PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
 
-        {
-            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
-
-            if (writeEmissionEventsFirst) {
+            {
+                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
                 String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
-                String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
-                String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
 
-                PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
-                PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                if (writeEmissionEventsFirst) {
+                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
+
+                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                }
+
+                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+                        outputDir + "/analysis/",
+                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
             }
-            patnaOnRoadExposure.run(outputDir+"/output/output_events.xml.gz", outputDir+"/analysis/");
-        }
-        {
-            String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
-
-            if (writeEmissionEventsFirst) {
+            {
+                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
                 String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
-                String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
-                String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
 
-                PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
-                PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                if (writeEmissionEventsFirst) {
+                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
+
+                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                }
+
+                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+                        outputDir + "/analysis/",
+                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
             }
-
-            patnaOnRoadExposure.run(outputDir+"/output/output_events.xml.gz",outputDir+"/analysis/");
         }
     }
 
-    private void run(String eventsFile, String outputFilesDir){
+    private void run(String eventsFile, String outputFilesDir, Network network, String data_date){
+
         OnRoadExposureConfigGroup onRoadExposureConfigGroup = new OnRoadExposureConfigGroup();
         onRoadExposureConfigGroup.setUsingMicroGramUnits(true);
 
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.PM.toString(), 236.0);
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.CO.toString(), 1690.0);
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.NO2.toString(), 93.8);
-        onRoadExposureConfigGroup.getPollutantToBackgroundConcentration().put(WarmPollutant.SO2.toString(), 5.1);
+        if(data_date.equals("_22Nov2017")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 217.36 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1410.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 116.79* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 21.44* Math.pow(10,-6));
+        } else if (data_date.equals("_22Jan2018")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 201.16 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 3470.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 44.70* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 49.82* Math.pow(10,-6));
+        } else if (data_date.equals("_22Mar2018")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 174.79 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 2140.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 24.48* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 52.57* Math.pow(10,-6));
+        } else if (data_date.equals("_22May2018")) {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 86.54 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1120.0 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 7.65 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 43.58 * Math.pow(10,-6));
+        } else {
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 0.);
+            data_date = "_withoutBackgroundConc";
+        }
 
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("motorbike");
         onRoadExposureConfigGroup.getPollutantToPenetrationRate("truck");
@@ -127,7 +162,7 @@ public class PatnaOnRoadExposure {
         EventsManager eventsManager = EventsUtils.createEventsManager();
 
         // this will include exposure to agent which leave in the same time step.
-        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup);
+        OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, network);
         eventsManager.addHandler(onRoadExposureHandler);
 
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
@@ -139,9 +174,8 @@ public class PatnaOnRoadExposure {
         if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {
             Map<String, Map<String, Double>> modeToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
-            String outFile = outputFilesDir+"/modeToOnRoadExposure.txt";
-            BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
-            try {
+            String outFile = outputFilesDir+"/modeToOnRoadExposure"+ data_date +".txt";
+            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("mode\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
@@ -154,7 +188,6 @@ public class PatnaOnRoadExposure {
                     }
                     writer.newLine();
                 }
-                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException("Data is not written/read. Reason : " + e);
             }
@@ -164,26 +197,29 @@ public class PatnaOnRoadExposure {
         {
             Map<Id<Person>, Coord> person2homeCoord = getXYForHomeLocationsOfPersons();
             Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
-            String outFile = outputFilesDir+"/personToOnRoadExposure.txt";
-            BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
-            try {
+            String outFile = outputFilesDir+"/personToOnRoadExposure"+ data_date +"_urban.txt";
+            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("personId\tzoneId\tX\tY\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
                 }
                 writer.newLine();
                 for (Id<Person> personId : personToInhaledMass.keySet()) {
+                    if (! PatnaPersonFilter.isPersonBelongsToUrban(personId)) continue;
+
                     Coord coord = person2homeCoord.get(personId);
                     String zoneId;
-                    if (coord==null) zoneId = "NA";
-                    else zoneId = getZoneId( coord );
-                    writer.write(personId+"\t"+zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
+                    if (coord==null) {
+                        writer.write(personId+"\t"+"NA"+"\t"+ "NA"+"\t"+"NA"+"\t");
+                    } else {
+                        zoneId = getZoneId( coord );
+                        writer.write(personId+"\t"+zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
+                    }
                     for (String poll : pollutants){
                         writer.write( personToInhaledMass.get(personId).get(poll) + "\t");
                     }
                     writer.newLine();
                 }
-                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException("Data is not written/read. Reason : " + e);
             }
@@ -191,9 +227,8 @@ public class PatnaOnRoadExposure {
         }
         {
             Map<Id<Link>, Map<String, Double>> linkToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getLinkToInhaledMass();
-            String outFile = outputFilesDir+"/linkToOnRoadExposure.txt";
-            BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
-            try {
+            String outFile = outputFilesDir+"/linkToOnRoadExposure"+ data_date +".txt";
+            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("linkId\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
@@ -206,7 +241,6 @@ public class PatnaOnRoadExposure {
                     }
                     writer.newLine();
                 }
-                writer.close();
             } catch (IOException e) {
                 throw new RuntimeException("Data is not written/read. Reason : " + e);
             }
@@ -232,10 +266,7 @@ public class PatnaOnRoadExposure {
 
     private static String getZoneId (Coord cord){
         for(SimpleFeature simpleFeature : simpleFeatureCollection){
-            CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
-            cord = ct.transform(cord);
-            Point point = new GeometryFactory().createPoint(new Coordinate(cord.getX(), cord.getY()));
-            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains(point ) ) {
+            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains(MGC.coord2Point(cord) ) ) {
                 return String.valueOf(simpleFeature.getAttribute("ID1"));
             }
         }

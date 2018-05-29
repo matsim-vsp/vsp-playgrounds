@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2017 by the members listed in the COPYING,        *
+ * copyright       : (C) 2018 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,34 +17,29 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation;
+package playground.agarwalamit.fundamentalDiagrams;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
+import org.matsim.utils.objectattributes.attributable.Attributable;
+import org.matsim.utils.objectattributes.attributable.Attributes;
+import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleImpl;
+import org.matsim.vehicles.VehicleType;
 
 /**
- * Created by amit on 29.06.17.
- *
- * update pcu at the end of track, eventually, this will also have effect on flow capacity
- *
+ * Created by amit on 04.05.18.
  */
 
+public class AttributableVehicle extends VehicleImpl implements Attributable {
 
-public class LinkPCUInfoCollector {
+    private final Attributes attributes = new Attributes();
 
-    private final Id<Link> linkId;
-    private final double timeBin;
-
-    private double pcu;
-
-    LinkPCUInfoCollector (final Id<Link> linkId, final double timeBin) {
-        this.linkId = linkId;
-        this.timeBin = timeBin;
+    public AttributableVehicle(Id<Vehicle> id, VehicleType type) {
+        super(id, type);
     }
 
-    public double getPCU () {
-        return this.pcu;
+    @Override
+    public Attributes getAttributes() {
+        return this.attributes;
     }
-
-
 }

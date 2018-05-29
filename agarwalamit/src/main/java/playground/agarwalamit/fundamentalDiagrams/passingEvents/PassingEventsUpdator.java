@@ -16,22 +16,49 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.fundamentalDiagrams.core;
+package playground.agarwalamit.fundamentalDiagrams.passingEvents;
 
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.events.*;
-import org.matsim.api.core.v01.events.handler.*;
+import org.matsim.api.core.v01.events.LinkEnterEvent;
+import org.matsim.api.core.v01.events.LinkLeaveEvent;
+import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
+import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
+import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
+import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 
 /**
  * @author amit
  */
 
-class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler,
+		VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, IterationEndsListener {
 
 	private final Map<Id<Person>, Double> personId2TrackEnterTime;
 
@@ -55,16 +82,29 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 
 	private final double lengthOfTrack ;
 
-	public PassingEventsUpdator(final Collection<String> seepModes, final Id<Link> trackingStartLink, final Id<Link> trackingEndLink, final double legnthOfTrack) {
-		this.seepModes = seepModes;
+	private final FDDataContainer fdDataContainer;
+	private final FDStabilityTester tester;
+	private String outputDir;
+
+	private final FDConfigGroup fdConfigGroup;
+
+	@Inject
+	PassingEventsUpdator(QSimConfigGroup qSimConfigGroup, FDNetworkGenerator fdNetworkGenerator,
+						 FDDataContainer fdDataContainer, ControlerConfigGroup config,
+						 FDStabilityTester tester, FDConfigGroup fdConfigGroup) {
+		this.seepModes = qSimConfigGroup.getSeepModes();
 		this.personId2TrackEnterTime = new HashMap<>();
 		this.personId2LinkEnterTime = new HashMap<>();
 		this.personId2LegMode = new HashMap<>();
 		this.bikesPassedByEachCarPerKm = new ArrayList<>();
 		this.carsPerKm = new ArrayList<>();
-		this.trackingStartLink = trackingStartLink;
-		this.trackingEndLink = trackingEndLink;
-		this.lengthOfTrack = legnthOfTrack;
+		this.trackingStartLink =  fdNetworkGenerator.getFirstLinkIdOfTrack();
+		this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
+		this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
+		this.fdDataContainer = fdDataContainer;
+		this.outputDir = config.getOutputDirectory();
+		this.tester = tester;
+		this.fdConfigGroup = fdConfigGroup;
 	}
 
 	@Override
@@ -143,15 +183,15 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 										+"("+this.personId2LegMode.get(leavingPersonId)+")"+" have entered the track at "+ this.personId2TrackEnterTime.get(personId)+ ", "
 										+ this.personId2TrackEnterTime.get(leavingPersonId)+" respectively. However, the later agent is leaving first. These persons entered on the current link at "
 										+ this.personId2LinkEnterTime.get(personId) + ", "+ this.personId2LinkEnterTime.get(leavingPersonId) +" respectively." );
-					} else {
+					} /*else {
 						// do nothing.
-					}
+					}*/
 				} else {
 					overtakenBicycles++;
 				}
-			} else {
+			} /*else {
 				// do nothing; no overtaking occured.
-			}
+			}*/
 		}
 		return overtakenBicycles;
 	}
@@ -171,11 +211,35 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 		driverAgents.remove(event.getVehicleId());
 	}
 
-	public double getAvgBikesPassingRate(){
+	@Override
+	public void notifyIterationEnds(IterationEndsEvent event) {
+		//arrival only possible once stability is achieved
+		if (tester.isStabilityAchieved() || this.fdConfigGroup.isWriteDataIfNoStability() ){
+			writeResults(this.outputDir + "/modeToPassingRates.txt");
+		}
+	}
+
+	private void writeResults(String outFile){
+		boolean writeHeaders = !(new File(outFile).exists());
+		try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
+			if (writeHeaders) writer.write("density\tspeed\tflow\tmode\theadway\n");
+			else{
+				FDModule.LOG.warn("Appending data to the existing file.");
+			}
+			writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
+			writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
+			writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
+			writer.write(getNoOfCarsPerKm()+"\t"+getAvgBikesPassingRate()+"\n");
+		} catch (IOException e) {
+			throw new RuntimeException("Data is not written/read. Reason : " + e);
+		}
+	}
+
+	private double getAvgBikesPassingRate(){
 		return this.bikesPassedByEachCarPerKm.stream().mapToDouble(i -> i).average().orElse(0.0);
 	}
 
-	public double getNoOfCarsPerKm(){
+	private double getNoOfCarsPerKm(){
 		return this.carsPerKm.stream().mapToDouble(i -> i).average().orElse(0.0);
 	}
 }

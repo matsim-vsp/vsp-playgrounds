@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.fundamentalDiagrams;
+package playground.agarwalamit.fundamentalDiagrams.shockwave;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +27,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkChangeEvent.ChangeType;
@@ -36,8 +37,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.FDUtils;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.utils.FileUtils;
 
 /**
@@ -105,7 +106,10 @@ public class ShockwaveExperiment {
             NetworkUtils.addNetworkChangeEvent(scenario.getNetwork(), event);
 		}
 
-		FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(scenario);
-		fundamentalDiagramDataGenerator.run();
+		Controler controler = new Controler(scenario);
+		controler.addOverridingModule(new FDModule(scenario));
+		controler.run();
+
+		FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
 	}
 }

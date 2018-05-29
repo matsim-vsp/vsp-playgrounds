@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.analysis.modalShare;
+package playground.vsp.analysis.modules.modalAnalyses.modalShare;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,16 +113,12 @@ public class ModalShareEventHandler implements PersonDepartureEventHandler, Tran
 	}
 
 	private void storeMode(String legMode) {
-		if(mode2numberOflegs.containsKey(legMode)){
-			mode2numberOflegs.put(legMode, mode2numberOflegs.get(legMode) + 1 );
-		} else {
-			mode2numberOflegs.put(legMode, 1);
-		}
+		mode2numberOflegs.merge(legMode, 1, (a, b) -> a + b);
 	}
 
 	public void handleRemainingTransitUsers(){
 		if(!modesForTransitUsers.isEmpty()) {
-			Logger.getLogger(ModalShareFromEvents.class).warn("A few transit users are not handle due to stuckAndAbort. Handling them now.");
+			Logger.getLogger(ModalShareEventHandler.class).warn("A few transit users are not handle due to stuckAndAbort. Handling them now.");
 			for(Id<Person> pId : modesForTransitUsers.keySet()){
 				List<String> modes = modesForTransitUsers.get(pId);
 				String legMode = modes.contains(TransportMode.pt) ? TransportMode.pt : TransportMode.walk;
