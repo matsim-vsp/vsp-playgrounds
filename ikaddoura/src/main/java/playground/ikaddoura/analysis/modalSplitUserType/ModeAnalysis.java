@@ -118,7 +118,7 @@ public class ModeAnalysis {
 		int counter = 0;
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			
-			if (counter%10000 == 0) {
+			if (counter%100000 == 0) {
 				log.info("Person #" + counter);
 			}
 			
@@ -128,7 +128,6 @@ public class ModeAnalysis {
 				double currentLegTotalRouteDistance = 0.;
 				String currentLegMode = null;
 
-				// own approach
 				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
 									
 					if (pE instanceof Leg) {
@@ -137,29 +136,23 @@ public class ModeAnalysis {
 						currentLegTotalRouteDistance += leg.getRoute().getDistance();
 						
 						if (currentLegMode == null) {
+							// first leg after a 'real' activity
 							currentLegMode = leg.getMode();
 						} else {
+							// at least second leg after a 'real' activity
+							
 							if (currentLegMode.equals(leg.getMode())) {
-								// same mode
+								// same mode, nothing to do
+								
 							} else {
-								if (currentLegMode.equals(TransportMode.pt) && leg.getMode().equals(TransportMode.transit_walk)
-										|| currentLegMode.equals(TransportMode.transit_walk) && leg.getMode().equals(TransportMode.pt)
-										|| currentLegMode.equals(TransportMode.pt) && leg.getMode().equals(TransportMode.access_walk)
-										|| currentLegMode.equals(TransportMode.access_walk) && leg.getMode().equals(TransportMode.pt)
-										|| currentLegMode.equals(TransportMode.pt) && leg.getMode().equals(TransportMode.egress_walk)
-										|| currentLegMode.equals(TransportMode.egress_walk) && leg.getMode().equals(TransportMode.pt)
-										) {
-									currentLegMode = TransportMode.pt;
-									
-								} else if (currentLegMode.equals(TransportMode.car) && leg.getMode().equals(TransportMode.access_walk)
-										|| currentLegMode.equals(TransportMode.access_walk) && leg.getMode().equals(TransportMode.car)
-										|| currentLegMode.equals(TransportMode.car) && leg.getMode().equals(TransportMode.egress_walk)
-										|| currentLegMode.equals(TransportMode.egress_walk) && leg.getMode().equals(TransportMode.car)
-										) {
-									currentLegMode = TransportMode.car;
-									
+								
+								if (currentLegMode.equals(TransportMode.access_walk)
+										|| currentLegMode.equals(TransportMode.egress_walk)
+										|| currentLegMode.equals(TransportMode.transit_walk)) {
+									// update the current leg mode by the 'real' trip mode
+									currentLegMode = leg.getMode();
 								} else {
-									throw new RuntimeException("Two different leg modes found for the same trip: " + leg.getMode() + " and " + currentLegMode + ". Aborting...");
+									log.warn("Two different leg modes found for the same trip (between two 'real' activities): " + leg.getMode() + " and " + currentLegMode + ".");
 								}
 							}
 						}
