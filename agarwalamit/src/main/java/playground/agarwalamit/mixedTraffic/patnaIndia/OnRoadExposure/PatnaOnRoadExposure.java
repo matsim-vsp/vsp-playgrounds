@@ -28,10 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -44,6 +41,7 @@ import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
@@ -267,10 +265,8 @@ public class PatnaOnRoadExposure {
     }
 
     private static String getZoneId (Coord cord){
-        Coord cord_transform = ct.transform(cord);
         for(SimpleFeature simpleFeature : simpleFeatureCollection){
-            Point point = new GeometryFactory().createPoint(new Coordinate(cord_transform.getX(), cord_transform.getY()));
-            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains( point ) ) {
+            if ( ((Geometry) simpleFeature.getDefaultGeometry()).contains(MGC.coord2Point(cord) ) ) {
                 return String.valueOf(simpleFeature.getAttribute("ID1"));
             }
         }
