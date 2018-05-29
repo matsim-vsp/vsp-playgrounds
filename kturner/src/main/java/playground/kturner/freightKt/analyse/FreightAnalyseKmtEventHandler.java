@@ -335,11 +335,27 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		return vehTypeId2TravelTimes;
 	}
 	
-	//TODO: erstellen  mai/18
-	public Map<Id<VehicleType>, Double> getVehTypId2TravelTimesInLEZ(Id<VehicleType> vehicleTypeId) {
-		log.warn("Hier fehlen noch die Inhalte fuer TT in LEZ");
-		// TODO Auto-generated method stub
-		return null;
+	public Map<Id<VehicleType>, Double> getVehTypId2TravelTimesInLEZ(Id<VehicleType> vehTypeId) {
+		Map<Id<VehicleType>,Double> vehTypeId2TravelTimesInLEZ = new HashMap<Id<VehicleType>, Double>();
+		for(Id<Person> personId : personId2tripNumber2travelTimeInLEZ.keySet()){
+			for(int i : personId2tripNumber2travelTimeInLEZ.get(personId).keySet()){
+				if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+					if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+						if (vehTypeId.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
+							double travelTime = personId2tripNumber2travelTimeInLEZ.get(personId).get(i);
+							if (vehTypeId2TravelTimesInLEZ.containsKey(vehTypeId)){
+								vehTypeId2TravelTimesInLEZ.put(vehTypeId, vehTypeId2TravelTimesInLEZ.get(vehTypeId) + travelTime);
+							} else {
+								vehTypeId2TravelTimesInLEZ.put(vehTypeId, travelTime);
+							}
+						}
+					}
+				} else {
+					//do nothing
+				}
+			}
+		}
+		return vehTypeId2TravelTimesInLEZ;
 	}
 	
 	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres Fahrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
