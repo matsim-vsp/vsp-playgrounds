@@ -135,14 +135,20 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			}
 		}	
 		
-		//TODO: Auch für withinLEZ? 
 		// updating the trip Length
 		int tripNumber = personId2currentTripNumber.get(event.getVehicleId());
 		double distanceBefore = personId2tripNumber2tripDistance.get(event.getVehicleId()).get(tripNumber);
 		double updatedDistance = distanceBefore + linkLength;
 		Map<Integer,Double> tripNumber2tripDistance = personId2tripNumber2tripDistance.get(event.getVehicleId());
 		tripNumber2tripDistance.put(tripNumber, updatedDistance);
-		personId2tripNumber2tripDistance.put(Id.createPersonId(event.getVehicleId()), tripNumber2tripDistance);		
+		personId2tripNumber2tripDistance.put(Id.createPersonId(event.getVehicleId()), tripNumber2tripDistance);			
+		if(lezLinkIds.contains(linkId)) { // for LEZ
+			double distanceBeforeInLEZ = personId2tripNumber2tripDistanceInLEZ.get(event.getVehicleId()).get(tripNumber);
+			double updatedDistanceInLEZ = distanceBeforeInLEZ + linkLength;
+			Map<Integer,Double> tripNumber2tripDistanceInLEZ = personId2tripNumber2tripDistanceInLEZ.get(event.getVehicleId());
+			tripNumber2tripDistanceInLEZ.put(tripNumber, updatedDistanceInLEZ);
+			personId2tripNumber2tripDistanceInLEZ.put(Id.createPersonId(event.getVehicleId()), tripNumber2tripDistanceInLEZ);		
+		}	
 	}
 
 	//TODO: Noch für withinLEZ anpassen
