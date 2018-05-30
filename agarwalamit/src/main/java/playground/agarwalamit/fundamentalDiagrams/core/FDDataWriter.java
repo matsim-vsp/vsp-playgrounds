@@ -118,9 +118,9 @@ public class FDDataWriter implements IterationEndsListener, ShutdownListener {
         if( stableState || this.FDConfigGroup.isWriteDataIfNoStability()) {
             writer.print("\n"); //always stats with a new line
 
-            writer.format("%d\t",fdDataContainer.getGlobalData().getnumberOfAgents());
+            writer.format("%d\t",fdDataContainer.getGlobalData().getNumberOfAgents());
             for (String travelMode : travelModes) {
-                writer.format("%d\t", fdDataContainer.getTravelModesFlowData().get(travelMode).getnumberOfAgents());
+                writer.format("%d\t", fdDataContainer.getTravelModesFlowData().get(travelMode).getNumberOfAgents());
             }
             writer.format("%.2f\t", fdDataContainer.getGlobalData().getPermanentDensity());
             for (String travelMode : travelModes) {
