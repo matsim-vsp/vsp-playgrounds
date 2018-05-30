@@ -69,16 +69,25 @@ public class ModeAnalysis {
 //		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
-
-		final String runId = "b5_36";
-		final String runDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/";
-		final String outputDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/modal-split-analysis/";
 		
-		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file
-//		final String personAttributesFile = "/Users/ihab/Desktop/test-run-directory_transit-walk/test.output_personAttributes.xml.gz";
-		final String personAttributesFile = null;
+		final String runId = "b5_64";
+		final String runDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/";
+		
+		// if iteration < 0 --> analysis of the final iteration
+		int iteration = 100;
+		
+		final String outputDirectory;
+		if (iteration >= 0) {
+			outputDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/modal-split-analysis_" + "it." + iteration + "/";
+		} else {
+			outputDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/modal-split-analysis/";
+		}
+		
+		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file; null --> using the output person attributes file
+		final String personAttributesFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_5_ik/population/personAttributes_500_10pct.xml.gz";
+//		final String personAttributesFile = null;
 
-		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile);
+		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile, iteration);
 		
 		AgentAnalysisFilter filter = new AgentAnalysisFilter(scenario);
 		
@@ -112,7 +121,7 @@ public class ModeAnalysis {
 		analysis.writeTripRouteDistances(outputDirectory, distanceGroups);
 		analysis.writeTripEuclideanDistances(outputDirectory, distanceGroups);
 	}
-		
+
 	public void run() {
 		
 		int counter = 0;
@@ -151,6 +160,12 @@ public class ModeAnalysis {
 										|| currentLegMode.equals(TransportMode.transit_walk)) {
 									// update the current leg mode by the 'real' trip mode
 									currentLegMode = leg.getMode();
+									
+								} else if (leg.getMode().equals(TransportMode.access_walk)
+										|| leg.getMode().equals(TransportMode.egress_walk)
+										|| leg.getMode().equals(TransportMode.transit_walk)) {
+									// current leg mode already set to the 'real' trip mode
+									
 								} else {
 									log.warn("Two different leg modes found for the same trip (between two 'real' activities): " + leg.getMode() + " and " + currentLegMode + ".");
 								}
@@ -388,38 +403,64 @@ public class ModeAnalysis {
 
 	}
 
-	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFile) {
+	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFile, int iteration) {
 		Scenario scenario;
-		if (runId == null) {
-			Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");
-			config.network().setInputFile(null);
-			config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
-			if (personAttributesFile == null) {
-				config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
+		if (iteration < 0) {
+			if (runId == null) {
+				Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");
+				config.network().setInputFile(null);
+				config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
+				if (personAttributesFile == null) {
+					config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
+				} else {
+					config.plans().setInputPersonAttributeFile(personAttributesFile);
+				}
+				config.vehicles().setVehiclesFile(null);
+				config.transit().setTransitScheduleFile(null);
+				config.transit().setVehiclesFile(null);
+				scenario = ScenarioUtils.loadScenario(config);
+				return scenario;
+				
 			} else {
-				config.plans().setInputPersonAttributeFile(personAttributesFile);
+				Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
+				config.network().setInputFile(null);
+				config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
+				if (personAttributesFile == null) {
+					config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
+				} else {
+					config.plans().setInputPersonAttributeFile(personAttributesFile);
+				}
+				config.vehicles().setVehiclesFile(null);
+				config.transit().setTransitScheduleFile(null);
+				config.transit().setVehiclesFile(null);
+				scenario = ScenarioUtils.loadScenario(config);
+				return scenario;
 			}
-			config.vehicles().setVehiclesFile(null);
-			config.transit().setTransitScheduleFile(null);
-			config.transit().setVehiclesFile(null);
-			scenario = ScenarioUtils.loadScenario(config);
-			return scenario;
-			
 		} else {
-			Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
-			config.network().setInputFile(null);
-			config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
-			if (personAttributesFile == null) {
-				config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
+			Config config = ConfigUtils.createConfig();
+
+			if (runId == null) {
+				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + iteration + "." + "plans.xml.gz");
+				if (personAttributesFile == null) {
+					throw new RuntimeException("Person attributes file required. Aborting...");
+				} else {
+					config.plans().setInputPersonAttributeFile(personAttributesFile);
+				}
+				scenario = ScenarioUtils.loadScenario(config);
+				return scenario;
+				
 			} else {
-				config.plans().setInputPersonAttributeFile(personAttributesFile);
+				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + "." + "plans.xml.gz");
+				if (personAttributesFile == null) {
+					throw new RuntimeException("Person attributes file required. Aborting...");
+				} else {
+					config.plans().setInputPersonAttributeFile(personAttributesFile);
+				}
+				scenario = ScenarioUtils.loadScenario(config);
+				return scenario;
 			}
-			config.vehicles().setVehiclesFile(null);
-			config.transit().setTransitScheduleFile(null);
-			config.transit().setVehiclesFile(null);
-			scenario = ScenarioUtils.loadScenario(config);
-			return scenario;
 		}
+		
 	}
 		
 }
