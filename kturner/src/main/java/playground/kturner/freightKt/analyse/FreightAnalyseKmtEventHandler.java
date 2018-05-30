@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -42,9 +43,8 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistanceInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>();	//Distance within LowEmissionZone //TODO Add getter kmt, mai'18
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2travelTimeInLEZ = new HashMap<Id<Person>, Map<Integer,Double>>(); //TravelTime within LowEmissionZone //TODO Add getter kmt, mai'18
 	private Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2amount = new HashMap<Id<Person>, Map<Integer,Double>>();	//TODO: Add functionality kmt, mai'18
-	private Map<Id<Person>,Double> driverId2totalDistance = new HashMap<Id<Person>,Double>(); //TODO: Auch nochmal mit within LEZ ? kmt mai 18
+	private Map<Id<Person>,Double> driverId2totalDistance = new HashMap<Id<Person>,Double>(); 
 	private Map<Id<Person>,Double> driverId2totalDistanceInLEZ = new HashMap<Id<Person>,Double>(); //Distance within LowEmissionZone //TODO Add getter kmt, mai'18
-
 	
 	public FreightAnalyseKmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes) {
 		this.scenario = scenario;
@@ -141,6 +141,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 		tripNumber2tripDistance.put(tripNumber, updatedDistance);
 		personId2tripNumber2tripDistance.put(Id.createPersonId(event.getVehicleId()), tripNumber2tripDistance);			
 		if(lezLinkIds.contains(linkId)) { // for LEZ
+			log.info("personId2tripNumber2tripDistanceInLEZ: " + personId2tripNumber2tripDistanceInLEZ.toString());
 			double distanceBeforeInLEZ = personId2tripNumber2tripDistanceInLEZ.get(event.getVehicleId()).get(tripNumber);
 			double updatedDistanceInLEZ = distanceBeforeInLEZ + linkLength;
 			Map<Integer,Double> tripNumber2tripDistanceInLEZ = personId2tripNumber2tripDistanceInLEZ.get(event.getVehicleId());
@@ -150,6 +151,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	}
 
 	//TODO: Noch für withinLEZ anpassen
+	//Vorebeirtung, dass Person hinzugefügt wird.
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
 		if (personId2currentTripNumber.containsKey(event.getPersonId())) {
@@ -167,6 +169,16 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			Map<Integer,Double> tripNumber2amount = personId2tripNumber2amount.get(event.getPersonId());
 			tripNumber2amount.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
 			personId2tripNumber2amount.put(event.getPersonId(), tripNumber2amount);
+			
+			if(lezLinkIds.contains(event.getLinkId())) {
+				
+				//TODO: Same for DepatureTime= ? -> Wozu benötigt?
+				Map<Integer,Double> tripNumber2tripDistanceInLEZ = personId2tripNumber2tripDistanceInLEZ.get(event.getPersonId());
+				tripNumber2tripDistanceInLEZ.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);  //Hinweis: TripNumber wie bei analyse aller Trips
+				personId2tripNumber2tripDistanceInLEZ.put(event.getPersonId(), tripNumber2tripDistanceInLEZ);
+							
+			}
+			
 	
 		} else {
 			// the following trip is the person's first trip
@@ -180,9 +192,15 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			tripNumber2tripDistance.put(1, 0.0);
 			personId2tripNumber2tripDistance.put(event.getPersonId(), tripNumber2tripDistance);
 			
+			//Initialisiere auch fuer Zaehlung der trips in LEZ
+			Map<Integer,Double> tripNumber2tripDistanceInLEZ = new HashMap<Integer, Double>();
+			tripNumber2tripDistanceInLEZ.put(1, 0.0);
+			personId2tripNumber2tripDistanceInLEZ.put(event.getPersonId(), tripNumber2tripDistanceInLEZ);
+			
 			Map<Integer,Double> tripNumber2amount = new HashMap<Integer, Double>();
 			tripNumber2amount.put(1, 0.0);
 			personId2tripNumber2amount.put(event.getPersonId(), tripNumber2amount);
+				
 		}
 		
 	}
@@ -267,13 +285,17 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	
 	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres Fahrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
 	public Map<Id<VehicleType>,Double> getVehTypId2TourDistances(Id<VehicleType> vehTypeId) {
-		log.info("Calculate distances for vehicleTyp " + vehTypeId.toString());
+		log.debug("Calculate distances for vehicleTyp " + vehTypeId.toString());
 		Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new HashMap<Id<VehicleType>, Double>();
 		for(Id<Person> personId: personId2tripNumber2tripDistance.keySet()){
+			log.debug("Handle Person: "+ personId );
 			for(int i : personId2tripNumber2tripDistance.get(personId).keySet()){
+				log.debug("Handle Trip "+ i+ " of person: "+ personId );
 				if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
+					log.debug("PersonId contains : "+ vehTypeId.toString() );
 					if (vehTypeId.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
 						double distance = personId2tripNumber2tripDistance.get(personId).get(i);
+						log.debug("Lenght of Trip  "+ i + " of Person " + personId + " is: " + distance);
 						if (vehTypeId2TourDistances.containsKey(vehTypeId)){
 							vehTypeId2TourDistances.put(vehTypeId, vehTypeId2TourDistances.get(vehTypeId) + distance);
 							log.debug("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
@@ -283,7 +305,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 						}
 					}
 				}else{
-					//do nothing
+					log.debug("Person " + personId + " has NOT a Vehicle of Type: " + vehTypeId);//do nothing
 				}
 			}
 		}
