@@ -71,7 +71,7 @@ public class AccessibilityComputationBerlin_V2 {
 		Network network = null;
 		ActivityFacilities facilities = null;
 		try {
-			URL osm = new URL("http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=" + southwest.getX() + "," + southwest.getY() + "," + northeast.getX() + "," + northeast.getY() +"]");
+			URL osm = new URL("http://overpass-api.de/api/xapi_meta?*[bbox=" + southwest.getX() + "," + southwest.getY() + "," + northeast.getX() + "," + northeast.getY() +"]");
 		    AccessibilityOsmNetworkReader networkReader = new AccessibilityOsmNetworkReader(((HttpURLConnection) osm.openConnection()).getInputStream(), scenarioCRS);
 			networkReader.setKeepPaths(true);
 			networkReader.setIincludeLowHierarchyWays(true);
@@ -82,7 +82,7 @@ public class AccessibilityComputationBerlin_V2 {
 			e.printStackTrace();
 		}
 		
-		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/neu/");
+		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/neu2/");
 		config.controler().setRunId("de_berlin_" + cellSize.toString().split("\\.")[0]);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
