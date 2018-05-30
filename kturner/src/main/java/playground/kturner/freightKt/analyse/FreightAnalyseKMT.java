@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -32,18 +33,14 @@ public class FreightAnalyseKMT {
 	 *  @author kturner
 	 */
 
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Base_Ia/Run_1/" ;
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/CordonTollOnHeavy/Run_1/" ; //City-Maut
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithoutUCC/Run_1/" ; //CO2-free City
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/ElectroWithUCC/Run_1/" 	//CO2-freie city mit UCC
-
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Grid/Base/Run_1/" ;
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/Base/Run_1/" ;
 	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
 		
 	private static final Logger log = Logger.getLogger(FreightAnalyseKMT.class);
 	
 	public static void main(String[] args) throws UncheckedIOException, IOException {
+		log.setLevel(Level.DEBUG);
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR);
 		
 		FreightAnalyseKMT analysis = new FreightAnalyseKMT();
@@ -61,7 +58,8 @@ public class FreightAnalyseKMT {
 			File networkFile = new File(RUN_DIR+ "output_network.xml.gz");
 			File carrierFile = new File(RUN_DIR+ "output_carriers.xml.gz");
 			File vehicleTypefile = new File(RUN_DIR+ "output_vehicleTypes.xml.gz");
-			File lezZonefile = new File("../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/lez_area.xml"); 
+//			File lezZonefile = new File("../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/lez_area.xml"); 
+			File lezZonefile = new File("../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/grid_Szenario/grid-tollArea.xml"); 
 			
 			Config config = ConfigUtils.loadConfig(configFile.getAbsolutePath());		
 			config.plans().setInputFile(populationFile.getAbsolutePath());
