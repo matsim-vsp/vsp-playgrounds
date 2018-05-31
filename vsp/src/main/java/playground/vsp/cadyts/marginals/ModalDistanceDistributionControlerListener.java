@@ -137,7 +137,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
                                 this.inputDistanceDistribution.getModalBinToDistanceBin()
                                                               .get(entry.getKey().getId())
                                                               .getCount() + "\t" +
-                                entry.getValue().getCount());
+                                entry.getValue().getCount() * inputDistanceDistribution.getModeToScalingFactor().get(entry.getKey().getMode()) );
                 writer.newLine();
             }
             writer.close();
@@ -168,7 +168,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
         distribution.getModalBinToDistanceBin()
                     .forEach((key, value) -> this.stats.getModalBinToDistanceBin()
                                                        .get(key)
-                                                       .addToCount(value.getCount() * this.inputDistanceDistribution.getModalBins().get(key).getScalingFactor() ));
+                                                       .addToCount(value.getCount()));
     }
 
     private void reset() {
