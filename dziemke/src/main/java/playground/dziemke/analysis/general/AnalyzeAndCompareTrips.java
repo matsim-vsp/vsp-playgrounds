@@ -47,20 +47,23 @@ public class AnalyzeAndCompareTrips {
 	public static final Logger LOG = Logger.getLogger(AnalyzeAndCompareTrips.class);
 
 	// Parameters
-	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
+//	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
+	private static final String RUN_DIRECTORY_ROOT = "/Users/dominik/Workspace/ils4/ziemke/open_berlin_scenario/output";
+
 //	private static final String RUN_ID = "be_253"; // To be adjusted
 //	private static final String RUN_ID = "be400mt_58_v6"; // To be adjusted
-	private static final String RUN_ID = "b500_2h"; // To be adjusted
+	private static final String RUN_ID = "b5_22e1a"; // To be adjusted
 
 	// Input and output
 	private static final String NETWORK_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_network.xml.gz";
 	private static final String CONFIG_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_config.xml";
 	private static final String EVENTS_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_events.xml.gz";
 	private static final String AREA_SHAPE_FILE = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
-	private static String analysisOutputDirectory = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/analysis";
+//	private static String analysisOutputDirectory = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/analysis";
+	private static String analysisOutputDirectory = "../../runs-svn/open_berlin_scenario" + "/" + RUN_ID + "/analysis";
 
 	// SrV parameters
-	private static final String SRV_BASE_DIR = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/input/"; // THis folder needs to be checked out
+	private static final String SRV_BASE_DIR = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/input/"; // This folder needs to be checked out
 	private static final String SRV_PERSON_FILE_PATH = SRV_BASE_DIR + "P2008_Berlin2.dat";
 	private static final String SRV_TRIP_FILE_PATH = SRV_BASE_DIR + "W2008_Berlin_Weekday.dat";
 //	private static String srvOutputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/output2/"; // needs nto be adjusted if applied
@@ -82,7 +85,7 @@ public class AnalyzeAndCompareTrips {
 //		matsimTripFilter.activateMode(TransportMode.walk);
 		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
 		matsimTripFilter.activateDist(0, 100);
-		matsimTripFilter.activateExcludeActivityType("freight");
+		matsimTripFilter.activateExcludeActivityType("freight");		
 //		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
 		List<Trip> filteredMatsimTrips = TripFilter.castTrips(matsimTripFilter.filter(matsimTrips));
