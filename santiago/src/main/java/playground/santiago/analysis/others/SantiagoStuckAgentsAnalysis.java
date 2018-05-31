@@ -23,7 +23,7 @@ public class SantiagoStuckAgentsAnalysis {
 	
 	public SantiagoStuckAgentsAnalysis(String caseName, String stepName){
 
-		this.runDir = "../../../runs-svn/santiago/" + caseName + "/";
+		this.runDir = "../../runs-svn/santiago/" + caseName + "/";
 		this.outputDir = runDir + "outputOf" + stepName + "/";
 		this.analysisDir = outputDir + "analysis/";	
 
