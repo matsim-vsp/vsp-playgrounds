@@ -13,7 +13,7 @@ import playground.santiago.analysis.travelDistances.SantiagoTollwayDistanceAnaly
  * 
  */
 
-public class SantiagoRunCarDistances {
+public class SantiagoRunCarDistancesTollwayTask {
 	
 	private static final String CASE_NAME = "baseCase1pct";
 	private static final String STEP_NAME = "Step1";
