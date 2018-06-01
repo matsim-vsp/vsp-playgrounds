@@ -22,12 +22,12 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.OnRoadExposure;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -48,11 +48,13 @@ import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
+import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureTable.OnRoadTripExposureInfo;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis.PatnaEmissionsInputGenerator;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
+import playground.agarwalamit.utils.MapUtils;
 import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
 
 /**
@@ -69,7 +71,8 @@ public class PatnaOnRoadExposure {
     private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
 
-    private static final String data_dates [] = {"none","_22Nov2017","_22Jan2018","_22Mar2018","_22May2018"};
+//    private static final String data_dates [] = {"none","_22Nov2017","_22Jan2018","_22Mar2018","_22May2018"};
+private static final String data_dates [] = {"_22Nov2017","_22May2018"};
 
     public static void main(String[] args) {
 
@@ -92,22 +95,22 @@ public class PatnaOnRoadExposure {
                         outputDir + "/analysis/",
                         LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
             }
-            {
-                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
-                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
-
-                if (writeEmissionEventsFirst) {
-                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
-                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
-
-                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
-                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
-                }
-
-                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
-                        outputDir + "/analysis/",
-                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
-            }
+//            {
+//                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
+//                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+//
+//                if (writeEmissionEventsFirst) {
+//                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+//                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
+//
+//                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+//                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+//                }
+//
+//                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+//                        outputDir + "/analysis/",
+//                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
+//            }
         }
     }
 
@@ -168,8 +171,11 @@ public class PatnaOnRoadExposure {
         CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
 
-        TreeSet<String> pollutants = Arrays.stream(WarmPollutant.values())
-                                           .map(Enum::toString).collect(Collectors.toCollection(TreeSet::new));
+        TreeSet<String> pollutants = new TreeSet<>();
+        pollutants.add(WarmPollutant.NO2.toString());
+        pollutants.add(WarmPollutant.CO.toString());
+        pollutants.add(WarmPollutant.PM.toString());
+        pollutants.add(WarmPollutant.SO2.toString());
 
         if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {
@@ -193,61 +199,108 @@ public class PatnaOnRoadExposure {
             }
             LOG.info("The data has written to "+outFile);
         }
-
         {
+            Map<Id<Person>, List<OnRoadTripExposureInfo>> roadTripExposureInfoList = onRoadExposureHandler.getOnRoadExposureTable().getPersonOnRoadExposureInfo();
             Map<Id<Person>, Coord> person2homeCoord = getXYForHomeLocationsOfPersons();
-            Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
-            String outFile = outputFilesDir+"/personToOnRoadExposure"+ data_date +"_urban.txt";
+            String outFile = outputFilesDir+"/personModeToOnRoadExposure"+ data_date +"_urban.txt";
             try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-                writer.write("personId\tzoneId\tX\tY\t");
+                writer.write("personId\tmode\tdistance_km\tzoneId\tX\tY\t");
                 for (String poll : pollutants){
                     writer.write(poll+"\t");
                 }
+                for (String poll : pollutants){
+                    writer.write(poll+"_perKm\t");
+                }
                 writer.newLine();
-                for (Id<Person> personId : personToInhaledMass.keySet()) {
+                for (Id<Person> personId : roadTripExposureInfoList.keySet()){
                     if (! PatnaPersonFilter.isPersonBelongsToUrban(personId)) continue;
+                    for (OnRoadTripExposureInfo trip : roadTripExposureInfoList.get(personId)){
+                        Coord coord = person2homeCoord.get(personId);
+                        double dist = getDistanceInKM(network, trip.getLink2Emissions().keySet());
+                        writer.write(personId+"\t"+trip.getMode()+"\t"+ dist + "\t");
 
-                    Coord coord = person2homeCoord.get(personId);
-                    String zoneId;
-                    if (coord==null) {
-                        writer.write(personId+"\t"+"NA"+"\t"+ "NA"+"\t"+"NA"+"\t");
-                    } else {
-                        zoneId = getZoneId( coord );
-                        writer.write(personId+"\t"+zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
+                        String zoneId;
+                        if (coord==null) {
+                            writer.write("NA"+"\t"+ "NA"+"\t"+"NA"+"\t");
+                        } else {
+                            zoneId = getZoneId( coord );
+                            writer.write(zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
+                        }
+                        Map<String, Double> values = MapUtils.valueMapSum(trip.getLink2Emissions());
+                        for (String poll : pollutants){
+                            writer.write( values.get(poll) + "\t");
+                        }
+                        for (String poll : pollutants){
+                            writer.write( values.get(poll)/dist + "\t");
+                        }
+                        writer.newLine();
                     }
-                    for (String poll : pollutants){
-                        writer.write( personToInhaledMass.get(personId).get(poll) + "\t");
-                    }
-                    writer.newLine();
                 }
             } catch (IOException e) {
                 throw new RuntimeException("Data is not written/read. Reason : " + e);
             }
             LOG.info("The data has written to "+outFile);
         }
-        {
-            Map<Id<Link>, Map<String, Double>> linkToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getLinkToInhaledMass();
-            String outFile = outputFilesDir+"/linkToOnRoadExposure"+ data_date +".txt";
-            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-                writer.write("linkId\t");
-                for (String poll : pollutants){
-                    writer.write(poll+"\t");
-                }
-                writer.newLine();
-                for (Id<Link> linkId : linkToInhaledMass.keySet()) {
-                    writer.write(linkId+"\t");
-                    for (String poll : pollutants){
-                        writer.write( linkToInhaledMass.get(linkId).get(poll) + "\t");
-                    }
-                    writer.newLine();
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Data is not written/read. Reason : " + e);
-            }
-            LOG.info("The data has written to "+outFile);
-        }
+
+//        {
+//            Map<Id<Person>, Coord> person2homeCoord = getXYForHomeLocationsOfPersons();
+//            Map<Id<Person>, Map<String, Double>> personToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getPersonToInhaledMass();
+//            String outFile = outputFilesDir+"/personToOnRoadExposure"+ data_date +"_urban.txt";
+//            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+//                writer.write("personId\tzoneId\tmode\tX\tY\t");
+//                for (String poll : pollutants){
+//                    writer.write(poll+"\t");
+//                }
+//                writer.newLine();
+//                for (Id<Person> personId : personToInhaledMass.keySet()) {
+//                    if (! PatnaPersonFilter.isPersonBelongsToUrban(personId)) continue;
+//
+//                    Coord coord = person2homeCoord.get(personId);
+//                    String zoneId;
+//                    if (coord==null) {
+//                        writer.write(personId+"\t"+"NA"+"\t"+ "NA"+"\t"+"NA"+"\t");
+//                    } else {
+//                        zoneId = getZoneId( coord );
+//                        writer.write(personId+"\t"+zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
+//                    }
+//                    for (String poll : pollutants){
+//                        writer.write( personToInhaledMass.get(personId).get(poll) + "\t");
+//                    }
+//                    writer.newLine();
+//                }
+//            } catch (IOException e) {
+//                throw new RuntimeException("Data is not written/read. Reason : " + e);
+//            }
+//            LOG.info("The data has written to "+outFile);
+//        }
+//        {
+//            Map<Id<Link>, Map<String, Double>> linkToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getLinkToInhaledMass();
+//            String outFile = outputFilesDir+"/linkToOnRoadExposure"+ data_date +".txt";
+//            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+//                writer.write("linkId\t");
+//                for (String poll : pollutants){
+//                    writer.write(poll+"\t");
+//                }
+//                writer.newLine();
+//                for (Id<Link> linkId : linkToInhaledMass.keySet()) {
+//                    writer.write(linkId+"\t");
+//                    for (String poll : pollutants){
+//                        writer.write( linkToInhaledMass.get(linkId).get(poll) + "\t");
+//                    }
+//                    writer.newLine();
+//                }
+//            } catch (IOException e) {
+//                throw new RuntimeException("Data is not written/read. Reason : " + e);
+//            }
+//            LOG.info("The data has written to "+outFile);
+//        }
        onRoadExposureHandler.reset(0);
     }
+
+    private static double getDistanceInKM (Network network, Set<Id<Link>> links) {
+        return links.stream().mapToDouble(l -> network.getLinks().get(l).getLength()).sum()/1000.;
+    }
+
 
     private static Map<Id<Person>, Coord> getXYForHomeLocationsOfPersons(){
         String plansFile = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/output_plans.xml.gz";
