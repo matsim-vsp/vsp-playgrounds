@@ -168,7 +168,7 @@ public class CNEMunich {
 				public void install() {
 					final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
 					String ug = "COMMUTER_REV_COMMUTER";
-					addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.name()
+					addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice
 							.concat("_")
 							.concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 						final String[] availableModes = {"car", "pt_".concat(ug)};

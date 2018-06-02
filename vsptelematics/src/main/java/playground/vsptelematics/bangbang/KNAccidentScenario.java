@@ -56,6 +56,8 @@ import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.replanning.StrategyManager;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.strategies.KeepLastExecutedAsPlanStrategy;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.util.TravelTime;
@@ -101,7 +103,7 @@ public class KNAccidentScenario {
 		// ===
 
 		final Config config = ConfigUtils.loadConfig("../../shared-svn/studies/countries/de/berlin/telematics/funkturm-example/baseconfig.xml") ;
-
+		
 		config.network().setInputFile("../../counts/iv_counts/network.xml.gz"); // note that this path is relative to path of config!
 		config.network().setTimeVariantNetwork(true);
 
@@ -142,6 +144,16 @@ public class KNAccidentScenario {
 		// ===
 
 		final Scenario scenario = ScenarioUtils.loadScenario( config ) ;
+		
+		for ( Link link : scenario.getNetwork().getLinks().values() ) {
+			if ( link.getAllowedModes().contains( TransportMode.walk ) ) {
+				Set<String> modes = new HashSet<>( link.getAllowedModes() ) ;
+				modes.add( "segway");
+				link.setAllowedModes(modes);
+			}
+		}
+		
+		
 		preparePopulation(scenario);
 		scheduleAccident(scenario); 
 
@@ -188,8 +200,13 @@ public class KNAccidentScenario {
 				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
 //				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
 //				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
-				this.addMobsimListenerBinding().to( WithinDayReRouteMobsimListener.class );
-
+				
+				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+				this.addMobsimListenerBinding().toInstance( abc ) ;
+//				abc.setLastReplanningIteration(9);
+				abc.setReplanningProba(0.1);
+				
+				
 			}
 		}) ;
 

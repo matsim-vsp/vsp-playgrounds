@@ -245,7 +245,7 @@ public class OuterCordonCadytsControler {
 		config.controler().setWriteEventsInterval(50);
 
 		StrategySettings reRoute = new StrategySettings();
-		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
+		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 		reRoute.setWeight(0.3);
 		config.strategy().addStrategySettings(reRoute);
 

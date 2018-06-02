@@ -48,6 +48,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.utils.collections.Tuple;
@@ -265,7 +266,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 					log.warn("Setting the disutilty of being delayed on the previous trip using the config parameters; assuming the marginal disutility of being delayed at the (hypothetical) activity to be equal to beta_performing: " + this.scenario.getConfig().planCalcScore().getPerforming_utils_hr());
 				
 					if (incompletedPlanWarning == 10) {
-						log.warn("Additional warnings of this type are suppressed.");
+						log.warn(Gbl.FUTURE_SUPPRESSED);
 					}
 					incompletedPlanWarning++;
 				}
@@ -484,7 +485,7 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 			} else {
 				if (this.personId2TripNr2VTTSh.containsKey(id)) {
 					
-					if (this.personId2TripNr2Mode.get(id).get(tripNrOfGivenTime) == TransportMode.car) {
+					if (this.personId2TripNr2Mode.get(id).get(tripNrOfGivenTime).equals(TransportMode.car)) {
 						// everything fine
 						double vtts = this.personId2TripNr2VTTSh.get(id).get(tripNrOfGivenTime);			
 						return vtts;

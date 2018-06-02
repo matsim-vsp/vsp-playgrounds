@@ -51,7 +51,7 @@ class MyControler {
 			config = ConfigUtils.loadConfig("examples/equil/config.xml") ;
 		}
 
-		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+//		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
 		
 		config.plans().setRemovingUnneccessaryPlanAttributes(true) ;
 		config.controler().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
@@ -59,15 +59,15 @@ class MyControler {
 		// prepare the scenario
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
-		Random rnd = new Random(4711) ;
-		final Map<Id<Person>, ? extends Person> pop = scenario.getPopulation().getPersons();
-		Iterator<Id<Person>> it = pop.keySet().iterator() ;
-		while ( it.hasNext() ) {
-			it.next() ;
-			if ( rnd.nextDouble() < 0.9 ) {
-				it.remove();
-			}
-		}
+//		Random rnd = new Random(4711) ;
+//		final Map<Id<Person>, ? extends Person> pop = scenario.getPopulation().getPersons();
+//		Iterator<Id<Person>> it = pop.keySet().iterator() ;
+//		while ( it.hasNext() ) {
+//			it.next() ;
+//			if ( rnd.nextDouble() < 0.9 ) {
+//				it.remove();
+//			}
+//		}
 
 		// prepare the control(l)er:
 		Controler controler = new Controler( scenario ) ;
@@ -75,20 +75,20 @@ class MyControler {
 //		controler.addOverridingModule(new OTFVisLiveModule());
 //		controler.setMobsimFactory(new OldMobsimFactory()) ;
 		
-		controler.addOverridingModule(new AbstractModule(){
-			@Override public void install() {
-				this.addEventHandlerBinding().toInstance(new BasicEventHandler(){
-					@Override public void reset(int iteration) { }
-					@Override public void handleEvent(Event event) {
-						if ( event instanceof HasPersonId ) {
-							if ( ((HasPersonId)event).getPersonId().equals( Id.createPersonId("5441604") ) ) {
-								Logger.getLogger(getClass()).warn( event );
-							}
-						}
-					}
-				});
-			}
-		});
+//		controler.addOverridingModule(new AbstractModule(){
+//			@Override public void install() {
+//				this.addEventHandlerBinding().toInstance(new BasicEventHandler(){
+//					@Override public void reset(int iteration) { }
+//					@Override public void handleEvent(Event event) {
+//						if ( event instanceof HasPersonId ) {
+//							if ( ((HasPersonId)event).getPersonId().equals( Id.createPersonId("5441604") ) ) {
+//								Logger.getLogger(getClass()).warn( event );
+//							}
+//						}
+//					}
+//				});
+//			}
+//		});
 		
 
 		// run everything:

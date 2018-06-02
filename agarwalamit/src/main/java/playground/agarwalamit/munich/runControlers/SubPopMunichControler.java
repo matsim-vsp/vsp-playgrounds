@@ -104,7 +104,7 @@ public class SubPopMunichControler {
 			@Override
 			public void install() {
 				String ug = "COMMUTER_REV_COMMUTER";
-				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name().concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 					@Inject
 					Scenario sc;
 					@Inject
@@ -123,7 +123,7 @@ public class SubPopMunichControler {
 			@Override
 			public void install() {
 				String ug = "COMMUTER_REV_COMMUTER";
-				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.name().concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "pt_".concat(ug)};
 					final String[] chainBasedModes = {"car", "bike"};
 					@Inject
