@@ -25,7 +25,7 @@ import org.matsim.core.utils.io.UncheckedIOException;
 import org.matsim.roadpricing.RoadPricingReaderXMLv1;
 import org.matsim.roadpricing.RoadPricingSchemeImpl;
 
-public class FreightAnalyseKMT {
+public class FreightAnalyseWithLEZ_KMT {
 
 	/**
 	 *  Calculates and writes some analysis for the defined Runs.
@@ -37,13 +37,13 @@ public class FreightAnalyseKMT {
 	
 	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
 		
-	private static final Logger log = Logger.getLogger(FreightAnalyseKMT.class);
+	private static final Logger log = Logger.getLogger(FreightAnalyseWithLEZ_KMT.class);
 	
 	public static void main(String[] args) throws UncheckedIOException, IOException {
 		log.setLevel(Level.DEBUG);
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR);
 		
-		FreightAnalyseKMT analysis = new FreightAnalyseKMT();
+		FreightAnalyseWithLEZ_KMT analysis = new FreightAnalyseWithLEZ_KMT();
 		analysis.run();
 		log.info("### Finished ###");
 		OutputDirectoryLogging.closeOutputDirLogging();
@@ -86,18 +86,18 @@ public class FreightAnalyseKMT {
 
 			Set<Id<Link>> lezLinkIds = scheme.getTolledLinkIds();  //Link-Ids der Umweltzone (LEZ)
 
-			FreightAnalyseKmtEventHandler tripHandler = new FreightAnalyseKmtEventHandler(scenario, vehicleTypes, lezLinkIds);
+			FreightAnalyseWithLEZ_KmtEventHandler tripHandler = new FreightAnalyseWithLEZ_KmtEventHandler(scenario, vehicleTypes, lezLinkIds);
 			eventsManager.addHandler(tripHandler);
 					
 			int iteration = config.controler().getLastIteration();
-			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
+			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml";		//TODO: Temporar nicht. .gz
 			
 			log.info("Reading the event file...");
 			MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
 			reader.readFile(eventsFile);
 			log.info("Reading the event file... Done.");
 			
-			FreightAnalyseKmtWriter tripWriter = new FreightAnalyseKmtWriter(tripHandler, OUTPUT_DIR);
+			FreightAnalyseWithLEZ_KmtWriter tripWriter = new FreightAnalyseWithLEZ_KmtWriter(tripHandler, OUTPUT_DIR);
 			//TODO: Writer hat Werte fuer innerhalb der LEZ bisher noch nicht fur die ganzen Carrier.
 			for (Carrier carrier : carriers.getCarriers().values()){
 				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());

@@ -41,13 +41,13 @@ import org.matsim.vehicles.VehicleType;
  * @author kturner based on ikaddoura , lkroeger
  *
  */
-public class FreightAnalyseKmtWriter {
-	private static final Logger log = Logger.getLogger(FreightAnalyseKmtWriter.class);
+public class FreightAnalyseWithLEZ_KmtWriter {
+	private static final Logger log = Logger.getLogger(FreightAnalyseWithLEZ_KmtWriter.class);
 
-	FreightAnalyseKmtEventHandler handler;
+	FreightAnalyseWithLEZ_KmtEventHandler handler;
 	String outputFolder;
 	
-	public FreightAnalyseKmtWriter(FreightAnalyseKmtEventHandler handler, String outputFolder) {
+	public FreightAnalyseWithLEZ_KmtWriter(FreightAnalyseWithLEZ_KmtEventHandler handler, String outputFolder) {
 		this.handler = handler;
 		String directory = outputFolder + (outputFolder.endsWith("/") ? "" : "/");
 		this.outputFolder = directory;

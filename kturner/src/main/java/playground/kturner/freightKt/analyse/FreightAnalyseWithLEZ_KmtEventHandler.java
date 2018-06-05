@@ -25,10 +25,10 @@ import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.vehicles.VehicleType;
 
 
-class FreightAnalyseKmtEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
+class FreightAnalyseWithLEZ_KmtEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
 PersonDepartureEventHandler, PersonArrivalEventHandler {
 
-	private final static Logger log = Logger.getLogger(FreightAnalyseKmtEventHandler.class);
+	private final static Logger log = Logger.getLogger(FreightAnalyseWithLEZ_KmtEventHandler.class);
 
 	private Scenario scenario;
 	private CarrierVehicleTypes vehicleTypes; //TODO: Warum ist das hier im Handler? Wird doch erst bei der Berechnung der Werte (im Writer benutzt) (?)... kmt, mai'18
@@ -46,14 +46,14 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	private Map<Id<Person>,Double> driverId2totalDistance = new HashMap<Id<Person>,Double>(); 
 	private Map<Id<Person>,Double> driverId2totalDistanceInLEZ = new HashMap<Id<Person>,Double>(); //Distance within LowEmissionZone //TODO Add getter kmt, mai'18
 	
-	public FreightAnalyseKmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes) {
+	public FreightAnalyseWithLEZ_KmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes) {
 		this.scenario = scenario;
 		this.vehicleTypes = vehicleTypes;
 		this.lezLinkIds = null;
 		readVehicleTypeCapabilities();
 	}
 	
-	public FreightAnalyseKmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes, Set<Id<Link>> lezLinkIds) {
+	public FreightAnalyseWithLEZ_KmtEventHandler(Scenario scenario, CarrierVehicleTypes vehicleTypes, Set<Id<Link>> lezLinkIds) {
 		this.scenario = scenario;
 		this.vehicleTypes = vehicleTypes;
 		this.lezLinkIds = lezLinkIds;
@@ -291,6 +291,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			log.debug("Handle Person: "+ personId );
 			for(int i : personId2tripNumber2tripDistance.get(personId).keySet()){
 				log.debug("Handle Trip "+ i+ " of person: "+ personId );
+				log.warn("This olny works correctly, if vehicleId contains the VehicleType in the definition of the VRP."); //TODO: Dieses Problem loesen oder umgehen. KMT mai/18
 				if(personId.toString().contains("_"+vehTypeId.toString()+"_")){
 					log.debug("PersonId contains : "+ vehTypeId.toString() );
 					if (vehTypeId.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//keine doppelte Erfassung der "frozen" bei den nicht-"frozen"...
