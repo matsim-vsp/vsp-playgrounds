@@ -621,7 +621,8 @@ public class TtRunCottbusSimulation {
 				break;
 			case MS_OPT_GREENSPLIT_18_05_04:
 				if (NETWORK_TYPE.toString().startsWith("V4") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
-					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_btu_solution.xml");
+//					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_btu_solution.xml");
+					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_btu_solution_inclGreenEnd.xml");
 				} else {
 					throw new UnsupportedOperationException("green split optimization from 2018-05-04 was done for network type V4 - can not be run with another network version now");
 				}
@@ -659,9 +660,9 @@ public class TtRunCottbusSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
+//		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
 //		config.travelTimeCalculator().setTraveltimeBinSize( 300 );
-//		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
+		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
 		// TODO
 
 		config.travelTimeCalculator().setTravelTimeCalculatorType(TravelTimeCalculatorType.TravelTimeCalculatorHashMap.toString());

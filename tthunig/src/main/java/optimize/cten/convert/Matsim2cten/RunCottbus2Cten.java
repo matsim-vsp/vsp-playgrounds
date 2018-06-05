@@ -43,6 +43,7 @@ public class RunCottbus2Cten {
 		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_laemmer.xml";
 //		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_no_13_v4.xml";
 		String signalConflictFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/conflictData_fromBtu2018-05-03_basedOnMSconflicts_v4_modifiedBasedOnMS_uTurnsDeleted.xml";
+//		String signalConflictFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/conflictData_fromBtu2018-05-03_basedOnMSconflicts_v4.xml";
 //		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n.xml.gz";
 		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n_v4.xml";
 //		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes.xml";
@@ -80,7 +81,8 @@ public class RunCottbus2Cten {
 		int cellsX = 5; // = default value
 		int cellsY = 5; // = default value
 		/* other parameters */
-		String scenarioDescription = "changed: no conflicts when base case fixed-time plan shows green together; no u-turns; lights grouped; Dreifertstrasse and Wilhem-Kuelz_Str. run 100it 0.7cap output plans between 05:30 and 09:30";
+		String scenarioDescription = "changed: no conflicts when base case fixed-time plans show green together; no u-turns; lights grouped; Dreifertstrasse and Wilhem-Kuelz_Str. run 100it 0.7cap output plans between 05:30 and 09:30";
+//		String scenarioDescription = "changed: same as 2018-05-04 but with base case fixed-time plans; Dreifertstrasse and Wilhem-Kuelz_Str. run 100it 0.7cap output plans between 05:30 and 09:30";
 		// String scenarioDescription =
 		// "run run1728 output plans between 13:30 and 18:30";
 
