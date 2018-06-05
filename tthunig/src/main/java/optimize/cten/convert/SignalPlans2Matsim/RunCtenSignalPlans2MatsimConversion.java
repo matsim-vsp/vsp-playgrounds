@@ -104,7 +104,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 					plan.addSignalGroupSettings(groupSetting);
 					FlexibleLight correspondingLight = getFlexLightForSignalGroup(signalsData, network, lanes, idConverter, flexCrossing, signalSystemId, signalGroup);
 					groupSetting.setOnset(correspondingLight.getGreenStart() * STEP_TIME);
-					groupSetting.setDropping(correspondingLight.getGreenEnd() * STEP_TIME);
+					groupSetting.setDropping((correspondingLight.getGreenEnd() + 1) * STEP_TIME);
 				} 
 			} else if (crossing instanceof FixCrossingSolution) {
 				// get the existing plan (assumes there is only one)
@@ -213,7 +213,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 		writer.setSignalGroupsOutputFilename(directoryPath + subdirectory
 				+ "signal_groups_" + basefilename + ".xml");
 		writer.setSignalControlOutputFilename(directoryPath + subdirectory
-				+ "signal_control_" + basefilename + ".xml");
+				+ "signal_control_" + basefilename + "_inclGreenEnd.xml");
 		writer.writeSignalSystemsData(signalsData.getSignalSystemsData());
 		writer.writeSignalGroupsData(signalsData.getSignalGroupsData());
 		writer.writeSignalControlData(signalsData.getSignalControlData());
