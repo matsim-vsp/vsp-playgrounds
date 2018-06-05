@@ -16,12 +16,18 @@ public class Events2ExperiencedPlansConverter {
     private Config config;
     private String eventsFile;
     private String outputExperiancedPlansFile;
+    private boolean activateTransitSchedule = false;
 
     public Events2ExperiencedPlansConverter(Config config, String eventsFile, String outputExperiancedPlansFile) {
 
         this.config = config;
         this.eventsFile = eventsFile;
         this.outputExperiancedPlansFile = outputExperiancedPlansFile;
+    }
+
+    public void activateTransitSchedule() {
+
+        this.activateTransitSchedule = true;
     }
 
     public void convert() {
@@ -34,7 +40,8 @@ public class Events2ExperiencedPlansConverter {
                         new EventsManagerModule(),
                         new ScenarioByInstanceModule(scenario),
                         new org.matsim.core.controler.ReplayEvents.Module()});
-//        ((EventsToLegs)injector.getInstance(EventsToLegs.class)).setTransitSchedule(scenario.getTransitSchedule());
+        if (activateTransitSchedule)
+            ((EventsToLegs)injector.getInstance(EventsToLegs.class)).setTransitSchedule(scenario.getTransitSchedule());
         ReplayEvents replayEvents = (ReplayEvents)injector.getInstance(ReplayEvents.class);
         replayEvents.playEventsFile(eventsFile, 0);
         ((ExperiencedPlansService)injector.getInstance(ExperiencedPlansService.class)).writeExperiencedPlans(outputExperiancedPlansFile);
