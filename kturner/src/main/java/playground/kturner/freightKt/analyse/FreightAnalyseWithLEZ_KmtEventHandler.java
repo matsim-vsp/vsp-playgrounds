@@ -299,10 +299,10 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 						log.debug("Lenght of Trip  "+ i + " of Person " + personId + " is: " + distance);
 						if (vehTypeId2TourDistances.containsKey(vehTypeId)){
 							vehTypeId2TourDistances.put(vehTypeId, vehTypeId2TourDistances.get(vehTypeId) + distance);
-							log.debug("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Aktuelle Distance für Person " + personId.toString() + " ; " + vehTypeId.toString() + " added: " + distance);
 						} else {
 							vehTypeId2TourDistances.put(vehTypeId, distance);
-							log.debug("Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Distance für Person " + personId.toString() + " ; " + vehTypeId.toString() + " added: " + distance);
 						}
 					}
 				}else{
@@ -314,7 +314,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	}
 	
 	public Map<Id<VehicleType>, Double> getVehTypId2TourDistancesInLEZ(Id<VehicleType> vehTypeId) {
-		log.warn("Hier fehlen noch die Inhalte fuer Distance in LEZ");
 		log.info("Calculate distances in LEZ for vehicleTyp " + vehTypeId.toString());
 		Map<Id<VehicleType>,Double> vehTypeId2TourDistancesInLEZ = new HashMap<Id<VehicleType>, Double>();
 		for(Id<Person> personId: personId2tripNumber2tripDistanceInLEZ.keySet()){
@@ -324,10 +323,12 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 						double distance = personId2tripNumber2tripDistanceInLEZ.get(personId).get(i);
 						if (vehTypeId2TourDistancesInLEZ.containsKey(vehTypeId)){
 							vehTypeId2TourDistancesInLEZ.put(vehTypeId, vehTypeId2TourDistancesInLEZ.get(vehTypeId) + distance);
-							log.debug("Aktuelle Distance in LEZ für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Aktuelle Distance in LEZ für Person " + personId.toString() + " ; " +vehTypeId.toString() + " angelegt: " + distance);
+							log.debug("Aktuelle Distance in LEZ für Person nach Neuanlage gespeicherter Wert: " + vehTypeId2TourDistancesInLEZ.get(vehTypeId));
 						} else {
 							vehTypeId2TourDistancesInLEZ.put(vehTypeId, distance);
-							log.debug("Distance für Person  in LEZ" + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Distance für Person in LEZ" + personId.toString() + " ; " +vehTypeId.toString() + " set: " + distance);
+							log.debug("Distance in LEZ für Person gespeicherter Wert für vehicle Type "+ vehTypeId.toString() + " ist: " + vehTypeId2TourDistancesInLEZ.get(vehTypeId));
 						}
 					}
 				}else{
