@@ -33,9 +33,18 @@ public class FreightAnalyseWithLEZ_KMT {
 	 *  @author kturner
 	 */
 
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/I-Base/Run_1/" ;
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Ia-BaseE/Run_1/" ; 		// Base mit Electro ab Depot
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/II-CityMaut/Run_1/" ;		//City-Maut
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IIa-CityMautE/Run_1/" ;; 	//City-Maut mit electro ab Depot
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IIIa-LEZE/Run_1/" ; //CO2-free City mit Elektro ab Depot
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IV-UCC/Run_1/" ;	//CO2-freie city mit UCC
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IVa-UCCE/Run_1/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
+
 	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/Base/Run_1/" ;
+
 	
-	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
+	private static final String OUTPUT_DIR = RUN_DIR + "Analysis_LEZ/" ;
 		
 	private static final Logger log = Logger.getLogger(FreightAnalyseWithLEZ_KMT.class);
 	
