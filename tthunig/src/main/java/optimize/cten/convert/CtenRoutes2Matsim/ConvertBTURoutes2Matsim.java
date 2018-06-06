@@ -19,9 +19,13 @@
  * *********************************************************************** */
 package optimize.cten.convert.CtenRoutes2Matsim;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -44,6 +48,7 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.Time;
 
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodities;
@@ -99,6 +104,8 @@ public class ConvertBTURoutes2Matsim {
 	private Population population;
 	private Population popWithRoutes;
 	private Network network;
+	
+	private Map<Id<Person>, Id<DgCommodity>> person2CommodityId = new HashMap<>();
 
 	/**
 	 * Starts the conversion of BTU paths into MATSim routes.
@@ -149,6 +156,22 @@ public class ConvertBTURoutes2Matsim {
 				this.network);
 		popWriter.write(outputFile);
 		log.info("plans file with btu routes written to " + outputFile);
+		
+		// write person-commodity relation
+		BufferedWriter bw = IOUtils.getBufferedWriter(directory + "id_conversion_person2commodity.txt");
+		try {
+			bw.write("person_id \t commodity_id");
+			bw.newLine();
+			for (Entry<Id<Person>, Id<DgCommodity>> e : this.person2CommodityId.entrySet()){
+				bw.write(e.getKey().toString());
+				bw.write("\t");
+				bw.write(e.getValue().toString());
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		};
 	}
 
 	/**
@@ -192,6 +215,8 @@ public class ConvertBTURoutes2Matsim {
 					matsimStartLinkId, matsimEndLinkId);
 				// remove his former plan
 				correspondingPerson.getPlans().clear();
+				// remember person-commodity relation
+				person2CommodityId.put(correspondingPerson.getId(), com.getId());
 
 				// add all btu routes of the commodity as plans
 				for (Leg leg : legs) {
@@ -433,7 +458,7 @@ public class ConvertBTURoutes2Matsim {
 		String[] filenameAttributes = btuRoutesFilename.split("/");
 		String outputFilename = directory
 //				+ "routeComparison/2015-03-10_sameEndTimes_ksOptTripPlans_"
-				+ "btu/2018-05-17_sameEndTimes_ksOptTripPlans_"
+				+ "btu/2018-06-06_sameEndTimes_ksOptTripPlans_agent2com_"
 				+ filenameAttributes[filenameAttributes.length - 1];
 		
 		new ConvertBTURoutes2Matsim().startConversion(directory,
