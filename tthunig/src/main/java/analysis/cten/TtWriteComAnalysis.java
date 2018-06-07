@@ -40,15 +40,21 @@ public class TtWriteComAnalysis implements IterationEndsListener {
 	
 	private TtCommodityTravelTimeAnalyzer handler;
 	private String outputDirBase;
+	private int lastIt;
 	
 	@Inject
 	public TtWriteComAnalysis(Scenario scenario, TtCommodityTravelTimeAnalyzer handler) {
 		this.handler = handler;
 		this.outputDirBase = scenario.getConfig().controler().getOutputDirectory();
+		this.lastIt = scenario.getConfig().controler().getLastIteration();
 	}
 	
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
+		if (lastIt != event.getIteration()) {
+			// only write analysis for the last iteration
+			return;
+		}
 		log.info("Starting to write analysis of iteration " + event.getIteration() + "...");
 		
 		// create output dir for this iteration analysis
@@ -56,7 +62,7 @@ public class TtWriteComAnalysis implements IterationEndsListener {
 		new File(outputDir).mkdir();
 		
 		PrintStream stream;
-		String filename = outputDir + "commodityTT.txt";
+		String filename = outputDir + "commodityTtMatsim.txt";
 		try {
 			stream = new PrintStream(new File(filename));
 		} catch (FileNotFoundException e) {

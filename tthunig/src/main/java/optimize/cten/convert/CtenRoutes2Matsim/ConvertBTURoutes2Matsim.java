@@ -172,6 +172,26 @@ public class ConvertBTURoutes2Matsim {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		};
+		
+		// write commodity travel times
+		bw = IOUtils.getBufferedWriter(directory + "btu/commodityTravelTimesCten.txt");
+		try {
+			bw.write("commodity_id\tavg_driving_time\tavg_waiting_time\tsum");
+			bw.newLine();
+			for (DgCommodity com : this.btuComsWithRoutes.getCommodities().values()){
+				bw.write(com.getId().toString());
+				bw.write("\t");
+				bw.write(Double.toString(com.getRelativeDrivingTime()));
+				bw.write("\t");
+				bw.write(Double.toString(com.getRelativeWaitingTime()));
+				bw.write("\t");
+				bw.write(Double.toString(com.getRelativeDrivingTime() + com.getRelativeWaitingTime()));
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		};
 	}
 
 	/**
@@ -458,7 +478,7 @@ public class ConvertBTURoutes2Matsim {
 		String[] filenameAttributes = btuRoutesFilename.split("/");
 		String outputFilename = directory
 //				+ "routeComparison/2015-03-10_sameEndTimes_ksOptTripPlans_"
-				+ "btu/2018-06-06_sameEndTimes_ksOptTripPlans_agent2com_"
+				+ "btu/2018-06-07_sameEndTimes_ksOptTripPlans_agent2com_"
 				+ filenameAttributes[filenameAttributes.length - 1];
 		
 		new ConvertBTURoutes2Matsim().startConversion(directory,

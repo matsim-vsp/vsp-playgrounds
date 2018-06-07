@@ -36,6 +36,8 @@ public class KS2015RouteXMLParser extends MatsimXmlParser{
 	private final static String EDGE = "edge";
 	private final static String FROMNODE = "source";
 	private final static String TONODE = "drain";
+	private final static String RELATIVE_DRIVING_TIME = "relativDrivingTime";
+	private final static String RELATIVE_WAITING_TIME = "relativWaitingTime";
 	
 	private DgCommodities comsWithRoutes = new DgCommodities();
 	
@@ -44,6 +46,8 @@ public class KS2015RouteXMLParser extends MatsimXmlParser{
 	private Id<DgCrossingNode> currentToNodeId = null;
 	private double currentFlow = 0.0;
 	private List<Id<DgStreet>> currentPath = new ArrayList<>();
+	private double currentRelDrivingTime;
+	private double currentRelWaitingTime;
 	
 	private DgIdConverter idConverter;
 	
@@ -62,13 +66,7 @@ public class KS2015RouteXMLParser extends MatsimXmlParser{
 	@Override
 	public void endTag(String name, String content, Stack<String> context) {
 		// create a commodity for the current path and empty the fields for the new one
-		if (name.equals(PATH)){
-			// check whether commodity already exists
-			if (!this.comsWithRoutes.getCommodities().containsKey(this.currentCommodityId)){
-				this.comsWithRoutes.addCommodity(new DgCommodity(this.currentCommodityId, 
-						this.currentFromNodeId, this.currentToNodeId, 0.0));
-			}
-			
+		if (name.equals(PATH)){		
 			// create the path id
 			Id<TtPath> pathId = this.idConverter.convertPathInfo2PathId(this.currentPath, 
 					this.currentFromNodeId, this.currentToNodeId);
@@ -81,11 +79,22 @@ public class KS2015RouteXMLParser extends MatsimXmlParser{
 
 	@Override
 	public void startTag(String elementName, Attributes atts, Stack<String> context) {
-		// save the commodity information (check for FROMNODE necessary because there are two different COMMODITY-tags)
+		// save the commodity information (check for FROMNODE and RELATIVE_DRIVING_TIME necessary because there are two different COMMODITY-tags)
+		if (elementName.equals(COMMODITY) && atts.getValue(RELATIVE_DRIVING_TIME) != null){
+			this.currentRelDrivingTime = Double.parseDouble(atts.getValue(RELATIVE_DRIVING_TIME));
+			this.currentRelWaitingTime = Double.parseDouble(atts.getValue(RELATIVE_WAITING_TIME));
+		}
 		if (elementName.equals(COMMODITY) && atts.getValue(FROMNODE) != null){
 			this.currentCommodityId = Id.create(atts.getValue(ID), DgCommodity.class);
 			this.currentFromNodeId = Id.create(atts.getValue(FROMNODE), DgCrossingNode.class);
 			this.currentToNodeId = Id.create(atts.getValue(TONODE), DgCrossingNode.class);
+			
+			DgCommodity newCommodity = new DgCommodity(this.currentCommodityId, 
+					this.currentFromNodeId, this.currentToNodeId, 0.0);
+			// add travel time information
+			newCommodity.setRelativeDrivingTime(currentRelDrivingTime);
+			newCommodity.setRelativeWaitingTime(currentRelWaitingTime);
+			this.comsWithRoutes.addCommodity(newCommodity);
 		}
 		// save the flow value of the path
 		if (elementName.equals(PATH)){
