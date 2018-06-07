@@ -80,6 +80,8 @@ import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.TtTotalTravelTime;
+import analysis.cten.TtCommodityTravelTimeAnalyzer;
+import analysis.cten.TtWriteComAnalysis;
 import analysis.signals.TtQueueLengthAnalysisTool;
 import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
@@ -120,7 +122,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V4;
+	private final static NetworkType NETWORK_TYPE = NetworkType.BTU_NET;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -135,7 +137,7 @@ public class TtRunCottbusSimulation {
 	}
 	private final static boolean LONG_LANES = true;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MSNetV4;
+	private final static PopulationType POP_TYPE = PopulationType.BTU_POP_MATSIM_ROUTES;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -207,7 +209,7 @@ public class TtRunCottbusSimulation {
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = .7;
+	private static final double SCALING_FACTOR = 1.;
 	
 	
 	public static void main(String[] args) {
@@ -647,10 +649,10 @@ public class TtRunCottbusSimulation {
 		
 		// set brain exp beta
 //		TODO
-		config.planCalcScore().setBrainExpBeta( 2 );
+//		config.planCalcScore().setBrainExpBeta( 2 );
 //		config.planCalcScore().setBrainExpBeta( 5 );
 //		config.planCalcScore().setBrainExpBeta( 10 );
-//		config.planCalcScore().setBrainExpBeta( 20 );
+		config.planCalcScore().setBrainExpBeta( 20 );
 
 		// choose between link to link and node to node routing
 		// (only has effect if lanes are used)
@@ -1065,6 +1067,12 @@ public class TtRunCottbusSimulation {
 					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
 					this.addControlerListenerBinding().to(TtQueueLengthAnalysisTool.class);
 					this.addMobsimListenerBinding().to(TtQueueLengthAnalysisTool.class);
+				}
+				
+				if (POP_TYPE.toString().startsWith("BTU_POP")) {
+					// bind commodity-based analysis
+					this.bind(TtCommodityTravelTimeAnalyzer.class);
+					this.addControlerListenerBinding().to(TtWriteComAnalysis.class);
 				}
 			}
 		});
