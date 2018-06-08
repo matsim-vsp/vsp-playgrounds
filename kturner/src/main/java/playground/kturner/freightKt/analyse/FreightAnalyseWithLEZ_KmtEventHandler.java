@@ -151,7 +151,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	}
 
 	//TODO: Noch für withinLEZ anpassen
-	//Vorebeirtung, dass Person hinzugefügt wird.
+	//Vorbereirtung, dass Person hinzugefügt wird.
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
 		if (personId2currentTripNumber.containsKey(event.getPersonId())) {
@@ -170,7 +170,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 			tripNumber2amount.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
 			personId2tripNumber2amount.put(event.getPersonId(), tripNumber2amount);
 			
-			if(lezLinkIds.contains(event.getLinkId())) {
+			if(lezLinkIds.contains(event.getLinkId())) {				//TODO: Wird also nur initialisiert wenn Aktivität in LEZ ist -> Sinnvoll oder Fehlerquelle?
 				
 				//TODO: Same for DepatureTime= ? -> Wozu benötigt?
 				Map<Integer,Double> tripNumber2tripDistanceInLEZ = personId2tripNumber2tripDistanceInLEZ.get(event.getPersonId());
