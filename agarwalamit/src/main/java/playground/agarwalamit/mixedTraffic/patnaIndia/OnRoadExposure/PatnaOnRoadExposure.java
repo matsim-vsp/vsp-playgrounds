@@ -72,32 +72,16 @@ public class PatnaOnRoadExposure {
     private static final boolean writeEmissionEventsFirst = false;
 
 //    private static final String data_dates [] = {"none","_22Nov2017","_22Jan2018","_22Mar2018","_22May2018"};
-private static final String data_dates [] = {"_22Nov2017","_22May2018"};
+private static final String data_dates [] = {"_22Nov2017"};
 
     public static void main(String[] args) {
 
         for (String date : data_dates) {
             PatnaOnRoadExposure patnaOnRoadExposure = new PatnaOnRoadExposure();
 
-            {
-                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
-                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
-
-                if (writeEmissionEventsFirst) {
-                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
-                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
-
-                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
-                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
-                }
-
-                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
-                        outputDir + "/analysis/",
-                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
-            }
 //            {
-//                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
-//                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+//                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/bauLastItr/";
+//                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
 //
 //                if (writeEmissionEventsFirst) {
 //                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
@@ -111,6 +95,22 @@ private static final String data_dates [] = {"_22Nov2017","_22May2018"};
 //                        outputDir + "/analysis/",
 //                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
 //            }
+            {
+                String outputDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/onRoadExposure/BT-b_lastItr/";
+                String filesDir = FileUtils.RUNS_SVN+"/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
+
+                if (writeEmissionEventsFirst) {
+                    String roadTypeMappingFile = outputDir+"/input/roadTypeMapping.txt";
+                    String networkWithRoadType = outputDir+"/input/networkWithRoadTypeMapping.txt";
+
+                    PatnaEmissionsInputGenerator.writeRoadTypeMappingFile(filesDir+"/output_network.xml.gz", roadTypeMappingFile, networkWithRoadType);
+                    PatnaOnlineEmissionsWriter.main(new String [] {filesDir, outputDir+"/output/", roadTypeMappingFile, networkWithRoadType});
+                }
+
+                patnaOnRoadExposure.run(outputDir + "/output/output_events.xml.gz",
+                        outputDir + "/analysis/",
+                        LoadMyScenarios.loadScenarioFromNetwork(filesDir + "/output_network.xml.gz").getNetwork(), date);
+            }
         }
     }
 
