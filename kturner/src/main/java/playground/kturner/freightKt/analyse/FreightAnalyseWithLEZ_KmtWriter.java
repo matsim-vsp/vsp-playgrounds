@@ -223,13 +223,13 @@ public class FreightAnalyseWithLEZ_KmtWriter {
 						vehTypeId2TourDistances.put(vehicleTypeId, distance );
 					}
 					if (distanceInLEZ != null) {
-						vehTypeId2TourDistancesInLEZ.put(vehicleTypeId, distance );
+						vehTypeId2TourDistancesInLEZ.put(vehicleTypeId, distanceInLEZ );
 					}
 					if (travelTime != null){
 						vehTypeId2TravelTimes.put(vehicleTypeId, travelTime);
 					}
 					if (travelTimeInLEZ != null){
-						vehTypeId2TravelTimesInLEZ.put(vehicleTypeId, travelTime);
+						vehTypeId2TravelTimesInLEZ.put(vehicleTypeId, travelTimeInLEZ);
 					}
 					if (nuOfVeh != null){
 						vehTypeId2NumberOfVehicles.put(vehicleTypeId, nuOfVeh);
@@ -255,7 +255,7 @@ public class FreightAnalyseWithLEZ_KmtWriter {
 				totalDistance = totalDistance + vehTypeId2TourDistances.get(vehTypeId);
 				totalDistanceInLEZ = totalDistanceInLEZ + vehTypeId2TourDistancesInLEZ.get(vehTypeId);
 				totalTravelTime = totalTravelTime + vehTypeId2TravelTimes.get(vehTypeId);
-				totalTravelTimeInLEZ = totalTravelTimeInLEZ + vehTypeId2TravelTimesInLEZ.get(vehTypeId);
+	//				totalTravelTimeInLEZ = totalTravelTimeInLEZ + vehTypeId2TravelTimesInLEZ.get(vehTypeId); //TODO: Muss noch ordentlich im Eventhandler hinterlegt werden.
 				totalNumberofVehicles = totalNumberofVehicles + vehTypeId2NumberOfVehicles.get(vehTypeId);
 				totalFuelConsumtion = totalFuelConsumtion + vehTypeId2TourDistances.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getFuelConsumtion()/100;
 				totalFuelConsumtionInLEZ = totalFuelConsumtionInLEZ + vehTypeId2TourDistancesInLEZ.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getFuelConsumtion()/100;
