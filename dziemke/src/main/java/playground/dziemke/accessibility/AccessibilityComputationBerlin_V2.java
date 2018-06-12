@@ -48,7 +48,7 @@ public class AccessibilityComputationBerlin_V2 {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationBerlin_V2.class);
 	
 	public static void main(String[] args) {
-		Double cellSize = 1000.;
+		Double cellSize = 500.;
 		boolean push2Geoserver = false; // Set true for run on server
 		boolean createQGisOutput = true; // Set false for run on server
 
@@ -57,8 +57,7 @@ public class AccessibilityComputationBerlin_V2 {
 		final Envelope envelope = new Envelope(4574000, 4620000, 5802000, 5839000); // Berlin; notation: minX, maxX, minY, maxY
 		String scenarioCRS = "EPSG:31468"; // EPSG:31468 = DHDN GK4
 		
-		config.network().setInputFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_network.xml.gz");
-//		config.network().setInputFile("../../runs-svn/open_berlin_scenario/be_253/be_253.output_network.xml.gz");
+		config.network().setInputFile("../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/be_5_network_with-pt-ride-freight.xml.gz");
 		config.facilities().setInputFile("../../shared-svn/projects/accessibility_berlin/osm/berlin/amenities/2018-05-30/facilities.xml");
 		
 //		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(scenarioCRS, "EPSG:4326");
@@ -78,7 +77,7 @@ public class AccessibilityComputationBerlin_V2 {
 //			e.printStackTrace();
 //		}
 		
-		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/neuneunue/");
+		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/pt_500/");
 		config.controler().setRunId("de_berlin_" + cellSize.toString().split("\\.")[0]);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
@@ -86,7 +85,9 @@ public class AccessibilityComputationBerlin_V2 {
 		config.global().setCoordinateSystem(scenarioCRS);
 	
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
-		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
+//		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
+		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromShapeFile);
+		acg.setShapeFileCellBasedAccessibility("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp");
 		acg.setEnvelope(envelope);
 		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
 //		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
@@ -103,6 +104,8 @@ public class AccessibilityComputationBerlin_V2 {
 		config.transit().setTransitScheduleFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitSchedule.xml.gz");
 		config.transit().setVehiclesFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitVehicles.xml.gz");
 		config.qsim().setEndTime(100*3600.);
+		
+		config.transitRouter().setCacheTree(true);
 		
 //		Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 //		new MatsimNetworkReader(TransformationFactory.getCoordinateTransformation("EPSG:4326", scenarioCRS), 
@@ -122,7 +125,9 @@ public class AccessibilityComputationBerlin_V2 {
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
+//		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION, "s"});
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
+//		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
 		
 		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork()); // will be aggregated in downstream code!
 		
