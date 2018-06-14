@@ -47,7 +47,8 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
          * same set of decision variables will be re-created. Amit Dec'17
          */
         axial_fixedVariation,
-        grid_fixedVariation
+        grid_fixedVariation,
+        Latin_hyperCube
     }
 
     private final Scenario scenario;
@@ -70,7 +71,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         //        this.rnd = new Random(4711);
         // this will create an identical sequence of candidate decision variables for each experiment where a new ModeChoiceRandomizer instance is created.
         // That's not good; the parametrized runs are then all conditional on the 4711 random seed.
-        // (careful with using matsim-random since it is always the same sequence in one createDiagonalCombinations)
+        // (careful with using matsim-random since it is always the same sequence in one createGridCombinations)
         this.rnd = MatsimRandom.getRandom(); // random seed of matsim random should be changed in each run.
 
         if ( ! randomizedUtilityParametersChoser.equals(RandomizedUtilityParametersChoser.ONLY_ASC) ) {
@@ -124,10 +125,13 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
                 allCombinations  = createAxialCombinations(oldParameterSet, 1);
                 break;
             case grid_randomVariation:
-                createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
+                createGridCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
                 break;
             case grid_fixedVariation:
-                createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, 1);
+                createGridCombinations(oldParameterSet, allCombinations, remainingModes, 1);
+                break;
+            case Latin_hyperCube:
+                createLatinHubercubeCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
                 break;
             default:
                 throw new RuntimeException("not implemented yet.");
@@ -146,8 +150,15 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         return result;
     }
 
-    private void createDiagonalCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
-        // create combinations with one mode and call createDiagonalCombinations again
+    private void createLatinHubercubeCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
+        int numberOfSample = (int) Math.pow(2,remainingModes.size());
+//        LatinHypercubeSampling sampling = new LatinHypercubeSampling(MatsimRandom.getRandom());
+
+
+    }
+
+    private void createGridCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
+        // create combinations with one mode and call createGridCombinations again
         if (remainingModes.isEmpty()) {
             // don't do anything
         } else {
@@ -168,7 +179,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
                     allCombinations.addAll(tempCombinations);
                 }
             }
-            createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
+            createGridCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
         }
     }
 
