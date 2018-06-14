@@ -41,9 +41,9 @@ public class ParametricRunsPatnaAllModes {
 
         String ascStyles [] = {
                 ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation.toString(),
-                ModeChoiceRandomizer.ASCRandomizerStyle.diagonal_fixedVariation.toString(),
+                ModeChoiceRandomizer.ASCRandomizerStyle.grid_fixedVariation.toString(),
                 ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation.toString(),
-                ModeChoiceRandomizer.ASCRandomizerStyle.diagonal_randomVariation.toString()
+                ModeChoiceRandomizer.ASCRandomizerStyle.grid_randomVariation.toString()
         };
         double [] stepSizes = {0.05, 0.1, 0.2};
         Integer [] convIterations = {600};
