@@ -70,22 +70,22 @@ public class ModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "b5_64";
-		final String runDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/";
+		final String runId = "run3";
+		final String runDirectory = "/Users/ihab/Desktop/ils4mount/berlin/output/berlin-5.0_run3/";
 		
 		// if iteration < 0 --> analysis of the final iteration
-		int iteration = 100;
+		int iteration = -1;
 		
 		final String outputDirectory;
 		if (iteration >= 0) {
-			outputDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/modal-split-analysis_" + "it." + iteration + "/";
+			outputDirectory = runDirectory + "/modal-split-analysis_" + "it." + iteration + "/";
 		} else {
-			outputDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/modal-split-analysis/";
+			outputDirectory = runDirectory + "/modal-split-analysis/";
 		}
 		
 		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file; null --> using the output person attributes file
-		final String personAttributesFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_5_ik/population/personAttributes_500_10pct.xml.gz";
-//		final String personAttributesFile = null;
+//		final String personAttributesFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_5_ik/population/personAttributes_500_10pct.xml.gz";
+		final String personAttributesFile = null;
 
 		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile, iteration);
 		
