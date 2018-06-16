@@ -773,9 +773,13 @@ public class IKAnalysisRun {
 			
 			if (new File(runDirectory + runId + ".output_config.xml").exists()) {
 				
-				networkFile = runDirectory + runId + ".output_network.xml.gz";
-				populationFile = runDirectory + runId + ".output_plans.xml.gz";
 				configFile = runDirectory + runId + ".output_config.xml";
+
+//				networkFile = runDirectory + runId + ".output_network.xml.gz";
+//				populationFile = runDirectory + runId + ".output_plans.xml.gz";
+				
+				networkFile = runId + ".output_network.xml.gz";
+				populationFile = runId + ".output_plans.xml.gz";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
 					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
@@ -785,9 +789,13 @@ public class IKAnalysisRun {
 				
 			} else {
 				
-				networkFile = runDirectory + "output_network.xml.gz";
-				populationFile = runDirectory + "output_plans.xml.gz";
 				configFile = runDirectory + "output_config.xml";
+
+//				networkFile = runDirectory + "output_network.xml.gz";
+//				populationFile = runDirectory + "output_plans.xml.gz";
+				
+				networkFile = "output_network.xml.gz";
+				populationFile = "output_plans.xml.gz";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
 					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
