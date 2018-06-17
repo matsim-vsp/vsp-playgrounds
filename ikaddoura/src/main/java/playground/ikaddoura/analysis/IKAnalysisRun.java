@@ -178,7 +178,26 @@ public class IKAnalysisRun {
 		Scenario scenario1 = loadScenario(runDirectory, runId, null);
 		Scenario scenario0 = loadScenario(runDirectoryToCompareWith, runIdToCompareWith, null);
 		
-		List<AgentAnalysisFilter> filter1 = null;
+		List<AgentAnalysisFilter> filter1 = new ArrayList<>();
+
+		AgentAnalysisFilter filter1a = new AgentAnalysisFilter(scenario1);
+		filter1a.setSubpopulation("person");
+		filter1a.setPersonAttribute("berlin");
+		filter1a.setPersonAttributeName("home-activity-zone");
+		filter1a.preProcess(scenario1);
+		filter1.add(filter1a);
+		
+		AgentAnalysisFilter filter1b = new AgentAnalysisFilter(scenario1);
+		filter1b.preProcess(scenario1);
+		filter1.add(filter1b);
+		
+		AgentAnalysisFilter filter1c = new AgentAnalysisFilter(scenario1);
+		filter1c.setSubpopulation("person");
+		filter1c.setPersonAttribute("brandenburg");
+		filter1c.setPersonAttributeName("home-activity-zone");
+		filter1c.preProcess(scenario1);
+		filter1.add(filter1c);
+		
 		List<AgentAnalysisFilter> filter0 = null;
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
@@ -759,71 +778,79 @@ public class IKAnalysisRun {
 	}
 
 	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFileToReplaceOutputFile) {
+		log.info("Loading scenario...");
 		
 		if (runDirectory == null) {
-			return null;
+			return null;	
+		}
+		
+		if (runDirectory == "") {
+			return null;	
+		}
+		
+		if (runDirectory == "null") {
+			return null;	
+		}
+		
+		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
+
+		String networkFile;
+		String populationFile;
+		String personAttributesFile;
+		String configFile;
+		
+		if (new File(runDirectory + runId + ".output_config.xml").exists()) {
+			
+			configFile = runDirectory + runId + ".output_config.xml";
+
+//			networkFile = runDirectory + runId + ".output_network.xml.gz";
+//			populationFile = runDirectory + runId + ".output_plans.xml.gz";
+			
+			networkFile = runId + ".output_network.xml.gz";
+			populationFile = runId + ".output_plans.xml.gz";
+			
+			if (personAttributesFileToReplaceOutputFile == null) {
+//				personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
+				personAttributesFile = runId + ".output_personAttributes.xml.gz";
+			} else {
+				personAttributesFile = personAttributesFileToReplaceOutputFile;
+			}
 			
 		} else {
-			if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
-
-			String networkFile;
-			String populationFile;
-			String personAttributesFile;
-			String configFile;
 			
-			if (new File(runDirectory + runId + ".output_config.xml").exists()) {
-				
-				configFile = runDirectory + runId + ".output_config.xml";
+			configFile = runDirectory + "output_config.xml";
 
-//				networkFile = runDirectory + runId + ".output_network.xml.gz";
-//				populationFile = runDirectory + runId + ".output_plans.xml.gz";
-				
-				networkFile = runId + ".output_network.xml.gz";
-				populationFile = runId + ".output_plans.xml.gz";
-				
-				if (personAttributesFileToReplaceOutputFile == null) {
-//					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
-					personAttributesFile = runId + ".output_personAttributes.xml.gz";
-				} else {
-					personAttributesFile = personAttributesFileToReplaceOutputFile;
-				}
-				
-			} else {
-				
-				configFile = runDirectory + "output_config.xml";
-
-//				networkFile = runDirectory + "output_network.xml.gz";
-//				populationFile = runDirectory + "output_plans.xml.gz";
-				
-				networkFile = "output_network.xml.gz";
-				populationFile = "output_plans.xml.gz";
-				
-				if (personAttributesFileToReplaceOutputFile == null) {
-//					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
-					personAttributesFile = "output_personAttributes.xml.gz";
-				} else {
-					personAttributesFile = personAttributesFileToReplaceOutputFile;
-				}
-			}
-
-			Config config = ConfigUtils.loadConfig(configFile);
-
-			if (config.controler().getRunId() != null) {
-				if (!runId.equals(config.controler().getRunId())) throw new RuntimeException("Given run ID " + runId + " doesn't match the run ID given in the config file. Aborting...");
-			} else {
-				config.controler().setRunId(runId);
-			}
-
-			config.controler().setOutputDirectory(runDirectory);
-			config.plans().setInputFile(populationFile);
-			config.plans().setInputPersonAttributeFile(personAttributesFile);
-			config.network().setInputFile(networkFile);
-			config.vehicles().setVehiclesFile(null);
-			config.transit().setTransitScheduleFile(null);
-			config.transit().setVehiclesFile(null);
+//			networkFile = runDirectory + "output_network.xml.gz";
+//			populationFile = runDirectory + "output_plans.xml.gz";
 			
-			return ScenarioUtils.loadScenario(config);
+			networkFile = "output_network.xml.gz";
+			populationFile = "output_plans.xml.gz";
+			
+			if (personAttributesFileToReplaceOutputFile == null) {
+//				personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+				personAttributesFile = "output_personAttributes.xml.gz";
+			} else {
+				personAttributesFile = personAttributesFileToReplaceOutputFile;
+			}
 		}
+
+		Config config = ConfigUtils.loadConfig(configFile);
+
+		if (config.controler().getRunId() != null) {
+			if (!runId.equals(config.controler().getRunId())) throw new RuntimeException("Given run ID " + runId + " doesn't match the run ID given in the config file. Aborting...");
+		} else {
+			config.controler().setRunId(runId);
+		}
+
+		config.controler().setOutputDirectory(runDirectory);
+		config.plans().setInputFile(populationFile);
+		config.plans().setInputPersonAttributeFile(personAttributesFile);
+		config.network().setInputFile(networkFile);
+		config.vehicles().setVehiclesFile(null);
+		config.transit().setTransitScheduleFile(null);
+		config.transit().setVehiclesFile(null);
+		
+		return ScenarioUtils.loadScenario(config);
 	}
 	
 	private Map<Id<Person>, Double> getPersonId2UserBenefit(Scenario scenario) {
