@@ -119,8 +119,8 @@ public class IKAnalysisRun {
 			
 	public static void main(String[] args) throws IOException {
 			
-		String runDirectory;
-		String runId;
+		String runDirectory = null;
+		String runId = null;
 		String runDirectoryToCompareWith = null;
 		String runIdToCompareWith = null;
 		String visualizationScriptInputDirectory = null;
@@ -131,25 +131,36 @@ public class IKAnalysisRun {
 		int scalingFactor;
 		
 		if (args.length > 0) {
-			runDirectory = args[0];
+			if (args[0] != "null") runDirectory = args[0];
 			log.info("Run directory: " + runDirectory);
 			
-			runId = args[1];
+			if (args[1] != "null") runId = args[1];
+			log.info("Run Id: " + runDirectory);
 			
-			runDirectoryToCompareWith = args[2];
+			if (args[2] != "null") runDirectoryToCompareWith = args[2];
 			log.info("Run directory to compare with: " + runDirectoryToCompareWith);
 			
-			runIdToCompareWith = args[3];
+			if (args[3] != "null") runIdToCompareWith = args[3];
+			log.info("Run Id to compare with: " + runDirectory);
 			
-			scenarioCRS = args[4];	
-			shapeFileZones = args[5];
-			zonesCRS = args[6];
+			if (args[4] != "null") scenarioCRS = args[4];	
+			log.info("Scenario CRS: " + scenarioCRS);
 			
-			homeActivity = args[7];
+			if (args[5] != "null") shapeFileZones = args[5];
+			log.info("Shape file zones: " + shapeFileZones);
+
+			if (args[6] != "null") zonesCRS = args[6];
+			log.info("Zones CRS: " + zonesCRS);
+			
+			if (args[7] != "null") homeActivity = args[7];
+			log.info("Home activity: " + homeActivity);
+
 			scalingFactor = Integer.valueOf(args[8]);
+			log.info("Scaling factor: " + scalingFactor);
 		
-			visualizationScriptInputDirectory = "./visualization-scripts/";
-			
+			if (args[9] != "null") visualizationScriptInputDirectory = args[9];
+			log.info("Visualization script input directory: " + visualizationScriptInputDirectory);
+
 		} else {
 			
 			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
@@ -784,11 +795,11 @@ public class IKAnalysisRun {
 			return null;	
 		}
 		
-		if (runDirectory == "") {
+		if (runDirectory.equals("")) {
 			return null;	
 		}
 		
-		if (runDirectory == "null") {
+		if (runDirectory.equals("null")) {
 			return null;	
 		}
 		
