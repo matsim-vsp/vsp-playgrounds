@@ -131,34 +131,34 @@ public class IKAnalysisRun {
 		int scalingFactor;
 		
 		if (args.length > 0) {
-			if (args[0] != "null") runDirectory = args[0];
+			if (!args[0].equals("null")) runDirectory = args[0];
 			log.info("Run directory: " + runDirectory);
 			
-			if (args[1] != "null") runId = args[1];
+			if (!args[1].equals("null")) runId = args[1];
 			log.info("Run Id: " + runDirectory);
 			
-			if (args[2] != "null") runDirectoryToCompareWith = args[2];
+			if (!args[2].equals("null")) runDirectoryToCompareWith = args[2];
 			log.info("Run directory to compare with: " + runDirectoryToCompareWith);
 			
-			if (args[3] != "null") runIdToCompareWith = args[3];
+			if (!args[3].equals("null")) runIdToCompareWith = args[3];
 			log.info("Run Id to compare with: " + runDirectory);
 			
-			if (args[4] != "null") scenarioCRS = args[4];	
+			if (!args[4].equals("null")) scenarioCRS = args[4];	
 			log.info("Scenario CRS: " + scenarioCRS);
 			
-			if (args[5] != "null") shapeFileZones = args[5];
+			if (!args[5].equals("null")) shapeFileZones = args[5];
 			log.info("Shape file zones: " + shapeFileZones);
 
-			if (args[6] != "null") zonesCRS = args[6];
+			if (!args[6].equals("null")) zonesCRS = args[6];
 			log.info("Zones CRS: " + zonesCRS);
 			
-			if (args[7] != "null") homeActivity = args[7];
+			if (!args[7].equals("null")) homeActivity = args[7];
 			log.info("Home activity: " + homeActivity);
 
 			scalingFactor = Integer.valueOf(args[8]);
 			log.info("Scaling factor: " + scalingFactor);
 		
-			if (args[9] != "null") visualizationScriptInputDirectory = args[9];
+			if (!args[9].equals("null")) visualizationScriptInputDirectory = args[9];
 			log.info("Visualization script input directory: " + visualizationScriptInputDirectory);
 
 		} else {
