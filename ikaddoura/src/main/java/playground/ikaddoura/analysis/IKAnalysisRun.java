@@ -782,7 +782,8 @@ public class IKAnalysisRun {
 				populationFile = runId + ".output_plans.xml.gz";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
+//					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
+					personAttributesFile = runId + ".output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}
@@ -798,7 +799,8 @@ public class IKAnalysisRun {
 				populationFile = "output_plans.xml.gz";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+//					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+					personAttributesFile = "output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}
