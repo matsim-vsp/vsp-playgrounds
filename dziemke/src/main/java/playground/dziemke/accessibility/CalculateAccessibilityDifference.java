@@ -53,15 +53,15 @@ public class CalculateAccessibilityDifference {
 //		String directoryRootBase = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus/runAccessibilityComputation/";
 //		String directoryRootPolicy = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus_pt-only/runAccessibilityComputation/";
 		
-//		String directoryRoot = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/";
-//		String directoryRootBase = directoryRoot + "BT-b/accessibilities_50_-5.25-0.0/";
-//		String directoryRootPolicy = directoryRoot + "BT-mb/accessibilities_50_-5.25-0.0/";
-//		String identifier = "BT-b-BT-mb_50_-5.25-0.0/";
+		String directoryRoot = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/";
+		String directoryRootBase = directoryRoot + "accessibilities/BT-mb/50_1.0-1.7/";
+		String directoryRootPolicy = directoryRoot + "accessibilities/BT-b/50_1.0-1.7/";
+		String identifier = "accessibilities/BT-b_BT-mb_50/";
 		
-		String directoryRoot = "../../upretoria/data/nmb/";
-		String directoryRootBase = directoryRoot + "output_1000_ptnw_6/";
-		String directoryRootPolicy = directoryRoot + "output_1000_ptnw_6_motherwell_rail/";
-		String identifier = "motherwell-rail-base/";
+//		String directoryRoot = "../../upretoria/data/nmb/";
+//		String directoryRootBase = directoryRoot + "output_1000_ptnw_6/";
+//		String directoryRootPolicy = directoryRoot + "output_1000_ptnw_6_motherwell_rail/";
+//		String identifier = "motherwell-rail-base/";
 		
 //		String directoryRoot = "../../../shared-svn/projects/maxess/data/nmb/output/17compRestricted500/";
 		String activityType = FacilityTypes.EDUCATION;
