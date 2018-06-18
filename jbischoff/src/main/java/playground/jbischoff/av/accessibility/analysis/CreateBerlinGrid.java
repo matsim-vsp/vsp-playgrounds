@@ -26,7 +26,6 @@ import com.vividsolutions.jts.geom.Point;
 import org.geotools.referencing.CRS;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.drt.analysis.zonal.DrtGridUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
@@ -36,6 +35,7 @@ import org.matsim.core.utils.gis.ShapeFileWriter;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import playground.jbischoff.utils.JbUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +45,9 @@ public class CreateBerlinGrid {
 
     public static void main(String[] args) {
         Network network = NetworkUtils.createNetwork();
-        new MatsimNetworkReader(network).readFile("D:/b5_22/berlin_only_net.xml.gz");
-        Map<String, Geometry> geometryMap = DrtGridUtils.createGridFromNetwork(network, 500);
+        new MatsimNetworkReader(network).readFile("D:/runs-svn/avsim/av_accessibility/input/berlin_only_net.xml.gz");
+        Map<String, Geometry> geometryMap = JbUtils.readShapeFileAndExtractGeometry("C:/Users/Joschka/Documents/shared-svn/projects/accessibility_berlin/av/grid/squares.shp", "NO");
+//        Map<String, Geometry> geometryMap = DrtGridUtils.createGridFromNetwork(network, 500);
         for (Link l : network.getLinks().values()) {
 
             Point p = MGC.coord2Point(l.getCoord());
@@ -59,8 +60,8 @@ public class CreateBerlinGrid {
 
         }
 
-        new NetworkWriter(network).write("d:/b5_22/berlin_analysisNet_500.xml.gz");
-        writeShape("d:/b5_22/gridzones_500.shp", geometryMap);
+        new NetworkWriter(network).write("D:\\runs-svn\\avsim\\av_accessibility\\input\\berlin_only_net_dominik.xml.gz");
+//        writeShape("d:/b5_22/gridzones_500.shp", geometryMap);
 
 
     }

@@ -53,7 +53,7 @@ public class RunAnalysis {
 
     public void run() {
         Network network = NetworkUtils.createNetwork();
-        new MatsimNetworkReader(network).readFile("D:/b5_22/berlin_analysisNet_500.xml.gz");
+        new MatsimNetworkReader(network).readFile("D:/runs-svn/avsim/av_accessibility/input/berlin_only_net_dominik.xml.gz");
         Map<String, List<Double>[]> aggregatedWaitTimes = new HashMap<>();
         network.getLinks().values().forEach(l -> {
             String zone = (String) l.getAttributes().getAttribute("zoneId");
@@ -69,7 +69,7 @@ public class RunAnalysis {
         for (int i = 0; i < 5; i++) {
             EventsManager events = EventsUtils.createEventsManager();
             events.addHandler(new WaitTimeHandler(network, aggregatedWaitTimes));
-            new MatsimEventsReader(events).readFile("D:/b5_22/output/taxi" + i + "/b5_22.output_events.xml.gz");
+            new MatsimEventsReader(events).readFile("D:\\runs-svn\\avsim\\av_accessibility\\output/taxi" + i + "/b5_22.output_events.xml.gz");
 
         }
         Map<String, int[]> averageHourlyWaitTimes = new HashMap<>();
@@ -83,7 +83,7 @@ public class RunAnalysis {
             }
         }
 
-        final BufferedWriter bw = IOUtils.getBufferedWriter("D:/b5_22/output/averageTaxiWaitTimes_500.csv");
+        final BufferedWriter bw = IOUtils.getBufferedWriter("D:\\runs-svn\\avsim\\av_accessibility\\output/averageTaxiWaitTimes_dominik.csv");
         try {
             bw.write("zoneId");
             for (int i = 0; i < 24; i++) {
