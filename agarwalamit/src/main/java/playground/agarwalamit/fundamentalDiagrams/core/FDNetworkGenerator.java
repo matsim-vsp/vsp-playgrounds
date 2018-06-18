@@ -21,7 +21,6 @@ package playground.agarwalamit.fundamentalDiagrams.core;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
@@ -30,7 +29,7 @@ import org.matsim.api.core.v01.network.Node;
  * Created by amit on 16/02/2017.
  */
 
-final class FDNetworkGenerator {
+public final class FDNetworkGenerator {
 
 	private final int noOfSides = 3;
 	private final Id<Link> startLinkId = Id.createLinkId("home");
@@ -41,27 +40,26 @@ final class FDNetworkGenerator {
 	private Id<Link> firstLinkOfMiddleSide; // link just after lastLinkOfBase
 	private Id<Link> lastLinkOfTrack; // left link
 
-	private final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup;
+	private final FDConfigGroup FDConfigGroup;
 
 	/**
-	 * @param fundamentalDiagramConfigGroup
+	 * @param FDConfigGroup
 	 */
-	public FDNetworkGenerator(final FundamentalDiagramConfigGroup fundamentalDiagramConfigGroup) {
-		this.fundamentalDiagramConfigGroup = fundamentalDiagramConfigGroup;
+	public FDNetworkGenerator(final FDConfigGroup FDConfigGroup) {
+		this.FDConfigGroup = FDConfigGroup;
 	}
 
-	public void createNetwork(final Scenario scenario) {
-		createTriangularNetwork(scenario);
+	public void createNetwork(final Network network) {
+		createTriangularNetwork(network);
 	}
 
 	/**
 	 * It will generate a triangular network.
 	 * Each link is subdivided in number of sub division factor.
 	 */
-	private void createTriangularNetwork(final Scenario scenario) {
-		Network network = scenario.getNetwork();
-		int subdivisionFactor = fundamentalDiagramConfigGroup.getTrackLinkDivisionFactor();
-		double linkLength = fundamentalDiagramConfigGroup.getTrackLinkLength();
+	private void createTriangularNetwork(final Network network) {
+		int subdivisionFactor = FDConfigGroup.getTrackLinkDivisionFactor();
+		double linkLength = FDConfigGroup.getTrackLinkLength();
 
 		//nodes of the equilateral triangle base starting, left node at (0,0)
 		for (int i = 0; i < subdivisionFactor + 1; i++) {
@@ -70,7 +68,7 @@ final class FDNetworkGenerator {
 			Coord coord = new Coord(x, y);
 			Id<Node> id = Id.createNodeId(i);
 
-			Node node = scenario.getNetwork().getFactory().createNode(id, coord);
+			Node node = network.getFactory().createNode(id, coord);
 			network.addNode(node);
 		}
 		//nodes of the triangle right side
@@ -80,7 +78,7 @@ final class FDNetworkGenerator {
 			Coord coord = new Coord(x, y);
 			Id<Node> id = Id.createNodeId(subdivisionFactor + i + 1);
 
-			Node node = scenario.getNetwork().getFactory().createNode(id, coord);
+			Node node = network.getFactory().createNode(id, coord);
 			network.addNode(node);
 		}
 		//nodes of the triangle left side
@@ -90,18 +88,18 @@ final class FDNetworkGenerator {
 			Coord coord = new Coord(x, y);
 			Id<Node> id = Id.createNodeId(2 * subdivisionFactor + i + 1);
 
-			Node node = scenario.getNetwork().getFactory().createNode(id, coord);
+			Node node = network.getFactory().createNode(id, coord);
 			network.addNode(node);
 		}
 		//additional startNode and endNode for home and work activities
 		double x = -50.0;
 		Coord coord = new Coord(x, 0.0);
-		Node startNode = scenario.getNetwork().getFactory().createNode(Id.createNodeId("home"), coord);
+		Node startNode = network.getFactory().createNode(Id.createNodeId("home"), coord);
 		network.addNode(startNode);
 
 		coord = new Coord(linkLength + 50.0, 0.0);
 		Id<Node> endNodeId = Id.createNodeId("work");
-		Node endNode = scenario.getNetwork().getFactory().createNode(endNodeId, coord);
+		Node endNode = network.getFactory().createNode(endNodeId, coord);
 		network.addNode(endNode);
 
 		// triangle links
@@ -115,11 +113,11 @@ final class FDNetworkGenerator {
 			Node from = network.getNodes().get(idFrom);
 			Node to = network.getNodes().get(idTo);
 
-			Link link = scenario.getNetwork().getFactory().createLink(Id.createLinkId(i+1), from, to);
-			link.setCapacity(fundamentalDiagramConfigGroup.getTrackLinkCapacity());
-			link.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
-			link.setLength(fundamentalDiagramConfigGroup.getTrackLinkLength());
-			link.setNumberOfLanes(fundamentalDiagramConfigGroup.getTrackLinkLanes());
+			Link link = network.getFactory().createLink(Id.createLinkId(i+1), from, to);
+			link.setCapacity(FDConfigGroup.getTrackLinkCapacity());
+			link.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
+			link.setLength(FDConfigGroup.getTrackLinkLength());
+			link.setNumberOfLanes(FDConfigGroup.getTrackLinkLanes());
 			network.addLink(link);
 
 			if (i==0) {
@@ -137,33 +135,33 @@ final class FDNetworkGenerator {
 		}
 
 		//additional startLink and endLink for home and work activities
-		Link startLink = scenario.getNetwork()
+		Link startLink = network
 								 .getFactory()
 								 .createLink(startLinkId,
 										 startNode,
-										 scenario.getNetwork().getNodes().get(Id.createNodeId(0)));
-		startLink.setCapacity(10 * fundamentalDiagramConfigGroup.getTrackLinkCapacity());
-		startLink.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
+										 network.getNodes().get(Id.createNodeId(0)));
+		startLink.setCapacity(10 * FDConfigGroup.getTrackLinkCapacity());
+		startLink.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
 		startLink.setLength(25.);
 		startLink.setNumberOfLanes(1.);
 		network.addLink(startLink);
 
-		Link endLink = scenario.getNetwork()
+		Link endLink = network
 							   .getFactory()
-							   .createLink(endLinkId, scenario.getNetwork().getNodes().get(Id.createNodeId(
+							   .createLink(endLinkId, network.getNodes().get(Id.createNodeId(
 									   subdivisionFactor)), endNode);
-		endLink.setCapacity(10 * fundamentalDiagramConfigGroup.getTrackLinkCapacity());
-		endLink.setFreespeed(fundamentalDiagramConfigGroup.getTrackLinkSpeed());
+		endLink.setCapacity(10 * FDConfigGroup.getTrackLinkCapacity());
+		endLink.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
 		endLink.setLength(25.);
 		endLink.setNumberOfLanes(1.);
 		network.addLink(endLink);
 	}
 
 	public double getLengthOfTrack(){
-		return fundamentalDiagramConfigGroup.getTrackLinkLength()* noOfSides;
+		return FDConfigGroup.getTrackLinkLength()* noOfSides;
 	}
 
-	Id<Link> getFirstLinkIdOfTrack() {
+	public Id<Link> getFirstLinkIdOfTrack() {
 		return firstLinkOfTrack;
 	}
 
@@ -175,11 +173,11 @@ final class FDNetworkGenerator {
 		return firstLinkOfMiddleSide;
 	}
 
-	Id<Link> getLastLinkIdOfTrack() {
+	public Id<Link> getLastLinkIdOfTrack() {
 		return lastLinkOfTrack;
 	}
 
-	Id<Link> getTripDepartureLinkId(){
+	public Id<Link> getTripDepartureLinkId(){
 		return this.startLinkId;
 	}
 

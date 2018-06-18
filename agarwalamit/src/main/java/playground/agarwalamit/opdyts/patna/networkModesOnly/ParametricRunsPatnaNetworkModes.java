@@ -19,7 +19,8 @@
 
 package playground.agarwalamit.opdyts.patna.networkModesOnly;
 
-import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
+import playground.agarwalamit.opdyts.ModeChoiceRandomizer.ASCRandomizerStyle;
+import playground.vsp.parametricRuns.PrepareParametricRuns;
 
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
@@ -30,19 +31,21 @@ import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
 public class ParametricRunsPatnaNetworkModes {
 
     public static void main(String[] args) {
-        int runCounter= 201;
+        int runCounter= 261;
 
-        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/";
-        String matsimDir = "r_87b4237ac664bb1068965f2e8797e6bd3cfa7e1f_patnaOpdyts_25Oct";
+        String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output_selectExpBeta_scaleLogObjFn/";
+        String matsimDir = "r_65a41d0f53e3d1aaf0639d445a17a152a42a5af1_patnaOpdyts_13May2018";
 
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
 
-        String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixedVariation","diagonal_fixedVariation"};
+        String ascStyles [] = {ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.grid_randomVariation.toString(),
+                ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.grid_fixedVariation.toString()};
+
         double [] stepSizes = {0.5, 0.75, 1.0};
         Integer [] convIterations = {600};
         double [] selfTuningWts = {1.0};
-        Integer [] warmUpIts = {1, 5, 10};
+        Integer [] warmUpIts = {5, 1};
 
         buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts")
               .append(PrepareParametricRuns.newLine);
@@ -65,14 +68,15 @@ public class ParametricRunsPatnaNetworkModes {
                                     "cd /net/ils4/agarwal/matsim/"+matsimDir+"/",
                                     PrepareParametricRuns.newLine,
 
-                                    "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
+                                    "java -Djava.awt.headless=true -Xmx58G -cp agarwalamit-0.11.0-SNAPSHOT.jar " +
                                             "playground/agarwalamit/opdyts/patna/networkModesOnly/PatnaNetworkModesOpdytsCalibrator " +
                                             "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/inputs/config_networkModesOnly.xml " +
-                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/calibration/output/"+jobName+"/ " +
-                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/relaxedPlans/output/output_plans.xml.gz "+
-                                            params+" "
+                                            baseOutDir+"/"+jobName+"/ " +
+                                            "/net/ils4/agarwal/patnaOpdyts/networkModes/relaxedPlans/output_selectExpBeta/output_plans.xml.gz "+
+                                            params+" true"
                             };
 
+                            parametricRuns.appendJobParameters("-l mem_free=15G");// 4 cores with 15G each
                             parametricRuns.run(additionalLines, baseOutDir, jobName);
                             buffer.append(jobName)
                                   .append("\t")

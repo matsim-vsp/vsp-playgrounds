@@ -35,6 +35,8 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.data.NoiseAllocationApproach;
@@ -60,8 +62,6 @@ import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 import playground.vsp.airPollution.exposure.GridTools;
@@ -168,7 +168,7 @@ public class CNEMunich {
 				public void install() {
 					final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
 					String ug = "COMMUTER_REV_COMMUTER";
-					addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.name()
+					addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice
 							.concat("_")
 							.concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 						final String[] availableModes = {"car", "pt_".concat(ug)};
@@ -181,7 +181,9 @@ public class CNEMunich {
 							final Builder builder = new Builder(new RandomPlanSelector<>());
 							builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
 									.global()
-									.getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+									.getNumberOfThreads(), availableModes, chainBasedModes, false, 
+									0.0, //value 0.0 for backward compatibility.
+									tripRouterProvider));
 							builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 							return builder.build();
 						}
@@ -283,23 +285,23 @@ public class CNEMunich {
 			
 			decongestionSettings.setMsa(true);
 			
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
-			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setToleratedAverageDelaySec(30.);
+			decongestionSettings.setWriteOutputIteration(controler.getConfig().controler().getLastIteration());
 
 		} else if (congestionTollingApproach.toString().equals(CongestionTollingApproach.DecongestionBangBang.toString())) {
 
 			decongestionSettings.setDecongestionApproach(DecongestionApproach.BangBang);
-			decongestionSettings.setINITIAL_TOLL(0.01);
-			decongestionSettings.setTOLL_ADJUSTMENT(1.0);
+			decongestionSettings.setInitialToll(0.01);
+			decongestionSettings.setTollAdjustment(1.0);
 			
 			decongestionSettings.setMsa(false);
 			
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
-			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setToleratedAverageDelaySec(30.);
+			decongestionSettings.setWriteOutputIteration(controler.getConfig().controler().getLastIteration());
 			
 		} else {
 			// for V3, V9 and V10: no additional settings

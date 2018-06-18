@@ -47,17 +47,16 @@ public class Events2TripsParser {
         MatsimNetworkReader networkReader = new MatsimNetworkReader(network);
         networkReader.readFile(networkFile);
 
-        List<MatsimTrip> trips = new ArrayList<>(tripHandler.getTrips().values());
+        trips = new ArrayList<>(tripHandler.getTrips().values());
 
         Config config = ConfigUtils.createConfig();
         ConfigReader configReader = new ConfigReader(config);
         configReader.readFile(configFile);
 
         log.info("Start calculating additional Information for Trips (f.e.: beeline distance)");
-        new TripInformationCalculator().calculateInformation(trips, network, config.plansCalcRoute().getNetworkModes());
+        new TripInformationCalculator(network, config.plansCalcRoute().getNetworkModes()).calculateInformation(trips);
         log.info("Finished calculating additional Information for Trips (f.e.: beeline distance)");
 
-        this.trips = trips;
     }
 
     public Network getNetwork() {

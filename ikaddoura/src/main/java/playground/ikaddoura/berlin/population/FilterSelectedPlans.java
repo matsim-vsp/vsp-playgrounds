@@ -38,8 +38,8 @@ public class FilterSelectedPlans {
 	
 	private static final Logger log = Logger.getLogger(FilterSelectedPlans.class);
 	
-	private static String inputPlans = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/b400_176/b400_176.output_plans.xml.gz";
-	private static String outputPlans = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/be_400_10pct_176.selected_plans.xml.gz";
+	private static String inputPlans = "/Users/ihab/Desktop/ils4mount/ziemke/open_berlin_scenario/output/b5_w3a19/b5_w3a19.output_plans.xml.gz";
+	private static String outputPlans = "/Users/ihab/Desktop/berlin/b5_w3a19.output_plans_selected.xml.gz";
 //	private static final String[] attributes = {"OpeningClosingTimes"};
 	private static final String[] attributes = {};
 	

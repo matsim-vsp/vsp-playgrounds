@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.signals.data.intergreens.v10.IntergreenTimesData;
@@ -42,7 +41,6 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalGroup;
-
 import playground.dgrether.signalsystems.utils.DgSignalGroupSettingsDataOnsetComparator;
 import signals.sylvia.data.DgPhase;
 

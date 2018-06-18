@@ -334,7 +334,9 @@ public class SantiagoAVScenarioRunnerWithDrt {
 			Log.info("Chain-based modes are " + chainBasedModes);
 			final Builder builder = new Builder(new RandomPlanSelector<Plan, Person>());
 			builder.addStrategyModule(new SubtourModeChoice(scenario.getConfig().global().getNumberOfThreads(),
-					availableModes, chainBasedModes, false, tripRouterProvider));
+					availableModes, chainBasedModes, false, 
+					0.0, // using value of 0.0 (=default) for backward compatibility
+					tripRouterProvider));
 			builder.addStrategyModule(new ReRoute(scenario, tripRouterProvider));
 			return builder.build();
 		}

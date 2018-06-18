@@ -36,6 +36,7 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
@@ -68,9 +69,11 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     private Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
     
     private final OnRoadExposureConfigGroup config;
+    private final Network network;
 
-    public OnRoadExposureHandler(OnRoadExposureConfigGroup config) {
+    public OnRoadExposureHandler(OnRoadExposureConfigGroup config, Network network) {
         this.config = config;
+        this.network = network;
     }
 
     @Override
@@ -176,6 +179,8 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
             if(event instanceof VehicleEntersTrafficEvent) {
 
                 VehicleEntersTrafficEvent vehicleEntersTrafficEvent = (VehicleEntersTrafficEvent) event;
+                createOnRoadExporureTrip(vehicleEntersTrafficEvent);
+
                 driverAgents.put(vehicleEntersTrafficEvent.getVehicleId(), new Tuple<>(vehicleEntersTrafficEvent.getPersonId(), vehicleEntersTrafficEvent.getNetworkMode()));
                 registerReceptor(vehicleEntersTrafficEvent.getVehicleId(), vehicleEntersTrafficEvent.getLinkId(), vehicleEntersTrafficEvent.getTime());
 
@@ -195,7 +200,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
                 this.agentsOnLink.get(coldEmissionEvent.getLinkId())
                                  .values()
                                  .stream()
-                                 .forEach(e -> e.addColdEmissions(coldEmissionEvent.getColdEmissions()));
+                                 .forEach(e -> e.addColdEmissions(coldEmissionEvent.getColdEmissions(), this.network.getLinks().get(coldEmissionEvent.getLinkId()).getLength() ));
 
             } else if(event instanceof WarmEmissionEvent) {
 
@@ -203,7 +208,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
                 this.agentsOnLink.get(warmEmissionEvent.getLinkId())
                                  .values()
                                  .stream()
-                                 .forEach(e -> e.addWarmEmissions(warmEmissionEvent.getWarmEmissions()));
+                                 .forEach(e -> e.addWarmEmissions(warmEmissionEvent.getWarmEmissions(), this.network.getLinks().get(warmEmissionEvent.getLinkId()).getLength()));
 
             } else if(event instanceof VehicleLeavesTrafficEvent) {
 
@@ -219,6 +224,10 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
     }
 
     // >>>> register - deregister >>>>
+
+    private void createOnRoadExporureTrip(VehicleEntersTrafficEvent event){
+        this.onRoadExposureTable.createTripAndAddInfo(event.getPersonId(), event.getLinkId(), event.getNetworkMode(), event.getTime());
+    }
 
     private void registerReceptor(Id<Vehicle> vehicleId, Id<Link> linkId, double time){
         VehicleLinkEmissionCollector vehicleLinkEmissionCollector = new VehicleLinkEmissionCollector(vehicleId,

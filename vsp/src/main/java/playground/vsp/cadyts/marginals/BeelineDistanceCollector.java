@@ -81,6 +81,11 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
 
     private final Map<Id<Person>, Coord> personToOriginCoord = new HashMap<>();
 
+    // only if event handler is used as post processing outside controler
+    public void setAgentFilter(AgentFilter agentFilter){
+        this.agentFilter= agentFilter;
+    }
+
     @Override
     public void handleEvent(PersonArrivalEvent event) {
         if (agentFilter!=null && !agentFilter.includeAgent(event.getPersonId())) return; // if filtering and agent should not be included
@@ -100,7 +105,7 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
         else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
             beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
         } else{
-            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
+            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.3");
         }
         double beelineDistance = beelineDistanceFactor *
                 NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);

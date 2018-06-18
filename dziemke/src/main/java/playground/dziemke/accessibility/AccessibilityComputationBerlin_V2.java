@@ -18,32 +18,25 @@
  * *********************************************************************** */
 package playground.dziemke.accessibility;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.AccessibilityModule;
 import org.matsim.contrib.accessibility.FacilityTypes;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
-import org.matsim.contrib.accessibility.utils.AccessibilityFacilityUtils;
-import org.matsim.contrib.accessibility.utils.AccessibilityOsmNetworkReader;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.facilities.ActivityFacilities;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -55,34 +48,36 @@ public class AccessibilityComputationBerlin_V2 {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationBerlin_V2.class);
 	
 	public static void main(String[] args) {
-		Double cellSize = 100.;
-		boolean push2Geoserver = false; // set true for run on server
-		boolean createQGisOutput = true; // set false for run on server
-		String scenarioCRS = "EPSG:31468"; // = DHDN GK4
-//		final Envelope envelope = new Envelope(4590000, 4593000, 5823500, 5825500); // Berlin-GG; notation: minX, maxX, minY, maxY
-//		final Envelope envelope = new Envelope(4589000, 4591500, 5820500, 5822500); // Berlin-SG; notation: minX, maxX, minY, maxY
-		final Envelope envelope = new Envelope(4589000, 4593000, 5820500, 5825500); // Berlin-SG/GG; notation: minX, maxX, minY, maxY
-		
+		Double cellSize = 500.;
+		boolean push2Geoserver = false; // Set true for run on server
+		boolean createQGisOutput = true; // Set false for run on server
+
 		final Config config = ConfigUtils.createConfig(new AccessibilityConfigGroup());
+
+		final Envelope envelope = new Envelope(4574000, 4620000, 5802000, 5839000); // Berlin; notation: minX, maxX, minY, maxY
+		String scenarioCRS = "EPSG:31468"; // EPSG:31468 = DHDN GK4
 		
-		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(scenarioCRS, "EPSG:4326");
-		Coord southwest = transformation.transform(new Coord(envelope.getMinX(), envelope.getMinY()));
-		Coord northeast = transformation.transform(new Coord(envelope.getMaxX(), envelope.getMaxY()));
-		Network network = null;
-		ActivityFacilities facilities = null;
-		try {
-			URL osm = new URL("http://overpass.osm.rambler.ru/cgi/xapi_meta?*[bbox=" + southwest.getX() + "," + southwest.getY() + "," + northeast.getX() + "," + northeast.getY() +"]");
-		    AccessibilityOsmNetworkReader networkReader = new AccessibilityOsmNetworkReader(((HttpURLConnection) osm.openConnection()).getInputStream(), scenarioCRS);
-			networkReader.setKeepPaths(true);
-			networkReader.setIincludeLowHierarchyWays(true);
-			networkReader.createNetwork();
-			network = networkReader.getNetwork();
-			facilities = AccessibilityFacilityUtils.createFacilites(((HttpURLConnection) osm.openConnection()).getInputStream(), scenarioCRS, 0.);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		config.network().setInputFile("../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/be_5_network_with-pt-ride-freight.xml.gz");
+		config.facilities().setInputFile("../../shared-svn/projects/accessibility_berlin/osm/berlin/amenities/2018-05-30/facilities.xml");
 		
-		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/neu/");
+//		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(scenarioCRS, "EPSG:4326");
+//		Coord southwest = transformation.transform(new Coord(envelope.getMinX(), envelope.getMinY()));
+//		Coord northeast = transformation.transform(new Coord(envelope.getMaxX(), envelope.getMaxY()));
+//		Network network = null;
+//		ActivityFacilities facilities = null;
+//		try {
+//			URL osm = new URL("http://overpass-api.de/api/xapi_meta?*[bbox=" + southwest.getX() + "," + southwest.getY() + "," + northeast.getX() + "," + northeast.getY() +"]");
+//		    AccessibilityOsmNetworkReader networkReader = new AccessibilityOsmNetworkReader(((HttpURLConnection) osm.openConnection()).getInputStream(), scenarioCRS);
+//			networkReader.setKeepPaths(true);
+//			networkReader.setIincludeLowHierarchyWays(true);
+//			networkReader.createNetwork();
+//			network = networkReader.getNetwork();
+//			facilities = AccessibilityFacilityUtils.createFacilites(((HttpURLConnection) osm.openConnection()).getInputStream(), scenarioCRS, 0.);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		
+		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/pt_500/");
 		config.controler().setRunId("de_berlin_" + cellSize.toString().split("\\.")[0]);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
@@ -90,20 +85,50 @@ public class AccessibilityComputationBerlin_V2 {
 		config.global().setCoordinateSystem(scenarioCRS);
 	
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
-		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
+//		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
+		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromShapeFile);
+		acg.setShapeFileCellBasedAccessibility("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp");
 		acg.setEnvelope(envelope);
 		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
-		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
+//		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, false);
+		acg.setComputingAccessibilityForMode(Modes4Accessibility.pt, true);
 		acg.setOutputCrs(scenarioCRS);
 		
 		ConfigUtils.setVspDefaults(config);
 		
-		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
-		scenario.setNetwork(network);
-		scenario.setActivityFacilities(facilities);
+//		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+		
+		// ---------- Schedule-based pt
+		config.transit().setUseTransit(true);
+		config.transit().setTransitScheduleFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitSchedule.xml.gz");
+		config.transit().setVehiclesFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitVehicles.xml.gz");
+		config.qsim().setEndTime(100*3600.);
+		
+		config.transitRouter().setCacheTree(true);
+		
+//		Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+//		new MatsimNetworkReader(TransformationFactory.getCoordinateTransformation("EPSG:4326", scenarioCRS), 
+//		scenario2.getNetwork()).readFile("../../../shared-svn/projects/maxess/data/nairobi/digital_matatus/matsim_2015-06-16_2/network.xml");
+//		MergeNetworks.merge(network, null, scenario2.getNetwork());
+		
+		ModeParams ptParams = new ModeParams(TransportMode.transit_walk);
+		config.planCalcScore().addModeParams(ptParams);
 
-		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.SHOPPING});
+		// ... trying to alter settings to drive down the number of "35527609 transfer links to be added".
+//		config.transitRouter().setAdditionalTransferTime(additionalTransferTime); // default: 0.0
+//		config.transitRouter().setDirectWalkFactor(directWalkFactor); // default: 1.0
+//		config.transitRouter().setMaxBeelineWalkConnectionDistance(0.); // default: 100.0
+//		config.transitRouter().setExtensionRadius(0.); // default: 200.0
+//		config.transitRouter().setSearchRadius(0.); // default: 1000.0
+		// ----------
+		
+		Scenario scenario = ScenarioUtils.loadScenario(config);
+
+//		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION, "s"});
+		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
+//		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
+		
 		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork()); // will be aggregated in downstream code!
 		
 		final Controler controler = new Controler(scenario);

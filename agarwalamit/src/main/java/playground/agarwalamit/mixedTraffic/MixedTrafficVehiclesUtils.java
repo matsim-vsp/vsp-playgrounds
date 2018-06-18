@@ -24,14 +24,7 @@ import org.matsim.api.core.v01.TransportMode;
  * @author amit
  */
 public class MixedTrafficVehiclesUtils {
-	
-	public final static String CAR = TransportMode.car;
-	public final static String BIKE = TransportMode.bike;
-	public final static String WALK = TransportMode.walk;
-//	public final static String PT = TransportMode.pt;
-	public final static String MOTORBIKE = "motorbike";
-	public final static String TRUCK = "truck";
-	
+
 	/**
 	 * @param travelMode
 	 * for which PCU value is required
@@ -39,13 +32,13 @@ public class MixedTrafficVehiclesUtils {
 	public static double getPCU(final String travelMode){
 		double pcu;
 		switch (travelMode) {
-		case CAR: pcu = 1.0; break;
+		case TransportMode.car: pcu = 1.0; break;
 		case "bicycle":
-		case BIKE: pcu = 0.25; break;
-		case MOTORBIKE: pcu = 0.25;break;
-		case WALK: pcu = 0.10;break;
+		case TransportMode.bike: pcu = 0.25; break;
+		case "motorbike": pcu = 0.25;break;
+		case TransportMode.walk: pcu = 0.10;break;
 //		case PT :
-		case TRUCK: pcu = 3.0; break;
+		case "truck": pcu = 3.0; break;
 		default: throw new RuntimeException("No PCU is set for travel mode "+travelMode+ ".");
 		}
 		return pcu;
@@ -58,13 +51,13 @@ public class MixedTrafficVehiclesUtils {
 	public static double getSpeed(final String travelMode){
 		double speed;
 		switch (travelMode) {
-		case CAR: speed = 16.67; break;
+		case TransportMode.car: speed = 16.67; break;
 		case "bicycle":
-		case BIKE: speed = 4.17; break;
-		case MOTORBIKE: speed = 16.67;break;
-		case WALK: speed = 1.2;break;
+		case TransportMode.bike: speed = 4.17; break;
+		case "motorbike": speed = 16.67;break;
+		case TransportMode.walk: speed = 1.2;break;
 //		case PT :
-		case TRUCK : speed = 8.33; break;
+		case "truck": speed = 8.33; break;
 		default: throw new RuntimeException("No speed is set for travel mode "+travelMode+ ".");
 		}
 		return speed;
@@ -80,5 +73,16 @@ public class MixedTrafficVehiclesUtils {
 	public static double getCellSize(final String travelMode){
 		double matsimCellSize = 7.5;
 		return matsimCellSize*getPCU(travelMode);
+	}
+
+	public static double getLength(final String travelMode){
+		switch (travelMode){
+			case TransportMode.car: return 3.72;
+			case "bicycle":
+			case TransportMode.bike:
+			case "motorbike": return 1.9;
+			case "truck": return 7.5;
+		}
+		throw new RuntimeException("Length fot "+travelMode+" is not found.");
 	}
 }

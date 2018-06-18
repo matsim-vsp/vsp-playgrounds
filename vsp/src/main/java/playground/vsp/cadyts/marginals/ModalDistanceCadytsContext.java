@@ -22,7 +22,6 @@ package playground.vsp.cadyts.marginals;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.supply.SimResults;
@@ -93,7 +92,9 @@ public class ModalDistanceCadytsContext implements CadytsContextI<ModalDistanceB
 		// addModule() also initializes the config group with the values read from the config file
 		cadytsConfig.setWriteAnalysisFile(true);
 
-		cadytsConfig.setCalibratedItems(modalDistanceBinMap.keySet().stream().map(Object::toString).collect(Collectors.toSet()));
+// dont set calibrated items back to cadytsConfig because by default, count stations for car mode (from config file) are used.
+// As far as I see, this is a problem is using more than one cadyts in parallel and only one cadyts config group. Amit May'18
+// cadytsConfig.setCalibratedItems(modalDistanceBinMap.keySet().stream().map(Object::toString).collect(Collectors.toSet()));
 		
 		this.writeAnalysisFile = cadytsConfig.isWriteAnalysisFile();
 		this.modalBinLoopUp = new ModalDistanceBinLoopUp(modalDistanceBinMap);

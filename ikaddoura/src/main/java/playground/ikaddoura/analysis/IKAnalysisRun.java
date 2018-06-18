@@ -32,6 +32,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.contrib.noise.personLinkMoneyEvents.CombinedPersonLinkMoneyEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -57,7 +58,6 @@ import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
  * 
@@ -773,24 +773,34 @@ public class IKAnalysisRun {
 			
 			if (new File(runDirectory + runId + ".output_config.xml").exists()) {
 				
-				networkFile = runDirectory + runId + ".output_network.xml.gz";
-				populationFile = runDirectory + runId + ".output_plans.xml.gz";
 				configFile = runDirectory + runId + ".output_config.xml";
+
+//				networkFile = runDirectory + runId + ".output_network.xml.gz";
+//				populationFile = runDirectory + runId + ".output_plans.xml.gz";
+				
+				networkFile = runId + ".output_network.xml.gz";
+				populationFile = runId + ".output_plans.xml.gz";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
+//					personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
+					personAttributesFile = runId + ".output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}
 				
 			} else {
 				
-				networkFile = runDirectory + "output_network.xml.gz";
-				populationFile = runDirectory + "output_plans.xml.gz";
 				configFile = runDirectory + "output_config.xml";
+
+//				networkFile = runDirectory + "output_network.xml.gz";
+//				populationFile = runDirectory + "output_plans.xml.gz";
+				
+				networkFile = "output_network.xml.gz";
+				populationFile = "output_plans.xml.gz";
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
-					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+//					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
+					personAttributesFile = "output_personAttributes.xml.gz";
 				} else {
 					personAttributesFile = personAttributesFileToReplaceOutputFile;
 				}

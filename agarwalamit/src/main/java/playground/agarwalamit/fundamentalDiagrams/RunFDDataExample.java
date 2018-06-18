@@ -21,9 +21,9 @@ package playground.agarwalamit.fundamentalDiagrams;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import playground.agarwalamit.fundamentalDiagrams.core.FundamentalDiagramDataGenerator;
+import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.utils.FileUtils;
 
 /**
@@ -45,11 +45,14 @@ public class RunFDDataExample {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/output";
+        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/test";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
 
-        FundamentalDiagramDataGenerator fundamentalDiagramDataGenerator = new FundamentalDiagramDataGenerator(scenario);
-        fundamentalDiagramDataGenerator.run();
+        Controler controler = new Controler(scenario);
+        controler.addOverridingModule(new FDModule(scenario));
+        controler.run();
+
+        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
     }
 }

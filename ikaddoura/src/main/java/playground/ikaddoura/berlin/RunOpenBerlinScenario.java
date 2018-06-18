@@ -27,6 +27,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -37,7 +38,10 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
+import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 
 /**
 * @author ikaddoura
@@ -55,6 +59,15 @@ public class RunOpenBerlinScenario {
 	private static boolean useCarTravelTimeForRide;
 	private static boolean useSBBptRouter;
 	private static boolean useDurationBasedTimeAllocationMutator;
+	private static double probaForRandomSingleTripMode;
+	private static boolean useVSPdefaults;
+	
+	private static double ascCar;
+	private static double ascPt;
+	private static double ascTransitWalk;
+	private static double ascWalk;
+	private static double ascBicycle;
+	private static double ascRide;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -79,11 +92,35 @@ public class RunOpenBerlinScenario {
 			
 			useDurationBasedTimeAllocationMutator = Boolean.parseBoolean(args[6]);
 			log.info("useDurationBasedTimeAllocationMutator: "+ useDurationBasedTimeAllocationMutator);
+			
+			probaForRandomSingleTripMode = Double.parseDouble(args[7]);
+			log.info("probaForRandomSingleTripMode: "+ probaForRandomSingleTripMode);
+			
+			useVSPdefaults = Boolean.parseBoolean(args[8]);
+			log.info("useVSPdefaults: "+ useVSPdefaults);
+			
+			ascCar = Double.parseDouble(args[9]);
+			log.info("ascCar: "+ ascCar);
+
+			ascPt = Double.parseDouble(args[10]);
+			log.info("ascPt: "+ ascPt);
+			
+			ascTransitWalk = Double.parseDouble(args[11]);
+			log.info("ascTransitWalk: "+ ascTransitWalk);
+
+			ascWalk = Double.parseDouble(args[12]);
+			log.info("ascWalk: "+ ascWalk);
+
+			ascBicycle = Double.parseDouble(args[13]);
+			log.info("ascBicycle: "+ ascBicycle);
+			
+			ascRide = Double.parseDouble(args[14]);
+			log.info("ascRide: "+ ascRide);
 
 		} else {
 			
-			configFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_3_ik/config_be_300_mode-choice_test.xml";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be_300_test_7/";
+			configFile = "/Users/ihab/Documents/workspace/matsim-project/examples/scenarios/equil/config.xml";
+			outputDirectory = "/Users/ihab/Desktop/test-run-equil/";
 			runId = "test-run";
 		}
 		
@@ -109,6 +146,21 @@ public class RunOpenBerlinScenario {
 			stratSets.setSubpopulation("person");
 			config.strategy().addStrategySettings(stratSets);
 		}
+		
+		config.subtourModeChoice().setProbaForRandomSingleTripMode(probaForRandomSingleTripMode);
+		
+		if (useVSPdefaults) {
+			config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+			config.qsim().setUsingTravelTimeCheckInTeleportation(true);
+			config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
+		}
+		
+		config.planCalcScore().getModes().get(TransportMode.car).setConstant(ascCar);
+		config.planCalcScore().getModes().get(TransportMode.pt).setConstant(ascPt);
+		config.planCalcScore().getModes().get(TransportMode.transit_walk).setConstant(ascTransitWalk);
+		config.planCalcScore().getModes().get(TransportMode.walk).setConstant(ascWalk);
+		config.planCalcScore().getModes().get("bicycle").setConstant(ascBicycle);
+		config.planCalcScore().getModes().get(TransportMode.ride).setConstant(ascRide);
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
@@ -142,10 +194,24 @@ public class RunOpenBerlinScenario {
 					addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());        }
 		    });
 		}
+		
+		// some online analysis
+		
+		controler.addOverridingModule(new AbstractModule() {
+			
+			@Override
+			public void install() {
+				this.bind(ModalShareEventHandler.class);
+				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+				
+				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
+			}
+		});
+		
 				
 		controler.run();
 		
-		log.info("Running analysis...");
+		log.info("Running offline analysis...");
 				
 		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
 		final String shapeFileZones = null;

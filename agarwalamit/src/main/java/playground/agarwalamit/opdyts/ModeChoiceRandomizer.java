@@ -41,13 +41,14 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
 
     public enum ASCRandomizerStyle {
         axial_randomVariation, // combinations like (0,+), (0,-), (+,0), (-,0)
-        diagonal_randomVariation, // combinations like (+,+), (+,-), (-,+), (-,-)
+        grid_randomVariation, // combinations like (+,+), (+,-), (-,+), (-,-)
         /**
          * A consequence of fixed variation is that if trial of a decision variable does not improve objective function,
          * same set of decision variables will be re-created. Amit Dec'17
          */
         axial_fixedVariation,
-        diagonal_fixedVariation
+        grid_fixedVariation,
+        Latin_hyperCube
     }
 
     private final Scenario scenario;
@@ -70,7 +71,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         //        this.rnd = new Random(4711);
         // this will create an identical sequence of candidate decision variables for each experiment where a new ModeChoiceRandomizer instance is created.
         // That's not good; the parametrized runs are then all conditional on the 4711 random seed.
-        // (careful with using matsim-random since it is always the same sequence in one createDiagonalCombinations)
+        // (careful with using matsim-random since it is always the same sequence in one createGridCombinations)
         this.rnd = MatsimRandom.getRandom(); // random seed of matsim random should be changed in each run.
 
         if ( ! randomizedUtilityParametersChoser.equals(RandomizedUtilityParametersChoser.ONLY_ASC) ) {
@@ -82,7 +83,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         this.considerdModes = considerdModes;
         this.ascRandomizerStyle = ascRandomizerStyle;
 
-        if (this.ascRandomizerStyle.equals(ASCRandomizerStyle.axial_fixedVariation) || this.ascRandomizerStyle.equals(ASCRandomizerStyle.diagonal_fixedVariation)) {
+        if (this.ascRandomizerStyle.equals(ASCRandomizerStyle.axial_fixedVariation) || this.ascRandomizerStyle.equals(ASCRandomizerStyle.grid_fixedVariation)) {
             log.warn("A consequence of the fixed variation: if trial of a decision variable does not improve \n" +
                     "the overall objective function, the next set of decision variables is likely to be same. \n" +
                     "This means, eventually, there will not be any improvements afterwards.");
@@ -94,7 +95,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
 
     public ModeChoiceRandomizer(final Scenario scenario, final RandomizedUtilityParametersChoser randomizedUtilityParametersChoser,
                                 final OpdytsScenario opdytsScenario, final String subPopName, final Collection<String> considerdModes) {
-        this(scenario,randomizedUtilityParametersChoser, opdytsScenario, subPopName, considerdModes, ASCRandomizerStyle.diagonal_randomVariation);
+        this(scenario,randomizedUtilityParametersChoser, opdytsScenario, subPopName, considerdModes, ASCRandomizerStyle.grid_randomVariation);
     }
 
     @Override
@@ -123,11 +124,14 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
             case axial_fixedVariation:
                 allCombinations  = createAxialCombinations(oldParameterSet, 1);
                 break;
-            case diagonal_randomVariation:
-                createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
+            case grid_randomVariation:
+                createGridCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
                 break;
-            case diagonal_fixedVariation:
-                createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, 1);
+            case grid_fixedVariation:
+                createGridCombinations(oldParameterSet, allCombinations, remainingModes, 1);
+                break;
+            case Latin_hyperCube:
+                createLatinHubercubeCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
                 break;
             default:
                 throw new RuntimeException("not implemented yet.");
@@ -146,8 +150,15 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         return result;
     }
 
-    private void createDiagonalCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
-        // create combinations with one mode and call createDiagonalCombinations again
+    private void createLatinHubercubeCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
+        int numberOfSample = (int) Math.pow(2,remainingModes.size());
+//        LatinHypercubeSampling sampling = new LatinHypercubeSampling(MatsimRandom.getRandom());
+
+
+    }
+
+    private void createGridCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
+        // create combinations with one mode and call createGridCombinations again
         if (remainingModes.isEmpty()) {
             // don't do anything
         } else {
@@ -168,7 +179,7 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
                     allCombinations.addAll(tempCombinations);
                 }
             }
-            createDiagonalCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
+            createGridCombinations(oldParameterSet, allCombinations, remainingModes, randomVariationOfStepSize);
         }
     }
 

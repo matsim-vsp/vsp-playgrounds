@@ -27,6 +27,8 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
@@ -39,8 +41,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
 import playground.vsp.airPollution.exposure.GridTools;
@@ -183,23 +183,23 @@ public class CNEBerlin3 {
 						
 			decongestionSettings.setMsa(true);
 			
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(toleratedDelay);
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
+			decongestionSettings.setToleratedAverageDelaySec(toleratedDelay);
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setWriteOutputIteration(controler.getConfig().controler().getLastIteration());
 
 		} else if (congestionTollingApproach.toString().equals(CongestionTollingApproach.DecongestionBangBang.toString())) {
 
 			decongestionSettings.setDecongestionApproach(DecongestionApproach.BangBang);
-			decongestionSettings.setINITIAL_TOLL(0.01);
-			decongestionSettings.setTOLL_ADJUSTMENT(1.0);
+			decongestionSettings.setInitialToll(0.01);
+			decongestionSettings.setTollAdjustment(1.0);
 			
 			decongestionSettings.setMsa(false);
 			
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(toleratedDelay);
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
+			decongestionSettings.setToleratedAverageDelaySec(toleratedDelay);
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setWriteOutputIteration(controler.getConfig().controler().getLastIteration());
 			
 		} else {
 			// for V3, V9 and V10: no additional settings

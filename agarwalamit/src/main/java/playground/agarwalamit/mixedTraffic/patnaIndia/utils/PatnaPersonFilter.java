@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.gbl.Gbl;
 import playground.agarwalamit.utils.PersonFilter;
 
 /**
@@ -30,11 +31,15 @@ import playground.agarwalamit.utils.PersonFilter;
  */
 
 public class PatnaPersonFilter implements PersonFilter{
-	
+
+	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PatnaPersonFilter.class);
+
 	public enum PatnaUserGroup {
 		urban, commuter, through
     }
-	
+
+    private int defaultSubPopCounter = 0;
+
 	public static boolean isPersonBelongsToUrban(Id<Person> personId){
 		return personId.toString().startsWith("slum") || personId.toString().startsWith("nonSlum");
 	}
@@ -70,5 +75,15 @@ public class PatnaPersonFilter implements PersonFilter{
 	@Override
 	public List<String> getUserGroupsAsStrings() {
 		return Arrays.stream(PatnaUserGroup.values()).map(Enum::toString).collect(Collectors.toList());
+	}
+
+	@Override
+	public boolean includePerson(Id<Person> personId){
+		if (defaultSubPopCounter==0){
+			LOG.warn("By default, persons belongs to "+PatnaUserGroup.urban+" will be included for the analysis/simulation.");
+			LOG.warn(Gbl.ONLYONCE);
+			defaultSubPopCounter++;
+		}
+		return isPersonBelongsToUrban(personId);
 	}
 }

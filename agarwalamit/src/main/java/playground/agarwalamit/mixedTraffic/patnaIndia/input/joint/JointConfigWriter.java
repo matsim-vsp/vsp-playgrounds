@@ -104,13 +104,13 @@ public class JointConfigWriter {
 			config.strategy().addStrategySettings(expChangeBeta);
 
 			StrategySettings reRoute = new StrategySettings();
-			reRoute.setStrategyName(DefaultStrategy.ReRoute.name());
+			reRoute.setStrategyName(DefaultStrategy.ReRoute);
 			reRoute.setSubpopulation(PatnaUserGroup.urban.name());
 			reRoute.setWeight(0.15);
 			config.strategy().addStrategySettings(reRoute);
 
 			StrategySettings timeAllocationMutator	= new StrategySettings();
-			timeAllocationMutator.setStrategyName(DefaultStrategy.TimeAllocationMutator.name());
+			timeAllocationMutator.setStrategyName(DefaultStrategy.TimeAllocationMutator);
 			timeAllocationMutator.setSubpopulation(PatnaUserGroup.urban.name());
 			timeAllocationMutator.setWeight(0.05);
 			config.strategy().addStrategySettings(timeAllocationMutator);
@@ -119,7 +119,7 @@ public class JointConfigWriter {
 			config.timeAllocationMutator().setMutationRange(7200.);
 
 			StrategySettings modeChoice = new StrategySettings();
-			modeChoice.setStrategyName(DefaultStrategy.ChangeTripMode.name());
+			modeChoice.setStrategyName(DefaultStrategy.ChangeTripMode);
 			modeChoice.setSubpopulation(PatnaUserGroup.urban.name());
 			modeChoice.setWeight(0.1);
 			config.strategy().addStrategySettings(modeChoice);
@@ -135,7 +135,7 @@ public class JointConfigWriter {
 			config.strategy().addStrategySettings(expChangeBeta);
 
 			StrategySettings reRoute = new StrategySettings();
-			reRoute.setStrategyName(DefaultStrategy.ReRoute.name());
+			reRoute.setStrategyName(DefaultStrategy.ReRoute);
 			reRoute.setSubpopulation(PatnaUserGroup.commuter.name());
 			reRoute.setWeight(0.15);
 			config.strategy().addStrategySettings(reRoute);
@@ -149,7 +149,7 @@ public class JointConfigWriter {
 			config.strategy().addStrategySettings(expChangeBeta);
 
 			StrategySettings reRoute = new StrategySettings();
-			reRoute.setStrategyName(DefaultStrategy.ReRoute.name());
+			reRoute.setStrategyName(DefaultStrategy.ReRoute);
 			reRoute.setSubpopulation(PatnaUserGroup.through.name());
 			reRoute.setWeight(0.15);
 			config.strategy().addStrategySettings(reRoute);

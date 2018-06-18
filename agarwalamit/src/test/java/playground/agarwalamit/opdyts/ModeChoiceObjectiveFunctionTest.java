@@ -1,5 +1,9 @@
 package playground.agarwalamit.opdyts;
 
+import static playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.*;
+import java.io.PrintStream;
+import java.util.Map;
+import java.util.TreeMap;
 import floetteroed.opdyts.ObjectiveFunction;
 import floetteroed.opdyts.SimulatorState;
 import org.apache.log4j.Logger;
@@ -27,12 +31,6 @@ import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModu
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-
-import java.io.PrintStream;
-import java.util.Map;
-import java.util.TreeMap;
-
-import static org.junit.Assert.*;
 
 public class ModeChoiceObjectiveFunctionTest {
 	private static final Logger log = Logger.getLogger(ModeChoiceObjectiveFunctionTest.class ) ;
@@ -63,10 +61,10 @@ public class ModeChoiceObjectiveFunctionTest {
 					return OpdytsScenario.PATNA_1Pct;
 				}
 			};
-			ObjectiveFunctionEvaluator.ObjectiveFunctionType objectiveFunctionType =
-					ObjectiveFunctionEvaluator.ObjectiveFunctionType.SUM_SQRT_DIFF_NORMALIZED ;
-			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction(distriInfo, objectiveFunctionType);
-			
+			ObjectiveFunctionType objectiveFunctionType =
+					ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED ;
+			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction(distriInfo);
+
 			final Config config = ConfigUtils.createConfig();
 			config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 			Scenario scenario = ScenarioUtils.createScenario(config);
@@ -103,6 +101,10 @@ public class ModeChoiceObjectiveFunctionTest {
 					install(new ControlerDefaultCoreListenersModule());
 					install(new ControlerDefaultsModule());
 					install(new ScenarioByInstanceModule(scenario));
+
+					this.bind(ObjectiveFunctionType.class).toInstance(objectiveFunctionType);
+					this.bind(ObjectiveFunctionEvaluator.class).asEagerSingleton();
+
 					this.bind(ObjectiveFunction.class).toInstance(objective);
 				}
 			});

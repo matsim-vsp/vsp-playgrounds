@@ -20,7 +20,7 @@
 package playground.agarwalamit.opdyts.patna.allModes;
 
 import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
-import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
+import playground.vsp.parametricRuns.PrepareParametricRuns;
 
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
@@ -41,9 +41,9 @@ public class ParametricRunsPatnaAllModes {
 
         String ascStyles [] = {
                 ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation.toString(),
-                ModeChoiceRandomizer.ASCRandomizerStyle.diagonal_fixedVariation.toString(),
+                ModeChoiceRandomizer.ASCRandomizerStyle.grid_fixedVariation.toString(),
                 ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation.toString(),
-                ModeChoiceRandomizer.ASCRandomizerStyle.diagonal_randomVariation.toString()
+                ModeChoiceRandomizer.ASCRandomizerStyle.grid_randomVariation.toString()
         };
         double [] stepSizes = {0.05, 0.1, 0.2};
         Integer [] convIterations = {600};

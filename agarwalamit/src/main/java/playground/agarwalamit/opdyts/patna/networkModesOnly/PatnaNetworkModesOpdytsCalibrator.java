@@ -19,16 +19,11 @@
 
 package playground.agarwalamit.opdyts.patna.networkModesOnly;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
@@ -40,25 +35,22 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.controler.events.ShutdownEvent;
-import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
-import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
-import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.opdyts.DistanceDistribution;
 import playground.agarwalamit.opdyts.ModeChoiceDecisionVariable;
 import playground.agarwalamit.opdyts.ModeChoiceObjectiveFunction;
 import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
+import playground.agarwalamit.opdyts.OpdytsModeChoiceUtils;
 import playground.agarwalamit.opdyts.OpdytsScenario;
 import playground.agarwalamit.opdyts.RandomizedUtilityParametersChoser;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
-import playground.agarwalamit.opdyts.equil.MatsimOpdytsEquilMixedTrafficIntegration;
-import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
-import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.utils.FileUtils;
 
 /**
@@ -94,9 +86,9 @@ public class PatnaNetworkModesOpdytsCalibrator {
 			warmUpItrs = Integer.valueOf(args[7]);
 			useConfigRandomSeed = Boolean.valueOf(args[8]);
 		} else {
-			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/input/config_networkModesOnly.xml";
-			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/output/";
-			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output/output_plans.xml.gz";
+			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/inputs/config_networkModesOnly.xml";
+			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/output/testCalib";
+			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output_changeExpBeta/output_plans.xml.gz";
 			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation;
 		}
 
@@ -135,7 +127,6 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>( new MATSimStateFactoryImpl<>(), scenario);
 
-		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
@@ -149,49 +140,12 @@ public class PatnaNetworkModesOpdytsCalibrator {
 				this.bind(ModalTripTravelTimeHandler.class);
 				this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
 
-				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
+				this.bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
 
-				addControlerListenerBinding().toInstance(new ShutdownListener() {
-					@Override
-					public void notifyShutdown(ShutdownEvent event) {
-						// copy the state vector elements files before removing ITERS dir
-						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizeFiles/";
-						new File(outDir).mkdirs();
+				this.bind(ObjectiveFunctionType.class).toInstance(ObjectiveFunctionType.SUM_SCALED_LOG);
+				this.bind(ObjectiveFunctionEvaluator.class).asEagerSingleton();
 
-						int firstIt = event.getServices().getConfig().controler().getFirstIteration();
-						int lastIt = event.getServices().getConfig().controler().getLastIteration();
-						int plotEveryItr = 50;
-
-						for (int itr = firstIt+1; itr <=lastIt; itr++) {
-							if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(event.getServices().getControlerIO().getIterationPath(itr)).exists() ) {
-								{
-									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt");
-									String sinkFile =  outDir+"/"+itr+".stateVector_networkModes.txt";
-									try {
-										Files.copy(new File(sourceFile), new File(sinkFile));
-									} catch (IOException e) {
-										Logger.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
-									}
-								}
-							}
-						}
-
-						// remove the unused iterations
-						String dir2remove = event.getServices().getControlerIO().getOutputPath()+"/ITERS/";
-						IOUtils.deleteDirectoryRecursively(new File(dir2remove).toPath());
-
-						// post-process
-						String opdytsConvergencefile = finalOUT_DIR +"/opdyts.con";
-						if (new File(opdytsConvergencefile).exists()) {
-							OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
-							opdytsConvergencePlotter.readFile(finalOUT_DIR +"/opdyts.con");
-							opdytsConvergencePlotter.plotData(finalOUT_DIR +"/convergence.png");
-						}
-						BestSolutionVsDecisionVariableChart bestSolutionVsDecisionVariableChart = new BestSolutionVsDecisionVariableChart(new ArrayList<>(modes2consider));
-						bestSolutionVsDecisionVariableChart.readFile(finalOUT_DIR +"/opdyts.log");
-						bestSolutionVsDecisionVariableChart.plotData(finalOUT_DIR +"/decisionVariableVsASC.png");
-					}
-				});
+				this.addControlerListenerBinding().toInstance(OpdytsModeChoiceUtils.copyVectorFilesToParentDirAndRemoveITERSDir(true));
 			}
 		});
 
@@ -202,7 +156,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		//search algorithm
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
-				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, modes2consider,ascRandomizeStyle);
+				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, modes2consider, ascRandomizeStyle);
 
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, PATNA_1_PCT);

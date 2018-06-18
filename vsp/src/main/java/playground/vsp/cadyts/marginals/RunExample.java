@@ -86,7 +86,7 @@ public class RunExample {
         // add mode choice to it
         StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
         //don't use subTourModeChoice here which does not change mode if plan has only one trip.
-        modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.name());
+        modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
         modeChoice.setWeight(0.15);
         config.strategy().addStrategySettings(modeChoice);
         config.changeMode().setModes(new String[]{"car", "bicycle"});

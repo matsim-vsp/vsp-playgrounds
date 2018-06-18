@@ -47,6 +47,7 @@ import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt.PtConstants;
+import playground.agarwalamit.utils.PersonFilter;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
 /**
@@ -65,12 +66,17 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 
 	private final SortedMap<String, SortedMap<Double, Integer>> mode2DistanceClass2LegCount ;
 	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2dist;
+	private final PersonFilter personFilter;
 
 	public LegModeBeelineDistanceDistributionFromPlansAnalyzer(){
-		this (new ArrayList<>());
+		this (new ArrayList<>(), null);
 	}
 
-	public LegModeBeelineDistanceDistributionFromPlansAnalyzer(final List<Double> distClasses ){
+	public LegModeBeelineDistanceDistributionFromPlansAnalyzer(PersonFilter personFilter){
+		this (new ArrayList<>(), personFilter);
+	}
+
+	public LegModeBeelineDistanceDistributionFromPlansAnalyzer(List<Double> distClasses, PersonFilter personFilter){
 		super(LegModeBeelineDistanceDistributionFromPlansAnalyzer.class.getSimpleName());
 		LOG.info("enabled");
 
@@ -78,6 +84,11 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 		this.usedModes = new TreeSet<>();
 		this.mode2PersonId2dist = new TreeMap<>();
 		this.mode2DistanceClass2LegCount = new TreeMap<>();
+		this.personFilter = personFilter;
+	}
+
+	public LegModeBeelineDistanceDistributionFromPlansAnalyzer(List<Double> distClasses ){
+		this(distClasses, null);
 	}
 
 	public void init(final Scenario sc){
@@ -111,6 +122,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 		LOG.info("Transit activities and belonging transit walk legs will be removed from the plan.");
 
 		for (Person person : this.scenario.getPopulation().getPersons().values()){
+			if ( personFilter!=null &&  ! this.personFilter.includePerson(person.getId())) continue;
 			for (Plan plan : person.getPlans()){
 				List<PlanElement> planElements = plan.getPlanElements();
 				for (int i = 0, n = planElements.size(); i < n; i++) {
@@ -178,6 +190,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 	private void calculateMode2DistanceClass2LegCount() {
 		Population pop = this.scenario.getPopulation();
 		for(Person person : pop.getPersons().values()){
+			if (  personFilter!=null &&  ! this.personFilter.includePerson(person.getId())) continue;
 			Plan plan = person.getSelectedPlan();
 			List<PlanElement> planElements = plan.getPlanElements();
 			for(PlanElement pe : planElements){
@@ -210,6 +223,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 	private void calculateMode2PersonId2Distances() {
 		Population pop = this.scenario.getPopulation();
 		for(Person person : pop.getPersons().values()){
+			if ( personFilter!=null &&  ! this.personFilter.includePerson(person.getId())) continue;
 			Plan plan = person.getSelectedPlan();
 			List<PlanElement> planElements = plan.getPlanElements();
 			for(PlanElement pe : planElements){
@@ -235,6 +249,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 	private double getLongestDistance(final Population pop){
 		double longestDistance = 0.0;
 		for(Person person : pop.getPersons().values()){
+			if ( personFilter!=null && ! this.personFilter.includePerson(person.getId())) continue;
 			Plan plan = person.getSelectedPlan();
 			List<PlanElement> planElements = plan.getPlanElements();
 			for(PlanElement pe : planElements){
@@ -267,6 +282,7 @@ public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends Abstrac
 
 	private void initializeUsedModes(final Population pop) {
 		for(Person person : pop.getPersons().values()){
+			if (  personFilter!=null && ! this.personFilter.includePerson(person.getId())) continue;
 			for(PlanElement pe : person.getSelectedPlan().getPlanElements()){
 				if(pe instanceof Leg){
 					Leg leg = (Leg) pe;

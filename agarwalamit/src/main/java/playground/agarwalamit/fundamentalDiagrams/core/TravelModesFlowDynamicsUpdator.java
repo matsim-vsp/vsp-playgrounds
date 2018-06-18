@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
@@ -44,7 +45,7 @@ import playground.agarwalamit.utils.ListUtils;
  * as well as methods to store and update this data.
  */
 
-final class TravelModesFlowDynamicsUpdator {
+public final class TravelModesFlowDynamicsUpdator {
 
 	private final int NUMBER_OF_MEMORIZED_FLOWS = 10;
 	private Id<VehicleType> modeId;
@@ -70,16 +71,13 @@ final class TravelModesFlowDynamicsUpdator {
 	private final double lengthOfTrack;
 	private final Id<Link> startOfTheLink;
 
-	TravelModesFlowDynamicsUpdator(final int noOfModes, final Id<Link> startOfTheLink,final double lengthOfTrack){
-		this(null, noOfModes, startOfTheLink, lengthOfTrack);
-	}
-
-	TravelModesFlowDynamicsUpdator(final VehicleType vT, final int noOfModes, final Id<Link> startOfTheLink, final double lengthOfTrack){
+	TravelModesFlowDynamicsUpdator(final VehicleType vT, Scenario scenario, FDNetworkGenerator fdNetworkGenerator){
 		this.vehicleType = vT;
 		if(this.vehicleType != null) this.modeId = this.vehicleType.getId();
-		this.noOfModes = noOfModes;
-		this.lengthOfTrack = lengthOfTrack;
-		this.startOfTheLink = startOfTheLink;
+
+		this.noOfModes = scenario.getConfig().qsim().getMainModes().size();
+		this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
+		this.startOfTheLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
 	}
 
 	void handle(LinkEnterEvent event){
@@ -88,13 +86,14 @@ final class TravelModesFlowDynamicsUpdator {
 			double nowTime = event.getTime();
 
 			this.updateFlow15Min(nowTime, this.vehicleType.getPcuEquivalents());
+//			this.updateFlow15Min(nowTime, (double) ((AttributableVehicle)scenario.getVehicles().getVehicles().get(event.getVehicleId())).getAttributes().getAttribute("vehicle_pcu"));
 			this.updateSpeedTable(nowTime, personId);
 
 			//Checking for stability
 			//Making sure all agents are on the track before testing stability
 			//Also waiting half an hour to let the database build itself.
 
-			if ((this.getNumberOfDrivingAgents() == this.numberOfAgents) && (nowTime > FundamentalDiagramDataGenerator.MAX_ACT_END_TIME * 2)){
+			if ((this.getNumberOfDrivingAgents() == this.numberOfAgents) && (nowTime > FDModule.MAX_ACT_END_TIME * 2)){
 				if (!(this.speedStability)){
 					this.checkSpeedStability();
 				}
@@ -160,7 +159,7 @@ final class TravelModesFlowDynamicsUpdator {
 		}
 	}
 
-	void checkSpeedStability(){
+	private void checkSpeedStability(){
 		double averageSpeed = ListUtils.doubleMean(this.speedTable);
 		double relativeDeviances = IntStream.range(0, this.speedTableSize)
 											.mapToDouble(i -> Math.pow((this.speedTable.get(i) - averageSpeed) / averageSpeed,
@@ -169,7 +168,7 @@ final class TravelModesFlowDynamicsUpdator {
 		relativeDeviances /= this.noOfModes;//taking dependence on number of modes away
 		if (relativeDeviances < 0.0005){
 			this.speedStability = true;
-			FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain speed stability in mode: "+modeId);
+			FDModule.LOG.info("========== Reaching a certain speed stability in mode: "+modeId);
 		} else {
 			this.speedStability = false;
 		}
@@ -191,14 +190,14 @@ final class TravelModesFlowDynamicsUpdator {
 
 //		if(relativeDeviances < 0.05){
 			this.flowStability = true;
-			if(modeId==null) FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain flow stability for global flow.");
-			else FundamentalDiagramDataGenerator.LOG.info("========== Reaching a certain flow stability in mode: "+modeId.toString());
+			if(modeId==null) FDModule.LOG.info("========== Reaching a certain flow stability for global flow.");
+			else FDModule.LOG.info("========== Reaching a certain flow stability in mode: "+modeId.toString());
 		} else {
 			this.flowStability = false;
 		}
 	}
 	
-	void initDynamicVariables() {
+	void resetBins() {
 		//numberOfAgents for each mode should be initialized at this point
 		this.decideSpeedTableSize();
 		this.speedTable = new LinkedList<>(Collections.nCopies(this.speedTableSize, 0.));
@@ -231,9 +230,9 @@ final class TravelModesFlowDynamicsUpdator {
 	void saveDynamicVariables(){
 		this.permanentDensity = this.numberOfAgents / (lengthOfTrack) *1000 * this.vehicleType.getPcuEquivalents();
 		this.permanentAverageVelocity = this.getActualAverageVelocity();
-		FundamentalDiagramDataGenerator.LOG.info("Calculated permanent Speed from "+modeId+"'s lastXSpeeds : "+speedTable+"\nResult is : "+this.permanentAverageVelocity);
+		FDModule.LOG.info("Calculated permanent Speed from "+modeId+"'s lastXSpeeds : "+speedTable+"\nResult is : "+this.permanentAverageVelocity);
 		this.permanentFlow = this.getSlidingAverageOfLastXHourlyFlows();
-		FundamentalDiagramDataGenerator.LOG.info("Calculated permanent Flow from "+modeId+"'s lastXFlows900 : "+lastXHourlyFlows+"\nResult is :"+this.permanentFlow);
+		FDModule.LOG.info("Calculated permanent Flow from "+modeId+"'s lastXFlows900 : "+lastXHourlyFlows+"\nResult is :"+this.permanentFlow);
 	}
 
 	VehicleType getVehicleType(){
@@ -252,7 +251,7 @@ final class TravelModesFlowDynamicsUpdator {
 		return this.flowTable15Min.stream().mapToDouble(i->i).sum() * 4;
 	}
 
-	double getSlidingAverageOfLastXHourlyFlows(){
+	private double getSlidingAverageOfLastXHourlyFlows(){
 		return this.lastXHourlyFlows.stream().mapToDouble(i->i).average().orElse(0.);
 	}
 
@@ -264,15 +263,15 @@ final class TravelModesFlowDynamicsUpdator {
 		return this.flowStability;
 	}
 
-	int getnumberOfAgents(){
+	public int getNumberOfAgents(){
 		return this.numberOfAgents ;
 	}
 
-	void setnumberOfAgents(int n){
+	public void setnumberOfAgents(int n){
 		this.numberOfAgents = n;
 	}
 
-	double getPermanentDensity(){
+	public double getPermanentDensity(){
 		return this.permanentDensity;
 	}
 
@@ -280,7 +279,7 @@ final class TravelModesFlowDynamicsUpdator {
 		this.permanentDensity = permanentDensity;
 	}
 
-	double getPermanentAverageVelocity(){
+	public double getPermanentAverageVelocity(){
 		return this.permanentAverageVelocity;
 	}
 
@@ -288,7 +287,7 @@ final class TravelModesFlowDynamicsUpdator {
 		this.permanentAverageVelocity = permanentAverageVelocity;
 	}
 
-	double getPermanentFlow(){
+	public double getPermanentFlow(){
 		return this.permanentFlow;
 	}
 
@@ -298,5 +297,9 @@ final class TravelModesFlowDynamicsUpdator {
 
 	int getNumberOfDrivingAgents() {
 		return this.lastSeenOnStudiedLinkEnter.size();
+	}
+
+	public int getSpeedTableSize() {
+		return speedTableSize;
 	}
 }

@@ -25,6 +25,7 @@ import javax.inject.Provider;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
@@ -49,7 +50,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingConfigGroup;
 import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingModule;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 
 /**
 * @author ikaddoura
@@ -187,7 +187,9 @@ public class RunExampleOptAV {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
 								.global()
-								.getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+								.getNumberOfThreads(), availableModes, chainBasedModes, false, 
+								0.0, // using value 0.0 (= default) to fix compile error
+								tripRouterProvider));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}

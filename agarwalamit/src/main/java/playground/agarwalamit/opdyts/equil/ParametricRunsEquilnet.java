@@ -19,7 +19,7 @@
 
 package playground.agarwalamit.opdyts.equil;
 
-import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
+import playground.vsp.parametricRuns.PrepareParametricRuns;
 
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
