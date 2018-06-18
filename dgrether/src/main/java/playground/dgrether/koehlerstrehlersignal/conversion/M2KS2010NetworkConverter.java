@@ -274,13 +274,22 @@ public class M2KS2010NetworkConverter {
 									+ " with from Link " + otherDir.getFromLink() + " and to link "
 									+ otherDir.getToLink() + ", i.e. the turn is not allowed.");
 						}
+						// add the conflicted light itself as restriction
 						r.addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
-						// add restriction also to all on- and off-lights (such that on- and off-lights always have the same restrictions)
-						for (Id<DgStreet> onOffLight : r.getRlightsOn()) {
-							if (r.getRlightsOff().contains(onOffLight)) {
-								crossing.getRestrictions().get(onOffLight).addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
+						// also add all on- and off-lights of the conflicted light as restriction
+						TtRestriction otherR = crossing.getRestrictions().get(otherLightId);
+						for (Id<DgStreet> onOffLightOfOtherR : otherR.getRlightsOn()) {
+							if (otherR.getRlightsOff().contains(onOffLightOfOtherR)) {
+								r.addAllowedLight(onOffLightOfOtherR, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
 							}
 						}
+						// add all these restrictions also to all on- and off-lights of the main direction 'dir' from the outer loop above
+						for (Id<DgStreet> onOffLightOfR : r.getRlightsOn()) {
+							if (r.getRlightsOff().contains(onOffLightOfR)) {
+								crossing.getRestrictions().get(onOffLightOfR).addAllowedLight(otherLightId, DEFAULT_CLEAR_TIME, DEFAULT_CLEAR_TIME);
+							}
+						}
+						// with this, on- and off-lights should always have the same restrictions
 					}
 				}
 			}
