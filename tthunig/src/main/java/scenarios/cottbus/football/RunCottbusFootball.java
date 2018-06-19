@@ -25,11 +25,17 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.hsqldb.lib.Collection;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
@@ -47,6 +53,9 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
+import com.esotericsoftware.kryo.serializers.FieldSerializer.Bind;
+
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
@@ -67,25 +76,24 @@ import utils.ModifyNetwork;
  */
 public class RunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(RunCottbusFootball.class);
-	
-	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE, LAEMMER_FULLY_ADAPTIVE};
-	private static final SignalControl CONTROL_TYPE = SignalControl.LAEMMER_NICO;
+
+	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE, LAEMMER_FULLY_ADAPTIVE, ALL_GREEN};
+	private static final SignalControl CONTROL_TYPE = SignalControl.LAEMMER_FULLY_ADAPTIVE;
 	private static final boolean CHECK_DOWNSTREAM = false;
-	
+
 	private static final boolean LONG_LANES = true;
 	private static final double FLOW_CAP = 1.0;
 	private static final int STUCK_TIME = 900;
-	private static final boolean VIS = false;
+	private static final boolean VIS = true;
 	private static final boolean OVERWRITE_FILES = true;
 	private static final int TIME_BIN_SIZE = 900;
 	private static final boolean USE_MS_IDEAL_BASE_PLANS = true;
 	private static final boolean USE_FIXED_NETWORK = true;
-	
-	private static final boolean REMOVE_ALL_LEGS_FROM_PLANS_AND_MODIFIY_ACTIVITIES_ON_MERGED_LINK = true;
+
 	private static final boolean LAEMMER_LOG_ENABLED = false;
-	private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.HEURISTIC;
-	
-	public static void main(String[] args) throws FileNotFoundException, IOException {		
+	private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.USE_MAX_LANECOUNT;
+
+	public static void main(String[] args) throws FileNotFoundException, IOException {
 		Config baseConfig;
 		if (args != null && args.length != 0){
 			baseConfig = ConfigUtils.loadConfig(args[0]);
@@ -108,23 +116,30 @@ public class RunCottbusFootball {
 			baseConfig.getModules().get("network").getParams().put("laneDefinitionsFile", "lanes_link10284merged.xml");
 			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
 		}
-		
+
 		baseConfig.controler().setLastIteration(0);
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		switch (CONTROL_TYPE){
+		case FIXED:
+			signalsConfigGroup.setSignalControlFile("signal_control_no_13_advanced.xml");
+			break;
 		case FIXED_IDEAL:
-			signalsConfigGroup.setSignalControlFile("signal_control_no_13_idealized.xml");
+			signalsConfigGroup.setSignalControlFile("signal_control_no_13_idealized_advanced.xml");
+			break;
+		case ALL_GREEN:
+			signalsConfigGroup.setSignalControlFile("signal_control_no_13_allGreen.xml");
 			break;
 		case SYLVIA:
 			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13.xml");
 			break;
 		case SYLVIA_IDEAL:
 			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13_idealized.xml");
+			break;
 		case LAEMMER_NICO:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
 			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer.xml");
-//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased.xml");
-//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer2phases.xml");
+			//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerLinkBased.xml");
+			//			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer2phases.xml");
 			break;
 		case LAEMMER_DOUBLE:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
@@ -133,7 +148,6 @@ public class RunCottbusFootball {
 		case LAEMMER_FULLY_ADAPTIVE:
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer_fully_adaptive.xml");
 			signalsConfigGroup.setSignalGroupsFile("signal_groups_no_13_laemmer_fully_adaptive.xml");
-			//signalsConfigGroup.setSignalControlFile("signal_control_no_13.xml");
 			break;
 		case NONE:
 			signalsConfigGroup.setUseSignalSystems(false);
@@ -152,41 +166,21 @@ public class RunCottbusFootball {
 			baseConfig.plans().setInputFile("cb_spn_gemeinde_nachfrage_landuse_woMines/"
 					+ "commuter_population_wgs84_utm33n_car_only_100it_MS_cap"+FLOW_CAP+"_tbs"+TIME_BIN_SIZE+".xml.gz");
 		}
-				
+
 		baseConfig.qsim().setFlowCapFactor(FLOW_CAP);
 		baseConfig.qsim().setStorageCapFactor( FLOW_CAP / Math.pow(FLOW_CAP,1/4.) );
 		baseConfig.travelTimeCalculator().setTraveltimeBinSize(TIME_BIN_SIZE);
 		baseConfig.qsim().setStuckTime(STUCK_TIME);
-		
+
 		baseConfig.qsim().setEndTime(36*3600);
-		
+
 		Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
-		
-//		if (REMOVE_ALL_LEGS_FROM_PLANS_AND_MODIFIY_ACTIVITIES_ON_MERGED_LINK) {
-//			baseScenario.getPopulation().getPersons().values().forEach(person->{
-//				person.getPlans().forEach(plan->{
-//					List<PlanElement> allPlanElements = new LinkedList<PlanElement>(plan.getPlanElements());
-//					allPlanElements.forEach(planElement->{
-//						if(planElement instanceof Leg)
-//							((Leg)planElement).setRoute(null); //plan.getPlanElements().remove(planElement);
-//						if(planElement instanceof Activity) {
-//							if (((Activity)planElement).getLinkId().equals(Id.createLinkId("8747")) || ((Activity)planElement).getLinkId().equals(Id.createLinkId("8745"))) {
-//								((Activity)planElement).setLinkId(Id.createLinkId("10284"));
-//							} else if (((Activity)planElement).getLinkId().equals(Id.createLinkId("8744")) || ((Activity)planElement).getLinkId().equals(Id.createLinkId("8746"))) {
-//								((Activity)planElement).setLinkId(Id.createLinkId("10283"));
-//							}
-//						}
-//					});
-//				});
-//			});
-//				
-//		}
-	
+
 		if (LONG_LANES){
 			// extend short lanes (needed for laemmer)
 			ModifyNetwork.lengthenAllLanes(baseScenario);
 		}
-		
+
 		if (CONTROL_TYPE.equals(SignalControl.LAEMMER_FULLY_ADAPTIVE)) {
 			ObjectAttributes conflictsObjectAttributes = new PsObjectAttributes();
 			ObjectAttributesXmlReader conflictsReader = new ObjectAttributesXmlReader(conflictsObjectAttributes);
@@ -197,7 +191,6 @@ public class RunCottbusFootball {
 				if(conflicts.getLaneId() == null) {
 					baseScenario.getNetwork().getLinks().get(conflicts.getLinkId()).getAttributes().putAttribute("conflicts", conflicts);
 				} else {
-					System.out.println("processing conflict for link "+conflicts.getLinkId()+" and lane "+conflicts.getLaneId());
 					baseScenario.getLanes().getLanesToLinkAssignments().get(
 							conflicts.getLinkId()).getLanes().get(
 									conflicts.getLaneId()).getAttributes().
@@ -205,7 +198,7 @@ public class RunCottbusFootball {
 				}
 			}
 		}
-		
+
 		// add missing scenario elements
 		if (!CONTROL_TYPE.equals(SignalControl.NONE))
 			baseScenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(baseConfig).loadSignalsData());
@@ -220,6 +213,9 @@ public class RunCottbusFootball {
 			break;
 		case FIXED:
 			baseOutputDirectory+= "fixedTime"; 
+			break;
+		case ALL_GREEN:
+			baseOutputDirectory+= "allGreen";
 			break;
 		case SYLVIA:
 			baseOutputDirectory+= "sylvia_maxExt1.5_fixedCycle";
@@ -245,7 +241,7 @@ public class RunCottbusFootball {
 		} else {
 			baseOutputDirectory += "_MSPlans";
 		}
-		
+
 		baseOutputDirectory+= "/";
 		LOG.info("using base output directory: " + baseOutputDirectory);
 		Population fanPop = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
@@ -267,12 +263,12 @@ public class RunCottbusFootball {
 					fanPop.addPerson(pers);
 				}
 			}
-		
+
 			baseConfig.controler().setOutputDirectory(baseOutputDirectory + numberOfFootballFans + "_football_fans/");
 			baseConfig.controler().setRunId(runId + "_" + numberOfFootballFans + "_football_fans");
 			Controler controler = new Controler(baseScenario);
 			controler.addControlerListener(new CottbusFansControlerListener(fanPop));
-			
+
 			//add average tt handler for football fans
 			CottbusFootballAnalysisControllerListener cbfbControllerListener = new CottbusFootballAnalysisControllerListener();
 			controler.addControlerListener(cbfbControllerListener);
@@ -286,48 +282,50 @@ public class RunCottbusFootball {
 				signalsModule.setSylviaConfig(sylviaConfig);
 				LaemmerConfig laemmerConfig = new LaemmerConfig();
 				laemmerConfig.setDesiredCycleTime(90);
-		        laemmerConfig.setMaxCycleTime(135);
-		        laemmerConfig.setAnalysisEnabled(LAEMMER_LOG_ENABLED);
-//				laemmerConfig.setMinGreenTime(5);
-//				laemmerConfig.setAnalysisEnabled(true);
-		        laemmerConfig.setActiveRegime(Regime.COMBINED);
+				laemmerConfig.setMaxCycleTime(135);
+				laemmerConfig.setAnalysisEnabled(LAEMMER_LOG_ENABLED);
+				//				laemmerConfig.setMinGreenTime(5);
+				//				laemmerConfig.setAnalysisEnabled(true);
+				laemmerConfig.setActiveRegime(Regime.COMBINED);
 				laemmerConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				laemmerConfig.setActiveStabilizationStrategy(STABILIZATION_STRATEGY);
+//				laemmerConfig.setAvgCarSensorBucketParameters(6.0*60.0, 1.5*60.0);
+				laemmerConfig.setShortenStabilizationAfterIntergreenTime(true);
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
 			}
-			
-	        if (VIS) {
-	            baseScenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
-	            baseScenario.getConfig().qsim().setNodeOffset(5.);
-	            OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(baseScenario.getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
-	            otfvisConfig.setScaleQuadTreeRect(true);
-//	            otfvisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
-//	            otfvisConfig.setAgentSize(240);
-	            controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
-	        }
-			
+
+			if (VIS) {
+				baseScenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+				baseScenario.getConfig().qsim().setNodeOffset(5.);
+				OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(baseScenario.getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
+				otfvisConfig.setScaleQuadTreeRect(true);
+				//	            otfvisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
+				//	            otfvisConfig.setAgentSize(240);
+				controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+			}
+
 			controler.run();
-			
+
 			if (cbfbControllerListener.getAverageTraveltime() != null){
 				percentageOfFans2AverageTTMap.put(numberOfFootballFans, cbfbControllerListener.getAverageTraveltime());
 				percentageOfFans2TotalTTMap.put(numberOfFootballFans, cbfbControllerListener.getTotalTraveltime());
 				percentageOfFans2noStuckedAgents.put(numberOfFootballFans, cbfbControllerListener.getNumberOfStuckedPersons() + 0.);
 			}
 		}
-		
-//		try {
-//			new SelectedPlans2ESRIShape(baseScenario.getPopulation(), baseScenario.getNetwork(), MGC.getCRS(TransformationFactory.WGS84_UTM33N), "/media/data/work/matsimOutput/run1219/" ).write();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
+
+		//		try {
+		//			new SelectedPlans2ESRIShape(baseScenario.getPopulation(), baseScenario.getNetwork(), MGC.getCRS(TransformationFactory.WGS84_UTM33N), "/media/data/work/matsimOutput/run1219/" ).write();
+		//		} catch (IOException e) {
+		//			e.printStackTrace();
+		//		}
+
 		writeAnalysis(percentageOfFans2AverageTTMap, baseOutputDirectory + "average_traveltimes_last_iteration.csv", "Average travel time");
 		writeAnalysis(percentageOfFans2TotalTTMap, baseOutputDirectory + "total_traveltimes_last_iteration.csv", "Total travel time");
 		writeAnalysis(percentageOfFans2noStuckedAgents, baseOutputDirectory + "numberOfStuckedAgents_last_iteration.csv", "Number of stucked agents");
-				
+
 	}
-		
+
 	private static void writeAnalysis(Map<Integer, Double> map, String filename, String headerColumn2) throws FileNotFoundException, IOException{
 		SortedMap<Integer, Double> sorted = new TreeMap<>();
 		sorted.putAll(map);
@@ -341,5 +339,5 @@ public class RunCottbusFootball {
 		writer.close();
 	}
 
-	
+
 }

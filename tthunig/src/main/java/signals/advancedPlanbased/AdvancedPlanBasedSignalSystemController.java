@@ -24,7 +24,7 @@ import com.google.inject.Provider;
 
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
-import signals.laemmer.model.LaemmerLane;
+import signals.laemmer.model.LaemmerApproach;
 import signals.sensor.LinkSensorManager;
 
 /**
@@ -37,7 +37,7 @@ public class AdvancedPlanBasedSignalSystemController implements SignalController
     protected SignalSystem system;
     private final TtTotalDelay delayCalculator;
 	private double averageWaitingCarCount;
-	private boolean isAvgQueueLengthNumWritten;
+	private boolean isAvgQueueLengthNumWritten = false;
 	private Lanes lanes;
 	private double lastAvgCarNumUpdate;
 	private Network network;
@@ -126,7 +126,11 @@ public class AdvancedPlanBasedSignalSystemController implements SignalController
 
     private void logQueueLengthToFile(double now) {
 		double currentQueueLengthSum = 0.0;
-    	if (now > 30.0*60.0 && now <= 90.0*60.0) {
+//    	double logStartTime = 30.0*60.0; //for illustrative 
+    	double logStartTime = 16.5*3600.0; //for CB
+//    	double logEndTime = 90.0*60.0; //for illustrative
+    	double logEndTime = 17.5*3600.0; //for CB with football
+    	if (now > logStartTime && now <= logEndTime) {
     		for (Signal signal : this.system.getSignals().values()) {
 				if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {
 					currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId());
@@ -136,11 +140,11 @@ public class AdvancedPlanBasedSignalSystemController implements SignalController
 					}
 				}
     		}
-    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-30.0*60.0+1.0); 
+    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-logStartTime+1.0); 
     		this.averageWaitingCarCount	+= currentQueueLengthSum;
-    		this.averageWaitingCarCount /= (now - 30.0*60.0+1.0);
+    		this.averageWaitingCarCount /= (now - logStartTime+1.0);
     		this.lastAvgCarNumUpdate = now;
-		} else if (now > 90.0*60.0 && !this.isAvgQueueLengthNumWritten) {
+		} else if (now > logEndTime && !this.isAvgQueueLengthNumWritten) {
 		    try { 
 		    	if (Files.notExists(Paths.get(("/tmp/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")))){
 		    		Files.createFile(Paths.get(("/tmp/avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")));

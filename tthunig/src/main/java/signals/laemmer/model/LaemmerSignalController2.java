@@ -46,7 +46,6 @@ import com.google.inject.Provider;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
-import signals.laemmer.model.LaemmerSignalController2.LaemmerSignal;
 import signals.sensor.LinkSensorManager;
 
 
@@ -55,7 +54,7 @@ import signals.sensor.LinkSensorManager;
  * @author tthunig
  * @author nkuehnel
  */
-public class LaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
+public class LaemmerSignalController2 extends AbstractSignalController implements SignalController, Analyzable {
 
     public static final String IDENTIFIER = "LaemmerSignalController";
 
@@ -102,12 +101,12 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
         @Override
         public SignalController get() {
-            return new LaemmerSignalController(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor);
+            return new LaemmerSignalController2(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor);
         }
     }
 
 
-    private LaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
+    private LaemmerSignalController2(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
         this.laemmerConfig = laemmerConfig;
         this.sensorManager = sensorManager;
         this.network = scenario.getNetwork();
@@ -159,7 +158,8 @@ public class LaemmerSignalController extends AbstractSignalController implements
         
         LaemmerSignal selection = selectSignal();
         processSelection(now, selection);
-        if (isAnalysisEnabled()) {
+        //TODO remove true
+        if (isAnalysisEnabled() || true) {
         	logQueueLengthToFile(now);
         }
     }
@@ -170,6 +170,10 @@ public class LaemmerSignalController extends AbstractSignalController implements
     private void updateActiveRegulation(double now) {
         if (activeRequest != null && !regulationQueue.isEmpty() && regulationQueue.peek().equals(activeRequest.signal)) {
             LaemmerSignal signal = regulationQueue.peek();
+            if (signal.determiningLink == null) {
+            	regulationQueue.poll();
+            	return;
+            }
             int n;
             if (signal.determiningLane != null) {
                 n = getNumberOfExpectedVehiclesOnLane(now, signal.determiningLink, signal.determiningLane);
@@ -285,12 +289,12 @@ public class LaemmerSignalController extends AbstractSignalController implements
                 if (signal.getLaneIds() != null && !(signal.getLaneIds().isEmpty())) {
                     for (Id<Lane> laneId : signal.getLaneIds()) {
                         this.sensorManager.registerNumberOfCarsOnLaneInDistanceMonitoring(signal.getLinkId(), laneId, 0.);
-                        this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoringOnLane(signal.getLinkId(), laneId);
+                        this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoringOnLane(signal.getLinkId(), laneId, laemmerConfig.getLookBackTime(), laemmerConfig.getTimeBucketSize());
                     }
                 }
                 //always register link in case only one lane is specified (-> no LaneEnter/Leave-Events?)
                 this.sensorManager.registerNumberOfCarsInDistanceMonitoring(signal.getLinkId(), 0.);
-                this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId());
+                this.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId(), laemmerConfig.getLookBackTime(), laemmerConfig.getTimeBucketSize());
             }
         }
         if (laemmerConfig.isCheckDownstream()){
@@ -326,10 +330,11 @@ public class LaemmerSignalController extends AbstractSignalController implements
     
     private void logQueueLengthToFile(double now) {
 		double currentQueueLengthSum = 0.0;
-//    	double logStartTime = 30.0*60.0; //for illustrative 
-    	double logStartTime = 16.5*3600.0; //for CB
-//    	double logEndTime = 90.0*60.0; //for illustrative
-    	double logEndTime = 17.5*3600.0; //for CB with football
+    	double logStartTime = 30.0*60.0; //for illustrative 
+//    	double logStartTime = 16.5*3600.0; //for CB
+    	double logEndTime = 90.0*60.0; //for illustrative
+//    	double logEndTime = 66751; //for CB w/o football ..
+//    	double logEndTime = 17.5*3600.0; //for CB with football
     	
     	if (now > logStartTime && now <= logEndTime) {
     		for (LaemmerSignal laemmerSignal : laemmerSignals) {
@@ -355,6 +360,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
 				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
 				this.isAvgQueueLengthNumWritten  = true;
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -409,7 +415,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
                         double laneOutflow = lanes.getLanesToLinkAssignments().get(signal.getLinkId()).getLanes().get(laneId).getCapacityVehiclesPerHour() * config.qsim().getFlowCapFactor() / 3600;
                         signalOutflowCapacity += laneOutflow;
                         double tempLoad = arrivalRate / laneOutflow;
-                        if (tempLoad >= this.determiningLoad) {
+                        if (tempLoad >= this.determiningLoad && getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), laneId) > 0.0) {
                             this.determiningLoad = tempLoad;
                             this.determiningArrivalRate = arrivalRate;
                             this.determiningLane = laneId;
@@ -421,7 +427,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
                     signalOutflowCapacity += linkOutflow;
                     double arrivalRate = getAverageArrivalRate(now, signal.getLinkId());
                     double tempLoad = arrivalRate / linkOutflow;
-                    if (tempLoad >= this.determiningLoad) {
+                    if (tempLoad >= this.determiningLoad && getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId()) > 0.0) {
                         this.determiningLoad = tempLoad;
                         this.determiningArrivalRate = arrivalRate;
                         this.determiningLane = null;
@@ -545,7 +551,7 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
         private void updateStabilization(double now) {
 
-            if (determiningArrivalRate == 0) {
+            if (determiningArrivalRate == 0 || determiningLink == null) {
                 return;
             }
 

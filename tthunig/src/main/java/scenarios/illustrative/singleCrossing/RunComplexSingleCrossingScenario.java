@@ -12,15 +12,15 @@ import signals.laemmer.run.LaemmerMain;
 /**
  * @author nkuehnel, tthunig, pschade
  */
-public class RunSingleCrossingScenarioWithFullyAdaptiveLaemmer {
+public class RunComplexSingleCrossingScenario {
     private static final Logger log = Logger.getLogger(LaemmerMain.class);
 
     private static final boolean USE_LAEMMER = true;
-    private static final ComplexSingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.LAEMMER_FULLY_ADAPTIVE;
+    private static final ComplexSingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.LAEMMER_NICO;
     private static final Regime LAEMMER_REGIME = Regime.COMBINED;
-    private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.COMBINE_SIMILAR_REGULATIONTIME;
+    private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.USE_MAX_LANECOUNT;
     private static final boolean VISUALIZE_WITH_OTFVIS = false;
-    private static final boolean LOG_ENABLED = true;
+    private static final boolean LOG_ENABLED = false;
     private static final boolean LIVE_ARRIVAL_RATES = true;
     private static final boolean STOCHASTIC_DEMAND = true;
     private static final boolean USE_LANES = true;
@@ -38,14 +38,18 @@ public class RunSingleCrossingScenarioWithFullyAdaptiveLaemmer {
     	}
         
         double flowNS = 360;
-        double flowWE = 720;
-        for (int i = 0; i <= 2100; i += 60) {
-//        for (int i = 0; i <= 10; i++) {
-        	flowWE = i;
-            ComplexSingleCrossingScenario complexSingleCrossingSc = new ComplexSingleCrossingScenario(flowNS, 0.0, flowWE, 0.16, SIGNAL_CONTROL, LAEMMER_REGIME, STABILIZATION_STRATEGY, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
-			Controler singleCrossingScenario2Controler = complexSingleCrossingSc.defineControler();
-			singleCrossingScenario2Controler.run();
-		 }
+        double flowWE = 1800;
+//        for (int strategyNum = 0; strategyNum < StabilizationStrategy.values().length; strategyNum++) {
+//        	if (StabilizationStrategy.values()[strategyNum].equals(StabilizationStrategy.CUSTOM)) {
+//        		continue;
+//        	}
+//        	StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.values()[strategyNum];
+	        for (int i = 0; i <= 2100; i += 60) {
+	        	flowWE = i;
+	            ComplexSingleCrossingScenario complexSingleCrossingSc = new ComplexSingleCrossingScenario(flowNS, 0.0, flowWE, 0.16, SIGNAL_CONTROL, LAEMMER_REGIME, STABILIZATION_STRATEGY, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
+				Controler singleCrossingScenario2Controler = complexSingleCrossingSc.defineControler();
+				singleCrossingScenario2Controler.run();
+			 }
+//        }
     }
-
 }

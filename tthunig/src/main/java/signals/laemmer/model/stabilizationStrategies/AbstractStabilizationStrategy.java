@@ -7,7 +7,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.lanes.data.Lanes;
 
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerLane;
+import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
 
 public abstract class AbstractStabilizationStrategy {
@@ -22,11 +22,11 @@ public abstract class AbstractStabilizationStrategy {
 		this.lanes = lanes;
 	}
 	
-	public LaemmerPhase determinePhase(Queue<LaemmerLane> lanesForStabilization, List<LaemmerPhase> laemmerPhases) {
+	public LaemmerPhase determinePhase(Queue<LaemmerApproach> lanesForStabilization, List<LaemmerPhase> laemmerPhases) {
 		return determinePhase(lanesForStabilization, laemmerPhases, false);
 	}
 
-	public abstract LaemmerPhase determinePhase(Queue<LaemmerLane> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug);
+	public abstract LaemmerPhase determinePhase(Queue<LaemmerApproach> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug);
 
 	public FullyAdaptiveLaemmerSignalController getFullyAdaptiveLaemmerSignalController() {
 		return this.fullyAdaptiveLaemmerSignalController;

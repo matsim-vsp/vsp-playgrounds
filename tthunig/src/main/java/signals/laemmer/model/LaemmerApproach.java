@@ -13,7 +13,7 @@ import org.matsim.lanes.data.Lane;
  */
 //TODO I consider renaming this to "LammerInDriveway" or "LammerNodeApproach" since is should also work without Lanes and shoud later also work for stabilization, pschade Jan '18
 
-public class LaemmerLane {
+public class LaemmerApproach {
 
 	private Lane physicalLane;
 	private FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController;
@@ -28,7 +28,7 @@ public class LaemmerLane {
 	private double queueLength;
 
 	//TODO laemmerLane should also work without lanes, pschade, Jan'18
-	public LaemmerLane (Link link, Lane physicalLane, SignalGroup signalGroup, Signal signal, FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController) {
+	public LaemmerApproach (Link link, Lane physicalLane, SignalGroup signalGroup, Signal signal, FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController) {
 		this.physicalLane = physicalLane;
 		this.fullyAdaptiveLaemmerSignalController = fullyAdaptiveLaemmerSignalController;
 		this.signal = signal;
@@ -41,7 +41,7 @@ public class LaemmerLane {
 		this.fullyAdaptiveLaemmerSignalController.sensorManager.registerAverageNumberOfCarsPerSecondMonitoring(signal.getLinkId(), this.fullyAdaptiveLaemmerSignalController.getLaemmerConfig().getLookBackTime(), this.fullyAdaptiveLaemmerSignalController.getLaemmerConfig().getTimeBucketSize());
 	}
 	
-    public LaemmerLane(Link link, SignalGroup signalGroup, Signal signal,
+    public LaemmerApproach(Link link, SignalGroup signalGroup, Signal signal,
 			FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController) {
     	this(link, null, signalGroup, signal, fullyAdaptiveLaemmerSignalController);
     }
@@ -186,6 +186,10 @@ public class LaemmerLane {
 
 	public void shortenRegulationTime(double passedRegulationTime) {
 		this.regulationTime -= passedRegulationTime;
+		if (this.regulationTime < 0) {
+			//negative regulation time is not possible
+			this.regulationTime = 0.0;
+		}
 	}
 
 	public void extendRegulationTime(double extraTime) {

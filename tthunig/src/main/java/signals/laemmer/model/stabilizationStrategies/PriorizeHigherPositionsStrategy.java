@@ -17,7 +17,7 @@ import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerLane;
+import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
 
 public class PriorizeHigherPositionsStrategy extends AbstractStabilizationStrategy {
@@ -27,7 +27,7 @@ public class PriorizeHigherPositionsStrategy extends AbstractStabilizationStrate
 	}
 
 	@Override
-	public LaemmerPhase determinePhase(Queue<LaemmerLane> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug) {
+	public LaemmerPhase determinePhase(Queue<LaemmerApproach> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug) {
 		LaemmerPhase max = null;
 		Map<LaemmerPhase, java.lang.Integer> stabilizationCandidatePhases = new HashMap<>();			
 //		Stream<LaemmerPhase> candidatePhases = laemmerPhases.stream().sequential()
@@ -49,7 +49,7 @@ public class PriorizeHigherPositionsStrategy extends AbstractStabilizationStrate
 				throw new IllegalStateException("There is no guarantee that PriorizeHigherPositionsStrategy strategy will work with more than 25 aproaches to one single crossing. Revisit the code to make sure, that proirizing stabilizing lanes will always higher ranked than not-stabilizing lanes or choose another stabilisation strategy.");
 			}
 			for (Entry<Id<Link>, List<Id<Lane>>>  lanesToLink : candPhase.getPhase().getGreenLanesToLinks().entrySet())
-				for (LaemmerLane stabilizationLaneCandidate : lanesForStabilization) {
+				for (LaemmerApproach stabilizationLaneCandidate : lanesForStabilization) {
 					//TODO probably nullcheck for lanesToLink.getValue() is needed, but unclear, what to do, is stabilizationLaneCandidate is not null but signalgroups lanes are
 					if (stabilizationLaneCandidate.getLink().getId().equals(lanesToLink.getKey()) &&
 							(stabilizationLaneCandidate.getLane() == null || lanesToLink.getValue().contains(stabilizationLaneCandidate.getLane().getId())))
@@ -65,7 +65,8 @@ public class PriorizeHigherPositionsStrategy extends AbstractStabilizationStrate
 						 * probably much more, as long as a large number of them are not getting green
 						 * together. pschade, Dec'17
 						 */
-						selectionScore += (8192*8192*16)/Math.pow(2, ((List<LaemmerLane>)lanesForStabilization).indexOf(stabilizationLaneCandidate));
+						//was 8196*8196*16
+						selectionScore += (1073741824)/Math.pow(2, ((List<LaemmerApproach>)lanesForStabilization).indexOf(stabilizationLaneCandidate));
 				}
 			stabilizationCandidatePhases.put(candPhase, new java.lang.Integer(selectionScore));
 			if (selectionScore > maxSelectionScore) {
