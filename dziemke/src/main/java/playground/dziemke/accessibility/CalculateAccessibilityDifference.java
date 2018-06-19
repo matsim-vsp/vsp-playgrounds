@@ -53,10 +53,15 @@ public class CalculateAccessibilityDifference {
 //		String directoryRootBase = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus/runAccessibilityComputation/";
 //		String directoryRootPolicy = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus_pt-only/runAccessibilityComputation/";
 		
-		String directoryRoot = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/";
-		String directoryRootBase = directoryRoot + "accessibilities/BT-mb/50_1.0-1.7/";
-		String directoryRootPolicy = directoryRoot + "accessibilities/BT-b/50_1.0-1.7/";
-		String identifier = "accessibilities/BT-b_BT-mb_50/";
+//		String directoryRoot = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/";
+//		String directoryRootBase = directoryRoot + "accessibilities/BT-mb/50_1.0-1.7/";
+//		String directoryRootPolicy = directoryRoot + "accessibilities/BT-b/50_1.0-1.7/";
+//		String identifier = "accessibilities/BT-b_BT-mb_50/";
+		
+		String directoryRoot = "../../shared-svn/projects/accessibility_berlin/output/";
+		String directoryRootBase = directoryRoot + "car_500_10min/";
+		String directoryRootPolicy = directoryRoot + "av_500_10min_waiting/";
+		String identifier = "av-car_2/";
 		
 //		String directoryRoot = "../../upretoria/data/nmb/";
 //		String directoryRootBase = directoryRoot + "output_1000_ptnw_6/";
