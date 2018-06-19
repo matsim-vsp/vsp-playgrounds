@@ -1,19 +1,18 @@
 package playground.vsp.openberlinscenario.cemdap.input;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.testcases.MatsimTestUtils;
-
 import playground.vsp.openberlinscenario.Gender;
-import playground.vsp.openberlinscenario.cemdap.input.DemandGeneratorCensus;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author GabrielT on 15.11.2016.
