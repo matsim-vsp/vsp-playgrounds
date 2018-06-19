@@ -54,7 +54,7 @@ public class CemdapStops2MatsimPlansConverter {
 	private static final Logger LOG = Logger.getLogger(CemdapStops2MatsimPlansConverter.class);
 
 	public static void main(String[] args) throws IOException {
-		
+
 	}
 
 	
@@ -118,7 +118,7 @@ public class CemdapStops2MatsimPlansConverter {
 		Population population = scenario.getPopulation();
 		
 		for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
-			new CemdapStopsParser().parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber));
+			new CemdapStopsParser().parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber), outputDirectory);
 			
 			// Commenting this for the time being; it does not do anything if the activity file is not considered on top of the stops file, dz,aa, sep'17
 			// Add a stay-home plan for those people who have no stops (i.e. no travel) in current stop file
