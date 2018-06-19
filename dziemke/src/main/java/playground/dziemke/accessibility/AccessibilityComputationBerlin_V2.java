@@ -18,6 +18,7 @@
  * *********************************************************************** */
 package playground.dziemke.accessibility;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,12 +35,15 @@ import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.ActivityFacilities;
 
 import com.vividsolutions.jts.geom.Envelope;
+
 
 /**
  * @author dziemke
@@ -51,14 +55,49 @@ public class AccessibilityComputationBerlin_V2 {
 		Double cellSize = 500.;
 		boolean push2Geoserver = false; // Set true for run on server
 		boolean createQGisOutput = true; // Set false for run on server
+		
+//		String runOutputFolder = "../../runs-svn/open_berlin_scenario/b5_22/";
+////		String accessibilityOutputDirectory = runOutputFolder + "../accessibilities/";
+//		
+//		Config config = ConfigUtils.loadConfig(runOutputFolder + "b5_22.output_config_simple_small.xml", new AccessibilityConfigGroup());
+//
+//		final Envelope envelope = new Envelope(4574000, 4620000, 5802000, 5839000); // Berlin; notation: minX, maxX, minY, maxY
+//		String scenarioCRS = "EPSG:31468"; // EPSG:31468 = DHDN GK4
+//		
+//		config.network().setInputFile("b5_22.output_network.xml.gz");
+////		config.network().setInputFile(new File ("../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/berlin-car_be_5_withVspAdjustments2018-04-30_network.xml.gz").getAbsolutePath());
+//
+//		
+//		config.plans().setInputFile("b5_22.output_plans.xml.gz");
+//		
+//		config.plans().setInputPersonAttributeFile("b5_22.output_personAttributes.xml.gz");
+//		
+//		config.vspExperimental().setVspDefaultsCheckingLevel(VspDefaultsCheckingLevel.warn);
+//		
+//		config.vehicles().setVehiclesFile("b5_22.output_vehicles.xml.gz");
+//		
+//		config.counts().setInputFile("b5_22.output_counts.xml.gz");
+//		
+//		config.transit().setUseTransit(false);
+////		config.transit().setTransitScheduleFile("");
+////		config.transit().setVehiclesFile("");
+//		
+//		config.facilities().setInputFile(new File("../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/accessibilities/facilities/2017-09-26_facilities.xml").getAbsolutePath());
+//		
+//		config.vehicles().setVehiclesFile("output_vehicles.xml.gz");
 
+		
+		
+
+		// Berlin old
 		final Config config = ConfigUtils.createConfig(new AccessibilityConfigGroup());
 
 		final Envelope envelope = new Envelope(4574000, 4620000, 5802000, 5839000); // Berlin; notation: minX, maxX, minY, maxY
 		String scenarioCRS = "EPSG:31468"; // EPSG:31468 = DHDN GK4
 		
-		config.network().setInputFile("../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/be_5_network_with-pt-ride-freight.xml.gz");
-		config.facilities().setInputFile("../../shared-svn/projects/accessibility_berlin/osm/berlin/amenities/2018-05-30/facilities.xml");
+//		config.network().setInputFile("../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/be_5_network_with-pt-ride-freight.xml.gz");
+		config.network().setInputFile("../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/berlin-car_be_5_withVspAdjustments2018-04-30_network.xml.gz");
+		config.facilities().setInputFile(new File("../../shared-svn/projects/accessibility_berlin/osm/berlin/amenities/2018-05-30/facilities.xml").getAbsolutePath());
 		
 //		CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(scenarioCRS, "EPSG:4326");
 //		Coord southwest = transformation.transform(new Coord(envelope.getMinX(), envelope.getMinY()));
@@ -77,7 +116,7 @@ public class AccessibilityComputationBerlin_V2 {
 //			e.printStackTrace();
 //		}
 		
-		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/pt_500/");
+		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/car_500_10min/");
 		config.controler().setRunId("de_berlin_" + cellSize.toString().split("\\.")[0]);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
@@ -91,8 +130,9 @@ public class AccessibilityComputationBerlin_V2 {
 		acg.setEnvelope(envelope);
 		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
 //		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
-		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, false);
-		acg.setComputingAccessibilityForMode(Modes4Accessibility.pt, true);
+//		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, false);
+//		acg.setComputingAccessibilityForMode(Modes4Accessibility.car, true);
+//		acg.setComputingAccessibilityForMode(Modes4Accessibility.pt, true);
 		acg.setOutputCrs(scenarioCRS);
 		
 		ConfigUtils.setVspDefaults(config);
@@ -100,20 +140,20 @@ public class AccessibilityComputationBerlin_V2 {
 //		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
 		
 		// ---------- Schedule-based pt
-		config.transit().setUseTransit(true);
-		config.transit().setTransitScheduleFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitSchedule.xml.gz");
-		config.transit().setVehiclesFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitVehicles.xml.gz");
-		config.qsim().setEndTime(100*3600.);
-		
-		config.transitRouter().setCacheTree(true);
+//		config.transit().setUseTransit(true);
+//		config.transit().setTransitScheduleFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitSchedule.xml.gz");
+//		config.transit().setVehiclesFile("../../runs-svn/open_berlin_scenario/b5_22e1a/b5_22e1a.output_transitVehicles.xml.gz");
+//		config.qsim().setEndTime(100*3600.);
+//		
+//		config.transitRouter().setCacheTree(true);
+//		
+//		ModeParams ptParams = new ModeParams(TransportMode.transit_walk);
+//		config.planCalcScore().addModeParams(ptParams);
 		
 //		Scenario scenario2 = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 //		new MatsimNetworkReader(TransformationFactory.getCoordinateTransformation("EPSG:4326", scenarioCRS), 
 //		scenario2.getNetwork()).readFile("../../../shared-svn/projects/maxess/data/nairobi/digital_matatus/matsim_2015-06-16_2/network.xml");
 //		MergeNetworks.merge(network, null, scenario2.getNetwork());
-		
-		ModeParams ptParams = new ModeParams(TransportMode.transit_walk);
-		config.planCalcScore().addModeParams(ptParams);
 
 		// ... trying to alter settings to drive down the number of "35527609 transfer links to be added".
 //		config.transitRouter().setAdditionalTransferTime(additionalTransferTime); // default: 0.0
@@ -132,6 +172,8 @@ public class AccessibilityComputationBerlin_V2 {
 		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork()); // will be aggregated in downstream code!
 		
 		final Controler controler = new Controler(scenario);
+		
+
 		
 		for (String activityType : activityTypes) {
 			AccessibilityModule module = new AccessibilityModule();
