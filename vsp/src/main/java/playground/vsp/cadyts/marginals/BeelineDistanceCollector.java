@@ -70,6 +70,7 @@ public class BeelineDistanceCollector implements ActivityEndEventHandler, Activi
     public void handleEvent(ActivityStartEvent event) {
 
         DistanceBin.DistanceRange distanceRange = this.eventsToBeelinDistanceRange.handleEvent(event);
+        if (distanceRange==null) return; // i.e. this agent is excluded.
         outputDistanceDistribution.addToDistribution(this.eventsToBeelinDistanceRange.getPersonToMode().get(event.getPersonId()), distanceRange, +1);
     }
 

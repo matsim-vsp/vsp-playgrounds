@@ -114,6 +114,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	public void handleEvent(ActivityStartEvent event) {
 
 		DistanceBin.DistanceRange distanceRange = this.eventsToBeelinDistanceRange.handleEvent(event);
+		if (distanceRange==null) return; // i.e. this agent is excluded.
 
 		// if only a subset of links is calibrated but the link is not contained, ignore the event
 		Id<ModalDistanceBinIdentifier> mlId = DistanceDistributionUtils.getModalBinId(this.eventsToBeelinDistanceRange.getPersonToMode().get(event.getPersonId()), distanceRange);
