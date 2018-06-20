@@ -20,6 +20,8 @@
 package playground.vsp.cadyts.marginals.prep;
 
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.matsim.api.core.v01.Id;
 
 /**
@@ -46,6 +48,15 @@ public class DistanceDistributionUtils {
 
     public static Id<ModalDistanceBinIdentifier> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
         return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(distanceRange) ), ModalDistanceBinIdentifier.class);
+    }
+
+    //technically, following can be applied directly in DistanceDistribution, however, ordering is imp only if writing the data.
+    public static SortedMap<ModalDistanceBinIdentifier, DistanceBin> getSortedMap(DistanceDistribution distanceDistribution) {
+        SortedMap<ModalDistanceBinIdentifier, DistanceBin> sortedMap = new TreeMap<>();
+        distanceDistribution.getModalBinToDistanceBin()
+                            .forEach((key, value) -> sortedMap.put(distanceDistribution.getModalBins().get(key),
+                                    value));
+        return sortedMap;
     }
 
 }

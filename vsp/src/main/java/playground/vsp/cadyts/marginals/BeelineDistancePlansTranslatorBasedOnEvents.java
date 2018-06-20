@@ -20,61 +20,58 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import cadyts.demand.PlanBuilder;
 import com.google.inject.Inject;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
+import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
-import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
+import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
+import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.cadyts.general.PlansTranslator;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
-import org.matsim.core.network.NetworkUtils;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
-class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalDistanceBinIdentifier>, PersonDepartureEventHandler,
-		PersonArrivalEventHandler, PersonStuckEventHandler {
+class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<ModalDistanceBinIdentifier>, ActivityEndEventHandler, ActivityStartEventHandler, PersonDepartureEventHandler, PersonStuckEventHandler {
 
 	private static final Logger log = Logger.getLogger(BeelineDistancePlansTranslatorBasedOnEvents.class);
 
 	private final Scenario scenario;
-
-	private final Map<Id<Person>, Coord> personToOriginCoord = new HashMap<>();
 
 	private int iteration = -1;
 
 	// this is _only_ there for output:
     private final Set<Plan> plansEverSeen = new HashSet<>();
 
-	//<--a problem may appear if using following same strings with multiple Cadyts contexts. Amit Feb'18-->
-	private static final String STR_PLANSTEPFACTORY = "planStepFactory"+ModalDistanceCadytsBuilderImpl.MARGINALS;
+	private static final String STR_PLAN_STEP_FACTORY = "planStepFactory"+ModalDistanceCadytsBuilderImpl.MARGINALS;
 	private static final String STR_ITERATION = "iteration"+ModalDistanceCadytsBuilderImpl.MARGINALS;
 
 	private final Map<Id<ModalDistanceBinIdentifier>, ModalDistanceBinIdentifier> modalDistanceBinMap;
-	private final DistanceDistribution inputDistanceDistribution;
+
+	private final EventsToBeelinDistanceRange eventsToBeelinDistanceRange;
 	
 	@Inject(optional=true)
 	private AgentFilter agentFilter;
 
 	@Inject
-    BeelineDistancePlansTranslatorBasedOnEvents(final Scenario scenario, DistanceDistribution inputDistanceDistribution) {
+    BeelineDistancePlansTranslatorBasedOnEvents(Scenario scenario,
+												DistanceDistribution inputDistanceDistribution,
+												EventsToBeelinDistanceRange eventsToBeelinDistanceRange) {
 		this.scenario = scenario;
-		this.inputDistanceDistribution = inputDistanceDistribution;
 		this.modalDistanceBinMap = inputDistanceDistribution.getModalBins();
+		this.eventsToBeelinDistanceRange = eventsToBeelinDistanceRange;
 	}
 
 	private long plansFound = 0;
@@ -82,7 +79,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 	@Override
 	public final cadyts.demand.Plan<ModalDistanceBinIdentifier> getCadytsPlan(final Plan plan) {
-		PlanBuilder<ModalDistanceBinIdentifier> planStepFactory = (PlanBuilder<ModalDistanceBinIdentifier>) plan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
+		PlanBuilder<ModalDistanceBinIdentifier> planStepFactory = (PlanBuilder<ModalDistanceBinIdentifier>) plan.getCustomAttributes().get(
+				STR_PLAN_STEP_FACTORY);
 		if (planStepFactory == null) {
 			this.plansNotFound++;
 			return null;
@@ -93,7 +91,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 	@Override
 	public void reset(final int iteration) {
-		this.personToOriginCoord.clear();
+		this.eventsToBeelinDistanceRange.reset();
 		this.iteration = iteration;
 
 		log.warn("found " + this.plansFound + " out of " + (this.plansFound + this.plansNotFound) + " ("
@@ -103,41 +101,22 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		if (agentFilter!=null && !agentFilter.includeAgent(event.getPersonId())) return; // if filtering and agent should not be included
-
-		this.personToOriginCoord.put(event.getPersonId(), scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord());
+		this.eventsToBeelinDistanceRange.handleEvent(event);
 	}
-	
+
 	@Override
-	public void handleEvent(PersonArrivalEvent event) {
-		if (agentFilter!=null && !agentFilter.includeAgent(event.getPersonId())) return; // if filtering and agent should not be included
+	public void handleEvent(ActivityEndEvent event) {
+		this.eventsToBeelinDistanceRange.handleEvent(event);
+	}
 
-		String mode  = event.getLegMode();
 
-		if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
-			log.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
-			return;
-		}
+	@Override
+	public void handleEvent(ActivityStartEvent event) {
 
-		Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
-		Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getToNode().getCoord();
-
-		//TODO check if we should include beeline distance factor which is not available for network mdoes
-		PlansCalcRouteConfigGroup.ModeRoutingParams params = this.scenario.getConfig().plansCalcRoute().getModeRoutingParams().get(mode);
-		double beelineDistanceFactor = 1.0;
-		if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
-		else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
-			beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
-		} else{
-			log.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.0");
-		}
-		double beelineDistance = beelineDistanceFactor *
-				NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
-
-		DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
+		DistanceBin.DistanceRange distanceRange = this.eventsToBeelinDistanceRange.handleEvent(event);
 
 		// if only a subset of links is calibrated but the link is not contained, ignore the event
-		Id<ModalDistanceBinIdentifier> mlId = DistanceDistributionUtils.getModalBinId(mode,distanceRange);
+		Id<ModalDistanceBinIdentifier> mlId = DistanceDistributionUtils.getModalBinId(this.eventsToBeelinDistanceRange.getPersonToMode().get(event.getPersonId()), distanceRange);
 		if (this.modalDistanceBinMap.get(mlId) == null) return;
 
 		// get the "Person" behind the id:
@@ -159,8 +138,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 	@Override
 	public void handleEvent(PersonStuckEvent event) {
-		log.warn("Stuck event: "+ event);
-		log.warn("This means, all trips are not included in the output distance distribution.");
+		this.eventsToBeelinDistanceRange.handleEvent(event);
 	}
 
 	// ###################################################################################
@@ -169,7 +147,8 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 	private PlanBuilder<ModalDistanceBinIdentifier> getPlanStepFactoryForPlan(final Plan selectedPlan) {
 		PlanBuilder<ModalDistanceBinIdentifier> planStepFactory = null;
 
-		planStepFactory = (PlanBuilder<ModalDistanceBinIdentifier>) selectedPlan.getCustomAttributes().get(STR_PLANSTEPFACTORY);
+		planStepFactory = (PlanBuilder<ModalDistanceBinIdentifier>) selectedPlan.getCustomAttributes().get(
+				STR_PLAN_STEP_FACTORY);
 		Integer factoryIteration = (Integer) selectedPlan.getCustomAttributes().get(STR_ITERATION);
 		if (planStepFactory == null || factoryIteration == null || factoryIteration != this.iteration) {
 			// attach the iteration number to the plan:
@@ -177,7 +156,7 @@ class BeelineDistancePlansTranslatorBasedOnEvents implements PlansTranslator<Mod
 
 			// construct a new PlanBulder and attach it to the plan:
 			planStepFactory = new PlanBuilder<>();
-			selectedPlan.getCustomAttributes().put(STR_PLANSTEPFACTORY, planStepFactory);
+			selectedPlan.getCustomAttributes().put(STR_PLAN_STEP_FACTORY, planStepFactory);
 
 			// memorize the plan as being seen:
 			this.plansEverSeen.add(selectedPlan);

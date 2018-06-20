@@ -41,6 +41,8 @@ public class ModalDistanceCadytsModule extends AbstractModule{
         bind(ModalDistanceCadytsContext.class).asEagerSingleton();
         addControlerListenerBinding().to(ModalDistanceCadytsContext.class);
 
+        bind(EventsToBeelinDistanceRange.class).asEagerSingleton(); // this is not an event handler
+
         bind(BeelineDistanceCollector.class);
         bind(BeelineDistancePlansTranslatorBasedOnEvents.class).asEagerSingleton();
 
