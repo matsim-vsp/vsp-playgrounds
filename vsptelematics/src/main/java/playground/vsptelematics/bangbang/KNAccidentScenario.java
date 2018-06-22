@@ -120,7 +120,8 @@ public class KNAccidentScenario {
 		config.qsim().setStorageCapFactor(0.06);
 		config.qsim().setStuckTime(100.);
 		config.qsim().setStartTime(6.*3600.);
-		config.qsim().setTrafficDynamics(TrafficDynamics.withHoles);
+//		config.qsim().setTrafficDynamics(TrafficDynamics.withHoles);
+		config.qsim().setTrafficDynamics(TrafficDynamics.queue);
 
 		{
 			ModeParams params = new ModeParams( "undefined" ) ;
@@ -199,12 +200,12 @@ public class KNAccidentScenario {
 				// ---
 				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
 //				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
-//				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
+				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
 				
-				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
-				this.addMobsimListenerBinding().toInstance( abc ) ;
-//				abc.setLastReplanningIteration(9);
-				abc.setReplanningProba(0.1);
+//				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+//				this.addMobsimListenerBinding().toInstance( abc ) ;
+////				abc.setLastReplanningIteration(9);
+//				abc.setReplanningProba(1.0);
 				
 				
 			}
