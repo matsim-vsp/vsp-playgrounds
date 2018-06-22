@@ -73,35 +73,39 @@ public class RunExample {
         } else {
             config = ConfigUtils.loadConfig(configFile);
         }
-
         double beelineDistanceFactorForNetworkModes = 1.0;
 
-        config.controler().setOutputDirectory(outputDir);
-
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        config.controler().setLastIteration(lastIt);
-        config.counts().setWriteCountsInterval(1);
-        config.counts().setAverageCountsOverIterations(4);
-
-        // add mode choice to it
-        StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
-        //don't use subTourModeChoice here which does not change mode if plan has only one trip.
-        modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
-        modeChoice.setWeight(0.15);
-        config.strategy().addStrategySettings(modeChoice);
-        config.changeMode().setModes(new String[]{"car", "bicycle"});
-        config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
-
-        config.planCalcScore().getOrCreateModeParams("car").setConstant(-2);
-
-        Scenario scenario = ScenarioUtils.loadScenario(config);
-        addPersonsWithShortTrips(scenario);
-
+        Scenario scenario = prepareScenario(outputDir, lastIt, config);        
         DistanceDistribution inputDistanceDistribution = getInputDistanceDistribution(beelineDistanceFactorForNetworkModes);
 
         Controler controler = new Controler(scenario);
 
-        controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
+        addCadytsModules(cadytsWt, config, inputDistanceDistribution, controler);
+        controler.run();
+    }
+
+	/**
+	 * @param outputDir
+	 * @param lastIt
+	 * @param config
+	 * @return
+	 */
+	public static Scenario prepareScenario(String outputDir, int lastIt, Config config) {
+		prepareConfig(outputDir, lastIt, config);
+        Scenario scenario = ScenarioUtils.loadScenario(config);
+        addPersonsWithShortTrips(scenario);
+		return scenario;
+	}
+
+	/**
+	 * @param cadytsWt
+	 * @param config
+	 * @param inputDistanceDistribution
+	 * @param controler
+	 */
+	private static void addCadytsModules(double cadytsWt, Config config, DistanceDistribution inputDistanceDistribution,
+			Controler controler) {
+		controler.addOverridingModule(new ModalDistanceCadytsModule(inputDistanceDistribution));
 
         final double cadytsScoringWeight = cadytsWt * config.planCalcScore().getBrainExpBeta();
         controler.addOverridingModule(new AbstractModule() {
@@ -144,10 +148,34 @@ public class RunExample {
             }
             
         });
-        controler.run();
-    }
+	}
 
-    private static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
+	/**
+	 * @param outputDir
+	 * @param lastIt
+	 * @param config
+	 */
+	private static void prepareConfig(String outputDir, int lastIt, Config config) {
+		config.controler().setOutputDirectory(outputDir);
+
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        config.controler().setLastIteration(lastIt);
+        config.counts().setWriteCountsInterval(1);
+        config.counts().setAverageCountsOverIterations(1);
+
+        // add mode choice to it
+        StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+        //don't use subTourModeChoice here which does not change mode if plan has only one trip.
+        modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
+        modeChoice.setWeight(0.15);
+        config.strategy().addStrategySettings(modeChoice);
+        config.changeMode().setModes(new String[]{"car", "bicycle"});
+        config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+
+        config.planCalcScore().getOrCreateModeParams("car").setConstant(-2);
+	}
+
+    public static DistanceDistribution getInputDistanceDistribution(double beelineDistanceFactorForNetworkModes){
         DistanceDistribution inputDistanceDistribution = new DistanceDistribution();
                 
         inputDistanceDistribution.setBeelineDistanceFactorForNetworkModes("car",beelineDistanceFactorForNetworkModes);
