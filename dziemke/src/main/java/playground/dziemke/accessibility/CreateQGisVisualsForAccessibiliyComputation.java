@@ -24,7 +24,16 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 //		String workingDirectory = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_-7.0-3.5_new/runAccessibilityComputation/";
 //		String workingDirectory = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNMBTest_-5.5--2.0/runAccessibilityComputation/";
 //		String workingDirectory = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/accessibilities/BT-b_BT-mb_50/";
-		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/car-pt/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/car-pt/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_pt-car_edu/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_fs-car_shop/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at-car_edu/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_car-pt_edu/";
+		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at-pt_edu/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at-pt_edu/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at_edu/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_car_edu/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_pt-called-car_edu_old/";
 //		String workingDirectory = "../../upretoria/data/nmb/output_500_6_work/";
 //		String workingDirectory = "../../upretoria/data/nmb/output_500_6_work_motherwell_road/";
 //		String workingDirectory = "../../shared-svn/projects/maxess/data/capetown/output/02/";
@@ -40,17 +49,20 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 //		final List<String> activityTypes = Arrays.asList(new String[]{"work"});
 //		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION, FacilityTypes.SHOPPING});
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
+//		final List<String> activityTypes = Arrays.asList("S");
 		
 //		final List<String> modes = Arrays.asList(new String[]{TransportMode.car, TransportMode.bike, TransportMode.walk, "freespeed"});
 //		final List<String> modes = Arrays.asList(new String[]{"pt-walk"});
-//		final List<String> modes = Arrays.asList(new String[]{Modes4Accessibility.car.toString()});
+		final List<String> modes = Arrays.asList(new String[]{Modes4Accessibility.car.toString()});
 //		final List<String> modes = Arrays.asList(new String[]{Modes4Accessibility.pt.toString()});
 //		final List<String> modes = Arrays.asList(new String[]{Modes4Accessibility.bike.toString()});
-		final List<String> modes = Arrays.asList(new String[]{"freespeed"});
+//		final List<String> modes = Arrays.asList(new String[]{"freespeed"});
 //		final List<String> modes = Arrays.asList(new String[]{Modes4Accessibility.freespeed.toString(), Modes4Accessibility.car.toString(),
 //				Modes4Accessibility.bike.toString(), Modes4Accessibility.walk.toString()});
 		
-		final Envelope envelope = new Envelope(4574000, 4620000, 5802000, 5839000); // Berlin; notation: minX, maxX, minY, maxY
+//		final Envelope envelope = new Envelope(4574000, 4620000, 5802000, 5839000); // Berlin; notation: minX, maxX, minY, maxY
+		final Envelope envelope = new Envelope(4570000, 4624000, 5796000, 5845000); // Berlin; notation: minX, maxX, minY, maxY (wider)
+		
 		String scenarioCRS = "EPSG:31468"; // EPSG:31468 = DHDN GK4
 //		Envelope envelope = new Envelope(307000,324000,2829000,2837000); // Patna
 //		String scenarioCRS = "EPSG:24345"; // EPSG:24345 = Kalianpur 1975 / UTM zone 45N
@@ -61,8 +73,8 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 //		final Envelope envelope = new Envelope(4574000, 4620000, 5802000, 5839000); // Berlin; notation: minX, maxX, minY, maxY
 //		String scenarioCRS = "EPSG:31468"; // EPSG:31468 = DHDN GK4
 		
-//		final boolean includeDensityLayer = true;
-		final boolean includeDensityLayer = false;
+		final boolean includeDensityLayer = true;
+//		final boolean includeDensityLayer = false;
 		final Integer range = 9; // In the current implementation, this must always be 9
 		
 //		final Double lowerBound = 2.; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
@@ -75,20 +87,30 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 //		final Double upperBound = 0.;
 //		final Double lowerBound = -14.; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
 //		final Double upperBound = 0.;
-		final Double lowerBound = -1.4; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
-		final Double upperBound = 1.4;
+//		final Double lowerBound = -2.8; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+//		final Double upperBound = 2.8;
+		final Double lowerBound = -.7; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+		final Double upperBound = .7;
+//		final Double lowerBound = -.35; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+//		final Double upperBound = .35;
+//		final Double lowerBound = -.175; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+//		final Double upperBound = .175;
+//		final Double lowerBound = -.28; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+//		final Double upperBound = .28;
+//		final Double lowerBound = -1.4; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+//		final Double upperBound = 1.4;
 		
-		final int populationThreshold = (int) (0 / (1000/cellSize * 1000/cellSize));
-//		final int populationThreshold = (int) (50 / (1000/cellSize * 1000/cellSize));
+//		final int populationThreshold = (int) (0 / (1000/cellSize * 1000/cellSize));
+		final int populationThreshold = (int) (20 / (1000/cellSize * 1000/cellSize));
 
 		String osName = System.getProperty("os.name");
 		for (String actType : activityTypes) {
 			String actSpecificWorkingDirectory = workingDirectory + actType + "/";
 			for (String mode : modes) {
-				VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode, envelope, workingDirectory, scenarioCRS, includeDensityLayer,
-						lowerBound, upperBound, range, cellSize, populationThreshold);
-//				VisualizationUtils.createQGisOutputRuleBasedStandardColorRange(actType, mode, envelope, workingDirectory, scenarioCRS, includeDensityLayer,
+//				VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode, envelope, workingDirectory, scenarioCRS, includeDensityLayer,
 //						lowerBound, upperBound, range, cellSize, populationThreshold);
+				VisualizationUtils.createQGisOutputRuleBasedStandardColorRange(actType, mode, envelope, workingDirectory, scenarioCRS, includeDensityLayer,
+						lowerBound, upperBound, range, cellSize, populationThreshold);
 //				VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode, new Envelope(100000,180000,-3720000,-3675000), workingDirectory, TransformationFactory.WGS84_SA_Albers, includeDensityLayer,
 //						lowerBound, upperBound, range, cellSize, populationThreshold);
 //				VisualizationUtils.createQGisOutput(actType, mode, new Envelope(251800.0, 258300.0, 9854300.0, 9858700.0), workingDirectory, "EPSG:21037", includeDensityLayer,
