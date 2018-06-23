@@ -68,7 +68,8 @@ public class AccessibilityComputationBerlin_V2 {
 ////		config.network().setInputFile(new File ("../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/network/berlin-car_be_5_withVspAdjustments2018-04-30_network.xml.gz").getAbsolutePath());
 //
 //		
-//		config.plans().setInputFile("b5_22.output_plans.xml.gz");
+////		config.plans().setInputFile("b5_22.output_plans.xml.gz");
+//		config.plans().setInputFile("b5_22.output_plans_no_links.xml.gz");
 //		
 //		config.plans().setInputPersonAttributeFile("b5_22.output_personAttributes.xml.gz");
 //		
@@ -84,7 +85,7 @@ public class AccessibilityComputationBerlin_V2 {
 //		
 //		config.facilities().setInputFile(new File("../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/accessibilities/facilities/2017-09-26_facilities.xml").getAbsolutePath());
 //		
-//		config.vehicles().setVehiclesFile("output_vehicles.xml.gz");
+//		config.vehicles().setVehiclesFile("b5_22.output_vehicles.xml.gz");
 
 		
 		
