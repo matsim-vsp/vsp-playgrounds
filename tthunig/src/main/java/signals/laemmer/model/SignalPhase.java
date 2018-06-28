@@ -42,22 +42,24 @@ public class SignalPhase {
 	}
 	
 	public void addGreenSignalGroup(SignalGroup signalGroup) {
-		signalGroups.add(signalGroup);
-		for (Signal signal : signalGroup.getSignals().values()) {
-			if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {
-				lanesToLinks.put(signal.getLinkId(), null);				
-			} else {
-				LinkedList<Id<Lane>> laneIds = new LinkedList<>(); 
-				for (Id<Lane> laneId : signal.getLaneIds())
-					laneIds.add(laneId);
-				if (lanesToLinks.containsKey(signal.getLinkId())) {
-					lanesToLinks.get(signal.getLinkId()).addAll(laneIds);
+		if (!this.getGreenSignalGroups().contains(signalGroup.getId())) {
+				signalGroups.add(signalGroup);
+			for (Signal signal : signalGroup.getSignals().values()) {
+				if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {
+					lanesToLinks.put(signal.getLinkId(), null);				
 				} else {
-					lanesToLinks.put(signal.getLinkId(), laneIds);
+					LinkedList<Id<Lane>> laneIds = new LinkedList<>(); 
+					for (Id<Lane> laneId : signal.getLaneIds())
+						laneIds.add(laneId);
+					if (lanesToLinks.containsKey(signal.getLinkId())) {
+						lanesToLinks.get(signal.getLinkId()).addAll(laneIds);
+					} else {
+						lanesToLinks.put(signal.getLinkId(), laneIds);
+					}
 				}
 			}
+			this.id = createIdFromCurrentSignalGroups();
 		}
-		this.id = createIdFromCurrentSignalGroups();
 	}
 	
 	public Set<Id<SignalGroup>> getGreenSignalGroups(){

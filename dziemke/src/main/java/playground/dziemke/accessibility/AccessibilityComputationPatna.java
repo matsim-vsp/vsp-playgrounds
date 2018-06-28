@@ -18,6 +18,7 @@
  * *********************************************************************** */
 package playground.dziemke.accessibility;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup.VspDefaultsCheckingLevel;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.MutableScenario;
@@ -42,6 +44,8 @@ import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * @author dziemke
+ * 
+ * For configurations also see playground.agarwalamit.mixedTraffic.patnaIndia.policies.PatnaPolicyControler
  */
 public class AccessibilityComputationPatna {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationPatna.class);
@@ -52,19 +56,28 @@ public class AccessibilityComputationPatna {
 		boolean createQGisOutput = true;
 		
 		// TODO
-		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
+//		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/bau/";
 //		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-b/";
-//		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-mb/";
-		String accessibilityOutputDirectory = runOutputFolder + "accessibilities/";
+		String runOutputFolder = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/BT-mb/";
+		String accessibilityOutputDirectory = runOutputFolder + "../accessibilities/BT-mb/50_1.0-1.7/";
 		
-		final Config config = ConfigUtils.createConfig(new AccessibilityConfigGroup());
-//		Config config = ConfigUtils.loadConfig(runOutputFolder + "output_config.xml.gz", new AccessibilityConfigGroup());
+//		final Config config = ConfigUtils.createConfig(new AccessibilityConfigGroup());
+		Config config = ConfigUtils.loadConfig(runOutputFolder + "output_config.xml.gz", new AccessibilityConfigGroup());
 		Envelope envelope = new Envelope(307000,324000,2829000,2837000); // Notation: minX, maxX, minY, maxY
 		String scenarioCRS = "EPSG:24345"; // EPSG:24345 = Kalianpur 1975 / UTM zone 45N
 		
-		config.network().setInputFile(runOutputFolder + "output_network.xml.gz");
+//		config.network().setInputFile(runOutputFolder + "output_network.xml.gz");
+		config.network().setInputFile("output_network.xml.gz");
 		
-		config.facilities().setInputFile("/Users/dominik/Downloads/patna/2017-09-26_facilities.xml");
+		config.plans().setInputFile("output_plans.xml.gz");
+		
+		config.plans().setInputPersonAttributeFile("output_personAttributes.xml.gz");
+		
+		config.vspExperimental().setVspDefaultsCheckingLevel(VspDefaultsCheckingLevel.warn);
+		
+		config.vehicles().setVehiclesFile("output_vehicles.xml.gz");
+		
+		config.facilities().setInputFile(new File("../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/accessibilities/facilities/2017-09-26_facilities.xml").getAbsolutePath());
 		
 //		config.global().setCoordinateSystem(scenarioCRS);
 
@@ -82,6 +95,11 @@ public class AccessibilityComputationPatna {
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.car, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.bike, true);
 		acg.setOutputCrs(scenarioCRS);
+		
+//		config.travelTimeCalculator().setAnalyzedModes("car,bike,motorbike");
+//		config.travelTimeCalculator().setSeparateModes(true);
+		
+//		config.plansCalcRoute().setNetworkModes(Arrays.asList("car", "bike", "motorbike"));
 		
 		MutableScenario scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 
@@ -107,8 +125,8 @@ public class AccessibilityComputationPatna {
 		if (createQGisOutput) {
 			final boolean includeDensityLayer = false;
 			final Integer range = 9; // In the current implementation, this must always be 9
-			final Double lowerBound = -5.25; // (upperBound - lowerBound) ideally nicely divisible by (range - 2) // TODO
-			final Double upperBound = 0.0;
+			final Double lowerBound = 1.0; // (upperBound - lowerBound) ideally nicely divisible by (range - 2) // TODO
+			final Double upperBound = 1.7;
 			final int populationThreshold = (int) (0 / (1000/cellSize * 1000/cellSize)); // TODO
 			
 			String osName = System.getProperty("os.name");

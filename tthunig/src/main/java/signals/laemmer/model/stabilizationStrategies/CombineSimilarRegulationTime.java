@@ -12,7 +12,7 @@ import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerLane;
+import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
 
 public class CombineSimilarRegulationTime extends AbstractStabilizationStrategy {
@@ -22,7 +22,7 @@ public class CombineSimilarRegulationTime extends AbstractStabilizationStrategy 
 	}
 
 	@Override
-	public LaemmerPhase determinePhase(Queue<LaemmerLane> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug) {
+	public LaemmerPhase determinePhase(Queue<LaemmerApproach> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug) {
 		LaemmerPhase max = null;
 		double minRegulationTimeDifference = Double.POSITIVE_INFINITY;
 //		Stream<LaemmerPhase> candidatePhases = laemmerPhases.stream().sequential()
@@ -40,7 +40,7 @@ public class CombineSimilarRegulationTime extends AbstractStabilizationStrategy 
 			double regulationTimeDifferenceSum = 0;
 			int laneCount = 0;
 			for (Entry<Id<Link>, List<Id<Lane>>> laneToLink : candPhase.getPhase().getGreenLanesToLinks().entrySet())
-				for (LaemmerLane stabilizationLaneCandidate : lanesForStabilization) {
+				for (LaemmerApproach stabilizationLaneCandidate : lanesForStabilization) {
 					if (stabilizationLaneCandidate.equals(lanesForStabilization.peek())) {
 						continue;
 					}

@@ -19,111 +19,74 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.PersonArrivalEvent;
+import com.google.inject.Inject;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
-import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
+import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
+import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
-import org.matsim.core.network.NetworkUtils;
-
-import com.google.inject.Inject;
-
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
-import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 
 /**
  * Created by amit on 21.02.18.
  */
 
-public class BeelineDistanceCollector implements PersonDepartureEventHandler, PersonArrivalEventHandler, PersonStuckEventHandler {
-
-    private static final Logger LOG = Logger.getLogger(BeelineDistanceCollector.class);
-
-    private final Network network;
-    private final PlansCalcRouteConfigGroup configGroup;
-    private final DistanceDistribution inputDistanceDistribution;
+public class BeelineDistanceCollector implements ActivityEndEventHandler, ActivityStartEventHandler, PersonDepartureEventHandler, PersonStuckEventHandler {
 
     private DistanceDistribution outputDistanceDistribution = new DistanceDistribution();
 
-    @Inject(optional=true)
-	private AgentFilter agentFilter;
-    
-    @Inject
-    public BeelineDistanceCollector(
-            Network network,
-            PlansCalcRouteConfigGroup plansCalcRouteConfigGroup,
-            DistanceDistribution inputDistanceDistribution,
-            EventsManager eventsManager
-    ){
-        eventsManager.addHandler(this);
-        this.network = network;
-        this.configGroup = plansCalcRouteConfigGroup;
-        this.inputDistanceDistribution = inputDistanceDistribution;
-        this.inputDistanceDistribution.getModeToBeelineDistanceFactor()
-                                      .forEach((key, value) -> outputDistanceDistribution.setBeelineDistanceFactorForNetworkModes(
-                                              key, value));
+    private final EventsToBeelinDistanceRange eventsToBeelinDistanceRange;
 
-        this.inputDistanceDistribution.getModeToScalingFactor()
-                                      .forEach((key, value) -> outputDistanceDistribution.setModeToScalingFactor(
-                                              key, value));
+    @Inject
+    public BeelineDistanceCollector(EventsToBeelinDistanceRange handler,
+                                    DistanceDistribution inputDistanceDistribution,
+                                    EventsManager eventsManager){
+        this.eventsToBeelinDistanceRange = handler;
+        eventsManager.addHandler(this);
+
+        inputDistanceDistribution.getModeToBeelineDistanceFactor()
+                                 .forEach(outputDistanceDistribution::setBeelineDistanceFactorForNetworkModes);
+
+        inputDistanceDistribution.getModeToScalingFactor()
+                                 .forEach(outputDistanceDistribution::setModeToScalingFactor);
     }
 
-    private final Map<Id<Person>, Coord> personToOriginCoord = new HashMap<>();
-
-    // only if event handler is used as post processing outside controler
-    public void setAgentFilter(AgentFilter agentFilter){
-        this.agentFilter= agentFilter;
+    // following is useful is not using Guice (i.e. simple events analysis)
+    public BeelineDistanceCollector(
+            Scenario scenario,
+            DistanceDistribution inputDistanceDistribution,
+            EventsManager eventsManager,
+            AgentFilter agentFilter) {
+        this(new EventsToBeelinDistanceRange(scenario, inputDistanceDistribution), inputDistanceDistribution, eventsManager);
     }
 
     @Override
-    public void handleEvent(PersonArrivalEvent event) {
-        if (agentFilter!=null && !agentFilter.includeAgent(event.getPersonId())) return; // if filtering and agent should not be included
+    public void handleEvent(ActivityStartEvent event) {
 
-        String mode  = event.getLegMode();
-        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
-            LOG.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
-            return;
-        }
-
-        Coord originCoord = this.personToOriginCoord.get(event.getPersonId());
-        Coord destinationCoord = this.network.getLinks().get(event.getLinkId()).getToNode().getCoord();
-
-        PlansCalcRouteConfigGroup.ModeRoutingParams params = this.configGroup.getModeRoutingParams().get(mode);
-        double beelineDistanceFactor = 1.3;
-        if (params!=null) beelineDistanceFactor = params.getBeelineDistanceFactor();
-        else if (this.inputDistanceDistribution.getModeToBeelineDistanceFactor().containsKey(mode)){
-            beelineDistanceFactor = this.inputDistanceDistribution.getModeToBeelineDistanceFactor().get(mode);
-        } else{
-            LOG.warn("The beeline distance factor for mode "+mode+" is not given. Using 1.3");
-        }
-        double beelineDistance = beelineDistanceFactor *
-                NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
-
-        DistanceBin.DistanceRange distanceRange = DistanceDistributionUtils.getDistanceRange(beelineDistance, this.inputDistanceDistribution.getDistanceRanges(mode));
-        outputDistanceDistribution.addToDistribution(mode, distanceRange, +1);
+        DistanceBin.DistanceRange distanceRange = this.eventsToBeelinDistanceRange.handleEvent(event);
+        if (distanceRange==null) return; // i.e. this agent is excluded.
+        outputDistanceDistribution.addToDistribution(this.eventsToBeelinDistanceRange.getPersonToMode().get(event.getPersonId()), distanceRange, +1);
     }
 
     @Override
     public void handleEvent(PersonDepartureEvent event) {
-        if (agentFilter!=null && !agentFilter.includeAgent(event.getPersonId())) return; // if filtering and agent should not be included
+       this.eventsToBeelinDistanceRange.handleEvent(event);
+    }
 
-        this.personToOriginCoord.put(event.getPersonId(), network.getLinks().get(event.getLinkId()).getToNode().getCoord());
+    @Override
+    public void handleEvent(ActivityEndEvent event) {
+        this.eventsToBeelinDistanceRange.handleEvent(event);
     }
 
     @Override
     public void reset(int iteration) {
-        this.personToOriginCoord.clear();
+        this.eventsToBeelinDistanceRange.reset();
         this.outputDistanceDistribution = new DistanceDistribution();
     }
 
@@ -133,7 +96,6 @@ public class BeelineDistanceCollector implements PersonDepartureEventHandler, Pe
 
     @Override
     public void handleEvent(PersonStuckEvent event) {
-        LOG.warn("Stuck event: "+ event);
-        LOG.warn("This means, all trips are not included in the output distance distribution.");
+        this.eventsToBeelinDistanceRange.handleEvent(event);
     }
 }

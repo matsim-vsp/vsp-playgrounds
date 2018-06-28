@@ -19,13 +19,13 @@
 
 package playground.ikaddoura.analysis.modalSplitUserType;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.matsim.api.core.v01.Scenario;

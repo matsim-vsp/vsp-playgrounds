@@ -72,6 +72,9 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
+import analysis.TtTotalTravelTime;
+import analysis.cten.TtCommodityTravelTimeAnalyzer;
+import analysis.cten.TtWriteComAnalysis;
 import analysis.signals.TtQueueLengthAnalysisTool;
 import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
@@ -105,7 +108,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V1;
+	private final static NetworkType NETWORK_TYPE = NetworkType.BTU_NET;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -115,11 +118,12 @@ public class TtRunCottbusSimulation {
 		V1_4, // 6 more links merged than in V1_3 (see mergedLinksForV1-34.xls)
 		V2, // add missing highway part, add missing links, correct directions, add missing signal
 		V21, // add missing lanes
-		V3 // double flow capacities of all signalized links and lanes
+		V3, // double flow capacities of all signalized links and lanes
+		V4 // V1-4 plus: move link at 5-approach-intersection system 24; add missing signal and link at system 19
 	}
 	private final static boolean LONG_LANES = true;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MS;
+	private final static PopulationType POP_TYPE = PopulationType.BTU_POP_MATSIM_ROUTES;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -147,10 +151,11 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap1MSNetV1_4,
 		WoMines100itcap07MSNetV1_4,
 		WoMines100itcap05MSNetV1_4,
+		WoMines100itcap07MSNetV4,
 		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
 	}
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.NONE;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS_OPT_GREENSPLIT_18_05_04;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_OPT_OFFSETS, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -166,7 +171,8 @@ public class TtRunCottbusSimulation {
 		LAEMMER_DOUBLE_GROUPS, // laemmer with fixed signal groups, where signals can be included more than once, i.e. alternative groups can be modeled
 		LAEMMER_DOUBLE_GROUPS_SYS17, // as above but two additional possible groups at system 17, such that opposing traffic can have green at the same time
 		LAEMMER_DOUBLE_GROUPS_14GREEN, // the same as LAEMMER_DOUBLE_GROUPS but without signal 1107 at system 14 (i.e. all green)
-		MS_IDEAL // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
+		MS_IDEAL, // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
+		MS_OPT_GREENSPLIT_18_05_04 // optimized greensplits based on model specification from 2018-05-04
 	}
 	
 	// defines which kind of pricing should be used
@@ -182,9 +188,10 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ewgt/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ctenOpt/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
-	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+//	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-05-4_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
@@ -334,6 +341,12 @@ public class TtRunCottbusSimulation {
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v3.xml.gz");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v3.xml");
 			break;
+		case V4:
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v4.xml");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v1-4.xml");
+			break;
+		default:
+			throw new RuntimeException("Network type not specified!");
 		}
 		if (SIGNAL_TYPE.toString().startsWith("ALL") && !SIGNAL_TYPE.toString().contains("MS")){
 			// if signal type 'All...' without 'MS' is used, lanes are defined later in 'prepareScenario'
@@ -345,7 +358,8 @@ public class TtRunCottbusSimulation {
 			config.plans().setInputFile(BTU_BASE_DIR + "trip_plans_from_morning_peak_ks_commodities_minFlow50.0.xml");
 			break;
 		case BTU_POP_BTU_ROUTES:
-			config.plans().setInputFile(BTU_BASE_DIR + "routeComparison/2015-03-10_sameEndTimes_ksOptRouteChoice_paths.xml");
+//			config.plans().setInputFile(BTU_BASE_DIR + "routeComparison/2015-03-10_sameEndTimes_ksOptRouteChoice_paths.xml");
+			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-05-17_sameEndTimes_ksOptTripPlans_btu_solution.xml");
 			break;
 		case WMines:
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse/commuter_population_wgs84_utm33n_car_only.xml.gz");
@@ -421,6 +435,9 @@ public class TtRunCottbusSimulation {
 		case WoMines100itcap05MSNetV1_4:
 			config.plans().setInputFile("../../runs-svn/cottbus/ewgt/2018-04-15-19-16-28_v1-4_MS_100it_BaseCase_cap05/1000.output_plans.xml.gz");
 			break;
+		case WoMines100itcap07MSNetV4:
+			config.plans().setInputFile("../../runs-svn/cottbus/createNewBC/2018-04-27-14-50-32_100it_netV4_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz");
+			break;
 		case NicoOutputPlans:
 			config.plans().setInputFile("../../runs-svn/cottbus/NicoMA/OutputFixedLongLanes/output_plans.xml.gz");
 			break;
@@ -434,7 +451,7 @@ public class TtRunCottbusSimulation {
 			}
 			break;
 		default:
-			break;
+			throw new RuntimeException("Population type not specified!");
 		}
 		// // pt scenario
 		// config.network().setInputFile(INPUT_BASE_DIR + "Cottbus-pt/INPUT_mod/public/input/network_improved.xml");
@@ -443,7 +460,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(0);
+		config.controler().setLastIteration(100);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
@@ -464,7 +481,8 @@ public class TtRunCottbusSimulation {
 				break;
 			case BTU_NET:
 //				signalConfigGroup.setSignalSystemFile(BTU_BASE_DIR + "output_signal_systems_v2.0.xml.gz"); // gives SAXParseException: Content is not allowed in prolog
-				signalConfigGroup.setSignalSystemFile(BTU_BASE_DIR + "signal_systems_no_13_btuNet.xml"); // this is the same file as output_signal_systems_v2.0.xml.gz but unpacked
+//				signalConfigGroup.setSignalSystemFile(BTU_BASE_DIR + "signal_systems_no_13_btuNet.xml"); // this is the same file as output_signal_systems_v2.0.xml.gz but unpacked
+				signalConfigGroup.setSignalSystemFile(BTU_BASE_DIR + "output_signal_systems_v2.0.xml");
 				break;
 			case V2:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v2.xml");
@@ -473,12 +491,19 @@ public class TtRunCottbusSimulation {
 			case V3:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v2.1.xml");
 				break;
+			case V4:
+				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4.xml");
+				break;
 			default:
 				throw new RuntimeException("Network type not specified!");
 			}			
 			// set signal group
-			if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+			if (NETWORK_TYPE.toString().startsWith("V1")) {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13.xml");
+			} else if (NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+				signalConfigGroup.setSignalGroupsFile(BTU_BASE_DIR + "output_signal_groups_v2.0.xml");
+			} else if (NETWORK_TYPE.toString().startsWith("V4")){
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v4.xml");
 			} else {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v2.xml");
 			}
@@ -491,8 +516,10 @@ public class TtRunCottbusSimulation {
 			case ALL_MS_INSIDE_ENVELOPE_REST_GREEN: // additional signal systems will be added later
 			case ALL_MS_AS_DOWNSTREAM_INSIDE_ENVELOPE_REST_GREEN: // will be changed to downstream later; additional signal systems will be added later
 			case ALL_DOWNSTREAM_INSIDE_ENVELOPE_BASIS_MS: // additional signal systems will be added later
-				if (NETWORK_TYPE.toString().startsWith("V1") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+				if (NETWORK_TYPE.toString().startsWith("V1")) {
 					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13.xml");
+				} else if (NETWORK_TYPE.toString().startsWith("V4") || NETWORK_TYPE.equals(NetworkType.BTU_NET)){
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v4.xml");
 				} else {
 					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v2.xml");
 				}
@@ -521,35 +548,79 @@ public class TtRunCottbusSimulation {
 				}
 				break;
 			case LAEMMER_DOUBLE_GROUPS:
-				// overwrite signal groups
-				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases.xml");
-				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				if (NETWORK_TYPE.toString().startsWith("V1") ){
+					// overwrite signal groups
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases.xml");
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
 				break;
 			case LAEMMER_DOUBLE_GROUPS_14GREEN:
-				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases_14allGreen1107.xml");
-				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				if (NETWORK_TYPE.toString().startsWith("V1")) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases_14allGreen1107.xml");
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
 				break;
 			case LAEMMER_DOUBLE_GROUPS_SYS17:
-				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases17.xml");
-				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				if (NETWORK_TYPE.toString().startsWith("V1")) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer_doublePhases17.xml");
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
 				break;
 			case LAEMMER_NICO_GROUPS:
-//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases.xml");
-//				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases_6.xml");
-				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer.xml");
-				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
-				break;	
+				if (NETWORK_TYPE.toString().startsWith("V1")) {
+					// signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases.xml");
+					// signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer2phases_6.xml");
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmer.xml");
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
 			case LAEMMER_NICO_GROUPS_14GREEN:
-				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14allGreen1107.xml");
-				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
-				break;	
+				if (NETWORK_TYPE.toString().startsWith("V1")) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14allGreen1107.xml");
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
 			case LAEMMER_NICO_GROUPS_14RE:
-				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases.xml");
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				if (NETWORK_TYPE.toString().startsWith("V1")) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases.xml");
+				} else if (NETWORK_TYPE.toString().startsWith("V4")) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases_v4.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
 				break;
 			case MS_IDEAL:
-				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_idealized.xml");
+				if (NETWORK_TYPE.toString().startsWith("V1")) {
+					signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_idealized.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
 				break;
+			case MS_OPT_GREENSPLIT_18_05_04:
+				if (NETWORK_TYPE.toString().startsWith("V4") || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+//					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_btu_solution.xml");
+					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_btu_solution_inclGreenEnd.xml");
+				} else {
+					throw new UnsupportedOperationException("green split optimization from 2018-05-04 was done for network type V4 - can not be run with another network version now");
+				}
+			}
+			
+			// add data about conflicting directions
+			if (NETWORK_TYPE.equals(NetworkType.V4)) {
+				signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR + "conflictData_fromBtu2018-04-25_basedOnMSconflicts_v4.xml");
+			} else {
+				signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR + "conflictData_fromBtu2018-04-25_basedOnMSconflicts.xml");				
 			}
 		}
 		if (PRICING_TYPE.toString().startsWith("CORDON_")){
@@ -564,10 +635,10 @@ public class TtRunCottbusSimulation {
 		
 		// set brain exp beta
 //		TODO
-		config.planCalcScore().setBrainExpBeta( 2 );
+//		config.planCalcScore().setBrainExpBeta( 2 );
 //		config.planCalcScore().setBrainExpBeta( 5 );
 //		config.planCalcScore().setBrainExpBeta( 10 );
-//		config.planCalcScore().setBrainExpBeta( 20 );
+		config.planCalcScore().setBrainExpBeta( 20 );
 
 		// choose between link to link and node to node routing
 		// (only has effect if lanes are used)
@@ -577,9 +648,9 @@ public class TtRunCottbusSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
+//		config.travelTimeCalculator().setTraveltimeBinSize( 900 );
 //		config.travelTimeCalculator().setTraveltimeBinSize( 300 );
-//		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
+		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
 		// TODO
 
 		config.travelTimeCalculator().setTravelTimeCalculatorType(TravelTimeCalculatorType.TravelTimeCalculatorHashMap.toString());
@@ -982,6 +1053,12 @@ public class TtRunCottbusSimulation {
 					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
 					this.addControlerListenerBinding().to(TtQueueLengthAnalysisTool.class);
 					this.addMobsimListenerBinding().to(TtQueueLengthAnalysisTool.class);
+				}
+				
+				if (POP_TYPE.toString().startsWith("BTU_POP")) {
+					// bind commodity-based analysis
+					this.bind(TtCommodityTravelTimeAnalyzer.class);
+					this.addControlerListenerBinding().to(TtWriteComAnalysis.class);
 				}
 			}
 		});

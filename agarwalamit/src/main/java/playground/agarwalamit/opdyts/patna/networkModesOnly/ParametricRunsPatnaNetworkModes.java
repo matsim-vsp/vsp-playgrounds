@@ -39,8 +39,8 @@ public class ParametricRunsPatnaNetworkModes {
         StringBuilder buffer = new StringBuilder();
         PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
 
-        String ascStyles [] = {ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.diagonal_randomVariation.toString(),
-                ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.diagonal_fixedVariation.toString()};
+        String ascStyles [] = {ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.grid_randomVariation.toString(),
+                ASCRandomizerStyle.axial_fixedVariation.toString(),ASCRandomizerStyle.grid_fixedVariation.toString()};
 
         double [] stepSizes = {0.5, 0.75, 1.0};
         Integer [] convIterations = {600};

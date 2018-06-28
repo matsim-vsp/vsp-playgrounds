@@ -39,7 +39,9 @@ public final class KNTaxiBus {
 		drtConfig.setMaxTravelTimeBeta(3600.);
 		
 		config.checkConsistency();
-		Scenario scenario = ScenarioUtils.loadScenario(config) ;
+
+		Scenario scenario = DrtControlerCreator.createScenario(config) ;
+		ScenarioUtils.loadScenario(config);
 		
 		for ( Person person : scenario.getPopulation().getPersons().values() ) {
 			for ( PlanElement pe : person.getSelectedPlan().getPlanElements() ) {

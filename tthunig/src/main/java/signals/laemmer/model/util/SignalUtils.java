@@ -38,13 +38,13 @@ public class SignalUtils {
 	 * @param signalGroups list with signalGroups to permutate 
 	 * @param length maximum length of permutations
 	 * @return list of lists with all possible permutations, may content duplicates and empty lists
- 	 * @author pschade
+	 * @author pschade
 	 *
 	 */
 	@Deprecated /** deprecated since runtime is unacceptable bad **/
 	private static ArrayList<ArrayList<SignalGroup>> permutate(ArrayList<SignalGroup> signalGroups, int length) {
 		ArrayList<ArrayList<SignalGroup>> out = new ArrayList<>();
-		
+
 		//Abbruchbedingung, wenn nur noch Länge 1 alle erzeugen und zurückgeben
 		if (length == 1) {
 			for (SignalGroup e : signalGroups) {
@@ -52,7 +52,7 @@ public class SignalUtils {
 			}
 			return out;
 		}
-		
+
 		//Wenn (Elementanzahl = Länge) eine Kombination erzeugen und hinzufügen
 
 		if (length == signalGroups.size()) {
@@ -62,7 +62,7 @@ public class SignalUtils {
 			}
 			out.add(tmp);
 		}
-		
+
 		//wenn (Elementanzahl > Länge) allo kombinationen hinzufügen, bei denen jeweils 1 übersprungen wird
 		if (length < signalGroups.size()) {	
 			for (int elementIdxToSkip = 0; elementIdxToSkip < signalGroups.size(); elementIdxToSkip++) {
@@ -82,49 +82,49 @@ public class SignalUtils {
 			ArrayList<ArrayList<SignalGroup>> newCombinations = permutate(subList, length-1);
 			for (ArrayList<SignalGroup> combination : newCombinations) {
 				if (!tmpCombinations.contains(combination))
-						tmpCombinations.add(combination);
+					tmpCombinations.add(combination);
 			}
 		}
 		out.addAll(tmpCombinations);
 		return out;
 	}
-	
+
 	private static ArrayList<ArrayList<SignalGroup>> createAllValidSignalGroupsCombinations(ArrayList<SignalGroup> signalGroups, Network network, Lanes lanes) {
-		
+
 		//first create a combination with only each single SignalGroup
 		Set<Entry<ArrayList<SignalGroup>, Integer>> createdCombinations = new LinkedHashSet<>();
-		
+
 		for (int idx = 0; idx < signalGroups.size(); idx++) {
 			ArrayList<SignalGroup> newCombination = new ArrayList<>(signalGroups.subList(idx, idx+1));
 			createdCombinations.add(new AbstractMap.SimpleEntry<>(newCombination, idx));
 		}
 		//now iterate over all known combinations and over all signalGroups and create know combination from known combination and signalGroup, if maxIdx of known combination < signalGroupIdx
 		//store them, if they are not illegal
-		
-		
+
+
 		for (int newSgIdx = 1; newSgIdx < signalGroups.size(); newSgIdx++) {
 			Set<Entry<ArrayList<SignalGroup>, Integer>> newCombinations = new LinkedHashSet<>();
 			knownCombinationsLoop:
-			for (Entry<ArrayList<SignalGroup>, Integer> knownCombination : createdCombinations) {
-				//to prevent doubled combinations only number-higher signalGroups will be added. E.g., if signalGroup with idx 1 exist, we will find combination with idx 8 (1-8). We dont need to check for combination 8-1, since its the same.
-				if (newSgIdx <= knownCombination.getValue())
-					continue;
-				//now check, if an illegal combination will occur, if another Sg are added.
-				SignalGroup newSg = signalGroups.get(newSgIdx);
-				for (SignalGroup knownSg : knownCombination.getKey()) {
-					//if one combination in this known combination, we cannot add a new signalGroup with current Idx so this known combination is skipped
-					if (!isConflictFreeCombination(newSg, knownSg, network, lanes)) {
-						continue knownCombinationsLoop;
+				for (Entry<ArrayList<SignalGroup>, Integer> knownCombination : createdCombinations) {
+					//to prevent doubled combinations only number-higher signalGroups will be added. E.g., if signalGroup with idx 1 exist, we will find combination with idx 8 (1-8). We dont need to check for combination 8-1, since its the same.
+					if (newSgIdx <= knownCombination.getValue())
+						continue;
+					//now check, if an illegal combination will occur, if another Sg are added.
+					SignalGroup newSg = signalGroups.get(newSgIdx);
+					for (SignalGroup knownSg : knownCombination.getKey()) {
+						//if one combination in this known combination, we cannot add a new signalGroup with current Idx so this known combination is skipped
+						if (!isConflictFreeCombination(newSg, knownSg, network, lanes)) {
+							continue knownCombinationsLoop;
+						}
 					}
+					//if the known combination is not skipped above we will keep the new combinations for adding them to the created combinations
+					ArrayList<SignalGroup> newCombination = new ArrayList<>(knownCombination.getKey());
+					newCombination.add(newSg);
+					newCombinations.add(new AbstractMap.SimpleEntry<>(newCombination, newSgIdx));
 				}
-				//if the known combination is not skipped above we will keep the new combinations for adding them to the created combinations
-				ArrayList<SignalGroup> newCombination = new ArrayList<>(knownCombination.getKey());
-				newCombination.add(newSg);
-				newCombinations.add(new AbstractMap.SimpleEntry<>(newCombination, newSgIdx));
-			}
 			createdCombinations.addAll(newCombinations);
 		}
-		
+
 		ArrayList<ArrayList<SignalGroup>> returnList = new ArrayList<ArrayList<SignalGroup>>();
 		for (Entry<ArrayList<SignalGroup>, Integer> e : createdCombinations) {
 			returnList.add(e.getKey());
@@ -132,7 +132,7 @@ public class SignalUtils {
 		return returnList;
 	}
 
-	
+
 	/**
 	 * Removes duplicate combinations of signalGroups
 	 * this should be moved to permutate(…) (with parameter?)
@@ -158,38 +158,38 @@ public class SignalUtils {
 		}
 		return clearedPermutes;
 	}
-	
-    public static ArrayList<SignalPhase> createSignalPhasesFromSignalGroups(SignalSystem system, Network network, Lanes lanes) {
+
+	public static ArrayList<SignalPhase> createSignalPhasesFromSignalGroups(SignalSystem system, Network network, Lanes lanes) {
 		ArrayList<SignalGroup> signalGroups = new ArrayList<>(system.getSignalGroups().values());
 		//ArrayList<ArrayList<SignalGroup>> allSignalGroupPerms = removeDuplicates(permutate(signalGroups, signalGroups.size()));
 		ArrayList<ArrayList<SignalGroup>> allSignalGroupPerms = removeDuplicateCombinations(createAllValidSignalGroupsCombinations(signalGroups, network, lanes));
 		ArrayList<SignalPhase> validPhases = new ArrayList<>();
 
-		System.out.println("size of siggroups before illegal; "+allSignalGroupPerms.size());
-		
+		//System.out.println("size of siggroups before illegal; "+allSignalGroupPerms.size());
+
 		//check for illegal combinations
 		ArrayList<ArrayList<SignalGroup>> illegalSignalGroups = new ArrayList<>();
 		for (ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
 			//check every signalGroup in this combination for illegal flows
 			outerSgLoop:
-			for (SignalGroup outerSg : sgs) {
-				for (SignalGroup innerSg : sgs) {
-					if(!isConflictFreeCombination(outerSg, innerSg, network, lanes)) {
-						illegalSignalGroups.add(sgs);
-						break outerSgLoop;
+				for (SignalGroup outerSg : sgs) {
+					for (SignalGroup innerSg : sgs) {
+						if(!isConflictFreeCombination(outerSg, innerSg, network, lanes)) {
+							illegalSignalGroups.add(sgs);
+							break outerSgLoop;
+						}
 					}
 				}
-			}
 		}
-		System.out.println("removing "+illegalSignalGroups.size()+" illegal ones");
+		//System.out.println("removing "+illegalSignalGroups.size()+" illegal ones");
 		allSignalGroupPerms.removeAll(illegalSignalGroups);
-		
-		System.out.println("size after removing illegals: "+allSignalGroupPerms.size());
-		System.out.print("Phases: ");
+
+		//		System.out.println("size after removing illegals: "+allSignalGroupPerms.size());
+		//		System.out.print("Phases: ");
 		for(ArrayList<SignalGroup> sgs : allSignalGroupPerms) {
 			SignalPhase newPhase = new SignalPhase();
 			for (SignalGroup sg : sgs) {
-				System.out.print(sg.getId()+", ");
+				//				System.out.print(sg.getId()+", ");
 				List<Id<Lane>> signalLanes = new LinkedList<>();
 				for (Signal s : sg.getSignals().values()) {
 					if (s.getLaneIds() != null) {
@@ -198,12 +198,12 @@ public class SignalUtils {
 				}
 				newPhase.addGreenSignalGroup(sg);
 			}
-			System.out.print("\n");
+			//			System.out.print("\n");
 			validPhases.add(newPhase);
 		}
 		return validPhases;
-		}
-	
+	}
+
 	public static boolean isConflictFreeCombination(SignalGroup firstSg, SignalGroup secondSg, Network network, Lanes lanes) {
 		// further tests can skipped after at least one illegal combination where found
 		for (Signal outerSignal : firstSg.getSignals().values()) {
@@ -260,7 +260,7 @@ public class SignalUtils {
 		}
 		return true;
 	}
-    
+
 	public static ArrayList<SignalPhase> removeSubPhases(ArrayList<SignalPhase> signalPhases) {
 		ArrayList<SignalPhase> phasesToRemove = new ArrayList<>();
 		for (SignalPhase signalPhase : signalPhases) {
@@ -273,7 +273,7 @@ public class SignalUtils {
 		signalPhases.removeAll(phasesToRemove);
 		return signalPhases;
 	}
-	
+
 	public static void writeSignaltoLanesAndLinksCombinationsToTempFile(Scenario scenario, Controler controler) throws IOException {
 		StringBuilder builder = new StringBuilder();
 		builder.append("SignalSystemId; SignalGroupId; SignalId; LinkId; LinkCapacity; LinkLaneCnt; LaneId; LaneCapacity; LaneCnt; toLinks; toLanes\n");
@@ -309,7 +309,7 @@ public class SignalUtils {
 		writer.append(builder.toString());
 		writer.close();
 	}
-	
+
 	/**
 	 * Estimates the number of minimal needed phases in a signalSystem. Will not return accurate results if:
 	 *  - if two links, but not opposite links, have seperate signaled left-tunring-lanes

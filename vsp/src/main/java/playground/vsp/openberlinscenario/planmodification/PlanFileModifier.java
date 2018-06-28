@@ -31,6 +31,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -39,6 +40,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.IdentityTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 
 /**
@@ -75,16 +78,25 @@ public class PlanFileModifier {
 //		String outputPlansFile = "../../upretoria/data/capetown/scenario_2017/population_32734.xml.gz";
 //		String inputPlansFile = "../../capetown/data/scenario_2017/population_32734.xml.gz";
 //		String outputPlansFile = "../../capetown/data/scenario_2017/population_32734_1pct.xml.gz";
-		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/502/plans1.xml.gz";
-		String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_6/population/plans_10000.xml.gz";
-//		double selectionProbability = 1.;
+		
+		
+		String inputPlansFile = "../../runs-svn/open_berlin_scenario/b5_22/b5_22.output_plans.xml.gz";
+		String outputPlansFile = "../../runs-svn/open_berlin_scenario/b5_22/b5_22.output_plans_no_links.xml.gz";
+		
+		
+//		String inputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/cemdap_input/502/plans1.xml.gz";
+//		String outputPlansFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_6/population/plans_10000.xml.gz";
 		double selectionProbability = 0.1;
-		boolean onlyTransferSelectedPlan = false;
+		boolean onlyTransferSelectedPlan = true;
+//		boolean onlyTransferSelectedPlan = false;
 		boolean considerHomeStayingAgents = true;
 		boolean includeNonSelectedStayHomePlans = true;
 		boolean onlyConsiderPeopleAlwaysGoingByCar = false;
-		int maxNumberOfAgentsConsidered = 10000;
-		boolean removeLinksAndRoutes = false;
+//		int maxNumberOfAgentsConsidered = 10000;
+		int maxNumberOfAgentsConsidered = 1000000;
+
+//		boolean removeLinksAndRoutes = false;
+		boolean removeLinksAndRoutes = true;
 //		String inputCRS = TransformationFactory.HARTEBEESTHOEK94_LO19;
 //		String outputCRS = "EPSG:32734";
 		String inputCRS = null;
