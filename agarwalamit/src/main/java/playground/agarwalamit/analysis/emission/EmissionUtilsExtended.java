@@ -36,17 +36,17 @@ import org.matsim.contrib.emissions.utils.EmissionUtils;
  * @author amit
  *
  */
-public class EmissionUtilsExtended extends EmissionUtils{
+public class EmissionUtilsExtended {
 
 	public  <T> Map<Id<T>, SortedMap<String, Double>> convertPerPersonColdEmissions2String (final Map<Id<T>, Map<ColdPollutant, Double>> coldEmiss) {
 		return coldEmiss.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey, e->convertColdPollutantMap2String(e.getValue())
+                Map.Entry::getKey, e->EmissionUtils.convertColdPollutantMap2String(e.getValue())
 		));
 	}
 
 	public  <T> Map<Id<T>, SortedMap<String, Double>> convertPerPersonWarmEmissions2String (final Map<Id<T>, Map<WarmPollutant, Double>> warmEmiss) {
 		return warmEmiss.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey, e -> convertWarmPollutantMap2String(e.getValue())
+                Map.Entry::getKey, e -> EmissionUtils.convertWarmPollutantMap2String(e.getValue())
 		));
 	}
 
@@ -86,23 +86,23 @@ public class EmissionUtilsExtended extends EmissionUtils{
 		return totalWarmEmissions;
 	}
 
-	public  Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkColdEmissions2String (final Network net, final Map<Double,Map<Id<Link>, Map<ColdPollutant, Double>>> coldEmiss) {
+	public static Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkColdEmissions2String(final Network net, final Map<Double, Map<Id<Link>, Map<ColdPollutant, Double>>> coldEmiss) {
 		Map<Double, Map<Id<Link>, SortedMap<String, Double>>> outColdEmiss = new HashMap<>();
 		for(double t:coldEmiss.keySet()) {
 			Map<Id<Link>, SortedMap<String, Double>> tempMap = coldEmiss.get(t).entrySet().stream().collect(Collectors
-									.toMap(Map.Entry::getKey, e -> convertColdPollutantMap2String(e.getValue())));
-			outColdEmiss.put(t,setNonCalculatedEmissionsForNetwork(net, tempMap));
+									.toMap(Map.Entry::getKey, e -> EmissionUtils.convertColdPollutantMap2String(e.getValue())));
+			outColdEmiss.put(t,EmissionUtils.setNonCalculatedEmissionsForNetwork(net, tempMap));
 		}
 		return outColdEmiss;
 	}
 
-	public  Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkWarmEmissions2String (final Network net, final Map<Double,Map<Id<Link>, Map<WarmPollutant, Double>>> warmEmiss) {
+	public static Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkWarmEmissions2String(final Network net, final Map<Double, Map<Id<Link>, Map<WarmPollutant, Double>>> warmEmiss) {
 		Map<Double, Map<Id<Link>, SortedMap<String, Double>>> outWarmEmiss = new HashMap<>();
 		for(double t:warmEmiss.keySet()) {
 			Map<Id<Link>, SortedMap<String, Double>> tempMap = warmEmiss.get(t).entrySet().stream().collect(Collectors.toMap(
-                    Map.Entry::getKey, e -> convertWarmPollutantMap2String(e.getValue())
+                    Map.Entry::getKey, e -> EmissionUtils.convertWarmPollutantMap2String(e.getValue())
 			));
-			outWarmEmiss.put(t, setNonCalculatedEmissionsForNetwork(net, tempMap));
+			outWarmEmiss.put(t, EmissionUtils.setNonCalculatedEmissionsForNetwork(net, tempMap));
 		}
 		return outWarmEmiss;
 	}
