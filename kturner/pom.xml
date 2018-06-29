@@ -37,12 +37,6 @@
 		</dependency>
 		
 		<dependency>
-		    <groupId>com.graphhopper</groupId>
-		    <artifactId>jsprit-examples</artifactId>
-		    <version>1.7.2</version>
-		</dependency>
-		
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.4</version>
