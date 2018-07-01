@@ -2,10 +2,10 @@ package signals.laemmer.model;
 
 //import com.sun.istack.internal.NotNull;
 //import com.sun.istack.internal.Nullable;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.lanes.data.Lane;
-
+import org.matsim.lanes.Lane;
 import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
 import signals.laemmer.model.stabilizationStrategies.CombineSimilarRegulationTime;
 import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;

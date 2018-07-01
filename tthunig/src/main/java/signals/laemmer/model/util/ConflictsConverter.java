@@ -1,24 +1,23 @@
 package signals.laemmer.model.util;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.lanes.data.Lane;
-import org.matsim.utils.objectattributes.AttributeConverter;
-import org.spark_project.guava.reflect.TypeToken;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.google.inject.util.Types;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.lanes.Lane;
+import org.matsim.utils.objectattributes.AttributeConverter;
+import org.spark_project.guava.reflect.TypeToken;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class ConflictsConverter implements AttributeConverter<signals.laemmer.model.util.Conflicts> {
 

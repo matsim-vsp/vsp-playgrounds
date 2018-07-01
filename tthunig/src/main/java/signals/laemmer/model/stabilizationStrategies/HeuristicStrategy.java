@@ -1,19 +1,18 @@
 package signals.laemmer.model.stabilizationStrategies;
 
-import java.util.List;
-import java.util.Queue;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.lanes.data.Lanes;
-
+import org.matsim.lanes.Lanes;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
 import signals.laemmer.model.SignalPhase;
 import signals.laemmer.model.util.SignalUtils;
+
+import java.util.List;
+import java.util.Queue;
 
 public class HeuristicStrategy extends AbstractStabilizationStrategy {
 

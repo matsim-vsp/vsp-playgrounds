@@ -23,19 +23,37 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.*;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkFactory;
+import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
-import org.matsim.contrib.signals.data.signalgroups.v20.*;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.contrib.signals.model.*;
+import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.model.Signal;
+import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.model.SignalPlan;
+import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.*;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesFactory;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.LanesWriter;
 
 /**
  * Class to create the parallel scenario (former figure9 scenario) with one direction.
@@ -476,10 +494,10 @@ public class TtCreateParallelScenario {
 				idL57, systems, groups);
 	}
 
-	private void createSignalSystem4Lights(Id<SignalSystem> signalSystemId,
-			Id<Link> linkWithLanesId, Id<Lane> laneId1, Id<Lane> laneId2, 
-			Id<Link> linkWoLanesId1, Id<Link> linkWoLanesId2,
-			SignalSystemsData systems, SignalGroupsData groups) {
+	private void createSignalSystem4Lights( Id<SignalSystem> signalSystemId,
+							    Id<Link> linkWithLanesId, Id<Lane> laneId1, Id<Lane> laneId2,
+							    Id<Link> linkWoLanesId1, Id<Link> linkWoLanesId2,
+							    SignalSystemsData systems, SignalGroupsData groups) {
 		
 		SignalSystemData sys = systems.getFactory().createSignalSystemData(signalSystemId);
 		systems.addSignalSystemData(sys);

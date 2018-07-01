@@ -19,12 +19,7 @@
  * *********************************************************************** */
 package signals.gershenson;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.LinkedList;
-
+import com.google.inject.Provider;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -38,13 +33,15 @@ import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.LanesToLinkAssignment;
-
-import com.google.inject.Provider;
-
-import signals.laemmer.model.LaemmerConfig;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.LanesToLinkAssignment;
 import signals.sensor.LinkSensorManager;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
 
 /**

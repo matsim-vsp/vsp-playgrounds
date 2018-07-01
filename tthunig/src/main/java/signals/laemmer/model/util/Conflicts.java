@@ -1,13 +1,13 @@
 package signals.laemmer.model.util;
 
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.lanes.Lane;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.lanes.data.Lane;
 
 public class Conflicts {
 	static org.apache.log4j.Logger log = org.apache.log4j.LogManager.getLogger(Conflicts.class);
