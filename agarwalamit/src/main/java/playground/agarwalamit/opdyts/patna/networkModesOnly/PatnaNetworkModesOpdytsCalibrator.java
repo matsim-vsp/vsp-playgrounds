@@ -73,6 +73,8 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		double selfTuningWt = 1.0;
 		int warmUpItrs = 5;
 
+		boolean updateStepSize = true;
+
 		if ( args.length>0 ) {
 			configFile = args[0];
 			OUT_DIR = args[1];
@@ -85,6 +87,8 @@ public class PatnaNetworkModesOpdytsCalibrator {
 			selfTuningWt = Double.valueOf(args[6]);
 			warmUpItrs = Integer.valueOf(args[7]);
 			useConfigRandomSeed = Boolean.valueOf(args[8]);
+
+			updateStepSize = Boolean.valueOf(args[9]);
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/inputs/config_networkModesOnly.xml";
 			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/output/testCalib";
@@ -157,6 +161,9 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
 				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, modes2consider, ascRandomizeStyle);
+		if (updateStepSize) {
+			((ModeChoiceRandomizer)decisionVariableRandomizer).updateStepSizeEveryIteration( simulator.getOpdytsIterationWrapper() );
+		}
 
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, PATNA_1_PCT);
