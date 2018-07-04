@@ -57,7 +57,7 @@ public class BeelineDistanceCollector implements ActivityEndEventHandler, Activi
                                  .forEach(outputDistanceDistribution::setModeToScalingFactor);
     }
 
-    // following is useful is not using Guice (i.e. simple events analysis)
+    // following is useful if not using Guice (i.e. simple events analysis)
     public BeelineDistanceCollector(
             Scenario scenario,
             DistanceDistribution inputDistanceDistribution,
