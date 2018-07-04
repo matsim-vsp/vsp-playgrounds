@@ -34,6 +34,11 @@ public class ResidenceFilterReader {
         population = scenario.getPopulation();
     }
 
+    public Population getWholePopulation() {
+
+        return population;
+    }
+
     public Population filter(String filterValue) {
 
         Population filteredPopulation = PopulationUtils.createPopulation(ConfigUtils.createConfig());
