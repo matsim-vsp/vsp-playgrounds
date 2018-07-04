@@ -150,13 +150,13 @@ public final class LinkSensor {
 					double avgVehPerSecond = timeBuckets.stream().mapToInt(AtomicInteger::intValue).sum()/(timeBuckets.size() * this.timeBucketCollectionDuration);
 					//if there wasn't any vehicles in the lookback-time but now vehicles are measured, the number of vehicles is expected on the currend, not finished bucket.
 					if (avgVehPerSecond == 0.0 && currentBucket != null && currentBucket.get() > 0) {
-						return currentBucket.get()/(now-currentBucketStartTime);
+						return currentBucket.get()/((now-currentBucketStartTime)+1);
 					} else {
 						return avgVehPerSecond;
 					}
 				} else if(timeBuckets.size() == 0 && currentBucket != null && currentBucket.get() > 0) {
 					//if there wasn't any vehicles since now but now vehicles are measured, the number of vehicles is expected on the currend, not finished bucket.
-					return currentBucket.get()/(now-currentBucketStartTime);
+					return currentBucket.get()/((now-currentBucketStartTime)+1);
 				}
 				else {
 					return 0.0;

@@ -54,17 +54,24 @@ public class CalculateAccessibilityDifference {
 //		String directoryRootPolicy = "/Users/dominik/Workspace/matsim/contribs/integration/test/output/org/matsim/integration/daily/accessibility/AccessibilityComputationNairobiTest_minibus_pt-only/runAccessibilityComputation/";
 		
 //		String directoryRoot = "../../runs-svn/patnaIndia/run108/jointDemand/policies/0.15pcu/";
-//		String directoryRootBase = directoryRoot + "BT-b/accessibilities_50_-5.25-0.0/";
-//		String directoryRootPolicy = directoryRoot + "BT-mb/accessibilities_50_-5.25-0.0/";
-//		String identifier = "BT-b-BT-mb_50_-5.25-0.0/";
+//		String directoryRootBase = directoryRoot + "accessibilities/BT-mb/50_1.0-1.7/";
+//		String directoryRootPolicy = directoryRoot + "accessibilities/BT-b/50_1.0-1.7/";
+//		String identifier = "accessibilities/BT-b_BT-mb_50/";
 		
-		String directoryRoot = "../../upretoria/data/nmb/";
-		String directoryRootBase = directoryRoot + "output_1000_ptnw_6/";
-		String directoryRootPolicy = directoryRoot + "output_1000_ptnw_6_motherwell_rail/";
-		String identifier = "motherwell-rail-base/";
+		String directoryRoot = "../../shared-svn/projects/accessibility_berlin/output/v3/";
+//		String directoryRootBase = directoryRoot + "500_pt-called-car_edu_old/";
+		String directoryRootBase = directoryRoot + "500_pt-called-car_edu_old/";
+		String directoryRootPolicy = directoryRoot + "500_at_edu/";
+		String identifier = "500_at-pt_edu/";
+		
+//		String directoryRoot = "../../upretoria/data/nmb/";
+//		String directoryRootBase = directoryRoot + "output_1000_ptnw_6/";
+//		String directoryRootPolicy = directoryRoot + "output_1000_ptnw_6_motherwell_rail/";
+//		String identifier = "motherwell-rail-base/";
 		
 //		String directoryRoot = "../../../shared-svn/projects/maxess/data/nmb/output/17compRestricted500/";
 		String activityType = FacilityTypes.EDUCATION;
+//		String activityType = "s";
 //		String activityType = FacilityTypes.LEISURE;
 //		String activityType = FacilityTypes.SHOPPING;
 //		String activityType = FacilityTypes.OTHER;

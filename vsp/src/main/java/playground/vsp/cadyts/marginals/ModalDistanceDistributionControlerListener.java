@@ -21,7 +21,6 @@ package playground.vsp.cadyts.marginals;
 
 import java.io.BufferedWriter;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -34,6 +33,7 @@ import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.utils.io.IOUtils;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
+import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils.DistanceDistributionFileLabels;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
 
@@ -129,7 +129,7 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
             writer.newLine();
 
 
-            for (SortedMap.Entry<ModalDistanceBinIdentifier, DistanceBin> entry : getSortedMap(averages).entrySet()) {
+            for (SortedMap.Entry<ModalDistanceBinIdentifier, DistanceBin> entry : DistanceDistributionUtils.getSortedMap(averages).entrySet()) {
                 writer.write(
                         entry.getKey().getMode() + "\t"
                                 + entry.getKey().getDistanceRange().getLowerLimit() + "\t"
@@ -175,14 +175,5 @@ public class ModalDistanceDistributionControlerListener implements StartupListen
         this.iterationsUsed = 0;
         this.stats.getModalBinToDistanceBin()
                   .forEach((key, value) -> value.addToCount( - value.getCount()));
-    }
-
-    //technically, following can be applied directly in DistanceDistribution, however, ordering is imp here only.
-    private SortedMap<ModalDistanceBinIdentifier, DistanceBin> getSortedMap(DistanceDistribution distanceDistribution) {
-        SortedMap<ModalDistanceBinIdentifier, DistanceBin> sortedMap = new TreeMap<>();
-        distanceDistribution.getModalBinToDistanceBin()
-                            .forEach((key, value) -> sortedMap.put(distanceDistribution.getModalBins().get(key),
-                                    value));
-        return sortedMap;
     }
 }

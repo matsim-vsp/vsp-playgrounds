@@ -60,8 +60,8 @@ public class ModeChoiceRandomizerTest {
         Object[] [] ascRandomizingStyples = new Object [] [] {
                 { ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation},
                 {ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation},
-                {ModeChoiceRandomizer.ASCRandomizerStyle.diagonal_fixedVariation},
-                {ModeChoiceRandomizer.ASCRandomizerStyle.diagonal_randomVariation}
+                {ModeChoiceRandomizer.ASCRandomizerStyle.grid_fixedVariation},
+                {ModeChoiceRandomizer.ASCRandomizerStyle.grid_randomVariation}
         };
         return Arrays.asList(ascRandomizingStyples);
     }
@@ -112,13 +112,13 @@ public class ModeChoiceRandomizerTest {
             case axial_randomVariation:
                 Assert.assertEquals("Wrong number of new decision variables", (this.consideredModes.size()-1)*2, result.size(), MatsimTestUtils.EPSILON);
                 break;
-            case diagonal_randomVariation:
+            case grid_randomVariation:
                 Assert.assertEquals("Wrong number of new decision variables", Math.pow(2,this.consideredModes.size()-1), result.size(), MatsimTestUtils.EPSILON);
                 break;
             case axial_fixedVariation:
                 Assert.assertEquals("Wrong number of new decision variables", (this.consideredModes.size()-1)*2, result.size(), MatsimTestUtils.EPSILON);
                 break;
-            case diagonal_fixedVariation:
+            case grid_fixedVariation:
                 Assert.assertEquals("Wrong number of new decision variables", Math.pow(2,this.consideredModes.size()-1), result.size(), MatsimTestUtils.EPSILON);
                 break;
         }
@@ -154,8 +154,8 @@ public class ModeChoiceRandomizerTest {
             case axial_fixedVariation:
                 variations = getAxialVariations(randomVariation);
                 break;
-            case diagonal_randomVariation:
-            case diagonal_fixedVariation:
+            case grid_randomVariation:
+            case grid_fixedVariation:
                 variations = getDiagonalVariations(randomVariation);
                 break;
         }

@@ -14,7 +14,7 @@ import org.matsim.lanes.data.Lane;
 import org.matsim.lanes.data.Lanes;
 
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerLane;
+import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
 
 public class MaxLaneCountStrategy extends AbstractStabilizationStrategy {
@@ -24,7 +24,7 @@ public class MaxLaneCountStrategy extends AbstractStabilizationStrategy {
 	}
 
 	@Override
-	public LaemmerPhase determinePhase(Queue<LaemmerLane> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug) {
+	public LaemmerPhase determinePhase(Queue<LaemmerApproach> lanesForStabilization, List<LaemmerPhase> laemmerPhases, boolean debug) {
 		LaemmerPhase max = null;
 		Map<LaemmerPhase, java.lang.Integer> stabilizationCandidatePhases = new HashMap<>();			
 //		Stream<LaemmerPhase> candidatePhases = laemmerPhases.stream().sequential()
@@ -43,7 +43,7 @@ public class MaxLaneCountStrategy extends AbstractStabilizationStrategy {
 			//Phase get one scorepoint for each lane they set green
 			int selectionScore = candPhase.getPhase().getNumberOfGreenLanes();
 			for (Entry<Id<Link>, List<Id<Lane>>>  lanesToLink : candPhase.getPhase().getGreenLanesToLinks().entrySet())
-				for (LaemmerLane stabilizationLaneCandidate : lanesForStabilization) {
+				for (LaemmerApproach stabilizationLaneCandidate : lanesForStabilization) {
 					//TODO probabry nullcheck for lanesToLink.getValue() is needed, but unclear, what to do, is stabilizationLaneCandidate is not null but signalgroups lanes are
 					if (stabilizationLaneCandidate.getLink().getId().equals(lanesToLink.getKey()) &&
 							(stabilizationLaneCandidate.getLane() == null || lanesToLink.getValue().contains(stabilizationLaneCandidate.getLane().getId())))

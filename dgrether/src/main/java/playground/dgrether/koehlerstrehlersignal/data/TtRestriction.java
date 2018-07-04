@@ -21,24 +21,29 @@
  */
 package playground.dgrether.koehlerstrehlersignal.data;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.core.utils.collections.Tuple;
 
 /**
  * @author tthunig
  *
  */
 public class TtRestriction {
-
+	
 	private Id<DgStreet> lightId;
 	private boolean allowed;
 	/** 
 	 * if allowed==true: lights that are allowed to show green at the same time than lightId;
 	 * if allowed==false: lights that have to show red when lightId shows green
+	 * 
+	 * the tuple contains the 'before' and 'after' intergreen time that is needed for the cten format
 	 */
-	private List<Id<DgStreet>> rlightsAllowed = new LinkedList<>();
+	private Map<Id<DgStreet>, Tuple<Integer, Integer>> rlightsAllowed = new HashMap<>();
 	/** lights that have to be switched on at the same time step than lightId */
 	private List<Id<DgStreet>> rlightsOn = new LinkedList<>();
 	/** lights that have to be switched off at the same time step than lightId */
@@ -49,9 +54,9 @@ public class TtRestriction {
 		this.allowed = allowed;
 	}
 	
-	public void addAllowedLight(Id<DgStreet> lightId){
-		if (!rlightsAllowed.contains(lightId)){
-			rlightsAllowed.add(lightId);
+	public void addAllowedLight(Id<DgStreet> lightId, int beforeIntergreen, int afterIntergreen){
+		if (!rlightsAllowed.containsKey(lightId)){
+			rlightsAllowed.put(lightId, new Tuple<Integer, Integer>(beforeIntergreen, afterIntergreen));
 		}
 	}
 	
@@ -75,7 +80,7 @@ public class TtRestriction {
 		return allowed;
 	}
 
-	public List<Id<DgStreet>> getRlightsAllowed() {
+	public Map<Id<DgStreet>, Tuple<Integer, Integer>> getRlightsAllowed() {
 		return rlightsAllowed;
 	}
 

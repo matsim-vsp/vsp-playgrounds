@@ -37,7 +37,7 @@ public class DgScenarioUtils {
 	private static final boolean loadPopulation = true;
 	
 	public static Scenario loadScenario(String net, String pop, String lanesFilename, String signalsFilename,
-			String signalGroupsFilename, String signalControlFilename){
+			String signalGroupsFilename, String signalControlFilename, String signalConflictsFilename){
 		Config c2 = ConfigUtils.createConfig();
 		c2.qsim().setUseLanes(true);
 		
@@ -50,9 +50,15 @@ public class DgScenarioUtils {
 			c2.plans().setInputFile(pop);
 		}
 		c2.network().setLaneDefinitionsFile(lanesFilename);
+		
 		signalsConfigGroup.setSignalSystemFile(signalsFilename);
 		signalsConfigGroup.setSignalGroupsFile(signalGroupsFilename);
 		signalsConfigGroup.setSignalControlFile(signalControlFilename);
+
+		if (signalConflictsFilename != null && !signalConflictsFilename.equals("")) {
+			signalsConfigGroup.setUseConflictingDirections(true);
+			signalsConfigGroup.setConflictingDirectionsFile(signalConflictsFilename);
+		}
 		
 		Scenario scenario = ScenarioUtils.loadScenario(c2);
 		

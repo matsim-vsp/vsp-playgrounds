@@ -31,7 +31,6 @@ import org.matsim.lanes.data.Lane;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodity;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossingNode;
-import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
 import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
 import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.data.TtPath;
@@ -92,6 +91,22 @@ public class DgIdConverter {
 		Integer ksIntToCrossingNodeId = Integer.parseInt(toCrossingNodeId.toString());
 		String matsimStringLinkId = this.idPool.getStringId(ksIntToCrossingNodeId);
 		if (matsimStringLinkId.endsWith("99")){
+			Id<Link> id = Id.create(matsimStringLinkId.substring(0, matsimStringLinkId.length() - 2), Link.class);
+			return id;
+		}
+		throw new IllegalStateException("Can not convert " + matsimStringLinkId + " to link id");
+	}
+	
+	/**
+	 * converts back. see convertLinkId2FromCrossingNodeId(...)
+	 * 
+	 * @param fromCrossingNodeId the id of a crossing node in the ks-model network
+	 * @return the id of the matsim link corresponding to the street starting in this crossing node
+	 */
+	public Id<Link> convertFromCrossingNodeId2LinkId(Id<DgCrossingNode> fromCrossingNodeId){
+		Integer ksIntFromCrossingNodeId = Integer.parseInt(fromCrossingNodeId.toString());
+		String matsimStringLinkId = this.idPool.getStringId(ksIntFromCrossingNodeId);
+		if (matsimStringLinkId.endsWith("11")){
 			Id<Link> id = Id.create(matsimStringLinkId.substring(0, matsimStringLinkId.length() - 2), Link.class);
 			return id;
 		}

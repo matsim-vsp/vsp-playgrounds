@@ -40,7 +40,7 @@ public class DgCrossing {
 	private Map<Id<DgStreet>, DgStreet> lights = new HashMap<>();
 	private Map<Id<DgProgram>, DgProgram> programs = new HashMap<>();
 	private Map<Id<DgStreet>, TtRestriction> restrictions = new HashMap<>();
-	private String type;
+	private String type; // use TtCrossingType
 	private int cycle;
 	private int clearTime = 2;
 

@@ -35,9 +35,9 @@ public class LaemmerConfig {
     private double minGreenTime = 5.0;
     
     //size of timeBuckets for LaneSensor and LinkSensor
-    private double timeBucketSize = Double.POSITIVE_INFINITY; //15.0; 5.0*60.0; 
+    private double timeBucketSize = Double.POSITIVE_INFINITY; //15.0; 5.0*60.0; 1.5*60.0;  
     //lookBackTime for LaneSensor and LinkSensor
-    private double lookBackTime = Double.POSITIVE_INFINITY; //300.0; 15.0*60.0; //
+    private double lookBackTime = Double.POSITIVE_INFINITY; //300.0; 15.0*60.0; //6.0*60.0;
 
     private Map<Id<Link>, Double> linkArrivalRates = new HashMap<>();
     private Map<Id<Link>, Map<Id<Lane>,Double>> laneArrivalRates = new HashMap<>();
@@ -65,6 +65,11 @@ public class LaemmerConfig {
 	 * If your network includes such cases, you need set this to false. As a side-effect from setting it to false will be a under-estimate of tIdle in some cases.  
 	 */
 	private boolean determineMaxLoadForTIdleGroupedBySignals = true;
+
+	/**
+	 * if a signals showed green during intergreenTime, stabilizationtime will be reduced after intergreenTime
+	 */
+	private boolean shortenStabilizationTimeAfterIntergreenTime = true;
 
     //    @Nullable
     public Double getLaneArrivalRate(Id<Link> linkId, Id<Lane> laneId) {
@@ -164,12 +169,6 @@ public class LaemmerConfig {
 		return checkDownstream;
 	}
 	
-	@Deprecated /** deprecated, use getStabilizationStrategy instead **/
-	public boolean useHeuristicPhaseGeneration() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public double getTimeBucketSize() {
 		return timeBucketSize;
 	}
@@ -178,8 +177,15 @@ public class LaemmerConfig {
 		return lookBackTime;
 	}
 
+	/**
+	 * If true subphases will be removed from the set of phases. Phase A is a
+	 * subphase of phase B it the set of SignalGroups of A if fully covered by the
+	 * set of SignalGroups of B.
+	 * 
+	 * @return true if subphases should removed of false if subphases should be kept
+	 */
 	public boolean isRemoveSubPhases() {
-		return isRemoveSubPhases ;
+		return isRemoveSubPhases;
 	}
 
 	public String getStabilizationStrategy() {
@@ -233,5 +239,18 @@ public class LaemmerConfig {
 		this.lookBackTime = lookBackTime;
 		this.timeBucketSize = timeBucketSize;
 	}
+	
+	/**
+	 * If signals showed green during the intergreenTime, there regulation time can be shorten after intergreenTime
+	 * @return true if regulationTime should be shorten, false if not.
+	 */
+	public boolean getShortenStabilizationAfterIntergreenTime() {
+		return shortenStabilizationTimeAfterIntergreenTime;
+	}
+	
+	public void setShortenStabilizationAfterIntergreenTime(boolean value) {
+		this.shortenStabilizationTimeAfterIntergreenTime = value;
+	}
+	
 	
 }
