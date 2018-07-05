@@ -70,11 +70,13 @@ public class PatnaNetworkModesOpdytsCalibrator {
 
 		double stepSize = 1.0;
 		int iterations2Convergence = 10; // 600
-		int averagingIterations = 2; // //100+
+		int averagingIterations = 5; // //100+
 		double selfTuningWt = 1.0;
 		int warmUpItrs = 5;
 
 		ObjectiveFunctionType objFunType = ObjectiveFunctionType.SUM_SCALED_LOG;
+
+		int opdytsIterations = 10;
 
 		boolean updateStepSize = true;
 
@@ -97,6 +99,9 @@ public class PatnaNetworkModesOpdytsCalibrator {
 			updateStepSize = Boolean.valueOf(args[10]);
 
 			objFunType = ObjectiveFunctionType.valueOf(args[11]);
+
+			opdytsIterations = Integer.valueOf(args[12]);
+
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
@@ -116,6 +121,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
 		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
 		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
+		opdytsConfigGroup.setMaxIteration(opdytsIterations);
 
 		List<String> modes2consider = Arrays.asList("car","bike","motorbike");
 
