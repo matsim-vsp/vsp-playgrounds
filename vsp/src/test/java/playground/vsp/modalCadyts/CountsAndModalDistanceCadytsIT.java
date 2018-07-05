@@ -21,9 +21,8 @@ package playground.vsp.modalCadyts;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-
 import javax.inject.Inject;
-
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +32,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
@@ -62,7 +60,6 @@ import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
 import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileHandler;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
@@ -70,11 +67,8 @@ import org.matsim.counts.Count;
 import org.matsim.counts.Counts;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
-
-import org.junit.Assert;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsContext;
 import playground.vsp.cadyts.marginals.ModalDistanceCadytsModule;
-import playground.vsp.cadyts.marginals.RunExample;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.ModalDistanceBinIdentifier;
@@ -92,9 +86,13 @@ public class CountsAndModalDistanceCadytsIT {
           this.cadytsMgnWt = mgnWt;
     }
     
-    @Parameterized.Parameters(name = "{index}: cadytsWeight == {0};")
+    @Parameterized.Parameters(name = "{index}: cadytsCountsWeight == {0}; cadytsMarginalWeight == {1};")
     public static Collection<Object[]> parameterObjects () {
-        return Arrays.asList(new Object[][] { {150.0, 0.0} ,  {0.0, 150.0}});
+        return Arrays.asList(new Object[][] {
+        		{150.0, 0.0} ,
+				{0.0, 150.0},
+//				{150.0, 150.0}
+        });
     }
     
     @Rule
@@ -507,10 +505,12 @@ public class CountsAndModalDistanceCadytsIT {
         
         config.strategy().addStrategySettings(reRoute);
         config.strategy().addStrategySettings(modeChoice);
-        
-        config.strategy().addParam("ModuleProbability_1", "0.5");
-        config.strategy().addParam("Module_1", "BestScore");
-        
+
+		StrategyConfigGroup.StrategySettings bestScore = new StrategyConfigGroup.StrategySettings();
+		bestScore.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.BestScore);
+		bestScore.setWeight(0.5);
+		config.strategy().addStrategySettings(bestScore);
+
         SubtourModeChoiceConfigGroup sbtModeChoiceConfgGroup = config.subtourModeChoice();
         String[] modes = new String[]{"car", "bicycle"};
        
