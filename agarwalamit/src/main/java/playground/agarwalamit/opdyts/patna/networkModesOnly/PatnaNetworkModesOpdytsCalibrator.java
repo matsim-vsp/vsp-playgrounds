@@ -62,16 +62,23 @@ public class PatnaNetworkModesOpdytsCalibrator {
 	private static final OpdytsScenario PATNA_1_PCT = OpdytsScenario.PATNA_1Pct;
 
 	public static void main(String[] args) {
-		String configFile;
-		String OUT_DIR = null;
-		String relaxedPlans ;
-		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
-		boolean useConfigRandomSeed = true;
+		String configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/changeExpBeta/calibration/inputs/config_networkModesOnly.xml";
+		String OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/changeExpBeta/calibration/output/testCalib/";
+		String relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/changeExpBeta/relaxedPlans/output_changeExpBeta/output_plans.xml.gz";
+		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation;
+		boolean useConfigRandomSeed = false; //false --> can't reproduce results
 
 		double stepSize = 1.0;
-		int iterations2Convergence = 800;
+		int iterations2Convergence = 10; // 600
+		int averagingIterations = 5; // //100+
 		double selfTuningWt = 1.0;
 		int warmUpItrs = 5;
+
+		ObjectiveFunctionType objFunType = ObjectiveFunctionType.SUM_SCALED_LOG;
+
+		int opdytsIterations = 10;
+
+		boolean updateStepSize = true;
 
 		if ( args.length>0 ) {
 			configFile = args[0];
@@ -81,15 +88,20 @@ public class PatnaNetworkModesOpdytsCalibrator {
 
 			// opdyts params
 			stepSize = Double.valueOf(args[4]);
+
 			iterations2Convergence = Integer.valueOf(args[5]);
-			selfTuningWt = Double.valueOf(args[6]);
-			warmUpItrs = Integer.valueOf(args[7]);
-			useConfigRandomSeed = Boolean.valueOf(args[8]);
-		} else {
-			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/inputs/config_networkModesOnly.xml";
-			OUT_DIR = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/calibration/output/testCalib";
-			relaxedPlans = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output_changeExpBeta/output_plans.xml.gz";
-			ascRandomizeStyle = ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation;
+			averagingIterations = Integer.valueOf(args[6]);
+
+			selfTuningWt = Double.valueOf(args[7]);
+			warmUpItrs = Integer.valueOf(args[8]);
+			useConfigRandomSeed = Boolean.valueOf(args[9]);
+
+			updateStepSize = Boolean.valueOf(args[10]);
+
+			objFunType = ObjectiveFunctionType.valueOf(args[11]);
+
+			opdytsIterations = Integer.valueOf(args[12]);
+
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
@@ -109,6 +121,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
 		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
 		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
+		opdytsConfigGroup.setMaxIteration(opdytsIterations);
 
 		List<String> modes2consider = Arrays.asList("car","bike","motorbike");
 
@@ -127,6 +140,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>( new MATSimStateFactoryImpl<>(), scenario);
 
+		final ObjectiveFunctionType finalObjFunType = objFunType;
 		simulator.addOverridingModule(new AbstractModule() {
 
 			@Override
@@ -142,7 +156,7 @@ public class PatnaNetworkModesOpdytsCalibrator {
 
 				this.bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
 
-				this.bind(ObjectiveFunctionType.class).toInstance(ObjectiveFunctionType.SUM_SCALED_LOG);
+				this.bind(ObjectiveFunctionType.class).toInstance(finalObjFunType);
 				this.bind(ObjectiveFunctionEvaluator.class).asEagerSingleton();
 
 				this.addControlerListenerBinding().toInstance(OpdytsModeChoiceUtils.copyVectorFilesToParentDirAndRemoveITERSDir(true));
@@ -157,6 +171,9 @@ public class PatnaNetworkModesOpdytsCalibrator {
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
 				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, modes2consider, ascRandomizeStyle);
+		if (updateStepSize) {
+			((ModeChoiceRandomizer)decisionVariableRandomizer).updateStepSizeEveryIteration( simulator.getOpdytsIterationWrapper() );
+		}
 
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, PATNA_1_PCT);
