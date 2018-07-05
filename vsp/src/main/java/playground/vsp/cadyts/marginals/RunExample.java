@@ -161,7 +161,7 @@ public class RunExample {
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setLastIteration(lastIt);
         config.counts().setWriteCountsInterval(1);
-        config.counts().setAverageCountsOverIterations(1);
+        config.counts().setAverageCountsOverIterations(4);
 
         // add mode choice to it
         StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
