@@ -1,21 +1,20 @@
 package signals.laemmer.model.stabilizationStrategies;
 
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
+import signals.laemmer.model.LaemmerApproach;
+import signals.laemmer.model.LaemmerPhase;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Map.Entry;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-
-import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerApproach;
-import signals.laemmer.model.LaemmerPhase;
+import java.util.Queue;
 
 public class MaxLaneCountStrategy extends AbstractStabilizationStrategy {
 

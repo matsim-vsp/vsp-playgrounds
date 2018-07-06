@@ -19,26 +19,17 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.conversion;
 
-import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import org.apache.log4j.Logger;
-import org.jfree.util.Log;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.conflicts.IntersectionDirections;
 import org.matsim.contrib.signals.data.conflicts.Direction;
+import org.matsim.contrib.signals.data.conflicts.IntersectionDirections;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
@@ -52,14 +43,10 @@ import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesToLinkAssignment;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.vis.vecmathutils.VectorUtils;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossingNode;
 import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
@@ -70,6 +57,16 @@ import playground.dgrether.koehlerstrehlersignal.data.TtCrossingType;
 import playground.dgrether.koehlerstrehlersignal.data.TtRestriction;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
+
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Class to convert a MATSim network into a KS-model network with crossings and streets. BTU Cottbus needs this network format to optimize signal plans with CPLEX.
@@ -106,7 +103,7 @@ public class M2KS2010NetworkConverter {
 		this.idConverter = idConverter;
 	}
 
-	public DgKSNetwork convertNetworkLanesAndSignals(Network network, Lanes lanes, SignalsData signals, double startTime, double endTime) {
+	public DgKSNetwork convertNetworkLanesAndSignals( Network network, Lanes lanes, SignalsData signals, double startTime, double endTime) {
 		return this.convertNetworkLanesAndSignals(network, lanes, signals, null, startTime, endTime);
 	}
 
@@ -474,8 +471,8 @@ public class M2KS2010NetworkConverter {
 	 *            the target crossing of the fromLink
 	 * @return the id of the created light
 	 */
-	private Id<DgStreet> createLights(Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> outLinkId, Id<Link> backLinkId, DgCrossingNode inLinkToNode,
-			DgCrossing crossing, Id<Signal> signalId) {
+	private Id<DgStreet> createLights( Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> outLinkId, Id<Link> backLinkId, DgCrossingNode inLinkToNode,
+						     DgCrossing crossing, Id<Signal> signalId) {
 		if (backLinkId != null && backLinkId.equals(outLinkId)) {
 			return null; // do nothing if it is the backlink
 		}

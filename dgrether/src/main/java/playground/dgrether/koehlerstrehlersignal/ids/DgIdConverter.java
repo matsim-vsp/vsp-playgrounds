@@ -19,21 +19,20 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.ids;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.lanes.data.Lane;
-
+import org.matsim.lanes.Lane;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodity;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossingNode;
 import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
 import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.data.TtPath;
+
+import java.util.List;
 
 
 /**
@@ -121,7 +120,7 @@ public class DgIdConverter {
 	 * @param toLinkId
 	 * @return the light id
 	 */
-	public Id<DgStreet> convertFromLinkIdToLinkId2LightId(Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> toLinkId){
+	public Id<DgStreet> convertFromLinkIdToLinkId2LightId( Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> toLinkId){
 		String id =  null;
 		if (fromLaneId == null){
 			id = fromLinkId.toString()  + "55" + toLinkId.toString();

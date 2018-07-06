@@ -1,5 +1,12 @@
 package signals.laemmer.model;
 
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.signals.model.Signal;
+import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
+import org.matsim.lanes.Lane;
+
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -7,13 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.signals.model.Signal;
-import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
-import org.matsim.lanes.data.Lane;
 
 public class SignalPhase {
 	private List<SignalGroup> signalGroups = new LinkedList<>();

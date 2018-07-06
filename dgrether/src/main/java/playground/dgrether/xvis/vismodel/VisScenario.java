@@ -19,17 +19,17 @@
  * *********************************************************************** */
 package playground.dgrether.xvis.vismodel;
 
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.signals.otfvis.VisSignalSystem;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.lanes.VisLinkWLanes;
+
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Float;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.lanes.vis.VisLinkWLanes;
-import org.matsim.contrib.signals.otfvis.VisSignalSystem;
 
 
 /**

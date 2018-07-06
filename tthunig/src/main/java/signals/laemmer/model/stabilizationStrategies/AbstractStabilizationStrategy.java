@@ -1,14 +1,13 @@
 package signals.laemmer.model.stabilizationStrategies;
 
-import java.util.List;
-import java.util.Queue;
-
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.lanes.data.Lanes;
-
+import org.matsim.lanes.Lanes;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
+
+import java.util.List;
+import java.util.Queue;
 
 public abstract class AbstractStabilizationStrategy {
 	

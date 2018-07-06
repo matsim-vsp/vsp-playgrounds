@@ -5,7 +5,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
-import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.Lane;
 
 /**
  * 

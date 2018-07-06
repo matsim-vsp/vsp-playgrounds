@@ -21,7 +21,7 @@ package signals.sensor;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.Lane;
 
 /**
  * This class provides methods to check, if a vehicle is approximately in a certain distance from a link's end.
@@ -44,7 +44,7 @@ public class CarLocator {
 		this.calculateEarliestTimeInDistance(enterTime, dist, link);
 	}
 
-	public CarLocator(Lane lane, Link link, double enterTime, double distance){
+	public CarLocator( Lane lane, Link link, double enterTime, double distance){
 		double dist = this.checkDistance(lane.getStartsAtMeterFromLinkEnd(), distance);
 		this.calculateEarliestTimeInDistance(enterTime, dist, link, lane);
 	}

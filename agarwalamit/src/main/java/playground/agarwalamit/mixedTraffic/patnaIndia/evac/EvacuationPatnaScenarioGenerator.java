@@ -232,8 +232,8 @@ public class EvacuationPatnaScenarioGenerator {
 			planOut.addActivity(evacAct);
 
 			if(PatnaUtils.URBAN_MAIN_MODES.contains(leg.getMode())){
-				TripRouter router = new TripRouter();
-				router.setRoutingModule(
+				TripRouter.Builder builder = new TripRouter.Builder( scenario.getConfig() ) ;
+				builder.setRoutingModule(
 						leg.getMode(), 
 						DefaultRoutingModules.createPureNetworkRouter(
 								leg.getMode(), 
@@ -244,7 +244,7 @@ public class EvacuationPatnaScenarioGenerator {
 										new FreeSpeedTravelTime())
 								)
 						);
-				List<? extends PlanElement> routeInfo = router.calcRoute(
+				List<? extends PlanElement> routeInfo = builder.build().calcRoute(
 						leg.getMode(), 
 						new ActivityWrapperFacility(home), 
 						new ActivityWrapperFacility(evacAct), 

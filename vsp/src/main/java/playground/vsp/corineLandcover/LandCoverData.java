@@ -53,6 +53,8 @@ public class LandCoverData {
     private final boolean simplifyGeometries;
     private final  boolean combiningGeom;
 
+    private int thresholdForPointInsideLandUseGeoms = 10000;
+
     public LandCoverData( String corineLandCoverShapeFile, boolean simplifyGeometries, boolean combiningGeom, DataSource dataSource) {
 
     	landCoverUtils = new LandCoverUtils(dataSource);
@@ -146,7 +148,7 @@ public class LandCoverData {
         	landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
         }
         if (this.combiningGeom) return GeometryUtils.getPointInteriorToGeometry( landUseGeom, zoneGeom );
-        else return GeometryUtils.getPointInteriorToGeometriesWithFallback( landUseGeoms, zoneGeom );
+        else return GeometryUtils.getPointInteriorToGeometriesWithFallback( landUseGeoms, zoneGeom, this.thresholdForPointInsideLandUseGeoms );
     }
 
     /**

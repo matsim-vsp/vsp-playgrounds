@@ -20,11 +20,10 @@
  */
 package optimize.cten.convert.SignalPlans2Matsim;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
+import optimize.cten.convert.SignalPlans2Matsim.data.CtenCrossingSolution;
+import optimize.cten.convert.SignalPlans2Matsim.data.FixCrossingSolution;
+import optimize.cten.convert.SignalPlans2Matsim.data.FlexCrossingSolution;
+import optimize.cten.convert.SignalPlans2Matsim.data.FlexibleLight;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -45,18 +44,18 @@ import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-
-import optimize.cten.convert.SignalPlans2Matsim.data.CtenCrossingSolution;
-import optimize.cten.convert.SignalPlans2Matsim.data.FixCrossingSolution;
-import optimize.cten.convert.SignalPlans2Matsim.data.FlexCrossingSolution;
-import optimize.cten.convert.SignalPlans2Matsim.data.FlexibleLight;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
 import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author tthunig
