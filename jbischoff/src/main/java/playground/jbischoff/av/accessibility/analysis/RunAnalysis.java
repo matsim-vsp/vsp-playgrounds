@@ -66,7 +66,7 @@ public class RunAnalysis {
             }
         });
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             EventsManager events = EventsUtils.createEventsManager();
             events.addHandler(new WaitTimeHandler(network, aggregatedWaitTimes));
             new MatsimEventsReader(events).readFile("D:\\runs-svn\\avsim\\av_accessibility\\output/taxi" + i + "/b5_22.output_events.xml.gz");
@@ -83,7 +83,7 @@ public class RunAnalysis {
             }
         }
 
-        final BufferedWriter bw = IOUtils.getBufferedWriter("D:\\runs-svn\\avsim\\av_accessibility\\output/averageTaxiWaitTimes_dominik.csv");
+        final BufferedWriter bw = IOUtils.getBufferedWriter("D:\\runs-svn\\avsim\\av_accessibility\\output/averageTaxiWaitTimes_dominik_10runs.csv");
         try {
             bw.write("zoneId");
             for (int i = 0; i < 24; i++) {
