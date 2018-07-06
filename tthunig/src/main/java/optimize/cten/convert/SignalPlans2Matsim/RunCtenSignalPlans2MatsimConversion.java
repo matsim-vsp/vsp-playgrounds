@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
@@ -192,7 +193,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 		signalConfig.setSignalGroupsFile(directory + "output_signal_groups_v2.0.xml");
 		signalConfig.setSignalControlFile(directory + "output_signal_control_v2.0.xml");
 		signalConfig.setConflictingDirectionsFile(directory + "output_conflicting_directions_v1.0.xml");
-		signalConfig.setUseConflictingDirections(true);
+		signalConfig.setIntersectionLogic(IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS);
 		config.network().setLaneDefinitionsFile(directory + "lanes_network_small.xml.gz");
 		config.network().setInputFile(directory + "network_small_simplified.xml.gz");
 		Scenario scenario = ScenarioUtils.loadScenario(config);
