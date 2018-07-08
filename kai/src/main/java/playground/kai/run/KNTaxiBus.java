@@ -46,7 +46,7 @@ public final class KNTaxiBus {
 
 	private static Scenario createCustomizedDrtScenario(Config config) {
 		Scenario scenario = DrtControlerCreator.createScenarioWithDrtRouteFactory(config);
-		ScenarioUtils.loadScenario(config);
+		ScenarioUtils.loadScenario(scenario);
 
 		for (Person person : scenario.getPopulation().getPersons().values()) {
 			for (PlanElement pe : person.getSelectedPlan().getPlanElements()) {
