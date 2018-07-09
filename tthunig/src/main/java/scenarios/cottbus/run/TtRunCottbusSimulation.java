@@ -42,6 +42,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -172,6 +173,8 @@ public class TtRunCottbusSimulation {
 		MS_IDEAL, // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
 		MS_OPT_GREENSPLIT_18_05_04 // optimized greensplits based on model specification from 2018-05-04
 	}
+	
+	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS;
 	
 	// defines which kind of pricing should be used
 	private static final PricingType PRICING_TYPE = PricingType.NONE;
@@ -615,11 +618,20 @@ public class TtRunCottbusSimulation {
 			}
 			
 			// add data about conflicting directions
-			if (NETWORK_TYPE.equals(NetworkType.V4)) {
-				signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR + "conflictData_fromBtu2018-04-25_basedOnMSconflicts_v4.xml");
-			} else {
-				signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR + "conflictData_fromBtu2018-04-25_basedOnMSconflicts.xml");				
+			if (INTERSECTION_LOGIC.toString().startsWith("CONFLICTING_DIRECTIONS")) {
+				if (NETWORK_TYPE.equals(NetworkType.V4)) {
+					// signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR +
+					// "conflictData_fromBtu2018-04-25_basedOnMSconflicts_v4.xml");
+					signalConfigGroup.setConflictingDirectionsFile(INPUT_BASE_DIR
+							+ "conflictData_fromBtu2018-05-03_basedOnMSconflicts_v4_modifiedBasedOnMS.xml");
+					// TODO konflikte erstellen, die information enthalten über must-yield/with-right-of-way
+					// TODO braucht man konflikt-daten für u-turns? -> utils methode erstellen, die diese mit links-abbiegern gleichsetzt
+				} else {
+					signalConfigGroup.setConflictingDirectionsFile(
+							INPUT_BASE_DIR + "conflictData_fromBtu2018-04-25_basedOnMSconflicts.xml");
+				}
 			}
+			signalConfigGroup.setIntersectionLogic(INTERSECTION_LOGIC);
 		}
 		if (PRICING_TYPE.toString().startsWith("CORDON_")){
 			RoadPricingConfigGroup roadPricingCG = ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
@@ -1145,7 +1157,15 @@ public class TtRunCottbusSimulation {
 			default:
 				runName += "_" + SIGNAL_TYPE;
 				break;
-			}			
+			}		
+			
+			switch (INTERSECTION_LOGIC) {
+			case CONFLICTING_DIRECTIONS_AND_TURN_RESTRICTIONS:
+				runName += "_restrictLeftTurns";
+				break;
+			default:
+				break;
+			}
 		}
 		
 		if (!PRICING_TYPE.equals(PricingType.NONE)){
