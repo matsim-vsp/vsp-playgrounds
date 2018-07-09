@@ -123,15 +123,15 @@ public class CORINELandCoverCoordsModifier {
 //        String matsimPlans = "../../../svn/shared-svn/studies/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
 //        String outPlans = "../../../svn/shared-svn/studies/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans_UrbanAtlas.xml.gz";
 
-    	String corineLandCoverFile = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/croine_cut_tempelhof.shp";
+    	String corineLandCoverFile = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/shapes/croine_cut_tempelhof.shp";
         String zoneFile = "C:/Users/Work/VSP/urbanAtlasBerlin/uA/zoneFiles/gemeinden_Planungsraum_GK4.shp";
         String zoneIdTag = "NR";
 
 //        String spatialRefinementShapeFile = "/Users/amit/Documents/gitlab/mercator-nemo/data/original_files/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/plz-gebiete_Ruhrgebiet_withPopulation.shp";
 //        String featureKeySpatialRefinement = "plz";
         
-        String matsimPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/be_400_c_10pct_person_freight.tempelhofCut.xml.gz";
-        String outPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/be_400_c_10pct_person_freight.tempelhofCut_MODIFIED_corine.xml.gz";
+        String matsimPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/input/be_400_c_10pct_person_freight.tempelhofCut.xml.gz";
+        String outPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/be_400_c_10pct_person_freight.tempelhofCut_MODIFIED_corine_10000.xml.gz";
 
     	
     	

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
+import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
 
 /**
 * @author ikaddoura
@@ -53,7 +54,8 @@ public class CorineForFreightAgents {
 	            simplifyGeom,
 	            combiningGeoms,
 	            sameHomeActivity,
-	            homeActivityPrefix);
+	            homeActivityPrefix,
+	            DataSource.Corine.toString());
 	    plansFilterForCORINELandCover.process();
 	    plansFilterForCORINELandCover.writePlans(outPlans);
     }

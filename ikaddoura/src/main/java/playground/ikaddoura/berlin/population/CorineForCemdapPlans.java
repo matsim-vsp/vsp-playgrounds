@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
+import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
 
 /**
 * @author ikaddoura
@@ -46,14 +47,14 @@ public class CorineForCemdapPlans {
 	
 	    Map<String, String> shapeFileToFeatureKey = new HashMap<>();
 	    shapeFileToFeatureKey.put(zoneFile, zoneIdTag);
-	
 	    CORINELandCoverCoordsModifier plansFilterForCORINELandCover = new CORINELandCoverCoordsModifier(matsimPlans,
 	            shapeFileToFeatureKey,
 	            corineLandCoverFile,
 	            simplifyGeom,
 	            combiningGeoms,
 	            sameHomeActivity,
-	            homeActivityPrefix);
+	            homeActivityPrefix,
+	           DataSource.Corine.toString());
 	    plansFilterForCORINELandCover.process();
 	    plansFilterForCORINELandCover.writePlans(outPlans);
     }
