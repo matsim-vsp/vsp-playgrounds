@@ -40,20 +40,21 @@ public final class KNTaxiBus {
 		
 		config.checkConsistency();
 
-		Scenario scenario = DrtControlerCreator.createScenario(config) ;
-		ScenarioUtils.loadScenario(config);
-		
-		for ( Person person : scenario.getPopulation().getPersons().values() ) {
-			for ( PlanElement pe : person.getSelectedPlan().getPlanElements() ) {
-				((Activity)pe).setEndTime(0*3600. + MatsimRandom.getRandom().nextDouble()*7200.);
-				break ;
-			}
-		}
-		
-		Controler controler = DrtControlerCreator.createControler(scenario,true) ;
-		
+		Controler controler = DrtControlerCreator.createControler(config, true, KNTaxiBus::createCustomizedDrtScenario);
 		controler.run() ;
-		
 	}
 
+	private static Scenario createCustomizedDrtScenario(Config config) {
+		Scenario scenario = DrtControlerCreator.createScenarioWithDrtRouteFactory(config);
+		ScenarioUtils.loadScenario(scenario);
+
+		for (Person person : scenario.getPopulation().getPersons().values()) {
+			for (PlanElement pe : person.getSelectedPlan().getPlanElements()) {
+				((Activity)pe).setEndTime(0 * 3600. + MatsimRandom.getRandom().nextDouble() * 7200.);
+				break;
+			}
+		}
+
+		return scenario;
+	}
 }
