@@ -113,22 +113,36 @@ public class CORINELandCoverCoordsModifier {
 
     public static void main(String[] args) {
     	
-        String corineLandCoverFile = "../../../svn/shared-svn/studies/de/open_berlin_scenario/input/shapefiles/UrbanAtlas/DE001L1_BERLIN/Shapefiles/DE001L1_BERLIN_UA2012.shp";
-        String zoneFile = "../../svn/shared-svn/studies/de/open_berlin_scenario/input/shapefiles/2016/gemeinden_Planungsraum_GK4.shp";
+//        String corineLandCoverFile = "../../../svn/shared-svn/studies/de/open_berlin_scenario/input/shapefiles/UrbanAtlas/DE001L1_BERLIN/Shapefiles/DE001L1_BERLIN_UA2012.shp";
+//        String zoneFile = "../../svn/shared-svn/studies/de/open_berlin_scenario/input/shapefiles/2016/gemeinden_Planungsraum_GK4.shp";
+//        String zoneIdTag = "NR";
+//
+////        String spatialRefinementShapeFile = "/Users/amit/Documents/gitlab/mercator-nemo/data/original_files/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/plz-gebiete_Ruhrgebiet_withPopulation.shp";
+////        String featureKeySpatialRefinement = "plz";
+//        
+//        String matsimPlans = "../../../svn/shared-svn/studies/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
+//        String outPlans = "../../../svn/shared-svn/studies/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans_UrbanAtlas.xml.gz";
+
+    	String corineLandCoverFile = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/croine_cut_tempelhof.shp";
+        String zoneFile = "C:/Users/Work/VSP/urbanAtlasBerlin/uA/zoneFiles/gemeinden_Planungsraum_GK4.shp";
         String zoneIdTag = "NR";
 
 //        String spatialRefinementShapeFile = "/Users/amit/Documents/gitlab/mercator-nemo/data/original_files/shapeFiles/plzBasedPopulation/plz-gebiete_Ruhrgebiet/plz-gebiete_Ruhrgebiet_withPopulation.shp";
 //        String featureKeySpatialRefinement = "plz";
         
-        String matsimPlans = "../../../svn/shared-svn/studies/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans.xml.gz";
-        String outPlans = "../../../svn/shared-svn/studies/de/open_berlin_scenario/be_3/population/be_400_c_10pct_person_freight.selected_plans_UrbanAtlas.xml.gz";
+        String matsimPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/be_400_c_10pct_person_freight.tempelhofCut.xml.gz";
+        String outPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/be_400_c_10pct_person_freight.tempelhofCut_MODIFIED_corine.xml.gz";
 
-        boolean simplifyGeom = true;
+    	
+    	
+    	boolean simplifyGeom = true;
         boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
         String homeActivityPrefix = "home";
-        String dataSource = DataSource.UrbanAtlas.toString();
+        String dataSource = DataSource.Corine.toString();
 
+        int thresholdForPointInsideLandUseGeoms = 10000;
+        
         if (args.length > 0) {
             corineLandCoverFile = args[0];
             zoneFile = args[1];
@@ -142,6 +156,7 @@ public class CORINELandCoverCoordsModifier {
             homeActivityPrefix = args[9];
             outPlans = args[10];
             dataSource = args[11];
+            thresholdForPointInsideLandUseGeoms = Integer.parseInt(args[12]);
         }
 
         Map<String, String> shapeFileToFeatureKey = new HashMap<>();
@@ -157,6 +172,8 @@ public class CORINELandCoverCoordsModifier {
                 homeActivityPrefix,
                 dataSource);
         
+        LOG.info("setting thresholdForPointInsideLandUseGeoms to" + thresholdForPointInsideLandUseGeoms);
+        plansFilterForCORINELandCover.setThresholdForPointInsideLandUseGeoms(thresholdForPointInsideLandUseGeoms);
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
     }
@@ -288,5 +305,9 @@ public class CORINELandCoverCoordsModifier {
         Config config = ConfigUtils.createConfig();
         config.plans().setInputFile(plansFile);
         return ScenarioUtils.loadScenario(config).getPopulation();
+    }
+    
+    public void setThresholdForPointInsideLandUseGeoms(int threshold) {
+    	this.corineLandCoverData.setThresholdForPointInsideLandUseGeoms(threshold);
     }
 }

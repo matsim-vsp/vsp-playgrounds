@@ -16,7 +16,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.vsp.openberlinscenario.planmodification;
+package playground.tschlenther.generalUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -159,10 +159,10 @@ public class ActivityPlotter {
 	public static void main(String[] args) {
 		
 //		String inputPopulation = "C:/Users/Work/VSP/urbanAtlasBerlin/output/.selected_plans_UrbanAtlas.xml.gz";
-		String inputPopulation =  "C:/Users/Work/VSP/urbanAtlasBerlin/output/co30G3d.selected_plans_Corine.xml.gz";
+		String inputPopulation =  "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/uA60G9d.tempelhofCut_MODIFIED_uA.xml.gz";
 	
 //		String outputFile = "C:/Users/Work/VSP/urbanAtlasBerlin/output/.selected_plans_UrbanAtlas_shortTypes.csv";
-		String outputFile =  "C:/Users/Work/VSP/urbanAtlasBerlin/output/co30G3d.selected_plans_Corine_shortTypes.csv";
+		String outputFile =  "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/uA60G9d.tempelhofCut_MODIFIED_uA.xml.csv";
 		
 		if(args.length != 0) {
 			inputPopulation = args[0];

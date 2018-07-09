@@ -53,7 +53,7 @@ public class LandCoverData {
     private final boolean simplifyGeometries;
     private final  boolean combiningGeom;
 
-    private int thresholdForPointInsideLandUseGeoms = 10000;
+    private int thresholdForPointInsideLandUseGeoms = 1000;
 
     public LandCoverData( String corineLandCoverShapeFile, boolean simplifyGeometries, boolean combiningGeom, DataSource dataSource) {
 
@@ -184,5 +184,9 @@ public class LandCoverData {
         } else {
             return GeometryUtils.isPointInsideGeometries(this.activityTypes2ListOfLandCoverZones.get(activityType), point);
         }
+    }
+    
+    public void setThresholdForPointInsideLandUseGeoms(int threshold) {
+    	this.thresholdForPointInsideLandUseGeoms = threshold;
     }
 }
