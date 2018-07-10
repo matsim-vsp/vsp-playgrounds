@@ -78,9 +78,9 @@ public class RunBerlin {
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/matsim-project/examples/scenarios/equil/config-decongestion.xml";
-			outputDirectory = "/Users/ihab/Desktop/test-run-equil_1/";
-			runId = "test-run_1";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/input/berlin-5.0_config_1a.xml";
+			outputDirectory = "/Users/ihab/Desktop/b5_decongestion_b5_1a-previous-2/";
+			runId = "b5_1a";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			activateDecongestionPricing = true;
 		}
