@@ -133,20 +133,45 @@ public class LandCoverData {
 
         Geometry landUseGeom ;
         Collection<Geometry> landUseGeoms ;
-        if(		this.landCoverUtils.getDataSource().equals(DataSource.Corine)
-        		&& ! activityType.equals(LandCoverUtils.LandCoverActivityType.other)
-        		&& ! activityType.equals(LandCoverUtils.LandCoverActivityType.home)        				
-        		&& warnCnt < 5) {
-        	
-            LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
-            if(warnCnt >= 4) LOGGER.warn(Gbl.FUTURE_SUPPRESSED);
-            warnCnt++;
-            landUseGeom =  this.activityType2CombinedLandcoverZone.get(LandCoverUtils.LandCoverActivityType.other) ;
-            landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(LandCoverUtils.LandCoverActivityType.other);
-        } else {
-        	landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
-        	landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
+
+        switch (this.landCoverUtils.getDataSource()) {
+            case Corine:
+                if ( activityType.equals(LandCoverUtils.LandCoverActivityType.other)
+                        || activityType.equals(LandCoverUtils.LandCoverActivityType.home) ) {
+                    landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
+                    landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
+            } else {
+                    if (warnCnt < 5 ) {
+                        LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
+                        warnCnt++;
+                        if(warnCnt == 5) LOGGER.warn(Gbl.FUTURE_SUPPRESSED);
+                    }
+                    landUseGeom =  this.activityType2CombinedLandcoverZone.get(LandCoverUtils.LandCoverActivityType.other) ;
+                    landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(LandCoverUtils.LandCoverActivityType.other);
+                }
+                break;
+            case UrbanAtlas:
+                landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
+                landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
+                break;
+                default: throw new RuntimeException("not implemented yet.");
         }
+
+
+//        if(		this.landCoverUtils.getDataSource().equals(DataSource.Corine)
+//        		&& ! activityType.equals(LandCoverUtils.LandCoverActivityType.other)
+//        		&& ! activityType.equals(LandCoverUtils.LandCoverActivityType.home)
+//        		&& warnCnt < 5) {
+//
+//            LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
+//            if(warnCnt >= 4) LOGGER.warn(Gbl.FUTURE_SUPPRESSED);
+//            warnCnt++;
+//            landUseGeom =  this.activityType2CombinedLandcoverZone.get(LandCoverUtils.LandCoverActivityType.other) ;
+//            landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(LandCoverUtils.LandCoverActivityType.other);
+//        } else {
+//        	landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
+//        	landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
+//        }
         if (this.combiningGeom) return GeometryUtils.getPointInteriorToGeometry( landUseGeom, zoneGeom );
         else return GeometryUtils.getPointInteriorToGeometriesWithFallback( landUseGeoms, zoneGeom, this.thresholdForPointInsideLandUseGeoms );
     }
