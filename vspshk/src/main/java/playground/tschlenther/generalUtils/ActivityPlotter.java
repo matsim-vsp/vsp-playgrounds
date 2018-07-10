@@ -159,10 +159,10 @@ public class ActivityPlotter {
 	public static void main(String[] args) {
 		
 //		String inputPopulation = "C:/Users/Work/VSP/urbanAtlasBerlin/output/.selected_plans_UrbanAtlas.xml.gz";
-		String inputPopulation = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/co1d_1000_60G.tempelhofCut_MODIFIED_co.xml.gz";
+		String inputPopulation = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/be_400_c_10pct_person_freight.tempelhofCut_MODIFIED_corine_100.xml.gz";
 	
 //		String outputFile = "C:/Users/Work/VSP/urbanAtlasBerlin/output/.selected_plans_UrbanAtlas_shortTypes.csv";
-		String outputFile =  "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/co1d_1000_60G.tempelhofCut_MODIFIED_co.xml.csv";
+		String outputFile =  "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/be_400_c_10pct_person_freight.tempelhofCut_MODIFIED_corine_100.csv";
 		
 		if(args.length != 0) {
 			inputPopulation = args[0];
