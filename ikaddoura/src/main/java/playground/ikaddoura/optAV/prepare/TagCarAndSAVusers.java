@@ -53,21 +53,27 @@ public class TagCarAndSAVusers {
 
 	private static final Logger log = Logger.getLogger(TagCarAndSAVusers.class);
 	
-	private final String inputDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/2017-07-20_car_pt_ptSlow_bicycle_walk_10pct/";
-	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/";
+	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/population/";
+	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/population/";
 	
-	private final String inputPlansFile = "be_251.output_plans_selected.xml.gz";
-	private final String outputPlansFile = "be_251.output_plans_selected_taggedCarUsers.xml.gz";
-	private final String outputPersonAttributesFile = "be_251.personAttributes_potentialSAVusers.xml.gz";
+	private final String inputPlansFile = "berlin-5.1-1pct_plans.xml.gz";
+	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers.xml.gz";
 	
+	private final String outputPersonAttributesFile = "berlin-5.0_person-attributes_potentialSAVusers.xml.gz";
+
 	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
 	private final String crsSHPFile = "EPSG:25833";
 	private final String crsPopulation = TransformationFactory.DHDN_GK4;
+
+	// Optional: provide input person attributes file...
+	private final String inputPersonAttributesFile = "berlin-5.0_person-attributes.xml.gz";
+	private final String inputPersonAttributesSubpopulationPerson = "person";
 	
 	// ####################################################################
 		
 	private String inputPlans;
 	private String outputPlans;
+	private String inputPersonAttributes;
 	private String outputPersonAttributes;
 	
 	private Scenario scenario;
@@ -87,10 +93,12 @@ public class TagCarAndSAVusers {
 		
 		inputPlans = inputDirectory + inputPlansFile;
 		outputPlans = outputDirectory + outputPlansFile;
+		inputPersonAttributes = inputDirectory + inputPersonAttributesFile;
 		outputPersonAttributes = outputDirectory + outputPersonAttributesFile;
 		
 		Config config = ConfigUtils.createConfig();
 		config.plans().setInputFile(inputPlans);
+		if (inputPersonAttributesFile != null) config.plans().setInputPersonAttributeFile(inputPersonAttributes);
 		scenario = ScenarioUtils.loadScenario(config);
 		
 		tagCarUsers();
@@ -159,15 +167,26 @@ public class TagCarAndSAVusers {
 				}
 			}
 			
-			if (allActivitiesInArea) { 
-				
-				scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "potentialSAVuser");
-//				person.getAttributes().putAttribute("subpopulation", "potentialSAVuser");
-				potentialSAVusers++;
+			if (inputPersonAttributesFile == null) {
+				if (allActivitiesInArea) { 
+					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "potentialSAVuser");
+					potentialSAVusers++;
+				} else {
+					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "noPotentialSAVuser");
+					noPotentialSAVusers++;
+				}
 			} else {
-				scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "noPotentialSAVuser");
-//				person.getAttributes().putAttribute("subpopulation", "noPotentialSAVuser");
-				noPotentialSAVusers++;
+				
+				String subpopulation = (String) scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName());
+				if (subpopulation.equals(inputPersonAttributesSubpopulationPerson)) {
+					if (allActivitiesInArea) { 
+						scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "person_potentialSAVuser");
+						potentialSAVusers++;
+					} else {
+						scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "person_noPotentialSAVuser");
+						noPotentialSAVusers++;
+					}
+				}
 			}
 		}
 		
