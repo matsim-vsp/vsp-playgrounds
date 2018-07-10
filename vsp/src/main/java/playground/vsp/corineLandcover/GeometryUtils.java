@@ -142,7 +142,6 @@ public class GeometryUtils {
             Coordinate coordinate = getRandomInteriorPoints(zoneGeom,1)[0];
             commonPoint = geometryFactory.createPoint(coordinate);
             if (isPointInsideGeometries(landUseGeoms,commonPoint)) return commonPoint;
-            counter++;
             if (counter > threshold) {
             	return commonPoint;
             }
