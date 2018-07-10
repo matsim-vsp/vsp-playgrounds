@@ -172,7 +172,7 @@ public class CORINELandCoverCoordsModifier {
                 homeActivityPrefix,
                 dataSource);
         
-        LOG.info("setting thresholdForPointInsideLandUseGeoms to" + thresholdForPointInsideLandUseGeoms);
+        LOG.info("setting thresholdForPointInsideLandUseGeoms to " + thresholdForPointInsideLandUseGeoms);
         plansFilterForCORINELandCover.setThresholdForPointInsideLandUseGeoms(thresholdForPointInsideLandUseGeoms);
         plansFilterForCORINELandCover.process();
         plansFilterForCORINELandCover.writePlans(outPlans);
