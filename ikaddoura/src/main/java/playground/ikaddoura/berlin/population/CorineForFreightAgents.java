@@ -55,7 +55,7 @@ public class CorineForFreightAgents {
 	            combiningGeoms,
 	            sameHomeActivity,
 	            homeActivityPrefix,
-	            DataSource.Corine.toString());
+	            DataSource.Corine);
 	    plansFilterForCORINELandCover.process();
 	    plansFilterForCORINELandCover.writePlans(outPlans);
     }

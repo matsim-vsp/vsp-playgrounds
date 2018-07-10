@@ -82,9 +82,9 @@ public class CORINELandCoverCoordsModifier {
     private final String homeActivityPrefix;
 
     public CORINELandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
-                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix, String dataSource) {
+                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix, DataSource dataSource) {
 
-    	this.corineLandCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, DataSource.valueOf(dataSource));
+    	this.corineLandCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, dataSource);
         LOG.info("Loading population from plans file " + matsimPlans);
         this.population = getPopulation(matsimPlans);
 
@@ -139,7 +139,7 @@ public class CORINELandCoverCoordsModifier {
         boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
         String homeActivityPrefix = "home";
-        String dataSource = DataSource.Corine.toString();
+        DataSource dataSource = DataSource.Corine;
 
         int thresholdForPointInsideLandUseGeoms = 10000;
         
@@ -155,7 +155,7 @@ public class CORINELandCoverCoordsModifier {
             sameHomeActivity = Boolean.valueOf(args[8]);
             homeActivityPrefix = args[9];
             outPlans = args[10];
-            dataSource = args[11];
+            dataSource = DataSource.valueOf(args[11]);
             thresholdForPointInsideLandUseGeoms = Integer.parseInt(args[12]);
         }
 

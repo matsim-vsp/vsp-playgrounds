@@ -39,86 +39,86 @@ public class LandCoverUtils {
 
     private final Map<LandCoverActivityType, List<Integer>> activityType2LandCoverId = new HashMap<>();
     
-    DataSource dataSource;
+    private final DataSource dataSource;
     
     public enum LandCoverActivityType {home, leisure, shopping, work, other}
     public enum DataSource {Corine, UrbanAtlas}
 
     LandCoverUtils(DataSource dataSource) {
     	this.dataSource = dataSource;
-    	
-    	if(dataSource.equals(DataSource.Corine)){
-    		landCover_ShapeFile_AttributeID = "CODE_12";
-    		{
-    			List<Integer> landCoverIds = new ArrayList<>();
-    			landCoverIds.add(111); // continuous urban fabric
-    			landCoverIds.add(112); // Discontinuous urban fabric
-    			activityType2LandCoverId.put(LandCoverActivityType.home,landCoverIds);
-    		}
-    		{
-    			List<Integer> landCoverIds = new ArrayList<>();
-    			landCoverIds.add(111); // continuous urban fabric
-    			landCoverIds.add(112); // Discontinuous urban fabric
-    			landCoverIds.add(121); //Industrial or commercial use
-    			landCoverIds.add(123); //Port areas
-    			landCoverIds.add(124); //Airports
-    			landCoverIds.add(133); //Construction sites
-    			landCoverIds.add(142); //Sport and leisure facilities
-    			activityType2LandCoverId.put(LandCoverActivityType.other, landCoverIds);
-    		}
-    	}
-    	else if(dataSource.equals(DataSource.UrbanAtlas)){
-    		landCover_ShapeFile_AttributeID = "CODE2012";
-    		List<Integer> basicLandUseIds = new ArrayList<>();
 
-    		basicLandUseIds.add(11100); // continuous urban fabric S.L.>80%
-			
-			basicLandUseIds.add(11210); // Discontinuous urban fabric S.L. 50%-80%
-			basicLandUseIds.add(11220); // Discontinuous urban fabric S.L. 30%-50%
-			basicLandUseIds.add(11230); // Discontinuous urban fabric S.L. 10%-30%
-			basicLandUseIds.add(11240); // Discontinuous urban fabric S.L.<10%
-			
-			basicLandUseIds.add(12100); //Industrial, commercial, public, military and private units
+    	switch (dataSource) {
+			case Corine:
+				landCover_ShapeFile_AttributeID = "CODE_12";
+			{
+				List<Integer> landCoverIds = new ArrayList<>();
+				landCoverIds.add(111); // continuous urban fabric
+				landCoverIds.add(112); // Discontinuous urban fabric
+				activityType2LandCoverId.put(LandCoverActivityType.home,landCoverIds);
+			}
+			{
+				List<Integer> landCoverIds = new ArrayList<>();
+				landCoverIds.add(111); // continuous urban fabric
+				landCoverIds.add(112); // Discontinuous urban fabric
+				landCoverIds.add(121); //Industrial or commercial use
+				landCoverIds.add(123); //Port areas
+				landCoverIds.add(124); //Airports
+				landCoverIds.add(133); //Construction sites
+				landCoverIds.add(142); //Sport and leisure facilities
+				activityType2LandCoverId.put(LandCoverActivityType.other, landCoverIds);
+			}
+				break;
+			case UrbanAtlas:
+				landCover_ShapeFile_AttributeID = "CODE2012";
+				List<Integer> basicLandUseIds = new ArrayList<>();
 
-    		{	//land use types assigned to home and shopping activity
-    			List<Integer> landCoverIds = new ArrayList<>();
-    			landCoverIds.addAll(basicLandUseIds);
-    			activityType2LandCoverId.put(LandCoverActivityType.home,landCoverIds);
-    			activityType2LandCoverId.put(LandCoverActivityType.shopping,landCoverIds);
-    		}
-    		{	//land use types assigned to work activity
-    			List<Integer> landCoverIds = new ArrayList<>();
-    			landCoverIds.addAll(basicLandUseIds);
-    			landCoverIds.add(12300); //Port areas
-    			landCoverIds.add(12400); //Airports
-    			landCoverIds.add(13300); //Construction sites
+				basicLandUseIds.add(11100); // continuous urban fabric S.L.>80%
 
-    			activityType2LandCoverId.put(LandCoverActivityType.work,landCoverIds);
-    		}
-    		{	//land use types assigned to leisure activity
-    			List<Integer> landCoverIds = new ArrayList<>();
-    			landCoverIds.addAll(basicLandUseIds);
-    			landCoverIds.add(14100); //Green Urban Areas
-    			landCoverIds.add(14200); //Sport and leisure facilities
+				basicLandUseIds.add(11210); // Discontinuous urban fabric S.L. 50%-80%
+				basicLandUseIds.add(11220); // Discontinuous urban fabric S.L. 30%-50%
+				basicLandUseIds.add(11230); // Discontinuous urban fabric S.L. 10%-30%
+				basicLandUseIds.add(11240); // Discontinuous urban fabric S.L.<10%
+
+				basicLandUseIds.add(12100); //Industrial, commercial, public, military and private units
+
+			{	//land use types assigned to home and shopping activity
+				List<Integer> landCoverIds = new ArrayList<>();
+				landCoverIds.addAll(basicLandUseIds);
+				activityType2LandCoverId.put(LandCoverActivityType.home,landCoverIds);
+				activityType2LandCoverId.put(LandCoverActivityType.shopping,landCoverIds);
+			}
+			{	//land use types assigned to work activity
+				List<Integer> landCoverIds = new ArrayList<>();
+				landCoverIds.addAll(basicLandUseIds);
+				landCoverIds.add(12300); //Port areas
+				landCoverIds.add(12400); //Airports
+				landCoverIds.add(13300); //Construction sites
+
+				activityType2LandCoverId.put(LandCoverActivityType.work,landCoverIds);
+			}
+			{	//land use types assigned to leisure activity
+				List<Integer> landCoverIds = new ArrayList<>();
+				landCoverIds.addAll(basicLandUseIds);
+				landCoverIds.add(14100); //Green Urban Areas
+				landCoverIds.add(14200); //Sport and leisure facilities
 //    			landCoverIds.add(31000); //Forests
-    			activityType2LandCoverId.put(LandCoverActivityType.leisure,landCoverIds);
-    		}
-    		{	//all above mentioned id's are assigned to other
-    			List<Integer> landCoverIds = new ArrayList<>();
-    			landCoverIds.addAll(basicLandUseIds);
-    			landCoverIds.add(12300); //Port areas
-    			landCoverIds.add(12400); //Airports
-    			landCoverIds.add(13300); //Construction sites
-    			landCoverIds.add(14100); //Green Urban Areas
-    			landCoverIds.add(14200); //Sport and leisure facilities
+				activityType2LandCoverId.put(LandCoverActivityType.leisure,landCoverIds);
+			}
+			{	//all above mentioned id's are assigned to other
+				List<Integer> landCoverIds = new ArrayList<>();
+				landCoverIds.addAll(basicLandUseIds);
+				landCoverIds.add(12300); //Port areas
+				landCoverIds.add(12400); //Airports
+				landCoverIds.add(13300); //Construction sites
+				landCoverIds.add(14100); //Green Urban Areas
+				landCoverIds.add(14200); //Sport and leisure facilities
 //    			landCoverIds.add(31000); //Forests
-    			activityType2LandCoverId.put(LandCoverActivityType.other,landCoverIds);
-    		}
-    	}
-    	else {
-    		throw new IllegalArgumentException("no lookup list implented yet for type of landcover data source = " + dataSource.toString());
-    	}
-    	
+				activityType2LandCoverId.put(LandCoverActivityType.other,landCoverIds);
+			}
+				break;
+
+				default: throw new IllegalArgumentException("no lookup list implented yet for type of landcover data source = " + dataSource.toString());
+		}
     }
 
     public List<LandCoverActivityType> getActivityTypesFromZone(final int landCoverId){
