@@ -22,7 +22,7 @@ package playground.ikaddoura.berlin.population;
 import java.util.HashMap;
 import java.util.Map;
 
-import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
+import playground.vsp.corineLandcover.LandCoverCoordsModifier;
 import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
 
 /**
@@ -47,7 +47,7 @@ public class CorineForCemdapPlans {
 	
 	    Map<String, String> shapeFileToFeatureKey = new HashMap<>();
 	    shapeFileToFeatureKey.put(zoneFile, zoneIdTag);
-	    CORINELandCoverCoordsModifier plansFilterForCORINELandCover = new CORINELandCoverCoordsModifier(matsimPlans,
+	    LandCoverCoordsModifier plansFilterForCORINELandCover = new LandCoverCoordsModifier(matsimPlans,
 	            shapeFileToFeatureKey,
 	            corineLandCoverFile,
 	            simplifyGeom,

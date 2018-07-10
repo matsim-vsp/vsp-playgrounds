@@ -22,7 +22,7 @@ package playground.vsp.openberlinscenario.planmodification;
 import java.util.HashMap;
 import java.util.Map;
 
-import playground.vsp.corineLandcover.CORINELandCoverCoordsModifier;
+import playground.vsp.corineLandcover.LandCoverCoordsModifier;
 import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
 
 public class RunCorineLandCoverCoordsModifier {
@@ -44,8 +44,8 @@ public class RunCorineLandCoverCoordsModifier {
 	    Map<String, String> shapeFileToFeatureKey = new HashMap<>();
 	    shapeFileToFeatureKey.put(zonalShapeFile, zoneIdTag);
 	
-	    CORINELandCoverCoordsModifier plansFilterForCORINELandCover = new CORINELandCoverCoordsModifier(inputPlansFile, shapeFileToFeatureKey,
-	            corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity, homeActivityPrefix, DataSource.Corine);
+	    LandCoverCoordsModifier plansFilterForCORINELandCover = new LandCoverCoordsModifier(inputPlansFile, shapeFileToFeatureKey,
+	            corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity, homeActivityPrefix, DataSource.Corine.toString());
 	    plansFilterForCORINELandCover.process();
 	    plansFilterForCORINELandCover.writePlans(outputPlansFile);
     }

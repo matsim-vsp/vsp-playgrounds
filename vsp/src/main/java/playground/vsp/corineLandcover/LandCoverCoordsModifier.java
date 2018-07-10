@@ -68,12 +68,12 @@ import org.opengis.feature.simple.SimpleFeature;
  * </p>
  */
 
-public class CORINELandCoverCoordsModifier {
+public class LandCoverCoordsModifier {
 
-    private static final Logger LOG = Logger.getLogger(CORINELandCoverCoordsModifier.class);
+    private static final Logger LOG = Logger.getLogger(LandCoverCoordsModifier.class);
     private static final Coord fakeCoord = new Coord(-1, -1);
 
-    private final LandCoverData corineLandCoverData;
+    private final LandCoverData landCoverData;
     private final Population population;
 
     private final Map<String, Geometry> zoneFeatures = new HashMap<>();
@@ -81,10 +81,10 @@ public class CORINELandCoverCoordsModifier {
     private final boolean sameHomeActivity;
     private final String homeActivityPrefix;
 
-    public CORINELandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
-                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix, DataSource dataSource) {
+    public LandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
+                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix, String dataSource) {
 
-    	this.corineLandCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, dataSource);
+    	this.landCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, DataSource.valueOf(dataSource));
         LOG.info("Loading population from plans file " + matsimPlans);
         this.population = getPopulation(matsimPlans);
 
@@ -139,7 +139,7 @@ public class CORINELandCoverCoordsModifier {
         boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
         String homeActivityPrefix = "home";
-        DataSource dataSource = DataSource.Corine;
+        String dataSource = DataSource.Corine.toString();
 
         int thresholdForPointInsideLandUseGeoms = 10000;
         
@@ -155,7 +155,7 @@ public class CORINELandCoverCoordsModifier {
             sameHomeActivity = Boolean.valueOf(args[8]);
             homeActivityPrefix = args[9];
             outPlans = args[10];
-            dataSource = DataSource.valueOf(args[11]);
+            dataSource = args[11];
             thresholdForPointInsideLandUseGeoms = Integer.parseInt(args[12]);
         }
 
@@ -163,7 +163,7 @@ public class CORINELandCoverCoordsModifier {
         shapeFileToFeatureKey.put(zoneFile, zoneIdTag);
 //        shapeFileToFeatureKey.put(spatialRefinementShapeFile, featureKeySpatialRefinement);
 
-        CORINELandCoverCoordsModifier plansFilterForCORINELandCover = new CORINELandCoverCoordsModifier(matsimPlans,
+        LandCoverCoordsModifier plansFilterForCORINELandCover = new LandCoverCoordsModifier(matsimPlans,
                 shapeFileToFeatureKey,
                 corineLandCoverFile,
                 simplifyGeom,
@@ -230,14 +230,14 @@ public class CORINELandCoverCoordsModifier {
                             if (homeLocationCoord==null) {
                                 Point point = MGC.coord2Point(coord);
                                 if (activityType.startsWith(this.homeActivityPrefix)) {
-                                    if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.home, point) ){
+                                    if (! landCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.home, point) ){
                                         coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.home);
                                     }
                                     homeLocationCoord = coord;
                                     homeActivityName = activityType;
 
                                 } else {
-                                    if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
+                                    if (! landCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
                                         coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
                                     }
                                 }
@@ -246,7 +246,7 @@ public class CORINELandCoverCoordsModifier {
                                 coord = homeLocationCoord;
                             } else {
                                 Point point = MGC.coord2Point(coord);
-                                if (! corineLandCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
+                                if (! landCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
                                     coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
                                 }
                                 activity.setCoord(coord);
@@ -278,7 +278,7 @@ public class CORINELandCoverCoordsModifier {
                                          .findFirst()
                                          .map(this.zoneFeatures::get)
                                          .orElse(null);
-        return corineLandCoverData.getRandomCoord(zone, activityType);
+        return landCoverData.getRandomCoord(zone, activityType);
     }
 
     /**
@@ -297,7 +297,7 @@ public class CORINELandCoverCoordsModifier {
         		LOG.warn(point.toString() + " / " + activityType + " not reassigned (Activity coordinates are outside given shape zone.");
         		return MGC.point2Coord(point);
         } else {
-            return corineLandCoverData.getRandomCoord(zone, activityType);
+            return landCoverData.getRandomCoord(zone, activityType);
         }
     }
 
@@ -308,6 +308,6 @@ public class CORINELandCoverCoordsModifier {
     }
     
     public void setThresholdForPointInsideLandUseGeoms(int threshold) {
-    	this.corineLandCoverData.setThresholdForPointInsideLandUseGeoms(threshold);
+    	this.landCoverData.setThresholdForPointInsideLandUseGeoms(threshold);
     }
 }
