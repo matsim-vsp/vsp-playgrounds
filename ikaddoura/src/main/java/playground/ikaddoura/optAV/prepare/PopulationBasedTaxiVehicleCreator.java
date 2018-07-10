@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -59,9 +60,9 @@ import com.vividsolutions.jts.io.WKTReader;
  */
 public class PopulationBasedTaxiVehicleCreator {
 
-	private String networkFile = "/Users/ihab/Desktop/ils4/kaddoura/optAV/input/be_251.output_network.xml.gz";
+	private String networkFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/network/berlin-5.0_network.xml.gz";
 	private String shapeFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/Planungsraum.shp";
-	private String vehiclesFilePrefix = "/Users/ihab/Documents/workspace/shared-svn/studies/jbischoff/berlin-internalisation/vehicles_be_251/v";
+	private String vehiclesFilePrefix = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/taxi/v";
 	private String populationData = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/bevoelkerung.txt";
 	
 	private Scenario scenario ;
@@ -72,7 +73,7 @@ public class PopulationBasedTaxiVehicleCreator {
     CoordinateTransformation ct; 
 
 	public static void main(String[] args) {
-		for (int i = 0; i<=100000 ; i=i+10000 ){
+		for (int i = 0; i<=50000 ; i=i+5000 ){
 			PopulationBasedTaxiVehicleCreator tvc = new PopulationBasedTaxiVehicleCreator();
 			System.out.println(i);
 			tvc.run(i);
@@ -83,6 +84,16 @@ public class PopulationBasedTaxiVehicleCreator {
 				
 		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
+		
+		// change nodes in a way that pt links are not taken into consideration
+		
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			if (link.getId().toString().startsWith("pt_")) {
+				link.getFromNode().setCoord(new Coord(4449458.462246102,4708888.241959611));
+				link.getToNode().setCoord(new Coord(4449458.462246102,4708888.241959611));
+			}
+		}
+		
 		this.geometry = readShapeFileAndExtractGeometry(shapeFile, "SCHLUESSEL");	
 		this.wrs = new WeightedRandomSelection<>();
 		this.ct = TransformationFactory.getCoordinateTransformation("EPSG:25833", TransformationFactory.DHDN_GK4);
