@@ -140,7 +140,7 @@ public class LandCoverData {
                         || activityType.equals(LandCoverUtils.LandCoverActivityType.home) ) {
                     landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
                     landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
-            } else {
+                } else {
                     if (warnCnt < 5 ) {
                         LOGGER.warn("A random point is desired for activity type "+ activityType+ ". However, the CORINE landcover data is categorized only for 'home' and 'other' activity types.");
                         warnCnt++;
@@ -150,11 +150,13 @@ public class LandCoverData {
                     landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(LandCoverUtils.LandCoverActivityType.other);
                 }
                 break;
+                
+            //note: this piece of code assumes that UrbanAtlas contains all activityTypes mentioned in LandCoverUtils.LandCoverActivityType
             case UrbanAtlas:
                 landUseGeom =  this.activityType2CombinedLandcoverZone.get(activityType) ;
                 landUseGeoms = this.activityTypes2ListOfLandCoverZones.get(activityType);
                 break;
-                default: throw new RuntimeException("not implemented yet.");
+            default: throw new RuntimeException("not implemented yet.");
         }
 
 
@@ -213,5 +215,9 @@ public class LandCoverData {
     
     public void setThresholdForPointInsideLandUseGeoms(int threshold) {
     	this.thresholdForPointInsideLandUseGeoms = threshold;
+    }
+    
+    public LandCoverUtils getLandCoverUtils() {
+    	return this.landCoverUtils;
     }
 }

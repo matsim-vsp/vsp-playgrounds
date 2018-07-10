@@ -27,6 +27,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import playground.vsp.corineLandcover.LandCoverUtils.DataSource;
+import playground.vsp.corineLandcover.LandCoverUtils.LandCoverActivityType;
 import playground.vsp.openberlinscenario.cemdap.output.Cemdap2MatsimUtils;
 import playground.vsp.openberlinscenario.cemdap.output.CemdapOutput2MatsimPlansConverter;
 
@@ -79,10 +80,11 @@ public class LandCoverCoordsModifier {
     private final Map<String, Geometry> zoneFeatures = new HashMap<>();
 
     private final boolean sameHomeActivity;
-    private final String homeActivityPrefix;
+    
+    private Map<String,LandCoverUtils.LandCoverActivityType> activityPrefixes = new HashMap<String,LandCoverUtils.LandCoverActivityType>();
 
     public LandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
-                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String homeActivityPrefix, String dataSource) {
+                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String dataSource) {
 
     	this.landCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, DataSource.valueOf(dataSource));
         LOG.info("Loading population from plans file " + matsimPlans);
@@ -108,7 +110,8 @@ public class LandCoverCoordsModifier {
         this.sameHomeActivity = sameHomeActivity;
         if (this.sameHomeActivity) LOG.info("Home activities for a person will be at the same location.");
         
-        this.homeActivityPrefix = homeActivityPrefix;
+        this.activityPrefixes.put("home", LandCoverActivityType.home);
+        this.activityPrefixes.put("other", LandCoverActivityType.other);
     }
 
     public static void main(String[] args) {
@@ -131,17 +134,16 @@ public class LandCoverCoordsModifier {
 //        String featureKeySpatialRefinement = "plz";
         
         String matsimPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/input/be_400_c_10pct_person_freight.tempelhofCut.xml.gz";
-        String outPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/be_400_c_10pct_person_freight.tempelhofCut_MODIFIED_corine_10000.xml.gz";
+        String outPlans = "C:/Users/Work/VSP/urbanAtlasBerlin/troubleShooting/plans/be_400_c_10pct_person_freight.tempelhofCut_MODIFIED_corine_100.xml.gz";
 
     	
     	
-    	boolean simplifyGeom = true;
+    	boolean simplifyGeom = false;
         boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
-        String homeActivityPrefix = "home";
+        
         String dataSource = DataSource.Corine.toString();
-
-        int thresholdForPointInsideLandUseGeoms = 10000;
+        int thresholdForPointInsideLandUseGeoms = 100;
         
         if (args.length > 0) {
             corineLandCoverFile = args[0];
@@ -153,7 +155,6 @@ public class LandCoverCoordsModifier {
             simplifyGeom = Boolean.valueOf(args[6]);
             combiningGeoms = Boolean.valueOf(args[7]);
             sameHomeActivity = Boolean.valueOf(args[8]);
-            homeActivityPrefix = args[9];
             outPlans = args[10];
             dataSource = args[11];
             thresholdForPointInsideLandUseGeoms = Integer.parseInt(args[12]);
@@ -163,19 +164,23 @@ public class LandCoverCoordsModifier {
         shapeFileToFeatureKey.put(zoneFile, zoneIdTag);
 //        shapeFileToFeatureKey.put(spatialRefinementShapeFile, featureKeySpatialRefinement);
 
-        LandCoverCoordsModifier plansFilterForCORINELandCover = new LandCoverCoordsModifier(matsimPlans,
+        LandCoverCoordsModifier plansFilterByLandCover = new LandCoverCoordsModifier(matsimPlans,
                 shapeFileToFeatureKey,
                 corineLandCoverFile,
                 simplifyGeom,
                 combiningGeoms,
                 sameHomeActivity,
-                homeActivityPrefix,
                 dataSource);
         
+        //set all activity prefixes
+        plansFilterByLandCover.addToActivityPrefixMap("shopping", LandCoverActivityType.shopping);
+        plansFilterByLandCover.addToActivityPrefixMap("work", LandCoverActivityType.work);
+        plansFilterByLandCover.addToActivityPrefixMap("leisure", LandCoverActivityType.leisure);
+        
         LOG.info("setting thresholdForPointInsideLandUseGeoms to " + thresholdForPointInsideLandUseGeoms);
-        plansFilterForCORINELandCover.setThresholdForPointInsideLandUseGeoms(thresholdForPointInsideLandUseGeoms);
-        plansFilterForCORINELandCover.process();
-        plansFilterForCORINELandCover.writePlans(outPlans);
+        plansFilterByLandCover.setThresholdForPointInsideLandUseGeoms(thresholdForPointInsideLandUseGeoms);
+        plansFilterByLandCover.process();
+        plansFilterByLandCover.writePlans(outPlans);
     }
 
     public void process() {
@@ -204,58 +209,71 @@ public class LandCoverCoordsModifier {
                             String zoneId = (String) activity.getAttributes().getAttribute(
                                     CemdapOutput2MatsimPlansConverter.activityZoneId_attributeKey);
 
-                            if (homeLocationCoord==null) {
-                                if ( activityType.startsWith(this.homeActivityPrefix) ) {
-                                    coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.home, zoneId);
-
-                                    homeLocationCoord = coord;
-                                    homeActivityName = activityType;
-                                } else {
-                                    Log.warn("First activity is not a home activity...");
-                                    coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.other, zoneId);
-                                }
-                            } else if (activityType.equals(homeActivityName) && sameHomeActivity) {
-                                // same home activity, just take the stored coord
-                                coord = homeLocationCoord;
-
-                            } else {
-                                coord = getRandomCoord(LandCoverUtils.LandCoverActivityType.other, zoneId);
+                            
+                            for(String activityPrefix: this.activityPrefixes.keySet()) {
+                            	if(activityType.startsWith(activityPrefix)) {
+                            		LandCoverUtils.LandCoverActivityType actType = this.activityPrefixes.get(activityPrefix); 
+                            		
+                            		if(actType.equals(LandCoverUtils.LandCoverActivityType.home) &&
+                            				sameHomeActivity &&
+                            				homeLocationCoord!=null) {
+                            				coord = homeLocationCoord;
+                            				break;
+                            		} else {
+                            			if(this.landCoverData.getLandCoverUtils().getDataSource().equals(LandCoverUtils.DataSource.Corine)
+                            					&& !actType.equals(LandCoverUtils.LandCoverActivityType.home)
+                            					) {
+                            				coord = getRandomCoord(LandCoverActivityType.other, zoneId);
+                            			} else {
+                            				coord = getRandomCoord(actType, zoneId);
+                            			}
+                            		}
+                            		
+                            		if(actType.equals(LandCoverUtils.LandCoverActivityType.home)) {
+                            			homeLocationCoord = coord;
+                                        homeActivityName = activityType;
+                            		} else {
+                                        Log.warn("First activity is not a home activity in plan of person " + person.getId());
+                                    }
+                            		break;
+                            	}
                             }
-
-                            activity.setCoord(coord);
                             activity.setType(activityType);
                         }
                         else {
                             // a regular coord --> check and reassign coord if required.
-                            if (homeLocationCoord==null) {
                                 Point point = MGC.coord2Point(coord);
-                                if (activityType.startsWith(this.homeActivityPrefix)) {
-                                    if (! landCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.home, point) ){
-                                        coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.home);
-                                    }
-                                    homeLocationCoord = coord;
-                                    homeActivityName = activityType;
-
-                                } else {
-                                    if (! landCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
-                                        coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
-                                    }
+                                
+                                for(String activityPrefix: this.activityPrefixes.keySet()) {
+                                	if(activityType.startsWith(activityPrefix)) {
+                                		LandCoverUtils.LandCoverActivityType actType = this.activityPrefixes.get(activityPrefix); 
+                                		if(this.landCoverData.getLandCoverUtils().getDataSource().equals(LandCoverUtils.DataSource.Corine) 
+                                				&& !actType.equals(LandCoverUtils.LandCoverActivityType.home)) {
+                                			actType = LandCoverUtils.LandCoverActivityType.other;
+                                		}
+                                		
+                                		if(actType.equals(LandCoverUtils.LandCoverActivityType.home) &&
+                                				sameHomeActivity &&
+                                				homeLocationCoord!=null) {
+                                				coord = homeLocationCoord;
+                                				break;
+                                		}
+                                		
+                                		if (! landCoverData.isPointInsideLandCover(actType, point) ){
+                                			coord = reassignCoord(point, actType);
+                                		}
+                                		if(actType.equals(LandCoverUtils.LandCoverActivityType.home)) {
+                                			homeLocationCoord = coord;
+                                            homeActivityName = activityType;
+                                		}
+                                		break;
+                                	}
                                 }
-                            } else if ( activityType.equals(homeActivityName) && sameHomeActivity) {
-                                // same home activity, just take the stored coord
-                                coord = homeLocationCoord;
-                            } else {
-                                Point point = MGC.coord2Point(coord);
-                                if (! landCoverData.isPointInsideLandCover(LandCoverUtils.LandCoverActivityType.other, point) ){
-                                    coord = reassignCoord(point, LandCoverUtils.LandCoverActivityType.other);
-                                }
-                                activity.setCoord(coord);
                             }
                             activity.setCoord(coord);
                         }
                     }
                 }
-            }
             personCounter++;
         }
         LOG.info("Finished processing.");
@@ -309,5 +327,13 @@ public class LandCoverCoordsModifier {
     
     public void setThresholdForPointInsideLandUseGeoms(int threshold) {
     	this.landCoverData.setThresholdForPointInsideLandUseGeoms(threshold);
+    }
+    
+    public void setActivityPrefixMap(Map<String, LandCoverActivityType> prefixMap) {
+    	this.activityPrefixes = prefixMap;
+    }
+    
+    public void addToActivityPrefixMap(String prefix, LandCoverUtils.LandCoverActivityType type) {
+    	this.activityPrefixes.put(prefix, type);
     }
 }
