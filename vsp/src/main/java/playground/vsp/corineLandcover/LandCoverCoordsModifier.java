@@ -84,9 +84,9 @@ public class LandCoverCoordsModifier {
     private Map<String,LandCoverUtils.LandCoverActivityType> activityPrefixes = new HashMap<String,LandCoverUtils.LandCoverActivityType>();
 
     public LandCoverCoordsModifier(String matsimPlans, Map<String, String> shapeFileToFeatureKey, String CORINELandCoverFile,
-                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, String dataSource) {
+                                         boolean simplifyGeoms, boolean combiningGeoms, boolean sameHomeActivity, DataSource dataSource) {
 
-    	this.landCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, DataSource.valueOf(dataSource));
+    	this.landCoverData = new LandCoverData(CORINELandCoverFile, simplifyGeoms, combiningGeoms, dataSource);
         LOG.info("Loading population from plans file " + matsimPlans);
         this.population = getPopulation(matsimPlans);
 
@@ -142,7 +142,7 @@ public class LandCoverCoordsModifier {
         boolean combiningGeoms = false;
         boolean sameHomeActivity = true;
         
-        String dataSource = DataSource.Corine.toString();
+        DataSource dataSource = DataSource.Corine;
         int thresholdForPointInsideLandUseGeoms = 100;
         
         if (args.length > 0) {
@@ -156,7 +156,7 @@ public class LandCoverCoordsModifier {
             combiningGeoms = Boolean.valueOf(args[7]);
             sameHomeActivity = Boolean.valueOf(args[8]);
             outPlans = args[10];
-            dataSource = args[11];
+            dataSource = DataSource.valueOf(args[11]);
             thresholdForPointInsideLandUseGeoms = Integer.parseInt(args[12]);
         }
 

@@ -45,7 +45,7 @@ public class RunCorineLandCoverCoordsModifier {
 	    shapeFileToFeatureKey.put(zonalShapeFile, zoneIdTag);
 	
 	    LandCoverCoordsModifier plansFilterForCORINELandCover = new LandCoverCoordsModifier(inputPlansFile, shapeFileToFeatureKey,
-	            corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity, homeActivityPrefix, DataSource.Corine.toString());
+	            corineLandCoverFile, simplifyGeom, combiningGeoms, sameHomeActivity, DataSource.Corine);
 	    plansFilterForCORINELandCover.process();
 	    plansFilterForCORINELandCover.writePlans(outputPlansFile);
     }
