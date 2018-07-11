@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import javax.inject.Inject;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -104,7 +105,7 @@ public class CountsAndModalDistanceCadytsIT {
      * since this is where functionality comes from
      * tschlenther june '18 
      */
-    @Test
+    @Test@Ignore
     public final void nemoModeLocationChoiceTest() {
         double beelineDistanceFactorForNetworkModes = 1.0;
 
