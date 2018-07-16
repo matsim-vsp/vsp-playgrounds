@@ -128,7 +128,7 @@ public class ModalShareEventHandler implements PersonDepartureEventHandler, Tran
 	}
 
 	private String getMainMode(List<String> modes){
-		if (modes.size()==1) return modes.get(0);
+		if (modes.size()==1) return modes.get(0).equals(TransportMode.transit_walk) ? TransportMode.walk: modes.get(0);
 		else if (modes.contains(TransportMode.transit_walk)) {
 			if (modes.contains(TransportMode.pt)) return TransportMode.pt;
 			else return TransportMode.walk;
