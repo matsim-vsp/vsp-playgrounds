@@ -66,8 +66,6 @@ public class ModalShareFromEvents implements ModalShare {
 		reader.readFile(this.eventsFile);
 		this.mode2numberOflegs = this.mseh.getMode2numberOflegs();
 		this.mode2PctOflegs = MapUtils.getIntPercentShare(this.mode2numberOflegs);
-		
-		this.mseh.handleRemainingTransitUsers();
 	}
 
 	@Override

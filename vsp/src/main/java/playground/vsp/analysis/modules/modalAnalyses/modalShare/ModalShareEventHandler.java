@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
@@ -38,25 +37,25 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.pt.PtConstants;
+import org.matsim.core.router.StageActivityTypes;
 
 /**
  * If someone starts with transit_walk leg, and do not use pt before starting a regular act (home/work/leis/shop); it is walk
  * else it is pt mode.
  * @author amit
  */
-public class ModalShareEventHandler implements PersonDepartureEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHandler, PersonStuckEventHandler {
+public class ModalShareEventHandler implements PersonDepartureEventHandler, TransitDriverStartsEventHandler, ActivityStartEventHandler, PersonStuckEventHandler, StageActivityTypes {
 
 	private final SortedMap<String, Integer> mode2numberOflegs = new TreeMap<>();
 	private final List<Id<Person>> transitDriverPersons = new ArrayList<>();
 	// agents who first departs with transitWalk and their subsequent modes are stored here until it starts a regular act (home/work/leis/shop)
-	private final Map<Id<Person>, List<String>> modesForTransitUsers = new HashMap<>(); 
+	private final Map<Id<Person>, List<String>> person2Modes = new HashMap<>();
 
 	@Override
 	public void reset(int iteration) {
 		this.mode2numberOflegs.clear();
 		this.transitDriverPersons.clear();
-		this.modesForTransitUsers.clear();
+		this.person2Modes.clear();
 	}
 
 	@Override
@@ -66,21 +65,13 @@ public class ModalShareEventHandler implements PersonDepartureEventHandler, Tran
 
 		if( transitDriverPersons.remove(personId) ) {
 			// transit driver drives "car" which should not be counted in the modal share.
-		} else {
-			if(legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ) { 
-				// transit_walk - transit_walk || transit_walk - pt
-				if(modesForTransitUsers.containsKey(personId)) {
-					List<String> modes = modesForTransitUsers.get(personId);
-					modes.add(legMode);
-				} else {
-					List<String> modes = new ArrayList<>();
-					modes.add(legMode);
-					modesForTransitUsers.put(personId, modes);
-				}
-			} else {
-				storeMode(legMode);
-			}
+			return;
 		}
+
+		//at this point, it could be main leg (e.g. car/bike) or start of a stage activity (e.g. car/pt interaction)
+		List<String> usedModes = person2Modes.getOrDefault(event.getPersonId(), new ArrayList<>());
+		usedModes.add(event.getLegMode());
+		person2Modes.put(event.getPersonId(), usedModes);
 	}
 
 	@Override
@@ -90,24 +81,23 @@ public class ModalShareEventHandler implements PersonDepartureEventHandler, Tran
 
 	@Override
 	public void handleEvent(ActivityStartEvent event) {
-		if( modesForTransitUsers.containsKey(event.getPersonId()) ) {
-			if(! event.getActType().equals(PtConstants.TRANSIT_ACTIVITY_TYPE) ) { 
-				List<String> modes = modesForTransitUsers.remove(event.getPersonId());
-				String legMode = modes.contains(TransportMode.pt) ? TransportMode.pt : TransportMode.walk;
+		if( person2Modes.containsKey(event.getPersonId()) ) {
+			if( ! isStageActivity(event.getActType()) ) {
+				String legMode = getMainMode(person2Modes.remove(event.getPersonId()));
 				storeMode(legMode);
 			} else { 
-				// else continue
+				// else continue storing leg modes
 			}
 		} else {
-			// nothing to do
+			throw new RuntimeException("Person "+event.getPersonId()+" is not registered.");
 		}
 	}
 
 	@Override
 	public void handleEvent(PersonStuckEvent event) {
-		if( modesForTransitUsers.containsKey( event.getPersonId()) ) { 
+		if( person2Modes.containsKey( event.getPersonId()) ) {
 			// since mode for transit users is determined at activity start, so storing mode for stuck agents so that, these can be handeled later.
-			List<String> modes = modesForTransitUsers.get(event.getPersonId());
+			List<String> modes = person2Modes.get(event.getPersonId());
 			modes.add(event.getLegMode());
 		}
 	}
@@ -116,19 +106,45 @@ public class ModalShareEventHandler implements PersonDepartureEventHandler, Tran
 		mode2numberOflegs.merge(legMode, 1, (a, b) -> a + b);
 	}
 
-	public void handleRemainingTransitUsers(){
-		if(!modesForTransitUsers.isEmpty()) {
-			Logger.getLogger(ModalShareEventHandler.class).warn("A few transit users are not handle due to stuckAndAbort. Handling them now.");
-			for(Id<Person> pId : modesForTransitUsers.keySet()){
-				List<String> modes = modesForTransitUsers.get(pId);
-				String legMode = modes.contains(TransportMode.pt) ? TransportMode.pt : TransportMode.walk;
-				storeMode(legMode);
-			}
-			modesForTransitUsers.clear();
+	private void handleRemainingTransitUsers(){
+		Logger.getLogger(ModalShareEventHandler.class).warn("A few transit users are not handle due to stuckAndAbort. Handling them now.");
+		for(Id<Person> pId : person2Modes.keySet()){
+			String legMode = getMainMode(person2Modes.get(pId));
+			storeMode(legMode);
 		}
+		person2Modes.clear();
 	}
 
 	public SortedMap<String, Integer> getMode2numberOflegs() {
+		if (!person2Modes.isEmpty()) {
+			handleRemainingTransitUsers();
+		}
 		return mode2numberOflegs;
+	}
+
+	@Override
+	public boolean isStageActivity(String actType){
+		return actType.endsWith("interaction");
+	}
+
+	private String getMainMode(List<String> modes){
+		if (modes.size()==1) return modes.get(0);
+		else if (modes.contains(TransportMode.transit_walk)) {
+			if (modes.contains(TransportMode.pt)) return TransportMode.pt;
+			else return TransportMode.walk;
+
+		} else if (modes.contains(TransportMode.car)) return TransportMode.car;
+		else if (modes.contains(TransportMode.bike)) return TransportMode.bike;
+		else if (modes.contains(TransportMode.walk)) return TransportMode.walk;
+		else if (modes.contains(TransportMode.ride)) return TransportMode.ride;
+		else {
+
+			new ArrayList<>(modes).stream().filter(m->m.startsWith("access")||m.startsWith("egress")).forEach(modes::remove);
+
+			if (modes.size()==0) return TransportMode.walk;
+			else if (modes.size()==1) return modes.get(0);
+			else throw new RuntimeException("Unknown mode(s) "+ modes.toString());
+
+		}
 	}
 }
