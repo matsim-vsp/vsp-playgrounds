@@ -78,7 +78,6 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 	
 	public void init(MutableScenario scenario) {
 		this.scenario = scenario;
-		this.emissionUtils = new EmissionUtils();
 		this.warmHandler = new EmissionsPerPersonWarmEventHandler();
 		this.coldHandler = new EmissionsPerPersonColdEventHandler();
 	}
@@ -105,8 +104,8 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 	public void postProcessData() {
 		this.person2warmEmissions = this.warmHandler.getWarmEmissionsPerPerson();
 		this.person2coldEmissions = this.coldHandler.getColdEmissionsPerPerson();
-		this.person2totalEmissions = this.emissionUtils.sumUpEmissionsPerId(person2warmEmissions, person2coldEmissions);
-		this.totalEmissions = this.emissionUtils.getTotalEmissions(this.person2totalEmissions);
+		this.person2totalEmissions = EmissionUtils.sumUpEmissionsPerId(person2warmEmissions, person2coldEmissions);
+		this.totalEmissions = EmissionUtils.getTotalEmissions(this.person2totalEmissions);
 	}
 
 	// TODO: should probably also write out person2totalEmissions...
@@ -118,7 +117,7 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
-			for(String pollutant : emissionUtils.getListOfPollutants()){
+			for(String pollutant : EmissionUtils.getListOfPollutants()){
 				bw.write(pollutant + "\t");
 			}
 			bw.newLine();

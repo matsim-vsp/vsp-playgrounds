@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
+import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -92,7 +93,7 @@ public class PatnaEmissionsAnalyzer {
 //            throw new RuntimeException("Data is not written/read. Reason : " + e);
 //        }
 
-        Map<Id<Vehicle>, SortedMap<String, Double>> vehicle2totalEmissions = emissionUtilsExtended.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
+        Map<Id<Vehicle>, SortedMap<String, Double>> vehicle2totalEmissions = EmissionUtils.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
         SortedMap<String, SortedMap<String, Double>> mode2emissions=  getModalEmissions(vehicle2totalEmissions);
 
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);

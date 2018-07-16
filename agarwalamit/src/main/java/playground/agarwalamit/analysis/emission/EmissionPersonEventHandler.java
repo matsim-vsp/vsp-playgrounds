@@ -35,6 +35,7 @@ import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.contrib.emissions.types.ColdPollutant;
 import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.vehicles.Vehicle;
 
 /**
@@ -153,12 +154,11 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
     public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2TotalEmissions(){
         EmissionUtilsExtended emissionUtilsExtended = new EmissionUtilsExtended();
         return this.vehicleId2WarmEmissions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
-                emissionUtilsExtended.sumUpEmissions(entry.getValue(), this.vehicleId2ColdEmissions.get(entry.getKey()))));
+                EmissionUtils.sumUpEmissions(entry.getValue(), this.vehicleId2ColdEmissions.get(entry.getKey()))));
     }
 
     public Map<Id<Person>, Map<String, Double>> getPersonId2TotalEmissions(){
-        EmissionUtilsExtended emissionUtilsExtended = new EmissionUtilsExtended();
         return this.personId2WarmEmissions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
-                emissionUtilsExtended.sumUpEmissions(entry.getValue(), this.personId2ColdEmissions.get(entry.getKey()))));
+                EmissionUtils.sumUpEmissions(entry.getValue(), this.personId2ColdEmissions.get(entry.getKey()))));
     }
 }

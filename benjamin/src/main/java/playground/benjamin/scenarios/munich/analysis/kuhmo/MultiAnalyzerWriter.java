@@ -56,7 +56,6 @@ public class MultiAnalyzerWriter {
 		this.outputDir = new File(outputPath + "analysis");
 		this.outputDir.mkdir();
 		
-		emissionUtils = new EmissionUtils();
 		personFilter = new PersonFilter();
 	}
 

@@ -163,9 +163,8 @@ public class DelaysAndEmissionCostsDiff {
 		ema.init((MutableScenario)sc);
 		ema.preProcessData();
 		ema.postProcessData();
-		EmissionUtils emu = new EmissionUtils();
 		Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-		Map<Id<Person>, SortedMap<String, Double>> personId2Emissions = emu.setNonCalculatedEmissionsForPopulation(sc.getPopulation(), totalEmissions);
+		Map<Id<Person>, SortedMap<String, Double>> personId2Emissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(sc.getPopulation(), totalEmissions);
 		Map<Id<Person>, Double> personId2EmissionsCosts= new HashMap<>();
 		boolean considerCO2Costs = true;
 

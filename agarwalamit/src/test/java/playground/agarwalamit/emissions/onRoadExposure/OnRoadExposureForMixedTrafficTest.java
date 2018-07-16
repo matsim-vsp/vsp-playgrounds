@@ -43,6 +43,7 @@ import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.utils.EmissionSpecificationMarker;
+import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -286,10 +287,10 @@ public class OnRoadExposureForMixedTrafficTest {
 
         @Override
         public void handleEvent(ColdEmissionEvent event) {
-            Map<String, Double> emiss = emissionUtilsExtended.convertColdPollutantMap2String(event.getColdEmissions())
-                                                             .entrySet()
-                                                             .stream()
-                                                             .collect(Collectors.toMap(e -> e.getKey(),
+            Map<String, Double> emiss = EmissionUtils.convertColdPollutantMap2String(event.getColdEmissions())
+                                                     .entrySet()
+                                                     .stream()
+                                                     .collect(Collectors.toMap(e -> e.getKey(),
                                                                      e -> e.getValue() / this.network.getLinks()
                                                                                                      .get(event.getLinkId())
                                                                                                      .getLength()));
@@ -315,7 +316,7 @@ public class OnRoadExposureForMixedTrafficTest {
 
         @Override
         public void handleEvent(WarmEmissionEvent event) {
-            Map<String, Double> emiss = emissionUtilsExtended.convertWarmPollutantMap2String(event.getWarmEmissions())
+            Map<String, Double> emiss = EmissionUtils.convertWarmPollutantMap2String(event.getWarmEmissions())
                                                              .entrySet()
                                                              .stream()
                                                              .collect(Collectors.toMap(e -> e.getKey(),

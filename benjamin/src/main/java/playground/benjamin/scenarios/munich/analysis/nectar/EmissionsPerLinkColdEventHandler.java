@@ -51,7 +51,6 @@ public class EmissionsPerLinkColdEventHandler implements
 			int noOfTimeBins) {
 		this.noOfTimeBins = noOfTimeBins;
 		this.timeBinSize = simulationEndTime / noOfTimeBins;
-		this.emissionUtils = new EmissionUtils();
 	}
 
 	@Override
