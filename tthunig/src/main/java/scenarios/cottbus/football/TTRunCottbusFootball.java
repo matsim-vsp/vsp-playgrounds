@@ -36,6 +36,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -51,6 +52,7 @@ import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFan
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerConfig.Regime;
+import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
 import signals.sylvia.controler.DgSylviaConfig;
 import utils.ModifyNetwork;
 
@@ -61,17 +63,17 @@ import utils.ModifyNetwork;
 public class TTRunCottbusFootball {
 	private static final Logger LOG = Logger.getLogger(TTRunCottbusFootball.class);
 	
-	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, NONE};
+	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, LAEMMER_NICO_GROUPS_14RE, LAEMMER_FLEXIBLE, NONE};
 	private static final SignalControl CONTROL_TYPE = SignalControl.SYLVIA;
 	private static final boolean CHECK_DOWNSTREAM = false;
 	
 	private static final boolean LONG_LANES = true;	
-	private static final double FLOW_CAP = 1.;
-	private static final int STUCK_TIME = 600;
-	private static final int TBS = 10;
+	private static final double FLOW_CAP = .7;
+	private static final int STUCK_TIME = 120;
+	private static final int TBS = 900;
 	private static final String SIGNALS_BASE_CASE = "MS"; // the signals that were used for the base case plans
 //	private static final String SIGNALS_BASE_CASE = "MSideal"; // the signals that were used for the base case plans
-	private static final String NETWORK = "V1"; //"V1-2";
+	private static final String NETWORK = "V4"; //"V1-2";
 	private static final double EARLIEST_ARRIVAL_TIME_AT_STADIUM = 17 * 3600; // studies by DG and JB were made with 17. in contrast 16.5 will result in more interaction with the evening peak.
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {		
@@ -90,12 +92,34 @@ public class TTRunCottbusFootball {
 		}
 		baseConfig.controler().setLastIteration(0);
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		
+		if (NETWORK.equals("V1-2")) {
+			// modify the network and lanes file
+			baseConfig.network().setInputFile("network_wgs84_utm33n_link10284andReverseMerged.xml");
+			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
+		} else if (NETWORK.equals("V4")) {
+			// modify network and lanes:
+			baseConfig.network().setInputFile("network_wgs84_utm33n_v4.xml");
+			baseConfig.network().setLaneDefinitionsFile("lanes_v1-4.xml");
+			
+			// base signal files:
+			signalsConfigGroup.setSignalControlFile("signal_control_no_13_v4.xml");
+			signalsConfigGroup.setSignalGroupsFile("signal_groups_no_13_v4.xml");
+			signalsConfigGroup.setSignalSystemFile("signal_systems_no_13_v4.xml");
+			signalsConfigGroup.setConflictingDirectionsFile("conflictData_fromBtu2018-05-03_basedOnMSconflicts_v4_modifiedBasedOnMS.xml");
+			signalsConfigGroup.setIntersectionLogic(IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS);
+		}
+		
 		switch (CONTROL_TYPE){
 		case FIXED_IDEAL:
 			signalsConfigGroup.setSignalControlFile("signal_control_no_13_idealized.xml");
 			break;
 		case SYLVIA:
-			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13.xml");
+			if (NETWORK.equals("V4")) {
+				signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13_v4.xml");
+			} else { // V1 or V1-2
+				signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13.xml");
+			}
 			break;
 		case SYLVIA_IDEAL:
 			signalsConfigGroup.setSignalControlFile("signal_control_sylvia_no_13_idealized.xml");
@@ -110,6 +134,21 @@ public class TTRunCottbusFootball {
 			signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
 			signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmer_doublePhases.xml");
 			break;
+		case LAEMMER_NICO_GROUPS_14RE:
+			if (NETWORK.equals("V4")) {
+				signalsConfigGroup.setSignalControlFile("signal_control_laemmer.xml");
+				signalsConfigGroup.setSignalGroupsFile("signal_groups_laemmerNico_14restructurePhases_v4.xml");
+			} else {
+				throw new UnsupportedOperationException("not yet supported");
+			}
+			break;
+		case LAEMMER_FLEXIBLE:
+			if (NETWORK.equals("V4")) {
+				signalsConfigGroup.setSignalControlFile("signal_control_laemmer_flexible.xml");
+			} else {
+				throw new UnsupportedOperationException("not yet supported. conflicts would need to be adapted for other network versions.");
+			}
+			break;
 		case NONE:
 			signalsConfigGroup.setUseSignalSystems(false);
 			signalsConfigGroup.setSignalControlFile(null);
@@ -120,11 +159,6 @@ public class TTRunCottbusFootball {
 			break;
 		}
 		
-		if (NETWORK.equals("V1-2")) {
-			// modify the network and lanes file
-			baseConfig.network().setInputFile("network_wgs84_utm33n_link10284andReverseMerged.xml");
-			baseConfig.network().setLaneDefinitionsFile("lanes_link10284merged.xml");
-		}
 		
 		String plansFile = "cb_spn_gemeinde_nachfrage_landuse_woMines/"
 				+ "commuter_population_wgs84_utm33n_car_only_100it_"+SIGNALS_BASE_CASE+"_cap"+FLOW_CAP;
@@ -133,7 +167,6 @@ public class TTRunCottbusFootball {
 		}
 		if (NETWORK!="V1") {
 			plansFile += "_net"+NETWORK;
-			
 		}
 		baseConfig.plans().setInputFile(plansFile+".xml.gz");
 		
@@ -175,6 +208,12 @@ public class TTRunCottbusFootball {
 			break;
 		case LAEMMER_DOUBLE:
 			baseOutputDirectory+= "laemmer_doubleGroups";
+			break;
+		case LAEMMER_NICO_GROUPS_14RE:
+			baseOutputDirectory+= "laemmer_nicoGroups14re";
+			break;
+		case LAEMMER_FLEXIBLE:
+			baseOutputDirectory+= "laemmer_flexible";
 			break;
 		case NONE:
 			baseOutputDirectory+= "noSignals";
@@ -223,10 +262,11 @@ public class TTRunCottbusFootball {
 				LaemmerConfig laemmerConfig = new LaemmerConfig();
 				laemmerConfig.setDesiredCycleTime(90);
 		        laemmerConfig.setMaxCycleTime(135);
-//				laemmerConfig.setMinGreenTime(5);
+				laemmerConfig.setMinGreenTime(5);
 //				laemmerConfig.setAnalysisEnabled(true);
 //		        laemmerConfig.setActiveRegime(Regime.STABILIZING);		       
 //		        laemmerConfig.setActiveRegime(Regime.OPTIMIZING);
+				laemmerConfig.setActiveStabilizationStrategy(StabilizationStrategy.USE_MAX_LANECOUNT);
 				laemmerConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
