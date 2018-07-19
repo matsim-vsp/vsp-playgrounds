@@ -24,6 +24,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.model.AbstractSignalController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalController;
@@ -38,6 +39,7 @@ import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
+import signals.laemmer.model.util.SignalCombinationBasedOnConflicts;
 import signals.laemmer.model.util.SignalUtils;
 import signals.sensor.LinkSensorManager;
 
@@ -77,6 +79,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 	final Network network;
 	final Lanes lanes;
 	final Config config;
+	final SignalsData signalsData;
 
 	final double DEFAULT_INTERGREEN;
 	double tIdle;
@@ -134,6 +137,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		this.network = scenario.getNetwork();
 		this.lanes = scenario.getLanes();
 		this.config = scenario.getConfig();
+		this.signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		this.delayCalculator = delayCalculator;
 		if (laemmerConfig.isUseDefaultIntergreenTime()) {
 			DEFAULT_INTERGREEN = laemmerConfig.getDefaultIntergreenTime();
@@ -148,11 +152,6 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 
 	@Override
 	public void simulationInitialized(double simStartTimeSeconds) {
-		java.util.logging.Logger.getGlobal().info("initialising signalSystem "+system.getId());
-
-		if(system.getId().equals(Id.create("SignalSystem0", SignalSystem.class))){
-			this.debug = true;
-		}
 		List<Double> maximumLaneOutflows = new LinkedList<>();
 		laemmerApproaches = new LinkedList<>();
 		this.estNumOfPhases = SignalUtils.estimateNumberOfPhases(system, network, lanes);
@@ -180,11 +179,11 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		}
 		//sum the maximum n lanes for systems outflow maximum
 		maximumSystemsOutflowSum = maximumLaneOutflows.stream().sorted(Comparator.comparingDouble(Double::doubleValue).reversed()).limit(this.estNumOfPhases).collect(Collectors.summingDouble(Double::doubleValue));
-		//Phasen kombinatorisch erstellen
-		this.signalPhases = SignalUtils.createSignalPhasesFromSignalGroups(system, network, lanes);
+		// create all possible signal combinations based on conflict data
+		this.signalPhases = new SignalCombinationBasedOnConflicts(signalsData, system, network, lanes).createSignalCombinations();
 
 		if (laemmerConfig.isRemoveSubPhases()) {
-			this.signalPhases = SignalUtils.removeSubPhases(this.signalPhases);
+			this.signalPhases = SignalUtils.removeRedundantSubPhases(this.signalPhases);
 			if(debug)
 				System.out.println("after remove subphases: " + this.signalPhases.size());
 		}
