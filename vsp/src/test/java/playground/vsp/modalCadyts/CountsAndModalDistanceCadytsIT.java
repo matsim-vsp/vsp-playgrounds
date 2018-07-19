@@ -105,7 +105,7 @@ public class CountsAndModalDistanceCadytsIT {
      * since this is where functionality comes from
      * tschlenther june '18 
      */
-    @Test@Ignore
+    @Test
     public final void nemoModeLocationChoiceTest() {
         double beelineDistanceFactorForNetworkModes = 1.0;
 
@@ -156,19 +156,19 @@ public class CountsAndModalDistanceCadytsIT {
     		switch(iteration) {
     		case 5:
     			
-    				// after 5 iterations, the 2 run's don't differ at all !?
+    				// after 5 iterations, the run's output data shows no differences at all !?
     			
-    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 171, mgnHandler.bikesOnShortDistance, 0.1);	
+    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 172, mgnHandler.bikesOnShortDistance, 0.1);	
     				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 134, mgnHandler.bikesOnMediumDistance, 0.1 );	
     				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 142, mgnHandler.bikesOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 829, mgnHandler.carsOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 828, mgnHandler.carsOnShortDistance, 0.1 );	
     				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 866, mgnHandler.carsOnMediumDistance, 0.1 );	
     				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 858, mgnHandler.carsOnLongDistance, 0.1 );	
     				
     				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 145, countsHandler.linkVolumes[0], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 123, countsHandler.linkVolumes[1], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 167, countsHandler.linkVolumes[2], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 124, countsHandler.linkVolumes[1], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 166, countsHandler.linkVolumes[2], 0.1);
     				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 154, countsHandler.linkVolumes[3], 0.1);
     				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 21, countsHandler.linkVolumes[4], 0.1);
     				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 300, countsHandler.linkVolumes[5], 0.1);
@@ -194,33 +194,33 @@ public class CountsAndModalDistanceCadytsIT {
     			
     			if(this.cadytsWt == 150.0) {
 
-    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 211, mgnHandler.bikesOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 181, mgnHandler.bikesOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 130, mgnHandler.bikesOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 213, mgnHandler.bikesOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 184, mgnHandler.bikesOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 128, mgnHandler.bikesOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 789, mgnHandler.carsOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 819, mgnHandler.carsOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 870, mgnHandler.carsOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 787, mgnHandler.carsOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 816, mgnHandler.carsOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 872, mgnHandler.carsOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 103, countsHandler.linkVolumes[0], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 94, countsHandler.linkVolumes[1], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 102, countsHandler.linkVolumes[2], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 77, countsHandler.linkVolumes[3], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 300, countsHandler.linkVolumes[4], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 49, countsHandler.linkVolumes[5], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 23, countsHandler.linkVolumes[6], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 20, countsHandler.linkVolumes[7], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 133, countsHandler.linkVolumes[8], 0.1); 
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 117, countsHandler.linkVolumes[0], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 96, countsHandler.linkVolumes[1], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 91, countsHandler.linkVolumes[2], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 73, countsHandler.linkVolumes[3], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 26, countsHandler.linkVolumes[4], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 46, countsHandler.linkVolumes[5], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 21, countsHandler.linkVolumes[6], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 300, countsHandler.linkVolumes[7], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 135, countsHandler.linkVolumes[8], 0.1); 
     				
     			} else {
 
-    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 238, mgnHandler.bikesOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 216, mgnHandler.bikesOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 201, mgnHandler.bikesOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 239, mgnHandler.bikesOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 215, mgnHandler.bikesOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 202, mgnHandler.bikesOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 762, mgnHandler.carsOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 784, mgnHandler.carsOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 799, mgnHandler.carsOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 761, mgnHandler.carsOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 785, mgnHandler.carsOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 798, mgnHandler.carsOnLongDistance, 0.1 );
     				
     				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 47, countsHandler.linkVolumes[0], 0.1);
     				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 40, countsHandler.linkVolumes[1], 0.1);
@@ -228,9 +228,9 @@ public class CountsAndModalDistanceCadytsIT {
     				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 300, countsHandler.linkVolumes[3], 0.1);
     				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 61, countsHandler.linkVolumes[4], 0.1);
     				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 95, countsHandler.linkVolumes[5], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 66, countsHandler.linkVolumes[6], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 63, countsHandler.linkVolumes[7], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 164, countsHandler.linkVolumes[8], 0.1); 
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 67, countsHandler.linkVolumes[6], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 64, countsHandler.linkVolumes[7], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 162, countsHandler.linkVolumes[8], 0.1); 
     				
     			}
     			mgnAbsoluteErrorSum = mgnHandler.absoluteErrorSum;
@@ -246,53 +246,45 @@ public class CountsAndModalDistanceCadytsIT {
     			Assert.assertTrue("the sum of absolute erros for marginals calibration should be less in iteration 15 than in iteration 10. old sum = " + mgnAbsoluteErrorSum + " new sum = " + mgnHandler.absoluteErrorSum,
     					mgnHandler.absoluteErrorSum < mgnAbsoluteErrorSum);
     			
-    			//error sum's are for some reason higher in iteration 15 than in iteration 10
-    			
-//    			Assert.assertTrue("the sum of relative absolute erros for counts calibration should be less in iteration 15 than in iteration 10. old sum = " + countsRelativeAbsoluteErrorSum + " new sum = " + countsHandler.relativeAbsoluteErrorSum,
-//    					countsHandler.relativeAbsoluteErrorSum < countsRelativeAbsoluteErrorSum);	
-//    			Assert.assertTrue("the sum of absolute erros for counts calibration should be less in iteration 15 than in iteration 10.  old sum = " + countsAbsoluteErrorSum + " new sum = " + countsHandler.absoluteErrorSum,
-//    					countsHandler.absoluteErrorSum < countsAbsoluteErrorSum);
-    			
     			if(this.cadytsWt == 150.0) {
     				
-    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 248, mgnHandler.bikesOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 251, mgnHandler.bikesOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 181, mgnHandler.bikesOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 258, mgnHandler.bikesOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 219, mgnHandler.bikesOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 172, mgnHandler.bikesOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 752, mgnHandler.carsOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 749, mgnHandler.carsOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 819, mgnHandler.carsOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 742, mgnHandler.carsOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 781, mgnHandler.carsOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 828, mgnHandler.carsOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 89, countsHandler.linkVolumes[0], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 300, countsHandler.linkVolumes[1], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 58, countsHandler.linkVolumes[2], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 55, countsHandler.linkVolumes[3], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 197, countsHandler.linkVolumes[4], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 47, countsHandler.linkVolumes[5], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 15, countsHandler.linkVolumes[6], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 71, countsHandler.linkVolumes[7], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 37, countsHandler.linkVolumes[8], 0.1); 
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 73, countsHandler.linkVolumes[0], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 205, countsHandler.linkVolumes[1], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 65, countsHandler.linkVolumes[2], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 56, countsHandler.linkVolumes[3], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 67, countsHandler.linkVolumes[4], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 42, countsHandler.linkVolumes[5], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 300, countsHandler.linkVolumes[6], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 65, countsHandler.linkVolumes[7], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 63, countsHandler.linkVolumes[8], 0.1); 
     				
     			} else {
     				
-    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 278, mgnHandler.bikesOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 233, mgnHandler.bikesOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 227, mgnHandler.bikesOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 299, mgnHandler.bikesOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 251, mgnHandler.bikesOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 245, mgnHandler.bikesOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 722, mgnHandler.carsOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 767, mgnHandler.carsOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 773, mgnHandler.carsOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 701, mgnHandler.carsOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 749, mgnHandler.carsOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 755, mgnHandler.carsOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 83, countsHandler.linkVolumes[0], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 84, countsHandler.linkVolumes[1], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 30, countsHandler.linkVolumes[2], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 63, countsHandler.linkVolumes[3], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 59, countsHandler.linkVolumes[4], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 182, countsHandler.linkVolumes[5], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 52, countsHandler.linkVolumes[6], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 50, countsHandler.linkVolumes[7], 0.1);
-    				//quite strange: this count is perfectly hit, when only marginals calibration has a weight, but not if count calibration has a weight
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 300, countsHandler.linkVolumes[8], 0.1); 
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 82, countsHandler.linkVolumes[0], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 300, countsHandler.linkVolumes[1], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 31, countsHandler.linkVolumes[2], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 62, countsHandler.linkVolumes[3], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 70, countsHandler.linkVolumes[4], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 192, countsHandler.linkVolumes[5], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 48, countsHandler.linkVolumes[6], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 73, countsHandler.linkVolumes[7], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 45, countsHandler.linkVolumes[8], 0.1); 
     				
     				
     			}
@@ -305,44 +297,44 @@ public class CountsAndModalDistanceCadytsIT {
     		case 20:
     			
     			if(this.cadytsWt == 150.0) {
-    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 170, mgnHandler.bikesOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 169, mgnHandler.bikesOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 24, mgnHandler.bikesOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 200, mgnHandler.bikesOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 153, mgnHandler.bikesOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 51, mgnHandler.bikesOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 830, mgnHandler.carsOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 831, mgnHandler.carsOnMediumDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 976, mgnHandler.carsOnLongDistance, 0.1 );
+    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 800, mgnHandler.carsOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 847, mgnHandler.carsOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 949, mgnHandler.carsOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 151, countsHandler.linkVolumes[0], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 137, countsHandler.linkVolumes[1], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 68, countsHandler.linkVolumes[2], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 123, countsHandler.linkVolumes[3], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 131, countsHandler.linkVolumes[4], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 104, countsHandler.linkVolumes[5], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 52, countsHandler.linkVolumes[6], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 120, countsHandler.linkVolumes[7], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 114, countsHandler.linkVolumes[8], 0.1); 
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 147, countsHandler.linkVolumes[0], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 151, countsHandler.linkVolumes[1], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 54, countsHandler.linkVolumes[2], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 106, countsHandler.linkVolumes[3], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 110, countsHandler.linkVolumes[4], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 94, countsHandler.linkVolumes[5], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 114, countsHandler.linkVolumes[6], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 78, countsHandler.linkVolumes[7], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 146, countsHandler.linkVolumes[8], 0.1); 
     				
     			} else {
     				
-    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 264, mgnHandler.bikesOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 244, mgnHandler.bikesOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in short distance range in iteration " + iteration, 299, mgnHandler.bikesOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of bikes in medium distance range in iteration " + iteration, 247, mgnHandler.bikesOnMediumDistance, 0.1 );	
     				Assert.assertEquals("wrong amount of bikes in long distance range in iteration " + iteration, 185, mgnHandler.bikesOnLongDistance, 0.1 );
     				
-    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 736, mgnHandler.carsOnShortDistance, 0.1 );	
-    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 756, mgnHandler.carsOnMediumDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in short distance range in iteration " + iteration, 701, mgnHandler.carsOnShortDistance, 0.1 );	
+    				Assert.assertEquals("wrong amount of cars in medium distance range in iteration " + iteration, 753, mgnHandler.carsOnMediumDistance, 0.1 );	
     				Assert.assertEquals("wrong amount of cars in long distance range in iteration " + iteration, 815, mgnHandler.carsOnLongDistance, 0.1 );
     				
     				
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 139, countsHandler.linkVolumes[0], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 153, countsHandler.linkVolumes[1], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 75, countsHandler.linkVolumes[2], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 116, countsHandler.linkVolumes[3], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 138, countsHandler.linkVolumes[4], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 111, countsHandler.linkVolumes[5], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 67, countsHandler.linkVolumes[6], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 75, countsHandler.linkVolumes[7], 0.1);
-    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 126, countsHandler.linkVolumes[8], 0.1); 
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 2 in iteration " + iteration, 137, countsHandler.linkVolumes[0], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 3 in iteration " + iteration, 137, countsHandler.linkVolumes[1], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 4 in iteration " + iteration, 58, countsHandler.linkVolumes[2], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 5 in iteration " + iteration, 120, countsHandler.linkVolumes[3], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 6 in iteration " + iteration, 158, countsHandler.linkVolumes[4], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 7 in iteration " + iteration, 93, countsHandler.linkVolumes[5], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 8 in iteration " + iteration, 61, countsHandler.linkVolumes[6], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 9 in iteration " + iteration, 148, countsHandler.linkVolumes[7], 0.1);
+    				Assert.assertEquals("wrong volume for 6am to 7am on link 10 in iteration " + iteration, 88, countsHandler.linkVolumes[8], 0.1); 
     			}
     			break;
     		}
