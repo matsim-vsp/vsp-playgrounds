@@ -38,7 +38,9 @@ import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.laemmer.model.LaemmerConfig.Regime;
+import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
 import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
+import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
 import signals.laemmer.model.util.SignalCombinationBasedOnConflicts;
 import signals.laemmer.model.util.SignalUtils;
 import signals.sensor.LinkSensorManager;
@@ -107,6 +109,8 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 	private int estNumOfPhases;
 
 	private boolean switchSignal; //schedules an update of activeRequest if stabilization selects same phase that was already selected 
+	
+	private SignalCombinationBasedOnConflicts signalCombinationConflicts;
 
 
 	public final static class SignalControlProvider implements Provider<SignalController> {
@@ -146,7 +150,10 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		}
 		this.downstreamSensor = downstreamSensor;
 		try {
-			this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationStrategy()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
+			this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationStrategy().toString()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
+			if (laemmerConfig.getStabilizationStrategy().equals(StabilizationStrategy.HEURISTIC)) {
+				((HeuristicStrategy) stabilisator).setSignalCombinationTool(this.signalCombinationConflicts);
+			}
 		} catch (Exception e) {	e.printStackTrace(); }
 	}
 
@@ -180,7 +187,8 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		//sum the maximum n lanes for systems outflow maximum
 		maximumSystemsOutflowSum = maximumLaneOutflows.stream().sorted(Comparator.comparingDouble(Double::doubleValue).reversed()).limit(this.estNumOfPhases).collect(Collectors.summingDouble(Double::doubleValue));
 		// create all possible signal combinations based on conflict data
-		this.signalPhases = new SignalCombinationBasedOnConflicts(signalsData, system, network, lanes).createSignalCombinations();
+		this.signalCombinationConflicts = new SignalCombinationBasedOnConflicts(signalsData, system, network, lanes);
+		this.signalPhases = signalCombinationConflicts.createSignalCombinations();
 
 		if (laemmerConfig.isRemoveSubPhases()) {
 			this.signalPhases = SignalUtils.removeRedundantSubPhases(this.signalPhases);

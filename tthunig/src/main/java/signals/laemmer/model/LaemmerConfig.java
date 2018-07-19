@@ -188,24 +188,11 @@ public class LaemmerConfig {
 		return isRemoveSubPhases;
 	}
 
-	public String getStabilizationStrategy() {
-		switch (activeStabilizationStrategy) {
-		case HEURISTIC:
-			return HeuristicStrategy.class.getName();
-		case USE_MAX_LANECOUNT:
-			return MaxLaneCountStrategy.class.getName();
-		case COMBINE_SIMILAR_REGULATIONTIME:
-			return CombineSimilarRegulationTime.class.getName();
-		case PRIORIZE_HIGHER_POSITIONS:
-			return PriorizeHigherPositionsStrategy.class.getName();
-		case CUSTOM:
-			if(this.customStabilizationStrategy == null) {
-				throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");
-			} else {
-				return customStabilizationStrategy;
-			}
+	public StabilizationStrategy getStabilizationStrategy() {
+		if (activeStabilizationStrategy.equals(StabilizationStrategy.CUSTOM) && this.customStabilizationStrategy == null) {
+			throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");			
 		}
-		return null;
+		return activeStabilizationStrategy;
 	}
 	
 	public void setCustomStabilzationStrategy(Class<? extends AbstractStabilizationStrategy> customStrategy) {
