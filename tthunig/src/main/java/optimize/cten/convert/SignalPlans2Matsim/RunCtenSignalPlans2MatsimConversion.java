@@ -204,24 +204,23 @@ public class RunCtenSignalPlans2MatsimConversion {
 	private static void writeOptimizedSignalControl(String directoryPath, String inputFilename,
 			SignalsData signalsData) {
 		SignalsScenarioWriter writer = new SignalsScenarioWriter();
-		String basefilename = inputFilename.substring(inputFilename.lastIndexOf("/")+1,
-				inputFilename.lastIndexOf("."));
+		String postFix = "opt";
 		String subdirectory = inputFilename.substring(0,inputFilename.lastIndexOf("/")+1);
 		
 		writer.setSignalSystemsOutputFilename(directoryPath + subdirectory
-				+ "signal_systems_" + basefilename + ".xml");
+				+ "signal_systems_" + postFix + ".xml");
 		writer.setSignalGroupsOutputFilename(directoryPath + subdirectory
-				+ "signal_groups_" + basefilename + ".xml");
+				+ "signal_groups_" + postFix + ".xml");
 		writer.setSignalControlOutputFilename(directoryPath + subdirectory
-				+ "signal_control_" + basefilename + "_inclGreenEnd.xml");
+				+ "signal_control_" + postFix + ".xml");
 		writer.writeSignalSystemsData(signalsData.getSignalSystemsData());
 		writer.writeSignalGroupsData(signalsData.getSignalGroupsData());
 		writer.writeSignalControlData(signalsData.getSignalControlData());
 	}
 	
 	public static void main(String[] args) {
-		convertOptimalSignalPlans("../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-05-4_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
-				"btu/btu_solution.xml");
+		convertOptimalSignalPlans("../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
+				"btu/solution.xml");
 	}
 
 }

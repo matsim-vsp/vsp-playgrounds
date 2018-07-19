@@ -468,17 +468,17 @@ public class ConvertBTURoutes2Matsim {
 
 		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
 //				+ "2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
-				+ "2018-05-4_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+				+ "2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 
 //		String btuRoutesFilename = "routeComparison/paths.xml";
-		String btuRoutesFilename = "btu/btu_solution.xml";
+		String btuRoutesFilename = "btu/solution.xml";
 		String networkFilename = "network_small_simplified.xml.gz";
 		String populationFile = "trip_plans_from_morning_peak_ks_commodities_minFlow50.0.xml";
 
 		String[] filenameAttributes = btuRoutesFilename.split("/");
 		String outputFilename = directory
 //				+ "routeComparison/2015-03-10_sameEndTimes_ksOptTripPlans_"
-				+ "btu/2018-06-07_sameEndTimes_ksOptTripPlans_agent2com_"
+				+ "btu/2018-07-09_sameEndTimes_ksOptTripPlans_agent2com_"
 				+ filenameAttributes[filenameAttributes.length - 1];
 		
 		new ConvertBTURoutes2Matsim().startConversion(directory,
