@@ -195,6 +195,26 @@ public class LaemmerConfig {
 		return activeStabilizationStrategy;
 	}
 	
+	public String getStabilizationClassName() {
+		switch (activeStabilizationStrategy) {
+		case HEURISTIC:
+			return HeuristicStrategy.class.getName();
+		case USE_MAX_LANECOUNT:
+			return MaxLaneCountStrategy.class.getName();
+		case COMBINE_SIMILAR_REGULATIONTIME:
+			return CombineSimilarRegulationTime.class.getName();
+		case PRIORIZE_HIGHER_POSITIONS:
+			return PriorizeHigherPositionsStrategy.class.getName();
+		case CUSTOM:
+			if(this.customStabilizationStrategy == null) {
+				throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");
+			} else {
+				return customStabilizationStrategy;
+			}
+		}
+		return null;
+	}
+	
 	public void setCustomStabilzationStrategy(Class<? extends AbstractStabilizationStrategy> customStrategy) {
 		this.activeStabilizationStrategy = StabilizationStrategy.CUSTOM;
 		this.customStabilizationStrategy = customStrategy.getName();

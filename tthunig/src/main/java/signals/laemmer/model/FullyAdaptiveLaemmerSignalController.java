@@ -19,7 +19,19 @@
  * *********************************************************************** */
 package signals.laemmer.model;
 
-import com.google.inject.Provider;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.stream.Collectors;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -34,6 +46,9 @@ import org.matsim.core.config.Config;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
+
+import com.google.inject.Provider;
+
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
@@ -44,19 +59,6 @@ import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
 import signals.laemmer.model.util.SignalCombinationBasedOnConflicts;
 import signals.laemmer.model.util.SignalUtils;
 import signals.sensor.LinkSensorManager;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.stream.Collectors;
 
 
 /**
@@ -150,7 +152,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		}
 		this.downstreamSensor = downstreamSensor;
 		try {
-			this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationStrategy().toString()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
+			this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationClassName()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
 			if (laemmerConfig.getStabilizationStrategy().equals(StabilizationStrategy.HEURISTIC)) {
 				((HeuristicStrategy) stabilisator).setSignalCombinationTool(this.signalCombinationConflicts);
 			}
