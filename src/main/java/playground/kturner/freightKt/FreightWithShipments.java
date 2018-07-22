@@ -43,6 +43,8 @@ import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierCapabilities;
 import org.matsim.contrib.freight.carrier.CarrierImpl;
 import org.matsim.contrib.freight.carrier.CarrierPlan;
+import org.matsim.contrib.freight.carrier.CarrierPlanXmlWriterV2;
+import org.matsim.contrib.freight.carrier.CarrierService;
 import org.matsim.contrib.freight.carrier.CarrierShipment;
 import org.matsim.contrib.freight.carrier.CarrierVehicle;
 import org.matsim.contrib.freight.carrier.CarrierVehicleType;
@@ -87,7 +89,7 @@ public class FreightWithShipments {
 		/*
 		 * some preparation - set logging level
 		 */
-		Logger.getRootLogger().setLevel(Level.INFO);
+		Logger.getRootLogger().setLevel(Level.DEBUG);
 		
 		/*
 		 * some preparation - create output folder
@@ -104,6 +106,12 @@ public class FreightWithShipments {
 		Carrier carrier = CarrierImpl.newInstance(Id.create("ShipmentCarrier", Carrier.class));
 		carrier.getShipments().add(getMatsimShipment("shipment1", "i(6,0)", "i(7,4)R", 1));
 		carrier.getShipments().add(getMatsimShipment("shipment2", "i(6,0)", "i(3,9)", 2));
+		carrier.getShipments().add(getMatsimShipment("shipment3", "i(6,0)", "i(4,9)", 2));
+		carrier.getShipments().add(getMatsimShipment("shipment4", null, "i(4,9)", 2));
+		
+//		carrier.getServices().add(getMatsimService("Service1", "i(7,4)R", 1));
+//		carrier.getServices().add(getMatsimService("Service2", "i(3,9)", 2));
+//		carrier.getServices().add(getMatsimService("Service3", "i(4,9)", 2));
 		
 		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class)).build();
 		CarrierVehicle carrierVehicle = CarrierVehicle.Builder.newInstance(Id.create("gridVehicle", org.matsim.vehicles.Vehicle.class), Id.createLinkId("i(6,0)")).setEarliestStart(0.0).setLatestEnd(36000.0).setTypeId(carrierVehType.getId()).build();
@@ -132,12 +140,8 @@ public class FreightWithShipments {
 		final NetworkBasedTransportCosts netBasedCosts = netBuilder.build() ;
 		netBuilder.setTimeSliceWidth(1800) ; // !!!!, otherwise it will not do anything.
 		vrpBuilder.setRoutingCost(netBasedCosts) ;
-		
 	
-
-
 		VehicleRoutingProblem problem = vrpBuilder.build();
-		
 
 		/*
 		 * get the algorithm out-of-the-box. 
@@ -164,7 +168,7 @@ public class FreightWithShipments {
 		/*
 		 * write out problem and solution to xml-file
 		 */
-		new VrpXMLWriter(problem, solutions).write(OUTPUT_DIR + "shipment-solution-with-route.xml");
+		new CarrierPlanXmlWriterV2(carriers).write( OUTPUT_DIR+ "jsprit_plannedCarriers.xml") ; 
 
 		/*
 		 * print nRoutes and totalCosts of bestSolution
@@ -206,6 +210,14 @@ public class FreightWithShipments {
 				.setDeliveryTimeWindow(TimeWindow.newInstance(3600.0, 36000.0))
 				.setPickupServiceTime(5.0)
 				.setPickupTimeWindow(TimeWindow.newInstance(0.0, 7200.0))
+				.build();
+	}
+	
+	private static CarrierService getMatsimService(String id, String to, int size) {
+		return CarrierService.Builder.newInstance(Id.create(id, CarrierService.class), Id.create(to, Link.class))
+				.setCapacityDemand(size)
+				.setServiceDuration(30.0)
+				.setServiceStartTimeWindow(TimeWindow.newInstance(3600.0, 36000.0))
 				.build();
 	}
 
