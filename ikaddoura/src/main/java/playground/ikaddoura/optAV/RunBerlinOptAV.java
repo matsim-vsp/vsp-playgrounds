@@ -94,8 +94,8 @@ public class RunBerlinOptAV {
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/berlin-5.1_1pct_config_optAV.xml";
-			runId = "b5avOpt0";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/berlin-5.1_1pct_config_optAV_0av_FFFT.xml";
+			runId = "b5avOpt_0av_100it_FFFT";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/output/" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 		}
@@ -215,7 +215,7 @@ public class RunBerlinOptAV {
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
 		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
-		filter1.setSubpopulation("person");
+//		filter1.setSubpopulation("person");
 		filter1.setPersonAttribute("berlin");
 		filter1.setPersonAttributeName("home-activity-zone");
 		filter1.preProcess(scenario);
