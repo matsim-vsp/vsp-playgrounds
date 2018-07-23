@@ -155,6 +155,7 @@ public class RunBerlinOptAV {
 			public void install() {
 				this.bind(ModalShareEventHandler.class);
 				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+				
 				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
 			}
 		});
@@ -215,7 +216,6 @@ public class RunBerlinOptAV {
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
 		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
-//		filter1.setSubpopulation("person");
 		filter1.setPersonAttribute("berlin");
 		filter1.setPersonAttributeName("home-activity-zone");
 		filter1.preProcess(scenario);
@@ -226,7 +226,6 @@ public class RunBerlinOptAV {
 		filters.add(filter2);
 		
 		AgentAnalysisFilter filter3 = new AgentAnalysisFilter(scenario);
-		filter3.setSubpopulation("person");
 		filter3.setPersonAttribute("brandenburg");
 		filter3.setPersonAttributeName("home-activity-zone");
 		filter3.preProcess(scenario);
