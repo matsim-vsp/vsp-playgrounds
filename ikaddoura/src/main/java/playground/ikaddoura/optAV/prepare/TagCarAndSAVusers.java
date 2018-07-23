@@ -57,9 +57,9 @@ public class TagCarAndSAVusers {
 	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/population/";
 	
 	private final String inputPlansFile = "berlin-5.1-1pct_plans.xml.gz";
-	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers.xml.gz";
+	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers_new.xml.gz";
 	
-	private final String outputPersonAttributesFile = "berlin-5.0_person-attributes_potentialSAVusers.xml.gz";
+	private final String outputPersonAttributesFile = "berlin-5.0_person-attributes_potentialSAVusers_new.xml.gz";
 
 	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
 	private final String crsSHPFile = "EPSG:25833";
@@ -151,23 +151,28 @@ public class TagCarAndSAVusers {
 					if (pE instanceof Activity) {
 						Activity activity = (Activity) pE;
 						
-						boolean activityInArea = false;
-						for (Geometry geometry : zoneId2geometry.values()) {
-							Point p = MGC.coord2Point(ct.transform(activity.getCoord())); 
-							
-							if (p.within(geometry)) {
-								activityInArea = true;
+						if (activity.getType().toString().contains("interaction")) {
+							// skip
+						} else {
+							boolean activityInArea = false;
+							for (Geometry geometry : zoneId2geometry.values()) {
+								Point p = MGC.coord2Point(ct.transform(activity.getCoord())); 
+								
+								if (p.within(geometry)) {
+									activityInArea = true;
+								}
 							}
-						}
-						
-						if (!activityInArea) {
-							allActivitiesInArea = false;
-						}					
+							
+							if (!activityInArea) {
+								allActivitiesInArea = false;
+							}	
+						}		
 					}	
 				}
 			}
 			
 			if (inputPersonAttributesFile == null) {
+				
 				if (allActivitiesInArea) { 
 					scenario.getPopulation().getPersonAttributes().putAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName(), "potentialSAVuser");
 					potentialSAVusers++;
