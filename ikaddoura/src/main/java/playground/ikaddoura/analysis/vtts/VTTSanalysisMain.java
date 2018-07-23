@@ -61,8 +61,14 @@ public class VTTSanalysisMain {
 //			runDirectory = "/Users/ihab/Desktop/v2b/v2b/santiago/output/baseCase10pct/";
 //			runId = null;
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cottbus/laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/";
-			runId = "1000";
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cottbus/laemmer/2018-02-8-11-59-30_100it_MS_cap07_stuck120_tbs900/";
+//			runId = "1000";
+			
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/b5_w3a19/";
+//			runId = "b5_w3a19";
+			
+			runDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.0-1pct-2018-06-18/output_from-reduced-config_FlowStorageCapacityFactor0.015_2018-07-04/";
+			runId = "b5_1";
 		}
 		
 		VTTSanalysisMain analysis = new VTTSanalysisMain();

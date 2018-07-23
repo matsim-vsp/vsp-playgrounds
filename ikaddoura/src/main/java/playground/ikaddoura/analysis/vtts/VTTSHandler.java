@@ -77,8 +77,8 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	private int currentIteration;
 	
 	private final Set<Id<Person>> personIdsToBeIgnored = new HashSet<>();
-	private String[] activitiesToBeSkipped = {"pt interaction"};
-	private String[] modesToBeSkipped = {"transit_walk", "access_walk", "egress_walk"};
+	private final String[] activitiesToBeSkipped = {"pt interaction", "car interaction", "ride interaction", "bicycle interaction"};
+	private final String[] modesToBeSkipped = {"transit_walk", "access_walk", "egress_walk"};
 	
 	private final Set<Id<Person>> departedPersonIds = new HashSet<>();
 	private final Map<Id<Person>, Double> personId2currentActivityStartTime = new HashMap<>();
