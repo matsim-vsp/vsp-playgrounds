@@ -235,7 +235,12 @@ class AssignmentEmulatingQLane implements QLaneI {
 	public final boolean isNotOfferingVehicle() {
 		return buffer.isEmpty();
 	}
-
+	
+//	@Override
+	public QVehicle getFirstVehicleOnLink() {
+		throw new RuntimeException( "not implemented" );
+	}
+	
 	@Override
 	public final void clearVehicles() {
 		double now = context.getSimTimer().getTimeOfDay() ;
