@@ -13,6 +13,7 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.Mobsim;
+import org.matsim.core.mobsim.qsim.PopulationPlugin;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
@@ -63,9 +64,7 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 	public Mobsim get() {
 		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
 				.useDefaults() //
-				.configurePlugins(plugins -> {
-					plugins.removeIf(PopulationAgentSource.class::isInstance);
-				}) //
+				.removePlugin(PopulationPlugin.class) //
 				.addOverridingModule(new AbstractModule() {
 					@Override
 					public void install() {
