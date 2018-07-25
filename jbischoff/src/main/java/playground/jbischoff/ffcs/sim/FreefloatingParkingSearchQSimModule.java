@@ -2,6 +2,8 @@ package playground.jbischoff.ffcs.sim;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.matsim.contrib.parking.parkingsearch.sim.ParkingPopulationAgentSource;
 import org.matsim.core.config.Config;
@@ -14,6 +16,8 @@ import org.matsim.core.mobsim.qsim.QSimProvider;
 import org.matsim.core.mobsim.qsim.TeleportationPlugin;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsPlugin;
+import org.matsim.core.mobsim.qsim.components.QSimComponents;
+import org.matsim.core.mobsim.qsim.components.StandardQSimComponentsConfigurator;
 import org.matsim.core.mobsim.qsim.messagequeueengine.MessageQueuePlugin;
 import org.matsim.core.mobsim.qsim.pt.TransitEnginePlugin;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEnginePlugin;
@@ -46,6 +50,20 @@ class FreefloatingParkingSearchQSimModule extends com.google.inject.AbstractModu
 		return plugins;
 	}
 	
+	@Provides
+	QSimComponents provideQSimComponents(Config config) {
+		QSimComponents components = new QSimComponents();
+		new StandardQSimComponentsConfigurator(config).configure(components);
+		
+		components.activeAgentSources.add(FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE);
+		components.activeAgentSources.add(FFCS_VEHICLE_AGENT_SOURCE);
+		
+		return components;
+	}
+	
+	static public String FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE = "FreefloatingParkingPopulationAgentSource";
+	static public String FFCS_VEHICLE_AGENT_SOURCE = "FFCSVehicleAgentSource";
+	
 	private static class ParkingSearchPopulationPlugin extends AbstractQSimPlugin {
 		public ParkingSearchPopulationPlugin(Config config) { super(config); }
 		@Override 
@@ -66,10 +84,10 @@ class FreefloatingParkingSearchQSimModule extends com.google.inject.AbstractModu
 			return result;
 		}
 		@Override 
-		public Collection<Class<? extends AgentSource>> agentSources() {
-			Collection<Class<? extends AgentSource>> result = new ArrayList<>();
-			result.add(FreefloatingParkingPopulationAgentSource.class);
-			result.add(FFCSVehicleAgentSource.class);
+		public Map<String, Class<? extends AgentSource>> agentSources() {
+			Map<String, Class<? extends AgentSource>> result = new HashMap<>();
+			result.put(FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE, FreefloatingParkingPopulationAgentSource.class);
+			result.put(FFCS_VEHICLE_AGENT_SOURCE, FFCSVehicleAgentSource.class);
 			return result;
 		}
 	}

@@ -20,6 +20,8 @@ package playground.kai.usecases.parkingSearch;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -103,9 +105,9 @@ final class KNParkingSearch {
 			return result;
 		}
 		@Override 
-		public Collection<Class<? extends AgentSource>> agentSources() {
-			Collection<Class<? extends AgentSource>> result = new ArrayList<>();
-			result.add(PopulationAgentSource.class);
+		public Map<String, Class<? extends AgentSource>> agentSources() {
+			Map<String, Class<? extends AgentSource>> result = new HashMap<>();
+			result.put(PopulationPlugin.POPULATION_SOURCE_NAME, PopulationAgentSource.class);
 			return result;
 		}
 	}
