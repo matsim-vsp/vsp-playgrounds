@@ -36,7 +36,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 
 import com.google.inject.Provider;
 
@@ -96,7 +96,7 @@ public class PRRunner {
 				bindMobsim().toProvider(new Provider<Mobsim>() {
 					@Override
 					public Mobsim get() {
-						final QSim mobsim = QSimUtils.createDefaultQSim(controler.getScenario(), controler.getEvents());
+						final QSim mobsim = new QSimBuilder(controler.getConfig()).useDefaults().build(controler.getScenario(), controler.getEvents());
 						mobsim.addMobsimEngine(adaptiveControl);
 						return mobsim;
 					}
