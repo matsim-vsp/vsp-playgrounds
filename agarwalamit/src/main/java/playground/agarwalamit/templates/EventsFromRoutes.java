@@ -36,7 +36,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 
@@ -81,7 +81,7 @@ public class EventsFromRoutes {
 		manager.addHandler(eventWriterXML);
 
 		PrepareForSimUtils.createDefaultPrepareForSim(net).run();
-		QSim qSim = QSimUtils.createDefaultQSim(net,manager);
+		QSim qSim = new QSimBuilder(net.getConfig()).useDefaults().build(net, manager);
 		qSim.run();
 		eventWriterXML.closeFile();
 	}

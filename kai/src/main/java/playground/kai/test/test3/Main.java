@@ -30,7 +30,7 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.scenario.ScenarioUtils;
 
 /**
@@ -49,7 +49,7 @@ class Main {
 			Logger.getLogger(this.getClass()).warn( " class2=" + class2 );
 			Logger.getLogger(this.getClass()).warn( " class3=" + class3 );
 
-			Mobsim qsim = QSimUtils.createDefaultQSim(scenario, eventsManager) ;
+			Mobsim qsim = new QSimBuilder(scenario.getConfig()).useDefaults().build(scenario, eventsManager);
 			return qsim ;
 		}
 	}

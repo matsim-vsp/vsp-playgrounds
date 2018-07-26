@@ -2,31 +2,35 @@ package playground.agarwalamit.fundamentalDiagrams.headwayMethod;
 
 import java.util.Map;
 import java.util.stream.Collectors;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
+import org.matsim.core.mobsim.qsim.PopulationPlugin;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngine;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
+import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+
 import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
 import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
-import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.agarwalamit.fundamentalDiagrams.core.FDTrackMobsimAgent;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
+import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
+import playground.agarwalamit.fundamentalDiagrams.core.FDTrackMobsimAgent;
 
 public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 
@@ -58,23 +62,20 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 	
 	@Override
 	public Mobsim get() {
-		final QSim qSim = new QSim(scenario, events);
-		ActivityEngine activityEngine = new ActivityEngine(events, qSim.getAgentCounter());
-		qSim.addMobsimEngine(activityEngine);
-		qSim.addActivityHandler(activityEngine);
-
-		QNetsimEngine netsimEngine  = new QNetsimEngine(qSim, qnetworkFactory);
-
-		qSim.addMobsimEngine(netsimEngine);
-		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
+		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
+				.useDefaults() //
+				.removePlugin(PopulationPlugin.class) //
+				.addOverridingModule(new AbstractModule() {
+					@Override
+					public void install() {
+						bind(QNetworkFactory.class).toInstance(qnetworkFactory);
+					}
+				}) //
+				.build(scenario, events);
 
 		FDModule.LOG.info("=======================");
 		FDModule.LOG.info("Mobsim agents' are directly added to AgentSource.");
 		FDModule.LOG.info("=======================");
-
-		if (this.scenario.getConfig().network().isTimeVariantNetwork()) {
-			qSim.addMobsimEngine(NetworkChangeEventsEngine.createNetworkChangeEventsEngine());
-		}
 
 		FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
 

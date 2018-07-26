@@ -1,6 +1,9 @@
 package lanes;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
@@ -26,8 +29,7 @@ import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.events.handler.BasicEventHandler;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -37,9 +39,6 @@ import org.matsim.lanes.LanesFactory;
 import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.testcases.MatsimTestUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class tests the travel time of one agent on different configuration of a
@@ -108,8 +107,7 @@ public class LinkLaneTTTest {
 			createPopulation(scenario, i);
 
 			PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
-			QSim qsim = QSimUtils.createDefaultQSim(scenario, events);
-			qsim.run();
+			new QSimBuilder(scenario.getConfig()).useDefaults().build(scenario, events).run();
 			
 			// write network and events
 			if (WRITE_OUTPUT) {

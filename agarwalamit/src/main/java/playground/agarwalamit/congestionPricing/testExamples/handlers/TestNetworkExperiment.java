@@ -48,7 +48,7 @@ import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
@@ -92,7 +92,7 @@ class TestNetworkExperiment {
 		events.addHandler(writer);
 
 		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
-		QSim qSim = QSimUtils.createDefaultQSim(sc,events);
+		QSim qSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, events);
 
 		qSim.run();
 		writer.closeFile();
@@ -176,7 +176,7 @@ class TestNetworkExperiment {
 //		else if(congestionPricingImpl.equalsIgnoreCase("v6")) events.addHandler(new CongestionHandlerImplV6(events, sc));
 
 		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
-		QSim sim = QSimUtils.createDefaultQSim(sc,events);
+		QSim sim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, events);
 		sim.run();
 
 		for (CongestionEvent event : congestionEvents) {
