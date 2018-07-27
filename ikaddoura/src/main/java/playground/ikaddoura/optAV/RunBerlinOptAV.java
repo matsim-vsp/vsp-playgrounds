@@ -155,10 +155,7 @@ public class RunBerlinOptAV {
 		controler.addOverridingModule(new AbstractModule() {
 			
 			@Override
-			public void install() {
-				this.bind(ModalShareEventHandler.class);
-				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
-				
+			public void install() {				
 				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
 			}
 		});
