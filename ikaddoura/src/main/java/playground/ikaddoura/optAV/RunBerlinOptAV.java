@@ -94,8 +94,8 @@ public class RunBerlinOptAV {
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/berlin-5.1_1pct_config_optAV_0av_FFFT.xml";
-			runId = "b5avOpt_0av_100it_FFFT";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/berlin-5.1_1pct_config_optAV_500av_TTTT_0.01_msaT.xml";
+			runId = "berlin-5.1_1pct_config_optAV_500av_TTTT_0.01_msaT";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/output/" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 		}
