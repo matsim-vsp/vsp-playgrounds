@@ -47,7 +47,7 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 	private double fixCostsSAVinsteadOfCar = -10.; // negative values are interpreted as a revenue for no longer owning a car
 	private double dailyFixCostAllSAVusers = 5.;
 
-	private TollingApproach optAVApproach = TollingApproach.NoPricing;
+	private TollingApproach tollingApproach = TollingApproach.NoPricing;
 			
 	public enum TollingApproach {
 		NoPricing, PrivateAndExternalCost, ExternalCost
@@ -73,14 +73,14 @@ public class OptAVConfigGroup extends ReflectiveConfigGroup {
 		this.accountForNoise = accountForNoise;
 	}
 
-	@StringGetter( "optAVApproach" )
-	public TollingApproach getOptAVApproach() {
-		return optAVApproach;
+	@StringGetter( "tollingApproach" )
+	public TollingApproach getTollingApproach() {
+		return tollingApproach;
 	}
 
-	@StringSetter( "optAVApproach" )
-	public void setOptAVApproach(TollingApproach optAVApproach) {
-		this.optAVApproach = optAVApproach;
+	@StringSetter( "tollingApproach" )
+	public void setTollingApproach(TollingApproach tollingApproach) {
+		this.tollingApproach = tollingApproach;
 	}
 
 	@StringGetter( "chargeOperatingCostsFromPassengers" )

@@ -94,8 +94,8 @@ public class RunBerlinOptAV {
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/berlin-5.1_1pct_config_optAV_500av_TTTT_0.01_msaT.xml";
-			runId = "berlin-5.1_1pct_config_optAV_500av_TTTT_0.01_msaT";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/berlin-5.1_1pct_config_optAV_0av_TTTT_0.01_msaT.xml";
+			runId = "berlin-5.1_1pct_config_optAV_0av_TTTT_0.01_msaT";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/output/" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 		}
@@ -117,10 +117,13 @@ public class RunBerlinOptAV {
 				new DecongestionConfigGroup()
 				);
 		
+		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
 		
+		// berlin scenario related settings
+
 		config.controler().setRoutingAlgorithmType( FastAStarLandmarks );
 		
 		config.subtourModeChoice().setProbaForRandomSingleTripMode(0.5);
@@ -163,6 +166,8 @@ public class RunBerlinOptAV {
 		// taxi-related modules
 		controler.addOverridingModule(TaxiDvrpModules.create());
 		controler.addOverridingModule(new TaxiModule());
+		
+		// optAV module
 		controler.addOverridingModule(new OptAVModule(scenario));
 		
 		// different modes for different subpopulations

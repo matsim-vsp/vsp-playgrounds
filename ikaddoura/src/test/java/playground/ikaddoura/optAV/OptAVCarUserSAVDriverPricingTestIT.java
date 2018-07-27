@@ -85,7 +85,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
-			optAVParams.setOptAVApproach(TollingApproach.NoPricing);
+			optAVParams.setTollingApproach(TollingApproach.NoPricing);
 			
 			Scenario scenario1 = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario1);
@@ -125,7 +125,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
-			optAVParams.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
+			optAVParams.setTollingApproach(TollingApproach.PrivateAndExternalCost);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
 			optAVParams.setChargeTollsFromCarUsers(true);
 			optAVParams.setChargeTollsFromSAVDriver(false);
@@ -178,7 +178,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
-			optAVParams.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
+			optAVParams.setTollingApproach(TollingApproach.PrivateAndExternalCost);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
 			optAVParams.setChargeTollsFromCarUsers(false);
 			optAVParams.setChargeTollsFromSAVDriver(true);
@@ -231,7 +231,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
-			optAVParams.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
+			optAVParams.setTollingApproach(TollingApproach.PrivateAndExternalCost);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
 			optAVParams.setChargeTollsFromCarUsers(true);
 			optAVParams.setChargeTollsFromSAVDriver(true);
