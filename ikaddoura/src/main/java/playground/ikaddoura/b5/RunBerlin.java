@@ -66,8 +66,7 @@ public class RunBerlin {
 	private static boolean activateDecongestionPricing;
 	private static boolean activateQueueBasedCongestionPricing;
 	private static String queueBasedCongestionPricingApproach;
-	
-	private final double blendFactorQCP = 1.0;
+	private static double blendFactorQCP;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -93,6 +92,9 @@ public class RunBerlin {
 			queueBasedCongestionPricingApproach = args[6];
 			log.info("queueBasedCongestionPricingApproach: "+ queueBasedCongestionPricingApproach);
 
+			blendFactorQCP = Double.parseDouble(args[7]);
+			log.info("blendFactorQCP: "+ blendFactorQCP);
+			
 		} else {
 			
 			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/input/berlin-5.0_config_1a.xml";
@@ -102,6 +104,7 @@ public class RunBerlin {
 			activateDecongestionPricing = true;
 			activateQueueBasedCongestionPricing = false;
 			queueBasedCongestionPricingApproach = "V3";
+			blendFactorQCP = 1.0;
 		}
 		
 		RunBerlin runner = new RunBerlin();
