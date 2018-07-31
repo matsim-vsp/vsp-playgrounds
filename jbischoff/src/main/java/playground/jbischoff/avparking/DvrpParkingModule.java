@@ -34,7 +34,8 @@ import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentQueryHelper;
-import org.matsim.contrib.dvrp.vrpagent.VrpAgentSourcePlugin;
+import org.matsim.contrib.dvrp.vrpagent.VrpAgentSource;
+import org.matsim.contrib.dynagent.run.DynAgentSourcePlugin;
 import org.matsim.contrib.dynagent.run.DynActivityEnginePlugin;
 import org.matsim.contrib.dynagent.run.DynRoutingModule;
 import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
@@ -164,7 +165,7 @@ public final class DvrpParkingModule extends AbstractModule {
 
 		plugins.add(new ParkingSearchPopulationPlugin(config));
 		plugins.add(new PassengerEnginePlugin(config, dvrpCfg.getMode()));
-		plugins.add(new VrpAgentSourcePlugin(config));
+		plugins.add(new DynAgentSourcePlugin(config, VrpAgentSource.class));
 		plugins.add(new QSimPlugin(config));
 		return plugins;
 	}
