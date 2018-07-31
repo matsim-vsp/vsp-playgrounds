@@ -78,7 +78,7 @@ public class CombinedSignalsModule extends AbstractModule {
 			this.addMobsimListenerBinding().toInstance(randomSeedResetter);
 		}
 	
-		if ((boolean) ConfigUtils.addOrGetModule(getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).isUseSignalSystems()) {
+		if ((boolean) ConfigUtils.addOrGetModule(getConfig(), SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			bind(DgSylviaConfig.class).toInstance(sylviaConfig);
 			bind(LaemmerConfig.class).toInstance(laemmerConfig);
 			bind(GershensonConfig.class).toInstance(gershensonConfig);
