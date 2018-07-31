@@ -69,7 +69,7 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 	private Map<String, Provider<SignalController>> signalControlProvider = new HashMap<>();
 	
 	@Inject
-	public CombinedSignalModelFactory(Scenario scenario, LaemmerConfig laemmerConfig, DgSylviaConfig sylviaConfig, 
+	CombinedSignalModelFactory(Scenario scenario, LaemmerConfig laemmerConfig, DgSylviaConfig sylviaConfig, 
 			LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, TtTotalDelay delayCalculator, GershensonConfig gershensonConfig) {
 		// prepare signal controller provider
 		signalControlProvider.put(SylviaSignalController.IDENTIFIER, new SylviaSignalController.SignalControlProvider(sylviaConfig, sensorManager, downstreamSensor));
