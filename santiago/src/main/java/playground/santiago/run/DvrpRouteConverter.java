@@ -39,7 +39,7 @@ import org.matsim.core.utils.misc.Time;
 /**
  * @author Michal Maciejewski (michalm)
  */
-public class DrtRouteConverter {
+public class DvrpRouteConverter {
 	public static void main(String[] args) {
 		Set<String> modesToDvrpMode = new HashSet<>(Arrays.asList("colectivo"));
 		String dvrpMode = TransportMode.drt;
@@ -58,7 +58,7 @@ public class DrtRouteConverter {
 					Leg leg = (Leg)e;
 
 					if (modesToDvrpMode.contains(leg.getMode())) {
-						leg.setMode(TransportMode.drt);
+						leg.setMode(dvrpMode);
 						leg.setDepartureTime(Time.UNDEFINED_TIME);
 						leg.setTravelTime(Time.UNDEFINED_TIME);
 						leg.setRoute(null);
