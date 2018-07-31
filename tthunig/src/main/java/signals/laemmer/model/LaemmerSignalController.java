@@ -181,8 +181,20 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
     private LaemmerSignal selectSignal() {
         LaemmerSignal max = null;
-        if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
-            max = regulationQueue.peek();
+		if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) {
+			max = regulationQueue.peek();
+			/*
+			 * TODO peek the first element for which the stabilization criterion is still active.
+			 * important, if a signal/lane is included in more than one group
+			 * because all groups, a determining lane belongs to, are added to the
+			 * stabilization queue if this lane fulfills the stabilization criterion.
+			 * could be something like this, but values have to set accordingly in LaemmerSignal:
+			 * theresa, apr'18
+			 */
+//			while (max != null && max.n < max.calcNCrit()) {
+//				regulationQueue.poll();
+//				max = regulationQueue.peek();
+//			}
         }
         if (!laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
             if (max == null) {
@@ -274,6 +286,9 @@ public class LaemmerSignalController extends AbstractSignalController implements
 
     @Override
     public void reset(Integer iterationNumber) {
+		laemmerSignals.clear();
+		activeRequest = null;
+		regulationQueue.clear();
     }
 
     private void initializeSensoring() {
