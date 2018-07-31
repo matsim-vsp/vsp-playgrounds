@@ -97,13 +97,13 @@ public class RunBerlin {
 			
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/input/berlin-5.0_config_1a.xml";
-			outputDirectory = "/Users/ihab/Desktop/b5_decongestion_b5_1a-previous-2/";
-			runId = "b5_1a";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/input/berlin-5.0_config_0c_1pct.xml";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/output/b5_1pct_1a-test3/";
+			runId = "test1";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			activateDecongestionPricing = true;
-			activateQueueBasedCongestionPricing = false;
-			queueBasedCongestionPricingApproach = "V3";
+			activateQueueBasedCongestionPricing = true;
+			queueBasedCongestionPricingApproach = "V10";
 			blendFactorQCP = 1.0;
 		}
 		
@@ -200,6 +200,8 @@ public class RunBerlin {
 				controler.addControlerListener(new AdvancedMarginalCongestionPricingContolerListener(controler.getScenario(), congestionTollHandlerQBP, new CongestionHandlerImplV9(controler.getEvents(), controler.getScenario())));
 			} else if (queueBasedCongestionPricingApproach.equals("V10")) {
 				controler.addControlerListener(new AdvancedMarginalCongestionPricingContolerListener(controler.getScenario(), congestionTollHandlerQBP, new CongestionHandlerImplV10(controler.getEvents(), controler.getScenario())));
+			} else {
+				throw new RuntimeException("Unknown queue based congestion pricing approach. Aborting...");
 			}
 		}
 				
