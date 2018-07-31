@@ -198,10 +198,10 @@ public class TTRunCottbusFootball {
 			baseOutputDirectory+= "fixedTime"; 
 			break;
 		case SYLVIA:
-			baseOutputDirectory+= "sylvia_maxExt1.5_noFixedCycle";
+			baseOutputDirectory+= "sylviaBugFix_maxExt1.5_noFixedCycle";
 			break;
 		case SYLVIA_IDEAL:
-			baseOutputDirectory+= "sylviaIdeal_maxExt1.5_noFixedCycle";
+			baseOutputDirectory+= "sylviaIdealBugFix_maxExt1.5_noFixedCycle";
 			break;
 		case LAEMMER_NICO:
 			baseOutputDirectory+= "laemmer_nicoGroups";

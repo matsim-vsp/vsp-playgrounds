@@ -151,6 +151,15 @@ public class SylviaSignalController extends AbstractSignalController implements 
 		else { // no extension is active
 			// increment the number of seconds that the basic plan is processed
 			this.secondInSylviaCycle++;
+			
+			List<Id<SignalGroup>> onsets = this.activeSylviaPlan.getOnsets(this.secondInSylviaCycle);
+			if (onsets != null) {
+				for (Id<SignalGroup> groupId : onsets) {
+					this.system.scheduleOnset(currentTime, groupId);
+					this.greenGroupId2OnsetMap.put(groupId, currentTime);
+				}
+			}
+			
 			// TODO what happens when first sim sim event is not at second 0? it does not extend the phase then?! theresa apr'17
 			
 			//check for forced extension trigger (end of the last phase of the plan)
@@ -185,13 +194,6 @@ public class SylviaSignalController extends AbstractSignalController implements 
 			for (Id<SignalGroup> groupId : droppings) {
 				this.system.scheduleDropping(currentTime, groupId);
 				this.greenGroupId2OnsetMap.remove(groupId);
-			}
-		}
-		List<Id<SignalGroup>> onsets = this.activeSylviaPlan.getOnsets(this.secondInSylviaCycle);
-		if (onsets != null) {
-			for (Id<SignalGroup> groupId : onsets) {
-				this.system.scheduleOnset(currentTime, groupId);
-				this.greenGroupId2OnsetMap.put(groupId, currentTime);
 			}
 		}
 		
