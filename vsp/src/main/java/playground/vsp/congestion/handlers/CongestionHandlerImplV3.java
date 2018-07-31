@@ -140,8 +140,6 @@ public final class CongestionHandlerImplV3 implements CongestionHandler, Activit
 		return this.delegate.getTotalDelay();
 	}
 	
-	
-
 	public final double getDelayNotInternalizedSpillbackNoCausingAgent() {
 		return this.delayNotInternalized_spillbackNoCausingAgent;
 	}
@@ -170,11 +168,17 @@ public final class CongestionHandlerImplV3 implements CongestionHandler, Activit
 		this.delegate.handleEvent( event ) ;
 
 		if (this.delegate.getPtVehicleIDs().contains(event.getVehicleId())){
-			log.warn("Public transport mode. Mixed traffic is not tested.");
-		} else { // car!
-			LinkCongestionInfo linkInfo = this.delegate.getLinkId2congestionInfo().get( event.getLinkId() ) ;
-			DelayInfo delayInfo = linkInfo.getFlowQueue().getLast();
-			calculateCongestion(event, delayInfo);
+			// skip pt vehicles
+		} else {
+			
+			Id<Person> personId = this.delegate.getVehicle2DriverEventHandler().getDriverOfVehicle( event.getVehicleId() ) ;
+
+			if (this.delegate.getCarPersonIDs().contains(personId)) {
+				// car
+				LinkCongestionInfo linkInfo = this.delegate.getLinkId2congestionInfo().get( event.getLinkId() ) ;
+				DelayInfo delayInfo = linkInfo.getFlowQueue().getLast();
+				calculateCongestion(event, delayInfo);
+			}
 		}
 	}
 
