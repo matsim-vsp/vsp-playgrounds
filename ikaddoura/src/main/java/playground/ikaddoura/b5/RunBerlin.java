@@ -155,8 +155,6 @@ public class RunBerlin {
 			
 			@Override
 			public void install() {
-				this.bind(ModalShareEventHandler.class);
-				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
 				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
 			}
 		});
