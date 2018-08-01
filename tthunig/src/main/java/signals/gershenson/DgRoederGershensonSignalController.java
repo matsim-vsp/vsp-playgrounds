@@ -213,6 +213,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 				}
 			}
 		}
+		
+		maximalNumberOfAgentsInDistance = (int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize());
 	}
 	private void addOutLinksWithoutBackLinkToMetadata(Link inLink, SignalGroupMetadata metadata){
 		for (Link outLink : inLink.getToNode().getOutLinks().values()){
@@ -238,6 +240,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	private void switchlight(SignalGroup group, double timeSeconds) {
 		if (group.getState() == null) {
 			timecounter.put(group.getId(), 0.);
+			counter.put(group.getId(), 0.);
 			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
 			this.system.scheduleDropping(timeSeconds, group.getId());
 		} else {
@@ -248,9 +251,11 @@ public class DgRoederGershensonSignalController implements SignalController {
 				this.system.scheduleOnset(timeSeconds + gershensonConfig.getInterGreenTime(), group.getId());
 				timecounter.put(group.getId(), - gershensonConfig.getInterGreenTime());
 				activeSignalGroup = group;
+				counter.put(group.getId(), 0.);
 			} else {
 				this.system.scheduleDropping(timeSeconds, group.getId());
 				timecounter.put(group.getId(), 0.);
+				counter.put(group.getId(), 0.);
 			}
 		}	
 	}
@@ -264,6 +269,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 		}
 		for (Link link : signalGroupIdMetadataMap.get(group.getId()).getInLinks()) {
 			//Integer cars = this.sensorManager.getNumberOfCarsOnLink(link.getId());
+			
+			//TODO Sensor-Manager doesn't seem to work right			
 			Integer cars = this.sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredDistance(), now); 
 			approachingVehiclesMap.get(group.getId()).put(link.getId(), cars);
 		} 
@@ -308,19 +315,35 @@ public class DgRoederGershensonSignalController implements SignalController {
 		for (SignalGroup group : this.system.getSignalGroups().values()) {
 			int vehicles = 0;
 			for(Id<Link> link : approachingVehiclesMap.get(group.getId()).keySet()){
-				vehicles += approachingVehiclesMap.get(group.getId()).get(link);
+				
+				//Fix Agents distance here
+				if(maximalNumberOfAgentsInDistance < approachingVehiclesMap.get(group.getId()).get(link)){
+					vehicles += maximalNumberOfAgentsInDistance;
+				} else {
+					vehicles += approachingVehiclesMap.get(group.getId()).get(link);
+				}
 			}
 		approachingVehiclesGroupMap.put(group.getId(), vehicles);
 		}
 	}
 	
+	private int maximalNumberOfAgentsInDistance;
+	
+	
 	private void updatecounter(){
-		counter.clear();		
+		//counter.clear();		
 		for(SignalGroup group : this.system.getSignalGroups().values()) {
-			if (timecounter.containsKey(group.getId()) && approachingVehiclesGroupMap.containsKey(group.getId())){
-					
-					counter.put(group.getId(), timecounter.get(group.getId())*approachingVehiclesGroupMap.get(group.getId()));
+			if (approachingVehiclesGroupMap.containsKey(group.getId())){
+				if (!counter.containsKey(group.getId())){
+					counter.put(group.getId(), 0.);
+				}
+					//counter.put(group.getId(), timecounter.get(group.getId())*approachingVehiclesGroupMap.get(group.getId()));
 				
+				if (group.getState() != null){
+					if (group.getState().equals((SignalGroupState.RED))){
+						counter.put(group.getId(), counter.get(group.getId()) + new Double(approachingVehiclesGroupMap.get(group.getId())));
+					} 
+				}
 			}
 		}
 
@@ -333,19 +356,19 @@ public class DgRoederGershensonSignalController implements SignalController {
 				if(sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredPlatoonTail(), time) < gershensonConfig.getLengthOfPlatoonTails() && 
 						sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredPlatoonTail(), time) > 0) {
 					VehInR = true;
-					//log.info("There were Vehicles in R in " + signal + " at time " +time + "s on link " + link.getId() );
+					log.info("There were "+sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredPlatoonTail(), time) +" Vehicles in "+gershensonConfig.getMonitoredPlatoonTail() +"m in " + signal + " at time " +time + "s on link " + link.getId() );
 				}
 			}
 		}
 		return VehInR;
 	}
 
-	private Id<SignalGroup> highestcount(){
-		Id<SignalGroup> highest = null;
+	private Double highestcount(){
+		Double highest = 0.;
 		for (Id<SignalGroup>signalgroup : counter.keySet()) {
 			if(!jammedafterIntersection(this.system.getSignalGroups().get(signalgroup))) {
-				if (highest==null) highest = signalgroup;
-				if(counter.get(highest)<counter.get(signalgroup)) highest = signalgroup;
+				if (highest==0.) highest = counter.get(signalgroup);
+				if(highest<counter.get(signalgroup)) highest = counter.get(signalgroup);
 			}
 		}
 		//if (highest == null) log.error("There are no Signalgroups in the, which are not jammed. Rule 6 should have triggerd before");
@@ -386,9 +409,16 @@ public class DgRoederGershensonSignalController implements SignalController {
 		
 		
 //		//This is just to demonstrate that the algorithm works
-//		if (timeSeconds%1==0) {
-//			log.info("States at "+timeSeconds +" "+ signalGroupstatesMap.toString() + approachingVehiclesGroupMap.toString());
-//		}
+		if (timeSeconds%1==0) {
+			//log.info("At "+timeSeconds +" "+ activeSignalGroup.getId() + " is active and is if not null");
+			if (activeSignalGroup!= null){
+				log.info("At "+timeSeconds +" "+ activeSignalGroup.getId().toString() + " is active and is" + activeSignalGroup.getState());
+			} else {
+				log.info("At "+timeSeconds + " active Signalgroup is not initilised");
+			}
+			log.info("At "+timeSeconds +" : "+ counter.toString() + " ");
+			log.info(" ");
+		}
 		
 		for (SignalGroup group : this.system.getSignalGroups().values()){
 			timecounter.merge(group.getId(), 0., (a,b) -> a+1.);
@@ -418,69 +448,122 @@ public class DgRoederGershensonSignalController implements SignalController {
 			carsApproachInGroup();
 			updatecounter();
 			//Find the group with the highest count (product of internal time with vehicles in D s.t. no OutLink-Jam)
-			Id<SignalGroup> signalGrouphighestCount = highestcount();
-	
+			Double signalGrouphighestCount = highestcount();
+			boolean thereAreVehiclesApproaching = vehiclesApproachingSomewhere();
+			
 	//-----------------End of Preparation--------------
 	
 		//Rule 6
 		//if the whole intersection is jammed OR
 		//no Cars approaching the SignalSystem.
 		//	-> turn all signals to RED	
-			if (!jammedSignalGroup.containsValue(false)  || !vehiclesApproachingSomewhere()) {
+			
+		//TODO VehicleApproaching run in the beginning of method to avoid unnecessary loops
+			if (!jammedSignalGroup.containsValue(false)  || !thereAreVehiclesApproaching) {
 				//log.info("Envoke Rule 6 at "+timeSeconds + !vehiclesApproachingSomewhere());
-				for (SignalGroup group : this.system.getSignalGroups().values()){ 
-					if (!SignalGroupState.RED.equals(group.getState())) switchlight(group,timeSeconds);
+				log.info("Rule 6");
+				log.info("all jammed: "+ !jammedSignalGroup.containsValue(false));
+				log.info("no cars approaching: "+!thereAreVehiclesApproaching);
+				
+				if (activeSignalGroup != null){
+					for (SignalGroup group : this.system.getSignalGroups().values()){ 			
+						if (activeSignalGroup.equals(group)) switchlight(group,timeSeconds);
+					}
+					activeSignalGroup = null;
 				}
+				//if(!vehiclesApproachingSomewhere()) activeSignalGroup=null;
 			} else {
 		//Rule 5
 		//At least one Outlink is jammed - from all groups, which are not jammed turn the one with the highest counter to GREEN
 		//the others to RED
+		//TODO implement a switchlight counter to ensure that activeSignal group is set to null if necessary
 				if (jammedSignalGroup.containsValue(true) && activeSignalGroup !=null) {
-					//log.error("Envoke Rule 5 at "+timeSeconds + jammedSignalGroup.toString());
+					log.error("Envoke Rule 5 at "+timeSeconds + jammedSignalGroup.toString());
+					
+					int switchlightcounter = 0;
 					for (SignalGroup group : this.system.getSignalGroups().values()) {
+						//The active signalgroup is jammed behind the intersection, switch it to Red
+						
+						
 						if (jammedSignalGroup.get(group.getId()) && activeSignalGroup.equals(group))
 								/*signalGroupstatesMap.get(group.getId()).equals(SignalGroupState.GREEN))*/ {
 							switchlight(group,timeSeconds);
+							switchlightcounter++;
+							log.info("Fehler 1 - Rule 5");
+							log.info("active ");
 						} else {
-							if ((counter.get(group.getId())==counter.get(signalGrouphighestCount)) ||
-									(counter.get(group.getId())!=counter.get(signalGrouphighestCount)  && activeSignalGroup.equals(group)))
-									/*signalGroupstatesMap.get(group.getId()).equals(SignalGroupState.GREEN)))*/ {
+						// Set a not active Signalgroup to Green if its is not jammed and it has the highest number of cars approaching
+						// if at there are some
+							if ( !jammedSignalGroup.get(group.getId()) && 
+									counter.get(group.getId())==signalGrouphighestCount && 
+									counter.get(group.getId())!=0. &&
+									group.getState().equals(SignalGroupState.RED) 
+									
+								|| (!activeSignalGroup.equals(group) && group.getState().equals(SignalGroupState.GREEN))){
+									
+//									 && ) ||
+//									//(counter.get(group.getId())!=counter.get(signalGrouphighestCount)  && activeSignalGroup.equals(group)))
+//									(activeSignalGroup.equals(group)))
+//									/*signalGroupstatesMap.get(group.getId()).equals(SignalGroupState.GREEN)))*/ {
 								
 								switchlight(group,timeSeconds);
+								switchlightcounter++;
+								log.info("Fehler 2 - Rule 5 " + switchlightcounter);
 							}
 						}	
 					}
+					//If only one switch happened, all groups should be red and active group should be null
+					if (switchlightcounter==1) activeSignalGroup=null;
+					
 				} else {
 		//Complement to Rule 6
 		//All Signals are RED, but there is no jam on Outlinks anymore. Restore a single Green for the Group with the highest count
 					if (activeSignalGroup==null) {
-						for (SignalGroup group : this.system.getSignalGroups().values()) {
-							if (counter.get(signalGrouphighestCount)!=0.0 && group.getId().equals(signalGrouphighestCount)) {
-								switchlight(group,timeSeconds);
+						if (jammedSignalGroup.containsValue(false)){
+							for (SignalGroup group : this.system.getSignalGroups().values()) {
+								if (signalGrouphighestCount!=0.0 && counter.get(group.getId()) == signalGrouphighestCount) {
+									switchlight(group,timeSeconds);
+									log.info("Complement Rule 6");
+									break;
+								}
 							}
 						}
 					} else {
 		//Rule 4
 		//One Group has GREEN but no cars approaching and another group has RED and Cars approaching (switch them)
-						if(approachingVehiclesGroupMap.containsValue(0) && vehiclesApproachingSomewhere()) {
+						if(approachingVehiclesGroupMap.containsValue(0) && thereAreVehiclesApproaching) {		
+							int highest = 0;
+							SignalGroup firstlight=null; 
 							for (SignalGroup group : this.system.getSignalGroups().values()) {
-								if (group.getState().equals(SignalGroupState.GREEN) &&
-										(approachingVehiclesGroupMap.get(group.getId())==0 || !highestcount().equals(group.getId()))){
-									switchlight(group,timeSeconds);
+								if (activeSignalGroup != null){
+									if (group.equals(activeSignalGroup) &&
+											(approachingVehiclesGroupMap.get(group.getId())==0 )){
+										switchlight(group,timeSeconds);
+										log.info("Rule 4");
+									} else {
+										if(approachingVehiclesGroupMap.get(activeSignalGroup.getId())==0  &&
+												counter.get(group.getId()) == signalGrouphighestCount &&
+												group.getState().equals(SignalGroupState.RED) &&
+												counter.get(group.getId()) > 0.){
+											switchlight(group,timeSeconds);
+										}
+									}
+								} else {
+									if (approachingVehiclesGroupMap.get(group.getId())>=highest) firstlight = group;
 								}
-								if(highestcount().equals(group.getId()) && group.getState().equals(SignalGroupState.RED)) {
-									switchlight(group,timeSeconds);
-								}
-								
 							}
+							if (activeSignalGroup == null) switchlight(firstlight,timeSeconds);
 						} else {
 		//Rule 3
 		//A signal should switch from GREEN to RED (according to Rule 1 and 2), but there are just a few cars left to pass: Don't switch
-							int counterRule3 = 0;
-							for (SignalGroup group : this.system.getSignalGroups().values()) {
-								if (hasMoreThanMVehiclesInR(group.getId(), timeSeconds)) counterRule3++;
-							}
-							if (counterRule3==0) {
+							boolean hasfewerThanMVehiclesInR= false;
+							if (hasMoreThanMVehiclesInR(activeSignalGroup.getId(), timeSeconds) ) hasfewerThanMVehiclesInR = true;
+							
+//							for (SignalGroup group : this.system.getSignalGroups().values()) {
+//								if (hasMoreThanMVehiclesInR(group.getId(), timeSeconds) ) counterRule3++;
+//								log.info("Rule 3");
+//							}
+							if (!hasfewerThanMVehiclesInR) {
 		//Rule 2
 		//A signal should switch from GREEN to RED (according to Rule 1), but internal time of the Group hasn't reached
 		//the minimal green time yet - Dont't switch
@@ -492,8 +575,9 @@ public class DgRoederGershensonSignalController implements SignalController {
 		//Rule 1
 									LinkedList<SignalGroup> potentialRule1 = new LinkedList<SignalGroup>();
 									for (SignalGroup group : this.system.getSignalGroups().values()) {
-										if (group.getState().equals(SignalGroupState.RED) && counter.get(group.getId())>gershensonConfig.getThreshold()) {
+										if (!group.equals(activeSignalGroup) && counter.get(group.getId())>gershensonConfig.getThreshold()) {
 											potentialRule1.add(group);
+											log.info("Rule 1: Signalgroup "+ group.getId().toString() + " reached the threshold");
 										}
 									}
 									if(!potentialRule1.isEmpty()) {
@@ -505,8 +589,9 @@ public class DgRoederGershensonSignalController implements SignalController {
 										
 										//log.info("Envoke Rule 1. Rule 2,3,4 are not violated. Switch " + groupR1.getId());
 										for (SignalGroup group : this.system.getSignalGroups().values()) {	
-											if (group.getState().equals(SignalGroupState.GREEN)) switchlight(group,timeSeconds);
+											//if (group.getState().equals(SignalGroupState.GREEN)) switchlight(group,timeSeconds);
 											if (group.equals(activeSignalGroup)) switchlight(group,timeSeconds);
+											if (group.getState().equals(SignalGroupState.GREEN)) switchlight(group,timeSeconds);
 											if (group.equals(groupR1)) switchlight(group,timeSeconds);
 										}
 									}

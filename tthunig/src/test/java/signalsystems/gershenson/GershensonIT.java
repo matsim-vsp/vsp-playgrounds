@@ -128,7 +128,7 @@ public class GershensonIT {
 		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 5, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
 		Assert.assertEquals("avg cycle time of the system is wrong", 19.990654205607477, avgCycleTimePerSystem.get(SIGNALSYSTEMID1), MatsimTestUtils.EPSILON);
 	}
-	@Test
+	@Ignore
 	public void testSingleCrossingDifferentUniformDemandAB() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 2000, 600, 0, 0 };
@@ -173,7 +173,7 @@ public class GershensonIT {
 	/**
 	 * demand crossing only in east-west direction
 	 */
-	@Test
+	@Ignore
 	public void testSingleCrossingUniformDemandA() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 3600, 0, 0, 0 };
@@ -230,7 +230,7 @@ public class GershensonIT {
 	}
 
 	
-	@Test
+	@Ignore
 	public void testSingleCrossingwithOutboundCongestionFromAB() {
 		String scenarioType = "singleCrossingTwoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
@@ -253,7 +253,7 @@ public class GershensonIT {
 
 	
 		
-	@Test
+	@Ignore
 	public void testSingleCrossingStochasticDemandAB() {
 		String scenarioType = "singleCrossingStochasticDemandAB";
 		double[] noPersons = { 2800., 2800., 0., 0. };
@@ -346,7 +346,7 @@ public class GershensonIT {
 		});
 		
 		// ---------- VIS
-//		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
 		// ---------- VIS
 
 		controler.run();
@@ -600,6 +600,7 @@ public class GershensonIT {
 
 	private Config defineConfig() {
 		Config config = ConfigUtils.createConfig();
+		
 		config.controler().setOutputDirectory(testUtils.getOutputDirectory());
 
 		// set number of iterations
