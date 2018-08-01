@@ -60,8 +60,6 @@ import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 
 /**
 * @author ikaddoura
@@ -94,9 +92,9 @@ public class RunBerlinOptAV {
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/berlin-5.1_1pct_config_optAV_0av_TTTT_0.01_msaT.xml";
-			runId = "berlin-5.1_1pct_config_optAV_0av_TTTT_0.01_msaT";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/output/" + runId + "/";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_500av_TFFF_no-demand-reactions.xml";
+			runId = "berlin-5.1_1pct_500av_TFFF_no-demand-reactions";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 		}
 		
