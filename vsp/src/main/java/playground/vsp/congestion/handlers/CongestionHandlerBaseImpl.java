@@ -115,7 +115,7 @@ class CongestionHandlerBaseImpl implements CongestionHandler {
 
 	@Override
 	public final void handleEvent(PersonStuckEvent event) {
-		log.warn("An agent is stucking. No garantee for right calculation of external congestion effects: " + event.toString());
+//		log.warn("An agent is stucking. No garantee for right calculation of external congestion effects: " + event.toString());
 	}
 
 	@Override
@@ -202,10 +202,13 @@ class CongestionHandlerBaseImpl implements CongestionHandler {
 
 	@Override
 	public final void handleEvent( PersonArrivalEvent event ) {
-		LinkCongestionInfo linkInfo = CongestionUtils.getOrCreateLinkInfo( event.getLinkId(), linkId2congestionInfo, scenario) ;
-		linkInfo.getAgentsOnLink().remove( event.getPersonId() ) ;
 		
-		this.carPersonIDs.remove(event.getPersonId());
+		if (event.getLegMode().equals(TransportMode.car)) {
+			LinkCongestionInfo linkInfo = CongestionUtils.getOrCreateLinkInfo( event.getLinkId(), linkId2congestionInfo, scenario) ;
+			linkInfo.getAgentsOnLink().remove( event.getPersonId() ) ;
+			
+			this.carPersonIDs.remove(event.getPersonId());
+		}
 	}
 
 	public final static void updateFlowAndDelayQueues(double time, DelayInfo delayInfo, LinkCongestionInfo linkInfo) {

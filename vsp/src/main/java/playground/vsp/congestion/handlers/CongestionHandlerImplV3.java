@@ -148,15 +148,19 @@ public final class CongestionHandlerImplV3 implements CongestionHandler, Activit
 	public void handleEvent(ActivityEndEvent event) {
 		// I read the following as: remove non-allocated delays from agents once they are no longer on a leg. kai, sep'15
 
-		if (this.agentId2storageDelay.get(event.getPersonId()) == null) {
-			// skip that person
-
+		if (event.getActType().contains("interaction")) {
+			// skip
 		} else {
-			if (this.agentId2storageDelay.get(event.getPersonId()) != 0.) {
-				// log.warn("A delay of " + this.agentId2storageDelay.get(event.getDriverId()) + " sec. resulting from spill-back effects was not internalized. Setting the delay to 0.");
-				this.delayNotInternalized_spillbackNoCausingAgent += this.agentId2storageDelay.get(event.getPersonId());
+			if (this.agentId2storageDelay.get(event.getPersonId()) == null) {
+				// skip that person
+
+			} else {
+				if (this.agentId2storageDelay.get(event.getPersonId()) != 0.) {
+					// log.warn("A delay of " + this.agentId2storageDelay.get(event.getDriverId()) + " sec. resulting from spill-back effects was not internalized. Setting the delay to 0.");
+					this.delayNotInternalized_spillbackNoCausingAgent += this.agentId2storageDelay.get(event.getPersonId());
+				}
+				this.agentId2storageDelay.put(event.getPersonId(), 0.);
 			}
-			this.agentId2storageDelay.put(event.getPersonId(), 0.);
 		}
 	}
 
