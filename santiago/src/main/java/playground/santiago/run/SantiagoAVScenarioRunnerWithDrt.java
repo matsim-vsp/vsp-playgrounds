@@ -88,7 +88,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 	/***/
 
 	private static String inputPath = "D:\\matsim-eclipse\\shared-svn\\projects\\santiago\\scenario\\inputForMATSim\\AV_simulation\\";
-	private static String configFile = inputPath + "config_v2a_medium_DRT.xml";
+	private static String configFile = inputPath + "config_v2a_small_DRT.xml";
 
 	public static void main(String args[]) {
 
@@ -119,7 +119,8 @@ public class SantiagoAVScenarioRunnerWithDrt {
 
 		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
 				new OTFVisConfigGroup());
-		Scenario scenario = ScenarioUtils.loadScenario(config);
+		Scenario scenario = DrtControlerCreator.createScenarioWithDrtRouteFactory(config);
+		ScenarioUtils.loadScenario(scenario);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
 		Controler controler = new Controler(scenario);

@@ -34,6 +34,7 @@ import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
@@ -43,6 +44,12 @@ import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.congestion.controler.AdvancedMarginalCongestionPricingContolerListener;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
+import playground.vsp.congestion.handlers.TollHandler;
+import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
 
 /**
 * @author ikaddoura
@@ -57,6 +64,9 @@ public class RunBerlin {
 	private static String runId;
 	private static String visualizationScriptInputDirectory;
 	private static boolean activateDecongestionPricing;
+	private static boolean activateQueueBasedCongestionPricing;
+	private static String queueBasedCongestionPricingApproach;
+	private static double blendFactorQCP;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -75,14 +85,26 @@ public class RunBerlin {
 			
 			activateDecongestionPricing = Boolean.parseBoolean(args[4]);
 			log.info("activateDecongestionPricing: "+ activateDecongestionPricing);
+			
+			activateQueueBasedCongestionPricing = Boolean.parseBoolean(args[5]);
+			log.info("activateQueueBasedCongestionPricing: "+ activateQueueBasedCongestionPricing);
+			
+			queueBasedCongestionPricingApproach = args[6];
+			log.info("queueBasedCongestionPricingApproach: "+ queueBasedCongestionPricingApproach);
 
+			blendFactorQCP = Double.parseDouble(args[7]);
+			log.info("blendFactorQCP: "+ blendFactorQCP);
+			
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/input/berlin-5.0_config_1a.xml";
-			outputDirectory = "/Users/ihab/Desktop/b5_decongestion_b5_1a-previous-2/";
-			runId = "b5_1a";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/input/berlin-5.0_config_0c_1pct.xml";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_decongestion/output/b5_1pct_1a-test3/";
+			runId = "test1";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			activateDecongestionPricing = true;
+			activateQueueBasedCongestionPricing = true;
+			queueBasedCongestionPricingApproach = "V10";
+			blendFactorQCP = 1.0;
 		}
 		
 		RunBerlin runner = new RunBerlin();
@@ -91,7 +113,13 @@ public class RunBerlin {
 
 	public void run() {
 		
-		Config config = ConfigUtils.loadConfig(configFile, new DecongestionConfigGroup());
+		Config config = null;
+		
+		if (activateDecongestionPricing) {
+			config = ConfigUtils.loadConfig(configFile, new DecongestionConfigGroup());
+		} else {
+			config = ConfigUtils.loadConfig(configFile);
+		}
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
 		config.controler().setOutputDirectory(outputDirectory);
@@ -127,8 +155,6 @@ public class RunBerlin {
 			
 			@Override
 			public void install() {
-				this.bind(ModalShareEventHandler.class);
-				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
 				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
 			}
 		});
@@ -149,6 +175,34 @@ public class RunBerlin {
 					this.bindCarTravelDisutilityFactory().toInstance( travelDisutilityFactory );
 				}
 			});	
+		}
+		
+		if (activateQueueBasedCongestionPricing) {
+			
+			final TollHandler congestionTollHandlerQBP = new TollHandler(controler.getScenario());
+			final CongestionTollTimeDistanceTravelDisutilityFactory factory = new CongestionTollTimeDistanceTravelDisutilityFactory(
+					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore()),
+					congestionTollHandlerQBP, controler.getConfig().planCalcScore()
+				);
+			factory.setSigma(0.);
+			factory.setBlendFactor(blendFactorQCP);
+			
+			controler.addOverridingModule(new AbstractModule(){
+				@Override
+				public void install() {
+					this.bindCarTravelDisutilityFactory().toInstance( factory );
+				}
+			}); 
+			
+			if (queueBasedCongestionPricingApproach.equals("V3")) {
+				controler.addControlerListener(new AdvancedMarginalCongestionPricingContolerListener(controler.getScenario(), congestionTollHandlerQBP, new CongestionHandlerImplV3(controler.getEvents(), controler.getScenario())));
+			} else if (queueBasedCongestionPricingApproach.equals("V9")) {
+				controler.addControlerListener(new AdvancedMarginalCongestionPricingContolerListener(controler.getScenario(), congestionTollHandlerQBP, new CongestionHandlerImplV9(controler.getEvents(), controler.getScenario())));
+			} else if (queueBasedCongestionPricingApproach.equals("V10")) {
+				controler.addControlerListener(new AdvancedMarginalCongestionPricingContolerListener(controler.getScenario(), congestionTollHandlerQBP, new CongestionHandlerImplV10(controler.getEvents(), controler.getScenario())));
+			} else {
+				throw new RuntimeException("Unknown queue based congestion pricing approach. Aborting...");
+			}
 		}
 				
 		controler.run();

@@ -56,10 +56,10 @@ public class TagCarAndSAVusers {
 	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/population/";
 	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV_be5/input/population/";
 	
-	private final String inputPlansFile = "berlin-5.1-1pct_plans.xml.gz";
-	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers_new.xml.gz";
+	private final String inputPlansFile = "berlin-5.1-10pct_plans.xml.gz";
+	private final String outputPlansFile = "berlin-5.1-10pct_plans_taggedCarUsers.xml.gz";
 	
-	private final String outputPersonAttributesFile = "berlin-5.0_person-attributes_potentialSAVusers_new.xml.gz";
+	private final String outputPersonAttributesFile = "berlin-5.0_person-attributes_potentialSAVusers_10pct.xml.gz";
 
 	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
 	private final String crsSHPFile = "EPSG:25833";

@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -39,6 +40,7 @@ import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
 
@@ -136,11 +138,17 @@ public final class CongestionHandlerImplV10 implements CongestionHandler {
 		this.delegate.handleEvent( event ) ;
 
 		if (this.delegate.getPtVehicleIDs().contains(event.getVehicleId())){
-			log.warn("Public transport mode. Mixed traffic is not tested.");
-		} else { // car!
-			LinkCongestionInfo linkInfo = this.delegate.getLinkId2congestionInfo().get( event.getLinkId() ) ;
-			DelayInfo delayInfo = linkInfo.getFlowQueue().getLast();
-			calculateCongestion(event, delayInfo);
+			// skip pt
+		} else {
+			
+			Id<Person> personId = this.delegate.getVehicle2DriverEventHandler().getDriverOfVehicle( event.getVehicleId() ) ;
+
+			if (this.delegate.getCarPersonIDs().contains(personId)) {
+				// car
+				LinkCongestionInfo linkInfo = this.delegate.getLinkId2congestionInfo().get( event.getLinkId() ) ;
+				DelayInfo delayInfo = linkInfo.getFlowQueue().getLast();
+				calculateCongestion(event, delayInfo);
+			}
 		}
 	}
 

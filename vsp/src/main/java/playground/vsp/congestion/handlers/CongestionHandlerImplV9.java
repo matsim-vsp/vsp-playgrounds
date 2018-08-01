@@ -144,26 +144,30 @@ public final class CongestionHandlerImplV9 implements CongestionHandler, Activit
 		return this.delegate.getTotalDelay();
 	}
 	
-	
-
 	public final double getDelayNotInternalizedSpillbackNoCausingAgent() {
 		return this.delayNotInternalized_spillbackNoCausingAgent;
 	}
 
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
-		// I read the following as: remove non-allocated delays from agents once they are no longer on a leg. kai, sep'15
-
-		if (this.agentId2storageDelay.get(event.getPersonId()) == null) {
-			// skip that person
-
+		
+		if (event.getActType().contains("interaction")) {
+			// skip
 		} else {
-			if (this.agentId2storageDelay.get(event.getPersonId()) != 0.) {
-				// log.warn("A delay of " + this.agentId2storageDelay.get(event.getDriverId()) + " sec. resulting from spill-back effects was not internalized. Setting the delay to 0.");
-				this.delayNotInternalized_spillbackNoCausingAgent += this.agentId2storageDelay.get(event.getPersonId());
+			// I read the following as: remove non-allocated delays from agents once they are no longer on a leg. kai, sep'15
+	
+			if (this.agentId2storageDelay.get(event.getPersonId()) == null) {
+				// skip that person
+	
+			} else {
+				if (this.agentId2storageDelay.get(event.getPersonId()) != 0.) {
+					// log.warn("A delay of " + this.agentId2storageDelay.get(event.getDriverId()) + " sec. resulting from spill-back effects was not internalized. Setting the delay to 0.");
+					this.delayNotInternalized_spillbackNoCausingAgent += this.agentId2storageDelay.get(event.getPersonId());
+				}
+				this.agentId2storageDelay.put(event.getPersonId(), 0.);
 			}
-			this.agentId2storageDelay.put(event.getPersonId(), 0.);
 		}
+			
 	}
 
 	@Override
@@ -172,11 +176,17 @@ public final class CongestionHandlerImplV9 implements CongestionHandler, Activit
 		this.delegate.handleEvent( event ) ;
 
 		if (this.delegate.getPtVehicleIDs().contains(event.getVehicleId())){
-			log.warn("Public transport mode. Mixed traffic is not tested.");
-		} else { // car!
-			LinkCongestionInfo linkInfo = this.delegate.getLinkId2congestionInfo().get( event.getLinkId() ) ;
-			DelayInfo delayInfo = linkInfo.getFlowQueue().getLast();
-			calculateCongestion(event, delayInfo);
+			// pt
+		} else {
+			
+			Id<Person> personId = this.delegate.getVehicle2DriverEventHandler().getDriverOfVehicle( event.getVehicleId() ) ;
+
+			if (this.delegate.getCarPersonIDs().contains(personId)) {
+				// car
+				LinkCongestionInfo linkInfo = this.delegate.getLinkId2congestionInfo().get( event.getLinkId() ) ;
+				DelayInfo delayInfo = linkInfo.getFlowQueue().getLast();
+				calculateCongestion(event, delayInfo);
+			}
 		}
 	}
 
