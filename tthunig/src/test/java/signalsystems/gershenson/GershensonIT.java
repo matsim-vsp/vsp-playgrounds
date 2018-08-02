@@ -106,7 +106,7 @@ public class GershensonIT {
 	/**
 	 * conflicting streams
 	 */
-	@Test
+	@Ignore
 	public void testSingleCrossingUniformDemandAB() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
@@ -131,7 +131,7 @@ public class GershensonIT {
 	@Ignore
 	public void testSingleCrossingDifferentUniformDemandAB() {
 		String scenarioType = "singleCrossingNoBottlenecks";
-		double[] noPersons = { 2000, 600, 0, 0 };
+		double[] noPersons = { 2000, 400, 0, 0 };
 		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
 		// check signal results
@@ -149,7 +149,7 @@ public class GershensonIT {
 		Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 6000/600 > totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2));
 	}
 	
-	//TODO
+	
 	@Ignore
 	public void testSingleCrossingDifferentDemandABCD() {
 		String scenarioType = "singleCrossingNoBottlenecks";
@@ -230,7 +230,7 @@ public class GershensonIT {
 	}
 
 	
-	@Ignore
+	@Test
 	public void testSingleCrossingwithOutboundCongestionFromAB() {
 		String scenarioType = "singleCrossingTwoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
@@ -440,10 +440,10 @@ public class GershensonIT {
 			
 			//Reset Capacity if Bottleneck	
 			if (numberOfBottlenecks==1 && (fromNodeId.equals("3") && toNodeId.equals("4")) ) {
-				link.setCapacity(1);				
+				link.setCapacity(500);				
 			}
 			if (numberOfBottlenecks==2 && ((fromNodeId.equals("3") && toNodeId.equals("4"))|| fromNodeId.equals("3") && toNodeId.equals("8"))) {
-				link.setCapacity(1);				
+				link.setCapacity(500);				
 			}
 			
 			net.addLink(link);
