@@ -283,18 +283,18 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		System.out.println("Congestion pricing car users and SAV drivers:");
 		printResults1(handler4);
 		
-		Assert.assertEquals(true, getNoiseSensitiveRouteDemand(handler2) < getNoiseSensitiveRouteDemand(handler1));
-		Assert.assertEquals(true, getNoiseSensitiveRouteDemand(handler3) < getNoiseSensitiveRouteDemand(handler1));
-		Assert.assertEquals(true, getNoiseSensitiveRouteDemand(handler4) < getNoiseSensitiveRouteDemand(handler2));
-		Assert.assertEquals(true, getNoiseSensitiveRouteDemand(handler4) < getNoiseSensitiveRouteDemand(handler3));
+		Assert.assertEquals(true, getShortCongestedRouteDemand(handler2) < getShortCongestedRouteDemand(handler1));
+		Assert.assertEquals(true, getShortCongestedRouteDemand(handler3) < getShortCongestedRouteDemand(handler1));
+		Assert.assertEquals(true, getShortCongestedRouteDemand(handler4) < getShortCongestedRouteDemand(handler2));
+		Assert.assertEquals(true, getShortCongestedRouteDemand(handler4) < getShortCongestedRouteDemand(handler3));
 	}
 	
 	private void printResults1(LinkDemandEventHandler handler) {
-		System.out.println("long but low external costs: " + getLongUncongestedDemand(handler));
-		System.out.println("short but high external costs: " + (getNoiseSensitiveRouteDemand(handler)));
+		System.out.println("long but low external costs: " + getLongUncongestedRouteDemand(handler));
+		System.out.println("short but high external costs: " + (getShortCongestedRouteDemand(handler)));
 	}
 	
-	private int getNoiseSensitiveRouteDemand(LinkDemandEventHandler handler) {
+	private int getShortCongestedRouteDemand(LinkDemandEventHandler handler) {
 		int noiseSensitiveRouteDemand = 0;
 		if (handler.getLinkId2demand().containsKey(Id.createLinkId("link_7_8"))) {
 			noiseSensitiveRouteDemand = handler.getLinkId2demand().get(Id.createLinkId("link_7_8"));
@@ -302,7 +302,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		return noiseSensitiveRouteDemand;
 	}
 	
-	private int getLongUncongestedDemand(LinkDemandEventHandler handler) {
+	private int getLongUncongestedRouteDemand(LinkDemandEventHandler handler) {
 		int longUncongestedRouteDemand = 0;
 		if (handler.getLinkId2demand().containsKey(Id.createLinkId("link_1_2"))) {
 			longUncongestedRouteDemand = handler.getLinkId2demand().get(Id.createLinkId("link_1_2"));
