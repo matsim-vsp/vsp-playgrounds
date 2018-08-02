@@ -42,8 +42,9 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMo
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
-import playground.ikaddoura.optAV.OptAVConfigGroup.TollingApproach;
 import playground.ikaddoura.optAV.congestionAV.DecongestionModuleSAV;
+import playground.ikaddoura.optAV.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
+import playground.ikaddoura.optAV.disutility.DvrpMoneyTravelDisutilityModule;
 import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 
 /**
@@ -137,12 +138,8 @@ public class OptAVModule extends AbstractModule {
 		// passenger-vehicle tracking
 		// #############################
 				
-		if (optAVParams.getTollingApproach().toString().equals(TollingApproach.ExternalCost.toString()) ||
-				optAVParams.getTollingApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString()) ||
-				optAVParams.getFixCostsSAVinsteadOfCar() != 0. || optAVParams.getDailyFixCostAllSAVusers() != 0.) {
-			this.bind(SAVPassengerTracker.class).asEagerSingleton();
-			addEventHandlerBinding().to(SAVPassengerTracker.class);
-		}
+		this.bind(SAVPassengerTracker.class).asEagerSingleton();
+		addEventHandlerBinding().to(SAVPassengerTracker.class);
 		
 		// #############################
 		// fix cost pricing
@@ -158,21 +155,26 @@ public class OptAVModule extends AbstractModule {
         // #############################
 		
 		if (optAVParams.isAccountForNoise()) {
+						
+			if (optAVParams.isChargeSAVTollsFromPassengers() || optAVParams.isChargeTollsFromCarUsers() || optAVParams.isChargeTollsFromSAVDriver()) {
+				noiseParams.setInternalizeNoiseDamages(true);
+			} else {
+				noiseParams.setInternalizeNoiseDamages(false);
+			}
 			install(new NoiseComputationModuleSAV(scenario));
+		} else {
+			noiseParams.setInternalizeNoiseDamages(false);
 		}
 				
 		if (optAVParams.isAccountForCongestion()) {
+						
+			if (optAVParams.isChargeSAVTollsFromPassengers() || optAVParams.isChargeTollsFromCarUsers() || optAVParams.isChargeTollsFromSAVDriver()) {
+				decongestionParams.setEnableDecongestionPricing(true);
+			} else {
+				decongestionParams.setEnableDecongestionPricing(false);
+			}
 			install(new DecongestionModuleSAV(scenario));
-		}
-		
-		if (optAVParams.getTollingApproach().toString().equals(TollingApproach.ExternalCost.toString()) ||
-				optAVParams.getTollingApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
-			
-			noiseParams.setInternalizeNoiseDamages(true);
-			decongestionParams.setEnableDecongestionPricing(true);
-			
 		} else {
-			noiseParams.setInternalizeNoiseDamages(false);
 			decongestionParams.setEnableDecongestionPricing(false);
 		}
 		
@@ -194,73 +196,39 @@ public class OptAVModule extends AbstractModule {
 		// taxi_optimizer
 		
 		if (optAVParams.isChargeTollsFromSAVDriver()) {
-			if (optAVParams.getTollingApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
-//				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-//					new MoneyTimeDistanceTravelDisutilityFactory(null);
-//	    			install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
-				
-				throw new RuntimeException("Not supported. Aborting...");
-	        	
-	        } else if (optAVParams.getTollingApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
-	        	
-	        		// old approach
-//	        		MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-//	        			new MoneyTimeDistanceTravelDisutilityFactory(
-//	        				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore())
+			
+			install(new DvrpMoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));
+			
+//			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
+//			new MoneyTimeDistanceTravelDisutilityFactory(
+//				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore())
 //					);
-//	        		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
-	        	
-	        		// new approach
-        			install(new DvrpMoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));
-
-	        		
-	        } else if (optAVParams.getTollingApproach().toString().equals(TollingApproach.NoPricing.toString())) {
-	        	
-	        	if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
-					log.info("Using the default travel disutility for SAV drivers / the taxi optimizer (case without pricing).");
-				} else {
-					RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-						new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
-					this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);				
-				}
-	        }
+//			install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
 			
 		} else {
 			
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
 				log.info("Using the default travel disutility for SAV drivers / the taxi optimizer (case without pricing).");
 			} else {
-				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-					new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
-				this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);				
+				install(new DvrpMoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));		
+				
+//				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
+//	        			new MoneyTimeDistanceTravelDisutilityFactory(
+//	        				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore())
+//					);
+//	        		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));   	
 			}
 		}
 		
 		// car user
 		
 		if (optAVParams.isChargeTollsFromCarUsers()) {
-			if (optAVParams.getTollingApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
-				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-					new MoneyTimeDistanceTravelDisutilityFactory(null);     
-	    			install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
-	        	
-	        } else if (optAVParams.getTollingApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
-	        		MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-	        			new MoneyTimeDistanceTravelDisutilityFactory(
-	        				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore())
-	        			);
-	        		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
-	        	
-	        } else if (optAVParams.getTollingApproach().toString().equals(TollingApproach.NoPricing.toString())) {
-	        		
-	        		if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
-					log.info("Using the default travel disutility for car drivers (case without pricing).");
-				} else {
-					RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-						new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()); 
-					this.addTravelDisutilityFactoryBinding(TransportMode.car).toInstance(defaultTravelDisutilityFactory);
-				}        	
-	        }
+			
+			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
+        			new MoneyTimeDistanceTravelDisutilityFactory(
+        				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore())
+        			);
+        		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
 			
 		} else {	
 			

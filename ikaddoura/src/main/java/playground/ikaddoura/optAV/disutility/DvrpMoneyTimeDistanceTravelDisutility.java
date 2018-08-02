@@ -17,12 +17,15 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.optAV.disutility;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.noise.personLinkMoneyEvents.PersonLinkMoneyEvent;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
@@ -42,23 +45,43 @@ import playground.ikaddoura.moneyTravelDisutility.data.TimeBin;
 */
 
 public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
+	private static final Logger log = Logger.getLogger(DvrpMoneyTimeDistanceTravelDisutility.class);
 
-	private final double timeBinSize;
 	private MoneyEventAnalysis moneyEventAnalysis;
 	private AgentFilter vehicleFilter;
-	private final double costPerSec;
 	private final TravelTime travelTime;
+	private final double marginalUtilityOfMoney;
+	private final double utilsPerSec;
+	private final double utilsPerM;
+	private final double costPerM;
+	private final double timeBinSize;
 	
 	public DvrpMoneyTimeDistanceTravelDisutility(
 			TravelTime travelTime,
-			double costPerSec, 
-			int timeBinSize,
+			Scenario scenario,
 			MoneyEventAnalysis moneyAnalysis,
 			AgentFilter vehicleFilter) {
 		
 		this.travelTime = travelTime;
-		this.timeBinSize = timeBinSize;
-		this.costPerSec = costPerSec;
+		this.timeBinSize = scenario.getConfig().travelTimeCalculator().getTraveltimeBinSize();
+		this.utilsPerSec = scenario.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMarginalUtilityOfTraveling();
+		this.utilsPerM = scenario.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMarginalUtilityOfDistance();
+		this.costPerM = scenario.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
+		this.marginalUtilityOfMoney = scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
+
+		if (utilsPerSec > 0. || utilsPerM > 0. || costPerM > 0. || marginalUtilityOfMoney < 0.) {
+			log.warn("utilsPerSec: " + utilsPerSec);
+			log.warn("utilsPerM: " + utilsPerM);
+			log.warn("costPerM: " + costPerM);
+			log.warn("marginalUtilityOfMoney: " + marginalUtilityOfMoney);
+
+			throw new RuntimeException("Check scoring parameters for " + DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER + ". Travel disutility may become positive. Aborting...");
+		}
+		
+		if ((utilsPerSec + utilsPerM + costPerM) == 0.) {
+			log.warn("Check scoring parameters for " + DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER + " (utilsPerSec + utilsPerM + costPerM = 0.).");
+		}
+		
 		this.vehicleFilter = vehicleFilter;
 		this.moneyEventAnalysis = moneyAnalysis;	
 	}
@@ -66,21 +89,24 @@ public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 	@Override
 	public double getLinkTravelDisutility(Link link, double time, Person person, Vehicle vehicle) {
 		
-		double travelDisutility = 0.;
+		double travelTimeDisutility = 0.;
 		
 		if (travelTime != null) {
-			travelDisutility = costPerSec * travelTime.getLinkTravelTime(link, time, person, vehicle);
+			travelTimeDisutility = -1. * utilsPerSec * travelTime.getLinkTravelTime(link, time, person, vehicle);
 		} else {
-			travelDisutility = costPerSec * (link.getLength() / link.getFreespeed());
+			travelTimeDisutility = -1. * utilsPerSec * (link.getLength() / link.getFreespeed());
 		}
+		
 		double linkExpectedTollDisutility = calculateExpectedTollDisutility(link, time, person, vehicle);
+		
+		double distanceDisutility = -1. * utilsPerM * link.getLength() + -1. * costPerM * link.getLength() * marginalUtilityOfMoney;
 				
-		return travelDisutility + linkExpectedTollDisutility;
+		return travelTimeDisutility + linkExpectedTollDisutility + distanceDisutility;
 	}
 
 	@Override
 	public double getLinkMinimumTravelDisutility(Link link) {
-		return costPerSec * (link.getLength() / link.getFreespeed());
+		return -1. * utilsPerSec * (link.getLength() / link.getFreespeed()) - 1. * utilsPerM * link.getLength() + -1. * costPerM * link.getLength() * marginalUtilityOfMoney;
 	}
 
 	private double calculateExpectedTollDisutility(final Link link, final double time, final Person person, final Vehicle vehicle) {
@@ -119,7 +145,7 @@ public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 			}
 		}
 				
-		double linkExpectedTollDisutility = -1 * estimatedAmount;
+		double linkExpectedTollDisutility = -1 * estimatedAmount * this.marginalUtilityOfMoney;
 		return linkExpectedTollDisutility;
 	}
 	

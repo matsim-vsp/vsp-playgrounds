@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.optAV.disutility;
 
 import org.matsim.core.controler.AbstractModule;
 

@@ -45,7 +45,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.optAV.OptAVConfigGroup.TollingApproach;
 
 /**
  * @author ikaddoura
@@ -83,7 +82,6 @@ public class OptAVModeChoiceTestIT {
 		OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
-		optAVParams1.setTollingApproach(TollingApproach.NoPricing);
 		optAVParams1.setDailyFixCostAllSAVusers(1000.);
 		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
@@ -124,7 +122,6 @@ public class OptAVModeChoiceTestIT {
 		OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(false);
-		optAVParams2.setTollingApproach(TollingApproach.NoPricing);
 		optAVParams2.setDailyFixCostAllSAVusers(-10000.);
 		optAVParams2.setFixCostsSAVinsteadOfCar(0);
 		
@@ -188,7 +185,6 @@ public class OptAVModeChoiceTestIT {
 		OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
-		optAVParams1.setTollingApproach(TollingApproach.NoPricing);
 		optAVParams1.setDailyFixCostAllSAVusers(1000.);
 		optAVParams1.setFixCostsSAVinsteadOfCar(0);
 
@@ -229,7 +225,6 @@ public class OptAVModeChoiceTestIT {
 		OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(false);
-		optAVParams2.setTollingApproach(TollingApproach.NoPricing);
 		optAVParams2.setFixCostsSAVinsteadOfCar(-10000);
 		optAVParams2.setDailyFixCostAllSAVusers(1000.);
 		

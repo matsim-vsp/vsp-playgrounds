@@ -17,10 +17,9 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.optAV.disutility;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -54,10 +53,7 @@ public final class DvrpMoneyTimeDistanceTravelDisutilityFactory implements Trave
 				
 		return new DvrpMoneyTimeDistanceTravelDisutility(
 				travelTime,
-//				scenario.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMarginalUtilityOfTraveling(),
-				-1.0,
-//				scenario.getConfig().travelTimeCalculator().getTraveltimeBinSize(),
-				60,
+				scenario,
 				this.moneyAnalysis,
 				this.vehicleFilter
 			);
