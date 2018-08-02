@@ -27,7 +27,6 @@ import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelDisutilityProvider;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
@@ -196,21 +195,34 @@ public class OptAVModule extends AbstractModule {
 		
 		if (optAVParams.isChargeTollsFromSAVDriver()) {
 			if (optAVParams.getTollingApproach().toString().equals(TollingApproach.ExternalCost.toString())) {
-				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-					new MoneyTimeDistanceTravelDisutilityFactory(null);
-	    			install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
+//				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
+//					new MoneyTimeDistanceTravelDisutilityFactory(null);
+//	    			install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
+				
+				throw new RuntimeException("Not supported. Aborting...");
 	        	
 	        } else if (optAVParams.getTollingApproach().toString().equals(TollingApproach.PrivateAndExternalCost.toString())) {
-	        		MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-	        			new MoneyTimeDistanceTravelDisutilityFactory(
-	        				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore())
-					);
-	        		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
 	        	
+	        		// old approach
+//	        		MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
+//	        			new MoneyTimeDistanceTravelDisutilityFactory(
+//	        				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore())
+//					);
+//	        		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
+	        	
+	        		// new approach
+        			install(new DvrpMoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));
+
+	        		
 	        } else if (optAVParams.getTollingApproach().toString().equals(TollingApproach.NoPricing.toString())) {
-	        		RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-	        			new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
-	        		this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);        	
+	        	
+	        	if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
+					log.info("Using the default travel disutility for SAV drivers / the taxi optimizer (case without pricing).");
+				} else {
+					RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
+						new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
+					this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);				
+				}
 	        }
 			
 		} else {
@@ -220,9 +232,7 @@ public class OptAVModule extends AbstractModule {
 			} else {
 				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
 					new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore()); 
-				this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);
-				
-//				DvrpTravelDisutilityProvider.bindTravelDisutilityForOptimizer(binder(),DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER);
+				this.addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(defaultTravelDisutilityFactory);				
 			}
 		}
 		
@@ -242,9 +252,14 @@ public class OptAVModule extends AbstractModule {
 	        		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
 	        	
 	        } else if (optAVParams.getTollingApproach().toString().equals(TollingApproach.NoPricing.toString())) {
-	        		RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-	        			new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()); 
-	        		this.addTravelDisutilityFactoryBinding(TransportMode.car).toInstance(defaultTravelDisutilityFactory);        	
+	        		
+	        		if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
+					log.info("Using the default travel disutility for car drivers (case without pricing).");
+				} else {
+					RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
+						new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()); 
+					this.addTravelDisutilityFactoryBinding(TransportMode.car).toInstance(defaultTravelDisutilityFactory);
+				}        	
 	        }
 			
 		} else {	
