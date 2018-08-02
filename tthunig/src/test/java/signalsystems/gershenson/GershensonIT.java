@@ -346,7 +346,15 @@ public class GershensonIT {
 		});
 		
 		// ---------- VIS
-		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+//		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+		// This was recently commented in by sbraun.  But you can't have vis in regression tests.  It produces
+		// spurious failures with output such as
+		//		libEGL warning: DRI2: xcb_connect failed
+		//		libEGL warning: DRI2: xcb_connect failed
+		//		libEGL warning: GLX: XOpenDisplay failed
+		// I.e. the JVM tries to connect to the xserver, but that is not there.  You may be able to avoid such
+		// issues with the "headless" option in the pom.xml (I put this in there), but better to not use
+		// otfvis at all in tests.  kai, aug'18
 		// ---------- VIS
 
 		controler.run();

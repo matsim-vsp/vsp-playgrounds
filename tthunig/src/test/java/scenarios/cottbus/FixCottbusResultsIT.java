@@ -65,12 +65,12 @@ public class FixCottbusResultsIT {
 
 	@Test
 	public void testBCContinuedFreeRouteChoice(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_OPT_OFFSETS, 1096817.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_BTU_OPT, 1096817.0);
 	}
 	
 	@Test
 	public void testBCContinuedFixedRouteSet(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_OPT_OFFSETS, 1073110.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_BTU_OPT, 1073110.0);
 	}	
 	
 	private void fixResults(NetworkType netType, PopulationType popType, SignalType signalType, double expectedTotalTt) {
@@ -138,7 +138,7 @@ public class FixCottbusResultsIT {
 		signalConfigGroup.setSignalGroupsFile(testUtils.getClassInputDirectory() + "matsimData/signal_groups_no_13.xml");
 		if (signalType.equals(SignalType.MS)){
 			signalConfigGroup.setSignalControlFile(testUtils.getClassInputDirectory() + "matsimData/signal_control_no_13.xml");
-		} else if (signalType.equals(SignalType.MS_OPT_OFFSETS)){ 
+		} else if (signalType.equals(SignalType.MS_BTU_OPT)){ 
 			signalConfigGroup.setSignalControlFile(testUtils.getClassInputDirectory() + "btuOpt/signal_control_opt.xml");
 		}
 

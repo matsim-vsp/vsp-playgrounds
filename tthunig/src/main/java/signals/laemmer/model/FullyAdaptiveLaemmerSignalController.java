@@ -19,28 +19,6 @@
  * *********************************************************************** */
 package signals.laemmer.model;
 
-import com.google.inject.Provider;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.signals.model.AbstractSignalController;
-import org.matsim.contrib.signals.model.Signal;
-import org.matsim.contrib.signals.model.SignalController;
-import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.core.config.Config;
-import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
-import org.matsim.lanes.Lane;
-import org.matsim.lanes.Lanes;
-import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
-import signals.Analyzable;
-import signals.downstreamSensor.DownstreamSensor;
-import signals.laemmer.model.LaemmerConfig.Regime;
-import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
-import signals.laemmer.model.util.SignalUtils;
-import signals.sensor.LinkSensorManager;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,6 +31,34 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.model.AbstractSignalController;
+import org.matsim.contrib.signals.model.Signal;
+import org.matsim.contrib.signals.model.SignalController;
+import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.core.config.Config;
+import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+
+import com.google.inject.Provider;
+
+import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
+import signals.Analyzable;
+import signals.downstreamSensor.DownstreamSensor;
+import signals.laemmer.model.LaemmerConfig.Regime;
+import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
+import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
+import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
+import signals.laemmer.model.util.SignalCombinationBasedOnConflicts;
+import signals.laemmer.model.util.SignalUtils;
+import signals.sensor.LinkSensorManager;
 
 
 /**
@@ -77,6 +83,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 	final Network network;
 	final Lanes lanes;
 	final Config config;
+	final SignalsData signalsData;
 
 	final double DEFAULT_INTERGREEN;
 	double tIdle;
@@ -104,6 +111,8 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 	private int estNumOfPhases;
 
 	private boolean switchSignal; //schedules an update of activeRequest if stabilization selects same phase that was already selected 
+	
+	private SignalCombinationBasedOnConflicts signalCombinationConflicts;
 
 
 	public final static class SignalControlProvider implements Provider<SignalController> {
@@ -134,6 +143,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		this.network = scenario.getNetwork();
 		this.lanes = scenario.getLanes();
 		this.config = scenario.getConfig();
+		this.signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		this.delayCalculator = delayCalculator;
 		if (laemmerConfig.isUseDefaultIntergreenTime()) {
 			DEFAULT_INTERGREEN = laemmerConfig.getDefaultIntergreenTime();
@@ -142,17 +152,15 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		}
 		this.downstreamSensor = downstreamSensor;
 		try {
-			this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationStrategy()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
+			this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationClassName()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
+			if (laemmerConfig.getStabilizationStrategy().equals(StabilizationStrategy.HEURISTIC)) {
+				((HeuristicStrategy) stabilisator).setSignalCombinationTool(this.signalCombinationConflicts);
+			}
 		} catch (Exception e) {	e.printStackTrace(); }
 	}
 
 	@Override
 	public void simulationInitialized(double simStartTimeSeconds) {
-		java.util.logging.Logger.getGlobal().info("initialising signalSystem "+system.getId());
-
-		if(system.getId().equals(Id.create("SignalSystem0", SignalSystem.class))){
-			this.debug = true;
-		}
 		List<Double> maximumLaneOutflows = new LinkedList<>();
 		laemmerApproaches = new LinkedList<>();
 		this.estNumOfPhases = SignalUtils.estimateNumberOfPhases(system, network, lanes);
@@ -180,11 +188,12 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		}
 		//sum the maximum n lanes for systems outflow maximum
 		maximumSystemsOutflowSum = maximumLaneOutflows.stream().sorted(Comparator.comparingDouble(Double::doubleValue).reversed()).limit(this.estNumOfPhases).collect(Collectors.summingDouble(Double::doubleValue));
-		//Phasen kombinatorisch erstellen
-		this.signalPhases = SignalUtils.createSignalPhasesFromSignalGroups(system, network, lanes);
+		// create all possible signal combinations based on conflict data
+		this.signalCombinationConflicts = new SignalCombinationBasedOnConflicts(signalsData, system, network, lanes);
+		this.signalPhases = signalCombinationConflicts.createSignalCombinations();
 
 		if (laemmerConfig.isRemoveSubPhases()) {
-			this.signalPhases = SignalUtils.removeSubPhases(this.signalPhases);
+			this.signalPhases = SignalUtils.removeRedundantSubPhases(this.signalPhases);
 			if(debug)
 				System.out.println("after remove subphases: " + this.signalPhases.size());
 		}

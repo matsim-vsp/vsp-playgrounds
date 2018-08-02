@@ -841,6 +841,9 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 
 	@Override
 	public final QVehicle getFirstVehicle() {
+		if (this.buffer.isEmpty()) {
+			return this.vehQueue.peek();
+		}
 		return this.buffer.peek() ;
 	}
 

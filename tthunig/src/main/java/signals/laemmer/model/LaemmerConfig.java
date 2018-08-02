@@ -188,7 +188,14 @@ public class LaemmerConfig {
 		return isRemoveSubPhases;
 	}
 
-	public String getStabilizationStrategy() {
+	public StabilizationStrategy getStabilizationStrategy() {
+		if (activeStabilizationStrategy.equals(StabilizationStrategy.CUSTOM) && this.customStabilizationStrategy == null) {
+			throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");			
+		}
+		return activeStabilizationStrategy;
+	}
+	
+	public String getStabilizationClassName() {
 		switch (activeStabilizationStrategy) {
 		case HEURISTIC:
 			return HeuristicStrategy.class.getName();

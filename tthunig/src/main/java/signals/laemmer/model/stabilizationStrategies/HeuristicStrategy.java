@@ -1,20 +1,23 @@
 package signals.laemmer.model.stabilizationStrategies;
 
+import java.util.List;
+import java.util.Queue;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.lanes.Lanes;
+
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
 import signals.laemmer.model.SignalPhase;
-import signals.laemmer.model.util.SignalUtils;
-
-import java.util.List;
-import java.util.Queue;
+import signals.laemmer.model.util.SignalCombinationBasedOnConflicts;
 
 public class HeuristicStrategy extends AbstractStabilizationStrategy {
+	
+	private SignalCombinationBasedOnConflicts signalCombinationConflicts;
 
 	public HeuristicStrategy(FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController, Network network, Lanes lanes) {
 		super(fullyAdaptiveLaemmerSignalController, network, lanes);
@@ -30,7 +33,7 @@ public class HeuristicStrategy extends AbstractStabilizationStrategy {
 			for (LaemmerApproach laemmerLane : ((List<LaemmerApproach>) lanesForStabilization).subList(1, lanesForStabilization.size())) {
 				boolean addLane = true;
 				for (Id<SignalGroup> presentSignalGroup : generatedPhase.getGreenSignalGroups()) {
-					if (!SignalUtils.isConflictFreeCombination(signalSystem.getSignalGroups().get(presentSignalGroup), laemmerLane.getSignalGroup(), getNetwork(), getLanes())) {
+					if (!signalCombinationConflicts.isConflictFreeCombination(presentSignalGroup, laemmerLane.getSignalGroup().getId())) {
 						addLane = false;
 						continue stabilisationLaneLoop;
 					}
@@ -47,7 +50,7 @@ public class HeuristicStrategy extends AbstractStabilizationStrategy {
 			for (Id<SignalGroup> presentSignalGroupId : generatedPhase.getGreenSignalGroups()) {
 				if (systemSignalGroup.getId().equals(presentSignalGroupId))
 					continue allSignalGroups;
-				if(!SignalUtils.isConflictFreeCombination(systemSignalGroup, signalSystem.getSignalGroups().get(presentSignalGroupId), getNetwork(), getLanes())){
+				if(!signalCombinationConflicts.isConflictFreeCombination(systemSignalGroup.getId(), presentSignalGroupId)){
 					addSg=false;
 					continue allSignalGroups;
 				}
@@ -64,5 +67,9 @@ public class HeuristicStrategy extends AbstractStabilizationStrategy {
 			System.out.print("\n");
 		}
 		return new LaemmerPhase(getFullyAdaptiveLaemmerSignalController(), generatedPhase);
+	}
+	
+	public void setSignalCombinationTool(SignalCombinationBasedOnConflicts signalCombinationConflicts) {
+		this.signalCombinationConflicts = signalCombinationConflicts;
 	}
 }

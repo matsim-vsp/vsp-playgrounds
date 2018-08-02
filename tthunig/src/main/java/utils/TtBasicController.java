@@ -23,11 +23,14 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
@@ -40,6 +43,8 @@ import signals.CombinedSignalsModule;
  *
  */
 public class TtBasicController {
+	
+	private static final boolean VIS = false;
 
 	/**
 	 * @param args the config file
@@ -50,6 +55,12 @@ public class TtBasicController {
 
 	static Controler prepareBasicControler(String configFileName) {
 		Config config = ConfigUtils.loadConfig(configFileName) ;
+		
+		// adjustments for live visualization
+		OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
+		otfvisConfig.setDrawTime(true);
+		otfvisConfig.setAgentSize(80f);
+		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
 		
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
@@ -66,6 +77,11 @@ public class TtBasicController {
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			// the combined signals module works for a lot of different signal controller, e.g. planbased, sylvia, downstream, laemmer...
 			controler.addOverridingModule(new CombinedSignalsModule());
+		}
+		
+		// add live visualization module
+		if (VIS) { 
+			controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
 		}
 				
 		// add analysis tools
