@@ -104,14 +104,14 @@ public class FreightWithShipments {
 		Carriers carriers = new Carriers() ;
 	
 		Carrier carrier = CarrierImpl.newInstance(Id.create("ShipmentCarrier", Carrier.class));
-		carrier.getShipments().add(getMatsimShipment("shipment1", "i(6,0)", "i(7,4)R", 1));
-		carrier.getShipments().add(getMatsimShipment("shipment2", "i(6,0)", "i(3,9)", 2));
-		carrier.getShipments().add(getMatsimShipment("shipment3", "i(6,0)", "i(4,9)", 2));
-		carrier.getShipments().add(getMatsimShipment("shipment4", null, "i(4,9)", 2));
+		carrier.getShipments().add(createMatsimShipment("shipment1", "i(6,0)", "i(7,4)R", 1));
+		carrier.getShipments().add(createMatsimShipment("shipment2", "i(6,0)", "i(3,9)", 2));
+		carrier.getShipments().add(createMatsimShipment("shipment3", "i(6,0)", "i(4,9)", 2));
+//		carrier.getShipments().add(createMatsimShipment("shipment4", null, "i(4,9)", 2));
 		
-//		carrier.getServices().add(getMatsimService("Service1", "i(7,4)R", 1));
-//		carrier.getServices().add(getMatsimService("Service2", "i(3,9)", 2));
-//		carrier.getServices().add(getMatsimService("Service3", "i(4,9)", 2));
+//		carrier.getServices().add(createMatsimService("Service1", "i(7,4)R", 1));
+//		carrier.getServices().add(createMatsimService("Service2", "i(3,9)", 2));
+//		carrier.getServices().add(createMatsimService("Service3", "i(4,9)", 2));
 		
 		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class)).build();
 		CarrierVehicle carrierVehicle = CarrierVehicle.Builder.newInstance(Id.create("gridVehicle", org.matsim.vehicles.Vehicle.class), Id.createLinkId("i(6,0)")).setEarliestStart(0.0).setLatestEnd(36000.0).setTypeId(carrierVehType.getId()).build();
@@ -204,8 +204,19 @@ public class FreightWithShipments {
 		return Location.Builder.newInstance().setCoordinate(coordinate).build();
 	}
 	
-	private static CarrierShipment getMatsimShipment(String id, String from, String to, int size) {
-		return CarrierShipment.Builder.newInstance(Id.create(id, CarrierShipment.class), Id.create(from, Link.class), Id.create(to, Link.class), size)
+	private static CarrierShipment createMatsimShipment(String id, String from, String to, int size) {
+		Id<CarrierShipment> shipmentId = Id.create(id, CarrierShipment.class);
+		Id<Link> fromLinkId = null; 
+		Id<Link> toLinkId= null;
+		
+		if(from != null ) {
+			fromLinkId = Id.create(from, Link.class);
+		} else 
+		if(to != null ) {
+			toLinkId = Id.create(to, Link.class);
+		}
+		
+		return CarrierShipment.Builder.newInstance(shipmentId, fromLinkId, toLinkId, size)
 				.setDeliveryServiceTime(30.0)
 				.setDeliveryTimeWindow(TimeWindow.newInstance(3600.0, 36000.0))
 				.setPickupServiceTime(5.0)
@@ -213,7 +224,7 @@ public class FreightWithShipments {
 				.build();
 	}
 	
-	private static CarrierService getMatsimService(String id, String to, int size) {
+	private static CarrierService createMatsimService(String id, String to, int size) {
 		return CarrierService.Builder.newInstance(Id.create(id, CarrierService.class), Id.create(to, Link.class))
 				.setCapacityDemand(size)
 				.setServiceDuration(30.0)
