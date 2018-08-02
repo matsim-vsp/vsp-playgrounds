@@ -3,12 +3,11 @@ package signals.gershenson;
 public class GershensonConfig {
 	private double storageCapacityOutlinkJam = 0.8;
 	//protected double maxRedTime = 15.0;
-	private double interGreenTime = 5.; 
-	//TODO this leads to reasonable results (try and error). Why did Gershenson think 13.33 was a good threshold?
-	//in the tests this led to inefficient switching after the minimum green-Time.
-	private double threshold = 250; 
+	private double interGreenTime = 5.; //TODO default should be at least 2
+	private double threshold = 250; //TODO should be higher
+	
 	private int lengthOfPlatoonTails = 2;
-	private double minimumGREENtime = 5;  //TODO must not be negative
+	private double minimumGREENtime = 5;  //TODO should be higher maybe 20
 	
 	//These are attributes for the Sensor
 	private double monitoredPlatoonTail = 25.;
@@ -26,13 +25,8 @@ public class GershensonConfig {
 	}
 	
 	public void setInterGreenTime(double interGreenTime){
-	
-	//Prevents negative intergreen times, if set by user set to 0	
-		if (interGreenTime < 0){
-			this.interGreenTime = 0.0;
-		} else this.interGreenTime = interGreenTime;
+		this.interGreenTime = interGreenTime;
 	}
-	
 	public double getInterGreenTime() {
 		return interGreenTime;
 	}
