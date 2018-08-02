@@ -64,6 +64,59 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 
 		String configFile = testUtils.getPackageInputDirectory() + "config4.xml";
 		final boolean otfvis = false;
+		
+		// ##################################################################
+		// congestion pricing for taxi drivers only
+		// ##################################################################
+
+		LinkDemandEventHandler handler3;
+		{
+			Config config = ConfigUtils.loadConfig(configFile,
+					new OptAVConfigGroup(),
+					new TaxiConfigGroup(),
+					new DvrpConfigGroup(),
+					new TaxiFareConfigGroup(),
+					new OTFVisConfigGroup());
+			
+			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-SAV");
+			config.travelTimeCalculator().setTraveltimeBinSize(60);
+			
+			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
+			optAVParams.setAccountForNoise(false);
+			optAVParams.setAccountForCongestion(true);
+			optAVParams.setTollingApproach(TollingApproach.PrivateAndExternalCost);
+			optAVParams.setChargeSAVTollsFromPassengers(false);
+			optAVParams.setChargeTollsFromCarUsers(false);
+			optAVParams.setChargeTollsFromSAVDriver(true);
+			
+			final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config, DecongestionConfigGroup.class);
+			decongestionSettings.setMsa(true);
+			decongestionSettings.setTollBlendFactor(0.);
+			decongestionSettings.setKd(0.);
+			decongestionSettings.setKi(0.);
+			decongestionSettings.setKp(999.);
+			decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+			decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
+			decongestionSettings.setUpdatePriceInterval(1);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setRunFinalAnalysis(false);
+			
+			Scenario scenario = ScenarioUtils.loadScenario(config);
+			Controler controler = new Controler(scenario);
+				
+			controler.addOverridingModule(TaxiDvrpModules.create());
+			controler.addOverridingModule(new TaxiModule());
+			controler.addOverridingModule(new OptAVModule(scenario));
+			
+			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
+
+			handler3 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
+			controler.getEvents().addHandler(handler3);
+			
+			controler.getConfig().controler().setCreateGraphs(false);
+	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+			controler.run();
+		}
 		 
 		// ##################################################################
 		// baseCase
@@ -153,59 +206,6 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 
 			handler2 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
 			controler.getEvents().addHandler(handler2);
-			
-			controler.getConfig().controler().setCreateGraphs(false);
-	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-			controler.run();
-		}
-		
-		// ##################################################################
-		// congestion pricing for taxi drivers only
-		// ##################################################################
-
-		LinkDemandEventHandler handler3;
-		{
-			Config config = ConfigUtils.loadConfig(configFile,
-					new OptAVConfigGroup(),
-					new TaxiConfigGroup(),
-					new DvrpConfigGroup(),
-					new TaxiFareConfigGroup(),
-					new OTFVisConfigGroup());
-			
-			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-SAV");
-			config.travelTimeCalculator().setTraveltimeBinSize(60);
-			
-			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
-			optAVParams.setAccountForNoise(false);
-			optAVParams.setAccountForCongestion(true);
-			optAVParams.setTollingApproach(TollingApproach.PrivateAndExternalCost);
-			optAVParams.setChargeSAVTollsFromPassengers(false);
-			optAVParams.setChargeTollsFromCarUsers(false);
-			optAVParams.setChargeTollsFromSAVDriver(true);
-			
-			final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config, DecongestionConfigGroup.class);
-			decongestionSettings.setMsa(true);
-			decongestionSettings.setTollBlendFactor(0.);
-			decongestionSettings.setKd(0.);
-			decongestionSettings.setKi(0.);
-			decongestionSettings.setKp(999.);
-			decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
-			decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.0);
-			decongestionSettings.setUpdatePriceInterval(1);
-			decongestionSettings.setWriteLinkInfoCharts(false);
-			decongestionSettings.setRunFinalAnalysis(false);
-			
-			Scenario scenario = ScenarioUtils.loadScenario(config);
-			Controler controler = new Controler(scenario);
-				
-			controler.addOverridingModule(TaxiDvrpModules.create());
-			controler.addOverridingModule(new TaxiModule());
-			controler.addOverridingModule(new OptAVModule(scenario));
-			
-			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
-
-			handler3 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
-			controler.getEvents().addHandler(handler3);
 			
 			controler.getConfig().controler().setCreateGraphs(false);
 	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
