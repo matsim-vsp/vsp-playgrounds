@@ -36,7 +36,7 @@ public class GuidanceQSimModule extends AbstractQSimModule {
 		bind(AgentFactory.class).to(GuidanceAgentFactory.class);
 		bind(Guidance.class).toInstance(guidance);
 		
-		addMobsimListenerBinding(GUIDANCE_LISTENER).to(Guidance.class);
+		bindMobsimListener(GUIDANCE_LISTENER).to(Guidance.class);
 	}
 	
 	@Provides

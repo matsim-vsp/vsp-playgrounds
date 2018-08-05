@@ -77,7 +77,7 @@ final class KNParkingSearch {
 				bind(AgentFactory.class).to(ParkingSearchAgentFactory.class).asEagerSingleton(); // (**)
 			}
 			
-			addAgentSourceBinding(PopulationModule.POPULATION_AGENT_SOURCE_NAME).to(PopulationAgentSource.class);
+			bindAgentSource(PopulationModule.POPULATION_AGENT_SOURCE_NAME).to(PopulationAgentSource.class);
 		}
 	}
 	private static class ParkingSearchAgentFactory implements AgentFactory {
