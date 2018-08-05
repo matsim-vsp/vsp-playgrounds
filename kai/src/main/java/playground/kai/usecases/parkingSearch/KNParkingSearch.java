@@ -20,8 +20,6 @@ package playground.kai.usecases.parkingSearch;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -35,27 +33,18 @@ import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.framework.MobsimAgent;
-import org.matsim.core.mobsim.qsim.AbstractQSimPlugin;
-import org.matsim.core.mobsim.qsim.ActivityEnginePlugin;
-import org.matsim.core.mobsim.qsim.PopulationPlugin;
+import org.matsim.core.mobsim.qsim.AbstractQSimModule;
+import org.matsim.core.mobsim.qsim.PopulationModule;
+import org.matsim.core.mobsim.qsim.QSimModule;
 import org.matsim.core.mobsim.qsim.QSimProvider;
-import org.matsim.core.mobsim.qsim.TeleportationPlugin;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
-import org.matsim.core.mobsim.qsim.agents.TransitAgentFactory;
-import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsPlugin;
 import org.matsim.core.mobsim.qsim.interfaces.Netsim;
-import org.matsim.core.mobsim.qsim.messagequeueengine.MessageQueuePlugin;
-import org.matsim.core.mobsim.qsim.pt.TransitEnginePlugin;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEnginePlugin;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.config.TransitConfigGroup;
 
-import com.google.inject.Module;
 import com.google.inject.Provides;
 
 /**
@@ -70,45 +59,25 @@ final class KNParkingSearch {
 		}
 		@SuppressWarnings("static-method")
 		@Provides 
-		Collection<AbstractQSimPlugin> provideQSimPlugins(TransitConfigGroup transitConfigGroup, NetworkConfigGroup networkConfigGroup, Config config) {
-			final Collection<AbstractQSimPlugin> plugins = new ArrayList<>();
-			plugins.add(new MessageQueuePlugin(config));
-			plugins.add(new ActivityEnginePlugin(config));
-			plugins.add(new QNetsimEnginePlugin(config));
-			if (networkConfigGroup.isTimeVariantNetwork()) {
-				plugins.add(new NetworkChangeEventsPlugin(config));
-			}
-			if (transitConfigGroup.isUseTransit()) {
-				plugins.add(new TransitEnginePlugin(config));
-			}
-			plugins.add(new TeleportationPlugin(config));
-			plugins.add(new ParkingSearchPopulationPlugin(config));
-			return plugins;
+		Collection<AbstractQSimModule> provideQSimPlugins(TransitConfigGroup transitConfigGroup, NetworkConfigGroup networkConfigGroup, Config config) {
+			Collection<AbstractQSimModule> modules = new ArrayList<>(QSimModule.getDefaultQSimModules());
+			modules.removeIf(PopulationModule.class::isInstance);
+			modules.add(new ParkingSearchPopulationModule());
+			return modules;
 		}
 	}
-	private static class ParkingSearchPopulationPlugin extends AbstractQSimPlugin {
-		public ParkingSearchPopulationPlugin(Config config) { super(config); }
-		@Override 
-		public Collection<? extends Module> modules() {
-			Collection<Module> result = new ArrayList<>();
-			result.add(new com.google.inject.AbstractModule() {
-				@Override
-				protected void configure() {
-					bind(PopulationAgentSource.class).asEagerSingleton();
-					if (getConfig().transit().isUseTransit()) {
-						throw new RuntimeException("parking search together with transit is not implemented (should not be difficult)") ;
-					} else {
-						bind(AgentFactory.class).to(ParkingSearchAgentFactory.class).asEagerSingleton(); // (**)
-					}
-				}
-			});
-			return result;
-		}
-		@Override 
-		public Map<String, Class<? extends AgentSource>> agentSources() {
-			Map<String, Class<? extends AgentSource>> result = new HashMap<>();
-			result.put(PopulationPlugin.POPULATION_SOURCE_NAME, PopulationAgentSource.class);
-			return result;
+	private static class ParkingSearchPopulationModule extends AbstractQSimModule {
+		@Override
+		protected void configureQSim() {
+			bind(PopulationAgentSource.class).asEagerSingleton();
+			
+			if (getConfig().transit().isUseTransit()) {
+				throw new RuntimeException("parking search together with transit is not implemented (should not be difficult)") ;
+			} else {
+				bind(AgentFactory.class).to(ParkingSearchAgentFactory.class).asEagerSingleton(); // (**)
+			}
+			
+			addAgentSourceBinding(PopulationModule.POPULATION_AGENT_SOURCE_NAME).to(PopulationAgentSource.class);
 		}
 	}
 	private static class ParkingSearchAgentFactory implements AgentFactory {
