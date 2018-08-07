@@ -21,7 +21,6 @@
 package scenarios.illustrative.singleCrossing;
 
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
-import org.matsim.contrib.signals.data.conflicts.AnalyzeSingleIntersectionLeftTurnDelays;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 
