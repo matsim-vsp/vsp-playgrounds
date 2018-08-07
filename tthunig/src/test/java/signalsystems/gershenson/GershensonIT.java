@@ -123,12 +123,9 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
-		Assert.assertEquals("total signal green times of both groups are not similiar enough", 0.0, totalSignalGreenTimes.get(SIGNALGROUPID1) - totalSignalGreenTimes.get(SIGNALGROUPID2), 3.);
-		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 5., avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("avg green time per cycle of signal group 2 is wrong", 5, avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("avg cycle time of the system is wrong", 19.990654205607477, avgCycleTimePerSystem.get(SIGNALSYSTEMID1), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("avg. signal green times of both groups are not similiar enough", 0.0, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) - avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), 1.);
 	}
-	@Ignore
+	@Test
 	public void testSingleCrossingDifferentUniformDemandAB() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 2000, 600, 0, 0 };
@@ -146,11 +143,11 @@ public class GershensonIT {
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertTrue("total signal green time should be higher for Group1", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
-		Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 6000/600 > totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2));
+		Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 2000/600 > totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2));
 	}
 	
-	//TODO
-	@Ignore
+	
+	@Test
 	public void testSingleCrossingDifferentDemandABCD() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 1200, 600, 1200, 600 };
@@ -165,7 +162,7 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
-		//Assert.assertTrue("total signal green time should be higher for Group1", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
+		Assert.assertTrue("average signal green time should be higher for Group1", avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) > avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		//Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 600/6000 > totalSignalGreenTimes.get(SIGNALGROUPID2)/totalSignalGreenTimes.get(SIGNALGROUPID1));
 	}
 	
@@ -189,14 +186,13 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
-		//Assert.assertTrue("total signal green time of group 1 is not bigger than of group 2", totalSignalGreenTimes.get(SIGNALGROUPID1) > totalSignalGreenTimes.get(SIGNALGROUPID2));
-		//Assert.assertTrue("total signal green time of group 2 should be zero", totalSignalGreenTimes.get(SIGNALGROUPID2)==0);
+		Assert.assertTrue("total signal green time of group 2 should be zero", totalSignalGreenTimes.get(SIGNALGROUPID2)==0);
 		Assert.assertEquals("avg green time per cycle of signal group 1 is wrong", 3605, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1), 5.);
 		Assert.assertEquals("avg cycle time of the system is wrong", 3800, avgCycleTimePerSystem.get(SIGNALSYSTEMID1), 2.);
 	}
 	
 	//TODO
-	@Ignore
+	@Test
 	public void testSingleCrossingwithOutboundCongestionFromA() {
 		String scenarioTypeTestCase = "singleCrossingOneBottlenecks";
 		String scenarioTypeNullCase = "singleCrossingNoBottlenecks";
@@ -224,13 +220,13 @@ public class GershensonIT {
 		log.info("avg cycle time per system: " + avgCycleTimePerSystemNullCase.get(SIGNALSYSTEMID1));
 		
 		
-		//Assert.assertTrue("avg greentime cycle of group 2 should be higher then group1 ", avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID2)>avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID1));
-		Assert.assertEquals("The green time ratio of Group1 should be ", 113.0/10591.0 , totalSignalGreenTimesTestCase.get(SIGNALGROUPID2)/totalSignalGreenTimesTestCase.get(SIGNALGROUPID1), MatsimTestUtils.EPSILON);
-		//Assert.assertTrue("The total green Time of Group 2 should become larger if Rule 5 triggers for Group 1", totalSignalGreenTimesTestCase.get(SIGNALGROUPID2)>totalSignalGreenTimesNullCase.get(SIGNALGROUPID2));
+		Assert.assertTrue("avg greentime cycle of group 2 should be higher then group1 ", avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID2)>avgSignalGreenTimePerCycleTestCase.get(SIGNALGROUPID1));
+		Assert.assertTrue("The total green Time of Group 2 should become larger if Rule 5 triggers for Group 1", totalSignalGreenTimesTestCase.get(SIGNALGROUPID2)>totalSignalGreenTimesNullCase.get(SIGNALGROUPID2));
 	}
 
 	
-	@Ignore
+	
+	@Test
 	public void testSingleCrossingwithOutboundCongestionFromAB() {
 		String scenarioType = "singleCrossingTwoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
@@ -248,12 +244,13 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
-		Assert.assertEquals("avg greentime cycle of group 2 should be more or less the same as in group1 ",0.0 , totalSignalGreenTimes.get(SIGNALGROUPID2)-totalSignalGreenTimes.get(SIGNALGROUPID1),5);
+		Assert.assertEquals("total greentime in respect to the average cycle time should be very similar ",0.0 , (totalSignalGreenTimes.get(SIGNALGROUPID2)-totalSignalGreenTimes.get(SIGNALGROUPID1))/avgCycleTimePerSystem.get(SIGNALSYSTEMID1),0.1);
+
 	}
 
 	
 		
-	@Ignore
+	@Test
 	public void testSingleCrossingStochasticDemandAB() {
 		String scenarioType = "singleCrossingStochasticDemandAB";
 		double[] noPersons = { 2800., 2800., 0., 0. };
@@ -448,10 +445,10 @@ public class GershensonIT {
 			
 			//Reset Capacity if Bottleneck	
 			if (numberOfBottlenecks==1 && (fromNodeId.equals("3") && toNodeId.equals("4")) ) {
-				link.setCapacity(1);				
+				link.setCapacity(20);				
 			}
 			if (numberOfBottlenecks==2 && ((fromNodeId.equals("3") && toNodeId.equals("4"))|| fromNodeId.equals("3") && toNodeId.equals("8"))) {
-				link.setCapacity(1);				
+				link.setCapacity(20);				
 			}
 			
 			net.addLink(link);
