@@ -49,6 +49,7 @@ import java.util.Set;
  * Multiple-Street Intersections" (Gershenson/Rosenblueth 2011). 
  * NULL-State: All Groups are RED if nobody approaches the SignalSystem. 
  * 
+ * 
  * default values:
  * interGreenTime=0
  * (monitoredDistance) d=50m   
@@ -187,6 +188,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 		}
 		//This is a fixed value and and doesn't have to be calculated in every iteration
 		maximalNumberOfAgentsInDistance = (int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize());
+		//TODO Adjust the Threshold according to the proposed formula.
+		setThresholdfromCycleTime();
 	}
 	
 	
@@ -275,6 +278,34 @@ public class DgRoederGershensonSignalController implements SignalController {
 	}
 	
 	
+	//If a minimum Cycle-Time for Rule 1 should be used, call this method.
+	public void setThresholdfromCycleTime(){
+		int minCycleTime = gershensonConfig.getMinmumCycleTime();
+		double intergreenTime = gershensonConfig.getInterGreenTime();
+		int numberOfGroups = signalGroupIdMetadataMap.size();
+		
+		
+		//This ensures that the threshold adjusts if there are more than one in InLink per Group that the Counter is not reached to quickly
+		double averageInLinksinGroup = 0.;
+		for (SignalGroup signalGroup : this.system.getSignalGroups().values()){
+			averageInLinksinGroup += signalGroupIdMetadataMap.get(signalGroup.getId()).getInLinks().size();
+		}
+		
+		if (averageInLinksinGroup != 0.){
+			averageInLinksinGroup /= numberOfGroups;
+		} else averageInLinksinGroup = 1;
+		
+		//TODO Explanation
+		double adjustedThreshold = averageInLinksinGroup*maximalNumberOfAgentsInDistance*(minCycleTime-intergreenTime)/numberOfGroups;
+		
+		
+		double oldThreshold = gershensonConfig.getThreshold();	
+		gershensonConfig.setThreshold(adjustedThreshold);
+		log.info("Set Threshold from "+ oldThreshold + " to "+ adjustedThreshold +" [veh*s]");
+	}
+	
+	
+	
 	private boolean jammedafterIntersection(SignalGroup group) {
 		boolean jammed = false;
 		if (jammedOutLinkMap.get(group.getId()) != null){
@@ -329,7 +360,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 						numberVehiclesInShortDistance - approachingVehiclesMap.get(signal).get(link.getId()) == 0
 						) {
 					VehInR = true;
-					log.info("There were "+sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredPlatoonTail(), time) +" Vehicles in "+gershensonConfig.getMonitoredPlatoonTail() +"m in " + signal + " at time " +time + "s on link " + link.getId() );
+					//log.info("There were "+sensorManager.getNumberOfCarsInDistance(link.getId(), gershensonConfig.getMonitoredPlatoonTail(), time) +" Vehicles in "+gershensonConfig.getMonitoredPlatoonTail() +"m in " + signal + " at time " +time + "s on link " + link.getId() );
 				}
 			}
 		}
@@ -383,16 +414,16 @@ public class DgRoederGershensonSignalController implements SignalController {
 		
 		
 //		//This is just to demonstrate that the algorithm works
-		if (timeSeconds%1==0) {
-			//log.info("At "+timeSeconds +" "+ activeSignalGroup.getId() + " is active and is if not null");
-			if (activeSignalGroup!= null){
-				log.info("At "+timeSeconds +" "+ activeSignalGroup.getId().toString() + " is active and is" + activeSignalGroup.getState());
-			} else {
-				log.info("At "+timeSeconds + " active Signalgroup is not initilised");
-			}
-			log.info("At "+timeSeconds +" : "+ counter.toString() + " ");
-			log.info(" ");
-		}
+//		if (timeSeconds%1==0) {
+//			//log.info("At "+timeSeconds +" "+ activeSignalGroup.getId() + " is active and is if not null");
+//			if (activeSignalGroup!= null){
+//				log.info("At "+timeSeconds +" "+ activeSignalGroup.getId().toString() + " is active and is" + activeSignalGroup.getState());
+//			} else {
+//				log.info("At "+timeSeconds + " active Signalgroup is not initilised");
+//			}
+//			log.info("At "+timeSeconds +" : "+ counter.toString() + " ");
+//			log.info(" ");
+//		}
 		
 		//add one second to the timecounter of eachgroup
 		//TODO adjust this so only the activegroup is counted to avoid this loop
@@ -437,9 +468,9 @@ public class DgRoederGershensonSignalController implements SignalController {
 			
 			if (!jammedSignalGroup.containsValue(false)  || !thereAreVehiclesApproaching) {
 				//log.info("Envoke Rule 6 at "+timeSeconds + !vehiclesApproachingSomewhere());
-				log.info("Rule 6");
-				log.info("all jammed: "+ !jammedSignalGroup.containsValue(false));
-				log.info("no cars approaching: "+!thereAreVehiclesApproaching);
+//				log.info("Rule 6");
+//				log.info("all jammed: "+ !jammedSignalGroup.containsValue(false));
+//				log.info("no cars approaching: "+!thereAreVehiclesApproaching);
 				
 				
 					for (SignalGroup group : this.system.getSignalGroups().values()){ 			
@@ -465,8 +496,8 @@ public class DgRoederGershensonSignalController implements SignalController {
 								/*signalGroupstatesMap.get(group.getId()).equals(SignalGroupState.GREEN))*/ {
 							switchlight(group,timeSeconds);
 							switchlightcounter++;
-							log.info("Fehler 1 - Rule 5");
-							log.info("active ");
+//							log.info("Fehler 1 - Rule 5");
+//							log.info("active ");
 						} else {
 		// Set a not active Signalgroup to Green if its is not jammed and it has the highest number of cars approaching
 		// if at there are some
@@ -478,7 +509,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 								
 								switchlight(group,timeSeconds);
 								switchlightcounter++;
-								log.info("Fehler 2 - Rule 5 " + switchlightcounter);
+//								log.info("Fehler 2 - Rule 5 " + switchlightcounter);
 							}
 						}	
 					}
@@ -493,7 +524,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 							for (SignalGroup group : this.system.getSignalGroups().values()) {
 								if (signalGrouphighestCount!=0.0 && counter.get(group.getId()) == signalGrouphighestCount) {
 									switchlight(group,timeSeconds);
-									log.info("Complement Rule 6");
+//									log.info("Complement Rule 6");
 									break;
 								}
 							}
@@ -509,7 +540,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 									if (group.equals(activeSignalGroup) &&
 											(approachingVehiclesGroupMap.get(group.getId())==0 )){
 										switchlight(group,timeSeconds);
-										log.info("Rule 4");
+//										log.info("Rule 4");
 									} else {
 										if(approachingVehiclesGroupMap.get(activeSignalGroup.getId())==0  &&
 												counter.get(group.getId()) == signalGrouphighestCount &&
@@ -545,7 +576,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 									for (SignalGroup group : this.system.getSignalGroups().values()) {
 										if (!group.equals(activeSignalGroup) && counter.get(group.getId())>gershensonConfig.getThreshold()) {
 											potentialRule1.add(group);
-											log.info("Rule 1: Signalgroup "+ group.getId().toString() + " reached the threshold");
+//											log.info("Rule 1: Signalgroup "+ group.getId().toString() + " reached the threshold");
 										}
 									}
 									if(!potentialRule1.isEmpty()) {
