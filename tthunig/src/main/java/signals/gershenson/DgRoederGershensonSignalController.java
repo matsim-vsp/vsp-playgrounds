@@ -288,6 +288,14 @@ public class DgRoederGershensonSignalController implements SignalController {
 		//This ensures that the threshold adjusts if there are more than one in InLink per Group that the Counter is not reached to quickly
 		double averageInLinksinGroup = 0.;
 		for (SignalGroup signalGroup : this.system.getSignalGroups().values()){
+			// count number of lanes of this signal group
+//			for (Signal signal : signalGroup.getSignals().values()) {
+//				if (signal.getLaneIds().isEmpty()) {
+//					averageInLinksinGroup += 1;
+//				} else {
+//					averageInLinksinGroup += signal.getLaneIds().size();
+//				}
+//			}
 			averageInLinksinGroup += signalGroupIdMetadataMap.get(signalGroup.getId()).getInLinks().size();
 		}
 		
@@ -296,7 +304,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		} else averageInLinksinGroup = 1;
 		
 		//TODO Explanation
-		double adjustedThreshold = averageInLinksinGroup*maximalNumberOfAgentsInDistance*(minCycleTime-intergreenTime)/numberOfGroups;
+		double adjustedThreshold = averageInLinksinGroup*maximalNumberOfAgentsInDistance*(minCycleTime-intergreenTime*numberOfGroups)/numberOfGroups;
 		
 		
 		double oldThreshold = gershensonConfig.getThreshold();	
