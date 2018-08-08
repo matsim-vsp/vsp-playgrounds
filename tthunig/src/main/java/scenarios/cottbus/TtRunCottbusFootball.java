@@ -50,9 +50,9 @@ import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControll
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 import signals.CombinedSignalsModule;
-import signals.laemmer.model.LaemmerConfig;
-import signals.laemmer.model.LaemmerConfig.Regime;
-import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
+import signals.laemmer.LaemmerConfig;
+import signals.laemmer.LaemmerConfig.Regime;
+import signals.laemmer.LaemmerConfig.StabilizationStrategy;
 import signals.sylvia.controler.SylviaConfig;
 import utils.ModifyNetwork;
 

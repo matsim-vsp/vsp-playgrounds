@@ -18,7 +18,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package signals.laemmer.model;
+package signals.laemmer;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;

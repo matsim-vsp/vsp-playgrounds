@@ -1,4 +1,4 @@
-package signals.laemmer.model;
+package signals.laemmer;
 
 //import com.sun.istack.internal.NotNull;
 //import com.sun.istack.internal.Nullable;
@@ -6,11 +6,12 @@ package signals.laemmer.model;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.lanes.Lane;
-import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
-import signals.laemmer.model.stabilizationStrategies.CombineSimilarRegulationTime;
-import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
-import signals.laemmer.model.stabilizationStrategies.MaxLaneCountStrategy;
-import signals.laemmer.model.stabilizationStrategies.PriorizeHigherPositionsStrategy;
+
+import signals.laemmer.stabilizationStrategies.AbstractStabilizationStrategy;
+import signals.laemmer.stabilizationStrategies.CombineSimilarRegulationTime;
+import signals.laemmer.stabilizationStrategies.HeuristicStrategy;
+import signals.laemmer.stabilizationStrategies.MaxLaneCountStrategy;
+import signals.laemmer.stabilizationStrategies.PriorizeHigherPositionsStrategy;
 
 import java.util.HashMap;
 import java.util.Map;

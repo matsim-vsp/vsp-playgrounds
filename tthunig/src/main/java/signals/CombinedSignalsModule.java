@@ -44,7 +44,7 @@ import com.google.inject.Singleton;
 
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.downstreamSensor.DownstreamSensor;
-import signals.laemmer.model.LaemmerConfig;
+import signals.laemmer.LaemmerConfig;
 import signals.laemmer.model.SignalAnalyzer;
 import signals.sensor.LinkSensorManager;
 import signals.sensor.SensorBasedSignalControlerListener;

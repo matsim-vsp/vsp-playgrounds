@@ -1,4 +1,4 @@
-package signals.laemmer.model;
+package signals.laemmer;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;

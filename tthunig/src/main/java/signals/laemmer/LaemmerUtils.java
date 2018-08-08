@@ -1,4 +1,4 @@
-package signals.laemmer.model;
+package signals.laemmer;
 
 import java.util.ArrayList;
 import java.util.Map;

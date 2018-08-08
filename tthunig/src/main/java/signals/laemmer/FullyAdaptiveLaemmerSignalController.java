@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.laemmer.model;
+package signals.laemmer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,10 +52,10 @@ import com.google.inject.Provider;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
-import signals.laemmer.model.LaemmerConfig.Regime;
-import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
-import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
-import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
+import signals.laemmer.LaemmerConfig.Regime;
+import signals.laemmer.LaemmerConfig.StabilizationStrategy;
+import signals.laemmer.stabilizationStrategies.AbstractStabilizationStrategy;
+import signals.laemmer.stabilizationStrategies.HeuristicStrategy;
 import signals.sensor.LinkSensorManager;
 
 

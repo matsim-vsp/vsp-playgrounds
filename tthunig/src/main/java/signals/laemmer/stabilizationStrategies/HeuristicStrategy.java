@@ -1,4 +1,4 @@
-package signals.laemmer.model.stabilizationStrategies;
+package signals.laemmer.stabilizationStrategies;
 
 import java.util.List;
 import java.util.Queue;
@@ -9,11 +9,11 @@ import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.lanes.Lanes;
 
-import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerApproach;
-import signals.laemmer.model.LaemmerPhase;
-import signals.laemmer.model.SignalCombinationBasedOnConflicts;
-import signals.laemmer.model.SignalPhase;
+import signals.laemmer.FullyAdaptiveLaemmerSignalController;
+import signals.laemmer.LaemmerApproach;
+import signals.laemmer.LaemmerPhase;
+import signals.laemmer.SignalCombinationBasedOnConflicts;
+import signals.laemmer.SignalPhase;
 
 public class HeuristicStrategy extends AbstractStabilizationStrategy {
 	

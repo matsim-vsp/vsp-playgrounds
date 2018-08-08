@@ -3,8 +3,8 @@ package scenarios.illustrative.singleCrossing;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario.SignalControl;
-import signals.laemmer.model.LaemmerConfig.Regime;
-import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
+import signals.laemmer.LaemmerConfig.Regime;
+import signals.laemmer.LaemmerConfig.StabilizationStrategy;
 
 /**
  * @author nkuehnel, tthunig

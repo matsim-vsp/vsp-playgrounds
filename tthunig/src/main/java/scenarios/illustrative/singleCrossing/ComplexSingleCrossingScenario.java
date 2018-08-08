@@ -69,11 +69,11 @@ import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
-import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerConfig;
-import signals.laemmer.model.LaemmerConfig.Regime;
-import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
-import signals.laemmer.model.LaemmerSignalController;
+import signals.laemmer.FullyAdaptiveLaemmerSignalController;
+import signals.laemmer.LaemmerConfig;
+import signals.laemmer.LaemmerSignalController;
+import signals.laemmer.LaemmerConfig.Regime;
+import signals.laemmer.LaemmerConfig.StabilizationStrategy;
 import signals.laemmer.model.util.Conflicts;
 import utils.OutputUtils;
 

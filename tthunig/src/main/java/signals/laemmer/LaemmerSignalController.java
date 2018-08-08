@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.laemmer.model;
+package signals.laemmer;
 
 import com.google.inject.Provider;
 import org.matsim.api.core.v01.Id;

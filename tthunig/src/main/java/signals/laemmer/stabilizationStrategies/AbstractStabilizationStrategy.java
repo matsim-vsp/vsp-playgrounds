@@ -1,10 +1,11 @@
-package signals.laemmer.model.stabilizationStrategies;
+package signals.laemmer.stabilizationStrategies;
 
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.lanes.Lanes;
-import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.model.LaemmerApproach;
-import signals.laemmer.model.LaemmerPhase;
+
+import signals.laemmer.FullyAdaptiveLaemmerSignalController;
+import signals.laemmer.LaemmerApproach;
+import signals.laemmer.LaemmerPhase;
 
 import java.util.List;
 import java.util.Queue;
