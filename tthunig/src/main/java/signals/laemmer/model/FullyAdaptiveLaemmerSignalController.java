@@ -56,8 +56,6 @@ import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
 import signals.laemmer.model.stabilizationStrategies.AbstractStabilizationStrategy;
 import signals.laemmer.model.stabilizationStrategies.HeuristicStrategy;
-import signals.laemmer.model.util.SignalCombinationBasedOnConflicts;
-import signals.laemmer.model.util.SignalUtils;
 import signals.sensor.LinkSensorManager;
 
 
@@ -163,7 +161,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 	public void simulationInitialized(double simStartTimeSeconds) {
 		List<Double> maximumLaneOutflows = new LinkedList<>();
 		laemmerApproaches = new LinkedList<>();
-		this.estNumOfPhases = SignalUtils.estimateNumberOfPhases(system, network, lanes);
+		this.estNumOfPhases = LaemmerUtils.estimateNumberOfPhases(system, network, signalsData);
 		this.initializeSensoring();
 
 		for (SignalGroup sg : this.system.getSignalGroups().values()) {
@@ -193,7 +191,7 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		this.signalPhases = signalCombinationConflicts.createSignalCombinations();
 
 		if (laemmerConfig.isRemoveSubPhases()) {
-			this.signalPhases = SignalUtils.removeRedundantSubPhases(this.signalPhases);
+			this.signalPhases = LaemmerUtils.removeRedundantSubPhases(this.signalPhases);
 			if(debug)
 				System.out.println("after remove subphases: " + this.signalPhases.size());
 		}

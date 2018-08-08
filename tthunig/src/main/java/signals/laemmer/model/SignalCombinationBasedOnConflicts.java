@@ -18,7 +18,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package signals.laemmer.model.util;
+package signals.laemmer.model;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -48,12 +48,10 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
 
-import signals.laemmer.model.SignalPhase;
-
 /**
  * @author tthunig based on code by Pierre Schade for his master thesis at VSP 2017
  */
-public class SignalCombinationBasedOnConflicts {
+class SignalCombinationBasedOnConflicts {
 	
 	private static final Logger log = Logger.getLogger(SignalCombinationBasedOnConflicts.class);
 	

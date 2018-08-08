@@ -12,8 +12,8 @@ import org.matsim.lanes.Lanes;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerApproach;
 import signals.laemmer.model.LaemmerPhase;
+import signals.laemmer.model.SignalCombinationBasedOnConflicts;
 import signals.laemmer.model.SignalPhase;
-import signals.laemmer.model.util.SignalCombinationBasedOnConflicts;
 
 public class HeuristicStrategy extends AbstractStabilizationStrategy {
 	

@@ -21,6 +21,13 @@
  */
 package scenarios.illustrative.singleCrossing;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -33,8 +40,11 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
+import org.matsim.contrib.signals.data.conflicts.ConflictData;
+import org.matsim.contrib.signals.data.conflicts.IntersectionDirections;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
@@ -64,23 +74,16 @@ import org.matsim.lanes.LanesFactory;
 import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
-import signals.gershenson.GershensonSignalController;
 import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
 import signals.laemmer.model.LaemmerSignalController;
-import signals.laemmer.model.util.Conflicts;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 /**
  * @author tthunig
@@ -112,6 +115,7 @@ public class SingleCrossingScenario {
 	private double minG = 0;
 	private boolean temporalCrowd = false;
 	private StabilizationStrategy stabilizationStrategy;
+	private IntersectionLogic intersectionLogic = IntersectionLogic.NONE;
 
 	public void setFlowNS(double flowNS) {
 		this.flowNS = flowNS;
@@ -257,8 +261,20 @@ public class SingleCrossingScenario {
         }
         createPopulation(scenario.getPopulation());
         createSignals(scenario);
+		if (intersectionLogic.toString().startsWith("CONFLICTING_DIRECTIONS")) {
+			createConflictData(scenario);
+		}
         return scenario;
     }
+	
+	private void createConflictData(Scenario scenario) {
+		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+		ConflictData conflictData = signalsData.getConflictingDirectionsData();
+		IntersectionDirections directionsForTheIntersection = conflictData.getFactory().
+				createConflictingDirectionsContainerForIntersection(signalSystemId, Id.createNodeId(3));
+		conflictData.addConflictingDirectionsForIntersection(signalSystemId, Id.createNodeId(3), directionsForTheIntersection);
+		SignalUtils.fillIntersectionDirectionsForSingleCrossingScenario(directionsForTheIntersection, signalSystemId, conflictData);
+	}
 	
     private String createOutputPath() {
 		String outputPath = OUTPUT_BASE_DIR;
@@ -314,6 +330,7 @@ public class SingleCrossingScenario {
 
         SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
         signalConfigGroup.setUseSignalSystems(true);
+        signalConfigGroup.setIntersectionLogic(intersectionLogic);
 
         PlanCalcScoreConfigGroup.ActivityParams dummyAct = new PlanCalcScoreConfigGroup.ActivityParams("dummy");
         dummyAct.setTypicalDuration(12 * 3600);
@@ -323,7 +340,7 @@ public class SingleCrossingScenario {
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
         config.controler().setWritePlansInterval(config.controler().getLastIteration());
         config.vspExperimental().setWritingOutputEvents(true);
-        config.planCalcScore().setWriteExperiencedPlans(true);
+        config.planCalcScore().setWriteExperiencedPlans(false);
         config.controler().setCreateGraphs(true);
 
         return config;
@@ -394,27 +411,7 @@ public class SingleCrossingScenario {
             modes.add("car");
             link.setAllowedModes(modes);
             net.addLink(link);
-        }
-        
-        Conflicts conflicts2_3 = new Conflicts(Id.createLinkId("2_3"));
-        conflicts2_3.addConflict(Id.createLinkId("7_3"));
-        conflicts2_3.addConflict(Id.createLinkId("8_3"));
-        net.getLinks().get(conflicts2_3.getLinkId()).getAttributes().putAttribute("conflicts", conflicts2_3);        
-        
-        Conflicts conflicts4_3 = new Conflicts(Id.createLinkId("4_3"));
-        conflicts4_3.addConflict(Id.createLinkId("7_3"));
-        conflicts4_3.addConflict(Id.createLinkId("8_3"));
-        net.getLinks().get(conflicts4_3.getLinkId()).getAttributes().putAttribute("conflicts", conflicts4_3);
-        
-        Conflicts conflicts7_3 = new Conflicts(Id.createLinkId("7_3"));
-        conflicts7_3.addConflict(Id.createLinkId("2_3"));
-        conflicts7_3.addConflict(Id.createLinkId("4_3"));
-        net.getLinks().get(conflicts7_3.getLinkId()).getAttributes().putAttribute("conflicts", conflicts7_3);
-        
-        Conflicts conflicts8_3 = new Conflicts(Id.createLinkId("8_3"));
-        conflicts8_3.addConflict(Id.createLinkId("2_3"));
-        conflicts8_3.addConflict(Id.createLinkId("4_3"));
-        net.getLinks().get(conflicts8_3.getLinkId()).getAttributes().putAttribute("conflicts", conflicts8_3);      
+        }     
     }
     
     private static void createLanes(Lanes lanes) {
@@ -743,4 +740,7 @@ public class SingleCrossingScenario {
         signalControl.addSignalSystemControllerData(signalSystemControl);		
 	}
 	
+	public void setIntersectionLogic(IntersectionLogic intersectionLogic) {
+		this.intersectionLogic = intersectionLogic;
+	}
 }

@@ -90,6 +90,7 @@ import java.util.Set;
  * @author tthunig, pschade
  *
  */
+@Deprecated // use SingleCrossingScenario instead. Please report, if there are use cases where it does not work. tthunig, aug'18
 public class ComplexSingleCrossingScenario {
 
 	private String OUTPUT_BASE_DIR = "../../runs-svn/complexSingleCrossingScenario/";
@@ -268,10 +269,8 @@ public class ComplexSingleCrossingScenario {
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
         createNetwork(scenario.getNetwork());
         if (useLanes) {
-        	ComplexSingleCrossingScenario.createLanes(scenario.getLanes());
-        } else {
-        	createLinkConflicts(scenario.getNetwork());
-        }
+        		ComplexSingleCrossingScenario.createLanes(scenario.getLanes());
+        } 
         createPopulation(scenario.getPopulation());
         createSignals(scenario, laemmerConfig);
         if (intersectionLogic.toString().startsWith("CONFLICTING_DIRECTIONS")) {
@@ -286,7 +285,7 @@ public class ComplexSingleCrossingScenario {
 		IntersectionDirections directionsForTheIntersection = conflictData.getFactory().
 				createConflictingDirectionsContainerForIntersection(signalSystemId, Id.createNodeId(3));
 		conflictData.addConflictingDirectionsForIntersection(signalSystemId, Id.createNodeId(3), directionsForTheIntersection);
-		SignalUtils.fillIntersectionDirectionsForComplexCrossingScenario(directionsForTheIntersection, signalSystemId, conflictData);
+		SignalUtils.fillIntersectionDirectionsForSingleCrossingScenario(directionsForTheIntersection, signalSystemId, conflictData);
 	}
 
 	private String createOutputPath() {
@@ -349,7 +348,7 @@ public class ComplexSingleCrossingScenario {
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
         config.controler().setWritePlansInterval(config.controler().getLastIteration());
         config.vspExperimental().setWritingOutputEvents(true);
-        config.planCalcScore().setWriteExperiencedPlans(true);
+        config.planCalcScore().setWriteExperiencedPlans(false);
         config.controler().setCreateGraphs(true);
 
         return config;
@@ -422,30 +421,6 @@ public class ComplexSingleCrossingScenario {
             net.addLink(link);
         }
    }
-    
-    private static void createLinkConflicts(Network network) {
-    	Conflicts link2_3conflicts = new Conflicts(Id.createLinkId("2_3"));
-    	Conflicts link4_3conflicts = new Conflicts(Id.createLinkId("2_3"));
-    	Conflicts link7_3conflicts = new Conflicts(Id.createLinkId("2_3"));
-    	Conflicts link8_3conflicts = new Conflicts(Id.createLinkId("2_3"));
-    	
-    	link2_3conflicts.addConflict(Id.createLinkId("7_3"));
-    	link2_3conflicts.addConflict(Id.createLinkId("8_3"));
-    	
-    	link4_3conflicts.addConflict(Id.createLinkId("7_3"));
-    	link4_3conflicts.addConflict(Id.createLinkId("8_3"));
-    	
-    	link7_3conflicts.addConflict(Id.createLinkId("2_3"));
-    	link7_3conflicts.addConflict(Id.createLinkId("4_3"));
-    	
-    	link8_3conflicts.addConflict(Id.createLinkId("2_3"));
-    	link8_3conflicts.addConflict(Id.createLinkId("4_3"));
-    	
-    	network.getLinks().get(Id.createLinkId("2_3")).getAttributes().putAttribute("conflicts", link2_3conflicts);
-    	network.getLinks().get(Id.createLinkId("4_3")).getAttributes().putAttribute("conflicts", link4_3conflicts);
-    	network.getLinks().get(Id.createLinkId("7_3")).getAttributes().putAttribute("conflicts", link7_3conflicts);
-    	network.getLinks().get(Id.createLinkId("8_3")).getAttributes().putAttribute("conflicts", link8_3conflicts);
-    }
 
     private static void createLanes(Lanes lanes) {
         LanesFactory factory = lanes.getFactory();
@@ -465,33 +440,16 @@ public class ComplexSingleCrossingScenario {
         LanesUtils.createAndAddLane(lanesForLink2_3, factory,
         		Id.create("2_3.l", Lane.class), LANE_CAPACITY, 500, 1, 1,
         		Arrays.asList(Id.create("3_7", Link.class)), null);
-        
-        Conflicts lane2_3lconflicts =  new Conflicts(Id.createLinkId("4_3"), Id.create("2_3.l", Lane.class)); 
-        lane2_3lconflicts.addConflict(Id.createLinkId("4_3"), Id.create("4_3.s", Lane.class));
-        lane2_3lconflicts.addConflict(Id.createLinkId("4_3"), Id.create("4_3.r", Lane.class));
-        lane2_3lconflicts.addConflict(Id.createLinkId("7_3"),  Id.create("7_3.ol", Lane.class));
-        lane2_3lconflicts.addConflict(Id.createLinkId("8_3"),  Id.create("8_3.ol", Lane.class));
-        lanesForLink2_3.getLanes().get(Id.create("2_3.l", Lane.class)).getAttributes().putAttribute("conflicts",lane2_3lconflicts); 
-        
+         
         // straight lane (alignment 0)
         LanesUtils.createAndAddLane(lanesForLink2_3, factory,
                 Id.create("2_3.s", Lane.class), LANE_CAPACITY, 500, 0, 1,
                 Arrays.asList(Id.create("3_4", Link.class)), null);
-        Conflicts lane2_3sconflicts =  new Conflicts(Id.createLinkId("2_3"), Id.create("2_3.s", Lane.class)); 
-        lane2_3sconflicts.addConflict(Id.createLinkId("4_3"), Id.create("4_3.l", Lane.class));
-        lane2_3sconflicts.addConflict(Id.createLinkId("7_3"),  Id.create("7_3.ol", Lane.class));
-        lane2_3sconflicts.addConflict(Id.createLinkId("8_3"),  Id.create("8_3.ol", Lane.class));
-        lanesForLink2_3.getLanes().get(Id.create("2_3.s", Lane.class)).getAttributes().putAttribute("conflicts",lane2_3sconflicts); 
 
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink2_3, factory,
                 Id.create("2_3.r", Lane.class), LANE_CAPACITY, 500, -1, 1,
                 Arrays.asList(Id.create("3_4", Link.class), Id.create("3_8", Link.class)), null);
-        Conflicts lane2_3rconflicts =  new Conflicts(Id.createLinkId("2_3"), Id.create("2_3.r", Lane.class)); 
-        lane2_3rconflicts.addConflict(Id.createLinkId("4_3"), Id.create("4_3.l", Lane.class));
-        lane2_3rconflicts.addConflict(Id.createLinkId("7_3"),  Id.create("7_3.ol", Lane.class));
-        lane2_3rconflicts.addConflict(Id.createLinkId("8_3"),  Id.create("8_3.ol", Lane.class));
-        lanesForLink2_3.getLanes().get(Id.create("2_3.r", Lane.class)).getAttributes().putAttribute("conflicts",lane2_3rconflicts); 
         
         // create lanes for link 4_3
         LanesToLinkAssignment lanesForLink4_3 = factory
@@ -507,33 +465,16 @@ public class ComplexSingleCrossingScenario {
         LanesUtils.createAndAddLane(lanesForLink4_3, factory,
                 Id.create("4_3.l", Lane.class), LANE_CAPACITY, 500, 1, 1,
                 Arrays.asList(Id.create("3_8", Link.class)), null);
-        Conflicts lane4_3lconflicts =  new Conflicts(Id.createLinkId("4_3"), Id.create("4_3.l", Lane.class)); 
-        lane4_3lconflicts.addConflict(Id.createLinkId("2_3"), Id.create("2_3.r", Lane.class));
-        lane4_3lconflicts.addConflict(Id.createLinkId("2_3"), Id.create("2_3.s", Lane.class));
-        lane4_3lconflicts.addConflict(Id.createLinkId("7_3"),  Id.create("7_3.ol", Lane.class));
-        lane4_3lconflicts.addConflict(Id.createLinkId("8_3"),  Id.create("8_3.ol", Lane.class));
-   		lanesForLink4_3.getLanes().get(Id.create("4_3.l", Lane.class)).getAttributes().putAttribute("conflicts",lane4_3lconflicts); 
 
         // straight lane (alignment 0)
         LanesUtils.createAndAddLane(lanesForLink4_3, factory,
                 Id.create("4_3.s", Lane.class), LANE_CAPACITY, 500, 0, 1,
                 Arrays.asList(Id.create("3_2", Link.class)), null);
-        Conflicts lane4_3sconflicts =  new Conflicts(Id.createLinkId("4_3"), Id.create("4_3.s", Lane.class)); 
-        lane4_3sconflicts.addConflict(Id.createLinkId("2_3"), Id.create("2_3.l", Lane.class));
-        lane4_3sconflicts.addConflict(Id.createLinkId("7_3"),  Id.create("7_3.ol", Lane.class));
-        lane4_3sconflicts.addConflict(Id.createLinkId("8_3"),  Id.create("8_3.ol", Lane.class));
-   		lanesForLink4_3.getLanes().get(Id.create("4_3.s", Lane.class)).getAttributes().putAttribute("conflicts",lane4_3sconflicts); 
-
         
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink4_3, factory,
                 Id.create("4_3.r", Lane.class), LANE_CAPACITY, 500, -1, 1,
                 Arrays.asList(Id.create("3_2", Link.class), Id.create("3_7", Link.class)), null);
-        Conflicts lane4_3rconflicts =  new Conflicts(Id.createLinkId("4_3"), Id.create("4_3.r", Lane.class)); 
-        lane4_3rconflicts.addConflict(Id.createLinkId("2_3"), Id.create("2_3.l", Lane.class));
-        lane4_3rconflicts.addConflict(Id.createLinkId("7_3"),  Id.create("7_3.ol", Lane.class));
-        lane4_3rconflicts.addConflict(Id.createLinkId("8_3"),  Id.create("8_3.ol", Lane.class));
-   		lanesForLink4_3.getLanes().get(Id.create("4_3.r", Lane.class)).getAttributes().putAttribute("conflicts",lane4_3rconflicts); 
 
         // create lanes for link 7_3
         LanesToLinkAssignment lanesForLink7_3 = factory
@@ -544,10 +485,6 @@ public class ComplexSingleCrossingScenario {
         LanesUtils.createAndAddLane(lanesForLink7_3, factory,
                 Id.create("7_3.ol", Lane.class), LANE_CAPACITY, 1000, 0, 1,
                 Arrays.asList(Id.create("3_4", Link.class), Id.create("3_2", Link.class), Id.create("3_8", Link.class)), null);
-        Conflicts lane7_3conflicts =  new Conflicts(Id.createLinkId("7_3"), Id.create("7_3.ol", Lane.class)); 
-        lane7_3conflicts.addConflict(Id.createLinkId("2_3"));
-        lane7_3conflicts.addConflict(Id.createLinkId("4_3"));
-        lanesForLink7_3.getLanes().get(Id.create("7_3.ol", Lane.class)).getAttributes().putAttribute("conflicts",lane7_3conflicts); 
 
         // create lanes for link 8_3
         LanesToLinkAssignment lanesForLink8_3 = factory
@@ -558,10 +495,6 @@ public class ComplexSingleCrossingScenario {
         LanesUtils.createAndAddLane(lanesForLink8_3, factory,
                 Id.create("8_3.ol", Lane.class), LANE_CAPACITY, 1000, 0, 1,
                 Arrays.asList(Id.create("3_2", Link.class), Id.create("3_7", Link.class), Id.create("3_4", Link.class)), null);
-        Conflicts lane8_3conflicts =  new Conflicts(Id.createLinkId("8_3"), Id.create("8_3.ol", Lane.class)); 
-        lane8_3conflicts.addConflict(Id.createLinkId("2_3"));
-        lane8_3conflicts.addConflict(Id.createLinkId("4_3"));
-        lanesForLink8_3.getLanes().get(Id.create("8_3.ol", Lane.class)).getAttributes().putAttribute("conflicts",lane8_3conflicts);
     }
     
     private void createPopulation(Population pop) {

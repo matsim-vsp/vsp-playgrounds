@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class SignalPhase {
+class SignalPhase {
 	private List<SignalGroup> signalGroups = new LinkedList<>();
 //	private Map<Id<SignalGroup>, List<Id<Lane>>> greenSignalsToLanes = new LinkedHashMap<>();
 	private Map<Id<Link>, List<Id<Lane>>> lanesToLinks = new LinkedHashMap<>();
