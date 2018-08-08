@@ -394,29 +394,29 @@ public class GershensonIT {
 		if (scenarioType.equals("singleCrossingNoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 0);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, true, 3);
+			createSignalsSingleCrossing(scenario, true, 3,noPersons);
 		}
 		if (scenarioType.equals("singleCrossingOneBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 1);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, true ,3);
+			createSignalsSingleCrossing(scenario, true ,3,noPersons);
 		}
 		if (scenarioType.equals("singleCrossingTwoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 2);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, false,3);
+			createSignalsSingleCrossing(scenario, false,3,noPersons);
 		}
 		if (scenarioType.equals("singleCrossingStochasticDemandAB")) {
 			stochasticDemand[0]=true;
 			stochasticDemand[1]=true;
 			createNetworkSingleCrossing(scenario.getNetwork(), 0);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, false,3);
+			createSignalsSingleCrossing(scenario, false,3,noPersons);
 		}
 		if(scenarioType.equals("doubleCrossingUniformDemandABC")) {
 			createNetworkScenario2(scenario.getNetwork(),0);
 			createPopulationDoubleCrossing(scenario.getPopulation(), noPersons);
-			createSignalsSingleCrossing(scenario, false,3);
+			createSignalsSingleCrossing(scenario, false,3,noPersons);
 		}	
 
 		
@@ -570,65 +570,105 @@ public class GershensonIT {
 		}
 	}
 
-	private void createSignalsSingleCrossing(Scenario scenario, boolean allowedDirectionStraight, int systemcenter) {
-		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-		SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
-		SignalSystemsDataFactory sysFac = signalSystems.getFactory();
-		SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
-		SignalControlData signalControl = signalsData.getSignalControlData();
-		SignalControlDataFactory conFac = signalControl.getFactory();
-
-		// create signal system
-		//Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
-		SignalSystemData signalSystem = sysFac.createSignalSystemData(SIGNALSYSTEMID1);
-		signalSystems.addSignalSystemData(signalSystem);
-
-		// create a signal for every inLink
-		for (Id<Link> inLinkId : scenario.getNetwork().getNodes().get(Id.createNodeId(3)).getInLinks().keySet()) {
-			SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLinkId, Signal.class));
-			signalSystem.addSignalData(signal);
-			signal.setLinkId(inLinkId);
-			if(allowedDirectionStraight) {
-				if(inLinkId.equals(Id.createLinkId("2_3"))||inLinkId.equals(Id.createLinkId("4_3"))) {
-					if(inLinkId.equals(Id.createLinkId("2_3"))) {
-						signal.addTurningMoveRestriction(Id.createLinkId("3_4"));
-					} else signal.addTurningMoveRestriction(Id.createLinkId("3_2"));
-				} else {
-					if (inLinkId.equals(Id.createLinkId("7_3"))) {
-						signal.addTurningMoveRestriction(Id.createLinkId("3_8"));
-					} else signal.addTurningMoveRestriction(Id.createLinkId("3_7"));
+	private void createSignalsSingleCrossing(Scenario scenario, boolean allowedDirectionStraight, int systemcenter, double[] noPersons) {
+		if (noPersons[2] == 0. && noPersons[3] == 0.) {
+			SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+			SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
+			SignalSystemsDataFactory sysFac = signalSystems.getFactory();
+			SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
+			SignalControlData signalControl = signalsData.getSignalControlData();
+			SignalControlDataFactory conFac = signalControl.getFactory();
+	
+			// create signal system
+			//Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+			SignalSystemData signalSystem = sysFac.createSignalSystemData(SIGNALSYSTEMID1);
+			signalSystems.addSignalSystemData(signalSystem);
+	
+			// create a signal for every inLink
+			for (Id<Link> inLinkId : scenario.getNetwork().getNodes().get(Id.createNodeId(3)).getInLinks().keySet()) {
+				SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLinkId, Signal.class));
+				signalSystem.addSignalData(signal);
+				signal.setLinkId(inLinkId);
+				if(allowedDirectionStraight) {
+					if(inLinkId.equals(Id.createLinkId("2_3"))||inLinkId.equals(Id.createLinkId("4_3"))) {
+						if(inLinkId.equals(Id.createLinkId("2_3"))) {
+							signal.addTurningMoveRestriction(Id.createLinkId("3_4"));
+						} else signal.addTurningMoveRestriction(Id.createLinkId("3_2"));
+					} else {
+						if (inLinkId.equals(Id.createLinkId("7_3"))) {
+							signal.addTurningMoveRestriction(Id.createLinkId("3_8"));
+						} else signal.addTurningMoveRestriction(Id.createLinkId("3_7"));
+					}
 				}
 			}
-		}
-
-		// group signals with non conflicting streams
-		//Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-		SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID1);
-		signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
-		signalGroup1.addSignalId(Id.create("Signal4_3", Signal.class));
-		signalGroups.addSignalGroupData(signalGroup1);
-
-		//Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-		SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID2);
-		signalGroup2.addSignalId(Id.create("Signal7_3", Signal.class));
-		signalGroup2.addSignalId(Id.create("Signal8_3", Signal.class));
-		signalGroups.addSignalGroupData(signalGroup2);
-
-		// create the signal control
-		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(SIGNALSYSTEMID1);
-		signalSystemControl.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
-		signalControl.addSignalSystemControllerData(signalSystemControl);
-
+	
+			// group signals with non conflicting streams
+			//Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
+			SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID1);
+			signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
+			//signalGroup1.addSignalId(Id.create("Signal4_3", Signal.class));
+			signalGroups.addSignalGroupData(signalGroup1);
+	
+			//Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
+			SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID2);
+			signalGroup2.addSignalId(Id.create("Signal7_3", Signal.class));
+			//signalGroup2.addSignalId(Id.create("Signal8_3", Signal.class));
+			signalGroups.addSignalGroupData(signalGroup2);
+	
+			// create the signal control
+			SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(SIGNALSYSTEMID1);
+			signalSystemControl.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
+			signalControl.addSignalSystemControllerData(signalSystemControl);
 		
-		// no plan is needed for GershensonController
-//		// create a plan for the signal system (with defined cycle time and offset 0)
-//		SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 60, 0, Id.create("SignalPlan1", SignalPlan.class));
-//		signalSystemControl.addSignalPlanData(signalPlan);
-//
-//		// specify signal group settings for both signal groups
-//		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1, 0, 5));
-//		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId2, 10, 55));
-//		signalPlan.setOffset(0);
+		} else {
+			SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+			SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
+			SignalSystemsDataFactory sysFac = signalSystems.getFactory();
+			SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
+			SignalControlData signalControl = signalsData.getSignalControlData();
+			SignalControlDataFactory conFac = signalControl.getFactory();
+	
+			// create signal system
+			//Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
+			SignalSystemData signalSystem = sysFac.createSignalSystemData(SIGNALSYSTEMID1);
+			signalSystems.addSignalSystemData(signalSystem);
+	
+			// create a signal for every inLink
+			for (Id<Link> inLinkId : scenario.getNetwork().getNodes().get(Id.createNodeId(3)).getInLinks().keySet()) {
+				SignalData signal = sysFac.createSignalData(Id.create("Signal" + inLinkId, Signal.class));
+				signalSystem.addSignalData(signal);
+				signal.setLinkId(inLinkId);
+				if(allowedDirectionStraight) {
+					if(inLinkId.equals(Id.createLinkId("2_3"))||inLinkId.equals(Id.createLinkId("4_3"))) {
+						if(inLinkId.equals(Id.createLinkId("2_3"))) {
+							signal.addTurningMoveRestriction(Id.createLinkId("3_4"));
+						} else signal.addTurningMoveRestriction(Id.createLinkId("3_2"));
+					} else {
+						if (inLinkId.equals(Id.createLinkId("7_3"))) {
+							signal.addTurningMoveRestriction(Id.createLinkId("3_8"));
+						} else signal.addTurningMoveRestriction(Id.createLinkId("3_7"));
+					}
+				}
+			}
+	
+			// group signals with non conflicting streams
+			//Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
+			SignalGroupData signalGroup1 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID1);
+			signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
+			signalGroup1.addSignalId(Id.create("Signal4_3", Signal.class));
+			signalGroups.addSignalGroupData(signalGroup1);
+	
+			//Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
+			SignalGroupData signalGroup2 = signalGroups.getFactory().createSignalGroupData(SIGNALSYSTEMID1, SIGNALGROUPID2);
+			signalGroup2.addSignalId(Id.create("Signal7_3", Signal.class));
+			signalGroup2.addSignalId(Id.create("Signal8_3", Signal.class));
+			signalGroups.addSignalGroupData(signalGroup2);
+	
+			// create the signal control
+			SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(SIGNALSYSTEMID1);
+			signalSystemControl.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
+			signalControl.addSignalSystemControllerData(signalSystemControl);
+		}
 	}
 
 	private Config defineConfig() {
