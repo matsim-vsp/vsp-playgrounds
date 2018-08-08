@@ -10,12 +10,14 @@ public class GershensonConfig {
 	private int lengthOfPlatoonTails = 2;
 	private double minimumGREENtime = 5;  //TODO must not be negative
 	
+	private int minimumCycleTime = 80;
+	
 	//These are attributes for the Sensor
 	private double monitoredPlatoonTail = 25.;
 	private double monitoredDistance = 50.;
 	private double minmumDistanceBehindIntersection =10.;
 	
-		
+	
 	
 	
 	public void setStorageCapacityOutlink(double storageCapacityOutlinkJam){
@@ -41,21 +43,21 @@ public class GershensonConfig {
 		this.threshold = threshold;
 	}
 	public double getThreshold() {
-		return threshold;
+		return this.threshold;
 	}
 	
 	public void setLengthOfPlatoonTails(int lengthOfPlatoonTails){
 		this.lengthOfPlatoonTails = lengthOfPlatoonTails;
 	}
 	public int getLengthOfPlatoonTails() {
-		return lengthOfPlatoonTails;
+		return this.lengthOfPlatoonTails;
 	}
 	
 	public void setMinimumGREENtime(double minimumGREENtime){
 		this.minimumGREENtime = minimumGREENtime;
 	}
 	public double getMinimumGREENtime() {
-		return minimumGREENtime;
+		return this.minimumGREENtime;
 	}
 	
 	//Attributes for the Sensor
@@ -63,20 +65,29 @@ public class GershensonConfig {
 		this.monitoredPlatoonTail = monitoredPlatoonTail;
 	}
 	public double getMonitoredPlatoonTail() {
-		return monitoredPlatoonTail;
+		return this.monitoredPlatoonTail;
 	}
 	
 	public void setMonitoredDistance(double monitoredDistance){
 		this.monitoredDistance = monitoredDistance;
 	}
 	public double getMonitoredDistance() {
-		return monitoredDistance;
+		return this.monitoredDistance;
 	}
 	
 	public void setMinmumDistanceBehindIntersection(double minmumDistanceBehindIntersection){
 		this.minmumDistanceBehindIntersection = minmumDistanceBehindIntersection;
 	}
 	public double getMinmumDistanceBehindIntersection() {
-		return minmumDistanceBehindIntersection;
+		return this.minmumDistanceBehindIntersection;
 	}
+	
+	public void setMinmumCycleTime(int minimumCycleTime){
+		this.minimumCycleTime = minimumCycleTime;
+	}
+	public int getMinmumCycleTime() {
+		return this.minimumCycleTime;
+	}
+	
+	
 }

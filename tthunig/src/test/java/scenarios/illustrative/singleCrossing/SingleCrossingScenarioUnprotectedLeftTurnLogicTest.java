@@ -21,7 +21,6 @@
 package scenarios.illustrative.singleCrossing;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
@@ -36,7 +35,6 @@ public class SingleCrossingScenarioUnprotectedLeftTurnLogicTest {
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
 	
 	@Test
-	@Ignore // until branch turnAcceptanceLogic has been merged into master
 	public void testSingleIntersectionScenarioWithLeftTurns() {
 		RunSingleIntersectionWithUnprotectedLeftTurnLogic simulationWithRestrictedLeftTurns = new RunSingleIntersectionWithUnprotectedLeftTurnLogic(
 				IntersectionLogic.CONFLICTING_DIRECTIONS_AND_TURN_RESTRICTIONS);
@@ -46,8 +44,8 @@ public class SingleCrossingScenarioUnprotectedLeftTurnLogicTest {
 		double leftTurnDelayWTurnRestriction = simulationWithRestrictedLeftTurns.runSingleIntersection();
 		double leftTurnDelayWoTurnRestriction = simulationWoRestrictedLeftTurns.runSingleIntersection();
 		Assert.assertTrue("Delay without restriction should be less than with restricted left turns.", leftTurnDelayWoTurnRestriction < leftTurnDelayWTurnRestriction);
-		Assert.assertEquals("Delay value for the case without turn restrictions is not as expected!", 23051, leftTurnDelayWoTurnRestriction, MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Delay value for the case with turn restrictions is not as expected!", 84314, leftTurnDelayWTurnRestriction, MatsimTestUtils.EPSILON);
+		Assert.assertEquals("Delay value for the case without turn restrictions is not as expected!", 21120.0, leftTurnDelayWoTurnRestriction, MatsimTestUtils.EPSILON);
+		Assert.assertEquals("Delay value for the case with turn restrictions is not as expected!", 80845.0, leftTurnDelayWTurnRestriction, MatsimTestUtils.EPSILON);
 	}
 	
 }
