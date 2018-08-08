@@ -60,8 +60,8 @@ import utils.ModifyNetwork;
  * @author tthunig, based on dgrether CottbusFootballBatch
  *
  */
-public class TTRunCottbusFootball {
-	private static final Logger LOG = Logger.getLogger(TTRunCottbusFootball.class);
+public class TtRunCottbusFootball {
+	private static final Logger LOG = Logger.getLogger(TtRunCottbusFootball.class);
 	
 	private enum SignalControl {FIXED, FIXED_IDEAL, SYLVIA, SYLVIA_IDEAL, LAEMMER_NICO, LAEMMER_DOUBLE, LAEMMER_NICO_GROUPS_14RE, LAEMMER_FLEXIBLE, NONE};
 	private static final SignalControl CONTROL_TYPE = SignalControl.SYLVIA;
