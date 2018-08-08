@@ -66,6 +66,8 @@ import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
+import signals.gershenson.GershensonSignalController;
+import signals.gershenson.GershensonConfig;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerConfig.Regime;
@@ -96,9 +98,11 @@ public class SingleCrossingScenario {
 
 	private double flowNS = 360;
 	private double flowWE = 0.5 * 2520;
-	public enum SignalControl {FIXED, LAEMMER_NICO, LAEMMER_FULLY_ADAPTIVE};
+	public enum SignalControl {FIXED, LAEMMER_NICO, LAEMMER_FULLY_ADAPTIVE, GERSHENSON};
 	SignalControl signalControl = SignalControl.LAEMMER_NICO;
 	private Regime laemmerRegime = Regime.COMBINED;
+	private LaemmerConfig laemmerConfig;
+	private GershensonConfig gershensonConfig;
 	private boolean vis = false;
 	private boolean logEnabled = false;
 	private boolean stochasticDemand = false;
@@ -160,12 +164,20 @@ public class SingleCrossingScenario {
 		this.temporalCrowd = temporalCrowd;
 	}
 	
+	public void setLaemmerConfig(LaemmerConfig laemmerConfig) {
+		this.laemmerConfig = laemmerConfig;
+	}
+	
+	public void setGershensonConfig(GershensonConfig gershensonConfig) {
+		this.gershensonConfig = gershensonConfig;
+	}
+	
 	public SingleCrossingScenario() {}
 	
 	/**
 	 * constructor useful for scenarios without laemmer signals
 	 */
-	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, StabilizationStrategy stabilizationStrategy, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
+	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
 		this.flowNS = flowNS;
 		this.flowWE = flowWE;
 		this.signalControl = signalControl;
@@ -175,35 +187,29 @@ public class SingleCrossingScenario {
 		this.useLanes = lanes;
 		this.groupedSignals = grouped;
 		this.temporalCrowd = temporalCrowd;
-		this.stabilizationStrategy = stabilizationStrategy;
 	}
 	
 	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, Regime laemmerRegime, StabilizationStrategy stabilizationStrategy, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
-		this(flowNS, flowWE, signalControl, stabilizationStrategy, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
+		this(flowNS, flowWE, signalControl, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
+		this.stabilizationStrategy = stabilizationStrategy;
 		this.liveArrivalRates = liveArrivalRates;
 		this.minG = minG;
 	}
 	
 	public Controler defineControler() {
-		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-        LaemmerConfig laemmerConfig = new LaemmerConfig();
-        laemmerConfig.setDefaultIntergreenTime(5);
-        laemmerConfig.setActiveStabilizationStrategy(stabilizationStrategy);
-        if(groupedSignals) {
-            laemmerConfig.setDesiredCycleTime(60);
-            laemmerConfig.setMaxCycleTime(90);
-        } else {
-            laemmerConfig.setDesiredCycleTime(120);
-            laemmerConfig.setMaxCycleTime(180);
+        if (laemmerConfig == null) {
+        		useDefaultLaemmerConfig();
         }
-        laemmerConfig.setMinGreenTime(minG);
-        laemmerConfig.setActiveRegime(laemmerRegime);
-        laemmerConfig.setAnalysisEnabled(logEnabled);
+        if (gershensonConfig == null) {
+        		useDefaultGershensonConfig();
+        }
+        CombinedSignalsModule signalsModule = new CombinedSignalsModule();
         signalsModule.setLaemmerConfig(laemmerConfig);
+        signalsModule.setGershensonConfig(gershensonConfig);
 
-        final Scenario scenario = defineScenario(laemmerConfig);
+        final Scenario scenario = defineScenario();
         Controler controler = new Controler(scenario);
         
         controler.addOverridingModule(signalsModule);
@@ -220,7 +226,28 @@ public class SingleCrossingScenario {
         return controler;
 	}
 	
-	private Scenario defineScenario(LaemmerConfig laemmerConfig) {
+	private void useDefaultLaemmerConfig() {
+		this.laemmerConfig = new LaemmerConfig();
+	    laemmerConfig.setDefaultIntergreenTime(5);
+	    laemmerConfig.setActiveStabilizationStrategy(stabilizationStrategy);
+	    if(groupedSignals) {
+	        laemmerConfig.setDesiredCycleTime(60);
+	        laemmerConfig.setMaxCycleTime(90);
+	    } else {
+	        laemmerConfig.setDesiredCycleTime(120);
+	        laemmerConfig.setMaxCycleTime(180);
+	    }
+	    laemmerConfig.setMinGreenTime(minG);
+	    laemmerConfig.setActiveRegime(laemmerRegime);
+	    laemmerConfig.setAnalysisEnabled(logEnabled);
+	}
+
+	private void useDefaultGershensonConfig() {
+		this.gershensonConfig = new GershensonConfig();
+		// TODO modify this here, if you think for this scenario a specific setup (e.g. threshold) should be used
+	}
+
+	private Scenario defineScenario() {
         Scenario scenario = ScenarioUtils.loadScenario(defineConfig(createOutputPath()));
         // add missing scenario elements
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
@@ -229,37 +256,43 @@ public class SingleCrossingScenario {
         	SingleCrossingScenario.createLanes(scenario.getLanes());
         }
         createPopulation(scenario.getPopulation());
-        createSignals(scenario, laemmerConfig);
+        createSignals(scenario);
         return scenario;
     }
 	
     private String createOutputPath() {
-    	String outputPath = OUTPUT_BASE_DIR;
-    	switch (signalControl){
-    	case LAEMMER_NICO:
-    		outputPath += "laemmer" + laemmerRegime.name();
-    		break;
-    	case LAEMMER_FULLY_ADAPTIVE:
-    		outputPath += "laemmerFullyAdaptive" + laemmerRegime.name()+"-"+stabilizationStrategy.name();
-    		break;
-    	case FIXED:
-    		outputPath += "fixedTime";
-    		break;
-    	}
-        if (stochasticDemand) {
-        	outputPath += "_stochastic";
-        } else {
-        	outputPath += "_constant";
-        }
-        if (useLanes){
-        	outputPath += "_lanes";
-        } else {
-        	outputPath += "_noLanes";
-        }
-        if (liveArrivalRates){
-        	outputPath += "_liveArrival";
-        }
-    	outputPath += "/_ew" + flowWE + "_ns" + flowNS;
+		String outputPath = OUTPUT_BASE_DIR;
+		
+		switch (signalControl) {
+		case LAEMMER_NICO:
+			outputPath += "laemmer" + laemmerRegime.name();
+			break;
+		case LAEMMER_FULLY_ADAPTIVE:
+			outputPath += "laemmerFullyAdaptive" + laemmerRegime.name() + "-" + stabilizationStrategy.name();
+			break;
+		case FIXED:
+			outputPath += "fixedTime";
+			break;
+		case GERSHENSON:
+			outputPath += "gershenson" + gershensonConfig.getThreshold();
+		}
+		
+		if (stochasticDemand) {
+			outputPath += "_stochastic";
+		} else {
+			outputPath += "_constant";
+		}
+		if (useLanes) {
+			outputPath += "_lanes";
+		} else {
+			outputPath += "_noLanes";
+		}
+		if (liveArrivalRates) {
+			outputPath += "_liveArrival";
+		}
+		
+		outputPath += "/_ew" + flowWE + "_ns" + flowNS;
+		
 		return outputPath;
 	}
 
@@ -403,7 +436,7 @@ public class SingleCrossingScenario {
                 Id.create("2_3.l", Lane.class), LANE_CAPACITY, 500, 1, 1,
                 Arrays.asList(Id.create("3_4", Link.class), Id.create("3_7", Link.class)), null);
 
-        // right turning lane (alignment -1)
+        // straight and right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink2_3, factory,
                 Id.create("2_3.r", Lane.class), LANE_CAPACITY, 500, -1, 1,
                 Arrays.asList(Id.create("3_4", Link.class), Id.create("3_8", Link.class)), null);
@@ -424,7 +457,7 @@ public class SingleCrossingScenario {
                 Id.create("4_3.l", Lane.class), LANE_CAPACITY, 500, 1, 1,
                 Arrays.asList(Id.create("3_2", Link.class), Id.create("3_8", Link.class)), null);
 
-        // right turning lane (alignment -1)
+        // straight and right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink4_3, factory,
                 Id.create("4_3.r", Lane.class), LANE_CAPACITY, 500, -1, 1,
                 Arrays.asList(Id.create("3_2", Link.class), Id.create("3_7", Link.class)), null);
@@ -435,7 +468,8 @@ public class SingleCrossingScenario {
                 .createLanesToLinkAssignment(Id.create("7_3", Link.class));
         lanes.addLanesToLinkAssignment(lanesForLink7_3);
 
-        // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
+        // original lane, i.e. lane that starts at the link from node. 
+        // In this case it leads to all outgoing links of the link, i.e. the link only has one lane
         LanesUtils.createAndAddLane(lanesForLink7_3, factory,
                 Id.create("7_3.ol", Lane.class), LANE_CAPACITY, 1000, 0, 1,
                 Arrays.asList(Id.create("3_4", Link.class), Id.create("3_2", Link.class), Id.create("3_8", Link.class)), null);
@@ -445,7 +479,8 @@ public class SingleCrossingScenario {
                 .createLanesToLinkAssignment(Id.create("8_3", Link.class));
         lanes.addLanesToLinkAssignment(lanesForLink8_3);
 
-        // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
+        // original lane, i.e. lane that starts at the link from node. 
+        // In this case it leads to all outgoing links of the link, i.e. the link only has one lane
         LanesUtils.createAndAddLane(lanesForLink8_3, factory,
                 Id.create("8_3.ol", Lane.class), LANE_CAPACITY, 1000, 0, 1,
                 Arrays.asList(Id.create("3_2", Link.class), Id.create("3_7", Link.class), Id.create("3_4", Link.class)), null);
@@ -528,7 +563,7 @@ public class SingleCrossingScenario {
         }
     }
     
-    private void createSignals(Scenario scenario, LaemmerConfig laemmerConfig) {
+    private void createSignals(Scenario scenario) {
         SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
         SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
         SignalSystemsDataFactory sysFac = signalSystems.getFactory();
@@ -580,17 +615,20 @@ public class SingleCrossingScenario {
             signalGroups.addSignalGroupData(signalGroup4);
         }
 
-        switch (this.signalControl){
-        case LAEMMER_NICO:
-        	createLaemmerSignalControl(signalControl, laemmerConfig);
-        	break;
-        case FIXED:
-        	createFixedTimeSignalControl(signalControl);
-        	break;
-        case LAEMMER_FULLY_ADAPTIVE:
-        	createFullyAdaptiveLaemmerSignalControl(signalControl, laemmerConfig);
-        	break;
-        }
+		switch (this.signalControl) {
+		case LAEMMER_NICO:
+			createLaemmerSignalControl(signalControl, laemmerConfig);
+			break;
+		case FIXED:
+			createFixedTimeSignalControl(signalControl);
+			break;
+		case LAEMMER_FULLY_ADAPTIVE:
+			createFullyAdaptiveLaemmerSignalControl(signalControl, laemmerConfig);
+			break;
+		case GERSHENSON:
+			createGershensonSignalControl(signalControl, gershensonConfig);
+			break;
+		}
     }
 
 	private void createFixedTimeSignalControl(SignalControlData signalControl) {
@@ -644,6 +682,13 @@ public class SingleCrossingScenario {
         signalPlan.setOffset(0);
 	}
 	
+	private void createGershensonSignalControl(SignalControlData signalControl, GershensonConfig gershensonConfig2) {
+		SignalControlDataFactory conFac = signalControl.getFactory();
+		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
+        signalSystemControl.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
+        signalControl.addSignalSystemControllerData(signalSystemControl);
+	}
+
 	private void createLaemmerSignalControl(SignalControlData signalControl, LaemmerConfig laemmerConfig){
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
