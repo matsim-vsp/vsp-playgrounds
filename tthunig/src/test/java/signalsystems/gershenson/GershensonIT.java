@@ -79,8 +79,9 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.signals.TtSignalAnalysisTool;
+import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
 import signals.CombinedSignalsModule;
-import signals.gershenson.DgRoederGershensonSignalController;
+import signals.gershenson.GershensonSignalController;
 
 /**
  * Test gershenson logic at an intersection with four incoming links and one signal each. No lanes are used.
@@ -300,6 +301,33 @@ public class GershensonIT {
 		
 	}
 	
+	@Ignore // TODO activate, when Gershenson Algo can handle lanes
+	public void testGershensonWithLanes() {
+		double flowNS = 360;
+		double flowWE = 1440;
+		SingleCrossingScenario scenarioCreation = new SingleCrossingScenario(flowNS, flowWE, SingleCrossingScenario.SignalControl.GERSHENSON, false, false, true, true, true, false);
+		Controler controler = scenarioCreation.defineControler();
+		
+		// add signal analysis tool
+		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				this.addEventHandlerBinding().toInstance(signalAnalyzer);
+				this.addControlerListenerBinding().toInstance(signalAnalyzer);
+			}
+		});
+		
+		// check signal results
+		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
+
+		log.info("total signal green times: Group 1" + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1));
+		log.info("total signal green times: Group 2" + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2));
+		log.info("avg cycle time: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
+		
+		// TODO test for correct results
+	}
 	
 	
 	
@@ -588,7 +616,7 @@ public class GershensonIT {
 
 		// create the signal control
 		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(SIGNALSYSTEMID1);
-		signalSystemControl.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
+		signalSystemControl.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl);
 
 		
@@ -816,11 +844,11 @@ public class GershensonIT {
 		
 		// create the signal control System1
 		SignalSystemControllerData signalSystemControl1 = conFac.createSignalSystemControllerData(SIGNALSYSTEMID1);
-		signalSystemControl1.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
+		signalSystemControl1.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl1);
 		// create the signal control System2
 		SignalSystemControllerData signalSystemControl2 = conFac.createSignalSystemControllerData(SIGNALSYSTEMID2);
-		signalSystemControl2.setControllerIdentifier(DgRoederGershensonSignalController.IDENTIFIER);
+		signalSystemControl2.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl2);
 	}
 }

@@ -58,13 +58,13 @@ import java.util.Set;
  * (lengthOfPlatoonTails) m= 2 veh 
  * (threshold) n= 13.33 veh*s   (sbraun Feb.18)
  * 
- * @author dgrether, sbraun, droeder
+ * @author dgrether, droeder, sbraun
  *
  */
-public class DgRoederGershensonSignalController implements SignalController {
+public class GershensonSignalController implements SignalController {
 
 	
-	public final static String IDENTIFIER = "gretherRoederGershensonSignalControl";
+	public final static String IDENTIFIER = "GershensonSignalController";
 	
 	
 	
@@ -81,7 +81,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 
 		@Override
 		public SignalController get() {
-			return new DgRoederGershensonSignalController(scenario, sensorManager, gershensonConfig);
+			return new GershensonSignalController(scenario, sensorManager, gershensonConfig);
 		}
 	}
 	
@@ -108,7 +108,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 		
 	}
 
-	private static final Logger log = Logger.getLogger(DgRoederGershensonSignalController.class);
+	private static final Logger log = Logger.getLogger(GershensonSignalController.class);
 	
 	private SignalSystem system;
 	private LinkSensorManager sensorManager;
@@ -117,7 +117,7 @@ public class DgRoederGershensonSignalController implements SignalController {
 	
 	private Map<Id<SignalGroup>, SignalGroupMetadata> signalGroupIdMetadataMap;	
 	
-	private DgRoederGershensonSignalController(Scenario scenario, LinkSensorManager sensorManager, GershensonConfig gershensonConfig) {
+	private GershensonSignalController(Scenario scenario, LinkSensorManager sensorManager, GershensonConfig gershensonConfig) {
 		this.scenario = scenario;
 		this.sensorManager = sensorManager;
 		this.gershensonConfig = gershensonConfig;

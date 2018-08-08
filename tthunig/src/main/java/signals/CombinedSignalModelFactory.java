@@ -42,7 +42,7 @@ import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.downstreamSensor.DownstreamSensor;
-import signals.gershenson.DgRoederGershensonSignalController;
+import signals.gershenson.GershensonSignalController;
 import signals.gershenson.GershensonConfig;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerSignalController;
@@ -76,7 +76,7 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 		signalControlProvider.put(DownstreamPlanbasedSignalController.IDENTIFIER, new DownstreamPlanbasedSignalController.SignalControlProvider(downstreamSensor));
 		signalControlProvider.put(LaemmerSignalController.IDENTIFIER, new LaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
 		signalControlProvider.put(FullyAdaptiveLaemmerSignalController.IDENTIFIER, new FullyAdaptiveLaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor));
-		signalControlProvider.put(DgRoederGershensonSignalController.IDENTIFIER, new DgRoederGershensonSignalController.SignalControlProvider(sensorManager, scenario, gershensonConfig));
+		signalControlProvider.put(GershensonSignalController.IDENTIFIER, new GershensonSignalController.SignalControlProvider(sensorManager, scenario, gershensonConfig));
 		signalControlProvider.put(AdvancedPlanBasedSignalSystemController.IDENTIFIER, new AdvancedPlanBasedSignalSystemController.SignalControlProvider(sensorManager, delayCalculator, scenario));
 	}
 
