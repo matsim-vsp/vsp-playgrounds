@@ -43,9 +43,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 import analysis.TtTotalTravelTime;
-import scenarios.cottbus.run.TtRunCottbusSimulation.NetworkType;
-import scenarios.cottbus.run.TtRunCottbusSimulation.PopulationType;
-import scenarios.cottbus.run.TtRunCottbusSimulation.SignalType;
+import scenarios.cottbus.TtRunCottbusSimulation.NetworkType;
+import scenarios.cottbus.TtRunCottbusSimulation.PopulationType;
+import scenarios.cottbus.TtRunCottbusSimulation.SignalType;
 
 /**
  * @author tthunig

@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package scenarios.cottbus.run;
+package scenarios.cottbus;
 
 import java.io.File;
 import java.io.FileNotFoundException;
