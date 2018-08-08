@@ -33,7 +33,7 @@ import org.matsim.contrib.signals.model.SignalPlan;
  * @author dgrether
  *
  */
-public class DgSylviaSignalPlan implements SignalPlan {
+public class SylviaSignalPlan implements SignalPlan {
 
 	private DatabasedSignalPlan delegate;
 	private List<DgExtensionPoint> extensionPoints = new ArrayList<DgExtensionPoint>();
@@ -41,7 +41,7 @@ public class DgSylviaSignalPlan implements SignalPlan {
 	private int fixedTimeCycle = 0;
 
 	
-	public DgSylviaSignalPlan(DatabasedSignalPlan delegate){
+	public SylviaSignalPlan(DatabasedSignalPlan delegate){
 		this.delegate = delegate;
 	}
 	

@@ -71,8 +71,8 @@ import org.matsim.testcases.MatsimTestUtils;
 
 import analysis.signals.TtSignalAnalysisTool;
 import signals.CombinedSignalsModule;
-import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.data.DgSylviaPreprocessData;
+import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.data.SylviaPreprocessData;
 
 /**
  * Test sylvia logic at an intersection with four incoming links and one signal each.
@@ -156,7 +156,7 @@ public class SylviaIT {
 		Controler controler = new Controler(scenario);
 		// add missing modules
 		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-		DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+		SylviaConfig sylviaConfig = new SylviaConfig();
 		// this is only needed because the default is to small (1.5)
 		sylviaConfig.setSignalGroupMaxGreenScale(100);
 		signalsModule.setSylviaConfig(sylviaConfig);
@@ -318,7 +318,7 @@ public class SylviaIT {
 		signalPlan.setOffset(0);
 
 		// create the sylvia signal control by shorten the temporary signal control
-		DgSylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
+		SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 	}
 
 	private Config defineConfig() {

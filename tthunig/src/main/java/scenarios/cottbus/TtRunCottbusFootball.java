@@ -53,7 +53,7 @@ import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerConfig.Regime;
 import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
-import signals.sylvia.controler.DgSylviaConfig;
+import signals.sylvia.controler.SylviaConfig;
 import utils.ModifyNetwork;
 
 /**
@@ -254,7 +254,7 @@ public class TtRunCottbusFootball {
 			if (!CONTROL_TYPE.equals(SignalControl.NONE)) {
 				//TODO adapt here
 				CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-				DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+				SylviaConfig sylviaConfig = new SylviaConfig();
 				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 				sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 				sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);

@@ -86,7 +86,7 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalCon
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
-import signals.sylvia.controler.DgSylviaConfig;
+import signals.sylvia.controler.SylviaConfig;
 import utils.OutputUtils;
 
 import java.io.File;
@@ -349,7 +349,7 @@ public final class RunBraessSimulation {
 			boolean alwaysSameMobsimSeed = false;
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 			signalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+			SylviaConfig sylviaConfig = new SylviaConfig();
 			// TODO modify sylvia config parameter here if you like
 			sylviaConfig.setSignalGroupMaxGreenScale(2);
 			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);

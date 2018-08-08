@@ -62,9 +62,9 @@ import signals.sylvia.model.SylviaSignalController;
  * @author dgrether
  *
  */
-public class DgSylviaPreprocessData {
+public class SylviaPreprocessData {
 
-	private static final Logger log = Logger.getLogger(DgSylviaPreprocessData.class);
+	private static final Logger log = Logger.getLogger(SylviaPreprocessData.class);
 
 	public static final String FIXED_TIME_PREFIX = "fixed_time_plan_";
 
@@ -450,7 +450,7 @@ public class DgSylviaPreprocessData {
 	public static void main(String[] args) throws JAXBException, SAXException, ParserConfigurationException, IOException {
 		String signalControlFile = "../../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_no_13_random_offsets.xml";
 		String signalControlOutFile = "../../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_control_sylvia_no_13_random_offsets.xml";
-		DgSylviaPreprocessData.convertFixedTimePlansToSylviaBasePlans(signalControlFile, signalControlOutFile);
+		SylviaPreprocessData.convertFixedTimePlansToSylviaBasePlans(signalControlFile, signalControlOutFile);
 	}
 
 }

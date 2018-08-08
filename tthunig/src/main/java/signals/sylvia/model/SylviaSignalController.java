@@ -34,8 +34,8 @@ import org.matsim.lanes.Lane;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.sensor.LinkSensorManager;
-import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.data.DgSylviaPreprocessData;
+import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.data.SylviaPreprocessData;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,11 +57,11 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	private static int sylviaPlanDumpCount = 0;
 	
 	public final static class SignalControlProvider implements Provider<SignalController>{
-		private DgSylviaConfig sylviaConfig;
+		private SylviaConfig sylviaConfig;
 		private LinkSensorManager sensorManager;
 		private DownstreamSensor downstreamSensor;
 		
-		public SignalControlProvider(DgSylviaConfig sylviaConfig, LinkSensorManager sensorManager, DownstreamSensor downstreamSensor) {
+		public SignalControlProvider(SylviaConfig sylviaConfig, LinkSensorManager sensorManager, DownstreamSensor downstreamSensor) {
 			this.sylviaConfig = sylviaConfig;
 			this.sensorManager = sensorManager;
 			this.downstreamSensor = downstreamSensor;
@@ -73,7 +73,7 @@ public class SylviaSignalController extends AbstractSignalController implements 
 		}
 	}
 	
-	private DgSylviaSignalPlan activeSylviaPlan = null;
+	private SylviaSignalPlan activeSylviaPlan = null;
 	private boolean extensionActive = false;
 	private boolean forcedExtensionActive = false;
 	private int secondInSylviaCycle = -1; //as this is incremented before use
@@ -84,11 +84,11 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	private int secondInCycle = -1; //used for debug output
 	private DgExtensionPoint currentExtensionPoint;
 
-	private final DgSylviaConfig sylviaConfig;
+	private final SylviaConfig sylviaConfig;
 	private final LinkSensorManager sensorManager;
 	private final DownstreamSensor downstreamSensor;
 
-	private SylviaSignalController(DgSylviaConfig sylviaConfig, LinkSensorManager sensorManager, DownstreamSensor downstreamSensor) {
+	private SylviaSignalController(SylviaConfig sylviaConfig, LinkSensorManager sensorManager, DownstreamSensor downstreamSensor) {
 		this.sylviaConfig = sylviaConfig;
 		this.sensorManager = sensorManager;
 		this.downstreamSensor = downstreamSensor;
@@ -317,7 +317,7 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	 */
 	@Override
 	public void simulationInitialized(double simStartTimeSeconds) {
-		Tuple<SignalPlan, DgSylviaSignalPlan> plans = this.searchActivePlans();
+		Tuple<SignalPlan, SylviaSignalPlan> plans = this.searchActivePlans();
 		this.activeSylviaPlan = plans.getSecond();
 		this.activeSylviaPlan.setFixedTimeCycle(plans.getFirst().getCycleTime());
 		this.setMaxExtensionTimeInSylviaPlan(plans);
@@ -330,7 +330,7 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	}
 
 
-	private void setMaxExtensionTimeInSylviaPlan(Tuple<SignalPlan, DgSylviaSignalPlan> plans) {
+	private void setMaxExtensionTimeInSylviaPlan(Tuple<SignalPlan, SylviaSignalPlan> plans) {
 		int ext = plans.getFirst().getCycleTime() - plans.getSecond().getCycleTime();
 		plans.getSecond().setMaxExtensionTime(ext);
 	}
@@ -340,22 +340,22 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	 * Collects sylvia and fixed time signal plans of this signal system from the signal plan container.
 	 * @return tuple of both (sylvia and fixed time) signal plans
 	 */
-	private Tuple<SignalPlan,DgSylviaSignalPlan> searchActivePlans() {
-		DgSylviaSignalPlan sylviaPlan = null;
+	private Tuple<SignalPlan,SylviaSignalPlan> searchActivePlans() {
+		SylviaSignalPlan sylviaPlan = null;
 		SignalPlan fixedTimePlan = null;
 		for (Id<SignalPlan> planId : this.signalPlans.keySet()){
 			// TODO this only works without multiple signal plans
-			if (planId.toString().startsWith(DgSylviaPreprocessData.SYLVIA_PREFIX)){
-				sylviaPlan = (DgSylviaSignalPlan) this.signalPlans.get(planId);
+			if (planId.toString().startsWith(SylviaPreprocessData.SYLVIA_PREFIX)){
+				sylviaPlan = (SylviaSignalPlan) this.signalPlans.get(planId);
 			}
-			if (planId.toString().startsWith(DgSylviaPreprocessData.FIXED_TIME_PREFIX)){
+			if (planId.toString().startsWith(SylviaPreprocessData.FIXED_TIME_PREFIX)){
 				fixedTimePlan = this.signalPlans.get(planId);
 			}
 		}
 		if (sylviaPlan == null && fixedTimePlan == null){
 			throw new IllegalStateException("No suitable plans found for controller of signal system: " + this.system.getId());
 		}
-		return new Tuple<SignalPlan, DgSylviaSignalPlan>(fixedTimePlan, sylviaPlan);
+		return new Tuple<SignalPlan, SylviaSignalPlan>(fixedTimePlan, sylviaPlan);
 	}
 
 	/**
@@ -365,9 +365,9 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	 * 
 	 * @param plans
 	 */
-	private void calculateExtensionPoints(Tuple<SignalPlan,DgSylviaSignalPlan> plans) {
+	private void calculateExtensionPoints(Tuple<SignalPlan,SylviaSignalPlan> plans) {
 		SignalPlan fixedTime = plans.getFirst();
-		DgSylviaSignalPlan sylvia = plans.getSecond();
+		SylviaSignalPlan sylvia = plans.getSecond();
 		int offset = 0;
 		if (sylvia.getOffset() != null){
 			offset = sylvia.getOffset();

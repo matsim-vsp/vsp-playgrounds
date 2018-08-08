@@ -48,7 +48,7 @@ import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.SignalAnalyzer;
 import signals.sensor.LinkSensorManager;
 import signals.sensor.SensorBasedSignalControlerListener;
-import signals.sylvia.controler.DgSylviaConfig;
+import signals.sylvia.controler.SylviaConfig;
 import signals.gershenson.GershensonConfig;
 
 /**
@@ -61,7 +61,7 @@ import signals.gershenson.GershensonConfig;
 public class CombinedSignalsModule extends AbstractModule {
 	
 	private boolean alwaysSameMobsimSeed = false;
-	private DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+	private SylviaConfig sylviaConfig = new SylviaConfig();
 	private LaemmerConfig laemmerConfig = new LaemmerConfig();
 	private GershensonConfig gershensonConfig = new GershensonConfig();
 	
@@ -79,7 +79,7 @@ public class CombinedSignalsModule extends AbstractModule {
 		}
 	
 		if ((boolean) ConfigUtils.addOrGetModule(getConfig(), SignalSystemsConfigGroup.class).isUseSignalSystems()) {
-			bind(DgSylviaConfig.class).toInstance(sylviaConfig);
+			bind(SylviaConfig.class).toInstance(sylviaConfig);
 			bind(LaemmerConfig.class).toInstance(laemmerConfig);
 			bind(GershensonConfig.class).toInstance(gershensonConfig);
 			bind(TtTotalDelay.class).asEagerSingleton();
@@ -121,7 +121,7 @@ public class CombinedSignalsModule extends AbstractModule {
 		this.alwaysSameMobsimSeed = alwaysSameMobsimSeed;
 	}
 
-	public void setSylviaConfig(DgSylviaConfig sylviaConfig) {
+	public void setSylviaConfig(SylviaConfig sylviaConfig) {
 		this.sylviaConfig = sylviaConfig;
 	}
 

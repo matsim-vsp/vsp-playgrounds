@@ -93,7 +93,7 @@ import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerConfig.StabilizationStrategy;
-import signals.sylvia.controler.DgSylviaConfig;
+import signals.sylvia.controler.SylviaConfig;
 import utils.ModifyNetwork;
 import utils.OutputUtils;
 import utils.SignalizeScenario;
@@ -1000,7 +1000,7 @@ public class TtRunCottbusSimulation {
 				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+			SylviaConfig sylviaConfig = new SylviaConfig();
 			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(SYLVIA_FIXED_CYCLE);
 			sylviaConfig.setSignalGroupMaxGreenScale(SYLVIA_MAX_EXTENSION);
 //			sylviaConfig.setCheckDownstream(true);

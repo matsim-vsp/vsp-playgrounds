@@ -53,7 +53,7 @@ import org.matsim.lanes.LanesToLinkAssignment;
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes.LaneType;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.laemmer.model.LaemmerSignalController;
-import signals.sylvia.data.DgSylviaPreprocessData;
+import signals.sylvia.data.SylviaPreprocessData;
 
 /**
  * Class to create signals (signal systems, signal groups and signal control) for the Braess scenario.
@@ -325,7 +325,7 @@ public final class TtCreateBraessSignals {
 		// convert basis fixed time plan to sylvia plan
 		if (this.signalLogic.equals(SignalControlLogic.SYLVIA)){
 			// create the final sylvia signal control with information of the temporary signal control
-			DgSylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
+			SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 		}
 	}
 

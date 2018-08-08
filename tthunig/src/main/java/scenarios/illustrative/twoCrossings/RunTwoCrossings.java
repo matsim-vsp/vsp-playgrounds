@@ -81,8 +81,8 @@ import analysis.signals.TtSignalAnalysisWriter;
 import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerSignalController;
-import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.data.DgSylviaPreprocessData;
+import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.data.SylviaPreprocessData;
 
 /**
  * @author tthunig
@@ -119,7 +119,7 @@ public class RunTwoCrossings {
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+			SylviaConfig sylviaConfig = new SylviaConfig();
 //			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 //			sylviaConfig.setSignalGroupMaxGreenScale(2);
 			signalsModule.setSylviaConfig(sylviaConfig);
@@ -356,7 +356,7 @@ public class RunTwoCrossings {
 			signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, Id.create(signalNorth.getId(), SignalGroup.class), 30, 55));	
 			tmpSignalControl.addSignalSystemControllerData(signalSystemControl);
 			// create the sylvia signal control by shorten the temporary signal control
-			DgSylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
+			SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 			break;
 		case LAEMMER:
 			signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);

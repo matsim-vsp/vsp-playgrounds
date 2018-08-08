@@ -80,8 +80,8 @@ import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerSignalController;
-import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.data.DgSylviaPreprocessData;
+import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.data.SylviaPreprocessData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -130,7 +130,7 @@ public class RunGridLock {
 			// add signal module
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 			
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
+			SylviaConfig sylviaConfig = new SylviaConfig();
 //			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 //			sylviaConfig.setSignalGroupMaxGreenScale(2);
 //			sylviaConfig.setCheckDownstream(true);
@@ -509,7 +509,7 @@ public class RunGridLock {
 			}
 			tmpSignalControl.addSignalSystemControllerData(signalSystemControl);
 			// create the sylvia signal control by shorten the temporary signal control
-			DgSylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
+			SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 			break;
 		default:
 			break;

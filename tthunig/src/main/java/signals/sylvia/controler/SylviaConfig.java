@@ -24,7 +24,7 @@ package signals.sylvia.controler;
  * @author dgrether
  *
  */
-public class DgSylviaConfig {
+public class SylviaConfig {
 	
 	/**
 	 * limits the total amount of available extension time to the cycle time of the corresponding fixed-time signal plan

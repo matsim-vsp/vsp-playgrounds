@@ -48,9 +48,9 @@ import signals.laemmer.model.LaemmerConfig;
 import signals.laemmer.model.LaemmerSignalController;
 import signals.laemmer.model.FullyAdaptiveLaemmerSignalController;
 import signals.sensor.LinkSensorManager;
-import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.data.DgSylviaPreprocessData;
-import signals.sylvia.model.DgSylviaSignalPlan;
+import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.data.SylviaPreprocessData;
+import signals.sylvia.model.SylviaSignalPlan;
 import signals.sylvia.model.SylviaSignalController;
 
 
@@ -69,7 +69,7 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 	private Map<String, Provider<SignalController>> signalControlProvider = new HashMap<>();
 	
 	@Inject
-	CombinedSignalModelFactory(Scenario scenario, LaemmerConfig laemmerConfig, DgSylviaConfig sylviaConfig, 
+	CombinedSignalModelFactory(Scenario scenario, LaemmerConfig laemmerConfig, SylviaConfig sylviaConfig, 
 			LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, TtTotalDelay delayCalculator, GershensonConfig gershensonConfig) {
 		// prepare signal controller provider
 		signalControlProvider.put(SylviaSignalController.IDENTIFIER, new SylviaSignalController.SignalControlProvider(sylviaConfig, sensorManager, downstreamSensor));
@@ -99,8 +99,8 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 	@Override
 	public SignalPlan createSignalPlan(SignalPlanData planData) {
 		DatabasedSignalPlan plan = (DatabasedSignalPlan) this.delegate.createSignalPlan(planData);
-		if (planData.getId().toString().startsWith(DgSylviaPreprocessData.SYLVIA_PREFIX)) {
-			return new DgSylviaSignalPlan(plan);
+		if (planData.getId().toString().startsWith(SylviaPreprocessData.SYLVIA_PREFIX)) {
+			return new SylviaSignalPlan(plan);
 		}
 		return plan;
 	}
