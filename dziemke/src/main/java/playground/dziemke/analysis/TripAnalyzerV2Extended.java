@@ -1,7 +1,10 @@
 package playground.dziemke.analysis;
 
 import java.io.File;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
@@ -21,6 +24,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import playground.dziemke.utils.ShapeReader;
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * @author dziemke
