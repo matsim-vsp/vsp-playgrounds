@@ -48,10 +48,10 @@ import signals.laemmerFix.LaemmerSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import signals.gershenson.GershensonConfig;
 import signals.sensor.LinkSensorManager;
-import signals.sylvia.controler.SylviaConfig;
-import signals.sylvia.data.SylviaPreprocessData;
-import signals.sylvia.model.SylviaSignalPlan;
-import signals.sylvia.model.SylviaSignalController;
+import signals.sylvia.SylviaConfig;
+import signals.sylvia.SylviaPreprocessData;
+import signals.sylvia.SylviaSignalController;
+import signals.sylvia.SylviaSignalPlan;
 
 
 /**

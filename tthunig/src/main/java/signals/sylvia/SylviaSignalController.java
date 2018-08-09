@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.sylvia.model;
+package signals.sylvia;
 
 import com.google.inject.Provider;
 import org.apache.log4j.Logger;
@@ -34,8 +34,6 @@ import org.matsim.lanes.Lane;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.sensor.LinkSensorManager;
-import signals.sylvia.controler.SylviaConfig;
-import signals.sylvia.data.SylviaPreprocessData;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +46,7 @@ import java.util.Set;
  * @author dgrether, tthunig
  *
  */
-public class SylviaSignalController extends AbstractSignalController implements SignalController {
+public final class SylviaSignalController extends AbstractSignalController implements SignalController {
 
 	private static final Logger log = Logger.getLogger(SylviaSignalController.class);
 	

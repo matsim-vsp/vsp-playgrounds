@@ -93,7 +93,7 @@ import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.laemmerFix.LaemmerConfig;
 import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
-import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.SylviaConfig;
 import utils.ModifyNetwork;
 import utils.OutputUtils;
 import utils.SignalizeScenario;

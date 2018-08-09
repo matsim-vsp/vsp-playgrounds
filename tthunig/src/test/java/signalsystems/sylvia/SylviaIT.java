@@ -71,8 +71,8 @@ import org.matsim.testcases.MatsimTestUtils;
 
 import analysis.signals.TtSignalAnalysisTool;
 import signals.CombinedSignalsModule;
-import signals.sylvia.controler.SylviaConfig;
-import signals.sylvia.data.SylviaPreprocessData;
+import signals.sylvia.SylviaConfig;
+import signals.sylvia.SylviaPreprocessData;
 
 /**
  * Test sylvia logic at an intersection with four incoming links and one signal each.

@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.sylvia.model;
+package signals.sylvia;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import org.matsim.contrib.signals.model.SignalPlan;
  * @author dgrether
  *
  */
-public class SylviaSignalPlan implements SignalPlan {
+public final class SylviaSignalPlan implements SignalPlan {
 
 	private DatabasedSignalPlan delegate;
 	private List<SylviaExtensionPoint> extensionPoints = new ArrayList<SylviaExtensionPoint>();

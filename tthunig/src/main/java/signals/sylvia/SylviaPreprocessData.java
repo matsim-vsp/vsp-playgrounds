@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.sylvia.data;
+package signals.sylvia;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +53,6 @@ import org.xml.sax.SAXException;
 
 import playground.dgrether.signalsystems.utils.DgSignalGroupSettingsDataOnsetComparator;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
-import signals.sylvia.model.SylviaSignalController;
 
 
 /**
@@ -62,7 +61,7 @@ import signals.sylvia.model.SylviaSignalController;
  * @author dgrether
  *
  */
-public class SylviaPreprocessData {
+public final class SylviaPreprocessData {
 
 	private static final Logger log = Logger.getLogger(SylviaPreprocessData.class);
 

@@ -49,7 +49,7 @@ import signals.laemmerFix.LaemmerConfig;
 import signals.laemmerFix.SignalAnalyzer;
 import signals.sensor.LinkSensorManager;
 import signals.sensor.SensorBasedSignalControlerListener;
-import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.SylviaConfig;
 
 /**
  * Add this module if you want to simulate fixed-time signals, sylvia, laemmer, gershenson or the downstream signals or different control schemes together at different intersections (i.e. systems) in

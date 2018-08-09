@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.sylvia.model;
+package signals.sylvia;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,7 +35,7 @@ import org.matsim.contrib.signals.model.SignalGroup;
  * @author dgrether
  *
  */
-public class SylviaExtensionPoint {
+final class SylviaExtensionPoint {
 
 	private Map<Id<SignalGroup>, Integer> maxGreenTimes = new HashMap<>();
 	private int secondInPlan;

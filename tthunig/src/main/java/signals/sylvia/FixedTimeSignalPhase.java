@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.sylvia.data;
+package signals.sylvia;
 
 import java.util.HashMap;
 import java.util.Map;

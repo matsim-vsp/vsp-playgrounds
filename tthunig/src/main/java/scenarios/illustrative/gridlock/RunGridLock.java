@@ -80,8 +80,8 @@ import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.laemmerFix.LaemmerConfig;
 import signals.laemmerFix.LaemmerSignalController;
-import signals.sylvia.controler.SylviaConfig;
-import signals.sylvia.data.SylviaPreprocessData;
+import signals.sylvia.SylviaConfig;
+import signals.sylvia.SylviaPreprocessData;
 
 import java.util.ArrayList;
 import java.util.Arrays;

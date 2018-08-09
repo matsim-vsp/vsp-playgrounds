@@ -17,14 +17,14 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.sylvia.controler;
+package signals.sylvia;
 
 
 /**
  * @author dgrether
  *
  */
-public class SylviaConfig {
+public final class SylviaConfig {
 	
 	/**
 	 * limits the total amount of available extension time to the cycle time of the corresponding fixed-time signal plan

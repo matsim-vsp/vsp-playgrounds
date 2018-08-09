@@ -86,7 +86,7 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalCon
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
 import signals.CombinedSignalsModule;
 import signals.laemmerFix.LaemmerConfig;
-import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.SylviaConfig;
 import utils.OutputUtils;
 
 import java.io.File;

@@ -53,7 +53,7 @@ import signals.CombinedSignalsModule;
 import signals.laemmerFix.LaemmerConfig;
 import signals.laemmerFix.LaemmerConfig.Regime;
 import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
-import signals.sylvia.controler.SylviaConfig;
+import signals.sylvia.SylviaConfig;
 import utils.ModifyNetwork;
 
 /**
