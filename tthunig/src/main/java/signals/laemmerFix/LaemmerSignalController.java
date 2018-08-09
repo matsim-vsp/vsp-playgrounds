@@ -52,7 +52,7 @@ import java.util.Queue;
  * @author tthunig
  * @author nkuehnel
  */
-public class LaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
+public final class LaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
 
     public static final String IDENTIFIER = "LaemmerSignalController";
 

@@ -43,7 +43,7 @@ import java.util.Map;
 /**
  * Created by nkuehnel on 05.04.2017.
  */
-public class SignalAnalyzer implements MobsimInitializedListener, MobsimAfterSimStepListener {
+public final class SignalAnalyzer implements MobsimInitializedListener, MobsimAfterSimStepListener {
 
     private  Config config;
     private Collection<SignalSystem> systems;

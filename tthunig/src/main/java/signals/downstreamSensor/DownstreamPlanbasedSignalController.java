@@ -38,7 +38,7 @@ import com.google.inject.Provider;
  * @author tthunig
  *
  */
-public class DownstreamPlanbasedSignalController implements SignalController {
+public final class DownstreamPlanbasedSignalController implements SignalController {
 
 	private static final Logger log = Logger.getLogger(DownstreamPlanbasedSignalController.class);
 

@@ -13,7 +13,7 @@ import org.matsim.lanes.Lane;
 /**
  * @author nkuehnel, tthunig
  */
-public class LaemmerConfig {
+public final class LaemmerConfig {
 	
     //Probably consider to try also a combination of simmilar outflow rates
     public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME, HEURISTIC}; 

@@ -25,7 +25,7 @@ import java.nio.file.StandardOpenOption;
 /**
  * Created by nkuehnel on 05.04.2017.
  */
-public class AdvancedPlanBasedSignalSystemController implements SignalController, Analyzable {
+public final class AdvancedPlanBasedSignalSystemController implements SignalController, Analyzable {
 
     private final LinkSensorManager sensorManager;
     private final DefaultPlanbasedSignalSystemController delegate = new DefaultPlanbasedSignalSystemController();

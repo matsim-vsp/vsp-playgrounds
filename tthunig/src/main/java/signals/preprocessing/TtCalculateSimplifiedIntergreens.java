@@ -50,7 +50,7 @@ import signals.sylvia.FixedTimeSignalPhase;
  * 
  * @author tthunig
  */
-public class TtCalculateSimplifiedIntergreens {
+public final class TtCalculateSimplifiedIntergreens {
 
 	private static final Logger log = Logger.getLogger(TtCalculateSimplifiedIntergreens.class);
 

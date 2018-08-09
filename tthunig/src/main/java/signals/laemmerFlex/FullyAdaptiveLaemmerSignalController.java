@@ -65,7 +65,7 @@ import signals.sensor.LinkSensorManager;
  * @author pschade
  */
 
-public class FullyAdaptiveLaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
+public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
 
 	public static final String IDENTIFIER = "FullyAdaptiveLaemmerSignalController";
 
