@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author dgrether
  *
  */
-public final class LaneSensor {
+final class LaneSensor {
 
 	private Link link;
 	private Lane lane;

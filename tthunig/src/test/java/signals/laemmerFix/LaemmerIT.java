@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package signalsystems.laemmer;
+package signals.laemmerFix;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ import analysis.signals.TtSignalAnalysisTool;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
 import signals.laemmerFix.LaemmerConfig.Regime;
 import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
-import signalsystems.sylvia.SylviaIT;
+import signals.sylvia.SylviaIT;
 import utils.ModifyPopulation;
 
 /**

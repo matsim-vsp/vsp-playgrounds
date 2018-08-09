@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package signalsystems.sylvia;
+package signals.sylvia;
 
 import java.util.Map;
 

@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package signalsystems.gershenson;
+package signals.gershenson;
 
 import java.util.Arrays;
 import java.util.Collection;

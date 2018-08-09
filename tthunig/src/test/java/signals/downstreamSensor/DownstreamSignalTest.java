@@ -19,7 +19,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package signalsystems.downstream;
+package signals.downstreamSensor;
 
 import java.util.Map;
 

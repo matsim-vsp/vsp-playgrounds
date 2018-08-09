@@ -32,7 +32,7 @@ import org.matsim.lanes.Lane;
  * @author dgrether
  *
  */
-public class CarLocator {
+final class CarLocator {
 	
 	/** time when the vehicle will be at the given distance in front of the links to node */
 	private double earliestTimeInDistance;

@@ -37,7 +37,7 @@ import com.google.inject.Inject;
  * 
  * @author dgrether, tthunig
  */
-public class SensorBasedSignalControlerListener implements SignalControlerListener, IterationStartsListener,
+public final class SensorBasedSignalControlerListener implements SignalControlerListener, IterationStartsListener,
 		ShutdownListener {
 
 	@Inject(optional = true) SignalSystemsManager signalManager = null;
