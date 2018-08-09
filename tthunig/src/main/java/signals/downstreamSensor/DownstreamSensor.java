@@ -32,9 +32,9 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
-import signals.sensor.LinkSensorManager;
 
 import java.util.HashMap;
 import java.util.HashSet;

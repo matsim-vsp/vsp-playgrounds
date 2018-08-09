@@ -26,9 +26,11 @@ import org.matsim.contrib.signals.analysis.SignalEvents2ViaCSVWriter;
 import org.matsim.contrib.signals.builder.FromDataBuilder;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalSystemsModelBuilder;
+import org.matsim.contrib.signals.controler.SensorBasedSignalControlerListener;
 import org.matsim.contrib.signals.mobsim.QSimSignalEngine;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.router.NetworkWithSignalsTurnInfoBuilder;
+import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.gbl.MatsimRandom;
@@ -47,8 +49,6 @@ import signals.downstreamSensor.DownstreamSensor;
 import signals.gershenson.GershensonConfig;
 import signals.laemmerFix.LaemmerConfig;
 import signals.laemmerFix.SignalAnalyzer;
-import signals.sensor.LinkSensorManager;
-import signals.sensor.SensorBasedSignalControlerListener;
 import signals.sylvia.SylviaConfig;
 
 /**

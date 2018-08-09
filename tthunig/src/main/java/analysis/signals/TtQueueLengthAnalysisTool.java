@@ -30,6 +30,7 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
@@ -41,7 +42,6 @@ import org.matsim.core.mobsim.framework.listeners.MobsimInitializedListener;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
 import playground.dziemke.analysis.GnuplotUtils;
-import signals.sensor.LinkSensorManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;

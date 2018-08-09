@@ -11,11 +11,11 @@ import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
-import signals.sensor.LinkSensorManager;
 
 import java.io.IOException;
 import java.nio.file.Files;

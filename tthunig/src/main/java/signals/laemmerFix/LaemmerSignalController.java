@@ -28,6 +28,7 @@ import org.matsim.contrib.signals.model.AbstractSignalController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.Lane;
@@ -35,7 +36,6 @@ import org.matsim.lanes.Lanes;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
-import signals.sensor.LinkSensorManager;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -32,10 +32,10 @@ import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.LanesToLinkAssignment;
-import signals.sensor.LinkSensorManager;
 
 import java.util.HashMap;
 import java.util.HashSet;
