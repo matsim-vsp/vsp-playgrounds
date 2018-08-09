@@ -44,7 +44,7 @@ class NewQSimViaConfig {
 					@Override public Mobsim get() {
 						final QSimBuilder builder = new QSimBuilder( config );
 						builder.useDefaults() ;
-						builder.addModule( new AbstractQSimModule() {
+						builder.addQSimModule( new AbstractQSimModule() {
 							@Override
 							protected void configureQSim() {
 								this.bindAgentSource(  MY_AGENT_SOURCE ).to( MyAgentSource.class ) ;
