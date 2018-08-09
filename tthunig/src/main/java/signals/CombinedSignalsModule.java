@@ -44,12 +44,12 @@ import com.google.inject.Singleton;
 
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.downstreamSensor.DownstreamSensor;
-import signals.laemmer.LaemmerConfig;
-import signals.laemmer.model.SignalAnalyzer;
+import signals.gershenson.GershensonConfig;
+import signals.laemmerFix.LaemmerConfig;
+import signals.laemmerFix.SignalAnalyzer;
 import signals.sensor.LinkSensorManager;
 import signals.sensor.SensorBasedSignalControlerListener;
 import signals.sylvia.controler.SylviaConfig;
-import signals.gershenson.GershensonConfig;
 
 /**
  * Add this module if you want to simulate fixed-time signals, sylvia, laemmer, gershenson or the downstream signals or different control schemes together at different intersections (i.e. systems) in

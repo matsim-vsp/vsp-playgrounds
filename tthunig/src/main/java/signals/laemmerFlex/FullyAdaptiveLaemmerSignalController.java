@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package signals.laemmer;
+package signals.laemmerFlex;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,10 +52,9 @@ import com.google.inject.Provider;
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
-import signals.laemmer.LaemmerConfig.Regime;
-import signals.laemmer.LaemmerConfig.StabilizationStrategy;
-import signals.laemmer.stabilizationStrategies.AbstractStabilizationStrategy;
-import signals.laemmer.stabilizationStrategies.HeuristicStrategy;
+import signals.laemmerFix.LaemmerConfig;
+import signals.laemmerFix.LaemmerConfig.Regime;
+import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
 import signals.sensor.LinkSensorManager;
 
 
@@ -150,9 +149,22 @@ public class FullyAdaptiveLaemmerSignalController extends AbstractSignalControll
 		}
 		this.downstreamSensor = downstreamSensor;
 		try {
-			this.stabilisator = (AbstractStabilizationStrategy) Class.forName(laemmerConfig.getStabilizationClassName()).getConstructor(FullyAdaptiveLaemmerSignalController.class, Network.class, Lanes.class).newInstance(this, network, lanes);
+			switch (laemmerConfig.getStabilizationStrategy()) {
+			case HEURISTIC:
+				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				break;
+			case USE_MAX_LANECOUNT:
+				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				break;
+			case COMBINE_SIMILAR_REGULATIONTIME:
+				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				break;
+			case PRIORIZE_HIGHER_POSITIONS:
+				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				break;
+			}
 			if (laemmerConfig.getStabilizationStrategy().equals(StabilizationStrategy.HEURISTIC)) {
-				((HeuristicStrategy) stabilisator).setSignalCombinationTool(this.signalCombinationConflicts);
+				((StabStratHeuristic) stabilisator).setSignalCombinationTool(this.signalCombinationConflicts);
 			}
 		} catch (Exception e) {	e.printStackTrace(); }
 	}

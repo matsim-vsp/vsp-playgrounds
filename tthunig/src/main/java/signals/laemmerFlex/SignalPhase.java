@@ -1,4 +1,4 @@
-package signals.laemmer;
+package signals.laemmerFlex;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;

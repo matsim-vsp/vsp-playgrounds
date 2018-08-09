@@ -1,4 +1,4 @@
-package signals.laemmer;
+package signals.laemmerFlex;
 
 import java.util.ArrayList;
 import java.util.Map;

@@ -38,8 +38,8 @@ import org.matsim.testcases.MatsimTestUtils;
 import analysis.TtGeneralAnalysis;
 import analysis.signals.TtSignalAnalysisTool;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
-import signals.laemmer.LaemmerConfig.Regime;
-import signals.laemmer.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFix.LaemmerConfig.Regime;
+import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
 import signalsystems.sylvia.SylviaIT;
 import utils.ModifyPopulation;
 

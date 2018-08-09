@@ -79,8 +79,8 @@ import analysis.signals.TtSignalAnalysisListener;
 import analysis.signals.TtSignalAnalysisTool;
 import analysis.signals.TtSignalAnalysisWriter;
 import signals.CombinedSignalsModule;
-import signals.laemmer.LaemmerConfig;
-import signals.laemmer.LaemmerSignalController;
+import signals.laemmerFix.LaemmerConfig;
+import signals.laemmerFix.LaemmerSignalController;
 import signals.sylvia.controler.SylviaConfig;
 import signals.sylvia.data.SylviaPreprocessData;
 

@@ -78,8 +78,8 @@ import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesUtils;
 import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
-import signals.laemmer.LaemmerConfig;
-import signals.laemmer.LaemmerSignalController;
+import signals.laemmerFix.LaemmerConfig;
+import signals.laemmerFix.LaemmerSignalController;
 import signals.sylvia.controler.SylviaConfig;
 import signals.sylvia.data.SylviaPreprocessData;
 

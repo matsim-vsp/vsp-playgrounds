@@ -79,11 +79,11 @@ import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
-import signals.laemmer.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.LaemmerConfig;
-import signals.laemmer.LaemmerSignalController;
-import signals.laemmer.LaemmerConfig.Regime;
-import signals.laemmer.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFix.LaemmerConfig;
+import signals.laemmerFix.LaemmerSignalController;
+import signals.laemmerFix.LaemmerConfig.Regime;
+import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 
 /**
  * @author tthunig

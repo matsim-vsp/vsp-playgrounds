@@ -1,4 +1,4 @@
-package signals.laemmer;
+package signals.laemmerFlex;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -6,11 +6,13 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.lanes.Lane;
 
+import signals.laemmerFix.LaemmerConfig;
+
 /**
  * 
  * @author pschade
  */
-public class LaemmerPhase {
+class LaemmerPhase {
 
 	private final FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController;
 

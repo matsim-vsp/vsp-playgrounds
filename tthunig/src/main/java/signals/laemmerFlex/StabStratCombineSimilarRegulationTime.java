@@ -1,4 +1,4 @@
-package signals.laemmer.stabilizationStrategies;
+package signals.laemmerFlex;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -6,18 +6,14 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
 
-import signals.laemmer.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.LaemmerApproach;
-import signals.laemmer.LaemmerPhase;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Queue;
 
-public class CombineSimilarRegulationTime extends AbstractStabilizationStrategy {
+class StabStratCombineSimilarRegulationTime extends AbstractStabilizationStrategy {
 
-	public CombineSimilarRegulationTime(FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController, Network network, Lanes lanes) {
+	public StabStratCombineSimilarRegulationTime(FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController, Network network, Lanes lanes) {
 		super(fullyAdaptiveLaemmerSignalController, network, lanes);
 	}
 

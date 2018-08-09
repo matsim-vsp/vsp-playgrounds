@@ -21,6 +21,15 @@
  */
 package scenarios.illustrative.singleCrossing;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -67,24 +76,15 @@ import org.matsim.lanes.LanesFactory;
 import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
 import signals.CombinedSignalsModule;
 import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
-import signals.laemmer.FullyAdaptiveLaemmerSignalController;
-import signals.laemmer.LaemmerConfig;
-import signals.laemmer.LaemmerSignalController;
-import signals.laemmer.LaemmerConfig.Regime;
-import signals.laemmer.LaemmerConfig.StabilizationStrategy;
-import signals.laemmer.model.util.Conflicts;
+import signals.laemmerFix.LaemmerConfig;
+import signals.laemmerFix.LaemmerSignalController;
+import signals.laemmerFix.LaemmerConfig.Regime;
+import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 
 /**
  * @author tthunig, pschade

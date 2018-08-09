@@ -1,4 +1,4 @@
-package signals.laemmer;
+package signals.laemmerFlex;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -13,7 +13,7 @@ import org.matsim.lanes.Lane;
  */
 //TODO I consider renaming this to "LammerInDriveway" or "LammerNodeApproach" since is should also work without Lanes and shoud later also work for stabilization, pschade Jan '18
 
-public class LaemmerApproach {
+class LaemmerApproach {
 
 	private Lane physicalLane;
 	private FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController;

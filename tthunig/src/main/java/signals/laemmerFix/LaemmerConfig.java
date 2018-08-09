@@ -1,4 +1,7 @@
-package signals.laemmer;
+package signals.laemmerFix;
+
+import java.util.HashMap;
+import java.util.Map;
 
 //import com.sun.istack.internal.NotNull;
 //import com.sun.istack.internal.Nullable;
@@ -7,22 +10,13 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.lanes.Lane;
 
-import signals.laemmer.stabilizationStrategies.AbstractStabilizationStrategy;
-import signals.laemmer.stabilizationStrategies.CombineSimilarRegulationTime;
-import signals.laemmer.stabilizationStrategies.HeuristicStrategy;
-import signals.laemmer.stabilizationStrategies.MaxLaneCountStrategy;
-import signals.laemmer.stabilizationStrategies.PriorizeHigherPositionsStrategy;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author nkuehnel, tthunig
  */
 public class LaemmerConfig {
 	
     //Probably consider to try also a combination of simmilar outflow rates
-    public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME, HEURISTIC, CUSTOM}; 
+    public enum StabilizationStrategy {USE_MAX_LANECOUNT, PRIORIZE_HIGHER_POSITIONS, COMBINE_SIMILAR_REGULATIONTIME, HEURISTIC}; 
     private StabilizationStrategy activeStabilizationStrategy = StabilizationStrategy.HEURISTIC;
     
     public enum Regime {COMBINED, OPTIMIZING, STABILIZING};
@@ -190,35 +184,7 @@ public class LaemmerConfig {
 	}
 
 	public StabilizationStrategy getStabilizationStrategy() {
-		if (activeStabilizationStrategy.equals(StabilizationStrategy.CUSTOM) && this.customStabilizationStrategy == null) {
-			throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");			
-		}
 		return activeStabilizationStrategy;
-	}
-	
-	public String getStabilizationClassName() {
-		switch (activeStabilizationStrategy) {
-		case HEURISTIC:
-			return HeuristicStrategy.class.getName();
-		case USE_MAX_LANECOUNT:
-			return MaxLaneCountStrategy.class.getName();
-		case COMBINE_SIMILAR_REGULATIONTIME:
-			return CombineSimilarRegulationTime.class.getName();
-		case PRIORIZE_HIGHER_POSITIONS:
-			return PriorizeHigherPositionsStrategy.class.getName();
-		case CUSTOM:
-			if(this.customStabilizationStrategy == null) {
-				throw new IllegalStateException("no custom stabilization strategy set in laemmerConfig!");
-			} else {
-				return customStabilizationStrategy;
-			}
-		}
-		return null;
-	}
-	
-	public void setCustomStabilzationStrategy(Class<? extends AbstractStabilizationStrategy> customStrategy) {
-		this.activeStabilizationStrategy = StabilizationStrategy.CUSTOM;
-		this.customStabilizationStrategy = customStrategy.getName();
 	}
 
 	public boolean isMinGreenTimeForNonGrowingQueues() {

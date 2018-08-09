@@ -52,7 +52,7 @@ import org.matsim.lanes.Lane;
 import org.matsim.lanes.LanesToLinkAssignment;
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes.LaneType;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
-import signals.laemmer.LaemmerSignalController;
+import signals.laemmerFix.LaemmerSignalController;
 import signals.sylvia.data.SylviaPreprocessData;
 
 /**

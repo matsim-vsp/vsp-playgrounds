@@ -1,15 +1,19 @@
 package scenarios.illustrative.singleCrossing;
 
+import org.apache.log4j.Logger;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 
+import scenarios.illustrative.braess.run.RunBraessSimulation;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario.SignalControl;
-import signals.laemmer.LaemmerConfig.Regime;
-import signals.laemmer.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFix.LaemmerConfig.Regime;
+import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
 
 /**
  * @author nkuehnel, tthunig
  */
 public class RunSingleCrossingScenario {
+	
+	private static final Logger log = Logger.getLogger(RunBraessSimulation.class);
 
     private static final SingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.LAEMMER_FULLY_ADAPTIVE;
     private static final Regime LAEMMER_REGIME = Regime.OPTIMIZING;
@@ -29,7 +33,7 @@ public class RunSingleCrossingScenario {
     private static final int MIN_G = 5;
     
     public static void main(String[] args) {
-    	log.info("Running single crossing scenario with signalcontrol "+SIGNAL_CONTROL.toString());
+    		log.info("Running single crossing scenario with signalcontrol "+SIGNAL_CONTROL.toString());
         double flowNS = 360;
         double flowWE = 1440;
 //	        for (int i = 0; i <= 2520; i += 120) {

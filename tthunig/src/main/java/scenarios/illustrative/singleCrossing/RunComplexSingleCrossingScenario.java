@@ -4,8 +4,8 @@ import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.core.controler.Controler;
 
 import scenarios.illustrative.singleCrossing.ComplexSingleCrossingScenario.SignalControl;
-import signals.laemmer.LaemmerConfig.Regime;
-import signals.laemmer.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFix.LaemmerConfig.Regime;
+import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
 
 /**
  * @author nkuehnel, tthunig, pschade

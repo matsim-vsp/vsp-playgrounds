@@ -18,7 +18,7 @@
  *  *                                                                         *
  *  * ***********************************************************************
  */
-package signals.laemmer;
+package signals.laemmerFlex;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
