@@ -77,12 +77,12 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	private boolean extensionActive = false;
 	private boolean forcedExtensionActive = false;
 	private int secondInSylviaCycle = -1; //as this is incremented before use
-	private Map<Integer, DgExtensionPoint> extensionPointMap = null;
-	private Map<Integer, DgExtensionPoint> forcedExtensionPointMap = null;
+	private Map<Integer, SylviaExtensionPoint> extensionPointMap = null;
+	private Map<Integer, SylviaExtensionPoint> forcedExtensionPointMap = null;
 	private Map<Id<SignalGroup>, Double> greenGroupId2OnsetMap = null;
 	private int extensionTime = 0;
 	private int secondInCycle = -1; //used for debug output
-	private DgExtensionPoint currentExtensionPoint;
+	private SylviaExtensionPoint currentExtensionPoint;
 
 	private final SylviaConfig sylviaConfig;
 	private final LinkSensorManager sensorManager;
@@ -251,7 +251,7 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	 * @param extensionPoint
 	 * @return true, if the signal should be extended. false, if not, i.e. if there is no time left to extend the signal or if there is no need to extend the signal.
 	 */
-	private boolean checkExtensionCondition(double currentTime, DgExtensionPoint extensionPoint){
+	private boolean checkExtensionCondition(double currentTime, SylviaExtensionPoint extensionPoint){
 		if (this.isExtensionTimeLeft()) {
 			//check if there is some green time left or one of the groups is over its maximal green time
 			for (Id<SignalGroup> signalGroupId : extensionPoint.getSignalGroupIds()){
@@ -275,7 +275,7 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	 * (or, if no lanes are used, when there is a car on an incoming link within some distance (specified in sylviaConfig - default is 10))
 	 * and, when downstream check is enabled, if all downstream links are empty
 	 */
-	private boolean checkTrafficConditions(double currentTime, DgExtensionPoint extensionPoint){
+	private boolean checkTrafficConditions(double currentTime, SylviaExtensionPoint extensionPoint){
 		if (sylviaConfig.isCheckDownstream()){
 			// no extension if downstream links are occupied
 			for (Id<SignalGroup> greenGroup : extensionPoint.getSignalGroupIds()){
@@ -383,11 +383,11 @@ public class SylviaSignalController extends AbstractSignalController implements 
 			
 			// put all extension points in a map ordered by time
 			if (! this.extensionPointMap.containsKey(extensionMoment)){
-				this.extensionPointMap.put(extensionMoment, new DgExtensionPoint(extensionMoment));
+				this.extensionPointMap.put(extensionMoment, new SylviaExtensionPoint(extensionMoment));
 //				// comment this out because it is not needed and not used. tt, oct'16
 //				sylvia.addExtensionPoint(extPoint); 
 			}
-			DgExtensionPoint extPoint = this.extensionPointMap.get(extensionMoment);
+			SylviaExtensionPoint extPoint = this.extensionPointMap.get(extensionMoment);
 			extPoint.addSignalGroupId(settings.getSignalGroupId());
 
 			//calculate max green time
@@ -415,7 +415,7 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	private void dumpSylviaPlan() {
 		log.debug("Signal System: "+ this.system.getId() + " Plan: " + this.activeSylviaPlan.getPlanData().getId());
 		log.debug("  Maximal time for extension: " + this.activeSylviaPlan.getMaxExtensionTime());
-		for (DgExtensionPoint p : this.extensionPointMap.values()){
+		for (SylviaExtensionPoint p : this.extensionPointMap.values()){
 			log.debug("  ExtensionPoint at: " + p.getSecondInPlan() + " groups: ");
 			for (Id<SignalGroup> sgId : p.getSignalGroupIds()){
 				log.debug("    SignalGroup: " + sgId + " maxGreen: "+ p.getMaxGreenTime(sgId));
@@ -431,7 +431,7 @@ public class SylviaSignalController extends AbstractSignalController implements 
 	 * Prepare also downstream sensors if checkDownstream is enabled in sylviaConfig
 	 */
 	private void initializeSensoring(){
-		for (DgExtensionPoint extPoint : this.extensionPointMap.values()){
+		for (SylviaExtensionPoint extPoint : this.extensionPointMap.values()){
 			Set<Signal> extPointSignals = new HashSet<>();
 			for (Id<SignalGroup> signalGroupId : extPoint.getSignalGroupIds()){
 				extPointSignals.addAll(system.getSignalGroups().get(signalGroupId).getSignals().values());

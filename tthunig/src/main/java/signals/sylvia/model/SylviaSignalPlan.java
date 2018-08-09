@@ -36,7 +36,7 @@ import org.matsim.contrib.signals.model.SignalPlan;
 public class SylviaSignalPlan implements SignalPlan {
 
 	private DatabasedSignalPlan delegate;
-	private List<DgExtensionPoint> extensionPoints = new ArrayList<DgExtensionPoint>();
+	private List<SylviaExtensionPoint> extensionPoints = new ArrayList<SylviaExtensionPoint>();
 	private int maxExtensionTime = 0;
 	private int fixedTimeCycle = 0;
 
@@ -80,11 +80,11 @@ public class SylviaSignalPlan implements SignalPlan {
 		return delegate.getCycleTime();
 	}
 	
-	public void addExtensionPoint(DgExtensionPoint extensionPoint){
+	public void addExtensionPoint(SylviaExtensionPoint extensionPoint){
 		this.extensionPoints.add(extensionPoint);
 	}
 
-	public List<DgExtensionPoint> getExtensionPoints() {
+	public List<SylviaExtensionPoint> getExtensionPoints() {
 		return extensionPoints;
 	}
 

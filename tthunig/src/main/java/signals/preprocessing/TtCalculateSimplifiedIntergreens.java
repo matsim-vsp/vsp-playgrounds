@@ -42,7 +42,7 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalGroup;
 import playground.dgrether.signalsystems.utils.DgSignalGroupSettingsDataOnsetComparator;
-import signals.sylvia.data.DgPhase;
+import signals.sylvia.data.FixedTimeSignalPhase;
 
 /**
  * Class to calculate the intergreen times from a (fixed) signal control plan and write them into a xml file.
@@ -56,8 +56,8 @@ public class TtCalculateSimplifiedIntergreens {
 
 	int signalSystemCycleTime = 0;
 	List<SignalGroupSettingsData> groupSettingsList = new ArrayList<>();
-	Map<Id<SignalGroup>, DgPhase> signalGroupIdToPhaseMapping = new HashMap<>();
-	List<DgPhase> sortedPhasesByOnset = new ArrayList<>();
+	Map<Id<SignalGroup>, FixedTimeSignalPhase> signalGroupIdToPhaseMapping = new HashMap<>();
+	List<FixedTimeSignalPhase> sortedPhasesByOnset = new ArrayList<>();
 	Map<Integer, List<SignalGroupSettingsData>> onsetSettingsMap = new HashMap<>();
 
 	public void calculateIntergreens(String signalControlInputFile, String intergreensOutputFile, boolean simplifyPhases) {
@@ -210,7 +210,7 @@ public class TtCalculateSimplifiedIntergreens {
 				}
 			}
 			// phase completed
-			DgPhase phase = new DgPhase(phaseOn, phaseDrop, phaseSignals);
+			FixedTimeSignalPhase phase = new FixedTimeSignalPhase(phaseOn, phaseDrop, phaseSignals);
 			this.sortedPhasesByOnset.add(phase);
 
 			// fill signalGroupIdToPhaseMapping with simplified phases
@@ -240,7 +240,7 @@ public class TtCalculateSimplifiedIntergreens {
 				lastDroppingSignal = extendPhase(lastDroppingSignal, overlappingSettingsMap, phaseSignals, handledSignals);
 			} while (phaseDrop != lastDroppingSignal.getDropping());
 			// phase completed
-			DgPhase phase = new DgPhase(phaseOn, phaseDrop, phaseSignals);
+			FixedTimeSignalPhase phase = new FixedTimeSignalPhase(phaseOn, phaseDrop, phaseSignals);
 			this.sortedPhasesByOnset.add(phase);
 
 			// fill signalGroupIdToPhaseMapping with unsimplified phases
@@ -276,7 +276,7 @@ public class TtCalculateSimplifiedIntergreens {
 	private void handleSamePhase(IntergreensForSignalSystemData systemIntergreens, SignalGroupSettingsData selectedSignal) {
 
 		// calculate intergreens to later signals in the same phase
-		DgPhase signalPhase = signalGroupIdToPhaseMapping.get(selectedSignal.getSignalGroupId());
+		FixedTimeSignalPhase signalPhase = signalGroupIdToPhaseMapping.get(selectedSignal.getSignalGroupId());
 		for (SignalGroupSettingsData samePhaseSignals : signalPhase.getSignalGroupSettingsByGroupId().values()) {
 			if (samePhaseSignals.getOnset() >= selectedSignal.getDropping()) {
 				systemIntergreens.setIntergreenTime(samePhaseSignals.getOnset() - selectedSignal.getDropping(), selectedSignal.getSignalGroupId(), samePhaseSignals.getSignalGroupId());
@@ -288,13 +288,13 @@ public class TtCalculateSimplifiedIntergreens {
 
 		// get the next phase
 		boolean cycleTimeCrossed = false;
-		DgPhase selectedPhase = this.signalGroupIdToPhaseMapping.get(selectedSignal.getSignalGroupId());
+		FixedTimeSignalPhase selectedPhase = this.signalGroupIdToPhaseMapping.get(selectedSignal.getSignalGroupId());
 		int nextPhaseIndex = this.sortedPhasesByOnset.indexOf(selectedPhase) + 1;
 		if (nextPhaseIndex >= this.sortedPhasesByOnset.size()) {
 			nextPhaseIndex = 0;
 			cycleTimeCrossed = true;
 		}
-		DgPhase nextPhase = this.sortedPhasesByOnset.get(nextPhaseIndex);
+		FixedTimeSignalPhase nextPhase = this.sortedPhasesByOnset.get(nextPhaseIndex);
 
 		// calculate intergreens to all signals in the next phase
 		for (SignalGroupSettingsData nextPhaseSignals : nextPhase.getSignalGroupSettingsByGroupId().values()) {

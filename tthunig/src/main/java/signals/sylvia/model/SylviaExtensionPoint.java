@@ -35,14 +35,14 @@ import org.matsim.contrib.signals.model.SignalGroup;
  * @author dgrether
  *
  */
-public class DgExtensionPoint {
+public class SylviaExtensionPoint {
 
 	private Map<Id<SignalGroup>, Integer> maxGreenTimes = new HashMap<>();
 	private int secondInPlan;
 	private Set<Id<SignalGroup>> signalGroupIds = new HashSet<>();
 	private Set<Signal> signals = new HashSet<>();
 
-	public DgExtensionPoint(int secondInPlan){
+	public SylviaExtensionPoint(int secondInPlan){
 		this.secondInPlan = secondInPlan;
 	}
 	

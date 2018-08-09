@@ -37,22 +37,22 @@ import org.matsim.contrib.signals.model.SignalGroup;
  * @author tthunig
  *
  */
-public final class DgPhase {
+public final class FixedTimeSignalPhase {
 
-	private static final Logger log = Logger.getLogger(DgPhase.class);
+	private static final Logger log = Logger.getLogger(FixedTimeSignalPhase.class);
 	private Integer on = null;
 	private Integer off = null;
 	private Map<Id<SignalGroup>, SignalGroupSettingsData> signalGroupSettingsByGroupId = new HashMap<>();
 
 	// private boolean mixedPhase = false;
 
-	public DgPhase(Integer phaseOn, Integer phaseDrop) {
+	public FixedTimeSignalPhase(Integer phaseOn, Integer phaseDrop) {
 		log.debug("created phase from " + phaseOn + " to " + phaseDrop);
 		this.on = phaseOn;
 		this.off = phaseDrop;
 	}
 
-	public DgPhase(Integer phaseOn, Integer phaseDrop, Map<Id<SignalGroup>, SignalGroupSettingsData> phaseSignals) {
+	public FixedTimeSignalPhase(Integer phaseOn, Integer phaseDrop, Map<Id<SignalGroup>, SignalGroupSettingsData> phaseSignals) {
 		this(phaseOn, phaseDrop);
 		this.signalGroupSettingsByGroupId = phaseSignals;
 	}
