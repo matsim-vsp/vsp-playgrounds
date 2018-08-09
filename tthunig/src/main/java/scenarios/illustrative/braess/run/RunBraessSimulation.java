@@ -21,9 +21,10 @@
  */
 package scenarios.illustrative.braess.run;
 
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -60,7 +61,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
+
+import analysis.signals.TtSignalAnalysisListener;
+import analysis.signals.TtSignalAnalysisTool;
+import analysis.signals.TtSignalAnalysisWriter;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -88,11 +92,6 @@ import signals.CombinedSignalsModule;
 import signals.laemmer.model.LaemmerConfig;
 import signals.sylvia.controler.DgSylviaConfig;
 import utils.OutputUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
 
 /**
  * Class to run a simulation of the braess scenario with or without signals. 
@@ -149,19 +148,6 @@ public final class RunBraessSimulation {
 		Controler controler = prepareController(scenario);
 	
 		controler.run();
-		
-		try {
-			MATSimVideoUtils.createLegHistogramVideo(config.controler().getOutputDirectory());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (PRICING_TYPE.equals(PricingType.INTERVALBASED)) {
-			try {
-				MATSimVideoUtils.createVideo(config.controler().getOutputDirectory(), 1, "toll_perLinkAndTimeBin");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	private static Config defineConfig() {
