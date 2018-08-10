@@ -55,6 +55,7 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerDa
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
+import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
@@ -76,13 +77,12 @@ import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import signals.CombinedSignalsModule;
-import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFix.LaemmerConfig;
-import signals.laemmerFix.LaemmerSignalController;
 import signals.laemmerFix.LaemmerConfig.Regime;
 import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFix.LaemmerSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 
 /**
@@ -107,7 +107,6 @@ public class SingleCrossingScenario {
 	private LaemmerConfig laemmerConfig;
 	private GershensonConfig gershensonConfig;
 	private boolean vis = false;
-	private boolean logEnabled = false;
 	private boolean stochasticDemand = false;
 	private boolean useLanes = true;
 	private boolean liveArrivalRates = true;
@@ -138,10 +137,6 @@ public class SingleCrossingScenario {
 
 	public void setVis(boolean vis) {
 		this.vis = vis;
-	}
-
-	public void setLogEnabled(boolean log) {
-		this.logEnabled = log;
 	}
 
 	public void setStochastic(boolean stochastic) {
@@ -181,21 +176,20 @@ public class SingleCrossingScenario {
 	/**
 	 * constructor useful for scenarios without laemmer signals
 	 */
-	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
+	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, boolean vis, boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
 		this.flowNS = flowNS;
 		this.flowWE = flowWE;
 		this.signalControl = signalControl;
 		this.vis = vis;
-		this.logEnabled = logEnabled;
 		this.stochasticDemand = stochastic;
 		this.useLanes = lanes;
 		this.groupedSignals = grouped;
 		this.temporalCrowd = temporalCrowd;
 	}
 	
-	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, Regime laemmerRegime, StabilizationStrategy stabilizationStrategy, boolean vis, boolean logEnabled, boolean stochastic, boolean lanes,
+	public SingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, Regime laemmerRegime, StabilizationStrategy stabilizationStrategy, boolean vis, boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
-		this(flowNS, flowWE, signalControl, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
+		this(flowNS, flowWE, signalControl, vis, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
 		this.stabilizationStrategy = stabilizationStrategy;
 		this.liveArrivalRates = liveArrivalRates;
@@ -243,7 +237,6 @@ public class SingleCrossingScenario {
 	    }
 	    laemmerConfig.setMinGreenTime(minG);
 	    laemmerConfig.setActiveRegime(laemmerRegime);
-	    laemmerConfig.setAnalysisEnabled(logEnabled);
 	}
 
 	private void useDefaultGershensonConfig() {
@@ -632,7 +625,7 @@ public class SingleCrossingScenario {
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
         SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
-        signalSystemControl.setControllerIdentifier(AdvancedPlanBasedSignalSystemController.IDENTIFIER);
+        signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
         signalControl.addSignalSystemControllerData(signalSystemControl);
 
         // create a plan for the signal system (with defined cycle time and offset 0)

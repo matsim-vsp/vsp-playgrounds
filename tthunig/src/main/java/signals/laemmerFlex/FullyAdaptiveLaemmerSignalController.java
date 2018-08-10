@@ -19,10 +19,6 @@
  * *********************************************************************** */
 package signals.laemmerFlex;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -50,8 +46,6 @@ import org.matsim.lanes.Lanes;
 
 import com.google.inject.Provider;
 
-import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
-import signals.Analyzable;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.laemmerFix.LaemmerConfig;
 import signals.laemmerFix.LaemmerConfig.Regime;
@@ -59,13 +53,9 @@ import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
 
 
 /**
- * @author dgrether
- * @author tthunig
- * @author nkuehnel
- * @author pschade
+ * @author tthunig, pschade based on LaemmerSignalController by nkuehnel
  */
-
-public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
+public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalController implements SignalController {
 
 	public static final String IDENTIFIER = "FullyAdaptiveLaemmerSignalController";
 
@@ -87,19 +77,11 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 
 	double maximumSystemsOutflowSum;
 
-	private TtTotalDelay delayCalculator;
-
 	private ArrayList<SignalPhase> signalPhases;
 	private List<LaemmerApproach> laemmerApproaches = new LinkedList<>();
 	private Queue<LaemmerApproach> approachesForStabilization = new LinkedList<>();
 
 	private LaemmerPhase regulationPhase;
-
-	private double averageWaitingCarCount = 0.0;
-
-	private double lastAvgCarNumUpdate = 30.0*60.0;
-
-	private boolean isAvgQueueLengthNumWritten = false;
 
 	private boolean debug = false;
 
@@ -115,33 +97,30 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 	public final static class SignalControlProvider implements Provider<SignalController> {
 		private final LaemmerConfig laemmerConfig;
 		private final LinkSensorManager sensorManager;
-		private final TtTotalDelay delayCalculator;
 		private final DownstreamSensor downstreamSensor;
 		private final Scenario scenario;
 
-		public SignalControlProvider(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
+		public SignalControlProvider(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
 			this.laemmerConfig = laemmerConfig;
 			this.sensorManager = sensorManager;
 			this.scenario = scenario;
-			this.delayCalculator = delayCalculator;
 			this.downstreamSensor = downstreamSensor;
 		}
 
 		@Override
 		public SignalController get() {
-			return new FullyAdaptiveLaemmerSignalController(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor);
+			return new FullyAdaptiveLaemmerSignalController(laemmerConfig, sensorManager, scenario, downstreamSensor);
 		}
 	}
 
 
-	private FullyAdaptiveLaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
+	private FullyAdaptiveLaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
 		this.laemmerConfig = laemmerConfig;
 		this.sensorManager = sensorManager;
 		this.network = scenario.getNetwork();
 		this.lanes = scenario.getLanes();
 		this.config = scenario.getConfig();
 		this.signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-		this.delayCalculator = delayCalculator;
 		if (laemmerConfig.isUseDefaultIntergreenTime()) {
 			DEFAULT_INTERGREEN = laemmerConfig.getDefaultIntergreenTime();
 		} else {
@@ -272,9 +251,6 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 		}
 		LaemmerPhase selection = selectSignal();
 		processSelection(now, selection);
-		if (isAnalysisEnabled()) {
-			logQueueLengthToFile(now);
-		}
 	}
 
 	/**
@@ -547,54 +523,6 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 	public void reset(Integer iterationNumber) {
 	}
 
-	@Override
-	public boolean isAnalysisEnabled() {
-		return this.laemmerConfig.isAnalysisEnabled();
-	}
-
-	@Override
-	public String getStatFields() {
-
-		StringBuilder builder = new StringBuilder();
-		builder.append("T_idle;selected;total delay;numOfLanesNeedsStabilize;stabilizationQueue;");
-		for (LaemmerPhase laemmerPhase : laemmerPhases) {
-			laemmerPhase.getStatFields(builder);
-		}
-		for (LaemmerApproach laemmerLane : laemmerApproaches) {
-			laemmerLane.getStatFields(builder);
-		}
-		return builder.toString();
-	}
-
-	@Override
-	public String getStepStats(double now) {
-
-		StringBuilder builder = new StringBuilder();
-		String selected = "none";
-		if (activeRequest != null) {
-			selected = activeRequest.laemmerPhase.phase.getId().toString();
-		}
-		builder.append(tIdle + ";" + selected + ";" + delayCalculator.getTotalDelay() + ";"+this.approachesForStabilization.size()+";");
-		for (LaemmerApproach ll : approachesForStabilization) {
-			builder.append(ll.getLink().getId());
-			if (ll.getLane() != null) {
-				builder.append("-");
-				builder.append(ll.getLane().getId());
-			}
-			builder.append(" ");
-		}
-		builder.append(";");
-		for (LaemmerPhase laemmerPhase : laemmerPhases) {
-			laemmerPhase.getStepStats(builder, now);
-		}
-
-		for (LaemmerApproach laemmerLane : laemmerApproaches) {
-			laemmerLane.getStepStats(builder, now);
-		}
-
-		return builder.toString();
-	}
-
 	public SignalSystem getSystem() {
 		return this.system;
 	}
@@ -615,46 +543,6 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 
 	public boolean getDebug() {
 		return debug;
-	}
-
-	//helper functions
-	private void logQueueLengthToFile(double now) {
-		double logStartTime = 30.0*60.0; //for illustrative 
-		//    	double logStartTime = 16.5*3600.0; //for CB
-		double logEndTime = 90.0*60.0; //for illustrative
-		//    	double logEndTime = 17.5*3600.0; //for CB with football
-		double currentQueueLengthSum = 0.0;
-		if (now > logStartTime && now <= logEndTime) {
-			for (LaemmerApproach l : laemmerApproaches) {
-				if (l.getLane() == null) {
-					currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLink(now, l.getLink().getId());
-				} else {
-					currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLane(now, l.getLink().getId(), l.getLane().getId());
-				}
-			}
-			this.averageWaitingCarCount *= (lastAvgCarNumUpdate-logStartTime+1.0);
-			this.averageWaitingCarCount	+= currentQueueLengthSum;
-			this.averageWaitingCarCount /= (now - logStartTime+1.0);
-			this.lastAvgCarNumUpdate = now; 
-		} else if (now > logEndTime && !this.isAvgQueueLengthNumWritten) {
-			StringBuilder filename = new StringBuilder();
-			filename.append("avgQueueLength_");
-			filename.append("fullyAdaptive_");
-			filename.append(this.laemmerConfig.getActiveRegime()+"_");
-			filename.append(this.laemmerConfig.getActiveStabilizationStrategy()+"_");
-			filename.append("signalSystem-"+this.system.getId());
-			filename.append(".csv");
-			try {
-				if (Files.notExists(Paths.get(this.config.controler().getOutputDirectory().concat("/../"+filename)))){
-					Files.createFile(Paths.get(this.config.controler().getOutputDirectory().concat("/../"+filename)));
-				}
-				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/../"+filename)), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
-				this.isAvgQueueLengthNumWritten  = true;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/** helper class for scheduling a new request 

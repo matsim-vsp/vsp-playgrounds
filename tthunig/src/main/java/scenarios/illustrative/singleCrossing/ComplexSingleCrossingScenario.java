@@ -57,6 +57,7 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerDa
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
+import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
@@ -78,11 +79,10 @@ import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import signals.CombinedSignalsModule;
-import signals.advancedPlanbased.AdvancedPlanBasedSignalSystemController;
 import signals.laemmerFix.LaemmerConfig;
-import signals.laemmerFix.LaemmerSignalController;
 import signals.laemmerFix.LaemmerConfig.Regime;
 import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import signals.laemmerFix.LaemmerSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
 
@@ -108,7 +108,6 @@ public class ComplexSingleCrossingScenario {
 	SignalControl signalControlSelect = SignalControl.LAEMMER_FULLY_ADAPTIVE;
 	private Regime laemmerRegime = Regime.STABILIZING;
 	private boolean vis = false;
-	private boolean logEnabled = false;
 	private boolean stochasticDemand = false;
 	private boolean useLanes = true;
 	private boolean liveArrivalRates = true;
@@ -144,10 +143,6 @@ public class ComplexSingleCrossingScenario {
 		this.vis = vis;
 	}
 
-	public void setLogEnabled(boolean log) {
-		this.logEnabled = log;
-	}
-
 	public void setStochastic(boolean stochastic) {
 		this.stochasticDemand = stochastic;
 	}
@@ -177,13 +172,12 @@ public class ComplexSingleCrossingScenario {
 	/**
 	 * constructor useful for scenarios without laemmer signals
 	 */
-	public ComplexSingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, boolean vis, boolean logEnabled, 
+	public ComplexSingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, boolean vis, 
 			boolean stochastic, boolean lanes, boolean grouped, boolean temporalCrowd) {
 		this.flowNS = flowNS;
 		this.flowWE = flowWE;
 		this.signalControlSelect = signalControl;
 		this.vis = vis;
-		this.logEnabled = logEnabled;
 		this.stochasticDemand = stochastic;
 		this.useLanes = lanes;
 		this.groupedSignals = grouped;
@@ -191,9 +185,9 @@ public class ComplexSingleCrossingScenario {
 	}
 	
 	public ComplexSingleCrossingScenario(double flowNS, double flowWE, SignalControl signalControl, Regime laemmerRegime, boolean vis, 
-			boolean logEnabled, boolean stochastic, boolean lanes,
+			boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
-		this(flowNS, flowWE, signalControl, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
+		this(flowNS, flowWE, signalControl, vis, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
 		this.liveArrivalRates = liveArrivalRates;
 		this.minG = minG;
@@ -216,10 +210,10 @@ public class ComplexSingleCrossingScenario {
 	 * @param temporalCrowd
 	 */
 	public ComplexSingleCrossingScenario(double flowNS, double leftTurningFactorNS, double flowWE, double leftTurningFactorWE, 
-			SignalControl signalControl, Regime laemmerRegime, StabilizationStrategy stabilizationStrategy, boolean vis, boolean logEnabled, 
+			SignalControl signalControl, Regime laemmerRegime, StabilizationStrategy stabilizationStrategy, boolean vis, 
 			boolean stochastic, boolean lanes,
 			boolean liveArrivalRates, boolean grouped, double minG, boolean temporalCrowd) {
-		this(flowNS, flowWE, signalControl, vis, logEnabled, stochastic, lanes, grouped, temporalCrowd);
+		this(flowNS, flowWE, signalControl, vis, stochastic, lanes, grouped, temporalCrowd);
 		this.laemmerRegime = laemmerRegime;
 		this.liveArrivalRates = liveArrivalRates;
 		this.stabilizationStrategy = stabilizationStrategy;
@@ -242,7 +236,6 @@ public class ComplexSingleCrossingScenario {
         }
         laemmerConfig.setMinGreenTime(minG);
         laemmerConfig.setActiveRegime(laemmerRegime);
-        laemmerConfig.setAnalysisEnabled(logEnabled);
         //laemmerConfig.setAvgCarSensorBucketParameters(360.0, 90.0);
         signalsModule.setLaemmerConfig(laemmerConfig);
 
@@ -689,7 +682,7 @@ public class ComplexSingleCrossingScenario {
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
         SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
-        signalSystemControl.setControllerIdentifier(AdvancedPlanBasedSignalSystemController.IDENTIFIER);
+        signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
         signalControl.addSignalSystemControllerData(signalSystemControl);
 
         // create a plan for the signal system

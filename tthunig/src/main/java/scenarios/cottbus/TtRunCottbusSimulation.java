@@ -1006,7 +1006,6 @@ public class TtRunCottbusSimulation {
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
 			LaemmerConfig laemmerConfig = new LaemmerConfig();
-			laemmerConfig.setAnalysisEnabled(false);
 			laemmerConfig.setDesiredCycleTime(90);
 			laemmerConfig.setMaxCycleTime(135);
 			laemmerConfig.setMinGreenTime(LAEMMER_MIN_G);

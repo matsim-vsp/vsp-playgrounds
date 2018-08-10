@@ -46,7 +46,7 @@ public class RunSingleIntersectionWithUnprotectedLeftTurnLogic {
 	 */
 	public double runSingleIntersection() {
 		ComplexSingleCrossingScenario singleIntersection = new ComplexSingleCrossingScenario(250, 0.0, 1250, 0.2,
-				ComplexSingleCrossingScenario.SignalControl.FIXED, null, null, vis, false, stochasticDemand, true, true,
+				ComplexSingleCrossingScenario.SignalControl.FIXED, null, null, vis, stochasticDemand, true, true,
 				true, 5, false);
 		singleIntersection.setIntersectionLogic(intersectionLogic);
 		singleIntersection.setProtectedLeftTurnForFixedTimeSignals(false);

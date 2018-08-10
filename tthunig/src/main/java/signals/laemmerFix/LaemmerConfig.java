@@ -38,14 +38,11 @@ public final class LaemmerConfig {
     private Map<Id<Link>, Map<Id<Lane>,Double>> laneArrivalRates = new HashMap<>();
 
     private boolean useDefaultIntergreenTime = true;
-    private boolean analysisEnabled = false;
     
 	/** activate the phase only if downstream links are empty. */
 	private boolean checkDownstream = false;
 
 	private boolean isRemoveSubPhases = true;
-
-	private String customStabilizationStrategy = null;
 	
 	/** if there exist queues but arrivalRate for this link/lane is 0, the queue will never emptied.
 	 * with tMinForNotGrowingQueues setten to true it will be get at least the minium green time
@@ -145,15 +142,6 @@ public final class LaemmerConfig {
 
     public void setDefaultIntergreenTime(double intergreen) {
         this.defaultIntergreenTime = intergreen;
-    }
-
-
-    public boolean isAnalysisEnabled() {
-        return analysisEnabled;
-    }
-    
-    public void setAnalysisEnabled(boolean enabled){
-    	this.analysisEnabled = enabled;
     }
 	
 	public void setCheckDownstream(boolean checkDownstream) {

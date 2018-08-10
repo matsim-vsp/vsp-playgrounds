@@ -19,7 +19,6 @@ public class RunSingleCrossingScenario {
     private static final Regime LAEMMER_REGIME = Regime.OPTIMIZING;
     
     private static final boolean VISUALIZE_WITH_OTFVIS = true;
-    private static final boolean LOG_ENABLED = true;
     private static final boolean LIVE_ARRIVAL_RATES = true;
     private static final boolean STOCHASTIC_DEMAND = true;
     private static final boolean USE_LANES = true;
@@ -39,7 +38,7 @@ public class RunSingleCrossingScenario {
 //	        for (int i = 0; i <= 2520; i += 120) {
 //	        	flowWE = i;
 		SingleCrossingScenario scenarioBuilder = new SingleCrossingScenario(flowNS, flowWE, SIGNAL_CONTROL,
-				LAEMMER_REGIME, STABILIZATION_STRATEGY, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND,
+				LAEMMER_REGIME, STABILIZATION_STRATEGY, VISUALIZE_WITH_OTFVIS, STOCHASTIC_DEMAND,
 				USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
 		scenarioBuilder.setIntersectionLogic(INTERSECTION_LOGIC);
 		scenarioBuilder.defineControler().run();

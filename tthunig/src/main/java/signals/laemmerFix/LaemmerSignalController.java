@@ -19,7 +19,11 @@
  * *********************************************************************** */
 package signals.laemmerFix;
 
-import com.google.inject.Provider;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -33,18 +37,10 @@ import org.matsim.core.config.Config;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
-import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
-import signals.Analyzable;
-import signals.downstreamSensor.DownstreamSensor;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import com.google.inject.Provider;
+
+import signals.downstreamSensor.DownstreamSensor;
 
 
 /**
@@ -52,7 +48,7 @@ import java.util.Queue;
  * @author tthunig
  * @author nkuehnel
  */
-public final class LaemmerSignalController extends AbstractSignalController implements SignalController, Analyzable {
+public final class LaemmerSignalController extends AbstractSignalController implements SignalController {
 
     public static final String IDENTIFIER = "LaemmerSignalController";
 
@@ -61,7 +57,6 @@ public final class LaemmerSignalController extends AbstractSignalController impl
     private final List<LaemmerSignal> laemmerSignals = new ArrayList<>();
     
     private LinkSensorManager sensorManager;
-    private TtTotalDelay delayCalculator;    
     private DownstreamSensor downstreamSensor;
 
     private final Network network;
@@ -75,42 +70,33 @@ public final class LaemmerSignalController extends AbstractSignalController impl
     // TODO this should be a constant. can be calculated once in simulationInitialized. tt, dez'17
     private double systemOutflowCapacity;
 
-	private double averageWaitingCarCount;
-
-	private double lastAvgCarNumUpdate;
-
-	private boolean isAvgQueueLengthNumWritten;
-
 
     public final static class SignalControlProvider implements Provider<SignalController> {
         private final LaemmerConfig laemmerConfig;
         private final LinkSensorManager sensorManager;
-        private final TtTotalDelay delayCalculator;
 		private final DownstreamSensor downstreamSensor;
 		private final Scenario scenario;
 
-        public SignalControlProvider(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
+        public SignalControlProvider(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
             this.laemmerConfig = laemmerConfig;
             this.sensorManager = sensorManager;
             this.scenario = scenario;
-            this.delayCalculator = delayCalculator;
             this.downstreamSensor = downstreamSensor;
         }
 
         @Override
         public SignalController get() {
-            return new LaemmerSignalController(laemmerConfig, sensorManager, scenario, delayCalculator, downstreamSensor);
+            return new LaemmerSignalController(laemmerConfig, sensorManager, scenario, downstreamSensor);
         }
     }
 
 
-    private LaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, TtTotalDelay delayCalculator, DownstreamSensor downstreamSensor) {
+    private LaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
         this.laemmerConfig = laemmerConfig;
         this.sensorManager = sensorManager;
         this.network = scenario.getNetwork();
         this.lanes = scenario.getLanes();
         this.config = scenario.getConfig();
-        this.delayCalculator = delayCalculator;
 		if (laemmerConfig.isUseDefaultIntergreenTime()) {
 			DEFAULT_INTERGREEN = laemmerConfig.getDefaultIntergreenTime();
 		} else {
@@ -127,11 +113,6 @@ public final class LaemmerSignalController extends AbstractSignalController impl
             LaemmerSignal laemmerSignal = new LaemmerSignal(group);
             laemmerSignals.add(laemmerSignal);
         }
-    }
-
-    @Override
-    public boolean isAnalysisEnabled() {
-        return this.laemmerConfig.isAnalysisEnabled();
     }
 
 
@@ -156,9 +137,6 @@ public final class LaemmerSignalController extends AbstractSignalController impl
         
         LaemmerSignal selection = selectSignal();
         processSelection(now, selection);
-        if (isAnalysisEnabled()) {
-        	logQueueLengthToFile(now);
-        }
     }
 
     /**
@@ -309,69 +287,7 @@ public final class LaemmerSignalController extends AbstractSignalController impl
 			downstreamSensor.registerDownstreamSensors(system);
         }
     }
-
-    @Override
-    public String getStatFields() {
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("T_idle;selected;total delay;");
-        for (LaemmerSignal laemmerSignal : laemmerSignals) {
-            laemmerSignal.getStatFields(builder);
-        }
-        return builder.toString();
-    }
-
-    @Override
-    public String getStepStats(double now) {
-
-        StringBuilder builder = new StringBuilder();
-        String selected = "none";
-        if (activeRequest != null) {
-            selected = activeRequest.signal.group.getId().toString();
-        }
-        builder.append(tIdle + ";" + selected + ";" + delayCalculator.getTotalDelay() + ";");
-        for (LaemmerSignal laemmerSignal : laemmerSignals) {
-            laemmerSignal.getStepStats(builder, now);
-        }
-        return builder.toString();
-    }
     
-    private void logQueueLengthToFile(double now) {
-		double currentQueueLengthSum = 0.0;
-//    	double logStartTime = 30.0*60.0; //for illustrative 
-    	double logStartTime = 16.5*3600.0; //for CB
-//    	double logEndTime = 90.0*60.0; //for illustrative
-    	double logEndTime = 17.5*3600.0; //for CB with football
-    	
-    	if (now > logStartTime && now <= logEndTime) {
-    		for (LaemmerSignal laemmerSignal : laemmerSignals) {
-    			for (Signal signal : laemmerSignal.group.getSignals().values()) {
-    				if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()) {
-    					currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLink(now, signal.getLinkId());
-    				} else {
-    					for (Id<Lane> laneId : signal.getLaneIds()) {
-    						currentQueueLengthSum += this.getNumberOfExpectedVehiclesOnLane(now, signal.getLinkId(), laneId);	
-    					}
-    				}
-    			}
-    		}
-    		this.averageWaitingCarCount *= (lastAvgCarNumUpdate-logStartTime+1.0); 
-    		this.averageWaitingCarCount	+= currentQueueLengthSum;
-    		this.averageWaitingCarCount /= (now - logStartTime+1.0);
-    		this.lastAvgCarNumUpdate = now; 
-    	} else if (now > logEndTime && !this.isAvgQueueLengthNumWritten) {
-		    try {
-		    	if (Files.notExists(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")))){
-		    		Files.createFile(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")));
-		    	}
-				Files.write(Paths.get(this.config.controler().getOutputDirectory().concat("/../avgQueueLength-signalSystem"+this.system.getId().toString()+".csv")), Double.toString(averageWaitingCarCount).concat("\n").getBytes(), StandardOpenOption.APPEND);
-				this.isAvgQueueLengthNumWritten  = true;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
     class Request {
     		/** time at which the laemmer signal is planned to show green */
         private final double onsetTime;

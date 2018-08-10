@@ -17,7 +17,6 @@ public class RunComplexSingleCrossingScenario {
     private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.USE_MAX_LANECOUNT;
     private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS;
     private static final boolean VISUALIZE_WITH_OTFVIS = true;
-    private static final boolean LOG_ENABLED = false;
     private static final boolean LIVE_ARRIVAL_RATES = true;
     private static final boolean STOCHASTIC_DEMAND = true;
     private static final boolean USE_LANES = true;
@@ -32,7 +31,7 @@ public class RunComplexSingleCrossingScenario {
         double flowWE = 1800;
 //	        for (int i = 0; i <= 2100; i += 60) {
 //	        	flowWE = i;
-	            ComplexSingleCrossingScenario complexSingleCrossingSc = new ComplexSingleCrossingScenario(flowNS, 0.0, flowWE, 0.16, SIGNAL_CONTROL, LAEMMER_REGIME, STABILIZATION_STRATEGY, VISUALIZE_WITH_OTFVIS, LOG_ENABLED, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
+	            ComplexSingleCrossingScenario complexSingleCrossingSc = new ComplexSingleCrossingScenario(flowNS, 0.0, flowWE, 0.16, SIGNAL_CONTROL, LAEMMER_REGIME, STABILIZATION_STRATEGY, VISUALIZE_WITH_OTFVIS, STOCHASTIC_DEMAND, USE_LANES, LIVE_ARRIVAL_RATES, GROUPED, MIN_G, TEMPORAL_CROWD);
 				complexSingleCrossingSc.setIntersectionLogic(INTERSECTION_LOGIC);
 	            Controler singleCrossingScenarioControler = complexSingleCrossingSc.defineControler();
 				singleCrossingScenarioControler.run();

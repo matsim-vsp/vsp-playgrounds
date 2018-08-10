@@ -305,7 +305,7 @@ public class GershensonIT {
 	public void testGershensonWithLanes() {
 		double flowNS = 360;
 		double flowWE = 1440;
-		SingleCrossingScenario scenarioCreation = new SingleCrossingScenario(flowNS, flowWE, SingleCrossingScenario.SignalControl.GERSHENSON, false, false, true, true, true, false);
+		SingleCrossingScenario scenarioCreation = new SingleCrossingScenario(flowNS, flowWE, SingleCrossingScenario.SignalControl.GERSHENSON, false, true, true, true, false);
 		Controler controler = scenarioCreation.defineControler();
 		
 		// add signal analysis tool

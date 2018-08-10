@@ -48,7 +48,6 @@ import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.downstreamSensor.DownstreamSensor;
 import signals.gershenson.GershensonConfig;
 import signals.laemmerFix.LaemmerConfig;
-import signals.laemmerFix.SignalAnalyzer;
 import signals.sylvia.SylviaConfig;
 
 /**
@@ -87,8 +86,6 @@ public class CombinedSignalsModule extends AbstractModule {
 			addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
 			bind(LinkSensorManager.class).asEagerSingleton();
 			bind(DownstreamSensor.class).asEagerSingleton();
-			bind(SignalAnalyzer.class);
-			addMobsimListenerBinding().to(SignalAnalyzer.class);
 			
 			// general signal bindings
 			bind(SignalSystemsModelBuilder.class).to(FromDataBuilder.class);

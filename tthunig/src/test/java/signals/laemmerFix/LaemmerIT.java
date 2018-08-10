@@ -402,7 +402,7 @@ public class LaemmerIT {
 	}
 	
 	private TtGeneralAnalysis runSingleCrossingScenario(double flowNS, double flowWE, boolean minG, double flowCapFactor, boolean doublePersons, TtSignalAnalysisTool signalAnalyzer, Regime regime) {
-		SingleCrossingScenario singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, SingleCrossingScenario.SignalControl.LAEMMER_NICO, regime, StabilizationStrategy.USE_MAX_LANECOUNT, false, false, false, false, true, true, 0, false);
+		SingleCrossingScenario singleCrossingScenario = new SingleCrossingScenario(flowNS, flowWE, SingleCrossingScenario.SignalControl.LAEMMER_NICO, regime, StabilizationStrategy.USE_MAX_LANECOUNT, false, false, false, true, true, 0, false);
 		if (minG){
 			singleCrossingScenario.setMinG(5);
 		}
