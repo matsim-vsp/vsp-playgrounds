@@ -81,7 +81,6 @@ public class CombinedSignalsModule extends AbstractModule {
 			bind(SylviaConfig.class).toInstance(sylviaConfig);
 			bind(LaemmerConfig.class).toInstance(laemmerConfig);
 			bind(GershensonConfig.class).toInstance(gershensonConfig);
-			bind(TtTotalDelay.class).asEagerSingleton();
 			bind(SignalModelFactory.class).to(CombinedSignalModelFactory.class);
 			addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
 			bind(LinkSensorManager.class).asEagerSingleton();
