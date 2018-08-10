@@ -29,11 +29,11 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
+import org.matsim.contrib.signals.sensor.DownstreamSensor;
 import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.lanes.Lane;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
-import signals.downstreamSensor.DownstreamSensor;
 
 import java.util.HashMap;
 import java.util.HashSet;

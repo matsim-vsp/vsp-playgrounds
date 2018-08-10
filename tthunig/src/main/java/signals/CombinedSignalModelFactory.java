@@ -34,13 +34,13 @@ import org.matsim.contrib.signals.model.DatabasedSignalPlan;
 import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.DownstreamSensor;
 import org.matsim.contrib.signals.sensor.LinkSensorManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
-import signals.downstreamSensor.DownstreamSensor;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFix.LaemmerConfig;

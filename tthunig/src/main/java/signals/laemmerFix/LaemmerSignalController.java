@@ -32,6 +32,7 @@ import org.matsim.contrib.signals.model.AbstractSignalController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.sensor.DownstreamSensor;
 import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
@@ -39,8 +40,6 @@ import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
 
 import com.google.inject.Provider;
-
-import signals.downstreamSensor.DownstreamSensor;
 
 
 /**

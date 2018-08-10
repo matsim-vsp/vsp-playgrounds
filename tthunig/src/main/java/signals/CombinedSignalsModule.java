@@ -30,6 +30,7 @@ import org.matsim.contrib.signals.controler.SensorBasedSignalControlerListener;
 import org.matsim.contrib.signals.mobsim.QSimSignalEngine;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.router.NetworkWithSignalsTurnInfoBuilder;
+import org.matsim.contrib.signals.sensor.DownstreamSensor;
 import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -45,7 +46,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
-import signals.downstreamSensor.DownstreamSensor;
 import signals.gershenson.GershensonConfig;
 import signals.laemmerFix.LaemmerConfig;
 import signals.sylvia.SylviaConfig;

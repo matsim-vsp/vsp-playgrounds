@@ -31,6 +31,7 @@ import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.DownstreamSensor;
 
 import com.google.inject.Provider;
 

@@ -38,6 +38,7 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.DownstreamSensor;
 import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
@@ -46,7 +47,6 @@ import org.matsim.lanes.Lanes;
 
 import com.google.inject.Provider;
 
-import signals.downstreamSensor.DownstreamSensor;
 import signals.laemmerFix.LaemmerConfig;
 import signals.laemmerFix.LaemmerConfig.Regime;
 import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
