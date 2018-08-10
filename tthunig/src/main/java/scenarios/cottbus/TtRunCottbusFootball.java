@@ -37,6 +37,10 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -50,10 +54,6 @@ import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControll
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 import signals.CombinedSignalsModule;
-import signals.laemmerFix.LaemmerConfig;
-import signals.laemmerFix.LaemmerConfig.Regime;
-import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
-import signals.sylvia.SylviaConfig;
 import utils.ModifyNetwork;
 
 /**

@@ -29,6 +29,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.controler.AbstractModule;
@@ -38,8 +40,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import analysis.TtGeneralAnalysis;
 import analysis.signals.TtSignalAnalysisTool;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
-import signals.laemmerFix.LaemmerConfig.Regime;
-import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
 import signals.sylvia.SylviaIT;
 import utils.ModifyPopulation;
 

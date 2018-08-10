@@ -21,14 +21,17 @@ package signals.preprocessing;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.signals.controller.sylvia.FixedTimeSignalPhase;
 import org.matsim.contrib.signals.data.intergreens.v10.IntergreenTimesData;
 import org.matsim.contrib.signals.data.intergreens.v10.IntergreenTimesDataImpl;
 import org.matsim.contrib.signals.data.intergreens.v10.IntergreenTimesWriter10;
@@ -41,8 +44,6 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalGroup;
-import playground.dgrether.signalsystems.utils.DgSignalGroupSettingsDataOnsetComparator;
-import signals.sylvia.FixedTimeSignalPhase;
 
 /**
  * Class to calculate the intergreen times from a (fixed) signal control plan and write them into a xml file.
@@ -120,7 +121,7 @@ public final class TtCalculateSimplifiedIntergreens {
 		// make a copy and sort by signal group onsets
 		ArrayList<SignalGroupSettingsData> sortedGroupSettingsList = new ArrayList<>();
 		sortedGroupSettingsList.addAll(groupSettingsList);
-		Collections.sort(sortedGroupSettingsList, new DgSignalGroupSettingsDataOnsetComparator());
+		Collections.sort(sortedGroupSettingsList, new SignalGroupSettingsOnsetComparator());
 
 		// create structures to simplify the intergreens calculation
 		this.createSameOnsetMapping();
@@ -338,4 +339,11 @@ public final class TtCalculateSimplifiedIntergreens {
 		new TtCalculateSimplifiedIntergreens().calculateIntergreens(signalControlFile, intergreensOutFile, simplifyPhases);
 	}
 
+}
+
+class SignalGroupSettingsOnsetComparator implements Comparator<SignalGroupSettingsData> {
+	@Override
+	public int compare(SignalGroupSettingsData o1, SignalGroupSettingsData o2) {
+		return Integer.valueOf(o1.getOnset()).compareTo(Integer.valueOf(o2.getOnset()));
+	}
 }

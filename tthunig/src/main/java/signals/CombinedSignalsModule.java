@@ -23,10 +23,12 @@ package signals;
 
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalEvents2ViaCSVWriter;
+import org.matsim.contrib.signals.binder.SensorBasedSignalControlerListener;
 import org.matsim.contrib.signals.builder.FromDataBuilder;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalSystemsModelBuilder;
-import org.matsim.contrib.signals.controler.SensorBasedSignalControlerListener;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.mobsim.QSimSignalEngine;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.router.NetworkWithSignalsTurnInfoBuilder;
@@ -47,8 +49,6 @@ import com.google.inject.Singleton;
 
 import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.gershenson.GershensonConfig;
-import signals.laemmerFix.LaemmerConfig;
-import signals.sylvia.SylviaConfig;
 
 /**
  * Add this module if you want to simulate fixed-time signals, sylvia, laemmer, gershenson or the downstream signals or different control schemes together at different intersections (i.e. systems) in

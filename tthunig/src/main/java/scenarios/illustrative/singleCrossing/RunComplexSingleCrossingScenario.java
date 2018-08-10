@@ -1,11 +1,11 @@
 package scenarios.illustrative.singleCrossing;
 
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
 import org.matsim.core.controler.Controler;
 
 import scenarios.illustrative.singleCrossing.ComplexSingleCrossingScenario.SignalControl;
-import signals.laemmerFix.LaemmerConfig.Regime;
-import signals.laemmerFix.LaemmerConfig.StabilizationStrategy;
 
 /**
  * @author nkuehnel, tthunig, pschade

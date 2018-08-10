@@ -35,6 +35,8 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionAppro
 import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -85,8 +87,6 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalBas
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalControlLogic;
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
 import signals.CombinedSignalsModule;
-import signals.laemmerFix.LaemmerConfig;
-import signals.sylvia.SylviaConfig;
 import utils.OutputUtils;
 
 import java.io.File;

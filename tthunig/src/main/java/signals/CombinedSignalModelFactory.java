@@ -27,11 +27,15 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.signals.builder.DefaultSignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
+import org.matsim.contrib.signals.builder.SignalModelFactoryImpl;
+import org.matsim.contrib.signals.controller.SignalController;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
+import org.matsim.contrib.signals.controller.sylvia.SylviaSignalPlan;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.model.DatabasedSignalPlan;
-import org.matsim.contrib.signals.model.SignalController;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.sensor.DownstreamSensor;
@@ -43,13 +47,7 @@ import com.google.inject.Provider;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
-import signals.laemmerFix.LaemmerConfig;
-import signals.laemmerFix.LaemmerSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
-import signals.sylvia.SylviaConfig;
-import signals.sylvia.SylviaPreprocessData;
-import signals.sylvia.SylviaSignalController;
-import signals.sylvia.SylviaSignalPlan;
 
 
 /**
@@ -62,17 +60,17 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 
 	private static final Logger log = Logger.getLogger(CombinedSignalModelFactory.class);
 
-	private SignalModelFactory delegate = new DefaultSignalModelFactory();
+	private SignalModelFactory delegate;
 
 	private Map<String, Provider<SignalController>> signalControlProvider = new HashMap<>();
 	
 	@Inject
 	CombinedSignalModelFactory(Scenario scenario, LaemmerConfig laemmerConfig, SylviaConfig sylviaConfig, 
 			LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, GershensonConfig gershensonConfig) {
+		delegate = new SignalModelFactoryImpl(scenario, laemmerConfig, sylviaConfig, sensorManager, downstreamSensor);
+		
 		// prepare signal controller provider
-		signalControlProvider.put(SylviaSignalController.IDENTIFIER, new SylviaSignalController.SignalControlProvider(sylviaConfig, sensorManager, downstreamSensor));
 		signalControlProvider.put(DownstreamPlanbasedSignalController.IDENTIFIER, new DownstreamPlanbasedSignalController.SignalControlProvider(downstreamSensor));
-		signalControlProvider.put(LaemmerSignalController.IDENTIFIER, new LaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, downstreamSensor));
 		signalControlProvider.put(FullyAdaptiveLaemmerSignalController.IDENTIFIER, new FullyAdaptiveLaemmerSignalController.SignalControlProvider(laemmerConfig, sensorManager, scenario, downstreamSensor));
 		signalControlProvider.put(GershensonSignalController.IDENTIFIER, new GershensonSignalController.SignalControlProvider(sensorManager, scenario, gershensonConfig));
 	}
