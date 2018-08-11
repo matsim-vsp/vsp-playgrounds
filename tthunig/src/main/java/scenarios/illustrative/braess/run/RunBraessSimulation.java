@@ -22,7 +22,6 @@
 package scenarios.illustrative.braess.run;
 
 import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisTool;
 import analysis.signals.SignalAnalysisWriter;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -35,6 +34,7 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionAppro
 import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.data.SignalsData;

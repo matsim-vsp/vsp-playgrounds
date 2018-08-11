@@ -22,7 +22,6 @@
 package scenarios.illustrative.gridlock;
 
 import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisTool;
 import analysis.signals.SignalAnalysisWriter;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -40,6 +39,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;

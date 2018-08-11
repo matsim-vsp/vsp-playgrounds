@@ -40,6 +40,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
@@ -80,7 +81,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisTool;
 import analysis.signals.SignalAnalysisWriter;
 import signals.CombinedSignalsModule;
 
