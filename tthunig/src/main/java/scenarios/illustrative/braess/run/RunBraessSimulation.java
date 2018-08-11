@@ -21,9 +21,9 @@
  */
 package scenarios.illustrative.braess.run;
 
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisTool;
+import analysis.signals.SignalAnalysisWriter;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -497,9 +497,9 @@ public final class RunBraessSimulation {
 						SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 				if (signalsConfigGroup.isUseSignalSystems()) {
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 				}
 			}
 		});

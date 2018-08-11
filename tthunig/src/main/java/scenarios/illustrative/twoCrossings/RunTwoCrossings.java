@@ -79,9 +79,9 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisTool;
+import analysis.signals.SignalAnalysisWriter;
 import signals.CombinedSignalsModule;
 
 /**
@@ -138,11 +138,11 @@ public class RunTwoCrossings {
 				@Override
 				public void install() {
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class).asEagerSingleton();
-					this.addEventHandlerBinding().to(TtSignalAnalysisTool.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class).asEagerSingleton();
+					this.addEventHandlerBinding().to(SignalAnalysisTool.class);
+					this.addControlerListenerBinding().to(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 				}
 			});
 		}

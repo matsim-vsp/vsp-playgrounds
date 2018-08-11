@@ -78,7 +78,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import analysis.signals.TtSignalAnalysisTool;
+import analysis.signals.SignalAnalysisTool;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
 import signals.CombinedSignalsModule;
 import signals.gershenson.GershensonSignalController;
@@ -111,7 +111,7 @@ public class GershensonIT {
 	public void testSingleCrossingUniformDemandAB() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
-		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // should be more or less equal (OW direction is always favored as the first phase)
@@ -130,7 +130,7 @@ public class GershensonIT {
 	public void testSingleCrossingDifferentUniformDemandAB() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 2000, 600, 0, 0 };
-		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // should be more or less equal (OW direction is always favored as the first phase)
@@ -152,7 +152,7 @@ public class GershensonIT {
 	public void testSingleCrossingDifferentDemandABCD() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 1200, 600, 1200, 600 };
-		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // should be more or less equal (OW direction is always favored as the first phase)
@@ -175,7 +175,7 @@ public class GershensonIT {
 	public void testSingleCrossingUniformDemandA() {
 		String scenarioType = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 3600, 0, 0, 0 };
-		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); // group 1 should have more total green time than group 2
@@ -198,8 +198,8 @@ public class GershensonIT {
 		String scenarioTypeTestCase = "singleCrossingOneBottlenecks";
 		String scenarioTypeNullCase = "singleCrossingNoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
-		TtSignalAnalysisTool signalAnalyzerTestCase = runScenario(noPersons,scenarioTypeTestCase);
-		TtSignalAnalysisTool signalAnalyzerNullCase = runScenario(noPersons,scenarioTypeNullCase);
+		SignalAnalysisTool signalAnalyzerTestCase = runScenario(noPersons,scenarioTypeTestCase);
+		SignalAnalysisTool signalAnalyzerNullCase = runScenario(noPersons,scenarioTypeNullCase);
 
 		// check signal results TestCase
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimesTestCase = signalAnalyzerTestCase.getTotalSignalGreenTime(); 
@@ -231,7 +231,7 @@ public class GershensonIT {
 	public void testSingleCrossingwithOutboundCongestionFromAB() {
 		String scenarioType = "singleCrossingTwoBottlenecks";
 		double[] noPersons = { 3600, 3600, 0, 0 };
-		TtSignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzer = runScenario(noPersons,scenarioType);
 
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime(); 
@@ -255,9 +255,9 @@ public class GershensonIT {
 	public void testSingleCrossingStochasticDemandAB() {
 		String scenarioType = "singleCrossingStochasticDemandAB";
 		double[] noPersons = { 2800., 2800., 0., 0. };
-		TtSignalAnalysisTool signalAnalyzerPlan = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzerPlan = runScenario(noPersons,scenarioType);
 		scenarioType = "singleCrossingNoBottlenecks";
-		TtSignalAnalysisTool signalAnalyzerNull = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzerNull = runScenario(noPersons,scenarioType);
 		
 		
 		// check signal results Plan
@@ -285,7 +285,7 @@ public class GershensonIT {
 	public void testDoubleCrossingUniformDemandABC() {
 		String scenarioType = "doubleCrossingUniformDemandABC";
 		double[] noPersons = { 2800., 2800., 0., 0. ,0.,0.};
-		TtSignalAnalysisTool signalAnalyzerPlan = runScenario(noPersons,scenarioType);
+		SignalAnalysisTool signalAnalyzerPlan = runScenario(noPersons,scenarioType);
 		
 		// check signal results Plan
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimesPlan = signalAnalyzerPlan.getTotalSignalGreenTime(); 
@@ -309,7 +309,7 @@ public class GershensonIT {
 		Controler controler = scenarioCreation.defineControler();
 		
 		// add signal analysis tool
-		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
+		SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
@@ -332,7 +332,7 @@ public class GershensonIT {
 	
 	
 //------------------------------------------	
-	private TtSignalAnalysisTool runScenario(double[] noPersons, String scenarioType) {
+	private SignalAnalysisTool runScenario(double[] noPersons, String scenarioType) {
 		Config config = defineConfig();
 
 		// ---------- VIS
@@ -356,7 +356,7 @@ public class GershensonIT {
 
 		
 		// add signal analysis tool
-		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
+		SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
 		
 		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 		controler.addOverridingModule(signalsModule);

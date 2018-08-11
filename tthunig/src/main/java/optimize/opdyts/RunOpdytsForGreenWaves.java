@@ -80,9 +80,9 @@ import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.TtTotalTravelTime;
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisTool;
+import analysis.signals.SignalAnalysisWriter;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
@@ -161,9 +161,9 @@ public class RunOpdytsForGreenWaves {
 					this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
 
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 					
 					this.addControlerListenerBinding().to(OpdytsOffsetStatsControlerListener.class);
 
@@ -205,9 +205,9 @@ public class RunOpdytsForGreenWaves {
 					this.addControlerListenerBinding().to(TtListenerToBindGeneralAnalysis.class);
 
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 				}
 			});
 			controler.run();

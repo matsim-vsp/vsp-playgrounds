@@ -48,7 +48,7 @@ import com.google.inject.Singleton;
  *
  */
 @Singleton
-public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler, AfterMobsimListener, ActivityStartEventHandler, ActivityEndEventHandler{
+public class SignalAnalysisTool implements SignalGroupStateChangedEventHandler, AfterMobsimListener, ActivityStartEventHandler, ActivityEndEventHandler{
 
 	private Map<Id<SignalGroup>, Double> totalSignalGreenTime;
 	private Map<Id<SignalSystem>, Integer> numberOfCyclesPerSystem;
@@ -64,11 +64,11 @@ public class TtSignalAnalysisTool implements SignalGroupStateChangedEventHandler
 	private double lastActStartTime;
 	private Double firstActEndTime;
 	
-	public TtSignalAnalysisTool() {
+	public SignalAnalysisTool() {
 	}
 	
 	@Inject
-	public TtSignalAnalysisTool(EventsManager em, ControlerListenerManager clm) {
+	public SignalAnalysisTool(EventsManager em, ControlerListenerManager clm) {
 		em.addHandler(this);
 		clm.addControlerListener(this);
 	}

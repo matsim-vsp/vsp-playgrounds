@@ -35,15 +35,15 @@ import playground.dziemke.analysis.GnuplotUtils;
  * 
  * @author tthunig
  */
-public class TtSignalAnalysisListener implements IterationEndsListener {
+public class SignalAnalysisListener implements IterationEndsListener {
 
-	private static final Logger log = Logger.getLogger(TtSignalAnalysisListener.class);
+	private static final Logger log = Logger.getLogger(SignalAnalysisListener.class);
 	
 	@Inject
 	private Scenario scenario;
 	
 	@Inject
-	private TtSignalAnalysisWriter writer;
+	private SignalAnalysisWriter writer;
 	
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
@@ -74,26 +74,6 @@ public class TtSignalAnalysisListener implements IterationEndsListener {
 //		log.info("and afterwards: gnuplot " + relativePathToGnuplotScript);
 		
 		GnuplotUtils.runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript);
-		
-//		try {
-//			// "&" splits different commands in one line in windows. Use ";" if you are a linux user.
-//			ProcessBuilder builder = new ProcessBuilder( "cmd", "/c", "cd", pathToSpecificAnalysisDir, "&", "gnuplot", relativePathToGnuplotScript);
-//			Process p = builder.start();
-//
-//			// print command line infos and errors:
-//			BufferedReader read = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//			String zeile;
-//			while ((zeile = read.readLine()) != null) {
-//				log.error("input stream: " + zeile);
-//			}			
-//			read = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-//			while ((zeile = read.readLine()) != null) {
-//				log.error("error: " + zeile);
-//			}
-//		} catch (IOException e) {
-//			log.error("ERROR while executing gnuplot command.");
-//			e.printStackTrace();
-//		}
 	}
 
 }

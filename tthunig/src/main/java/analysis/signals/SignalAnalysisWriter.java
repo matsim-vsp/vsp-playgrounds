@@ -40,11 +40,11 @@ import com.google.inject.Inject;
  *
  * @author tthunig
  */
-public class TtSignalAnalysisWriter {
+public class SignalAnalysisWriter {
 
-	private static final Logger log = Logger.getLogger(TtSignalAnalysisWriter.class);
+	private static final Logger log = Logger.getLogger(SignalAnalysisWriter.class);
 	
-	private TtSignalAnalysisTool handler;
+	private SignalAnalysisTool handler;
 	private String outputDirBase;
 	private PrintStream totalGreenOverItWritingStream;
 	private PrintStream avgGreenPerCycOverItWritingStream;
@@ -52,7 +52,7 @@ public class TtSignalAnalysisWriter {
 	private SignalsData signalsData;
 	
 	@Inject
-	public TtSignalAnalysisWriter(Scenario scenario, TtSignalAnalysisTool handler) {
+	public SignalAnalysisWriter(Scenario scenario, SignalAnalysisTool handler) {
 		this.handler = handler;
 		this.outputDirBase = scenario.getConfig().controler().getOutputDirectory();
 		this.lastIteration = scenario.getConfig().controler().getLastIteration();

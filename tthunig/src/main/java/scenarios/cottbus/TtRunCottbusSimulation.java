@@ -80,9 +80,9 @@ import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.cten.TtCommodityTravelTimeAnalyzer;
 import analysis.cten.TtWriteComAnalysis;
 import analysis.signals.TtQueueLengthAnalysisTool;
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisTool;
+import analysis.signals.SignalAnalysisWriter;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -1106,9 +1106,9 @@ public class TtRunCottbusSimulation {
 				
 				if (signalsConfigGroup.isUseSignalSystems()) {
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 					this.addControlerListenerBinding().to(TtQueueLengthAnalysisTool.class);
 					this.addMobsimListenerBinding().to(TtQueueLengthAnalysisTool.class);
 				}

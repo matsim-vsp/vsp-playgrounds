@@ -69,7 +69,7 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
-import analysis.signals.TtSignalAnalysisTool;
+import analysis.signals.SignalAnalysisTool;
 import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 
@@ -93,8 +93,8 @@ public class DownstreamSignalTest {
 	 */
 	@Test
 	public void testSingleStream() {
-		TtSignalAnalysisTool analyzerWoBottleneck = runScenario(ScenarioType.SingleStream, 3600);
-		TtSignalAnalysisTool analyzerWBottleneck = runScenario(ScenarioType.SingleStream, 900);
+		SignalAnalysisTool analyzerWoBottleneck = runScenario(ScenarioType.SingleStream, 3600);
+		SignalAnalysisTool analyzerWBottleneck = runScenario(ScenarioType.SingleStream, 900);
 
 		Map<Id<SignalGroup>, Double> signalGreenTimeRatiosWoBottleneck = analyzerWoBottleneck.calculateSignalGreenTimeRatios();
 		Map<Id<SignalGroup>, Double> signalGreenTimeRatiosWBottleneck = analyzerWBottleneck.calculateSignalGreenTimeRatios();
@@ -108,8 +108,8 @@ public class DownstreamSignalTest {
 
 	@Test
 	public void testOneDirTwoStreams() {
-		TtSignalAnalysisTool analyzerWoBottleneck = runScenario(ScenarioType.OneDirTwoStreams, 3600);
-		TtSignalAnalysisTool analyzerWBottleneck = runScenario(ScenarioType.OneDirTwoStreams, 900);
+		SignalAnalysisTool analyzerWoBottleneck = runScenario(ScenarioType.OneDirTwoStreams, 3600);
+		SignalAnalysisTool analyzerWBottleneck = runScenario(ScenarioType.OneDirTwoStreams, 900);
 
 		Map<Id<SignalGroup>, Double> signalGreenTimeRatiosWoBottleneck = analyzerWoBottleneck.calculateSignalGreenTimeRatios();
 		Map<Id<SignalGroup>, Double> signalGreenTimeRatiosWBottleneck = analyzerWBottleneck.calculateSignalGreenTimeRatios();
@@ -132,8 +132,8 @@ public class DownstreamSignalTest {
 
 	@Test
 	public void testTwoDir() {
-		TtSignalAnalysisTool analyzerWoBottleneck = runScenario(ScenarioType.TwoDir, 3600);
-		TtSignalAnalysisTool analyzerWBottleneck = runScenario(ScenarioType.TwoDir, 900);
+		SignalAnalysisTool analyzerWoBottleneck = runScenario(ScenarioType.TwoDir, 3600);
+		SignalAnalysisTool analyzerWBottleneck = runScenario(ScenarioType.TwoDir, 900);
 
 		Map<Id<SignalGroup>, Double> signalGreenTimeRatiosWoBottleneck = analyzerWoBottleneck.calculateSignalGreenTimeRatios();
 		Map<Id<SignalGroup>, Double> signalGreenTimeRatiosWBottleneck = analyzerWBottleneck.calculateSignalGreenTimeRatios();
@@ -154,7 +154,7 @@ public class DownstreamSignalTest {
 		Assert.assertEquals("Signal green time ratio with and without bottleneck should be 29s in 60s for S-N direction", 29 / 60., signalGreenTimeRatiosWoBottleneck.get(signalGroupSN), 0.01);
 	}
 
-	private TtSignalAnalysisTool runScenario(ScenarioType scenarioType, double bottleneckCap) {
+	private SignalAnalysisTool runScenario(ScenarioType scenarioType, double bottleneckCap) {
 		Config config = defineConfig();
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -186,7 +186,7 @@ public class DownstreamSignalTest {
 		controler.addOverridingModule(new CombinedSignalsModule());
 
 		// add signal analysis tool
-		TtSignalAnalysisTool signalAnalyzer = new TtSignalAnalysisTool();
+		SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
