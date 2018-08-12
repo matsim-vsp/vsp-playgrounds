@@ -21,11 +21,11 @@
 package scenarios.illustrative.singleCrossing;
 
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.analysis.DelayAnalysisTool;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 
 import analysis.TtTotalTravelTime;
-import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 
 /**
  * @author tthunig
@@ -52,7 +52,7 @@ public class RunSingleIntersectionWithUnprotectedLeftTurnLogic {
 		singleIntersection.setProtectedLeftTurnForFixedTimeSignals(false);
 		Controler controler = singleIntersection.defineControler();
 		AnalyzeSingleIntersectionLeftTurnDelays leftTurnDelay = new AnalyzeSingleIntersectionLeftTurnDelays();
-		TtTotalDelay totalDelay = new TtTotalDelay(controler.getScenario().getNetwork(), controler.getEvents());
+		DelayAnalysisTool delay = new DelayAnalysisTool(controler.getScenario().getNetwork(), controler.getEvents());
 		TtTotalTravelTime totalTt = new TtTotalTravelTime();
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
@@ -65,7 +65,7 @@ public class RunSingleIntersectionWithUnprotectedLeftTurnLogic {
 		System.out.println("left turn delays: " + leftTurnDelay.getLeftTurnDelay() + " (including red light delays)");
 		System.out.println("stucked agents: " + leftTurnDelay.getStuckCount());
 		System.out.println("total travel time: " + totalTt.getTotalTt());
-		System.out.println("total delay: " + totalDelay.getTotalDelay());
+		System.out.println("total delay: " + delay.getTotalDelay());
 
 		return leftTurnDelay.getLeftTurnDelay();
 	}
