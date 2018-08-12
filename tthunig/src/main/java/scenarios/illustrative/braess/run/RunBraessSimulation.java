@@ -21,8 +21,11 @@
  */
 package scenarios.illustrative.braess.run;
 
-import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -62,6 +65,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
@@ -88,11 +94,6 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalCon
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
 import signals.CombinedSignalsModule;
 import utils.OutputUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
 
 /**
  * Class to run a simulation of the braess scenario with or without signals. 
@@ -176,13 +177,17 @@ public final class RunBraessSimulation {
 		signalConfigGroup.setUseSignalSystems(SIGNAL_LOGIC.equals(SignalControlLogic.NONE) ? false : true);
 		config.qsim().setUsingFastCapacityUpdate(false);
 		
-		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
-				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
 		// TODO modify laemmer config parameter here if you like
 		laemmerConfigGroup.setMaxCycleTime(90);
 		laemmerConfigGroup.setDesiredCycleTime(60);
 		laemmerConfigGroup.setIntergreenTime(0);
 		laemmerConfigGroup.setMinGreenTime(0);
+		
+		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfig.class);
+		// TODO modify sylvia config parameter here if you like
+		sylviaConfig.setSignalGroupMaxGreenScale(2);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
 
 		// set brain exp beta
 		config.planCalcScore().setBrainExpBeta(2);
@@ -357,11 +362,6 @@ public final class RunBraessSimulation {
 			boolean alwaysSameMobsimSeed = false;
 			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
 			signalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
-			SylviaConfig sylviaConfig = new SylviaConfig();
-			// TODO modify sylvia config parameter here if you like
-			sylviaConfig.setSignalGroupMaxGreenScale(2);
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
-			signalsModule.setSylviaConfig(sylviaConfig);
 			controler.addOverridingModule(signalsModule);
 			break;
 		}

@@ -102,11 +102,14 @@ public class RunTwoCrossings {
 		otfvisConfig.setScaleQuadTreeRect(true);
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
 		
-		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
-				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
 		laemmerConfigGroup.setIntergreenTime(5);
 		laemmerConfigGroup.setDesiredCycleTime(60);
 		laemmerConfigGroup.setMaxCycleTime(90);
+		
+		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfig.class);
+//		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+//		sylviaConfig.setSignalGroupMaxGreenScale(2);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -122,13 +125,7 @@ public class RunTwoCrossings {
 		controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			SylviaConfig sylviaConfig = new SylviaConfig();
-//			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-//			sylviaConfig.setSignalGroupMaxGreenScale(2);
-			signalsModule.setSylviaConfig(sylviaConfig);
-			
-			controler.addOverridingModule(signalsModule);
+			controler.addOverridingModule(new CombinedSignalsModule());
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override

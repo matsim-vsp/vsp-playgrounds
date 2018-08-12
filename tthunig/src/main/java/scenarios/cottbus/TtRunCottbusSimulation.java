@@ -80,9 +80,9 @@ import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
 import analysis.cten.TtCommodityTravelTimeAnalyzer;
 import analysis.cten.TtWriteComAnalysis;
-import analysis.signals.TtQueueLengthAnalysisTool;
 import analysis.signals.SignalAnalysisListener;
 import analysis.signals.SignalAnalysisWriter;
+import analysis.signals.TtQueueLengthAnalysisTool;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -491,14 +491,18 @@ public class TtRunCottbusSimulation {
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
-		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
-				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
 		// TODO adapt here
 		laemmerConfigGroup.setDesiredCycleTime(90);
 		laemmerConfigGroup.setMaxCycleTime(135);
 		laemmerConfigGroup.setMinGreenTime(LAEMMER_MIN_G);
 		laemmerConfigGroup.setCheckDownstream(false);
 		laemmerConfigGroup.setActiveStabilizationStrategy(LAEMMER_FLEX_STAB_STRATEGY);
+		
+		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfig.class);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(SYLVIA_FIXED_CYCLE);
+		sylviaConfig.setSignalGroupMaxGreenScale(SYLVIA_MAX_EXTENSION);
+//		sylviaConfig.setCheckDownstream(true);
 		
 		// able or enable signals and lanes
 		// if signal type 'All...' is used without 'MS', lanes and signals are defined later in 'prepareScenario'
@@ -1009,13 +1013,7 @@ public class TtRunCottbusSimulation {
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
 				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			SylviaConfig sylviaConfig = new SylviaConfig();
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(SYLVIA_FIXED_CYCLE);
-			sylviaConfig.setSignalGroupMaxGreenScale(SYLVIA_MAX_EXTENSION);
-//			sylviaConfig.setCheckDownstream(true);
-			signalsModule.setSylviaConfig(sylviaConfig);
-			controler.addOverridingModule(signalsModule);
+			controler.addOverridingModule(new CombinedSignalsModule());
 		}
 		
 		if (PRICING_TYPE.toString().startsWith("CP_")){

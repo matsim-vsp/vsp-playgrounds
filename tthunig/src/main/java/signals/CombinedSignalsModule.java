@@ -27,7 +27,6 @@ import org.matsim.contrib.signals.binder.SensorBasedSignalControlerListener;
 import org.matsim.contrib.signals.builder.FromDataBuilder;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalSystemsModelBuilder;
-import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.mobsim.QSimSignalEngine;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.router.NetworkWithSignalsTurnInfoBuilder;
@@ -58,7 +57,6 @@ import signals.gershenson.GershensonConfig;
 public class CombinedSignalsModule extends AbstractModule {
 	
 	private boolean alwaysSameMobsimSeed = false;
-	private SylviaConfig sylviaConfig = new SylviaConfig();
 	private GershensonConfig gershensonConfig = new GershensonConfig();
 	
 	@Override
@@ -75,7 +73,6 @@ public class CombinedSignalsModule extends AbstractModule {
 		}
 	
 		if ((boolean) ConfigUtils.addOrGetModule(getConfig(), SignalSystemsConfigGroup.class).isUseSignalSystems()) {
-			bind(SylviaConfig.class).toInstance(sylviaConfig);
 			bind(GershensonConfig.class).toInstance(gershensonConfig);
 			bind(SignalModelFactory.class).to(CombinedSignalModelFactory.class);
 			addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
@@ -111,10 +108,6 @@ public class CombinedSignalsModule extends AbstractModule {
 	
 	public void setAlwaysSameMobsimSeed(boolean alwaysSameMobsimSeed) {
 		this.alwaysSameMobsimSeed = alwaysSameMobsimSeed;
-	}
-
-	public void setSylviaConfig(SylviaConfig sylviaConfig) {
-		this.sylviaConfig = sylviaConfig;
 	}
 	
 	public void setGershensonConfig(GershensonConfig gershensonConfig) {

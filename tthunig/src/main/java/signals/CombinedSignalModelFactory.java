@@ -30,7 +30,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalModelFactoryImpl;
 import org.matsim.contrib.signals.controller.SignalController;
-import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
 import org.matsim.contrib.signals.controller.sylvia.SylviaSignalPlan;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
@@ -64,9 +63,8 @@ public class CombinedSignalModelFactory implements SignalModelFactory {
 	private Map<String, Provider<SignalController>> signalControlProvider = new HashMap<>();
 	
 	@Inject
-	CombinedSignalModelFactory(Scenario scenario, SylviaConfig sylviaConfig, 
-			LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, GershensonConfig gershensonConfig) {
-		delegate = new SignalModelFactoryImpl(scenario, sylviaConfig, sensorManager, downstreamSensor);
+	CombinedSignalModelFactory(Scenario scenario, LinkSensorManager sensorManager, DownstreamSensor downstreamSensor, GershensonConfig gershensonConfig) {
+		delegate = new SignalModelFactoryImpl(scenario, sensorManager, downstreamSensor);
 		
 		// prepare signal controller provider
 		signalControlProvider.put(DownstreamPlanbasedSignalController.IDENTIFIER, new DownstreamPlanbasedSignalController.SignalControlProvider(downstreamSensor));

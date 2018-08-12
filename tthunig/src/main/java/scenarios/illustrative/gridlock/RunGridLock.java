@@ -21,8 +21,11 @@
  */
 package scenarios.illustrative.gridlock;
 
-import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -80,13 +83,11 @@ import org.matsim.lanes.Lanes;
 import org.matsim.lanes.LanesFactory;
 import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesUtils;
+
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author tthunig
@@ -116,12 +117,16 @@ public class RunGridLock {
 //		otfvisConfig.setDrawTime(true);
 //		otfvisConfig.setAgentSize(80f);
 		
-		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
-				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
 		laemmerConfigGroup.setIntergreenTime(1);
 		laemmerConfigGroup.setDesiredCycleTime(60);
 		laemmerConfigGroup.setMaxCycleTime(90);
 		laemmerConfigGroup.setCheckDownstream(false); // TODO try this out
+		
+		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfig.class);
+//		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+//		sylviaConfig.setSignalGroupMaxGreenScale(2);
+//		sylviaConfig.setCheckDownstream(true);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -135,15 +140,7 @@ public class RunGridLock {
 //		controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			
-			SylviaConfig sylviaConfig = new SylviaConfig();
-//			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-//			sylviaConfig.setSignalGroupMaxGreenScale(2);
-//			sylviaConfig.setCheckDownstream(true);
-			signalsModule.setSylviaConfig(sylviaConfig);
-			
-			controler.addOverridingModule(signalsModule);
+			controler.addOverridingModule(new CombinedSignalsModule());
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override

@@ -174,8 +174,7 @@ public class TtRunCottbusFootball {
 		baseConfig.qsim().setStuckTime(STUCK_TIME);
 		baseConfig.qsim().setEndTime(36*3600);
 		
-		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(baseConfig,
-				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(baseConfig, LaemmerConfigGroup.class);
 		laemmerConfigGroup.setDesiredCycleTime(90);
 		laemmerConfigGroup.setMaxCycleTime(135);
 		laemmerConfigGroup.setMinGreenTime(5);
@@ -184,6 +183,11 @@ public class TtRunCottbusFootball {
 //        laemmerConfigGroup.setActiveRegime(Regime.OPTIMIZING);
 		laemmerConfigGroup.setActiveStabilizationStrategy(StabilizationStrategy.USE_MAX_LANECOUNT);
 		laemmerConfigGroup.setCheckDownstream(CHECK_DOWNSTREAM);
+		
+		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(baseConfig, SylviaConfig.class);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+		sylviaConfig.setSignalGroupMaxGreenScale(1.5);
+		sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 		
 		Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
 		if (LONG_LANES){
@@ -261,14 +265,7 @@ public class TtRunCottbusFootball {
 			controler.addControlerListener(cbfbControllerListener);
 			//add the signals module
 			if (!CONTROL_TYPE.equals(SignalControl.NONE)) {
-				//TODO adapt here
-				CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-				SylviaConfig sylviaConfig = new SylviaConfig();
-				sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-				sylviaConfig.setSignalGroupMaxGreenScale(1.5);
-				sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);
-				signalsModule.setSylviaConfig(sylviaConfig);
-				controler.addOverridingModule(signalsModule);
+				controler.addOverridingModule(new CombinedSignalsModule());
 			}
 			
 			controler.run();
