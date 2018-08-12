@@ -21,6 +21,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.contrib.signals.analysis.DelayAnalysisTool;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -33,8 +34,6 @@ import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
-
-import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 
 /**
  * 
@@ -54,7 +53,7 @@ import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
  */
 
 
-public class TtTotalDelayTest {
+public class DelayAnalysisToolTest {
 	
 	@Rule public MatsimTestUtils utils = new MatsimTestUtils();
 	
@@ -72,7 +71,7 @@ public class TtTotalDelayTest {
 		Scenario scenario = prepareTest(1);
 		
 		EventsManager events = EventsUtils.createEventsManager();
-		TtTotalDelay handler = new TtTotalDelay(scenario.getNetwork(), events);
+		DelayAnalysisTool handler = new DelayAnalysisTool(scenario.getNetwork(), events);
 		
 		final List<Event> eventslist = new ArrayList<Event>();
 		events.addHandler(new BasicEventHandler(){
@@ -100,7 +99,7 @@ public class TtTotalDelayTest {
 		Scenario scenario = prepareTest(NUMBER_OF_PERSONS);
 		
 		EventsManager events = EventsUtils.createEventsManager();
-		TtTotalDelay handler = new TtTotalDelay(scenario.getNetwork(), events);
+		DelayAnalysisTool handler = new DelayAnalysisTool(scenario.getNetwork(), events);
 		
 		final List<Event> eventslist = new ArrayList<Event>();
 		events.addHandler(new BasicEventHandler(){
