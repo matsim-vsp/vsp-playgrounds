@@ -98,7 +98,7 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 	// in 100 s steps
 	private Map<Double, Integer> numberOfArrivalsPerTimeInterval = new TreeMap<>();
 	
-	private Network network;
+	private final Network network;
 	
 	public TtGeneralAnalysis(Network network) {
 		this.network = network;
