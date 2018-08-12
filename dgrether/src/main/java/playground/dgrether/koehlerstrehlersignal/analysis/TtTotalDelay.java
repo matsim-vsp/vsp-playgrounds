@@ -135,7 +135,7 @@ public class TtTotalDelay implements LinkEnterEventHandler, LinkLeaveEventHandle
 		if (this.considerStuckAbortDelay){
 			if (this.network.getLinks().containsKey(event.getLinkId())) {
 				if (earliestLinkExitTime != null) {
-					// add the number of seconds the agent is later as the earliest link exit time as delay
+					// add the number of seconds the agent is later than the earliest link exit time as delay
 					double stuckAbortDelay = event.getTime() - earliestLinkExitTime;
 					this.agentsTotalDelay += stuckAbortDelay;
 					LOG.warn("Add delay " + stuckAbortDelay + " of agent " + event.getPersonId() + " that stucked on link " + event.getLinkId());
