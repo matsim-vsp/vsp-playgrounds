@@ -38,7 +38,7 @@ import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
-import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -184,7 +184,7 @@ public class TtRunCottbusFootball {
 		laemmerConfigGroup.setActiveStabilizationStrategy(StabilizationStrategy.USE_MAX_LANECOUNT);
 		laemmerConfigGroup.setCheckDownstream(CHECK_DOWNSTREAM);
 		
-		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(baseConfig, SylviaConfig.class);
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(baseConfig, SylviaConfigGroup.class);
 		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 		sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 		sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);

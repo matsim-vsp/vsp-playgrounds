@@ -46,7 +46,7 @@ import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
-import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
@@ -123,7 +123,7 @@ public class RunGridLock {
 		laemmerConfigGroup.setMaxCycleTime(90);
 		laemmerConfigGroup.setCheckDownstream(false); // TODO try this out
 		
-		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfig.class);
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
 //		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 //		sylviaConfig.setSignalGroupMaxGreenScale(2);
 //		sylviaConfig.setCheckDownstream(true);

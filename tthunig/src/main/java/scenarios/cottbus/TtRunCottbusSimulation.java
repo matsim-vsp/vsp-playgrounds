@@ -43,7 +43,7 @@ import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
-import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -499,7 +499,7 @@ public class TtRunCottbusSimulation {
 		laemmerConfigGroup.setCheckDownstream(false);
 		laemmerConfigGroup.setActiveStabilizationStrategy(LAEMMER_FLEX_STAB_STRATEGY);
 		
-		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfig.class);
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
 		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(SYLVIA_FIXED_CYCLE);
 		sylviaConfig.setSignalGroupMaxGreenScale(SYLVIA_MAX_EXTENSION);
 //		sylviaConfig.setCheckDownstream(true);

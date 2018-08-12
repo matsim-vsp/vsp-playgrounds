@@ -39,7 +39,7 @@ import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityF
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
-import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -184,7 +184,7 @@ public final class RunBraessSimulation {
 		laemmerConfigGroup.setIntergreenTime(0);
 		laemmerConfigGroup.setMinGreenTime(0);
 		
-		SylviaConfig sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfig.class);
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
 		// TODO modify sylvia config parameter here if you like
 		sylviaConfig.setSignalGroupMaxGreenScale(2);
 		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
