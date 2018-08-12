@@ -24,7 +24,6 @@ package scenarios.illustrative.twoCrossings;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -42,7 +41,7 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
@@ -68,13 +67,12 @@ import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -103,6 +101,12 @@ public class RunTwoCrossings {
 		// make links visible beyond screen edge
 		otfvisConfig.setScaleQuadTreeRect(true);
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
+				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		laemmerConfigGroup.setIntergreenTime(5);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setMaxCycleTime(90);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -123,14 +127,6 @@ public class RunTwoCrossings {
 //			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 //			sylviaConfig.setSignalGroupMaxGreenScale(2);
 			signalsModule.setSylviaConfig(sylviaConfig);
-			
-			LaemmerConfig laemmerConfig = new LaemmerConfig();
-	        laemmerConfig.setDefaultIntergreenTime(5);
-	        laemmerConfig.setDesiredCycleTime(60);
-	        laemmerConfig.setMaxCycleTime(90);
-	        signalsModule.setLaemmerConfig(laemmerConfig);
-//	        LaemmerSignalController.log.setLevel(Level.OFF);
-//	        LaemmerSignalController.signalLog.setLevel(Level.OFF);
 			
 			controler.addOverridingModule(signalsModule);
 

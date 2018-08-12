@@ -75,7 +75,7 @@ class LaemmerApproach {
         }
 
         if (n == 0) {
-            stabilizationPressure_a = this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN;
+            stabilizationPressure_a = this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime();
         } else {
 			// IMO a shouldn't be incremented but calculated since 1 sec
 			// stepwidth isn't a prerequisite which you can trust.

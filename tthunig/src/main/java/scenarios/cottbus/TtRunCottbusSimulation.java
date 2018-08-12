@@ -41,8 +41,8 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
@@ -491,6 +491,15 @@ public class TtRunCottbusSimulation {
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
+				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		// TODO adapt here
+		laemmerConfigGroup.setDesiredCycleTime(90);
+		laemmerConfigGroup.setMaxCycleTime(135);
+		laemmerConfigGroup.setMinGreenTime(LAEMMER_MIN_G);
+		laemmerConfigGroup.setCheckDownstream(false);
+		laemmerConfigGroup.setActiveStabilizationStrategy(LAEMMER_FLEX_STAB_STRATEGY);
+		
 		// able or enable signals and lanes
 		// if signal type 'All...' is used without 'MS', lanes and signals are defined later in 'prepareScenario'
 		if (!SIGNAL_TYPE.equals(SignalType.NONE) && (SIGNAL_TYPE.toString().contains("MS") || !SIGNAL_TYPE.toString().startsWith("ALL"))) {
@@ -680,6 +689,7 @@ public class TtRunCottbusSimulation {
 			}
 			signalConfigGroup.setIntersectionLogic(INTERSECTION_LOGIC);
 		}
+		
 		if (PRICING_TYPE.toString().startsWith("CORDON_")){
 			RoadPricingConfigGroup roadPricingCG = ConfigUtils.addOrGetModule(config, RoadPricingConfigGroup.GROUP_NAME, RoadPricingConfigGroup.class);
 			// TODO adapt toll value here
@@ -1005,13 +1015,6 @@ public class TtRunCottbusSimulation {
 			sylviaConfig.setSignalGroupMaxGreenScale(SYLVIA_MAX_EXTENSION);
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
-			LaemmerConfig laemmerConfig = new LaemmerConfig();
-			laemmerConfig.setDesiredCycleTime(90);
-			laemmerConfig.setMaxCycleTime(135);
-			laemmerConfig.setMinGreenTime(LAEMMER_MIN_G);
-			laemmerConfig.setCheckDownstream(false);
-			laemmerConfig.setActiveStabilizationStrategy(LAEMMER_FLEX_STAB_STRATEGY);
-			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 		}
 		

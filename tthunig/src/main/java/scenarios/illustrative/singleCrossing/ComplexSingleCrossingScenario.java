@@ -44,10 +44,10 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.conflicts.ConflictData;
@@ -223,26 +223,10 @@ public class ComplexSingleCrossingScenario {
 	}
 	
 	public Controler defineControler() {
-		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-        LaemmerConfig laemmerConfig = new LaemmerConfig();
-        laemmerConfig.setDefaultIntergreenTime(5);
-        laemmerConfig.setActiveStabilizationStrategy(stabilizationStrategy);
-        if(groupedSignals) {
-            laemmerConfig.setDesiredCycleTime(60);
-            laemmerConfig.setMaxCycleTime(90);
-        } else {
-            laemmerConfig.setDesiredCycleTime(120);
-            laemmerConfig.setMaxCycleTime(180);
-        }
-        laemmerConfig.setMinGreenTime(minG);
-        laemmerConfig.setActiveRegime(laemmerRegime);
-        //laemmerConfig.setAvgCarSensorBucketParameters(360.0, 90.0);
-        signalsModule.setLaemmerConfig(laemmerConfig);
-
-        final Scenario scenario = defineScenario(laemmerConfig);
+		final Scenario scenario = defineScenario();
         Controler controler = new Controler(scenario);
         
-        controler.addOverridingModule(signalsModule);
+        controler.addOverridingModule(new CombinedSignalsModule());
 
         if (vis) {
             scenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
@@ -256,7 +240,7 @@ public class ComplexSingleCrossingScenario {
         return controler;
 	}
 	
-	private Scenario defineScenario(LaemmerConfig laemmerConfig) {
+	private Scenario defineScenario() {
         Scenario scenario = ScenarioUtils.loadScenario(defineConfig(createOutputPath()));
         // add missing scenario elements
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
@@ -265,7 +249,7 @@ public class ComplexSingleCrossingScenario {
         		ComplexSingleCrossingScenario.createLanes(scenario.getLanes());
         } 
         createPopulation(scenario.getPopulation());
-        createSignals(scenario, laemmerConfig);
+        createSignals(scenario);
         if (intersectionLogic.toString().startsWith("CONFLICTING_DIRECTIONS")) {
         		createConflictData(scenario);
         }
@@ -332,6 +316,21 @@ public class ComplexSingleCrossingScenario {
         SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
         signalConfigGroup.setUseSignalSystems(true);
         signalConfigGroup.setIntersectionLogic(intersectionLogic);
+        
+        LaemmerConfigGroup laemmerConfig = ConfigUtils.addOrGetModule(config,
+				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		laemmerConfig.setIntergreenTime(5);
+        laemmerConfig.setActiveStabilizationStrategy(stabilizationStrategy);
+        if(groupedSignals) {
+            laemmerConfig.setDesiredCycleTime(60);
+            laemmerConfig.setMaxCycleTime(90);
+        } else {
+            laemmerConfig.setDesiredCycleTime(120);
+            laemmerConfig.setMaxCycleTime(180);
+        }
+        laemmerConfig.setMinGreenTime(minG);
+        laemmerConfig.setActiveRegime(laemmerRegime);
+        //laemmerConfig.setAvgCarSensorBucketParameters(360.0, 90.0);
 
         PlanCalcScoreConfigGroup.ActivityParams dummyAct = new PlanCalcScoreConfigGroup.ActivityParams("dummy");
         dummyAct.setTypicalDuration(12 * 3600);
@@ -570,7 +569,7 @@ public class ComplexSingleCrossingScenario {
         }
     }
     
-    private void createSignals(Scenario scenario, LaemmerConfig laemmerConfig) {
+    private void createSignals(Scenario scenario) {
         SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
         SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
         SignalSystemsDataFactory sysFac = signalSystems.getFactory();
@@ -672,7 +671,7 @@ public class ComplexSingleCrossingScenario {
 		}
 		if (this.signalControlSelect.equals(SignalControl.LAEMMER_NICO)
 				|| this.signalControlSelect.equals(SignalControl.LAEMMER_FULLY_ADAPTIVE)) {
-			createLaemmerSignalControl(signalControl, laemmerConfig);
+			createLaemmerSignalControl(signalControl, (LaemmerConfigGroup) scenario.getConfig().getModule(LaemmerConfigGroup.GROUP_NAME));
 		} else {
 			createFixedTimeSignalControl(signalControl);
 		}
@@ -758,7 +757,7 @@ public class ComplexSingleCrossingScenario {
         signalSystemControl.addSignalPlanData(signalPlan);
 	}
 	
-	private void createLaemmerSignalControl(SignalControlData signalControl, LaemmerConfig laemmerConfig){
+	private void createLaemmerSignalControl(SignalControlData signalControl, LaemmerConfigGroup laemmerConfig){
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
 		if (!liveArrivalRates) {

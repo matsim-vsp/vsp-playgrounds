@@ -41,7 +41,7 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
@@ -115,6 +115,13 @@ public class RunGridLock {
 //		OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class ) ;
 //		otfvisConfig.setDrawTime(true);
 //		otfvisConfig.setAgentSize(80f);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
+				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		laemmerConfigGroup.setIntergreenTime(1);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setMaxCycleTime(90);
+		laemmerConfigGroup.setCheckDownstream(false); // TODO try this out
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -135,13 +142,6 @@ public class RunGridLock {
 //			sylviaConfig.setSignalGroupMaxGreenScale(2);
 //			sylviaConfig.setCheckDownstream(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
-			
-			LaemmerConfig laemmerConfig = new LaemmerConfig();
-			laemmerConfig.setDefaultIntergreenTime(1);
-			laemmerConfig.setDesiredCycleTime(60);
-			laemmerConfig.setMaxCycleTime(90);
-			laemmerConfig.setCheckDownstream(false); // TODO try this out
-			signalsModule.setLaemmerConfig(laemmerConfig);
 			
 			controler.addOverridingModule(signalsModule);
 

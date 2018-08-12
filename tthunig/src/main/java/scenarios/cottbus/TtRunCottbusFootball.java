@@ -22,7 +22,6 @@
 package scenarios.cottbus;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,9 +36,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
@@ -176,6 +174,17 @@ public class TtRunCottbusFootball {
 		baseConfig.qsim().setStuckTime(STUCK_TIME);
 		baseConfig.qsim().setEndTime(36*3600);
 		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(baseConfig,
+				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		laemmerConfigGroup.setDesiredCycleTime(90);
+		laemmerConfigGroup.setMaxCycleTime(135);
+		laemmerConfigGroup.setMinGreenTime(5);
+//		laemmerConfigGroup.setAnalysisEnabled(true);
+//        laemmerConfigGroup.setActiveRegime(Regime.STABILIZING);		       
+//        laemmerConfigGroup.setActiveRegime(Regime.OPTIMIZING);
+		laemmerConfigGroup.setActiveStabilizationStrategy(StabilizationStrategy.USE_MAX_LANECOUNT);
+		laemmerConfigGroup.setCheckDownstream(CHECK_DOWNSTREAM);
+		
 		Scenario baseScenario = ScenarioUtils.loadScenario(baseConfig);
 		if (LONG_LANES){
 			// extend short lanes (needed for laemmer)
@@ -259,16 +268,6 @@ public class TtRunCottbusFootball {
 				sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 				sylviaConfig.setCheckDownstream(CHECK_DOWNSTREAM);
 				signalsModule.setSylviaConfig(sylviaConfig);
-				LaemmerConfig laemmerConfig = new LaemmerConfig();
-				laemmerConfig.setDesiredCycleTime(90);
-		        laemmerConfig.setMaxCycleTime(135);
-				laemmerConfig.setMinGreenTime(5);
-//				laemmerConfig.setAnalysisEnabled(true);
-//		        laemmerConfig.setActiveRegime(Regime.STABILIZING);		       
-//		        laemmerConfig.setActiveRegime(Regime.OPTIMIZING);
-				laemmerConfig.setActiveStabilizationStrategy(StabilizationStrategy.USE_MAX_LANECOUNT);
-				laemmerConfig.setCheckDownstream(CHECK_DOWNSTREAM);
-				signalsModule.setLaemmerConfig(laemmerConfig);
 				controler.addOverridingModule(signalsModule);
 			}
 			

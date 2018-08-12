@@ -27,7 +27,6 @@ import org.matsim.contrib.signals.binder.SensorBasedSignalControlerListener;
 import org.matsim.contrib.signals.builder.FromDataBuilder;
 import org.matsim.contrib.signals.builder.SignalModelFactory;
 import org.matsim.contrib.signals.builder.SignalSystemsModelBuilder;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.mobsim.QSimSignalEngine;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
@@ -60,7 +59,6 @@ public class CombinedSignalsModule extends AbstractModule {
 	
 	private boolean alwaysSameMobsimSeed = false;
 	private SylviaConfig sylviaConfig = new SylviaConfig();
-	private LaemmerConfig laemmerConfig = new LaemmerConfig();
 	private GershensonConfig gershensonConfig = new GershensonConfig();
 	
 	@Override
@@ -78,7 +76,6 @@ public class CombinedSignalsModule extends AbstractModule {
 	
 		if ((boolean) ConfigUtils.addOrGetModule(getConfig(), SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			bind(SylviaConfig.class).toInstance(sylviaConfig);
-			bind(LaemmerConfig.class).toInstance(laemmerConfig);
 			bind(GershensonConfig.class).toInstance(gershensonConfig);
 			bind(SignalModelFactory.class).to(CombinedSignalModelFactory.class);
 			addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
@@ -118,10 +115,6 @@ public class CombinedSignalsModule extends AbstractModule {
 
 	public void setSylviaConfig(SylviaConfig sylviaConfig) {
 		this.sylviaConfig = sylviaConfig;
-	}
-
-	public void setLaemmerConfig(LaemmerConfig laemmerConfig) {
-		this.laemmerConfig = laemmerConfig;
 	}
 	
 	public void setGershensonConfig(GershensonConfig gershensonConfig) {

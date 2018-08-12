@@ -2,8 +2,8 @@ package scenarios.illustrative.singleCrossing;
 
 import org.apache.log4j.Logger;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 
 import scenarios.illustrative.braess.run.RunBraessSimulation;
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario.SignalControl;

@@ -35,7 +35,7 @@ import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfig;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
@@ -175,6 +175,14 @@ public final class RunBraessSimulation {
 		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(SIGNAL_LOGIC.equals(SignalControlLogic.NONE) ? false : true);
 		config.qsim().setUsingFastCapacityUpdate(false);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
+				LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+		// TODO modify laemmer config parameter here if you like
+		laemmerConfigGroup.setMaxCycleTime(90);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setIntergreenTime(0);
+		laemmerConfigGroup.setMinGreenTime(0);
 
 		// set brain exp beta
 		config.planCalcScore().setBrainExpBeta(2);
@@ -354,13 +362,6 @@ public final class RunBraessSimulation {
 			sylviaConfig.setSignalGroupMaxGreenScale(2);
 			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
 			signalsModule.setSylviaConfig(sylviaConfig);
-			LaemmerConfig laemmerConfig = new LaemmerConfig();
-			// TODO modify laemmer config parameter here if you like
-			laemmerConfig.setMaxCycleTime(90);
-			laemmerConfig.setDesiredCycleTime(60);
-			laemmerConfig.setDefaultIntergreenTime(0);
-			laemmerConfig.setMinGreenTime(0);
-			signalsModule.setLaemmerConfig(laemmerConfig);
 			controler.addOverridingModule(signalsModule);
 			break;
 		}

@@ -34,9 +34,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.controller.AbstractSignalController;
 import org.matsim.contrib.signals.controller.SignalController;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
@@ -44,6 +44,7 @@ import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.sensor.DownstreamSensor;
 import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
@@ -58,7 +59,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 
 	public static final String IDENTIFIER = "FullyAdaptiveLaemmerSignalController";
 
-	final LaemmerConfig laemmerConfig;
+	final LaemmerConfigGroup laemmerConfig;
 	private final List<LaemmerPhase> laemmerPhases = new ArrayList<>();
 
 	Request activeRequest = null;
@@ -71,7 +72,6 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 	final Config config;
 	final SignalsData signalsData;
 
-	final double DEFAULT_INTERGREEN;
 	double tIdle;
 
 	double maximumSystemsOutflowSum;
@@ -94,13 +94,11 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 
 
 	public final static class SignalControlProvider implements Provider<SignalController> {
-		private final LaemmerConfig laemmerConfig;
 		private final LinkSensorManager sensorManager;
 		private final DownstreamSensor downstreamSensor;
 		private final Scenario scenario;
 
-		public SignalControlProvider(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
-			this.laemmerConfig = laemmerConfig;
+		public SignalControlProvider(LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
 			this.sensorManager = sensorManager;
 			this.scenario = scenario;
 			this.downstreamSensor = downstreamSensor;
@@ -108,23 +106,18 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 
 		@Override
 		public SignalController get() {
-			return new FullyAdaptiveLaemmerSignalController(laemmerConfig, sensorManager, scenario, downstreamSensor);
+			return new FullyAdaptiveLaemmerSignalController(sensorManager, scenario, downstreamSensor);
 		}
 	}
 
 
-	private FullyAdaptiveLaemmerSignalController(LaemmerConfig laemmerConfig, LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
-		this.laemmerConfig = laemmerConfig;
+	private FullyAdaptiveLaemmerSignalController(LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
 		this.sensorManager = sensorManager;
 		this.network = scenario.getNetwork();
 		this.lanes = scenario.getLanes();
 		this.config = scenario.getConfig();
+        this.laemmerConfig = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
 		this.signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-		if (laemmerConfig.isUseDefaultIntergreenTime()) {
-			DEFAULT_INTERGREEN = laemmerConfig.getDefaultIntergreenTime();
-		} else {
-			throw new UnsupportedOperationException("Laemmer with signal specific intergreen times is not yet implemented.");
-		}
 		this.downstreamSensor = downstreamSensor;
 		try {
 			switch (laemmerConfig.getStabilizationStrategy()) {
@@ -219,8 +212,8 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 
 	@Override
 	public void updateState(double now) {
-		if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
-				laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
+		if (laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.COMBINED) ||
+				laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.STABILIZING)) {
 			updateActiveRegulation(now);
 		}
 		updatePhasesAndLanes(now);
@@ -239,8 +232,8 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 				return;
 			}
 		}
-		if ((laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED) ||
-				laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING))
+		if ((laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.COMBINED) ||
+				laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.STABILIZING))
 				&& regulationPhase == null && approachesForStabilization.size() > 0) {
 			switchSignal = true;
 			regulationPhase = findBestPhaseForStabilization();
@@ -266,7 +259,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 				.filter(ll -> regulationPhase.getPhase().getGreenSignalGroups().contains(ll.getSignalGroup().getId()))
 				.max(Comparator.comparingDouble(LaemmerApproach::getDeterminingLoad).reversed())
 				.get();
-		tIdle -= Math.max(representiveLane.getDeterminingLoad() * laemmerConfig.getDesiredCycleTime() + laemmerConfig.getDefaultIntergreenTime(), laemmerConfig.getMinGreenTime());
+		tIdle -= Math.max(representiveLane.getDeterminingLoad() * laemmerConfig.getDesiredCycleTime() + laemmerConfig.getIntergreenTime(), laemmerConfig.getMinGreenTime());
 		//get all laemmerLanes and keep only the lanes which are not in the current phase
 		if (laemmerConfig.isDetermineMaxLoadForTIdleGroupedBySignals()) {
 			//implementation of grouping by values adapted from https://marcin-chwedczuk.github.io/grouping-using-java-8-streams
@@ -285,7 +278,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 					.limit(this.estNumOfPhases-1)
 					//sum the parts of tIdle
 					.collect(Collectors.summingDouble(determinigLoad->
-					Math.max(determinigLoad * laemmerConfig.getDesiredCycleTime()+laemmerConfig.getDefaultIntergreenTime(),laemmerConfig.getMinGreenTime())
+					Math.max(determinigLoad * laemmerConfig.getDesiredCycleTime()+laemmerConfig.getIntergreenTime(),laemmerConfig.getMinGreenTime())
 							))
 					.doubleValue();
 		}
@@ -298,7 +291,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 					.limit(this.estNumOfPhases-1)
 					//sum the parts of tIdle
 					.collect(Collectors.summingDouble(ll->
-					Math.max(ll.getDeterminingLoad() * laemmerConfig.getDesiredCycleTime()+laemmerConfig.getDefaultIntergreenTime(),laemmerConfig.getMinGreenTime())
+					Math.max(ll.getDeterminingLoad() * laemmerConfig.getDesiredCycleTime()+laemmerConfig.getIntergreenTime(),laemmerConfig.getMinGreenTime())
 							))
 					.doubleValue();
 		}
@@ -408,14 +401,14 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 		LaemmerPhase max = null;
 
 		//selection if stabilization is needed
-		if (laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)
-				|| laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.STABILIZING)) {
+		if (laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.COMBINED)
+				|| laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.STABILIZING)) {
 			max = regulationPhase;
 		}
 
 		//selection for optimizing
-		if ((laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)
-				|| laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING)) && max == null) {
+		if ((laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.COMBINED)
+				|| laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.OPTIMIZING)) && max == null) {
 			double index = 0;
 			for (LaemmerPhase phase : laemmerPhases) {
 				if (phase.index > index) {
@@ -459,7 +452,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 		}
 
 		if (activeRequest == null && selection != null) {
-			activeRequest = new Request(now + DEFAULT_INTERGREEN, selection);
+			activeRequest = new Request(now + laemmerConfig.getIntergreenTime(), selection);
 		}
 
 		if (activeRequest != null && activeRequest.isDue(now)) {
@@ -468,12 +461,10 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 				List<LaemmerApproach> markForRemove = new LinkedList<>();
 				for (LaemmerApproach l : approachesForStabilization) {
 					if (l.getSignalGroup().getState().equals(SignalGroupState.GREEN)) {
-						if (laemmerConfig.isUseDefaultIntergreenTime()) {
-							//regulation time here will be shorten only, approaches will not removed. since they included in the next phase, they will be removed after minG
-							l.shortenRegulationTime(laemmerConfig.getDefaultIntergreenTime());
-						} else {
-							throw new IllegalStateException("Shorten stabilization time with specific intergreen times is not yet implemented.");
-						}
+						// regulation time here will be shorten only, approaches will not removed. since
+						// they included in the next phase, they will be removed after minG
+						l.shortenRegulationTime(laemmerConfig.getIntergreenTime());
+
 					}
 				}
 				approachesForStabilization.removeAll(markForRemove);
@@ -536,7 +527,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 		return approachesForStabilization.contains(laemmerLane);
 	}
 
-	public LaemmerConfig getLaemmerConfig() {
+	public LaemmerConfigGroup getLaemmerConfig() {
 		return this.laemmerConfig;
 	}
 

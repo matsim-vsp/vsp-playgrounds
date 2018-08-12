@@ -41,12 +41,11 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
-import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.Regime;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig.StabilizationStrategy;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.conflicts.ConflictData;
@@ -81,6 +80,7 @@ import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
+import signals.CombinedSignalsModule;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
@@ -104,7 +104,7 @@ public class SingleCrossingScenario {
 	public enum SignalControl {FIXED, LAEMMER_NICO, LAEMMER_FULLY_ADAPTIVE, GERSHENSON};
 	SignalControl signalControl = SignalControl.LAEMMER_NICO;
 	private Regime laemmerRegime = Regime.COMBINED;
-	private LaemmerConfig laemmerConfig;
+	private LaemmerConfigGroup laemmerConfig;
 	private GershensonConfig gershensonConfig;
 	private boolean vis = false;
 	private boolean stochasticDemand = false;
@@ -115,6 +115,9 @@ public class SingleCrossingScenario {
 	private boolean temporalCrowd = false;
 	private StabilizationStrategy stabilizationStrategy;
 	private IntersectionLogic intersectionLogic = IntersectionLogic.NONE;
+	private boolean createLeftTurnDemand = false;
+	private double leftTurningFactorNS = 0.1;
+	private double leftTurningFactorWE = 0.1;
 
 	public void setFlowNS(double flowNS) {
 		this.flowNS = flowNS;
@@ -163,7 +166,7 @@ public class SingleCrossingScenario {
 		this.temporalCrowd = temporalCrowd;
 	}
 	
-	public void setLaemmerConfig(LaemmerConfig laemmerConfig) {
+	public void setLaemmerConfig(LaemmerConfigGroup laemmerConfig) {
 		this.laemmerConfig = laemmerConfig;
 	}
 	
@@ -197,15 +200,11 @@ public class SingleCrossingScenario {
 	}
 	
 	public Controler defineControler() {
-        if (laemmerConfig == null) {
-        		useDefaultLaemmerConfig();
-        }
         if (gershensonConfig == null) {
         		useDefaultGershensonConfig();
         }
-        SignalsModule signalsModule = new SignalsModule();
-        signalsModule.setLaemmerConfig(laemmerConfig);
-//        signalsModule.setGershensonConfig(gershensonConfig); // TODO add this again, when move to contribs finalized
+        CombinedSignalsModule signalsModule = new CombinedSignalsModule();
+        signalsModule.setGershensonConfig(gershensonConfig);
 
         final Scenario scenario = defineScenario();
         Controler controler = new Controler(scenario);
@@ -222,21 +221,6 @@ public class SingleCrossingScenario {
             controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
         }
         return controler;
-	}
-	
-	private void useDefaultLaemmerConfig() {
-		this.laemmerConfig = new LaemmerConfig();
-	    laemmerConfig.setDefaultIntergreenTime(5);
-	    laemmerConfig.setActiveStabilizationStrategy(stabilizationStrategy);
-	    if(groupedSignals) {
-	        laemmerConfig.setDesiredCycleTime(60);
-	        laemmerConfig.setMaxCycleTime(90);
-	    } else {
-	        laemmerConfig.setDesiredCycleTime(120);
-	        laemmerConfig.setMaxCycleTime(180);
-	    }
-	    laemmerConfig.setMinGreenTime(minG);
-	    laemmerConfig.setActiveRegime(laemmerRegime);
 	}
 
 	private void useDefaultGershensonConfig() {
@@ -324,6 +308,23 @@ public class SingleCrossingScenario {
         SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
         signalConfigGroup.setUseSignalSystems(true);
         signalConfigGroup.setIntersectionLogic(intersectionLogic);
+        
+		if (laemmerConfig == null) {
+			// define specific default parameter for this scenario
+			this.laemmerConfig = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME,
+					LaemmerConfigGroup.class);
+			laemmerConfig.setActiveRegime(laemmerRegime);
+			if (groupedSignals) {
+				laemmerConfig.setDesiredCycleTime(60);
+				laemmerConfig.setMaxCycleTime(90);
+			} else {
+				laemmerConfig.setDesiredCycleTime(120);
+				laemmerConfig.setMaxCycleTime(180);
+			}
+			laemmerConfig.setMinGreenTime(minG);
+			laemmerConfig.setIntergreenTime(5);
+			laemmerConfig.setActiveStabilizationStrategy(stabilizationStrategy);
+		}
 
         PlanCalcScoreConfigGroup.ActivityParams dummyAct = new PlanCalcScoreConfigGroup.ActivityParams("dummy");
         dummyAct.setTypicalDuration(12 * 3600);
@@ -479,10 +480,16 @@ public class SingleCrossingScenario {
     private void createPopulation(Population pop) {
         String[] linksNS = {"6_7-8_9", "9_8-7_6"};
         String[] linksWE = {"5_4-2_1", "1_2-4_5"};
+        String[] linksNSleftTurning = {"6_7-4_5", "8_9-2_1"};
+        String[] linksWEleftTurning = {"1_2-7_6", "5_4-8_9"};
 
         Random rnd = new Random(14);
         createPopulationForRelation(flowNS, pop, linksNS, rnd);
         createPopulationForRelation(flowWE, pop, linksWE, rnd);
+		if (createLeftTurnDemand) {
+			createPopulationForRelation(flowNS * leftTurningFactorNS, pop, linksNSleftTurning, rnd);
+			createPopulationForRelation(flowWE * leftTurningFactorWE, pop, linksWEleftTurning, rnd);
+		}
     }
     
     private void createPopulationForRelation(double flow, Population population, String[] links, Random rnd) {
@@ -607,16 +614,16 @@ public class SingleCrossingScenario {
 
 		switch (this.signalControl) {
 		case LAEMMER_NICO:
-			createLaemmerSignalControl(signalControl, laemmerConfig);
+			createLaemmerSignalControl(signalControl);
 			break;
 		case FIXED:
 			createFixedTimeSignalControl(signalControl);
 			break;
 		case LAEMMER_FULLY_ADAPTIVE:
-			createFullyAdaptiveLaemmerSignalControl(signalControl, laemmerConfig);
+			createFullyAdaptiveLaemmerSignalControl(signalControl);
 			break;
 		case GERSHENSON:
-			createGershensonSignalControl(signalControl, gershensonConfig);
+			createGershensonSignalControl(signalControl);
 			break;
 		}
     }
@@ -672,14 +679,14 @@ public class SingleCrossingScenario {
         signalPlan.setOffset(0);
 	}
 	
-	private void createGershensonSignalControl(SignalControlData signalControl, GershensonConfig gershensonConfig2) {
+	private void createGershensonSignalControl(SignalControlData signalControl) {
 		SignalControlDataFactory conFac = signalControl.getFactory();
 		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
         signalSystemControl.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
         signalControl.addSignalSystemControllerData(signalSystemControl);
 	}
 
-	private void createLaemmerSignalControl(SignalControlData signalControl, LaemmerConfig laemmerConfig){
+	private void createLaemmerSignalControl(SignalControlData signalControl){
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
 		if (!liveArrivalRates) {
@@ -706,7 +713,7 @@ public class SingleCrossingScenario {
         signalControl.addSignalSystemControllerData(signalSystemControl);
 	}
 	
-	private void createFullyAdaptiveLaemmerSignalControl(SignalControlData signalControl, LaemmerConfig laemmerConfig) {
+	private void createFullyAdaptiveLaemmerSignalControl(SignalControlData signalControl) {
 		SignalControlDataFactory conFac = signalControl.getFactory();
 
 		if (!liveArrivalRates) {

@@ -2,7 +2,7 @@ package signals.laemmerFlex;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfig;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.lanes.Lane;
@@ -31,13 +31,13 @@ class LaemmerPhase {
 	public LaemmerPhase(FullyAdaptiveLaemmerSignalController fullyAdaptiveLaemmerSignalController, SignalPhase signalPhase) {
 		this.fullyAdaptiveLaemmerSignalController = fullyAdaptiveLaemmerSignalController;
 		this.phase = signalPhase;
-		this.intergreenTime_a = this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN;
+		this.intergreenTime_a = this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime();
 	}
 
 
 	void updateAbortationPenaltyAndPriorityIndex(double now) {
-		if (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.OPTIMIZING) ||
-				this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfig.Regime.COMBINED)) {
+		if (this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.OPTIMIZING) ||
+				this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getActiveRegime().equals(LaemmerConfigGroup.Regime.COMBINED)) {
 			updateAbortionPenalty(now);
 			calculatePriorityIndex(now);
 		}        
@@ -48,7 +48,7 @@ class LaemmerPhase {
 		if (this.fullyAdaptiveLaemmerSignalController.activeRequest != null && this.equals(this.fullyAdaptiveLaemmerSignalController.activeRequest.laemmerPhase)) {
 			double waitingTimeSum = 0;
 			double remainingInBetweenTime = Math.max(this.fullyAdaptiveLaemmerSignalController.activeRequest.onsetTime - now, 0);
-			for (double i = remainingInBetweenTime; i < this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN; i++) {
+			for (double i = remainingInBetweenTime; i < this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime(); i++) {
 				for (Id<SignalGroup> signalGroup : phase.getGreenSignalGroups()) {
 					for (Signal signal : fullyAdaptiveLaemmerSignalController.getSystem().getSignalGroups().get(signalGroup).getSignals().values()) {
 						if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
@@ -69,11 +69,11 @@ class LaemmerPhase {
 					if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
 						for (Id<Lane> laneId : signal.getLaneIds()) {
 							n += this.fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(
-									now + this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN, signal.getLinkId(), laneId);
+									now + this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime(), signal.getLinkId(), laneId);
 						}
 					} else {
 						n += this.fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLink(
-								now + this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN, signal.getLinkId());
+								now + this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime(), signal.getLinkId());
 					}
 				} 
 			}
@@ -88,7 +88,7 @@ class LaemmerPhase {
 		if (this.fullyAdaptiveLaemmerSignalController.activeRequest != null && this.fullyAdaptiveLaemmerSignalController.activeRequest.laemmerPhase.equals(this)) {
 			double remainingInBetweenTime = Math.max(this.fullyAdaptiveLaemmerSignalController.activeRequest.onsetTime - now, 0);
 			double remainingMinG = Math.max(this.fullyAdaptiveLaemmerSignalController.activeRequest.onsetTime - now + this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMinGreenTime() - remainingInBetweenTime, 0);
-			for (double i = remainingInBetweenTime; i <= this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN; i++) {
+			for (double i = remainingInBetweenTime; i <= this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime(); i++) {
 				double nExpected = 0;
 				double reqGreenTime = remainingMinG;
 				for (Id<SignalGroup> signalGroup : phase.getGreenSignalGroups()) {
@@ -136,7 +136,7 @@ class LaemmerPhase {
 					if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
 						for (Id<Lane> laneId : signal.getLaneIds()) {
 							double nTemp = this.fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLane(
-									now + this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN
+									now + this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime()
 									+ this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMinGreenTime(),
 									signal.getLinkId(), laneId);
 							nExpected += nTemp;
@@ -150,7 +150,7 @@ class LaemmerPhase {
 						}
 					} else {
 						double nTemp = this.fullyAdaptiveLaemmerSignalController.getNumberOfExpectedVehiclesOnLink(
-								now + this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN
+								now + this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime()
 								+ this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getMinGreenTime(),
 								signal.getLinkId());
 						nExpected += nTemp;
@@ -167,7 +167,7 @@ class LaemmerPhase {
 			if (this.fullyAdaptiveLaemmerSignalController.activeRequest != null) {
 				penalty = this.fullyAdaptiveLaemmerSignalController.activeRequest.laemmerPhase.abortionPenalty;
 			}
-			index = nExpected / (penalty + this.fullyAdaptiveLaemmerSignalController.DEFAULT_INTERGREEN + reqGreenTime);
+			index = nExpected / (penalty + this.fullyAdaptiveLaemmerSignalController.laemmerConfig.getIntergreenTime() + reqGreenTime);
 		}
 	}
 
