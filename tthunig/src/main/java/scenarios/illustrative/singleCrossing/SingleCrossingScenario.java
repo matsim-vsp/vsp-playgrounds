@@ -250,7 +250,7 @@ public class SingleCrossingScenario {
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
         createNetwork(scenario.getNetwork());
         if (useLanes) {
-        	SingleCrossingScenario.createLanes(scenario.getLanes());
+        		SingleCrossingScenario.createLanes(scenario.getLanes());
         }
         createPopulation(scenario.getPopulation());
         createSignals(scenario);
