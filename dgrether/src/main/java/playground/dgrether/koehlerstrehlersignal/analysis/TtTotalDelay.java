@@ -55,7 +55,7 @@ import com.google.inject.Inject;
  * @author tthunig
  *
  */
-public class TtTotalDelay implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonStuckEventHandler{
+class TtTotalDelay implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonStuckEventHandler{
 
 	private static final Logger LOG = Logger.getLogger(TtTotalDelay.class);
 	

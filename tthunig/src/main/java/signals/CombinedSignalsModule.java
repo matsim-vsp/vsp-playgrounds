@@ -47,7 +47,6 @@ import org.matsim.core.replanning.ReplanningContext;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import playground.dgrether.koehlerstrehlersignal.analysis.TtTotalDelay;
 import signals.gershenson.GershensonConfig;
 
 /**
