@@ -100,8 +100,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 
 		@Override
 		public SignalController createSignalSystemController(SignalSystem signalSystem) {
-			SignalController controller = new FullyAdaptiveLaemmerSignalController(sensorManager, scenario,
-					downstreamSensor);
+			SignalController controller = new FullyAdaptiveLaemmerSignalController(scenario, sensorManager, downstreamSensor);
 			controller.setSignalSystem(signalSystem);
 			return controller;
 		}
@@ -112,7 +111,7 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 		}
 	}
 
-	private FullyAdaptiveLaemmerSignalController(LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
+	private FullyAdaptiveLaemmerSignalController(Scenario scenario, LinkSensorManager sensorManager, DownstreamSensor downstreamSensor) {
 		this.sensorManager = sensorManager;
 		this.network = scenario.getNetwork();
 		this.lanes = scenario.getLanes();
