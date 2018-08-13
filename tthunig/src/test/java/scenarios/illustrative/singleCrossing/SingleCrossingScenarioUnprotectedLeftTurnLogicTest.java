@@ -43,9 +43,11 @@ public class SingleCrossingScenarioUnprotectedLeftTurnLogicTest {
 		
 		double leftTurnDelayWTurnRestriction = simulationWithRestrictedLeftTurns.runSingleIntersection();
 		double leftTurnDelayWoTurnRestriction = simulationWoRestrictedLeftTurns.runSingleIntersection();
+		System.out.println("Left turn delay with intersection modeling: " + leftTurnDelayWTurnRestriction);
+		System.out.println("Left turn delay without intersection modeling: " + leftTurnDelayWoTurnRestriction);
 		Assert.assertTrue("Delay without restriction should be less than with restricted left turns.", leftTurnDelayWoTurnRestriction < leftTurnDelayWTurnRestriction);
 		Assert.assertEquals("Delay value for the case without turn restrictions is not as expected!", 21120.0, leftTurnDelayWoTurnRestriction, MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Delay value for the case with turn restrictions is not as expected!", 80845.0, leftTurnDelayWTurnRestriction, MatsimTestUtils.EPSILON);
+		Assert.assertEquals("Delay value for the case with turn restrictions is not as expected!", 82544.0, leftTurnDelayWTurnRestriction, MatsimTestUtils.EPSILON);
 	}
 	
 }
