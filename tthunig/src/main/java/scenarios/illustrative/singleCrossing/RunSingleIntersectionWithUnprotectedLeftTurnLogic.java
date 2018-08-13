@@ -26,6 +26,7 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 
 import analysis.TtTotalTravelTime;
+import scenarios.illustrative.singleCrossing.SingleCrossingScenario.SignalControl;
 
 /**
  * @author tthunig
@@ -45,11 +46,9 @@ public class RunSingleIntersectionWithUnprotectedLeftTurnLogic {
 	 * turning vehicles.
 	 */
 	public double runSingleIntersection() {
-		ComplexSingleCrossingScenario singleIntersection = new ComplexSingleCrossingScenario(250, 0.0, 1250, 0.2,
-				ComplexSingleCrossingScenario.SignalControl.FIXED, null, null, vis, stochasticDemand, true, true,
-				true, 5, false);
+		SingleCrossingScenario singleIntersection = new SingleCrossingScenario(250., 1250., SignalControl.FIXED, vis, stochasticDemand, true, true, false);
 		singleIntersection.setIntersectionLogic(intersectionLogic);
-		singleIntersection.setProtectedLeftTurnForFixedTimeSignals(false);
+		singleIntersection.setCreateLeftTurnDemand(true);
 		Controler controler = singleIntersection.defineControler();
 		AnalyzeSingleIntersectionLeftTurnDelays leftTurnDelay = new AnalyzeSingleIntersectionLeftTurnDelays();
 		DelayAnalysisTool delay = new DelayAnalysisTool(controler.getScenario().getNetwork(), controler.getEvents());
