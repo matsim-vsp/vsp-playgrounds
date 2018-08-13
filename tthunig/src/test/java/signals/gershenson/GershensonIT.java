@@ -21,23 +21,15 @@
  */
 package signals.gershenson;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -51,6 +43,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
@@ -65,11 +58,10 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactor
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -80,8 +72,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
-import signals.CombinedSignalsModule;
-import signals.gershenson.GershensonSignalController;
 
 /**
  * Test gershenson logic at an intersection with four incoming links and one signal each. No lanes are used.
@@ -352,16 +342,25 @@ public class GershensonIT {
 		
 
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(new CombinedSignalsModule());
-
+		SignalsModule signalsModule = new SignalsModule();
+		// the signals module works for planbased, sylvia and laemmer signal controller by default 
+		// and is pluggable for your own signal controller like this:
+		signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
+        controler.addOverridingModule(signalsModule);
+        
+        // bind gershenson config
+        controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				GershensonConfig gershensonConfig = new GershensonConfig();
+				bind(GershensonConfig.class).toInstance(gershensonConfig);
+			}
+		});
+		
+		//controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
 		
 		// add signal analysis tool
 		SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
-		
-		CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-		controler.addOverridingModule(signalsModule);
-		//controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
-		
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {

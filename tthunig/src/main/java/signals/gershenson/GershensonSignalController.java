@@ -19,12 +19,18 @@
  * *********************************************************************** */
 package signals.gershenson;
 
-import com.google.inject.Provider;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.controller.SignalController;
+import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
@@ -37,11 +43,7 @@ import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.LanesToLinkAssignment;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import com.google.inject.Inject;
 
 
 /**
@@ -66,22 +68,21 @@ public class GershensonSignalController implements SignalController {
 	
 	public final static String IDENTIFIER = "GershensonSignalController";
 	
+	public final static class GershensonFactory implements SignalControllerFactory {
+		@Inject private LinkSensorManager sensorManager;
+		@Inject private Scenario scenario;
+		@Inject private GershensonConfig gershensonConfig;
 	
-	
-	public final static class SignalControlProvider implements Provider<SignalController> {
-		private final LinkSensorManager sensorManager;
-		private final Scenario scenario;
-		private final GershensonConfig gershensonConfig;
-		
-		public SignalControlProvider(LinkSensorManager sensorManager, Scenario scenario, GershensonConfig gershensonConfig) {
-			this.sensorManager = sensorManager;
-			this.scenario = scenario;
-			this.gershensonConfig = gershensonConfig;
+		@Override
+		public SignalController createSignalSystemController(SignalSystem signalSystem) {
+			SignalController controller = new GershensonSignalController(scenario, sensorManager, gershensonConfig);
+			controller.setSignalSystem(signalSystem);
+			return controller;
 		}
 
 		@Override
-		public SignalController get() {
-			return new GershensonSignalController(scenario, sensorManager, gershensonConfig);
+		public String getIdentifier() {
+			return IDENTIFIER;
 		}
 	}
 	

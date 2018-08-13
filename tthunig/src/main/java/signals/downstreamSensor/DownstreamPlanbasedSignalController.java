@@ -28,12 +28,13 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.signals.controller.SignalController;
+import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.sensor.DownstreamSensor;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
 
 /**
  * @author tthunig
@@ -45,16 +46,19 @@ public final class DownstreamPlanbasedSignalController implements SignalControll
 
 	public final static String IDENTIFIER = "DownstreamSignalControl";
 
-	public final static class SignalControlProvider implements Provider<SignalController> {
-		private final DownstreamSensor downstreamSensor;
+	public final static class DownstreamFactory implements SignalControllerFactory {
+		@Inject private DownstreamSensor downstreamSensor;
 
-		public SignalControlProvider(DownstreamSensor downstreamSensor) {
-			this.downstreamSensor = downstreamSensor;
+		@Override
+		public SignalController createSignalSystemController(SignalSystem signalSystem) {
+			SignalController controller = new DownstreamPlanbasedSignalController(downstreamSensor);
+			controller.setSignalSystem(signalSystem);
+			return controller;
 		}
 
 		@Override
-		public DownstreamPlanbasedSignalController get() {
-			return new DownstreamPlanbasedSignalController(downstreamSensor);
+		public String getIdentifier() {
+			return IDENTIFIER;
 		}
 	}
 

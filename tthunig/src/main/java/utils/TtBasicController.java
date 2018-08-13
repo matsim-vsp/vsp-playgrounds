@@ -21,6 +21,7 @@ package utils;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
@@ -35,7 +36,10 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import analysis.TtAnalyzedGeneralResultsWriter;
 import analysis.TtGeneralAnalysis;
 import analysis.TtListenerToBindGeneralAnalysis;
-import signals.CombinedSignalsModule;
+import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 
 
 /**
@@ -75,8 +79,13 @@ public class TtBasicController {
         
 		// add the signals module if signal systems are used
 		if (signalsConfigGroup.isUseSignalSystems()) {
-			// the combined signals module works for a lot of different signal controller, e.g. planbased, sylvia, downstream, laemmer...
-			controler.addOverridingModule(new CombinedSignalsModule());
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller by default 
+			// and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
+			controler.addOverridingModule(signalsModule);
 		}
 		
 		// add live visualization module
@@ -84,10 +93,17 @@ public class TtBasicController {
 			controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
 		}
 				
-		// add analysis tools
+		// add additional bindings (analysis tools and classes that are necessary for
+		// your own implementations, e.g. your own signal controllers, as e.g. the
+		// config for Gershenson)
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
+				GershensonConfig gershensonConfig = new GershensonConfig();
+				gershensonConfig.setMinimumGREENtime(5);
+				// ... set parameters as you like
+				bind(GershensonConfig.class).toInstance(gershensonConfig);
+				
 				this.bind(TtGeneralAnalysis.class).asEagerSingleton();
 				this.addEventHandlerBinding().to(TtGeneralAnalysis.class);
 				this.bind(TtAnalyzedGeneralResultsWriter.class);

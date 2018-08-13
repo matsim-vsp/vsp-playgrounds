@@ -43,6 +43,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
@@ -86,8 +87,10 @@ import org.matsim.lanes.LanesUtils;
 
 import analysis.signals.SignalAnalysisListener;
 import analysis.signals.SignalAnalysisWriter;
-import signals.CombinedSignalsModule;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 
 /**
  * @author tthunig
@@ -140,11 +143,21 @@ public class RunGridLock {
 //		controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
-			controler.addOverridingModule(new CombinedSignalsModule());
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller by default 
+			// and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
+	        controler.addOverridingModule(signalsModule);
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
+					// bind gershenson config
+					GershensonConfig gershensonConfig = new GershensonConfig();
+					bind(GershensonConfig.class).toInstance(gershensonConfig);
+					
 					// TODO inflow and outflow analysis so far in TtRunPostAnalysis
 
 					// bind tool to analyze signals

@@ -41,6 +41,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
@@ -70,6 +71,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -80,7 +82,7 @@ import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import signals.CombinedSignalsModule;
+import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
@@ -203,13 +205,25 @@ public class SingleCrossingScenario {
         if (gershensonConfig == null) {
         		useDefaultGershensonConfig();
         }
-        CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-        signalsModule.setGershensonConfig(gershensonConfig);
 
         final Scenario scenario = defineScenario();
         Controler controler = new Controler(scenario);
         
+        SignalsModule signalsModule = new SignalsModule();
+		// the signals module works for planbased, sylvia and laemmer signal controller by default 
+		// and is pluggable for your own signal controller like this:
+		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
+		signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+		signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
         controler.addOverridingModule(signalsModule);
+        
+        // bind gershenson config
+        controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				bind(GershensonConfig.class).toInstance(gershensonConfig);
+			}
+		});
 
         if (vis) {
             scenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);

@@ -36,6 +36,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
@@ -43,6 +44,7 @@ import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
@@ -51,7 +53,10 @@ import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
 import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
-import signals.CombinedSignalsModule;
+import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.ModifyNetwork;
 
 /**
@@ -265,7 +270,23 @@ public class TtRunCottbusFootball {
 			controler.addControlerListener(cbfbControllerListener);
 			//add the signals module
 			if (!CONTROL_TYPE.equals(SignalControl.NONE)) {
-				controler.addOverridingModule(new CombinedSignalsModule());
+				SignalsModule signalsModule = new SignalsModule();
+				// the signals module works for planbased, sylvia and laemmer signal controller by default 
+				// and is pluggable for your own signal controller like this:
+				signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
+				signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+				signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
+		        controler.addOverridingModule(signalsModule);
+		        
+		        // bind gershenson config
+		        controler.addOverridingModule(new AbstractModule() {
+					@Override
+					public void install() {
+						GershensonConfig gershensonConfig = new GershensonConfig();
+						bind(GershensonConfig.class).toInstance(gershensonConfig);
+					}
+				});
+
 			}
 			
 			controler.run();

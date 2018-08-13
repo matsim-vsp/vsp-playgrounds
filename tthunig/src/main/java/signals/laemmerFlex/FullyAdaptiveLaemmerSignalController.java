@@ -34,6 +34,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.controller.AbstractSignalController;
 import org.matsim.contrib.signals.controller.SignalController;
+import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
@@ -49,7 +50,7 @@ import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.lanes.Lane;
 import org.matsim.lanes.Lanes;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
 
 
 /**
@@ -92,24 +93,24 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 	
 	private SignalCombinationBasedOnConflicts signalCombinationConflicts;
 
+	public final static class LaemmerFlexFactory implements SignalControllerFactory {
+		@Inject private LinkSensorManager sensorManager;
+		@Inject private DownstreamSensor downstreamSensor;
+		@Inject private Scenario scenario;
 
-	public final static class SignalControlProvider implements Provider<SignalController> {
-		private final LinkSensorManager sensorManager;
-		private final DownstreamSensor downstreamSensor;
-		private final Scenario scenario;
-
-		public SignalControlProvider(LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
-			this.sensorManager = sensorManager;
-			this.scenario = scenario;
-			this.downstreamSensor = downstreamSensor;
+		@Override
+		public SignalController createSignalSystemController(SignalSystem signalSystem) {
+			SignalController controller = new FullyAdaptiveLaemmerSignalController(sensorManager, scenario,
+					downstreamSensor);
+			controller.setSignalSystem(signalSystem);
+			return controller;
 		}
 
 		@Override
-		public SignalController get() {
-			return new FullyAdaptiveLaemmerSignalController(sensorManager, scenario, downstreamSensor);
+		public String getIdentifier() {
+			return IDENTIFIER;
 		}
 	}
-
 
 	private FullyAdaptiveLaemmerSignalController(LinkSensorManager sensorManager, Scenario scenario, DownstreamSensor downstreamSensor) {
 		this.sensorManager = sensorManager;

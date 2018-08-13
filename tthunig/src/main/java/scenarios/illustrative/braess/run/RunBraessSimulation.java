@@ -38,6 +38,7 @@ import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
@@ -92,7 +93,10 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals;
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalBasePlan;
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalControlLogic;
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
-import signals.CombinedSignalsModule;
+import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
 
 /**
@@ -358,11 +362,22 @@ public final class RunBraessSimulation {
 			});
 			break;
 		default:
-			// add combined signals module (works for different signal types as sylvia, downstream or planbased)
-			boolean alwaysSameMobsimSeed = false;
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			signalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
-			controler.addOverridingModule(signalsModule);
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller by default 
+			// and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
+	        controler.addOverridingModule(signalsModule);
+	        
+			// bind gershenson config
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					GershensonConfig gershensonConfig = new GershensonConfig();
+					bind(GershensonConfig.class).toInstance(gershensonConfig);
+				}
+			});
 			break;
 		}
 		

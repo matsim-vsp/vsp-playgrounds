@@ -43,11 +43,12 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.conflicts.ConflictData;
@@ -82,7 +83,6 @@ import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.lanes.LanesUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import signals.CombinedSignalsModule;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
 
@@ -226,7 +226,11 @@ public class ComplexSingleCrossingScenario {
 		final Scenario scenario = defineScenario();
         Controler controler = new Controler(scenario);
         
-        controler.addOverridingModule(new CombinedSignalsModule());
+        SignalsModule signalsModule = new SignalsModule();
+		// the signals module works for planbased, sylvia and laemmer signal controller by default 
+		// and is pluggable for your own signal controller like this:
+		signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+        controler.addOverridingModule(signalsModule);
 
         if (vis) {
             scenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);

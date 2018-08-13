@@ -41,6 +41,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.binder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
@@ -69,9 +70,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
-
-import signals.CombinedSignalsModule;
-import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 
 /**
  * @author tthunig
@@ -183,7 +181,11 @@ public class DownstreamSignalTest {
 
 		Controler controler = new Controler(scenario);
 		// add signal module
-		controler.addOverridingModule(new CombinedSignalsModule());
+		SignalsModule signalsModule = new SignalsModule();
+		// the signals module works for planbased, sylvia and laemmer signal controller by default 
+		// and is pluggable for your own signal controller like this:
+		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
+        controler.addOverridingModule(signalsModule);
 
 		// add signal analysis tool
 		SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
