@@ -15,7 +15,7 @@ public class RunSingleCrossingScenario {
 	
 	private static final Logger log = Logger.getLogger(RunBraessSimulation.class);
 
-    private static final SingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.LAEMMER_FULLY_ADAPTIVE;
+    private static final SingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.NONE;
     private static final Regime LAEMMER_REGIME = Regime.OPTIMIZING;
     
     private static final boolean VISUALIZE_WITH_OTFVIS = true;
@@ -26,7 +26,7 @@ public class RunSingleCrossingScenario {
     private static final boolean TEMPORAL_CROWD = false;
     
     private static final StabilizationStrategy STABILIZATION_STRATEGY = StabilizationStrategy.USE_MAX_LANECOUNT;
-    private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS;
+    private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.NONE;
     
     /** minimal green time in seconds */
     private static final int MIN_G = 5;

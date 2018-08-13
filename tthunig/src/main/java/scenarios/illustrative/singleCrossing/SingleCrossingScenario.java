@@ -103,7 +103,7 @@ public class SingleCrossingScenario {
 
 	private double flowNS = 360;
 	private double flowWE = 0.5 * 2520;
-	public enum SignalControl {FIXED, LAEMMER_NICO, LAEMMER_FULLY_ADAPTIVE, GERSHENSON};
+	public enum SignalControl {NONE, FIXED, LAEMMER_NICO, LAEMMER_FULLY_ADAPTIVE, GERSHENSON};
 	SignalControl signalControl = SignalControl.LAEMMER_NICO;
 	private Regime laemmerRegime = Regime.COMBINED;
 	private LaemmerConfigGroup laemmerConfig;
@@ -209,21 +209,23 @@ public class SingleCrossingScenario {
         final Scenario scenario = defineScenario();
         Controler controler = new Controler(scenario);
         
-        SignalsModule signalsModule = new SignalsModule();
-		// the signals module works for planbased, sylvia and laemmer signal controller by default 
-		// and is pluggable for your own signal controller like this:
-		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
-		signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-		signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
-        controler.addOverridingModule(signalsModule);
-        
-        // bind gershenson config
-        controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				bind(GershensonConfig.class).toInstance(gershensonConfig);
-			}
-		});
+		if (!this.signalControl.equals(SignalControl.NONE)) {
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller
+			// by default and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
+			controler.addOverridingModule(signalsModule);
+
+			// bind gershenson config
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					bind(GershensonConfig.class).toInstance(gershensonConfig);
+				}
+			});
+		}
 
         if (vis) {
             scenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
@@ -245,13 +247,18 @@ public class SingleCrossingScenario {
 	private Scenario defineScenario() {
         Scenario scenario = ScenarioUtils.loadScenario(defineConfig(createOutputPath()));
         // add missing scenario elements
-        scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
+		if (!signalControl.equals(SignalControl.NONE)) {
+			scenario.addScenarioElement(SignalsData.ELEMENT_NAME,
+					new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
+		}
         createNetwork(scenario.getNetwork());
         if (useLanes) {
         		SingleCrossingScenario.createLanes(scenario.getLanes());
         }
         createPopulation(scenario.getPopulation());
-        createSignals(scenario);
+        if (!signalControl.equals(SignalControl.NONE)) {
+        		createSignals(scenario);
+        }
 		if (intersectionLogic.toString().startsWith("CONFLICTING_DIRECTIONS")) {
 			createConflictData(scenario);
 		}
@@ -282,6 +289,10 @@ public class SingleCrossingScenario {
 			break;
 		case GERSHENSON:
 			outputPath += "gershenson" + gershensonConfig.getThreshold();
+			break;
+		case NONE:
+			outputPath += "noSignals";
+			break;
 		}
 		
 		if (stochasticDemand) {
@@ -319,8 +330,12 @@ public class SingleCrossingScenario {
             config.travelTimeCalculator().setCalculateLinkToLinkTravelTimes(true);
         }
 
-        SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
-        signalConfigGroup.setUseSignalSystems(true);
+        SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
+        if (signalControl.equals(SignalControl.NONE)) {
+        		signalConfigGroup.setUseSignalSystems(false);
+        } else {
+        		signalConfigGroup.setUseSignalSystems(true);
+        }
         signalConfigGroup.setIntersectionLogic(intersectionLogic);
         
 		if (laemmerConfig == null) {
@@ -639,6 +654,8 @@ public class SingleCrossingScenario {
 		case GERSHENSON:
 			createGershensonSignalControl(signalControl);
 			break;
+		default:
+			throw new RuntimeException("something went wrong with signal control " + this.signalControl);
 		}
     }
 
