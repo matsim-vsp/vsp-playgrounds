@@ -127,7 +127,7 @@ public class FixCottbusResultsIT {
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes( true );
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems( true );
 		// set signal files
 		if (netType.equals(NetworkType.V1)){

@@ -510,7 +510,7 @@ public class TtRunCottbusSimulation {
 		// able or enable signals and lanes
 		// if signal type 'All...' is used without 'MS', lanes and signals are defined later in 'prepareScenario'
 		if (!SIGNAL_TYPE.equals(SignalType.NONE) && (SIGNAL_TYPE.toString().contains("MS") || !SIGNAL_TYPE.toString().startsWith("ALL"))) {
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems(true);
 			config.qsim().setUseLanes(SIGNAL_TYPE.toString().startsWith("ALL") && !SIGNAL_TYPE.toString().contains("MS") ? false : true);
 			// set signal systems
@@ -871,7 +871,7 @@ public class TtRunCottbusSimulation {
 		
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 		}
@@ -1014,7 +1014,7 @@ public class TtRunCottbusSimulation {
 
 		// add the signals module if signal systems are used
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			SignalsModule signalsModule = new SignalsModule();
 			// the signals module works for planbased, sylvia and laemmer signal controller by default 
@@ -1207,7 +1207,7 @@ public class TtRunCottbusSimulation {
 				runName += "_2node";
 		}			
 
-		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			switch (SIGNAL_TYPE){
 			case MS_BTU_OPT:
@@ -1320,7 +1320,7 @@ public class TtRunCottbusSimulation {
 			new SignalGroupsWriter20(signalsData.getSignalGroupsData()).write(outputDir + "signalGroups.xml");
 			
 			SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(),
-					SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+					SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalsConfigGroup.setSignalSystemFile("signalSystems.xml");
 			signalsConfigGroup.setSignalGroupsFile("signalGroups.xml");
 			signalsConfigGroup.setSignalControlFile("signalControl.xml");

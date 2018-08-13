@@ -67,7 +67,7 @@ public class DgOTFVis {
 	
 	public void playScenario(Scenario scenario) {
 
-		if (ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).isUseSignalSystems()){
+		if (ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).isUseSignalSystems()){
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
 		}
 		

@@ -138,7 +138,7 @@ public class RunResultsLoader {
 
 	private SignalsData loadSignals(String systemspath, String groupspath, String controlpath) {
 		Config c = ConfigUtils.createConfig();
-		SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalSystemsConfigGroup.setSignalSystemFile(systemspath);
 		signalSystemsConfigGroup.setSignalGroupsFile(groupspath);
 		signalSystemsConfigGroup.setSignalControlFile(controlpath);

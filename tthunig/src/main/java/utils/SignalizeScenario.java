@@ -112,7 +112,7 @@ public class SignalizeScenario {
 	public void createSignalsForAllLinks(){
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(),
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (!signalsConfigGroup.isUseSignalSystems()){
 			signalsConfigGroup.setUseSignalSystems(true);
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
@@ -135,7 +135,7 @@ public class SignalizeScenario {
 	public void createSignalsAndLanesForAllTurnings(){
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), 
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (!signalsConfigGroup.isUseSignalSystems()){
 			signalsConfigGroup.setUseSignalSystems(true);
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());

@@ -163,7 +163,7 @@ public class TtsignalAnalysisToolTest {
 	        config.qsim().setUsingFastCapacityUpdate(false);
 		
 			// able or enable signals and lanes
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems( true );
 			
 			

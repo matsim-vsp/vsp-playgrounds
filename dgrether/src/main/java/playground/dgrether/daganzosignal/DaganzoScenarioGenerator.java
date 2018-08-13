@@ -243,9 +243,9 @@ public class DaganzoScenarioGenerator {
 		}
 		if (isUseSignalSystems) {
 			//enable lanes and signal system feature in config
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(SIGNALSYSTEMSOUTPUTFILE);
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(SIGNALSYSTEMCONFIGURATIONSOUTPUTFILE);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(SIGNALSYSTEMSOUTPUTFILE);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(SIGNALSYSTEMCONFIGURATIONSOUTPUTFILE);
 			//create the signal systems and write them
 //			SignalSystems signalSystems = createSignalSystems(scenario);
 //			MatsimSignalSystemsWriter ssWriter = new MatsimSignalSystemsWriter(signalSystems);
@@ -366,8 +366,8 @@ public class DaganzoScenarioGenerator {
 			config.network().setLaneDefinitionsFile(lanesInputFile);
 		}
 		if (isUseSignalSystems){
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalInputFile);
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(this.signalConfigInputFile);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalInputFile);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(this.signalConfigInputFile);
 		}
 
 		if (runId != null) {

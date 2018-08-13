@@ -375,7 +375,7 @@ public class RunOpdytsForGreenWaves {
 		config.controler().setLastIteration(1);
 
 		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
 
 		// define strategies (there is only one route, so ReRoute always returns the same route)

@@ -177,7 +177,7 @@ public final class RunBraessSimulation {
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(SIGNAL_LOGIC.equals(SignalControlLogic.NONE) ? false : true);
 		config.qsim().setUsingFastCapacityUpdate(false);
 		
@@ -332,7 +332,7 @@ public final class RunBraessSimulation {
 	
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 			createSignals(scenario);
@@ -510,7 +510,7 @@ public final class RunBraessSimulation {
 				this.bind(TtAnalyzedResultsWriter.class);
 				
 				SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-						SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+						SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 				if (signalsConfigGroup.isUseSignalSystems()) {
 					// bind tool to analyze signals
 					this.bind(SignalAnalysisTool.class);
@@ -690,7 +690,7 @@ public final class RunBraessSimulation {
 				runName += "_node";
 		}			
 
-		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			switch (SIGNAL_LOGIC){
 			case SIMPLE_RESPONSIVE:
@@ -788,7 +788,7 @@ public final class RunBraessSimulation {
 			new SignalSystemsWriter20(signalsData.getSignalSystemsData()).write(outputDir + "signalSystems.xml");
 			new SignalControlWriter20(signalsData.getSignalControlData()).write(outputDir + "signalControl.xml");
 			new SignalGroupsWriter20(signalsData.getSignalGroupsData()).write(outputDir + "signalGroups.xml");
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setSignalSystemFile("signalSystems.xml");
 			signalConfigGroup.setSignalControlFile("signalControl.xml");
 			signalConfigGroup.setSignalGroupsFile("signalGroups.xml");

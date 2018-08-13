@@ -56,7 +56,7 @@ public class ModifyNetwork {
 		config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v2.xml.gz");
 		config.qsim().setUseLanes( true );
 		config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v2.1.xml");
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
 		signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v2.1.xml");
 		signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v2.xml");

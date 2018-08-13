@@ -109,7 +109,7 @@ public class TtCreateParallelScenario {
 		this.initIds();
 		Config config = ConfigUtils.createConfig();
 		config.qsim().setUseLanes(true);
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 				SignalSystemsConfigGroup.class).setUseSignalSystems(true);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		

@@ -85,7 +85,7 @@ public class DgOTFVisReplayLastIteration {
 		if (config.network().getLaneDefinitionsFile() != null || config.qsim().isUseLanes()) {
 			config.network().setLaneDefinitionsFile(inputPreFix + Controler.FILENAME_LANES);
 		}
-		SignalSystemsConfigGroup signalsConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalsConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfig.isUseSignalSystems()) {
 			signalsConfig.setSignalSystemFile(inputPreFix + SignalsScenarioWriter.FILENAME_SIGNAL_SYSTEMS);
 			signalsConfig.setSignalGroupsFile(inputPreFix + SignalsScenarioWriter.FILENAME_SIGNAL_GROUPS);

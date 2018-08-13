@@ -180,7 +180,7 @@ public class RunGridLock {
 
 		// able or enable signals and lanes
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems(true);
 		}
 		config.qsim().setUseLanes(true);

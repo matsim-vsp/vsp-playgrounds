@@ -46,7 +46,7 @@ public class DgController {
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
 		// add missing scenario elements
-		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 		}

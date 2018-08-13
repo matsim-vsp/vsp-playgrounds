@@ -210,7 +210,7 @@ public class DownstreamSignalTest {
 		config.controler().setLastIteration(0);
 
 		// able or enable signals and lanes
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);

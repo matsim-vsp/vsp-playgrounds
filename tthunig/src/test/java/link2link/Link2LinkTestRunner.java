@@ -128,7 +128,7 @@ public class Link2LinkTestRunner {
 		Config config = defineConfig(runSettings);
 		config.qsim().setUsingFastCapacityUpdate(false);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		Controler controler = new Controler(scenario);
 
 		if ((boolean) signalConfigGroup.isUseSignalSystems()) {
@@ -163,7 +163,7 @@ public class Link2LinkTestRunner {
 		// able or enable signals and lanes
 		config.qsim().setUseLanes( settings.isUseLanes() );
 		if(settings.isUseSignals()){
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems(true);
 		}
 		

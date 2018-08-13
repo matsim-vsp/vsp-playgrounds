@@ -187,7 +187,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 	
 	private static Scenario loadScenario(String directory) {
 		Config config = ConfigUtils.createConfig();
-		SignalSystemsConfigGroup signalConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfig.setUseSignalSystems(true);
 		signalConfig.setSignalSystemFile(directory + "output_signal_systems_v2.0.xml");
 		signalConfig.setSignalGroupsFile(directory + "output_signal_groups_v2.0.xml");

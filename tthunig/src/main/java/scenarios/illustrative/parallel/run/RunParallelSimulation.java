@@ -110,7 +110,7 @@ public final class RunParallelSimulation {
 	
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 			createSignals(scenario);
@@ -128,7 +128,7 @@ public final class RunParallelSimulation {
 
 		// add the signals module if signal systems are used
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			controler.addOverridingModule(new SignalsModule());
 		}
@@ -224,7 +224,7 @@ public final class RunParallelSimulation {
 
 		config.qsim().setUseLanes( true );
 		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils
-				.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+				.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 						SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems( USE_SIGNALS? true : false );
 
@@ -398,7 +398,7 @@ public final class RunParallelSimulation {
 		else
 			runName += "_node2node";
 
-		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			runName += "_signals";
 		}

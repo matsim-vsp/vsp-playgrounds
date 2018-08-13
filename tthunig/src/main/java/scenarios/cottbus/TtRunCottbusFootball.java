@@ -94,7 +94,7 @@ public class TtRunCottbusFootball {
 			baseConfig.controler().setRunId("1200");
 		}
 		baseConfig.controler().setLastIteration(0);
-		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(baseConfig, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		
 		if (NETWORK.equals("V1-2")) {
 			// modify the network and lanes file

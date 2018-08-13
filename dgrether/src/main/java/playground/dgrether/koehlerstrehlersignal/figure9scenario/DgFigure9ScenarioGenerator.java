@@ -105,7 +105,7 @@ public class DgFigure9ScenarioGenerator {
 		this.initIds();
 		Config config = ConfigUtils.createConfig();
 		config.qsim().setUseLanes(true);
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
 		Scenario scenario = ScenarioUtils.createScenario(config);
 		
 		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);

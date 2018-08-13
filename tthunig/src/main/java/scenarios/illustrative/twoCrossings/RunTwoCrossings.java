@@ -165,7 +165,7 @@ public class RunTwoCrossings {
 
 		// able or enable signals
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems(true);
 		}
 

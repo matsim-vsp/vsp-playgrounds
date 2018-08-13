@@ -61,7 +61,7 @@ public class DgFigure9OtfVis {
 		String conf = "../../../shared-svn/studies/dgrether/koehlerStrehler2010/scenario5/config_signals_coordinated.xml";
 		
 		Config config = ConfigUtils.loadConfig(conf);
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class).setAgentSize(40.0f);
 		MatsimRandom.reset(config.global().getRandomSeed());
 		Scenario scenario = ScenarioUtils.loadScenario(config);

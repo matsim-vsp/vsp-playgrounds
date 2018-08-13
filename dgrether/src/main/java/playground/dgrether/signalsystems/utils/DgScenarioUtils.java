@@ -43,7 +43,7 @@ public class DgScenarioUtils {
 		c2.qsim().setUseLanes(true);
 		
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(c2,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalsConfigGroup.setUseSignalSystems(true);
 		
 		c2.network().setInputFile(net);

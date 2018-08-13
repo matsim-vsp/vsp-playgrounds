@@ -67,7 +67,7 @@ public class AdaptConflictsBasedOnBaseCaseFixedTimePlans {
 		Config config = ConfigUtils.createConfig();
 		config.network().setInputFile(DIR + "network_wgs84_utm33n_v4.xml");
 		config.network().setLaneDefinitionsFile(DIR + "lanes_v1-4.xml");
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
 		signalConfigGroup.setConflictingDirectionsFile(DIR + CONFL_FILE);
 		signalConfigGroup.setIntersectionLogic(IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS);
