@@ -88,8 +88,8 @@ public class AnalyzeAndCompareTrips {
 		ResidenceFilterReader residenceFilterReader = new ResidenceFilterReader(EXPERIENCED_PLANS_FILE_WITH_RESIDENCE);
 		Population2TripsParser population2TripsParser = new Population2TripsParser(
 //				residenceFilterReader.getWholePopulation(),
-				residenceFilterReader.filter(ResidenceFilterWriter.INTERIOR_OF_AREA),
-//				residenceFilterReader.filter(ResidenceFilterWriter.EXTERIOR_OF_AREA),
+//				residenceFilterReader.filter(ResidenceFilterWriter.INTERIOR_OF_AREA),
+				residenceFilterReader.filter(ResidenceFilterWriter.EXTERIOR_OF_AREA),
 				network, config.plansCalcRoute().getNetworkModes());
 		List<MatsimTrip> matsimTrips = population2TripsParser.parse();
 
@@ -102,9 +102,9 @@ public class AnalyzeAndCompareTrips {
 //		matsimTripFilter.activateMode("ptSlow");
 //		matsimTripFilter.activateMode("bicycle");
 //		matsimTripFilter.activateMode(TransportMode.ride);
-		matsimTripFilter.activateMode(TransportMode.walk);
+//		matsimTripFilter.activateMode(TransportMode.walk);
 //		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
-		matsimTripFilter.activateDist(0, 100);
+//		matsimTripFilter.activateDist(0, 100);
 		matsimTripFilter.activateExcludeActivityType("freight");		
 //		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
@@ -117,8 +117,8 @@ public class AnalyzeAndCompareTrips {
 		GeneralTripAnalyzer.analyze(filteredMatsimTrips, -1, -1, analysisOutputDirectory);
 
 		//switch
-		doSrvComparism();
-//		runGnuplotWithoutSrvComparism();
+//		doSrvComparism();
+		runGnuplotWithoutSrvComparism();
 	}
 
 	private static void doSrvComparism() {
@@ -134,7 +134,7 @@ public class AnalyzeAndCompareTrips {
 //		srvTripFilter.activateMode(TransportMode.pt);
 //		srvTripFilter.activateMode(TransportMode.bike);
 //		srvTripFilter.activateMode(TransportMode.ride);
-		srvTripFilter.activateMode(TransportMode.walk);
+//		srvTripFilter.activateMode(TransportMode.walk);
 		srvTripFilter.activateDist(0, 100);
 //		srvTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
