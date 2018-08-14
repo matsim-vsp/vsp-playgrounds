@@ -92,9 +92,13 @@ public class RunBerlinOptAV {
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_500av_TFFF_no-demand-reactions.xml";
-			runId = "berlin-5.1_1pct_500av_TFFF_no-demand-reactions";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/" + runId + "/";
+//			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_0.xml";
+//			runId = "oAV_0_1pct";
+
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_A1_test.xml";
+			runId = "oAV_A1_1pct_test";
+
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 		}
 		
