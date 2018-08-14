@@ -14,6 +14,7 @@ import playground.dziemke.analysis.general.srv.SrvTrip;
 import playground.dziemke.analysis.general.srv.SrvTripFilterImpl;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -50,19 +51,20 @@ public class AnalyzeAndCompareTrips {
 	public static final Logger LOG = Logger.getLogger(AnalyzeAndCompareTrips.class);
 
 	// Parameters
-	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
+	private static final String RUN_DIRECTORY_ROOT = "../../public-svn\\matsim\\scenarios\\countries\\de\\berlin\\2018-06-18-berlin-v5.0-10pct"; // To be adjusted
 
-	private static final String RUN_ID = ""; // To be adjusted
+	private static final String RUN_ID = "b5_1"; // To be adjusted
 
 	// Input and output
 	private static final String NETWORK_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_network.xml.gz";
 	private static final String CONFIG_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_config.xml";
 	private static final String EVENTS_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".output_events.xml.gz";
 	private static final String EXPERIENCED_PLANS_FILE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".experiencedPlans.xml.gz";
-	private static final String EXPERIENCED_PLANS_FILE_WITH_RESIDENCE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".experiencedPlans_withResidence.xml.gz";
+	private static final String EXPERIENCED_PLANS_FILE_WITH_RESIDENCE = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/" + RUN_ID + ".experiencedPlansWithResidence.xml.gz";
 	private static final String AREA_SHAPE_FILE = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
 	private static final String AREA_ID = "11000000"; //Berlin
 	private static String analysisOutputDirectory = "../../runs-svn/open_berlin_scenario" + "/" + RUN_ID + "/analysis_ber";
+//	private static String analysisOutputDirectory = RUN_DIRECTORY_ROOT + "/" + RUN_ID + "/analysis_ber";
 
 	// SrV parameters
 	private static final String SRV_BASE_DIR = "../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/srv/input/"; // This folder needs to be checked out
@@ -87,6 +89,7 @@ public class AnalyzeAndCompareTrips {
 		Population2TripsParser population2TripsParser = new Population2TripsParser(
 //				residenceFilterReader.getWholePopulation(),
 				residenceFilterReader.filter(ResidenceFilterWriter.INTERIOR_OF_AREA),
+//				residenceFilterReader.filter(ResidenceFilterWriter.EXTERIOR_OF_AREA),
 				network, config.plansCalcRoute().getNetworkModes());
 		List<MatsimTrip> matsimTrips = population2TripsParser.parse();
 
@@ -98,9 +101,10 @@ public class AnalyzeAndCompareTrips {
 //		matsimTripFilter.activateMode(TransportMode.pt);
 //		matsimTripFilter.activateMode("ptSlow");
 //		matsimTripFilter.activateMode("bicycle");
-//		matsimTripFilter.activateMode(TransportMode.walk);
+//		matsimTripFilter.activateMode(TransportMode.ride);
+		matsimTripFilter.activateMode(TransportMode.walk);
 //		matsimTripFilter.activateStartsOrEndsIn(events2TripsParser.getNetwork(), AREA_SHAPE_FILE, 11000000);
-//		matsimTripFilter.activateDist(0, 100);
+		matsimTripFilter.activateDist(0, 100);
 		matsimTripFilter.activateExcludeActivityType("freight");		
 //		matsimTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		matsimTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
@@ -112,19 +116,25 @@ public class AnalyzeAndCompareTrips {
 //				events2TripsParser.getPersonStuckCounter(), analysisOutputDirectory);
 		GeneralTripAnalyzer.analyze(filteredMatsimTrips, -1, -1, analysisOutputDirectory);
 
+		//switch
+		doSrvComparism();
+//		runGnuplotWithoutSrvComparism();
+	}
+
+	private static void doSrvComparism() {
 
 		// SrV/Survey
 		Srv2MATSimPopulation srv2MATSimPopulation = new Srv2MATSimPopulation(SRV_PERSON_FILE_PATH, SRV_TRIP_FILE_PATH);
 //		srv2MATSimPopulation.writePopulation(OUTPUT_POPULATION_FILE_PATH);
 		List<SrvTrip> srvTrips = srv2MATSimPopulation.getTrips();
-		
+
 		// Set filters if desired
 		SrvTripFilterImpl srvTripFilter = new SrvTripFilterImpl();
 //		srvTripFilter.activateMode(TransportMode.car);
 //		srvTripFilter.activateMode(TransportMode.pt);
 //		srvTripFilter.activateMode(TransportMode.bike);
 //		srvTripFilter.activateMode(TransportMode.ride);
-//		srvTripFilter.activateMode(TransportMode.walk);
+		srvTripFilter.activateMode(TransportMode.walk);
 		srvTripFilter.activateDist(0, 100);
 //		srvTripFilter.activateDepartureTimeRange(7. * 3600, 9. * 3600);
 //		srvTripFilter.activateDepartureTimeRange(16. * 3600, 22. * 3600);
@@ -145,6 +155,14 @@ public class AnalyzeAndCompareTrips {
 		GnuplotUtils.runGnuplotScript(analysisOutputDirectory, relativePathToGnuplotScript, srvOutputDirectory);
 
 		deleteFolder(new File(srvOutputDirectoryFullPath)); // Delete temporary SrV statistics folder
+	}
+
+	private static void runGnuplotWithoutSrvComparism() {
+
+		// Gnuplot
+		String gnuplotScriptName = "plot_abs_path_run.gnu";
+		String relativePathToGnuplotScript = "../../../../shared-svn/studies/countries/de/open_berlin_scenario/analysis/gnuplot/" + gnuplotScriptName;
+		GnuplotUtils.runGnuplotScript(analysisOutputDirectory, relativePathToGnuplotScript);
 	}
 
 	private static void deleteFolder(File folder) {
