@@ -113,7 +113,7 @@ public class IKAnalysisRun {
 	private final Scenario scenario0;
 	private final List<AgentAnalysisFilter> filters0;
 
-	private final String outputDirectoryName = "analysis-ik-v1.1";
+	private final String outputDirectoryName = "analysis-ik-v1.2";
 
 	private final String visualizationScriptInputDirectory;
 			
