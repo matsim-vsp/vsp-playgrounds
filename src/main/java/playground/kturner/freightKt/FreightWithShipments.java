@@ -104,7 +104,7 @@ public class FreightWithShipments {
 		Carriers carriers = new Carriers() ;
 	
 		Carrier carrier = CarrierImpl.newInstance(Id.create("ShipmentCarrier", Carrier.class));
-		carrier.getShipments().add(createMatsimShipment("shipment1", "i(6,0)", "i(7,4)R", 1));
+		carrier.getShipments().add(createMatsimShipment("shipment1", "i(6,0)", "i(7,4)R", 1)); 	// TODO: MATSimJspritFactory sees it as Pickup .. line 513 :(
 		carrier.getShipments().add(createMatsimShipment("shipment2", "i(6,0)", "i(3,9)", 2));
 		carrier.getShipments().add(createMatsimShipment("shipment3", "i(6,0)", "i(4,9)", 2));
 //		carrier.getShipments().add(createMatsimShipment("shipment4", null, "i(4,9)", 2));
