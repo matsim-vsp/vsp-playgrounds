@@ -153,7 +153,7 @@ public class IKAnalysisRun {
 			log.info("Zones CRS: " + zonesCRS);
 			
 			if (!args[7].equals("null")) homeActivityPrefix = args[7];
-			log.info("Home activity: " + homeActivityPrefix);
+			log.info("Home activity prefix: " + homeActivityPrefix);
 
 			scalingFactor = Integer.valueOf(args[8]);
 			log.info("Scaling factor: " + scalingFactor);
