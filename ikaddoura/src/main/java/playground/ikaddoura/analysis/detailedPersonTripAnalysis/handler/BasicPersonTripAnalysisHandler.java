@@ -66,7 +66,8 @@ PersonDepartureEventHandler , PersonArrivalEventHandler , LinkEnterEventHandler,
 PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	
 	private final static Logger log = Logger.getLogger(BasicPersonTripAnalysisHandler.class);
-	
+	private final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+	private final String helpActivitySubString = "interaction";
 	@Inject
 	private Scenario scenario;
 	
@@ -231,8 +232,8 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			// activities by pt or taxi drivers are not considered
 			
 		} else {
-			if (event.getActType().toString().equals("pt interaction")){
-				// pseudo activities by normal persons are excluded
+			if (event.getActType().toString().contains(helpActivitySubString)){
+				// pseudo activities are excluded
 				
 			} else {
 				// a "real" activity
@@ -283,31 +284,31 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 				// at least the person's second trip
 				int tripNumber = personId2currentTripNumber.get(event.getPersonId());
 				Map<Integer,String> tripNumber2legMode = personId2tripNumber2legMode.get(event.getPersonId());
-				if (tripNumber2legMode.containsKey(tripNumber)){
-					if (!tripNumber2legMode.get(tripNumber).toString().equals("pt")){
-						throw new RuntimeException("A leg mode has already been listed.");
-					}
-				} else {
-					String legMode = event.getLegMode();
-					if((event.getLegMode().toString().equals(TransportMode.transit_walk)
-							|| event.getLegMode().toString().equals(TransportMode.access_walk)
-							|| event.getLegMode().toString().equals(TransportMode.egress_walk))){
-						legMode = TransportMode.pt;
-					}
-					tripNumber2legMode.put(personId2currentTripNumber.get(event.getPersonId()), legMode);
+				
+				if (tripNumber2legMode.get(tripNumber) == null) {
+					// save the help leg mode (better than to have nothing; there may be transit_walk trips without any main mode leg)
+					tripNumber2legMode.put(personId2currentTripNumber.get(event.getPersonId()), event.getLegMode());
 					personId2tripNumber2legMode.put(event.getPersonId(), tripNumber2legMode);
+				
+				} else {
+					// there is already a mode stored for the current trip, only overwrite help leg modes
+					boolean isHelpLeg = false;
+					for (String helpLegMode : helpLegModes) {
+						if(event.getLegMode().toString().equals(helpLegMode)) {
+							isHelpLeg = true;
+						}
+					}
+					if (!isHelpLeg) {
+						// no help leg -> save the leg mode
+						tripNumber2legMode.put(personId2currentTripNumber.get(event.getPersonId()), event.getLegMode());
+						personId2tripNumber2legMode.put(event.getPersonId(), tripNumber2legMode);	
+					}
 				}
 				
 			} else {
 				// the person's first trip
 				Map<Integer,String> tripNumber2legMode = new HashMap<Integer,String>();
-				String legMode = event.getLegMode();
-				if((event.getLegMode().toString().equals(TransportMode.transit_walk)
-						|| event.getLegMode().toString().equals(TransportMode.access_walk)
-						|| event.getLegMode().toString().equals(TransportMode.egress_walk))){
-					legMode = TransportMode.pt;
-				}
-				tripNumber2legMode.put(1, legMode);
+				tripNumber2legMode.put(1, event.getLegMode());
 				personId2tripNumber2legMode.put(event.getPersonId(), tripNumber2legMode);
 			}
 		}		

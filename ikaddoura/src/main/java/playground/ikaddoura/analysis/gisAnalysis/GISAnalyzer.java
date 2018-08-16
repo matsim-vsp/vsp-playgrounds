@@ -291,7 +291,7 @@ public class GISAnalyzer {
 				if (pE instanceof Activity){
 					Activity act = (Activity) pE;
 					
-					if (act.getType().equals(activity)) {
+					if (act.getType().startsWith(activity)) {
 						
 						Coord coord = act.getCoord();
 						personId2coord.put(person.getId(), coord);
