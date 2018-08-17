@@ -104,7 +104,7 @@ public class RunBerlinOptAV {
 
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
-			carAvailableModeForNonBerliners = true;
+			carAvailableModeForNonBerliners = false;
 		}
 		
 		RunBerlinOptAV runner = new RunBerlinOptAV();

@@ -70,8 +70,8 @@ public class ModeAnalysis {
 //		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
 //		final String runId = "test";
 		
-		final String runId = "b5_1";
-		final String runDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.0-1pct-2018-06-18/output_from-reduced-config_FlowStorageCapacityFactor0.02_2018-07-04/";
+		final String runId = "berlin-v5.1-10pct";
+		final String runDirectory = "/Users/ihab/Desktop/ils4a/berlin/scenarios/berlin-v5.1-10pct/output-berlin-v5.1-10pct_c/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;
