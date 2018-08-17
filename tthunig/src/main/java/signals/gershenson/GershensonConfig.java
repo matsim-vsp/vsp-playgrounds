@@ -10,7 +10,7 @@ public class GershensonConfig {
 	private int lengthOfPlatoonTails = 2;
 	private double minimumGREENtime = 5;  //TODO must not be negative
 	
-	private int minimumCycleTime = 80;
+	private int minimumCycleTime = 90;
 	
 	//These are attributes for the Sensor
 	private double monitoredPlatoonTail = 25.;
