@@ -124,7 +124,7 @@ public class GershensonIT {
 		log.info("avg signal green times per cycle: " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) + ", " + avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
-		Assert.assertEquals("avg. signal green times of both groups are not similiar enough", 0.0, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) - avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), 1.);
+		Assert.assertEquals("avg. signal green times of both groups are not similiar enough", 0.0, avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) - avgSignalGreenTimePerCycle.get(SIGNALGROUPID2), 5.);
 	}
 	@Test
 	public void testSingleCrossingDifferentUniformDemandAB() {
@@ -246,7 +246,7 @@ public class GershensonIT {
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertEquals("total greentime in respect to the average cycle time should be very similar ",0.0 , (totalSignalGreenTimes.get(SIGNALGROUPID2)-totalSignalGreenTimes.get(SIGNALGROUPID1))/avgCycleTimePerSystem.get(SIGNALSYSTEMID1),0.1);
-
+		Assert.assertEquals("avg cycle time should be ", 232.30434782608697, avgCycleTimePerSystem.get(SIGNALSYSTEMID1),0.001);
 	}
 
 	
@@ -301,7 +301,7 @@ public class GershensonIT {
 		
 	}
 	
-	@Ignore // TODO activate, when Gershenson Algo can handle lanes
+	@Test // TODO activate, when Gershenson Algo can handle lanes
 	public void testGershensonWithLanes() {
 		double flowNS = 360;
 		double flowWE = 1440;
@@ -318,15 +318,25 @@ public class GershensonIT {
 			}
 		});
 		
+		controler.run();
+		
+		
+		
+		
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime();
 		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
 
-		log.info("total signal green times: Group 1" + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1));
-		log.info("total signal green times: Group 2" + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2));
+		log.info("total signal green times: Group 1 " + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1));
+		log.info("total signal green times: Group 2 " + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2));
+		log.info("total signal green times: Group 3 " + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId3));
+		log.info("total signal green times: Group 4 " + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId4));
 		log.info("avg cycle time: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		// TODO test for correct results
+		Assert.assertEquals("Total Signal Green Time Group1 is wrong", 2755.0,  totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1), 0.00001);
+		Assert.assertEquals("Total Signal Green Time Group2 is wrong", 1920.0,  totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2), 0.00001);
+		Assert.assertEquals("Avg CycleTime should be ", 78.90140845070422, avgCycleTimePerSystem.get(SIGNALSYSTEMID1), 0.00001);
 	}
 	
 	
@@ -371,7 +381,7 @@ public class GershensonIT {
 		});
 		
 		// ---------- VIS
-//		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+		//controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
 		// This was recently commented in by sbraun.  But you can't have vis in regression tests.  It produces
 		// spurious failures with output such as
 		//		libEGL warning: DRI2: xcb_connect failed
