@@ -63,12 +63,12 @@ public class TagCarAndSAVusers {
 	private static final Logger log = Logger.getLogger(TagCarAndSAVusers.class);
 	
 	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
-	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
+	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population_test/";
 	
-	private final String inputPlansFile = "berlin-v5.1-10pct.plans.xml.gz";
-	private final String outputPlansFile = "berlin-5.1-10pct_plans_taggedCarUsers.xml.gz";
+	private final String inputPlansFile = "berlin-v5.1-1pct.plans.xml.gz";
+	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers.xml.gz";
 
-	private final String outputPersonAttributesFile = "berlin-5.0-10pct_person-attributes_potentialSAVusers.xml.gz";
+	private final String outputPersonAttributesFile = "berlin-5.0-1pct_person-attributes_potentialSAVusers.xml.gz";
 
 	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
 	private final String crsSHPFile = "EPSG:25833";
@@ -80,11 +80,11 @@ public class TagCarAndSAVusers {
 	
 	// Optional: change trip mode for all potential SAV users
 	private final boolean changeCar2TaxiTripsForAllPotentialSAVusers = true;
-	private final String outputPlansFileChangeTripMode = "berlin-5.1-10pct_plans_taggedCarUsers_berlin-population-taxi.xml.gz";
+	private final String outputPlansFileChangeTripMode = "berlin-5.1-1pct_plans_taggedCarUsers_berlin-population-taxi.xml.gz";
 	
 	// Optional: split trips from/to outside of Berlin into two trips (outside = car; inside = pt)
 	private final boolean splitTripsForAllTripsCrossingTheBerlinBorder = true;
-	private final String outputPlansFileChangeTripModeSplitTrips = "berlin-5.1-10pct_plans_taggedCarUsers_berlin-population-taxi_splitTrips.xml.gz";
+	private final String outputPlansFileChangeTripModeSplitTrips = "berlin-5.1-1pct_plans_taggedCarUsers_berlin-population-taxi_splitTrips.xml.gz";
 	private final Coord[] prCoordinates = {
 			new Coord(4594046.225912675, 5836589.393558677), // S Mühlenbeck-Mönchmühle
 			new Coord(4596787.252510464, 5836430.391383448), // Schönerlinde
@@ -107,6 +107,7 @@ public class TagCarAndSAVusers {
 			};
 	private final String parkAndRideActivity = "park-and-ride";
 	private final double parkAndRideDuration = 60.;
+	
 	// ####################################################################
 
 	private Scenario scenario;
@@ -146,7 +147,7 @@ public class TagCarAndSAVusers {
 		
 		if (changeCar2TaxiTripsForAllPotentialSAVusers) new PopulationWriter(changeTripModes("person_potentialSAVuser", TransportMode.car, TransportMode.taxi)).write(outputDirectory + outputPlansFileChangeTripMode);;
 
-		if (splitTripsForAllTripsCrossingTheBerlinBorder) new PopulationWriter(splitTrips("person_noPotentialSAVuser", TransportMode.pt)).write(outputDirectory + outputPlansFileChangeTripModeSplitTrips);;
+		if (splitTripsForAllTripsCrossingTheBerlinBorder) new PopulationWriter(splitTrips("person_noPotentialSAVuser")).write(outputDirectory + outputPlansFileChangeTripModeSplitTrips);;
 
 	}
 
@@ -160,9 +161,9 @@ public class TagCarAndSAVusers {
 		}
 	}
 
-	private Population splitTrips(String subpopulation, String modeForTripsInsideTheCityBoundaries) {
+	private Population splitTrips(String subpopulation) {
 				
-		log.info("Splitting border-crossing trips for subpopulation " + subpopulation + " and setting inner-city car trips to " + modeForTripsInsideTheCityBoundaries + "...");
+		log.info("Splitting border-crossing trips for subpopulation " + subpopulation + " and setting inner-city car trips to car...");
 		final String[] attributes = {"CarOwnerInBaseCase"};
 
 		Scenario scenarioOutput = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
@@ -183,62 +184,76 @@ public class TagCarAndSAVusers {
 		
 				boolean addUnModifiedPlan = true;
 				
-				Plan plan = factory.createPlan();
+				Plan plan1 = factory.createPlan();
+				Plan plan2 = factory.createPlan();
+
 				// add first activity
-				plan.addActivity((Activity) person.getSelectedPlan().getPlanElements().get(0));
-				
+				plan1.addActivity((Activity) person.getSelectedPlan().getPlanElements().get(0));
+				plan2.addActivity((Activity) person.getSelectedPlan().getPlanElements().get(0));
+
 				StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction");
 				for (Trip trip : TripStructureUtils.getTrips(person.getSelectedPlan().getPlanElements(), stageActivities )) {
 					
 					String mainMode = new MainModeIdentifierImpl().identifyMainMode(trip.getTripElements());
-										
-					if (mainMode.equals(TransportMode.car)) {
-						if (isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
-							// change from car to pt
+								
+					if (isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
+						// change from car to pt
+						if (mainMode.equals(TransportMode.car)) {
+							
 							addUnModifiedPlan = false;
+
+							plan1.addLeg(factory.createLeg(TransportMode.pt));
+							plan1.addActivity(trip.getDestinationActivity());
 							
-							plan.addLeg(factory.createLeg(TransportMode.pt));
-							plan.addActivity(trip.getDestinationActivity());
-							
-						} else if (isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())) {
-							// from inside Berlin to outside Berlin --> split trip
-							addUnModifiedPlan = false;
-							
-							plan.addLeg(factory.createLeg(TransportMode.pt));
-							Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
-							prActivity.setMaximumDuration(parkAndRideDuration);
-							plan.addActivity(prActivity);
-							
-							plan.addLeg(factory.createLeg(TransportMode.car));
-							plan.addActivity(trip.getDestinationActivity());
-							
-						} else if (!isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
-							// from outside Berlin to inside Berlin --> split trip
-							addUnModifiedPlan = false;
-							
-							plan.addLeg(factory.createLeg(TransportMode.car));
-							Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
-							prActivity.setMaximumDuration(parkAndRideDuration);
-							plan.addActivity(prActivity);
-							
-							plan.addLeg(factory.createLeg(TransportMode.pt));
-							plan.addActivity(trip.getDestinationActivity());
-							
-						} else if (!isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())){
-							// do not change the mode (car outside the city boundaries is still allowed)
-							for (Leg leg : trip.getLegsOnly()) {
-								plan.addLeg(leg);
-							}
-							plan.addActivity(trip.getDestinationActivity());
+							plan2.addLeg(factory.createLeg(TransportMode.pt));
+							plan2.addActivity(trip.getDestinationActivity());
+						
 						} else {
-							throw new RuntimeException("Aborting...");
+							plan1.addLeg(factory.createLeg(mainMode));
+							plan1.addActivity(trip.getDestinationActivity());
 						}
-					} else {
-						// other main mode than car
+						
+					} else if (isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())) {
+						// from inside Berlin to outside Berlin --> split trip
+						addUnModifiedPlan = false;
+						
+						plan1.addLeg(factory.createLeg(TransportMode.pt));
+						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
+						prActivity.setMaximumDuration(parkAndRideDuration);
+						plan1.addActivity(prActivity);
+						
+						plan1.addLeg(factory.createLeg(mainMode));
+						plan1.addActivity(trip.getDestinationActivity());
+						
+						plan2.addLeg(factory.createLeg(TransportMode.pt));
+						plan2.addActivity(trip.getDestinationActivity());
+						
+					} else if (!isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
+						// from outside Berlin to inside Berlin --> split trip
+						addUnModifiedPlan = false;
+						
+						plan1.addLeg(factory.createLeg(mainMode));
+						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
+						prActivity.setMaximumDuration(parkAndRideDuration);
+						plan1.addActivity(prActivity);
+						
+						plan1.addLeg(factory.createLeg(TransportMode.pt));
+						plan1.addActivity(trip.getDestinationActivity());
+						
+						plan2.addLeg(factory.createLeg(TransportMode.pt));
+						plan2.addActivity(trip.getDestinationActivity());
+						
+					} else if (!isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())){
+						// do not change the mode (car outside the city boundaries is still allowed)
 						for (Leg leg : trip.getLegsOnly()) {
-							plan.addLeg(leg);
+							plan1.addLeg(leg);
+							plan2.addLeg(leg);
 						}
-						plan.addActivity(trip.getDestinationActivity());
+						plan1.addActivity(trip.getDestinationActivity());
+						plan2.addActivity(trip.getDestinationActivity());
+
+					} else {
+						throw new RuntimeException("Aborting...");
 					}
 				}
 				
@@ -247,7 +262,8 @@ public class TagCarAndSAVusers {
 					personClone.addPlan(person.getSelectedPlan());
 				} else {
 					// add modified plan
-					personClone.addPlan(plan);
+					personClone.addPlan(plan1);
+					personClone.addPlan(plan2);
 				}
 				
 			} else {
