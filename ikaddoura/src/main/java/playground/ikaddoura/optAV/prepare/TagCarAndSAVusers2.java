@@ -65,7 +65,7 @@ public class TagCarAndSAVusers2 {
 	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
 	
 	private final String inputPlansFile = "berlin-v5.1-1pct.plans.xml.gz";
-	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers_split-activities.xml.gz";
+	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers_noCarInBerlin_splitTrips.xml.gz";
 
 	private final String inputPersonAttributesFile = "berlin-v5.0.person-attributes.xml.gz";
 	private final String inputPersonAttributesSubpopulationPerson = "person";
@@ -74,6 +74,12 @@ public class TagCarAndSAVusers2 {
 	private final String crsSHPFile = "EPSG:25833";
 	private final String crsPopulation = TransformationFactory.DHDN_GK4;
 	
+	private final String modeToReplaceCarTripsInBerlin = TransportMode.taxi;
+	private final String modeToReplaceCarTripsToFromBerlin = TransportMode.pt;
+	private final String berlinModeTail = "";
+	private final String brandenburgModeTail = "_brandenburg";
+	
+	private final boolean splitTrips = true; 
 	private final Coord[] prCoordinates = {
 			new Coord(4594046.225912675, 5836589.393558677), // S Mühlenbeck-Mönchmühle
 			new Coord(4596787.252510464, 5836430.391383448), // Schönerlinde
@@ -94,8 +100,6 @@ public class TagCarAndSAVusers2 {
 		};
 	private final String parkAndRideActivity = "park-and-ride";
 	private final double parkAndRideDuration = 60.;
-	private final String berlinModeTail = "";
-	private final String brandenburgModeTail = "_brandenburg";
 
 	// ####################################################################
 
@@ -176,8 +180,8 @@ public class TagCarAndSAVusers2 {
 					if (isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
 						// berlin --> berlin
 						if (mainMode.equals(TransportMode.car)) {				
-							plan1.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail ));		
-							plan2.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail));				
+							plan1.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail ));		
+							plan2.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail));				
 						} else {
 							plan1.addLeg(factory.createLeg(mainMode + berlinModeTail));
 							plan2.addLeg(factory.createLeg(mainMode + berlinModeTail));
@@ -191,8 +195,8 @@ public class TagCarAndSAVusers2 {
 						
 						// berlin trip
 						if (mainMode.equals(TransportMode.car)) {	
-							plan1.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail));
-							plan2.addLeg(factory.createLeg(TransportMode.pt + brandenburgModeTail));
+							plan1.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail));
+							plan2.addLeg(factory.createLeg(modeToReplaceCarTripsToFromBerlin + brandenburgModeTail));
 						} else {
 							plan1.addLeg(factory.createLeg(mainMode + berlinModeTail));
 							plan2.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
@@ -220,10 +224,11 @@ public class TagCarAndSAVusers2 {
 						
 						// berlin trip
 						if (mainMode.equals(TransportMode.car)) {	
-							plan1.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail));
-							plan2.addLeg(factory.createLeg(TransportMode.pt +  brandenburgModeTail));
+							plan1.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail));
+							plan2.addLeg(factory.createLeg(modeToReplaceCarTripsToFromBerlin +  brandenburgModeTail));
 						} else {
 							plan1.addLeg(factory.createLeg(mainMode + berlinModeTail));
+							plan2.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
 						}
 						
 						plan1.addActivity(trip.getDestinationActivity());			
@@ -241,7 +246,7 @@ public class TagCarAndSAVusers2 {
 						throw new RuntimeException("Aborting...");
 					}
 				}
-				personClone.addPlan(plan1);
+				if (splitTrips) personClone.addPlan(plan1);
 				personClone.addPlan(plan2);
 			} else {
 				personClone.addPlan(person.getSelectedPlan());
