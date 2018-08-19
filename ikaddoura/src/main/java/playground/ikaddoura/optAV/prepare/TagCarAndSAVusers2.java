@@ -94,7 +94,9 @@ public class TagCarAndSAVusers2 {
 		};
 	private final String parkAndRideActivity = "park-and-ride";
 	private final double parkAndRideDuration = 60.;
-	
+	private final String berlinModeTail = "";
+	private final String brandenburgModeTail = "_brandenburg";
+
 	// ####################################################################
 
 	private Scenario scenario;
@@ -174,11 +176,11 @@ public class TagCarAndSAVusers2 {
 					if (isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
 						// berlin --> berlin
 						if (mainMode.equals(TransportMode.car)) {				
-							plan1.addLeg(factory.createLeg(TransportMode.taxi + "_berlin"));		
-							plan2.addLeg(factory.createLeg(TransportMode.taxi + "_berlin"));				
+							plan1.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail ));		
+							plan2.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail));				
 						} else {
-							plan1.addLeg(factory.createLeg(mainMode + "_berlin"));
-							plan2.addLeg(factory.createLeg(mainMode + "_berlin"));
+							plan1.addLeg(factory.createLeg(mainMode + berlinModeTail));
+							plan2.addLeg(factory.createLeg(mainMode + berlinModeTail));
 						}
 						
 						plan1.addActivity(trip.getDestinationActivity());
@@ -189,11 +191,11 @@ public class TagCarAndSAVusers2 {
 						
 						// berlin trip
 						if (mainMode.equals(TransportMode.car)) {	
-							plan1.addLeg(factory.createLeg(TransportMode.taxi + "_berlin"));
-							plan2.addLeg(factory.createLeg(TransportMode.pt + "_brandenburg"));
+							plan1.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail));
+							plan2.addLeg(factory.createLeg(TransportMode.pt + brandenburgModeTail));
 						} else {
-							plan1.addLeg(factory.createLeg(mainMode + "_berlin"));
-							plan2.addLeg(factory.createLeg(mainMode + "_brandenburg"));
+							plan1.addLeg(factory.createLeg(mainMode + berlinModeTail));
+							plan2.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
 						}
 
 						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
@@ -201,7 +203,7 @@ public class TagCarAndSAVusers2 {
 						plan1.addActivity(prActivity);
 						
 						// brandenburg trip
-						plan1.addLeg(factory.createLeg(mainMode + "_brandenburg"));
+						plan1.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
 						
 						plan1.addActivity(trip.getDestinationActivity());		
 						plan2.addActivity(trip.getDestinationActivity());
@@ -210,7 +212,7 @@ public class TagCarAndSAVusers2 {
 						// brandenburg --> berlin
 						
 						// brandenburg trip
-						plan1.addLeg(factory.createLeg(mainMode + "_brandenburg"));
+						plan1.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
 						
 						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
 						prActivity.setMaximumDuration(parkAndRideDuration);
@@ -218,10 +220,10 @@ public class TagCarAndSAVusers2 {
 						
 						// berlin trip
 						if (mainMode.equals(TransportMode.car)) {	
-							plan1.addLeg(factory.createLeg(TransportMode.taxi + "_berlin"));
-							plan2.addLeg(factory.createLeg(TransportMode.pt +  "_brandenburg"));
+							plan1.addLeg(factory.createLeg(TransportMode.taxi + berlinModeTail));
+							plan2.addLeg(factory.createLeg(TransportMode.pt +  brandenburgModeTail));
 						} else {
-							plan1.addLeg(factory.createLeg(mainMode + "_berlin"));
+							plan1.addLeg(factory.createLeg(mainMode + berlinModeTail));
 						}
 						
 						plan1.addActivity(trip.getDestinationActivity());			
@@ -229,8 +231,8 @@ public class TagCarAndSAVusers2 {
 						
 					} else if (!isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())){
 						// brandenburg --> brandenburg
-						plan1.addLeg(factory.createLeg(mainMode + "_brandenburg"));
-						plan2.addLeg(factory.createLeg(mainMode + "_brandenburg"));
+						plan1.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
+						plan2.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
 						
 						plan1.addActivity(trip.getDestinationActivity());
 						plan2.addActivity(trip.getDestinationActivity());

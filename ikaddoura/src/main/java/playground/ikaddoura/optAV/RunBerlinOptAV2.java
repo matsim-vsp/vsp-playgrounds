@@ -22,7 +22,9 @@ package playground.ikaddoura.optAV;
 import static org.matsim.core.config.groups.ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -135,14 +137,7 @@ public class RunBerlinOptAV2 {
 		config.qsim().setUsingTravelTimeCheckInTeleportation(true);
 		config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
 		
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		for (Link link : scenario.getNetwork().getLinks().values()) {
-			link.getAllowedModes().add("car_brandenburg");
-			link.getAllowedModes().add("ride_brandenburg");
-			link.getAllowedModes().add("pt_brandenburg");
-			link.getAllowedModes().add("walk_brandenburg");
-		}
-		
+		Scenario scenario = ScenarioUtils.loadScenario(config);		
 		Controler controler = new Controler(scenario);
 		
 		// use the sbb pt raptor router
@@ -217,6 +212,23 @@ public class RunBerlinOptAV2 {
 		// otfvis
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());	
 				
+		// network mode adjustments
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			if (link.getAllowedModes().contains(TransportMode.car) && link.getAllowedModes().contains(TransportMode.ride) && link.getAllowedModes().contains("freight")) {
+				Set<String> allowedModes = new HashSet<>();
+				allowedModes.add("freight");
+				allowedModes.add(TransportMode.car);
+				allowedModes.add(TransportMode.ride);
+				allowedModes.add(TransportMode.car + "_brandenburg");
+				allowedModes.add(TransportMode.ride + "_brandenburg");
+				link.setAllowedModes(allowedModes);
+			} else if (link.getAllowedModes().contains(TransportMode.pt)) {	
+				// pt link
+			} else {
+				throw new RuntimeException("Aborting...");
+			}
+		}
+		
 		controler.run();
 		
 		// some offline analysis
