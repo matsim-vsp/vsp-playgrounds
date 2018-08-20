@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package gunnar.ihop2.regent.demandreading;
 
 import static gunnar.ihop2.regent.RegentDictionary.regent2matsim;
@@ -25,6 +25,7 @@ import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.HOMEZONE_
 import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.HOUSINGTYPE_ATTRIBUTE;
 import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.OTHERTOURMODE_ATTRIBUTE;
 import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.OTHERZONE_ATTRIBUTE;
+import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.PT_ATTRIBUTEVALUE;
 import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.WORKTOURMODE_ATTRIBUTE;
 import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.WORKZONE_ATTRIBUTE;
 import static gunnar.ihop2.regent.demandreading.ShapeUtils.drawPointFromGeometry;
@@ -60,7 +61,6 @@ import org.matsim.utils.objectattributes.ObjectAttributeUtils2;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
 import floetteroed.utilities.FractionalIterable;
-import floetteroed.utilities.math.MathHelpers;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
@@ -68,32 +68,15 @@ import saleem.stockholmmodel.utils.StockholmTransformationFactory;
  * @author Gunnar Flötteröd, based on Patryk Larek
  *
  */
-public class PopulationCreator {
+public class PopulationCreator_v1 {
 
 	// -------------------- CONSTANTS --------------------
 
 	private final Random rnd = MatsimRandom.getRandom(); // TODO
 
-	public static final String W1S = "w1s";
-	public static final String W1L = "w1l";
-	public static final String HgivenW1S = "h|w1s";
-	public static final String HgivenW1L = "h|w1l";
-
-	public static final String O1 = "o1";
-	public static final String HgivenO1 = "h|o1";
-
-	public static final String W2S = "w2s";
-	public static final String W2L = "w2l";
-	public static final String HgivenW2S = "h|w2s";
-	public static final String HgivenW2L = "h|w2l";
-	// public static final String H2givenW2S = "h2|w2s";
-	// public static final String H2givenW2L = "h2|w2l";
-	public static final String O2givenW2S = "o2|w2s";
-	public static final String O2givenW2L = "o2|w2l";
-
-	// public static final String HOME = "home";
-	// public static final String WORK = "work";
-	// public static final String OTHER = "other";
+	public static final String HOME = "home";
+	public static final String WORK = "work";
+	public static final String OTHER = "other";
 
 	// anything not completely nonsensical, just to get started
 	final double workDuration_s = 8.0 * 3600.0;
@@ -119,19 +102,14 @@ public class PopulationCreator {
 	 * Better pass on the link attributes (file name) into this constructor and
 	 * first reduce the network and only then add it to the zonal system.
 	 */
-	public PopulationCreator(final String networkFileName,
-			final String zoneShapeFileName, final String zonalCoordinateSystem,
-			final String populationFileName) {
-		this.scenario = ScenarioUtils
-				.createScenario(ConfigUtils.createConfig());
+	public PopulationCreator_v1(final String networkFileName, final String zoneShapeFileName,
+			final String zonalCoordinateSystem, final String populationFileName) {
+		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		(new MatsimNetworkReader(this.scenario.getNetwork())).readFile(networkFileName);
-		this.zonalSystem = new ZonalSystem(zoneShapeFileName,
-				zonalCoordinateSystem);
-		this.zonalSystem.addNetwork(this.scenario.getNetwork(),
-				StockholmTransformationFactory.WGS84_SWEREF99);
-		Logger.getLogger(this.getClass().getName()).info(
-				"number of zones in zonal system is "
-						+ this.zonalSystem.getId2zoneView().size());
+		this.zonalSystem = new ZonalSystem(zoneShapeFileName, zonalCoordinateSystem);
+		this.zonalSystem.addNetwork(this.scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
+		Logger.getLogger(this.getClass().getName())
+				.info("number of zones in zonal system is " + this.zonalSystem.getId2zoneView().size());
 		new RegentPopulationReader(populationFileName, this.zonalSystem,
 				this.scenario.getPopulation().getPersonAttributes());
 	}
@@ -145,18 +123,15 @@ public class PopulationCreator {
 	}
 
 	public void removeExpandedLinks(final ObjectAttributes linkAttributes) {
-		final Set<String> tmLinkIds = new LinkedHashSet<String>(
-				ObjectAttributeUtils2.allObjectKeys(linkAttributes));
+		final Set<String> tmLinkIds = new LinkedHashSet<String>(ObjectAttributeUtils2.allObjectKeys(linkAttributes));
 		final Set<Id<Link>> removeTheseLinkIds = new LinkedHashSet<Id<Link>>();
-		for (Id<Link> candidateId : this.scenario.getNetwork().getLinks()
-				.keySet()) {
+		for (Id<Link> candidateId : this.scenario.getNetwork().getLinks().keySet()) {
 			if (!tmLinkIds.contains(candidateId.toString())) {
 				removeTheseLinkIds.add(candidateId);
 			}
 		}
-		Logger.getLogger(this.getClass().getName()).info(
-				"Excluding " + removeTheseLinkIds.size()
-						+ " expanded links from being activity locations.");
+		Logger.getLogger(this.getClass().getName())
+				.info("Excluding " + removeTheseLinkIds.size() + " expanded links from being activity locations.");
 		for (Id<Link> linkId : removeTheseLinkIds) {
 			this.scenario.getNetwork().removeLink(linkId);
 		}
@@ -164,91 +139,72 @@ public class PopulationCreator {
 
 	// -------------------- INTERNALS --------------------
 
-	private Coord drawHomeCoord(final String personId,
-			final CoordinateTransformation coordinateTransform) {
-		final Zone homeZone = this.zonalSystem.getZone(this.attr(personId,
-				HOMEZONE_ATTRIBUTE));
+	private Coord drawHomeCoord(final String personId, final CoordinateTransformation coordinateTransform) {
+		final Zone homeZone = this.zonalSystem.getZone(this.attr(personId, HOMEZONE_ATTRIBUTE));
 		if (!this.zonalSystem.getNodes(homeZone).isEmpty()) {
-			final String homeBuildingType = (String) this.attr(personId,
-					HOUSINGTYPE_ATTRIBUTE);
-			return coordinateTransform.transform(drawPointFromGeometry(homeZone
-					.drawHomeGeometry(homeBuildingType)));
+			final String homeBuildingType = (String) this.attr(personId, HOUSINGTYPE_ATTRIBUTE);
+			return coordinateTransform.transform(drawPointFromGeometry(homeZone.drawHomeGeometry(homeBuildingType)));
 		}
 		return null;
 	}
 
-	private Coord drawWorkCoordinate(final String personId,
-			final CoordinateTransformation coordinateTransform) {
-		if (CAR_ATTRIBUTEVALUE.equals(this.attr(personId,
-				WORKTOURMODE_ATTRIBUTE))) {
-			final Zone workZone = this.zonalSystem.getZone(this.attr(personId,
-					WORKZONE_ATTRIBUTE));
+	private Coord drawWorkCoordinate(final String personId, final CoordinateTransformation coordinateTransform) {
+		final String modeAttr = this.attr(personId, WORKTOURMODE_ATTRIBUTE);
+		if (CAR_ATTRIBUTEVALUE.equals(modeAttr) || PT_ATTRIBUTEVALUE.equals(modeAttr)) {
+			final Zone workZone = this.zonalSystem.getZone(this.attr(personId, WORKZONE_ATTRIBUTE));
 			if (!this.zonalSystem.getNodes(workZone).isEmpty()) {
-				return coordinateTransform
-						.transform(drawPointFromGeometry(workZone
-								.drawWorkGeometry()));
+				return coordinateTransform.transform(drawPointFromGeometry(workZone.drawWorkGeometry()));
 			}
 		}
 		return null;
 	}
 
-	private Coord drawOtherCoordinate(final String personId,
-			final CoordinateTransformation coordinateTransform) {
-		if (CAR_ATTRIBUTEVALUE.equals(this.attr(personId,
-				OTHERTOURMODE_ATTRIBUTE))) {
-			final Zone otherZone = this.zonalSystem.getZone(this.attr(personId,
-					OTHERZONE_ATTRIBUTE));
+	private Coord drawOtherCoordinate(final String personId, final CoordinateTransformation coordinateTransform) {
+		final String modeAttr = this.attr(personId, OTHERTOURMODE_ATTRIBUTE);
+		if (CAR_ATTRIBUTEVALUE.equals(modeAttr) || PT_ATTRIBUTEVALUE.equals(modeAttr)) {
+			final Zone otherZone = this.zonalSystem.getZone(this.attr(personId, OTHERZONE_ATTRIBUTE));
 			if (!this.zonalSystem.getNodes(otherZone).isEmpty()) {
-				return coordinateTransform
-						.transform(drawPointFromGeometry(otherZone
-								.drawWorkGeometry()));
+				return coordinateTransform.transform(drawPointFromGeometry(otherZone.drawWorkGeometry()));
 			}
 		}
 		return null;
 	}
 
-	private void addHomeActivity(final Plan plan, final Coord homeCoord,
-			final Double endTime_s, final String type) {
-		final Activity home = this.scenario.getPopulation().getFactory()
-				.createActivityFromCoord(type, homeCoord);
+	private void addHomeActivity(final Plan plan, final Coord homeCoord, final Double endTime_s, final String type) {
+		final Activity home = this.scenario.getPopulation().getFactory().createActivityFromCoord(type, homeCoord);
 		if (endTime_s != null) {
 			home.setEndTime(endTime_s);
 		}
 		plan.addActivity(home);
 	}
 
-	private void addTour(final Plan plan, final String type,
-			final Coord actCoord, final String mode, final Double endTime_s) {
+	private void addTour(final Plan plan, final String type, final Coord actCoord, final String mode,
+			final Double endTime_s) {
 
 		// leg to activity
-		final Leg homeToAct = this.scenario.getPopulation().getFactory()
-				.createLeg(mode);
+		final Leg homeToAct = this.scenario.getPopulation().getFactory().createLeg(mode);
 		plan.addLeg(homeToAct);
 
 		// activity itself
-		final Activity act = this.scenario.getPopulation().getFactory()
-				.createActivityFromCoord(type, actCoord);
+		final Activity act = this.scenario.getPopulation().getFactory().createActivityFromCoord(type, actCoord);
 		if (endTime_s != null) {
 			act.setEndTime(endTime_s);
 		}
 		plan.addActivity(act);
 
 		// leg back home
-		final Leg actToHome = this.scenario.getPopulation().getFactory()
-				.createLeg(mode);
+		final Leg actToHome = this.scenario.getPopulation().getFactory().createLeg(mode);
 		plan.addLeg(actToHome);
 	}
 
 	private String attr(final String who, final String what) {
-		return (String) this.scenario.getPopulation().getPersonAttributes()
-				.getAttribute(who, what);
+		return (String) this.scenario.getPopulation().getPersonAttributes().getAttribute(who, what);
 	}
 
 	private Person newPerson(final String personId, final XY2Links xy2links,
 			final CoordinateTransformation coordinateTransform) {
 
-		final Coord homeCoord = this.drawHomeCoord(personId,
-				coordinateTransform);
+		final Coord homeCoord = this.drawHomeCoord(personId, coordinateTransform);
 		if (homeCoord == null) {
 			return null; // ------------------------------------------------
 		}
@@ -256,8 +212,7 @@ public class PopulationCreator {
 		/*
 		 * (1) Create a person with socio-demographics and an empty single plan.
 		 */
-		final Person person = this.scenario.getPopulation().getFactory()
-				.createPerson(Id.createPersonId(personId));
+		final Person person = this.scenario.getPopulation().getFactory().createPerson(Id.createPersonId(personId));
 		// socio-demographics
 		// ((PersonImpl) person).setSex((String) this.scenario.getPopulation()
 		// .getPersonAttributes()
@@ -269,17 +224,14 @@ public class PopulationCreator {
 		// .getPersonAttributes()
 		// .getAttribute(personId, BIRTHYEAR_ATTRIBUTE));
 
-		final Plan plan = this.scenario.getPopulation().getFactory()
-				.createPlan();
+		final Plan plan = this.scenario.getPopulation().getFactory().createPlan();
 		person.addPlan(plan);
 
 		/*
 		 * (2) Construct plan based on what tours are made.
 		 */
-		final Coord workCoord = this.drawWorkCoordinate(personId,
-				coordinateTransform);
-		final Coord otherCoord = this.drawOtherCoordinate(personId,
-				coordinateTransform);
+		final Coord workCoord = this.drawWorkCoordinate(personId, coordinateTransform);
+		final Coord otherCoord = this.drawOtherCoordinate(personId, coordinateTransform);
 
 		if ((workCoord != null) && (otherCoord == null)) {
 
@@ -287,40 +239,33 @@ public class PopulationCreator {
 			 * HOME - WORK - HOME
 			 */
 
-			final boolean shortWork = (this.rnd.nextDouble() < 0.63);
+			final double totalOvernightTime_s = 24.0 * 3600.0 - 2.0 * this.tripDuration_s - 1.0 * this.workDuration_s;
+			final double initialHomeEndTime_s = totalOvernightTime_s / 2.0;
 
-			final double initialHomeEndTime_s = MathHelpers.draw(5.0, 7.0,
-					this.rnd) * 3600.0;
-			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s,
-					(shortWork ? HgivenW1S : HgivenW1L));
+			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, HOME);
 
-			final double workEndTime_s = initialHomeEndTime_s
-					+ this.tripDuration_s + this.workDuration_s;
-			final String workTourMode = regent2matsim.get(this.attr(personId,
-					WORKTOURMODE_ATTRIBUTE));
-			this.addTour(plan, (shortWork ? W1S : W1L), workCoord,
-					workTourMode, workEndTime_s);
+			final double workEndTime_s = initialHomeEndTime_s + this.tripDuration_s + this.workDuration_s;
+			final String workTourMode = regent2matsim.get(this.attr(personId, WORKTOURMODE_ATTRIBUTE));
+			this.addTour(plan, WORK, workCoord, workTourMode, workEndTime_s);
 
-			this.addHomeActivity(plan, homeCoord, null, (shortWork ? HgivenW1S
-					: HgivenW1L));
+			this.addHomeActivity(plan, homeCoord, null, HOME);
 
 		} else if ((workCoord == null) && (otherCoord != null)) {
 
 			/*
 			 * HOME - OTHER - HOME
 			 */
-			final double initialHomeEndTime_s = MathHelpers.draw(6.0, 22.0,
-					this.rnd) * 3600.0;
-			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s,
-					HgivenO1);
 
-			final double otherEndTime_s = initialHomeEndTime_s
-					+ this.tripDuration_s + this.otherDuration_s;
-			final String otherTourMode = regent2matsim.get(this.attr(personId,
-					OTHERTOURMODE_ATTRIBUTE));
-			this.addTour(plan, O1, otherCoord, otherTourMode, otherEndTime_s);
+			final double totalOvernightTime_s = 24.0 * 3600.0 - 2.0 * this.tripDuration_s - 1.0 * this.otherDuration_s;
+			final double initialHomeEndTime_s = totalOvernightTime_s / 2.0;
 
-			this.addHomeActivity(plan, homeCoord, null, HgivenO1);
+			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, HOME);
+
+			final double otherEndTime_s = initialHomeEndTime_s + this.tripDuration_s + this.otherDuration_s;
+			final String otherTourMode = regent2matsim.get(this.attr(personId, OTHERTOURMODE_ATTRIBUTE));
+			this.addTour(plan, OTHER, otherCoord, otherTourMode, otherEndTime_s);
+
+			this.addHomeActivity(plan, homeCoord, null, HOME);
 
 		} else if ((homeCoord != null) && (workCoord != null)) {
 
@@ -328,34 +273,24 @@ public class PopulationCreator {
 			 * HOME - WORK - HOME - OTHER - HOME
 			 */
 
-			final boolean shortWork = (this.rnd.nextDouble() < 0.41);
+			final double totalOvernightTime_s = 24.0 * 3600.0 - 4.0 * this.tripDuration_s - 1.0 * this.workDuration_s
+					- 1.0 * this.intermediateHomeDuration_s - 1.0 * this.otherDuration_s;
+			final double initialHomeEndTime_s = totalOvernightTime_s / 2.0;
+			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, HOME);
 
-			final double initialHomeEndTime_s = MathHelpers.draw(5.0, 7.0,
-					this.rnd) * 3600.0;
-			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s,
-					(shortWork ? HgivenW2S : HgivenW2L));
+			final double workEndTime_s = initialHomeEndTime_s + this.tripDuration_s + this.workDuration_s;
+			final String workTourMode = regent2matsim.get(this.attr(personId, WORKTOURMODE_ATTRIBUTE));
+			this.addTour(plan, WORK, workCoord, workTourMode, workEndTime_s);
 
-			final double workEndTime_s = initialHomeEndTime_s
-					+ this.tripDuration_s + this.workDuration_s;
-			final String workTourMode = regent2matsim.get(this.attr(personId,
-					WORKTOURMODE_ATTRIBUTE));
-			this.addTour(plan, (shortWork ? W2S : W2L), workCoord,
-					workTourMode, workEndTime_s);
+			final double intermediateHomeEndTime_s = workEndTime_s + this.tripDuration_s
+					+ this.intermediateHomeDuration_s;
+			this.addHomeActivity(plan, homeCoord, intermediateHomeEndTime_s, HOME);
 
-			final double intermediateHomeEndTime_s = workEndTime_s
-					+ this.tripDuration_s + this.intermediateHomeDuration_s;
-			this.addHomeActivity(plan, homeCoord, intermediateHomeEndTime_s,
-					(shortWork ? HgivenW2S : HgivenW2L));
+			final double otherEndTime_s = intermediateHomeEndTime_s + this.tripDuration_s + this.otherDuration_s;
+			final String otherTourMode = regent2matsim.get(this.attr(personId, OTHERTOURMODE_ATTRIBUTE));
+			this.addTour(plan, OTHER, otherCoord, otherTourMode, otherEndTime_s);
 
-			final double otherEndTime_s = intermediateHomeEndTime_s
-					+ this.tripDuration_s + this.otherDuration_s;
-			final String otherTourMode = regent2matsim.get(this.attr(personId,
-					OTHERTOURMODE_ATTRIBUTE));
-			this.addTour(plan, (shortWork ? O2givenW2S : O2givenW2L),
-					otherCoord, otherTourMode, otherEndTime_s);
-
-			this.addHomeActivity(plan, homeCoord, null, (shortWork ? HgivenW2S
-					: HgivenW2L));
+			this.addHomeActivity(plan, homeCoord, null, HOME);
 
 		} else {
 
@@ -376,18 +311,15 @@ public class PopulationCreator {
 	public void run(final String initialPlansFile) throws FileNotFoundException {
 
 		final XY2Links xy2links = new XY2Links(this.scenario);
-		final CoordinateTransformation coordinateTransform = getCoordinateTransformation(
-				WGS84_EPSG3857, WGS84_SWEREF99);
+		final CoordinateTransformation coordinateTransform = getCoordinateTransformation(WGS84_EPSG3857,
+				WGS84_SWEREF99);
 
-		final List<String> allPersonIds = allObjectKeys(this.scenario
-				.getPopulation().getPersonAttributes());
+		final List<String> allPersonIds = allObjectKeys(this.scenario.getPopulation().getPersonAttributes());
 		Collections.shuffle(allPersonIds);
 
-		for (String personId : new FractionalIterable<>(allPersonIds,
-				this.populationSampleFactor)) {
+		for (String personId : new FractionalIterable<>(allPersonIds, this.populationSampleFactor)) {
 
-			final Person person = this.newPerson(personId, xy2links,
-					coordinateTransform);
+			final Person person = this.newPerson(personId, xy2links, coordinateTransform);
 			if (person != null) {
 				// Logger.getLogger(this.getClass().getName()).info(
 				// "creating person " + personId);
@@ -395,8 +327,7 @@ public class PopulationCreator {
 			}
 		}
 
-		PopulationWriter popwriter = new PopulationWriter(
-				scenario.getPopulation(), this.scenario.getNetwork());
+		PopulationWriter popwriter = new PopulationWriter(scenario.getPopulation(), this.scenario.getNetwork());
 		popwriter.write(initialPlansFile);
 	}
 
@@ -422,10 +353,8 @@ public class PopulationCreator {
 		// linkAttributes);
 		// reader.parse(linkAttributesFileName);
 
-		final PopulationCreator pc = new PopulationCreator(networkFileName,
-				zonesShapeFileName,
-				StockholmTransformationFactory.WGS84_EPSG3857,
-				populationFileName);
+		final PopulationCreator pc = new PopulationCreator(networkFileName, zonesShapeFileName,
+				StockholmTransformationFactory.WGS84_EPSG3857, populationFileName);
 		pc.setBuildingsFileName(buildingShapeFileName);
 		// pc.setAgentHomeXYFile("./data/demand_output/agenthomeXY_v03.txt");
 		// pc.setAgentWorkXYFile("./data/demand_output/agentWorkXY_v03.txt");

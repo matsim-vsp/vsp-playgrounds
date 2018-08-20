@@ -29,6 +29,8 @@ import org.matsim.matrices.Matrices;
 import org.matsim.matrices.Matrix;
 import org.matsim.matrices.MatsimMatricesReader;
 
+import floetteroed.utilities.FractionalIterable;
+
 /**
  * 
  * @author Gunnar Flötteröd
