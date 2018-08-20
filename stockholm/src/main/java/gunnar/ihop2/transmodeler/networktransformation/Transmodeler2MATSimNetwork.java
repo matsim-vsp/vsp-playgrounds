@@ -19,7 +19,12 @@
  */ 
 package gunnar.ihop2.transmodeler.networktransformation;
 
-import floetteroed.utilities.Units;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.SortedSet;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -30,21 +35,17 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.lanes.Lane;
-import org.matsim.lanes.Lanes;
-import org.matsim.lanes.LanesFactory;
-import org.matsim.lanes.LanesToLinkAssignment;
-import org.matsim.lanes.LanesUtils;
-import org.matsim.lanes.LanesWriter;
+import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.data.Lanes;
+import org.matsim.lanes.data.LanesFactory;
+import org.matsim.lanes.data.LanesToLinkAssignment;
+import org.matsim.lanes.data.LanesUtils;
+import org.matsim.lanes.data.LanesWriter;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
-import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.SortedSet;
+import floetteroed.utilities.Units;
+import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
  * Turns a mesoscopic Transmodeler network (defined through a set of files in
