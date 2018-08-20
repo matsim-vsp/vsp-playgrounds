@@ -89,7 +89,8 @@ public class FreightWithShipments {
 		/*
 		 * some preparation - set logging level
 		 */
-		Logger.getRootLogger().setLevel(Level.DEBUG);
+//		Logger.getRootLogger().setLevel(Level.DEBUG);
+		Logger.getRootLogger().setLevel(Level.INFO);
 		
 		/*
 		 * some preparation - create output folder
@@ -190,6 +191,7 @@ public class FreightWithShipments {
 		solutionPlotter.plot(OUTPUT_DIR + "simpleEnRoutePickupAndDeliveryExample_solution.png", "en-route pickup and delivery");
 
 		new GraphStreamViewer(problem).setRenderShipments(true).display();
+		new GraphStreamViewer(problem, Solutions.bestOf(solutions)).setRenderDelay(50).display();
 
 
 		log.info("#### Finished ####");
