@@ -58,7 +58,7 @@ public class JspritWithShipments {
 		/*
          * get a vehicle type-builder and build a type with the typeId "vehicleType" and a capacity of 2
 		 */
-        VehicleTypeImpl.Builder vehicleTypeBuilder = VehicleTypeImpl.Builder.newInstance("vehicleType").addCapacityDimension(0, 1);
+        VehicleTypeImpl.Builder vehicleTypeBuilder = VehicleTypeImpl.Builder.newInstance("vehicleType").addCapacityDimension(0, 2).setFixedCost(1000.0);
         VehicleType vehicleType = vehicleTypeBuilder.build();
 
 		/*
@@ -75,20 +75,20 @@ public class JspritWithShipments {
         VehicleImpl vehicle2 = vehicleBuilder2.build();
         
 
-		/*
-         * build shipments at the required locations, each with a capacity-demand of 1.
-		 * 4 shipments
-		 * 1: (5,7)->(6,9)
-		 * 2: (5,13)->(6,11)
-		 * 3: (15,7)->(14,9)
-		 * 4: (15,13)->(14,11)
-		 */
-
-        Shipment shipment1 = Shipment.Builder.newInstance("1").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(5, 7))).setDeliveryLocation(loc(Coordinate.newInstance(6, 9))).build();
-        Shipment shipment2 = Shipment.Builder.newInstance("2").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(5, 13))).setDeliveryLocation(loc(Coordinate.newInstance(6, 11))).build();
-
-        Shipment shipment3 = Shipment.Builder.newInstance("3").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(15, 7))).setDeliveryLocation(loc(Coordinate.newInstance(14, 9))).build();
-        Shipment shipment4 = Shipment.Builder.newInstance("4").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(15, 13))).setDeliveryLocation(loc(Coordinate.newInstance(14, 11))).build();
+//		/*
+//         * build shipments at the required locations, each with a capacity-demand of 1.
+//		 * 4 shipments
+//		 * 1: (5,7)->(6,9)
+//		 * 2: (5,13)->(6,11)
+//		 * 3: (15,7)->(14,9)
+//		 * 4: (15,13)->(14,11)
+//		 */
+//
+//        Shipment shipment1 = Shipment.Builder.newInstance("1").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(5, 7))).setDeliveryLocation(loc(Coordinate.newInstance(6, 9))).build();
+//        Shipment shipment2 = Shipment.Builder.newInstance("2").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(5, 13))).setDeliveryLocation(loc(Coordinate.newInstance(6, 11))).build();
+//
+//        Shipment shipment3 = Shipment.Builder.newInstance("3").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(15, 7))).setDeliveryLocation(loc(Coordinate.newInstance(14, 9))).build();
+//        Shipment shipment4 = Shipment.Builder.newInstance("4").addSizeDimension(0, 1).setPickupLocation(loc(Coordinate.newInstance(15, 13))).setDeliveryLocation(loc(Coordinate.newInstance(14, 11))).build();
 
 
         //
@@ -104,23 +104,25 @@ public class JspritWithShipments {
         Delivery delivery3 = Delivery.Builder.newInstance("7").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(16, 8))).build();
         Delivery delivery4 = Delivery.Builder.newInstance("8").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(16, 12))).build();
         
-        /*
-         * build pickups, (implicitly picked up in the depot)
-		 * 1: (8,4)
-		 * 2: (12,4)
-		 * 3: (8,16)
-		 * 4: (12,16)
-		 */
-        Pickup pickup1 = Pickup.Builder.newInstance("9").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(8, 4))).build();
-        Pickup pickup2 = Pickup.Builder.newInstance("10").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(12, 4))).build();
-        Pickup pickup3 = Pickup.Builder.newInstance("11").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(8, 16))).build();
-        Pickup pickup4 = Pickup.Builder.newInstance("12").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(12, 16))).build();
+//        /*
+//         * build pickups, (implicitly picked up in the depot)
+//		 * 1: (8,4)
+//		 * 2: (12,4)
+//		 * 3: (8,16)
+//		 * 4: (12,16)
+//		 */
+//        Pickup pickup1 = Pickup.Builder.newInstance("9").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(8, 4))).build();
+//        Pickup pickup2 = Pickup.Builder.newInstance("10").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(12, 4))).build();
+//        Pickup pickup3 = Pickup.Builder.newInstance("11").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(8, 16))).build();
+//        Pickup pickup4 = Pickup.Builder.newInstance("12").addSizeDimension(0, 1).setLocation(loc(Coordinate.newInstance(12, 16))).build();
 
         VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
         vrpBuilder.addVehicle(vehicle1).addVehicle(vehicle2);
-        vrpBuilder.addJob(shipment1).addJob(shipment2).addJob(shipment3).addJob(shipment4)
-            .addJob(delivery1).addJob(delivery2).addJob(delivery3).addJob(delivery4).
-            addJob(pickup1).addJob(pickup2).addJob(pickup3).addJob(pickup4).build();
+        vrpBuilder
+//        	.addJob(shipment1).addJob(shipment2).addJob(shipment3).addJob(shipment4)
+            .addJob(delivery1).addJob(delivery2).addJob(delivery3).addJob(delivery4)
+//          .addJob(pickup1).addJob(pickup2).addJob(pickup3).addJob(pickup4)
+            .build();
 
         VehicleRoutingProblem problem = vrpBuilder.build();
 
