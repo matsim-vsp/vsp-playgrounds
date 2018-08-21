@@ -15,7 +15,7 @@ public class RunSingleCrossingScenario {
 	
 	private static final Logger log = Logger.getLogger(RunBraessSimulation.class);
 
-    private static final SingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.NONE;
+    private static final SingleCrossingScenario.SignalControl SIGNAL_CONTROL = SignalControl.FIXED;
     private static final Regime LAEMMER_REGIME = Regime.OPTIMIZING;
     
     private static final boolean VISUALIZE_WITH_OTFVIS = true;
