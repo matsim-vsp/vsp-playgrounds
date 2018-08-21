@@ -154,7 +154,7 @@ public class GershensonIT {
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertTrue("average signal green time should be higher for Group1", avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) > avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		//Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 600/6000 > totalSignalGreenTimes.get(SIGNALGROUPID2)/totalSignalGreenTimes.get(SIGNALGROUPID1));
+		Assert.assertEquals("The ratio of total signal green times is", 1778./1590.,totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2),0.00001);
 	}
 	
 
@@ -236,6 +236,7 @@ public class GershensonIT {
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertEquals("total greentime in respect to the average cycle time should be very similar ",0.0 , (totalSignalGreenTimes.get(SIGNALGROUPID2)-totalSignalGreenTimes.get(SIGNALGROUPID1))/avgCycleTimePerSystem.get(SIGNALSYSTEMID1),0.1);
+		Assert.assertEquals("avg cycle time should be ", 232.30434782608697, avgCycleTimePerSystem.get(SIGNALSYSTEMID1),0.001);
 
 	}
 
@@ -291,7 +292,7 @@ public class GershensonIT {
 		
 	}
 	
-	@Ignore // TODO activate, when Gershenson Algo can handle lanes
+	@Test
 	public void testGershensonWithLanes() {
 		double flowNS = 360;
 		double flowWE = 1440;
@@ -307,16 +308,30 @@ public class GershensonIT {
 				this.addControlerListenerBinding().toInstance(signalAnalyzer);
 			}
 		});
-		
+		controler.run();
+
 		// check signal results
 		Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime();
-		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
+		Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer
+				.calculateAvgFlexibleCycleTimePerSignalSystem();
 
-		log.info("total signal green times: Group 1" + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1));
-		log.info("total signal green times: Group 2" + totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2));
+		log.info("total signal green times: Group 1 "
+				+ totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1));
+		log.info("total signal green times: Group 2 "
+				+ totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2));
+		log.info("total signal green times: Group 3 "
+				+ totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId3));
+		log.info("total signal green times: Group 4 "
+				+ totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId4));
 		log.info("avg cycle time: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
-		
+
 		// TODO test for correct results
+		Assert.assertEquals("Total Signal Green Time Group1 is wrong", 2755.0,
+				totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1), 0.00001);
+		Assert.assertEquals("Total Signal Green Time Group2 is wrong", 1920.0,
+				totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2), 0.00001);
+		Assert.assertEquals("Avg CycleTime should be ", 78.90140845070422, avgCycleTimePerSystem.get(SIGNALSYSTEMID1),
+				0.00001);
 	}
 	
 	
@@ -393,29 +408,29 @@ public class GershensonIT {
 		if (scenarioType.equals("singleCrossingNoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 0);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, true, 3);
+			createSignalsSingleCrossing(scenario, true);
 		}
 		if (scenarioType.equals("singleCrossingOneBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 1);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, true ,3);
+			createSignalsSingleCrossing(scenario, true);
 		}
 		if (scenarioType.equals("singleCrossingTwoBottlenecks")) {
 			createNetworkSingleCrossing(scenario.getNetwork(), 2);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, false,3);
+			createSignalsSingleCrossing(scenario, false);
 		}
 		if (scenarioType.equals("singleCrossingStochasticDemandAB")) {
 			stochasticDemand[0]=true;
 			stochasticDemand[1]=true;
 			createNetworkSingleCrossing(scenario.getNetwork(), 0);
 			createPopulationScenario(scenario.getPopulation(), noPersons, stochasticDemand);
-			createSignalsSingleCrossing(scenario, false,3);
+			createSignalsSingleCrossing(scenario, false);
 		}
 		if(scenarioType.equals("doubleCrossingUniformDemandABC")) {
 			createNetworkScenario2(scenario.getNetwork(),0);
 			createPopulationDoubleCrossing(scenario.getPopulation(), noPersons);
-			createSignalsSingleCrossing(scenario, false,3);
+			createSignalsSingleCrossing(scenario, false);
 		}	
 
 		
@@ -569,7 +584,7 @@ public class GershensonIT {
 		}
 	}
 
-	private void createSignalsSingleCrossing(Scenario scenario, boolean allowedDirectionStraight, int systemcenter) {
+	private void createSignalsSingleCrossing(Scenario scenario, boolean allowedDirectionStraight) {
 		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
 		SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
 		SignalSystemsDataFactory sysFac = signalSystems.getFactory();
@@ -618,16 +633,7 @@ public class GershensonIT {
 		signalSystemControl.setControllerIdentifier(GershensonSignalController.IDENTIFIER);
 		signalControl.addSignalSystemControllerData(signalSystemControl);
 
-		
-		// no plan is needed for GershensonController
-//		// create a plan for the signal system (with defined cycle time and offset 0)
-//		SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 60, 0, Id.create("SignalPlan1", SignalPlan.class));
-//		signalSystemControl.addSignalPlanData(signalPlan);
-//
-//		// specify signal group settings for both signal groups
-//		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1, 0, 5));
-//		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId2, 10, 55));
-//		signalPlan.setOffset(0);
+		// note: no signal plans are needed for GershensonController
 	}
 
 	private Config defineConfig() {
