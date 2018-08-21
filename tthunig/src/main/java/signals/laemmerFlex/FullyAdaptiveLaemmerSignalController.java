@@ -104,11 +104,6 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 			controller.setSignalSystem(signalSystem);
 			return controller;
 		}
-
-		@Override
-		public String getIdentifier() {
-			return IDENTIFIER;
-		}
 	}
 
 	private FullyAdaptiveLaemmerSignalController(Scenario scenario, LinkSensorManager sensorManager, DownstreamSensor downstreamSensor) {

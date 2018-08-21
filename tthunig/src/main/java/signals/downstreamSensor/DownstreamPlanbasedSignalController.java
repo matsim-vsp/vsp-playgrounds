@@ -55,11 +55,6 @@ public final class DownstreamPlanbasedSignalController implements SignalControll
 			controller.setSignalSystem(signalSystem);
 			return controller;
 		}
-
-		@Override
-		public String getIdentifier() {
-			return IDENTIFIER;
-		}
 	}
 
 	private final DownstreamSensor downstreamSensor;

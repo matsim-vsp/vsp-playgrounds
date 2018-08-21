@@ -79,11 +79,6 @@ public class GershensonSignalController implements SignalController {
 			controller.setSignalSystem(signalSystem);
 			return controller;
 		}
-
-		@Override
-		public String getIdentifier() {
-			return IDENTIFIER;
-		}
 	}
 	
 	private class SignalGroupMetadata {
