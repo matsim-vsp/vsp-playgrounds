@@ -65,7 +65,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 
 	// set this based on the parameters in the header of the btu_solution
 	private static final int CYCLE_TIME = 90;
-	private static final int STEP_TIME = 3;
+	private static final int STEP_TIME = 1;
 	
 	private static void convertOptimalSignalPlans(String directory, String inputFile) {
 		CtenSignalPlanXMLParser solutionParser = new CtenSignalPlanXMLParser();
@@ -134,7 +134,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 				toLinkId = turningMoveRestrictionsIterator.next();
 				Id<DgStreet> correspondingLightId = idConverter.convertFromLinkIdToLinkId2LightId(fromLinkId, null, toLinkId);
 				correspondingLight = flexCrossing.getLights().get(Id.create(correspondingLightId, DgGreen.class));
-				// correspondingGreen stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
+				// correspondingLight stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
 			}
 		} else if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
 			Set<Id<Link>> toLinksOfThisSignal = new HashSet<>();
@@ -148,7 +148,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 					toLinksOfThisSignal.add(toLinkId);
 					Id<DgStreet> correspondingLightId = idConverter.convertFromLinkIdToLinkId2LightId(fromLinkId, fromLaneId, toLinkId);
 					correspondingLight = flexCrossing.getLights().get(Id.create(correspondingLightId, DgGreen.class));
-					// correspondingGreen stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
+					// correspondingLight stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
 				}
 			} if (correspondingLight == null) {
 				/* correspondingLight is still null -> no fromLink-fromLane-toLink-Relation of this signal has been found for which a light exists.
@@ -179,7 +179,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 				toLinkId = outLinkIterator.next().getId();
 				Id<DgStreet> correspondingLightId = idConverter.convertFromLinkIdToLinkId2LightId(fromLinkId, null, toLinkId);
 				correspondingLight = flexCrossing.getLights().get(Id.create(correspondingLightId, DgGreen.class));
-				// correspondingGreen stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
+				// correspondingLight stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
 			}
 		}
 		return correspondingLight;
@@ -204,7 +204,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 	private static void writeOptimizedSignalControl(String directoryPath, String inputFilename,
 			SignalsData signalsData) {
 		SignalsScenarioWriter writer = new SignalsScenarioWriter();
-		String postFix = "opt";
+		String postFix = "opt_expanded";
 		String subdirectory = inputFilename.substring(0,inputFilename.lastIndexOf("/")+1);
 		
 		writer.setSignalSystemsOutputFilename(directoryPath + subdirectory
@@ -220,7 +220,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 	
 	public static void main(String[] args) {
 		convertOptimalSignalPlans("../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
-				"btu/solution.xml");
+				"btu/solution_splits_expanded.xml");
 	}
 
 }
