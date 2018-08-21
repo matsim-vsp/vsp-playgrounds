@@ -28,11 +28,13 @@ import org.apache.commons.io.FilenameUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsManagerImpl;
 import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -71,13 +73,18 @@ public class LinksPerMode2GIS {
 
 		for (Map.Entry<String, Set<Id<Link>>> entry : this.detailedMode2LinkIds.entrySet()) {
 						
-			final List<Link> links = new ArrayList<>(entry.getValue().size());
+//			final List<Link> links = new ArrayList<>(entry.getValue().size());
+			Network network = NetworkUtils.createNetwork() ;
 			for (Id<Link> linkId : entry.getValue()) {
-				links.add(this.scenario.getNetwork().getLinks().get(linkId));
+//				links.add(this.scenario.getNetwork().getLinks().get(linkId));
+				network.addLink(this.scenario.getNetwork().getLinks().get(linkId));
 			}
 			
 			final String shapeFileName = FilenameUtils.concat(path, entry.getKey() + "-links.shp");
-			new Links2ESRIShape(links, shapeFileName, builder).write();		
+//			new Links2ESRIShape(links, shapeFileName, builder).write();
+			new Links2ESRIShape(network, shapeFileName, builder).write();
+			
+			// I replaced "links" by "network" to make this compile; I have not tested if it works.  kai, aug'18
 		}
 	}
 
