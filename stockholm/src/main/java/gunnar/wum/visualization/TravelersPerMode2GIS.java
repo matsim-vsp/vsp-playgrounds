@@ -28,8 +28,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
@@ -59,15 +61,22 @@ public class TravelersPerMode2GIS {
 
 			System.out.println("processing mode " + entry.getKey() + " with " + entry.getValue().size() + " users");
 
-			final List<Person> persons = new ArrayList<>(entry.getValue().size());
+//			final List<Person> persons = new ArrayList<>(entry.getValue().size());
+			Population tmpPop = PopulationUtils.createPopulation( ConfigUtils.createConfig() ) ;
 			for (Id<Person> personId : entry.getValue()) {
-				persons.add(this.scenario.getPopulation().getPersons().get(personId));
+//				persons.add(this.scenario.getPopulation().getPersons().get(personId));
+				tmpPop.addPerson( this.scenario.getPopulation().getPersons().get( personId ) );
 			}
 
 			final String outPrefix = FilenameUtils.concat(path, entry.getKey());
-
-			final SelectedPlans2ESRIShape sp = new SelectedPlans2ESRIShape(persons, this.scenario.getNetwork(),
+			
+//			final SelectedPlans2ESRIShape sp = new SelectedPlans2ESRIShape(persons, this.scenario.getNetwork(),
+//					MGC.getCRS(TransformationFactory.WGS84), outPrefix);
+			final SelectedPlans2ESRIShape sp = new SelectedPlans2ESRIShape(tmpPop, this.scenario.getNetwork(),
 					MGC.getCRS(TransformationFactory.WGS84), outPrefix);
+			
+			// I replaced persons in the code above by tmpPop to make the code compile.  Have not tested what it does.  kai, aug'18
+			
 			sp.setOutputSample(1.0);
 //			sp.setActBlurFactor(100);
 //			sp.setLegBlurFactor(100);
