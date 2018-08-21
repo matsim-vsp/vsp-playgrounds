@@ -102,8 +102,8 @@ public class SingleCrossingScenario {
 	public static final Id<SignalGroup> signalGroupId4 = Id.create("SignalGroup4", SignalGroup.class);
 	public static final Id<SignalSystem> signalSystemId = Id.create("SignalSystem1", SignalSystem.class);
 
-	private double flowNS = 360;
-	private double flowWE = 0.5 * 2520;
+	private final double flowNS;
+	private final double flowWE;
 	public enum SignalControl {NONE, FIXED, FIXED_PROTECTED_LEFT_TURN, 
 		LAEMMER_NICO, LAEMMER_FULLY_ADAPTIVE, GERSHENSON};
 	SignalControl signalControl = SignalControl.LAEMMER_NICO;
@@ -120,19 +120,12 @@ public class SingleCrossingScenario {
 	private StabilizationStrategy stabilizationStrategy;
 	private IntersectionLogic intersectionLogic = IntersectionLogic.NONE;
 	private boolean createLeftTurnDemand = false;
+	private double leftTurningFactorWE = 0.2;
+	
 	public void setCreateLeftTurnDemand(boolean createLeftTurnDemand) {
 		this.createLeftTurnDemand = createLeftTurnDemand;
 	}
 
-	private double leftTurningFactorWE = 0.2;
-
-	public void setFlowNS(double flowNS) {
-		this.flowNS = flowNS;
-	}
-
-	public void setFlowWE(double flowWE) {
-		this.flowWE = flowWE;
-	}
 
 	public void setSignalType(Regime laemmerRegime) {
 		this.laemmerRegime = laemmerRegime;
@@ -180,8 +173,6 @@ public class SingleCrossingScenario {
 	public void setGershensonConfig(GershensonConfig gershensonConfig) {
 		this.gershensonConfig = gershensonConfig;
 	}
-	
-	public SingleCrossingScenario() {}
 	
 	/**
 	 * constructor useful for scenarios without laemmer signals
@@ -654,7 +645,7 @@ public class SingleCrossingScenario {
 	        		signalGroup3.addSignalId(Id.create("Signal4_3", Signal.class));
 	        		signalGroup4.addSignalId(Id.create("Signal8_3", Signal.class));
 	        	}
-		} else { // lanes are used - we have a signal per lane! (3 lanes r/l for WE, 1 lane ol for NS)
+		} else { // lanes are used - we have a signal per lane! (2 lanes r+l for WE, 1 lane ol for NS)
 			signalGroup1.addSignalId(Id.create("Signal2_3.r", Signal.class));
 			signalGroup2.addSignalId(Id.create("Signal7_3.ol", Signal.class));
 			if (groupedSignals) {
