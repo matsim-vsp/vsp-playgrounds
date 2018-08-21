@@ -1,4 +1,4 @@
-package playground.dziemke.analysis;
+package playground.vsp.analysis.utils;
 
 import org.apache.log4j.Logger;
 

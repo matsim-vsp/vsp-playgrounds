@@ -44,6 +44,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
+import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
@@ -103,7 +104,8 @@ public class HolesInOTFVisTest {
 				stuckEvents.add(event);
 			}
 		});
-		
+
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
 		QSim qSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, manager);
 		
 		if ( IS_USING_OTFVIS ) {

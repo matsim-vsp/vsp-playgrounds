@@ -36,7 +36,9 @@ import org.matsim.contrib.emissions.utils.EmissionUtils;
  * @author amit
  *
  */
-public class EmissionUtilsExtended {
+public final class EmissionUtilsExtended {
+
+	private EmissionUtilsExtended () {}
 
 	public static <T> Map<Id<T>, SortedMap<String, Double>> convertPerPersonColdEmissions2String (final Map<Id<T>, Map<ColdPollutant, Double>> coldEmiss) {
 		return coldEmiss.entrySet().stream().collect(Collectors.toMap(

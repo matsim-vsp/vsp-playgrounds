@@ -13,10 +13,9 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.PopulationPlugin;
+import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
-import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.vehicles.Vehicle;
@@ -64,8 +63,8 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 	public Mobsim get() {
 		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
 				.useDefaults() //
-				.removePlugin(PopulationPlugin.class) //
-				.addOverridingModule(new AbstractModule() {
+				.removeModule(PopulationModule.class) //
+				.addOverridingControllerModule(new AbstractModule() {
 					@Override
 					public void install() {
 						bind(QNetworkFactory.class).toInstance(qnetworkFactory);

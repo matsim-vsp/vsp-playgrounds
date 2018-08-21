@@ -152,7 +152,6 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
     }
 
     public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2TotalEmissions(){
-        EmissionUtilsExtended emissionUtilsExtended = new EmissionUtilsExtended();
         return this.vehicleId2WarmEmissions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
                 EmissionUtils.sumUpEmissions(entry.getValue(), this.vehicleId2ColdEmissions.get(entry.getKey()))));
     }

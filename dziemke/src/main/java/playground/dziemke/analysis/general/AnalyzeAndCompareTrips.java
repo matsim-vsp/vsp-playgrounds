@@ -1,20 +1,24 @@
 package playground.dziemke.analysis.general;
 
+import java.io.File;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.dziemke.analysis.GnuplotUtils;
-import playground.dziemke.analysis.general.matsim.*;
+
+import playground.dziemke.analysis.general.matsim.MatsimTrip;
+import playground.dziemke.analysis.general.matsim.MatsimTripFilterImpl;
+import playground.dziemke.analysis.general.matsim.Population2TripsParser;
+import playground.dziemke.analysis.general.matsim.ResidenceFilterReader;
+import playground.dziemke.analysis.general.matsim.ResidenceFilterWriter;
 import playground.dziemke.analysis.general.srv.Srv2MATSimPopulation;
 import playground.dziemke.analysis.general.srv.SrvTrip;
 import playground.dziemke.analysis.general.srv.SrvTripFilterImpl;
-
-import java.io.File;
-import java.util.List;
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * With this class, one can

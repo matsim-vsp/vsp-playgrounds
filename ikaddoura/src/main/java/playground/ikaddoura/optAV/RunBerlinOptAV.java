@@ -73,6 +73,7 @@ public class RunBerlinOptAV {
 	private static String outputDirectory;
 	private static String runId;
 	private static String visualizationScriptInputDirectory;
+	private static boolean carAvailableModeForNonBerliners = true;
 	private static final boolean otfvis = false;
 	
 	public static void main(String[] args) {
@@ -89,13 +90,21 @@ public class RunBerlinOptAV {
 			
 			visualizationScriptInputDirectory = args[3];
 			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
+			
+			carAvailableModeForNonBerliners = Boolean.parseBoolean(args[4]);
+			log.info("carAvailableModeForNonBerliners: "+ carAvailableModeForNonBerliners);
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_500av_TFFF_no-demand-reactions.xml";
-			runId = "berlin-5.1_1pct_500av_TFFF_no-demand-reactions";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/" + runId + "/";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_G1.xml";
+			runId = "oAV_G1_1pct";
+
+//			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_A1_test.xml";
+//			runId = "oAV_A1_1pct_test";
+
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
+			carAvailableModeForNonBerliners = false;
 		}
 		
 		RunBerlinOptAV runner = new RunBerlinOptAV();
@@ -173,10 +182,18 @@ public class RunBerlinOptAV {
 				
 				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
 				
+				List<String> availableModesArrayList = new ArrayList<>();
+				availableModesArrayList.add("bicycle");
+				availableModesArrayList.add("pt");
+				availableModesArrayList.add("walk");
+				if (carAvailableModeForNonBerliners) {
+					availableModesArrayList.add("car");
+				}
+				
+				final String[] availableModes = availableModesArrayList.toArray(new String[availableModesArrayList.size()]);
+				
 				addPlanStrategyBinding("SubtourModeChoice_noPotentialSAVuser").toProvider(new Provider<PlanStrategy>() {
-					
-					final String[] availableModes = {"car", "bicycle", "pt", "walk"};
-					
+										
 					@Inject
 					Scenario sc;
 

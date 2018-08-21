@@ -31,7 +31,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.PopulationPlugin;
+import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
 
 import com.google.inject.Provider;
@@ -88,8 +88,9 @@ public class GuidanceMobsimFactory implements Provider<Mobsim>, ShutdownListener
 		
 		return new QSimBuilder(scenario.getConfig()) //
 				.useDefaults() //
-				.removePlugin(PopulationPlugin.class) //
-				.addPlugin(new GuidanceQSimPlugin(scenario.getConfig(), guidance, equipmentFraction, ttObserver)) //
+				.removeModule(PopulationModule.class) //
+				.addQSimModule(new GuidanceQSimModule(guidance, equipmentFraction, ttObserver)) //
+				.configureComponents(GuidanceQSimModule::configureComponents) //
 				.build(scenario, eventsManager);
 	}
 

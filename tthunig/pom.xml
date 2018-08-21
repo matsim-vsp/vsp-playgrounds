@@ -14,32 +14,52 @@
 			<name>maven central</name>
 			<url>https://repo1.maven.org/maven2</url>
 		</repository>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
 	</repositories>
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.matsim.contrib</groupId>
-			<artifactId>signals</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>dgrether</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>ikaddoura</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
-			<artifactId>dziemke</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
-		</dependency>
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-math</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.contrib</groupId>
+		<artifactId>signals</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+		<artifactId>dgrether</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+		<artifactId>agarwalamit</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+		<artifactId>vsp</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.contrib</groupId>
+		<artifactId>decongestion</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+		<scope>compile</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.contrib</groupId>
+		<artifactId>locationchoice</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.github.matsim-org</groupId>
+		<artifactId>Opdyts-MATSim-Integration</artifactId>
+		<version>-SNAPSHOT</version>
+	</dependency>
 		<!-- <dependency>
 			<groupId>gurobi</groupId>
 			<artifactId>gurobi</artifactId>
@@ -52,6 +72,11 @@
 			<artifactId>jmpi-solver-gurobi</artifactId>
 			<version>0.6</version>
 		</dependency>  -->
+	<dependency>
+		<groupId>com.google.code.gson</groupId>
+		<artifactId>gson</artifactId>
+		<version>2.8.2</version>
+	</dependency>
 	</dependencies>
 	<build>
 		<plugins>

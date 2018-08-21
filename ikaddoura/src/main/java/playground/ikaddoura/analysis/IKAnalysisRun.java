@@ -98,7 +98,7 @@ public class IKAnalysisRun {
 	private final String scenarioCRS;	
 	private final String shapeFileZones;
 	private final String zonesCRS;
-	private final String homeActivity;
+	private final String homeActivityPrefix;
 	private final int scalingFactor;
 		
 	// policy case
@@ -113,7 +113,7 @@ public class IKAnalysisRun {
 	private final Scenario scenario0;
 	private final List<AgentAnalysisFilter> filters0;
 
-	private final String outputDirectoryName = "analysis-ik-v1.1";
+	private final String outputDirectoryName = "analysis-ik-v1.2";
 
 	private final String visualizationScriptInputDirectory;
 			
@@ -127,7 +127,7 @@ public class IKAnalysisRun {
 		String scenarioCRS = null;	
 		String shapeFileZones = null;
 		String zonesCRS = null;
-		String homeActivity = null;
+		String homeActivityPrefix = null;
 		int scalingFactor;
 		
 		if (args.length > 0) {
@@ -152,8 +152,8 @@ public class IKAnalysisRun {
 			if (!args[6].equals("null")) zonesCRS = args[6];
 			log.info("Zones CRS: " + zonesCRS);
 			
-			if (!args[7].equals("null")) homeActivity = args[7];
-			log.info("Home activity: " + homeActivity);
+			if (!args[7].equals("null")) homeActivityPrefix = args[7];
+			log.info("Home activity prefix: " + homeActivityPrefix);
 
 			scalingFactor = Integer.valueOf(args[8]);
 			log.info("Scaling factor: " + scalingFactor);
@@ -163,11 +163,15 @@ public class IKAnalysisRun {
 
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run3_bln_c_DecongestionPID/";
-			runId = "policyCase";
+//			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_oAV_B1_1pct/";
+//			runId = "oAV_B1_1pct";
+//			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_oAV_0_1pct/";
+//			runIdToCompareWith = "oAV_0_1pct";
 			
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output-FINAL/m_r_output_run0_bln_bc/";
-			runIdToCompareWith = "baseCase";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/oAV_C7/";
+			runId = "oAV_C7";		
+			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/oAV_0/";
+			runIdToCompareWith = "oAV_0";
 			
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			
@@ -182,8 +186,8 @@ public class IKAnalysisRun {
 //			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_LOR_SHP_EPSG_3068/Planungsraum_EPSG_3068.shp";
 //			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
 			
-			homeActivity = "home";
-			scalingFactor = 100;			
+			homeActivityPrefix = "home";
+			scalingFactor = 10;			
 		}
 		
 		Scenario scenario1 = loadScenario(runDirectory, runId, null);
@@ -218,7 +222,7 @@ public class IKAnalysisRun {
 				scenarioCRS,
 				shapeFileZones,
 				zonesCRS,
-				homeActivity,
+				homeActivityPrefix,
 				scalingFactor,
 				filter1,
 				filter0);
@@ -254,7 +258,7 @@ public class IKAnalysisRun {
 		this.scenarioCRS = scenarioCRS;
 		this.shapeFileZones = null;
 		this.zonesCRS = null;
-		this.homeActivity = null;
+		this.homeActivityPrefix = null;
 		this.scalingFactor = scalingFactor;
 		
 		this.filters0 = null;
@@ -263,14 +267,14 @@ public class IKAnalysisRun {
 	
 	@Deprecated
 	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
-			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor,
+			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
 			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
 		
-		this(scenario1, scenario0, "./visualization-scripts/", scenarioCRS, shapeFileZones, zonesCRS, homeActivity, scalingFactor, filters1, filters0);
+		this(scenario1, scenario0, "./visualization-scripts/", scenarioCRS, shapeFileZones, zonesCRS, homeActivityPrefix, scalingFactor, filters1, filters0);
 	}
 	
 	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
-			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivity, int scalingFactor,
+			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
 			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
 
 		String runDirectory = scenario1.getConfig().controler().getOutputDirectory();
@@ -298,7 +302,7 @@ public class IKAnalysisRun {
 		this.scenarioCRS = scenarioCRS;
 		this.shapeFileZones = shapeFileZones;
 		this.zonesCRS = zonesCRS;
-		this.homeActivity = homeActivity;
+		this.homeActivityPrefix = homeActivityPrefix;
 		this.scalingFactor = scalingFactor;
 		
 		this.filters0 = filters0;
@@ -502,7 +506,7 @@ public class IKAnalysisRun {
 			personTripScenarioComparisonOutputDirectory = analysisOutputDirectory + "scenario-comparison_" + runId + "-vs-" + runIdToCompareWith + "/";
 			createDirectory(personTripScenarioComparisonOutputDirectory);
 
-			PersonTripScenarioComparison scenarioComparison = new PersonTripScenarioComparison(this.homeActivity, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0);
+			PersonTripScenarioComparison scenarioComparison = new PersonTripScenarioComparison(this.homeActivityPrefix, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0);
 			try {
 				scenarioComparison.analyzeByMode();
 				scenarioComparison.analyzeByScore(0.0);
@@ -682,7 +686,7 @@ public class IKAnalysisRun {
 			createDirectory(spatialAnalysisOutputDirectory);
 			String spatialAnalysisOutputDirectoryWithPrefix = spatialAnalysisOutputDirectory + scenario.getConfig().controler().getRunId() + ".";
 			
-			GISAnalyzer gisAnalysis = new GISAnalyzer(scenario, shapeFileZones, scalingFactor, homeActivity, zonesCRS, scenarioCRS);
+			GISAnalyzer gisAnalysis = new GISAnalyzer(scenario, shapeFileZones, scalingFactor, homeActivityPrefix, zonesCRS, scenarioCRS);
 			gisAnalysis.analyzeZoneTollsUserBenefits(spatialAnalysisOutputDirectoryWithPrefix, "tolls_userBenefits_travelTime_modes_zones.shp", personId2userBenefit, personMoneyHandler.getPersonId2toll(), personMoneyHandler.getPersonId2congestionToll(), personMoneyHandler.getPersonId2noiseToll(), personMoneyHandler.getPersonId2airPollutionToll(), basicHandler);
 		}
 		

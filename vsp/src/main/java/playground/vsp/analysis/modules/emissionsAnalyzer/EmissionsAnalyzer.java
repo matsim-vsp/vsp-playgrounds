@@ -63,7 +63,6 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 	private final static Logger log = Logger.getLogger(EmissionsAnalyzer.class);
 	private MutableScenario scenario;
 	private final String emissionEventsFile;
-	private EmissionUtils emissionUtils;
 	private EmissionsPerPersonWarmEventHandler warmHandler;
 	private EmissionsPerPersonColdEventHandler coldHandler;
 	private Map<Id<Person>, Map<WarmPollutant, Double>> person2warmEmissions;

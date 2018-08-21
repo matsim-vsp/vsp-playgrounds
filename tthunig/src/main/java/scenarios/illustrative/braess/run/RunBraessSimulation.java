@@ -23,7 +23,6 @@ package scenarios.illustrative.braess.run;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
 
 import org.apache.log4j.Logger;
@@ -69,7 +68,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import analysis.signals.SignalAnalysisListener;
 import analysis.signals.SignalAnalysisWriter;
-import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -154,19 +152,6 @@ public final class RunBraessSimulation {
 		Controler controler = prepareController(scenario);
 	
 		controler.run();
-		
-		try {
-			MATSimVideoUtils.createLegHistogramVideo(config.controler().getOutputDirectory());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (PRICING_TYPE.equals(PricingType.INTERVALBASED)) {
-			try {
-				MATSimVideoUtils.createVideo(config.controler().getOutputDirectory(), 1, "toll_perLinkAndTimeBin");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	private static Config defineConfig() {

@@ -270,7 +270,6 @@ public class OnRoadExposureForMixedTrafficTest {
         private Map<String, Map<String, Double>> coldEmissions = new HashMap<>();
         private Map<String, Map<String, Double>> warmEmissions = new HashMap<>();
 
-        private final EmissionUtilsExtended emissionUtilsExtended = new EmissionUtilsExtended();
         private final Network network;
 
         EmissionAggregator(Network network){

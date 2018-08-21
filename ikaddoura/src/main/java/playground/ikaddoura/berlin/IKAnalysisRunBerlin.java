@@ -40,16 +40,18 @@ public class IKAnalysisRunBerlin {
 			
 	public static void main(String[] args) throws IOException {
 			
-		final String runId = "b400_85_v10";
-		final String runDirectory = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/output/" + runId + "/";
-//		final String scenarioCRS = TransformationFactory.DHDN_GK4;
-		final String scenarioCRS = null;	
-		final String shapeFileZones = null;
-		final String zonesCRS = null;
-		final String homeActivity = "home";
-		final int scalingFactor = 10;
+		final String runId = "berlin-v5.1-1pct";
+		final String runDirectory = "/Users/ihab/Desktop/ils4a/berlin/scenarios/berlin-v5.1-1pct/output-berlin-v5.1-1pct_a/";
+		final String visualizationScriptInputDirectory = "./visualization-scripts/";
+
+		final String scenarioCRS = TransformationFactory.DHDN_GK4;
+		final String shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
+		final String zonesCRS = TransformationFactory.DHDN_GK4;
+		final String homeActivityPrefix = "home";
+		final int scalingFactor = 100;
+		
+		// optional: person attributes file to replace the output person attributes file
 		final String personAttributesFile = null;
-//		final String personAttributesFile = "/Users/ihab/Documents/workspace/shared-svn/studies/countries/de/open_berlin_scenario/be_3/population/personAttributes_400_person_freight_10pct.xml.gz";
 
 		Scenario scenario1 = loadScenario(runDirectory, runId, personAttributesFile);
 		
@@ -76,10 +78,11 @@ public class IKAnalysisRunBerlin {
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
 				null,
+				visualizationScriptInputDirectory,
 				scenarioCRS,
 				shapeFileZones,
 				zonesCRS,
-				homeActivity,
+				homeActivityPrefix,
 				scalingFactor,
 				filters1,
 				null);
@@ -100,9 +103,10 @@ public class IKAnalysisRunBerlin {
 			String networkFile;
 			String populationFile;
 			String personAttributesFile;
-			String configFile;
+			String configFile = runDirectory + runId + ".output_config.xml";
+			log.info("Setting config file to " + configFile);
 			
-			if (new File(runDirectory + runId + ".output_config.xml").exists()) {
+			if (new File(configFile).exists()) {
 				
 				networkFile = runDirectory + runId + ".output_network.xml.gz";
 				populationFile = runDirectory + runId + ".output_plans.xml.gz";
@@ -115,10 +119,14 @@ public class IKAnalysisRunBerlin {
 				}
 				
 			} else {
+
+				configFile = runDirectory + "output_config.xml";
+				log.info("Setting config file to " + configFile);
 				
 				networkFile = runDirectory + "output_network.xml.gz";
 				populationFile = runDirectory + "output_plans.xml.gz";
-				configFile = runDirectory + "output_config.xml";
+				
+				log.info("Trying to load config file " + configFile);
 				
 				if (personAttributesFileToReplaceOutputFile == null) {
 					personAttributesFile = runDirectory + "output_personAttributes.xml.gz";

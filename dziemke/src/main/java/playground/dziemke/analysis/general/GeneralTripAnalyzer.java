@@ -1,14 +1,15 @@
 package playground.dziemke.analysis.general;
 
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import playground.dziemke.analysis.GnuplotUtils;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * @author on 04.04.2017.

@@ -21,14 +21,12 @@ package playground.benjamin.scenarios.munich.analysis.nectar;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.contrib.emissions.types.WarmPollutant;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
 
 
 /**
@@ -43,7 +41,6 @@ public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandle
 	
 	final int noOfTimeBins;
 	final double timeBinSize;
-	EmissionUtils emissionUtils;
 
 	public EmissionsPerLinkWarmEventHandler(double simulationEndTime, int noOfTimeBins){
 		this.noOfTimeBins = noOfTimeBins;

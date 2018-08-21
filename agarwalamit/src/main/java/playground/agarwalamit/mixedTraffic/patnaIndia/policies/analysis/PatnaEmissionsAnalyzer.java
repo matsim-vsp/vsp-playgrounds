@@ -44,11 +44,7 @@ import playground.agarwalamit.utils.MapUtils;
  * Created by amit on 23/12/2016.
  */
 
-
 public class PatnaEmissionsAnalyzer {
-
-    private final EmissionUtilsExtended emissionUtilsExtended = new EmissionUtilsExtended();
-
     public static void main(String[] args) {
         String policyCase = "BT-mb";
         String emissionEventsFile = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/"+policyCase+"/output_emissions_events.xml.gz";
@@ -76,9 +72,9 @@ public class PatnaEmissionsAnalyzer {
         emissionEventsReader.readFile(emissionEventsFile);
 
         // probably just use the total directly from event handler; (need to test first) amit June'17
-        Map<String, Double> coldEmissions = emissionUtilsExtended.getTotalColdEmissions(emissionPersonEventHandler.getPersonId2ColdEmissions(
+        Map<String, Double> coldEmissions = EmissionUtilsExtended.getTotalColdEmissions(emissionPersonEventHandler.getPersonId2ColdEmissions(
                 PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
-        Map<String, Double> warmEmissions = emissionUtilsExtended.getTotalWarmEmissions(emissionPersonEventHandler.getPersonId2WarmEmissions(PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
+        Map<String, Double> warmEmissions = EmissionUtilsExtended.getTotalWarmEmissions(emissionPersonEventHandler.getPersonId2WarmEmissions(PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
 
         Map<String, Double> totalEmissions = MapUtils.mergeMaps(coldEmissions, warmEmissions);
 
