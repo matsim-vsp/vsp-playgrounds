@@ -78,15 +78,25 @@ public class TtBasicController {
 		Controler controler = new Controler( scenario );
         
 		// add the signals module if signal systems are used
-		if (signalsConfigGroup.isUseSignalSystems()) {
-			SignalsModule signalsModule = new SignalsModule();
-			// the signals module works for planbased, sylvia and laemmer signal controller by default 
-			// and is pluggable for your own signal controller like this:
-			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
-			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-			signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
-			controler.addOverridingModule(signalsModule);
-		}
+		SignalsModule signalsModule = new SignalsModule();
+		// the signals module works for planbased, sylvia and laemmer signal controller
+		// by default and is pluggable for your own signal controller like this:
+		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+				DownstreamPlanbasedSignalController.DownstreamFactory.class);
+		signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+				FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+		signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+				GershensonSignalController.GershensonFactory.class);
+		controler.addOverridingModule(signalsModule);
+
+		// bind gershenson config
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				GershensonConfig gershensonConfig = new GershensonConfig();
+				bind(GershensonConfig.class).toInstance(gershensonConfig);
+			}
+		});
 		
 		// add live visualization module
 		if (VIS) { 

@@ -342,11 +342,11 @@ public class GershensonIT {
 		
 
 		Controler controler = new Controler(scenario);
+		// add the signals module with gershenson controller
 		SignalsModule signalsModule = new SignalsModule();
-		// the signals module works for planbased, sylvia and laemmer signal controller by default 
-		// and is pluggable for your own signal controller like this:
-		signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
-        controler.addOverridingModule(signalsModule);
+		signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+				GershensonSignalController.GershensonFactory.class);
+		controler.addOverridingModule(signalsModule);
         
         // bind gershenson config
         controler.addOverridingModule(new AbstractModule() {

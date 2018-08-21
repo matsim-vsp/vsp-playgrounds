@@ -130,12 +130,15 @@ public class RunTwoCrossings {
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
 			SignalsModule signalsModule = new SignalsModule();
-			// the signals module works for planbased, sylvia and laemmer signal controller by default 
-			// and is pluggable for your own signal controller like this:
-			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
-			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-			signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
-	        controler.addOverridingModule(signalsModule);
+			// the signals module works for planbased, sylvia and laemmer signal controller
+			// by default and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+					DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+					GershensonSignalController.GershensonFactory.class);
+			controler.addOverridingModule(signalsModule);
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override

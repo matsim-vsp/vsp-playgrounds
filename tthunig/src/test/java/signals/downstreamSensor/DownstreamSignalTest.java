@@ -180,12 +180,11 @@ public class DownstreamSignalTest {
 		}
 
 		Controler controler = new Controler(scenario);
-		// add signal module
+		// add signal module with downstream controller
 		SignalsModule signalsModule = new SignalsModule();
-		// the signals module works for planbased, sylvia and laemmer signal controller by default 
-		// and is pluggable for your own signal controller like this:
-		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
-        controler.addOverridingModule(signalsModule);
+		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+				DownstreamPlanbasedSignalController.DownstreamFactory.class);
+		controler.addOverridingModule(signalsModule);
 
 		// add signal analysis tool
 		SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
