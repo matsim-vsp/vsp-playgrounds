@@ -178,6 +178,7 @@ public class GershensonSignalController implements SignalController {
 			SignalGroupMetadata metadata = this.signalGroupIdMetadataMap.get(signalGroup.getId());
 			for(Signal signal : signalGroup.getSignals().values()){
 				
+				maximalNumberOfAgentsInDistanceMap.put(signal.getId(), (int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize()));
 				//TODO if signal has only one lane register the lane and not the link otherwise this is wrong
 				//Like this sensor will mix up signal groups.
 				
@@ -196,6 +197,10 @@ public class GershensonSignalController implements SignalController {
 //					But if m*vehicle length is more than the distance between the monitored distance this might not work properly
 					
 					double lenghtOfLink = scenario.getNetwork().getLinks().get(signal.getLinkId()).getLength();
+					
+					int adjustedNumberOfAgents = java.lang.Math.max((int)(lenghtOfLink/this.scenario.getConfig().jdeqSim().getCarSize()),1);
+					maximalNumberOfAgentsInDistanceMap.put(signal.getId(), adjustedNumberOfAgents);
+					
 					if (lenghtOfLink<gershensonConfig.getMonitoredDistance()){
 						if (lenghtOfLink<gershensonConfig.getMonitoredPlatoonTail()){
 							log.warn("The length of "+signal.getLinkId().toString() +" of Signal "+ signal.getId().toString()+" is smaller than "+gershensonConfig.getMonitoredPlatoonTail()+" m. Register one Sensor at"+ lenghtOfLink+
@@ -343,13 +348,11 @@ public class GershensonSignalController implements SignalController {
 						Link outLink = scenario.getNetwork().getLinks().get(linkid);
 						metadata.addOutLink(outLink);
 					}
-				}			
+				}					
 			}
 		}
 		//This is a fixed value and and doesn't have to be calculated in every iteration
 		maximalNumberOfAgentsInDistance = (int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize());
-		//TODO Adjust the Threshold according to the proposed formula.
-		setThresholdfromCycleTime();
 	}
 				
 				//-----------------------------------------------------------
@@ -423,6 +426,8 @@ public class GershensonSignalController implements SignalController {
 		initSignalGroupMetadata();
 		initSignalStates(simStartTimeSeconds);
 		registerAndInitializeSensorManager();
+		//TODO Adjust the Threshold according to the proposed formula.
+		setThresholdfromCycleTime();
 	}
 		
 	/**
@@ -546,9 +551,11 @@ public class GershensonSignalController implements SignalController {
 		
 		//This ensures that the threshold adjusts if there are more than one in InLink per Group that the Counter is not reached to quickly
 		double averageInLinksinGroup = 0.;
+		double avgMaximalNumberOfAgentsInDistance=0.;
 		for (SignalGroup signalGroup : this.system.getSignalGroups().values()){
 			// count number of lanes of this signal group
 			for (Signal signal : signalGroup.getSignals().values()) {
+				avgMaximalNumberOfAgentsInDistance += (double) maximalNumberOfAgentsInDistanceMap.get(signal.getId());
 				if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()) {
 					averageInLinksinGroup += 1;
 				} else {
@@ -556,13 +563,17 @@ public class GershensonSignalController implements SignalController {
 				}
 			}
 		}
+		avgMaximalNumberOfAgentsInDistance/=maximalNumberOfAgentsInDistanceMap.size();
+		
+		log.info("The average maximal numbers of agents in distance is "+avgMaximalNumberOfAgentsInDistance+" m. Default was: "+(int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize())+" m.");
+		
 		
 		if (averageInLinksinGroup != 0.){
 			averageInLinksinGroup /= numberOfGroups;
 		} else averageInLinksinGroup = 1;
 		
 		//TODO Explanation
-		this.threshold  = averageInLinksinGroup*maximalNumberOfAgentsInDistance*(minCycleTime-intergreenTime*numberOfGroups)/numberOfGroups;		
+		this.threshold  = averageInLinksinGroup*avgMaximalNumberOfAgentsInDistance*(minCycleTime-intergreenTime*numberOfGroups)/numberOfGroups;		
 		double oldThreshold = gershensonConfig.getThreshold();	
 		
 		log.info("Set Threshold from "+ oldThreshold + " to "+ this.threshold  +" [veh*s]");
@@ -586,8 +597,8 @@ public class GershensonSignalController implements SignalController {
 			for(Signal signal : approachingVehiclesMap.get(group.getId()).keySet()){
 				
 				//Fix Agents distance here for the case that there is no length of lane exceptions //TODO
-				if(maximalNumberOfAgentsInDistance < approachingVehiclesMap.get(group.getId()).get(signal)){
-					vehicles += maximalNumberOfAgentsInDistance;
+				if(maximalNumberOfAgentsInDistanceMap.get(signal.getId()) < approachingVehiclesMap.get(group.getId()).get(signal)){
+					vehicles += maximalNumberOfAgentsInDistanceMap.get(signal.getId());
 				} else {
 					vehicles += approachingVehiclesMap.get(group.getId()).get(signal);
 				}
@@ -722,7 +733,7 @@ public class GershensonSignalController implements SignalController {
 	private Map<Id<SignalGroup>, Boolean> jammedSignalGroup = new HashMap<Id<SignalGroup>,Boolean>();
 	private SignalGroup activeSignalGroup = null;
 	private int maximalNumberOfAgentsInDistance;
-	private Map<Id<Signal>, Integer>  maximalNumberOfAgentsInDistanceMap;
+	private Map<Id<Signal>, Integer>  maximalNumberOfAgentsInDistanceMap = new HashMap<Id<Signal>, Integer>();
 	private double threshold;
 	
 
