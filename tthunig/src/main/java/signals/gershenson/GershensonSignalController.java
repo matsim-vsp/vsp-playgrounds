@@ -198,10 +198,13 @@ public class GershensonSignalController implements SignalController {
 					
 					double lenghtOfLink = scenario.getNetwork().getLinks().get(signal.getLinkId()).getLength();
 					
-					int adjustedNumberOfAgents = java.lang.Math.max((int)(lenghtOfLink/this.scenario.getConfig().jdeqSim().getCarSize()),1);
-					maximalNumberOfAgentsInDistanceMap.put(signal.getId(), adjustedNumberOfAgents);
+					
 					
 					if (lenghtOfLink<gershensonConfig.getMonitoredDistance()){
+						
+						int adjustedNumberOfAgents = java.lang.Math.max((int)(lenghtOfLink/this.scenario.getConfig().jdeqSim().getCarSize()),1);
+						maximalNumberOfAgentsInDistanceMap.put(signal.getId(), adjustedNumberOfAgents);
+						
 						if (lenghtOfLink<gershensonConfig.getMonitoredPlatoonTail()){
 							log.warn("The length of "+signal.getLinkId().toString() +" of Signal "+ signal.getId().toString()+" is smaller than "+gershensonConfig.getMonitoredPlatoonTail()+" m. Register one Sensor at"+ lenghtOfLink+
 								" The sensor for Rule 3 is set 0´. This means Rule 3 is not going to execute. This might be not fatal but annoying.");
@@ -232,6 +235,9 @@ public class GershensonSignalController implements SignalController {
 						log.info("Register Sensor for InLane "+ laneId.toString() +" of Signal "+ signal.getId().toString());
 						double lenghtOfLane = lanes4link.getLanes().get(laneId).getStartsAtMeterFromLinkEnd();
 						if (lenghtOfLane<gershensonConfig.getMonitoredDistance()){
+							
+							int adjustedNumberOfAgents = java.lang.Math.max((int)(lenghtOfLane/this.scenario.getConfig().jdeqSim().getCarSize()),1);
+							maximalNumberOfAgentsInDistanceMap.put(signal.getId(), adjustedNumberOfAgents);
 							//TODO MAP Signal-Exceptions in metadata to adjust for the rules
 							if (lenghtOfLane<gershensonConfig.getMonitoredPlatoonTail()){
 								log.warn("The length of "+laneId.toString() +" of Signal "+ signal.getId().toString()+" is smaller than "+gershensonConfig.getMonitoredPlatoonTail()+" m. Register one Sensor at"+ lenghtOfLane+
@@ -565,7 +571,7 @@ public class GershensonSignalController implements SignalController {
 		}
 		avgMaximalNumberOfAgentsInDistance/=maximalNumberOfAgentsInDistanceMap.size();
 		
-		log.info("The average maximal numbers of agents in distance is "+avgMaximalNumberOfAgentsInDistance+" m. Default was: "+(int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize())+" m.");
+		log.info("The average maximal numbers of agents in distance is "+avgMaximalNumberOfAgentsInDistance+". Default was: "+(int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize()));
 		
 		
 		if (averageInLinksinGroup != 0.){
