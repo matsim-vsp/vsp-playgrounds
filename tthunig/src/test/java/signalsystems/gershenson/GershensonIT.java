@@ -164,7 +164,7 @@ public class GershensonIT {
 		log.info("avg cycle time per system: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 		
 		Assert.assertTrue("average signal green time should be higher for Group1", avgSignalGreenTimePerCycle.get(SIGNALGROUPID1) > avgSignalGreenTimePerCycle.get(SIGNALGROUPID2));
-		//Assert.assertTrue("The ratio of demands should higher than the ratio of total green times", 600/6000 > totalSignalGreenTimes.get(SIGNALGROUPID2)/totalSignalGreenTimes.get(SIGNALGROUPID1));
+		Assert.assertEquals("The ratio of total signal green times is", 1778./1590.,totalSignalGreenTimes.get(SIGNALGROUPID1)/totalSignalGreenTimes.get(SIGNALGROUPID2),0.00001);
 	}
 	
 
