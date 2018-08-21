@@ -98,6 +98,7 @@ import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.ModifyNetwork;
+import utils.ModifyPopulation;
 import utils.OutputUtils;
 import utils.SignalizeScenario;
 
@@ -113,7 +114,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.V4;
+	private final static NetworkType NETWORK_TYPE = NetworkType.BTU_NET;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -127,13 +128,13 @@ public class TtRunCottbusSimulation {
 		V4 // V1-4 plus: move link at 5-approach-intersection system 24; add missing signal and link at system 19
 	}
 	private final static boolean LONG_LANES = true;
-	private final static boolean LANE_CAP_FROM_NETWORK = false;
+	private final static boolean LANE_CAP_FROM_NETWORK = true;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap10MSNetV4;
+	private final static PopulationType POP_TYPE = PopulationType.BTU_POP_BTU_ROUTES_90;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
-		BTU_POP_BTU_ROUTES,
+		BTU_POP_BTU_ROUTES, BTU_POP_BTU_ROUTES_90,
 		WMines, // with mines as working places. causes an oversized number of working places in the south west of Cottbus.
 		WoMines, // without mines as working places
 		WoMines100itcap1MS, // without mines. iterated for 100it with capacity 1.0 and signals MS
@@ -163,8 +164,10 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap10MSNetV4,
 		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
 	}
+	private final static int POP_SCALE = 90;
+	private final static boolean DELETE_ROUTES = false;
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_FLEXIBLE;
+	private final static SignalType SIGNAL_TYPE = SignalType.MS_BTU_OPT;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -189,10 +192,10 @@ public class TtRunCottbusSimulation {
 	private final static boolean SYLVIA_FIXED_CYCLE = false;
 	private final static double SYLVIA_MAX_EXTENSION = 1.5;
 	private final static StabilizationStrategy LAEMMER_FLEX_STAB_STRATEGY = StabilizationStrategy.USE_MAX_LANECOUNT;
-	private final static int LAEMMER_MIN_G = 0;
+	private final static int LAEMMER_MIN_G = 5;
 	
-	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS;
-//	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.NONE;
+//	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS;
+	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.NONE;
 	
 	// defines which kind of pricing should be used
 	private static final PricingType PRICING_TYPE = PricingType.NONE;
@@ -207,7 +210,7 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/laemmer/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ctenOpt/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
@@ -378,9 +381,14 @@ public class TtRunCottbusSimulation {
 			config.plans().setInputFile(BTU_BASE_DIR + "trip_plans_from_morning_peak_ks_commodities_minFlow50.0.xml");
 			break;
 		case BTU_POP_BTU_ROUTES:
+			// TODO
 //			config.plans().setInputFile(BTU_BASE_DIR + "routeComparison/2015-03-10_sameEndTimes_ksOptRouteChoice_paths.xml");
 //			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-05-17_sameEndTimes_ksOptTripPlans_btu_solution.xml");
-			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-07-09_sameEndTimes_ksOptTripPlans_agent2com_solution.xml");
+//			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-07-09_sameEndTimes_ksOptTripPlans_agent2com_solution.xml");
+			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-08-14_sameEndTimes_ksOptTripPlans_agent2com_solution_splits_expanded.xml");
+			break;
+		case BTU_POP_BTU_ROUTES_90:
+			config.plans().setInputFile(BTU_BASE_DIR + "btu/2018-08-16_ksOptTripPlans_scale90_solution_splits_expanded.xml");
 			break;
 		case WMines:
 			config.plans().setInputFile(INPUT_BASE_DIR + "cb_spn_gemeinde_nachfrage_landuse/commuter_population_wgs84_utm33n_car_only.xml.gz");
@@ -595,7 +603,8 @@ public class TtRunCottbusSimulation {
 			case MS_BTU_OPT:
 			case DOWNSTREAM_BTUOPT:
 				if (NETWORK_TYPE.equals(BTU_BASE_NET) || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
-					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_opt.xml");
+					// TODO
+					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_opt_expanded.xml");
 				} else {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
@@ -736,7 +745,7 @@ public class TtRunCottbusSimulation {
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
-			if (POP_TYPE.equals(PopulationType.BTU_POP_BTU_ROUTES) || POP_TYPE.equals(PopulationType.NicoOutputPlans))
+			if (POP_TYPE.toString().startsWith("BTU_POP_BTU_ROUTES") || POP_TYPE.equals(PopulationType.NicoOutputPlans))
 				strat.setWeight(0.0); // no ReRoute, fix route choice set
 			else
 				strat.setWeight(0.1);
@@ -792,8 +801,8 @@ public class TtRunCottbusSimulation {
 //		config.qsim().setStorageCapFactor( SCALING_FACTOR );
 		/* storage cap should be scaled less than flow capacity factor. 
 		 * read in NicolaiNagelHiResAccessibilityMethod (2014), p.75f. (or p.9 in preprint), they mention RieserNagel2008NetworkBreakdown as reference */
-		config.qsim().setStorageCapFactor( SCALING_FACTOR / Math.pow(SCALING_FACTOR,1/4.) );
-		config.qsim().setFlowCapFactor( SCALING_FACTOR );
+		config.qsim().setStorageCapFactor( POP_SCALE * SCALING_FACTOR / Math.pow(SCALING_FACTOR,1/4.) );
+		config.qsim().setFlowCapFactor( POP_SCALE * SCALING_FACTOR );
 		
 		// adapt monetary distance cost rate
 		// (should be negative. the smaller it is, the more counts the distance.
@@ -861,6 +870,15 @@ public class TtRunCottbusSimulation {
 	private static Scenario prepareScenario(Config config) {
 		Scenario scenario = ScenarioUtils.loadScenario(config);	
 	
+		// scale population if necessary
+		if (POP_SCALE != 1 && !POP_TYPE.equals(PopulationType.BTU_POP_BTU_ROUTES_90)) {
+			// if BTU_POP_BTU_ROUTES_90 is used, population is already scaled (only flow/storage capacitiy has still to be scaled)
+			ModifyPopulation.copyEachPerson(scenario.getPopulation(), POP_SCALE - 1);
+		}
+		if (DELETE_ROUTES) {
+			ModifyPopulation.removeRoutesLeaveFirstPlan(scenario.getPopulation());
+		}
+		
 		if (LONG_LANES){
 			// lengthen all lanes
 			ModifyNetwork.lengthenAllLanes(scenario);
@@ -1015,25 +1033,25 @@ public class TtRunCottbusSimulation {
 		// add the signals module if signal systems are used
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
 				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
-		if (signalsConfigGroup.isUseSignalSystems()) {
-			SignalsModule signalsModule = new SignalsModule();
-			// the signals module works for planbased, sylvia and laemmer signal controller by default 
-			// and is pluggable for your own signal controller like this:
-			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.DownstreamFactory.class);
-			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-			signalsModule.addSignalControllerFactory(GershensonSignalController.GershensonFactory.class);
-	        controler.addOverridingModule(signalsModule);
-	        
-	        // bind gershenson config
-	        controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					GershensonConfig gershensonConfig = new GershensonConfig();
-					bind(GershensonConfig.class).toInstance(gershensonConfig);
-				}
-			});
+		SignalsModule signalsModule = new SignalsModule();
+		// the signals module works for planbased, sylvia and laemmer signal controller
+		// by default and is pluggable for your own signal controller like this:
+		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+				DownstreamPlanbasedSignalController.DownstreamFactory.class);
+		signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+				FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+		signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+				GershensonSignalController.GershensonFactory.class);
+		controler.addOverridingModule(signalsModule);
 
-		}
+		// bind gershenson config
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				GershensonConfig gershensonConfig = new GershensonConfig();
+				bind(GershensonConfig.class).toInstance(gershensonConfig);
+			}
+		});
 		
 		if (PRICING_TYPE.toString().startsWith("CP_")){
 			// add tolling
@@ -1161,6 +1179,13 @@ public class TtRunCottbusSimulation {
 				runName += "_storeCap" + storeCap;
 			if (flowCap != 1.0)
 				runName += "_flowCap" + flowCap;
+		}
+		
+		if (POP_SCALE != 1) {
+			runName += "_popScale" + POP_SCALE;
+		}
+		if (DELETE_ROUTES) {
+			runName += "_noInitRoutes";
 		}
 		
 		if (LONG_LANES){
