@@ -19,8 +19,6 @@
 
 package playground.ikaddoura.optAV;
 
-import static org.matsim.core.config.groups.ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,8 +42,8 @@ import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -55,11 +53,10 @@ import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.router.TripRouter;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.run.RunBerlinScenario;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
@@ -68,15 +65,16 @@ import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeContro
 * @author ikaddoura
 */
 
-public class RunBerlinOptAV2 {
+public class RunBerlinOptAVmodeApproach {
 
-	private static final Logger log = Logger.getLogger(RunBerlinOptAV2.class);
+	private static final Logger log = Logger.getLogger(RunBerlinOptAVmodeApproach.class);
 
 	private static String configFile;
 	private static String outputDirectory;
 	private static String runId;
 	private static String visualizationScriptInputDirectory;
 	private static final boolean otfvis = false;
+	private static boolean isCarAvailableModeForTripsInFromToBerlin;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -92,69 +90,67 @@ public class RunBerlinOptAV2 {
 			
 			visualizationScriptInputDirectory = args[3];
 			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
+			
+			isCarAvailableModeForTripsInFromToBerlin = Boolean.parseBoolean(args[4]);
+			log.info("isCarAvailableModeForTripsInFromToBerlin: "+ isCarAvailableModeForTripsInFromToBerlin);
 
 		} else {
 			
 			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_X.xml";
 			runId = "oAV_X_1pct";
-
-//			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_A1_test.xml";
-//			runId = "oAV_A1_1pct_test";
-
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
+			isCarAvailableModeForTripsInFromToBerlin = false;
 		}
 		
-		RunBerlinOptAV2 runner = new RunBerlinOptAV2();
+		RunBerlinOptAVmodeApproach runner = new RunBerlinOptAVmodeApproach();
 		runner.run();
 	}
 
 	public void run() {
-		
-		Config config = ConfigUtils.loadConfig(
-				configFile,
+	
+		RunBerlinScenario berlin = new RunBerlinScenario( configFile, null );
+		ConfigGroup[] customModules = {
 				new OptAVConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup(),
-				new DecongestionConfigGroup()
-				);
-		
+				new DecongestionConfigGroup()};
+		Config config = berlin.prepareConfig(customModules);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
 		
-		// berlin scenario related settings
-
-		config.controler().setRoutingAlgorithmType( FastAStarLandmarks );
+		Scenario scenario = berlin.prepareScenario();
 		
-		config.subtourModeChoice().setProbaForRandomSingleTripMode(0.5);
-		
-		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
-		config.qsim().setUsingTravelTimeCheckInTeleportation(true);
-		config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
-		
-		Scenario scenario = ScenarioUtils.loadScenario(config);		
-		Controler controler = new Controler(scenario);
-		
-		// use the sbb pt raptor router
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				install(new SwissRailRaptorModule());
+		// network mode adjustments
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			if (link.getAllowedModes().contains(TransportMode.car) && link.getAllowedModes().contains(TransportMode.ride) && link.getAllowedModes().contains("freight")) {
+				Set<String> allowedModes = new HashSet<>();
+				allowedModes.add("freight");
+				allowedModes.add(TransportMode.car);
+				allowedModes.add(TransportMode.ride);
+				allowedModes.add(TransportMode.car + "_brandenburg");
+				allowedModes.add(TransportMode.ride + "_brandenburg");
+				allowedModes.add(TransportMode.car + "_from-to-berlin");
+				allowedModes.add(TransportMode.ride + "_from-to-berlin");
+				link.setAllowedModes(allowedModes);
+			} else if (link.getAllowedModes().contains(TransportMode.pt)) {	
+				// skip pt links
+			} else {
+				throw new RuntimeException("Aborting...");
 			}
-		});
+		}
 		
-		// use the (congested) car travel time for the teleported ride mode
+		Controler controler = berlin.prepareControler();
+				
+		// use the (congested) car travel time for the teleported ride modes
 		controler.addOverridingModule(new AbstractModule(){
 			@Override
-			public void install() {
-				addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
-				addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());
-				
+			public void install() {	
 				addTravelTimeBinding(TransportMode.ride + "_brandenburg").to(networkTravelTime());
 				addTravelDisutilityFactoryBinding(TransportMode.ride + "_brandenburg").to(carTravelDisutilityFactoryKey());
 				
@@ -217,7 +213,18 @@ public class RunBerlinOptAV2 {
 			@Override
 			public void install() {
 				
-				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);		
+				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
+				
+				List<String> availableModesArrayList = new ArrayList<>();
+				availableModesArrayList.add("bicycle_from-to-berlin");
+				availableModesArrayList.add("pt_from-to-berlin");
+				availableModesArrayList.add("walk_from-to-berlin");
+			
+				if (isCarAvailableModeForTripsInFromToBerlin) {
+					availableModesArrayList.add("car_from-to-berlin");
+				}
+				
+				final String[] availableModes = availableModesArrayList.toArray(new String[availableModesArrayList.size()]);
 				
 				addPlanStrategyBinding("SubtourModeChoice_from-to-berlin").toProvider(new Provider<PlanStrategy>() {
 										
@@ -226,9 +233,7 @@ public class RunBerlinOptAV2 {
 
 					@Override
 					public PlanStrategy get() {
-
-						final String[] availableModes = {"bicycle_from-to-berlin", "pt_from-to-berlin", "walk_from-to-berlin"};
-
+						
 						log.info("SubtourModeChoice_from-to-berlin" + " - available modes: " + availableModes.toString());
 						final String[] chainBasedModes = {"bicycle_from-to-berlin"};
 
@@ -246,27 +251,8 @@ public class RunBerlinOptAV2 {
 		
 		// otfvis
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());	
-				
-		// network mode adjustments
-		for (Link link : scenario.getNetwork().getLinks().values()) {
-			if (link.getAllowedModes().contains(TransportMode.car) && link.getAllowedModes().contains(TransportMode.ride) && link.getAllowedModes().contains("freight")) {
-				Set<String> allowedModes = new HashSet<>();
-				allowedModes.add("freight");
-				allowedModes.add(TransportMode.car);
-				allowedModes.add(TransportMode.ride);
-				allowedModes.add(TransportMode.car + "_brandenburg");
-				allowedModes.add(TransportMode.ride + "_brandenburg");
-				allowedModes.add(TransportMode.car + "_from-to-berlin");
-				allowedModes.add(TransportMode.ride + "_from-to-berlin");
-				link.setAllowedModes(allowedModes);
-			} else if (link.getAllowedModes().contains(TransportMode.pt)) {	
-				// pt link
-			} else {
-				throw new RuntimeException("Aborting...");
-			}
-		}
 		
-		controler.run();
+		berlin.run();
 		
 		// some offline analysis
 		

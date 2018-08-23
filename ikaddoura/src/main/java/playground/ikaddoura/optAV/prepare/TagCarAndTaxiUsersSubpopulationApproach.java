@@ -58,9 +58,9 @@ import com.vividsolutions.jts.geom.Point;
 * @author ikaddoura
 */
 
-public class TagCarAndSAVusers {
+public class TagCarAndTaxiUsersSubpopulationApproach {
 
-	private static final Logger log = Logger.getLogger(TagCarAndSAVusers.class);
+	private static final Logger log = Logger.getLogger(TagCarAndTaxiUsersSubpopulationApproach.class);
 	
 	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
 	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population_test/";
@@ -122,7 +122,7 @@ public class TagCarAndSAVusers {
 	
 	public static void main(String[] args) {			
 				
-		TagCarAndSAVusers generateAVDemand = new TagCarAndSAVusers();
+		TagCarAndTaxiUsersSubpopulationApproach generateAVDemand = new TagCarAndTaxiUsersSubpopulationApproach();
 		generateAVDemand.run();
 	}
 

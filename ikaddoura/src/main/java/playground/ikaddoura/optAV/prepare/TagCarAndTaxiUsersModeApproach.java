@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
@@ -57,15 +58,15 @@ import com.vividsolutions.jts.geom.Point;
 * @author ikaddoura
 */
 
-public class TagCarAndSAVusers2 {
+public class TagCarAndTaxiUsersModeApproach {
 
-	private static final Logger log = Logger.getLogger(TagCarAndSAVusers2.class);
+	private static final Logger log = Logger.getLogger(TagCarAndTaxiUsersModeApproach.class);
 	
 	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
 	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
 	
 	private final String inputPlansFile = "berlin-v5.1-1pct.plans.xml.gz";
-	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers_noCarInBerlin_splitTrips.xml.gz";
+	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers_OD-based-modes_no-car-trips-in-from-to-berlin_split-trips.xml.gz";
 
 	private final String inputPersonAttributesFile = "berlin-v5.0.person-attributes.xml.gz";
 	private final String inputPersonAttributesSubpopulationPerson = "person";
@@ -101,6 +102,7 @@ public class TagCarAndSAVusers2 {
 		};
 	private final String parkAndRideActivity = "park-and-ride";
 	private final double parkAndRideDuration = 60.;
+	private final boolean forceAgentsToUseTheSamePRstation = true;
 
 	// ####################################################################
 
@@ -111,10 +113,11 @@ public class TagCarAndSAVusers2 {
 	
 	private final Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
 	private final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(crsPopulation, crsSHPFile);
+	private final Map<Id<Person>, Coord> personId2prCoord = new HashMap<>();
 	
 	public static void main(String[] args) {			
 				
-		TagCarAndSAVusers2 generateAVDemand = new TagCarAndSAVusers2();
+		TagCarAndTaxiUsersModeApproach generateAVDemand = new TagCarAndTaxiUsersModeApproach();
 		generateAVDemand.run();
 	}
 
@@ -203,7 +206,7 @@ public class TagCarAndSAVusers2 {
 							directTripPlan.addLeg(factory.createLeg(mainMode + fromToBerlinModeTail));
 						}
 
-						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
+						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPRCoord(person.getId(), trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
 						prActivity.setMaximumDuration(parkAndRideDuration);
 						splitTripPlan.addActivity(prActivity);
 						
@@ -219,7 +222,7 @@ public class TagCarAndSAVusers2 {
 						// brandenburg trip
 						splitTripPlan.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
 						
-						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
+						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPRCoord(person.getId(), trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
 						prActivity.setMaximumDuration(parkAndRideDuration);
 						splitTripPlan.addActivity(prActivity);
 						
@@ -258,7 +261,15 @@ public class TagCarAndSAVusers2 {
 		
 	}
 
-	private Coord getPlausiblePRCoord(Coord coordOrigin, Coord coordDestination) {
+	private Coord getPRCoord(Id<Person> id, Coord coordOrigin, Coord coordDestination) {
+		
+		if (forceAgentsToUseTheSamePRstation) {
+			if (personId2prCoord.get(id) != null) {
+				return personId2prCoord.get(id);
+			}
+		}
+		
+		// try to find a plausible P+R station
 		double minDistance = Double.MAX_VALUE;
 		Coord minDistanceCoord = null;
 		for (Coord coord : prCoordinates) {
@@ -268,6 +279,9 @@ public class TagCarAndSAVusers2 {
 				minDistanceCoord = coord;
 			}
 		}
+		
+		if (forceAgentsToUseTheSamePRstation) personId2prCoord.put(id, minDistanceCoord);
+		
 		return minDistanceCoord;
 	}
 
