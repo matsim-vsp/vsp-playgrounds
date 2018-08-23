@@ -157,6 +157,9 @@ public class RunBerlinOptAV2 {
 				
 				addTravelTimeBinding(TransportMode.ride + "_brandenburg").to(networkTravelTime());
 				addTravelDisutilityFactoryBinding(TransportMode.ride + "_brandenburg").to(carTravelDisutilityFactoryKey());
+				
+				addTravelTimeBinding(TransportMode.ride + "_from-to-berlin").to(networkTravelTime());
+				addTravelDisutilityFactoryBinding(TransportMode.ride + "_from-to-berlin").to(carTravelDisutilityFactoryKey());
 			}
 	    });
 		
@@ -176,7 +179,7 @@ public class RunBerlinOptAV2 {
 		// optAV module
 		controler.addOverridingModule(new OptAVModule(scenario));
 		
-		// different modes for different subpopulations
+		// different modes for different trip types (within berlin, within brandenburg, from/to berlin)
 		controler.addOverridingModule(new AbstractModule() {
 			
 			@Override
@@ -209,6 +212,38 @@ public class RunBerlinOptAV2 {
 			}
 		});
 		
+		controler.addOverridingModule(new AbstractModule() {
+			
+			@Override
+			public void install() {
+				
+				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);		
+				
+				addPlanStrategyBinding("SubtourModeChoice_from-to-berlin").toProvider(new Provider<PlanStrategy>() {
+										
+					@Inject
+					Scenario sc;
+
+					@Override
+					public PlanStrategy get() {
+
+						final String[] availableModes = {"bicycle_from-to-berlin", "pt_from-to-berlin", "walk_from-to-berlin"};
+
+						log.info("SubtourModeChoice_from-to-berlin" + " - available modes: " + availableModes.toString());
+						final String[] chainBasedModes = {"bicycle_from-to-berlin"};
+
+						final Builder builder = new Builder(new RandomPlanSelector<>());
+						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig()
+								.global()
+								.getNumberOfThreads(), availableModes, chainBasedModes, false, 
+								0.5, tripRouterProvider));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
+						return builder.build();
+					}
+				});			
+			}
+		});
+		
 		// otfvis
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());	
 				
@@ -221,6 +256,8 @@ public class RunBerlinOptAV2 {
 				allowedModes.add(TransportMode.ride);
 				allowedModes.add(TransportMode.car + "_brandenburg");
 				allowedModes.add(TransportMode.ride + "_brandenburg");
+				allowedModes.add(TransportMode.car + "_from-to-berlin");
+				allowedModes.add(TransportMode.ride + "_from-to-berlin");
 				link.setAllowedModes(allowedModes);
 			} else if (link.getAllowedModes().contains(TransportMode.pt)) {	
 				// pt link
