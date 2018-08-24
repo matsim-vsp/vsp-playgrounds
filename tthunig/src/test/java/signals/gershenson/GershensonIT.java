@@ -293,7 +293,7 @@ public class GershensonIT {
 	}
 	
 	@Test
-	@Ignore
+	
 	public void testGershensonWithLanes() {
 		double flowNS = 360;
 		double flowWE = 1440;
@@ -327,11 +327,13 @@ public class GershensonIT {
 		log.info("avg cycle time: " + avgCycleTimePerSystem.get(SIGNALSYSTEMID1));
 
 		// TODO test for correct results
-		Assert.assertEquals("Total Signal Green Time Group1 is wrong", 2755.0,
+		
+		
+		Assert.assertEquals("Total Signal Green Time Group1 is wrong", 3554.0,
 				totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId1), 0.00001);
-		Assert.assertEquals("Total Signal Green Time Group2 is wrong", 1920.0,
+		Assert.assertEquals("Total Signal Green Time Group2 is wrong", 1079.0,
 				totalSignalGreenTimes.get(SingleCrossingScenario.signalGroupId2), 0.00001);
-		Assert.assertEquals("Avg CycleTime should be ", 78.90140845070422, avgCycleTimePerSystem.get(SIGNALSYSTEMID1),
+		Assert.assertEquals("Avg CycleTime should be ", 71.15384615384616, avgCycleTimePerSystem.get(SIGNALSYSTEMID1),
 				0.00001);
 	}
 	
