@@ -14,11 +14,7 @@ public class ActitoppExample {
 
 	private static ModelFileBase fileBase = new ModelFileBase();
 	private static RNGHelper randomgenerator = new RNGHelper(1234);
-	
-	/**
-	 * 
-	 * @param args
-	 */
+
 	public static void main(String[] args) {
 		
 		ActitoppPerson testperson = new ActitoppPerson(
@@ -29,16 +25,13 @@ public class ActitoppExample {
 				1, 		// Beruf
 				1, 		// Geschlecht
 				2, 		// Raumtyp
-				2			// Pkw im HH
+				2		// Pkw im HH
 				);		
 		System.out.println(testperson);
 			
-		try 
-		{
+		try {
 			testperson.generateSchedule(fileBase, randomgenerator);
-		} 
-		catch (InvalidPatternException e) 
-		{
+		} catch (InvalidPatternException e) {
 			e.printStackTrace();
 		}
 		
@@ -55,8 +48,5 @@ public class ActitoppExample {
 				System.out.println("Type = " + activity.getType());
 			}
 		}
-
-
 	}
-
 }
