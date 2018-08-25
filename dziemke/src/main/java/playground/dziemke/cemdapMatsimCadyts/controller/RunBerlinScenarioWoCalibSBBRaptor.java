@@ -29,7 +29,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import playground.dziemke.analysis.SelectedPlansAnalyzer;
 import playground.dziemke.analysis.TripAnalyzerV2Extended;
 
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
+//import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
 /**
  * @author dziemke
@@ -43,12 +43,13 @@ public class RunBerlinScenarioWoCalibSBBRaptor {
 		
 		final Controler controler = new Controler(scenario);
 
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				install(new SwissRailRaptorModule());
-			}
-		});
+		// TODO uncomment this again; commented temporarily trying to make build faster
+//		controler.addOverridingModule(new AbstractModule() {
+//			@Override
+//			public void install() {
+//				install(new SwissRailRaptorModule());
+//			}
+//		});
 
 		controler.run();
 		
