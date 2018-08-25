@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
@@ -37,12 +36,6 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.router.MainModeIdentifierImpl;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
-import org.matsim.core.router.TripStructureUtils;
-import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -82,32 +75,6 @@ public class TagCarAndTaxiUsersSubpopulationApproach {
 	private final boolean changeCar2TaxiTripsForAllPotentialSAVusers = true;
 	private final String outputPlansFileChangeTripMode = "berlin-5.1-1pct_plans_taggedCarUsers_berlin-population-taxi.xml.gz";
 	
-	// Optional: split trips from/to outside of Berlin into two trips (outside = car; inside = pt)
-	private final boolean splitTripsForAllTripsCrossingTheBerlinBorder = true;
-	private final String outputPlansFileChangeTripModeSplitTrips = "berlin-5.1-1pct_plans_taggedCarUsers_berlin-population-taxi_splitTrips.xml.gz";
-	private final Coord[] prCoordinates = {
-			new Coord(4594046.225912675, 5836589.393558677), // S Mühlenbeck-Mönchmühle
-			new Coord(4596787.252510464, 5836430.391383448), // Schönerlinde
-			new Coord(4602589.292594807, 5836203.410669737), // S Röntgental
-			new Coord(4606283.312046832, 5827655.318362243), // S Ahrensfelde
-			new Coord(4611006.318080213, 5824035.417242844), // U Hönow
-			new Coord(4612016.365326108, 5821570.320163683), // S Birkenstein
-			new Coord(4619288.439198637, 5812016.2948688), // S Erkner
-			new Coord(4610059.579579681, 5805505.010516966), // S Eichwalde
-			new Coord(4603139.379672928, 5807465.218550463), // S Schönefeld
-			new Coord(4596075.353004076, 5803913.1885673115), // S Mahlow
-			new Coord(4588581.255512315, 5806921.197011784), // S Teltow
-			new Coord(4586956.237755206, 5807860.2450342635), // S Teltow-Stadt
-			new Coord(4580318.237931468, 5810453.194058485), // S Wannsee
-			new Coord(4581359.229151482, 5823085.281743402), // S U Spandau
-//			new Coord(4577580.099560545, 5823326.95671485), // S Staaken
-//			new Coord(4576685.154127585, 5824640.341833886), // Albrechtshof
-			new Coord(4581737.18532087, 5834563.406155014), // S Hennigsdorf
-			new Coord(4587412.176538966, 5834115.416970312), // S Frohnau
-			};
-	private final String parkAndRideActivity = "park-and-ride";
-	private final double parkAndRideDuration = 60.;
-	
 	// ####################################################################
 
 	private Scenario scenario;
@@ -145,10 +112,7 @@ public class TagCarAndTaxiUsersSubpopulationApproach {
 		new PopulationWriter(scenario.getPopulation()).write(outputDirectory + outputPlansFile);
 		new ObjectAttributesXmlWriter(scenario.getPopulation().getPersonAttributes()).writeFile(outputDirectory + outputPersonAttributesFile);
 		
-		if (changeCar2TaxiTripsForAllPotentialSAVusers) new PopulationWriter(changeTripModes("person_potentialSAVuser", TransportMode.car, TransportMode.taxi)).write(outputDirectory + outputPlansFileChangeTripMode);;
-
-		if (splitTripsForAllTripsCrossingTheBerlinBorder) new PopulationWriter(splitTrips("person_noPotentialSAVuser")).write(outputDirectory + outputPlansFileChangeTripModeSplitTrips);;
-
+		if (changeCar2TaxiTripsForAllPotentialSAVusers) new PopulationWriter(changeTripModes("person_potentialSAVuser", TransportMode.car, TransportMode.taxi)).write(outputDirectory + outputPlansFileChangeTripMode);
 	}
 
 	private void loadShapeFile() {		
@@ -159,135 +123,6 @@ public class TagCarAndTaxiUsersSubpopulationApproach {
 			zoneId2geometry.put(featureCounter, (Geometry) feature.getDefaultGeometry());
 			featureCounter++;
 		}
-	}
-
-	private Population splitTrips(String subpopulation) {
-				
-		log.info("Splitting border-crossing trips for subpopulation " + subpopulation + " and setting inner-city car trips to car...");
-		final String[] attributes = {"CarOwnerInBaseCase"};
-
-		Scenario scenarioOutput = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-		Population populationOutput = scenarioOutput.getPopulation();
-		
-		for (Person person : scenario.getPopulation().getPersons().values()) {
-			
-			if (person.getPlans().size() > 1) throw new RuntimeException("More than one plan per person. Aborting...");
-			
-			PopulationFactory factory = populationOutput.getFactory();
-			Person personClone = factory.createPerson(person.getId());
-			for (String attribute : attributes) {
-				personClone.getAttributes().putAttribute(attribute, person.getAttributes().getAttribute(attribute));
-			}
-			populationOutput.addPerson(personClone);
-		
-			if (this.scenario.getPopulation().getPersonAttributes().getAttribute(person.getId().toString(), scenario.getConfig().plans().getSubpopulationAttributeName()).equals(subpopulation)) {
-		
-				boolean addUnModifiedPlan = true;
-				
-				Plan plan1 = factory.createPlan();
-				Plan plan2 = factory.createPlan();
-
-				// add first activity
-				plan1.addActivity((Activity) person.getSelectedPlan().getPlanElements().get(0));
-				plan2.addActivity((Activity) person.getSelectedPlan().getPlanElements().get(0));
-
-				StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction");
-				for (Trip trip : TripStructureUtils.getTrips(person.getSelectedPlan().getPlanElements(), stageActivities )) {
-					
-					String mainMode = new MainModeIdentifierImpl().identifyMainMode(trip.getTripElements());
-								
-					if (isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
-						// change from car to pt
-						if (mainMode.equals(TransportMode.car)) {
-							
-							addUnModifiedPlan = false;
-
-							plan1.addLeg(factory.createLeg(TransportMode.pt));
-							plan1.addActivity(trip.getDestinationActivity());
-							
-							plan2.addLeg(factory.createLeg(TransportMode.pt));
-							plan2.addActivity(trip.getDestinationActivity());
-						
-						} else {
-							plan1.addLeg(factory.createLeg(mainMode));
-							plan1.addActivity(trip.getDestinationActivity());
-						}
-						
-					} else if (isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())) {
-						// from inside Berlin to outside Berlin --> split trip
-						addUnModifiedPlan = false;
-						
-						plan1.addLeg(factory.createLeg(TransportMode.pt));
-						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
-						prActivity.setMaximumDuration(parkAndRideDuration);
-						plan1.addActivity(prActivity);
-						
-						plan1.addLeg(factory.createLeg(mainMode));
-						plan1.addActivity(trip.getDestinationActivity());
-						
-						plan2.addLeg(factory.createLeg(TransportMode.pt));
-						plan2.addActivity(trip.getDestinationActivity());
-						
-					} else if (!isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
-						// from outside Berlin to inside Berlin --> split trip
-						addUnModifiedPlan = false;
-						
-						plan1.addLeg(factory.createLeg(mainMode));
-						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPlausiblePRCoord(trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
-						prActivity.setMaximumDuration(parkAndRideDuration);
-						plan1.addActivity(prActivity);
-						
-						plan1.addLeg(factory.createLeg(TransportMode.pt));
-						plan1.addActivity(trip.getDestinationActivity());
-						
-						plan2.addLeg(factory.createLeg(TransportMode.pt));
-						plan2.addActivity(trip.getDestinationActivity());
-						
-					} else if (!isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())){
-						// do not change the mode (car outside the city boundaries is still allowed)
-						for (Leg leg : trip.getLegsOnly()) {
-							plan1.addLeg(leg);
-							plan2.addLeg(leg);
-						}
-						plan1.addActivity(trip.getDestinationActivity());
-						plan2.addActivity(trip.getDestinationActivity());
-
-					} else {
-						throw new RuntimeException("Aborting...");
-					}
-				}
-				
-				if (addUnModifiedPlan) {
-					// add unmodified plan
-					personClone.addPlan(person.getSelectedPlan());
-				} else {
-					// add modified plan
-					personClone.addPlan(plan1);
-					personClone.addPlan(plan2);
-				}
-				
-			} else {
-				// add unmodified plan
-				personClone.addPlan(person.getSelectedPlan());
-			}
-			
-		}		
-		log.info("Done.");
-		return populationOutput;
-		
-	}
-
-	private Coord getPlausiblePRCoord(Coord coordOrigin, Coord coordDestination) {
-		double minDistance = Double.MAX_VALUE;
-		Coord minDistanceCoord = null;
-		for (Coord coord : prCoordinates) {
-			double distance = NetworkUtils.getEuclideanDistance(coordOrigin, coord) + NetworkUtils.getEuclideanDistance(coord, coordDestination);
-			if (distance < minDistance) {
-				minDistance = distance;
-				minDistanceCoord = coord;
-			}
-		}
-		return minDistanceCoord;
 	}
 
 	private void tagPotentialSAVusers() {
