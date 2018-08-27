@@ -47,6 +47,7 @@ public class RunCottbus2Cten {
 //		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n.xml.gz";
 		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n_v4.xml";
 //		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes.xml";
+		// TODO benutzt converter überhaupt lane length?
 		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes_v1-4_long.xml";
 		// change run number here to use another base case
 //		String populationFilename = "../../runs-svn/cottbus/before2015/run1728/1728.output_plans.xml.gz";
