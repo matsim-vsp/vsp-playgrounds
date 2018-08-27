@@ -55,13 +55,13 @@ public class TagCarAndTaxiUsersSubpopulationApproach {
 
 	private static final Logger log = Logger.getLogger(TagCarAndTaxiUsersSubpopulationApproach.class);
 	
-	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
-	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population_test/";
+	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-10pct/input/";
+	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-10pct/input/";
 	
-	private final String inputPlansFile = "berlin-v5.1-1pct.plans.xml.gz";
-	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers.xml.gz";
+	private final String inputPlansFile = "berlin-v5.2-10pct.plans.xml.gz";
+	private final String outputPlansFile = "berlin-5.2-10pct_plans_taggedCarUsers.xml.gz";
 
-	private final String outputPersonAttributesFile = "berlin-5.0-1pct_person-attributes_potentialSAVusers.xml.gz";
+	private final String outputPersonAttributesFile = "berlin-v5.0.person-attributes_potentialSAVusers.xml.gz";
 
 	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
 	private final String crsSHPFile = "EPSG:25833";
@@ -73,7 +73,7 @@ public class TagCarAndTaxiUsersSubpopulationApproach {
 	
 	// Optional: change trip mode for all potential SAV users
 	private final boolean changeCar2TaxiTripsForAllPotentialSAVusers = true;
-	private final String outputPlansFileChangeTripMode = "berlin-5.1-1pct_plans_taggedCarUsers_berlin-population-taxi.xml.gz";
+	private final String outputPlansFileChangeTripMode = "berlin-5.2-10pct_plans_taggedCarUsers_berlin-population-taxi.xml.gz";
 	
 	// ####################################################################
 
