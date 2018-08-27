@@ -92,11 +92,11 @@ public class RunBerlinOptAVsubpopulationApproach {
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_X.xml";
-			runId = "oAV_X_1pct";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_" + runId + "/";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-1pct/input/berlin-v5.2-1pct.config_oAV_C1.xml";
+			runId = "oAV_C1_1pct";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-1pct/run_" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
-			isCarAvailableModeForNonBerliners = false;
+			isCarAvailableModeForNonBerliners = true;
 		}
 		
 		RunBerlinOptAVsubpopulationApproach runner = new RunBerlinOptAVsubpopulationApproach();
