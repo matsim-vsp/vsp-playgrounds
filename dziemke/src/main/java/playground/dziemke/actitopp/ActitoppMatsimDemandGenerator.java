@@ -110,7 +110,7 @@ public class ActitoppMatsimDemandGenerator {
 		
 		List<HActivity> activityList = weekPattern.getAllActivities();
 		for (HActivity actitoppActivity : activityList) {
-			if (actitoppActivity.getIndexDay() == 0) { // Only use activities of first day; until 1,440min
+			if (actitoppActivity.getDayIndex() == 0) { // Only use activities of first day; until 1,440min
 				
 				actitoppActivity.getType(); // Letter-based type
 				String matsimActivityType = transformActType(actitoppActivity.getType());
