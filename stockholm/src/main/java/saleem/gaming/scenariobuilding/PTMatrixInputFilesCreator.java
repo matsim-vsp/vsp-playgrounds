@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
@@ -106,7 +107,11 @@ public class PTMatrixInputFilesCreator {
 		stopsWriter.writeNewLine();
 
 		for (Facility fac : locationFacilitiesMap.values() ) {
-			stopsWriter.writeField(fac.getId());
+			if ( fac instanceof Identifiable ) {
+				stopsWriter.writeField( ((Identifiable)fac).getId() );
+			} else {
+				throw new RuntimeException( Facility.FACILITY_NO_LONGER_IDENTIFIABLE ) ;
+			}
 			stopsWriter.writeField(fac.getCoord().getX());
 			stopsWriter.writeField(fac.getCoord().getY());
 			stopsWriter.writeNewLine();

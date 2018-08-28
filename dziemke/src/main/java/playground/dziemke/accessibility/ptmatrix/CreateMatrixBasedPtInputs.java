@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.gis.GridUtils;
@@ -170,7 +171,11 @@ public class CreateMatrixBasedPtInputs {
 //		}
 		
 		for ( Facility fac : ptMatrixLocationsMap.values() ) {
-			mapOfLocationFacilitiesMaps.get(arrayNumber).put( fac.getId(), fac ) ;
+			if ( fac instanceof Identifiable ) {
+				mapOfLocationFacilitiesMaps.get( arrayNumber ).put( ( (Identifiable) fac ).getId(), fac );
+			} else {
+				throw new RuntimeException( Facility.FACILITY_NO_LONGER_IDENTIFIABLE ) ;
+			}
 			locationsAdded++;
 			if (locationsAdded == (numberOfMeasuringPoints / numberOfThreads) + 1) {
 				arrayNumber++;

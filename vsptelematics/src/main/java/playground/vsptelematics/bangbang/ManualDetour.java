@@ -118,8 +118,8 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 		
 		for ( Id<Link> currentId : KNAccidentScenario.replanningLinkIds ) {
 			
-			Facility<ActivityFacility> fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
-			Facility<ActivityFacility> toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(mergeLinkId));
+			Facility fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
+			Facility toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(mergeLinkId));
 
 			final Leg leg = (Leg) routingModule.calcRoute(fromFacility, toFacility, 0, null).get(0);
 			links = ((NetworkRoute)leg.getRoute()).getLinkIds() ;
