@@ -17,7 +17,7 @@ public class GershensonConfig {
 	private double monitoredDistance = 50.;
 	private double minmumDistanceBehindIntersection =10.;
 	
-	
+	private boolean useSignalSystemDependendThreshold = true;
 	
 	
 	public void setStorageCapacityOutlink(double storageCapacityOutlinkJam){
@@ -87,6 +87,21 @@ public class GershensonConfig {
 	}
 	public int getMinmumCycleTime() {
 		return this.minimumCycleTime;
+	}
+	
+	public boolean getSignalSystemDependendThreshold(){
+		return this.useSignalSystemDependendThreshold;
+	}
+
+	/**
+	 * @param useSignalSystemDependendThreshold
+	 * If true the threshold will vary depending on the Signal system, if false
+	 * the default threshold will be 250 veh*s which might not be optimal
+	 * 
+	 * default is true
+	 */
+	public void setSignalSystemDependendThreshold(boolean useSignalSystemDependendThreshold){
+		this.useSignalSystemDependendThreshold = useSignalSystemDependendThreshold;
 	}
 	
 	

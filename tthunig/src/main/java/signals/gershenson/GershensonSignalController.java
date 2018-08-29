@@ -21,7 +21,7 @@ package signals.gershenson;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+//import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,82 +83,82 @@ public class GershensonSignalController implements SignalController {
 	
 	private class SignalGroupMetadata {
 
-		private Set<Link> inLinks;
 		private Set<Link> outLinks;
-		private Set<Lane> inLanes;
-		private HashMap<Id<Lane>,Id<Link>> inLanesOnLink;
 		private HashMap<Id<Lane>,Double> inLanesLengthExceptions;
 		private HashMap<Id<Link>,Double> inLinkLengthExceptions;
 		private HashMap<Link,Boolean> outLinkExceptionLinkHasNext;
 		
 		public SignalGroupMetadata(){
-			this.inLinks = new HashSet<Link>();
 			this.outLinks = new HashSet<Link>();
-			this.inLanes = new HashSet<Lane>();
-			this.inLanesOnLink = new HashMap<Id<Lane>,Id<Link>>();
 			this.inLanesLengthExceptions  = new HashMap<Id<Lane>,Double>();
 			this.inLinkLengthExceptions = new HashMap<Id<Link>,Double>();
 			this.outLinkExceptionLinkHasNext = new HashMap<Link,Boolean>();
 		}
 		
-		
-		public void addInLink(Link link) {
-			this.inLinks.add(link);
-		}
-
-		public void addOutLink(Link outLink) {
-			this.outLinks.add(outLink);
-		}
-		
 		public Set<Link> getOutLinks(){
 			return this.outLinks;
-		}
-		
-		
-		public Set<Link> getInLinks(){
-			return this.inLinks;
-		}
-		
-		public void addInLanes(Lane lane) {
-			this.inLanes.add(lane);
-		}
+		}	
+		public void addOutLink(Link outLink) {
+			this.outLinks.add(outLink);
+			//If the Outlink is too small try to check if there is a following link
+			checkOutlinkLength(outLink);	
+		}		
 
-		public Set<Lane> getInLanes(){
-			return this.inLanes;
-		}
-		
-		public void addLaneToLinkAssignment(Id<Lane> lane, Id<Link> link){
-			this.inLanesOnLink.put(lane, link);
-		}
-		
-		public Id<Link> getLinkOfLane(Id<Lane> lane){
-			return this.inLanesOnLink.get(lane);
-		}
-		
 		public HashMap<Id<Lane>,Double> getInLanesLengthExceptions(){
 			return this.inLanesLengthExceptions;
-		}
-		
+		}		
 		public void setInLanesLengthExceptions(Id<Lane> lane,Double length){
 			this.inLanesLengthExceptions.put(lane, length);
 		}
 		
 		public HashMap<Id<Link>,Double> getInLinkLengthExceptions(){
 			return this.inLinkLengthExceptions;
-		}
-		
+		}		
 		public void setInLinkLengthExceptions(Id<Link> link,Double length){
 			this.inLinkLengthExceptions.put(link, length);
 		}
+		
 		public HashMap<Link,Boolean> getOutLinkExceptionLinkHasNext(){
 			return this.outLinkExceptionLinkHasNext;
-		}
-		
+		}		
 		public void setOutLinkExceptionLinkHasNext(Link link,Boolean hasSingleNext){
 			this.outLinkExceptionLinkHasNext.put(link, hasSingleNext);
 		}
 		
-		
+		public void addOutLinksWithoutBackLinkToMetadata(Link inLink){
+			for (Link outLink : inLink.getToNode().getOutLinks().values()){
+				if (!outLink.getToNode().equals(inLink.getToNode())){
+					addOutLink(outLink);
+				}
+			}
+		}
+		public void addOutLinksWithoutBackLaneToMetadata(Lane inLane, LanesToLinkAssignment lanes4link){
+			if (inLane.getToLinkIds()!=null||!inLane.getToLinkIds().isEmpty()){
+				for (Id<Link> toLink : inLane.getToLinkIds()){
+					Link outLink = scenario.getNetwork().getLinks().get(toLink);
+					addOutLink(outLink);
+				}
+			} else {
+				Link inLink = scenario.getNetwork().getLinks().get(lanes4link.getLinkId());
+				addOutLinksWithoutBackLinkToMetadata(inLink);
+			}		
+		}				
+		private void checkOutlinkLength(Link outLink){
+			double length = outLink.getLength();
+			if (length<=gershensonConfig.getMinmumDistanceBehindIntersection()){
+				log.warn("The Outlink "+ outLink.getId().toString()+" is shorter than "+gershensonConfig.getMinmumDistanceBehindIntersection() +"m (actual: "+length+"m) to monitor at least one car. Try to add next link");				
+				if(outLink.getToNode().getOutLinks().size()==1.){
+					setOutLinkExceptionLinkHasNext(outLink, true);
+					length += outLink.getToNode().getOutLinks().values().iterator().next().getLength();
+					if (length<=gershensonConfig.getMinmumDistanceBehindIntersection()){
+						log.warn("The Outlink "+ outLink.getId().toString()+" and the next Link are combinded still too short");
+					}
+				}else{
+					log.error("The Outlink "+ outLink.getId().toString()+"has no or more than one following Link. May be fatal for the signalsystem");
+					setOutLinkExceptionLinkHasNext(outLink, false);
+				}
+			}
+		}		
 	}
 
 	private static final Logger log = Logger.getLogger(GershensonSignalController.class);
@@ -170,7 +170,16 @@ public class GershensonSignalController implements SignalController {
 	
 	private Map<Id<SignalGroup>, SignalGroupMetadata> signalGroupIdMetadataMap;	
 	
-	
+	private Map<Id<SignalGroup>, Map<Signal, Integer> > approachingVehiclesMap = new HashMap<Id<SignalGroup>, Map<Signal, Integer>>();
+	private Map<Id<SignalGroup>, Integer> approachingVehiclesGroupMap = new HashMap<Id<SignalGroup>, Integer>();
+	private Map<Id<SignalGroup>, Map<Id<Link>, Boolean> > jammedOutLinkMap = new HashMap<Id<SignalGroup>, Map<Id<Link>, Boolean>>();	
+	private Map<Id<SignalGroup>, Double> counter = new HashMap<Id<SignalGroup>, Double>();	
+	private Map<Id<SignalGroup>, Boolean> jammedSignalGroup = new HashMap<Id<SignalGroup>,Boolean>();
+	private SignalGroup activeSignalGroup;
+	private Map<Id<Signal>, Integer>  maximalNumberOfAgentsInDistanceMap = new HashMap<Id<Signal>, Integer>();
+	private double threshold;
+	private double timeactivegroup = 0;
+	private boolean thereAreVehiclesApproaching;
 	
 	
 	private GershensonSignalController(Scenario scenario, LinkSensorManager sensorManager, GershensonConfig gershensonConfig) {
@@ -179,6 +188,52 @@ public class GershensonSignalController implements SignalController {
 		this.gershensonConfig = gershensonConfig;
 	}
 
+	private void initSignalGroupMetadata(){
+		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+		this.signalGroupIdMetadataMap = new HashMap<>();
+		SignalSystemData systemData = signalsData.getSignalSystemsData().getSignalSystemData().get(this.system.getId());
+		
+		for (SignalGroup signalGroup : this.system.getSignalGroups().values()){
+			if (!this.signalGroupIdMetadataMap.containsKey(signalGroup.getId())){
+				this.signalGroupIdMetadataMap.put(signalGroup.getId(), new SignalGroupMetadata());
+				log.info("SignalGroupIdMetadata for group "+ signalGroup.getId().toString());
+			}
+			SignalGroupMetadata metadata = this.signalGroupIdMetadataMap.get(signalGroup.getId());
+			
+			//OutLinks
+			for (Signal signal : signalGroup.getSignals().values()){
+				Link inLink = scenario.getNetwork().getLinks().get(signal.getLinkId());
+				SignalData signalData = systemData.getSignalData().get(signal.getId());
+				LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signalData.getLinkId());
+				//There are no TurningMoveRestrictions
+				if (signalData.getTurningMoveRestrictions() == null || signalData.getTurningMoveRestrictions().isEmpty()){
+					//If there are no Lanes for that Link add every Outlink of the intersection except the one which allows the U-Turn
+					if (signalData.getLaneIds() == null || signalData.getLaneIds().isEmpty() || scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1){
+						log.info("No TurninMoveRestrictions and no Lanes - adding every Outlink of intersections except the one in back direction");
+						metadata.addOutLinksWithoutBackLinkToMetadata(inLink);
+						
+					}
+					//There are Lanes:
+					else{
+						log.info("No TurninMoveRestrictions and there are Lanes - adding every Outlink of intersections except the one in back direction of each Lane");
+						for(Id<Lane> laneId : signalData.getLaneIds()){
+							Lane inLane = lanes4link.getLanes().get(laneId);
+							metadata.addOutLinksWithoutBackLaneToMetadata(inLane,lanes4link);
+						}
+					}
+				//There are TurningMoveRestrictions
+				//ADD this set to the Methods for 5 and 6
+				} else {
+					log.info("If there are TurningMoverestriction add those to outlinks");
+					for (Id<Link> linkid : signalData.getTurningMoveRestrictions()){
+						Link outLink = scenario.getNetwork().getLinks().get(linkid);
+						metadata.addOutLink(outLink);
+					}
+				}					
+			}
+		}
+	}
+	
 	private void registerAndInitializeSensorManager() {
 		for (SignalGroup signalGroup : this.system.getSignalGroups().values()){
 			SignalGroupMetadata metadata = this.signalGroupIdMetadataMap.get(signalGroup.getId());
@@ -190,7 +245,6 @@ public class GershensonSignalController implements SignalController {
 				
 				
 				if((signal.getLaneIds()==null)|| signal.getLaneIds().isEmpty() ||scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1. ){
-					//this.sensorManager.registerNumberOfCarsMonitoring(signal.getLinkId());
 					if (!(signal.getLaneIds()==null|| signal.getLaneIds().isEmpty()) && scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()==1. ){
 						log.info("Register InLane "+ signal.getLaneIds().iterator().next().toString() +" of Signal "+ signal.getId().toString()+". Since there is only one Lane for this signal register the Link");
 					} else {
@@ -244,7 +298,7 @@ public class GershensonSignalController implements SignalController {
 							
 							int adjustedNumberOfAgents = java.lang.Math.max((int)(lenghtOfLane/this.scenario.getConfig().jdeqSim().getCarSize()),1);
 							maximalNumberOfAgentsInDistanceMap.put(signal.getId(), adjustedNumberOfAgents);
-							//TODO MAP Signal-Exceptions in metadata to adjust for the rules
+		//TODO MAP Signal-Exceptions in metadata to adjust for the rules
 							if (lenghtOfLane<gershensonConfig.getMonitoredPlatoonTail()){
 								log.warn("The length of "+laneId.toString() +" of Signal "+ signal.getId().toString()+" is smaller than "+gershensonConfig.getMonitoredPlatoonTail()+" m. Register one Sensor at"+ lenghtOfLane+
 										" The sensor for Rule 3 is set 0´. This means Rule 3 is not going to execute. This might be not fatal but annoying.");
@@ -278,377 +332,61 @@ public class GershensonSignalController implements SignalController {
 				log.info("Register Outlink "+ outLink.getId().toString());
 			}
 		}
-	}	
-		
-//		for (SignalGroupMetadata metadata : this.signalGroupIdMetadataMap.values()){
-//			// initialize sensors per signal group: one at the out-link, two sensors at the in-link with different distances
-//			for (Link outLink : metadata.getOutLinks()){
-//				this.sensorManager.registerNumberOfCarsMonitoring(outLink.getId());
-//				log.info("Register Outlink "+ outLink.getId().toString());
-//			}
-//			
-//			for (Link inLink : metadata.getInLinks()){
-//				this.sensorManager.registerNumberOfCarsMonitoring(inLink.getId());
-//				log.info("Register Inlink "+ inLink.getId().toString());
-//				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), gershensonConfig.getMonitoredPlatoonTail());
-//				this.sensorManager.registerNumberOfCarsInDistanceMonitoring(inLink.getId(), gershensonConfig.getMonitoredDistance());
-//				
-//
-//			}
-//			
-//			
-//		}	
-//	}
+	}
 
-	
-//TODO METADATA-Datastructure might be obsolete
-	private void initSignalGroupMetadata(){
-		SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-		this.signalGroupIdMetadataMap = new HashMap<>();
-		SignalSystemData systemData = signalsData.getSignalSystemsData().getSignalSystemData().get(this.system.getId());
-		
-		for (SignalGroup signalGroup : this.system.getSignalGroups().values()){
-			if (!this.signalGroupIdMetadataMap.containsKey(signalGroup.getId())){
-				this.signalGroupIdMetadataMap.put(signalGroup.getId(), new SignalGroupMetadata());
-				log.info("SignalGroupIdMetadata for group "+ signalGroup.getId().toString());
-			}
-			SignalGroupMetadata metadata = this.signalGroupIdMetadataMap.get(signalGroup.getId());
-			
-			//InLinks and InLanes
-			for (Signal signal : signalGroup.getSignals().values()){
-				SignalData signalData = systemData.getSignalData().get(signal.getId());
-				if (signal.getLaneIds() == null || signal.getLaneIds().isEmpty()|| scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1. ){
-					Link inLink = scenario.getNetwork().getLinks().get(signal.getLinkId());
-					metadata.addInLink(inLink);
-					log.info("ADDING INLINK "+ inLink.toString() + " ; Signalgroup: "+signalGroup.getId().toString()+" with signal: "+signal.getId().toString());
-				} else {
-					LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signalData.getLinkId());
-					for (Id<Lane> laneId : signal.getLaneIds()){
-						metadata.addInLanes(lanes4link.getLanes().get(laneId));
-						metadata.addLaneToLinkAssignment(laneId, lanes4link.getLinkId());
-						
-						log.info("ADDING INLANE "+ laneId.toString()+" ON LINK "+ lanes4link.getLinkId()+ " ; Signalgroup: "+signalGroup.getId().toString()+" with signal: "+signal.getId().toString());
-					}
-				}
-			}
-			//OutLinks
-			for (Signal signal : signalGroup.getSignals().values()){
-				Link inLink = scenario.getNetwork().getLinks().get(signal.getLinkId());
-				SignalData signalData = systemData.getSignalData().get(signal.getId());
-				LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signalData.getLinkId());
-				//There are no TurningMoveRestrictions
-				if (signalData.getTurningMoveRestrictions() == null || signalData.getTurningMoveRestrictions().isEmpty()){
-					//If there are no Lanes for that Link add every Outlink of the intersection except the one which allows the U-Turn
-					if (signalData.getLaneIds() == null || signalData.getLaneIds().isEmpty() || scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1){
-						log.info("No TurninMoveRestrictions and no Lanes - adding every Outlink of intersections except the one in back direction");
-						this.addOutLinksWithoutBackLinkToMetadata(inLink, metadata);
-						
-					}
-					//There are Lanes:
-					else{
-						log.info("No TurninMoveRestrictions and there are Lanes - adding every Outlink of intersections except the one in back direction of each Lane");
-						for(Id<Lane> laneId : signalData.getLaneIds()){
-							Lane inLane = lanes4link.getLanes().get(laneId);
-							addOutLinksWithoutBackLaneToMetadata(inLane,metadata);
-						}
-					}
-				//There are TurningMoveRestrictions
-				//ADD this set to the Methods for 5 and 6
-				} else {
-					log.info("If there are TurningMoverestriction add those to outlinks");
-					for (Id<Link> linkid : signalData.getTurningMoveRestrictions()){
-						Link outLink = scenario.getNetwork().getLinks().get(linkid);
-						metadata.addOutLink(outLink);
-						checkOutlinkLength(outLink,metadata);
-						
-
-						
-					}
-				}					
-			}
-		}
-		//This is a fixed value and and doesn't have to be calculated in every iteration
-		maximalNumberOfAgentsInDistance = (int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize());
-	}
-	
-		//If Outlink is too small try to check if there is a following link
-	private void checkOutlinkLength(Link outLink, SignalGroupMetadata metadata){
-		if (outLink.getLength()<=gershensonConfig.getMinmumDistanceBehindIntersection()){
-			log.warn("The Outlink "+ outLink.getId().toString()+"is too small to monitor at least one car. Try to add next link");
-			double length = outLink.getLength();
-			if(outLink.getToNode().getOutLinks().size()==1.){
-				metadata.setOutLinkExceptionLinkHasNext(outLink, true);
-				length += outLink.getToNode().getOutLinks().values().iterator().next().getLength();
-				if (length<=gershensonConfig.getMinmumDistanceBehindIntersection()){
-					log.warn("The Outlink "+ outLink.getId().toString()+" and the next Link are combinded still too short");
-				}
-			}else{
-				log.error("The Outlink "+ outLink.getId().toString()+"has no or more than one following Link. May be fatal for the signalsystem");
-				metadata.setOutLinkExceptionLinkHasNext(outLink, false);
-			}
-		}
-	}
-				
-				//-----------------------------------------------------------
-				
-//				Link inLink = scenario.getNetwork().getLinks().get(signal.getLinkId());
-//				metadata.addInLink(inLink);
-//				//outlinks
-//				SignalData signalData = systemData.getSignalData().get(signal.getId());
-//				if (signalData.getTurningMoveRestrictions() == null || signalData.getTurningMoveRestrictions().isEmpty()){
-//					if (signalData.getLaneIds() == null || signalData.getLaneIds().isEmpty()){
-//						this.addOutLinksWithoutBackLinkToMetadata(inLink, metadata);
-//					}
-//					else { // there are lanes
-//						LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signalData.getLinkId());
-//						for (Id<Lane> laneId : signalData.getLaneIds()){
-//							Lane lane = lanes4link.getLanes().get(laneId);
-//							if (lane.getToLinkIds() == null || lane.getToLinkIds().isEmpty()){
-//								this.addOutLinksWithoutBackLinkToMetadata(inLink, metadata);
-//							}
-//							else{
-//								for (Id<Link> toLinkId : lane.getToLinkIds()){
-//									Link toLink = scenario.getNetwork().getLinks().get(toLinkId);
-//									if (!toLink.getFromNode().equals(inLink.getToNode())){
-//										metadata.addOutLink(toLink);
-//									}
-//								}
-//							}
-//						}
-//					}
-//				}
-//				else {  // turning move restrictions exist
-//					for (Id<Link> linkid : signalData.getTurningMoveRestrictions()){
-//						Link outLink = scenario.getNetwork().getLinks().get(linkid);
-//						metadata.addOutLink(outLink);
-//					}
-//				}
-//			}
-//		}
-//		
-//		
-//		
-//		//This is a fixed value and and doesn't have to be calculated in every iteration
-//		maximalNumberOfAgentsInDistance = (int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize());
-//		
-//		setThresholdfromCycleTime();
-//	}
-	
-	
-	private void addOutLinksWithoutBackLinkToMetadata(Link inLink, SignalGroupMetadata metadata){
-		for (Link outLink : inLink.getToNode().getOutLinks().values()){
-			if (!outLink.getToNode().equals(inLink.getToNode())){
-				metadata.addOutLink(outLink);
-				checkOutlinkLength(outLink, metadata);
-			}
-		}
-	}
-	private void addOutLinksWithoutBackLaneToMetadata(Lane inLane, SignalGroupMetadata metadata){
-		if (inLane.getToLinkIds()!=null||!inLane.getToLinkIds().isEmpty()){
-			for (Id<Link> toLink : inLane.getToLinkIds()){
-				Link outLink = scenario.getNetwork().getLinks().get(toLink);
-				metadata.addOutLink(outLink);
-				checkOutlinkLength(outLink, metadata);
-			}
-		} else {
-			Link inLink = scenario.getNetwork().getLinks().get(metadata.getLinkOfLane(inLane.getId()));
-			addOutLinksWithoutBackLinkToMetadata(inLink,metadata);
-		}		
-	}
-	
-	
-	
-	@Override
-	public void simulationInitialized(double simStartTimeSeconds) {
-		initSignalGroupMetadata();
-		initSignalStates(simStartTimeSeconds);
-		registerAndInitializeSensorManager();
-		//TODO Adjust the Threshold according to the proposed formula.
-		setThresholdfromCycleTime();
-	}
-		
 	/**
-	 * The signal group for that the next onset will be triggered
-	 */
-	
-	
-	//If the given SignalGroup is active -> schedule dropping -> all signals are red
-	//If the the given Signalgroup is not active -> check whether there is an other signal group active
-	//								1. if not: -> everything was red -> schedule Onset for Signalgroup
-	//								2. if yes: -> another group was active -> schedule drop for the old group and Onset for the new group
-	
+	 * If the given SignalGroup is active -> schedule dropping -> all signals are red
+	 * If the the given Signalgroup is not active -> check whether there is an other signal group active
+	 * 			1. if not: -> everything was red -> schedule Onset for Signalgroup
+	 * 			2. if yes: -> another group was active -> schedule drop for the old group and Onset for the new group								
+	*/
 	private void switchlight(SignalGroup group, double timeSeconds) {
 		if (group.getState() == null) {
-			timecounter.put(group.getId(), 0.);
 			counter.put(group.getId(), 0.);
 			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
+			activeSignalGroup = null;
 			this.system.scheduleDropping(timeSeconds, group.getId());
+			timeactivegroup = 0.;
 		} else {
 			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
 			if (group.equals(activeSignalGroup) || group.getState().equals(SignalGroupState.GREEN)){
-				timecounter.put(group.getId(), 0.);
 				counter.put(group.getId(), 0.);
 				approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
 				this.system.scheduleDropping(timeSeconds, group.getId());
 				activeSignalGroup = null;
+				timeactivegroup = 0.;
 			} else {
 				if (activeSignalGroup==null) {
 					this.system.scheduleOnset(timeSeconds + gershensonConfig.getInterGreenTime(), group.getId());
-					timecounter.put(group.getId(), - gershensonConfig.getInterGreenTime());
 					activeSignalGroup = group;
+					timeactivegroup = -gershensonConfig.getInterGreenTime();
 					counter.put(group.getId(), 0.);
 				} else {
 					this.system.scheduleDropping(timeSeconds, activeSignalGroup.getId());
-					timecounter.put(activeSignalGroup.getId(), 0.);
 					counter.put(activeSignalGroup.getId(), 0.);
 					approachingVehiclesMap.get(activeSignalGroup.getId()).forEach((k,v) -> v=0);
 					
 					this.system.scheduleOnset(timeSeconds + gershensonConfig.getInterGreenTime(), group.getId());
-					timecounter.put(group.getId(), - gershensonConfig.getInterGreenTime());
 					activeSignalGroup = group;
+					timeactivegroup = -gershensonConfig.getInterGreenTime();
 					counter.put(group.getId(), 0.);
 				}
 			}
 		}
 	}
-		
-		
-//		
-//		
-//		
-//		if (group.getState() == null) {
-//			timecounter.put(group.getId(), 0.);
-//			counter.put(group.getId(), 0.);
-//			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
-//			this.system.scheduleDropping(timeSeconds, group.getId());
-//		} else {
-//			
-//			approachingVehiclesMap.get(group.getId()).forEach((k,v) -> v=0);
-//		
-//			if (group.getState().equals(SignalGroupState.RED)){
-//				this.system.scheduleOnset(timeSeconds + gershensonConfig.getInterGreenTime(), group.getId());
-//				timecounter.put(group.getId(), - gershensonConfig.getInterGreenTime());
-//				activeSignalGroup = group;
-//				counter.put(group.getId(), 0.);
-//			} else {
-//				this.system.scheduleDropping(timeSeconds, group.getId());
-//				timecounter.put(group.getId(), 0.);
-//				counter.put(group.getId(), 0.);
-//				
-//				//TODO does this even makes sense; might be obsolet
-//				for(Id<SignalGroup> groupid : this.signalGroupIdMetadataMap.keySet()){
-//					if (!groupid.equals(group.getId())&&(!this.system.getSignalGroups().get(groupid).getState().equals(SignalGroupState.RED)||!this.system.getSignalGroups().get(groupid).equals(activeSignalGroup))){
-//						this.system.scheduleDropping(timeSeconds, groupid);
-//					}
-//				}
-//				
-//				
-//				//Ensures that if a Group is switched from GREEN to RED that it is not the active Group anymore
-//				if(group.equals(activeSignalGroup)) activeSignalGroup=null;
-//			}
-//		}	
-//	}
-	
 
-	
-	//Method to monitor approaching cars for a signal group
-	private void carsOnInLinks(SignalGroup group, double now) {
-		if (!approachingVehiclesMap.containsKey(group.getId())) {
-			approachingVehiclesMap.put(group.getId(), new HashMap<Signal,Integer>());
-		}
-		for (Signal signal : group.getSignals().values()) {
-			if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()||scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1.){
-//			if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()){
-				//There are Link Exceptions
-				if(signalGroupIdMetadataMap.get(group.getId()).getInLinkLengthExceptions().containsKey(signal.getLinkId())){
-					Integer cars = this.sensorManager.getNumberOfCarsInDistance(signal.getLinkId(), signalGroupIdMetadataMap.get(group.getId()).getInLinkLengthExceptions().get(signal.getLinkId()), now); 
-					approachingVehiclesMap.get(group.getId()).put(signal, cars);
-					//There are no Link-Exceptions	
-				} else {
-					Integer cars = this.sensorManager.getNumberOfCarsInDistance(signal.getLinkId(),gershensonConfig.getMonitoredDistance(), now); 
-					approachingVehiclesMap.get(group.getId()).put(signal, cars);
-				}
-					
-			} else {
-				Integer cars = new Integer(0);
-				for (Id<Lane> laneId : signal.getLaneIds()){
-					//There are Lane-Exceptions	
-
-					
-					if(signalGroupIdMetadataMap.get(group.getId()).getInLanesLengthExceptions().containsKey(laneId)){
-						cars += this.sensorManager.getNumberOfCarsInDistanceOnLane(signal.getLinkId(), laneId ,signalGroupIdMetadataMap.get(group.getId()).getInLanesLengthExceptions().get(laneId), now);
-					//Normal Case - No Length of Lane Exception
-					} else {
-						cars += this.sensorManager.getNumberOfCarsInDistanceOnLane(signal.getLinkId(), laneId ,gershensonConfig.getMonitoredDistance(), now);
-					}
-				}
-				
-				
-//				/if(group.getId().toString().equals("SignalGroup2")) log.error(cars);
-				approachingVehiclesMap.get(group.getId()).put(signal, cars);
-			}
-		}	
-//		if (group.getId().toString().equals("SignalGroup2")){	
-//			log.error(group.getId().toString()+" has: ");
-//				for (Signal signalwqw : approachingVehiclesMap.get(group.getId()).keySet()){
-//					log.error("             at signal"+signalwqw.getId().toString()+ " are "+  approachingVehiclesMap.get(group.getId()).get(signalwqw));
-//				}
-//		}
-	}
-	
-	//method to monitor cars behind intersection
-	private void jamOnOutLink(SignalGroup group) {
-		SignalGroupMetadata metadata = signalGroupIdMetadataMap.get(group.getId());
-		if (!jammedOutLinkMap.containsKey(group.getId())) {
-			jammedOutLinkMap.put(group.getId(), new HashMap<Id<Link>,Boolean>());
-		}
-
-		for (Link link : metadata.getOutLinks()) {
-			
-			//TODO check this is not always jammed due to negative storage capacity
-			
-			boolean jammed = false;
-			if(!metadata.getOutLinkExceptionLinkHasNext().containsKey(link)){
-				double storageCap = ((link.getLength()- gershensonConfig.getMinmumDistanceBehindIntersection()) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
-				
-				if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * gershensonConfig.getStorageCapacityOutlinkJam())){
-					jammed = true;
-				}
-				
-			} else {
-				if (metadata.getOutLinkExceptionLinkHasNext().get(link)){
-					Link nextLink = link.getToNode().getOutLinks().values().iterator().next();
-					double length = link.getLength()+ nextLink.getLength();
-					double storageCap = ((length- gershensonConfig.getMinmumDistanceBehindIntersection()) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
-	
-					if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * gershensonConfig.getStorageCapacityOutlinkJam())){
-						jammed = true;
-					}
-				} else {
-
-					if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) >= 1){
-						jammed = true;
-					}
-				}	
-			}
-			jammedOutLinkMap.get(group.getId()).put(link.getId(), jammed);
-		}
-	}
-	
 	private void initSignalStates(double now) {
 		for(SignalGroup group : this.system.getSignalGroups().values()) {
 			system.scheduleDropping(now, group.getId());
 		}
 		activeSignalGroup = null;
 	}
-	
-	
+		
 	//If a minimum Cycle-Time for Rule 1 should be used, call this method.
 	private void setThresholdfromCycleTime(){
 		int minCycleTime = gershensonConfig.getMinmumCycleTime();
 		double intergreenTime = gershensonConfig.getInterGreenTime();
 		int numberOfGroups = signalGroupIdMetadataMap.size();
-		
 		
 		//This ensures that the threshold adjusts if there are more than one in InLink per Group that the Counter is not reached to quickly
 		double averageInLinksinGroup = 0.;
@@ -666,7 +404,7 @@ public class GershensonSignalController implements SignalController {
 		}
 		avgMaximalNumberOfAgentsInDistance/=maximalNumberOfAgentsInDistanceMap.size();
 		
-		log.info("The average maximal numbers of agents in distance is "+avgMaximalNumberOfAgentsInDistance+". Default was: "+(int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize()));
+		log.info("The average maximal numbers of agents in distance is "+(int)avgMaximalNumberOfAgentsInDistance+". Default was: "+(int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize()));
 		
 		
 		if (averageInLinksinGroup != 0.){
@@ -679,67 +417,12 @@ public class GershensonSignalController implements SignalController {
 		
 		log.info("Set Threshold from "+ oldThreshold + " to "+ this.threshold  +" [veh*s]");
 	}
-	
-	
-	
-	private boolean jammedafterIntersection(SignalGroup group) {
-		boolean jammed = false;
-		if (jammedOutLinkMap.get(group.getId()) != null){
-			if(jammedOutLinkMap.get(group.getId()).containsValue(true)) jammed = true;
-		}
-		return jammed;
-	}
-	
-	//fills approachingVehiclesGroupMap, adding up every link for each group
-	private void carsApproachInGroup() {
-		approachingVehiclesGroupMap.clear();
-		for (SignalGroup group : this.system.getSignalGroups().values()) {
-			int vehicles = 0;
-			for(Signal signal : approachingVehiclesMap.get(group.getId()).keySet()){
-				
-				//Fix Agents distance here for the case that there is no length of lane exceptions //TODO
-				if(maximalNumberOfAgentsInDistanceMap.get(signal.getId()) < approachingVehiclesMap.get(group.getId()).get(signal)){
-					vehicles += maximalNumberOfAgentsInDistanceMap.get(signal.getId());
-				} else {
-					vehicles += approachingVehiclesMap.get(group.getId()).get(signal);
-				}
-				
-//				if (SignalGroupState.RED.equals(group.getState())){
-//				log.warn("There are approaching"+approachingVehiclesMap.get(group.getId()).get(signal)+" vehicles in signal "+signal.getId().toString() +" of "+ group.getId().toString());
-//				}
-			}
-		approachingVehiclesGroupMap.put(group.getId(), vehicles);
-		}
-	}
-		
-	
-	
-	private void updatecounter(){	
-		for(SignalGroup group : this.system.getSignalGroups().values()) {
-			if (approachingVehiclesGroupMap.containsKey(group.getId())){
-				if (!counter.containsKey(group.getId())){
-					counter.put(group.getId(), 0.);
-				}
-					
-				if (group.getState() != null ||activeSignalGroup!=null){
-					if (group.getState().equals((SignalGroupState.RED))){
-						counter.put(group.getId(), counter.get(group.getId()) + new Double(approachingVehiclesGroupMap.get(group.getId())));
-					} 
-				}
-			}
-//			if (SignalGroupState.RED.equals(group.getState())){
-//			log.warn("The counter is"+counter.get(group.getId())+" vehicles in signal of "+ group.getId().toString());
-//			}	
-		}
-	}
-	
 
 	private Boolean rule3Tester(SignalGroup signalGroup, double time) {
 		Boolean VehInR = false;
 		for (Signal signal : signalGroup.getSignals().values()) {
 			if(VehInR) return VehInR;
 			if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()||scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1.){
-//			if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()){
 				if(!VehInR) {
 					//There are Link-Sensor-Excepetions ie. a lane was to short for the suggested montitored distances by Gershenson
 					if (signalGroupIdMetadataMap.get(signalGroup.getId()).getInLinkLengthExceptions().containsKey(signal.getLinkId())){
@@ -800,74 +483,132 @@ public class GershensonSignalController implements SignalController {
 		}
 		return VehInR;
 	}
-		
-
-		
 	
-
-	private Double highestcount(){
-		Double highest = 0.;
-		for (Id<SignalGroup>signalgroup : counter.keySet()) {
-			if(!jammedafterIntersection(this.system.getSignalGroups().get(signalgroup))) {
-				if (highest==0.) highest = counter.get(signalgroup);
-				if(highest<counter.get(signalgroup)) highest = counter.get(signalgroup);
+	/**
+	 * Method that fills all necessary Maps which are used in the rule set
+	 * 
+	 */
+	private void updateMonitoredTraffic(double now){
+		jammedSignalGroup.clear();
+		jammedOutLinkMap.clear();
+		approachingVehiclesMap.clear();
+		approachingVehiclesGroupMap.clear();
+//-------------------------------
+		for (SignalGroup group : this.system.getSignalGroups().values()){
+//------------------------------- Fill approachingVehiclesMap, monitor approaching cars for a signal group
+			if (!approachingVehiclesMap.containsKey(group.getId())) {
+				approachingVehiclesMap.put(group.getId(), new HashMap<Signal,Integer>());
+			}
+			for (Signal signal : group.getSignals().values()) {
+				if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()||scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1.){
+					//There are Link Exceptions
+					if(signalGroupIdMetadataMap.get(group.getId()).getInLinkLengthExceptions().containsKey(signal.getLinkId())){
+						Integer cars = this.sensorManager.getNumberOfCarsInDistance(signal.getLinkId(), signalGroupIdMetadataMap.get(group.getId()).getInLinkLengthExceptions().get(signal.getLinkId()), now); 
+						approachingVehiclesMap.get(group.getId()).put(signal, cars);
+						//There are no Link-Exceptions	
+					} else {
+						Integer cars = this.sensorManager.getNumberOfCarsInDistance(signal.getLinkId(),gershensonConfig.getMonitoredDistance(), now); 
+						approachingVehiclesMap.get(group.getId()).put(signal, cars);
+					}
+						
+				} else {
+					Integer cars = new Integer(0);
+					for (Id<Lane> laneId : signal.getLaneIds()){
+						//There are Lane-Exceptions	
+						if(signalGroupIdMetadataMap.get(group.getId()).getInLanesLengthExceptions().containsKey(laneId)){
+							cars += this.sensorManager.getNumberOfCarsInDistanceOnLane(signal.getLinkId(), laneId ,signalGroupIdMetadataMap.get(group.getId()).getInLanesLengthExceptions().get(laneId), now);
+						//Normal Case - No Length of Lane Exception
+						} else {
+							cars += this.sensorManager.getNumberOfCarsInDistanceOnLane(signal.getLinkId(), laneId ,gershensonConfig.getMonitoredDistance(), now);
+						}
+					}			
+					approachingVehiclesMap.get(group.getId()).put(signal, cars);
+				}
+			}
+//-----------------------------Fills approachingVehiclesGroupMap
+			int vehicles = 0;
+			for(Signal signal : approachingVehiclesMap.get(group.getId()).keySet()){	
+				//Fix Agents distance here for the case that there is no length of lane exceptions //TODO
+				if(maximalNumberOfAgentsInDistanceMap.get(signal.getId()) < approachingVehiclesMap.get(group.getId()).get(signal)){
+					vehicles += maximalNumberOfAgentsInDistanceMap.get(signal.getId());
+				} else {
+					vehicles += approachingVehiclesMap.get(group.getId()).get(signal);
+				}
+			}
+		approachingVehiclesGroupMap.put(group.getId(), vehicles);
+//-------------------------------Fills counter
+		if (approachingVehiclesGroupMap.containsKey(group.getId())){
+			if (!counter.containsKey(group.getId())){
+				counter.put(group.getId(), 0.);
+			}			
+			if (group.getState() != null ||activeSignalGroup!=null){
+				if (group.getState().equals((SignalGroupState.RED))){
+					counter.put(group.getId(), counter.get(group.getId()) + new Double(approachingVehiclesGroupMap.get(group.getId())));
+				} 
 			}
 		}
-		return highest;
-	}
-	
-	private Boolean vehiclesApproachingSomewhere() {
+
+////-------------------------------Fills jammedOutLinkMap
+			SignalGroupMetadata metadata = signalGroupIdMetadataMap.get(group.getId());
+			if (!jammedOutLinkMap.containsKey(group.getId())) {
+				jammedOutLinkMap.put(group.getId(), new HashMap<Id<Link>,Boolean>());
+			}
+
+			for (Link link : metadata.getOutLinks()) {
+								
+				boolean jammed = false;
+				if(!metadata.getOutLinkExceptionLinkHasNext().containsKey(link)){
+					double storageCap = ((link.getLength()- gershensonConfig.getMinmumDistanceBehindIntersection()) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
+					
+					if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * gershensonConfig.getStorageCapacityOutlinkJam())){
+						jammed = true;
+					}	
+				} else {
+					if (metadata.getOutLinkExceptionLinkHasNext().get(link)){
+						Link nextLink = link.getToNode().getOutLinks().values().iterator().next();
+						double length = link.getLength()+ nextLink.getLength();
+						double storageCap = ((length- gershensonConfig.getMinmumDistanceBehindIntersection()) * link.getNumberOfLanes()) / (this.scenario.getConfig().jdeqSim().getCarSize() * this.scenario.getConfig().qsim().getStorageCapFactor());
+		
+						if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) > (storageCap * gershensonConfig.getStorageCapacityOutlinkJam())){
+							jammed = true;
+						}
+					} else {
+
+						if (this.sensorManager.getNumberOfCarsOnLink(link.getId()) >= 1){
+							jammed = true;
+						}
+					}	
+				}
+				jammedOutLinkMap.get(group.getId()).put(link.getId(), jammed);
+			}
+//-------------------------------Fills jammedSignalGroup
+			boolean jammedGroup = false;
+			if (jammedOutLinkMap.get(group.getId()) != null){
+				if(jammedOutLinkMap.get(group.getId()).containsValue(true)) jammedGroup = true;
+			}
+			jammedSignalGroup.put(group.getId(), jammedGroup);		
+		}
+//---------------------------Set Bool thereAreVehiclesApproaching
 		Boolean approach = false;
 		for (Id<SignalGroup> signalGroupId : approachingVehiclesGroupMap.keySet()) {
 			if(!approach && approachingVehiclesGroupMap.get(signalGroupId).compareTo(0)!=0) {
 				approach = true;
 			}
 		}
-		return approach;
+		thereAreVehiclesApproaching = approach;
 	}
 	
-	
-	
-	
-	//-----------------------------
-
-	//-------------------------
-	
-	private Map<Id<SignalGroup>, Map<Signal, Integer> > approachingVehiclesMap = new HashMap<Id<SignalGroup>, Map<Signal, Integer>>();
-	private Map<Id<SignalGroup>, Integer> approachingVehiclesGroupMap = new HashMap<Id<SignalGroup>, Integer>();
-	private Map<Id<SignalGroup>, Map<Id<Link>, Boolean> > jammedOutLinkMap = new HashMap<Id<SignalGroup>, Map<Id<Link>, Boolean>>();	
-	private Map<Id<SignalGroup>, Double>  timecounter = new HashMap<Id<SignalGroup>, Double>();	
-	private Map<Id<SignalGroup>, Double> counter = new HashMap<Id<SignalGroup>, Double>();	
-	private Map<Id<SignalGroup>, Boolean> jammedSignalGroup = new HashMap<Id<SignalGroup>,Boolean>();
-	private SignalGroup activeSignalGroup;
-	private int maximalNumberOfAgentsInDistance;
-	private Map<Id<Signal>, Integer>  maximalNumberOfAgentsInDistanceMap = new HashMap<Id<Signal>, Integer>();
-	private double threshold;
-	
-
-	
-	
+	@Override
+	public void simulationInitialized(double simStartTimeSeconds) {
+		initSignalGroupMetadata();
+		initSignalStates(simStartTimeSeconds);
+		registerAndInitializeSensorManager();
+		//TODO Adjust the Threshold according to the proposed formula.
+		if (gershensonConfig.getSignalSystemDependendThreshold()) setThresholdfromCycleTime();
+	}
+		
 	@Override
 	public void updateState(double timeSeconds) {
-	// Get data which is needed before going through the rule set	
-		
-		//This is just to demonstrate that the algorithm works
-//		if (timeSeconds%1==0) {
-//			if (activeSignalGroup!= null){
-//				log.info("At "+timeSeconds +" "+ activeSignalGroup.getId().toString() + " is active and is" + activeSignalGroup.getState());
-//			} else {
-//				log.info("At "+timeSeconds + " active Signalgroup is not initilised");
-//			}
-//			log.info("At "+timeSeconds +" : "+ counter.toString() + " ");
-//			log.info(" ");
-//		}
-		
-		//add one second to the timecounter of eachgroup
-		for (SignalGroup group : this.system.getSignalGroups().values()){
-			timecounter.merge(group.getId(), 0., (a,b) -> a+1.);
-	
-		}
-		
 		for(SignalGroup group : this.system.getSignalGroups().values()){
 			boolean greenbefore = false;
 			if (group.getState()!=null){
@@ -882,31 +623,11 @@ public class GershensonSignalController implements SignalController {
 		//Only run through the ruleset if there is no active Signalgroup (i.e. all are RED) or if the activeSignal-Group is Green
 		// -> If the active Signalgroup is Red it should be due to the intergreen time				
 		if( activeSignalGroup ==null|| activeSignalGroup.getState().equals(SignalGroupState.GREEN)) {
-			
-			
-			jammedSignalGroup.clear();
-			jammedOutLinkMap.clear();
-			approachingVehiclesMap.clear();
-			
-			
-			
-			for (SignalGroup group : this.system.getSignalGroups().values()){
+			//add one second to the timecounter of the active group
+			if(activeSignalGroup!=null) timeactivegroup++; 
+			// Get data which is needed before going through the rule set	
+			updateMonitoredTraffic(timeSeconds);
 
-		//fills approachingVehiclesMap
-				carsOnInLinks(group,timeSeconds);
-		//fills jammedOutLinkMap
-				jamOnOutLink(group);
-				
-				jammedSignalGroup.put(group.getId(), jammedafterIntersection(group));
-			}
-			
-		//fills approachingVehiclesGroupMap and counter (product of internal times with vehicles)
-			carsApproachInGroup();
-			updatecounter();
-		//Find the group with the highest count (product of internal time with vehicles in D s.t. no OutLink-Jam)
-			Double signalGrouphighestCount = highestcount();
-			boolean thereAreVehiclesApproaching = vehiclesApproachingSomewhere();
-			
 	//-----------------End of Preparation--------------
 	
 		//Rule 6
@@ -915,40 +636,15 @@ public class GershensonSignalController implements SignalController {
 		//	-> turn all signals to RED	
 			
 			if (!jammedSignalGroup.containsValue(false)  || (!thereAreVehiclesApproaching)) {
-//				log.info("Envoke Rule 6 at "+timeSeconds + !vehiclesApproachingSomewhere());
-//				log.info("Rule 6");
-//				log.info("all jammed: "+ !jammedSignalGroup.containsValue(false));
-//				log.info("cars approaching: "+thereAreVehiclesApproaching);
 					if (activeSignalGroup != null) switchlight(activeSignalGroup,timeSeconds);
-				
-//					for (SignalGroup group : this.system.getSignalGroups().values()){ 			
-//						if (activeSignalGroup != null && activeSignalGroup.equals(group)) switchlight(group,timeSeconds);
-//					}
-			
-//					for(SignalGroup group : this.system.getSignalGroups().values()){
-//						boolean greenbefore = false;
-//						if (group.getState()!=null){
-//							if (greenbefore && group.getState().equals(SignalGroupState.GREEN)){
-//								log.error("BOTH GROUPS ARE GREEN -RULE6" );
-//								break;
-//							}
-//							if (group.getState().equals(SignalGroupState.GREEN)) greenbefore = true;
-//						}
-//					}
-				
-				//if(!vehiclesApproachingSomewhere()) activeSignalGroup=null;
 			} else {
 		//Rule 5
 		//At least one Outlink is jammed - from all groups, which are not jammed turn the one with the highest counter to GREEN
 		//the others to RED
 		//The switchlightCounter ensures that the activeSignalGroup is set to null if necessary
 				if (jammedSignalGroup.containsValue(true) && activeSignalGroup !=null) {
-					//log.info("Envoke Rule 5 at "+timeSeconds + jammedSignalGroup.toString());
-//					log.info("One is jammed:" +jammedSignalGroup.containsValue(true)+ "and there is an active group: "+activeSignalGroup.getId().toString());
-					int switchlightcounter = 0;
 					SignalGroup changerGroup = null;
 					for (SignalGroup group : this.system.getSignalGroups().values()) {
-						//The signalGroup is jammed behind the intersection, switch it to Red
 						if (!jammedSignalGroup.get(group.getId())){
 							if (changerGroup==null){
 								changerGroup = group;
@@ -960,47 +656,12 @@ public class GershensonSignalController implements SignalController {
 						}
 					}
 					if (!changerGroup.equals(activeSignalGroup)) switchlight(changerGroup,timeSeconds);
-//					log.warn("group: " + changerGroup.getId().toString() + ", "
-//							+ "activeSignal: " + activeSignalGroup.getId().toString());						
-						
-						
-//						if (jammedSignalGroup.get(group.getId()) && activeSignalGroup.equals(group))
-//								/*signalGroupstatesMap.get(group.getId()).equals(SignalGroupState.GREEN))*/ {
-//							switchlight(group,timeSeconds);
-//							switchlightcounter++;
-////							log.info("Fehler 1 - Rule 5");
-////							log.info("active ");
-//				} else {
-//		// Set a not active Signalgroup to Green if its is not jammed and it has the highest number of cars approaching
-//		// if at there are some
-
-//							if ( !jammedSignalGroup.get(group.getId()) && 
-//									counter.get(group.getId())==signalGrouphighestCount && 
-//									counter.get(group.getId())!=0.0 &&
-//									group.getState().equals(SignalGroupState.RED) 			
-//								|| (!activeSignalGroup.equals(group) && 
-//										group.
-//										getState().
-//										equals(SignalGroupState.GREEN))){
-//								
-//								switchlight(group,timeSeconds);
-//								switchlightcounter++;
-////								log.info("Fehler 2 - Rule 5 " + switchlightcounter);
-//							}
-//						}	
-//					}
-			//If only one switch happened, all groups should be red and active group should be null
-					//if (switchlightcounter==1) activeSignalGroup=null;
-				
-					
 				} else {
 		//Complement to Rule 6
 		//All Signals are RED, but there is no jam on Outlinks anymore. Restore a single Green for the Group with the highest count
 					if (activeSignalGroup==null) {
-//						log.info("no active Signalgroup: "+ activeSignalGroup==null);
 						if (jammedSignalGroup.containsValue(false)){
 							SignalGroup changerGroup = null;
-//							log.info("Rule 6 complement. One group is jammed on Outlink: "+jammedSignalGroup.containsValue(false));
 							for (SignalGroup group : this.system.getSignalGroups().values()) {
 								if (!jammedSignalGroup.get(group.getId())){
 									if (changerGroup==null){
@@ -1013,28 +674,11 @@ public class GershensonSignalController implements SignalController {
 								}
 							}
 							switchlight(changerGroup,timeSeconds);
-//							log.info("Counter of Group " +changerGroup.getId().toString()+ " is "+counter.get(changerGroup.getId())+ " group is " + changerGroup.getState().toString());
-						}
-								
-						
-//								if (signalGrouphighestCount!=0.0 && counter.get(group.getId()) == signalGrouphighestCount) {
-//									switchlight(group,timeSeconds);
-////									log.info("Complement Rule 6 switched light of group " +group.getId().toString());
-//									break;
-//								}
-//							}
-//						}
-							
-						
+						}				
 					} else {
 		//Rule 4
 		//One Group has GREEN but no cars approaching and another group has RED and Cars approaching (switch them)
-						if(approachingVehiclesGroupMap.containsValue(0) && thereAreVehiclesApproaching && activeSignalGroup!=null && approachingVehiclesGroupMap.get(activeSignalGroup.getId())==0) {
-//							log.info("There is a group where no one is approaching " +approachingVehiclesGroupMap.containsValue(0));
-//							log.info("There are vehicles approacing " +thereAreVehiclesApproaching);
-							int highest = 0;
-							SignalGroup firstlight=null; 
-							
+						if(approachingVehiclesGroupMap.containsValue(0) && thereAreVehiclesApproaching && activeSignalGroup!=null && approachingVehiclesGroupMap.get(activeSignalGroup.getId())==0) {		
 							if(approachingVehiclesGroupMap.get(activeSignalGroup.getId())==0){
 								SignalGroup changerGroup = null;
 								for (SignalGroup group : this.system.getSignalGroups().values()) {
@@ -1047,60 +691,23 @@ public class GershensonSignalController implements SignalController {
 									}																	
 								}
 								if (!(changerGroup==null)) switchlight(changerGroup,timeSeconds);	
-							}
-							
-							
-							
-							
-							
-							
-//							for (SignalGroup group : this.system.getSignalGroups().values()) {
-//								if (activeSignalGroup != null){								
-//									if (group.getState().equals(SignalGroupState.GREEN) &&
-//											(approachingVehiclesGroupMap.get(group.getId())==0 )){
-//											
-//										//Active group should be switched to red
-//										switchlight(group,timeSeconds);
-////										log.info("Rule 4 - Group "+group.getId().toString()+" is green: "+group.getState().equals(SignalGroupState.GREEN));
-////										log.info("but there are Cars arriving:" +approachingVehiclesGroupMap.get(group.getId()) + "->switch to RED");
-//									} else {
-//										if(
-//												//approachingVehiclesGroupMap.get(activeSignalGroup.getId())==0  &&
-//												counter.get(group.getId()) == signalGrouphighestCount &&
-//												group.getState().equals(SignalGroupState.RED) &&
-//												counter.get(group.getId()) > 0.){
-//											switchlight(group,timeSeconds);
-//										}
-//									}
-//								} else {
-//									if (approachingVehiclesGroupMap.get(group.getId())>=highest) firstlight = group;
-//								}
-//							}
-							//if (activeSignalGroup == null) switchlight(firstlight,timeSeconds);
-							
+							}	
 						} else {
 		//Rule 3
 		//A signal should switch from GREEN to RED (according to Rule 1 and 2), but there are just a few cars left to pass: Don't switch
 							boolean hasfewerThanMVehiclesInR= false;
 							if (rule3Tester(activeSignalGroup, timeSeconds) ){
 								hasfewerThanMVehiclesInR = true;
-//								log.info("Rule 3 of active group"+ activeSignalGroup.getId().toString());
 							}
-							
-							if (!hasfewerThanMVehiclesInR) {
 		//Rule 2
 		//A signal should switch from GREEN to RED (according to Rule 1), but internal time of the Group hasn't reached
 		//the minimal green time yet - Dont't switch
-								boolean counterRule2 = true;
-//								for (SignalGroup group : this.system.getSignalGroups().values()) {
-//									if (group.getState().equals(activeSignalGroup) && timecounter.get(group.getId())< gershensonConfig.getMinimumGREENtime()) counterRule2 = false;
-//								}
-								
-								if (timecounter.get(activeSignalGroup.getId())< gershensonConfig.getMinimumGREENtime()) counterRule2 = false;
-								
-								if (counterRule2) {
-		//Rule 1
-							//		LinkedList<SignalGroup> potentialRule1 = new LinkedList<SignalGroup>();
+							if (!hasfewerThanMVehiclesInR) {
+								boolean minimumGreenTimereached = false;	
+								if (timeactivegroup>= gershensonConfig.getMinimumGREENtime()) minimumGreenTimereached = true;
+
+		//Rule 1								
+								if (minimumGreenTimereached) {
 									SignalGroup changerGroup = null;
 									for (SignalGroup group : this.system.getSignalGroups().values()) {										
 										if (!group.equals(activeSignalGroup) && counter.get(group.getId())>this.threshold) {
@@ -1114,35 +721,9 @@ public class GershensonSignalController implements SignalController {
 										}
 									}
 									if (changerGroup!=null){
-//										log.info(changerGroup.getId().toString()+" reached the threshold- counter: "+counter.get(changerGroup.getId())+ " threshold was: "+this.threshold);
 										switchlight(changerGroup,timeSeconds);
-
 									}
-								}
-									
-											
-//											potentialRule1.add(group);
-//											//log.info("Rule 1: Signalgroup "+ group.getId().toString() + " reached the threshold");
-//										}
-//									}
-//									if(!potentialRule1.isEmpty()) {
-//										SignalGroup groupR1 = null;
-//										for(SignalGroup group : potentialRule1) {
-//											if (groupR1==null) groupR1=group;
-//											if(counter.get(groupR1.getId())<counter.get(group.getId())) groupR1=group;
-//										}
-//										//some og it obsolet
-//										for (SignalGroup group : this.system.getSignalGroups().values()) {	
-//											if (group.equals(activeSignalGroup)) switchlight(group,timeSeconds);
-//											if (group.getState().equals(SignalGroupState.GREEN)) switchlight(group,timeSeconds);
-//											if (group.equals(groupR1)){
-//												//log.info(groupR1.getId().toString()+" reached the threshold- counter: "+counter.get(groupR1.getId())+ " threshold was: "+gershensonConfig.getThreshold());
-//												switchlight(group,timeSeconds);
-//											}
-											
-//										}
-//									}
-//								}
+								}			
 							}
 						}
 					}
@@ -1150,8 +731,6 @@ public class GershensonSignalController implements SignalController {
 			}
 		}
 	}
-
-			
 			
 	@Override
 	public void addPlan(SignalPlan plan) {
@@ -1160,7 +739,6 @@ public class GershensonSignalController implements SignalController {
 
 	@Override
 	public void reset(Integer iterationNumber) {
-		// TODO call initialize method or similar
 		// simulationInitialized-Method is called anyway so there is no need to do anything here
 	}
 
@@ -1168,7 +746,4 @@ public class GershensonSignalController implements SignalController {
 	public void setSignalSystem(SignalSystem signalSystem) {
 		this.system = signalSystem ;		
 	}	
-
-	
-
 }
