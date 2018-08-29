@@ -67,9 +67,9 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 	@Inject
 	private EmissionResponsibilityCostModule emissionCostModule;
 	@Inject(optional=true) private PersonFilter pf ;
-	@Inject(optional=true) private double noOfTimeBins ;
+	@Inject(optional=true) private double noOfTimeBins =1;
 
-	private double timeBinSize;
+	private double timeBinSize  ;
 
 	public ExperiencedEmissionCostHandler(){}
 
@@ -106,10 +106,13 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 		Id<Person> personId = this.vehicle2Person.get(vehicleId);
 		if(personId==null) throw new RuntimeException("no person is found for vehicle "+vehicleId+". This occus at "+ event.toString());
 
+		if (timeBinSize==0.) {
+			timeBinSize = qSimConfigGroup.getEndTime() / noOfTimeBins;
+		}
 		double endOfTimeInterval = Math.max(1, Math.ceil( event.getTime()/this.timeBinSize) ) * this.timeBinSize;
 
-		Map<Id<Vehicle>,Double> vehi2emiss = this.vehicleId2WarmEmissCosts.putIfAbsent(endOfTimeInterval, new HashMap<>());
-		Map<Id<Person>, Double> person2emiss = this.personId2WarmEmissCosts.putIfAbsent(endOfTimeInterval, new HashMap<>());
+		Map<Id<Vehicle>,Double> vehi2emiss = this.vehicleId2WarmEmissCosts.getOrDefault(endOfTimeInterval, new HashMap<>());
+		Map<Id<Person>, Double> person2emiss = this.personId2WarmEmissCosts.getOrDefault(endOfTimeInterval, new HashMap<>());
 
 		double totalAmount_vehicle = vehi2emiss.getOrDefault(vehicleId, 0.) + amount2Pay;
 		double totalAmount_person = person2emiss.getOrDefault(personId, 0.) + amount2Pay;
@@ -130,10 +133,13 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 		Id<Person> personId = this.vehicle2Person.get(vehicleId);
 		if(personId==null) throw new RuntimeException("no person is found for vehicle "+vehicleId+". This occus at "+ event.toString());
 
+		if (timeBinSize==0.) {
+			timeBinSize = qSimConfigGroup.getEndTime() / noOfTimeBins;
+		}
 		double endOfTimeInterval = Math.max(1, Math.ceil( event.getTime()/this.timeBinSize) ) * this.timeBinSize;
 
-		Map<Id<Vehicle>,Double> vehi2emiss = this.vehicleId2ColdEmissCosts.putIfAbsent(endOfTimeInterval, new HashMap<>());
-		Map<Id<Person>, Double> person2emiss = this.personId2ColdEmissCosts.putIfAbsent(endOfTimeInterval, new HashMap<>());
+		Map<Id<Vehicle>,Double> vehi2emiss = this.vehicleId2ColdEmissCosts.getOrDefault(endOfTimeInterval, new HashMap<>());
+		Map<Id<Person>, Double> person2emiss = this.personId2ColdEmissCosts.getOrDefault(endOfTimeInterval, new HashMap<>());
 
 		double totalAmount_vehicle = vehi2emiss.getOrDefault(vehicleId, 0.) + amount2Pay;
 		double totalAmount_person = person2emiss.getOrDefault(personId, 0.) + amount2Pay;

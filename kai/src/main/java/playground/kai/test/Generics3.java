@@ -10,7 +10,7 @@ public class Generics3 {
 		
 		Id<ActivityFacility> actFacId = Id.create("actFac", ActivityFacility.class ) ;
 		
-		Id<? extends Facility<?>> facId = actFacId ;
+		Id<? extends Facility> facId = actFacId ;
 		
 	}
 	

@@ -163,11 +163,11 @@ public class SimpleWithindayAgent implements MobsimDriverAgent {
 		return delegate.getCurrentPlan();
 	}
 
-	public Facility<? extends Facility<?>> getCurrentFacility() {
+	public Facility getCurrentFacility() {
 		return this.delegate.getCurrentFacility();
 	}
 
-	public Facility<? extends Facility<?>> getDestinationFacility() {
+	public Facility getDestinationFacility() {
 		return this.delegate.getDestinationFacility();
 	}
 

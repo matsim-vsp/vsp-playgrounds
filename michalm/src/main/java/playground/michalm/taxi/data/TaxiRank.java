@@ -24,11 +24,12 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.facilities.Facility;
 
-public class TaxiRank implements Facility<TaxiRank> {
+public class TaxiRank implements Facility, Identifiable<TaxiRank> {
 	private final Id<TaxiRank> id;
 	private final String name;
 	private final Link link;

@@ -119,8 +119,8 @@ class WithinDayBangBangMobsimListener implements MobsimBeforeSimStepListener {
 
 		List<Id<Link>> links = null ;
 		for ( Id<Link> currentId : KNAccidentScenario.replanningLinkIds ) {
-			Facility<ActivityFacility> fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
-			Facility<ActivityFacility> toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(returnId));
+			Facility fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
+			Facility toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(returnId));
 
 			final Leg leg = (Leg) routingModule.calcRoute(fromFacility, toFacility, 0, null).get(0);
 			links = ((NetworkRoute)leg.getRoute()).getLinkIds() ;

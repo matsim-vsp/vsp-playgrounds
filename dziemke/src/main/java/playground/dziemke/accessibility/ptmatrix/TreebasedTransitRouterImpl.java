@@ -66,7 +66,7 @@ public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements
 
     private TransitLeastCostPathTree transitLeastCostPathTree;
 
-    private Facility<?> fromFacility;
+    private Facility fromFacility;
 
     public TreebasedTransitRouterImpl(final TransitRouterConfig config, final TransitSchedule schedule) {
         super(config);
@@ -112,7 +112,7 @@ public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements
     }
 
     @Override
-    public List<Leg> calcRoute(final Facility<?> fromFacility, final Facility<?> toFacility, final double departureTime, final Person person) {
+    public List<Leg> calcRoute( final Facility fromFacility, final Facility toFacility, final double departureTime, final Person person) {
         // find possible start stops
         Map<Node, InitialNode> wrappedFromNodes = this.locateWrappedNearestTransitNodes(person, fromFacility.getCoord(), departureTime);
         // find possible end stops

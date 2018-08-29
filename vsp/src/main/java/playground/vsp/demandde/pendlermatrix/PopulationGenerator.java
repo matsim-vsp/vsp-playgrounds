@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -106,9 +107,12 @@ public class PopulationGenerator implements TripFlowSink {
 	}
 
 	private Id<Person> createId(Facility source, Facility sink, int i, String transportMode) {
-		return Id.create(transportMode + "_" + source.getId() + "_" + sink.getId() + "_" + i, Person.class);
+		if ( source instanceof Identifiable && sink instanceof Identifiable ) {
+			return Id.create( transportMode + "_" + ( (Identifiable) source ).getId() + "_" + ( (Identifiable) sink ).getId() + "_" + i, Person.class );
+		} else {
+			throw new RuntimeException( Facility.FACILITY_NO_LONGER_IDENTIFIABLE );
+		}
 	}
-
 	public void setSink(PersonSink personSink) {
 		this.personSink = personSink;
 	}
