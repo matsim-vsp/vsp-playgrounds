@@ -503,11 +503,6 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 		}
 	}
 
-
-	@Override
-	public void reset(Integer iterationNumber) {
-	}
-
 	public SignalSystem getSystem() {
 		return this.system;
 	}

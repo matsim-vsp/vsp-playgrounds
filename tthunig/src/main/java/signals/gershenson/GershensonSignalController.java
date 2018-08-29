@@ -738,11 +738,6 @@ public class GershensonSignalController implements SignalController {
 	}
 
 	@Override
-	public void reset(Integer iterationNumber) {
-		// simulationInitialized-Method is called anyway so there is no need to do anything here
-	}
-
-	@Override
 	public void setSignalSystem(SignalSystem signalSystem) {
 		this.system = signalSystem ;		
 	}	
