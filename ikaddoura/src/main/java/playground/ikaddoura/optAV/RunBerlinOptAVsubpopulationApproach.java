@@ -19,8 +19,6 @@
 
 package playground.ikaddoura.optAV;
 
-import static org.matsim.core.config.groups.ControlerConfigGroup.RoutingAlgorithmType.FastAStarLandmarks;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +27,6 @@ import javax.inject.Provider;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -41,8 +38,8 @@ import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -52,11 +49,10 @@ import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.router.TripRouter;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.run.RunBerlinScenario;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
@@ -73,8 +69,8 @@ public class RunBerlinOptAVsubpopulationApproach {
 	private static String outputDirectory;
 	private static String runId;
 	private static String visualizationScriptInputDirectory;
-	private static boolean carAvailableModeForNonBerliners = true;
 	private static final boolean otfvis = false;
+	private static boolean isCarAvailableModeForNonBerliners;
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
@@ -91,20 +87,16 @@ public class RunBerlinOptAVsubpopulationApproach {
 			visualizationScriptInputDirectory = args[3];
 			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
 			
-			carAvailableModeForNonBerliners = Boolean.parseBoolean(args[4]);
-			log.info("carAvailableModeForNonBerliners: "+ carAvailableModeForNonBerliners);
+			isCarAvailableModeForNonBerliners = Boolean.parseBoolean(args[4]);
+			log.info("isCarAvailableModeForNonBerliners: "+ isCarAvailableModeForNonBerliners);
 
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_G1.xml";
-			runId = "oAV_G1_1pct";
-
-//			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/berlin-5.1_1pct_config_oAV_A1_test.xml";
-//			runId = "oAV_A1_1pct_test";
-
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_" + runId + "/";
+			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-1pct/input/berlin-v5.2-1pct.config_b1_A1.xml";
+			runId = "b1_A1_1pct";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-1pct/local-run_" + runId + "/";
 			visualizationScriptInputDirectory = "./visualization-scripts/";
-			carAvailableModeForNonBerliners = false;
+			isCarAvailableModeForNonBerliners = true;
 		}
 		
 		RunBerlinOptAVsubpopulationApproach runner = new RunBerlinOptAVsubpopulationApproach();
@@ -112,51 +104,24 @@ public class RunBerlinOptAVsubpopulationApproach {
 	}
 
 	public void run() {
-		
-		Config config = ConfigUtils.loadConfig(
-				configFile,
+	
+		RunBerlinScenario berlin = new RunBerlinScenario( configFile, null );
+		ConfigGroup[] customModules = {
 				new OptAVConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup(),
-				new DecongestionConfigGroup()
-				);
-		
+				new DecongestionConfigGroup()};
+		Config config = berlin.prepareConfig(customModules);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
 		
-		// berlin scenario related settings
-
-		config.controler().setRoutingAlgorithmType( FastAStarLandmarks );
-		
-		config.subtourModeChoice().setProbaForRandomSingleTripMode(0.5);
-		
-		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
-		config.qsim().setUsingTravelTimeCheckInTeleportation(true);
-		config.qsim().setTrafficDynamics(TrafficDynamics.kinematicWaves);
-		
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		Controler controler = new Controler(scenario);
-		
-		// use the sbb pt raptor router
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				install(new SwissRailRaptorModule());
-			}
-		});
-		
-		// use the (congested) car travel time for the teleported ride mode
-		controler.addOverridingModule(new AbstractModule(){
-			@Override
-			public void install() {
-				addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
-				addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());        }
-	    });
+		Scenario scenario = berlin.prepareScenario();	
+		Controler controler = berlin.prepareControler();
 		
 		// some online analysis
 		controler.addOverridingModule(new AbstractModule() {
@@ -186,7 +151,7 @@ public class RunBerlinOptAVsubpopulationApproach {
 				availableModesArrayList.add("bicycle");
 				availableModesArrayList.add("pt");
 				availableModesArrayList.add("walk");
-				if (carAvailableModeForNonBerliners) {
+				if (isCarAvailableModeForNonBerliners) {
 					availableModesArrayList.add("car");
 				}
 				
@@ -217,8 +182,8 @@ public class RunBerlinOptAVsubpopulationApproach {
 		
 		// otfvis
 		if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());	
-				
-		controler.run();
+		
+		berlin.run();
 		
 		// some offline analysis
 		

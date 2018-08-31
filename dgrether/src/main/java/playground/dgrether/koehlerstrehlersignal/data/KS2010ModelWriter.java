@@ -186,6 +186,7 @@ public class KS2010ModelWriter {
 				
 				atts.addAttribute("", "", TO, CDATA, light.getToNode().getId().toString());
 				atts.addAttribute("", "", COST, CDATA, Long.toString(light.getCost())); // is usually 0 in MATSim
+				atts.addAttribute("", "", CAPACITY, CDATA, Double.toString(light.getCapacity()));
 				// add min/maxGreen for flexible crossings
 				if (crossing.getType().equals(TtCrossingType.FLEXIBLE)){
 					atts.addAttribute("", "", MINGREEN, CDATA, Integer.toString(light.getMinGreen()));

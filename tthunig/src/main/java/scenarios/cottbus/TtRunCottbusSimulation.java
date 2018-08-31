@@ -41,7 +41,7 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.binder.SignalsModule;
+import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
@@ -114,7 +114,7 @@ public class TtRunCottbusSimulation {
 	
 	private final static String RUN_ID = "1000";
 	
-	private final static NetworkType NETWORK_TYPE = NetworkType.BTU_NET;
+	private final static NetworkType NETWORK_TYPE = NetworkType.V4;
 	public enum NetworkType {
 		BTU_NET, // "network small simplified" in BTU_BASE_DIR
 		V1, // network of the public-svn scenario from 2016-03-18 (same as from DG)
@@ -125,12 +125,15 @@ public class TtRunCottbusSimulation {
 		V2, // add missing highway part, add missing links, correct directions, add missing signal
 		V21, // add missing lanes
 		V3, // double flow capacities of all signalized links and lanes
-		V4 // V1-4 plus: move link at 5-approach-intersection system 24; add missing signal and link at system 19
+		V4, // V1-4 plus: move link at 5-approach-intersection system 24; add missing signal and link at system 19
+		V4_1, // V4 but with simplified/corrected to-links of lanes, such that it is more similar to the cten model. some lanes also had to be created newly, such that signal systems and groups also had to adjusted.
+		// TODO create this. is this even usefull when only intersections with lanes are fixed? should I also introduce lanes at the other signalized intersections?
+		V4_2 // V4-1 but without u-turns at intersections with lanes (at intersection without lanes, u-turns are still allowed)
 	}
 	private final static boolean LONG_LANES = true;
-	private final static boolean LANE_CAP_FROM_NETWORK = true;
+	private final static boolean LANE_CAP_FROM_NETWORK = false;
 	
-	private final static PopulationType POP_TYPE = PopulationType.BTU_POP_BTU_ROUTES_90;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MSNetV4;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -164,10 +167,10 @@ public class TtRunCottbusSimulation {
 		WoMines100itcap10MSNetV4,
 		NicoOutputPlans // the plans that nico used in his MA: netV1, MS, 100it
 	}
-	private final static int POP_SCALE = 90;
+	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.MS_BTU_OPT;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_NICO_GROUPS_14RE;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -192,7 +195,7 @@ public class TtRunCottbusSimulation {
 	private final static boolean SYLVIA_FIXED_CYCLE = false;
 	private final static double SYLVIA_MAX_EXTENSION = 1.5;
 	private final static StabilizationStrategy LAEMMER_FLEX_STAB_STRATEGY = StabilizationStrategy.USE_MAX_LANECOUNT;
-	private final static int LAEMMER_MIN_G = 5;
+	private final static int LAEMMER_MIN_G = 0;
 	
 //	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS;
 	private static final IntersectionLogic INTERSECTION_LOGIC = IntersectionLogic.NONE;
@@ -210,7 +213,7 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/ctenOpt/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/test/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
@@ -218,7 +221,7 @@ public class TtRunCottbusSimulation {
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = 1.;
+	private static final double SCALING_FACTOR = .7;
 	
 	
 	public static void main(String[] args) {
@@ -367,6 +370,10 @@ public class TtRunCottbusSimulation {
 		case V4:
 			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v4.xml");
 			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v1-4.xml");
+			break;
+		case V4_1:
+			config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v4.xml");
+			config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v4-1.xml");
 			break;
 		default:
 			throw new RuntimeException("Network type not specified!");
@@ -545,6 +552,9 @@ public class TtRunCottbusSimulation {
 			case V4:
 				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4.xml");
 				break;
+			case V4_1:
+				signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v4-1.xml");
+				break;
 			default:
 				throw new RuntimeException("Network type not specified!");
 			}			
@@ -553,8 +563,10 @@ public class TtRunCottbusSimulation {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13.xml");
 			} else if (NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
 				signalConfigGroup.setSignalGroupsFile(BTU_BASE_DIR + "output_signal_groups_v2.0.xml");
-			} else if (NETWORK_TYPE.toString().startsWith("V4")){
+			} else if (NETWORK_TYPE.equals(NetworkType.V4)){
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v4.xml");
+			} else if (NETWORK_TYPE.equals(NetworkType.V4_1)){
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v4-1.xml");
 			} else {
 				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_no_13_v2.xml");
 			}

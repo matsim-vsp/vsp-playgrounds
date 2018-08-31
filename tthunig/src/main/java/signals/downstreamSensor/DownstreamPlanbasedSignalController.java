@@ -133,11 +133,6 @@ public final class DownstreamPlanbasedSignalController implements SignalControll
 		// TODO try alternatives: e.g. switch to next phase when downstream link occupied
 	}
 
-	@Override
-	public void reset(Integer iterationNumber) {
-		// nothing is to do. init() is only needed once
-	}
-
 	/**
 	 * Is called when mobsim is initialized. Installs sensors on all outgoing links of the systems node.
 	 */

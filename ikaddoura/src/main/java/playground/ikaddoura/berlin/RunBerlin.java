@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.b5;
+package playground.ikaddoura.berlin;
 
 import java.util.ArrayList;
 import java.util.List;
