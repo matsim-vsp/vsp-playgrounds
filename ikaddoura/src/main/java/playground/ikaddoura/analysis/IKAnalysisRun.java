@@ -628,13 +628,16 @@ public class IKAnalysisRun {
 
 		// trip-based analysis
 		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, basicHandler, null, null);
+		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, basicHandler, null, null);
 		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, null, basicHandler, null, null);
 
 		// person-based analysis
 		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);	
+		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, personId2userBenefit, basicHandler, null);	
 
 		// aggregated analysis
 		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);
+		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, personId2userBenefit, basicHandler, null);
 		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, null, personId2userBenefit, basicHandler, null);
 		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, personId2userBenefit, basicHandler, null, null, delayAnalysis, null);
 		
