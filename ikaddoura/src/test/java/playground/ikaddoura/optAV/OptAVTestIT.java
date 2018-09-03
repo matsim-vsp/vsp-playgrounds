@@ -46,7 +46,6 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.optAV.OptAVConfigGroup.TollingApproach;
 
 /**
  * @author ikaddoura
@@ -84,7 +83,6 @@ public class OptAVTestIT {
 		OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
-		optAVParams1.setOptAVApproach(TollingApproach.NoPricing);
 
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
@@ -122,8 +120,10 @@ public class OptAVTestIT {
 		OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
 		optAVParams2.setAccountForNoise(true);
 		optAVParams2.setAccountForCongestion(false);
-		optAVParams2.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
-		
+		optAVParams2.setChargeSAVTollsFromPassengers(true);
+		optAVParams2.setChargeTollsFromCarUsers(false);
+		optAVParams2.setChargeTollsFromSAVDriver(true);
+
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);
 		
@@ -156,13 +156,15 @@ public class OptAVTestIT {
 				new NoiseConfigGroup());
 		
 		config3.controler().setOutputDirectory(testUtils.getOutputDirectory() + "n-with-operating-costs");
-		config3.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.02);
+		config3.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-9999999.0);
 		ConfigUtils.addOrGetModule(config3, TaxiFareConfigGroup.class).setDistanceFare_m(0.02);
 		
 		OptAVConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, OptAVConfigGroup.class);
 		optAVParams3.setAccountForNoise(true);
 		optAVParams3.setAccountForCongestion(false);
-		optAVParams3.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
+		optAVParams3.setChargeSAVTollsFromPassengers(true);
+		optAVParams3.setChargeTollsFromSAVDriver(true);
+		optAVParams3.setChargeTollsFromCarUsers(false);
 		
 		Scenario scenario3 = ScenarioUtils.loadScenario(config3);
 		Controler controler3 = new Controler(scenario3);
@@ -231,7 +233,6 @@ public class OptAVTestIT {
 		final OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
-		optAVParams1.setOptAVApproach(TollingApproach.NoPricing);
 		
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
@@ -268,7 +269,6 @@ public class OptAVTestIT {
 		final OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(true);
-		optAVParams2.setOptAVApproach(TollingApproach.PrivateAndExternalCost);
 		
 		final DecongestionConfigGroup decongestionSettings = ConfigUtils.addOrGetModule(config2, DecongestionConfigGroup.class);
 		decongestionSettings.setMsa(true);

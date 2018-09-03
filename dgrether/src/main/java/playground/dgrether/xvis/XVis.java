@@ -116,7 +116,7 @@ public class XVis {
 			
 			// add missing scenario elements
 			SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-					SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+					SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			if (signalsConfigGroup.isUseSignalSystems()) {
 				scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 			}
@@ -128,8 +128,8 @@ public class XVis {
 		}
 		else if (MatsimFileTypeGuesser.FileType.SignalControl.equals(guesser.getGuessedFileType())){
 			Config config = ConfigUtils.createConfig();
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(filename);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(filename);
 			scenario = (MutableScenario) ScenarioUtils.loadScenario(config);
 		}
 		

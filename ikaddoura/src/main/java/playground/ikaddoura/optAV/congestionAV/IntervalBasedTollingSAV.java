@@ -75,63 +75,70 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
 		
-		if (decongestionInfo.getlinkInfos().get(event.getLinkId()) != null) {
+		if (!decongestionInfo.getTransitVehicleIDs().contains(event.getVehicleId()) && decongestionInfo.getlinkInfos().get(event.getLinkId()) != null) {
 						
 			int currentTimeBin = (int) (event.getTime() / this.decongestionInfo.getScenario().getConfig().travelTimeCalculator().getTraveltimeBinSize());
 			
 			if (decongestionInfo.getlinkInfos().get(event.getLinkId()).getTime2toll().get(currentTimeBin) != null) {
 								
 				double toll = decongestionInfo.getlinkInfos().get(event.getLinkId()).getTime2toll().get(currentTimeBin);
-				this.totalTollPayments = this.totalTollPayments + toll;
 				
-				if (this.tracker.getTaxiVehicles().contains(event.getVehicleId())) {
+				if (toll != 0.) {
 					
-					// a taxi vehicle
+					this.totalTollPayments = this.totalTollPayments + toll;
 					
-					if (optAVParams.isChargeTollsFromSAVDriver()) {
+					if (this.tracker.getTaxiVehicles().contains(event.getVehicleId())) {
 						
-						// charge the driver
+						// a taxi vehicle
 						
-						this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll));
-						this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
-					}
-					
-					if (optAVParams.isChargeSAVTollsFromPassengers()) {
+						if (optAVParams.isChargeTollsFromSAVDriver()) {
+							
+							// charge the driver
+							
+							this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll));
+							this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
+						}
 						
-						// charge the passenger
-						
-						Id<Person> passenger = this.tracker.getVehicle2passenger().get(event.getVehicleId());
-						
-						if (passenger == null) {
-//							log.info("No passenger identified for " + event.getVehicleId() + " at " + event.getTime() + " on link " + event.getLinkId() +".");
-							if (vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) == null) {
-								vehicle2tollToBeChargedFromNextPassenger.put(event.getVehicleId(), toll);
+						if (optAVParams.isChargeSAVTollsFromPassengers()) {
+							
+							// charge the passenger
+							
+							Id<Person> passenger = this.tracker.getVehicle2passenger().get(event.getVehicleId());
+							
+							if (passenger == null) {
+//								log.info("No passenger identified for " + event.getVehicleId() + " at " + event.getTime() + " on link " + event.getLinkId() +".");
+								if (vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) == null) {
+									vehicle2tollToBeChargedFromNextPassenger.put(event.getVehicleId(), toll);
+								} else {
+									double newToll = vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) + toll;
+									vehicle2tollToBeChargedFromNextPassenger.put(event.getVehicleId(), newToll);
+								}	
+//								log.info("Toll payments to be charged from next passenger: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
+								
 							} else {
-								double newToll = vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()) + toll;
-								vehicle2tollToBeChargedFromNextPassenger.put(event.getVehicleId(), newToll);
-							}	
-//							log.info("Toll payments to be charged from next passenger: " + vehicle2tollToBeChargedFromNextPassenger.get(event.getVehicleId()));
+								this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), passenger, -1. * toll));
+								this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), passenger, event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
+							}
 							
 						} else {
-							this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), passenger, -1. * toll));
-							this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), passenger, event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
+							// do not charge the passenger
 						}
 						
 					} else {
-						// do not charge the passenger
+						
+						// a car user
+						
+						if (optAVParams.isChargeTollsFromCarUsers()) {
+							
+							// charge the car user
+							
+							this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll));
+							this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
+						}
 					}
 					
 				} else {
-					
-					// a car user
-					
-					if (optAVParams.isChargeTollsFromCarUsers()) {
-						
-						// charge the car user
-						
-						this.eventsManager.processEvent(new PersonMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), -1. * toll));
-						this.eventsManager.processEvent(new PersonLinkMoneyEvent(event.getTime(), this.decongestionInfo.getVehicleId2personId().get(event.getVehicleId()), event.getLinkId(), -1. * toll, event.getTime(), "congestion"));
-					}
+					// do not throw money events if toll is zero.
 				}
 			}		
 		}

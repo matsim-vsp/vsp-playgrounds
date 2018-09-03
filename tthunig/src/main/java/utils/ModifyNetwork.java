@@ -21,8 +21,6 @@
  */
 package utils;
 
-import java.util.SortedMap;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -36,9 +34,11 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.LanesToLinkAssignment;
-import org.matsim.lanes.data.LanesWriter;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesWriter;
+
+import java.util.SortedMap;
 
 /**
  * double flow capacities of all signalized links and lanes
@@ -56,7 +56,7 @@ public class ModifyNetwork {
 		config.network().setInputFile(INPUT_BASE_DIR + "network_wgs84_utm33n_v2.xml.gz");
 		config.qsim().setUseLanes( true );
 		config.network().setLaneDefinitionsFile(INPUT_BASE_DIR + "lanes_v2.1.xml");
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
 		signalConfigGroup.setSignalSystemFile(INPUT_BASE_DIR + "signal_systems_no_13_v2.1.xml");
 		signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_no_13_v2.xml");

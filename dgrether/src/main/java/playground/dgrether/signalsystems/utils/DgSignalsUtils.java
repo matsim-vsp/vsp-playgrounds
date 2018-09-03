@@ -52,27 +52,6 @@ import org.matsim.contrib.signals.model.SignalSystem;
  */
 public class DgSignalsUtils {
 	
-	public static SignalPlanData copySignalPlanData(final SignalPlanData signalPlan, SignalControlDataFactory factory) {
-		return copySignalPlanData(signalPlan, signalPlan.getId(), factory);
-	}
-	
-	
-	public static SignalPlanData copySignalPlanData(final SignalPlanData signalPlan, Id<SignalPlan> planId, SignalControlDataFactory factory) {
-		SignalPlanData newPlan = factory.createSignalPlanData(planId);
-		newPlan.setCycleTime(signalPlan.getCycleTime());
-		newPlan.setEndTime(signalPlan.getEndTime());
-		newPlan.setStartTime(signalPlan.getStartTime());
-		newPlan.setOffset(signalPlan.getOffset());
-		for (SignalGroupSettingsData settings : signalPlan.getSignalGroupSettingsDataByGroupId().values()) {
-			SignalGroupSettingsData newSettings = factory.createSignalGroupSettingsData(settings.getSignalGroupId());
-			newSettings.setDropping(settings.getDropping());
-			newSettings.setOnset(settings.getOnset());
-			newPlan.addSignalGroupSettings(newSettings);
-		}
-		return newPlan;
-	}
-
-	
 	/**
 	 * @return Map with the signal system Id as key and a List with Node Ids as values
 	 */
@@ -121,14 +100,6 @@ public class DgSignalsUtils {
 		}
 		return nodes;
 	}
-
-	public static SignalGroupSettingsData copySignalGroupSettingsData(final SignalGroupSettingsData signalGroupSettings, final SignalControlDataFactory fac){
-		SignalGroupSettingsData newSettings = fac.createSignalGroupSettingsData(signalGroupSettings.getSignalGroupId());
-		newSettings.setOnset(signalGroupSettings.getOnset());
-		newSettings.setDropping(signalGroupSettings.getDropping());
-		return newSettings;
-	}
-
 	
 	
 	/**
@@ -196,36 +167,6 @@ public class DgSignalsUtils {
 			}
 		}
 		return true;
-	}
-	
-	public static int calculateGreenTimeSeconds(SignalGroupSettingsData settings, int cylceTimeSeconds){
-		int on = settings.getOnset();
-		int off = settings.getDropping();
-		int green = 0;
-		if (on < off){
-			green = off - on;
-		}
-		else {
-			green = off + cylceTimeSeconds - on;
-		}
-		return green;
-	}
-	
-	public static SignalControlData copySignalControlData(SignalControlData signalControlData){
-		
-		SignalControlData newSignalControl = new SignalControlDataImpl();
-		
-		for (SignalSystemControllerData oldSignalSystemControl : signalControlData.getSignalSystemControllerDataBySystemId().values()){
-			SignalSystemControllerData newSignalSystemControl = new SignalSystemControllerDataImpl(oldSignalSystemControl.getSignalSystemId());
-			newSignalSystemControl.setControllerIdentifier(oldSignalSystemControl.getControllerIdentifier());
-			
-			for (SignalPlanData oldSignalPlan : oldSignalSystemControl.getSignalPlanData().values()){
-				SignalPlanData newSignalPlan = copySignalPlanData(oldSignalPlan, signalControlData.getFactory());
-				newSignalSystemControl.addSignalPlanData(newSignalPlan);
-			}
-		}
-		
-		return newSignalControl;
 	}
 	
 }

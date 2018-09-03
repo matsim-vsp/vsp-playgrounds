@@ -19,19 +19,12 @@
  * *********************************************************************** */
 package optimize.cten.convert.Matsim2cten;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.lanes.data.Lanes;
+import org.matsim.lanes.Lanes;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-//import optimize.gurobi.OptimizeMIP;
 import playground.dgrether.koehlerstrehlersignal.conversion.DgKS2010Router;
 import playground.dgrether.koehlerstrehlersignal.conversion.DgKSNet2MatsimNet;
 import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010NetworkConverter;
@@ -49,6 +42,13 @@ import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
 import playground.dgrether.koehlerstrehlersignal.network.DgNetworkUtils;
 import playground.dgrether.signalsystems.utils.DgSignalsBoundingBox;
 import playground.dgrether.utils.zones.DgZones;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+//import optimize.gurobi.OptimizeMIP;
 
 /**
  * Converts a MATSim Scenario to the traffic signal optimization model published in 

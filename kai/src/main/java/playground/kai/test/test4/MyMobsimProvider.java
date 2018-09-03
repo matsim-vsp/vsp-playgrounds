@@ -6,7 +6,7 @@ import javax.inject.Provider;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 
 public class MyMobsimProvider implements Provider<Mobsim> {
 	@Inject Scenario scenario ;
@@ -14,7 +14,7 @@ public class MyMobsimProvider implements Provider<Mobsim> {
 	
 	@Override
 	public Mobsim get() {
-		return QSimUtils.createDefaultQSim(scenario, events ) ;
+		return new QSimBuilder(scenario.getConfig()).useDefaults().build(scenario, events);
 	}
 
 }

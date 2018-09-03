@@ -100,10 +100,6 @@ public class FilteredModalShareEventHandler implements PersonDepartureEventHandl
 		}	
 	}
 	
-	public void handleRemainingTransitUsers(){
-		this.delegate.handleRemainingTransitUsers();
-	}
-
 	public SortedMap<String, Integer> getMode2numberOflegs() {
 		return this.delegate.getMode2numberOflegs();
 	}

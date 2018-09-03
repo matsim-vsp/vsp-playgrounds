@@ -33,7 +33,7 @@ import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkTransform;
-import org.matsim.core.network.io.NetworkReaderMatsimV1;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.population.*;
 import org.matsim.core.scenario.MutableScenario;
@@ -78,7 +78,7 @@ public class Fcd {
 	
 	public static Set<String> readFcdReturningLinkIdsUsed(String fcdNetInFile, String fcdEventsInFile, String outDir, String matsimNetwork, double minDistanceBetweenTwoActs){
 		MutableScenario sc = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		NetworkReaderMatsimV1 reader = new NetworkReaderMatsimV1(sc.getNetwork());
+		MatsimNetworkReader reader = new MatsimNetworkReader(sc.getNetwork());
 		reader.readFile(matsimNetwork);
 		
 		Fcd fcd = new Fcd(fcdNetInFile, fcdEventsInFile, minDistanceBetweenTwoActs);
@@ -101,7 +101,7 @@ public class Fcd {
 		String linksUsed = "D:\\Berlin\\DLR_FCD\\20110207_Analysis\\linksUsed.txt";
 		
 		MutableScenario sc = (MutableScenario) ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		NetworkReaderMatsimV1 reader = new NetworkReaderMatsimV1(sc.getNetwork());
+		MatsimNetworkReader reader = new MatsimNetworkReader(sc.getNetwork());
 		reader.readFile(matsimNetwork);
 		
 		Fcd fcd = new Fcd(netInFile, fcdEventsInFile, 0.0);

@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
@@ -85,7 +85,7 @@ public class DgOTFVisReplayLastIteration {
 		if (config.network().getLaneDefinitionsFile() != null || config.qsim().isUseLanes()) {
 			config.network().setLaneDefinitionsFile(inputPreFix + Controler.FILENAME_LANES);
 		}
-		SignalSystemsConfigGroup signalsConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalsConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfig.isUseSignalSystems()) {
 			signalsConfig.setSignalSystemFile(inputPreFix + SignalsScenarioWriter.FILENAME_SIGNAL_SYSTEMS);
 			signalsConfig.setSignalGroupsFile(inputPreFix + SignalsScenarioWriter.FILENAME_SIGNAL_GROUPS);

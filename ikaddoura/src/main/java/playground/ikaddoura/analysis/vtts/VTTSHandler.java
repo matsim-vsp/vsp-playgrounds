@@ -48,6 +48,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scoring.functions.ScoringParameters;
@@ -77,8 +78,8 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 	private int currentIteration;
 	
 	private final Set<Id<Person>> personIdsToBeIgnored = new HashSet<>();
-	private String[] activitiesToBeSkipped = {"pt interaction"};
-	private String[] modesToBeSkipped = {"transit_walk", "access_walk", "egress_walk"};
+	private final String[] activitiesToBeSkipped = {"pt interaction", "car interaction", "ride interaction", "bicycle interaction"};
+	private final String[] modesToBeSkipped = {"transit_walk", "access_walk", "egress_walk"};
 	
 	private final Set<Id<Person>> departedPersonIds = new HashSet<>();
 	private final Map<Id<Person>, Double> personId2currentActivityStartTime = new HashMap<>();
@@ -179,6 +180,10 @@ public class VTTSHandler implements ActivityStartEventHandler, ActivityEndEventH
 
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
+		
+		if (event.getActType().equals(VrpAgentLogic.BEFORE_SCHEDULE_ACTIVITY_TYPE)) {
+			this.personIdsToBeIgnored.add(event.getPersonId());
+		}
 		
 		if (isActivityToBeSkipped(event.getActType()) || this.personIdsToBeIgnored.contains(event.getPersonId())) {
 			// skip			

@@ -70,11 +70,11 @@ public class ConvertBraessSolution2Matsim {
 	
 	private SignalsData loadSignalsData(String directory) {
 		Config config = ConfigUtils.createConfig();
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(
 				directory + "output_signal_systems_v2.0.xml.gz");
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(
 				directory + "output_signal_groups_v2.0.xml.gz");
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(
 				directory + "output_signal_control_v2.0.xml.gz");
 		SignalsDataLoader signalsLoader = new SignalsDataLoader(config);
 		return signalsLoader.loadSignalsData();

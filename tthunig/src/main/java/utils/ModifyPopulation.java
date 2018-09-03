@@ -117,22 +117,24 @@ public class ModifyPopulation {
 		}		
 	}
 	
-	public static void doubleEachPerson(Population population){
-		Population doubledPersons = PopulationUtils.createPopulation(ConfigUtils.createConfig());
-		PopulationFactory fac = doubledPersons.getFactory();
+	public static void copyEachPerson(Population originalPop, int numberOfCopiesPerPerson){
+		Population scaledPop = PopulationUtils.createPopulation(ConfigUtils.createConfig());
+		PopulationFactory fac = scaledPop.getFactory();
 		
-		// create a copy of each person into another population object
-		for (Person person : population.getPersons().values()){
-			Person doubledPerson = fac.createPerson(Id.createPersonId(person.getId()+"_2"));
-			for (Plan plan : person.getPlans()){
-				doubledPerson.addPlan(PlanUtils.createCopy(plan));
+		// create copies of each person and save them in the new population object
+		for (Person originalPerson : originalPop.getPersons().values()){
+			for (int i = 1; i <= numberOfCopiesPerPerson; i++) {
+				Person clone = fac.createPerson(Id.createPersonId(originalPerson.getId() + "_" + (i+1)));
+				for (Plan plan : originalPerson.getPlans()) {
+					clone.addPlan(PlanUtils.createCopy(plan));
+				}
+				scaledPop.addPerson(clone);
 			}
-			doubledPersons.addPerson(doubledPerson);
 		}
 		
 		// add all the copied persons to the original population object
-		for (Person doubledPerson : doubledPersons.getPersons().values()){
-			population.addPerson(doubledPerson);
+		for (Person clone : scaledPop.getPersons().values()){
+			originalPop.addPerson(clone);
 		}
 	}
 

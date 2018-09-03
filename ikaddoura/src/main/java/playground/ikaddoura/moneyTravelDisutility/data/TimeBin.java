@@ -47,6 +47,9 @@ public class TimeBin {
 	private final Map<Id<Person>, List<Double>> personId2amounts;
 	private final List<Id<Person>> enteringAgents;
 	
+	private double amountSum;
+	private int numberOfEnteringAgents;
+	
 	private double averageAmount = 0.;
 	private final Map<String, Double> agentType2avgAmount = new HashMap<>();
 		
@@ -54,6 +57,8 @@ public class TimeBin {
 		this.timeBinNr = timeBinNr;
 		this.personId2amounts = new HashMap<>();
 		this.enteringAgents = new ArrayList<>();
+		this.amountSum = 0.;
+		this.setNumberOfEnteringAgents(0);
 	}
 
 	public void setAverageAmount(double averageAmount) {
@@ -78,6 +83,22 @@ public class TimeBin {
 
 	public List<Id<Person>> getEnteringAgents() {
 		return enteringAgents;
+	}
+
+	public double getAmountSum() {
+		return amountSum;
+	}
+
+	public void setAmountSum(double amountSum) {
+		this.amountSum = amountSum;
+	}
+
+	public int getNumberOfEnteringAgents() {
+		return numberOfEnteringAgents;
+	}
+
+	public void setNumberOfEnteringAgents(int numberOfEnteringAgents) {
+		this.numberOfEnteringAgents = numberOfEnteringAgents;
 	}
 
 }

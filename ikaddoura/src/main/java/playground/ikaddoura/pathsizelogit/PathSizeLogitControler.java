@@ -78,11 +78,11 @@ public class PathSizeLogitControler {
         if (pathSizeLogit){
 			
 			final Builder builder = new DiversityGeneratingPlansRemover.Builder() ;
-			builder.setActTypeWeight(0.);
-			builder.setLocationWeight(0.);
+			builder.setSameActivityTypePenalty(0.);
+			builder.setSameLocationPenalty(0.);
 			builder.setSameModePenalty(0.);
 			builder.setSameRoutePenalty(0.);
-			builder.setActTimeParameter(actTimeParam);
+			builder.setSameActivityEndTimePenalty(actTimeParam);
 
 			// this is the new syntax; not yet extensively tested: kai, aug'14
 			controler.addOverridingModule(new AbstractModule() {

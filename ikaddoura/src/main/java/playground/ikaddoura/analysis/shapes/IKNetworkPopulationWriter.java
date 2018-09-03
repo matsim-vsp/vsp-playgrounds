@@ -30,10 +30,9 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.contrib.noise.handler.PersonActivityTracker;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.network.io.NetworkReaderMatsimV1;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -116,7 +115,7 @@ public class IKNetworkPopulationWriter {
 	private void exportNetwork2Shp1(){
 		
 		if (this.scenario.getNetwork().getLinks().size() == 0) {
-			new NetworkReaderMatsimV1(scenario.getNetwork()).readFile(this.networkFile);
+			new MatsimNetworkReader(scenario.getNetwork()).readFile(this.networkFile);
 		}
 		
 		PolylineFeatureFactory factory = new PolylineFeatureFactory.Builder()
@@ -155,7 +154,7 @@ public class IKNetworkPopulationWriter {
 	private void exportNetwork2Shp2() {
 		
 		if (this.scenario.getNetwork().getLinks().size() == 0) {
-			new NetworkReaderMatsimV1(scenario.getNetwork()).readFile(this.networkFile);
+			new MatsimNetworkReader(scenario.getNetwork()).readFile(this.networkFile);
 		}
 
 		FeatureGeneratorBuilderImpl builder = new FeatureGeneratorBuilderImpl(scenario.getNetwork(), crs);

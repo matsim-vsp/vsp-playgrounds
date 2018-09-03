@@ -44,17 +44,18 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
+import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import org.matsim.vis.otfvis.OnTheFlyServer;
 import org.matsim.vis.otfvis.OTFVisConfigGroup.ColoringScheme;
+import org.matsim.vis.otfvis.OnTheFlyServer;
 
 /**
  * @author amit
@@ -103,8 +104,9 @@ public class HolesInOTFVisTest {
 				stuckEvents.add(event);
 			}
 		});
-		
-		QSim qSim = QSimUtils.createDefaultQSim(sc, manager);
+
+		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
+		QSim qSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, manager);
 		
 		if ( IS_USING_OTFVIS ) {
 			// otfvis configuration.  There is more you can do here than via file!

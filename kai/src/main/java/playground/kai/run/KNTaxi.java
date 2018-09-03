@@ -81,6 +81,6 @@ class KNTaxi {
 	}
 
 	public static void main(String... args) {
-		run("mielec_2014_02/mielec_taxi_config.xml", true, false, false);
+		run("mielec_2014_02/mielec_taxi_config.xml", true, false, true);
 	}
 }

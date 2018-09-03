@@ -19,13 +19,17 @@
 
 package playground.vsp.corineLandcover;
 
-import com.vividsolutions.jts.geom.*;
+import java.util.Collection;
+import java.util.List;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygonal;
 import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 import org.geotools.geometry.jts.JTSFactoryFinder;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by amit on 10.10.17.
@@ -41,6 +45,7 @@ public class GeometryUtils {
      * @return a simplified geometry by increasing tolerance until number of vertices are less than 1000.
      */
     public static Geometry getSimplifiedGeom(final Geometry geom){
+        //Do not change this hardcoded value here, rather use the other method.
         return getSimplifiedGeom(geom, 1000);
     }
 
@@ -121,9 +126,11 @@ public class GeometryUtils {
     }
     
     /**
+     * @param landUseGeoms
+     * @param threshold number of times the check is performed (if the point is inside 'landUseGeoms'); afterwards a random point is returned.
      * @return a random point which is covered by list of landUseGeom as well as zoneGeom
      */
-    public static Point getPointInteriorToGeometriesWithFallback(final Collection<Geometry> landUseGeoms, final Geometry zoneGeom) {
+    public static Point getPointInteriorToGeometriesWithFallback(final Collection<Geometry> landUseGeoms, final Geometry zoneGeom, final int threshold) {
         if (landUseGeoms.isEmpty() || zoneGeom.isEmpty() ) throw new RuntimeException("No geometries.");
 
         Point commonPoint = null;
@@ -136,7 +143,7 @@ public class GeometryUtils {
             commonPoint = geometryFactory.createPoint(coordinate);
             if (isPointInsideGeometries(landUseGeoms,commonPoint)) return commonPoint;
             counter++;
-            if (counter > 10000) {
+            if (counter > threshold) {
             	return commonPoint;
             }
         } while(true);

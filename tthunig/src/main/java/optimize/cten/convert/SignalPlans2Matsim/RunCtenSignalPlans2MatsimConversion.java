@@ -20,17 +20,18 @@
  */
 package optimize.cten.convert.SignalPlans2Matsim;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
+import optimize.cten.convert.SignalPlans2Matsim.data.CtenCrossingSolution;
+import optimize.cten.convert.SignalPlans2Matsim.data.FixCrossingSolution;
+import optimize.cten.convert.SignalPlans2Matsim.data.FlexCrossingSolution;
+import optimize.cten.convert.SignalPlans2Matsim.data.FlexibleLight;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
@@ -39,24 +40,23 @@ import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-
-import optimize.cten.convert.SignalPlans2Matsim.data.CtenCrossingSolution;
-import optimize.cten.convert.SignalPlans2Matsim.data.FixCrossingSolution;
-import optimize.cten.convert.SignalPlans2Matsim.data.FlexCrossingSolution;
-import optimize.cten.convert.SignalPlans2Matsim.data.FlexibleLight;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
 import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author tthunig
@@ -65,7 +65,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 
 	// set this based on the parameters in the header of the btu_solution
 	private static final int CYCLE_TIME = 90;
-	private static final int STEP_TIME = 3;
+	private static final int STEP_TIME = 1;
 	
 	private static void convertOptimalSignalPlans(String directory, String inputFile) {
 		CtenSignalPlanXMLParser solutionParser = new CtenSignalPlanXMLParser();
@@ -134,7 +134,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 				toLinkId = turningMoveRestrictionsIterator.next();
 				Id<DgStreet> correspondingLightId = idConverter.convertFromLinkIdToLinkId2LightId(fromLinkId, null, toLinkId);
 				correspondingLight = flexCrossing.getLights().get(Id.create(correspondingLightId, DgGreen.class));
-				// correspondingGreen stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
+				// correspondingLight stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
 			}
 		} else if (signal.getLaneIds() != null && !signal.getLaneIds().isEmpty()) {
 			Set<Id<Link>> toLinksOfThisSignal = new HashSet<>();
@@ -148,7 +148,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 					toLinksOfThisSignal.add(toLinkId);
 					Id<DgStreet> correspondingLightId = idConverter.convertFromLinkIdToLinkId2LightId(fromLinkId, fromLaneId, toLinkId);
 					correspondingLight = flexCrossing.getLights().get(Id.create(correspondingLightId, DgGreen.class));
-					// correspondingGreen stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
+					// correspondingLight stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
 				}
 			} if (correspondingLight == null) {
 				/* correspondingLight is still null -> no fromLink-fromLane-toLink-Relation of this signal has been found for which a light exists.
@@ -179,7 +179,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 				toLinkId = outLinkIterator.next().getId();
 				Id<DgStreet> correspondingLightId = idConverter.convertFromLinkIdToLinkId2LightId(fromLinkId, null, toLinkId);
 				correspondingLight = flexCrossing.getLights().get(Id.create(correspondingLightId, DgGreen.class));
-				// correspondingGreen stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
+				// correspondingLight stays null until a fromLink-toLink relation has been found for which a light exists in cten (no u-turns)
 			}
 		}
 		return correspondingLight;
@@ -187,13 +187,13 @@ public class RunCtenSignalPlans2MatsimConversion {
 	
 	private static Scenario loadScenario(String directory) {
 		Config config = ConfigUtils.createConfig();
-		SignalSystemsConfigGroup signalConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfig.setUseSignalSystems(true);
 		signalConfig.setSignalSystemFile(directory + "output_signal_systems_v2.0.xml");
 		signalConfig.setSignalGroupsFile(directory + "output_signal_groups_v2.0.xml");
 		signalConfig.setSignalControlFile(directory + "output_signal_control_v2.0.xml");
 		signalConfig.setConflictingDirectionsFile(directory + "output_conflicting_directions_v1.0.xml");
-		signalConfig.setUseConflictingDirections(true);
+		signalConfig.setIntersectionLogic(IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS);
 		config.network().setLaneDefinitionsFile(directory + "lanes_network_small.xml.gz");
 		config.network().setInputFile(directory + "network_small_simplified.xml.gz");
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -204,24 +204,23 @@ public class RunCtenSignalPlans2MatsimConversion {
 	private static void writeOptimizedSignalControl(String directoryPath, String inputFilename,
 			SignalsData signalsData) {
 		SignalsScenarioWriter writer = new SignalsScenarioWriter();
-		String basefilename = inputFilename.substring(inputFilename.lastIndexOf("/")+1,
-				inputFilename.lastIndexOf("."));
+		String postFix = "opt_expanded";
 		String subdirectory = inputFilename.substring(0,inputFilename.lastIndexOf("/")+1);
 		
 		writer.setSignalSystemsOutputFilename(directoryPath + subdirectory
-				+ "signal_systems_" + basefilename + ".xml");
+				+ "signal_systems_" + postFix + ".xml");
 		writer.setSignalGroupsOutputFilename(directoryPath + subdirectory
-				+ "signal_groups_" + basefilename + ".xml");
+				+ "signal_groups_" + postFix + ".xml");
 		writer.setSignalControlOutputFilename(directoryPath + subdirectory
-				+ "signal_control_" + basefilename + "_inclGreenEnd.xml");
+				+ "signal_control_" + postFix + ".xml");
 		writer.writeSignalSystemsData(signalsData.getSignalSystemsData());
 		writer.writeSignalGroupsData(signalsData.getSignalGroupsData());
 		writer.writeSignalControlData(signalsData.getSignalControlData());
 	}
 	
 	public static void main(String[] args) {
-		convertOptimalSignalPlans("../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-05-4_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
-				"btu/btu_solution.xml");
+		convertOptimalSignalPlans("../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
+				"btu/solution_splits_expanded.xml");
 	}
 
 }

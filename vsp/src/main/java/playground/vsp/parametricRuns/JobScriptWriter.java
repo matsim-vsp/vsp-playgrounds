@@ -195,7 +195,7 @@ public class JobScriptWriter {
         buffer.append("#$ -pe mp 4"); // job runs on a 16 GB node with 4 processors
         buffer.append(newLine);
 
-        buffer.append("#$ -l mem_free=7.5G"); //memory requirements of the job
+        buffer.append("#$ -l mem_free=15G"); //memory requirements of the job
         buffer.append(newLine);
     }
 

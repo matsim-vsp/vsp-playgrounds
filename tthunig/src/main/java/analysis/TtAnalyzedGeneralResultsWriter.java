@@ -61,7 +61,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 	private int lastIteration;
 	
 	private enum RelCumFreqType {
-		DepPerTime, ArrPerTime, TripsPerDuration, TripsPerDist, TripsPerAvgSpeed
+		DepPerTime, ArrPerTime, TripsPerDuration, TripsPerDist, TripsPerAvgSpeed, LinkLeavesPerDelay
 	}
 	
 	private CoordinateReferenceSystem crs = MGC.getCRS(TransformationFactory.WGS84_UTM33N);
@@ -129,6 +129,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 		writeRelCumFreqData(outputDir, RelCumFreqType.TripsPerDuration, handler.getRelativeCumulativeFrequencyOfTripsPerDuration());
 		writeRelCumFreqData(outputDir, RelCumFreqType.TripsPerDist, handler.getRelativeCumulativeFrequencyOfTripsPerDistance());
 		writeRelCumFreqData(outputDir, RelCumFreqType.TripsPerAvgSpeed, handler.getRelativeCumulativeFrequencyOfTripsPerSpeed());
+		writeRelCumFreqData(outputDir, RelCumFreqType.LinkLeavesPerDelay, handler.getRelativeComulativeFrequencyOfDelays());
 	}
 
 	private void writeRelCumFreqData(String outputDir, RelCumFreqType type, Map<Double, Double> relCumFreqMap) {
@@ -157,6 +158,9 @@ public final class TtAnalyzedGeneralResultsWriter {
 			break;
 		case TripsPerAvgSpeed:
 			header = "avg trip speed\trelative cumulative frequency of trips";
+			break;
+		case LinkLeavesPerDelay:
+			header = "delay\trelative cumulative frequency of link leaves";
 			break;
 		}
 		stream.println(header);

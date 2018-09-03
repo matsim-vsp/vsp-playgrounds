@@ -50,6 +50,8 @@ public class CorineLandCoverData {
     private final boolean simplifyGeometries;
     private final  boolean combiningGeom;
 
+    private int thresholdForPointInsideLandUseGeoms = 10000;
+
     public CorineLandCoverData( String corineLandCoverShapeFile, boolean simplifyGeometries, boolean combiningGeom) {
 
         LOGGER.info("Reading CORINE landcover shape file . . .");
@@ -103,6 +105,13 @@ public class CorineLandCoverData {
     }
 
     /**
+     * @param thresholdForPointInsideLandUseGeoms number of times the check is performed (if the point is inside 'landUseGeoms'); afterwards a random point is returned.
+     */
+    public void setThresholdForPointInsideLandUseGeoms(int thresholdForPointInsideLandUseGeoms) {
+        this.thresholdForPointInsideLandUseGeoms = thresholdForPointInsideLandUseGeoms;
+    }
+
+    /**
      * @param feature simpleFeature (zone)
      * @param activityType classified as 'home' and 'other' activity types.
      * @return a random point such that it is inside the @param feature as well as inside the zones corresponding to the given activity type.
@@ -116,7 +125,7 @@ public class CorineLandCoverData {
      * @param activityType classified as 'home' and 'other' activity types.
      * @return a random point such that it is inside the @param feature as well as inside the zones corresponding to the given activity type.
      */
-    public Point getRandomPoint (final Geometry geometry, final LandCoverUtils.LandCoverActivityType activityType) {
+    public Point getRandomPoint(final Geometry geometry, final LandCoverUtils.LandCoverActivityType activityType) {
         Geometry zoneGeom;
         if ( this.simplifyGeometries ) {
             zoneGeom = GeometryUtils.getSimplifiedGeom( geometry) ;
@@ -141,7 +150,7 @@ public class CorineLandCoverData {
         }
 
         if (this.combiningGeom) return GeometryUtils.getPointInteriorToGeometry( landUseGeom, zoneGeom );
-        else return GeometryUtils.getPointInteriorToGeometriesWithFallback( landUseGeoms, zoneGeom );
+        else return GeometryUtils.getPointInteriorToGeometriesWithFallback( landUseGeoms, zoneGeom, this.thresholdForPointInsideLandUseGeoms );
     }
 
     /**

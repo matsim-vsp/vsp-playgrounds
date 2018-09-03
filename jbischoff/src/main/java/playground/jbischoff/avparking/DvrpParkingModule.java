@@ -23,19 +23,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
-import org.matsim.contrib.dvrp.passenger.PassengerEnginePlugin;
+import org.matsim.contrib.dvrp.passenger.PassengerEngineModule;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentQueryHelper;
-import org.matsim.contrib.dvrp.vrpagent.VrpAgentSourcePlugin;
-import org.matsim.contrib.dynagent.run.DynActivityEnginePlugin;
+import org.matsim.contrib.dvrp.vrpagent.VrpAgentSource;
+import org.matsim.contrib.dynagent.run.DynAgentSourceModule;
 import org.matsim.contrib.dynagent.run.DynRoutingModule;
 import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.evaluation.ParkingListener;
@@ -46,18 +47,15 @@ import org.matsim.contrib.parking.parkingsearch.manager.vehicleteleportationlogi
 import org.matsim.contrib.parking.parkingsearch.manager.vehicleteleportationlogic.VehicleTeleportationToNearbyParking;
 import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.routing.WithinDayParkingRouter;
-import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPopulationPlugin;
+import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPopulationModule;
 import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPrepareForSimImpl;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.PrepareForSim;
 import org.matsim.core.mobsim.framework.listeners.MobsimListener;
-import org.matsim.core.mobsim.qsim.AbstractQSimPlugin;
-import org.matsim.core.mobsim.qsim.TeleportationPlugin;
-import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsPlugin;
-import org.matsim.core.mobsim.qsim.messagequeueengine.MessageQueuePlugin;
-import org.matsim.core.mobsim.qsim.pt.TransitEnginePlugin;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEnginePlugin;
+import org.matsim.core.mobsim.qsim.AbstractQSimModule;
+import org.matsim.core.mobsim.qsim.PopulationModule;
+import org.matsim.core.mobsim.qsim.QSimModule;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.router.StageActivityTypes;
@@ -149,45 +147,28 @@ public final class DvrpParkingModule extends AbstractModule {
 	}
 
 	@Provides
-	private Collection<AbstractQSimPlugin> provideQSimPlugins(Config config) {
-		final Collection<AbstractQSimPlugin> plugins = new ArrayList<>();
-		plugins.add(new MessageQueuePlugin(config));
-		plugins.add(new DynActivityEnginePlugin(config));
-		plugins.add(new QNetsimEnginePlugin(config));
-		if (config.network().isTimeVariantNetwork()) {
-			plugins.add(new NetworkChangeEventsPlugin(config));
-		}
-		if (config.transit().isUseTransit()) {
-			plugins.add(new TransitEnginePlugin(config));
-		}
-		plugins.add(new TeleportationPlugin(config));
-
-		plugins.add(new ParkingSearchPopulationPlugin(config));
-		plugins.add(new PassengerEnginePlugin(config, dvrpCfg.getMode()));
-		plugins.add(new VrpAgentSourcePlugin(config));
-		plugins.add(new QSimPlugin(config));
-		return plugins;
+	private Collection<AbstractQSimModule> provideQSimModules(Config config) {
+		Collection<AbstractQSimModule> modules = new LinkedList<>(QSimModule.getDefaultQSimModules());
+		modules.removeIf(PopulationModule.class::isInstance);
+		
+		modules.add(new ParkingSearchPopulationModule());
+		modules.add(new PassengerEngineModule(dvrpCfg.getMode()));
+		modules.add(new DynAgentSourceModule(VrpAgentSource.class));
+		modules.add(new LocalQSimModule());
+		
+		return modules;
 	}
 
-	private class QSimPlugin extends AbstractQSimPlugin {
-		public QSimPlugin(Config config) {
-			super(config);
-		}
-
+	private class LocalQSimModule extends AbstractQSimModule {
 		@Override
-		public Collection<? extends Module> modules() {
-			Collection<Module> result = new ArrayList<>();
-			result.add(module);
-			return result;
-		}
-
-		@Override
-		public Collection<Class<? extends MobsimListener>> listeners() {
-			Collection<Class<? extends MobsimListener>> result = new ArrayList<>();
+		protected void configureQSim() {
+			install(module);
+			
+			int i = 0;
+			
 			for (Class<? extends MobsimListener> l : listeners) {
-				result.add(l);
+				bindMobsimListener("listener_" + (i++)).to(l);
 			}
-			return result;
 		}
 	}
 }

@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
@@ -40,7 +39,7 @@ import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.pt.PtConstants;
+import org.matsim.core.router.StageActivityTypes;
 
 /**
  * (1) Handles departure and arrival events and store total travel time of a person and 
@@ -53,7 +52,7 @@ import org.matsim.pt.PtConstants;
  */
 
 public class ModalTripTravelTimeHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler, PersonStuckEventHandler, 
-TransitDriverStartsEventHandler, ActivityStartEventHandler {
+TransitDriverStartsEventHandler, ActivityStartEventHandler, StageActivityTypes {
 
 	private static final Logger LOGGER = Logger.getLogger(ModalTripTravelTimeHandler.class);
 	private static final int MAX_STUCK_AND_ABORT_WARNINGS = 5;
@@ -62,9 +61,8 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 	private int warnCount = 0;
 	private final List<Id<Person>> transitDriverPersons = new ArrayList<>();
 	// agents who first departs with transitWalk and their subsequent modes are stored here until it starts a regular act (home/work/leis/shop)
-	private final Map<Id<Person>, List<String>> modesForTransitUsers = new HashMap<>();
-	private final Map<Id<Person>, Double> transitUserDepartureTime = new HashMap<>();
-	private final Map<Id<Person>, Double> transitUserArrivalTime = new HashMap<>(); 
+	private final Map<Id<Person>, List<String>> person2Modes = new HashMap<>();
+	private final Map<Id<Person>, Double> personId2ArrivalTime = new HashMap<>();
 
 	public ModalTripTravelTimeHandler() {
 		LOGGER.warn("Excluding the departure and arrivals of transit drivers.");
@@ -74,9 +72,8 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 	public void reset(int iteration) {
 		this.mode2PersonId2TravelTimes.clear();
 		this.personId2DepartureTime.clear();
-		this.modesForTransitUsers.clear();
 		this.transitDriverPersons.clear();
-		this.modesForTransitUsers.clear();
+		this.person2Modes.clear();
 	}
 
 	@Override
@@ -86,15 +83,11 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 
 		if(transitDriverPersons.remove(personId)) {
 			// exclude arrivals of transit drivers ;
+			return;
 		}
-		else {
-			if( legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ){
-				transitUserArrivalTime.put(personId, event.getTime()); // store the arrival time
-			} else { // rest of the modes
-				double travelTime = event.getTime() - this.personId2DepartureTime.remove(personId);
-				storeData(personId, legMode, travelTime);
-			}
-		}
+
+		// keep updating the arrival time even if exists
+		personId2ArrivalTime.put(event.getPersonId(), event.getTime());
 	}
 
 	@Override
@@ -105,17 +98,15 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 
 		if(transitDriverPersons.contains(personId)) {
 			// exclude departures of transit drivers and remove them from arrivals
-		} else {
-			if (legMode.equals(TransportMode.transit_walk) || legMode.equals(TransportMode.pt) ) { 
-				// transit_walk - transit_walk || transit_walk - pt
-				List<String> modes = modesForTransitUsers.getOrDefault(personId, new ArrayList<>());
-				modes.add(legMode);
-				modesForTransitUsers.put(personId, modes);
-				transitUserDepartureTime.put(personId, event.getTime()); // store the departure time, when agent is left after a regular activity
-			} else {
-				this.personId2DepartureTime.put(personId, deartureTime);
-			}
-		} 
+			return;
+		}
+
+		//at this point, it could be main leg (e.g. car/bike) or start of a stage activity (e.g. car/pt interaction)
+		List<String> usedModes = person2Modes.getOrDefault(personId, new ArrayList<>());
+		usedModes.add(legMode);
+		person2Modes.put(personId, usedModes);
+
+		personId2DepartureTime.putIfAbsent(personId, deartureTime);
 	}
 
 	/**
@@ -141,33 +132,52 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler {
 
 	@Override
 	public void handleEvent(ActivityStartEvent event) {
-		if( modesForTransitUsers.containsKey(event.getPersonId()) ) {
-			if(! event.getActType().equals(PtConstants.TRANSIT_ACTIVITY_TYPE) ) { 
-				List<String> modes = modesForTransitUsers.remove(event.getPersonId());
-				String legMode = modes.contains(TransportMode.pt) ? TransportMode.pt : TransportMode.walk;
-				double departureTime = transitUserDepartureTime.remove(event.getPersonId());
-				double arrivalTime = transitUserArrivalTime.remove(event.getPersonId());
+		if( person2Modes.containsKey(event.getPersonId()) ) {
+			if(! isStageActivity(event.getActType()) ) {
+				List<String> modes = person2Modes.remove(event.getPersonId());
+				String legMode = getMainMode(modes);
+				double departureTime = personId2DepartureTime.remove(event.getPersonId());
+				double arrivalTime = personId2ArrivalTime.remove(event.getPersonId());
 				storeData(event.getPersonId(), legMode, arrivalTime - departureTime);
 			} else { 
 				// else continue
 			}
 		} else {
-			// nothing to do
+			throw new RuntimeException("Person "+event.getPersonId()+" is not registered.");
+		}
+	}
+
+	@Override
+	public boolean isStageActivity(String actType){
+		return actType.endsWith("interaction");
+	}
+
+	private String getMainMode(List<String> modes){
+		if (modes.size()==1) return modes.get(0).equals(TransportMode.transit_walk) ? TransportMode.walk: modes.get(0);
+		else if (modes.contains(TransportMode.transit_walk)) {
+			if (modes.contains(TransportMode.pt)) return TransportMode.pt;
+			else return TransportMode.walk;
+
+		} else if (modes.contains(TransportMode.car)) return TransportMode.car;
+		else if (modes.contains(TransportMode.bike)) return TransportMode.bike;
+		else if (modes.contains(TransportMode.walk)) return TransportMode.walk;
+		else if (modes.contains(TransportMode.ride)) return TransportMode.ride;
+		else {
+
+			new ArrayList<>(modes).stream().filter(m->m.startsWith("access")||m.startsWith("egress")).forEach(modes::remove);
+
+			if (modes.size()==0) return TransportMode.walk;
+			else if (modes.size()==1) return modes.get(0);
+			else throw new RuntimeException("Unknown mode(s) "+ modes.toString());
+
 		}
 	}
 
 	private void storeData(final Id<Person> personId, final String legMode, final double travelTime){
-		if( this.mode2PersonId2TravelTimes.get(legMode)!=null ){
-			Map<Id<Person>, List<Double>> personId2TravelTimes = this.mode2PersonId2TravelTimes.get(legMode);
-			List<Double> travelTimes = personId2TravelTimes.getOrDefault(personId, new ArrayList<>());
-			travelTimes.add(travelTime);
-			personId2TravelTimes.put(personId, travelTimes);
-		} else {
-			Map<Id<Person>, List<Double>> personId2TravelTimes = new HashMap<>();
-			List<Double> travelTimes = new ArrayList<>();
-			travelTimes.add(travelTime);
-			personId2TravelTimes.put(personId, travelTimes);
-			this.mode2PersonId2TravelTimes.put(legMode, personId2TravelTimes);
-		}
+		Map<Id<Person>, List<Double>> personId2TravelTimes = this.mode2PersonId2TravelTimes.getOrDefault(legMode, new HashMap<>());
+		List<Double> travelTimes = personId2TravelTimes.getOrDefault(personId, new ArrayList<>());
+		travelTimes.add(travelTime);
+		personId2TravelTimes.put(personId, travelTimes);
+		this.mode2PersonId2TravelTimes.put(legMode, personId2TravelTimes);
 	}
 }

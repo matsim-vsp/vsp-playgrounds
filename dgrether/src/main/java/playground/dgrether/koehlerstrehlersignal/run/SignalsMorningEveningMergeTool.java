@@ -28,18 +28,17 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
-import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
 import org.matsim.contrib.signals.model.SignalPlan;
-
-import playground.dgrether.signalsystems.utils.DgSignalsUtils;
+import org.matsim.contrib.signals.utils.SignalUtils;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 
 
 /**
@@ -80,7 +79,7 @@ public class SignalsMorningEveningMergeTool {
 			morningController.getSignalPlanData().clear();
 			for (SignalPlanData morningPlan : morningPlans) {
 				Id<SignalPlan> newId = Id.create(morningPlan.getId().toString() + "_m", SignalPlan.class);
-				SignalPlanData newPlan = DgSignalsUtils.copySignalPlanData(morningPlan, newId, morningControl.getFactory());
+				SignalPlanData newPlan = SignalUtils.copySignalPlanData(morningPlan, newId);
 				newPlan.setStartTime(0.0);
 				newPlan.setEndTime(12.0 * 3600.0);
 				morningController.addSignalPlanData(newPlan);
@@ -88,7 +87,7 @@ public class SignalsMorningEveningMergeTool {
 			SignalSystemControllerData ecd = eveningControl.getSignalSystemControllerDataBySystemId().get(morningController.getSignalSystemId());
 			for (SignalPlanData eplan : ecd.getSignalPlanData().values()) {
 				Id<SignalPlan> newId = Id.create(eplan.getId().toString() + "_e", SignalPlan.class);
-				SignalPlanData newPlan = DgSignalsUtils.copySignalPlanData(eplan, newId, morningControl.getFactory());
+				SignalPlanData newPlan = SignalUtils.copySignalPlanData(eplan, newId);
 				newPlan.setStartTime(12.0 * 3600.0);
 				newPlan.setEndTime((23.0 * 3600.0) + (59.0 * 60.0) + 59.0);
 				morningController.addSignalPlanData(newPlan);
@@ -119,7 +118,7 @@ public class SignalsMorningEveningMergeTool {
 			}
 		}
 		Config config = ConfigUtils.createConfig();
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(infile.getAbsolutePath());
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(infile.getAbsolutePath());
 		SignalsDataLoader signalsLoader = new SignalsDataLoader(config);
 		SignalsData signals = signalsLoader.loadSignalsData();
 		return signals.getSignalControlData();

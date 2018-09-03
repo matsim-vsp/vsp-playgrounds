@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -137,8 +138,13 @@ class ThreadedMatrixCreator implements Runnable {
 					
 					// if origin == destination, there is one (transit) walk leg with zero travel time, which is
 					// correctly picked up below
-					log.warn("Leg list is null! Origin = " + fromFac.getId() + " -- Destination = " + toFac.getId()
-							+ " Setting time and distance to infinity.");
+					if ( fromFac instanceof Identifiable && toFac instanceof Identifiable ) {
+						log.warn( "Leg list is null! Origin = " + ((Identifiable) fromFac).getId() + " -- Destination = "
+									    + ((Identifiable)toFac).getId()
+									    + " Setting time and distance to infinity." );
+					} else {
+						throw new RuntimeException( Facility.FACILITY_NO_LONGER_IDENTIFIABLE ) ;
+					}
 					// TODO check if a very high value is better than positive infinity
 					travelTime = Float.MAX_VALUE;
 					travelDistance = Float.MAX_VALUE;
@@ -242,16 +248,20 @@ class ThreadedMatrixCreator implements Runnable {
 						}
 					}
 				}
-				
-				travelTimeMatrixWriter.writeField(fromFac.getId());
-				travelTimeMatrixWriter.writeField(toFac.getId());
-				travelTimeMatrixWriter.writeField(travelTime);
-				travelTimeMatrixWriter.writeNewLine();
-				
-				travelDistanceMatrixWriter.writeField(fromFac.getId());
-				travelDistanceMatrixWriter.writeField(toFac.getId());
-				travelDistanceMatrixWriter.writeField(travelDistance);
-				travelDistanceMatrixWriter.writeNewLine();
+
+				if ( fromFac instanceof Identifiable && toFac instanceof Identifiable ) {
+					travelTimeMatrixWriter.writeField( ((Identifiable) fromFac).getId() );
+					travelTimeMatrixWriter.writeField( ((Identifiable) toFac).getId() );
+					travelTimeMatrixWriter.writeField( travelTime );
+					travelTimeMatrixWriter.writeNewLine();
+					
+					travelDistanceMatrixWriter.writeField( ((Identifiable)fromFac).getId() );
+					travelDistanceMatrixWriter.writeField( ((Identifiable)toFac).getId() );
+					travelDistanceMatrixWriter.writeField( travelDistance );
+					travelDistanceMatrixWriter.writeNewLine();
+				} else {
+					throw new RuntimeException( Facility.FACILITY_NO_LONGER_IDENTIFIABLE ) ;
+				}
 				
 				if (counterTransitLegs >= 3) {
 					counterMoreThan3TransitLegs++;

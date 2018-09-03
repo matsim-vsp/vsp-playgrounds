@@ -45,7 +45,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 public class RunRobotaxiBerlin {
 
     public static void main(String[] args) {
-        String configFile = "D:\\b5_22\\taxiconfig.xml";
+        String configFile = "D:/runs-svn/avsim/av_accessibility/input/taxiconfig.xml";
         RunRobotaxiBerlin.run(configFile, false);
     }
 

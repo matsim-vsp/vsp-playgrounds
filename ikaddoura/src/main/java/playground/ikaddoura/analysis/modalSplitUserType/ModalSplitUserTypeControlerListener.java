@@ -62,7 +62,6 @@ public class ModalSplitUserTypeControlerListener implements StartupListener, Ite
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		
 		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
-		filter1.setSubpopulation("person");
 		filter1.setPersonAttribute("berlin");
 		filter1.setPersonAttributeName("home-activity-zone");
 		filter1.preProcess(scenario);

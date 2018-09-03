@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -92,8 +93,12 @@ import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
  */
 public class ConvertBTURoutes2Matsim {
 
-	private static final Logger log = Logger
-			.getLogger(ConvertBTURoutes2Matsim.class);
+	private static final Logger log = Logger.getLogger(ConvertBTURoutes2Matsim.class);
+	
+	private static final double INTERVAL_START = 5.5 * 3600;
+	private static final double INTERVAL_END = 9.5 * 3600;
+	private static final Random RANDOM = new Random();
+	private static final int POP_SCALE = 90;
 
 	private DgCommodities btuComsWithRoutes;
 	private double currentDepartureTime;
@@ -121,39 +126,35 @@ public class ConvertBTURoutes2Matsim {
 	 * (directory + networkFile should give the correct path)
 	 */
 	private void startConversion(String directory, String inputFile,
-			String networkFile,	String populationFile, String outputFile) {
+			String networkFile,	String populationFile, String outputFile, boolean identifyMatsimAgent) {
 
 		// prepare id conversation between btu and matsim model
 		this.idPool = DgIdPool.readFromFile(directory + "id_conversions.txt");
 		this.idConverter = new DgIdConverter(idPool);
 
 		// parse btu paths from xml file
-		KS2015RouteXMLParser routeParser = new KS2015RouteXMLParser(
-				this.idConverter);
+		KS2015RouteXMLParser routeParser = new KS2015RouteXMLParser(this.idConverter);
 		routeParser.readFile(directory + inputFile);
 		this.btuComsWithRoutes = routeParser.getComsWithRoutes();
 
 		// read the matsim files
-		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils
-				.createConfig());
+		Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		// save network in scenario
 		(new MatsimNetworkReader(scenario.getNetwork())).readFile(directory + networkFile);
 		this.network = scenario.getNetwork();
-		// save former population (without routes) in scenario
-		(new PopulationReader(scenario)).readFile(directory
-				+ populationFile);
-		this.population = scenario.getPopulation();
-		// create container for the population with routes
-		this.popWithRoutes = ScenarioUtils.createScenario(
-				ConfigUtils.createConfig()).getPopulation();
-		
-		// convert routes from btu to matsim 
-		// and write them into this.popWithRoutes
-		convertAndAddRoutesToPlans();
+		if (identifyMatsimAgent) {
+			// save former population (without routes) in scenario
+			(new PopulationReader(scenario)).readFile(directory + populationFile);
+			this.population = scenario.getPopulation();
+			// create container for the population with routes
+		}
+		this.popWithRoutes = ScenarioUtils.createScenario(ConfigUtils.createConfig()).getPopulation();
+
+		// convert routes from btu to matsim and write them into this.popWithRoutes
+		convertAndAddRoutesToPlans(identifyMatsimAgent);
 
 		// write population with routes as plans file
-		MatsimWriter popWriter = new PopulationWriter(this.popWithRoutes,
-				this.network);
+		MatsimWriter popWriter = new PopulationWriter(this.popWithRoutes, this.network);
 		popWriter.write(outputFile);
 		log.info("plans file with btu routes written to " + outputFile);
 		
@@ -195,14 +196,17 @@ public class ConvertBTURoutes2Matsim {
 	}
 
 	/**
-	 * Converts the BTU paths into MATSim links, looks for the corresponding
-	 * agent in the MATSim population (an arbitrary one with the same start
-	 * and end link) and gives him all paths of his commodity as route choice set.
+	 * Converts the BTU paths into MATSim links, looks for the corresponding agent
+	 * in the MATSim population (an arbitrary one with the same start and end link)
+	 * if the flag identifyMatsimAgent is set to true and gives him all paths of his
+	 * commodity as route choice set. If identifyMatsimAgent is set to false, create
+	 * a new agent for this od-relation with the given route choice set and
+	 * uniformly distribute the departure time in the defined time interval.
 	 * 
 	 * Note: BTU paths contain lights and streets. In the MATSim route all lights
 	 * are skipped.
 	 */
-	private void convertAndAddRoutesToPlans() {
+	private void convertAndAddRoutesToPlans(boolean identifyMatsimAgent) {
 		// determine the maximal number of plans as additional information output
 		int maxNumberOfPlans = Integer.MIN_VALUE;
 		
@@ -227,43 +231,55 @@ public class ConvertBTURoutes2Matsim {
 			int roundedFlow = (int) Math.round(com.getFlow());
 				
 			// create a route choice set for each agent of the commodity			
-			for (int i = 0; i < roundedFlow; i++) {
+			for (int i = 0; i < roundedFlow * POP_SCALE; i++) {
 				
-				// look for a matsim agent with the same start and end link
-				// (remove him from this.population)
-				Person correspondingPerson = getCorrespondingMatsimAgent(
-					matsimStartLinkId, matsimEndLinkId);
-				// remove his former plan
-				correspondingPerson.getPlans().clear();
+				Person matsimPerson;
+				if (identifyMatsimAgent) {
+					// look for a matsim agent with the same start and end link to reuse his departure time
+					// (remove him from this.population)
+					matsimPerson = getCorrespondingMatsimAgent(matsimStartLinkId, matsimEndLinkId);
+					// remove the former plan
+					matsimPerson.getPlans().clear();
+				} else {
+					// create a new person
+					matsimPerson = this.popWithRoutes.getFactory().createPerson(Id.createPersonId(com.getId() + "_" + i));
+				}
 				// remember person-commodity relation
-				person2CommodityId.put(correspondingPerson.getId(), com.getId());
+				person2CommodityId.put(matsimPerson.getId(), com.getId());
 
 				// add all btu routes of the commodity as plans
 				for (Leg leg : legs) {
-					Plan plan = this.population.getFactory().createPlan();
-					Activity start = this.population.getFactory().
+					Plan plan = this.popWithRoutes.getFactory().createPlan();
+					Activity start = this.popWithRoutes.getFactory().
 						createActivityFromLinkId("dummy", matsimStartLinkId);
-					start.setEndTime(this.currentDepartureTime);
+					start.setEndTime(identifyMatsimAgent? this.currentDepartureTime : createNewDepartureTime());
 					plan.addActivity(start);
 					plan.addLeg(leg);
-					Activity end = this.population.getFactory().
+					Activity end = this.popWithRoutes.getFactory().
 						createActivityFromLinkId("dummy", matsimEndLinkId);
 					plan.addActivity(end);
-					correspondingPerson.addPlan(plan);
+					matsimPerson.addPlan(plan);
 				}
 					
 				// add the agent to this.popWithRoutes
-				this.popWithRoutes.addPerson(correspondingPerson);
+				this.popWithRoutes.addPerson(matsimPerson);
 			}
 			
 		}
 		log.info("The maximal number of plans per agent is " + maxNumberOfPlans);
 
 		// check whether all agents have routes
-		if (!this.population.getPersons().isEmpty()) {
+		if (identifyMatsimAgent && !this.population.getPersons().isEmpty()) {
 			throw new RuntimeException("There are " + this.population.
 				getPersons().size() + " persons left with no route.");
 		}
+	}
+
+	/**
+	 * creates an uniformly distributed activity end time in the given time interval
+	 */
+	private double createNewDepartureTime() {
+		return INTERVAL_START + RANDOM.nextDouble() * (INTERVAL_END - INTERVAL_START);
 	}
 
 	/**
@@ -386,7 +402,7 @@ public class ConvertBTURoutes2Matsim {
 
 			// create leg with this route
 			Route route = RouteUtils.createLinkNetworkRouteImpl(matsimStartLinkId, matsimLinks, matsimEndLinkId);
-			Leg leg = this.population.getFactory().createLeg(
+			Leg leg = this.popWithRoutes.getFactory().createLeg(
 					TransportMode.car);
 			leg.setRoute(route);
 			legs.add(leg);
@@ -397,7 +413,7 @@ public class ConvertBTURoutes2Matsim {
 	/**
 	 * Looks for a MATSim agent with the given start and end link.
 	 * 
-	 * Note: This method takes a long time... (depending on the 
+	 * Note: This method takes some time... (depending on the 
 	 * number of agents in the population)
 	 * 
 	 * @param matsimStartLinkId
@@ -468,22 +484,37 @@ public class ConvertBTURoutes2Matsim {
 
 		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
 //				+ "2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
-				+ "2018-05-4_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+				+ "2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 
 //		String btuRoutesFilename = "routeComparison/paths.xml";
-		String btuRoutesFilename = "btu/btu_solution.xml";
+		String btuRoutesFilename = "btu/solution_splits_expanded.xml";
 		String networkFilename = "network_small_simplified.xml.gz";
 		String populationFile = "trip_plans_from_morning_peak_ks_commodities_minFlow50.0.xml";
 
 		String[] filenameAttributes = btuRoutesFilename.split("/");
 		String outputFilename = directory
 //				+ "routeComparison/2015-03-10_sameEndTimes_ksOptTripPlans_"
-				+ "btu/2018-06-07_sameEndTimes_ksOptTripPlans_agent2com_"
+//				+ "btu/2018-07-09_sameEndTimes_ksOptTripPlans_agent2com_"
+				+ "btu/2018-08-16_ksOptTripPlans_scale" + POP_SCALE + "_"
 				+ filenameAttributes[filenameAttributes.length - 1];
+		
+		// set this to true, if you want to use the same start times for all agents as
+		// in the matsim population in populationFile, i.e. whether you want to identify
+		// the corresponding matsim agents in this population or create new agents for
+		// each commodity flow particle
+		boolean identifyMatsimAgents = false;
+		
+		log.info("Start a conversion of commodities in the BTU solution to MATSim agents. All routes of a commodity are saved in the plan choice set of every agent corresponding to the same OD-relation.");
+		if (identifyMatsimAgents) {
+			log.info("Same departure times are used for the MATSim agents as in the population file " + populationFile);
+		} else {
+			log.info("Departure times are distributed uniformly in the time interval [ " + INTERVAL_START + " , " + INTERVAL_END + " ].");
+		}
+		log.info("For every commodity flow particle " + POP_SCALE + " MATSim agents are created.");
 		
 		new ConvertBTURoutes2Matsim().startConversion(directory,
 				btuRoutesFilename, networkFilename, populationFile, 
-				outputFilename);
+				outputFilename, identifyMatsimAgents);
 	}
 
 }

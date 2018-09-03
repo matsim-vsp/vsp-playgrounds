@@ -33,6 +33,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 import org.matsim.core.mobsim.framework.listeners.MobsimBeforeSimStepListener;
@@ -118,8 +119,8 @@ class WithinDayBangBangMobsimListener implements MobsimBeforeSimStepListener {
 
 		List<Id<Link>> links = null ;
 		for ( Id<Link> currentId : KNAccidentScenario.replanningLinkIds ) {
-			Facility<ActivityFacility> fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
-			Facility<ActivityFacility> toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(returnId));
+			Facility fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
+			Facility toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(returnId));
 
 			final Leg leg = (Leg) routingModule.calcRoute(fromFacility, toFacility, 0, null).get(0);
 			links = ((NetworkRoute)leg.getRoute()).getLinkIds() ;
@@ -180,24 +181,25 @@ class WithinDayBangBangMobsimListener implements MobsimBeforeSimStepListener {
 
 		// method 2:
 //		if ( true ) {
-//		if ( MatsimRandom.getRandom().nextDouble() < 0.2 ) {
-		if ( ttimeDetour < ttimeOrig ) {
-
-			final int idx = WithinDayAgentUtils.getCurrentRouteLinkIdIndex(agent);
-
-			if ( oldRoute.getLinkIds().contains( this.returnId ) ) {
-				List<Id<Link>> copy = new ArrayList<>( oldRoute.getLinkIds() ) ;
-				while (  !copy.get( idx ).equals( this.returnId )  ) {
-					copy.remove( idx ) ;
+		if ( MatsimRandom.getRandom().nextDouble() < 0.2 ) {
+			if (ttimeDetour < ttimeOrig) {
+				
+				final int idx = WithinDayAgentUtils.getCurrentRouteLinkIdIndex(agent);
+				
+				if (oldRoute.getLinkIds().contains(this.returnId)) {
+					List<Id<Link>> copy = new ArrayList<>(oldRoute.getLinkIds());
+					while (!copy.get(idx).equals(this.returnId)) {
+						copy.remove(idx);
+					}
+					copy.addAll(idx, this.alternativeLinks);
+					final RouteFactories modeRouteFactory = this.scenario.getPopulation().getFactory().getRouteFactories();
+					NetworkRoute newRoute = modeRouteFactory.createRoute(NetworkRoute.class, oldRoute.getStartLinkId(), oldRoute.getEndLinkId());
+					
+					//			RouteUtils.createNetworkRoute(routeLinkIds, network) ;
+					
+					newRoute.setLinkIds(oldRoute.getStartLinkId(), copy, oldRoute.getEndLinkId());
+					leg.setRoute(newRoute);
 				}
-				copy.addAll( idx, this.alternativeLinks ) ;
-				final RouteFactories modeRouteFactory = this.scenario.getPopulation().getFactory().getRouteFactories();
-				NetworkRoute newRoute = modeRouteFactory.createRoute( NetworkRoute.class, oldRoute.getStartLinkId(), oldRoute.getEndLinkId()) ;
-
-				//			RouteUtils.createNetworkRoute(routeLinkIds, network) ;
-
-				newRoute.setLinkIds( oldRoute.getStartLinkId(), copy, oldRoute.getEndLinkId() );
-				leg.setRoute(newRoute);
 			}
 		}
 

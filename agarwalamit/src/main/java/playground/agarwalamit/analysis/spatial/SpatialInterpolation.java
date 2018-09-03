@@ -188,7 +188,8 @@ public class SpatialInterpolation {
 	 * @param fromNodeCoord
 	 * @param toNodeCoord
 	 * @param cellCentroid
-	 * @return The outcome is derived assuming constant emission on link and then integrating effect of emission on link on the cell centroid.
+	 * @return The outcome is derived assuming constant emission throughout the (linear) link and
+	 * then integrating effect of emission on the link at the cell centroid.
 	 */
 	private double calculateWeightFromLine(final Coordinate fromNodeCoord, final Coordinate toNodeCoord, final Coordinate cellCentroid){
 		double constantA = fromNodeCoord.distance(cellCentroid) * fromNodeCoord.distance(cellCentroid);

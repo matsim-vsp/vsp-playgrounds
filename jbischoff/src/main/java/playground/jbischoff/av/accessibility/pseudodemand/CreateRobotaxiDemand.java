@@ -32,15 +32,15 @@ public class CreateRobotaxiDemand {
 
     public static void main(String[] args) {
 
-        String inputPopulation = "D:/b5_22/b5_22.output_plans.xml.gz";
-        String inputAttributes = "D:/b5_22/b5_22.output_personAttributes.xml.gz";
-        String outputPopulation = "D:/b5_22/taxiplans";
+        String inputPopulation = "D:\\runs-svn\\avsim\\av_accessibility\\input\\b5_22.output_plans.xml.gz";
+        String inputAttributes = "D:\\runs-svn\\avsim\\av_accessibility\\input\\b5_22.output_personAttributes.xml.gz";
+        String outputPopulation = "D:\\runs-svn\\avsim\\av_accessibility\\input/taxiplans";
         new CreateRobotaxiDemand().run(inputPopulation, inputAttributes, outputPopulation, 0.1);
 
     }
 
     public void run(String inputPopulationFile, String inputAttributesFile, String outputPopulationFile, Double robotaxiShare) {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 5; i < 10; i++) {
             Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
             new PopulationReader(scenario).readFile(inputPopulationFile);
             new ObjectAttributesXmlReader(scenario.getPopulation().getPersonAttributes()).readFile(inputAttributesFile);

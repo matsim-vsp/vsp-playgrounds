@@ -20,15 +20,11 @@
  */
 package optimize.cten.convert.Restrictions2Matsim;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.conflicts.ConflictData;
@@ -47,8 +43,13 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.LanesToLinkAssignment;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.LanesToLinkAssignment;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * can be run after a conflicting directions file for matsim was created
@@ -66,10 +67,10 @@ public class AdaptConflictsBasedOnBaseCaseFixedTimePlans {
 		Config config = ConfigUtils.createConfig();
 		config.network().setInputFile(DIR + "network_wgs84_utm33n_v4.xml");
 		config.network().setLaneDefinitionsFile(DIR + "lanes_v1-4.xml");
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(true);
 		signalConfigGroup.setConflictingDirectionsFile(DIR + CONFL_FILE);
-		signalConfigGroup.setUseConflictingDirections(true);
+		signalConfigGroup.setIntersectionLogic(IntersectionLogic.CONFLICTING_DIRECTIONS_NO_TURN_RESTRICTIONS);
 		signalConfigGroup.setSignalControlFile(DIR + "signal_control_no_13_v4.xml");
 		signalConfigGroup.setSignalGroupsFile(DIR + "signal_groups_no_13_v4.xml");
 		signalConfigGroup.setSignalSystemFile(DIR + "signal_systems_no_13_v4.xml");

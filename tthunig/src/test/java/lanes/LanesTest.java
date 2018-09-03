@@ -24,14 +24,14 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesFactory;
-import org.matsim.lanes.data.LanesToLinkAssignment;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesFactory;
+import org.matsim.lanes.LanesToLinkAssignment;
 import org.matsim.testcases.MatsimTestUtils;
 
 public class LanesTest {
@@ -78,7 +78,7 @@ public class LanesTest {
 		events.addHandler(handler);
 
 		PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
-		QSim qsim = QSimUtils.createDefaultQSim(scenario, events);
+		QSim qsim = new QSimBuilder(scenario.getConfig()).useDefaults().build(scenario, events);
 		qsim.run();
 		
 		handler.printAllTravelTimes();

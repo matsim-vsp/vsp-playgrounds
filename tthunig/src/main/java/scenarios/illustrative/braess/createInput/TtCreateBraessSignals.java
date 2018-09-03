@@ -26,8 +26,10 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
+import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
 import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataImpl;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
@@ -44,18 +46,14 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactoryImpl;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsWriter20;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.utils.SignalUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.LanesToLinkAssignment;
-
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.LanesToLinkAssignment;
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes.LaneType;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
-import signals.laemmer.model.LaemmerSignalController;
-import signals.sylvia.data.DgSylviaPreprocessData;
 
 /**
  * Class to create signals (signal systems, signal groups and signal control) for the Braess scenario.
@@ -327,7 +325,7 @@ public final class TtCreateBraessSignals {
 		// convert basis fixed time plan to sylvia plan
 		if (this.signalLogic.equals(SignalControlLogic.SYLVIA)){
 			// create the final sylvia signal control with information of the temporary signal control
-			DgSylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
+			SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 		}
 	}
 

@@ -21,15 +21,12 @@
  */
 package scenarios.illustrative.parallel.run;
 
-import java.io.File;
-import java.util.Calendar;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -49,14 +46,16 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.LanesWriter;
-
+import org.matsim.lanes.LanesWriter;
 import scenarios.illustrative.analysis.TtAnalyzedResultsWriter;
 import scenarios.illustrative.analysis.TtListenerToBindAndWriteAnalysis;
 import scenarios.illustrative.parallel.analysis.TtAnalyzeParallel;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelNetworkAndLanes;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelPopulation;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelSignals;
+
+import java.io.File;
+import java.util.Calendar;
 
 /**
  * Class to run a simulation of the parallel scenario with or without signals. 
@@ -111,7 +110,7 @@ public final class RunParallelSimulation {
 	
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 			createSignals(scenario);
@@ -129,7 +128,7 @@ public final class RunParallelSimulation {
 
 		// add the signals module if signal systems are used
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			controler.addOverridingModule(new SignalsModule());
 		}
@@ -225,7 +224,7 @@ public final class RunParallelSimulation {
 
 		config.qsim().setUseLanes( true );
 		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils
-				.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+				.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 						SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems( USE_SIGNALS? true : false );
 
@@ -399,7 +398,7 @@ public final class RunParallelSimulation {
 		else
 			runName += "_node2node";
 
-		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			runName += "_signals";
 		}

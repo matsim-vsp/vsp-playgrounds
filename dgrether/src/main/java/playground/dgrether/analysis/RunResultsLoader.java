@@ -33,8 +33,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesReader;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesReader;
 
 import java.io.File;
 
@@ -138,7 +138,7 @@ public class RunResultsLoader {
 
 	private SignalsData loadSignals(String systemspath, String groupspath, String controlpath) {
 		Config c = ConfigUtils.createConfig();
-		SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(c, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalSystemsConfigGroup.setSignalSystemFile(systemspath);
 		signalSystemsConfigGroup.setSignalGroupsFile(groupspath);
 		signalSystemsConfigGroup.setSignalControlFile(controlpath);
