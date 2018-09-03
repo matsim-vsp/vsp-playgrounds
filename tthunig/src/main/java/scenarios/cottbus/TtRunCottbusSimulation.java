@@ -170,7 +170,7 @@ public class TtRunCottbusSimulation {
 	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_NICO_GROUPS_14RE;
+	private final static SignalType SIGNAL_TYPE = SignalType.GERSHENSON;
 	public enum SignalType {
 		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
@@ -188,7 +188,8 @@ public class TtRunCottbusSimulation {
 		LAEMMER_DOUBLE_GROUPS_SYS17, // as above but two additional possible groups at system 17, such that opposing traffic can have green at the same time
 		LAEMMER_DOUBLE_GROUPS_14GREEN, // the same as LAEMMER_DOUBLE_GROUPS but without signal 1107 at system 14 (i.e. all green)
 		MS_IDEAL, // fixed-time signals based on MS optimization but with idealized signal timings to be more comparable: intergreen time of 5 seconds always, phases like for laemmer double groups
-		LAEMMER_FLEXIBLE // version implemented by pierre schade in his thesis
+		LAEMMER_FLEXIBLE, // version implemented by pierre schade in his thesis
+		GERSHENSON
 	}
 	
 	// parameters for specific signal control
@@ -505,7 +506,7 @@ public class TtRunCottbusSimulation {
 		// set number of iterations
 		// TODO
 		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(100);
+		config.controler().setLastIteration(0);
 		
 		config.qsim().setUsingFastCapacityUpdate(false);
 
@@ -699,6 +700,10 @@ public class TtRunCottbusSimulation {
 				break;
 			case LAEMMER_FLEXIBLE:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer_flexible.xml");
+				break;
+			case GERSHENSON:
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_gershenson.xml");
+				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases_v4.xml");
 				break;
 			}
 			
