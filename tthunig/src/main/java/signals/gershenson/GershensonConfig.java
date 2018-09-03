@@ -2,15 +2,15 @@ package signals.gershenson;
 
 public class GershensonConfig {
 	private double storageCapacityOutlinkJam = 0.8;
-	//protected double maxRedTime = 15.0;
 	private double interGreenTime = 5.; //TODO default should be at least 2
 	//TODO this leads to reasonable results (try and error). Why did Gershenson think 13.33 was a good threshold?
 	//in the tests this led to inefficient switching after the minimum green-Time.
 	private double threshold = 250;
 	private int lengthOfPlatoonTails = 2;
-	private double minimumGREENtime = 5;  //TODO must not be negative
+	private double minimumGREENtime = 5; 
 	
-	private int minimumCycleTime = 90;
+//	equivalent Cycle time of a system with fixed plans
+	private int equiCycleTime = 90;
 	
 	//These are attributes for the Sensor
 	private double monitoredPlatoonTail = 25.;
@@ -82,11 +82,11 @@ public class GershensonConfig {
 		return this.minmumDistanceBehindIntersection;
 	}
 	
-	public void setMinmumCycleTime(int minimumCycleTime){
-		this.minimumCycleTime = minimumCycleTime;
+	public void setEquiCycleTime(int equiCycleTime){
+		this.equiCycleTime = equiCycleTime;
 	}
-	public int getMinmumCycleTime() {
-		return this.minimumCycleTime;
+	public int getEquiCycleTime() {
+		return this.equiCycleTime;
 	}
 	
 	public boolean getSignalSystemDependendThreshold(){
