@@ -43,9 +43,8 @@ public class IKRunBerlinScenario {
 		String configFileName ;
 		String overridingConfigFileName = null;
 		if ( args.length==0 || args[0].equals("")) {
-			configFileName = "scenarios/berlin-v5.1-10pct/input/berlin-v5.2-10pct.config.xml";
-//			configFileName = "scenarios/berlin-v5.1-10pct/input/berlin-v5.1-10pct.config.xml";
-			overridingConfigFileName = "overridingConfig.xml";
+			configFileName = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/berlin-v5.2-10pct.config.xml";
+			overridingConfigFileName = null;
 		} else {
 			configFileName = args[0];
 			if ( args.length>1 ) overridingConfigFileName = args[1];
@@ -78,7 +77,7 @@ public class IKRunBerlinScenario {
 		
 		new PopulationWriter(scenario.getPopulation()).write("/Users/ihab/Desktop/plans1pct.xml.gz");
 		
-		berlin.run();
+//		berlin.run();
 	}
 
 }
