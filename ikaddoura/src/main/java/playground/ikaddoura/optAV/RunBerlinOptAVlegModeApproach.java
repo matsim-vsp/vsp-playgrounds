@@ -65,9 +65,9 @@ import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeContro
 * @author ikaddoura
 */
 
-public class RunBerlinOptAVmodeApproach {
+public class RunBerlinOptAVlegModeApproach {
 
-	private static final Logger log = Logger.getLogger(RunBerlinOptAVmodeApproach.class);
+	private static final Logger log = Logger.getLogger(RunBerlinOptAVlegModeApproach.class);
 
 	private static String configFile;
 	private static String outputDirectory;
@@ -103,7 +103,7 @@ public class RunBerlinOptAVmodeApproach {
 			isCarAvailableModeForTripsInFromToBerlin = false;
 		}
 		
-		RunBerlinOptAVmodeApproach runner = new RunBerlinOptAVmodeApproach();
+		RunBerlinOptAVlegModeApproach runner = new RunBerlinOptAVlegModeApproach();
 		runner.run();
 	}
 
