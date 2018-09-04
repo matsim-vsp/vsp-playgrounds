@@ -20,13 +20,24 @@
 package playground.ikaddoura.optAV;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Provider;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -43,15 +54,16 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.replanning.PlanStrategy;
-import org.matsim.core.replanning.PlanStrategyImpl.Builder;
-import org.matsim.core.replanning.modules.ReRoute;
-import org.matsim.core.replanning.modules.SubtourModeChoice;
-import org.matsim.core.replanning.selectors.RandomPlanSelector;
-import org.matsim.core.router.TripRouter;
+import org.matsim.core.router.TripStructureUtils;
+import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.run.RunBerlinScenario;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import org.opengis.feature.simple.SimpleFeature;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
@@ -65,33 +77,30 @@ public class RunBerlinOptAVnetworkModeApproach {
 
 	private static final Logger log = Logger.getLogger(RunBerlinOptAVnetworkModeApproach.class);
 
+	private static String baseDirectory;
 	private static String configFile;
 	private static String outputDirectory;
 	private static String runId;
 	private static String visualizationScriptInputDirectory;
+	private static String berlinShapeFile;
+
 	private static final boolean otfvis = false;
+	
+	private final Map<Integer, Geometry> zoneId2geometry = new HashMap<Integer, Geometry>();
 	
 	public static void main(String[] args) {
 		if (args.length > 0) {
-			
-			configFile = args[0];		
-			log.info("configFile: "+ configFile);
-			
-			outputDirectory = args[1];
-			log.info("outputDirectory: "+ outputDirectory);
-			
-			runId = args[2];
-			log.info("runId: "+ runId);
-			
-			visualizationScriptInputDirectory = args[3];
-			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
+			throw new RuntimeException();
 			
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-1pct/input/berlin-v5.2-1pct.config_b1_A1.xml";
-			runId = "b1_A1_1pct";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV/scenarios/berlin-v5.1-1pct/local-run_" + runId + "/";
-			visualizationScriptInputDirectory = "./visualization-scripts/";
+			baseDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_networkModeApproach/";
+			runId = "test1";
+
+			configFile = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-v5.2-1pct.config_test.xml";
+			outputDirectory = baseDirectory + "scenarios/berlin-v5.2-1pct/local-run_" + runId + "/";
+			visualizationScriptInputDirectory = baseDirectory + "visualization-scripts";
+			berlinShapeFile = baseDirectory + "berlin-shp/berlin.shp";
 		}
 		
 		RunBerlinOptAVnetworkModeApproach runner = new RunBerlinOptAVnetworkModeApproach();
@@ -115,7 +124,65 @@ public class RunBerlinOptAVnetworkModeApproach {
 		config.controler().setOutputDirectory(outputDirectory);
 		config.controler().setRunId(runId);
 		
-		Scenario scenario = berlin.prepareScenario();	
+		Scenario scenario = berlin.prepareScenario();
+		
+		loadShapeFile();
+		int counterLinksInBerlin = 0;
+		int counterLinksInBrandenburg = 0;
+		// network mode adjustments
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			if (link.getAllowedModes().contains(TransportMode.car) && link.getAllowedModes().contains(TransportMode.ride) && link.getAllowedModes().contains("freight")) {
+				Set<String> allowedModes = new HashSet<>();
+				allowedModes.add("freight");
+				allowedModes.add(TransportMode.ride);
+				
+				// "car" = mode used by taxis; should be allowed everywhere
+				allowedModes.add(TransportMode.car);
+				
+				// "car_br" = mode used by cars; should not be allowed in berlin (except for P+R access roads TODO)
+				if ( isCoordInArea(link.getFromNode().getCoord()) || isCoordInArea(link.getToNode().getCoord()) ) {
+					// from or to node in berlin
+					counterLinksInBerlin++;
+				} else {
+					allowedModes.add(TransportMode.car + "_br");
+					counterLinksInBrandenburg++;
+				}
+				
+				link.setAllowedModes(allowedModes);
+			
+			} else if (link.getAllowedModes().contains(TransportMode.pt)) {	
+				// skip pt links
+			} else {
+				throw new RuntimeException("Aborting...");
+			}
+		}
+		
+		log.info("links in Berlin: " + counterLinksInBerlin);
+		log.info("links in Brandenburg: " + counterLinksInBrandenburg);
+
+		new NetworkWriter(scenario.getNetwork()).write(baseDirectory + "adjusted-network.xml.gz");
+				
+		// rename car to car_br (remaining car trips in plans file are only trips within brandenburg)
+		for (Person person : scenario.getPopulation().getPersons().values()) {
+			for (Leg leg : TripStructureUtils.getLegs(person.getSelectedPlan().getPlanElements())) {
+				if (leg.getMode().equals("car")) {
+					leg.setMode("car_br");
+				}
+			}
+		}
+		
+		// remove activity link Ids
+		for (Person person : scenario.getPopulation().getPersons().values()) {
+			for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
+				if (pE instanceof Activity) {
+					Activity act = (Activity) pE;
+					act.setLinkId(null);
+				}
+			}
+		}
+		
+		new PopulationWriter(scenario.getPopulation()).write(baseDirectory + "adjusted-population.xml.gz");
+		
 		Controler controler = berlin.prepareControler();
 		
 		// some online analysis
@@ -206,6 +273,28 @@ public class RunBerlinOptAVnetworkModeApproach {
 	
 		log.info("Done.");
 		
+	}
+	
+	private void loadShapeFile() {		
+		Collection<SimpleFeature> features;
+		features = ShapeFileReader.getAllFeatures(berlinShapeFile);
+		int featureCounter = 0;
+		for (SimpleFeature feature : features) {
+			zoneId2geometry.put(featureCounter, (Geometry) feature.getDefaultGeometry());
+			featureCounter++;
+		}
+	}
+	
+	private boolean isCoordInArea(Coord coord) {
+		boolean coordInArea = false;
+		for (Geometry geometry : zoneId2geometry.values()) {
+			Point p = MGC.coord2Point(coord); 
+			
+			if (p.within(geometry)) {
+				coordInArea = true;
+			}
+		}
+		return coordInArea;
 	}
 
 }
