@@ -28,7 +28,7 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.vsp.analysis.utils.GnuplotUtils;
+//import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * Class to bind the signal analyze and writing tool to the simulation. 
@@ -73,7 +73,7 @@ public class TtSignalAnalysisListener implements IterationEndsListener {
 //		log.info("execute command: cd " + pathToSpecificAnalysisDir);
 //		log.info("and afterwards: gnuplot " + relativePathToGnuplotScript);
 		
-		GnuplotUtils.runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript);
+//		GnuplotUtils.runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript);
 		
 //		try {
 //			// "&" splits different commands in one line in windows. Use ";" if you are a linux user.
