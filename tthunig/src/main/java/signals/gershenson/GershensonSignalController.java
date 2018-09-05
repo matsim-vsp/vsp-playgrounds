@@ -194,7 +194,6 @@ public class GershensonSignalController implements SignalController {
 	
 	private Map<Id<SignalGroup>, SignalGroupMetadata> signalGroupIdMetadataMap;	
 	
-//	private Map<Id<SignalGroup>, Map<Signal, Integer> > approachingVehiclesMap = new HashMap<Id<SignalGroup>, Map<Signal, Integer>>();
 	private Map<Id<SignalGroup>, Integer> approachingVehiclesGroupMap = new HashMap<Id<SignalGroup>, Integer>();
 	private Map<Id<SignalGroup>, Map<Id<Link>, Boolean> > jammedOutLinkMap = new HashMap<Id<SignalGroup>, Map<Id<Link>, Boolean>>();	
 	private Map<Id<SignalGroup>, Double> counter = new HashMap<Id<SignalGroup>, Double>();	
@@ -240,7 +239,7 @@ public class GershensonSignalController implements SignalController {
 //				There are no TurningMoveRestrictions
 				if (signalData.getTurningMoveRestrictions() == null || signalData.getTurningMoveRestrictions().isEmpty()){
 //					If there are no Lanes for that Link add every Outlink of the intersection except the one which allows the U-Turn
-					if (signalData.getLaneIds() == null || signalData.getLaneIds().isEmpty() || scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1){
+					if (signalData.getLaneIds() == null || signalData.getLaneIds().isEmpty() || lanes4link.getLanes().size()<=1){
 						log.info(system.getId().toString()+": No TurninMoveRestrictions and no Lanes - adding every Outlink of intersections except the one in back direction");
 						metadata.addOutLinksWithoutBackLinkToMetadata(inLink);
 						
@@ -282,11 +281,14 @@ public class GershensonSignalController implements SignalController {
 //			Register InLinks/InLanes for the Sensor-Manager
 			for(Signal signal : signalGroup.getSignals().values()){
 				
+				LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId());
+
+				
 //				Put the default value in maximalNumberOfAgentsInDistanceMap first. If the link is to short this will be overwritten
 				maximalNumberOfAgentsInDistanceMap.put(signal.getId(), (int)(gershensonConfig.getMonitoredDistance()/this.scenario.getConfig().jdeqSim().getCarSize()));
 
 //				There are only Links (if there is only one Lane on the Link ignore this Lane and work with Link-Sensors instead)
-				if((signal.getLaneIds()==null)|| signal.getLaneIds().isEmpty() ||scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1. ){
+				if((signal.getLaneIds()==null)|| signal.getLaneIds().isEmpty() ||lanes4link.getLanes().size()<=1. ){
 					if (!(signal.getLaneIds()==null|| signal.getLaneIds().isEmpty()) && scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()==1. ){
 						log.info(system.getId().toString()+": Register InLane "+ signal.getLaneIds().iterator().next().toString() +" of Signal "+ signal.getId().toString()+". Since there is only one Lane for this signal register the Link");
 					} else {
@@ -334,7 +336,6 @@ public class GershensonSignalController implements SignalController {
 					}
 //				There are lanes. Follow the sam logic as above to check if the sensor will work as wanted
 				}else{
-					LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId());
 					for(Id<Lane> laneId : signal.getLaneIds()){
 						log.info(system.getId().toString()+": Register Sensor for InLane "+ laneId.toString() +" of Signal "+ signal.getId().toString());
 						double lenghtOfLane = lanes4link.getLanes().get(laneId).getStartsAtMeterFromLinkEnd();
@@ -488,7 +489,9 @@ public class GershensonSignalController implements SignalController {
 		Boolean VehInR = false;
 		for (Signal signal : signalGroup.getSignals().values()) {
 			if(VehInR) return VehInR;
-			if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()||scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1.){
+			LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId());
+ 
+			if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()||lanes4link.getLanes().size()<=1.){
 				if(!VehInR) {
 //					There are Link-Sensor-Exceptions ie. a lane was to short for the suggested monitored distances by Gershenson
 					if (signalGroupIdMetadataMap.get(signalGroup.getId()).getInLinkLengthExceptions().containsKey(signal.getLinkId())){
@@ -571,8 +574,10 @@ public class GershensonSignalController implements SignalController {
 			}
 			int carsapproaching = 0;
 			for (Signal signal : group.getSignals().values()) {
+				LanesToLinkAssignment lanes4link = scenario.getLanes().getLanesToLinkAssignments().get(signal.getLinkId());
+
 				int agents = 0;
-				if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()||scenario.getNetwork().getLinks().get(signal.getLinkId()).getNumberOfLanes()<=1.){
+				if (signal.getLaneIds()==null||signal.getLaneIds().isEmpty()||lanes4link.getLanes().size()<=1.){
 //			There are Link Exceptions
 					if(signalGroupIdMetadataMap.get(group.getId()).getInLinkLengthExceptions().containsKey(signal.getLinkId())){
 						agents = this.sensorManager.getNumberOfCarsInDistance(signal.getLinkId(), signalGroupIdMetadataMap.get(group.getId()).getInLinkLengthExceptions().get(signal.getLinkId()), now); 
