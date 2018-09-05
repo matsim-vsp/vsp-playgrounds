@@ -28,7 +28,7 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.vsp.analysis.utils.GnuplotUtils;
+//import playground.vsp.analysis.utils.GnuplotUtils;
 
 
 /**
@@ -74,7 +74,7 @@ public class SignalAnalysisListener implements IterationEndsListener {
 //		log.info("execute command: cd " + pathToSpecificAnalysisDir);
 //		log.info("and afterwards: gnuplot " + relativePathToGnuplotScript);
 		
-		GnuplotUtils.runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript);
+//		GnuplotUtils.runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript);
 	}
 
 }
