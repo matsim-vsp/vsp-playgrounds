@@ -62,24 +62,29 @@ public class TagCarAndTaxiUsersModeApproach {
 
 	private static final Logger log = Logger.getLogger(TagCarAndTaxiUsersModeApproach.class);
 	
-	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
-	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/input/population/";
+	private final String inputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_networkModeApproach/scenarios/berlin-v5.2-1pct/input/";
+	private final String outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_networkModeApproach/scenarios/berlin-v5.2-1pct/input/";
 	
-	private final String inputPlansFile = "berlin-v5.1-1pct.plans.xml.gz";
-	private final String outputPlansFile = "berlin-5.1-1pct_plans_taggedCarUsers_OD-based-modes_no-car-trips-in-from-to-berlin_split-trips.xml.gz";
+	private final String inputPlansFile = inputDirectory + "berlin-v5.2-1pct.plans.xml.gz";
+	private final String outputPlansFile = outputDirectory + "berlin-5.2-1pct_plans_taggedCarUsers_split-trips_noCarInFromToBerlin.xml.gz";
 
-	private final String inputPersonAttributesFile = "berlin-v5.0.person-attributes.xml.gz";
+//	private final String inputPersonAttributesFile = inputDirectory + "berlin-v5.0.person-attributes.xml.gz";
+	private final String inputPersonAttributesFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/berlin-v5.0.person-attributes.xml.gz";
 	private final String inputPersonAttributesSubpopulationPerson = "person";
 	
-	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/shared-svn/projects/audi_av/shp/untersuchungsraumAll.shp";
-	private final String crsSHPFile = "EPSG:25833";
-	private final String crsPopulation = TransformationFactory.DHDN_GK4;
+	private final String areaOfPotentialSAVusersSHPFile = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_networkModeApproach/berlin-shp/berlin.shp";
+	private final String crsSHPFile = TransformationFactory.GK4; // "EPSG:31468";
+	private final String crsPopulation = TransformationFactory.GK4; // "EPSG:31468";
+	private final String crsScenario = TransformationFactory.GK4; // "EPSG:31468";
 	
 	private final String modeToReplaceCarTripsInBerlin = TransportMode.taxi;
 	private final String modeToReplaceCarTripsToFromBerlin = TransportMode.pt;
 	private final String berlinModeTail = "";
-	private final String brandenburgModeTail = "_brandenburg";
-	private final String fromToBerlinModeTail = "_from-to-berlin";
+//	private final String brandenburgModeTail = "_brandenburg";
+	private final String brandenburgModeTail = "";
+//	private final String fromToBerlinModeTail = "_from-to-berlin";
+	private final String fromToBerlinModeTail = "";
+
 	
 	private final boolean splitTrips = true; 
 	private final Coord[] prCoordinates = {
@@ -107,7 +112,7 @@ public class TagCarAndTaxiUsersModeApproach {
 	// ####################################################################
 
 	private Scenario scenario;
-	private final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction");
+	private final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction");
 	private int carUsers = 0;
 	private int noCarUsers = 0;
 	
@@ -124,15 +129,17 @@ public class TagCarAndTaxiUsersModeApproach {
 	private void run() {
 				
 		Config config = ConfigUtils.createConfig();
-		config.plans().setInputFile(inputDirectory + inputPlansFile);
-		config.plans().setInputPersonAttributeFile(inputDirectory + inputPersonAttributesFile);
+		config.global().setCoordinateSystem(crsScenario);
+		config.plans().setInputFile(inputPlansFile);
+		config.plans().setInputCRS(crsPopulation);
+		config.plans().setInputPersonAttributeFile(inputPersonAttributesFile);
 		scenario = ScenarioUtils.loadScenario(config);
 		
 		final int agentsBefore = scenario.getPopulation().getPersons().size();
 		
 		tagCarUsers();
 		loadShapeFile();		
-		new PopulationWriter(splitTrips()).write(outputDirectory + outputPlansFile);
+		new PopulationWriter(splitTrips()).write(outputPlansFile);
 		
 		log.info("Car users: " + carUsers);
 		log.info("No car users: " + noCarUsers);

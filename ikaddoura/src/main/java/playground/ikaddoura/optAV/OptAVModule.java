@@ -182,8 +182,8 @@ public class OptAVModule extends AbstractModule {
 		// dvrp / taxi
 		// #############################
 
-		DvrpConfigGroup.get(this.getConfig()).setMode(TransportMode.taxi);
-		DvrpConfigGroup.get(this.getConfig()).setNetworkMode(TransportMode.car);
+//		DvrpConfigGroup.get(this.getConfig()).setMode(TransportMode.taxi);
+//		DvrpConfigGroup.get(this.getConfig()).setNetworkMode(TransportMode.car);
 		this.getConfig().addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		this.getConfig().checkConsistency();
         
