@@ -9,8 +9,8 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.NetworkReaderMatsimV1;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -33,8 +33,12 @@ public class RunExample {
 			Scenario sce = ScenarioUtils.createScenario(config);
 			createPopulation(sce);
 			
-			NetworkReaderMatsimV1 reader = new NetworkReaderMatsimV1(sce.getNetwork());
-			reader.readFile("C:/Users/Felix/Documents/VSP/Berlin-Netz/mergedReducedSpeedKNWay.xml");
+//			NetworkReaderMatsimV1 reader = new NetworkReaderMatsimV1(sce.getNetwork());
+//			reader.readFile("C:/Users/Felix/Documents/VSP/Berlin-Netz/mergedReducedSpeedKNWay.xml");
+			NetworkUtils.readNetwork(sce.getNetwork(),
+					"C:/Users/Felix/Documents/VSP/Berlin-Netz/mergedReducedSpeedKNWay.xml") ;
+			
+			
 //			config.network().setInputFile("C:/Users/Felix/Documents/VSP/Berlin-Netz/mergedReducedSpeedSantiagoWay.xml");
 			
 			controler = new Controler(sce);
