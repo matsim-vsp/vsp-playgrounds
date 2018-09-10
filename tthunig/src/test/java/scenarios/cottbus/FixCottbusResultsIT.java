@@ -27,7 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -43,9 +43,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 import analysis.TtTotalTravelTime;
-import scenarios.cottbus.run.TtRunCottbusSimulation.NetworkType;
-import scenarios.cottbus.run.TtRunCottbusSimulation.PopulationType;
-import scenarios.cottbus.run.TtRunCottbusSimulation.SignalType;
+import scenarios.cottbus.TtRunCottbusSimulation.NetworkType;
+import scenarios.cottbus.TtRunCottbusSimulation.PopulationType;
+import scenarios.cottbus.TtRunCottbusSimulation.SignalType;
 
 /**
  * @author tthunig
@@ -65,12 +65,12 @@ public class FixCottbusResultsIT {
 
 	@Test
 	public void testBCContinuedFreeRouteChoice(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_OPT_OFFSETS, 1096817.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_MATSIM_ROUTES, SignalType.MS_BTU_OPT, 1096817.0);
 	}
 	
 	@Test
 	public void testBCContinuedFixedRouteSet(){
-		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_OPT_OFFSETS, 1073110.0);
+		fixResults(NetworkType.BTU_NET, PopulationType.BTU_POP_BTU_ROUTES, SignalType.MS_BTU_OPT, 1073110.0);
 	}	
 	
 	private void fixResults(NetworkType netType, PopulationType popType, SignalType signalType, double expectedTotalTt) {
@@ -127,7 +127,7 @@ public class FixCottbusResultsIT {
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes( true );
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems( true );
 		// set signal files
 		if (netType.equals(NetworkType.V1)){
@@ -138,7 +138,7 @@ public class FixCottbusResultsIT {
 		signalConfigGroup.setSignalGroupsFile(testUtils.getClassInputDirectory() + "matsimData/signal_groups_no_13.xml");
 		if (signalType.equals(SignalType.MS)){
 			signalConfigGroup.setSignalControlFile(testUtils.getClassInputDirectory() + "matsimData/signal_control_no_13.xml");
-		} else if (signalType.equals(SignalType.MS_OPT_OFFSETS)){ 
+		} else if (signalType.equals(SignalType.MS_BTU_OPT)){ 
 			signalConfigGroup.setSignalControlFile(testUtils.getClassInputDirectory() + "btuOpt/signal_control_opt.xml");
 		}
 

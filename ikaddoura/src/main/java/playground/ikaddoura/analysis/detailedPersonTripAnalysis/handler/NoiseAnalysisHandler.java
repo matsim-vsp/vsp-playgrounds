@@ -91,8 +91,8 @@ public class NoiseAnalysisHandler implements NoiseEventCausedHandler, NoiseEvent
 		
 		// trip-specific noise cost
 		
-		if (basicHandler.getTaxiDrivers().contains(event.getCausingAgentId())) {
-			// skip the trip-specific noise cost analysis for taxi drivers
+		if (basicHandler.getTaxiDrivers().contains(event.getCausingAgentId()) || basicHandler.getPtDrivers().contains(event.getCausingAgentId())) {
+			// skip the trip-specific noise cost analysis for taxi or pt drivers
 				
 		} else {
 

@@ -114,7 +114,7 @@ public final class GlobalFlowDynamicsUpdator implements
 				this.fdDataContainer.getGlobalData().updateFlow15Min(nowTime, pcuPerson);
 				this.fdDataContainer.getGlobalData().updateSpeedTable(nowTime,personId);
 				//Waiting for all agents to be on the track before studying stability
-				if ((this.fdDataContainer.getGlobalData().getNumberOfDrivingAgents() == this.fdDataContainer.getGlobalData().getnumberOfAgents()) && (nowTime > FDModule.MAX_ACT_END_TIME * 2)){
+				if ((this.fdDataContainer.getGlobalData().getNumberOfDrivingAgents() == this.fdDataContainer.getGlobalData().getNumberOfAgents()) && (nowTime > FDModule.MAX_ACT_END_TIME * 2)){
 					/*//Taking speed check out, as it is not reliable on the global speed table
 					 *  Maybe making a list of moving averages could be smart,
 					 *  but there is no reliable converging process even in that case. (ssix, 25.10.13)
@@ -129,7 +129,7 @@ public final class GlobalFlowDynamicsUpdator implements
 					//Checking modes stability
 					boolean modesStable = true;
 					for (String vehTyp : fdDataContainer.getTravelModesFlowData().keySet()){
-						if (this.fdDataContainer.getTravelModesFlowData().get(vehTyp).getnumberOfAgents() != 0){
+						if (this.fdDataContainer.getTravelModesFlowData().get(vehTyp).getNumberOfAgents() != 0){
 							if (! this.fdDataContainer.getTravelModesFlowData().get(vehTyp).isSpeedStable() || ! this.fdDataContainer.getTravelModesFlowData().get(vehTyp).isFlowStable() ) {
 								modesStable = false;
 								break;

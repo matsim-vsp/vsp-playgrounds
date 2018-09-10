@@ -69,12 +69,15 @@ public class CemdapStopsParser {
 	}
 
 	
-	public final void parse(String cemdapStopsFile, int planNumber, Population population, ObjectAttributes personZoneAttributes) {
+	public final void parse(String cemdapStopsFile, int planNumber, Population population,
+							ObjectAttributes personZoneAttributes, String outputDirectory) {
 		int lineCount = 0;
 
 		try {
 			BufferedReader bufferedReader = IOUtils.getBufferedReader(cemdapStopsFile);
 			String currentLine;
+
+			CemdapOutputAnalyzer analyzer = new CemdapOutputAnalyzer();
 
 			while ((currentLine = bufferedReader.readLine()) != null) {
 				String[] entries = currentLine.split("\t", -1);
@@ -95,6 +98,7 @@ public class CemdapStopsParser {
 					}
 					person = population.getFactory().createPerson(personId);
 					population.addPerson(person);
+					analyzer.increaseNumberOfAgents();
 				}
 
 				// Create a new plan if plan with current plan number does not already exist and add a home activity
@@ -116,6 +120,7 @@ public class CemdapStopsParser {
 					Activity firstActivity = population.getFactory().createActivityFromCoord(activityType, DEFAULT_COORD);
 					firstActivity.setEndTime(departureTime);
 					plan.addActivity(firstActivity);
+					analyzer.registerTrip(firstActivity.getType(), departureTime);
 				}
 				
 				plan.addLeg(population.getFactory().createLeg(TransportMode.car));
@@ -140,7 +145,11 @@ public class CemdapStopsParser {
 				}
 				
 				plan.addActivity(activity);
+
+				analyzer.registerTrip(activityType, stopDuration);
 			}
+
+			analyzer.writeOutput(outputDirectory + "/statistics.txt");
 		} catch (IOException e) {
 			LOG.error(e);
 		}

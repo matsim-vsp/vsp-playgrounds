@@ -60,7 +60,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
@@ -331,7 +331,7 @@ public class PedestrianWithPTTest {
 			events.addHandler(eventHandler);
 
 			PrepareForSimUtils.createDefaultPrepareForSim(scenario).run();
-			QSim qSim = QSimUtils.createDefaultQSim(this.scenario,events);
+			QSim qSim = new QSimBuilder(this.scenario.getConfig()).useDefaults().build(this.scenario, events);
 			qSim.run();
 		}
 	}

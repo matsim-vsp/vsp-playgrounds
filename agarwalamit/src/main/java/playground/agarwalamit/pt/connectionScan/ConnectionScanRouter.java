@@ -32,7 +32,7 @@ import org.matsim.pt.router.TransitRouter;
 
 public class ConnectionScanRouter implements TransitRouter {
     @Override
-    public List<Leg> calcRoute(Facility<?> fromFacility, Facility<?> toFacility, double departureTime, Person person) {
+    public List<Leg> calcRoute( Facility fromFacility, Facility toFacility, double departureTime, Person person) {
         return null;
     }
 }

@@ -49,7 +49,7 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
 
     private boolean usingMicroGramUnits = true;
 
-    public void initializeMaps(){
+    private void initializeMaps(){
         Arrays.stream(WarmPollutant.values()).forEach(pollutant -> {
             pollutantToBackgroundConcentration.put(pollutant.toString(), 0.);
             pollutantToPenetrationRate.put(pollutant.toString(), 1.);
@@ -60,7 +60,7 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
         this.modeToPollutantToPenetrationRate.put(TransportMode.car, pollutantToPenetrationRate);
     }
 
-    public double getDispersionRate() {
+    double getDispersionRate() {
         return dispersionRate;
     }
 
@@ -68,7 +68,7 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
         this.dispersionRate = dispersionRate;
     }
 
-    public Map<String, Double> getPollutantToBackgroundConcentration() {
+    public Map<String, Double> getPollutantToBackgroundConcentration_gm() {
         return pollutantToBackgroundConcentration;
     }
 
@@ -85,7 +85,7 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
         return modeToOccupancy;
     }
 
-    public boolean isUsingMicroGramUnits() {
+    boolean isUsingMicroGramUnits() {
         return usingMicroGramUnits;
     }
 

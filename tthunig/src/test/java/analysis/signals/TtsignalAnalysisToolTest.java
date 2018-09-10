@@ -21,7 +21,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
@@ -36,7 +38,6 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactoryImpl;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
@@ -64,7 +65,7 @@ public class TtsignalAnalysisToolTest {
 	@Test
 	public void testTotalSignalGreenTime() {
 		ScenarioForTest testscenario = new ScenarioForTest(0.0,10060.);
-		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
+		SignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		double totalgreentime = ((Double)signalAnalysishandler.getTotalSignalGreenTime().get(SIGNALGROUP)).doubleValue();
 			
 		Assert.assertEquals("The total green time of SignalGroup 2-3",1560.,totalgreentime, MatsimTestUtils.EPSILON); 		
@@ -73,7 +74,7 @@ public class TtsignalAnalysisToolTest {
 	@Test
 	public void testSumBygoneGreenTime() {
 		ScenarioForTest testscenario = new ScenarioForTest(0.0,10000.);
-		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
+		SignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		
 		double greenAt51 = signalAnalysishandler.getSumOfBygoneSignalGreenTime().get(new Double(51)).get(SIGNALGROUP).doubleValue();
 		double greenAt61 = signalAnalysishandler.getSumOfBygoneSignalGreenTime().get(new Double(61)).get(SIGNALGROUP).doubleValue();
@@ -87,7 +88,7 @@ public class TtsignalAnalysisToolTest {
 	@Test
 	public void testAvgGreenCycleperSignalGroup() {
 		ScenarioForTest testscenario = new ScenarioForTest(0.0,0.0);
-		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
+		SignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		
 		double avgGreenCycle = signalAnalysishandler.calculateAvgFlexibleCycleTimePerSignalSystem().get(SIGNALSYSTEM).doubleValue();
 		
@@ -98,7 +99,7 @@ public class TtsignalAnalysisToolTest {
 	@Test
 	public void testSignalGreenTimeRatios() {
 		ScenarioForTest testscenario = new ScenarioForTest(0.0,120);
-		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
+		SignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		
 		double greenRatio = signalAnalysishandler.calculateSignalGreenTimeRatios().get(SIGNALGROUP).doubleValue();
 		Assert.assertEquals("Ratio of Greentime to relevant simulation time", 0.018939393939, greenRatio, MatsimTestUtils.EPSILON);		
@@ -107,7 +108,7 @@ public class TtsignalAnalysisToolTest {
 	@Test
 	public void testcalculateAvgSignalGreenTimePerCycle() {
 		ScenarioForTest testscenario = new ScenarioForTest(0.0,240.);
-		TtSignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
+		SignalAnalysisTool signalAnalysishandler = testscenario.prepareTest();		
 		
 		double avggreentime = signalAnalysishandler.calculateAvgSignalGreenTimePerFlexibleCycle().get(SIGNALGROUP).doubleValue();
 		Assert.assertEquals("The average Green time per flexible cycle should be ", 60. , avggreentime , MatsimTestUtils.EPSILON);		
@@ -127,12 +128,12 @@ public class TtsignalAnalysisToolTest {
 			this.planEndTime = new Double(planEndTime);
 		}
 			
-		TtSignalAnalysisTool prepareTest() {
+		SignalAnalysisTool prepareTest() {
 			Config config = createConfig();
 			createScenarioElem(config);
 			
 			EventsManager eventsManager = EventsUtils.createEventsManager();		
-			TtSignalAnalysisTool signalAnalysishandler = new TtSignalAnalysisTool();
+			SignalAnalysisTool signalAnalysishandler = new SignalAnalysisTool();
 						
 			eventsManager.addHandler(signalAnalysishandler);
 			
@@ -162,7 +163,7 @@ public class TtsignalAnalysisToolTest {
 	        config.qsim().setUsingFastCapacityUpdate(false);
 		
 			// able or enable signals and lanes
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems( true );
 			
 			

@@ -19,8 +19,11 @@
 package playground.vsp.congestion.handlers;
 
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.TypicalDurationScoreComputation;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scoring.SumScoringFunction;
+import org.matsim.core.scoring.functions.ActivityUtilityParameters;
 import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.utils.misc.Time;
@@ -36,6 +39,15 @@ public class MarginalSumScoringFunction {
 	CharyparNagelActivityScoring activityScoringB;
 	
 	public MarginalSumScoringFunction(ScoringParameters params) {
+				
+		PlanCalcScoreConfigGroup.ActivityParams taxiActParams = new PlanCalcScoreConfigGroup.ActivityParams("TaxiPickup");
+		taxiActParams.setTypicalDurationScoreComputation(TypicalDurationScoreComputation.relative);
+		taxiActParams.setScoringThisActivityAtAll(false);
+		taxiActParams.setTypicalDuration(1.0);
+		
+		ActivityUtilityParameters actUtilityParams = new ActivityUtilityParameters.Builder(taxiActParams).build();
+		params.utilParams.put("TaxiPickup", actUtilityParams);
+		
 		activityScoringA = new CharyparNagelActivityScoring(params);
 		activityScoringB = new CharyparNagelActivityScoring(params);
 	}

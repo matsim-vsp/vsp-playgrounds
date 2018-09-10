@@ -45,6 +45,7 @@ public class GeometryUtils {
      * @return a simplified geometry by increasing tolerance until number of vertices are less than 1000.
      */
     public static Geometry getSimplifiedGeom(final Geometry geom){
+        //Do not change this hardcoded value here, rather use the other method.
         return getSimplifiedGeom(geom, 1000);
     }
 
@@ -125,9 +126,11 @@ public class GeometryUtils {
     }
     
     /**
+     * @param landUseGeoms
+     * @param threshold number of times the check is performed (if the point is inside 'landUseGeoms'); afterwards a random point is returned.
      * @return a random point which is covered by list of landUseGeom as well as zoneGeom
      */
-    public static Point getPointInteriorToGeometriesWithFallback(final Collection<Geometry> landUseGeoms, final Geometry zoneGeom) {
+    public static Point getPointInteriorToGeometriesWithFallback(final Collection<Geometry> landUseGeoms, final Geometry zoneGeom, final int threshold) {
         if (landUseGeoms.isEmpty() || zoneGeom.isEmpty() ) throw new RuntimeException("No geometries.");
 
         Point commonPoint = null;
@@ -140,7 +143,7 @@ public class GeometryUtils {
             commonPoint = geometryFactory.createPoint(coordinate);
             if (isPointInsideGeometries(landUseGeoms,commonPoint)) return commonPoint;
             counter++;
-            if (counter>100){
+            if (counter > threshold) {
             	return commonPoint;
             }
         } while(true);

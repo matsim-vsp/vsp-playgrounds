@@ -21,16 +21,20 @@ package playground.ikaddoura.moneyTravelDisutility;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
+import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
+import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.noise.personLinkMoneyEvents.PersonLinkMoneyEvent;
@@ -53,7 +57,7 @@ import playground.ikaddoura.moneyTravelDisutility.data.TimeBin;
  * @author ikaddoura
  */
 
-public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnterEventHandler, IterationEndsListener, PersonEntersVehicleEventHandler {
+public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnterEventHandler, IterationEndsListener, PersonEntersVehicleEventHandler, TransitDriverStartsEventHandler {
 	private static final Logger log = Logger.getLogger(MoneyEventAnalysis.class);
 	
 	@Inject
@@ -70,8 +74,12 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 	private int warnCounter2 = 0;
 	private int warnCounter3 = 0;
 	private int warnCounter4 = 0;
-	
+	private int warnCounter5 = 0;
+	private int warnCounter6 = 0;
+
 	private int tollUpdateCounter = 0;
+
+	private Set<Id<Vehicle>> notConsideredTransitVehicleIDs = new HashSet<>();
 
 	@Override
 	public void reset(int iteration) {
@@ -85,6 +93,8 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 			for (TimeBin timeBin : linkInfo.getTimeBinNr2timeBin().values()) {
 				timeBin.getEnteringAgents().clear();
 				timeBin.getPersonId2amounts().clear();
+				timeBin.setAmountSum(0.);
+				timeBin.setNumberOfEnteringAgents(0);
 			}
 		}
 		
@@ -106,32 +116,45 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 			TimeBin timeBin = linkMoneyInfo.getTimeBinNr2timeBin().get(timeBinNr);
 			if (timeBin != null) {
 				
-				List<Double> amounts = timeBin.getPersonId2amounts().get(personId);
+				double newAmountSum = timeBin.getAmountSum() + event.getAmount();
+				timeBin.setAmountSum(newAmountSum);
 				
-				if (amounts != null) {
-					timeBin.getPersonId2amounts().get(personId).add(event.getAmount());
-				} else {
-					amounts = new ArrayList<>();
-					amounts.add(event.getAmount());
-					timeBin.getPersonId2amounts().put(personId, amounts);
+				if (this.agentFilter != null) {
+					List<Double> amounts = timeBin.getPersonId2amounts().get(personId);
+					
+					if (amounts != null) {
+						timeBin.getPersonId2amounts().get(personId).add(event.getAmount());
+					} else {
+						amounts = new ArrayList<>();
+						amounts.add(event.getAmount());
+						timeBin.getPersonId2amounts().put(personId, amounts);
+					}
 				}
 				
 			} else {
 				
 				timeBin = new TimeBin(timeBinNr);
-				List<Double> amounts = new ArrayList<>();
-				amounts.add(event.getAmount());
-				timeBin.getPersonId2amounts().put(personId, amounts);
-				
+				timeBin.setAmountSum(event.getAmount());
+
+				if (this.agentFilter != null) {
+					List<Double> amounts = new ArrayList<>();
+					amounts.add(event.getAmount());
+					timeBin.getPersonId2amounts().put(personId, amounts);
+				}
+								
 				linkMoneyInfo.getTimeBinNr2timeBin().put(timeBinNr, timeBin);
 			}
 			
 		} else {
 			
 			TimeBin timeBin = new TimeBin(timeBinNr);
-			List<Double> amounts = new ArrayList<>();
-			amounts.add(event.getAmount());
-			timeBin.getPersonId2amounts().put(personId, amounts);
+			timeBin.setAmountSum(event.getAmount());
+
+			if (this.agentFilter != null) {
+				List<Double> amounts = new ArrayList<>();
+				amounts.add(event.getAmount());
+				timeBin.getPersonId2amounts().put(personId, amounts);
+			}
 
 			linkMoneyInfo = new LinkInfo(linkId);
 			linkMoneyInfo.getTimeBinNr2timeBin().put(timeBinNr, timeBin);
@@ -144,33 +167,51 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 				
 		int timeBinNr = getIntervalNr(event.getTime());
 
-		Id<Link> linkId = event.getLinkId();
-		Id<Vehicle> vehicleId = event.getVehicleId();
-		Id<Person> personId = this.vehicleId2driverIdToBeCharged.get(vehicleId);
+		Id<Person> personId = this.vehicleId2driverIdToBeCharged.get(event.getVehicleId());
 		
-		if (linkId2info.get(linkId) != null) {
-			LinkInfo linkMoneyInfo = linkId2info.get(linkId);
-			
-			if (linkMoneyInfo.getTimeBinNr2timeBin().get(timeBinNr) != null) {
-				TimeBin timeBin = linkMoneyInfo.getTimeBinNr2timeBin().get(timeBinNr);
-				timeBin.getEnteringAgents().add(personId);
+		if (personId != null) {
+			Id<Link> linkId = event.getLinkId();
+
+			if (linkId2info.get(linkId) != null) {
+				LinkInfo linkMoneyInfo = linkId2info.get(linkId);
+				
+				if (linkMoneyInfo.getTimeBinNr2timeBin().get(timeBinNr) != null) {
+					TimeBin timeBin = linkMoneyInfo.getTimeBinNr2timeBin().get(timeBinNr);
+					
+					int numberOfEnteringAgents = timeBin.getNumberOfEnteringAgents() + 1;
+					timeBin.setNumberOfEnteringAgents(numberOfEnteringAgents );
+					
+					if (this.agentFilter != null) {
+						timeBin.getEnteringAgents().add(personId);
+					}
+					
+				} else {
+					
+					TimeBin timeBin = new TimeBin(timeBinNr);
+					timeBin.setNumberOfEnteringAgents(1);
+					
+					if (this.agentFilter != null) {
+						timeBin.getEnteringAgents().add(personId);
+					}
+					
+					linkMoneyInfo.getTimeBinNr2timeBin().put(timeBinNr, timeBin);
+				}
 				
 			} else {
 				
 				TimeBin timeBin = new TimeBin(timeBinNr);
-				timeBin.getEnteringAgents().add(personId);
+				timeBin.setNumberOfEnteringAgents(1);
+				
+				if (this.agentFilter != null) {
+					timeBin.getEnteringAgents().add(personId);
+				}
+				
+				LinkInfo linkMoneyInfo = new LinkInfo(linkId);
 				linkMoneyInfo.getTimeBinNr2timeBin().put(timeBinNr, timeBin);
+				linkId2info.put(linkId, linkMoneyInfo);
 			}
-			
-		} else {
-			
-			TimeBin timeBin = new TimeBin(timeBinNr);
-			timeBin.getEnteringAgents().add(personId);
-			
-			LinkInfo linkMoneyInfo = new LinkInfo(linkId);
-			linkMoneyInfo.getTimeBinNr2timeBin().put(timeBinNr, timeBin);
-			linkId2info.put(linkId, linkMoneyInfo);
 		}
+		
 	}
 
 	@Override
@@ -178,16 +219,41 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 		
 		// a vehicle may have several passengers (transit, taxi, ...) but we are interested in the driver to be charged. In the case of AV it is an imaginary vehicle driver (robot)...
 		
-		if (this.vehicleId2driverIdToBeCharged.containsKey(event.getVehicleId()) && (!event.getPersonId().toString().equals(event.getPersonId().toString()))) {
-			if (warnCounter2 <= 5) {
-				log.warn(event.getPersonId() + " enters vehicle " + event.getVehicleId() + ". Person " + this.vehicleId2driverIdToBeCharged.get(event.getVehicleId()) + " has entered the vehicle before"
-						+ " and is considered as the transit / taxi driver.");
-				if (warnCounter4 == 5) {
+		if (notConsideredTransitVehicleIDs.contains(event.getVehicleId())) {
+			// skip public transit users or drivers
+			if (warnCounter6 <= 5) {
+				log.warn(event.getPersonId() + " enters vehicle " + event.getVehicleId()
+						+ " and is considered as a passenger / the driver of a public tranist vehicle and will be ignored...");
+				warnCounter6++;
+				if (warnCounter6 == 5) {
 					log.warn("Further log statements of this type are not printed out.");
 				}
 			}
+
 		} else {
-			this.vehicleId2driverIdToBeCharged.put(event.getVehicleId(), event.getPersonId());
+			
+			if (this.vehicleId2driverIdToBeCharged.get(event.getVehicleId()) != null ) {
+				// person has entered vehicle before
+				if (warnCounter4 <= 5) {
+					log.info(event.getPersonId() + " enters vehicle " + event.getVehicleId()
+							+ ". Person " + this.vehicleId2driverIdToBeCharged.get(event.getVehicleId()) + " has entered the vehicle before"
+							+ " and is considered as the taxi driver.");
+					warnCounter4++;
+					if (warnCounter4 == 5) {
+						log.info("Further log statements of this type are not printed out.");
+					}
+				}
+			} else {
+				if (warnCounter5 <= 5) {
+					log.info(event.getPersonId() + " enters vehicle " + event.getVehicleId() + " "
+							+ " and is considered as the taxi or private car driver to be charged.");
+					warnCounter5++;
+					if (warnCounter5 == 5) {
+						log.info("Further log statements of this type are not printed out.");
+					}
+				}
+				this.vehicleId2driverIdToBeCharged.put(event.getVehicleId(), event.getPersonId());
+			}
 		}	
 	}
 	
@@ -325,18 +391,11 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 	}
 
 	private double computeAverageAmount(TimeBin timeBin) {
-		double sum = 0.;
-
-		for (Id<Person> personId : timeBin.getPersonId2amounts().keySet()) {
-			for (Double amount : timeBin.getPersonId2amounts().get(personId)) {
-				sum += amount;
-			}
-		}
 		
 		double average = 0.;
-		if (timeBin.getEnteringAgents().size() == 0) {
+		if (timeBin.getNumberOfEnteringAgents() == 0) {
 			if (warnCounter3 <= 5) {
-				log.warn("No entering agent in time bin " + timeBin.getTimeBinNr() + " even though there are person money events (total monetary amounts: " + sum + ")."
+				log.warn("No entering agent in time bin " + timeBin.getTimeBinNr() + " even though there are person money events (total monetary amounts: " + timeBin.getAmountSum() + ")."
 						+ " Can't compute the average amount per time bin.");
 				warnCounter3++;
 				if (warnCounter3 == 5) {
@@ -345,9 +404,14 @@ public class MoneyEventAnalysis implements PersonLinkMoneyEventHandler, LinkEnte
 			}
 
 		} else {
-			average = sum / timeBin.getEnteringAgents().size();
+			average = timeBin.getAmountSum() / timeBin.getNumberOfEnteringAgents();
 		}
 		return average;
+	}
+	
+	@Override
+	public void handleEvent(TransitDriverStartsEvent event) {
+		notConsideredTransitVehicleIDs.add(event.getVehicleId());
 	}
 	
 	private int getIntervalNr(double time) {

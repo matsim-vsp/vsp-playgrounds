@@ -105,7 +105,7 @@ public class LatinHypercubeSampling {
 		LatinHypercubeSampling sampler = new LatinHypercubeSampling(rnd);
 		sampler.addDimension(0, 1);
 		sampler.addDimension(0, 1);
-		
+
 		int sampleSize = 10;
 		double[][] result = sampler.draw(sampleSize);
 		for (int sample = 0; sample < sampleSize; sample++) {

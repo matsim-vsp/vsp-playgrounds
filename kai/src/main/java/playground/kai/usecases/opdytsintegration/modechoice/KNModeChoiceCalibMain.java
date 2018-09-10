@@ -79,13 +79,13 @@ class KNModeChoiceCalibMain {
 		}
 		if ( !equil ) {
 			StrategySettings stratSets = new StrategySettings() ;
-			stratSets.setStrategyName( DefaultStrategy.ReRoute.name() );
+			stratSets.setStrategyName( DefaultStrategy.ReRoute );
 			stratSets.setWeight(0.1);
 			config.strategy().addStrategySettings(stratSets);
 		}
 		{
 			StrategySettings stratSets = new StrategySettings() ;
-			stratSets.setStrategyName( DefaultStrategy.ChangeSingleTripMode.name() );
+			stratSets.setStrategyName( DefaultStrategy.ChangeSingleTripMode );
 			stratSets.setWeight(0.1);
 			config.strategy().addStrategySettings(stratSets);
 			// note that changeMode _always_ includes ReRoute!

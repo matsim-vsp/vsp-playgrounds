@@ -19,38 +19,37 @@
  * *********************************************************************** */
 package playground.dgrether.xvis.vismodel;
 
-import java.awt.geom.Point2D;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.lanes.data.ModelLane;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesToLinkAssignment;
-import org.matsim.lanes.data.LanesUtils;
-import org.matsim.lanes.vis.VisLane;
-import org.matsim.lanes.vis.VisLaneModelBuilder;
-import org.matsim.lanes.vis.VisLinkWLanes;
 import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.lanes.vis.VisSignal;
 import org.matsim.contrib.signals.otfvis.VisSignalGroup;
 import org.matsim.contrib.signals.otfvis.VisSignalSystem;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.ModelLane;
+import org.matsim.lanes.VisLane;
+import org.matsim.lanes.VisLaneModelBuilder;
+import org.matsim.lanes.VisLinkWLanes;
+import org.matsim.lanes.VisSignal;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 import org.matsim.vis.snapshotwriters.VisLink;
-
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
+
+import java.awt.geom.Point2D;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -117,7 +116,7 @@ public class VisScenarioBuilder {
 				l2l = lanes.getLanesToLinkAssignments().get(l.getId());
 			}
 			VisLink vl = new VisLinkImpl(l);
-			List<ModelLane> la = null; 
+			List<ModelLane> la = null;
 			if (l2l != null) {
 				la = LanesUtils.createLanes(l, l2l);
 			}

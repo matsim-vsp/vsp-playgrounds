@@ -23,7 +23,6 @@ package scenarios.illustrative.braess.run;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
 
 import org.apache.log4j.Logger;
@@ -37,6 +36,10 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionAppro
 import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -46,8 +49,8 @@ import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup.TravelTimeCalculatorType;
 import org.matsim.core.controler.AbstractModule;
@@ -60,16 +63,11 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
-import org.matsim.lanes.data.LanesWriter;
+import org.matsim.lanes.LanesWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import analysis.TtAnalyzedGeneralResultsWriter;
-import analysis.TtGeneralAnalysis;
-import analysis.TtListenerToBindGeneralAnalysis;
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
-import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -93,9 +91,10 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals;
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalBasePlan;
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalControlLogic;
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
-import signals.CombinedSignalsModule;
-import signals.laemmer.model.LaemmerConfig;
-import signals.sylvia.controler.DgSylviaConfig;
+import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
 
 /**
@@ -153,19 +152,6 @@ public final class RunBraessSimulation {
 		Controler controler = prepareController(scenario);
 	
 		controler.run();
-		
-		try {
-			MATSimVideoUtils.createLegHistogramVideo(config.controler().getOutputDirectory());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (PRICING_TYPE.equals(PricingType.INTERVALBASED)) {
-			try {
-				MATSimVideoUtils.createVideo(config.controler().getOutputDirectory(), 1, "toll_perLinkAndTimeBin");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	private static Config defineConfig() {
@@ -176,9 +162,21 @@ public final class RunBraessSimulation {
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(SIGNAL_LOGIC.equals(SignalControlLogic.NONE) ? false : true);
 		config.qsim().setUsingFastCapacityUpdate(false);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
+		// TODO modify laemmer config parameter here if you like
+		laemmerConfigGroup.setMaxCycleTime(90);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setIntergreenTime(0);
+		laemmerConfigGroup.setMinGreenTime(0);
+		
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
+		// TODO modify sylvia config parameter here if you like
+		sylviaConfig.setSignalGroupMaxGreenScale(2);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
 
 		// set brain exp beta
 		config.planCalcScore().setBrainExpBeta(2);
@@ -319,7 +317,7 @@ public final class RunBraessSimulation {
 	
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 			createSignals(scenario);
@@ -349,23 +347,25 @@ public final class RunBraessSimulation {
 			});
 			break;
 		default:
-			// add combined signals module (works for different signal types as sylvia, downstream or planbased)
-			boolean alwaysSameMobsimSeed = false;
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			signalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-			// TODO modify sylvia config parameter here if you like
-			sylviaConfig.setSignalGroupMaxGreenScale(2);
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
-			signalsModule.setSylviaConfig(sylviaConfig);
-			LaemmerConfig laemmerConfig = new LaemmerConfig();
-			// TODO modify laemmer config parameter here if you like
-			laemmerConfig.setMaxCycleTime(90);
-			laemmerConfig.setDesiredCycleTime(60);
-			laemmerConfig.setDefaultIntergreenTime(0);
-			laemmerConfig.setMinGreenTime(0);
-			signalsModule.setLaemmerConfig(laemmerConfig);
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller
+			// by default and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+					DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+					GershensonSignalController.GershensonFactory.class);
 			controler.addOverridingModule(signalsModule);
+
+			// bind gershenson config
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					GershensonConfig gershensonConfig = new GershensonConfig();
+					bind(GershensonConfig.class).toInstance(gershensonConfig);
+				}
+			});
 			break;
 		}
 		
@@ -498,12 +498,12 @@ public final class RunBraessSimulation {
 				this.bind(TtAnalyzedResultsWriter.class);
 				
 				SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-						SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+						SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 				if (signalsConfigGroup.isUseSignalSystems()) {
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 				}
 			}
 		});
@@ -678,7 +678,7 @@ public final class RunBraessSimulation {
 				runName += "_node";
 		}			
 
-		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			switch (SIGNAL_LOGIC){
 			case SIMPLE_RESPONSIVE:
@@ -776,7 +776,7 @@ public final class RunBraessSimulation {
 			new SignalSystemsWriter20(signalsData.getSignalSystemsData()).write(outputDir + "signalSystems.xml");
 			new SignalControlWriter20(signalsData.getSignalControlData()).write(outputDir + "signalControl.xml");
 			new SignalGroupsWriter20(signalsData.getSignalGroupsData()).write(outputDir + "signalGroups.xml");
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setSignalSystemFile("signalSystems.xml");
 			signalConfigGroup.setSignalControlFile("signalControl.xml");
 			signalConfigGroup.setSignalGroupsFile("signalGroups.xml");

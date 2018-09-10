@@ -12,7 +12,7 @@
 	
 	<module name="noise" >
 		<param name="allowForSpeedsOutsideTheValidRange" value="false" />
-		<param name="annualCostRate" value="100000.0" />
+		<param name="annualCostRate" value="999999999." />
 		<param name="busIdIdentifier" value="" />
 		<param name="computeCausingAgents" value="true" />
 		<param name="computeNoiseDamages" value="true" />

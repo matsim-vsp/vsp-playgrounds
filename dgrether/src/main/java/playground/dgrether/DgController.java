@@ -22,7 +22,7 @@ package playground.dgrether;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVisFileWriterModule;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -46,7 +46,7 @@ public class DgController {
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
 		// add missing scenario elements
-		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 		}

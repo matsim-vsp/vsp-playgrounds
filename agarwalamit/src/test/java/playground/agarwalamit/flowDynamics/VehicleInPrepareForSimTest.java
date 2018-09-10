@@ -126,10 +126,10 @@ public class VehicleInPrepareForSimTest {
 
         StrategyConfigGroup.StrategySettings strategySettings = new StrategyConfigGroup.StrategySettings();
         if (this.modeChoice) {
-            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.name());
+            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
             config.changeMode().setModes(transportModes);
         } else {
-            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
+            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         }
         strategySettings.setWeight(1);
 

@@ -2,13 +2,13 @@ package link2link;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupSettingsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
@@ -16,11 +16,10 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactoryImpl;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.utils.SignalUtils;
-import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.Lane;
 
 public class Link2LinkTestSignalsCreator {
 	

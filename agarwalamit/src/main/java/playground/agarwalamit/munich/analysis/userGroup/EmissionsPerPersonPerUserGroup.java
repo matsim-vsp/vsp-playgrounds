@@ -92,9 +92,8 @@ public class EmissionsPerPersonPerUserGroup {
 			ema.preProcessData();
 			ema.postProcessData();
 
-			EmissionUtils emu = new EmissionUtils();
 			Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-			emissionsPerPerson = emu.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions);
+			emissionsPerPerson = EmissionUtils.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions);
 
 			getTotalEmissionsPerUserGroup(this.emissionsPerPerson);
 			writeTotalEmissionsPerUserGroup(this.outputDir+runCase+"/analysis/userGrpEmissions.txt");

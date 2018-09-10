@@ -67,4 +67,15 @@ public class CommuterRelationV2 {
 	public void setTripsFemale(int tripsFemale) {
 		this.tripsFemale = tripsFemale;
 	}
+
+    @Override
+    public String toString() {
+        return "CommuterRelationV2{" +
+                "origin='" + origin + '\'' +
+                ", destination='" + destination + '\'' +
+                ", tripsAll=" + tripsAll +
+                ", tripsMale=" + tripsMale +
+                ", tripsFemale=" + tripsFemale +
+                '}';
+    }
 }

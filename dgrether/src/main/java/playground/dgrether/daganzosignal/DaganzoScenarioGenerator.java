@@ -20,10 +20,6 @@
 
 package playground.dgrether.daganzosignal;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -51,9 +47,17 @@ import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.*;
-
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesFactory;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.LanesWriter;
 import playground.dgrether.DgPlaygroundJobfileCreator;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author dgrether
@@ -239,9 +243,9 @@ public class DaganzoScenarioGenerator {
 		}
 		if (isUseSignalSystems) {
 			//enable lanes and signal system feature in config
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(SIGNALSYSTEMSOUTPUTFILE);
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(SIGNALSYSTEMCONFIGURATIONSOUTPUTFILE);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(SIGNALSYSTEMSOUTPUTFILE);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(SIGNALSYSTEMCONFIGURATIONSOUTPUTFILE);
 			//create the signal systems and write them
 //			SignalSystems signalSystems = createSignalSystems(scenario);
 //			MatsimSignalSystemsWriter ssWriter = new MatsimSignalSystemsWriter(signalSystems);
@@ -362,8 +366,8 @@ public class DaganzoScenarioGenerator {
 			config.network().setLaneDefinitionsFile(lanesInputFile);
 		}
 		if (isUseSignalSystems){
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalInputFile);
-			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(this.signalConfigInputFile);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalInputFile);
+			ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(this.signalConfigInputFile);
 		}
 
 		if (runId != null) {

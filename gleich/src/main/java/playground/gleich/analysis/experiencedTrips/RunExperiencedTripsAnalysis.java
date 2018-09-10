@@ -28,18 +28,10 @@ import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
-import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
-import org.matsim.contrib.drt.run.DrtConfigConsistencyChecker;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
-import org.matsim.contrib.drt.run.DrtControlerCreator;
-import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;

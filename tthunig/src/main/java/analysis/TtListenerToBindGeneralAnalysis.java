@@ -21,10 +21,6 @@
  */
 package analysis;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.controler.events.IterationEndsEvent;
@@ -32,7 +28,7 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.dziemke.analysis.GnuplotUtils;
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * Class to bind general analyze and writing tool to the simulation.

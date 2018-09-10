@@ -99,7 +99,7 @@ public class RndPtRouterLauncherV2 {
 		}
 		{
 			StrategyConfigGroup.StrategySettings stratSets = new StrategyConfigGroup.StrategySettings();
-			stratSets.setStrategyName(DefaultStrategy.ReRoute.name()); 
+			stratSets.setStrategyName(DefaultStrategy.ReRoute );
 			stratSets.setWeight(0.1);
 			stratSets.setDisableAfter((new Double(lastIteration * 0.9)).intValue());
 			config.strategy().addStrategySettings(stratSets);

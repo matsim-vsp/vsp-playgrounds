@@ -26,6 +26,7 @@ import org.matsim.core.mobsim.framework.MobsimFactory;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
 import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
 import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
@@ -51,7 +52,7 @@ class MyControler {
 			config = ConfigUtils.loadConfig("examples/equil/config.xml") ;
 		}
 
-		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
+//		config.plansCalcRoute().setInsertingAccessEgressWalk(true);
 		
 		config.plans().setRemovingUnneccessaryPlanAttributes(true) ;
 		config.controler().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
@@ -59,15 +60,15 @@ class MyControler {
 		// prepare the scenario
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
-		Random rnd = new Random(4711) ;
-		final Map<Id<Person>, ? extends Person> pop = scenario.getPopulation().getPersons();
-		Iterator<Id<Person>> it = pop.keySet().iterator() ;
-		while ( it.hasNext() ) {
-			it.next() ;
-			if ( rnd.nextDouble() < 0.9 ) {
-				it.remove();
-			}
-		}
+//		Random rnd = new Random(4711) ;
+//		final Map<Id<Person>, ? extends Person> pop = scenario.getPopulation().getPersons();
+//		Iterator<Id<Person>> it = pop.keySet().iterator() ;
+//		while ( it.hasNext() ) {
+//			it.next() ;
+//			if ( rnd.nextDouble() < 0.9 ) {
+//				it.remove();
+//			}
+//		}
 
 		// prepare the control(l)er:
 		Controler controler = new Controler( scenario ) ;
@@ -75,20 +76,20 @@ class MyControler {
 //		controler.addOverridingModule(new OTFVisLiveModule());
 //		controler.setMobsimFactory(new OldMobsimFactory()) ;
 		
-		controler.addOverridingModule(new AbstractModule(){
-			@Override public void install() {
-				this.addEventHandlerBinding().toInstance(new BasicEventHandler(){
-					@Override public void reset(int iteration) { }
-					@Override public void handleEvent(Event event) {
-						if ( event instanceof HasPersonId ) {
-							if ( ((HasPersonId)event).getPersonId().equals( Id.createPersonId("5441604") ) ) {
-								Logger.getLogger(getClass()).warn( event );
-							}
-						}
-					}
-				});
-			}
-		});
+//		controler.addOverridingModule(new AbstractModule(){
+//			@Override public void install() {
+//				this.addEventHandlerBinding().toInstance(new BasicEventHandler(){
+//					@Override public void reset(int iteration) { }
+//					@Override public void handleEvent(Event event) {
+//						if ( event instanceof HasPersonId ) {
+//							if ( ((HasPersonId)event).getPersonId().equals( Id.createPersonId("5441604") ) ) {
+//								Logger.getLogger(getClass()).warn( event );
+//							}
+//						}
+//					}
+//				});
+//			}
+//		});
 		
 
 		// run everything:
@@ -115,24 +116,24 @@ class MyControler {
 	        }
 
 	        // construct the QSim:
-			QSim qSim = new QSim(sc, eventsManager);
+			QSim qSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, eventsManager);
 
 			// add the actsim engine:
-			ActivityEngine activityEngine = new ActivityEngine(eventsManager, qSim.getAgentCounter());
-			qSim.addMobsimEngine(activityEngine);
-			qSim.addActivityHandler(activityEngine);
+			//ActivityEngine activityEngine = new ActivityEngine(eventsManager, qSim.getAgentCounter());
+			//qSim.addMobsimEngine(activityEngine);
+			//qSim.addActivityHandler(activityEngine);
 
 			// add the netsim engine:
 
-			QNetsimEngine netsimEngine = new QNetsimEngine(qSim) ;
+			//QNetsimEngine netsimEngine = new QNetsimEngine(qSim) ;
 //			QNetsimEngine netsimEngine = netsimEngFactory.createQSimEngine(qSim, MatsimRandom.getRandom());
-			qSim.addMobsimEngine(netsimEngine);
-			qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
+			//qSim.addMobsimEngine(netsimEngine);
+			//qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
 
-			DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, eventsManager);
-			qSim.addMobsimEngine(teleportationEngine);
+			//DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, eventsManager);
+			//qSim.addMobsimEngine(teleportationEngine);
 	        
-			AgentFactory agentFactory;
+			//AgentFactory agentFactory;
 //	        if (sc.getConfig().transit().isUseTransit()) {
 //	            agentFactory = new TransitAgentFactory(qSim);
 //	            TransitQSimEngine transitEngine = new TransitQSimEngine(qSim);
@@ -142,13 +143,13 @@ class MyControler {
 //	            qSim.addAgentSource(transitEngine);
 //	            qSim.addMobsimEngine(transitEngine);
 //	        } else {
-			agentFactory = new DefaultAgentFactory(qSim);
+			//agentFactory = new DefaultAgentFactory(qSim);
 //	        }
 //	        if (sc.getConfig().network().isTimeVariantNetwork()) {
 //				qSim.addMobsimEngine(new NetworkChangeEventsEngine());		
 //			}
 
-	        PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
+	        //PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
 			//	        setter for ModeVehicleTypes to agent source is gone now. Amit May'17
 //	        Map<String, VehicleType> modeVehicleTypes = new HashMap<String, VehicleType>();
 //
@@ -174,7 +175,7 @@ class MyControler {
 //
 //			agentSource.setModeVehicleTypes(modeVehicleTypes);
 	        
-	        qSim.addAgentSource(agentSource);
+	        //qSim.addAgentSource(agentSource);
 			
 			if ( useOTFVis ) {
 				// otfvis configuration.  There is more you can do here than via file!

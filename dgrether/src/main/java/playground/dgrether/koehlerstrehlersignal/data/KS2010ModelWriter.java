@@ -78,6 +78,8 @@ public class KS2010ModelWriter {
 	private static final String RLIGHT = "rlight";
 	private static final String ON = "on";
 	private static final String OFF = "off";
+	private static final String BEFORE = "before";
+	private static final String AFTER = "after";
 
 	// tags for the streets element
 	private static final String STREETS = "streets";
@@ -184,6 +186,7 @@ public class KS2010ModelWriter {
 				
 				atts.addAttribute("", "", TO, CDATA, light.getToNode().getId().toString());
 				atts.addAttribute("", "", COST, CDATA, Long.toString(light.getCost())); // is usually 0 in MATSim
+				atts.addAttribute("", "", CAPACITY, CDATA, Double.toString(light.getCapacity()));
 				// add min/maxGreen for flexible crossings
 				if (crossing.getType().equals(TtCrossingType.FLEXIBLE)){
 					atts.addAttribute("", "", MINGREEN, CDATA, Integer.toString(light.getMinGreen()));
@@ -224,9 +227,11 @@ public class KS2010ModelWriter {
 					atts.addAttribute("", "", LIGHT, CDATA, restriction.getLightId().toString());
 					atts.addAttribute("", "", ALLOWED, CDATA, Boolean.toString(restriction.isAllowed()));
 					hd.startElement("", "", RESTRICTION, atts);
-					for (Id<DgStreet> rlight : restriction.getRlightsAllowed()){
+					for (Id<DgStreet> rlight : restriction.getRlightsAllowed().keySet()){
 						atts.clear();
 						atts.addAttribute("", "", LIGHT, CDATA, rlight.toString());
+						atts.addAttribute("", "", BEFORE, CDATA, Integer.toString(restriction.getRlightsAllowed().get(rlight).getFirst()));
+						atts.addAttribute("", "", AFTER, CDATA, Integer.toString(restriction.getRlightsAllowed().get(rlight).getSecond()));
 						hd.startElement("", "", RLIGHT, atts);
 						hd.endElement("", "", RLIGHT);
 					}

@@ -19,9 +19,6 @@
  */ 
 package gunnar.ihop2;
 
-import gunnar.ihop2.regent.demandreading.PopulationCreator;
-import gunnar.ihop2.transmodeler.networktransformation.Transmodeler2MATSimNetwork;
-
 import java.io.IOException;
 
 import org.matsim.core.config.Config;
@@ -31,6 +28,8 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 
+import gunnar.ihop2.regent.demandreading.PopulationCreator_v1;
+import gunnar.ihop2.transmodeler.networktransformation.Transmodeler2MATSimNetwork;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
@@ -49,27 +48,30 @@ public class ProductionRunner {
 		 * ALL POSSIBLE PARAMETERS
 		 */
 
-		final String nodesFile = "./ihop2-data/network-input/Nodes.csv";
-		final String segmentsFile = "./ihop2-data/network-input/Segments.csv";
-		final String lanesFile = "./ihop2-data/network-input/Lanes.csv";
-		final String laneConnectorsFile = "./ihop2-data/network-input/Lane Connectors.csv";
-		final String linksFile = "./ihop2-data/network-input/Links.csv";
+		final String path = "/Users/GunnarF/NoBackup/data-workspace/ihop2/ihop2-data/";
+		
+		final String nodesFile = path + "network-input/Nodes.csv";
+		final String segmentsFile = path + "network-input/Segments.csv";
+		final String lanesFile = path + "network-input/Lanes.csv";
+		final String laneConnectorsFile = path + "network-input/Lane Connectors.csv";
+		final String linksFile = path + "network-input/Links.csv";
 
-		final String matsimNetworkFile = "./ihop2-data/network-output/network.xml";
-		final String matsimFullNetworkFile = "./ihop2-data/network-output/network-full.xml";
-		final String linkAttributesFile = "./ihop2-data/network-output/link-attributes.xml";
-		final String matsimLanesFile = "./ihop2-data/network-output/lanes.xml";
-		final String matsimTollFile = "./ihop2-data/network-output/toll.xml";
+		final String matsimNetworkFile = path + "network-output/network.xml";
+		final String matsimFullNetworkFile = path + "network-output/network-full.xml";
+		final String linkAttributesFile = path + "network-output/link-attributes.xml";
+		final String matsimLanesFile = path + "network-output/lanes.xml";
+		final String matsimTollFile = path + "network-output/toll.xml";
 
 		final double populationSample = 0.01;
-		final String zonesShapeFileName = "./ihop2-data/demand-input/sverige_TZ_EPSG3857.shp";
-		final String buildingShapeFileName = "./ihop2-data/demand-input/by_full_EPSG3857_2.shp";
-		final String populationFileName = "./ihop2-data/demand-input/trips.xml";
+		final String zonesShapeFileName = path + "demand-input/sverige_TZ_EPSG3857.shp";
+		final String buildingShapeFileName = path + "demand-input/by_full_EPSG3857_2.shp";
+		final String populationFileName = path + "demand-input/trips.xml";
 
-		final String initialPlansFile = "./ihop2-data/without-toll/ITERS/it.200/200.plans.xml.gz";
+		final String initialPlansFile = path + "demand-output/1PctCarAndPt.xml";
+				// "./ihop2-data/without-toll/ITERS/it.200/200.plans.xml.gz";
 		// "./ihop2-data/demand-output/initial-plans_" + populationSample + ".xml";
 
-		final String configFileName = "./ihop2-data/matsim-input/matsim-config.xml";
+		final String configFileName = path + "matsim-input/matsim-config.xml";
 		final double networkUpscaleFactor = 2;
 		final String lastIteration = "200";
 		final boolean useLanes = false;
@@ -83,7 +85,7 @@ public class ProductionRunner {
 
 		final boolean doNetworkConversion = false;
 		final boolean doPopulationGeneration = false;
-		final boolean runMATSim = true;
+		final boolean runMATSim = false;
 
 		/*
 		 * TRANSMODELER -> MATSIM NETWORK CONVERSION
@@ -102,7 +104,7 @@ public class ProductionRunner {
 		 * REGENT -> MATSIM POPULATION CONVERSION
 		 */
 		if (doPopulationGeneration) {
-			final PopulationCreator populationCreator = new PopulationCreator(
+			final PopulationCreator_v1 populationCreator = new PopulationCreator_v1(
 					matsimNetworkFile, zonesShapeFileName,
 					StockholmTransformationFactory.WGS84_EPSG3857,
 					populationFileName);

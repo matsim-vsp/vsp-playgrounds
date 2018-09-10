@@ -21,11 +21,6 @@
  */
 package scenarios.illustrative.braess.createInput;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -34,12 +29,17 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.lanes.data.LanesUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesFactory;
-import org.matsim.lanes.data.LanesToLinkAssignment;
-import org.matsim.lanes.data.LanesWriter;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesFactory;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.LanesWriter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class to create network and lanes for the breass scenario.

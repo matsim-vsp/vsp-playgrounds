@@ -51,7 +51,6 @@ import playground.vsp.analysis.modules.AbstractAnalysisModule;
 public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 	private static final Logger LOG = Logger.getLogger(EmissionLinkAnalyzer.class);
 	private final String emissionEventsFile;
-	private final EmissionUtils emissionUtils = new EmissionUtils();
     private final FilteredWarmEmissionHandler warmHandler;
 	private final FilteredColdEmissionHandler coldHandler;
 	private Map<Double, Map<Id<Link>, Map<WarmPollutant, Double>>> link2WarmEmissions;
@@ -182,10 +181,10 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 			Map<Id<Link>, Map<WarmPollutant, Double>> warmEmissions = time2warmEmissionsTotal.get(endOfTimeInterval);
 			Map<Id<Link>, Map<ColdPollutant, Double>> coldEmissions = time2coldEmissionsTotal.get(endOfTimeInterval);
 
-			Map<Id<Link>, SortedMap<String, Double>> totalEmissions = this.emissionUtils.sumUpEmissionsPerId(warmEmissions, coldEmissions);
+			Map<Id<Link>, SortedMap<String, Double>> totalEmissions = EmissionUtils.sumUpEmissionsPerId(warmEmissions, coldEmissions);
 			time2totalEmissions.put(endOfTimeInterval, totalEmissions);
 
-			this.totalEmissions = MapUtils.mergeMaps(this.totalEmissions, this.emissionUtils.getTotalEmissions(totalEmissions));
+			this.totalEmissions = MapUtils.mergeMaps(this.totalEmissions, EmissionUtils.getTotalEmissions(totalEmissions));
 		}
 		return time2totalEmissions;
 	}

@@ -43,7 +43,7 @@ public class BerlinTaxiCreator implements VehicleGenerator.VehicleCreator
 {
     private static final Logger log = Logger.getLogger(BerlinTaxiCreator.class);
     private static final Random RND = new Random(42);
-    private static final double PAXPERCAR = 4;
+    private static final int PAXPERCAR = 4;
 
     private final Map<Id<Zone>, Zone> zones;
     private final Network network;

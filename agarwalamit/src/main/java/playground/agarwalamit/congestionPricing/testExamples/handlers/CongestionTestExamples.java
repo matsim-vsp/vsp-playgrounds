@@ -37,7 +37,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.utils.collections.Tuple;
 
 import playground.vsp.congestion.events.CongestionEvent;
@@ -159,7 +159,7 @@ public class CongestionTestExamples {
 //		else if(congestionPricingImpl.equalsIgnoreCase("v6")) events.addHandler(new CongestionHandlerImplV6(events, sc));
 
 		PrepareForSimUtils.createDefaultPrepareForSim(sc).run();
-		QSim sim = QSimUtils.createDefaultQSim(sc, events);
+		QSim sim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, events);
 		sim.run();
 		
 		return congestionEvents;

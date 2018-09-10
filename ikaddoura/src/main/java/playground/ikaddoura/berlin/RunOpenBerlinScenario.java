@@ -38,7 +38,10 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
+import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
 import playground.ikaddoura.durationBasedTimeAllocationMutator.DurationBasedTimeAllocationPlanStrategyProvider;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 
 /**
 * @author ikaddoura
@@ -116,8 +119,8 @@ public class RunOpenBerlinScenario {
 
 		} else {
 			
-			configFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_3_ik/config_be_300_mode-choice_test.xml";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/open_berlin_scenario/be_300_test_7/";
+			configFile = "/Users/ihab/Documents/workspace/matsim-project/examples/scenarios/equil/config.xml";
+			outputDirectory = "/Users/ihab/Desktop/test-run-equil/";
 			runId = "test-run";
 		}
 		
@@ -191,10 +194,24 @@ public class RunOpenBerlinScenario {
 					addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());        }
 		    });
 		}
+		
+		// some online analysis
+		
+		controler.addOverridingModule(new AbstractModule() {
+			
+			@Override
+			public void install() {
+				this.bind(ModalShareEventHandler.class);
+				this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+				
+				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
+			}
+		});
+		
 				
 		controler.run();
 		
-		log.info("Running analysis...");
+		log.info("Running offline analysis...");
 				
 		final String scenarioCRS = TransformationFactory.DHDN_GK4;	
 		final String shapeFileZones = null;

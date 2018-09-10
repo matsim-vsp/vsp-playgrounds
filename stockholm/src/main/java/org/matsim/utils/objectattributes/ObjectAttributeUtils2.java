@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import gunnar.ihop2.utils.FractionalIterable;
+import floetteroed.utilities.FractionalIterable;
 
 /**
  * 

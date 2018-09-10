@@ -19,16 +19,11 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.figure9scenario;
 
-import java.io.IOException;
-
-import javax.xml.transform.TransformerConfigurationException;
-
 import org.apache.log4j.Logger;
-import org.matsim.core.scenario.MutableScenario;
-import org.matsim.lanes.data.Lanes;
 import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.core.scenario.MutableScenario;
+import org.matsim.lanes.Lanes;
 import org.xml.sax.SAXException;
-
 import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010NetworkConverter;
 import playground.dgrether.koehlerstrehlersignal.conversion.M2KS2010SimpleDemandConverter;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodities;
@@ -36,6 +31,9 @@ import playground.dgrether.koehlerstrehlersignal.data.DgKSNetwork;
 import playground.dgrether.koehlerstrehlersignal.data.KS2010ModelWriter;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
+
+import javax.xml.transform.TransformerConfigurationException;
+import java.io.IOException;
 
 
 public class DgFigure9ToKoehlerStrehler2010ModelConverter {
@@ -52,7 +50,7 @@ public class DgFigure9ToKoehlerStrehler2010ModelConverter {
 		log.warn("Check times of demand!");
 		DgKSNetwork net = converter.convertNetworkLanesAndSignals(
 				sc.getNetwork(),
-				(Lanes) sc.getScenarioElement(Lanes.ELEMENT_NAME), 
+				(Lanes) sc.getScenarioElement(Lanes.ELEMENT_NAME),
 				(SignalsData) sc.getScenarioElement(SignalsData.ELEMENT_NAME), 0.0, 3600.0);
 		
 		M2KS2010SimpleDemandConverter demandConverter = new M2KS2010SimpleDemandConverter();

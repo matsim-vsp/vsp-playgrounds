@@ -45,13 +45,11 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.network.io.NetworkReaderMatsimV2;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 
 import playground.gleich.analysis.experiencedTrips.DrtEventsReader;
-import playground.gleich.analysis.experiencedTrips.DrtPtTripEventHandler;
 
 
 /**

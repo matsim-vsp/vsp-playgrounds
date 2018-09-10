@@ -58,17 +58,17 @@ public class CemdapOutput2MatsimPlansConverter {
 	public static void main(String[] args) throws IOException {
 		// Local use
 //		String cemdapDataRoot = "../../shared-svn/studies/countries/de/open_berlin_scenario/cemdap_output/";
-		String cemdapDataRoot = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/cemdap_output/";
-//		int numberOfFirstCemdapOutputFile = 200;
-		int numberOfFirstCemdapOutputFile = 400;
+		String cemdapDataRoot = "../../shared-svn/projects\\nemo_mercator\\data\\cemdap_output\\2018-01-19\\";
+		int numberOfFirstCemdapOutputFile = 200;
+//		int numberOfFirstCemdapOutputFile = 400;
 //		int numberOfPlans = 1;
 		int numberOfPlans = 1;
 //		int numberOfPlansFile = 300;
-		int numberOfPlansFile = 400;
+		int numberOfPlansFile = 200;
 //		String outputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/matsim_initial/" + numberOfPlansFile + "/";
-		String outputDirectory = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_4/matsim_initial//" + numberOfPlansFile + "/";
-//		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
-		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/gemeinden_Planungsraum.shp";
+		String outputDirectory = "../../shared-svn/projects\\nemo_mercator\\data\\cemdap_output\\2018-01-19\\matsim_input\\";
+		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/gemeindenLOR_DHDN_GK4.shp";
+//		String zonalShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/gemeinden_Planungsraum.shp";
 		String zoneIdTag = "NR";
 		boolean allowVariousWorkAndEducationLocations = true;
 		boolean addStayHomePlan = true;
@@ -179,7 +179,7 @@ public class CemdapOutput2MatsimPlansConverter {
 		for (int planNumber = 0; planNumber < numberOfPlans; planNumber++) {
 			CemdapStopsParser cemdapStopsParser = new CemdapStopsParser();
 			cemdapStopsParser.setActivityDurationThreshold_s(activityDurationThreshold_s);
-			cemdapStopsParser.parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber));
+			cemdapStopsParser.parse(cemdapStopsFilesMap.get(planNumber), planNumber, population, personZoneAttributesMap.get(planNumber), outputDirectory);
 			
 			// Commenting this for the time being; it does not do anything if the activity file is not considered on top of the stops file, dz,aa, sep'17
 			// Add a stay-home plan for those people who have no stops (i.e. no travel) in current stop file

@@ -136,7 +136,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     private void writeResults(String outFile){
         boolean writeHeaders = ! (new File(outFile).exists());
         try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
-            if (writeHeaders) writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\theadway\n");
+            if (writeHeaders) writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\tnumberOfAgents\tmodeDensity\tmodeSpeed\tmodeFlow\theadway\n");
             else{
                 FDModule.LOG.warn("Appending data to the existing file.");
             }
@@ -145,7 +145,12 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentDensity()+"\t");
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
-                    writer.write(mode+"\t"+d+"\n");
+                    writer.write(mode+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getNumberOfAgents()+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentDensity()+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentAverageVelocity()+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentFlow()+"\t");
+                    writer.write(d+"\n");
                 }
             }
         } catch (IOException e) {

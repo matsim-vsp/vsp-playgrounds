@@ -19,12 +19,6 @@
 
 package org.matsim.core.mobsim.qsim.qnetsimengine;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
@@ -41,10 +35,16 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.VehicleQ;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.vis.VisLinkWLanes;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.VisLinkWLanes;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 
@@ -235,7 +235,12 @@ class AssignmentEmulatingQLane implements QLaneI {
 	public final boolean isNotOfferingVehicle() {
 		return buffer.isEmpty();
 	}
-
+	
+//	@Override
+	public QVehicle getFirstVehicleOnLink() {
+		throw new RuntimeException( "not implemented" );
+	}
+	
 	@Override
 	public final void clearVehicles() {
 		double now = context.getSimTimer().getTimeOfDay() ;

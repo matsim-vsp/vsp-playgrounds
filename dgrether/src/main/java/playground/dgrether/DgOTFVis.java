@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -67,7 +67,7 @@ public class DgOTFVis {
 	
 	public void playScenario(Scenario scenario) {
 
-		if (ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).isUseSignalSystems()){
+		if (ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).isUseSignalSystems()){
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(scenario.getConfig()).loadSignalsData());
 		}
 		

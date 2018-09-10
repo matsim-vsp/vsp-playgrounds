@@ -96,6 +96,18 @@ public class OnRoadExposureTable {
                 else this.link2Emissions.put(linkId, MapUtils.mergeMaps(inhaledMass, soFar));
             }
         }
+
+        public Id<Person> getPersonId() {
+            return personId;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+
+        public Map<Id<Link>, Map<String, Double>> getLink2Emissions() {
+            return link2Emissions;
+        }
     }
 
     public void clear(){
@@ -162,5 +174,9 @@ public class OnRoadExposureTable {
             }
         }
         return outMap;
+    }
+
+    public Map<Id<Person>, List<OnRoadTripExposureInfo>> getPersonOnRoadExposureInfo() {
+        return personInfo;
     }
 }

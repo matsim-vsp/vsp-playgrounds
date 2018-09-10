@@ -47,6 +47,9 @@ public class DgCommodity {
 	private double totalFlow;
 	// container for the paths. Can stay empty.
 	private Map<Id<TtPath>, TtPath> paths = new HashMap<>();
+	// container for the travel time. Can stay empty
+	private double relativeDrivingTime;
+	private double relativeWaitingTime;
 	
 	public DgCommodity(Id<DgCommodity> id){
 		this.id = id;
@@ -139,6 +142,22 @@ public class DgCommodity {
 
 	public double getFlow(){
 		return this.totalFlow;
+	}
+
+	public double getRelativeDrivingTime() {
+		return relativeDrivingTime;
+	}
+
+	public void setRelativeDrivingTime(double relativeDrivingTime) {
+		this.relativeDrivingTime = relativeDrivingTime;
+	}
+
+	public double getRelativeWaitingTime() {
+		return relativeWaitingTime;
+	}
+
+	public void setRelativeWaitingTime(double relativeWaitingTime) {
+		this.relativeWaitingTime = relativeWaitingTime;
 	}
 	
 }

@@ -19,33 +19,31 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.network;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.vividsolutions.jts.geom.Envelope;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.network.algorithms.NetworkCalcTopoType;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesWriter;
 import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.SignalsScenarioWriter;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.data.SignalsScenarioWriter;
+import org.matsim.core.network.algorithms.NetworkCalcTopoType;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesWriter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import playground.dgrether.lanes.LanesConsistencyChecker;
 import playground.dgrether.signalsystems.data.consistency.SignalSystemsDataConsistencyChecker;
 import playground.dgrether.signalsystems.utils.DgSignalsBoundingBox;
 import playground.dgrether.signalsystems.utils.DgSignalsUtils;
 
-import com.vividsolutions.jts.geom.Envelope;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 /**

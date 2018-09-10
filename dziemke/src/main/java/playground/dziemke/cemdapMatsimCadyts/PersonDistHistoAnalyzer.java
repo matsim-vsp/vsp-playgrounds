@@ -1,10 +1,10 @@
 package playground.dziemke.cemdapMatsimCadyts;
 
+import java.util.ArrayList;
+
 import playground.dziemke.accessibility.OTPMatrix.CSVReader;
 import playground.dziemke.accessibility.ptmatrix.CSVFileWriter;
-import playground.dziemke.analysis.GnuplotUtils;
-
-import java.util.ArrayList;
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * @author gthunig on 23.02.2017.

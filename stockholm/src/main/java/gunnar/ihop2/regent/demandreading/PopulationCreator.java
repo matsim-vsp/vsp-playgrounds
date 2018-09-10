@@ -59,8 +59,8 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.utils.objectattributes.ObjectAttributeUtils2;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 
+import floetteroed.utilities.FractionalIterable;
 import floetteroed.utilities.math.MathHelpers;
-import gunnar.ihop2.utils.FractionalIterable;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**

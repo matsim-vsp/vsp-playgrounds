@@ -19,7 +19,6 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.run;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +30,6 @@ import org.matsim.contrib.signals.data.SignalsScenarioWriter;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.utils.collections.Tuple;
 
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
 import playground.dgrether.koehlerstrehlersignal.solutionconverter.KS2010CrossingSolution;
@@ -54,7 +52,7 @@ public class ConvertCottbusSolution2Matsim {
 	 */
 	private static boolean xmlFormat = true;
 
-	private void convertOptimalSolution(String directory, String inputFile) {
+	private void convertOptimalOffsets(String directory, String inputFile) {
 		List<KS2010CrossingSolution> crossingSolutions;
 		if (xmlFormat) { // standard format since 2014
 			KS2014SolutionXMLParser solutionParser = new KS2014SolutionXMLParser();
@@ -69,11 +67,11 @@ public class ConvertCottbusSolution2Matsim {
 		DgIdPool idPool = DgIdPool.readFromFile(directory
 				+ "id_conversions.txt");
 
-		convertSignals(crossingSolutions, idPool, signalsData);
+		convertOffsets(crossingSolutions, idPool, signalsData);
 		writeOptimizedSignalControl(directory, inputFile, signalsData);
 	}
 	
-	private void convertRandomSolution(String directory, String inputFile) {
+	private void convertRandomOffsets(String directory, String inputFile) {
 		KS2014RandomOffsetsXMLParser solutionParser = new KS2014RandomOffsetsXMLParser();
 		solutionParser.readFile(directory + inputFile);
 		Map<Integer, List<KS2010CrossingSolution>> crossingSolutions = 
@@ -85,12 +83,12 @@ public class ConvertCottbusSolution2Matsim {
 
 		// convert and write offsets for min random (=0), max random (=1), avg random (=2), med random (=3)
 		for (int i=0; i<4; i++){
-			convertSignals(crossingSolutions.get(i), idPool, signalsData);
+			convertOffsets(crossingSolutions.get(i), idPool, signalsData);
 			writeRandomOffsetsSignalControl(directory, inputFile, signalsData, i);
 		}
 	}
 
-	private void convertSignals(List<KS2010CrossingSolution> crossingSolutions,
+	private void convertOffsets(List<KS2010CrossingSolution> crossingSolutions,
 			DgIdPool idPool, SignalsData signalsData) {
 		KS2010Solution2Matsim converter = new KS2010Solution2Matsim(idPool);
 		// converter.setScale(3); // TODO check this parameter when tool is
@@ -116,12 +114,12 @@ public class ConvertCottbusSolution2Matsim {
 
 	private SignalsData loadSignalsData(String directory) {
 		Config config = ConfigUtils.createConfig();
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(
-				directory + "output_signal_systems_v2.0.xml.gz");
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(
-				directory + "output_signal_groups_v2.0.xml.gz");
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(
-				directory + "output_signal_control_v2.0.xml.gz");
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(
+				directory + "output_signal_systems_v2.0.xml");
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(
+				directory + "output_signal_groups_v2.0.xml");
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(
+				directory + "output_signal_control_v2.0.xml");
 		SignalsDataLoader signalsLoader = new SignalsDataLoader(config);
 		return signalsLoader.loadSignalsData();
 	}
@@ -178,12 +176,10 @@ public class ConvertCottbusSolution2Matsim {
 		writer.writeSignalControlData(signalsData.getSignalControlData());
 	}
 	
-	public static void main(String[] args) {
-		List<Tuple<String, String>> input = new ArrayList<>();
-		
-		new ConvertCottbusSolution2Matsim().convertOptimalSolution("../../shared-svn/projects/cottbus/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
-				"btu/opt.xml");
-//		new ConvertCottbusSolution2Matsim().convertRandomSolution("../../shared-svn/projects/cottbus/cb2ks2010/2015-02-06_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
+	public static void main(String[] args) {	
+		new ConvertCottbusSolution2Matsim().convertOptimalOffsets("../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-04-27_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
+				"btu/btu_sol1.xml");
+//		new ConvertCottbusSolution2Matsim().convertRandomOffsets("../../shared-svn/projects/cottbus/cb2ks2010/2015-02-06_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
 //				"btu/random_coordinations.xml");
 		
 	}

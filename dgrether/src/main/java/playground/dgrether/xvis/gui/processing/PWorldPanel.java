@@ -18,9 +18,22 @@
  * *********************************************************************** */
 package playground.dgrether.xvis.gui.processing;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
+import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.signals.otfvis.VisSignalGroup;
+import org.matsim.contrib.signals.otfvis.VisSignalSystem;
+import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
+import org.matsim.lanes.VisLane;
+import org.matsim.lanes.VisLinkWLanes;
+import org.matsim.lanes.VisSignal;
+import playground.dgrether.xvis.control.XVisControl;
+import playground.dgrether.xvis.control.events.SignalGroupsSelectionEvent;
+import playground.dgrether.xvis.control.events.SignalSystemSelectionEvent;
+import playground.dgrether.xvis.control.handlers.SignalGroupsSelectionEventListener;
+import playground.dgrether.xvis.control.handlers.SignalSystemSelectionEventListener;
+import playground.dgrether.xvis.vismodel.VisScenario;
+import processing.core.PApplet;
+
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -31,22 +44,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.lanes.vis.VisLane;
-import org.matsim.lanes.vis.VisLinkWLanes;
-import org.matsim.lanes.vis.VisSignal;
-import org.matsim.contrib.signals.otfvis.VisSignalGroup;
-import org.matsim.contrib.signals.otfvis.VisSignalSystem;
-import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
-
-import playground.dgrether.xvis.control.XVisControl;
-import playground.dgrether.xvis.control.events.SignalGroupsSelectionEvent;
-import playground.dgrether.xvis.control.events.SignalSystemSelectionEvent;
-import playground.dgrether.xvis.control.handlers.SignalGroupsSelectionEventListener;
-import playground.dgrether.xvis.control.handlers.SignalSystemSelectionEventListener;
-import playground.dgrether.xvis.vismodel.VisScenario;
-import processing.core.PApplet;
 
 
 @SuppressWarnings("serial")
@@ -140,7 +137,7 @@ public class PWorldPanel extends PApplet  implements MouseWheelListener, SignalS
 	}
 
 	private void drawNetwork() {
-		for (VisLinkWLanes  link : this.visScenario.getLanesLinkData().values()){
+		for (VisLinkWLanes link : this.visScenario.getLanesLinkData().values()){
 			this.setColor(XVisControl.getInstance().getDrawingPreferences().getLinkColor());
 			this.strokeWeight(1.0f);
 			if (link.getLaneData() == null){
@@ -165,7 +162,7 @@ public class PWorldPanel extends PApplet  implements MouseWheelListener, SignalS
 		this.fill(c.getRGB());
 	}
 
-	private void drawSignals(Map<String, VisSignal> signals, Point2D.Double point, Point2D.Double ortho, List<VisLinkWLanes> toLinks){
+	private void drawSignals( Map<String, VisSignal> signals, Point2D.Double point, Point2D.Double ortho, List<VisLinkWLanes> toLinks){
 		double dist = signals.size() - 1;
 		Point2D.Double startPoint = this.calcPoint(point, ortho, (quadSizeLinkEnd * - dist));
 		int i = 0;

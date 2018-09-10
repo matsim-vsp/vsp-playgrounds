@@ -26,8 +26,8 @@ import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesToLinkAssignment;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesToLinkAssignment;
 
 
 /**

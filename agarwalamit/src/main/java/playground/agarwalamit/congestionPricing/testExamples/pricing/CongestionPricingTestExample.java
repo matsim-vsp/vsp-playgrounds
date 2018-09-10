@@ -138,7 +138,7 @@ class CongestionPricingTestExample {
 		config.qsim().setEndTime(9*3600.);
 
 		StrategySettings reRoute = new StrategySettings();
-		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
+		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 		reRoute.setWeight(0.10);
 		config.strategy().addStrategySettings(reRoute);
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.7);

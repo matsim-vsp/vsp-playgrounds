@@ -22,9 +22,16 @@
  */
 package playground.vsp.congestion;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
+
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -40,7 +47,12 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -53,14 +65,8 @@ import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.ControlerListener;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.events.EventsUtils;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
-import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
-import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineModule;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
@@ -68,9 +74,15 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
+
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.events.CongestionEvent;
-import playground.vsp.congestion.handlers.*;
+import playground.vsp.congestion.handlers.CongestionEventHandler;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
+import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
+import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
 
 /**
@@ -1279,18 +1291,7 @@ public class MarginalCongestionHandlerFlowSpillbackQueueQsimTest {
 	}
 
 	private QSim createQSim(Scenario sc, EventsManager events) {
-		QSim qSim1 = new QSim(sc, events);
-		ActivityEngine activityEngine = new ActivityEngine(events, qSim1.getAgentCounter());
-		qSim1.addMobsimEngine(activityEngine);
-		qSim1.addActivityHandler(activityEngine);
-        QNetsimEngineModule.configure(qSim1);
-		DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, events);
-		qSim1.addMobsimEngine(teleportationEngine);
-		QSim qSim = qSim1;
-		AgentFactory agentFactory = new DefaultAgentFactory(qSim);
-		PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
-		qSim.addAgentSource(agentSource);
-		return qSim;
+		return new QSimBuilder(sc.getConfig()).useDefaults().build(sc, events);
 	}
 	
 }

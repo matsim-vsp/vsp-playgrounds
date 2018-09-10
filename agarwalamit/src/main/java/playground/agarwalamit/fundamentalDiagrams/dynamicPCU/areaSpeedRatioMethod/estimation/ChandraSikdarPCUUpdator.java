@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import com.google.inject.Inject;
-import org.apache.commons.lang3.EnumUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -49,7 +48,6 @@ import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
 import playground.agarwalamit.fundamentalDiagrams.core.FDStabilityTester;
 import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.PCUMethod;
-import playground.agarwalamit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
 import playground.agarwalamit.fundamentalDiagrams.headwayMethod.HeadwayHandler;
 import playground.agarwalamit.utils.NumberUtils;
 
@@ -82,9 +80,6 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     private HeadwayHandler delegate;
     private final Map<String, VehicleTypeToPCU> modeToPCU = new TreeMap<>();
     private final double qsimDefaultHeadway;
-
-    //a local field, should be configurable
-    private boolean updatePCU =false;
 
     private final FDConfigGroup fdConfigGroup;
 
@@ -138,7 +133,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
                     addVehicleTypeToPCU(mode, PCUMethod.HEADWAY_RATIO, pcu);
 
                 }
-                if (updatePCU) {
+                if (this.pcuMethod!=null) {
                     scenario.getVehicles()
                             .getVehicleTypes()
                             .get(Id.create(mode, VehicleType.class))
@@ -185,16 +180,15 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     }
 
     private double getAreaRatio(String mode){
-        if (EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode)){
+//        if (  EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode) ){
+//            return VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
+//        } else {
             return (double) ((AttributableVehicleType) scenario.getVehicles()
                                                                .getVehicleTypes()
                                                                .get(Id.create(mode, VehicleType.class))).getAttributes()
                                                                                                         .getAttribute(
                                                                                                                 projected_area_ratio);
-        } else {
-            VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
-        }
-        return 0;
+//        }
     }
 
     @Override
@@ -216,7 +210,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
         boolean writeHeaders = !(new File(outFile).exists());
         try (BufferedWriter writer = IOUtils.getAppendingBufferedWriter(outFile)) {
             if (writeHeaders) {
-                writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\tmodeDensity\tmodeSpeed\tmodeFlow\tpcu_method\tpcu_value\n");
+                writer.write("streamDensity\tstreamSpeed\tstreamFlow\tmode\tnumberOfAgents\tmodeDensity\tmodeSpeed\tmodeFlow\tpcu_method\tpcu_value\n");
             } else{
                 FDModule.LOG.warn("Appending data to the existing file.");
             }
@@ -227,6 +221,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentAverageVelocity()+"\t");
                     writer.write(this.fdDataContainer.getGlobalData().getPermanentFlow()+"\t");
                     writer.write(mode+"\t");
+                    writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getNumberOfAgents()+"\t");
                     writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentDensity()+"\t");
                     writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentAverageVelocity()+"\t");
                     writer.write(this.fdDataContainer.getTravelModesFlowData().get(mode).getPermanentFlow()+"\t");

@@ -57,13 +57,14 @@ public class SplitActivityTypesBasedOnDuration {
 		final String[] activityTypes = {ActivityTypes.HOME, ActivityTypes.WORK, ActivityTypes.EDUCATION, ActivityTypes.LEISURE, ActivityTypes.SHOPPING, ActivityTypes.OTHER}; 
 		
 		SplitActivityTypesBasedOnDuration splitAct = new SplitActivityTypesBasedOnDuration(inputPopulationFile);
-		splitAct.run(outputPopulationFile, outputConfigFile, timeBinSize_s, activityTypes);	
+		splitAct.run(outputPopulationFile, outputConfigFile, timeBinSize_s, activityTypes, 0.0);
 	}
 
-	public void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities) {
+	public void run(String outputPopulationFile, String outputConfigFile, double timeBinSize_s, String[] activities, double dayStartTime) {
 		
 		CemdapPopulationTools tools = new CemdapPopulationTools();
-		tools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(scenario.getPopulation(), timeBinSize_s);
+		tools.setActivityTypesAccordingToDurationAndMergeOvernightActivities(scenario.getPopulation(), timeBinSize_s,
+				dayStartTime);
 		
 		PopulationWriter writer = new PopulationWriter(scenario.getPopulation());
 		writer.write(outputPopulationFile);

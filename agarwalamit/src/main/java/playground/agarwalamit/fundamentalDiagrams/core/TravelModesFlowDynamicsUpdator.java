@@ -263,7 +263,7 @@ public final class TravelModesFlowDynamicsUpdator {
 		return this.flowStability;
 	}
 
-	int getnumberOfAgents(){
+	public int getNumberOfAgents(){
 		return this.numberOfAgents ;
 	}
 

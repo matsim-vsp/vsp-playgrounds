@@ -118,8 +118,8 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 		
 		for ( Id<Link> currentId : KNAccidentScenario.replanningLinkIds ) {
 			
-			Facility<ActivityFacility> fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
-			Facility<ActivityFacility> toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(mergeLinkId));
+			Facility fromFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(currentId));
+			Facility toFacility = new LinkWrapperFacility(scenario.getNetwork().getLinks().get(mergeLinkId));
 
 			final Leg leg = (Leg) routingModule.calcRoute(fromFacility, toFacility, 0, null).get(0);
 			links = ((NetworkRoute)leg.getRoute()).getLinkIds() ;
@@ -129,16 +129,17 @@ public class ManualDetour implements MobsimBeforeSimStepListener {
 
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent event) {
-//		double now = event.getSimulationTime() ;
-//		double duration = 60 ;
-//		if (                                                              now < 8.*3600+10*60 ) return ;
-//		if ( 8.*3600 + 10*60 + duration < now && now < 8.*3600+20*60 ) return ;
-//		if ( 8.*3600 + 20*60 + duration < now && now < 8.*3600+30*60 ) return ;
-//		if ( 8.*3600 + 30*60 + duration < now && now < 8.*3600+40*60 ) return ;
-//		if ( 8.*3600 + 40*60 + duration < now && now < 8.*3600+50*60 ) return ;
-//		if ( 8.*3600 + 50*60 + duration < now  ) return ;
-
-		Collection<MobsimAgent> agentsToReplan = WithinDayReRouteMobsimListener.getAgentsToReplan( (Netsim) event.getQueueSimulation() );
+		double now = event.getSimulationTime() ;
+		double duration = 5*60 ;
+		if (                                                              now < 8.*3600+10*60 ) return ;
+		if ( 8.*3600 + 10*60 + duration < now && now < 8.*3600+20*60 ) return ;
+		if ( 8.*3600 + 20*60 + duration < now && now < 8.*3600+30*60 ) return ;
+		if ( 8.*3600 + 30*60 + duration < now && now < 8.*3600+40*60 ) return ;
+		if ( 8.*3600 + 40*60 + duration < now && now < 8.*3600+50*60 ) return ;
+		if ( 8.*3600 + 50*60 + duration < now  ) return ;
+		
+		double replanningProba = 1. ;
+		Collection<MobsimAgent> agentsToReplan = WithinDayReRouteMobsimListener.getAgentsToReplan( (Netsim) event.getQueueSimulation(), replanningProba);
 
 		for (MobsimAgent ma : agentsToReplan) {
 			doReplanning(ma);

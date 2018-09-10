@@ -97,8 +97,8 @@ public class NotWorkingCottbusOsmSmallNetworkGenerator {
 		Config c1 = ConfigUtils.createConfig();
 		c1.network().setInputFile(networkWoJunctionsFile);
 		String signalsSystems = "../../shared-svn/studies/dgrether/cottbus/cottbus_feb_fix/signal_systems.xml";
-		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
-		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalsSystems);
+		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
+		ConfigUtils.addOrGetModule(c1, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(signalsSystems);
 		Scenario scenario = ScenarioUtils.loadScenario(c1);
 		
 		CoordinateReferenceSystem crs = MGC.getCRS(TransformationFactory.WGS84_UTM33N);
