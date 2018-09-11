@@ -561,41 +561,42 @@ public class KTFreight_v3 {
 		listener.setPhysicallyEnforceTimeWindowBeginnings(true);
 		controler.addOverridingModule(listener) ;
 		
-		controler.addOverridingModule(new AbstractModule() {
-			@Override public void install() {
-				
-				this.addControlerListenerBinding().toInstance( new ReplanningListener(){
-					@Inject Config config ;
-					@Inject Network originalNetwork ;
-					@Inject TravelTime travelTime ;
-					@Override
-					public void notifyReplanning(ReplanningEvent event) {
-						
-						Network network = NetworkUtils.createNetwork( config ) ;
-						
-						for ( Node node : originalNetwork.getNodes().values() ) {
-							network.addNode(node); // careful, is not a copy; uses the original node; do not modify!!
-						}
-						for ( Link link : originalNetwork.getLinks().values() ){
-							Link newLink = new MyLink( link, travelTime ) ;
-							network.addLink( newLink );
-						}
-						
-						// copy originalNetwork into that new network somehow.
-						
-						try {
-							Carriers carriers = jspritRun(config, network);
-						} catch (InvalidAttributeValueException e) {
-							e.printStackTrace();
-						}
-						
-						// TODO yyyyyy somehow get the generated carriers back into matsim
-						
-					}
-				}) ;
-
-			}
-		});
+//		//TODO: Added from KN: Prototype for injection of timeDependent and replanning with jsprit.
+//		controler.addOverridingModule(new AbstractModule() {
+//			@Override public void install() {
+//				
+//				this.addControlerListenerBinding().toInstance( new ReplanningListener(){
+//					@Inject Config config ;
+//					@Inject Network originalNetwork ;
+//					@Inject TravelTime travelTime ;
+//					@Override
+//					public void notifyReplanning(ReplanningEvent event) {
+//						
+//						Network network = NetworkUtils.createNetwork( config ) ;
+//						
+//						for ( Node node : originalNetwork.getNodes().values() ) {
+//							network.addNode(node); // careful, is not a copy; uses the original node; do not modify!!
+//						}
+//						for ( Link link : originalNetwork.getLinks().values() ){
+//							Link newLink = new MyLink( link, travelTime ) ;
+//							network.addLink( newLink );
+//						}
+//						
+//						// copy originalNetwork into that new network somehow.
+//						
+//						try {
+//							Carriers carriers = jspritRun(config, network);
+//						} catch (InvalidAttributeValueException e) {
+//							e.printStackTrace();
+//						}
+//						
+//						// TODO yyyyyy somehow get the generated carriers back into matsim
+//						
+//					}
+//				}) ;
+//
+//			}
+//		});
 
 		controler.run();
 	}
