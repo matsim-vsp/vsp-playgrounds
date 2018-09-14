@@ -46,14 +46,14 @@ public class ConvertCarriersToShipmentBasedCarriers {
 
 	private static final Logger log = Logger.getLogger(FreightWithShipments.class);
 
-	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
-	private static final String OUTPUT_DIR = INPUT_DIR + "CarriersWShipments/";
+	private static final String INPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/Ia-BaseE/" ;
+	private static final String OUTPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/CarriersWShipments/";
 
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
-	private static final String CARRIERFILE_NAME_INPUT = "carrierLEH_v2_withFleet.xml" ;
-	private static final String CARRIERFILE_NAME_OUTPUT = "carrierLEH_v2_withFleet_Shipment.xml";
-	private static final String ABC = CARRIERFILE_NAME_INPUT.substring(CARRIERFILE_NAME_INPUT.length() - 4, CARRIERFILE_NAME_INPUT.length()) + "_Shipments.mxl";
+	private static final String CARRIERFILE_NAME_INPUT = "Run_1/jsprit_plannedCarriers.xml" ;
+	private static final String CARRIERFILE_NAME_OUTPUT = "Ia-BaseE_carrierLEH_v2_withFleet_Shipment.xml";
+//	private static final String ABC = CARRIERFILE_NAME_INPUT.substring(CARRIERFILE_NAME_INPUT.length() - 4, CARRIERFILE_NAME_INPUT.length()) + "_Shipments.mxl";
 	
 	private static final String CARRIERFILE_INPUT = INPUT_DIR + CARRIERFILE_NAME_INPUT;
 	private static final String CARRIERFILE_OUTPUT = OUTPUT_DIR + CARRIERFILE_NAME_OUTPUT;
@@ -79,9 +79,9 @@ public class ConvertCarriersToShipmentBasedCarriers {
 		Carriers carriersOutput = new Carriers();
 		carriersOutput = FreightUtils.createShipmentVRPCarrierFromServiceVRPSolution(carriersInput);
 		
-//		log.info("Writing convertet carriers to file: " + CARRIERFILE_OUTPUT);
-		log.info("Writing convertet carriers to file: " + ABC);
-//		new CarrierPlanXmlWriterV2(carriersOutput).write(new File(CARRIERFILE_OUTPUT).getCanonicalPath().toString());
+		log.info("Writing convertet carriers to file: " + CARRIERFILE_OUTPUT);
+//		log.info("Writing convertet carriers to file: " + ABC);
+		new CarrierPlanXmlWriterV2(carriersOutput).write(new File(CARRIERFILE_OUTPUT).getCanonicalPath().toString());
 		
 		log.info("#### Finish ####");
 
