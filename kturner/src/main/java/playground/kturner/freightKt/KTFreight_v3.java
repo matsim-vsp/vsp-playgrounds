@@ -207,7 +207,7 @@ public class KTFreight_v3 {
 	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
 	private static final int MAX_JSPRIT_ITERATION = 10000;
-	private static final int NU_OF_TOTAL_RUNS = 2;	
+	private static final int NU_OF_TOTAL_RUNS = 1;	
 
 	//temporär zum Programmieren als Ausgabe
 	private static WriteTextToFile textInfofile; 
