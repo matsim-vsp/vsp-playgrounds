@@ -48,14 +48,16 @@ public class RunDrtCottbus {
             config.controler().setWriteEventsInterval(1);
             config.controler().setWritePlansInterval(1);
             config.controler().setRunId("door2door_" + vehicles);
-            config.controler().setOutputDirectory("output/door2door_norejects/" + config.controler().getRunId());
+            config.controler().setOutputDirectory("output/stopbased_rejects_notransitwalks_er_350/" + config.controler().getRunId());
             DrtConfigGroup drt = (DrtConfigGroup) config.getModules().get(DrtConfigGroup.GROUP_NAME);
             drt.setVehiclesFile(folder + "drt_vehicles_" + vehicles + ".xml");
             drt.setMaxWaitTime(600);
             drt.setMaxWaitTime(600);
-            drt.setOperationalScheme(DrtConfigGroup.OperationalScheme.door2door.toString());
-            drt.setRequestRejection(false);
+            drt.setMaxWalkDistance(350);
+            drt.setOperationalScheme(DrtConfigGroup.OperationalScheme.stopbased.toString());
+            drt.setRequestRejection(true);
             Controler controler = DrtControlerCreator.createControler(config, false);
+
             controler.run();
         }
 
