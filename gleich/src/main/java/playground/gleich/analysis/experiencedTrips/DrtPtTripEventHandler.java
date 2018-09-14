@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
@@ -51,6 +52,7 @@ import org.matsim.core.api.experimental.events.AgentWaitingForPtEvent;
 import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.api.experimental.events.handler.AgentWaitingForPtEventHandler;
 import org.matsim.core.api.experimental.events.handler.TeleportationArrivalEventHandler;
+import org.matsim.core.utils.misc.Counter;
 import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
@@ -61,28 +63,44 @@ import org.matsim.vehicles.Vehicle;
 // One trip is the sum of all legs and "pt interaction" activities between to real, non-"pt interaction", activities
 // Coords unavailable in events -> no coords written
 /**
- * Please note: Looks up the TransitRoute using the vehicleId. If the same vehicle services multiple TransitRoutes,
- * this program will always save the first TransitRoute found where this vehicle operates as the TransitRoute used
- * for the leg, although the agent used another TransitRoute where the same vehicle operates, too.
+ * Please note: Looks up the TransitRoute using the vehicleId. If the same
+ * vehicle services multiple TransitRoutes, this program will always save the
+ * first TransitRoute found where this vehicle operates as the TransitRoute used
+ * for the leg, although the agent used another TransitRoute where the same
+ * vehicle operates, too.
+ * <p>
  * 
- * Drt legs can start when the drt request is submitted. This can happen before or after the PersonDepartureEvent,
- * that means a part of the wait time can take place before the agent has terminated its last activity (or 
- * pt interaction) prior to departing for the drt leg. Therefore the wait time is split into gross wait time 
- * (wait time between the drt request and the drt vehicle arrival) and (net) wait time (wait time between the
- * departure event and the drt vehicle arrival).
+ * Drt legs can start when the drt request is submitted. This class should be
+ * able to process drt requests before and after the PersonDepartureEvent, that
+ * means a part of the wait time can take place before the agent has terminated
+ * its last activity (or pt interaction) prior to departing for the drt leg.
+ * Therefore wait time is calculated as gross wait time (wait time between the
+ * drt request and the drt vehicle arrival) and as wll as (net) wait time (wait
+ * time between the agent departure event and the drt vehicle arrival).
+ * <p>
+ * 
+ * In the current drt implementation, agents always request their drt rides
+ * after terminating an activity, i.e. gross wait time and (net) wait time
+ * should be equal.
  * 
  * @author gleich
  *
  * @param network
- * @param monitoredModes : All trips to be monitored have to consist only of legs of these modes
- * @param monitoredStartAndEndLinks : only trips which start or end on one these links will be monitored.
- * Set to null if you want to have all trips from all origins and to all destinations.
+ * @param monitoredModes
+ *            : All trips to be monitored have to consist only of legs of these
+ *            modes
+ * @param monitoredStartAndEndLinks
+ *            : only trips which start or end on one these links will be
+ *            monitored. Set to null if you want to have all trips from all
+ *            origins and to all destinations.
  * 
  */
 public class DrtPtTripEventHandler implements ActivityStartEventHandler, ActivityEndEventHandler,
 PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, 
 LinkEnterEventHandler, TeleportationArrivalEventHandler, AgentWaitingForPtEventHandler, 
 DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
+	
+	private final static Logger log = Logger.getLogger(DrtPtTripEventHandler.class);
 	
 //	private Set<Id<Person>> agentsOnMonitoredTrip = new HashSet<>(); -> agent2CurrentTripStartLink.contains()
 //	private Map<Id<Person>, Boolean> agentHasDrtLeg = new HashMap<>();
@@ -113,6 +131,8 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	private Map<Id<Vehicle>, Id<TransitRoute>> monitoredVeh2toTransitRoute = new HashMap<>();
 	private Set<String> monitoredModes = new HashSet<>();
 	private Set<Id<Link>> monitoredStartAndEndLinks; // set to null if all links are to be monitored
+	
+	private Counter counter = new Counter("[" + this.getClass().getSimpleName() + "] handled ExperiencedTrip # ", "", 4);
 	
 	/**
 	 * 
@@ -251,13 +271,16 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
 		if (agent2CurrentTripStartLink.containsKey(event.getPersonId())) {
+			if (agent2CurrentLegMode.get(event.getPersonId()) == null) {
+				throw new RuntimeException("Found PersonArrivalEvent for personId not contained in agent2CurrentLegMode: person " + event.getPersonId().toString() + " , event time " + event.getTime());
+			}
 			if (agent2CurrentLegMode.get(event.getPersonId()).equals(event.getLegMode())) {				
 				double waitTime;
 				double grossWaitTime;
 				double inVehicleTime;
 				double distance;
 				Id<TransitRoute> ptRoute;
-				// e.g. pt leg
+				// e.g. pt or drt leg
 				if (agent2CurrentLegEnterVehicleTime.containsKey(event.getPersonId())) {
 					inVehicleTime = event.getTime() - agent2CurrentLegEnterVehicleTime.get(event.getPersonId());
 					distance = monitoredVeh2toMonitoredDistance.get(agent2CurrentLegVehicle.get(event.getPersonId())) - 
@@ -310,9 +333,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 			}
 		}	
 	}
-//Test
-	int tripCounter = 0;
-	
+
 	// Detect end of a trip
 	@Override
 	public void handleEvent(ActivityStartEvent event) {
@@ -337,8 +358,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 							 */
 							person2ExperiencedTrips.get(event.getPersonId()).size() + 1,
 							agent2CurrentTripExperiencedLegs.get(event.getPersonId()), monitoredModes));
-					tripCounter++;
-					System.out.println("ExperiencedTrip " + tripCounter);
+					counter.incCounter();
 				}
 				agent2CurrentTripStartTime.remove(event.getPersonId());
 				agent2CurrentTripStartLink.remove(event.getPersonId());
@@ -358,6 +378,10 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 
 	public Set<Id<Link>> getMonitoredStartAndEndLinks() {
 		return monitoredStartAndEndLinks;
+	}
+	
+	public long getNumberOfExperiencedTrips() {
+		return counter.getCounter();
 	}
 
 	@Override
