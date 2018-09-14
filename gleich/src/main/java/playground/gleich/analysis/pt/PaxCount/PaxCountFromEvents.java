@@ -29,10 +29,10 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsReaderXMLv1;
 import org.matsim.core.events.EventsUtils;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.Time;
@@ -42,6 +42,7 @@ import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
+import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 /**
@@ -53,29 +54,26 @@ public class PaxCountFromEvents {
 	
 	private final static Logger log = Logger.getLogger(PaxCountFromEvents.class);
 	
-	private final Config config;
 	private final String eventsFile;
 	private final Scenario scenario;
 	private Map<Id<TransitLine>, Map<Id<TransitRoute>, Map<Id<Departure>, Map<Integer, StopInformationEnhanced>>>> line2route2dep2stop2info;
 	
-	PaxCountFromEvents (String networkFile, String scheduleFile, String coordinateSystem, String eventsFile) {
+	PaxCountFromEvents (String networkFile, String scheduleFile, String eventsFile) {
 		this.eventsFile = eventsFile;
-		config = ConfigUtils.createConfig();
-		config.network().setInputFile(networkFile);
-		config.transit().setTransitScheduleFile(scheduleFile);
-		config.global().setCoordinateSystem(coordinateSystem);
-		scenario = ScenarioUtils.loadScenario(config);
+        scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+        new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
+        new TransitScheduleReader(scenario).readFile(scheduleFile);
 	}
 	
 	public static void main (String[] args) {
-		if (args.length != 5) {
+		if (args.length != 4) {
 			throw new RuntimeException("Wrong number of args to main method. " + ""
-					+ "Should be path to network file, transitSchedule file, coordinate system, events file, "+
+					+ "Should be path to network file, transitSchedule file, events file, "+
 					"and path to analysis output file.");
 		}
-		PaxCountFromEvents paxCounter = new PaxCountFromEvents(args[0], args[1], args[2], args[3]);
+		PaxCountFromEvents paxCounter = new PaxCountFromEvents(args[0], args[1], args[2]);
 		paxCounter.run();
-		paxCounter.writeLine2route2dep2stop2info(args[4], ";");
+		paxCounter.writeLine2route2dep2stop2info(args[3], ";");
 	}
 
 	private void run() {
@@ -138,10 +136,11 @@ public class PaxCountFromEvents {
 								nOfPassengers -= si.nOfLeaving;
 								nOfPassengers += si.nOfEntering;
 							} else {
-								new RuntimeException("no StopInformation for line: " + line.getId().toString()
-										+ ", route: " + route.getId().toString() + ", at stop: "
+								log.warn("no StopInformation for line: " + line.getId().toString() + ", route: "
+										+ route.getId().toString() + ", at stop: "
 										+ stop.getStopFacility().getId().toString() + ", departure: "
-										+ dep.getId().toString());
+										+ dep.getId().toString()
+										+ ". This can happen if a transit vehicle has not completed its transit route, because it stuck or similar.");
 							}
 							stop2info.put(i, new StopInformationEnhanced(si.nOfEntering, si.nOfLeaving, nOfPassengers,
 									si.arrivalTime, si.departureTime));
@@ -162,7 +161,8 @@ public class PaxCountFromEvents {
 			// write header
 			bw.write("lineId" + sep + "routeId" + sep + "depId" + sep + "stopNr" + sep + "stopFacilityId" + sep
 					+ "arrivalTimePlanned" + sep + "departureTimePlanned" + sep + "arrivalTimeReal" + sep
-					+ "departureTimeReal" + sep + "nPaxEntering" + sep + "nPaxLeaving" + sep + "nPaxInVehicle");
+					+ "departureTimeReal" + sep + "nPaxEntering" + sep + "nPaxLeaving" + sep + "nPaxInVehicle" + sep
+					+ "transportMode");
 			bw.newLine();
 
 			for (TransitLine line : this.scenario.getTransitSchedule().getTransitLines().values()) {
@@ -182,7 +182,8 @@ public class PaxCountFromEvents {
 									+ Time.writeTime(dep.getDepartureTime() + stop.getDepartureOffset()) + sep
 									+ Time.writeTime(stopInfo.arrivalTime) + sep
 									+ Time.writeTime(stopInfo.departureTime) + sep + stopInfo.nPaxEntering + sep
-									+ stopInfo.nPaxLeaving + sep + stopInfo.nPaxInVehicle);
+									+ stopInfo.nPaxLeaving + sep + stopInfo.nPaxInVehicle + sep
+									+ route.getTransportMode());
 							bw.newLine();
 						}
 					}
