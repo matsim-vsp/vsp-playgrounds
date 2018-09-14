@@ -39,7 +39,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 /**
- * An events reader which reads the default events and the additional custom events CongestionEvent, NoiseEventAffected, NoiseEventCaused.
+ * An events reader which reads the default events and the additional drt events DrtRequestSubmittedEvent, DrtRequestRejectedEvent, DrtRequestScheduledEvent.
  * 
  * @author gleich
  *
