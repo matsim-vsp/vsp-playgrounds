@@ -56,8 +56,8 @@ import gunnar.ihop2.regent.costwriting.LinkTollCostInCrownes;
 import gunnar.ihop2.regent.costwriting.LinkTravelDistanceInKilometers;
 import gunnar.ihop2.regent.costwriting.LinkTravelTimeInMinutes;
 import gunnar.ihop2.regent.costwriting.TripCostMatrices;
-import gunnar.ihop2.regent.demandreading.PopulationCreator;
 import gunnar.ihop2.regent.demandreading.ZonalSystem;
+import gunnar.ihop2.regent.demandreading.experimental.PopulationCreator_DEPRECATED;
 import gunnar.ihop2.scaper.ScaperPopulationCreator;
 
 /**
@@ -442,7 +442,7 @@ public class MATSimDummy {
 
 				if (DEMANDMODEL.regent.equals(demandModel)) {
 
-					final PopulationCreator populationCreator = new PopulationCreator(
+					final PopulationCreator_DEPRECATED populationCreator = new PopulationCreator_DEPRECATED(
 							matsimNetworkFileName, zoneShapeFileName,
 							StockholmTransformationFactory.WGS84_EPSG3857,
 							populationFileName);

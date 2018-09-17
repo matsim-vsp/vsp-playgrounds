@@ -62,12 +62,14 @@
   			<version>0.11.0-SNAPSHOT</version>
   		</dependency>
 
+		<!-- 
 		<dependency>
 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 			<artifactId>stockholm</artifactId>
 			<version>0.11.0-SNAPSHOT</version>
 		</dependency>		
-	
+	 	-->
+	 
 		<!--  -->
 
   		<dependency>

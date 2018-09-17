@@ -17,19 +17,19 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */ 
-package gunnar.ihop2.regent.demandreading;
+package gunnar.ihop2.regent.demandreading.experimental;
 
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.HOMEZONE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.HOUSINGTYPE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.OTHERZONE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.WORKZONE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.ShapeUtils.drawPointFromGeometry;
+import static gunnar.utils.ShapeUtils.drawPointFromGeometry;
 
 import java.util.logging.Logger;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.utils.objectattributes.ObjectAttributes;
+
+import gunnar.ihop2.regent.RegentDictionary;
+import gunnar.ihop2.regent.demandreading.ZonalSystem;
+import gunnar.ihop2.regent.demandreading.Zone;
 
 /**
  * 
@@ -75,7 +75,7 @@ public class ActivityLocationSampler {
 	public Coord drawHomeCoordinate(final String personId) {
 		final Zone homeZone = this.zonalSystem
 				.getZone((String) this.personAttributes.getAttribute(personId,
-						HOMEZONE_ATTRIBUTE));
+						RegentDictionary.REGENT_HOMEZONE_ATTRIBUTE));
 		if (this.zonalSystem.getNodes(homeZone).isEmpty()) {
 			Logger.getLogger(this.getClass().getName()).warning(
 					"Person " + personId + "'s home-zone " + homeZone
@@ -85,7 +85,7 @@ public class ActivityLocationSampler {
 			}
 		}
 		final String homeBuildingType = (String) this.personAttributes
-				.getAttribute(personId, HOUSINGTYPE_ATTRIBUTE);
+				.getAttribute(personId, RegentDictionary.REGENT_HOUSINGTYPE_ATTRIBUTE);
 		return this.zonesToMATSimTrafo.transform(drawPointFromGeometry(homeZone
 				.drawHomeGeometry(homeBuildingType)));
 	}
@@ -93,7 +93,7 @@ public class ActivityLocationSampler {
 	public Coord drawWorkCoordinate(final String personId) {
 		final Zone workZone = this.zonalSystem
 				.getZone((String) this.personAttributes.getAttribute(personId,
-						WORKZONE_ATTRIBUTE));
+						RegentDictionary.REGENT_WORKZONE_ATTRIBUTE));
 		if (this.zonalSystem.getNodes(workZone).isEmpty()) {
 			Logger.getLogger(this.getClass().getName()).warning(
 					"Person " + personId + "'s work-zone " + workZone
@@ -109,7 +109,7 @@ public class ActivityLocationSampler {
 	public Coord drawOtherCoordinate(final String personId) {
 		final Zone otherZone = this.zonalSystem
 				.getZone((String) this.personAttributes.getAttribute(personId,
-						OTHERZONE_ATTRIBUTE));
+						RegentDictionary.REGENT_OTHERZONE_ATTRIBUTE));
 		if (this.zonalSystem.getNodes(otherZone).isEmpty()) {
 			Logger.getLogger(this.getClass().getName()).warning(
 					"Person " + personId + "'s other-zone " + otherZone

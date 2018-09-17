@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */ 
-package gunnar.ihop2.regent.demandreading;
+package gunnar.utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

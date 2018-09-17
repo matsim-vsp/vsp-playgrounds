@@ -17,38 +17,41 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */ 
-package gunnar.ihop2.regent.demandreading;
+package gunnar.ihop2.regent.demandreading.experimental;
 
 import org.matsim.utils.objectattributes.ObjectAttributeUtils2;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
+
+import gunnar.ihop2.regent.RegentDictionary;
+import gunnar.ihop2.regent.demandreading.ZonalSystem;
 
 @Deprecated
 public class RegentPopulationReader {
 
 	// CONSTANTS
 
-	public static final String BIRTHYEAR_ATTRIBUTE = "birthyear";
-
-	public static final String SEX_ATTRIBUTE = "sex";
-
-	public static final String INCOME_ATTRIBUTE = "income";
-
-	public static final String HOUSINGTYPE_ATTRIBUTE = "housingtype";
-
-	public static final String HOMEZONE_ATTRIBUTE = "homezone";
-
-	public static final String WORKZONE_ATTRIBUTE = "workzone";
-
-	public static final String OTHERZONE_ATTRIBUTE = "otherzone";
-
-	public static final String WORKTOURMODE_ATTRIBUTE = "worktourmode";
-
-	public static final String OTHERTOURMODE_ATTRIBUTE = "othertourmode";
-
-	public static final String CAR_ATTRIBUTEVALUE = "Car";
-
-	public static final String PT_ATTRIBUTEVALUE = "PublicTransport";
+//	public static final String BIRTHYEAR_ATTRIBUTE = "birthyear";
+//
+//	public static final String SEX_ATTRIBUTE = "sex";
+//
+//	public static final String INCOME_ATTRIBUTE = "income";
+//
+//	public static final String HOUSINGTYPE_ATTRIBUTE = "housingtype";
+//
+//	public static final String HOMEZONE_ATTRIBUTE = "homezone";
+//
+//	public static final String WORKZONE_ATTRIBUTE = "workzone";
+//
+//	public static final String OTHERZONE_ATTRIBUTE = "otherzone";
+//
+//	public static final String WORKTOURMODE_ATTRIBUTE = "worktourmode";
+//
+//	public static final String OTHERTOURMODE_ATTRIBUTE = "othertourmode";
+//
+//	public static final String CAR_ATTRIBUTEVALUE = "Car";
+//
+//	public static final String PT_ATTRIBUTEVALUE = "PublicTransport";
 
 	// MEMBERS
 
@@ -86,10 +89,10 @@ public class RegentPopulationReader {
 		for (String personId : ObjectAttributeUtils2
 				.allObjectKeys(personAttributes)) {
 
-			final String homeZone = (String) personAttributes.getAttribute(
-					personId, HOMEZONE_ATTRIBUTE);
-			final String workZone = (String) personAttributes.getAttribute(
-					personId, WORKZONE_ATTRIBUTE);
+//			final String homeZone = (String) personAttributes.getAttribute(
+//					personId, RegentDictionary.REGENT_HOMEZONE_ATTRIBUTE);
+//			final String workZone = (String) personAttributes.getAttribute(
+//					personId, RegentDictionary.REGENT_WORKZONE_ATTRIBUTE);
 
 			// final String income = (String) personAttributes.getAttribute(
 			// personId, INCOME_ATTRIBUTE);

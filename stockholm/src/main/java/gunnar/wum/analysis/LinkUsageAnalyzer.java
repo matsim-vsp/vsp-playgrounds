@@ -43,24 +43,31 @@ import org.matsim.vehicles.Vehicle;
  * @author Gunnar Flötteröd
  *
  */
-public class DifferentiatedPTLinkExtractor implements LinkEnterEventHandler {
+public class LinkUsageAnalyzer implements LinkEnterEventHandler {
 
 	private final Scenario scenario;
 
 	private boolean ignoreCircularLinks = true;
 
-	private Map<String, Set<Id<Link>>> detailedPTMode2linkIds = new LinkedHashMap<>();
+	private Map<String, Set<Id<Link>>> mode2linkIds = new LinkedHashMap<>();
 
-	public DifferentiatedPTLinkExtractor(final Scenario scenario) {
+	public LinkUsageAnalyzer(final Scenario scenario) {
 		this.scenario = scenario;
+		final Set<Id<Link>> carLinkIds = new LinkedHashSet<>();
+		this.mode2linkIds.put("car", carLinkIds);
+		for (Link link : scenario.getNetwork().getLinks().values()) {
+			if (link.getAllowedModes().contains("car")) {
+				carLinkIds.add(link.getId());
+			}
+		}
 	}
 
 	public void setIgnoreCircularLinks(final boolean ignoreCircularLinks) {
 		this.ignoreCircularLinks = ignoreCircularLinks;
 	}
 
-	public Map<String, Set<Id<Link>>> getDetailedPTMode2linkIds() {
-		return this.detailedPTMode2linkIds;
+	public Map<String, Set<Id<Link>>> getMode2linkIds() {
+		return this.mode2linkIds;
 	}
 
 	@Override
@@ -78,10 +85,10 @@ public class DifferentiatedPTLinkExtractor implements LinkEnterEventHandler {
 
 				final String mode = transitVehicle.getType().getId().toString();
 
-				Set<Id<Link>> linkIds = this.detailedPTMode2linkIds.get(mode);
+				Set<Id<Link>> linkIds = this.mode2linkIds.get(mode);
 				if (linkIds == null) {
 					linkIds = new LinkedHashSet<>();
-					this.detailedPTMode2linkIds.put(mode, linkIds);
+					this.mode2linkIds.put(mode, linkIds);
 				}
 				linkIds.add(event.getLinkId());
 			}
@@ -89,7 +96,7 @@ public class DifferentiatedPTLinkExtractor implements LinkEnterEventHandler {
 	}
 
 	public static void main(String[] args) {
-		final String path = "/Users/GunnarF/NoBackup/data-workspace/pt/2018-08-09_scenario/";
+		final String path = "/Users/GunnarF/NoBackup/data-workspace/pt/production-scenario/";
 		final String configFileName = path + "config.xml";
 		final String eventsFileName = path + "output/output_events.xml.gz";
 
@@ -99,12 +106,12 @@ public class DifferentiatedPTLinkExtractor implements LinkEnterEventHandler {
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		final EventsManager eventsManager = new EventsManagerImpl();
-		final DifferentiatedPTLinkExtractor ptLinkExtractor = new DifferentiatedPTLinkExtractor(scenario);
-		ptLinkExtractor.setIgnoreCircularLinks(true);
-		eventsManager.addHandler(ptLinkExtractor);
+		final LinkUsageAnalyzer linkUsageAnalyzer = new LinkUsageAnalyzer(scenario);
+		linkUsageAnalyzer.setIgnoreCircularLinks(true);
+		eventsManager.addHandler(linkUsageAnalyzer);
 		new MatsimEventsReader(eventsManager).readFile(eventsFileName);
 
-		for (Map.Entry<String, Set<Id<Link>>> entry : ptLinkExtractor.getDetailedPTMode2linkIds().entrySet()) {
+		for (Map.Entry<String, Set<Id<Link>>> entry : linkUsageAnalyzer.getMode2linkIds().entrySet()) {
 			System.out.println("Mode " + entry.getKey() + " uses " + entry.getValue().size() + " links.");
 		}
 	}

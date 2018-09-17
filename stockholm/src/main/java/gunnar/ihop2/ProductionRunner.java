@@ -28,7 +28,9 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 
-import gunnar.ihop2.regent.demandreading.PopulationCreator_v1;
+import gunnar.ihop2.regent.demandreading.ObjectAttributeStatistics;
+import gunnar.ihop2.regent.demandreading.PopulationCreator;
+import gunnar.ihop2.regent.demandreading.PopulationStatistics;
 import gunnar.ihop2.transmodeler.networktransformation.Transmodeler2MATSimNetwork;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
@@ -62,12 +64,13 @@ public class ProductionRunner {
 		final String matsimLanesFile = path + "network-output/lanes.xml";
 		final String matsimTollFile = path + "network-output/toll.xml";
 
-		final double populationSample = 0.01;
+		final double populationSample = 0.25;
 		final String zonesShapeFileName = path + "demand-input/sverige_TZ_EPSG3857.shp";
 		final String buildingShapeFileName = path + "demand-input/by_full_EPSG3857_2.shp";
 		final String populationFileName = path + "demand-input/trips.xml";
 
-		final String initialPlansFile = path + "demand-output/1PctCarAndPt.xml";
+		final String initialPlansFile = path + "demand-output/25PctAllModes.xml";
+		// final String initialPlansFile = path + "demand-output/1PctCarAndPt.xml";
 				// "./ihop2-data/without-toll/ITERS/it.200/200.plans.xml.gz";
 		// "./ihop2-data/demand-output/initial-plans_" + populationSample + ".xml";
 
@@ -85,6 +88,7 @@ public class ProductionRunner {
 
 		final boolean doNetworkConversion = false;
 		final boolean doPopulationGeneration = false;
+		final boolean checkPopulation = true;
 		final boolean runMATSim = false;
 
 		/*
@@ -104,13 +108,27 @@ public class ProductionRunner {
 		 * REGENT -> MATSIM POPULATION CONVERSION
 		 */
 		if (doPopulationGeneration) {
-			final PopulationCreator_v1 populationCreator = new PopulationCreator_v1(
+			
+			final PopulationCreator populationCreator = new PopulationCreator(
 					matsimNetworkFile, zonesShapeFileName,
 					StockholmTransformationFactory.WGS84_EPSG3857,
 					populationFileName);
 			populationCreator.setBuildingsFileName(buildingShapeFileName);
 			populationCreator.setPopulationSampleFactor(populationSample);
-			populationCreator.run(initialPlansFile);
+			populationCreator.run(initialPlansFile);			
+		}
+		
+		if (checkPopulation) {
+			ObjectAttributeStatistics personAttrStats = new ObjectAttributeStatistics(populationFileName);
+			PopulationStatistics populationStats = new PopulationStatistics(initialPlansFile);
+			
+			System.out.println("------------------------------------------------------");
+			System.out.println("FROM ATTRIBUTES FILE");
+			personAttrStats.printSummaryStatistic();
+			
+			System.out.println("------------------------------------------------------");
+			System.out.println("FROM POPULATION FILE");
+			populationStats.printSummaryStatistic();
 		}
 
 		/*

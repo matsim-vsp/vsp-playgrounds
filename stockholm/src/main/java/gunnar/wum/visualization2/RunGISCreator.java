@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.wum.visualization;
+package gunnar.wum.visualization2;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;

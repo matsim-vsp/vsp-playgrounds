@@ -17,18 +17,10 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package gunnar.ihop2.regent.demandreading;
+package gunnar.ihop2.regent.demandreading.experimental;
 
 import static gunnar.ihop2.regent.RegentDictionary.regent2matsim;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.CAR_ATTRIBUTEVALUE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.HOMEZONE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.HOUSINGTYPE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.OTHERTOURMODE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.OTHERZONE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.PT_ATTRIBUTEVALUE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.WORKTOURMODE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.RegentPopulationReader.WORKZONE_ATTRIBUTE;
-import static gunnar.ihop2.regent.demandreading.ShapeUtils.drawPointFromGeometry;
+import static gunnar.utils.ShapeUtils.drawPointFromGeometry;
 import static org.matsim.utils.objectattributes.ObjectAttributeUtils2.allObjectKeys;
 import static saleem.stockholmmodel.utils.StockholmTransformationFactory.WGS84_EPSG3857;
 import static saleem.stockholmmodel.utils.StockholmTransformationFactory.WGS84_SWEREF99;
@@ -59,8 +51,13 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.utils.objectattributes.ObjectAttributeUtils2;
 import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 
 import floetteroed.utilities.FractionalIterable;
+import floetteroed.utilities.math.MathHelpers;
+import gunnar.ihop2.regent.RegentDictionary;
+import gunnar.ihop2.regent.demandreading.ZonalSystem;
+import gunnar.ihop2.regent.demandreading.Zone;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
@@ -68,15 +65,32 @@ import saleem.stockholmmodel.utils.StockholmTransformationFactory;
  * @author Gunnar Flötteröd, based on Patryk Larek
  *
  */
-public class PopulationCreator_v1 {
+public class PopulationCreator_DEPRECATED {
 
 	// -------------------- CONSTANTS --------------------
 
 	private final Random rnd = MatsimRandom.getRandom(); // TODO
 
-	public static final String HOME = "home";
-	public static final String WORK = "work";
-	public static final String OTHER = "other";
+	public static final String W1S = "w1s";
+	public static final String W1L = "w1l";
+	public static final String HgivenW1S = "h|w1s";
+	public static final String HgivenW1L = "h|w1l";
+
+	public static final String O1 = "o1";
+	public static final String HgivenO1 = "h|o1";
+
+	public static final String W2S = "w2s";
+	public static final String W2L = "w2l";
+	public static final String HgivenW2S = "h|w2s";
+	public static final String HgivenW2L = "h|w2l";
+	// public static final String H2givenW2S = "h2|w2s";
+	// public static final String H2givenW2L = "h2|w2l";
+	public static final String O2givenW2S = "o2|w2s";
+	public static final String O2givenW2L = "o2|w2l";
+
+	// public static final String HOME = "home";
+	// public static final String WORK = "work";
+	// public static final String OTHER = "other";
 
 	// anything not completely nonsensical, just to get started
 	final double workDuration_s = 8.0 * 3600.0;
@@ -102,7 +116,7 @@ public class PopulationCreator_v1 {
 	 * Better pass on the link attributes (file name) into this constructor and
 	 * first reduce the network and only then add it to the zonal system.
 	 */
-	public PopulationCreator_v1(final String networkFileName, final String zoneShapeFileName,
+	public PopulationCreator_DEPRECATED(final String networkFileName, final String zoneShapeFileName,
 			final String zonalCoordinateSystem, final String populationFileName) {
 		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		(new MatsimNetworkReader(this.scenario.getNetwork())).readFile(networkFileName);
@@ -110,8 +124,7 @@ public class PopulationCreator_v1 {
 		this.zonalSystem.addNetwork(this.scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
 		Logger.getLogger(this.getClass().getName())
 				.info("number of zones in zonal system is " + this.zonalSystem.getId2zoneView().size());
-		new RegentPopulationReader(populationFileName, this.zonalSystem,
-				this.scenario.getPopulation().getPersonAttributes());
+		new ObjectAttributesXmlReader(this.scenario.getPopulation().getPersonAttributes()).readFile(populationFileName);
 	}
 
 	public void setBuildingsFileName(final String buildingShapeFileName) {
@@ -140,18 +153,19 @@ public class PopulationCreator_v1 {
 	// -------------------- INTERNALS --------------------
 
 	private Coord drawHomeCoord(final String personId, final CoordinateTransformation coordinateTransform) {
-		final Zone homeZone = this.zonalSystem.getZone(this.attr(personId, HOMEZONE_ATTRIBUTE));
+		final Zone homeZone = this.zonalSystem.getZone(this.attr(personId, RegentDictionary.REGENT_HOMEZONE_ATTRIBUTE));
 		if (!this.zonalSystem.getNodes(homeZone).isEmpty()) {
-			final String homeBuildingType = (String) this.attr(personId, HOUSINGTYPE_ATTRIBUTE);
+			final String homeBuildingType = (String) this.attr(personId, RegentDictionary.REGENT_HOUSINGTYPE_ATTRIBUTE);
 			return coordinateTransform.transform(drawPointFromGeometry(homeZone.drawHomeGeometry(homeBuildingType)));
 		}
 		return null;
 	}
 
 	private Coord drawWorkCoordinate(final String personId, final CoordinateTransformation coordinateTransform) {
-		final String modeAttr = this.attr(personId, WORKTOURMODE_ATTRIBUTE);
-		if (CAR_ATTRIBUTEVALUE.equals(modeAttr) || PT_ATTRIBUTEVALUE.equals(modeAttr)) {
-			final Zone workZone = this.zonalSystem.getZone(this.attr(personId, WORKZONE_ATTRIBUTE));
+		if (RegentDictionary.REGENT_CAR_ATTRIBUTEVALUE
+				.equals(this.attr(personId, RegentDictionary.REGENT_WORKTOURMODE_ATTRIBUTE))) {
+			final Zone workZone = this.zonalSystem
+					.getZone(this.attr(personId, RegentDictionary.REGENT_WORKZONE_ATTRIBUTE));
 			if (!this.zonalSystem.getNodes(workZone).isEmpty()) {
 				return coordinateTransform.transform(drawPointFromGeometry(workZone.drawWorkGeometry()));
 			}
@@ -160,9 +174,10 @@ public class PopulationCreator_v1 {
 	}
 
 	private Coord drawOtherCoordinate(final String personId, final CoordinateTransformation coordinateTransform) {
-		final String modeAttr = this.attr(personId, OTHERTOURMODE_ATTRIBUTE);
-		if (CAR_ATTRIBUTEVALUE.equals(modeAttr) || PT_ATTRIBUTEVALUE.equals(modeAttr)) {
-			final Zone otherZone = this.zonalSystem.getZone(this.attr(personId, OTHERZONE_ATTRIBUTE));
+		if (RegentDictionary.REGENT_CAR_ATTRIBUTEVALUE
+				.equals(this.attr(personId, RegentDictionary.REGENT_OTHERTOURMODE_ATTRIBUTE))) {
+			final Zone otherZone = this.zonalSystem
+					.getZone(this.attr(personId, RegentDictionary.REGENT_OTHERZONE_ATTRIBUTE));
 			if (!this.zonalSystem.getNodes(otherZone).isEmpty()) {
 				return coordinateTransform.transform(drawPointFromGeometry(otherZone.drawWorkGeometry()));
 			}
@@ -239,33 +254,32 @@ public class PopulationCreator_v1 {
 			 * HOME - WORK - HOME
 			 */
 
-			final double totalOvernightTime_s = 24.0 * 3600.0 - 2.0 * this.tripDuration_s - 1.0 * this.workDuration_s;
-			final double initialHomeEndTime_s = totalOvernightTime_s / 2.0;
+			final boolean shortWork = (this.rnd.nextDouble() < 0.63);
 
-			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, HOME);
+			final double initialHomeEndTime_s = MathHelpers.draw(5.0, 7.0, this.rnd) * 3600.0;
+			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, (shortWork ? HgivenW1S : HgivenW1L));
 
 			final double workEndTime_s = initialHomeEndTime_s + this.tripDuration_s + this.workDuration_s;
-			final String workTourMode = regent2matsim.get(this.attr(personId, WORKTOURMODE_ATTRIBUTE));
-			this.addTour(plan, WORK, workCoord, workTourMode, workEndTime_s);
+			final String workTourMode = regent2matsim
+					.get(this.attr(personId, RegentDictionary.REGENT_WORKTOURMODE_ATTRIBUTE));
+			this.addTour(plan, (shortWork ? W1S : W1L), workCoord, workTourMode, workEndTime_s);
 
-			this.addHomeActivity(plan, homeCoord, null, HOME);
+			this.addHomeActivity(plan, homeCoord, null, (shortWork ? HgivenW1S : HgivenW1L));
 
 		} else if ((workCoord == null) && (otherCoord != null)) {
 
 			/*
 			 * HOME - OTHER - HOME
 			 */
-
-			final double totalOvernightTime_s = 24.0 * 3600.0 - 2.0 * this.tripDuration_s - 1.0 * this.otherDuration_s;
-			final double initialHomeEndTime_s = totalOvernightTime_s / 2.0;
-
-			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, HOME);
+			final double initialHomeEndTime_s = MathHelpers.draw(6.0, 22.0, this.rnd) * 3600.0;
+			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, HgivenO1);
 
 			final double otherEndTime_s = initialHomeEndTime_s + this.tripDuration_s + this.otherDuration_s;
-			final String otherTourMode = regent2matsim.get(this.attr(personId, OTHERTOURMODE_ATTRIBUTE));
-			this.addTour(plan, OTHER, otherCoord, otherTourMode, otherEndTime_s);
+			final String otherTourMode = regent2matsim
+					.get(this.attr(personId, RegentDictionary.REGENT_OTHERTOURMODE_ATTRIBUTE));
+			this.addTour(plan, O1, otherCoord, otherTourMode, otherEndTime_s);
 
-			this.addHomeActivity(plan, homeCoord, null, HOME);
+			this.addHomeActivity(plan, homeCoord, null, HgivenO1);
 
 		} else if ((homeCoord != null) && (workCoord != null)) {
 
@@ -273,24 +287,26 @@ public class PopulationCreator_v1 {
 			 * HOME - WORK - HOME - OTHER - HOME
 			 */
 
-			final double totalOvernightTime_s = 24.0 * 3600.0 - 4.0 * this.tripDuration_s - 1.0 * this.workDuration_s
-					- 1.0 * this.intermediateHomeDuration_s - 1.0 * this.otherDuration_s;
-			final double initialHomeEndTime_s = totalOvernightTime_s / 2.0;
-			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, HOME);
+			final boolean shortWork = (this.rnd.nextDouble() < 0.41);
+
+			final double initialHomeEndTime_s = MathHelpers.draw(5.0, 7.0, this.rnd) * 3600.0;
+			this.addHomeActivity(plan, homeCoord, initialHomeEndTime_s, (shortWork ? HgivenW2S : HgivenW2L));
 
 			final double workEndTime_s = initialHomeEndTime_s + this.tripDuration_s + this.workDuration_s;
-			final String workTourMode = regent2matsim.get(this.attr(personId, WORKTOURMODE_ATTRIBUTE));
-			this.addTour(plan, WORK, workCoord, workTourMode, workEndTime_s);
+			final String workTourMode = regent2matsim
+					.get(this.attr(personId, RegentDictionary.REGENT_WORKTOURMODE_ATTRIBUTE));
+			this.addTour(plan, (shortWork ? W2S : W2L), workCoord, workTourMode, workEndTime_s);
 
 			final double intermediateHomeEndTime_s = workEndTime_s + this.tripDuration_s
 					+ this.intermediateHomeDuration_s;
-			this.addHomeActivity(plan, homeCoord, intermediateHomeEndTime_s, HOME);
+			this.addHomeActivity(plan, homeCoord, intermediateHomeEndTime_s, (shortWork ? HgivenW2S : HgivenW2L));
 
 			final double otherEndTime_s = intermediateHomeEndTime_s + this.tripDuration_s + this.otherDuration_s;
-			final String otherTourMode = regent2matsim.get(this.attr(personId, OTHERTOURMODE_ATTRIBUTE));
-			this.addTour(plan, OTHER, otherCoord, otherTourMode, otherEndTime_s);
+			final String otherTourMode = regent2matsim
+					.get(this.attr(personId, RegentDictionary.REGENT_OTHERTOURMODE_ATTRIBUTE));
+			this.addTour(plan, (shortWork ? O2givenW2S : O2givenW2L), otherCoord, otherTourMode, otherEndTime_s);
 
-			this.addHomeActivity(plan, homeCoord, null, HOME);
+			this.addHomeActivity(plan, homeCoord, null, (shortWork ? HgivenW2S : HgivenW2L));
 
 		} else {
 
@@ -353,7 +369,7 @@ public class PopulationCreator_v1 {
 		// linkAttributes);
 		// reader.parse(linkAttributesFileName);
 
-		final PopulationCreator pc = new PopulationCreator(networkFileName, zonesShapeFileName,
+		final PopulationCreator_DEPRECATED pc = new PopulationCreator_DEPRECATED(networkFileName, zonesShapeFileName,
 				StockholmTransformationFactory.WGS84_EPSG3857, populationFileName);
 		pc.setBuildingsFileName(buildingShapeFileName);
 		// pc.setAgentHomeXYFile("./data/demand_output/agenthomeXY_v03.txt");
