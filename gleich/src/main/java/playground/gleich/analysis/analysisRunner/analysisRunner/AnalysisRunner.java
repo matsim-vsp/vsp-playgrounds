@@ -1,6 +1,5 @@
 package playground.gleich.analysis.analysisRunner.analysisRunner;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,10 +20,13 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
+import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt.transitSchedule.api.TransitLine;
+import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
+import org.matsim.vehicles.VehicleReaderV1;
 import org.matsim.vehicles.Vehicles;
 
 import playground.vsp.analysis.modules.act2mode.ActivityToModeAnalysis;
@@ -169,7 +171,7 @@ import playground.vsp.analysis.modules.welfareAnalyzer.WelfareAnalyzer;
  * @param pathToLatexFiles
  * @param pathToRScriptExe
  * @param pathToPdfLatexExe
- * @param coordinateSystem (as String)
+ * @param targetCoordinateSystem (as String)
  * @param useConfigXml : Shall the config be loaded from an xml file to be found at
  * pathToScenarioData
  * 
@@ -177,93 +179,58 @@ import playground.vsp.analysis.modules.welfareAnalyzer.WelfareAnalyzer;
  */
 public class AnalysisRunner {
 	
-	private boolean useConfigXml;
-	private String pathToScenarioData = "Z:/WinHome/ArbeitWorkspace/Analyzer/";
-	private String eventFile = pathToScenarioData 
-			+ "output/testOneBusManyIterations/ITERS/it.10/10.events.xml.gz";
-	private String outputDirectory;
-	private String pathToRScriptFiles = "Z:/WinHome/ArbeitWorkspace/Analyzer/output/Rscripts";
-	private String pathToLatexFiles = "Z:/WinHome/ArbeitWorkspace/Analyzer/output/Latex";
-	private String pathToRScriptExe = "C:/Program Files/R/R-2.14.2/bin/Rscript.exe";
-	private String pathToPdfLatexExe = "pdflatex";
-	private String coordinateSystem = "DHDN_GK4";//DHDN_GK4
-	
-	private Scenario scenario;
+	private final String networkFile;
+	private final String eventFile;
+	private final String analysisOutputDirectory;
+	private final String targetCoordinateSystem;
+	private final Scenario scenario;
 	
 	public static void main(String[] args) throws IOException{
-		AnalysisRunner analysisRun = new AnalysisRunner();
-		analysisRun.runAllAnalyzersAndGenerateReport();
+		AnalysisRunner analysisRun = new AnalysisRunner(args[0], args[1], args[2]);
+		analysisRun.runAllAnalyzers();
 	}
 	
-	public AnalysisRunner(){
-		/* Set outputDirectory to the users desktop ---- TODO: Test Linux, Mac----
-		 * using the desktop as output directory appears to cause runTime
-		 * exceptions of the cmd.exe on the workplace pc when ReportGenerator
-		 * tries to start R and Latex :
-		 * CMD.EXE wurde mit dem oben angegebenen Pfad als aktuellem Verzeichnis gestartet. UNC-Pfade werden nicht unterstützt.
-		 * possible solutions proposed on the internet include modifying the registry */
-		String operatingSystem = System.getProperty("os.name");
-		if(operatingSystem.equals("Windows 7") || operatingSystem.equals("Windows Vista") || operatingSystem.equals("Windows XP")){
-			outputDirectory = System.getProperty("user.home") + "/desktop/MATSimAnalyzer";
-			(new File(System.getProperty("user.home") + "/desktop/MATSimAnalyzer")).mkdir();
-		} else {
-			outputDirectory = System.getProperty("user.home") + "/Desktop/MATSimAnalyzer";
-			(new File(System.getProperty("user.home") + "/desktop/MATSimAnalyzer")).mkdir();
-		}
-		outputDirectory = "Z:/WinHome/MATSimAnalyzer4";
-		(new File("Z:/WinHome/MATSimAnalyzer4")).mkdir();
-		this.initialize();
-	}
-	
-	public AnalysisRunner(String pathToExampleScenario, String eventFile,
-			String outputDirectory, String pathToRScriptFiles, 
-			String pathToLatexFiles, String pathToRScriptExe, 
-			String pathToPdfLatexExe, String coordinateSystem, 
-			boolean useConfigXml){
-		this.pathToScenarioData = pathToExampleScenario;
+	public AnalysisRunner(String configFile, String eventFile, String analysisOutputDirectory){
 		this.eventFile = eventFile;
-		this.outputDirectory = outputDirectory;
-		this.pathToRScriptFiles = pathToRScriptFiles;
-		this.pathToLatexFiles = pathToLatexFiles;
-		this.pathToRScriptExe = pathToRScriptExe;
-		this.pathToPdfLatexExe = pathToPdfLatexExe;
-		this.coordinateSystem = coordinateSystem;
-		this.useConfigXml = useConfigXml;
-		this.initialize();
-	}
-	
-	private void initialize(){
-		Config config;
-		if(useConfigXml){
-			config = ConfigUtils.loadConfig(pathToScenarioData);// + "input/config_exampleScenario.xml"
-		} else {
-			config = ConfigUtils.createConfig();
-//			Config config = ConfigUtils.loadConfig(pathToExampleScenario + "input/ExampleScenario/config_exampleScenario.xml");
-			config.network().setInputFile(pathToScenarioData + "input/network.xml");
-			config.transit().setTransitScheduleFile(pathToScenarioData + "input/transitSchedule.xml");
-			config.transit().setVehiclesFile(pathToScenarioData + "input/Vehicles.xml");
-			config.transit().setUseTransit(true);
-			config.scenario().setUseVehicles(true);
-			
-			/* Some analyzers read the result plan files.
-			 * The Plan File should include the plans used for the iteration
-			 * whose eventfile is to be analysed. */
-			config.plans().setInputFile(pathToScenarioData + "output/testOneBusManyIterations/ITERS/it.10/10.plans.xml.gz");//pathToScenarioData + "output/ExampleScenario/1.plans.xml.gz"
-		}
+		this.analysisOutputDirectory = analysisOutputDirectory;
+		Config config = ConfigUtils.loadConfig(configFile);
 		scenario = ScenarioUtils.loadScenario(config);
+		this.targetCoordinateSystem = config.global().getCoordinateSystem();
+		this.networkFile = config.network().getInputFile();
+		if (! (new File(analysisOutputDirectory)).exists()) {
+			(new File(analysisOutputDirectory)).mkdir();
+		}
 	}
 	
-	private void runAllAnalyzersAndGenerateReport() throws IOException{
+	public AnalysisRunner(String networkFile, String scheduleFile, String transitVehiclesFile, 
+			String plansFile, String coordinateSystem, String eventFile, String analysisOutputDirectory){
+		this.targetCoordinateSystem = coordinateSystem;
+		this.networkFile = networkFile;
+		this.eventFile = eventFile;
+		this.analysisOutputDirectory = analysisOutputDirectory;
+        scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+        new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
+        new TransitScheduleReader(scenario).readFile(scheduleFile);
+		new VehicleReaderV1(scenario.getTransitVehicles()).readFile(transitVehiclesFile);
+        new PopulationReader(scenario).readFile(plansFile);
+		if (! (new File(analysisOutputDirectory)).exists()) {
+			(new File(analysisOutputDirectory)).mkdir();
+		}
+	}
+	
+	// maybe these some analyszers not work any longer, because pt now uses access/egress_walk instead of transit_walk
+	
+	public final void runAllAnalyzers() throws IOException{
 		rAct2Mode();
 		rAct2ModeWithPlanCoord();
-		rBoardingAlightingCountAnalyzer();
-		rBvgAna();// mehrere Analyzer
+//		rBoardingAlightingCountAnalyzer(); // java.lang.RuntimeException: There is already a counts object for location ...--> paratransit lines are circular -> start and end stop are identical, tries to insert it twice?
+//		rBvgAna();// mehrere Analyzer // java.lang.NullPointerException	at playground.vsp.analysis.modules.bvgAna.ptTripTravelTime.PtTripTravelTimeEventHandler.handleEvent(PtTripTravelTimeEventHandler.java:97)
 		rCarDistanceAnalyzer();
 		/*rEmissionsAnalyzer(); */ //not included: needs an emission events file created with the package emissionsWriter which needs settings made with VspExperimentalConfigGroup which is not intended for public use
 		rLegModeDistanceDistribution(); // reads the plans in the scenario -> scenario should include the most recent plans (set in config)
 		rMonetaryPaymentsAnalyzer();
 
-		rNetworkAnalyzer();
+//		rNetworkAnalyzer(); // Capetown: WARN NetworkAnalyzer:223 at least one small cluster found... network is not routable
 		/*
 		While retrieving the coordinate reference system, the inserted 
 		"DHDN_GK4" is looked up in map MGC.transformations where this key 
@@ -309,12 +276,12 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 	*/
 		rPlansSubset();
 		rPtAccesibility();
-		rPtCircuityAnalysis();
+//		rPtCircuityAnalysis(); // ArrayIndexOutOfBoundsException
 		rPtDriverPrefix();
 		rPtLines2PaxAnalysis();
 		rPtOperator();
-		rPtPaxVolumes();
-		rPtRoutes2PaxAnalysis();
+//		rPtPaxVolumes();// java.lang.RuntimeException: There is already a counts object for location para_17_55 --> paratransit lines are circular -> start and end stop are identical, tries to insert it twice?
+//		rPtRoutes2PaxAnalysis();// java.lang.RuntimeException: There is already a counts object for location 0 --> paratransit lines are circular -> start and end stop are identical, tries to insert it twice?
 		/*
 		rPtTravelStats();
 		Exception in thread "main" java.lang.RuntimeException: counts start at 1, not at 0.  If you have a use case where you need to go below one, let us know and we think about it, but so far we had numerous debugging sessions because someone inserted counts at 0.
@@ -383,21 +350,17 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		rUserBenefits();
 		rWaitingTimes();
 		rWelfareAnalyzer();
-		
-		ReportGenerator reporter = new ReportGenerator(pathToRScriptFiles,
-				pathToLatexFiles, pathToRScriptExe, pathToPdfLatexExe, 
-				outputDirectory);
-		reporter.generateReport();
+
 	}
 	
-	private void rAct2Mode() {
+	public final void rAct2Mode() {
 		//works without facilities, although stated to be necessary in ActivityToModeAnalysis
 		Set<Id> personsOfInterest = new TreeSet<Id>();
 
 		for(Id id: scenario.getPopulation().getPersons().keySet()){
 			personsOfInterest.add(id);
 		}
-		ActivityToModeAnalysis analysis = new ActivityToModeAnalysis(scenario, personsOfInterest, 30*60, coordinateSystem);
+		ActivityToModeAnalysis analysis = new ActivityToModeAnalysis(scenario, personsOfInterest, 30*60, targetCoordinateSystem);
 		EventsManager events = EventsUtils.createEventsManager();
 		List<EventHandler> handler = analysis.getEventHandler();
 		for(EventHandler eh : handler){
@@ -406,11 +369,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		analysis.postProcessData();
-		(new File(outputDirectory + "/Act2Mode")).mkdir(); 
-		analysis.writeResults(outputDirectory + "/Act2Mode/");
+		(new File(analysisOutputDirectory + "/Act2Mode")).mkdir(); 
+		analysis.writeResults(analysisOutputDirectory + "/Act2Mode/");
 	}
 
-	private void rAct2ModeWithPlanCoord() {
+	public void rAct2ModeWithPlanCoord() {
 		Set<Id> personsOfInterest = new TreeSet<Id>();
 		//personsOfInterest.add(Id.create("car_11_to_12_Nr100"));
 		
@@ -418,7 +381,7 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 			personsOfInterest.add(id);
 		}
 		
-		ActivityToModeAnalysis analysis = new ActivityToModeAnalysis(scenario, personsOfInterest, 30*60, coordinateSystem);
+		ActivityToModeAnalysis analysis = new ActivityToModeAnalysis(scenario, personsOfInterest, 30*60, targetCoordinateSystem);
 		EventsManager events = EventsUtils.createEventsManager();
 		List<EventHandler> handler = analysis.getEventHandler();
 		for(EventHandler eh : handler){
@@ -427,11 +390,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		analysis.postProcessData();
-		(new File(outputDirectory + "/Act2ModeWithPlanCoord")).mkdir(); 
-		analysis.writeResultsPlanCoords(outputDirectory + "/Act2ModeWithPlanCoord/");
+		(new File(analysisOutputDirectory + "/Act2ModeWithPlanCoord")).mkdir(); 
+		analysis.writeResultsPlanCoords(analysisOutputDirectory + "/Act2ModeWithPlanCoord/");
 	}
 
-	private void rBvgAna(){
+	public final void rBvgAna(){
 		VehDelayAtStopHistogramAnalyzer cda = new VehDelayAtStopHistogramAnalyzer(100);
 		cda.init((MutableScenario) scenario);
 		cda.preProcessData();
@@ -443,8 +406,8 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		cda.postProcessData();
-		(new File(outputDirectory + "/BvgAna")).mkdir(); 
-		cda.writeResults(outputDirectory + "/BvgAna/");
+		(new File(analysisOutputDirectory + "/BvgAna")).mkdir(); 
+		cda.writeResults(analysisOutputDirectory + "/BvgAna/");
 		
 		PtTripTravelTimeTransfersAnalyzer transfer = new PtTripTravelTimeTransfersAnalyzer();
 		transfer.init((MutableScenario) scenario);
@@ -457,13 +420,13 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader2 = new MatsimEventsReader(events2);
 		reader2.readFile(eventFile);
 		transfer.postProcessData();
-		transfer.writeResults(outputDirectory + "/BvgAna/");
+		transfer.writeResults(analysisOutputDirectory + "/BvgAna/");
 		//pTripTransfers.txt empty due to no transfers in the example Scenario
 	}
 
-	private void rBoardingAlightingCountAnalyzer(){
+	public final void rBoardingAlightingCountAnalyzer(){
 		BoardingAlightingCountAnalyzer ba = new BoardingAlightingCountAnalyzer(
-				scenario, 30*60, coordinateSystem);
+				scenario, 30*60, targetCoordinateSystem);
 		EventsManager events = EventsUtils.createEventsManager();
 		List<EventHandler> handler = ba.getEventHandler();
 		for(EventHandler eh : handler){
@@ -472,11 +435,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		ba.postProcessData();
-		(new File(outputDirectory + "/BoardingAlightingCountAnalyzer")).mkdir(); 
-		ba.writeResults(outputDirectory + "/BoardingAlightingCountAnalyzer/");
+		(new File(analysisOutputDirectory + "/BoardingAlightingCountAnalyzer")).mkdir(); 
+		ba.writeResults(analysisOutputDirectory + "/BoardingAlightingCountAnalyzer/");
 	}
 	
-	private void rCarDistanceAnalyzer() {
+	public final void rCarDistanceAnalyzer() {
 		CarDistanceAnalyzer cda = new CarDistanceAnalyzer();
 		cda.init((MutableScenario) scenario);
 		cda.preProcessData();
@@ -488,11 +451,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		cda.postProcessData();
-		(new File(outputDirectory + "/CarDistanceAnalyzer")).mkdir(); 
-		cda.writeResults(outputDirectory + "/CarDistanceAnalyzer/");
+		(new File(analysisOutputDirectory + "/CarDistanceAnalyzer")).mkdir(); 
+		cda.writeResults(analysisOutputDirectory + "/CarDistanceAnalyzer/");
 	}
 	
-	private void rEmissionsAnalyzer() {
+	public final void rEmissionsAnalyzer() {
 		 //insert emissions event file
 		EmissionsAnalyzer ema = new EmissionsAnalyzer("Z:/WinHome/ArbeitWorkspace/Analyzer/output/test1/ITERS/it.10/10.events.xml.gz");
 		ema.init((MutableScenario) scenario);
@@ -505,19 +468,19 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		ema.postProcessData();
-		(new File(outputDirectory + "/EmissionsAnalyzer")).mkdir(); 
-		ema.writeResults(outputDirectory + "/EmissionsAnalyzer/");
+		(new File(analysisOutputDirectory + "/EmissionsAnalyzer")).mkdir(); 
+		ema.writeResults(analysisOutputDirectory + "/EmissionsAnalyzer/");
 	}
 	
-	private void rLegModeDistanceDistribution(){
+	public final void rLegModeDistanceDistribution(){
 		LegModeDistanceDistribution lmdd = new LegModeDistanceDistribution();
 		lmdd.init(scenario);
 		lmdd.postProcessData();
-		(new File(outputDirectory + "/LegModeDistanceDistribution")).mkdir(); 
-		lmdd.writeResults(outputDirectory + "/LegModeDistanceDistribution/");
+		(new File(analysisOutputDirectory + "/LegModeDistanceDistribution")).mkdir(); 
+		lmdd.writeResults(analysisOutputDirectory + "/LegModeDistanceDistribution/");
 	}
 	
-	private void rMonetaryPaymentsAnalyzer(){
+	public final void rMonetaryPaymentsAnalyzer(){
 		MonetaryPaymentsAnalyzer mpa = new MonetaryPaymentsAnalyzer();
 		mpa.init((MutableScenario) scenario);
 		EventsManager events = EventsUtils.createEventsManager();
@@ -528,30 +491,30 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		mpa.postProcessData();
-		(new File(outputDirectory + "/MonetaryPaymentsAnalyzer")).mkdir(); 
-		mpa.writeResults(outputDirectory + "/MonetaryPaymentsAnalyzer/");
+		(new File(analysisOutputDirectory + "/MonetaryPaymentsAnalyzer")).mkdir(); 
+		mpa.writeResults(analysisOutputDirectory + "/MonetaryPaymentsAnalyzer/");
 	}
 	
-	private void rNetworkAnalyzer(){//TODO: Change Analyzer to use the scenario as input instead of path to network file
-		NetworkAnalyzer nea = new NetworkAnalyzer(pathToScenarioData + "input/network.xml", coordinateSystem);
+	public final void rNetworkAnalyzer(){//TODO: Change Analyzer to use the scenario as input instead of path to network file
+		NetworkAnalyzer nea = new NetworkAnalyzer(networkFile, targetCoordinateSystem);
 		//no event handler
 		nea.postProcessData();
-		(new File(outputDirectory + "/NetworkAnalyzer")).mkdir(); 
-		nea.writeResults(outputDirectory + "/NetworkAnalyzer/");
+		(new File(analysisOutputDirectory + "/NetworkAnalyzer")).mkdir(); 
+		nea.writeResults(analysisOutputDirectory + "/NetworkAnalyzer/");
 	}
 	
-	private void rPlansSubset(){
+	public final void rPlansSubset(){
 		Set<Id<Person>> selection = new TreeSet<>();
 		selection.add(Id.create(2, Person.class));
 		selection.add(Id.create(256, Person.class));
 		GetPlansSubset gps = new GetPlansSubset(scenario, selection, true);
 		//gps.preProcessData(); //unused, no EventHandler
 		gps.postProcessData();
-		(new File(outputDirectory + "/PlansSubset")).mkdir(); 
-		gps.writeResults(outputDirectory + "/PlansSubset/");
+		(new File(analysisOutputDirectory + "/PlansSubset")).mkdir(); 
+		gps.writeResults(analysisOutputDirectory + "/PlansSubset/");
 	}
 	
-	private void rPtAccesibility(){
+	public final void rPtAccesibility(){
 		List<Integer> distanceCluster = new ArrayList<Integer>();
 		distanceCluster.add(200);
 		distanceCluster.add(1000);
@@ -567,14 +530,14 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		activityCluster.put("h", home);
 		activityCluster.put("w", work);
 		activityCluster.put("s", shop);
-		PtAccessibility pta = new PtAccessibility(scenario, distanceCluster, 16, activityCluster, coordinateSystem, 10);
+		PtAccessibility pta = new PtAccessibility(scenario, distanceCluster, 16, activityCluster, targetCoordinateSystem, 10);
 		pta.preProcessData();
 		pta.postProcessData();
-		(new File(outputDirectory + "/PtAccessibility")).mkdir(); 
-		pta.writeResults(outputDirectory + "/PtAccessibility/");
+		(new File(analysisOutputDirectory + "/PtAccessibility")).mkdir(); 
+		pta.writeResults(analysisOutputDirectory + "/PtAccessibility/");
 	}
 	
-	private void rPtCircuityAnalysis(){
+	public final void rPtCircuityAnalysis(){
 		MutableScenario sc = (MutableScenario) scenario;
 		Vehicles vehicles = sc.getTransitVehicles();
 		PtCircuityAnalyzer analysis = new PtCircuityAnalyzer(scenario, vehicles);
@@ -587,11 +550,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		analysis.postProcessData();
-		(new File(outputDirectory + "/PtCircuityAnalysis")).mkdir(); 
-		analysis.writeResults(outputDirectory + "/PtCircuityAnalysis/");
+		(new File(analysisOutputDirectory + "/PtCircuityAnalysis")).mkdir(); 
+		analysis.writeResults(analysisOutputDirectory + "/PtCircuityAnalysis/");
 	}
 	
-	private void rPtDriverPrefix(){
+	public final void rPtDriverPrefix(){
 		PtDriverIdAnalyzer pda = new PtDriverIdAnalyzer();
 		pda.init((MutableScenario)scenario);
 		EventsManager events = EventsUtils.createEventsManager();
@@ -601,11 +564,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		}
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
-		(new File(outputDirectory + "/PtDriverIdAnalyzer")).mkdir(); 
-		pda.writeResults(outputDirectory + "/PtDriverIdAnalyzer/");//no output file, only console
+		(new File(analysisOutputDirectory + "/PtDriverIdAnalyzer")).mkdir(); 
+		pda.writeResults(analysisOutputDirectory + "/PtDriverIdAnalyzer/");//no output file, only console
 	}
 	
-	private void rPtLines2PaxAnalysis(){
+	public final void rPtLines2PaxAnalysis(){
 		
 		Map<Id<TransitLine>, TransitLine> lines = scenario.getTransitSchedule().getTransitLines();
 		//scenario.getScenarioElement(vehicles)
@@ -622,34 +585,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		}
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
-		(new File(outputDirectory + "/PtLines2PaxAnalysis")).mkdir(); 
-		ppa.writeResults(outputDirectory + "/PtLines2PaxAnalysis/");
-		
-		//Latex code to insert one example plot, implemented here because file names are known here
-		BufferedWriter w = IOUtils.getBufferedWriter(outputDirectory + "/PtLines2PaxAnalysis/includeExamplePlot.tex");
-		if(lines.size() > 0){
-			Id exampleLine = lines.values().iterator().next().getId();
-			Id exampleRoute = lines.get(exampleLine).getRoutes().values().iterator().next().getId();
-			try {
-				w.write("\\includegraphics[width=0.99\\textwidth, page=1]{" +
-						"PtLines2PaxAnalysis/" + exampleLine.toString() +
-						"--" + exampleRoute.toString() + ".pdf}\n" + 
-						exampleLine.toString() + "\n");
-				w.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			try{
-				w.write("No transit line found, therefore no plot to be shown.");
-				w.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		(new File(analysisOutputDirectory + "/PtLines2PaxAnalysis")).mkdir(); 
+		ppa.writeResults(analysisOutputDirectory + "/PtLines2PaxAnalysis/");
 	}
 	
-	private void rPtOperator(){
+	public final void rPtOperator(){
 		PtOperatorAnalyzer poa = new PtOperatorAnalyzer();
 		poa.init((MutableScenario)scenario);
 		poa.preProcessData();
@@ -661,12 +601,12 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		poa.postProcessData();
-		(new File(outputDirectory + "/PtOperator")).mkdir(); 
-		poa.writeResults(outputDirectory + "/PtOperator/");
+		(new File(analysisOutputDirectory + "/PtOperator")).mkdir(); 
+		poa.writeResults(analysisOutputDirectory + "/PtOperator/");
 	}
 	
-	private void rPtPaxVolumes(){
-		PtPaxVolumesAnalyzer ppv = new PtPaxVolumesAnalyzer(scenario, 30.0*60.0, coordinateSystem);
+	public final void rPtPaxVolumes(){
+		PtPaxVolumesAnalyzer ppv = new PtPaxVolumesAnalyzer(scenario, 30.0*60.0, targetCoordinateSystem);
 		EventsManager events = EventsUtils.createEventsManager();
 		List<EventHandler> handler = ppv.getEventHandler();
 		for(EventHandler eh : handler){
@@ -675,11 +615,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		ppv.postProcessData();
-		(new File(outputDirectory + "/PtPaxVolumes")).mkdir(); 
-		ppv.writeResults(outputDirectory + "/PtPaxVolumes/");
+		(new File(analysisOutputDirectory + "/PtPaxVolumes")).mkdir(); 
+		ppv.writeResults(analysisOutputDirectory + "/PtPaxVolumes/");
 	}
 	
-	private void rPtRoutes2PaxAnalysis(){
+	public final void rPtRoutes2PaxAnalysis(){
 		
 		Map<Id<TransitLine>, TransitLine> lines = scenario.getTransitSchedule().getTransitLines();
 		//scenario.getScenarioElement(vehicles)
@@ -696,35 +636,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		}
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
-		(new File(outputDirectory + "/PtRoutes2PaxAnalysis")).mkdir(); 
-		ppa.writeResults(outputDirectory + "/PtRoutes2PaxAnalysis/");
-		
-		//Latex code to insert one example plot, implemented here because file names are known here
-		BufferedWriter w = IOUtils.getBufferedWriter(outputDirectory + "/PtRoutes2PaxAnalysis/includeExamplePlot.tex");
-		if(lines.size() > 0){
-			Id<TransitLine> exampleLine = lines.values().iterator().next().getId();
-			Id exampleRoute = lines.get(exampleLine).getRoutes().values().iterator().next().getId();
-			try {
-				w.write("\\includegraphics[width=0.99\\textwidth, page=1]{" +
-						"PtRoutes2PaxAnalysis/" + exampleLine.toString() +
-						"--" + exampleRoute.toString() + ".pdf}\n" + 
-						exampleLine.toString() + " " + 
-						exampleRoute.toString() + "\n");
-				w.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			try{
-				w.write("No transit line found, therefore no plot to be shown.");
-				w.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		(new File(analysisOutputDirectory + "/PtRoutes2PaxAnalysis")).mkdir(); 
+		ppa.writeResults(analysisOutputDirectory + "/PtRoutes2PaxAnalysis/");
 	}
 	
-	private void rPtTravelStats(){
+	public final void rPtTravelStats(){
 		TravelStatsAnalyzer tsa = new TravelStatsAnalyzer(scenario, 30.0*60.0);
 		EventsManager events = EventsUtils.createEventsManager();
 		List<EventHandler> handler = tsa.getEventHandler();
@@ -733,11 +649,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		}
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
-		(new File(outputDirectory + "/PtTravelStats")).mkdir(); 
-		tsa.writeResults(outputDirectory + "/PtTravelStats/");
+		(new File(analysisOutputDirectory + "/PtTravelStats")).mkdir(); 
+		tsa.writeResults(analysisOutputDirectory + "/PtTravelStats/");
 	}
 	
-	private void rPtTripAnalysis(){
+	public final void rPtTripAnalysis(){
 //		List<String> ptModes = new LinkedList<String>();
 		Set<String> ptModes = scenario.getConfig().transit().getTransitModes();
 		System.out.println("ptModes: " + ptModes);
@@ -750,11 +666,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 //		networkModes.add("car");
 //		networkModes.add("bus");
 		TTtripAnalysis analysis = new TTtripAnalysis(ptModes, networkModes, scenario.getPopulation());
-		(new File(outputDirectory + "/PtTripAnalysis")).mkdir(); 
-		analysis.writeResults(outputDirectory + "/PtTripAnalysis/");
+		(new File(analysisOutputDirectory + "/PtTripAnalysis")).mkdir(); 
+		analysis.writeResults(analysisOutputDirectory + "/PtTripAnalysis/");
 	}
 	
-	private void rStuckAgents(){
+	public final void rStuckAgents(){
 		GetStuckEventsAndPlans stuck = new GetStuckEventsAndPlans(scenario);
 		EventsManager events = EventsUtils.createEventsManager();
 		List<EventHandler> handler = stuck.getEventHandler();
@@ -764,25 +680,25 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		stuck.postProcessData();
-		(new File(outputDirectory + "/StuckAgents")).mkdir(); 
-		stuck.writeResults(outputDirectory + "/StuckAgents/");
+		(new File(analysisOutputDirectory + "/StuckAgents")).mkdir(); 
+		stuck.writeResults(analysisOutputDirectory + "/StuckAgents/");
 		//empty due to no stuck events to be written
 	}
 	
-	private void rTransitSchedule2Shp(){
-		TransitSchedule2Shp tshp = new TransitSchedule2Shp(scenario, coordinateSystem);
-		(new File(outputDirectory + "/TransitSchedule2Shp")).mkdir(); 
-		tshp.writeResults(outputDirectory + "/TransitSchedule2Shp/");
+	public final void rTransitSchedule2Shp(){
+		TransitSchedule2Shp tshp = new TransitSchedule2Shp(scenario, targetCoordinateSystem);
+		(new File(analysisOutputDirectory + "/TransitSchedule2Shp")).mkdir(); 
+		tshp.writeResults(analysisOutputDirectory + "/TransitSchedule2Shp/");
 	}
 	
-	private void rTransitScheduleAnalyser(){
+	public final void rTransitScheduleAnalyser(){
 		TransitScheduleAnalyser tsa = new TransitScheduleAnalyser(scenario);
-		(new File(outputDirectory + "/TransitScheduleAnalyser")).mkdir(); 
-		tsa.writeResults(outputDirectory + "/TransitScheduleAnalyser/");
+		(new File(analysisOutputDirectory + "/TransitScheduleAnalyser")).mkdir(); 
+		tsa.writeResults(analysisOutputDirectory + "/TransitScheduleAnalyser/");
 	}
 	
-	private void rTransitVehicleVolume(){
-		TransitVehicleVolumeAnalyzer tsa = new TransitVehicleVolumeAnalyzer(scenario, 30.0*60.0, coordinateSystem);
+	public final void rTransitVehicleVolume(){
+		TransitVehicleVolumeAnalyzer tsa = new TransitVehicleVolumeAnalyzer(scenario, 30.0*60.0, targetCoordinateSystem);
 		EventsManager events = EventsUtils.createEventsManager();
 		List<EventHandler> handler = tsa.getEventHandler();
 		for(EventHandler eh : handler){
@@ -791,11 +707,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		tsa.postProcessData();
-		(new File(outputDirectory + "/TransitVehicleVolume")).mkdir(); 
-		tsa.writeResults(outputDirectory + "/TransitVehicleVolume/");
+		(new File(analysisOutputDirectory + "/TransitVehicleVolume")).mkdir(); 
+		tsa.writeResults(analysisOutputDirectory + "/TransitVehicleVolume/");
 	}
 		
-	private void rTravelTimeAnalyzer() {
+	public final void rTravelTimeAnalyzer() {
 		TravelTimeAnalyzer tt = new TravelTimeAnalyzer();
 		tt.init((MutableScenario) scenario);
 		tt.preProcessData();
@@ -807,20 +723,20 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		tt.postProcessData();
-		(new File(outputDirectory + "/TravelTimeAnalyzer")).mkdir(); 
-		tt.writeResults(outputDirectory + "/TravelTimeAnalyzer/");
+		(new File(analysisOutputDirectory + "/TravelTimeAnalyzer")).mkdir(); 
+		tt.writeResults(analysisOutputDirectory + "/TravelTimeAnalyzer/");
 	}
 
-	private void rUserBenefits() {
+	public final void rUserBenefits() {
 		UserBenefitsAnalyzer uba = new UserBenefitsAnalyzer();
 		uba.init((MutableScenario) scenario);
 		uba.preProcessData();
-		(new File(outputDirectory + "/UserBenefits")).mkdir(); 
-		uba.writeResults(outputDirectory + "/UserBenefits/");
+		(new File(analysisOutputDirectory + "/UserBenefits")).mkdir(); 
+		uba.writeResults(analysisOutputDirectory + "/UserBenefits/");
 		
 	}
 	
-	private void rWaitingTimes(){
+	public final void rWaitingTimes(){
 		WaitingTimesAnalyzer tt = new WaitingTimesAnalyzer();
 		tt.init((MutableScenario) scenario);
 		tt.preProcessData();
@@ -832,11 +748,11 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		tt.postProcessData();
-		(new File(outputDirectory + "/WaitingTimes")).mkdir(); 
-		tt.writeResults(outputDirectory + "/WaitingTimes/");
+		(new File(analysisOutputDirectory + "/WaitingTimes")).mkdir(); 
+		tt.writeResults(analysisOutputDirectory + "/WaitingTimes/");
 	}
 	
-	private void rWelfareAnalyzer(){
+	public final void rWelfareAnalyzer(){
 		WelfareAnalyzer tt = new WelfareAnalyzer();
 		tt.init((MutableScenario) scenario);
 		tt.preProcessData();
@@ -848,7 +764,7 @@ Information: Building backing store for org.geotools.referencing.factory.epsg.Th
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventFile);
 		tt.postProcessData();
-		(new File(outputDirectory + "/WelfareAnalyzer")).mkdir(); 
-		tt.writeResults(outputDirectory + "/WelfareAnalyzer/");
+		(new File(analysisOutputDirectory + "/WelfareAnalyzer")).mkdir(); 
+		tt.writeResults(analysisOutputDirectory + "/WelfareAnalyzer/");
 	}
 }
