@@ -22,7 +22,6 @@ package gunnar.wum.creation;
 import java.time.LocalDate;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.gtfs.RunGTFS2MATSim;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -59,7 +58,9 @@ public class CreateFullTransitSystem {
 
 		// Convert GTFS
 
-		RunGTFS2MATSim.convertGtfs(gtfsZipFile, scheduleFile, date, ct, false);
+		System.out.println("Commented out line to make this compile.");
+		System.exit(0);
+//		RunGTFS2MATSim.convertGtfs(gtfsZipFile, scheduleFile, date, ct, false);
 
 		// Parse the schedule again
 
