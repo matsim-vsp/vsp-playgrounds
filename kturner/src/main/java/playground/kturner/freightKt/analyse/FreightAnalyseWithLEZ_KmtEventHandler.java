@@ -74,15 +74,15 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 				break;
 			case "medium18t" : emissionsPerMeter = 0.655;
 				break;
-			case "medium18telectro" : emissionsPerMeter = 0.433;
+			case "medium18telectro" : emissionsPerMeter = 0.0; // Assuming carbon-free energy generation; Value before that assupmtion: 0.433;
 				break;
 			case "light8t" : emissionsPerMeter = 0.524;
 				break;
-			case "light8telectro" : emissionsPerMeter = 0.346;
+			case "light8telectro" : emissionsPerMeter = 0.0; // Assuming carbon-free energy generation; Value before that assupmtion: 0.346;
 				break;
 			case "light8t_frozen" : emissionsPerMeter = 0.524;
 				break;
-			case "light8telectro_frozen" : emissionsPerMeter = 0.524;
+			case "light8telectro_frozen" : emissionsPerMeter = 0.0; // Assuming carbon-free energy generation; Value before that assupmtion: 0.524;
 			}
 			log.warn(vehType.getId().toString() + " : No values for emissions defined. Using " + emissionsPerMeter + " instead!");
 				
