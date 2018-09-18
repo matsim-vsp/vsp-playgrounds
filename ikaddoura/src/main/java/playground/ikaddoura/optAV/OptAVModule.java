@@ -62,11 +62,18 @@ import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 
 public class OptAVModule extends AbstractModule {
 	private static final Logger log = Logger.getLogger(OptAVModule.class);
-
-	private final Scenario scenario;
+	
+	private final DecongestionConfigGroup decongestionCfgGroup;
+	private final NoiseConfigGroup noiseCfgGroup;
 
 	public OptAVModule(Scenario scenario) {
-		this.scenario = scenario;
+		this.decongestionCfgGroup = (DecongestionConfigGroup) scenario.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
+		this.noiseCfgGroup = (NoiseConfigGroup) scenario.getConfig().getModules().get(NoiseConfigGroup.GROUP_NAME);
+	}
+	
+	public OptAVModule(DecongestionConfigGroup decongestionCfgGroup, NoiseConfigGroup noiseCfgGroup) {
+		this.decongestionCfgGroup = decongestionCfgGroup;
+		this.noiseCfgGroup = noiseCfgGroup;
 	}
 		
 	private final boolean useDefaultTravelDisutilityInTheCaseWithoutPricing = true;
@@ -161,7 +168,8 @@ public class OptAVModule extends AbstractModule {
 			} else {
 				noiseParams.setInternalizeNoiseDamages(false);
 			}
-			install(new NoiseComputationModuleSAV(scenario));
+			throw new RuntimeException("Not yet implemented. Aborting...");
+//			install(new NoiseComputationModuleSAV(this.noiseCfgGroup)); // TODO: the noise module shouldn't require a scenario at his point; the noise config group should be enough
 		} else {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
@@ -173,7 +181,7 @@ public class OptAVModule extends AbstractModule {
 			} else {
 				decongestionParams.setEnableDecongestionPricing(false);
 			}
-			install(new DecongestionModuleSAV(scenario));
+			install(new DecongestionModuleSAV(this.decongestionCfgGroup));
 		} else {
 			decongestionParams.setEnableDecongestionPricing(false);
 		}
