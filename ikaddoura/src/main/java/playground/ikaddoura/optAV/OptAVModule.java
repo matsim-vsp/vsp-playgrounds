@@ -26,7 +26,6 @@ import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.decongestion.handler.DelayAnalysis;
-import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
@@ -63,17 +62,10 @@ import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 public class OptAVModule extends AbstractModule {
 	private static final Logger log = Logger.getLogger(OptAVModule.class);
 	
-	private final DecongestionConfigGroup decongestionCfgGroup;
-	private final NoiseConfigGroup noiseCfgGroup;
+	private final Scenario scenario;
 
 	public OptAVModule(Scenario scenario) {
-		this.decongestionCfgGroup = (DecongestionConfigGroup) scenario.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
-		this.noiseCfgGroup = (NoiseConfigGroup) scenario.getConfig().getModules().get(NoiseConfigGroup.GROUP_NAME);
-	}
-	
-	public OptAVModule(DecongestionConfigGroup decongestionCfgGroup, NoiseConfigGroup noiseCfgGroup) {
-		this.decongestionCfgGroup = decongestionCfgGroup;
-		this.noiseCfgGroup = noiseCfgGroup;
+		this.scenario = scenario;
 	}
 		
 	private final boolean useDefaultTravelDisutilityInTheCaseWithoutPricing = true;
@@ -168,8 +160,7 @@ public class OptAVModule extends AbstractModule {
 			} else {
 				noiseParams.setInternalizeNoiseDamages(false);
 			}
-			throw new RuntimeException("Not yet implemented. Aborting...");
-//			install(new NoiseComputationModuleSAV(this.noiseCfgGroup)); // TODO: the noise module shouldn't require a scenario at his point; the noise config group should be enough
+			install(new NoiseComputationModuleSAV(this.scenario));
 		} else {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
@@ -181,7 +172,7 @@ public class OptAVModule extends AbstractModule {
 			} else {
 				decongestionParams.setEnableDecongestionPricing(false);
 			}
-			install(new DecongestionModuleSAV(this.decongestionCfgGroup));
+			install(new DecongestionModuleSAV(this.scenario));
 		} else {
 			decongestionParams.setEnableDecongestionPricing(false);
 		}

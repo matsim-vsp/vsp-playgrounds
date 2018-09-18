@@ -19,6 +19,7 @@
 
 package playground.ikaddoura.optAV;
 
+import org.apache.log4j.Logger;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.Config;
@@ -31,6 +32,7 @@ import org.matsim.run.RunBerlinDrtScenario;
 */
 
 public class RunBerlinDrtOptScenario {
+	private static final Logger log = Logger.getLogger(RunBerlinDrtOptScenario.class);
 
 	public static void main(String[] args) {
 		
@@ -73,7 +75,10 @@ public class RunBerlinDrtOptScenario {
 			runId = "drt-opt-1";
 			outputDirectory = baseDirectory + "scenarios/berlin-v5.2-1pct/output-local-run_" + runId + "/";
 		}
-		
+			
+		log.info("run Id: " + runId);
+		log.info("output directory: " + outputDirectory); 
+
 		RunBerlinDrtScenario berlin = new RunBerlinDrtScenario(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
 		
 		ConfigGroup[] modulesToAdd = {new OptAVConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
@@ -82,9 +87,11 @@ public class RunBerlinDrtOptScenario {
 		config.controler().setOutputDirectory(outputDirectory);
 				
 		Controler controler = berlin.prepareControler();		
-		controler.addOverridingModule(new OptAVModule(controler.getScenario()));		
+		controler.addOverridingModule(new DRTpricingModule(controler.getScenario()));		
 		
 		controler.run();
+		
+		log.info("Done.");
 	}
 
 }

@@ -31,6 +31,7 @@ import org.matsim.contrib.decongestion.tollSetting.DecongestionTollSetting;
 import org.matsim.contrib.decongestion.tollSetting.DecongestionTollingBangBang;
 import org.matsim.contrib.decongestion.tollSetting.DecongestionTollingPID;
 import org.matsim.contrib.decongestion.tollSetting.DecongestionTollingP_MCP;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 
 
@@ -43,8 +44,8 @@ public class DecongestionModuleSAV extends AbstractModule {
 
 	private final DecongestionConfigGroup decongestionConfigGroup;
 	
-	public DecongestionModuleSAV(DecongestionConfigGroup decongestionConfigGroup) {
-		this.decongestionConfigGroup = decongestionConfigGroup;
+	public DecongestionModuleSAV(Scenario scenario) {
+		this.decongestionConfigGroup = 	(DecongestionConfigGroup) scenario.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
 	}
 
 	@Override
