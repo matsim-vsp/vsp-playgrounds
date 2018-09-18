@@ -43,8 +43,8 @@ public class DecongestionModuleSAV extends AbstractModule {
 
 	private final DecongestionConfigGroup decongestionConfigGroup;
 	
-	public DecongestionModuleSAV(Scenario scenario) {
-		this.decongestionConfigGroup = (DecongestionConfigGroup) scenario.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
+	public DecongestionModuleSAV(DecongestionConfigGroup decongestionConfigGroup) {
+		this.decongestionConfigGroup = decongestionConfigGroup;
 	}
 
 	@Override
