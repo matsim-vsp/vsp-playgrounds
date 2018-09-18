@@ -79,13 +79,7 @@ public class TagCarAndTaxiUsersModeApproach {
 	
 	private final String modeToReplaceCarTripsInBerlin = TransportMode.taxi;
 	private final String modeToReplaceCarTripsToFromBerlin = TransportMode.pt;
-	private final String berlinModeTail = "";
-//	private final String brandenburgModeTail = "_brandenburg";
-	private final String brandenburgModeTail = "";
-//	private final String fromToBerlinModeTail = "_from-to-berlin";
-	private final String fromToBerlinModeTail = "";
 
-	
 	private final boolean splitTrips = true; 
 	private final Coord[] prCoordinates = {
 			new Coord(4594046.225912675, 5836589.393558677), // S Mühlenbeck-Mönchmühle
@@ -191,11 +185,11 @@ public class TagCarAndTaxiUsersModeApproach {
 					if (isActivityInArea(trip.getOriginActivity()) && isActivityInArea(trip.getDestinationActivity())) {
 						// berlin --> berlin
 						if (mainMode.equals(TransportMode.car)) {				
-							splitTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail ));		
-							directTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail));				
+							splitTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin));		
+							directTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin));				
 						} else {
-							splitTripPlan.addLeg(factory.createLeg(mainMode + berlinModeTail));
-							directTripPlan.addLeg(factory.createLeg(mainMode + berlinModeTail));
+							splitTripPlan.addLeg(factory.createLeg(mainMode));
+							directTripPlan.addLeg(factory.createLeg(mainMode));
 						}
 						
 						splitTripPlan.addActivity(trip.getDestinationActivity());
@@ -206,11 +200,11 @@ public class TagCarAndTaxiUsersModeApproach {
 						
 						// berlin trip
 						if (mainMode.equals(TransportMode.car)) {	
-							splitTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail));
-							directTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsToFromBerlin + fromToBerlinModeTail));
+							splitTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin));
+							directTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsToFromBerlin));
 						} else {
-							splitTripPlan.addLeg(factory.createLeg(mainMode + berlinModeTail));
-							directTripPlan.addLeg(factory.createLeg(mainMode + fromToBerlinModeTail));
+							splitTripPlan.addLeg(factory.createLeg(mainMode));
+							directTripPlan.addLeg(factory.createLeg(mainMode));
 						}
 
 						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPRCoord(person.getId(), trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
@@ -218,7 +212,7 @@ public class TagCarAndTaxiUsersModeApproach {
 						splitTripPlan.addActivity(prActivity);
 						
 						// brandenburg trip
-						splitTripPlan.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
+						splitTripPlan.addLeg(factory.createLeg(mainMode));
 						
 						splitTripPlan.addActivity(trip.getDestinationActivity());		
 						directTripPlan.addActivity(trip.getDestinationActivity());
@@ -227,7 +221,7 @@ public class TagCarAndTaxiUsersModeApproach {
 						// brandenburg --> berlin
 						
 						// brandenburg trip
-						splitTripPlan.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
+						splitTripPlan.addLeg(factory.createLeg(mainMode));
 						
 						Activity prActivity = factory.createActivityFromCoord(parkAndRideActivity, getPRCoord(person.getId(), trip.getOriginActivity().getCoord(), trip.getDestinationActivity().getCoord()));
 						prActivity.setMaximumDuration(parkAndRideDuration);
@@ -235,11 +229,11 @@ public class TagCarAndTaxiUsersModeApproach {
 						
 						// berlin trip
 						if (mainMode.equals(TransportMode.car)) {	
-							splitTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin + berlinModeTail));
-							directTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsToFromBerlin +  fromToBerlinModeTail));
+							splitTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsInBerlin));
+							directTripPlan.addLeg(factory.createLeg(modeToReplaceCarTripsToFromBerlin));
 						} else {
-							splitTripPlan.addLeg(factory.createLeg(mainMode + berlinModeTail));
-							directTripPlan.addLeg(factory.createLeg(mainMode + fromToBerlinModeTail));
+							splitTripPlan.addLeg(factory.createLeg(mainMode));
+							directTripPlan.addLeg(factory.createLeg(mainMode));
 						}
 						
 						splitTripPlan.addActivity(trip.getDestinationActivity());			
@@ -247,8 +241,8 @@ public class TagCarAndTaxiUsersModeApproach {
 						
 					} else if (!isActivityInArea(trip.getOriginActivity()) && !isActivityInArea(trip.getDestinationActivity())){
 						// brandenburg --> brandenburg
-						splitTripPlan.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
-						directTripPlan.addLeg(factory.createLeg(mainMode + brandenburgModeTail));
+						splitTripPlan.addLeg(factory.createLeg(mainMode));
+						directTripPlan.addLeg(factory.createLeg(mainMode));
 						
 						splitTripPlan.addActivity(trip.getDestinationActivity());
 						directTripPlan.addActivity(trip.getDestinationActivity());
@@ -265,7 +259,6 @@ public class TagCarAndTaxiUsersModeApproach {
 		}		
 		log.info("Done.");
 		return populationOutput;
-		
 	}
 
 	private Coord getPRCoord(Id<Person> id, Coord coordOrigin, Coord coordDestination) {
