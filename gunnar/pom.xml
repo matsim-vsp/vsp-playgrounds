@@ -59,7 +59,8 @@
 		<dependency>
   			<groupId>org.matsim.contrib</groupId>
   			<artifactId>pseudosimulation</artifactId>
-  			<version>0.11.0-SNAPSHOT</version>
+			<version>deterministic-psim</version>
+  			<!-- <version>0.11.0-SNAPSHOT</version> -->
   		</dependency>
 
 		<!-- 
@@ -101,7 +102,12 @@
 	    	<version>3.12</version>
     	</dependency>
     
-  
+   		<dependency>
+  			<groupId>ch.sbb</groupId>
+  			<artifactId>matsim-sbb-extensions</artifactId>
+  			<version>0.11.0-SNAPSHOT</version>
+  		</dependency>  
+  		
 	</dependencies>
 
 </project>
