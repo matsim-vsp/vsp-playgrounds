@@ -110,11 +110,11 @@
 	    <version>-SNAPSHOT</version>
 	</dependency>
 	
-	<dependency>
-	    <groupId>com.github.matsim-vsp</groupId>
-	    <artifactId>matsim-berlin</artifactId>
-	    <version>drt-in-berlin-SNAPSHOT</version>
-	</dependency>
+<!-- 	<dependency> -->
+<!-- 	    <groupId>com.github.matsim-vsp</groupId> -->
+<!-- 	    <artifactId>matsim-berlin</artifactId> -->
+<!-- 	    <version>drt-in-berlin-SNAPSHOT</version> -->
+<!-- 	</dependency> -->
 
 <!-- 	<dependency> -->
 <!-- 	    <groupId>org.matsim</groupId> -->
