@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
@@ -146,6 +147,9 @@ public class RunBerlinDrtPricingScenario {
 		filter3.setPersonAttributeName("home-activity-zone");
 		filter3.preProcess(controler.getScenario());
 		filters.add(filter3);
+		
+		List<String> modes = new ArrayList<>();
+		modes.add(TransportMode.car);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				controler.getScenario(),
@@ -157,7 +161,8 @@ public class RunBerlinDrtPricingScenario {
 				homeActivity,
 				scalingFactor,
 				filters,
-				null);
+				null,
+				modes);
 		analysis.run();
 		
 		// noise post-analysis

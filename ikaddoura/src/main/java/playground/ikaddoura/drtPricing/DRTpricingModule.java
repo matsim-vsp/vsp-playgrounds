@@ -31,6 +31,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
+import org.matsim.run.RunBerlinDrtScenario;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.AnalysisControlerListener;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
@@ -122,9 +123,15 @@ public class DRTpricingModule extends AbstractModule {
 					+ " It may make sense to charge a slighlty higher fare...");
 		}
 		
-		DrtPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), DrtPricingConfigGroup.class);
+		DrtPricingConfigGroup drtPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), DrtPricingConfigGroup.class);
 
-		if (optAVParams.getFixCostsSAVinsteadOfCar() > 0) {
+		drtPricingParams.setAccountForCongestion(false);
+		drtPricingParams.setAccountForNoise(false);
+		drtPricingParams.setChargeSAVTollsFromPassengers(false);
+		drtPricingParams.setChargeTollsFromCarUsers(false);
+		drtPricingParams.setChargeTollsFromSAVDriver(false);
+		
+		if (drtPricingParams.getFixCostsSAVinsteadOfCar() > 0) {
 			log.warn("Daily SAV fix costs (per user) should be lower than 0, meaning SAV users who are no longer private car users should 'earn' something."); 
 		}
 		
@@ -142,7 +149,7 @@ public class DRTpricingModule extends AbstractModule {
 		// fix cost pricing
 		// #############################
 		
-		if (optAVParams.getFixCostsSAVinsteadOfCar() != 0.) {
+		if (drtPricingParams.getFixCostsSAVinsteadOfCar() != 0.) {
 			this.bind(SAVFixCostHandler.class).asEagerSingleton();
 			addEventHandlerBinding().to(SAVFixCostHandler.class);
 		}
@@ -151,11 +158,11 @@ public class DRTpricingModule extends AbstractModule {
         // noise and congestion pricing
         // #############################
 		
-		if (optAVParams.isAccountForNoise()) {
+		if (drtPricingParams.isAccountForNoise()) {
 			
 			// TODO: make sure the noise package works for any network mode
 						
-			if (optAVParams.isChargeSAVTollsFromPassengers() || optAVParams.isChargeTollsFromCarUsers() || optAVParams.isChargeTollsFromSAVDriver()) {
+			if (drtPricingParams.isChargeSAVTollsFromPassengers() || drtPricingParams.isChargeTollsFromCarUsers() || drtPricingParams.isChargeTollsFromSAVDriver()) {
 				noiseParams.setInternalizeNoiseDamages(true);
 			} else {
 				noiseParams.setInternalizeNoiseDamages(false);
@@ -165,11 +172,11 @@ public class DRTpricingModule extends AbstractModule {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
 				
-		if (optAVParams.isAccountForCongestion()) {
+		if (drtPricingParams.isAccountForCongestion()) {
 			
 			// TODO: make sure the decongestion package works for any network mode
 						
-			if (optAVParams.isChargeSAVTollsFromPassengers() || optAVParams.isChargeTollsFromCarUsers() || optAVParams.isChargeTollsFromSAVDriver()) {
+			if (drtPricingParams.isChargeSAVTollsFromPassengers() || drtPricingParams.isChargeTollsFromCarUsers() || drtPricingParams.isChargeTollsFromSAVDriver()) {
 				decongestionParams.setEnableDecongestionPricing(true);
 			} else {
 				decongestionParams.setEnableDecongestionPricing(false);
@@ -185,7 +192,7 @@ public class DRTpricingModule extends AbstractModule {
 		               
 		// drt_optimizer
 		
-		if (optAVParams.isChargeTollsFromSAVDriver()) {
+		if (drtPricingParams.isChargeTollsFromSAVDriver()) {
 			
 			install(new DvrpMoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));
 			
@@ -212,17 +219,17 @@ public class DRTpricingModule extends AbstractModule {
 		
 		// car user
 		
-		if (optAVParams.isChargeTollsFromCarUsers()) {
+		if (drtPricingParams.isChargeTollsFromCarUsers()) {
 			
 			// TODO: make sure the decongestion package works for any network mode
 			
 			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
         			new MoneyTimeDistanceTravelDisutilityFactory(
-        				new RandomizingTimeDistanceTravelDisutilityFactory("car_bb", this.getConfig().planCalcScore())
+        				new RandomizingTimeDistanceTravelDisutilityFactory(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg, this.getConfig().planCalcScore())
         			);
-        		install(new MoneyTravelDisutilityModule("car_bb", dvrpTravelDisutilityFactory));
+        		install(new MoneyTravelDisutilityModule(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg, dvrpTravelDisutilityFactory));
 			
-  			throw new RuntimeException("Not tested for 'car_bb'. Aborting!"); // TODO
+  			throw new RuntimeException("Not tested for " + RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg + ". Aborting!"); // TODO
 
 		} else {	
 			
@@ -230,42 +237,20 @@ public class DRTpricingModule extends AbstractModule {
 				log.info("Using the default travel disutility for car drivers (case without pricing).");
 			} else {
 				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-					new RandomizingTimeDistanceTravelDisutilityFactory("car_bb", this.getConfig().planCalcScore()); 
-				this.addTravelDisutilityFactoryBinding("car_bb").toInstance(defaultTravelDisutilityFactory);
+					new RandomizingTimeDistanceTravelDisutilityFactory(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg, this.getConfig().planCalcScore()); 
+				this.addTravelDisutilityFactoryBinding(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg).toInstance(defaultTravelDisutilityFactory);
 			}
 		}
 		
 		// account for vehicle type (taxi vs. car user)
-		if ((optAVParams.isChargeTollsFromCarUsers() == false && optAVParams.isChargeTollsFromSAVDriver() == true) 
-				|| (optAVParams.isChargeTollsFromCarUsers() == true && optAVParams.isChargeTollsFromSAVDriver() == false))  {
+		if ((drtPricingParams.isChargeTollsFromCarUsers() == false && drtPricingParams.isChargeTollsFromSAVDriver() == true) 
+				|| (drtPricingParams.isChargeTollsFromCarUsers() == true && drtPricingParams.isChargeTollsFromSAVDriver() == false))  {
 			
 			log.info("Using an agent filter which differentiates between taxi and other vehicles...");
 			this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
 		} else {
 			log.info("Not binding any agent filter. "
 					+ "The computation of average toll payments does not differentiate between taxi/rt and a normal car.");
-		}
-		
-		// #############################
-		// analysis
-		// #############################
-		
-		if (optAVParams.isRunDefaultAnalysis()) {
-			this.bind(BasicPersonTripAnalysisHandler.class).asEagerSingleton();
-			this.addEventHandlerBinding().to(BasicPersonTripAnalysisHandler.class);
-
-			this.bind(NoiseAnalysisHandler.class).asEagerSingleton();
-			this.addEventHandlerBinding().to(NoiseAnalysisHandler.class);
-
-			this.bind(PersonMoneyLinkHandler.class).asEagerSingleton();
-			this.addEventHandlerBinding().to(PersonMoneyLinkHandler.class);
-			
-			if (!optAVParams.isAccountForCongestion()) {
-				this.bind(DelayAnalysis.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(DelayAnalysis.class);
-			}
-			
-			this.addControlerListenerBinding().to(AnalysisControlerListener.class);
 		}
 				
 	}

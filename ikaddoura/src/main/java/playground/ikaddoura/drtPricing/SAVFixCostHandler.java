@@ -25,7 +25,6 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
@@ -35,6 +34,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.run.RunBerlinDrtScenario;
 
 import com.google.inject.Inject;
 
@@ -103,7 +103,7 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 		for (PlanElement pE : selectedPlan.getPlanElements()) {
 			if (pE instanceof Leg) {
 				Leg leg = (Leg) pE;
-				if (leg.getMode().equals("car_bb")) {
+				if (leg.getMode().equals(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg)) {
 					personWithoutCarTrips = false;
 				}	
 			}	

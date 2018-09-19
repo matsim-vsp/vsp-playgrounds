@@ -39,9 +39,7 @@ public class DrtPricingConfigGroup extends ReflectiveConfigGroup {
 	private boolean chargeTollsFromSAVDriver = true;
 	private boolean chargeSAVTollsFromPassengers = true;
 	private boolean chargeTollsFromCarUsers = true;
-	
-	private boolean runDefaultAnalysis = true;
-	
+		
 	private double fixCostsSAVinsteadOfCar = -10.; // negative values are interpreted as a revenue for no longer owning a car
 
 	@StringGetter( "accountForCongestion" )
@@ -82,16 +80,6 @@ public class DrtPricingConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter( "fixCostsSAVinsteadOfCar" )
 	public void setFixCostsSAVinsteadOfCar(double fixCostsSAVinsteadOfCar) {
 		this.fixCostsSAVinsteadOfCar = fixCostsSAVinsteadOfCar;
-	}
-
-	@StringGetter( "runDefaultAnalysis" )
-	public boolean isRunDefaultAnalysis() {
-		return runDefaultAnalysis;
-	}
-
-	@StringSetter( "runDefaultAnalysis" )
-	public void setRunDefaultAnalysis(boolean runDefaultAnalysis) {
-		this.runDefaultAnalysis = runDefaultAnalysis;
 	}
 
 	@StringGetter( "chargeTollsFromCarUsers" )
