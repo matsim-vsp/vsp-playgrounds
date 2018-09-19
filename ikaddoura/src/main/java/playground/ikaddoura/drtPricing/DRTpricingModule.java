@@ -31,7 +31,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
-import org.matsim.run.RunBerlinDrtScenario;
+import org.matsim.runDRT.RunBerlinDrtScenario;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.AnalysisControlerListener;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;

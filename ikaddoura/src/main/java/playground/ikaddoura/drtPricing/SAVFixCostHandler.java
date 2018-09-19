@@ -34,7 +34,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.run.RunBerlinDrtScenario;
+import org.matsim.runDRT.RunBerlinDrtScenario;
 
 import com.google.inject.Inject;
 

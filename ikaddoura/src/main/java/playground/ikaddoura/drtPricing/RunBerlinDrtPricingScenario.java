@@ -33,7 +33,7 @@ import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.run.RunBerlinDrtScenario;
+import org.matsim.runDRT.RunBerlinDrtScenario;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
