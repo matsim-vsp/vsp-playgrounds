@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.drtPricing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +89,7 @@ public class RunBerlinDrtPricingScenario {
 			transitStopCoordinatesSFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_S-zoneC.csv";
 			transitStopCoordinatesRBFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_RB-zoneC.csv";
 			
-			runId = "drt-opt-1";
+			runId = "drt-opt-2";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/drtPricing/output/output-local-run_" + runId + "/";
 			
 			visualizationScriptDirectory = "./visualization-scripts/";
@@ -100,13 +100,13 @@ public class RunBerlinDrtPricingScenario {
 
 		RunBerlinDrtScenario berlin = new RunBerlinDrtScenario(configFileName, overridingConfigFileName, turnDefaultScenarioIntoDrtScenario, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
 		
-		ConfigGroup[] modulesToAdd = {new OptAVConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
+		ConfigGroup[] modulesToAdd = {new DrtPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
 		config.controler().setRunId(runId);
 		config.controler().setOutputDirectory(outputDirectory);
 						
 		Controler controler = berlin.prepareControler();		
-//		controler.addOverridingModule(new DRTpricingModule(controler.getScenario()));
+		controler.addOverridingModule(new DRTpricingModule(controler.getScenario()));
 		
 		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {
 			
@@ -162,7 +162,7 @@ public class RunBerlinDrtPricingScenario {
 		
 		// noise post-analysis
 		
-		OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(controler.getConfig(), OptAVConfigGroup.class);
+		DrtPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(controler.getConfig(), DrtPricingConfigGroup.class);
 		if (optAVParams.isAccountForNoise()) {
 			String immissionsDir = controler.getConfig().controler().getOutputDirectory() + "/ITERS/it." + controler.getConfig().controler().getLastIteration() + "/immissions/";
 			String receiverPointsFile = controler.getConfig().controler().getOutputDirectory() + "/receiverPoints/receiverPoints.csv";

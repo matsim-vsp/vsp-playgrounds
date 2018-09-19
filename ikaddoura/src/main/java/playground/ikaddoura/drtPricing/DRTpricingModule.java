@@ -17,18 +17,16 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.drtPricing;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.decongestion.handler.DelayAnalysis;
+import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.noise.NoiseConfigGroup;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
-import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
@@ -38,13 +36,13 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.AnalysisControle
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
+import playground.ikaddoura.drtPricing.congestionAV.DecongestionModuleSAV;
+import playground.ikaddoura.drtPricing.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
+import playground.ikaddoura.drtPricing.disutility.DvrpMoneyTravelDisutilityModule;
+import playground.ikaddoura.drtPricing.noiseAV.NoiseComputationModuleSAV;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
-import playground.ikaddoura.optAV.congestionAV.DecongestionModuleSAV;
-import playground.ikaddoura.optAV.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.optAV.disutility.DvrpMoneyTravelDisutilityModule;
-import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 
 /**
  * Idea:
@@ -77,54 +75,54 @@ public class DRTpricingModule extends AbstractModule {
 		// consistency check
 		// #############################
 		
-		ModeParams taxiOptimizerModeParams = null;
-		if (this.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) != null) {
-			taxiOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER);
+		ModeParams drtOptimizerModeParams = null;
+		if (this.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER) != null) {
+			drtOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER);
 		} else {
-			throw new RuntimeException("There is no 'taxi_optimizer' mode in the planCalcScore config group.");
+			throw new RuntimeException("There is no 'drt_optimizer' mode in the planCalcScore config group.");
 		}
 		
-		ModeParams taxiModeParams = null;
-		if (this.getConfig().planCalcScore().getModes().get(TransportMode.taxi) != null) {
-			taxiModeParams = this.getConfig().planCalcScore().getModes().get(TransportMode.taxi);
+		ModeParams drtModeParams = null;
+		if (this.getConfig().planCalcScore().getModes().get(TransportMode.drt) != null) {
+			drtModeParams = this.getConfig().planCalcScore().getModes().get(TransportMode.drt);
 		} else {
 			throw new RuntimeException("There is no 'taxi' mode in the planCalcScore config group.");
 		}
 		
-		if (taxiOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
+		if (drtOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
 			log.warn("The monetary distance rate for 'taxi_optimizer' is zero. Are you sure, the operating costs are zero?");
 		}
 		
-		if (taxiOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
+		if (drtOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
 			log.warn("The monetary distance rate for 'taxi_optimizer' should be negative.");
 		}
 		
-		if (taxiOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
+		if (drtOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
 			log.warn("The marginal utility of distance for 'taxi_optimizer' should be zero.");
 		}
 		
-		if (taxiModeParams.getMonetaryDistanceRate() != 0.) {
+		if (drtModeParams.getMonetaryDistanceRate() != 0.) {
 			log.warn("The monetary distance rate for 'taxi' should be zero. The fare is considered somewhere else.");
 		}
 		
-		if (taxiModeParams.getMarginalUtilityOfDistance() != 0.) {
+		if (drtModeParams.getMarginalUtilityOfDistance() != 0.) {
 			log.warn("The marginal utility of distance for 'taxi' should be zero.");
 		}
 		
-		if (taxiOptimizerModeParams.getMarginalUtilityOfTraveling() != taxiModeParams.getMarginalUtilityOfTraveling()) {
+		if (drtOptimizerModeParams.getMarginalUtilityOfTraveling() != drtModeParams.getMarginalUtilityOfTraveling()) {
 			log.warn("The marginal utility of traveling for 'taxi' and 'taxi_optimizer' should be the same..."
 					+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
 		}
 		
 		TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
 		
-		if (taxiOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
+		if (drtOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
 			log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer' should be (approximately) the same..."
 					+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
 					+ " It may make sense to charge a slighlty higher fare...");
 		}
 		
-		OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), OptAVConfigGroup.class);
+		DrtPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), DrtPricingConfigGroup.class);
 
 		if (optAVParams.getFixCostsSAVinsteadOfCar() > 0) {
 			log.warn("Daily SAV fix costs (per user) should be lower than 0, meaning SAV users who are no longer private car users should 'earn' something."); 
@@ -144,7 +142,7 @@ public class DRTpricingModule extends AbstractModule {
 		// fix cost pricing
 		// #############################
 		
-		if (optAVParams.getFixCostsSAVinsteadOfCar() != 0. || optAVParams.getDailyFixCostAllSAVusers() != 0.) {
+		if (optAVParams.getFixCostsSAVinsteadOfCar() != 0.) {
 			this.bind(SAVFixCostHandler.class).asEagerSingleton();
 			addEventHandlerBinding().to(SAVFixCostHandler.class);
 		}
@@ -154,6 +152,8 @@ public class DRTpricingModule extends AbstractModule {
         // #############################
 		
 		if (optAVParams.isAccountForNoise()) {
+			
+			// TODO: make sure the noise package works for any network mode
 						
 			if (optAVParams.isChargeSAVTollsFromPassengers() || optAVParams.isChargeTollsFromCarUsers() || optAVParams.isChargeTollsFromSAVDriver()) {
 				noiseParams.setInternalizeNoiseDamages(true);
@@ -166,6 +166,8 @@ public class DRTpricingModule extends AbstractModule {
 		}
 				
 		if (optAVParams.isAccountForCongestion()) {
+			
+			// TODO: make sure the decongestion package works for any network mode
 						
 			if (optAVParams.isChargeSAVTollsFromPassengers() || optAVParams.isChargeTollsFromCarUsers() || optAVParams.isChargeTollsFromSAVDriver()) {
 				decongestionParams.setEnableDecongestionPricing(true);
@@ -177,26 +179,15 @@ public class DRTpricingModule extends AbstractModule {
 			decongestionParams.setEnableDecongestionPricing(false);
 		}
 		
-		// #############################
-		// dvrp / taxi
-		// #############################
-
-//		DvrpConfigGroup.get(this.getConfig()).setMode(TransportMode.taxi);
-//		DvrpConfigGroup.get(this.getConfig()).setNetworkMode(TransportMode.car);
-		this.getConfig().addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
-		this.getConfig().checkConsistency();
-        
-		if (optAVParams.isChargeOperatingCostsFromPassengers()) addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-		
         // #############################
         // travel disutility
         // #############################
 		               
-		// taxi_optimizer
+		// drt_optimizer
 		
 		if (optAVParams.isChargeTollsFromSAVDriver()) {
 			
-			install(new DvrpMoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));
+			install(new DvrpMoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));
 			
 //			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
 //			new MoneyTimeDistanceTravelDisutilityFactory(
@@ -207,9 +198,9 @@ public class DRTpricingModule extends AbstractModule {
 		} else {
 			
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
-				log.info("Using the default travel disutility for SAV drivers / the taxi optimizer (case without pricing).");
+				log.info("Using the default travel disutility for SAV drivers / the drt optimizer (case without pricing).");
 			} else {
-				install(new DvrpMoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));		
+				install(new DvrpMoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));		
 				
 //				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
 //	        			new MoneyTimeDistanceTravelDisutilityFactory(
@@ -223,20 +214,24 @@ public class DRTpricingModule extends AbstractModule {
 		
 		if (optAVParams.isChargeTollsFromCarUsers()) {
 			
+			// TODO: make sure the decongestion package works for any network mode
+			
 			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
         			new MoneyTimeDistanceTravelDisutilityFactory(
-        				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore())
+        				new RandomizingTimeDistanceTravelDisutilityFactory("car_bb", this.getConfig().planCalcScore())
         			);
-        		install(new MoneyTravelDisutilityModule(TransportMode.car, dvrpTravelDisutilityFactory));
+        		install(new MoneyTravelDisutilityModule("car_bb", dvrpTravelDisutilityFactory));
 			
+  			throw new RuntimeException("Not tested for 'car_bb'. Aborting!"); // TODO
+
 		} else {	
 			
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
 				log.info("Using the default travel disutility for car drivers (case without pricing).");
 			} else {
 				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-					new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, this.getConfig().planCalcScore()); 
-				this.addTravelDisutilityFactoryBinding(TransportMode.car).toInstance(defaultTravelDisutilityFactory);
+					new RandomizingTimeDistanceTravelDisutilityFactory("car_bb", this.getConfig().planCalcScore()); 
+				this.addTravelDisutilityFactoryBinding("car_bb").toInstance(defaultTravelDisutilityFactory);
 			}
 		}
 		
