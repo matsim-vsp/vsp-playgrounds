@@ -40,8 +40,9 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.optAV.OptAVConfigGroup;
-import playground.ikaddoura.optAV.SAVPassengerTracker;
+import playground.ikaddoura.drtPricing.DrtPricingConfigGroup;
+import playground.ikaddoura.drtPricing.SAVPassengerTracker;
+
 
 
 /**
@@ -60,7 +61,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	private NoiseContext noiseContext;
 	
 	@Inject
-	private OptAVConfigGroup optAVParams;
+	private DrtPricingConfigGroup optAVParams;
 	
 	@Inject
 	private SAVPassengerTracker savPassengerTracker;

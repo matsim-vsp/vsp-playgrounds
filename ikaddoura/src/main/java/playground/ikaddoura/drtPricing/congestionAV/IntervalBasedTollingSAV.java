@@ -38,8 +38,8 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.optAV.OptAVConfigGroup;
-import playground.ikaddoura.optAV.SAVPassengerTracker;
+import playground.ikaddoura.drtPricing.DrtPricingConfigGroup;
+import playground.ikaddoura.drtPricing.SAVPassengerTracker;
 
 /**
  * Throws agent money events for the tolled links and time bins.
@@ -61,7 +61,7 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 	private SAVPassengerTracker tracker;
 	
 	@Inject
-	private OptAVConfigGroup optAVParams;
+	private DrtPricingConfigGroup optAVParams;
 	
 	private double totalTollPayments;
 	private Map<Id<Vehicle>, Double> vehicle2tollToBeChargedFromNextPassenger = new HashMap<>();

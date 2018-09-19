@@ -123,14 +123,7 @@ public class DRTpricingModule extends AbstractModule {
 					+ " It may make sense to charge a slighlty higher fare...");
 		}
 		
-		DrtPricingConfigGroup drtPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), DrtPricingConfigGroup.class);
-
-		drtPricingParams.setAccountForCongestion(false);
-		drtPricingParams.setAccountForNoise(false);
-		drtPricingParams.setChargeSAVTollsFromPassengers(false);
-		drtPricingParams.setChargeTollsFromCarUsers(false);
-		drtPricingParams.setChargeTollsFromSAVDriver(false);
-		
+		DrtPricingConfigGroup drtPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), DrtPricingConfigGroup.class);		
 		if (drtPricingParams.getFixCostsSAVinsteadOfCar() > 0) {
 			log.warn("Daily SAV fix costs (per user) should be lower than 0, meaning SAV users who are no longer private car users should 'earn' something."); 
 		}
@@ -229,8 +222,6 @@ public class DRTpricingModule extends AbstractModule {
         			);
         		install(new MoneyTravelDisutilityModule(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg, dvrpTravelDisutilityFactory));
 			
-  			throw new RuntimeException("Not tested for " + RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg + ". Aborting!"); // TODO
-
 		} else {	
 			
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {

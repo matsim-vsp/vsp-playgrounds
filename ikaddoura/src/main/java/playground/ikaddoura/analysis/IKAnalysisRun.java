@@ -807,16 +807,17 @@ public class IKAnalysisRun {
 		}
 		log.info("Creating leg histogram video for all modes... Done.");
 
-		for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
-			try {
-				log.info("Creating leg histogram video for mode " + mode);
-				MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
-				log.info("Creating leg histogram video for mode " + mode + " Done.");
-			} catch (IOException e) {
-				e.printStackTrace();
+		if (scenario.getConfig().controler().getLastIteration() - scenario.getConfig().controler().getFirstIteration() > 0) {
+			for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
+				try {
+					log.info("Creating leg histogram video for mode " + mode);
+					MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+					log.info("Creating leg histogram video for mode " + mode + " Done.");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-
 	}
 	
 	private void createDirectory(String directory) {
