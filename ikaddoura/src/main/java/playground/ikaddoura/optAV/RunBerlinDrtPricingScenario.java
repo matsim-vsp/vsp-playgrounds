@@ -58,6 +58,8 @@ public class RunBerlinDrtPricingScenario {
 		String outputDirectory;
 
 		String visualizationScriptDirectory;
+		
+		final boolean turnDefaultScenarioIntoDrtScenario = true;
 
 		if (args.length > 0) {
 			
@@ -96,7 +98,7 @@ public class RunBerlinDrtPricingScenario {
 		log.info("run Id: " + runId);
 		log.info("output directory: " + outputDirectory); 
 
-		RunBerlinDrtScenario berlin = new RunBerlinDrtScenario(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
+		RunBerlinDrtScenario berlin = new RunBerlinDrtScenario(configFileName, overridingConfigFileName, turnDefaultScenarioIntoDrtScenario, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
 		
 		ConfigGroup[] modulesToAdd = {new OptAVConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
