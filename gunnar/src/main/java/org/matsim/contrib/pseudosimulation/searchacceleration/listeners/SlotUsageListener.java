@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.pseudosimulation.searchacceleration;
+package org.matsim.contrib.pseudosimulation.searchacceleration.listeners;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -35,6 +35,7 @@ import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.pseudosimulation.searchacceleration.utils.SetUtils;
 import org.matsim.vehicles.Vehicles;
@@ -44,7 +45,7 @@ import org.matsim.vehicles.Vehicles;
  * @author Gunnar Flötteröd
  *
  */
-class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
+public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
 		PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
 
 	// -------------------- MEMBERS --------------------
@@ -59,7 +60,7 @@ class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTrafficEv
 
 	// -------------------- CONSTRUCTION --------------------
 
-	SlotUsageListener(final Population population, final Vehicles transitVehicles,
+	public SlotUsageListener(final Population population, final Vehicles transitVehicles,
 			final AccelerationConfigGroup accelerationConfig) {
 		if (!SetUtils.disjoint(population.getPersons().keySet(), transitVehicles.getVehicles().keySet())) {
 			throw new RuntimeException("Population ids and transit vehicle ids are not disjoint.");
@@ -74,12 +75,12 @@ class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTrafficEv
 
 	// -------------------- CONTENT ACCESS --------------------
 
-	Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getNewIndicatorView() {
+	public Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getNewIndicatorView() {
 		// Need a deep copy because of subsequent (pSim) resets.
 		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
 
-	Map<Id<?>, Double> getWeightView() {
+	public Map<Id<?>, Double> getWeightView() {
 		final Map<Id<?>, Double> result = new LinkedHashMap<>(this.accelerationConfig.getLinkWeightView());
 		result.putAll(this.transitVehicleUsageListener.newTransitWeightView());
 		return result;

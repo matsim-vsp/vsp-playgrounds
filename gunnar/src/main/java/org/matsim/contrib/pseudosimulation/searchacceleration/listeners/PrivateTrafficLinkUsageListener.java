@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.pseudosimulation.searchacceleration;
+package org.matsim.contrib.pseudosimulation.searchacceleration.listeners;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

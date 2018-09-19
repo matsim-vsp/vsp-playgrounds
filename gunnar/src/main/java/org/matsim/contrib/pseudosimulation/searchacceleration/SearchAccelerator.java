@@ -49,6 +49,7 @@ import org.matsim.contrib.pseudosimulation.mobsim.PSim;
 import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Utilities;
+import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.SlotUsageListener;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageDeltaForUniformReplanning;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageReplanningEfficiency;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageUtility;
