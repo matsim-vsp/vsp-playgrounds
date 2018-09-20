@@ -23,14 +23,10 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.utils.CreatePseudoNetwork;
-
-import ch.sbb.matsim.mobsim.qsim.SBBQSimModule;
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
 /**
  * Execution class for StockholmPTCar model. Before running the simulation, the
@@ -65,12 +61,12 @@ public class StockholmScenarioSimulation {
 		TransitSchedule schedule = scenario.getTransitSchedule();
 		new CreatePseudoNetwork(schedule, network, "tr_").createNetwork();
 
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				install(new SwissRailRaptorModule());
-			}
-		});
+//		controler.addOverridingModule(new AbstractModule() {
+//			@Override
+//			public void install() {
+//				install(new SwissRailRaptorModule());
+//			}
+//		});
 		controler.run();
 	}
 }

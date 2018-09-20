@@ -307,7 +307,7 @@ public class Greedo extends AbstractModule {
 		// STEP 1: The Config.
 
 		Config config = ConfigUtils
-				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/pt/production-scenario/config.xml");
+				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/config.xml");
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		// FIXME QSim misinterprets default time values.
 		if (greedo != null) {

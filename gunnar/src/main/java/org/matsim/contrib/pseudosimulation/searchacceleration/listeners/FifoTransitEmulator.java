@@ -30,6 +30,7 @@ import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
@@ -67,11 +68,12 @@ public class FifoTransitEmulator implements TransitEmulator {
 		final Tuple<Departure, Double> accessDepartureAndTime_s = fifoTransitPerformance
 				.getNextDepartureAndTime_s(line.getId(), transitRoute, accessStopId, earliestDepartureTime_s);
 		if (accessDepartureAndTime_s == null) {
-			return new Trip(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+			return new Trip(null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 		} else {
+			Id<Vehicle> vehicleId = accessDepartureAndTime_s.getA().getVehicleId();
 			double egressTime_s = accessDepartureAndTime_s.getA().getDepartureTime()
 					+ transitRoute.getStop(stopFacilities.get(egressStopId)).getArrivalOffset();
-			return new Trip(accessDepartureAndTime_s.getB(), egressTime_s);
+			return new Trip(vehicleId, accessDepartureAndTime_s.getB(), egressTime_s);
 		}
 	}
 }
