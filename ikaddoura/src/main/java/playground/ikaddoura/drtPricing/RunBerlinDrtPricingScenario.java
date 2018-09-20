@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
@@ -33,7 +34,7 @@ import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.runDRT.RunBerlinDrtScenario;
+import org.matsim.runDRT.RunBerlinDrtScenario1;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
@@ -46,77 +47,71 @@ import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeContro
 public class RunBerlinDrtPricingScenario {
 	private static final Logger log = Logger.getLogger(RunBerlinDrtPricingScenario.class);
 
+	private static String configFileName;
+	private static String overridingConfigFileName;
+	private static String berlinShapeFile;
+	private static String drtServiceAreaShapeFile;
+	private static String transitStopCoordinatesSFile;
+	private static String transitStopCoordinatesRBFile;
+	private static String runId;
+	private static String outputDirectory;
+	private static String visualizationScriptDirectory;
+		
 	public static void main(String[] args) {
-		
-		String configFileName;
-		String overridingConfigFileName;
-		String berlinShapeFile;
-		String drtServiceAreaShapeFile;
-		String transitStopCoordinatesSFile;
-		String transitStopCoordinatesRBFile;
-		
-		String runId;
-		String outputDirectory;
 
-		String visualizationScriptDirectory;
-		
-		final boolean turnDefaultScenarioIntoDrtScenario = true;
-
-		if (args.length > 0) {
-			
+		if (args.length > 0) {		
 			configFileName = args[0];
 			overridingConfigFileName = args[1];
 			berlinShapeFile = args[2];
 			drtServiceAreaShapeFile = args[3];
 			transitStopCoordinatesSFile = args[4];
 			transitStopCoordinatesRBFile = args[5];
-			
 			runId = args[6];
 			outputDirectory = args[7];
-
 			visualizationScriptDirectory = args[8];
-
-		} else {
 			
-			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";
-			
+		} else {		
+			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
 			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drt-v5.2-1pct.config_2agents_drtPricing.xml";
-			
 			overridingConfigFileName = null;
-			
 			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
-
 			transitStopCoordinatesSFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_S-zoneC.csv";
 			transitStopCoordinatesRBFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_RB-zoneC.csv";
-			
 			runId = "drt-opt-3";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/drtPricing/output/output-local-run_" + runId + "/";
-			
 			visualizationScriptDirectory = "./visualization-scripts/";
 		}
 			
 		log.info("run Id: " + runId);
-		log.info("output directory: " + outputDirectory); 
-
-		RunBerlinDrtScenario berlin = new RunBerlinDrtScenario(configFileName, overridingConfigFileName, turnDefaultScenarioIntoDrtScenario, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
+		log.info("output directory: " + outputDirectory);
+		
+		RunBerlinDrtPricingScenario drtPricing = new RunBerlinDrtPricingScenario();
+		drtPricing.run();
+	}
+	
+	private void run() {
+		RunBerlinDrtScenario1 berlin = new RunBerlinDrtScenario1(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
 		
 		ConfigGroup[] modulesToAdd = {new DrtPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
 		config.controler().setRunId(runId);
 		config.controler().setOutputDirectory(outputDirectory);
 						
-		Controler controler = berlin.prepareControler();		
-		controler.addOverridingModule(new DRTpricingModule(controler.getScenario()));
+		Scenario scenario = berlin.prepareScenario();
 		
-		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {
-			
+		Controler controler = berlin.prepareControler();		
+
+		// drt pricing
+		controler.addOverridingModule(new DRTpricingModule(scenario, RunBerlinDrtScenario1.modeToReplaceCarTripsInBrandenburg));
+		
+		// modal split analysis
+		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {	
 			@Override
 			public void install() {
 				this.addControlerListenerBinding().to(ModalSplitUserTypeControlerListener.class);
 			}
 		});
-		
 		
 		controler.run();
 		
@@ -132,17 +127,17 @@ public class RunBerlinDrtPricingScenario {
 		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
-		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(controler.getScenario());
+		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
 		filter1.setPersonAttribute("berlin");
 		filter1.setPersonAttributeName("home-activity-zone");
 		filter1.preProcess(controler.getScenario());
 		filters.add(filter1);
 		
-		AgentAnalysisFilter filter2 = new AgentAnalysisFilter(controler.getScenario());
+		AgentAnalysisFilter filter2 = new AgentAnalysisFilter(scenario);
 		filter2.preProcess(controler.getScenario());
 		filters.add(filter2);
 		
-		AgentAnalysisFilter filter3 = new AgentAnalysisFilter(controler.getScenario());
+		AgentAnalysisFilter filter3 = new AgentAnalysisFilter(scenario);
 		filter3.setPersonAttribute("brandenburg");
 		filter3.setPersonAttributeName("home-activity-zone");
 		filter3.preProcess(controler.getScenario());
@@ -150,7 +145,7 @@ public class RunBerlinDrtPricingScenario {
 		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
-		modes.add(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg);
+		modes.add(RunBerlinDrtScenario1.modeToReplaceCarTripsInBrandenburg);
 		modes.add(TransportMode.drt);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
@@ -169,7 +164,7 @@ public class RunBerlinDrtPricingScenario {
 		
 		// noise post-analysis
 		
-		DrtPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(controler.getConfig(), DrtPricingConfigGroup.class);
+		DrtPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, DrtPricingConfigGroup.class);
 		if (optAVParams.isAccountForNoise()) {
 			String immissionsDir = controler.getConfig().controler().getOutputDirectory() + "/ITERS/it." + controler.getConfig().controler().getLastIteration() + "/immissions/";
 			String receiverPointsFile = controler.getConfig().controler().getOutputDirectory() + "/receiverPoints/receiverPoints.csv";

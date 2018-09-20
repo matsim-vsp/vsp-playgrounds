@@ -24,19 +24,13 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
-import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
-import org.matsim.runDRT.RunBerlinDrtScenario;
 
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.AnalysisControlerListener;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
-import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
 import playground.ikaddoura.drtPricing.congestionAV.DecongestionModuleSAV;
 import playground.ikaddoura.drtPricing.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.drtPricing.disutility.DvrpMoneyTravelDisutilityModule;
@@ -47,12 +41,8 @@ import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 
 /**
  * Idea:
- * (1) Adjusts the SAV's (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer')
- * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'taxi'), i.e. waiting for or sitting inside the SAV.
- * 
- * Marginal operating costs are charged from the passengers via the 'TaxiFareHandler'
- * Marginal external costs are charged from the passengers via the 'SAVTolls2FareHandler'
- * 
+ * (1) Adjusts the DRT's (routing- and dispatch-relevant) cost function (mode = 'drt_optimizer')
+ * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'drt'), i.e. waiting for or traveling with DRT.
  * 
  * 
 * @author ikaddoura
@@ -62,9 +52,11 @@ public class DRTpricingModule extends AbstractModule {
 	private static final Logger log = Logger.getLogger(DRTpricingModule.class);
 
 	private final Scenario scenario;
+	private final String privateCarMode;
 	
-	public DRTpricingModule(Scenario scenario) {
+	public DRTpricingModule(Scenario scenario, String privateCarMode) {
 		this.scenario = scenario;
+		this.privateCarMode = privateCarMode;
 	}
 		
 	private final boolean useDefaultTravelDisutilityInTheCaseWithoutPricing = true;
@@ -124,10 +116,6 @@ public class DRTpricingModule extends AbstractModule {
 		}
 		
 		DrtPricingConfigGroup drtPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), DrtPricingConfigGroup.class);		
-		if (drtPricingParams.getFixCostsSAVinsteadOfCar() > 0) {
-			log.warn("Daily SAV fix costs (per user) should be lower than 0, meaning SAV users who are no longer private car users should 'earn' something."); 
-		}
-		
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
 		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
 		
@@ -137,15 +125,6 @@ public class DRTpricingModule extends AbstractModule {
 				
 		this.bind(SAVPassengerTracker.class).asEagerSingleton();
 		addEventHandlerBinding().to(SAVPassengerTracker.class);
-		
-		// #############################
-		// fix cost pricing
-		// #############################
-		
-		if (drtPricingParams.getFixCostsSAVinsteadOfCar() != 0.) {
-			this.bind(SAVFixCostHandler.class).asEagerSingleton();
-			addEventHandlerBinding().to(SAVFixCostHandler.class);
-		}
 				
 		// #############################
         // noise and congestion pricing
@@ -191,9 +170,9 @@ public class DRTpricingModule extends AbstractModule {
 			
 //			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
 //			new MoneyTimeDistanceTravelDisutilityFactory(
-//				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore())
+//				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultDrtOptimizer.DRT_OPTIMIZER, this.getConfig().planCalcScore())
 //					);
-//			install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));
+//			install(new MoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, dvrpTravelDisutilityFactory));
 			
 		} else {
 			
@@ -204,23 +183,21 @@ public class DRTpricingModule extends AbstractModule {
 				
 //				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
 //	        			new MoneyTimeDistanceTravelDisutilityFactory(
-//	        				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, this.getConfig().planCalcScore())
+//	        				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultDrtOptimizer.DRT_OPTIMIZER, this.getConfig().planCalcScore())
 //					);
-//	        		install(new MoneyTravelDisutilityModule(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER, dvrpTravelDisutilityFactory));   	
+//	        		install(new MoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, dvrpTravelDisutilityFactory));   	
 			}
 		}
 		
 		// car user
-		
+				
 		if (drtPricingParams.isChargeTollsFromCarUsers()) {
-			
-			// TODO: make sure the decongestion package works for any network mode
-			
+						
 			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
         			new MoneyTimeDistanceTravelDisutilityFactory(
-        				new RandomizingTimeDistanceTravelDisutilityFactory(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg, this.getConfig().planCalcScore())
+        				new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig().planCalcScore())
         			);
-        		install(new MoneyTravelDisutilityModule(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg, dvrpTravelDisutilityFactory));
+        		install(new MoneyTravelDisutilityModule(privateCarMode, dvrpTravelDisutilityFactory));
 			
 		} else {	
 			
@@ -228,8 +205,8 @@ public class DRTpricingModule extends AbstractModule {
 				log.info("Using the default travel disutility for car drivers (case without pricing).");
 			} else {
 				RandomizingTimeDistanceTravelDisutilityFactory defaultTravelDisutilityFactory =
-					new RandomizingTimeDistanceTravelDisutilityFactory(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg, this.getConfig().planCalcScore()); 
-				this.addTravelDisutilityFactoryBinding(RunBerlinDrtScenario.modeToReplaceCarTripsInBrandenburg).toInstance(defaultTravelDisutilityFactory);
+					new RandomizingTimeDistanceTravelDisutilityFactory(privateCarMode, this.getConfig().planCalcScore()); 
+				this.addTravelDisutilityFactoryBinding(privateCarMode).toInstance(defaultTravelDisutilityFactory);
 			}
 		}
 		
