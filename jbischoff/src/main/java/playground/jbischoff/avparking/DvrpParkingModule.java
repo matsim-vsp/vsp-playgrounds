@@ -29,7 +29,7 @@ import java.util.List;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
-import org.matsim.contrib.dvrp.passenger.PassengerEngineModule;
+import org.matsim.contrib.dvrp.passenger.PassengerEngineQSimModule;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
@@ -153,7 +153,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		modules.removeIf(PopulationModule.class::isInstance);
 		
 		modules.add(new ParkingSearchPopulationModule());
-		modules.add(new PassengerEngineModule(TaxiConfigGroup.get(config).getMode()));
+		modules.add(new PassengerEngineQSimModule(TaxiConfigGroup.get(config).getMode()));
 		modules.add(new DynAgentSourceModule(VrpAgentSource.class));
 		modules.add(new LocalQSimModule());
 		
