@@ -44,8 +44,8 @@ import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeContro
 * @author ikaddoura
 */
 
-public class RunBerlinDrtPricingScenario {
-	private static final Logger log = Logger.getLogger(RunBerlinDrtPricingScenario.class);
+public class RunBerlinDrtPricingScenario1 {
+	private static final Logger log = Logger.getLogger(RunBerlinDrtPricingScenario1.class);
 
 	private static String configFileName;
 	private static String overridingConfigFileName;
@@ -86,7 +86,7 @@ public class RunBerlinDrtPricingScenario {
 		log.info("run Id: " + runId);
 		log.info("output directory: " + outputDirectory);
 		
-		RunBerlinDrtPricingScenario drtPricing = new RunBerlinDrtPricingScenario();
+		RunBerlinDrtPricingScenario1 drtPricing = new RunBerlinDrtPricingScenario1();
 		drtPricing.run();
 	}
 	
