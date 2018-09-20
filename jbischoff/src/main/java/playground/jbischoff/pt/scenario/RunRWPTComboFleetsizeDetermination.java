@@ -55,8 +55,6 @@ public class RunRWPTComboFleetsizeDetermination {
 		config.controler().setOutputDirectory(outPutDir);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		
-		DvrpConfigGroup.get(config).setMode("taxi");
-		
 		TaxiConfigGroup tcg = (TaxiConfigGroup) config.getModules().get(TaxiConfigGroup.GROUP_NAME);
 		tcg.setTaxisFile(taxisFile);
 		
@@ -92,7 +90,7 @@ public class RunRWPTComboFleetsizeDetermination {
        Scenario scenario = ScenarioUtils.loadScenario(config);
        Controler controler = new Controler(scenario);
        controler.addOverridingModule(new AvIncreasedCapacityModule(avfactor));
-       controler.addOverridingModule(TaxiDvrpModules.create());
+       controler.addOverridingModule(TaxiDvrpModules.create(TaxiConfigGroup.get(config).getMode()));
 
        controler.addOverridingModule(new TaxiModule());
 

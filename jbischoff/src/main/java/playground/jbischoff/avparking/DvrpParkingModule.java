@@ -49,6 +49,7 @@ import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.routing.WithinDayParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPopulationModule;
 import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPrepareForSimImpl;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.PrepareForSim;
@@ -116,7 +117,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		routingModuleCar.setStageActivityTypes(stageActivityTypesCar);
 		addRoutingModuleBinding(TransportMode.car).toInstance(routingModuleCar);
 
-		String mode = dvrpCfg.getMode();
+		String mode = TaxiConfigGroup.get(getConfig()).getMode();
 		addRoutingModuleBinding(mode).toInstance(new DynRoutingModule(mode));
 		bind(ParkingSearchManager.class).to(FacilityBasedParkingManager.class).asEagerSingleton();
 		bind(WalkLegFactory.class).asEagerSingleton();
@@ -152,7 +153,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		modules.removeIf(PopulationModule.class::isInstance);
 		
 		modules.add(new ParkingSearchPopulationModule());
-		modules.add(new PassengerEngineModule(dvrpCfg.getMode()));
+		modules.add(new PassengerEngineModule(TaxiConfigGroup.get(config).getMode()));
 		modules.add(new DynAgentSourceModule(VrpAgentSource.class));
 		modules.add(new LocalQSimModule());
 		

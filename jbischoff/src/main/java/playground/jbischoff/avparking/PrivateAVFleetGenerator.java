@@ -42,6 +42,7 @@ import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.data.VehicleImpl;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.events.IterationStartsEvent;
@@ -70,7 +71,7 @@ public class PrivateAVFleetGenerator implements Fleet, BeforeMobsimListener {
 	 * 
 	 */
 	public PrivateAVFleetGenerator(Scenario scenario) {
-		mode = DvrpConfigGroup.get(scenario.getConfig()).getMode();
+		mode = TaxiConfigGroup.get(scenario.getConfig()).getMode();
 		this.population= scenario.getPopulation();
 		this.network = scenario.getNetwork();
 //		this.manager = manager;

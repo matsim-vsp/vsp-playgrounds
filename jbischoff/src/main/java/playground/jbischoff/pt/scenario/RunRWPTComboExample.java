@@ -70,13 +70,12 @@ public class RunRWPTComboExample {
 		config.transitRouter().setSearchRadius(3000);
 		config.transitRouter().setExtensionRadius(0);
 		
-		DvrpConfigGroup.get(config).setMode(TransportMode.taxi);
        config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
        config.checkConsistency();
 
        Scenario scenario = ScenarioUtils.loadScenario(config);
        Controler controler = new Controler(scenario);
-       controler.addOverridingModule(TaxiDvrpModules.create());
+       controler.addOverridingModule(TaxiDvrpModules.create(TaxiConfigGroup.get(config).getMode()));
        
        controler.addOverridingModule(new AbstractModule() {
 		@Override

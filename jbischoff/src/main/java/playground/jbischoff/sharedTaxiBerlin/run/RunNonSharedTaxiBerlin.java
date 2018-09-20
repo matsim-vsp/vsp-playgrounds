@@ -48,10 +48,11 @@ public class RunNonSharedTaxiBerlin {
 		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
 		config.checkConsistency();
 
+		String mode = TaxiConfigGroup.get(config).getMode();
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(TaxiDvrpModules.create());
+		controler.addOverridingModule(TaxiDvrpModules.create(mode));
         controler.addOverridingModule(new TaxiModule());
 
 		if (otfvis) {

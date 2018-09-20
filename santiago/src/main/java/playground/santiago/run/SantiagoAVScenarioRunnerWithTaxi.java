@@ -199,8 +199,9 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		// addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 		// }
 		// });
+		String mode = TaxiConfigGroup.get(controler.getConfig()).getMode();
 
-		controler.addOverridingModule(TaxiDvrpModules.create());
+		controler.addOverridingModule(TaxiDvrpModules.create(mode));
 		controler.addOverridingModule(new TaxiModule());
 
 		boolean otfvis = false;

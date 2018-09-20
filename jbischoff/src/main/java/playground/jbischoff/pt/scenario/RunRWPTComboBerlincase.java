@@ -52,14 +52,12 @@ public class RunRWPTComboBerlincase {
 		Config config = ConfigUtils.loadConfig(configfile, new TaxiConfigGroup(), new DvrpConfigGroup(), new  VariableAccessConfigGroup(), new TaxiFareConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		
-		DvrpConfigGroup.get(config).setMode(TransportMode.taxi);
-
        config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
        config.checkConsistency();
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(TaxiDvrpModules.create());
+		controler.addOverridingModule(TaxiDvrpModules.create(TaxiConfigGroup.get(config).getMode()));
 		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new VariableAccessTransitRouterModule());
 		controler.addOverridingModule(new ChangeSingleLegModeWithPredefinedFromModesModule());

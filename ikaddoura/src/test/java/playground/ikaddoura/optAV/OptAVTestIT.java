@@ -86,8 +86,9 @@ public class OptAVTestIT {
 
 		Scenario scenario1 = ScenarioUtils.loadScenario(config1);
 		Controler controler1 = new Controler(scenario1);
-		
-		controler1.addOverridingModule(TaxiDvrpModules.create());
+
+		String mode1 = TaxiConfigGroup.get(config1).getMode();
+		controler1.addOverridingModule(TaxiDvrpModules.create(mode1));
 		controler1.addOverridingModule(new TaxiModule());
 		controler1.addOverridingModule(new OptAVModule(scenario1));		
 		
@@ -126,8 +127,9 @@ public class OptAVTestIT {
 
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);
-		
-		controler2.addOverridingModule(TaxiDvrpModules.create());
+
+		String mode2 = TaxiConfigGroup.get(config2).getMode();
+		controler2.addOverridingModule(TaxiDvrpModules.create(mode2));
 		controler2.addOverridingModule(new TaxiModule());
 		controler2.addOverridingModule(new OptAVModule(scenario2));		        
 		controler2.addOverridingModule(new PersonTripAnalysisModule());
@@ -168,8 +170,9 @@ public class OptAVTestIT {
 		
 		Scenario scenario3 = ScenarioUtils.loadScenario(config3);
 		Controler controler3 = new Controler(scenario3);
-		
-		controler3.addOverridingModule(TaxiDvrpModules.create());
+
+		String mode3 = TaxiConfigGroup.get(config3).getMode();
+		controler3.addOverridingModule(TaxiDvrpModules.create(mode3));
 		controler3.addOverridingModule(new TaxiModule());
 		controler3.addOverridingModule(new OptAVModule(scenario3));		        
 		controler3.addOverridingModule(new PersonTripAnalysisModule());
@@ -238,8 +241,9 @@ public class OptAVTestIT {
 		Controler controler1 = new Controler(scenario1);
 		
 		// taxi
-		
-		controler1.addOverridingModule(TaxiDvrpModules.create());
+
+		String mode1 = TaxiConfigGroup.get(config1).getMode();
+		controler1.addOverridingModule(TaxiDvrpModules.create(mode1));
 		controler1.addOverridingModule(new TaxiModule());
 		controler1.addOverridingModule(new OptAVModule(scenario1));
 		controler1.addOverridingModule(new PersonTripAnalysisModule());
@@ -284,8 +288,9 @@ public class OptAVTestIT {
 		
 		Scenario scenario2 = ScenarioUtils.loadScenario(config2);
 		Controler controler2 = new Controler(scenario2);
-			
-		controler2.addOverridingModule(TaxiDvrpModules.create());
+
+		String mode2 = TaxiConfigGroup.get(config2).getMode();
+		controler2.addOverridingModule(TaxiDvrpModules.create(mode2));
 		controler2.addOverridingModule(new TaxiModule());
 		controler2.addOverridingModule(new OptAVModule(scenario2));
 		

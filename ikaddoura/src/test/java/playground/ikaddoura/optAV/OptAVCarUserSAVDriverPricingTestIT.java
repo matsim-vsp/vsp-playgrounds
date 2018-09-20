@@ -101,8 +101,9 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
-				
-			controler.addOverridingModule(TaxiDvrpModules.create());
+
+			String mode = TaxiConfigGroup.get(config).getMode();
+			controler.addOverridingModule(TaxiDvrpModules.create(mode));
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario));
 			
@@ -141,8 +142,9 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Controler controler = new Controler(scenario1);
 			
 			// taxi
-			
-			controler.addOverridingModule(TaxiDvrpModules.create());
+
+			String mode = TaxiConfigGroup.get(config).getMode();
+			controler.addOverridingModule(TaxiDvrpModules.create(mode));
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario1));
 			controler.addOverridingModule(new PersonTripAnalysisModule());
@@ -193,8 +195,9 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
-				
-			controler.addOverridingModule(TaxiDvrpModules.create());
+
+			String mode = TaxiConfigGroup.get(config).getMode();
+			controler.addOverridingModule(TaxiDvrpModules.create(mode));
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario));
 			
@@ -245,8 +248,9 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			
 			Scenario scenario = ScenarioUtils.loadScenario(config);
 			Controler controler = new Controler(scenario);
-				
-			controler.addOverridingModule(TaxiDvrpModules.create());
+
+			String mode = TaxiConfigGroup.get(config).getMode();
+			controler.addOverridingModule(TaxiDvrpModules.create(mode));
 			controler.addOverridingModule(new TaxiModule());
 			controler.addOverridingModule(new OptAVModule(scenario));
 			
