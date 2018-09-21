@@ -28,7 +28,7 @@ import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.*;
-import org.matsim.contrib.taxi.run.examples.TaxiQSimModules;
+import org.matsim.contrib.taxi.run.examples.TaxiQSimModule;
 import org.matsim.core.config.*;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -56,7 +56,7 @@ public class RunNonSharedTaxiBerlin {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		Controler controler = new Controler(scenario);
-		controler.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler.addQSimModule(new TaxiQSimModule());
 		controler.addOverridingModule(DvrpModule.createModule(mode,
 				Collections.singleton(TaxiOptimizer.class)));
         controler.addOverridingModule(new TaxiModule());
