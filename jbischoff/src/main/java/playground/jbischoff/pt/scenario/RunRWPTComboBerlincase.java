@@ -18,46 +18,60 @@
  * *********************************************************************** */
 
 /**
- * 
+ *
  */
 package playground.jbischoff.pt.scenario;
 
+import java.util.Collections;
+
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
 import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.*;
+import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.taxi.run.*;
-import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
-import org.matsim.core.config.*;
-import org.matsim.core.controler.*;
+import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
+import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.TaxiModule;
+import org.matsim.contrib.taxi.run.examples.TaxiQSimModules;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.jbischoff.pt.strategy.ChangeSingleLegModeWithPredefinedFromModesModule;
 
 /**
- * @author  jbischoff
- *
+ * @author jbischoff
  */
 public class RunRWPTComboBerlincase {
-	
+
 	public static void main(String[] args) {
-		if (args.length!=1){
+		if (args.length != 1) {
 			throw new RuntimeException("Wrong arguments");
 		}
 		String configfile = args[0];
-		
-		Config config = ConfigUtils.loadConfig(configfile, new TaxiConfigGroup(), new DvrpConfigGroup(), new  VariableAccessConfigGroup(), new TaxiFareConfigGroup());
+
+		Config config = ConfigUtils.loadConfig(configfile, new TaxiConfigGroup(), new DvrpConfigGroup(),
+				new VariableAccessConfigGroup(), new TaxiFareConfigGroup());
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		
-       config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
-       config.checkConsistency();
+
+		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
+		config.checkConsistency();
+		String mode = TaxiConfigGroup.get(config).getMode();
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(TaxiDvrpModules.create(TaxiConfigGroup.get(config).getMode()));
+		controler.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler.addOverridingModule(DvrpModule.createModule(mode,
+				Collections.singleton(TaxiOptimizer.class)));
+		controler.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler.addOverridingModule(DvrpModule.createModule(mode, Collections.singleton(TaxiOptimizer.class)));
+
 		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new VariableAccessTransitRouterModule());
 		controler.addOverridingModule(new ChangeSingleLegModeWithPredefinedFromModesModule());

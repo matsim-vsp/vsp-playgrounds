@@ -19,6 +19,7 @@
 
 package playground.santiago.run;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,10 +41,12 @@ import org.matsim.contrib.cadyts.car.CadytsCarModule;
 import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
+import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
+import org.matsim.contrib.taxi.run.examples.TaxiQSimModules;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -201,7 +204,9 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		// });
 		String mode = TaxiConfigGroup.get(controler.getConfig()).getMode();
 
-		controler.addOverridingModule(TaxiDvrpModules.create(mode));
+		controler.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler.addOverridingModule(DvrpModule.createModule(mode,
+				Collections.singleton(TaxiOptimizer.class)));
 		controler.addOverridingModule(new TaxiModule());
 
 		boolean otfvis = false;

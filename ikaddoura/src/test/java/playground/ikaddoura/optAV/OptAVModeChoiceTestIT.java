@@ -22,6 +22,8 @@
  */
 package playground.ikaddoura.optAV;
 
+import java.util.Collections;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,12 +31,14 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
+import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
+import org.matsim.contrib.taxi.run.examples.TaxiQSimModules;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -90,7 +94,9 @@ public class OptAVModeChoiceTestIT {
 		Controler controler1 = new Controler(scenario1);
 
 		String mode1 = TaxiConfigGroup.get(config1).getMode();
-		controler1.addOverridingModule(TaxiDvrpModules.create(mode1));
+		controler1.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler1.addOverridingModule(DvrpModule.createModule(mode1,
+				Collections.singleton(TaxiOptimizer.class)));
 		controler1.addOverridingModule(new TaxiModule());
 		controler1.addOverridingModule(new OptAVModule(scenario1));		
 		
@@ -130,7 +136,9 @@ public class OptAVModeChoiceTestIT {
 		Controler controler2 = new Controler(scenario2);
 
 		String mode2 = TaxiConfigGroup.get(config2).getMode();
-		controler2.addOverridingModule(TaxiDvrpModules.create(mode2));
+		controler2.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler2.addOverridingModule(DvrpModule.createModule(mode2,
+				Collections.singleton(TaxiOptimizer.class)));
 		controler2.addOverridingModule(new TaxiModule());
 		controler2.addOverridingModule(new OptAVModule(scenario2));		        
 		
@@ -194,7 +202,9 @@ public class OptAVModeChoiceTestIT {
 		Controler controler1 = new Controler(scenario1);
 
 		String mode1 = TaxiConfigGroup.get(config1).getMode();
-		controler1.addOverridingModule(TaxiDvrpModules.create(mode1));
+		controler1.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler1.addOverridingModule(DvrpModule.createModule(mode1,
+				Collections.singleton(TaxiOptimizer.class)));
 		controler1.addOverridingModule(new TaxiModule());
 		controler1.addOverridingModule(new OptAVModule(scenario1));		
 		controler1.addOverridingModule(new PersonTripAnalysisModule());
@@ -235,7 +245,9 @@ public class OptAVModeChoiceTestIT {
 		Controler controler2 = new Controler(scenario2);
 
 		String mode2 = TaxiConfigGroup.get(config2).getMode();
-		controler2.addOverridingModule(TaxiDvrpModules.create(mode2));
+		controler2.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler2.addOverridingModule(DvrpModule.createModule(mode2,
+				Collections.singleton(TaxiOptimizer.class)));
 		controler2.addOverridingModule(new TaxiModule());
 		controler2.addOverridingModule(new OptAVModule(scenario2));		        
 		controler2.addOverridingModule(new PersonTripAnalysisModule());

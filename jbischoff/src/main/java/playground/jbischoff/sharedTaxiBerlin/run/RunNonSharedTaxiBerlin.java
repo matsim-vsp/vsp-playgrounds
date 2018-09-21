@@ -19,12 +19,16 @@
 
 package playground.jbischoff.sharedTaxiBerlin.run;
 
+import java.util.Collections;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
+import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.*;
-import org.matsim.contrib.taxi.run.examples.TaxiDvrpModules;
+import org.matsim.contrib.taxi.run.examples.TaxiQSimModules;
 import org.matsim.core.config.*;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -52,7 +56,9 @@ public class RunNonSharedTaxiBerlin {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		Controler controler = new Controler(scenario);
-		controler.addOverridingModule(TaxiDvrpModules.create(mode));
+		controler.addQSimModule(TaxiQSimModules.createModuleForQSimPlugin());
+		controler.addOverridingModule(DvrpModule.createModule(mode,
+				Collections.singleton(TaxiOptimizer.class)));
         controler.addOverridingModule(new TaxiModule());
 
 		if (otfvis) {
