@@ -78,44 +78,42 @@ public class RunBerlinPricing {
 			visualizationScriptInputDirectory = args[3];
 			log.info("visualizationScriptInputDirectory: "+ visualizationScriptInputDirectory);
 			
-			activateDecongestionPricing = Boolean.parseBoolean(args[4]);
+			scaleFactor = Integer.parseInt(args[4]);
+			log.info("scaleFactor: "+ scaleFactor);
+			
+			activateDecongestionPricing = Boolean.parseBoolean(args[5]);
 			log.info("activateDecongestionPricing: "+ activateDecongestionPricing);
 			
-			activateQueueBasedCongestionPricing = Boolean.parseBoolean(args[5]);
+			activateQueueBasedCongestionPricing = Boolean.parseBoolean(args[6]);
 			log.info("activateQueueBasedCongestionPricing: "+ activateQueueBasedCongestionPricing);
 			
-			queueBasedCongestionPricingApproach = args[6];
+			queueBasedCongestionPricingApproach = args[7];
 			log.info("queueBasedCongestionPricingApproach: "+ queueBasedCongestionPricingApproach);
 
-			blendFactorQCP = Double.parseDouble(args[7]);
+			blendFactorQCP = Double.parseDouble(args[8]);
 			log.info("blendFactorQCP: "+ blendFactorQCP);
 			
-			scaleFactor = Integer.parseInt(args[8]);
+			scaleFactor = Integer.parseInt(args[9]);
 			log.info("scaleFactor: "+ scaleFactor);
 			
 		} else {
 			
-			configFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-1pct/input/berlin-v5.2-1pct.config.xml";
+			configFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-1pct/input/berlin-pricing-v5.2-1pct.config.xml";
 			runId = "decongestion-1";
-			outputDirectory = "scenarios/berlin-v5.2-1pct/output-berlin-v5.2-1pct-" + runId;
+			outputDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-1pct/output-berlin-v5.2-1pct-" + runId;
 			visualizationScriptInputDirectory = "./visualization-scripts/";
-			
+			scaleFactor = 100;
+
 			activateDecongestionPricing = true;
 			
 			activateQueueBasedCongestionPricing = false;
-			queueBasedCongestionPricingApproach = "V10";
-			blendFactorQCP = 1.0;
-			scaleFactor = 10;
+			queueBasedCongestionPricingApproach = "V3";
+			blendFactorQCP = 1.0;			
 		}
 		
 		RunBerlinScenario berlin = new RunBerlinScenario( configFile, null );
 			
-		Config config;
-		if (activateDecongestionPricing) {
-			config = berlin.prepareConfig(new DecongestionConfigGroup());	
-		} else {
-			config = berlin.prepareConfig();
-		}
+		Config config = berlin.prepareConfig(new DecongestionConfigGroup());	
 		
 		config.controler().setRunId(runId);
 		config.controler().setOutputDirectory(outputDirectory);
