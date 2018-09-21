@@ -93,9 +93,6 @@ public class RunBerlinPricing {
 			blendFactorQCP = Double.parseDouble(args[8]);
 			log.info("blendFactorQCP: "+ blendFactorQCP);
 			
-			scaleFactor = Integer.parseInt(args[9]);
-			log.info("scaleFactor: "+ scaleFactor);
-			
 		} else {
 			
 			configFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-1pct/input/berlin-pricing-v5.2-1pct.config.xml";
