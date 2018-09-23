@@ -35,8 +35,7 @@ import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentQueryHelper;
-import org.matsim.contrib.dvrp.vrpagent.VrpAgentSource;
-import org.matsim.contrib.dynagent.run.DynAgentSourceModule;
+import org.matsim.contrib.dvrp.vrpagent.VrpAgentSourceQSimModule;
 import org.matsim.contrib.dynagent.run.DynRoutingModule;
 import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.evaluation.ParkingListener;
@@ -105,7 +104,7 @@ public final class DvrpParkingModule extends AbstractModule {
 
 	@Override
 	public void install() {
-		
+
 		final DynRoutingModule routingModuleCar = new DynRoutingModule(TransportMode.car);
 		StageActivityTypes stageActivityTypesCar = new StageActivityTypes() {
 			@Override
@@ -126,7 +125,6 @@ public final class DvrpParkingModule extends AbstractModule {
 		bind(ParkingRouter.class).to(WithinDayParkingRouter.class);
 		bind(VehicleTeleportationLogic.class).to(VehicleTeleportationToNearbyParking.class);
 
-
 		// Visualisation of schedules for DVRP DynAgents
 		bind(NonPlanAgentQueryHelper.class).to(VrpAgentQueryHelper.class);
 
@@ -141,7 +139,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		if (dvrpCfg.getNetworkMode() == null) { // no mode filtering
 			return network;
 		}
-		
+
 		Network dvrpNetwork = NetworkUtils.createNetwork();
 		new TransportModeNetworkFilter(network).filter(dvrpNetwork, Collections.singleton(dvrpCfg.getNetworkMode()));
 		return dvrpNetwork;
@@ -151,12 +149,13 @@ public final class DvrpParkingModule extends AbstractModule {
 	private Collection<AbstractQSimModule> provideQSimModules(Config config) {
 		Collection<AbstractQSimModule> modules = new LinkedList<>(QSimModule.getDefaultQSimModules());
 		modules.removeIf(PopulationModule.class::isInstance);
-		
+
+		String mode = TaxiConfigGroup.get(config).getMode();
 		modules.add(new ParkingSearchPopulationModule());
-		modules.add(new PassengerEngineQSimModule(TaxiConfigGroup.get(config).getMode()));
-		modules.add(new DynAgentSourceModule(VrpAgentSource.class));
+		modules.add(new PassengerEngineQSimModule(mode));
+		modules.add(new VrpAgentSourceQSimModule(mode));
 		modules.add(new LocalQSimModule());
-		
+
 		return modules;
 	}
 
@@ -164,9 +163,9 @@ public final class DvrpParkingModule extends AbstractModule {
 		@Override
 		protected void configureQSim() {
 			install(module);
-			
+
 			int i = 0;
-			
+
 			for (Class<? extends MobsimListener> l : listeners) {
 				bindMobsimListener("listener_" + (i++)).to(l);
 			}
