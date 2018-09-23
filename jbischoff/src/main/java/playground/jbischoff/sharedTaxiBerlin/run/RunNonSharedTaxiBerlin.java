@@ -28,7 +28,7 @@ import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.*;
-import org.matsim.contrib.taxi.run.examples.TaxiQSimModule;
+import org.matsim.contrib.taxi.run.TaxiQSimModule;
 import org.matsim.core.config.*;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
