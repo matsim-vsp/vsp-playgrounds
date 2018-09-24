@@ -25,6 +25,7 @@ import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.TravelTimeUtils;
 import org.matsim.contrib.taxi.run.RunTaxiScenario;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -36,7 +37,7 @@ import com.google.inject.name.Names;
 public class RunSantiagoAVFlow {
 	public static void run(String configFile, double flowEfficiencyFactor, String inputEvents) {
 		Config config = ConfigUtils.loadConfig(configFile, new TaxiConfigGroup(), new DvrpConfigGroup());
-		final Controler controler = RunTaxiScenario.createControler(config, false);
+		final Controler controler = TaxiControlerCreator.createControler(config, false);
 
 		// to speed up computations
 //		final TravelTime initialTT = TravelTimeUtils.createTravelTimesFromEvents(controler.getScenario(), inputEvents);
