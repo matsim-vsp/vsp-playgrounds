@@ -45,13 +45,14 @@ public class RunEAVBenchmark {
 	}
 
 	public static Controler createControler(Config config, int runs) {
+		String mode = TaxiConfigGroup.get(config).getMode();
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		Controler controler = RunETaxiBenchmark.createControler(config, runs);
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
 				bind(AuxEnergyConsumption.Factory.class).toInstance(
-						new DvrpAuxConsumptionFactory(() -> TEMPERATURE, RunEAVBenchmark::isServingCustomer));
+						new DvrpAuxConsumptionFactory(mode, () -> TEMPERATURE, RunEAVBenchmark::isServingCustomer));
 			}
 		});
 
