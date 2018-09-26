@@ -85,8 +85,8 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
-			<!--<version>-SNAPSHOT</version>-->
-			<version>6d028cec88</version>
+			<version>-SNAPSHOT</version>
+			<!--<version>6d028cec88</version>-->
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>

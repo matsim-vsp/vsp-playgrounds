@@ -46,8 +46,8 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
-			<!--<version>-SNAPSHOT</version>-->
-			<version>6d028cec88</version>
+			<version>-SNAPSHOT</version>
+			<!--<version>6d028cec88</version>-->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
 		<dependency>
