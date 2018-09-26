@@ -58,7 +58,7 @@
 	<dependency>
 		<groupId>com.github.matsim-org</groupId>
 		<artifactId>Opdyts-MATSim-Integration</artifactId>
-		<version>-SNAPSHOT</version>
+		<version>-77a4cad5f1-1</version>
 	</dependency>
 		<!-- <dependency>
 			<groupId>gurobi</groupId>
