@@ -51,9 +51,8 @@ public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 	private AgentFilter vehicleFilter;
 	private final TravelTime travelTime;
 	private final double marginalUtilityOfMoney;
-	private final double utilsPerSec;
-	private final double utilsPerM;
-	private final double costPerM;
+	private final double marginalUtilityOfTime_sec;
+	private final double marginalUtilityOfDistance_m;
 	private final double timeBinSize;
 	
 	public DvrpMoneyTimeDistanceTravelDisutility(
@@ -64,25 +63,30 @@ public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		
 		this.travelTime = travelTime;
 		this.timeBinSize = scenario.getConfig().travelTimeCalculator().getTraveltimeBinSize();
-		this.utilsPerSec = scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMarginalUtilityOfTraveling();
-		this.utilsPerM = scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMarginalUtilityOfDistance();
-		this.costPerM = scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMonetaryDistanceRate();
 		this.marginalUtilityOfMoney = scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
 
-		if (utilsPerSec > 0. || utilsPerM > 0. || costPerM > 0. || marginalUtilityOfMoney < 0.) {
-			log.warn("utilsPerSec: " + utilsPerSec);
-			log.warn("utilsPerM: " + utilsPerM);
-			log.warn("costPerM: " + costPerM);
-			log.warn("marginalUtilityOfMoney: " + marginalUtilityOfMoney);
-
-			throw new RuntimeException("Check scoring parameters for " + DefaultDrtOptimizer.DRT_OPTIMIZER + ". Travel disutility may become positive. Aborting...");
-		}
+		this.marginalUtilityOfTime_sec = (scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMarginalUtilityOfTraveling() +
+				(-1. * scenario.getConfig().planCalcScore().getPerforming_utils_hr() )  ) / 3600.;
 		
-		if ((utilsPerSec + utilsPerM + costPerM) == 0.) {
-			log.warn("Check scoring parameters for " + DefaultDrtOptimizer.DRT_OPTIMIZER + " (utilsPerSec + utilsPerM + costPerM = 0.).");
+		this.marginalUtilityOfDistance_m = scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMarginalUtilityOfDistance() + 
+				scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMonetaryDistanceRate() * marginalUtilityOfMoney;
+
+		log.info("marginalUtilityOfDistance_m" + this.marginalUtilityOfDistance_m);
+		log.info("marginalUtilityOfTime_sec" + this.marginalUtilityOfTime_sec);
+		
+		if (marginalUtilityOfTime_sec > 0.) log.warn("Check marginalUtilityOfTime_sec: " + marginalUtilityOfTime_sec);
+		if (marginalUtilityOfDistance_m > 0.) log.warn("Check marginalUtilityOfDistance_m: " + marginalUtilityOfDistance_m);
+		if (marginalUtilityOfMoney > 0.) log.warn("Check marginalUtilityOfMoney: " + marginalUtilityOfMoney);
+
+		if (marginalUtilityOfTime_sec >= 0. && marginalUtilityOfTime_sec >= 0.) {
+			throw new RuntimeException("Check scoring parameters for " + DefaultDrtOptimizer.DRT_OPTIMIZER + ".");
 		}
 		
 		this.vehicleFilter = vehicleFilter;
+		if (this.vehicleFilter == null) {
+			log.info("vehicle filter is null. Not differentiating between different vehicle types...");
+		}
+		
 		this.moneyEventAnalysis = moneyAnalysis;	
 	}
 
@@ -92,21 +96,20 @@ public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		double travelTimeDisutility = 0.;
 		
 		if (travelTime != null) {
-			travelTimeDisutility = -1. * utilsPerSec * travelTime.getLinkTravelTime(link, time, person, vehicle);
+			travelTimeDisutility = -1. * marginalUtilityOfTime_sec * travelTime.getLinkTravelTime(link, time, person, vehicle);
 		} else {
-			travelTimeDisutility = -1. * utilsPerSec * (link.getLength() / link.getFreespeed());
+			travelTimeDisutility = -1. * marginalUtilityOfTime_sec * (link.getLength() / link.getFreespeed());
 		}
 		
 		double linkExpectedTollDisutility = calculateExpectedTollDisutility(link, time, person, vehicle);
-		
-		double distanceDisutility = -1. * utilsPerM * link.getLength() + -1. * costPerM * link.getLength() * marginalUtilityOfMoney;
+		double distanceDisutility = -1. * marginalUtilityOfDistance_m * link.getLength();
 				
 		return travelTimeDisutility + linkExpectedTollDisutility + distanceDisutility;
 	}
 
 	@Override
 	public double getLinkMinimumTravelDisutility(Link link) {
-		return -1. * utilsPerSec * (link.getLength() / link.getFreespeed()) - 1. * utilsPerM * link.getLength() + -1. * costPerM * link.getLength() * marginalUtilityOfMoney;
+		return -1. *  marginalUtilityOfTime_sec * (link.getLength() / link.getFreespeed()) - 1. * marginalUtilityOfDistance_m * link.getLength();
 	}
 
 	private double calculateExpectedTollDisutility(final Link link, final double time, final Person person, final Vehicle vehicle) {
