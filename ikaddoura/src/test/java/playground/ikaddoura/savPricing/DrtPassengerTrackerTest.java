@@ -20,7 +20,7 @@
 /**
  * 
  */
-package playground.ikaddoura.drtPricing;
+package playground.ikaddoura.savPricing;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -43,7 +43,7 @@ import playground.ikaddoura.savPricing.drtPricing.SAVPassengerTracker;
  * @author ikaddoura
  *
  */
-public class SAVPassengerTrackerTest {
+public class DrtPassengerTrackerTest {
 	
 	@Rule
 	public MatsimTestUtils testUtils = new MatsimTestUtils();
