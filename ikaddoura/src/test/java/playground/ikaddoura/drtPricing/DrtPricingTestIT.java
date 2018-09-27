@@ -45,6 +45,8 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.savPricing.drtPricing.DRTpricingModule;
+import playground.ikaddoura.savPricing.drtPricing.DrtPricingConfigGroup;
 
 /**
  * @author ikaddoura

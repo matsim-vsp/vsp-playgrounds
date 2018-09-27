@@ -45,8 +45,8 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.savPricing.TaxiPricingConfigGroup;
-import playground.ikaddoura.savPricing.TaxiPricingModule;
+import playground.ikaddoura.savPricing.taxiPricing.TaxiPricingConfigGroup;
+import playground.ikaddoura.savPricing.taxiPricing.TaxiPricingModule;
 
 /**
  * @author ikaddoura
