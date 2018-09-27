@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.drtPricing;
+package playground.ikaddoura.savPricing.runDrtPricing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
 import org.matsim.contrib.noise.utils.ProcessNoiseImmissions;
@@ -39,6 +40,8 @@ import org.matsim.runDRT.RunBerlinDrtScenario2;
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
+import playground.ikaddoura.savPricing.SAVPricingConfigGroup;
+import playground.ikaddoura.savPricing.SAVPricingModule;
 
 /**
 * @author ikaddoura
@@ -90,17 +93,20 @@ public class RunBerlinDrtPricingScenario2 {
 	private void run() {
 		RunBerlinDrtScenario2 berlin = new RunBerlinDrtScenario2(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
 		
-		ConfigGroup[] modulesToAdd = {new DrtPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
+		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
 		config.controler().setRunId(runId);
 		config.controler().setOutputDirectory(outputDirectory);
-						
+			
+		SAVPricingConfigGroup optAVParamsDrt = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
+		optAVParamsDrt.setSavMode(TransportMode.drt);
+		
 		Scenario scenario = berlin.prepareScenario();
 		
 		Controler controler = berlin.prepareControler();		
 
 		// drt pricing
-		controler.addOverridingModule(new DRTpricingModule(scenario, RunBerlinDrtScenario2.modeToReplaceCarTripsInBrandenburg));
+		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinDrtScenario2.modeToReplaceCarTripsInBrandenburg));
 		
 		// modal split analysis
 		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {	
@@ -160,7 +166,7 @@ public class RunBerlinDrtPricingScenario2 {
 		
 		// noise post-analysis
 		
-		DrtPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, DrtPricingConfigGroup.class);
+		SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 		if (optAVParams.isAccountForNoise()) {
 			String immissionsDir = controler.getConfig().controler().getOutputDirectory() + "/ITERS/it." + controler.getConfig().controler().getLastIteration() + "/immissions/";
 			String receiverPointsFile = controler.getConfig().controler().getOutputDirectory() + "/receiverPoints/receiverPoints.csv";

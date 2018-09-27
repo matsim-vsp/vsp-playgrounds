@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.drtPricing;
+package playground.ikaddoura.savPricing;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
@@ -26,6 +26,7 @@ import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.noise.NoiseConfigGroup;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
@@ -34,28 +35,27 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
-import playground.ikaddoura.savPricing.AVAgentFilter;
-import playground.ikaddoura.savPricing.drtPricing.congestionAV.DecongestionModuleSAV;
-import playground.ikaddoura.savPricing.drtPricing.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.savPricing.drtPricing.disutility.DvrpMoneyTravelDisutilityModule;
-import playground.ikaddoura.savPricing.drtPricing.noiseAV.NoiseComputationModuleSAV;
+import playground.ikaddoura.savPricing.congestionSAV.DecongestionModuleSAV;
+import playground.ikaddoura.savPricing.disutility.SAVMoneyTravelDisutilityModule;
+import playground.ikaddoura.savPricing.disutility.SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory;
+import playground.ikaddoura.savPricing.noiseSAV.NoiseComputationModuleSAV;
 
 /**
  * Idea:
- * (1) Adjusts the DRT's (routing- and dispatch-relevant) cost function (mode = 'drt_optimizer')
- * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'drt'), i.e. waiting for or traveling with DRT.
+ * (1) Adjusts the taxi (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer')
+ * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'taxi'), i.e. waiting for or traveling with taxi.
  * 
  * 
 * @author ikaddoura
 */
 
-public class DRTpricingModule extends AbstractModule {
-	private static final Logger log = Logger.getLogger(DRTpricingModule.class);
+public class SAVPricingModule extends AbstractModule {
+	private static final Logger log = Logger.getLogger(SAVPricingModule.class);
 
 	private final Scenario scenario;
 	private final String privateCarMode;
 	
-	public DRTpricingModule(Scenario scenario, String privateCarMode) {
+	public SAVPricingModule(Scenario scenario, String privateCarMode) {
 		this.scenario = scenario;
 		this.privateCarMode = privateCarMode;
 	}
@@ -65,61 +65,72 @@ public class DRTpricingModule extends AbstractModule {
 	@Override
 	public void install() {
 		
+		SAVPricingConfigGroup taxiPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), SAVPricingConfigGroup.class);		
+
+		String savMode = taxiPricingParams.getSavMode();
+		String savOptimizerMode;
+		if (savMode.equals(TransportMode.taxi)) {
+			savOptimizerMode = DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER;
+		} else if (savMode.equals(TransportMode.drt)) {
+			savOptimizerMode = DefaultDrtOptimizer.DRT_OPTIMIZER;
+		} else {
+			throw new RuntimeException("Unknown sav mode. Aborting...");
+		}
+		
 		// #############################
 		// consistency check
 		// #############################
 		
-		ModeParams drtModeParams = null;
-		if (this.getConfig().planCalcScore().getModes().get(TransportMode.drt) != null) {
-			drtModeParams = this.getConfig().planCalcScore().getModes().get(TransportMode.drt);
+		ModeParams taxiModeParams = null;
+		if (this.getConfig().planCalcScore().getModes().get(savMode) != null) {
+			taxiModeParams = this.getConfig().planCalcScore().getModes().get(savMode);
 		} else {
-			throw new RuntimeException("There is no 'drt' mode in the planCalcScore config group.");
+			throw new RuntimeException("There is no 'taxi' mode in the planCalcScore config group.");
 		}
 		
-		ModeParams drtOptimizerModeParams = null;
-		if (this.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER) != null) {
-			drtOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER);
+		ModeParams taxiOptimizerModeParams = null;
+		if (this.getConfig().planCalcScore().getModes().get(savOptimizerMode) != null) {
+			taxiOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(savOptimizerMode);
 		} else {
-			log.warn("There is no 'drt_optimizer' mode in the planCalcScore config group. Probably using some default parameters...");
+			log.warn("There is no 'taxi_optimizer' mode in the planCalcScore config group. Probably using some default parameters...");
 		}
 		
 		TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
 		
-		if (drtOptimizerModeParams != null) {
+		if (taxiOptimizerModeParams != null) {
 			
-			if (drtOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
-				log.warn("The monetary distance rate for 'drt_optimizer' is zero. Are you sure, the operating costs are zero?");
+			if (taxiOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
+				log.warn("The monetary distance rate for 'taxi_optimizer' is zero. Are you sure, the operating costs are zero?");
 			}
 			
-			if (drtOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
-				log.warn("The monetary distance rate for 'drt_optimizer' should be negative.");
+			if (taxiOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
+				log.warn("The monetary distance rate for 'taxi_optimizer' should be negative.");
 			}
 			
-			if (drtOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
-				log.warn("The marginal utility of distance for 'drt_optimizer' should be zero.");
+			if (taxiOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
+				log.warn("The marginal utility of distance for 'taxi_optimizer' should be zero.");
 			}
 			
-			if (drtOptimizerModeParams.getMarginalUtilityOfTraveling() != drtModeParams.getMarginalUtilityOfTraveling()) {
-				log.warn("The marginal utility of traveling for 'drt' and 'drt_optimizer' should be the same..."
+			if (taxiOptimizerModeParams.getMarginalUtilityOfTraveling() != taxiModeParams.getMarginalUtilityOfTraveling()) {
+				log.warn("The marginal utility of traveling for 'taxi' and 'taxi_optimizer' should be the same..."
 						+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
 			}
 			
-			if (drtOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
+			if (taxiOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
 				log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer' should be (approximately) the same..."
 						+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
 						+ " It may make sense to charge a slighlty higher fare...");
 			}
 		}
 		
-		if (drtModeParams.getMonetaryDistanceRate() != 0.) {
-			log.warn("The monetary distance rate for 'drt' should be zero. The fare is considered somewhere else.");
+		if (taxiModeParams.getMonetaryDistanceRate() != 0.) {
+			log.warn("The monetary distance rate for 'taxi' should be zero. The fare is considered somewhere else.");
 		}
 		
-		if (drtModeParams.getMarginalUtilityOfDistance() != 0.) {
-			log.warn("The marginal utility of distance for 'drt' should be zero.");
+		if (taxiModeParams.getMarginalUtilityOfDistance() != 0.) {
+			log.warn("The marginal utility of distance for 'taxi' should be zero.");
 		}
 				
-		DrtPricingConfigGroup drtPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), DrtPricingConfigGroup.class);		
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
 		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
 		
@@ -127,16 +138,17 @@ public class DRTpricingModule extends AbstractModule {
 		// passenger-vehicle tracking
 		// #############################
 				
-		this.bind(SAVPassengerTracker.class).asEagerSingleton();
-		addEventHandlerBinding().to(SAVPassengerTracker.class);
+		SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(savMode);
+		this.bind(SAVPassengerTracker.class).toInstance(tracker);
+		addEventHandlerBinding().toInstance(tracker);
 				
 		// #############################
         // noise and congestion pricing
         // #############################
 		
-		if (drtPricingParams.isAccountForNoise()) {
+		if (taxiPricingParams.isAccountForNoise()) {
 						
-			if (drtPricingParams.isChargeSAVTollsFromPassengers() || drtPricingParams.isChargeTollsFromCarUsers() || drtPricingParams.isChargeTollsFromSAVDriver()) {
+			if (taxiPricingParams.isChargeSAVTollsFromPassengers() || taxiPricingParams.isChargeTollsFromCarUsers() || taxiPricingParams.isChargeTollsFromSAVDriver()) {
 				noiseParams.setInternalizeNoiseDamages(true);
 			} else {
 				noiseParams.setInternalizeNoiseDamages(false);
@@ -146,9 +158,9 @@ public class DRTpricingModule extends AbstractModule {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
 				
-		if (drtPricingParams.isAccountForCongestion()) {
+		if (taxiPricingParams.isAccountForCongestion()) {
 									
-			if (drtPricingParams.isChargeSAVTollsFromPassengers() || drtPricingParams.isChargeTollsFromCarUsers() || drtPricingParams.isChargeTollsFromSAVDriver()) {
+			if (taxiPricingParams.isChargeSAVTollsFromPassengers() || taxiPricingParams.isChargeTollsFromCarUsers() || taxiPricingParams.isChargeTollsFromSAVDriver()) {
 				decongestionParams.setEnableDecongestionPricing(true);
 			} else {
 				decongestionParams.setEnableDecongestionPricing(false);
@@ -162,39 +174,27 @@ public class DRTpricingModule extends AbstractModule {
         // travel disutility
         // #############################
 		               
-		// drt_optimizer
+		// taxi_optimizer
 		
-		if (drtPricingParams.isChargeTollsFromSAVDriver()) {
+		if (taxiPricingParams.isChargeTollsFromSAVDriver()) {
 			
-			log.info("Charge tolls from SAV drivers. Modify the default travel disutility of the DRT optimizer.");
-			install(new DvrpMoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));
-			
-//			MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-//			new MoneyTimeDistanceTravelDisutilityFactory(
-//				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultDrtOptimizer.DRT_OPTIMIZER, this.getConfig().planCalcScore())
-//					);
-//			install(new MoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, dvrpTravelDisutilityFactory));
-			
+			log.info("Charge tolls from SAV drivers. Modify the default travel disutility of the taxi optimizer.");
+			install(new SAVMoneyTravelDisutilityModule(savOptimizerMode, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
+		
 		} else {
 			
-			log.info("Tolls are not charged from SAV drivers. No need to modify the default travel disutility of the DRT optimizer.");
+			log.info("Tolls are not charged from SAV drivers. No need to modify the default travel disutility of the taxi optimizer.");
 			
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
-				log.info("Using the default travel disutility for SAV drivers / the DRT optimizer.");
+				log.info("Using the default travel disutility for SAV drivers / the taxi optimizer.");
 			} else {
-				install(new DvrpMoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, new DvrpMoneyTimeDistanceTravelDisutilityFactory()));		
-				
-//				MoneyTimeDistanceTravelDisutilityFactory dvrpTravelDisutilityFactory =
-//	        			new MoneyTimeDistanceTravelDisutilityFactory(
-//	        				new RandomizingTimeDistanceTravelDisutilityFactory(DefaultDrtOptimizer.DRT_OPTIMIZER, this.getConfig().planCalcScore())
-//					);
-//	        		install(new MoneyTravelDisutilityModule(DefaultDrtOptimizer.DRT_OPTIMIZER, dvrpTravelDisutilityFactory));   	
+				install(new SAVMoneyTravelDisutilityModule(savOptimizerMode, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));		  	
 			}
 		}
 		
 		// car user
 				
-		if (drtPricingParams.isChargeTollsFromCarUsers()) {
+		if (taxiPricingParams.isChargeTollsFromCarUsers()) {
 						
 			log.info("Charge tolls from private car users. Modify the default travel disutility of private car users.");
 
@@ -217,15 +217,15 @@ public class DRTpricingModule extends AbstractModule {
 			}
 		}
 		
-		// account for vehicle type (drt vs. car user)
-		if ((drtPricingParams.isChargeTollsFromCarUsers() == false && drtPricingParams.isChargeTollsFromSAVDriver() == true) 
-				|| (drtPricingParams.isChargeTollsFromCarUsers() == true && drtPricingParams.isChargeTollsFromSAVDriver() == false))  {
+		// account for vehicle type (taxi vs. car user)
+		if ((taxiPricingParams.isChargeTollsFromCarUsers() == false && taxiPricingParams.isChargeTollsFromSAVDriver() == true) 
+				|| (taxiPricingParams.isChargeTollsFromCarUsers() == true && taxiPricingParams.isChargeTollsFromSAVDriver() == false))  {
 			
-			log.info("Using an agent filter which differentiates between DRT vehicles and other vehicles...");
+			log.info("Using an agent filter which differentiates between taxi vehicles and other vehicles...");
 			this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
 		} else {
 			log.info("Not binding any agent filter. "
-					+ "The computation of average toll payments does not differentiate between drt/rt and a normal car.");
+					+ "The computation of average toll payments does not differentiate between taxi/rt and a normal car.");
 		}
 				
 	}

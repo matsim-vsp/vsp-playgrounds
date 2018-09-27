@@ -37,8 +37,6 @@ import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 
-import playground.ikaddoura.savPricing.drtPricing.SAVPassengerTracker;
-
 /**
  * @author ikaddoura
  *
@@ -54,7 +52,7 @@ public class DrtPassengerTrackerTest {
 		Id<Vehicle> taxiId = Id.createVehicleId("taxiVehicle1");
 		Id<Person> passengerId = Id.createPersonId("passenger1");
 
-		SAVPassengerTracker handler = new SAVPassengerTracker();
+		SAVPassengerTrackerImpl handler = new SAVPassengerTrackerImpl(TransportMode.drt);
 		handler.handleEvent(new ActivityEndEvent(1., Id.createPersonId("taxiDriver1"), Id.createLinkId("link1"), null, VrpAgentLogic.BEFORE_SCHEDULE_ACTIVITY_TYPE));
 		handler.handleEvent(new PersonDepartureEvent(2. ,passengerId, Id.createLinkId("link1"), TransportMode.drt));
 	

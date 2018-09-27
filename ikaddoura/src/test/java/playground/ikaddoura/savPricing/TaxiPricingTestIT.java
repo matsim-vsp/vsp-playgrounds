@@ -45,8 +45,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.savPricing.taxiPricing.TaxiPricingConfigGroup;
-import playground.ikaddoura.savPricing.taxiPricing.TaxiPricingModule;
 
 /**
  * @author ikaddoura
@@ -72,7 +70,7 @@ public class TaxiPricingTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new TaxiPricingConfigGroup(),
+				new SAVPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -81,7 +79,7 @@ public class TaxiPricingTestIT {
 		config1.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc1");
-		TaxiPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, TaxiPricingConfigGroup.class);
+		SAVPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, SAVPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		
@@ -93,7 +91,7 @@ public class TaxiPricingTestIT {
 				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 			}
 		});
-		controler1.addOverridingModule(new TaxiPricingModule(controler1.getScenario(), TransportMode.car));		
+		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));		
 
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
 		
@@ -112,7 +110,7 @@ public class TaxiPricingTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new TaxiPricingConfigGroup(),
+				new SAVPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -121,7 +119,7 @@ public class TaxiPricingTestIT {
 		config2.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "n");
-		TaxiPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, TaxiPricingConfigGroup.class);
+		SAVPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, SAVPricingConfigGroup.class);
 		optAVParams2.setAccountForNoise(true);
 		optAVParams2.setAccountForCongestion(false);
 		optAVParams2.setChargeSAVTollsFromPassengers(true);
@@ -136,7 +134,7 @@ public class TaxiPricingTestIT {
 				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 			}
 		});
-		controler2.addOverridingModule(new TaxiPricingModule(controler2.getScenario(), TransportMode.car));
+		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
 
@@ -154,7 +152,7 @@ public class TaxiPricingTestIT {
 		// ##################################################################
 
 		Config config3 = ConfigUtils.loadConfig(configFile,
-				new TaxiPricingConfigGroup(),
+				new SAVPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -165,7 +163,7 @@ public class TaxiPricingTestIT {
 		config3.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-9999999.0);
 		ConfigUtils.addOrGetModule(config3, TaxiFareConfigGroup.class).setDistanceFare_m(0.02);
 		
-		TaxiPricingConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, TaxiPricingConfigGroup.class);
+		SAVPricingConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, SAVPricingConfigGroup.class);
 		optAVParams3.setAccountForNoise(true);
 		optAVParams3.setAccountForCongestion(false);
 		optAVParams3.setChargeSAVTollsFromPassengers(true);
@@ -180,7 +178,7 @@ public class TaxiPricingTestIT {
 				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 			}
 		});
-		controler3.addOverridingModule(new TaxiPricingModule(controler3.getScenario(), TransportMode.car));
+		controler3.addOverridingModule(new SAVPricingModule(controler3.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler3.addOverridingModule(new OTFVisLiveModule());
 
@@ -228,7 +226,7 @@ public class TaxiPricingTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new TaxiPricingConfigGroup(),
+				new SAVPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -238,7 +236,7 @@ public class TaxiPricingTestIT {
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc2");
 		config1.travelTimeCalculator().setTraveltimeBinSize(900);
 		
-		final TaxiPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, TaxiPricingConfigGroup.class);
+		final SAVPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, SAVPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		
@@ -252,7 +250,7 @@ public class TaxiPricingTestIT {
 				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 			}
 		});
-		controler1.addOverridingModule(new TaxiPricingModule(controler1.getScenario(), TransportMode.car));
+		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
 		
 		LinkDemandEventHandler handler1 = new LinkDemandEventHandler(controler1.getScenario().getNetwork());
 		controler1.getEvents().addHandler(handler1);
@@ -266,7 +264,7 @@ public class TaxiPricingTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new TaxiPricingConfigGroup(),
+				new SAVPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -275,7 +273,7 @@ public class TaxiPricingTestIT {
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c");
 		config2.travelTimeCalculator().setTraveltimeBinSize(900);
 		
-		final TaxiPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, TaxiPricingConfigGroup.class);
+		final SAVPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, SAVPricingConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(true);
 		
@@ -300,7 +298,7 @@ public class TaxiPricingTestIT {
 			}
 		});
 		
-		controler2.addOverridingModule(new TaxiPricingModule(controler2.getScenario(), TransportMode.car));
+		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
 

@@ -1,10 +1,9 @@
 /* *********************************************************************** *
  * project: org.matsim.*
- * DefaultTravelCostCalculatorFactoryImpl
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2009 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,46 +16,31 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.ikaddoura.savPricing.taxiPricing.disutility;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
-import org.matsim.core.router.util.TravelDisutility;
-import org.matsim.core.router.util.TravelTime;
+package playground.ikaddoura.savPricing;
 
-import com.google.inject.Inject;
+import java.util.Map;
+import java.util.Set;
 
-import playground.ikaddoura.moneyTravelDisutility.MoneyEventAnalysis;
-import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
-
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.vehicles.Vehicle;
 
 /**
- * 
- * A travel disutility which accounts for link-, time- and vehicle-specific monetary payments.
- * 
- * @author ikaddoura
- *
- */
-public final class DvrpMoneyTimeDistanceTravelDisutilityFactory implements TravelDisutilityFactory {
+* @author ikaddoura
+*/
+
+public interface SAVPassengerTracker {
+
+	public boolean isTaxiPassenger(Id<Person> personId);
 	
-	@Inject
-	private MoneyEventAnalysis moneyAnalysis;
+	public Set<Id<Vehicle>> getTaxiVehicles();
+
+	public Map<Id<Vehicle>, Id<Person>> getVehicle2passenger();
+
+	public Map<Id<Vehicle>, Id<Person>> getVehicle2lastPassenger();
 	
-	@Inject(optional = true)
-	private AgentFilter vehicleFilter;
-	
-	@Inject
-	private Scenario scenario;
-	
-	@Override
-	public final TravelDisutility createTravelDisutility(TravelTime travelTime) {
-				
-		return new DvrpMoneyTimeDistanceTravelDisutility(
-				travelTime,
-				scenario,
-				this.moneyAnalysis,
-				this.vehicleFilter
-			);
-	}
+	public Set<Id<Person>> getCurrentTaxiPassengers();
 	
 }
+

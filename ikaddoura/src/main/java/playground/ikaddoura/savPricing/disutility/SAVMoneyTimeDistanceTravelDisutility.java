@@ -17,14 +17,13 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.drtPricing.disutility;
+package playground.ikaddoura.savPricing.disutility;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.noise.personLinkMoneyEvents.PersonLinkMoneyEvent;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -44,8 +43,8 @@ import playground.ikaddoura.moneyTravelDisutility.data.TimeBin;
 * @author ikaddoura
 */
 
-public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
-	private static final Logger log = Logger.getLogger(DvrpMoneyTimeDistanceTravelDisutility.class);
+public class SAVMoneyTimeDistanceTravelDisutility implements TravelDisutility {
+	private static final Logger log = Logger.getLogger(SAVMoneyTimeDistanceTravelDisutility.class);
 
 	private MoneyEventAnalysis moneyEventAnalysis;
 	private AgentFilter vehicleFilter;
@@ -55,21 +54,22 @@ public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 	private final double marginalUtilityOfDistance_m;
 	private final double timeBinSize;
 	
-	public DvrpMoneyTimeDistanceTravelDisutility(
+	public SAVMoneyTimeDistanceTravelDisutility(
 			TravelTime travelTime,
 			Scenario scenario,
 			MoneyEventAnalysis moneyAnalysis,
-			AgentFilter vehicleFilter) {
+			AgentFilter vehicleFilter,
+			String savOptimizerMode) {
 		
 		this.travelTime = travelTime;
 		this.timeBinSize = scenario.getConfig().travelTimeCalculator().getTraveltimeBinSize();
 		this.marginalUtilityOfMoney = scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
 
-		this.marginalUtilityOfTime_sec = (scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMarginalUtilityOfTraveling() +
+		this.marginalUtilityOfTime_sec = (scenario.getConfig().planCalcScore().getModes().get(savOptimizerMode).getMarginalUtilityOfTraveling() +
 				(-1. * scenario.getConfig().planCalcScore().getPerforming_utils_hr() )  ) / 3600.;
 		
-		this.marginalUtilityOfDistance_m = scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMarginalUtilityOfDistance() + 
-				scenario.getConfig().planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).getMonetaryDistanceRate() * marginalUtilityOfMoney;
+		this.marginalUtilityOfDistance_m = scenario.getConfig().planCalcScore().getModes().get(savOptimizerMode).getMarginalUtilityOfDistance() + 
+				scenario.getConfig().planCalcScore().getModes().get(savOptimizerMode).getMonetaryDistanceRate() * marginalUtilityOfMoney;
 
 		log.info("marginalUtilityOfDistance_m" + this.marginalUtilityOfDistance_m);
 		log.info("marginalUtilityOfTime_sec" + this.marginalUtilityOfTime_sec);
@@ -79,7 +79,7 @@ public class DvrpMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		if (marginalUtilityOfMoney > 0.) log.warn("Check marginalUtilityOfMoney: " + marginalUtilityOfMoney);
 
 		if (marginalUtilityOfTime_sec >= 0. && marginalUtilityOfTime_sec >= 0.) {
-			throw new RuntimeException("Check scoring parameters for " + DefaultDrtOptimizer.DRT_OPTIMIZER + ".");
+			throw new RuntimeException("Check scoring parameters for " + savOptimizerMode + ".");
 		}
 		
 		this.vehicleFilter = vehicleFilter;

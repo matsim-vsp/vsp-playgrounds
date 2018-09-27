@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.taxiPricing;
+package playground.ikaddoura.savPricing;
 
 import org.matsim.core.config.ReflectiveConfigGroup;
 
@@ -26,10 +26,10 @@ import org.matsim.core.config.ReflectiveConfigGroup;
  * @author ikaddoura
  */
 
-public class TaxiPricingConfigGroup extends ReflectiveConfigGroup {
-	public static final String GROUP_NAME = "taxiPricing" ;
+public class SAVPricingConfigGroup extends ReflectiveConfigGroup {
+	public static final String GROUP_NAME = "SAVPricing" ;
 	
-	public TaxiPricingConfigGroup() {
+	public SAVPricingConfigGroup() {
 		super(GROUP_NAME);
 	}
 		
@@ -39,7 +39,19 @@ public class TaxiPricingConfigGroup extends ReflectiveConfigGroup {
 	private boolean chargeTollsFromSAVDriver = true;
 	private boolean chargeSAVTollsFromPassengers = true;
 	private boolean chargeTollsFromCarUsers = true;
+	
+	private String savMode = "taxi";
 		
+	@StringGetter( "savMode" )
+	public String getSavMode() {
+		return savMode;
+	}
+
+	@StringSetter( "savMode" )
+	public void setSavMode(String savMode) {
+		this.savMode = savMode;
+	}
+
 	@StringGetter( "accountForCongestion" )
 	public boolean isAccountForCongestion() {
 		return accountForCongestion;

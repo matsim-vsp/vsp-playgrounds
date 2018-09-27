@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.taxiPricing;
+package playground.ikaddoura.savPricing.runTaxiPricing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,29 +29,33 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
 import org.matsim.contrib.noise.utils.ProcessNoiseImmissions;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.runTaxi.RunBerlinTaxiScenario2;
+import org.matsim.runTaxi.RunBerlinTaxiScenario1;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 import playground.ikaddoura.analysis.modalSplitUserType.ModalSplitUserTypeControlerListener;
+import playground.ikaddoura.savPricing.SAVPricingModule;
+import playground.ikaddoura.savPricing.SAVPricingConfigGroup;
 
 /**
 * @author ikaddoura
 */
 
-public class RunBerlinTaxiPricingScenario2 {
-	private static final Logger log = Logger.getLogger(RunBerlinTaxiPricingScenario2.class);
+public class RunBerlinTaxiPricingScenario1 {
+	private static final Logger log = Logger.getLogger(RunBerlinTaxiPricingScenario1.class);
 
 	private static String configFileName;
 	private static String overridingConfigFileName;
 	private static String berlinShapeFile;
 	private static String drtServiceAreaShapeFile;
-	private static double dailyRewardDrtInsteadOfPrivateCar;
+	private static String transitStopCoordinatesSFile;
+	private static String transitStopCoordinatesRBFile;
 	private static String runId;
 	private static String outputDirectory;
 	private static String visualizationScriptDirectory;
@@ -63,19 +67,21 @@ public class RunBerlinTaxiPricingScenario2 {
 			overridingConfigFileName = args[1];
 			berlinShapeFile = args[2];
 			drtServiceAreaShapeFile = args[3];
-			dailyRewardDrtInsteadOfPrivateCar = Double.parseDouble(args[4]);
-			runId = args[5];
-			outputDirectory = args[6];
-			visualizationScriptDirectory = args[7];
+			transitStopCoordinatesSFile = args[4];
+			transitStopCoordinatesRBFile = args[5];
+			runId = args[6];
+			outputDirectory = args[7];
+			visualizationScriptDirectory = args[8];
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
-			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drt-v5.2-1pct.config_2agents_drtPricing.xml";
+			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-taxi-v5.2-1pct.config_2agents_taxiPricing.xml";
 			overridingConfigFileName = null;
 			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
-			dailyRewardDrtInsteadOfPrivateCar = 0.;
-			runId = "drt-opt-3";
+			transitStopCoordinatesSFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_S-zoneC.csv";
+			transitStopCoordinatesRBFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_RB-zoneC.csv";
+			runId = "taxi-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/drtPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
 		}
@@ -83,14 +89,14 @@ public class RunBerlinTaxiPricingScenario2 {
 		log.info("run Id: " + runId);
 		log.info("output directory: " + outputDirectory);
 		
-		RunBerlinTaxiPricingScenario2 drtPricing = new RunBerlinTaxiPricingScenario2();
+		RunBerlinTaxiPricingScenario1 drtPricing = new RunBerlinTaxiPricingScenario1();
 		drtPricing.run();
 	}
 	
 	private void run() {
-		RunBerlinTaxiScenario2 berlin = new RunBerlinTaxiScenario2(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
+		RunBerlinTaxiScenario1 berlin = new RunBerlinTaxiScenario1(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
 		
-		ConfigGroup[] modulesToAdd = {new TaxiPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
+		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
 		config.controler().setRunId(runId);
 		config.controler().setOutputDirectory(outputDirectory);
@@ -99,8 +105,8 @@ public class RunBerlinTaxiPricingScenario2 {
 		
 		Controler controler = berlin.prepareControler();		
 
-		// drt pricing
-		controler.addOverridingModule(new TaxiPricingModule(scenario, RunBerlinTaxiScenario2.modeToReplaceCarTripsInBrandenburg));
+		// taxi pricing
+		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg));
 		
 		// modal split analysis
 		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {	
@@ -120,7 +126,7 @@ public class RunBerlinTaxiPricingScenario2 {
 		final String shapeFileZones = null;
 		final String zonesCRS = null;
 		final String homeActivity = "home";
-		final int scalingFactor = 10;
+		final int scalingFactor = 10; // TODO configurable
 		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
@@ -142,6 +148,7 @@ public class RunBerlinTaxiPricingScenario2 {
 		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
+		modes.add(RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg);
 		modes.add(TransportMode.taxi);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
@@ -160,7 +167,7 @@ public class RunBerlinTaxiPricingScenario2 {
 		
 		// noise post-analysis
 		
-		TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
+		SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 		if (optAVParams.isAccountForNoise()) {
 			String immissionsDir = controler.getConfig().controler().getOutputDirectory() + "/ITERS/it." + controler.getConfig().controler().getLastIteration() + "/immissions/";
 			String receiverPointsFile = controler.getConfig().controler().getOutputDirectory() + "/receiverPoints/receiverPoints.csv";

@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.drtPricing;
+package playground.ikaddoura.savPricing;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
@@ -46,8 +45,8 @@ import org.matsim.vehicles.Vehicle;
  * @author ikaddoura
  */
 
-public class SAVPassengerTracker implements PersonDepartureEventHandler, PersonArrivalEventHandler, ActivityEndEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
-	private static final Logger log = Logger.getLogger(SAVPassengerTracker.class);
+public class SAVPassengerTrackerImpl implements SAVPassengerTracker, PersonDepartureEventHandler, PersonArrivalEventHandler, ActivityEndEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
+	private static final Logger log = Logger.getLogger(SAVPassengerTrackerImpl.class);
 
 	private final Set<Id<Person>> taxiDrivers = new HashSet<>();
 	private final Set<Id<Person>> currentTaxiPassengers = new HashSet<>();
@@ -55,6 +54,12 @@ public class SAVPassengerTracker implements PersonDepartureEventHandler, PersonA
 	private final Set<Id<Vehicle>> taxiVehicles = new HashSet<>();
 	private final Map<Id<Vehicle>, Id<Person>> vehicle2passenger = new HashMap<>();
 	private final Map<Id<Vehicle>, Id<Person>> vehicle2lastPassenger = new HashMap<>();
+
+	private final String savMode;
+	
+	public SAVPassengerTrackerImpl(String savMode) {
+		this.savMode = savMode;
+	}
 
 	@Override
 	public void reset(int iteration) {
@@ -75,14 +80,14 @@ public class SAVPassengerTracker implements PersonDepartureEventHandler, PersonA
 	
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
-		if (event.getLegMode().equals(TransportMode.drt)) {
+		if (event.getLegMode().equals(savMode)) {
 			currentTaxiPassengers.add(event.getPersonId());
 		}
 	}
 	
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
-		if (event.getLegMode().equals(TransportMode.drt)) {
+		if (event.getLegMode().equals(savMode)) {
 			currentTaxiPassengers.remove(event.getPersonId());
 		}
 	}
@@ -134,22 +139,23 @@ public class SAVPassengerTracker implements PersonDepartureEventHandler, PersonA
 	 * May not have collected all taxi vehicle IDs at the time of passenger boarding.
 	 * Should only be called after the passenger has entered the vehicle. 
 	 */	
+	@Override
 	public Set<Id<Vehicle>> getTaxiVehicles() {
 		return taxiVehicles;
 	}
-
+	@Override
 	public Map<Id<Vehicle>, Id<Person>> getVehicle2passenger() {
 		return vehicle2passenger;
 	}
-
+	@Override
 	public Map<Id<Vehicle>, Id<Person>> getVehicle2lastPassenger() {
 		return vehicle2lastPassenger;
 	}
-
+	@Override
 	public Set<Id<Person>> getCurrentTaxiPassengers() {
 		return currentTaxiPassengers;
 	}
-	
+	@Override
 	public boolean isTaxiPassenger(Id<Person> personId) {
 		if (this.currentTaxiPassengers.contains(personId)) {
 			return true;

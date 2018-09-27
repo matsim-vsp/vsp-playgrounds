@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.ikaddoura.savPricing.drtPricing.disutility;
+package playground.ikaddoura.savPricing.disutility;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
@@ -37,7 +37,7 @@ import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
  * @author ikaddoura
  *
  */
-public final class DvrpMoneyTimeDistanceTravelDisutilityFactory implements TravelDisutilityFactory {
+public final class SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory implements TravelDisutilityFactory {
 	
 	@Inject
 	private MoneyEventAnalysis moneyAnalysis;
@@ -48,14 +48,21 @@ public final class DvrpMoneyTimeDistanceTravelDisutilityFactory implements Trave
 	@Inject
 	private Scenario scenario;
 	
+	private final String savOptimizerMode;
+	
+	public SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(String savOptimizerMode) {
+		this.savOptimizerMode = savOptimizerMode;
+	}
+
 	@Override
 	public final TravelDisutility createTravelDisutility(TravelTime travelTime) {
 				
-		return new DvrpMoneyTimeDistanceTravelDisutility(
+		return new SAVMoneyTimeDistanceTravelDisutility(
 				travelTime,
 				scenario,
 				this.moneyAnalysis,
-				this.vehicleFilter
+				this.vehicleFilter,
+				savOptimizerMode
 			);
 	}
 	

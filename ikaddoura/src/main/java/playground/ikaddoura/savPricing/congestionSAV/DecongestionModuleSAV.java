@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.taxiPricing.congestionAV;
+package playground.ikaddoura.savPricing.congestionSAV;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;

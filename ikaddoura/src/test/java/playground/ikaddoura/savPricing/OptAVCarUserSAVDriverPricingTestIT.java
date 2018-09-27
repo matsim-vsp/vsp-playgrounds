@@ -33,6 +33,7 @@ import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
+import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
@@ -44,8 +45,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.savPricing.taxiPricing.TaxiPricingConfigGroup;
-import playground.ikaddoura.savPricing.taxiPricing.TaxiPricingModule;
 
 /**
  * @author ikaddoura
@@ -72,7 +71,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler3;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new TaxiPricingConfigGroup(),
+					new SAVPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -81,7 +80,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-SAV");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
+			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
@@ -101,7 +100,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setRunFinalAnalysis(false);
 
 			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
-			controler.addOverridingModule(new TaxiPricingModule(controler.getScenario(), TransportMode.car));
+			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
 			controler.addOverridingModule(new AbstractModule() {
@@ -128,7 +127,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler1;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new TaxiPricingConfigGroup(),
+					new SAVPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -138,12 +137,12 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
+			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
 			
 			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
-			controler.addOverridingModule(new TaxiPricingModule(controler.getScenario(), TransportMode.car));
+			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
 			controler.addOverridingModule(new AbstractModule() {
@@ -168,7 +167,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler2;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new TaxiPricingConfigGroup(),
+					new SAVPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -177,7 +176,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-only");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
+			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
@@ -197,7 +196,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setRunFinalAnalysis(false);
 			
 			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
-			controler.addOverridingModule(new TaxiPricingModule(controler.getScenario(), TransportMode.car));
+			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 
@@ -224,7 +223,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler4;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new TaxiPricingConfigGroup(),
+					new SAVPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -233,7 +232,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-SAV");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
+			final SAVPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
@@ -253,7 +252,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			decongestionSettings.setRunFinalAnalysis(false);
 			
 			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
-			controler.addOverridingModule(new TaxiPricingModule(controler.getScenario(), TransportMode.car));
+			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			controler.addOverridingModule(new AbstractModule() {
 				@Override

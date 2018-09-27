@@ -20,7 +20,7 @@
 /**
  * 
  */
-package playground.ikaddoura.savPricing.drtPricing.noiseAV;
+package playground.ikaddoura.savPricing.noiseSAV;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,10 +40,8 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.savPricing.drtPricing.DrtPricingConfigGroup;
-import playground.ikaddoura.savPricing.drtPricing.SAVPassengerTracker;
-
-
+import playground.ikaddoura.savPricing.SAVPassengerTracker;
+import playground.ikaddoura.savPricing.SAVPricingConfigGroup;
 
 /**
  * This handler calculates agent money events based on the noise damages an agent may cause (NoiseEventCaused).
@@ -61,7 +59,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	private NoiseContext noiseContext;
 	
 	@Inject
-	private DrtPricingConfigGroup optAVParams;
+	private SAVPricingConfigGroup optAVParams;
 	
 	@Inject
 	private SAVPassengerTracker savPassengerTracker;

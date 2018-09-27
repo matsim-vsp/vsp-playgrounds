@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.drtPricing.disutility;
+package playground.ikaddoura.savPricing.disutility;
 
 import org.matsim.core.controler.AbstractModule;
 
@@ -30,23 +30,23 @@ import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 * @author ikaddoura
 */
 
-public class DvrpMoneyTravelDisutilityModule extends AbstractModule {
+public class SAVMoneyTravelDisutilityModule extends AbstractModule {
 	
 	private final String mode;
-	private final DvrpMoneyTimeDistanceTravelDisutilityFactory factory;
+	private final SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory;
 	
 	@Inject(optional = true)
 	private AgentFilter agentFilter;
 	
 	private final AgentFilter agentFilterToBind;
 	
-	public DvrpMoneyTravelDisutilityModule(String mode, DvrpMoneyTimeDistanceTravelDisutilityFactory factory, AgentFilter agentFilter) {
+	public SAVMoneyTravelDisutilityModule(String mode, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory, AgentFilter agentFilter) {
 		this.mode = mode;
 		this.factory = factory;
 		this.agentFilterToBind = agentFilter;
 	}
 
-	public DvrpMoneyTravelDisutilityModule(String mode, DvrpMoneyTimeDistanceTravelDisutilityFactory factory) {
+	public SAVMoneyTravelDisutilityModule(String mode, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory) {
 		this.mode = mode;
 		this.factory = factory;
 		this.agentFilterToBind = null;
