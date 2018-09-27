@@ -5,16 +5,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
 import javax.inject.Inject;
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.SimulatorState;
+
 import org.apache.log4j.Logger;
 import org.matsim.analysis.TransportPlanningMainModeIdentifier;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.analysis.kai.DataMap;
 import org.matsim.contrib.analysis.kai.Databins;
 import org.matsim.core.gbl.Gbl;
@@ -24,6 +26,9 @@ import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
 import org.matsim.core.scoring.ExperiencedPlansService;
 import org.matsim.core.utils.geometry.CoordUtils;
+
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.SimulatorState;
 
 /**
  * 
@@ -36,9 +41,13 @@ class ModeChoiceObjectiveFunction implements ObjectiveFunction {
 
 	private MainModeIdentifier mainModeIdentifier = new TransportPlanningMainModeIdentifier() ;
 
-	@Inject ExperiencedPlansService service ;
+	// For some reason, the service does not provide experienced plans. Gunnar, 2018-09-27
+	@Inject Population population;
+	// @Inject ExperiencedPlansService service ;
 	@Inject TripRouter tripRouter ;
 	@Inject Network network ;
+	
+	
 	// Documentation: "Guice injects ... fields of all values (=classes) that are bound using toInstance(). These are injected at injector-creation time."
 	// https://github.com/google/guice/wiki/InjectionPoints
 	// I read that as "the fields are injected (every time again) when the instance is injected".
@@ -96,11 +105,17 @@ class ModeChoiceObjectiveFunction implements ObjectiveFunction {
 
 	@Override public double value(SimulatorState state) {
 
+		log.warn("Evaluating selected plans instead of experienced plans.");
+
 		resetContainers();
 
 		StatType statType = StatType.tripBeelineDistances ;
 
-		for ( Plan plan : service.getExperiencedPlans().values() ) {
+		int processedTrips = 0;
+		// For some reason, the service does not provide experienced plans. Gunnar, 2018-09-27
+		// for ( Plan plan : service.getExperiencedPlans().values() ) {
+		for (Person person : population.getPersons().values()) {
+			Plan plan = person.getSelectedPlan();
 			List<Trip> trips = TripStructureUtils.getTrips(plan, tripRouter.getStageActivityTypes() ) ;
 			for ( Trip trip : trips ) {
 				List<String> tripTypes = new ArrayList<>() ;
@@ -108,11 +123,14 @@ class ModeChoiceObjectiveFunction implements ObjectiveFunction {
 				tripTypes.add(mode) ;
 				double item = calcBeelineDistance( trip.getOriginActivity(), trip.getDestinationActivity() ) ;
 				addItemToAllRegisteredTypes(tripTypes, statType, item);
+				processedTrips++;
 			}
 		}
+		log.warn("processedTrips=" + processedTrips);
 
 		double objective = 0 ;
 		double sum = 0. ;
+		int processedEntryCnt = 0;
 		for ( Entry<StatType, Databins<String>> entry : simStatsContainer.entrySet() ) {
 			StatType theStatType = entry.getKey() ;  // currently only one type ;
 			log.warn( "statType=" + statType );
@@ -129,10 +147,13 @@ class ModeChoiceObjectiveFunction implements ObjectiveFunction {
 					}
 					objective += diff * diff ;
 					sum += reaVal[ii] ;
+					processedEntryCnt++;
 				}
 			}
 		}
 		objective /= (sum*sum) ;
+		log.warn( "sum=" + sum ) ;
+		log.warn( "processedEntryCnt=" + processedEntryCnt ) ;
 		log.warn( "objective=" + objective ) ;
 		return objective ;
 

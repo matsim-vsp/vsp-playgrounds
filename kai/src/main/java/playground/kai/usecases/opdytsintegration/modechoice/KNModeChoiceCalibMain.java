@@ -1,18 +1,12 @@
 package playground.kai.usecases.opdytsintegration.modechoice;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
-import floetteroed.utilities.TimeDiscretization;
+
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.opdyts.MATSimSimulator2;
-import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
-import org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer;
-import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
-import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
-import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
+import org.matsim.contrib.opdyts.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.example.modechoice.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -22,6 +16,7 @@ import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
+
 import playground.kairuns.run.KNBerlinControler;
 import playground.kairuns.run.KNBerlinControler.A100;
 
@@ -112,59 +107,81 @@ class KNModeChoiceCalibMain {
 
 		// ===
 
+		// For some reason, this does not work. Gunnar, 2018-09-27.
+		config.planCalcScore().setWriteExperiencedPlans(false);
+		
 		if ( calib ) {
 
 			OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), OpdytsConfigGroup.class);
-
-			MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
-
-			// if not provided created by default using opdytsConfigGroup. Amit July'17
-			final TimeDiscretization timeDiscretization = new TimeDiscretization(0, 3600, 24);
-			opdytsControler.setTimeDiscretization(timeDiscretization);
-
-			final MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>( new MATSimStateFactoryImpl<>(),
-					scenario);
-			simulator.addOverridingModule( overrides ) ;
-
-			// alternatively, opdytsControler.addNetworkModeOccupancyAnalyzr(simulator); could be used.
-			Set<String> relevantNetworkModes = new HashSet<>();
-			relevantNetworkModes.add("car");
-			simulator.addSimulationStateAnalyzer(new DifferentiatedLinkOccupancyAnalyzer.Provider(timeDiscretization, relevantNetworkModes,
-					new LinkedHashSet<>(scenario.getNetwork().getLinks().keySet())));
-
+			
 			//all of these will go to opdytsConfigGroup.
 			int maxIterations = 10 ;
 			int maxTransitions = Integer.MAX_VALUE ;
-			int populationSize = 10 ;
-			boolean interpolate = true ;
-			boolean includeCurrentBest = false ;
+			// int populationSize = 10 ;
+			// boolean interpolate = true ;
+			// boolean includeCurrentBest = false ;
 			int warmupIterations = 1;
 			boolean useAllWarmUpIterations = false;
 
 			opdytsConfigGroup.setMaxIteration(maxIterations);
 			opdytsConfigGroup.setMaxTransition(maxTransitions);
-			opdytsConfigGroup.setPopulationSize( populationSize );
-			opdytsConfigGroup.setInterpolate(interpolate);
-			opdytsConfigGroup.setIncludeCurrentBest(includeCurrentBest);
+			// opdytsConfigGroup.setPopulationSize( populationSize );
+			// opdytsConfigGroup.setInterpolate(interpolate);
+			// opdytsConfigGroup.setIncludeCurrentBest(includeCurrentBest);
 			opdytsConfigGroup.setWarmUpIterations(warmupIterations);
 			opdytsConfigGroup.setUseAllWarmUpIterations(useAllWarmUpIterations);
-
-			final ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable( scenario.getConfig().planCalcScore(), scenario );
-
-			final FixedIterationNumberConvergenceCriterion convergenceCriterion ;
 			if ( testcase ) {
 				opdytsConfigGroup.setNumberOfIterationsForConvergence(2);
 				opdytsConfigGroup.setNumberOfIterationsForAveraging(1);
-				convergenceCriterion= new FixedIterationNumberConvergenceCriterion(2, 1 );
 			} else {
-				opdytsConfigGroup.setNumberOfIterationsForConvergence(2);
-				opdytsConfigGroup.setNumberOfIterationsForAveraging(1);
-				convergenceCriterion= new FixedIterationNumberConvergenceCriterion(100, 10 );
+				opdytsConfigGroup.setNumberOfIterationsForConvergence(100);
+				opdytsConfigGroup.setNumberOfIterationsForAveraging(10);
 			}
-			opdytsControler.setFixedIterationNumberConvergenceCriterion(convergenceCriterion); // if not provided created by default using opdytsConfigGroup. Amit July'17
-			//
+			opdytsConfigGroup.setStartTime(0);
+			opdytsConfigGroup.setBinSize(3600);
+			opdytsConfigGroup.setBinCount(24);
 
-			opdytsControler.run(simulator, new ModeChoiceRandomizer(scenario), initialDecisionVariable, new ModeChoiceObjectiveFunction(equil));
+			
+			// MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
+			MATSimOpdytsRunner<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsRunner<>(scenario, new MATSimStateFactoryImpl<>());
+
+			// if not provided created by default using opdytsConfigGroup. Amit July'17
+			// final TimeDiscretization timeDiscretization = new TimeDiscretization(0, 3600,
+			// 24);
+			// opdytsControler.setTimeDiscretization(timeDiscretization);
+
+			// final MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new
+			// MATSimSimulator2<>( new MATSimStateFactoryImpl<>(),
+			// scenario);
+			// simulator.addOverridingModule( overrides ) ;
+			opdytsControler.addOverridingModule(overrides);
+
+			// alternatively, opdytsControler.addNetworkModeOccupancyAnalyzr(simulator); could be used.
+			// Set<String> relevantNetworkModes = new HashSet<>();
+			// relevantNetworkModes.add("car");
+			// simulator.addSimulationStateAnalyzer(new
+			// DifferentiatedLinkOccupancyAnalyzer.Provider(timeDiscretization,
+			// relevantNetworkModes,
+			// new LinkedHashSet<>(scenario.getNetwork().getLinks().keySet())));
+			// the above is included by default
+		
+			final ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable( scenario.getConfig().planCalcScore(), scenario );
+
+			// final FixedIterationNumberConvergenceCriterion convergenceCriterion ;
+			// if ( testcase ) {
+			// opdytsConfigGroup.setNumberOfIterationsForConvergence(2);
+			// opdytsConfigGroup.setNumberOfIterationsForAveraging(1);
+			// convergenceCriterion= new FixedIterationNumberConvergenceCriterion(2, 1 );
+			// } else {
+			// opdytsConfigGroup.setNumberOfIterationsForConvergence(2);
+			// opdytsConfigGroup.setNumberOfIterationsForAveraging(1);
+			// convergenceCriterion= new FixedIterationNumberConvergenceCriterion(100, 10 );
+			// }
+			// opdytsControler.setFixedIterationNumberConvergenceCriterion(convergenceCriterion);
+			// // if not provided created by default using opdytsConfigGroup. Amit July'17
+
+			// opdytsControler.run(simulator, new ModeChoiceRandomizer(scenario), initialDecisionVariable, new ModeChoiceObjectiveFunction(equil));
+			opdytsControler.run(new ModeChoiceRandomizer(scenario), initialDecisionVariable, new ModeChoiceObjectiveFunction(equil));
 
 		} else {
 			config.controler().setLastIteration(1000);
