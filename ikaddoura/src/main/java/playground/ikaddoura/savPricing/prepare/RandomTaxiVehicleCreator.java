@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing.prepare;
+package playground.ikaddoura.savPricing.prepare;
 
 import java.util.ArrayList;
 import java.util.Collection;

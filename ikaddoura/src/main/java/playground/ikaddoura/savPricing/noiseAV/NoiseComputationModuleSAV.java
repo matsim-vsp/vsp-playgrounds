@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing.noiseAV;
+package playground.ikaddoura.savPricing.noiseAV;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;

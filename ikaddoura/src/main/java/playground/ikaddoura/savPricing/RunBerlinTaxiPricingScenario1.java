@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing;
+package playground.ikaddoura.savPricing;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing.disutility;
+package playground.ikaddoura.savPricing.disutility;
 
 import org.matsim.core.controler.AbstractModule;
 

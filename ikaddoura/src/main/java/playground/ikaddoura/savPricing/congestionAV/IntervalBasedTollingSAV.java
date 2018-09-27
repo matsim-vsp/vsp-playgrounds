@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing.congestionAV;
+package playground.ikaddoura.savPricing.congestionAV;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +38,8 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
-import playground.ikaddoura.taxiPricing.SAVPassengerTracker;
+import playground.ikaddoura.savPricing.SAVPassengerTracker;
+import playground.ikaddoura.savPricing.TaxiPricingConfigGroup;
 
 /**
  * Throws agent money events for the tolled links and time bins.
