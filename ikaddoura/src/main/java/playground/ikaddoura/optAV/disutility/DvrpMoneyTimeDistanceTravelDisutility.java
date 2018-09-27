@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing.disutility;
+package playground.ikaddoura.optAV.disutility;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;

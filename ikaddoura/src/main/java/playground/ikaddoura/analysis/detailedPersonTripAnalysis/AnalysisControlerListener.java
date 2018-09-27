@@ -48,7 +48,7 @@ import com.google.inject.Inject;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
-import playground.ikaddoura.taxiPricing.SAVFixCostHandler;
+import playground.ikaddoura.optAV.SAVFixCostHandler;
 
 
 /**

@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing.prepare;
+package playground.ikaddoura.optAV.prepare;
 
 import java.util.Collection;
 import java.util.HashMap;

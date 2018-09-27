@@ -50,8 +50,8 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
-import playground.ikaddoura.taxiPricing.TaxiPricingModule;
+import playground.ikaddoura.optAV.TaxiPricingConfigGroup;
+import playground.ikaddoura.optAV.TaxiPricingModule;
 
 /**
  * @author ikaddoura

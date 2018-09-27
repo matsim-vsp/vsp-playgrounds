@@ -20,7 +20,7 @@
 /**
  * 
  */
-package playground.ikaddoura.taxiPricing.noiseAV;
+package playground.ikaddoura.optAV.noiseAV;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +40,8 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
-import playground.ikaddoura.taxiPricing.SAVPassengerTracker;
+import playground.ikaddoura.optAV.SAVPassengerTracker;
+import playground.ikaddoura.optAV.TaxiPricingConfigGroup;
 
 
 /**

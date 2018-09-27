@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing;
+package playground.ikaddoura.optAV;
 
 import org.matsim.core.config.ReflectiveConfigGroup;
 

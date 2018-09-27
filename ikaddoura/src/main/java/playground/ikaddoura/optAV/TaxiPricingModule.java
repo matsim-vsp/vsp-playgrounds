@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.taxiPricing;
+package playground.ikaddoura.optAV;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
@@ -41,10 +41,10 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMo
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
-import playground.ikaddoura.taxiPricing.congestionAV.DecongestionModuleSAV;
-import playground.ikaddoura.taxiPricing.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.taxiPricing.disutility.DvrpMoneyTravelDisutilityModule;
-import playground.ikaddoura.taxiPricing.noiseAV.NoiseComputationModuleSAV;
+import playground.ikaddoura.optAV.congestionAV.DecongestionModuleSAV;
+import playground.ikaddoura.optAV.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
+import playground.ikaddoura.optAV.disutility.DvrpMoneyTravelDisutilityModule;
+import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 
 /**
  * Idea:

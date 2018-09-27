@@ -17,7 +17,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.ikaddoura.taxiPricing.disutility;
+package playground.ikaddoura.optAV.disutility;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
