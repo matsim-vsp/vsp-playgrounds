@@ -292,13 +292,14 @@ public class TaxiPricingTestIT {
 		decongestionSettings.setRunFinalAnalysis(false);
 
 		Controler controler2 = TaxiControlerCreator.createControler(config2, false);
-		// drt fares
+		// taxi fares
 		controler2.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
 				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
 			}
 		});
+		
 		controler2.addOverridingModule(new TaxiPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
