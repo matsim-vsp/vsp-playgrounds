@@ -50,6 +50,8 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
+import playground.ikaddoura.taxiPricing.TaxiPricingModule;
 
 /**
  * @author ikaddoura
@@ -75,7 +77,7 @@ public class OptAVTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -84,7 +86,7 @@ public class OptAVTestIT {
 		config1.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc1");
-		OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, TaxiPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 
@@ -96,7 +98,7 @@ public class OptAVTestIT {
 		controler1.addOverridingModule(DvrpModule.createModule(mode1,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler1.addOverridingModule(new TaxiModule());
-		controler1.addOverridingModule(new OptAVModule(scenario1));		
+		controler1.addOverridingModule(new TaxiPricingModule(scenario1));		
 		
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
 		
@@ -115,7 +117,7 @@ public class OptAVTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -124,7 +126,7 @@ public class OptAVTestIT {
 		config2.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "n");
-		OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, TaxiPricingConfigGroup.class);
 		optAVParams2.setAccountForNoise(true);
 		optAVParams2.setAccountForCongestion(false);
 		optAVParams2.setChargeSAVTollsFromPassengers(true);
@@ -139,7 +141,7 @@ public class OptAVTestIT {
 		controler2.addOverridingModule(DvrpModule.createModule(mode2,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler2.addOverridingModule(new TaxiModule());
-		controler2.addOverridingModule(new OptAVModule(scenario2));		        
+		controler2.addOverridingModule(new TaxiPricingModule(scenario2));		        
 		controler2.addOverridingModule(new PersonTripAnalysisModule());
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
@@ -158,7 +160,7 @@ public class OptAVTestIT {
 		// ##################################################################
 
 		Config config3 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -169,7 +171,7 @@ public class OptAVTestIT {
 		config3.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-9999999.0);
 		ConfigUtils.addOrGetModule(config3, TaxiFareConfigGroup.class).setDistanceFare_m(0.02);
 		
-		OptAVConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, TaxiPricingConfigGroup.class);
 		optAVParams3.setAccountForNoise(true);
 		optAVParams3.setAccountForCongestion(false);
 		optAVParams3.setChargeSAVTollsFromPassengers(true);
@@ -184,7 +186,7 @@ public class OptAVTestIT {
 		controler3.addOverridingModule(DvrpModule.createModule(mode3,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler3.addOverridingModule(new TaxiModule());
-		controler3.addOverridingModule(new OptAVModule(scenario3));		        
+		controler3.addOverridingModule(new TaxiPricingModule(scenario3));		        
 		controler3.addOverridingModule(new PersonTripAnalysisModule());
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
@@ -233,7 +235,7 @@ public class OptAVTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -243,7 +245,7 @@ public class OptAVTestIT {
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc2");
 		config1.travelTimeCalculator().setTraveltimeBinSize(60);
 		
-		final OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
+		final TaxiPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, TaxiPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		
@@ -257,7 +259,7 @@ public class OptAVTestIT {
 		controler1.addOverridingModule(DvrpModule.createModule(mode1,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler1.addOverridingModule(new TaxiModule());
-		controler1.addOverridingModule(new OptAVModule(scenario1));
+		controler1.addOverridingModule(new TaxiPricingModule(scenario1));
 		controler1.addOverridingModule(new PersonTripAnalysisModule());
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
 		
@@ -273,7 +275,7 @@ public class OptAVTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -282,7 +284,7 @@ public class OptAVTestIT {
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c");
 		config2.travelTimeCalculator().setTraveltimeBinSize(60);
 		
-		final OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
+		final TaxiPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, TaxiPricingConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(true);
 		
@@ -306,7 +308,7 @@ public class OptAVTestIT {
 		controler2.addOverridingModule(DvrpModule.createModule(mode2,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler2.addOverridingModule(new TaxiModule());
-		controler2.addOverridingModule(new OptAVModule(scenario2));
+		controler2.addOverridingModule(new TaxiPricingModule(scenario2));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
 

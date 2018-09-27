@@ -49,6 +49,8 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
+import playground.ikaddoura.taxiPricing.TaxiPricingModule;
 
 /**
  * @author ikaddoura
@@ -75,7 +77,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler3;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new OptAVConfigGroup(),
+					new TaxiPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -84,7 +86,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-SAV");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
+			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
@@ -111,7 +113,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(DvrpModule.createModule(mode,
 					Collections.singleton(TaxiOptimizer.class)));
 			controler.addOverridingModule(new TaxiModule());
-			controler.addOverridingModule(new OptAVModule(scenario));
+			controler.addOverridingModule(new TaxiPricingModule(scenario));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 
@@ -130,7 +132,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler1;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new OptAVConfigGroup(),
+					new TaxiPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -140,7 +142,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
+			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(false);
 			
@@ -154,7 +156,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(DvrpModule.createModule(mode,
 					Collections.singleton(TaxiOptimizer.class)));
 			controler.addOverridingModule(new TaxiModule());
-			controler.addOverridingModule(new OptAVModule(scenario1));
+			controler.addOverridingModule(new TaxiPricingModule(scenario1));
 			controler.addOverridingModule(new PersonTripAnalysisModule());
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());	
 			
@@ -173,7 +175,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler2;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new OptAVConfigGroup(),
+					new TaxiPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -182,7 +184,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-only");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
+			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
@@ -209,7 +211,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(DvrpModule.createModule(mode,
 					Collections.singleton(TaxiOptimizer.class)));
 			controler.addOverridingModule(new TaxiModule());
-			controler.addOverridingModule(new OptAVModule(scenario));
+			controler.addOverridingModule(new TaxiPricingModule(scenario));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 
@@ -228,7 +230,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 		LinkDemandEventHandler handler4;
 		{
 			Config config = ConfigUtils.loadConfig(configFile,
-					new OptAVConfigGroup(),
+					new TaxiPricingConfigGroup(),
 					new TaxiConfigGroup(),
 					new DvrpConfigGroup(),
 					new TaxiFareConfigGroup(),
@@ -237,7 +239,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			config.controler().setOutputDirectory(testUtils.getOutputDirectory() + "c-car-SAV");
 			config.travelTimeCalculator().setTraveltimeBinSize(60);
 			
-			final OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, OptAVConfigGroup.class);
+			final TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(config, TaxiPricingConfigGroup.class);
 			optAVParams.setAccountForNoise(false);
 			optAVParams.setAccountForCongestion(true);
 			optAVParams.setChargeSAVTollsFromPassengers(false);
@@ -264,7 +266,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(DvrpModule.createModule(mode,
 					Collections.singleton(TaxiOptimizer.class)));
 			controler.addOverridingModule(new TaxiModule());
-			controler.addOverridingModule(new OptAVModule(scenario));
+			controler.addOverridingModule(new TaxiPricingModule(scenario));
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 

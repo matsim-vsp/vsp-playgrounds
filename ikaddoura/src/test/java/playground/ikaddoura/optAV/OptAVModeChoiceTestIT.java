@@ -49,6 +49,8 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysisModule;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
+import playground.ikaddoura.taxiPricing.TaxiPricingModule;
 
 /**
  * @author ikaddoura
@@ -74,7 +76,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -83,7 +85,7 @@ public class OptAVModeChoiceTestIT {
 		config1.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "1");
-		OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, TaxiPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		optAVParams1.setDailyFixCostAllSAVusers(1000.);
@@ -98,7 +100,7 @@ public class OptAVModeChoiceTestIT {
 		controler1.addOverridingModule(DvrpModule.createModule(mode1,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler1.addOverridingModule(new TaxiModule());
-		controler1.addOverridingModule(new OptAVModule(scenario1));		
+		controler1.addOverridingModule(new TaxiPricingModule(scenario1));		
 		
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
 		
@@ -117,7 +119,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -126,7 +128,7 @@ public class OptAVModeChoiceTestIT {
 		config2.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "2");
-		OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, TaxiPricingConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(false);
 		optAVParams2.setDailyFixCostAllSAVusers(-10000.);
@@ -140,7 +142,7 @@ public class OptAVModeChoiceTestIT {
 		controler2.addOverridingModule(DvrpModule.createModule(mode2,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler2.addOverridingModule(new TaxiModule());
-		controler2.addOverridingModule(new OptAVModule(scenario2));		        
+		controler2.addOverridingModule(new TaxiPricingModule(scenario2));		        
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
 
@@ -183,7 +185,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 		
 		Config config1 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -192,7 +194,7 @@ public class OptAVModeChoiceTestIT {
 		config1.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "1");
-		OptAVConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, TaxiPricingConfigGroup.class);
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		optAVParams1.setDailyFixCostAllSAVusers(1000.);
@@ -206,7 +208,7 @@ public class OptAVModeChoiceTestIT {
 		controler1.addOverridingModule(DvrpModule.createModule(mode1,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler1.addOverridingModule(new TaxiModule());
-		controler1.addOverridingModule(new OptAVModule(scenario1));		
+		controler1.addOverridingModule(new TaxiPricingModule(scenario1));		
 		controler1.addOverridingModule(new PersonTripAnalysisModule());
 		
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
@@ -226,7 +228,7 @@ public class OptAVModeChoiceTestIT {
 		// ##################################################################
 
 		Config config2 = ConfigUtils.loadConfig(configFile,
-				new OptAVConfigGroup(),
+				new TaxiPricingConfigGroup(),
 				new TaxiConfigGroup(),
 				new DvrpConfigGroup(),
 				new TaxiFareConfigGroup(),
@@ -235,7 +237,7 @@ public class OptAVModeChoiceTestIT {
 		config2.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "2");
-		OptAVConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, TaxiPricingConfigGroup.class);
 		optAVParams2.setAccountForNoise(false);
 		optAVParams2.setAccountForCongestion(false);
 		optAVParams2.setFixCostsSAVinsteadOfCar(-10000);
@@ -249,7 +251,7 @@ public class OptAVModeChoiceTestIT {
 		controler2.addOverridingModule(DvrpModule.createModule(mode2,
 				Collections.singleton(TaxiOptimizer.class)));
 		controler2.addOverridingModule(new TaxiModule());
-		controler2.addOverridingModule(new OptAVModule(scenario2));		        
+		controler2.addOverridingModule(new TaxiPricingModule(scenario2));		        
 		controler2.addOverridingModule(new PersonTripAnalysisModule());
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());

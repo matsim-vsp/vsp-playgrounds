@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.taxiPricing;
 
 import java.util.HashMap;
 import java.util.HashSet;

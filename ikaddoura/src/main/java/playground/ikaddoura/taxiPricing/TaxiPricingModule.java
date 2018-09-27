@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.taxiPricing;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
@@ -41,10 +41,10 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMo
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
-import playground.ikaddoura.optAV.congestionAV.DecongestionModuleSAV;
-import playground.ikaddoura.optAV.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
-import playground.ikaddoura.optAV.disutility.DvrpMoneyTravelDisutilityModule;
-import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
+import playground.ikaddoura.taxiPricing.congestionAV.DecongestionModuleSAV;
+import playground.ikaddoura.taxiPricing.disutility.DvrpMoneyTimeDistanceTravelDisutilityFactory;
+import playground.ikaddoura.taxiPricing.disutility.DvrpMoneyTravelDisutilityModule;
+import playground.ikaddoura.taxiPricing.noiseAV.NoiseComputationModuleSAV;
 
 /**
  * Idea:
@@ -59,12 +59,12 @@ import playground.ikaddoura.optAV.noiseAV.NoiseComputationModuleSAV;
 * @author ikaddoura
 */
 
-public class OptAVModule extends AbstractModule {
-	private static final Logger log = Logger.getLogger(OptAVModule.class);
+public class TaxiPricingModule extends AbstractModule {
+	private static final Logger log = Logger.getLogger(TaxiPricingModule.class);
 	
 	private final Scenario scenario;
 
-	public OptAVModule(Scenario scenario) {
+	public TaxiPricingModule(Scenario scenario) {
 		this.scenario = scenario;
 	}
 		
@@ -124,7 +124,7 @@ public class OptAVModule extends AbstractModule {
 					+ " It may make sense to charge a slighlty higher fare...");
 		}
 		
-		OptAVConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), OptAVConfigGroup.class);
+		TaxiPricingConfigGroup optAVParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiPricingConfigGroup.class);
 
 		if (optAVParams.getFixCostsSAVinsteadOfCar() > 0) {
 			log.warn("Daily SAV fix costs (per user) should be lower than 0, meaning SAV users who are no longer private car users should 'earn' something."); 

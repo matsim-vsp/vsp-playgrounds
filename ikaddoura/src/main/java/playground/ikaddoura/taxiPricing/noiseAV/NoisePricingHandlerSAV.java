@@ -20,7 +20,7 @@
 /**
  * 
  */
-package playground.ikaddoura.optAV.noiseAV;
+package playground.ikaddoura.taxiPricing.noiseAV;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,8 +40,8 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.optAV.OptAVConfigGroup;
-import playground.ikaddoura.optAV.SAVPassengerTracker;
+import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
+import playground.ikaddoura.taxiPricing.SAVPassengerTracker;
 
 
 /**
@@ -60,7 +60,7 @@ public class NoisePricingHandlerSAV implements NoiseEventCausedHandler, PersonEn
 	private NoiseContext noiseContext;
 	
 	@Inject
-	private OptAVConfigGroup optAVParams;
+	private TaxiPricingConfigGroup optAVParams;
 	
 	@Inject
 	private SAVPassengerTracker savPassengerTracker;

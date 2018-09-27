@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.taxiPricing;
 
 import org.matsim.core.config.ReflectiveConfigGroup;
 
@@ -26,10 +26,10 @@ import org.matsim.core.config.ReflectiveConfigGroup;
  * @author ikaddoura
  */
 
-public class OptAVConfigGroup extends ReflectiveConfigGroup {
+public class TaxiPricingConfigGroup extends ReflectiveConfigGroup {
 	public static final String GROUP_NAME = "optAV" ;
 	
-	public OptAVConfigGroup() {
+	public TaxiPricingConfigGroup() {
 		super(GROUP_NAME);
 	}
 		

@@ -43,7 +43,7 @@ import org.matsim.vehicles.Vehicle;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
-import playground.ikaddoura.optAV.SAVFixCostHandler;
+import playground.ikaddoura.taxiPricing.SAVFixCostHandler;
 
 /**
  * @author ikaddoura

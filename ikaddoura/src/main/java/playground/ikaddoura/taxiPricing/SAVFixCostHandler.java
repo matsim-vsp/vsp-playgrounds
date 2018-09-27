@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV;
+package playground.ikaddoura.taxiPricing;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -79,9 +79,9 @@ public class SAVFixCostHandler implements PersonEntersVehicleEventHandler {
 					carOwnerInBaseCase = (boolean) person.getAttributes().getAttribute("CarOwnerInBaseCase");
 				}
 								
-				double costsPerDay = ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getDailyFixCostAllSAVusers();
+				double costsPerDay = ConfigUtils.addOrGetModule(this.scenario.getConfig(), TaxiPricingConfigGroup.class).getDailyFixCostAllSAVusers();
 				if (carOwnerInBaseCase && personWithoutCarTrips(person.getSelectedPlan())) {
-					costsPerDay += ConfigUtils.addOrGetModule(this.scenario.getConfig(), OptAVConfigGroup.class).getFixCostsSAVinsteadOfCar();
+					costsPerDay += ConfigUtils.addOrGetModule(this.scenario.getConfig(), TaxiPricingConfigGroup.class).getFixCostsSAVinsteadOfCar();
 					savUsersFormerCarUsers++;
 					totalSAVFixCostPaidBySAVusersFormerCarUsers += costsPerDay;
 					

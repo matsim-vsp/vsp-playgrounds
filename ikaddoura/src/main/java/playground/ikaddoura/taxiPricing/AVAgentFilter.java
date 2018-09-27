@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2017 by the members listed in the COPYING,        *
+ * copyright       : (C) 2015 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,53 +17,43 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV.disutility;
+package playground.ikaddoura.taxiPricing;
 
-import org.matsim.core.controler.AbstractModule;
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
 
-import com.google.inject.Inject;
-
-import playground.ikaddoura.moneyTravelDisutility.MoneyEventAnalysis;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 
 /**
 * @author ikaddoura
 */
 
-public class DvrpMoneyTravelDisutilityModule extends AbstractModule {
-	
-	private final String mode;
-	private final DvrpMoneyTimeDistanceTravelDisutilityFactory factory;
-	
-	@Inject(optional = true)
-	private AgentFilter agentFilter;
-	
-	private final AgentFilter agentFilterToBind;
-	
-	public DvrpMoneyTravelDisutilityModule(String mode, DvrpMoneyTimeDistanceTravelDisutilityFactory factory, AgentFilter agentFilter) {
-		this.mode = mode;
-		this.factory = factory;
-		this.agentFilterToBind = agentFilter;
-	}
-
-	public DvrpMoneyTravelDisutilityModule(String mode, DvrpMoneyTimeDistanceTravelDisutilityFactory factory) {
-		this.mode = mode;
-		this.factory = factory;
-		this.agentFilterToBind = null;
-	}
+public class AVAgentFilter implements AgentFilter {
+	private static final Logger log = Logger.getLogger(AVAgentFilter.class);
+	private int wrnCnt = 0;
 
 	@Override
-	public void install() {
-		
-		if (agentFilterToBind != null && agentFilter == null ) {
-			this.bind(AgentFilter.class).toInstance(agentFilterToBind);
+	public String getAgentTypeFromId(Id<Person> id) {
+			
+		if (id == null) {
+			if (wrnCnt < 5) {
+				log.warn("Person id is null. Assuming this person to be a taxi driver.");
+				if (wrnCnt == 4) log.warn("Further warnings of this type are not printed out.");
+				wrnCnt++;
+			}
+			return "taxi";
 		}
 		
-		this.addTravelDisutilityFactoryBinding(mode).toInstance(factory);
+		if (id.toString().startsWith("taxi")
+				|| id.toString().startsWith("av")
+				|| id.toString().startsWith("sav")
+				|| id.toString().startsWith("rt")) {
+			return "taxi";
 		
-		this.bind(MoneyEventAnalysis.class).asEagerSingleton();	
-		this.addControlerListenerBinding().to(MoneyEventAnalysis.class);
-		this.addEventHandlerBinding().to(MoneyEventAnalysis.class);
+		} else {
+			return "other";
+		}
 	}
 
 }

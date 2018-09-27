@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.optAV.congestionAV;
+package playground.ikaddoura.taxiPricing.congestionAV;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +38,8 @@ import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
 
-import playground.ikaddoura.optAV.OptAVConfigGroup;
-import playground.ikaddoura.optAV.SAVPassengerTracker;
+import playground.ikaddoura.taxiPricing.TaxiPricingConfigGroup;
+import playground.ikaddoura.taxiPricing.SAVPassengerTracker;
 
 /**
  * Throws agent money events for the tolled links and time bins.
@@ -61,7 +61,7 @@ public class IntervalBasedTollingSAV implements LinkLeaveEventHandler, IntervalB
 	private SAVPassengerTracker tracker;
 	
 	@Inject
-	private OptAVConfigGroup optAVParams;
+	private TaxiPricingConfigGroup optAVParams;
 	
 	private double totalTollPayments;
 	private Map<Id<Vehicle>, Double> vehicle2tollToBeChargedFromNextPassenger = new HashMap<>();
