@@ -64,7 +64,7 @@ public class DrtPricingTestIT {
 	@Test
 	public final void test1(){
 
-		String configFile = testUtils.getPackageInputDirectory() + "config1.xml";
+		String configFile = testUtils.getPackageInputDirectory() + "drtPricing/config1.xml";
 		final boolean otfvis = false;
 		 
 		// ##################################################################
@@ -220,7 +220,7 @@ public class DrtPricingTestIT {
 	@Test
 	public final void test2(){
 
-		String configFile = testUtils.getPackageInputDirectory() + "config2.xml";
+		String configFile = testUtils.getPackageInputDirectory() + "drtPricing/config2.xml";
 		final boolean otfvis = false;
 		 
 		// ##################################################################
