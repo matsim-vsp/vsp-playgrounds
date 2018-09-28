@@ -83,7 +83,7 @@ public class RunBerlinTaxiPricingScenario1 {
 			transitStopCoordinatesSFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_S-zoneC.csv";
 			transitStopCoordinatesRBFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_RB-zoneC.csv";
 			runId = "taxi-test-1";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/drtPricing/output/output-local-run_" + runId + "/";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
 			scaleFactor = 100;
 		}
