@@ -76,7 +76,7 @@ public class SAVMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		
 		if (marginalUtilityOfTime_sec > 0.) log.warn("Check marginalUtilityOfTime_sec: " + marginalUtilityOfTime_sec);
 		if (marginalUtilityOfDistance_m > 0.) log.warn("Check marginalUtilityOfDistance_m: " + marginalUtilityOfDistance_m);
-		if (marginalUtilityOfMoney > 0.) log.warn("Check marginalUtilityOfMoney: " + marginalUtilityOfMoney);
+		if (marginalUtilityOfMoney < 0.) log.warn("Check marginalUtilityOfMoney: " + marginalUtilityOfMoney);
 
 		if (marginalUtilityOfTime_sec >= 0. && marginalUtilityOfTime_sec >= 0.) {
 			throw new RuntimeException("Check scoring parameters for " + savOptimizerMode + ".");

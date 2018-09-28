@@ -27,7 +27,7 @@ import org.matsim.core.config.ReflectiveConfigGroup;
  */
 
 public class SAVPricingConfigGroup extends ReflectiveConfigGroup {
-	public static final String GROUP_NAME = "SAVPricing" ;
+	public static final String GROUP_NAME = "savPricing" ;
 	
 	public SAVPricingConfigGroup() {
 		super(GROUP_NAME);
