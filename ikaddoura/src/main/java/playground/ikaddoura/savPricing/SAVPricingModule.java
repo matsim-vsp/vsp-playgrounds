@@ -128,10 +128,7 @@ public class SAVPricingModule extends AbstractModule {
 						+ " It may make sense to charge a slighlty higher fare...");
 			}
 		}
-				
-		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
-		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
-		
+						
 		// #############################
 		// passenger-vehicle tracking
 		// #############################
@@ -144,6 +141,8 @@ public class SAVPricingModule extends AbstractModule {
         // noise and congestion pricing
         // #############################
 		
+		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
+
 		if (savPricingParams.isAccountForNoise()) {
 						
 			if (savPricingParams.isChargeSAVTollsFromPassengers() || savPricingParams.isChargeTollsFromCarUsers() || savPricingParams.isChargeTollsFromSAVDriver()) {
@@ -155,6 +154,8 @@ public class SAVPricingModule extends AbstractModule {
 		} else {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
+		
+		DecongestionConfigGroup decongestionParams = ConfigUtils.addOrGetModule(this.getConfig(), DecongestionConfigGroup.class);
 				
 		if (savPricingParams.isAccountForCongestion()) {
 									
