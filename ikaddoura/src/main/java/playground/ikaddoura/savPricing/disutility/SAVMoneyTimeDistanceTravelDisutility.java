@@ -71,8 +71,8 @@ public class SAVMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		this.marginalUtilityOfDistance_m = scenario.getConfig().planCalcScore().getModes().get(savOptimizerMode).getMarginalUtilityOfDistance() + 
 				scenario.getConfig().planCalcScore().getModes().get(savOptimizerMode).getMonetaryDistanceRate() * marginalUtilityOfMoney;
 
-		log.info("marginalUtilityOfDistance_m" + this.marginalUtilityOfDistance_m);
-		log.info("marginalUtilityOfTime_sec" + this.marginalUtilityOfTime_sec);
+		log.info("marginalUtilityOfDistance_m: " + this.marginalUtilityOfDistance_m);
+		log.info("marginalUtilityOfTime_sec: " + this.marginalUtilityOfTime_sec);
 		
 		if (marginalUtilityOfTime_sec > 0.) log.warn("Check marginalUtilityOfTime_sec: " + marginalUtilityOfTime_sec);
 		if (marginalUtilityOfDistance_m > 0.) log.warn("Check marginalUtilityOfDistance_m: " + marginalUtilityOfDistance_m);
