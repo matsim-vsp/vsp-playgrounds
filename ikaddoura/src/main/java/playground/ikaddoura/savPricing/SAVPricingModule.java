@@ -88,47 +88,43 @@ public class SAVPricingModule extends AbstractModule {
 			throw new RuntimeException("There is no 'taxi/sav' mode in the planCalcScore config group.");
 		}
 		
-		ModeParams savOptimizerModeParams = null;
-		if (this.getConfig().planCalcScore().getModes().get(savOptimizerMode) != null) {
-			savOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(savOptimizerMode);
-		} else {
-			log.warn("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Probably using some default parameters...");
-		}
-		
-		TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
-		
-		if (savOptimizerModeParams != null) {
-			
-			if (savOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
-				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' is zero. Are you sure, the operating costs are zero?");
-			}
-			
-			if (savOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
-				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' should be negative.");
-			}
-			
-			if (savOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
-				log.warn("The marginal utility of distance for 'taxi_optimizer/drt_optimizer' should be zero.");
-			}
-			
-			if (savOptimizerModeParams.getMarginalUtilityOfTraveling() != savModeParams.getMarginalUtilityOfTraveling()) {
-				log.warn("The marginal utility of traveling for 'taxi/sav' and 'taxi_optimizer/drt_optimizer' should be the same..."
-						+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
-			}
-			
-			if (savOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
-				log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer/drt_optimizer' should be (approximately) the same..."
-						+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
-						+ " It may make sense to charge a slighlty higher fare...");
-			}
-		}
-		
 		if (savModeParams.getMonetaryDistanceRate() != 0.) {
 			log.warn("The monetary distance rate for 'taxi/sav' should be zero. The fare is considered somewhere else.");
 		}
 		
 		if (savModeParams.getMarginalUtilityOfDistance() != 0.) {
 			log.warn("The marginal utility of distance for 'taxi/sav' should be zero.");
+		}
+		
+		ModeParams savOptimizerModeParams = null;
+		if (this.getConfig().planCalcScore().getModes().get(savOptimizerMode) != null) {
+			savOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(savOptimizerMode);
+		} else {
+			throw new RuntimeException("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Aborting...");
+		}
+		
+		TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
+		if (savOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
+			log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' is zero. Are you sure, the operating costs are zero?");
+		}
+		
+		if (savOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
+			log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' should be negative.");
+		}
+		
+		if (savOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
+			log.warn("The marginal utility of distance for 'taxi_optimizer/drt_optimizer' should be zero.");
+		}
+		
+		if (savOptimizerModeParams.getMarginalUtilityOfTraveling() != savModeParams.getMarginalUtilityOfTraveling()) {
+			log.warn("The marginal utility of traveling for 'taxi/sav' and 'taxi_optimizer/drt_optimizer' should be the same..."
+					+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
+		}
+		
+		if (savOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
+			log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer/drt_optimizer' should be (approximately) the same..."
+					+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
+					+ " It may make sense to charge a slighlty higher fare...");
 		}
 				
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
