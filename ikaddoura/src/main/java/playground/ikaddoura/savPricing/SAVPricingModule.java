@@ -42,8 +42,8 @@ import playground.ikaddoura.savPricing.noiseSAV.NoiseComputationModuleSAV;
 
 /**
  * Idea:
- * (1) Adjusts the taxi (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer')
- * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'taxi'), i.e. waiting for or traveling with taxi.
+ * (1) Adjusts the sav (routing- and dispatch-relevant) cost function (mode = 'taxi_optimizer' / 'drt_optimizer')
+ * (2) Adds the SAV's external costs to the fare paid by the passenger traveling with the SAV (mode = 'taxi/drt'), i.e. waiting for or traveling with an SAV.
  * 
  * 
 * @author ikaddoura
@@ -65,9 +65,9 @@ public class SAVPricingModule extends AbstractModule {
 	@Override
 	public void install() {
 		
-		SAVPricingConfigGroup taxiPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), SAVPricingConfigGroup.class);		
+		SAVPricingConfigGroup savPricingParams = ConfigUtils.addOrGetModule(this.getConfig(), SAVPricingConfigGroup.class);		
 
-		String savMode = taxiPricingParams.getSavMode();
+		String savMode = savPricingParams.getSavMode();
 		String savOptimizerMode;
 		if (savMode.equals(TransportMode.taxi)) {
 			savOptimizerMode = DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER;
@@ -81,54 +81,54 @@ public class SAVPricingModule extends AbstractModule {
 		// consistency check
 		// #############################
 		
-		ModeParams taxiModeParams = null;
+		ModeParams savModeParams = null;
 		if (this.getConfig().planCalcScore().getModes().get(savMode) != null) {
-			taxiModeParams = this.getConfig().planCalcScore().getModes().get(savMode);
+			savModeParams = this.getConfig().planCalcScore().getModes().get(savMode);
 		} else {
-			throw new RuntimeException("There is no 'taxi' mode in the planCalcScore config group.");
+			throw new RuntimeException("There is no 'taxi/sav' mode in the planCalcScore config group.");
 		}
 		
-		ModeParams taxiOptimizerModeParams = null;
+		ModeParams savOptimizerModeParams = null;
 		if (this.getConfig().planCalcScore().getModes().get(savOptimizerMode) != null) {
-			taxiOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(savOptimizerMode);
+			savOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(savOptimizerMode);
 		} else {
-			log.warn("There is no 'taxi_optimizer' mode in the planCalcScore config group. Probably using some default parameters...");
+			log.warn("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Probably using some default parameters...");
 		}
 		
 		TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
 		
-		if (taxiOptimizerModeParams != null) {
+		if (savOptimizerModeParams != null) {
 			
-			if (taxiOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
-				log.warn("The monetary distance rate for 'taxi_optimizer' is zero. Are you sure, the operating costs are zero?");
+			if (savOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
+				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' is zero. Are you sure, the operating costs are zero?");
 			}
 			
-			if (taxiOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
-				log.warn("The monetary distance rate for 'taxi_optimizer' should be negative.");
+			if (savOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
+				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' should be negative.");
 			}
 			
-			if (taxiOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
-				log.warn("The marginal utility of distance for 'taxi_optimizer' should be zero.");
+			if (savOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
+				log.warn("The marginal utility of distance for 'taxi_optimizer/drt_optimizer' should be zero.");
 			}
 			
-			if (taxiOptimizerModeParams.getMarginalUtilityOfTraveling() != taxiModeParams.getMarginalUtilityOfTraveling()) {
-				log.warn("The marginal utility of traveling for 'taxi' and 'taxi_optimizer' should be the same..."
+			if (savOptimizerModeParams.getMarginalUtilityOfTraveling() != savModeParams.getMarginalUtilityOfTraveling()) {
+				log.warn("The marginal utility of traveling for 'taxi/sav' and 'taxi_optimizer/drt_optimizer' should be the same..."
 						+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
 			}
 			
-			if (taxiOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
-				log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer' should be (approximately) the same..."
+			if (savOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
+				log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer/drt_optimizer' should be (approximately) the same..."
 						+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
 						+ " It may make sense to charge a slighlty higher fare...");
 			}
 		}
 		
-		if (taxiModeParams.getMonetaryDistanceRate() != 0.) {
-			log.warn("The monetary distance rate for 'taxi' should be zero. The fare is considered somewhere else.");
+		if (savModeParams.getMonetaryDistanceRate() != 0.) {
+			log.warn("The monetary distance rate for 'taxi/sav' should be zero. The fare is considered somewhere else.");
 		}
 		
-		if (taxiModeParams.getMarginalUtilityOfDistance() != 0.) {
-			log.warn("The marginal utility of distance for 'taxi' should be zero.");
+		if (savModeParams.getMarginalUtilityOfDistance() != 0.) {
+			log.warn("The marginal utility of distance for 'taxi/sav' should be zero.");
 		}
 				
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
@@ -146,9 +146,9 @@ public class SAVPricingModule extends AbstractModule {
         // noise and congestion pricing
         // #############################
 		
-		if (taxiPricingParams.isAccountForNoise()) {
+		if (savPricingParams.isAccountForNoise()) {
 						
-			if (taxiPricingParams.isChargeSAVTollsFromPassengers() || taxiPricingParams.isChargeTollsFromCarUsers() || taxiPricingParams.isChargeTollsFromSAVDriver()) {
+			if (savPricingParams.isChargeSAVTollsFromPassengers() || savPricingParams.isChargeTollsFromCarUsers() || savPricingParams.isChargeTollsFromSAVDriver()) {
 				noiseParams.setInternalizeNoiseDamages(true);
 			} else {
 				noiseParams.setInternalizeNoiseDamages(false);
@@ -158,9 +158,9 @@ public class SAVPricingModule extends AbstractModule {
 			noiseParams.setInternalizeNoiseDamages(false);
 		}
 				
-		if (taxiPricingParams.isAccountForCongestion()) {
+		if (savPricingParams.isAccountForCongestion()) {
 									
-			if (taxiPricingParams.isChargeSAVTollsFromPassengers() || taxiPricingParams.isChargeTollsFromCarUsers() || taxiPricingParams.isChargeTollsFromSAVDriver()) {
+			if (savPricingParams.isChargeSAVTollsFromPassengers() || savPricingParams.isChargeTollsFromCarUsers() || savPricingParams.isChargeTollsFromSAVDriver()) {
 				decongestionParams.setEnableDecongestionPricing(true);
 			} else {
 				decongestionParams.setEnableDecongestionPricing(false);
@@ -174,19 +174,19 @@ public class SAVPricingModule extends AbstractModule {
         // travel disutility
         // #############################
 		               
-		// taxi_optimizer
+		// sav_optimizer
 		
-		if (taxiPricingParams.isChargeTollsFromSAVDriver()) {
+		if (savPricingParams.isChargeTollsFromSAVDriver()) {
 			
-			log.info("Charge tolls from SAV drivers. Modify the default travel disutility of the taxi optimizer.");
+			log.info("Charge tolls from SAV drivers. Modify the default travel disutility of the sav optimizer.");
 			install(new SAVMoneyTravelDisutilityModule(savOptimizerMode, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
 		
 		} else {
 			
-			log.info("Tolls are not charged from SAV drivers. No need to modify the default travel disutility of the taxi optimizer.");
+			log.info("Tolls are not charged from SAV drivers. No need to modify the default travel disutility of the sav optimizer.");
 			
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
-				log.info("Using the default travel disutility for SAV drivers / the taxi optimizer.");
+				log.info("Using the default travel disutility for SAV drivers / the sav optimizer.");
 			} else {
 				install(new SAVMoneyTravelDisutilityModule(savOptimizerMode, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));		  	
 			}
@@ -194,7 +194,7 @@ public class SAVPricingModule extends AbstractModule {
 		
 		// car user
 				
-		if (taxiPricingParams.isChargeTollsFromCarUsers()) {
+		if (savPricingParams.isChargeTollsFromCarUsers()) {
 						
 			log.info("Charge tolls from private car users. Modify the default travel disutility of private car users.");
 
@@ -217,15 +217,15 @@ public class SAVPricingModule extends AbstractModule {
 			}
 		}
 		
-		// account for vehicle type (taxi vs. car user)
-		if ((taxiPricingParams.isChargeTollsFromCarUsers() == false && taxiPricingParams.isChargeTollsFromSAVDriver() == true) 
-				|| (taxiPricingParams.isChargeTollsFromCarUsers() == true && taxiPricingParams.isChargeTollsFromSAVDriver() == false))  {
+		// account for vehicle type (sav vs. car)
+		if ((savPricingParams.isChargeTollsFromCarUsers() == false && savPricingParams.isChargeTollsFromSAVDriver() == true) 
+				|| (savPricingParams.isChargeTollsFromCarUsers() == true && savPricingParams.isChargeTollsFromSAVDriver() == false))  {
 			
-			log.info("Using an agent filter which differentiates between taxi vehicles and other vehicles...");
+			log.info("Using an agent filter which differentiates between sav vehicles and other vehicles...");
 			this.bind(AgentFilter.class).toInstance(new AVAgentFilter());
 		} else {
 			log.info("Not binding any agent filter. "
-					+ "The computation of average toll payments does not differentiate between taxi/rt and a normal car.");
+					+ "The computation of average toll payments does not differentiate between sav and a normal car.");
 		}
 				
 	}
