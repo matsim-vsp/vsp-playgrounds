@@ -79,7 +79,7 @@ public class RunBerlinTaxiPricingScenario2 {
 			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			serviceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
 			dailyRewardDrtInsteadOfPrivateCar = 0.;
-			runId = "taxi-test-1";
+			runId = "taxi2-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
 			scaleFactor = 100;

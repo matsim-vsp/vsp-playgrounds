@@ -79,7 +79,7 @@ public class RunBerlinDrtPricingScenario2 {
 			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
 			dailyRewardDrtInsteadOfPrivateCar = 0.;
-			runId = "drt-test-1";
+			runId = "drt2-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
 			scaleFactor = 100;
