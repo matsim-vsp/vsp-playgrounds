@@ -58,6 +58,7 @@ public class RunBerlinTaxiPricingScenario1 {
 	private static String runId;
 	private static String outputDirectory;
 	private static String visualizationScriptDirectory;
+	private static Integer scaleFactor;
 		
 	public static void main(String[] args) {
 
@@ -71,6 +72,7 @@ public class RunBerlinTaxiPricingScenario1 {
 			runId = args[6];
 			outputDirectory = args[7];
 			visualizationScriptDirectory = args[8];
+			scaleFactor = Integer.parseInt(args[9]);
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
@@ -83,6 +85,7 @@ public class RunBerlinTaxiPricingScenario1 {
 			runId = "taxi-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/drtPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
+			scaleFactor = 100;
 		}
 			
 		log.info("run Id: " + runId);
@@ -125,7 +128,7 @@ public class RunBerlinTaxiPricingScenario1 {
 		final String shapeFileZones = null;
 		final String zonesCRS = null;
 		final String homeActivity = "home";
-		final int scalingFactor = 10; // TODO configurable
+		final int scalingFactor = scaleFactor;
 		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 

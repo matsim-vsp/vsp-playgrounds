@@ -52,34 +52,37 @@ public class RunBerlinTaxiPricingScenario2 {
 	private static String configFileName;
 	private static String overridingConfigFileName;
 	private static String berlinShapeFile;
-	private static String drtServiceAreaShapeFile;
+	private static String serviceAreaShapeFile;
 	private static double dailyRewardDrtInsteadOfPrivateCar;
 	private static String runId;
 	private static String outputDirectory;
 	private static String visualizationScriptDirectory;
-		
+	private static Integer scaleFactor;
+
 	public static void main(String[] args) {
 
 		if (args.length > 0) {		
 			configFileName = args[0];
 			overridingConfigFileName = args[1];
 			berlinShapeFile = args[2];
-			drtServiceAreaShapeFile = args[3];
+			serviceAreaShapeFile = args[3];
 			dailyRewardDrtInsteadOfPrivateCar = Double.parseDouble(args[4]);
 			runId = args[5];
 			outputDirectory = args[6];
 			visualizationScriptDirectory = args[7];
+			scaleFactor = Integer.parseInt(args[8]);
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
-			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drt-v5.2-1pct.config_2agents_drtPricing.xml";
+			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-taxi-v5.2-1pct.config_2agents_taxiPricing.xml";
 			overridingConfigFileName = null;
 			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
-			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
+			serviceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
 			dailyRewardDrtInsteadOfPrivateCar = 0.;
-			runId = "drt-opt-3";
+			runId = "taxi-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/drtPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
+			scaleFactor = 100;
 		}
 			
 		log.info("run Id: " + runId);
@@ -90,7 +93,7 @@ public class RunBerlinTaxiPricingScenario2 {
 	}
 	
 	private void run() {
-		RunBerlinTaxiScenario2 berlin = new RunBerlinTaxiScenario2(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
+		RunBerlinTaxiScenario2 berlin = new RunBerlinTaxiScenario2(configFileName, overridingConfigFileName, berlinShapeFile, serviceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
@@ -122,7 +125,7 @@ public class RunBerlinTaxiPricingScenario2 {
 		final String shapeFileZones = null;
 		final String zonesCRS = null;
 		final String homeActivity = "home";
-		final int scalingFactor = 10;
+		final int scalingFactor = scaleFactor;
 		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
