@@ -101,8 +101,8 @@ public class OptAVModeChoiceTestIT {
 			@Override
 			public void install() {
 				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(0., TransportMode.car));			
-				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
-				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				org.matsim.sav.SAVPassengerTrackerImpl tracker = new org.matsim.sav.SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(org.matsim.sav.SAVPassengerTracker.class).toInstance(tracker);
 				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});
@@ -155,8 +155,8 @@ public class OptAVModeChoiceTestIT {
 			@Override
 			public void install() {
 				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(0., TransportMode.car));			
-				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
-				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				org.matsim.sav.SAVPassengerTrackerImpl tracker = new org.matsim.sav.SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(org.matsim.sav.SAVPassengerTracker.class).toInstance(tracker);
 				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});	        
@@ -234,8 +234,8 @@ public class OptAVModeChoiceTestIT {
 			@Override
 			public void install() {
 				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(0., TransportMode.car));			
-				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
-				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				org.matsim.sav.SAVPassengerTrackerImpl tracker = new org.matsim.sav.SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(org.matsim.sav.SAVPassengerTracker.class).toInstance(tracker);
 				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});	 
@@ -289,8 +289,8 @@ public class OptAVModeChoiceTestIT {
 			@Override
 			public void install() {
 				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(10000., TransportMode.car));			
-				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
-				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				org.matsim.sav.SAVPassengerTrackerImpl tracker = new org.matsim.sav.SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(org.matsim.sav.SAVPassengerTracker.class).toInstance(tracker);
 				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});	
