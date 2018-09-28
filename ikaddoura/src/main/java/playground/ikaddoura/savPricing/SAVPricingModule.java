@@ -100,31 +100,33 @@ public class SAVPricingModule extends AbstractModule {
 		if (this.getConfig().planCalcScore().getModes().get(savOptimizerMode) != null) {
 			savOptimizerModeParams = this.getConfig().planCalcScore().getModes().get(savOptimizerMode);
 		} else {
-			throw new RuntimeException("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Aborting...");
+			log.warn("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Will only allow the default travel disutility.");
 		}
 		
-		TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
-		if (savOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
-			log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' is zero. Are you sure, the operating costs are zero?");
-		}
-		
-		if (savOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
-			log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' should be negative.");
-		}
-		
-		if (savOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
-			log.warn("The marginal utility of distance for 'taxi_optimizer/drt_optimizer' should be zero.");
-		}
-		
-		if (savOptimizerModeParams.getMarginalUtilityOfTraveling() != savModeParams.getMarginalUtilityOfTraveling()) {
-			log.warn("The marginal utility of traveling for 'taxi/sav' and 'taxi_optimizer/drt_optimizer' should be the same..."
-					+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
-		}
-		
-		if (savOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
-			log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer/drt_optimizer' should be (approximately) the same..."
-					+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
-					+ " It may make sense to charge a slighlty higher fare...");
+		if (savOptimizerModeParams != null) {
+			TaxiFareConfigGroup taxiFareParams = ConfigUtils.addOrGetModule(this.getConfig(), TaxiFareConfigGroup.class);
+			if (savOptimizerModeParams.getMonetaryDistanceRate() == 0.) {
+				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' is zero. Are you sure, the operating costs are zero?");
+			}
+			
+			if (savOptimizerModeParams.getMonetaryDistanceRate() > 0.) {
+				log.warn("The monetary distance rate for 'taxi_optimizer/drt_optimizer' should be negative.");
+			}
+			
+			if (savOptimizerModeParams.getMarginalUtilityOfDistance() != 0.) {
+				log.warn("The marginal utility of distance for 'taxi_optimizer/drt_optimizer' should be zero.");
+			}
+			
+			if (savOptimizerModeParams.getMarginalUtilityOfTraveling() != savModeParams.getMarginalUtilityOfTraveling()) {
+				log.warn("The marginal utility of traveling for 'taxi/sav' and 'taxi_optimizer/drt_optimizer' should be the same..."
+						+ "Assumption: There is either a passenger in the SAV or there is a passenger waiting for the SAV.");	
+			}
+			
+			if (savOptimizerModeParams.getMonetaryDistanceRate() != (taxiFareParams.getDistanceFare_m() * (-1) )) {
+				log.warn("Distance-based cost in plansCalcScore config group and taxiFareConfigGroup for 'taxi_optimizer/drt_optimizer' should be (approximately) the same..."
+						+ "Assumption: A competitive market where the fare is equivalent to the marginal operating costs."
+						+ " It may make sense to charge a slighlty higher fare...");
+			}
 		}
 				
 		NoiseConfigGroup noiseParams = ConfigUtils.addOrGetModule(this.getConfig(), NoiseConfigGroup.class);
@@ -175,6 +177,7 @@ public class SAVPricingModule extends AbstractModule {
 		if (savPricingParams.isChargeTollsFromSAVDriver()) {
 			
 			log.info("Charge tolls from SAV drivers. Modify the default travel disutility of the sav optimizer.");
+			if (savOptimizerModeParams == null) throw new RuntimeException("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Aborting...");
 			install(new SAVMoneyTravelDisutilityModule(savOptimizerMode, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
 		
 		} else {
@@ -182,8 +185,9 @@ public class SAVPricingModule extends AbstractModule {
 			log.info("Tolls are not charged from SAV drivers. No need to modify the default travel disutility of the sav optimizer.");
 			
 			if (useDefaultTravelDisutilityInTheCaseWithoutPricing) {
-				log.info("Using the default travel disutility for SAV drivers / the sav optimizer.");
+				log.info("Using the default travel disutility for the SAV optimizer.");
 			} else {
+				if (savOptimizerModeParams == null) throw new RuntimeException("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Aborting...");
 				install(new SAVMoneyTravelDisutilityModule(savOptimizerMode, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));		  	
 			}
 		}
