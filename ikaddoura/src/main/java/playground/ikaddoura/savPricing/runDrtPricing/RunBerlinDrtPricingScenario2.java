@@ -74,7 +74,7 @@ public class RunBerlinDrtPricingScenario2 {
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
-			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drt-v5.2-1pct.config_2agents_drtPricing.xml";
+			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drt2-v5.2-1pct.config.xml";
 			overridingConfigFileName = null;
 			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
