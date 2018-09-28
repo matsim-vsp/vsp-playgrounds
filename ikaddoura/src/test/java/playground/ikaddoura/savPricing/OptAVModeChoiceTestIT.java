@@ -40,8 +40,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.runTaxi.DailyRewardHandlerTaxiInsteadOfCar;
-import org.matsim.runTaxi.TaxiPassengerTracker;
+import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
@@ -101,9 +100,10 @@ public class OptAVModeChoiceTestIT {
 		controler1.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerTaxiInsteadOfCar(0., TransportMode.car));			
-				this.bind(TaxiPassengerTracker.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(TaxiPassengerTracker.class);
+				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(0., TransportMode.car));			
+				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});
 		
@@ -154,9 +154,10 @@ public class OptAVModeChoiceTestIT {
 		controler2.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerTaxiInsteadOfCar(0., TransportMode.car));			
-				this.bind(TaxiPassengerTracker.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(TaxiPassengerTracker.class);
+				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(0., TransportMode.car));			
+				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});	        
 		
@@ -232,9 +233,10 @@ public class OptAVModeChoiceTestIT {
 		controler1.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerTaxiInsteadOfCar(0., TransportMode.car));			
-				this.bind(TaxiPassengerTracker.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(TaxiPassengerTracker.class);
+				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(0., TransportMode.car));			
+				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});	 
 		
@@ -286,9 +288,10 @@ public class OptAVModeChoiceTestIT {
 		controler2.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerTaxiInsteadOfCar(10000., TransportMode.car));			
-				this.bind(TaxiPassengerTracker.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(TaxiPassengerTracker.class);
+				this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(10000., TransportMode.car));			
+				SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.taxi);
+				this.bind(SAVPassengerTracker.class).toInstance(tracker);
+				this.addEventHandlerBinding().toInstance(tracker);
 			}
 		});	
 		

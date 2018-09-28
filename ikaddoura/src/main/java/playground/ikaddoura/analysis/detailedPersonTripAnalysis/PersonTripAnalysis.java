@@ -38,7 +38,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
-import org.matsim.runTaxi.DailyRewardHandlerTaxiInsteadOfCar;
+import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.vehicles.Vehicle;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
@@ -490,7 +490,7 @@ public class PersonTripAnalysis {
 			NoiseAnalysisHandler noiseHandler,
 			PersonMoneyLinkHandler moneyHandler,
 			DelayAnalysis delayAnalysis,
-			DailyRewardHandlerTaxiInsteadOfCar savFixCostHandler
+			DailyRewardHandlerSAVInsteadOfCar savFixCostHandler
 			) {
 	
 		String fileName = outputPath + "aggregated_info.csv";
