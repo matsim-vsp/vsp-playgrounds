@@ -70,15 +70,15 @@ public class RandomTaxiVehicleCreator {
 
 	public static void main(String[] args) {
 
-		String networkFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/adjusted-multi-modal-cleaned-network.xml.gz";
-		String shapeFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
+		String networkFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/berlin-v5.0.network.xml.gz";
+		String shapeFile = "/Users/ihab/Documents/workspace/matsim-berlin/scenarios/berlin-v5.2-10pct/input/shp-inner-city-area/inner-city-area.shp";
 		
-		String vehiclesFilePrefix = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_networkModeApproach/scenarios/taxi-files/taxis-berlin_";
+		String vehiclesFilePrefix = "/Users/ihab/Desktop/taxi-files/taxis-berlin_";
 	    CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.DHDN_GK4, TransformationFactory.DHDN_GK4); 
 		
 		RandomTaxiVehicleCreator tvc = new RandomTaxiVehicleCreator(networkFile, shapeFile, vehiclesFilePrefix, ct);
-
-		for (int i = 0; i<=10000 ; i=i+1000 ){
+		
+		for (int i = 0; i<=5000 ; i=i+50 ){
 			System.out.println(i);
 			tvc.run(i);
 		}
