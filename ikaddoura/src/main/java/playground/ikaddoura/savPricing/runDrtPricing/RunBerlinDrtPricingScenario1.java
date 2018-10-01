@@ -51,7 +51,7 @@ public class RunBerlinDrtPricingScenario1 {
 
 	private static String configFileName;
 	private static String overridingConfigFileName;
-	private static String berlinShapeFile;
+	private static String carRestrictedAreaShapeFile;
 	private static String drtServiceAreaShapeFile;
 	private static String transitStopCoordinatesSFile;
 	private static String transitStopCoordinatesRBFile;
@@ -65,7 +65,7 @@ public class RunBerlinDrtPricingScenario1 {
 		if (args.length > 0) {		
 			configFileName = args[0];
 			overridingConfigFileName = args[1];
-			berlinShapeFile = args[2];
+			carRestrictedAreaShapeFile = args[2];
 			drtServiceAreaShapeFile = args[3];
 			transitStopCoordinatesSFile = args[4];
 			transitStopCoordinatesRBFile = args[5];
@@ -78,7 +78,7 @@ public class RunBerlinDrtPricingScenario1 {
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
 			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drt1-v5.2-1pct.config.xml";
 			overridingConfigFileName = null;
-			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
+			carRestrictedAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
 			transitStopCoordinatesSFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_S-zoneC.csv";
 			transitStopCoordinatesRBFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_RB-zoneC.csv";
@@ -96,7 +96,7 @@ public class RunBerlinDrtPricingScenario1 {
 	}
 	
 	private void run() {
-		RunBerlinDrtScenario1 berlin = new RunBerlinDrtScenario1(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile, transitStopCoordinatesRBFile);
+		RunBerlinDrtScenario1 berlin = new RunBerlinDrtScenario1(configFileName, overridingConfigFileName, carRestrictedAreaShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);

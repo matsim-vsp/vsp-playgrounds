@@ -51,7 +51,6 @@ public class RunBerlinDrtPricingScenario2 {
 
 	private static String configFileName;
 	private static String overridingConfigFileName;
-	private static String berlinShapeFile;
 	private static String drtServiceAreaShapeFile;
 	private static double dailyRewardDrtInsteadOfPrivateCar;
 	private static String runId;
@@ -64,19 +63,17 @@ public class RunBerlinDrtPricingScenario2 {
 		if (args.length > 0) {		
 			configFileName = args[0];
 			overridingConfigFileName = args[1];
-			berlinShapeFile = args[2];
-			drtServiceAreaShapeFile = args[3];
-			dailyRewardDrtInsteadOfPrivateCar = Double.parseDouble(args[4]);
-			runId = args[5];
-			outputDirectory = args[6];
-			visualizationScriptDirectory = args[7];
-			scaleFactor = Integer.parseInt(args[8]);
+			drtServiceAreaShapeFile = args[2];
+			dailyRewardDrtInsteadOfPrivateCar = Double.parseDouble(args[3]);
+			runId = args[4];
+			outputDirectory = args[5];
+			visualizationScriptDirectory = args[6];
+			scaleFactor = Integer.parseInt(args[7]);
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
 			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drt2-v5.2-1pct.config.xml";
 			overridingConfigFileName = null;
-			berlinShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
 			dailyRewardDrtInsteadOfPrivateCar = 0.;
 			runId = "drt2-test-1";
@@ -93,7 +90,7 @@ public class RunBerlinDrtPricingScenario2 {
 	}
 	
 	private void run() {
-		RunBerlinDrtScenario2 berlin = new RunBerlinDrtScenario2(configFileName, overridingConfigFileName, berlinShapeFile, drtServiceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
+		RunBerlinDrtScenario2 berlin = new RunBerlinDrtScenario2(configFileName, overridingConfigFileName, drtServiceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
