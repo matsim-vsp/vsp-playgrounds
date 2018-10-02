@@ -54,7 +54,6 @@ public class RunBerlinDrtPricingScenario1 {
 	private static String carRestrictedAreaShapeFile;
 	private static String drtServiceAreaShapeFile;
 	private static String transitStopCoordinatesSFile;
-	private static String transitStopCoordinatesRBFile;
 	private static String runId;
 	private static String outputDirectory;
 	private static String visualizationScriptDirectory;
@@ -68,11 +67,10 @@ public class RunBerlinDrtPricingScenario1 {
 			carRestrictedAreaShapeFile = args[2];
 			drtServiceAreaShapeFile = args[3];
 			transitStopCoordinatesSFile = args[4];
-			transitStopCoordinatesRBFile = args[5];
-			runId = args[6];
-			outputDirectory = args[7];
-			visualizationScriptDirectory = args[8];
-			scaleFactor = Integer.parseInt(args[9]);
+			runId = args[5];
+			outputDirectory = args[6];
+			visualizationScriptDirectory = args[7];
+			scaleFactor = Integer.parseInt(args[8]);
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
@@ -81,7 +79,6 @@ public class RunBerlinDrtPricingScenario1 {
 			carRestrictedAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-shp/berlin.shp";
 			drtServiceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
 			transitStopCoordinatesSFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_S-zoneC.csv";
-			transitStopCoordinatesRBFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_RB-zoneC.csv";
 			runId = "drt1-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
