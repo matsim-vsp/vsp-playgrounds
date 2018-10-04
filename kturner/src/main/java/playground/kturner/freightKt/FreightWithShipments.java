@@ -62,7 +62,9 @@ import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
+import org.matsim.vehicles.EngineInformationImpl;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.EngineInformation.FuelType;
 
 /**
  * @author kturner
@@ -90,8 +92,8 @@ public class FreightWithShipments {
 		/*
 		 * some preparation - set logging level
 		 */
-		Logger.getRootLogger().setLevel(Level.DEBUG);
-//		Logger.getRootLogger().setLevel(Level.INFO);
+//		Logger.getRootLogger().setLevel(Level.DEBUG);
+		Logger.getRootLogger().setLevel(Level.INFO);
 
 		/*
 		 * some preparation - create output folder
@@ -99,8 +101,8 @@ public class FreightWithShipments {
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR);
 
 
-		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
-		new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPEFILE) ;
+//		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
+//		new CarrierVehicleTypeReader(vehicleTypes).readFile(VEHTYPEFILE) ;
 
 		//Create carrier with shipments
 		Carriers carriers = new Carriers() ;
@@ -115,7 +117,19 @@ public class FreightWithShipments {
 		carrier.getServices().add(createMatsimService("Service2", "i(3,9)", 2));
 		carrier.getServices().add(createMatsimService("Service3", "i(4,9)", 2));
 
-		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class)).build();
+		//Create vehicle for Carrier
+		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class))
+				.setCapacity(3)
+				.setMaxVelocity(10)
+				.setCostPerDistanceUnit(0.0001)
+				.setCostPerTimeUnit(0.001)
+				.setFixCost(130)
+				.setEngineInformation(new EngineInformationImpl(FuelType.diesel, 0.015))
+				.build();
+		CarrierVehicleTypes vehicleTypes = new CarrierVehicleTypes() ;
+		vehicleTypes.getVehicleTypes().put(carrierVehType.getId(), carrierVehType);
+		
+//		CarrierVehicleType carrierVehType = CarrierVehicleType.Builder.newInstance(Id.create("gridType", VehicleType.class)).build();
 		CarrierVehicle carrierVehicle = CarrierVehicle.Builder.newInstance(Id.create("gridVehicle", org.matsim.vehicles.Vehicle.class), Id.createLinkId("i(6,0)")).setEarliestStart(0.0).setLatestEnd(36000.0).setTypeId(carrierVehType.getId()).build();
 
 		CarrierCapabilities.Builder ccBuilder = CarrierCapabilities.Builder.newInstance() 
