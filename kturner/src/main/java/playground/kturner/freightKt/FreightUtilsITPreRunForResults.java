@@ -18,9 +18,11 @@
   
 package playground.kturner.freightKt;
 
+import java.io.IOException;
 import java.util.Collection;
 
-import org.junit.BeforeClass;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -43,25 +45,26 @@ import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts;
 import org.matsim.contrib.freight.jsprit.NetworkRouter;
 import org.matsim.contrib.freight.jsprit.NetworkBasedTransportCosts.Builder;
 import org.matsim.contrib.freight.utils.FreightUtils;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.vehicles.EngineInformationImpl;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.EngineInformation.FuelType;
 
-import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.SchrimpfFactory;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
-import com.graphhopper.jsprit.core.reporting.SolutionPrinter;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.io.problem.VrpXMLWriter;
 
 public class FreightUtilsITPreRunForResults {
+	private static final Logger log = Logger.getLogger(FreightUtilsITPreRunForResults.class);
 	
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
 	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/Shipments/grid/ShipmentsIT/";
+	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
 	private static final Id<Carrier> CARRIER_SERVICES_ID = Id.create("CarrierWServices", Carrier.class);
 	private static final Id<Carrier> CARRIER_SHIPMENTS_ID = Id.create("CarrierWShipments", Carrier.class);
@@ -71,18 +74,19 @@ public class FreightUtilsITPreRunForResults {
 	private static Carrier carrierWShipments;
 	
 	private static Carriers carriersWithShipmentsOnly;
-	private static Carrier carrierWShipmentsOnlyFromCarrierWServices;
-	private static Carrier carrierWShipmentsOnlyFromCarrierWShipments;
 	
-	/** Commented out because it is not working even as @Rule nor as @ClassRule due to different reasons, 
-	* e.g. @BeforeClass needs @ClassRule, but MatsimTestUtils does not work together with @ClassRule ;
-	*  MatsimTestUtils needs be static vs static not allowed in @Rule, KMT sep/18
-	**/
-//	@Rule		
-//	public static MatsimTestUtils testUtils = new MatsimTestUtils();
-	
-	@BeforeClass
-	public static void main() {
+	public static void main(String[] args) throws IOException {
+		/*
+		 * some preparation - set logging level
+		 */
+//		Logger.getRootLogger().setLevel(Level.DEBUG);
+		Logger.getRootLogger().setLevel(Level.INFO);
+
+		/*
+		 * some preparation - create output folder
+		 */
+		OutputDirectoryLogging.initLoggingWithOutputDirectory(LOG_DIR);
+
 		
 		//Create carrier with services and shipments
 		carriersWithServicesAndShpiments = new Carriers() ;
@@ -180,10 +184,11 @@ public class FreightUtilsITPreRunForResults {
 		}
 		new CarrierPlanXmlWriterV2(carriersWithShipmentsOnly).write( OUTPUT_DIR+ "shipmentsOnly_jsprit_plannedCarriers.xml") ; 
 		
-		carrierWShipmentsOnlyFromCarrierWServices = carriersWithShipmentsOnly.getCarriers().get(CARRIER_SERVICES_ID);		//with converted Service
-		carrierWShipmentsOnlyFromCarrierWShipments = carriersWithShipmentsOnly.getCarriers().get(CARRIER_SHIPMENTS_ID);		//with copied Shipments
-		
-		
+		log.info("#### Finished ####");
+		/*
+		 * close logging
+		 */
+		OutputDirectoryLogging.closeOutputDirLogging();
 	}
 	
 	private static CarrierShipment createMatsimShipment(String id, String from, String to, int size) {
