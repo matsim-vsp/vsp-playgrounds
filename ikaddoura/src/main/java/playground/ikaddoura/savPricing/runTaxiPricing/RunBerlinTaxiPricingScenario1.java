@@ -104,7 +104,7 @@ public class RunBerlinTaxiPricingScenario1 {
 		
 		Controler controler = berlin.prepareControler();		
 
-		// taxi pricing
+		// sav pricing
 		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg));
 		
 		// modal split analysis
