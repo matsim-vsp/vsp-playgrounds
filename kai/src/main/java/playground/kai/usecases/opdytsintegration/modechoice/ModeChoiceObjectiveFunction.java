@@ -19,12 +19,12 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.analysis.kai.DataMap;
 import org.matsim.contrib.analysis.kai.Databins;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
-import org.matsim.core.scoring.ExperiencedPlansService;
 import org.matsim.core.utils.geometry.CoordUtils;
 
 import floetteroed.opdyts.ObjectiveFunction;
@@ -35,7 +35,7 @@ import floetteroed.opdyts.SimulatorState;
  * @author Kai Nagel based on Gunnar Flötteröd
  * 
  */
-class ModeChoiceObjectiveFunction implements ObjectiveFunction {
+class ModeChoiceObjectiveFunction implements ObjectiveFunction<MATSimState> {
 	@SuppressWarnings("unused")
 	private static final Logger log = Logger.getLogger( ModeChoiceObjectiveFunction.class );
 
@@ -103,7 +103,7 @@ class ModeChoiceObjectiveFunction implements ObjectiveFunction {
 		}
 	}
 
-	@Override public double value(SimulatorState state) {
+	@Override public double value(MATSimState state) {
 
 		log.warn("Evaluating selected plans instead of experienced plans.");
 
