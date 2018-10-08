@@ -74,7 +74,7 @@ public class RunBerlinTaxiPricingScenario2 {
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
 			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-taxi2-v5.2-1pct.config.xml";
 			overridingConfigFileName = null;
-			serviceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berliner-ring-area-shp/service-area.shp";
+			serviceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/shp-inner-city-area/inner-city-area.shp";
 			dailyRewardDrtInsteadOfPrivateCar = 0.;
 			runId = "taxi2-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
