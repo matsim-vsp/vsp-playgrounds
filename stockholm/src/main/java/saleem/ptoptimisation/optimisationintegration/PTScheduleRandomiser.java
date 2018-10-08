@@ -51,7 +51,7 @@ public class PTScheduleRandomiser implements DecisionVariableRandomizer<PTSchedu
 	}
 
 	@Override
-	public Collection<PTSchedule> newRandomVariations(PTSchedule decisionVariable) {
+	public Collection<PTSchedule> newRandomVariations(PTSchedule decisionVariable, int iteration) {
 		TransitSchedule schedule = this.ptschedule.getSchedule();
 		Vehicles vehicles = this.ptschedule.getVehicles();
 		ScenarioHelper helper = new ScenarioHelper();

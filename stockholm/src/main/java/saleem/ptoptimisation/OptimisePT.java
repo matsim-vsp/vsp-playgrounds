@@ -19,30 +19,22 @@
  */ 
 package saleem.ptoptimisation;
 
-import java.util.LinkedHashSet;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.opdyts.deprecated.PTOccupancyAnalyzer;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.ControlerDefaultsModule;
 import org.matsim.core.controler.MatsimServices;
-import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import org.matsim.pt.utils.CreatePseudoNetwork;
 
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
 import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
 import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
-import floetteroed.opdyts.searchalgorithms.RandomSearch;
-import floetteroed.opdyts.searchalgorithms.SelfTuner;
 import floetteroed.utilities.TimeDiscretization;
-import saleem.ptoptimisation.optimisationintegration.PTMatsimStateFactoryImpl;
 import saleem.ptoptimisation.optimisationintegration.PTObjectiveFunction;
 import saleem.ptoptimisation.optimisationintegration.PTSchedule;
 import saleem.ptoptimisation.optimisationintegration.PTScheduleRandomiser;

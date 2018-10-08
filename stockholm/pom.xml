@@ -41,6 +41,13 @@
 			<version>0.10.0</version>
   		</dependency>
   		 -->
+  		 
+		<dependency>
+  			<groupId>org.matsim.contrib</groupId>
+  			<artifactId>pseudosimulation</artifactId>
+			<version>deterministic-psim</version>
+  			<!-- <version>0.11.0-SNAPSHOT</version> -->
+  		</dependency>
   
 	  	<dependency>
 			<groupId>com.github.gunnarfloetteroed</groupId>
