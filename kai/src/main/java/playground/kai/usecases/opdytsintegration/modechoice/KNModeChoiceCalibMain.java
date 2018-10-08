@@ -5,7 +5,8 @@ import java.util.Arrays;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
 import org.matsim.contrib.opdyts.OpdytsConfigGroup;
-import org.matsim.contrib.opdyts.example.modechoice.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -143,7 +144,7 @@ class KNModeChoiceCalibMain {
 
 			
 			// MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
-			MATSimOpdytsRunner<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsRunner<>(scenario, new MATSimStateFactoryImpl<>());
+			MATSimOpdytsRunner<ModeChoiceDecisionVariable, MATSimState> opdytsControler = new MATSimOpdytsRunner<>(scenario, new MATSimStateFactoryImpl<>());
 
 			// if not provided created by default using opdytsConfigGroup. Amit July'17
 			// final TimeDiscretization timeDiscretization = new TimeDiscretization(0, 3600,
