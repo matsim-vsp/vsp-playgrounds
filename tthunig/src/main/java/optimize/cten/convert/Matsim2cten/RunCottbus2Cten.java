@@ -39,8 +39,9 @@ public class RunCottbus2Cten {
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13.xml";
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmerLinkBased.xml";
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmer2phases_6.xml";
+		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmerNico_14re_3re_7re_v4-1.xml";
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13_v4.xml";
-		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13_v4-1.xml";
+//		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13_v4-1.xml";
 //		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_no_13.xml";
 		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_laemmer.xml";
 //		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_no_13_v4.xml";
