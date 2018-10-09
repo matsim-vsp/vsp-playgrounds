@@ -59,8 +59,8 @@
 		<dependency>
   			<groupId>org.matsim.contrib</groupId>
   			<artifactId>pseudosimulation</artifactId>
-			<version>deterministic-psim</version>
-  			<!-- <version>0.11.0-SNAPSHOT</version> -->
+			<!-- <version>pseudosimulation</version> -->
+  			<version>0.11.0-SNAPSHOT</version>
   		</dependency>
 
 		<!-- 

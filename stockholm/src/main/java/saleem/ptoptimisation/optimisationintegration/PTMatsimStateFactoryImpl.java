@@ -34,7 +34,7 @@ import floetteroed.utilities.math.Vector;
  *
  */
 public class PTMatsimStateFactoryImpl<U extends DecisionVariable> implements
-		MATSimStateFactory<U> {
+		MATSimStateFactory<U, MATSimState> {
 	private Scenario scenario;
 	final double occupancyScale;
 	public PTMatsimStateFactoryImpl(Scenario scenario, final double occupancyScale) {
