@@ -73,12 +73,14 @@ public class Greedo extends AbstractModule {
 	private static final Logger log = Logger.getLogger(Greedo.class);
 
 	private final int defaultIterationsPerCycle = 10;
-	
+
 	// -------------------- MEMBERS --------------------
 
 	private final Set<String> bestResponseInnovationStrategyNames = new LinkedHashSet<>();
 
 	private final Set<String> randomInnovationStrategyNames = new LinkedHashSet<>();
+
+	private boolean adjustStrategyWeights = true;
 
 	private Config config = null;
 
@@ -90,9 +92,7 @@ public class Greedo extends AbstractModule {
 
 	public Greedo() {
 
-		/*
-		 * Strategies that imply a costly best-response (re-route) calculation.
-		 */
+		// Strategies that imply a costly best-response (e.g. re-route) calculation.
 		this.setBestResponseStrategyName("ReRoute");
 		this.setBestResponseStrategyName("TimeAllocationMutator_ReRoute");
 		this.setBestResponseStrategyName("ChangeLegMode");
@@ -100,9 +100,7 @@ public class Greedo extends AbstractModule {
 		this.setBestResponseStrategyName("ChangeSingleLegMode");
 		this.setBestResponseStrategyName("SubtoutModeChoice");
 
-		/*
-		 * Strategies that are cheap to calculate.
-		 */
+		// Strategies that are cheap to calculate.
 		this.setRandomInnovationStrategyName("TimeAllocationMutator");
 	}
 
@@ -116,6 +114,12 @@ public class Greedo extends AbstractModule {
 		this.randomInnovationStrategyNames.add(strategyName);
 	}
 
+	public void setAdjustStrategyWeights(final boolean adjustStrategyWeights) {
+		this.adjustStrategyWeights = adjustStrategyWeights;
+	}
+
+	// -------------------- WIRE GREEDO INTO MATSim --------------------
+
 	public void meet(final Config config) {
 
 		if (this.config != null) {
@@ -124,8 +128,9 @@ public class Greedo extends AbstractModule {
 		this.config = config;
 
 		/*
-		 * The following should not be necessary but is currently assumed when handling
-		 * iteration-dependent replanning rates.
+		 * Ensure that the simulation starts at iteration 0. This should not be
+		 * necessary but is currently assumed when handling iteration-dependent
+		 * re-planning rates.
 		 */
 		config.controler()
 				.setLastIteration(config.controler().getLastIteration() - config.controler().getFirstIteration());
@@ -143,14 +148,12 @@ public class Greedo extends AbstractModule {
 		 */
 		int bestResponseStrategyCnt = 0;
 		int randomInnovationStrategyCnt = 0;
-		double bestResponseStrategyWeightSum = 0.0;
 		double randomInnovationStrategyWeightSum = 0.0;
 		for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
 			final String strategyName = strategySettings.getStrategyName();
 			if (strategySettings.getWeight() > 0) {
 				if (this.bestResponseInnovationStrategyNames.contains(strategyName)) {
 					bestResponseStrategyCnt++;
-					bestResponseStrategyWeightSum += strategySettings.getWeight();
 				} else if (this.randomInnovationStrategyNames.contains(strategyName)) {
 					randomInnovationStrategyCnt++;
 					randomInnovationStrategyWeightSum += strategySettings.getWeight();
@@ -165,7 +168,6 @@ public class Greedo extends AbstractModule {
 		final boolean pSimConfigExists = config.getModules().containsKey(PSimConfigGroup.GROUP_NAME);
 		final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class);
 		if (!pSimConfigExists) {
-
 			// Adjust number of PSim iterations to number and type of innovation strategies.
 			if (randomInnovationStrategyCnt > 0) {
 				// This case is difficult to configure automatically. Make sure that every
@@ -174,7 +176,7 @@ public class Greedo extends AbstractModule {
 						this.defaultIterationsPerCycle));
 			} else {
 				if (bestResponseStrategyCnt > 0) {
-					// Only best-response strategies: every best-response strategy is used one
+					// Only best-response strategies: every best-response strategy is used on
 					// average exactly once.
 					pSimConf.setIterationsPerCycle(bestResponseStrategyCnt);
 				} else {
@@ -183,7 +185,6 @@ public class Greedo extends AbstractModule {
 					pSimConf.setIterationsPerCycle(2);
 				}
 			}
-
 			// Adjust iteration numbers to pSim iteration overhead.
 			config.controler()
 					.setLastIteration(config.controler().getLastIteration() * pSimConf.getIterationsPerCycle());
@@ -193,12 +194,12 @@ public class Greedo extends AbstractModule {
 					config.controler().getWritePlansInterval() * pSimConf.getIterationsPerCycle());
 			config.controler().setWriteSnapshotsInterval(
 					config.controler().getWriteSnapshotsInterval() * pSimConf.getIterationsPerCycle());
-
+			// TODO: Deprecate this, allow for SBB transit only:
 			pSimConf.setFullTransitPerformanceTransmission(false);
 		}
 
 		/*
-		 * Ensure a valid Acceleration configuration; fall back to default values if not
+		 * Ensure a valid acceleration configuration; fall back to default values if not
 		 * available.
 		 */
 		ConfigUtils.addOrGetModule(config, AccelerationConfigGroup.class);
@@ -215,15 +216,26 @@ public class Greedo extends AbstractModule {
 		 * Keep only plan innovation strategies. Re-weight for maximum pSim efficiency.
 		 * 
 		 */
-		final double randomStrategyFactor = (1.0 - bestResponseStrategyWeightSum) / randomInnovationStrategyWeightSum;
-		for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
-			final String strategyName = strategySettings.getStrategyName();
-			if (this.bestResponseInnovationStrategyNames.contains(strategyName)) {
-				strategySettings.setWeight(1.0 / pSimConf.getIterationsPerCycle());
-			} else if (this.randomInnovationStrategyNames.contains(strategyName)) {
-				strategySettings.setWeight(randomStrategyFactor * strategySettings.getWeight());
-			} else {
-				strategySettings.setWeight(0.0); // i.e., dismiss
+		if (this.adjustStrategyWeights) {
+			final double individualBestResponseStrategyProba = 1.0 / pSimConf.getIterationsPerCycle();
+			final double bestResponseStrategyProbaSum = individualBestResponseStrategyProba * bestResponseStrategyCnt;
+			final double randomInnovationStrategyProbaSum = 1.0 - bestResponseStrategyProbaSum;
+			final double randomInnovationStrategyWeightFactor = randomInnovationStrategyProbaSum
+					/ randomInnovationStrategyWeightSum;
+			double sum = 0;
+			for (StrategySettings strategySettings : config.strategy().getStrategySettings()) {
+				final String strategyName = strategySettings.getStrategyName();
+				if (this.bestResponseInnovationStrategyNames.contains(strategyName)) {
+					strategySettings.setWeight(individualBestResponseStrategyProba);
+				} else if (this.randomInnovationStrategyNames.contains(strategyName)) {
+					strategySettings.setWeight(randomInnovationStrategyWeightFactor * strategySettings.getWeight());
+				} else {
+					strategySettings.setWeight(0.0); // i.e., dismiss
+				}
+				sum += strategySettings.getWeight();
+			}
+			if (Math.abs(1.0 - sum) >= 1e-8) {
+				throw new RuntimeException("The sum of all strategy probabilities is " + sum + ".");
 			}
 		}
 
@@ -282,12 +294,15 @@ public class Greedo extends AbstractModule {
 		this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
 		this.bind(PSimProvider.class).toInstance(new PSimProvider(this.scenario, this.controler.getEvents()));
 
-		// Transit-specific PSim.
+		// Transit-specific PSim. TODO Allow only for SBB transit.
 		final FifoTransitPerformance transitPerformance = new FifoTransitPerformance(mobSimSwitcher,
 				this.scenario.getPopulation(), this.scenario.getTransitVehicles(), this.scenario.getTransitSchedule());
 		this.bind(FifoTransitPerformance.class).toInstance(transitPerformance);
 		this.addEventHandlerBinding().toInstance(transitPerformance);
 		this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
+
+
+		this.bind(QSimProvider.class);
 
 		// Acceleration logic.
 		this.bind(SearchAccelerator.class).in(Singleton.class);
@@ -297,7 +312,17 @@ public class Greedo extends AbstractModule {
 				.toProvider(AcceptIntendedReplanningStragetyProvider.class);
 	}
 
+	@Provides
+	QSimComponents provideQSimComponents() {
+		QSimComponents components = new QSimComponents();
+		new StandardQSimComponentsConfigurator(this.config).configure(components);
+		// SBBTransitEngineQSimModule.configure(components);
+		return components;
+	}
+
+	// =========================================================================
 	// -------------------- MAIN-FUNCTION, ONLY FOR TESTING --------------------
+	// =========================================================================
 
 	public static void main(String[] args) {
 
