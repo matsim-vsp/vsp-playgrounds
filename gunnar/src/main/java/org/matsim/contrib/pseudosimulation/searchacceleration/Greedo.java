@@ -29,6 +29,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
 import org.matsim.contrib.pseudosimulation.mobsim.PSimProvider;
@@ -66,7 +67,7 @@ import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
  * @author Gunnar Flötteröd
  *
  */
-public class Greedo extends AbstractModule {
+public class Greedo extends AbstractModule implements MATSimOpdytsRunner.WantsControlerReferenceBeforeInjection {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -262,6 +263,7 @@ public class Greedo extends AbstractModule {
 				ConfigUtils.addOrGetModule(this.config, PSimConfigGroup.class).getIterationsPerCycle());
 	}
 
+	@Override
 	public void meet(final Controler controler) {
 
 		if (this.scenario == null) {
