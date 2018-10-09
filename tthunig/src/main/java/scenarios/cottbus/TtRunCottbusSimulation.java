@@ -133,7 +133,7 @@ public class TtRunCottbusSimulation {
 	private final static boolean LONG_LANES = true;
 	private final static boolean LANE_CAP_FROM_NETWORK = false;
 	
-	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap07MSNetV4;
+	private final static PopulationType POP_TYPE = PopulationType.WoMines100itcap10MSNetV4;
 	public enum PopulationType {
 		GRID_LOCK_BTU, // artificial demand: from every ingoing link to every outgoing link of the inner city ring
 		BTU_POP_MATSIM_ROUTES,
@@ -170,9 +170,9 @@ public class TtRunCottbusSimulation {
 	private final static int POP_SCALE = 1;
 	private final static boolean DELETE_ROUTES = false;
 	
-	private final static SignalType SIGNAL_TYPE = SignalType.GERSHENSON;
+	private final static SignalType SIGNAL_TYPE = SignalType.LAEMMER_NICO_GROUPS_14RE_3RE_7RE;
 	public enum SignalType {
-		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_BTU_OPT, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
+		NONE, MS, MS_RANDOM_OFFSETS, MS_SYLVIA, MS_BTU_OPT, MS_BTU_OPT_SYLVIA, DOWNSTREAM_MS, DOWNSTREAM_BTUOPT, DOWNSTREAM_ALLGREEN, 
 		ALL_NODES_ALL_GREEN, ALL_NODES_DOWNSTREAM, ALL_GREEN_INSIDE_ENVELOPE, 
 		ALL_MS_INSIDE_ENVELOPE_REST_GREEN, // all MS systems fixed-time, rest all green
 		ALL_MS_AS_SYLVIA_INSIDE_ENVELOPE_REST_GREEN, // all MS systems as sylvia with MS basis, rest all green. note: green basis for sylvia does not work
@@ -184,6 +184,7 @@ public class TtRunCottbusSimulation {
 		LAEMMER_NICO_GROUPS_14GREEN, // the same as LAEMMER_NICO_GROUPS but without signal 1107 at system 14 (i.e. all green)
 		LAEMMER_NICO_GROUPS_14RE, // same as LAEMMER_NICO_GROUPS but with different phases at system 14: left turns together, straight together
 		LAEMMER_NICO_GROUPS_14RE_6RE, // same as LAEMMER_NICO_GROUPS_14RE but with restructured phases at system 6: 1509 together with 1511 and 1512
+		LAEMMER_NICO_GROUPS_14RE_3RE_7RE, // same as LAEMMER_NICO_GROUPS_14RE but with separate signal groups for conflicting left turns at sys 3 and 7
 		LAEMMER_DOUBLE_GROUPS, // laemmer with fixed signal groups, where signals can be included more than once, i.e. alternative groups can be modeled
 		LAEMMER_DOUBLE_GROUPS_SYS17, // as above but two additional possible groups at system 17, such that opposing traffic can have green at the same time
 		LAEMMER_DOUBLE_GROUPS_14GREEN, // the same as LAEMMER_DOUBLE_GROUPS but without signal 1107 at system 14 (i.e. all green)
@@ -214,7 +215,7 @@ public class TtRunCottbusSimulation {
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
 	private static final double SIGMA = 0.0;
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/test/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/cottbus/laemmer/";
 	private static final String INPUT_BASE_DIR = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/";
 //	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 	private static final String BTU_BASE_DIR = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
@@ -222,7 +223,7 @@ public class TtRunCottbusSimulation {
 	
 	private static final boolean WRITE_INITIAL_FILES = true;
 	private static final boolean USE_COUNTS = false;
-	private static final double SCALING_FACTOR = .7;
+	private static final double SCALING_FACTOR = 1;
 	
 	
 	public static void main(String[] args) {
@@ -622,6 +623,14 @@ public class TtRunCottbusSimulation {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
 				break;
+			case MS_BTU_OPT_SYLVIA:
+				if (NETWORK_TYPE.equals(BTU_BASE_NET) || NETWORK_TYPE.equals(NetworkType.BTU_NET)) {
+					// TODO
+					signalConfigGroup.setSignalControlFile(BTU_BASE_DIR + "btu/signal_control_opt_expanded_sylvia.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
 			case LAEMMER_DOUBLE_GROUPS:
 				if (NETWORK_TYPE.toString().startsWith("V1") ){
 					// overwrite signal groups
@@ -690,6 +699,18 @@ public class TtRunCottbusSimulation {
 					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
 				}
 				break;
+			case LAEMMER_NICO_GROUPS_14RE_3RE_7RE:
+				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_laemmer.xml");
+				if (NETWORK_TYPE.equals(NetworkType.V4_1) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4_1))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4-1.xml");
+				} if (NETWORK_TYPE.equals(NetworkType.V4) || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.equals(NetworkType.V4))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14re_3re_7re_v4.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
+				break;
 			case MS_IDEAL:
 				if (NETWORK_TYPE.toString().startsWith("V1") || 
 						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V1"))) {
@@ -703,7 +724,12 @@ public class TtRunCottbusSimulation {
 				break;
 			case GERSHENSON:
 				signalConfigGroup.setSignalControlFile(INPUT_BASE_DIR + "signal_control_gershenson.xml");
-				signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases_v4.xml");
+				if (NETWORK_TYPE.toString().startsWith("V4") || 
+						(NETWORK_TYPE.equals(NetworkType.BTU_NET) && BTU_BASE_NET.toString().startsWith("V4"))) {
+					signalConfigGroup.setSignalGroupsFile(INPUT_BASE_DIR + "signal_groups_laemmerNico_14restructurePhases_v4.xml");
+				} else {
+					throw new UnsupportedOperationException("It is not yet supported to combine " + SIGNAL_TYPE + " and " + NETWORK_TYPE);
+				}
 				break;
 			}
 			
