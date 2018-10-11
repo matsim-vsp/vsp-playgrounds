@@ -108,8 +108,9 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         log.warn("The step size will be updated based on the opdyts iteration number (e.g. stepSize * (1/ItNr)).");
     }
 
+    // FIXME: I added a second argument but I am not sure if this is correct. ihab oct '18
     @Override
-    public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable) {
+	public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable, int arg1) {
         List<ModeChoiceDecisionVariable> result ;
 
         final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();

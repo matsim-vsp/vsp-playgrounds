@@ -105,7 +105,7 @@ public class ModeChoiceRandomizerTest {
                 this.consideredModes,
                 this.ascRandomizerStyle);
 
-        List<ModeChoiceDecisionVariable> result = modeChoiceRandomizer.newRandomVariations(initialDecisionVariable);
+        List<ModeChoiceDecisionVariable> result = modeChoiceRandomizer.newRandomVariations(initialDecisionVariable, 0); // FIXME: I added a second argument but I am not sure if this is correct. ihab oct '18
 
         // check number of new decision variables
         switch (this.ascRandomizerStyle) {
