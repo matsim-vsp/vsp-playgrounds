@@ -115,7 +115,7 @@ public class IKAnalysisRun {
 	
 	private final List<String> modes;
 
-	private final String outputDirectoryName = "analysis-ik-v1.2";
+	private String outputDirectoryName = "analysis-ik-v1.2";
 
 	private final String visualizationScriptInputDirectory;
 			
@@ -267,6 +267,8 @@ public class IKAnalysisRun {
 			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
 			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes) {
 
+		this.outputDirectoryName = this.outputDirectoryName + "-comparison";
+		
 		String runDirectory = scenario1.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
 
