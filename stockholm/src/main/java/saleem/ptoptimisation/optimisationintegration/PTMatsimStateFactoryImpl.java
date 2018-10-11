@@ -19,13 +19,13 @@
  */ 
 package saleem.ptoptimisation.optimisationintegration;
 
-import floetteroed.opdyts.DecisionVariable;
-import floetteroed.utilities.math.Vector;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.opdyts.MATSimState;
-import org.matsim.contrib.opdyts.MATSimStateFactory;
-import org.matsim.core.controler.Controler;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
+import org.matsim.contrib.opdyts.microstate.MATSimStateFactory;
+
+import floetteroed.opdyts.DecisionVariable;
+import floetteroed.utilities.math.Vector;
 
 /**
  * A factory class to create PTMatSimState objects.
@@ -34,7 +34,7 @@ import org.matsim.core.controler.Controler;
  *
  */
 public class PTMatsimStateFactoryImpl<U extends DecisionVariable> implements
-		MATSimStateFactory<U> {
+		MATSimStateFactory<U, MATSimState> {
 	private Scenario scenario;
 	final double occupancyScale;
 	public PTMatsimStateFactoryImpl(Scenario scenario, final double occupancyScale) {
@@ -49,10 +49,10 @@ public class PTMatsimStateFactoryImpl<U extends DecisionVariable> implements
 		
 	}
 
-	@Override
-	public void registerControler(Controler controler) {
-		// TODO Auto-generated method stub
-		
-	}
+//	@Override
+//	public void registerControler(Controler controler) {
+//		// TODO Auto-generated method stub
+//		
+//	}
 
 }

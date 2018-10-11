@@ -154,7 +154,7 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler, StageActivityTypes {
 
 	private String getMainMode(List<String> modes){
 		if (modes.size()==1) return modes.get(0).equals(TransportMode.transit_walk) ? TransportMode.walk: modes.get(0);
-		else if (modes.contains(TransportMode.transit_walk)) {
+		else if (modes.contains(TransportMode.transit_walk) || modes.contains(TransportMode.access_walk) || modes.contains(TransportMode.egress_walk)) {
 			if (modes.contains(TransportMode.pt)) return TransportMode.pt;
 			else return TransportMode.walk;
 

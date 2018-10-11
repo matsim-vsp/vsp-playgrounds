@@ -19,9 +19,7 @@
  */ 
 package gunnar.ihop2.transmodeler.eventsreading;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import floetteroed.utilities.Time;
 import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -32,10 +30,11 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
-import org.matsim.core.network.io.NetworkReaderMatsimV1;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import floetteroed.utilities.Time;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -62,9 +61,10 @@ class TryOutEventsReading implements EventHandler {
 		final Scenario scenario = ScenarioUtils.createScenario(config);
 
 		System.out.println("reading network");
-		final NetworkReaderMatsimV1 networkReader = new NetworkReaderMatsimV1(
-				scenario.getNetwork());
-		networkReader.readFile(matsimNetworkFile);
+//		final NetworkReaderMatsim networkReader = new NetworkReaderMatsim(
+//				scenario.getNetwork());
+//		networkReader.readFile(matsimNetworkFile);
+		NetworkUtils.readNetwork( scenario.getNetwork(), matsimNetworkFile );
 
 		// defining links of interest and checking if they are there
 		final List<Id<Link>> observedLinks = new ArrayList<Id<Link>>();

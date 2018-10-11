@@ -119,10 +119,10 @@ public class Zone {
 			return MathHelpers.draw(this.apartmentBuilding2size,
 					this.apartmentBuildingSizeSum, this.rnd).getGeometry();
 		} else {
-			Logger.getLogger(this.getClass().getName()).warning(
-					"Could not fine home building of type " + buildingType
-							+ " in zone " + this.zoneId
-							+ "; falling back to zone geometry.");
+//			Logger.getLogger(this.getClass().getName()).warning(
+//					"Could not fine home building of type " + buildingType
+//							+ " in zone " + this.zoneId
+//							+ "; falling back to zone geometry.");
 			return this.getGeometry();
 		}
 	}
@@ -132,9 +132,9 @@ public class Zone {
 			return MathHelpers.draw(this.workBuilding2size,
 					this.workBuildingSizeSum, this.rnd).getGeometry();
 		} else {
-			Logger.getLogger(this.getClass().getName()).warning(
-					"Could not fine work building  in zone " + this.zoneId
-							+ "; falling back to zone geometry.");
+//			Logger.getLogger(this.getClass().getName()).warning(
+//					"Could not fine work building  in zone " + this.zoneId
+//							+ "; falling back to zone geometry.");
 			return this.getGeometry();
 		}
 	}
@@ -144,9 +144,9 @@ public class Zone {
 			return this.allBuildings.get(
 					this.rnd.nextInt(this.allBuildings.size())).getGeometry();
 		} else {
-			Logger.getLogger(this.getClass().getName()).warning(
-					"Could not fine any building in zone " + this.zoneId
-							+ "; falling back to zone geometry.");
+//			Logger.getLogger(this.getClass().getName()).warning(
+//					"Could not fine any building in zone " + this.zoneId
+//							+ "; falling back to zone geometry.");
 			return this.getGeometry();
 		}
 	}

@@ -128,7 +128,6 @@
 	</module>
 	
 	<module name="dvrp">
-		<param name="mode" value="taxi"/>
 	</module>
 	
 	<module name="taxi">

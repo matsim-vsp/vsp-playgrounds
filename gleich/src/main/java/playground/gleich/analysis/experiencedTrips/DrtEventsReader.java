@@ -39,7 +39,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 /**
- * An events reader which reads the default events and the additional custom events CongestionEvent, NoiseEventAffected, NoiseEventCaused.
+ * An events reader which reads the default events and the additional drt events DrtRequestSubmittedEvent, DrtRequestRejectedEvent, DrtRequestScheduledEvent.
  * 
  * @author gleich
  *
@@ -86,9 +86,10 @@ public class DrtEventsReader extends MatsimXmlParser {
 				Map<String, String> attributes = event.getAttributes();
 				
 				Double time = Double.parseDouble(attributes.get(DrtRequestRejectedEvent.ATTRIBUTE_TIME));
-				Id<Request> requestId = Id.create(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_REQUEST), Request.class);
+				Id<Request> requestId = Id.create(attributes.get(DrtRequestRejectedEvent.ATTRIBUTE_REQUEST), Request.class);
+				String cause = attributes.get(DrtRequestRejectedEvent.ATTRIBUTE_CAUSE);
 				
-				return new DrtRequestRejectedEvent(time, requestId);
+				return new DrtRequestRejectedEvent(time, requestId, cause);
 			}
 		};
 		

@@ -79,9 +79,11 @@ public class M2KS2010NetworkConverter {
 
 	private static final Logger LOG = Logger.getLogger(M2KS2010NetworkConverter.class);
 
-	private static final int MIN_GREEN_RILSA = 5;
+//	private static final int MIN_GREEN_RILSA = 5;
+	private static final int MIN_GREEN_RILSA = 6;
 	// TODO adapt this if necessary (Nicos Laemmer implemenation also uses a standard clear time of 5 seconds for all group switches)
-	private static final int DEFAULT_CLEAR_TIME = 5;
+//	private static final int DEFAULT_CLEAR_TIME = 5;
+	private static final int DEFAULT_CLEAR_TIME = 3;
 	// TODO adapt this if necessary (90 seconds is the cycle time of fixed-time and laemmer signals in the cottbus scenario)
 	private static final int DEFAULT_CYCLE_TIME = 90;
 

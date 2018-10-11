@@ -90,12 +90,12 @@ public class DifferentiatedPTUsageAnalyzer {
 	}
 
 	public static void main(String[] args) {
-		final String path = "/Users/GunnarF/NoBackup/data-workspace/pt/2018-08-09_scenario/";
+		final String path = "/Users/GunnarF/NoBackup/data-workspace/pt/production-scenario/";
 		final String configFileName = path + "config.xml";
 
 		Config config = ConfigUtils.loadConfig(configFileName);
-		config.network().addParam("inputNetworkFile", "output/output_network.xml.gz");
-		config.plans().addParam("inputPlansFile", "output/output_plans.xml.gz");
+		config.network().addParam("inputNetworkFile", "2018-08-29_output/output_network.xml.gz");
+		config.plans().addParam("inputPlansFile", "2018-08-29_output/output_plans.xml.gz");
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		final DifferentiatedPTUsageAnalyzer ptUsageAnalyzer = new DifferentiatedPTUsageAnalyzer(scenario);

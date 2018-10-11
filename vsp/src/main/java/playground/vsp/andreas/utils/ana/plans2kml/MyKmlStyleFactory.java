@@ -40,6 +40,8 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 	private static final byte[] PTGREEN = new byte[]{(byte) 255, (byte) 0, (byte) 100, (byte) 0};
 	private static final byte[] PTVIOLET = new byte[]{(byte) 255, (byte) 139, (byte) 0, (byte) 139};
 
+	private static final byte[] MATSIMWHITE = new byte[]{(byte) 230, (byte) 230, (byte) 230, (byte) 230};
+
 	public MyKmlStyleFactory(KMZWriter writer, DocumentType document) {
 		super(writer, document);
 //		this.writer = writer;
@@ -56,7 +58,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.myCarNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();
@@ -78,7 +80,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.myWalkNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();
@@ -100,7 +102,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.myDBNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();
@@ -122,7 +124,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.myMetroBusTramNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();
@@ -144,7 +146,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.myBusNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();
@@ -166,7 +168,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.myTramNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();
@@ -188,7 +190,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.mySubWayNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();
@@ -210,7 +212,7 @@ public class MyKmlStyleFactory extends MatsimKmlStyleFactory{
 //			this.writer.addNonKMLFile(MatsimResource.getAsInputStream(DEFAULTNODEICONRESOURCE), DEFAULTLINKICON);
 			IconStyleType iStyle = this.kmlObjectFactory.createIconStyleType();
 			iStyle.setIcon(iconLink);
-			iStyle.setColor(MatsimKmlStyleFactory.MATSIMWHITE);
+			iStyle.setColor(MATSIMWHITE);
 			iStyle.setScale(MyKmlStyleFactory.ICONSCALE);
 			this.mySBAHNNetworklinkStyle.setIconStyle(iStyle);
 			LineStyleType lineStyle = this.kmlObjectFactory.createLineStyleType();

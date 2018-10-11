@@ -29,14 +29,13 @@ import java.util.List;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
-import org.matsim.contrib.dvrp.passenger.PassengerEngineModule;
+import org.matsim.contrib.dvrp.passenger.PassengerEngineQSimModule;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentQueryHelper;
-import org.matsim.contrib.dvrp.vrpagent.VrpAgentSource;
-import org.matsim.contrib.dynagent.run.DynAgentSourceModule;
+import org.matsim.contrib.dvrp.vrpagent.VrpAgentSourceQSimModule;
 import org.matsim.contrib.dynagent.run.DynRoutingModule;
 import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.evaluation.ParkingListener;
@@ -49,6 +48,7 @@ import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.routing.WithinDayParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPopulationModule;
 import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchPrepareForSimImpl;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.PrepareForSim;
@@ -104,7 +104,7 @@ public final class DvrpParkingModule extends AbstractModule {
 
 	@Override
 	public void install() {
-		
+
 		final DynRoutingModule routingModuleCar = new DynRoutingModule(TransportMode.car);
 		StageActivityTypes stageActivityTypesCar = new StageActivityTypes() {
 			@Override
@@ -116,7 +116,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		routingModuleCar.setStageActivityTypes(stageActivityTypesCar);
 		addRoutingModuleBinding(TransportMode.car).toInstance(routingModuleCar);
 
-		String mode = dvrpCfg.getMode();
+		String mode = TaxiConfigGroup.get(getConfig()).getMode();
 		addRoutingModuleBinding(mode).toInstance(new DynRoutingModule(mode));
 		bind(ParkingSearchManager.class).to(FacilityBasedParkingManager.class).asEagerSingleton();
 		bind(WalkLegFactory.class).asEagerSingleton();
@@ -124,7 +124,6 @@ public final class DvrpParkingModule extends AbstractModule {
 		addControlerListenerBinding().to(ParkingListener.class);
 		bind(ParkingRouter.class).to(WithinDayParkingRouter.class);
 		bind(VehicleTeleportationLogic.class).to(VehicleTeleportationToNearbyParking.class);
-
 
 		// Visualisation of schedules for DVRP DynAgents
 		bind(NonPlanAgentQueryHelper.class).to(VrpAgentQueryHelper.class);
@@ -140,7 +139,7 @@ public final class DvrpParkingModule extends AbstractModule {
 		if (dvrpCfg.getNetworkMode() == null) { // no mode filtering
 			return network;
 		}
-		
+
 		Network dvrpNetwork = NetworkUtils.createNetwork();
 		new TransportModeNetworkFilter(network).filter(dvrpNetwork, Collections.singleton(dvrpCfg.getNetworkMode()));
 		return dvrpNetwork;
@@ -150,12 +149,13 @@ public final class DvrpParkingModule extends AbstractModule {
 	private Collection<AbstractQSimModule> provideQSimModules(Config config) {
 		Collection<AbstractQSimModule> modules = new LinkedList<>(QSimModule.getDefaultQSimModules());
 		modules.removeIf(PopulationModule.class::isInstance);
-		
+
+		String mode = TaxiConfigGroup.get(config).getMode();
 		modules.add(new ParkingSearchPopulationModule());
-		modules.add(new PassengerEngineModule(dvrpCfg.getMode()));
-		modules.add(new DynAgentSourceModule(VrpAgentSource.class));
+		modules.add(new PassengerEngineQSimModule(mode));
+		modules.add(new VrpAgentSourceQSimModule(mode));
 		modules.add(new LocalQSimModule());
-		
+
 		return modules;
 	}
 
@@ -163,9 +163,9 @@ public final class DvrpParkingModule extends AbstractModule {
 		@Override
 		protected void configureQSim() {
 			install(module);
-			
+
 			int i = 0;
-			
+
 			for (Class<? extends MobsimListener> l : listeners) {
 				bindMobsimListener("listener_" + (i++)).to(l);
 			}

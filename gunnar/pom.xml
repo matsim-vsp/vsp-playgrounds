@@ -45,7 +45,7 @@
 			<!--<groupId>org.matsim</groupId>-->
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
-			<version>-SNAPSHOT</version>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 	
 		<!-- 
@@ -59,15 +59,18 @@
 		<dependency>
   			<groupId>org.matsim.contrib</groupId>
   			<artifactId>pseudosimulation</artifactId>
+			<!-- <version>pseudosimulation</version> -->
   			<version>0.11.0-SNAPSHOT</version>
   		</dependency>
 
+		<!-- 
 		<dependency>
 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 			<artifactId>stockholm</artifactId>
 			<version>0.11.0-SNAPSHOT</version>
 		</dependency>		
-	
+	 	-->
+	 
 		<!--  -->
 
   		<dependency>
@@ -98,8 +101,13 @@
 	    	<artifactId>poi</artifactId>
 	    	<version>3.12</version>
     	</dependency>
-    
-  
+  		
+   		<dependency>
+  			<groupId>ch.sbb</groupId>
+  			<artifactId>matsim-sbb-extensions</artifactId>
+  			<version>0.11.0-SNAPSHOT</version>
+  		</dependency>  
+  		
 	</dependencies>
 
 </project>

@@ -54,10 +54,9 @@ public class MergeCSVFiles {
 	
 	private static final Logger log = Logger.getLogger(MergeCSVFiles.class);
 	
-	private static final String directory = "/Users/ihab/Desktop/ils4a/kaddoura/cne_berlin10pct/output/";
-	private static final String fileName = "aggregated_info_car";
+	private static final String directory = "/Users/ihab/Desktop/ils4a/kaddoura/b5-congestion-pricing/scenarios/berlin-v5.2-1pct/";
+	private static final String fileName = "aggregated_info";
 	private static final String separator = ";";
-	private static final int finalIteration = 200;
 	
 	private static TreeMap<String, LinkedHashMap<String, String>> path2key2Value = new TreeMap<>();
 	
@@ -68,7 +67,7 @@ public class MergeCSVFiles {
 
 		for (File f : fileList) {
 			
-			if (!f.getName().startsWith("merged") && f.getName().endsWith(fileName + ".csv")) {
+			if (!f.getName().startsWith(".") && !f.getName().startsWith("merged") && f.getName().endsWith(fileName + ".csv")) {
 				
 				log.info("*** file: " + f.getPath());
 				
@@ -109,7 +108,7 @@ public class MergeCSVFiles {
 			
 		if (path2key2Value.size() > 0) {
 			
-			String outputFile = directory + "merged_it." + finalIteration + "_" + fileName + ".csv";
+			String outputFile = directory + "merged" + "_" + fileName + ".csv";
 
 			try ( BufferedWriter bw = IOUtils.getBufferedWriter(outputFile) ) {
 
@@ -151,13 +150,19 @@ public class MergeCSVFiles {
 		if (files != null) {
 			for (File f : files) {
 				if (f.isDirectory()) {
-					if(f.getName().toString().startsWith("it")) {
-						if (f.getName().toString().equals("it." + finalIteration)) {
-							collectAllFilesInDirectory(f, fileList);
-						} else {
-							// skip other iterations
-							log.info("... skipping " + f.getName().toString());
-						}
+//					if(f.getName().toString().startsWith("it")) {
+//						if (f.getName().toString().equals("it." + finalIteration)) {
+//							collectAllFilesInDirectory(f, fileList);
+//						} else {
+//							// skip other iterations
+//							log.info("... skipping " + f.getName().toString());
+//						}
+//					} else {
+//						collectAllFilesInDirectory(f, fileList);
+//					}
+					
+					if(f.getName().toString().startsWith("ITERS")) {
+						log.info("... skipping " + f.getName().toString());
 					} else {
 						collectAllFilesInDirectory(f, fileList);
 					}

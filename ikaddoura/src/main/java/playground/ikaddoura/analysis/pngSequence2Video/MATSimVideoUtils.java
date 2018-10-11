@@ -89,6 +89,7 @@ public class MATSimVideoUtils {
 		}
 
 		int counter = 0;
+		int counterNoImage = 0;
 		for (int i = config.controler().getFirstIteration(); i<= config.controler().getLastIteration(); i++) {
 			
 			if (counter % interval == 0) {
@@ -114,6 +115,7 @@ public class MATSimVideoUtils {
 
 					} catch (IOException e2){
 						log.warn("Couldn't find png for iteration " + i + "." );
+						counterNoImage++;
 					}
 				}
 								
@@ -127,8 +129,13 @@ public class MATSimVideoUtils {
 		}
 		
 		try { 
-			enc.finish();
-			log.info("Generating a video using a png sequence... Done. Video written to " + outputFile);
+			
+			if (counterNoImage < counter) {
+				enc.finish();
+				log.info("Generating a video using a png sequence... Done. Video written to " + outputFile);
+			} else {
+				log.warn("Couldn't create a video." );
+			}
 
 		} catch (IOException e) {
 			log.warn("Couldn't create a video." );

@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package gunnar.ihop2.regent.demandreading;
 
 import static java.lang.Math.max;
@@ -40,13 +40,13 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 
-import patryk.popgen2.Building;
-import saleem.stockholmmodel.utils.StockholmTransformationFactory;
-
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+
+import patryk.popgen2.Building;
+import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
  * 
@@ -61,24 +61,31 @@ public class ZonalSystem implements Iterable<Zone> {
 
 	private final Map<String, Zone> id2zone = new LinkedHashMap<String, Zone>();
 
+	public Geometry entireRegion = null;
+
 	private Map<Node, Zone> node2zone = null;
 
 	private Map<Zone, Set<Node>> zone2nodes = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public ZonalSystem(final String zonesShapeFileName,
-			final String zonalCoordinateSystem) {
+	public ZonalSystem(final String zonesShapeFileName, final String zonalCoordinateSystem) {
 		this.zonalCoordinateSystem = zonalCoordinateSystem;
 		final GeometryFactory geometryFactory = new GeometryFactory();
 		final WKTReader wktReader = new WKTReader(geometryFactory);
-		for (SimpleFeature ft : ShapeFileReader
-				.getAllFeatures(zonesShapeFileName)) {
+		for (SimpleFeature ft : ShapeFileReader.getAllFeatures(zonesShapeFileName)) {
 			try {
 				final String zoneId = ft.getAttribute("ZONE").toString();
 				final Zone zone = new Zone(zoneId);
-				zone.setGeometry(wktReader.read((ft.getAttribute("the_geom"))
-						.toString()));
+				zone.setGeometry(wktReader.read((ft.getAttribute("the_geom")).toString()));
+
+				if (this.entireRegion == null) {
+					this.entireRegion = wktReader.read((ft.getAttribute("the_geom")).toString());
+				} else {
+					this.entireRegion = this.entireRegion
+							.union(wktReader.read((ft.getAttribute("the_geom")).toString()));
+				}
+
 				this.id2zone.put(zoneId, zone);
 			} catch (ParseException e) {
 				throw new RuntimeException(e);
@@ -93,24 +100,19 @@ public class ZonalSystem implements Iterable<Zone> {
 
 		final ShapeFileReader shapeFileReader = new ShapeFileReader();
 		shapeFileReader.readFileAndInitialize(buildingShapeFileName);
-		final Collection<SimpleFeature> features = shapeFileReader
-				.getFeatureSet();
+		final Collection<SimpleFeature> features = shapeFileReader.getFeatureSet();
 
 		for (SimpleFeature ft : features) {
 
 			try {
-				final Geometry geometry = wktReader.read((ft
-						.getAttribute("the_geom")).toString());
-				final String buildingType = ft.getAttribute("ANDAMAL_1T")
-						.toString();
-				final int buildingSize = Integer.valueOf(ft
-						.getAttribute("AREA").toString());
+				final Geometry geometry = wktReader.read((ft.getAttribute("the_geom")).toString());
+				final String buildingType = ft.getAttribute("ANDAMAL_1T").toString();
+				final int buildingSize = Integer.valueOf(ft.getAttribute("AREA").toString());
 				final Building building = new Building(geometry, buildingSize);
 				building.setBuildingType(buildingType);
 
 				for (Zone zone : this.id2zone.values()) {
-					if (zone.getGeometry() != null
-							&& zone.getGeometry().intersects(geometry)) {
+					if (zone.getGeometry() != null && zone.getGeometry().intersects(geometry)) {
 						zone.addBuilding(building);
 						break;
 					}
@@ -122,21 +124,17 @@ public class ZonalSystem implements Iterable<Zone> {
 		}
 	}
 
-	public void addNetwork(final Network network,
-			final String networkCoordinateSystem) {
+	public void addNetwork(final Network network, final String networkCoordinateSystem) {
 
 		final CoordinateTransformation node2zoneCoordinateTrafo = StockholmTransformationFactory
-				.getCoordinateTransformation(networkCoordinateSystem,
-						this.zonalCoordinateSystem);
+				.getCoordinateTransformation(networkCoordinateSystem, this.zonalCoordinateSystem);
 
 		this.node2zone = new LinkedHashMap<Node, Zone>();
 		this.zone2nodes = new LinkedHashMap<Zone, Set<Node>>();
 
 		for (Node node : network.getNodes().values()) {
 			for (Zone zone : this.id2zone.values()) {
-				if (zone.getGeometry().contains(
-						MGC.coord2Point(node2zoneCoordinateTrafo.transform(node
-								.getCoord())))) {
+				if (zone.getGeometry().contains(MGC.coord2Point(node2zoneCoordinateTrafo.transform(node.getCoord())))) {
 					this.node2zone.put(node, zone);
 					Set<Node> nodeSet = zone2nodes.get(zone);
 					if (nodeSet == null) {
@@ -241,16 +239,13 @@ public class ZonalSystem implements Iterable<Zone> {
 		System.out.println("STARTED ...");
 
 		final String zonesShapefile = "./data/shapes/sverige_TZ_EPSG3857.shp";
-		final ZonalSystem zonalSystem = new ZonalSystem(zonesShapefile,
-				StockholmTransformationFactory.WGS84_EPSG3857);
+		final ZonalSystem zonalSystem = new ZonalSystem(zonesShapefile, StockholmTransformationFactory.WGS84_EPSG3857);
 
 		final Config config = ConfigUtils.createConfig();
-		config.setParam("network", "inputNetworkFile",
-				"./data/transmodeler/network.xml");
+		config.setParam("network", "inputNetworkFile", "./data/transmodeler/network.xml");
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
-		zonalSystem.addNetwork(scenario.getNetwork(),
-				StockholmTransformationFactory.WGS84_SWEREF99);
+		zonalSystem.addNetwork(scenario.getNetwork(), StockholmTransformationFactory.WGS84_SWEREF99);
 		final int[] absSizeFreqs = zonalSystem.getNodePerZoneAbsFreqs();
 		System.out.println("nodeCnt\tabsFreq");
 		for (int i = 0; i < absSizeFreqs.length; i++) {

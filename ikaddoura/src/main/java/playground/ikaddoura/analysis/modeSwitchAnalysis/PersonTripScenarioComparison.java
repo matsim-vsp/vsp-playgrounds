@@ -132,8 +132,8 @@ public class PersonTripScenarioComparison {
 	    BufferedWriter writerCar2Car = IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_car2car.csv");
 	    BufferedWriter writerX2X = IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_non-car2non-car.csv");
 	    BufferedWriter writerAll = IOUtils.getBufferedWriter( analysisOutputDirectory + "trip_comparison.csv");
-	    BufferedWriter writerCar2Taxi = IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_car2taxi.csv");
-	    BufferedWriter writerX2Taxi = IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_non-taxi2taxi.csv");
+	    BufferedWriter writerCar2Taxi = IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_car2drt.csv");
+	    BufferedWriter writerX2Taxi = IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_non-drt2drt.csv");
 
 	    writerCar.write("personId;tripNr;main-mode0;main-mode1;main-mode-distance0;main-mode-distance1;all-legs-travelTime0;all-legs-travelTime1;payments0;payments1"); 
 	    writerCar.newLine();
@@ -196,7 +196,7 @@ public class PersonTripScenarioComparison {
 				
 				// taxi-related analysis
 				
-				if (mode1.equals(TransportMode.taxi) && mode0.equals(TransportMode.car)) {
+				if (mode1.equals(TransportMode.drt) && mode0.equals(TransportMode.car)) {
 					// car --> taxi
 					writerCar2Taxi.write(personId + ";" + tripNr + ";"
 				+ mode0 + ";" + mode1 + ";" 
@@ -207,7 +207,7 @@ public class PersonTripScenarioComparison {
 					writerCar2Taxi.newLine();
 				}
 				
-				if (mode1.equals(TransportMode.taxi) && !mode0.equals(TransportMode.taxi)) {
+				if (mode1.equals(TransportMode.drt) && !mode0.equals(TransportMode.drt)) {
 					// x --> taxi
 					writerX2Taxi.write(personId + ";" + tripNr + ";"
 				+ mode0 + ";" + mode1 + ";" 

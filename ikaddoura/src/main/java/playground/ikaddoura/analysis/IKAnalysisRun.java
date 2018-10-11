@@ -112,6 +112,8 @@ public class IKAnalysisRun {
 	private final String runIdToCompareWith;
 	private final Scenario scenario0;
 	private final List<AgentAnalysisFilter> filters0;
+	
+	private final List<String> modes;
 
 	private final String outputDirectoryName = "analysis-ik-v1.2";
 
@@ -214,6 +216,9 @@ public class IKAnalysisRun {
 		filter1.add(filter1c);
 		
 		List<AgentAnalysisFilter> filter0 = null;
+		
+		List<String> modes = new ArrayList<>();
+		modes.add(TransportMode.car);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
@@ -225,21 +230,12 @@ public class IKAnalysisRun {
 				homeActivityPrefix,
 				scalingFactor,
 				filter1,
-				filter0);
+				filter0,
+				modes);
 		analysis.run();
 	}
 	
-	@Deprecated
-	public IKAnalysisRun(Scenario scenario, String scenarioCRS) {
-		this(scenario, scenarioCRS, 1);
-	}
-	
-	@Deprecated
-	public IKAnalysisRun(Scenario scenario, String scenarioCRS, int scalingFactor) {
-		this(scenario, "./visualization-scripts/", scenarioCRS, scalingFactor);
-	}
-	
-	public IKAnalysisRun(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor) {
+	public IKAnalysisRun(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor, List<String> modes) {
 		
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
@@ -263,19 +259,13 @@ public class IKAnalysisRun {
 		
 		this.filters0 = null;
 		this.filters1 = null;
-	}
-	
-	@Deprecated
-	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
-			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
-			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
 		
-		this(scenario1, scenario0, "./visualization-scripts/", scenarioCRS, shapeFileZones, zonesCRS, homeActivityPrefix, scalingFactor, filters1, filters0);
+		this.modes = modes;
 	}
 	
 	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
 			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
-			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
+			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes) {
 
 		String runDirectory = scenario1.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
@@ -307,6 +297,36 @@ public class IKAnalysisRun {
 		
 		this.filters0 = filters0;
 		this.filters1 = filters1;
+		
+		this.modes = modes;
+	}
+
+	public IKAnalysisRun(Scenario scenario, String crs, int scaleFactor) {
+		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
+		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
+
+		this.scenario1 = scenario;
+		this.runDirectory = runDirectory;
+		this.runId = scenario.getConfig().controler().getRunId();
+		
+		// scenario 0 will not be analyzed
+		this.scenario0 = null;
+		this.runDirectoryToCompareWith = null;
+		this.runIdToCompareWith = null;
+		
+		this.visualizationScriptInputDirectory = null;
+		
+		this.scenarioCRS = crs;
+		this.shapeFileZones = null;
+		this.zonesCRS = null;
+		this.homeActivityPrefix = null;
+		this.scalingFactor = scaleFactor;
+		
+		this.filters0 = null;
+		this.filters1 = null;
+		
+		this.modes = new ArrayList<>();
+		modes.add(TransportMode.car);
 	}
 
 	public void run() {
@@ -479,7 +499,8 @@ public class IKAnalysisRun {
 				personMoneyHandler1,
 				actHandler1,
 				modeAnalysisList1,
-				vttsHandler1);
+				vttsHandler1,
+				modes);
 		
 		log.info("Printing results...");
 		if (scenario0 != null) printResults(scenario0,
@@ -493,7 +514,8 @@ public class IKAnalysisRun {
 				personMoneyHandler0,
 				actHandler0,
 				modeAnalysisList0,
-				vttsHandler0);
+				vttsHandler0,
+				modes);
 
 		// #####################################
 		// Scenario comparison
@@ -614,7 +636,8 @@ public class IKAnalysisRun {
 			MoneyExtCostHandler personMoneyHandler,
 			ActDurationHandler actHandler,
 			List<ModeAnalysis> modeAnalysisList,
-			VTTSHandler vttsHandler) {
+			VTTSHandler vttsHandler,
+			List<String> modes) {
 		
 		// #####################################
 		// Print results: person / trip analysis
@@ -627,44 +650,50 @@ public class IKAnalysisRun {
 		PersonTripAnalysis analysis = new PersonTripAnalysis();
 
 		// trip-based analysis
-		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, basicHandler, null, null);
-		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, basicHandler, null, null);
 		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, null, basicHandler, null, null);
+		for (String mode : modes) {
+			analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, mode, basicHandler, null, null);
+		}
 
 		// person-based analysis
-		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);	
-		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, personId2userBenefit, basicHandler, null);	
+		for (String mode : modes) {
+			analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, mode, personId2userBenefit, basicHandler, null);	
+		}
 
 		// aggregated analysis
-		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);
-		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, personId2userBenefit, basicHandler, null);
 		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, null, personId2userBenefit, basicHandler, null);
+		for (String mode : modes) {
+			analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, mode, personId2userBenefit, basicHandler, null);
+		}
 		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, personId2userBenefit, basicHandler, null, null, delayAnalysis, null);
 		
 		// time-specific trip distance analysis
-		SortedMap<Double, List<Double>> departureTime2traveldistance = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2tripDistance(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "distancePerDepartureTime_car_3600.csv", departureTime2traveldistance);
-		
-		// time-specific trip travel time analysis
-		SortedMap<Double, List<Double>> departureTime2travelTime = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2travelTime(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "travelTimePerDepartureTime_car_3600.csv", departureTime2travelTime);
-	
-		// time-specific toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "tollsPerDepartureTime_car_3600.csv", departureTime2tolls);
+		for (String mode : modes) {
+			SortedMap<Double, List<Double>> departureTime2traveldistance = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2tripDistance(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "distancePerDepartureTime_" + mode + "_3600.csv", departureTime2traveldistance);
 			
-		// time-specific congestion toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2congestionTolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2congestionPayment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "congestionTollsPerDepartureTime_car_3600.csv", departureTime2congestionTolls);
+			// time-specific trip travel time analysis
+			SortedMap<Double, List<Double>> departureTime2travelTime = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2travelTime(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "travelTimePerDepartureTime_" + mode + "_3600.csv", departureTime2travelTime);
 		
-		// time-specific noise toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2noiseTolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2noisePayment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "noiseTollsPerDepartureTime_car_3600.csv", departureTime2noiseTolls);
-		
-		// time-specific air pollution toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2airPollutionTolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2airPollutionPayment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "airPollutionTollsPerDepartureTime_car_3600.csv", departureTime2airPollutionTolls);
-		
+			// time-specific toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "tollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2tolls);
+				
+			// time-specific congestion toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2congestionTolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2congestionPayment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "congestionTollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2congestionTolls);
+			
+			// time-specific noise toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2noiseTolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2noisePayment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "noiseTollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2noiseTolls);
+			
+			// time-specific air pollution toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2airPollutionTolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2airPollutionPayment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "airPollutionTollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2airPollutionTolls);
+			
+		}
+
 		// #####################################
 		// Print results: link traffic volumes
 		// #####################################
@@ -778,16 +807,17 @@ public class IKAnalysisRun {
 		}
 		log.info("Creating leg histogram video for all modes... Done.");
 
-		for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
-			try {
-				log.info("Creating leg histogram video for mode " + mode);
-				MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
-				log.info("Creating leg histogram video for mode " + mode + " Done.");
-			} catch (IOException e) {
-				e.printStackTrace();
+		if (scenario.getConfig().controler().getLastIteration() - scenario.getConfig().controler().getFirstIteration() > 0) {
+			for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
+				try {
+					log.info("Creating leg histogram video for mode " + mode);
+					MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+					log.info("Creating leg histogram video for mode " + mode + " Done.");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-
 	}
 	
 	private void createDirectory(String directory) {
@@ -820,15 +850,11 @@ public class IKAnalysisRun {
 		if (new File(runDirectory + runId + ".output_config.xml").exists()) {
 			
 			configFile = runDirectory + runId + ".output_config.xml";
-
-//			networkFile = runDirectory + runId + ".output_network.xml.gz";
-//			populationFile = runDirectory + runId + ".output_plans.xml.gz";
 			
 			networkFile = runId + ".output_network.xml.gz";
 			populationFile = runId + ".output_plans.xml.gz";
 			
 			if (personAttributesFileToReplaceOutputFile == null) {
-//				personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
 				personAttributesFile = runId + ".output_personAttributes.xml.gz";
 			} else {
 				personAttributesFile = personAttributesFileToReplaceOutputFile;
@@ -837,15 +863,11 @@ public class IKAnalysisRun {
 		} else {
 			
 			configFile = runDirectory + "output_config.xml";
-
-//			networkFile = runDirectory + "output_network.xml.gz";
-//			populationFile = runDirectory + "output_plans.xml.gz";
 			
 			networkFile = "output_network.xml.gz";
 			populationFile = "output_plans.xml.gz";
 			
 			if (personAttributesFileToReplaceOutputFile == null) {
-//				personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
 				personAttributesFile = "output_personAttributes.xml.gz";
 			} else {
 				personAttributesFile = personAttributesFileToReplaceOutputFile;

@@ -75,15 +75,11 @@ public class RunDrt {
 				monitoredModes, monitoredStartAndEndLinks);
 		events.addHandler(eventHandler);
 		new DrtEventsReader(events).readFile(config.controler().getOutputDirectory() + "/output_events.xml.gz");
+		
 		System.out.println("Start writing trips of " + eventHandler.getPerson2ExperiencedTrips().size() + " agents.");
-		ExperiencedTripsWriter tripsWriter = new ExperiencedTripsWriter(config.controler().getOutputDirectory() +
-				"/experiencedTrips.csv", 
-				eventHandler.getPerson2ExperiencedTrips(), monitoredModes);
-		tripsWriter.writeExperiencedTrips();
-		ExperiencedTripsWriter legsWriter = new ExperiencedTripsWriter(config.controler().getOutputDirectory() + 
-				"/experiencedLegs.csv", 
-				eventHandler.getPerson2ExperiencedTrips(), monitoredModes);
-		legsWriter.writeExperiencedLegs();
+		ExperiencedTripsWriter tripsWriter = new ExperiencedTripsWriter(eventHandler.getPerson2ExperiencedTrips(), monitoredModes);
+		tripsWriter.writeExperiencedTrips(config.controler().getOutputDirectory() + "/experiencedTrips.csv");
+		tripsWriter.writeExperiencedLegs(config.controler().getOutputDirectory() + "/experiencedLegs.csv");
 	}
 
 }

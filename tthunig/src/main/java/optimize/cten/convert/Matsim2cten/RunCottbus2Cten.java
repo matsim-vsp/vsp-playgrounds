@@ -34,11 +34,14 @@ public class RunCottbus2Cten {
 	public static void main(String[] args) throws Exception {
 		// input files
 //		String signalSystemsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_systems_no_13.xml";
-		String signalSystemsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_systems_no_13_v4.xml";
+//		String signalSystemsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_systems_no_13_v4.xml";
+		String signalSystemsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_systems_no_13_v4-1.xml";
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13.xml";
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmerLinkBased.xml";
 //		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmer2phases_6.xml";
-		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13_v4.xml";
+		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_laemmerNico_14re_3re_7re_v4-1.xml";
+//		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13_v4.xml";
+//		String signalGroupsFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_groups_no_13_v4-1.xml";
 //		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_no_13.xml";
 		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_laemmer.xml";
 //		String signalControlFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/signal_control_no_13_v4.xml";
@@ -47,13 +50,14 @@ public class RunCottbus2Cten {
 //		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n.xml.gz";
 		String networkFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/network_wgs84_utm33n_v4.xml";
 //		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes.xml";
-		// TODO benutzt converter überhaupt lane length?
-		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes_v1-4_long.xml";
+//		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes_v1-4_long.xml";
+		String lanesFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/lanes_v4-1.xml";
 		// change run number here to use another base case
 //		String populationFilename = "../../runs-svn/cottbus/before2015/run1728/1728.output_plans.xml.gz";
 //		String populationFilename = "../../shared-svn/projects/cottbus/data/scenarios/cottbus_scenario/cb_spn_gemeinde_nachfrage_landuse_woMines/"
 //				+ "commuter_population_wgs84_utm33n_car_only_100it_MS_cap0.7.xml.gz";
-		String populationFilename = "../../runs-svn/cottbus/createNewBC/2018-04-27-14-50-32_100it_netV4_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz";
+//		String populationFilename = "../../runs-svn/cottbus/createNewBC/2018-04-27-14-50-32_100it_netV4_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz";
+		String populationFilename = "../../runs-svn/cottbus/createNewBC/2018-08-24-12-40-20_100it_netV4-1_tbs900_stuck120_beta2_MS_cap07/1000.output_plans.xml.gz";
 
 		// output files
 		String outputDirectory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/";
@@ -82,7 +86,7 @@ public class RunCottbus2Cten {
 		int cellsX = 5; // = default value
 		int cellsY = 5; // = default value
 		/* other parameters */
-		String scenarioDescription = "changed: light with lane capacities; no conflicts when base case fixed-time plans show green together; no u-turns; lights grouped; demand: 100it 0.7cap output plans between 05:30 and 09:30";
+		String scenarioDescription = "changed: lanes corrected in matsim. lights with lane capacities; no conflicts when base case fixed-time plans show green together; no u-turns; lights grouped; demand: 100it 0.7cap output plans between 05:30 and 09:30";
 //		String scenarioDescription = "changed: same as 2018-05-04 but with base case fixed-time plans; Dreifertstrasse and Wilhem-Kuelz_Str. run 100it 0.7cap output plans between 05:30 and 09:30";
 		// String scenarioDescription =
 		// "run run1728 output plans between 13:30 and 18:30";

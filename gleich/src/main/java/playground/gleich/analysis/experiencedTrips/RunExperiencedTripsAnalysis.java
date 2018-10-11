@@ -24,78 +24,153 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
-import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
-import org.matsim.contrib.drt.run.DrtConfigConsistencyChecker;
-import org.matsim.contrib.drt.run.DrtConfigGroup;
-import org.matsim.contrib.drt.run.DrtControlerCreator;
-import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
 import org.matsim.core.events.EventsUtils;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.io.IOUtils;
+import org.matsim.pt.transitSchedule.api.TransitLine;
+import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 
+/**
+ * Runner that guesses configuration based on output directory path (1 arg)
+ * Otherwise detailed configuration (7 args[]) is also available
+ * 
+ * @author gleich
+ *
+ */
 public class RunExperiencedTripsAnalysis {
-	public static void main(String[] args) {
-		if (args.length != 4) {
-			throw new RuntimeException("Wrong number of args to main method. " + ""
-					+ "Should be path to config, path to output_events file, "+
-					"monitoredModes (separated by ,) and path to monitoredStartAndEndLinks. " + 
-					"Use null for the latter if you do not want this in the analysis.");
+	private final static Logger log = Logger.getLogger(RunExperiencedTripsAnalysis.class);
+	private final String eventsFile;
+	private final String monitoredStartAndEndLinksFile;
+
+	private final Scenario scenario;
+	private final Set<String> monitoredModes;
+
+	public RunExperiencedTripsAnalysis(String string) {
+		// got only output directory path, guess the details
+		String networkFile = string + "output_network.xml.gz";
+		String scheduleFile = string + "output_transitSchedule.xml.gz";
+		eventsFile = string + "output_events.xml.gz";
+		monitoredStartAndEndLinksFile = null;
+		
+        scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+        new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
+        new TransitScheduleReader(scenario).readFile(scheduleFile);
+
+		monitoredModes = new HashSet<>();
+		// add some common default monitored modes
+		monitoredModes.add(TransportMode.pt);
+		monitoredModes.add(TransportMode.drt);
+		monitoredModes.add(TransportMode.transit_walk);
+		monitoredModes.add(TransportMode.access_walk);
+		monitoredModes.add(TransportMode.egress_walk);
+		// find transportModes in schedule
+		for (TransitLine line : scenario.getTransitSchedule().getTransitLines().values()) {
+			for (TransitRoute route : line.getRoutes().values()) {
+				if (!monitoredModes.contains(route.getTransportMode())) {
+					monitoredModes.add(route.getTransportMode());
+				}
+			}
 		}
-		Config config = ConfigUtils.loadConfig(args[0]);
-		
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		
-		// Analysis
-		EventsManager events = EventsUtils.createEventsManager();
-		Set<String> monitoredModes = new HashSet<>();
-		for (String mode: args[2].split(",")) {
+	}
+
+	public RunExperiencedTripsAnalysis(String[] args) {
+		// got detailed args, set accordingly
+		String networkFile = args[0];
+		String scheduleFile = args[1];
+		eventsFile = args[2];
+		monitoredStartAndEndLinksFile = args[3];
+		monitoredModes = new HashSet<>();
+		for (String mode : args[4].split(",")) {
 			monitoredModes.add(mode);
 		}
-		
-		Set<Id<Link>> monitoredStartAndEndLinks = new HashSet<>();
-		if (args[1] != "null") {
-				try {
-					BufferedReader reader = new BufferedReader(new FileReader(IOUtils.newUrl(config.getContext(), args[3]).getFile()));
-					if (reader.readLine().startsWith("id")) {
-						for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-							monitoredStartAndEndLinks.add(Id.createLinkId(line.split(",")[0]));
-						}
-						reader.close();
-					} else {
-						reader.close();
-						throw new RuntimeException("linksInArea.csv : first column in header should be id.");
-					}
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+        scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+        new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
+        new TransitScheduleReader(scenario).readFile(scheduleFile);
+	}
+
+	public static void main(String[] args) {
+		String experiencedTripsFile = null;
+		String experiencedLegsFile = null;
+		RunExperiencedTripsAnalysis runner;
+
+		if (args.length == 1) {
+			runner = new RunExperiencedTripsAnalysis(args[0]);
+			experiencedTripsFile = args[0] + "experiencedTrips.csv";
+			experiencedLegsFile = args[0] + "experiencedLegs.csv";
+		} else if (args.length == 7) {
+			runner = new RunExperiencedTripsAnalysis(args);
+			experiencedTripsFile = args[5];
+			experiencedLegsFile = args[6];
+		} else {
+			throw new RuntimeException("Wrong number of args to main method. "
+					+ "Should be either only path to output directory or \n" + "networkFile, scheduleFile, eventsFile, "
+					+ "monitoredStartAndEndLinksFile (use null if you want all links in the analysis.), "
+					+ "monitoredModes (separated by ,),"
+					+ "experiencedTripsFile (use null to switch off), "
+					+ "experiencedLegsFile (use null to switch off)");
 		}
-		
-		DrtPtTripEventHandler eventHandler = new DrtPtTripEventHandler(scenario.getNetwork(), scenario.getTransitSchedule(), 
-				monitoredModes, monitoredStartAndEndLinks);
+
+		ExperiencedTripsWriter tripsWriter = new ExperiencedTripsWriter(runner.calcAgent2trips(),
+				runner.monitoredModes);
+		if (experiencedTripsFile != null) {
+			tripsWriter.writeExperiencedTrips(experiencedTripsFile);
+		}
+		if (experiencedLegsFile != null) {
+			tripsWriter.writeExperiencedLegs(experiencedLegsFile);
+		}
+
+	}
+
+	public Map<Id<Person>, List<ExperiencedTrip>> calcAgent2trips() {
+		// Analysis
+		EventsManager events = EventsUtils.createEventsManager();
+		Set<Id<Link>> monitoredStartAndEndLinks = readMonitoredStartAndEndLinks();
+
+		DrtPtTripEventHandler eventHandler = new DrtPtTripEventHandler(scenario.getNetwork(),
+				scenario.getTransitSchedule(), monitoredModes, monitoredStartAndEndLinks);
 		events.addHandler(eventHandler);
-		new DrtEventsReader(events).readFile(args[1] + "output_events.xml.gz");
-		System.out.println("Start writing trips of " + eventHandler.getPerson2ExperiencedTrips().size() + " agents.");
-		ExperiencedTripsWriter tripsWriter = new ExperiencedTripsWriter(args[1] +
-				"/experiencedTrips.csv", 
-				eventHandler.getPerson2ExperiencedTrips(), monitoredModes);
-		tripsWriter.writeExperiencedTrips();
-		ExperiencedTripsWriter legsWriter = new ExperiencedTripsWriter(args[1] + 
-				"/experiencedLegs.csv", 
-				eventHandler.getPerson2ExperiencedTrips(), monitoredModes);
-		legsWriter.writeExperiencedLegs();
+		new DrtEventsReader(events).readFile(eventsFile);
+
+		Map<Id<Person>, List<ExperiencedTrip>> agent2trips = eventHandler.getPerson2ExperiencedTrips();
+		log.info("found " + eventHandler.getNumberOfExperiencedTrips() + " experienced trips of "
+				+ eventHandler.getPerson2ExperiencedTrips().size() + " agents.");
+		return agent2trips;
+	}
+
+	private Set<Id<Link>> readMonitoredStartAndEndLinks() {
+		Set<Id<Link>> monitoredStartAndEndLinks = new HashSet<>();
+		if (monitoredStartAndEndLinksFile != null && monitoredStartAndEndLinksFile != "null") {
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(monitoredStartAndEndLinksFile));
+				if (reader.readLine().startsWith("id")) {
+					for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+						monitoredStartAndEndLinks.add(Id.createLinkId(line.split(",")[0]));
+					}
+					reader.close();
+				} else {
+					reader.close();
+					throw new RuntimeException("linksInArea.csv : first column in header should be id.");
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return monitoredStartAndEndLinks;
 	}
 
 }

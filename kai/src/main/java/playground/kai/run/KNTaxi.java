@@ -29,6 +29,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.taxi.run.RunTaxiScenario;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.contrib.util.PopulationUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -59,7 +60,7 @@ class KNTaxi {
 		OTFVisConfigGroup otfConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
 		otfConfig.setAgentSize(otfConfig.getAgentSize() * 2);
 
-		Controler controler = RunTaxiScenario.createControler(config, otfvis);
+		Controler controler = TaxiControlerCreator.createControler(config, otfvis);
 
 		if (removeNonPassengers) {
 			PopulationUtils.removePersonsNotUsingMode(TransportMode.taxi, controler.getScenario());

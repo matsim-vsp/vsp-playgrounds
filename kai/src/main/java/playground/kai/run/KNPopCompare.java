@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.TransportPlanningMainModeIdentifier;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -43,6 +44,7 @@ import org.matsim.contrib.matrixbasedptrouter.utils.BoundingBox;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.MainModeIdentifierImpl;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
@@ -56,6 +58,8 @@ import org.matsim.facilities.ActivityFacilitiesFactory;
 import org.matsim.facilities.ActivityFacility;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.pt.PtConstants;
+
+import static org.matsim.contrib.analysis.kai.KNAnalysisEventsHandler.*;
 
 /**
  * @author nagel
@@ -130,14 +134,6 @@ public class KNPopCompare {
 			pop2 = scenario2.getPopulation() ;
 		}
 		
-		
-		
-		List<SpatialGrid> spatialGrids = new ArrayList<>() ;
-		ActivityFacilities homesWithScoreDifferences = FacilitiesUtils.createActivityFacilities("scoreDifferencesAtHome") ;
-		ActivityFacilities homesWithMoneyDifferences = FacilitiesUtils.createActivityFacilities("moneyDifferencesAtHome") ;
-		ActivityFacilities homesWithTtimeDifferences = FacilitiesUtils.createActivityFacilities("ttimeDifferencesAtHome") ;
-
-
 		// yy could try to first sort the person files and then align them
 		for ( Person person1 : pop1.getPersons().values() ) {
 				Person person2 = pop2.getPersons().get( person1.getId() ) ;
@@ -154,15 +150,14 @@ public class KNPopCompare {
 
 					ActivityFacility fac = ff.createActivityFacility(Id.create(person1.getId().toString(), ActivityFacility.class), coord);
 					fac.getCustomAttributes().put(GridUtils.WEIGHT, deltaScore ) ;
-					homesWithScoreDifferences.addActivityFacility(fac);
 				}
 				List<String> popTypes = new ArrayList<>() ;
 				{ // process money differences:
-					Double payments1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.PAYMENTS ) ;
+					Double payments1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), PAYMENTS ) ;
 					if ( payments1==null ) {
 						payments1 = 0. ;
 					}
-					Double payments2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.PAYMENTS ) ;
+					Double payments2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), PAYMENTS ) ;
 					if ( payments2==null ) {
 						payments2 = 0. ;
 					}
@@ -172,13 +167,12 @@ public class KNPopCompare {
 					
 					ActivityFacility fac = ff.createActivityFacility(Id.create(person1.getId().toString(), ActivityFacility.class), coord) ;
 					fac.getCustomAttributes().put(GridUtils.WEIGHT, deltaPayments ) ; 
-					homesWithMoneyDifferences.addActivityFacility(fac);
 
 					// to which subPopType does the agent belong?
 					popTypes.add( "zz_all" ) ; 
 					
 					final String subpopAttrName = config.plans().getSubpopulationAttributeName() ;
-					final String subpopName = KNAnalysisEventsHandler.getSubpopName( person1.getId(), pop1.getPersonAttributes(), subpopAttrName);
+					final String subpopName = getSubpopName( person1.getId(), pop1.getPersonAttributes(), subpopAttrName);
 					popTypes.add( "yy_" + subpopName ) ;
 
 					if ( payments2!=0.) { // is a toll payer
@@ -187,8 +181,7 @@ public class KNPopCompare {
 						popTypes.add( subpopName + "_nonPayer") ;
 					}
 					
-					Double certainLinksCnt = (Double) pop1.getPersonAttributes().getAttribute( person1.getId().toString(), 
-							KNAnalysisEventsHandler.CERTAIN_LINKS_CNT ) ;
+					Double certainLinksCnt = (Double) pop1.getPersonAttributes().getAttribute( person1.getId().toString(), CERTAIN_LINKS_CNT ) ;
 					if ( certainLinksCnt != null && payments2==0. ) {
 						popTypes.add( subpopName + "_avoid" ) ;
 					}
@@ -199,11 +192,11 @@ public class KNPopCompare {
 
 				}
 				{ // process travtime differences:
-					Double item1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.TRAV_TIME ) ;
+					Double item1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), TRAV_TIME ) ;
 					if ( item1==null ) {
 						item1 = 0. ;
 					}
-					Double item2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.TRAV_TIME ) ;
+					Double item2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), TRAV_TIME ) ;
 					if ( item2==null ) {
 						item2 = 0. ;
 					}
@@ -213,7 +206,6 @@ public class KNPopCompare {
 					
 					ActivityFacility fac = ff.createActivityFacility(Id.create(person1.getId().toString(), ActivityFacility.class), coord) ;
 					fac.getCustomAttributes().put(GridUtils.WEIGHT, deltaTtime ) ;
-					homesWithTtimeDifferences.addActivityFacility(fac);
 					
 					addItemToStatsContainer( StatType.ttime1, popTypes, item1 ) ;
 					addItemToStatsContainer( StatType.ttime2, popTypes, item2 ) ;
@@ -305,14 +297,17 @@ public class KNPopCompare {
 	}
 	
 	private void writePersonSpecificRecords( final Population pop1, final Population pop2 ) {
+		StageActivityTypes stateActivityTypes = activityType -> activityType.contains( " interaction" ) ;
+		MainModeIdentifier mainModeIdentifier = new TransportPlanningMainModeIdentifier() ;
+		
 		try ( BufferedWriter writer = IOUtils.getBufferedWriter("personscompare.txt") ) {
 
 			boolean first = true ;
 			for ( Person person : pop1.getPersons().values() ) {
 				if ( first ) {
 					first = false ;
-					writer.write("personId\tx\ty\tdeltaPt\tdeltaBicycle");
-					for ( Object key : person.getCustomAttributes().keySet() ) { // design is such that this might vary person by peron :-(
+					writer.write("personId\tx\ty\tdeltaPt\tdeltaBicycle\tmode1\tmode2");
+					for ( Object key : person.getCustomAttributes().keySet() ) { // design is such that this might vary person by person :-(
 						writer.write( "\t" + key );
 					}
 					writer.newLine() ;
@@ -328,34 +323,36 @@ public class KNPopCompare {
 				// ---
 				double deltaPt = 0 ;
 				double deltaBicycle = 0 ;
+				String mode1="" ;
 				{
 					// pop1 is base
-					List<Trip> trips = TripStructureUtils.getTrips( person.getSelectedPlan(), new StageActivityTypesImpl( PtConstants.TRANSIT_ACTIVITY_TYPE) ) ;
+					List<Trip> trips = TripStructureUtils.getTrips( person.getSelectedPlan(), stateActivityTypes ) ;
 					//				for ( Trip trip : trips ) {
 					Trip trip = trips.get(0) ;
-					String mode = new MainModeIdentifierImpl().identifyMainMode( trip.getTripElements() ) ;
-					if ( mode.equals( TransportMode.pt ) ) {
+					mode1 = mainModeIdentifier.identifyMainMode( trip.getTripElements() ) ;
+					if ( mode1.equals( TransportMode.pt ) ) {
 						deltaPt -- ;
-					} else if ( mode.equals( TransportMode.bike ) ) {
+					} else if ( mode1.equals( TransportMode.bike ) ) {
 						deltaBicycle-- ;
 					}
 					//				}
 				}
+				String mode2="" ;
 				{
 					// pop1 is policy
 					Person person2 = pop2.getPersons().get( person.getId() ) ;
-					List<Trip> trips = TripStructureUtils.getTrips( person2.getSelectedPlan(), new StageActivityTypesImpl(PtConstants.TRANSIT_ACTIVITY_TYPE) ) ;
+					List<Trip> trips = TripStructureUtils.getTrips( person2.getSelectedPlan(), stateActivityTypes ) ;
 					//				for ( Trip trip : trips ) {
 					Trip trip = trips.get(0) ;
-					String mode = new MainModeIdentifierImpl().identifyMainMode( trip.getTripElements() ) ;
-					if ( mode.equals( TransportMode.pt ) ) {
+					mode2 = mainModeIdentifier.identifyMainMode( trip.getTripElements() ) ;
+					if ( mode2.equals( TransportMode.pt ) ) {
 						deltaPt ++ ;
-					} else if ( mode.equals( TransportMode.bike ) ) {
+					} else if ( mode2.equals( TransportMode.bike ) ) {
 						deltaBicycle ++ ;
 					}
 					//				}
 				}
-				writer.write("\t" + deltaPt + "\t" + deltaBicycle );
+				writer.write("\t" + deltaPt + "\t" + deltaBicycle + "\t" + mode1 + "\t" + mode2 );
 				// ---
 				for ( Entry<String,Object> entry : person.getCustomAttributes().entrySet() ) {
 					writer.write( /* "\t" + entry.getKey() + */ "\t" + entry.getValue() ) ;

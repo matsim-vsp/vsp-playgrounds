@@ -19,8 +19,6 @@
  */
 package gunnar.wum.visualization;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,15 +34,12 @@ import org.matsim.core.events.EventsManagerImpl;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.utils.gis.matsim2esri.network.FeatureGeneratorBuilderImpl;
 import org.matsim.utils.gis.matsim2esri.network.LanesBasedWidthCalculator;
 import org.matsim.utils.gis.matsim2esri.network.LineStringBasedFeatureGenerator;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
-import org.matsim.utils.gis.matsim2esri.plans.SelectedPlans2ESRIShape;
 
-import gunnar.wum.analysis.DifferentiatedPTLinkExtractor;
+import gunnar.wum.analysis.LinkUsageAnalyzer;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
@@ -102,14 +97,14 @@ public class LinksPerMode2GIS {
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		final EventsManager eventsManager = new EventsManagerImpl();
-		final DifferentiatedPTLinkExtractor ptLinkExtractor = new DifferentiatedPTLinkExtractor(scenario);
+		final LinkUsageAnalyzer ptLinkExtractor = new LinkUsageAnalyzer(scenario);
 		ptLinkExtractor.setIgnoreCircularLinks(true);
 		eventsManager.addHandler(ptLinkExtractor);
 		new MatsimEventsReader(eventsManager).readFile(eventsFileName);
 		
 		// TODO add car links!
 		
-		final LinksPerMode2GIS linkWriter = new LinksPerMode2GIS(scenario, ptLinkExtractor.getDetailedPTMode2linkIds());
+		final LinksPerMode2GIS linkWriter = new LinksPerMode2GIS(scenario, ptLinkExtractor.getMode2linkIds());
 		linkWriter.run(outPath);
 		
 		System.out.println("... DONE");

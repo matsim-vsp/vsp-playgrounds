@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -74,6 +75,9 @@ public class IKAnalysisRunBerlin {
 		filter1c.setPersonAttributeName("home-activity-zone");
 		filter1c.preProcess(scenario1);
 		filters1.add(filter1c);
+		
+		List<String> modes = new ArrayList<>();
+		modes.add(TransportMode.car);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
@@ -85,7 +89,8 @@ public class IKAnalysisRunBerlin {
 				homeActivityPrefix,
 				scalingFactor,
 				filters1,
-				null);
+				null,
+				modes);
 		analysis.run();
 	
 		log.info("Done.");

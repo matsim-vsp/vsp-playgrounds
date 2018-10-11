@@ -42,14 +42,13 @@ import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.charts.XYLineChart;
+import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 
 import com.google.inject.Inject;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
-import playground.ikaddoura.optAV.SAVFixCostHandler;
-
 
 /**
  * 
@@ -83,7 +82,7 @@ public class AnalysisControlerListener implements IterationEndsListener {
 	private DelayAnalysis delayAnalysis;
 	
 	@Inject(optional=true)
-	private SAVFixCostHandler savFixCostHandler;
+	private DailyRewardHandlerSAVInsteadOfCar savFixCostHandler;
 	
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
