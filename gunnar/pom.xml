@@ -102,12 +102,18 @@
 	    	<version>3.12</version>
     	</dependency>
   		
-   		<dependency>
+   		<!-- <dependency>
   			<groupId>ch.sbb</groupId>
   			<artifactId>matsim-sbb-extensions</artifactId>
   			<version>0.11.0-SNAPSHOT</version>
-  		</dependency>  
+  		</dependency>   -->
   		
-	</dependencies>
+  		<dependency>
+	    	<groupId>com.github.SchweizerischeBundesbahnen</groupId>
+	    	<artifactId>matsim-sbb-extensions</artifactId>
+	    	<version>-SNAPSHOT</version>
+		</dependency> 
+  		
+  	</dependencies>
 
 </project>
