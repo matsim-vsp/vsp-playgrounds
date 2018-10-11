@@ -280,6 +280,41 @@ public class PlanFileModifier {
 			}
 		}
 	}
+
+	private static void removePtWalksAndInteractions(Plan plan) {
+
+		for(int i = 0; i < plan.getPlanElements().size(); i++) {
+			PlanElement pe = plan.getPlanElements().get(i);
+			if (pe instanceof Activity) {
+				if (((Activity) pe).getType().equals("pt interaction")) {
+					plan.getPlanElements().remove(pe);
+					i--;
+				}
+			}
+			if (pe instanceof Leg) {
+				if (((Leg) pe).getMode().equals(TransportMode.transit_walk) ||
+						((Leg) pe).getMode().equals(TransportMode.egress_walk) ||
+						((Leg) pe).getMode().equals(TransportMode.access_walk)) {
+					plan.getPlanElements().remove(pe);
+					i--;
+				}
+			}
+		}
+	}
+
+	private static void removeLegFollowingLegs(Plan plan) {
+
+		for(int i = 0; i < plan.getPlanElements().size(); i++) {
+			PlanElement pe = plan.getPlanElements().get(i);
+			if (pe instanceof Leg) {
+				PlanElement nextPe = plan.getPlanElements().get(i+1);
+				if (nextPe != null && nextPe instanceof Leg) {
+					plan.getPlanElements().remove(nextPe);
+					i--;
+				}
+			}
+		}
+	}
 	
 	private void transformCoordinates(Plan plan) {
 		for (PlanElement pe : plan.getPlanElements()) {
