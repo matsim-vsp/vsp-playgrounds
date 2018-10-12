@@ -126,7 +126,6 @@ public class IKAnalysisRunBerlin {
 		modes.add(TransportMode.taxi);
 		modes.add("car_bb");
 
-
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
 				scenario0,
