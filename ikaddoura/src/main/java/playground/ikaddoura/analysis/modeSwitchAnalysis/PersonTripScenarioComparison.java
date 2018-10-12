@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
@@ -397,9 +396,19 @@ public class PersonTripScenarioComparison {
 					double score0 = scenarioToCompareWith.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 			        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 					
+			        double homeX = 0.;
+			        double homeY = 0.;
+			        
+			        if (personId2homeActCoord.get(personId) == null) {
+			        		log.warn("No home coordinate for " + personId + ".");
+			        } else {
+			        		homeX = personId2homeActCoord.get(personId).getX();
+			        		homeY = personId2homeActCoord.get(personId).getY();
+			        }
+			        
 			        writer.write(personId + ";"
-		    	    + personId2homeActCoord.get(personId).getX() + ";"
-		    		+ personId2homeActCoord.get(personId).getY() + ";"
+		    	    + homeX + ";"
+		    		+ homeY + ";"
 		        	+ basicHandler1.getPersonId2tripNumber2legMode().get(personId).size() + ";"
 				+ switchType2agents.get(modeA + "2" + modeA).get(personId) + ";"
 				+ score0 + ";"
@@ -435,18 +444,28 @@ public class PersonTripScenarioComparison {
 					double score0 = scenarioToCompareWith.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 			        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 					
+			        double homeX = 0.;
+			        double homeY = 0.;
+			        
+			        if (personId2homeActCoord.get(personId) == null) {
+			        		log.warn("No home coordinate for " + personId + ".");
+			        } else {
+			        		homeX = personId2homeActCoord.get(personId).getX();
+			        		homeY = personId2homeActCoord.get(personId).getY();
+			        }
+			        
 			        writer.write(personId + ";"
-		    	    + personId2homeActCoord.get(personId).getX() + ";"
-		    		+ personId2homeActCoord.get(personId).getY() + ";"
+		    	    + homeX + ";"
+		    		+ homeY + ";"
 		        	+ basicHandler1.getPersonId2tripNumber2legMode().get(personId).size() + ";"
-				+ switchType2agents.get("x2" + modeA).get(personId) + ";"
-				+ score0 + ";"
-				+ score1
-				);
-		        		writer.newLine();
+		        	+ switchType2agents.get("x2" + modeA).get(personId) + ";"
+		        	+ score0 + ";"
+		        	+ score1
+			        		);
+		        	writer.newLine();
 		        	
-		        		score0Sum += score0;
-		        		score1Sum += score1;
+		        	score0Sum += score0;
+		        	score1Sum += score1;
 		        } 
 				
 				writer.newLine();
@@ -472,18 +491,28 @@ public class PersonTripScenarioComparison {
 					double score0 = scenarioToCompareWith.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 			        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 					
+			        double homeX = 0.;
+			        double homeY = 0.;
+			        
+			        if (personId2homeActCoord.get(personId) == null) {
+			        		log.warn("No home coordinate for " + personId + ".");
+			        } else {
+			        		homeX = personId2homeActCoord.get(personId).getX();
+			        		homeY = personId2homeActCoord.get(personId).getY();
+			        }
+			        
 			        writer.write(personId + ";"
-		    	    + personId2homeActCoord.get(personId).getX() + ";"
-		    		+ personId2homeActCoord.get(personId).getY() + ";"
+		    	    + homeX + ";"
+		    		+ homeY + ";"
 		        	+ basicHandler1.getPersonId2tripNumber2legMode().get(personId).size() + ";"
-				+ switchType2agents.get(modeA + "2x").get(personId) + ";"
-				+ score0 + ";"
-				+ score1
-				);
-		        		writer.newLine();
+		        	+ switchType2agents.get(modeA + "2x").get(personId) + ";"
+		        	+ score0 + ";"
+		        	+ score1);
+			        
+		        	writer.newLine();
 		        	
-		        		score0Sum += score0;
-		        		score1Sum += score1;
+		        	score0Sum += score0;
+		        	score1Sum += score1;
 		        } 
 				
 				writer.newLine();
