@@ -122,10 +122,11 @@ public class EmissionResponsibilityTollTimeDistanceTravelDisutility implements T
         WarmEmissionAnalysisModule warmEmissionAnalysisModule = this.emissionModule.getWarmEmissionAnalysisModule();
         Map<WarmPollutant, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
                 vehicle,
-//                NetworkUtils.getType(((Link) link)),
-                    EmissionUtils.getHbefaRoadType( link ),
-                link.getFreespeed(),
-                distance,
+////                NetworkUtils.getType(((Link) link)),
+//                    EmissionUtils.getHbefaRoadType( link ),
+//                link.getFreespeed(),
+//                distance,
+                link,
                 linkTravelTime
         );
         double expectedEmissionCosts = this.emissionResponsibilityCostModule.calculateWarmEmissionCosts(expectedWarmEmissions, link.getId(), time);
