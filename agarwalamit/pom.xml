@@ -48,7 +48,7 @@
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
 			<!-- <version>-SNAPSHOT</version> -->
 			<!-- <version>-77a4cad5f1-1</version> -->
-			<version>-835082313a-1</version>
+			<version>0.0.1-aa6d8cd2f3-1</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
 		<dependency>
