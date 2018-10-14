@@ -61,7 +61,7 @@ public class OffsetRandomizer implements DecisionVariableRandomizer<OffsetDecisi
 	}
 
 	@Override
-	public Collection<OffsetDecisionVariable> newRandomVariations(OffsetDecisionVariable decisionVariable, int searchIteration) {
+	public Collection<OffsetDecisionVariable> newRandomVariations(OffsetDecisionVariable decisionVariable) {
 		List<OffsetDecisionVariable> result = new ArrayList<>();
 		
 		int delta = (int) opdytsConfigGroup.getDecisionVariableStepSize();
