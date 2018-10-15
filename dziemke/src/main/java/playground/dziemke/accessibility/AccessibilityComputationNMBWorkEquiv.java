@@ -119,7 +119,7 @@ public class AccessibilityComputationNMBWorkEquiv {
 					public ControlerListener get() {
 						BoundingBox bb = BoundingBox.createBoundingBox(((Scenario) scenario).getNetwork());
 						ActivityFacilitiesImpl measuringPoints = GridUtils.createGridLayerByGridSizeByBoundingBoxV2(bb.getXMin(), bb.getYMin(), bb.getXMax(), bb.getYMax(), cellSize) ;
-						AccessibilityCalculator accessibilityCalculator = new AccessibilityCalculator(scenario, measuringPoints);
+						AccessibilityCalculator accessibilityCalculator = new AccessibilityCalculator(scenario, measuringPoints, scenario.getNetwork());
 						GridBasedAccessibilityShutdownListenerV3 listener = new GridBasedAccessibilityShutdownListenerV3(accessibilityCalculator, (ActivityFacilities) amenities, null, scenario, bb.getXMin(), bb.getYMin(),
 						bb.getXMax(),bb.getYMax(), cellSize);
 						if ( true ) {
