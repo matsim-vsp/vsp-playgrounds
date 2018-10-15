@@ -94,6 +94,12 @@ public class IKAnalysisRunBerlinTest {
 		Scenario scenario0 = loadScenario(runDirectoryBaseCase, runIdBaseCase, personAttributesFile);
 		
 		List<AgentAnalysisFilter> filters1 = new ArrayList<>();
+		
+		AgentAnalysisFilter filter1a = new AgentAnalysisFilter(scenario1);
+		filter1a.setPersonAttribute("berlin");
+		filter1a.setPersonAttributeName("home-activity-zone");
+		filter1a.preProcess(scenario1);
+		filters1.add(filter1a);
 
 		AgentAnalysisFilter filter1b = new AgentAnalysisFilter(scenario1);
 		filter1b.preProcess(scenario1);
@@ -101,6 +107,12 @@ public class IKAnalysisRunBerlinTest {
 		
 		
 		List<AgentAnalysisFilter> filters0 = new ArrayList<>();
+		
+		AgentAnalysisFilter filter0a = new AgentAnalysisFilter(scenario0);
+		filter0a.setPersonAttribute("berlin");
+		filter0a.setPersonAttributeName("home-activity-zone");
+		filter0a.preProcess(scenario0);
+		filters0.add(filter0a);
 		
 		AgentAnalysisFilter filter0b = new AgentAnalysisFilter(scenario0);
 		filter0b.preProcess(scenario0);
