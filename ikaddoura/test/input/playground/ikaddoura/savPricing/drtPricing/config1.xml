@@ -196,7 +196,7 @@
 	
 	<module name="global">
 		<param name="coordinateSystem" value="Atlantis" />
-		<param name="numberOfThreads" value="4" />
+		<param name="numberOfThreads" value="1" />
 		<param name="randomSeed" value="1499" />
 	</module>
 	
