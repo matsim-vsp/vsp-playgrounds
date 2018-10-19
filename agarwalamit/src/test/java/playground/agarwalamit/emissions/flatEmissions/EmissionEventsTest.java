@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,7 +53,8 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
-import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
+
+import playground.vsp.airPollution.CombinedEmissionEventsReader;
 
 /**
  *
@@ -157,7 +159,7 @@ public class EmissionEventsTest {
 
         // check
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(eventsManager);
+        CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
         eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(outputEventsFile);
@@ -171,7 +173,7 @@ public class EmissionEventsTest {
         if (! isWritingEmissionsEvents) return; // no combined emission events file
         try {
             EventsManager eventsManagerCombinedEvents = EventsUtils.createEventsManager();
-            CombinedMatsimEventsReader combinedMatsimEventsReader = new CombinedMatsimEventsReader(eventsManagerCombinedEvents);
+            CombinedEmissionEventsReader combinedMatsimEventsReader = new CombinedEmissionEventsReader(eventsManagerCombinedEvents);
             eventsManagerCombinedEvents.addHandler(new MyEventsCatcher());
             combinedMatsimEventsReader.readFile(outputEventsFile);
         } catch (RuntimeException e) {
@@ -225,7 +227,7 @@ public class EmissionEventsTest {
         String eventsFile = outputDirectory + "/ITERS/it."+lastItr+"/"+lastItr+".events.xml.gz";
 
         EventsManager eventsManager = EventsUtils.createEventsManager();
-        CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(eventsManager);
+        CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(eventsManager);
         List<WarmEmissionEvent> warmEvents = new ArrayList<>();
         eventsManager.addHandler(new MyWarmEmissionEventHandler(warmEvents));
         reader.readFile(eventsFile);

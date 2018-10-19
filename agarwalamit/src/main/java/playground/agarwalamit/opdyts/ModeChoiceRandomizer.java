@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import floetteroed.opdyts.DecisionVariableRandomizer;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -32,6 +31,8 @@ import org.matsim.contrib.opdyts.OpdytsIterationWrapper;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
+
+import floetteroed.opdyts.DecisionVariableRandomizer;
 
 /**
  * @author amit
@@ -108,9 +109,8 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         log.warn("The step size will be updated based on the opdyts iteration number (e.g. stepSize * (1/ItNr)).");
     }
 
-    // FIXME: I added a second argument but I am not sure if this is correct. ihab oct '18
     @Override
-	public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable, int arg1) {
+	public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable) {
         List<ModeChoiceDecisionVariable> result ;
 
         final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();

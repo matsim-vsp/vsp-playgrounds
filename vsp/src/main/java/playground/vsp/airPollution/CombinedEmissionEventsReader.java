@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.kai.usecases.combinedEventsReader;
+package playground.vsp.airPollution;
 
 import java.io.InputStream;
 import java.util.Locale;
@@ -39,9 +39,9 @@ import org.xml.sax.SAXException;
  *
  * @author mrieser
  */
-public class CombinedMatsimEventsReader implements MatsimReader {
+public class CombinedEmissionEventsReader implements MatsimReader {
 
-	private final static Logger log = Logger.getLogger(CombinedMatsimEventsReader.class);
+	private final static Logger log = Logger.getLogger(CombinedEmissionEventsReader.class);
 	private final EventsManager events;
 
 	/**
@@ -49,7 +49,7 @@ public class CombinedMatsimEventsReader implements MatsimReader {
 	 *
 	 * @param events The Events-object that handles the events.
 	 */
-	public CombinedMatsimEventsReader(final EventsManager events) {
+	public CombinedEmissionEventsReader(final EventsManager events) {
 		this.events = events;
 	}
 
