@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
@@ -33,10 +34,11 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
+
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.MapUtils;
-import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
+import playground.vsp.airPollution.CombinedEmissionEventsReader;
 import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.IntervalHandler;
@@ -140,7 +142,7 @@ public class ExperiencedEmissionCostCalculatorExample {
 
                     EventsManager events = EventsUtils.createEventsManager();
                     events.addHandler(handler);
-                    CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(events);
+                    CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(events);
                     reader.readFile(eventsFile);
 
                     handler.getUserGroup2TotalEmissionCosts()
