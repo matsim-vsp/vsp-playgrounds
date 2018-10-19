@@ -45,7 +45,7 @@ public class ActitoppExample {
 			if (activity.getDay().getWeekday() == 1) {
 				System.out.println("Start time = " + activity.getStartTime());
 				System.out.println("End time = " + activity.getEndTime());
-				System.out.println("Type = " + activity.getType());
+				System.out.println("Type = " + activity.getActivityType());
 			}
 		}
 	}

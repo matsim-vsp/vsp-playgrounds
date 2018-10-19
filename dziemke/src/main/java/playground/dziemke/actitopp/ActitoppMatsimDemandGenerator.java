@@ -21,6 +21,7 @@ import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 
 import edu.kit.ifv.mobitopp.actitopp.ActitoppPerson;
+import edu.kit.ifv.mobitopp.actitopp.ActivityType;
 import edu.kit.ifv.mobitopp.actitopp.HActivity;
 import edu.kit.ifv.mobitopp.actitopp.HWeekPattern;
 import edu.kit.ifv.mobitopp.actitopp.InvalidPatternException;
@@ -112,8 +113,9 @@ public class ActitoppMatsimDemandGenerator {
 		for (HActivity actitoppActivity : activityList) {
 			if (actitoppActivity.getDayIndex() == 0) { // Only use activities of first day; until 1,440min
 				
-				actitoppActivity.getType(); // Letter-based type
-				String matsimActivityType = transformActType(actitoppActivity.getType());
+//				actitoppActivity.getType(); // Letter-based type
+				actitoppActivity.getActivityType();
+				String matsimActivityType = transformActType(actitoppActivity.getActivityType());
 				Coord dummyCoord = CoordUtils.createCoord(0, 0); // TODO choose location
 			
 				Activity matsimActivity = populationFactory.createActivityFromCoord(matsimActivityType,
@@ -244,18 +246,18 @@ public class ActitoppMatsimDemandGenerator {
 	}
 	
 	// Information from "https://github.com/mobitopp/actitopp/blob/master/src/main/java/edu/kit/ifv/mobitopp/actitopp/Configuration.java"
-	private static String transformActType(char activityTypeLetter) {
-		if (activityTypeLetter == 'H') {
+	private static String transformActType(ActivityType activityTypeLetter) {
+		if (activityTypeLetter == ActivityType.HOME) {
 			return DefaultActivityTypes.home ;
-		} else if (activityTypeLetter == 'W') {
+		} else if (activityTypeLetter == ActivityType.WORK) {
 			return DefaultActivityTypes.work ;
-		} else if (activityTypeLetter == 'E') {
+		} else if (activityTypeLetter == ActivityType.EDUCATION) {
 			return ActiToppActivityTypes.education.toString();
-		} else if (activityTypeLetter == 'L') {
+		} else if (activityTypeLetter == ActivityType.LEISURE) {
 			return ActiToppActivityTypes.leisure.toString();
-		} else if (activityTypeLetter == 'S') {
+		} else if (activityTypeLetter == ActivityType.SHOPPING) {
 			return ActiToppActivityTypes.shopping.toString();
-		} else if (activityTypeLetter == 'T') {
+		} else if (activityTypeLetter == ActivityType.TRANSPORT) {
 			return ActiToppActivityTypes.other.toString();
 		} else {
 			LOG.error(new IllegalArgumentException("Activity type " + activityTypeLetter + " not allowed."));
