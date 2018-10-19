@@ -26,7 +26,7 @@ import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
-import org.matsim.contrib.emissions.utils.EmissionSpecificationMarker;
+import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -85,10 +85,9 @@ public class PatnaEmissionsWriter {
             else if  (vt.getId().toString().equals("motorbike")) vehicleCategory = HbefaVehicleCategory.MOTORCYCLE;
             else if  (vt.getId().toString().equals("truck")) vehicleCategory = HbefaVehicleCategory.HEAVY_GOODS_VEHICLE;
             else throw new RuntimeException("not implemented yet.");
-
-            vt.setDescription(  EmissionSpecificationMarker.BEGIN_EMISSIONS.toString()+
-                    vehicleCategory.toString().concat(";;;")+
-                    EmissionSpecificationMarker.END_EMISSIONS.toString() );
+    
+            final String hbefaVehicleDescription = vehicleCategory.toString().concat( ";;;" );
+            EmissionUtils.setHbefaVehicleDescription( vt, hbefaVehicleDescription );
         }
 
         PatnaEmissionVehicleCreatorHandler emissionVehicleCreatorHandler = new PatnaEmissionVehicleCreatorHandler(scenario);
@@ -109,7 +108,7 @@ public class PatnaEmissionsWriter {
 
         emissionModule.writeEmissionInformation();
     }
-
+    
     static class PatnaEmissionVehicleCreatorHandler implements PersonDepartureEventHandler {
 
         private final Scenario scenario;
