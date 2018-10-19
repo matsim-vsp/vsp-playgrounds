@@ -121,7 +121,7 @@
 		<!-- Maximum desired walk distance (in meters) to next stop location in stopbased system. If no suitable stop is found in that range, the search radius will be extended in steps of maxWalkDistance until a stop is found. -->
 		<param name="maxWalkDistance" value="0.0" />
 		<!-- Number of threads used for parallel evaluation of request insertion into existing schedules. Scales well up to 4, due to path data provision, the most computationally intensive part, using up to 4 threads. Default value is 'min(4, no. of cores available to JVM)' -->
-		<param name="numberOfThreads" value="4" />
+		<param name="numberOfThreads" value="1" />
 		<!-- Operational Scheme, either door2door or stopbased. door2door by default -->
 		<param name="operationalScheme" value="door2door" />
 		<!-- Prints detailed warnings for DRT customers that cannot be served or routed. Default is false. -->
