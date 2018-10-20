@@ -84,7 +84,7 @@ public class FDAgentsGeneratorForGivenSetOfAgentsImpl implements FDAgentsGenerat
             );
         }
 
-        FDModule.LOG.warn("The modal share in PCU is : " + this.modalShareInPCU);
+        FDModule.LOG.warn("The modal share in PCU is : " + Arrays.toString(this.modalShareInPCU));
         this.scenario = scenario;
         this.fdDataContainer.getListOfPointsToRun().clear();
         this.fileName = fileName;
