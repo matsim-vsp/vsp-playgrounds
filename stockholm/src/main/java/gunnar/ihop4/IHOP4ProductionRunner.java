@@ -33,8 +33,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
 import org.matsim.contrib.opdyts.OpdytsConfigGroup;
-import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.openingtimes.OpeningTimes;
-import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.openingtimes.OpeningTimesRandomizer;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.buildingblocks.objectivefunctions.WeightedSumObjectiveFunction;
 import org.matsim.contrib.opdyts.buildingblocks.objectivefunctions.calibration.LegHistogramObjectiveFunction;
@@ -139,114 +137,114 @@ public class IHOP4ProductionRunner {
 		controler.run();
 	}
 
-	static class MyStateFactory extends MATSimStateFactoryImpl<OpeningTimes, MATSimState>
-			implements AfterMobsimListener {
+//	static class MyStateFactory extends MATSimStateFactoryImpl<OpeningTimes, MATSimState>
+//			implements AfterMobsimListener {
+//
+//		@Inject
+//		private LegHistogram legHist;
+//
+//		private LegHistogramObjectiveFunction.StateComponent legHistogramData = null;
+//
+//		@Override
+//		public void notifyAfterMobsim(final AfterMobsimEvent event) {
+//			this.legHistogramData = new LegHistogramObjectiveFunction.StateComponent();
+//			for (String mode : this.legHist.getLegModes()) {
+//				this.legHistogramData.mode2departureData.put(mode, this.legHist.getDepartures(mode));
+//				this.legHistogramData.mode2arrivalData.put(mode, this.legHist.getArrivals(mode));
+//			}
+//		}
+//
+//		@Override
+//		protected void addComponents(final MATSimState state) {
+//			state.putComponent(LegHistogramObjectiveFunction.StateComponent.class, this.legHistogramData);
+//		}
+//	}
 
-		@Inject
-		private LegHistogram legHist;
-
-		private LegHistogramObjectiveFunction.StateComponent legHistogramData = null;
-
-		@Override
-		public void notifyAfterMobsim(final AfterMobsimEvent event) {
-			this.legHistogramData = new LegHistogramObjectiveFunction.StateComponent();
-			for (String mode : this.legHist.getLegModes()) {
-				this.legHistogramData.mode2departureData.put(mode, this.legHist.getDepartures(mode));
-				this.legHistogramData.mode2arrivalData.put(mode, this.legHist.getArrivals(mode));
-			}
-		}
-
-		@Override
-		protected void addComponents(final MATSimState state) {
-			state.putComponent(LegHistogramObjectiveFunction.StateComponent.class, this.legHistogramData);
-		}
-	}
-
-	static void optimize(final boolean useGreedo) {
-
-		OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
-
-		final Greedo greedo = (useGreedo ? new Greedo() : null);
-		if (greedo != null) {
-			greedo.setAdjustStrategyWeights(true);
-			greedo.setGreedoProgressListener(progressListener);
-		}
-
-		final Config config = ConfigUtils
-				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/config.xml");
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		if (greedo != null) {
-			greedo.meet(config);
-		}
-
-		OpdytsConfigGroup opdytsConfig = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.class);
-		opdytsConfig.setBinCount(24 * 12);
-		opdytsConfig.setBinSize(3600 / 12);
-		opdytsConfig.setInertia(0.9);
-		opdytsConfig.setInitialEquilibriumGapWeight(0.0);
-		opdytsConfig.setInitialUniformityGapWeight(0.0);
-		opdytsConfig.setMaxIteration(100);
-		opdytsConfig.setMaxMemoryPerTrajectory(Integer.MAX_VALUE);
-		opdytsConfig.setMaxTotalMemory(Integer.MAX_VALUE);
-		opdytsConfig.setMaxTransition(Integer.MAX_VALUE);
-		opdytsConfig.setNoisySystem(true);
-		opdytsConfig.setNumberOfIterationsForAveraging(5); // TODO REMOVE
-		opdytsConfig.setNumberOfIterationsForConvergence(10); // TODO REMOVE
-		opdytsConfig.setSelfTuningWeightScale(1.0);
-		opdytsConfig.setStartTime(0);
-		opdytsConfig.setUseAllWarmUpIterations(true);
-		opdytsConfig.setWarmUpIterations(1);
-
-		// TODO NEW:
-		if (greedo != null) {
-			opdytsConfig.setEnBlockSimulationIterations(
-					ConfigUtils.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle());
-		}
-
-		// OBJECTIVE FUNCTION
-
-		Set<String> modes = new LinkedHashSet<>(Arrays.asList("car"));
-
-		double[] realDepartures = new double[362];
-		final ObjectiveFunction<MATSimState> dptObjFct = LegHistogramObjectiveFunction.newDepartures(modes,
-				realDepartures);
-		final WeightedSumObjectiveFunction<MATSimState> objFct = new WeightedSumObjectiveFunction<>();
-		objFct.add(dptObjFct, 1.0);
-
-		// DECISION VARIABLE RANDOMIZER
-
-		int maxNumberOfVariedElements = 4; // work and other open and close
-		double initialSearchRange_s = 600;
-		double searchStageExponent = 0;
-		final DecisionVariableRandomizer<OpeningTimes> randomizer = new OpeningTimesRandomizer(
-				maxNumberOfVariedElements, initialSearchRange_s, searchStageExponent);
-
-		// STATE FACTORY
-
-		MyStateFactory stateFactory = new MyStateFactory();
-
-		// WIRE EVERYTHING TOGETHER
-
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		keepOnlyStrictCarUsers(scenario);
-		greedo.meet(scenario);
-
-		MATSimOpdytsRunner<OpeningTimes, MATSimState> runner = new MATSimOpdytsRunner<>(scenario, stateFactory);
-		runner.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
-				this.addControlerListenerBinding().toInstance(stateFactory);
-			}
-		});
-		if (greedo != null) {
-			// runner.addWantsControlerReferenceBeforeInjection(greedo);
-			runner.addOverridingModule(greedo);
-		}
-		runner.setOpdytsProgressListener(progressListener);
-		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(2.5));
-		runner.run(randomizer, new OpeningTimes(config), objFct);
-	}
+//	static void optimize(final boolean useGreedo) {
+//
+//		OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
+//
+//		final Greedo greedo = (useGreedo ? new Greedo() : null);
+//		if (greedo != null) {
+//			greedo.setAdjustStrategyWeights(true);
+//			greedo.setGreedoProgressListener(progressListener);
+//		}
+//
+//		final Config config = ConfigUtils
+//				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/config.xml");
+//		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+//		if (greedo != null) {
+//			greedo.meet(config);
+//		}
+//
+//		OpdytsConfigGroup opdytsConfig = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.class);
+//		opdytsConfig.setBinCount(24 * 12);
+//		opdytsConfig.setBinSize(3600 / 12);
+//		opdytsConfig.setInertia(0.9);
+//		opdytsConfig.setInitialEquilibriumGapWeight(0.0);
+//		opdytsConfig.setInitialUniformityGapWeight(0.0);
+//		opdytsConfig.setMaxIteration(100);
+//		opdytsConfig.setMaxMemoryPerTrajectory(Integer.MAX_VALUE);
+//		opdytsConfig.setMaxTotalMemory(Integer.MAX_VALUE);
+//		opdytsConfig.setMaxTransition(Integer.MAX_VALUE);
+//		opdytsConfig.setNoisySystem(true);
+//		opdytsConfig.setNumberOfIterationsForAveraging(5); // TODO REMOVE
+//		opdytsConfig.setNumberOfIterationsForConvergence(10); // TODO REMOVE
+//		opdytsConfig.setSelfTuningWeightScale(1.0);
+//		opdytsConfig.setStartTime(0);
+//		opdytsConfig.setUseAllWarmUpIterations(true);
+//		opdytsConfig.setWarmUpIterations(1);
+//
+//		// TODO NEW:
+//		if (greedo != null) {
+//			opdytsConfig.setEnBlockSimulationIterations(
+//					ConfigUtils.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle());
+//		}
+//
+//		// OBJECTIVE FUNCTION
+//
+//		Set<String> modes = new LinkedHashSet<>(Arrays.asList("car"));
+//
+//		double[] realDepartures = new double[362];
+//		final ObjectiveFunction<MATSimState> dptObjFct = LegHistogramObjectiveFunction.newDepartures(modes,
+//				realDepartures);
+//		final WeightedSumObjectiveFunction<MATSimState> objFct = new WeightedSumObjectiveFunction<>();
+//		objFct.add(dptObjFct, 1.0);
+//
+//		// DECISION VARIABLE RANDOMIZER
+//
+//		int maxNumberOfVariedElements = 4; // work and other open and close
+//		double initialSearchRange_s = 600;
+//		double searchStageExponent = 0;
+//		final DecisionVariableRandomizer<OpeningTimes> randomizer = new OpeningTimesRandomizer(
+//				maxNumberOfVariedElements, initialSearchRange_s, searchStageExponent);
+//
+//		// STATE FACTORY
+//
+//		MyStateFactory stateFactory = new MyStateFactory();
+//
+//		// WIRE EVERYTHING TOGETHER
+//
+//		Scenario scenario = ScenarioUtils.loadScenario(config);
+//		keepOnlyStrictCarUsers(scenario);
+//		greedo.meet(scenario);
+//
+//		MATSimOpdytsRunner<OpeningTimes, MATSimState> runner = new MATSimOpdytsRunner<>(scenario, stateFactory);
+//		runner.addOverridingModule(new AbstractModule() {
+//			@Override
+//			public void install() {
+//				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
+//				this.addControlerListenerBinding().toInstance(stateFactory);
+//			}
+//		});
+//		if (greedo != null) {
+//			// runner.addWantsControlerReferenceBeforeInjection(greedo);
+//			runner.addOverridingModule(greedo);
+//		}
+//		runner.setOpdytsProgressListener(progressListener);
+//		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(2.5));
+//		runner.run(randomizer, new OpeningTimes(config), objFct);
+//	}
 
 	public static void main(String[] args) {
 		final boolean useGreedo = true;
