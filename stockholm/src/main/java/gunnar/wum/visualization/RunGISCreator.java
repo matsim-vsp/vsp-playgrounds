@@ -29,7 +29,6 @@ import org.matsim.utils.gis.matsim2esri.network.FeatureGeneratorBuilderImpl;
 import org.matsim.utils.gis.matsim2esri.network.LanesBasedWidthCalculator;
 import org.matsim.utils.gis.matsim2esri.network.LineStringBasedFeatureGenerator;
 import org.matsim.utils.gis.matsim2esri.network.Links2ESRIShape;
-import org.matsim.utils.gis.matsim2esri.network.Nodes2ESRIShape;
 import org.matsim.utils.gis.matsim2esri.plans.SelectedPlans2ESRIShape;
 
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;

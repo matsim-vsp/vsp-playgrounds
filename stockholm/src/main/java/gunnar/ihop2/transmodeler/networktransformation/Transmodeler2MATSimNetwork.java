@@ -19,7 +19,12 @@
  */ 
 package gunnar.ihop2.transmodeler.networktransformation;
 
-import floetteroed.utilities.Units;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.SortedSet;
+
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -38,13 +43,9 @@ import org.matsim.lanes.LanesUtils;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
-import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.SortedSet;
+import floetteroed.utilities.Units;
+import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
  * Turns a mesoscopic Transmodeler network (defined through a set of files in

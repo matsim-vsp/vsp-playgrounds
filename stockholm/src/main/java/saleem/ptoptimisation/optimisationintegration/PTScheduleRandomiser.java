@@ -20,8 +20,6 @@
 package saleem.ptoptimisation.optimisationintegration;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,9 +28,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.vehicles.Vehicles;
 
+import floetteroed.opdyts.DecisionVariableRandomizer;
 import saleem.ptoptimisation.decisionvariables.TransitScheduleAdapter;
 import saleem.ptoptimisation.utils.ScenarioHelper;
-import floetteroed.opdyts.DecisionVariableRandomizer;
 /**
  * A class to create variations of current transit schedule.
  * 

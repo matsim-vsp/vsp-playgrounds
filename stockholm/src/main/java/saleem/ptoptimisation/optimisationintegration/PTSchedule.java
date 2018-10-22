@@ -19,18 +19,12 @@
  */ 
 package saleem.ptoptimisation.optimisationintegration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.vehicles.Vehicles;
 
-import saleem.ptoptimisation.utils.ScenarioHelper;
 import floetteroed.opdyts.DecisionVariable;
-import floetteroed.opdyts.SimulatorState;
+import saleem.ptoptimisation.utils.ScenarioHelper;
 /**
  * A class representing a variation of the transit schedule and vehicles, and also keeping track of the orignal pre-changed transit schedule and vehicles.
  * 

@@ -32,7 +32,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.handler.BasicEventHandler;
 import org.matsim.core.scoring.EventsToScore;
-import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
 /**
  * An event handling class to help analyse first order second order effects of P0.
  * I.e. for vehicles passing through signlised junctions (first order), and vehicle not passing through junctions (second order)

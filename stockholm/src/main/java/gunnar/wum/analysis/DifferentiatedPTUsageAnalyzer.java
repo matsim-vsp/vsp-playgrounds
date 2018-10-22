@@ -36,8 +36,6 @@ import org.matsim.pt.routes.ExperimentalTransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 
-import gunnar.wum.utils.Key2SetInverter;
-
 /**
  *
  * @author Gunnar Flötteröd
