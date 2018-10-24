@@ -47,8 +47,8 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.QSimProvider;
-import org.matsim.core.mobsim.qsim.components.QSimComponents;
-import org.matsim.core.mobsim.qsim.components.StandardQSimComponentsConfigurator;
+import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
+import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
@@ -330,9 +330,9 @@ public class Greedo extends AbstractModule {
 	}
 
 	@Provides
-	QSimComponents provideQSimComponents() {
-		QSimComponents components = new QSimComponents();
-		new StandardQSimComponentsConfigurator(this.config).configure(components);
+	QSimComponentsConfig provideQSimComponentsConfig() {
+		QSimComponentsConfig components = new QSimComponentsConfig();
+		new StandardQSimComponentConfigurator(this.config).configure(components);
 		if (this.config.transit().isUseTransit()) {
 			SBBTransitEngineQSimModule.configure(components);
 		}
@@ -399,9 +399,9 @@ public class Greedo extends AbstractModule {
 			}
 
 			@Provides
-			QSimComponents provideQSimComponents() {
-				QSimComponents components = new QSimComponents();
-				new StandardQSimComponentsConfigurator(config).configure(components);
+			QSimComponentsConfig provideQSimComponentsConfig() {
+				QSimComponentsConfig components = new QSimComponentsConfig();
+				new StandardQSimComponentConfigurator(config).configure(components);
 				SBBTransitEngineQSimModule.configure(components);
 				return components;
 			}

@@ -11,8 +11,8 @@ import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.QSimModule;
 import org.matsim.core.mobsim.qsim.QSimProvider;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.components.QSimComponents;
-import org.matsim.core.mobsim.qsim.components.StandardQSimComponentsConfigurator;
+import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
+import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
 import org.matsim.pt.config.TransitConfigGroup;
 
 import com.google.inject.Provides;
@@ -33,12 +33,12 @@ class FreefloatingParkingSearchQSimModule extends com.google.inject.AbstractModu
 	}
 	
 	@Provides
-	QSimComponents provideQSimComponents(Config config) {
-		QSimComponents components = new QSimComponents();
-		new StandardQSimComponentsConfigurator(config).configure(components);
+	QSimComponentsConfig provideQSimComponentsConfig(Config config) {
+		QSimComponentsConfig components = new QSimComponentsConfig();
+		new StandardQSimComponentConfigurator(config).configure(components);
 		
-		components.activeAgentSources.add(FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE);
-		components.activeAgentSources.add(FFCS_VEHICLE_AGENT_SOURCE);
+		components.addNamedComponent(FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE);
+		components.addNamedComponent(FFCS_VEHICLE_AGENT_SOURCE);
 		
 		return components;
 	}
@@ -57,8 +57,8 @@ class FreefloatingParkingSearchQSimModule extends com.google.inject.AbstractModu
 			bind(FFCSVehicleAgentSource.class).asEagerSingleton();
 			bind(FreefloatingParkingPopulationAgentSource.class).asEagerSingleton();
 			
-			bindAgentSource(FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE).to(FreefloatingParkingPopulationAgentSource.class);
-			bindAgentSource(FFCS_VEHICLE_AGENT_SOURCE).to(FFCSVehicleAgentSource.class);
+			bindNamedComponent(FreefloatingParkingPopulationAgentSource.class, FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE);
+			bindNamedComponent(FFCSVehicleAgentSource.class, FFCS_VEHICLE_AGENT_SOURCE);
 		}
 	}
 	

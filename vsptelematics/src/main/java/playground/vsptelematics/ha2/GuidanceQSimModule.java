@@ -11,7 +11,7 @@ import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
-import org.matsim.core.mobsim.qsim.components.QSimComponents;
+import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
@@ -37,7 +37,7 @@ public class GuidanceQSimModule extends AbstractQSimModule {
 		bind(AgentFactory.class).to(GuidanceAgentFactory.class);
 		bind(Guidance.class).toInstance(guidance);
 		
-		bindMobsimListener(GUIDANCE_LISTENER).to(Guidance.class);
+		addNamedComponent(Guidance.class, GUIDANCE_LISTENER);
 	}
 	
 	@Provides
@@ -46,7 +46,7 @@ public class GuidanceQSimModule extends AbstractQSimModule {
 		return new GuidanceAgentFactory(qSim, equipmentFraction, guidance, ttObserver);
 	}
 	
-	static public void configureComponents(QSimComponents components) {
-		components.activeMobsimListeners.add(GUIDANCE_LISTENER);
+	static public void configureComponents(QSimComponentsConfig components) {
+		components.addNamedComponent(GUIDANCE_LISTENER);
 	}
 }
