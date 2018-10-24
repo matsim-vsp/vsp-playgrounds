@@ -393,11 +393,11 @@ public class PersonTripScenarioComparison {
 			for (Id<Person> personId : scenario1.getPopulation().getPersons().keySet()) {
 				
 				boolean analyzePerson = true;
-				if (basicHandler1.getPersonId2tripNumber2stuckAbort().get(personId).size() > 0) {
+				if (basicHandler1.getPersonId2tripNumber2stuckAbort().get(personId) != null) {
 					log.info("Person " + personId + " is stucking in policy case. Excluding person from score comparison.");
 					analyzePerson = false;
 				}
-				if (basicHandlerToCompareWith.getPersonId2tripNumber2stuckAbort().get(personId).size() > 0) {
+				if (basicHandlerToCompareWith.getPersonId2tripNumber2stuckAbort().get(personId) != null) {
 					log.info("Person " + personId + " is stucking in base case. Excluding person from score comparison.");
 					analyzePerson = false;
 				}
@@ -405,7 +405,7 @@ public class PersonTripScenarioComparison {
 				if (analyzePerson) {
 					double score0 = scenarioToCompareWith.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 			        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
-					
+								        
 			        int numberOfTrips = 0;
 			        if (basicHandler1.getPersonId2tripNumber2legMode().get(personId) != null) {
 			        		numberOfTrips = basicHandler1.getPersonId2tripNumber2legMode().get(personId).size();
