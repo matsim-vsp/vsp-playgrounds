@@ -131,6 +131,7 @@ public class IKAnalysisRun {
 		String zonesCRS = null;
 		String homeActivityPrefix = null;
 		int scalingFactor;
+		String modesString = null;
 		
 		if (args.length > 0) {
 			if (!args[0].equals("null")) runDirectory = args[0];
@@ -162,6 +163,9 @@ public class IKAnalysisRun {
 		
 			if (!args[9].equals("null")) visualizationScriptInputDirectory = args[9];
 			log.info("Visualization script input directory: " + visualizationScriptInputDirectory);
+			
+			if (!args[10].equals("null")) modesString = args[10];
+			log.info("modes: " + modesString);
 
 		} else {
 			
@@ -189,7 +193,9 @@ public class IKAnalysisRun {
 //			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
 			
 			homeActivityPrefix = "home";
-			scalingFactor = 10;			
+			scalingFactor = 10;
+			
+			modesString = TransportMode.car;
 		}
 		
 		Scenario scenario1 = loadScenario(runDirectory, runId, null);
@@ -218,7 +224,9 @@ public class IKAnalysisRun {
 		List<AgentAnalysisFilter> filter0 = null;
 		
 		List<String> modes = new ArrayList<>();
-		modes.add(TransportMode.car);
+		for (String mode : modesString.split(",")) {
+			modes.add(mode);
+		}
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
@@ -658,6 +666,7 @@ public class IKAnalysisRun {
 		}
 
 		// person-based analysis
+		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, null, personId2userBenefit, basicHandler, null);
 		for (String mode : modes) {
 			analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, mode, personId2userBenefit, basicHandler, null);	
 		}
