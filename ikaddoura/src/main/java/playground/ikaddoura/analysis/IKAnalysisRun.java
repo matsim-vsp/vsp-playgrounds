@@ -216,7 +216,7 @@ public class IKAnalysisRun {
 			modesString = TransportMode.car;
 			
 			taxiMode = TransportMode.taxi;
-			carMode = "car_bb";
+			carMode = "car";
 			rewardSAVuserFormerCarUser = 5.3;
 		}
 		
