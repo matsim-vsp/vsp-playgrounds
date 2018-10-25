@@ -130,6 +130,10 @@ public class RunBerlinDrtPricingScenario1 {
 		final String homeActivity = "home";
 		final int scalingFactor = scaleFactor;
 		
+		final String taxiMode = null;
+		final String carMode = null;
+		final double rewardSAVformerCarUser = 0.;
+		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
 		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
@@ -164,7 +168,10 @@ public class RunBerlinDrtPricingScenario1 {
 				scalingFactor,
 				filters,
 				null,
-				modes);
+				modes,
+				taxiMode,
+				carMode,
+				rewardSAVformerCarUser);
 		analysis.run();
 		
 		// noise post-analysis

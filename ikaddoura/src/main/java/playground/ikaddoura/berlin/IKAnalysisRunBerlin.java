@@ -90,7 +90,10 @@ public class IKAnalysisRunBerlin {
 				scalingFactor,
 				filters1,
 				null,
-				modes);
+				modes,
+				null,
+				null,
+				0.);
 		analysis.run();
 	
 		log.info("Done.");

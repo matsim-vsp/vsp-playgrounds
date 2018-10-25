@@ -161,7 +161,10 @@ public class RunBerlinTaxiPricingScenario1 {
 				scalingFactor,
 				filters,
 				null,
-				modes);
+				modes,
+				null,
+				null,
+				0.);
 		analysis.run();
 		
 		// noise post-analysis
