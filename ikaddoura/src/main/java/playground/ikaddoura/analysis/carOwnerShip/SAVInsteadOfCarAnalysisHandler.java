@@ -44,7 +44,6 @@ public class SAVInsteadOfCarAnalysisHandler implements PersonEntersVehicleEventH
 	private final Set<Id<Person>> passengersThatHaveAlreadyReceivedTheirReward = new HashSet<>();
 	
 	private int taxiUsersFormerNonCarUsers = 0;
-	private double totalRewardBySAVusersFormerNonCarUsers = 0.;
 	
 	private int taxiUsersFormerCarUsers = 0;
 	private double totalRewardsEarnedByTaxiUsersFormerCarUsers = 0.;
@@ -111,15 +110,10 @@ public class SAVInsteadOfCarAnalysisHandler implements PersonEntersVehicleEventH
 		this.taxiUsersFormerCarUsers = 0;
 		this.taxiUsersFormerNonCarUsers = 0;
 		this.totalRewardsEarnedByTaxiUsersFormerCarUsers = 0.;
-		this.totalRewardBySAVusersFormerNonCarUsers = 0.;
 	}
 
 	public int getSavUsersFormerNonCarUsers() {
 		return taxiUsersFormerNonCarUsers;
-	}
-
-	public double getTotalSAVFixCostPaidBySAVusersFormerNonCarUsers() {
-		return totalRewardBySAVusersFormerNonCarUsers;
 	}
 
 	public int getSavUsersFormerCarUsers() {

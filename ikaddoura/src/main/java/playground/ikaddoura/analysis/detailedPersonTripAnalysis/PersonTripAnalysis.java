@@ -740,7 +740,6 @@ public class PersonTripAnalysis {
 			bw.newLine();
 						
 			double paymentsSAVUserFormerCarUser = 0.;
-			double paymentsSAVUserFormerNonCarUser = 0.;
 
 			int savUsersFormerCarUsers = 0;
 			int savUsersFormerNonCarUsers = 0;
@@ -749,7 +748,6 @@ public class PersonTripAnalysis {
 				savUsersFormerCarUsers = savFixCostHandler.getSavUsersFormerCarUsers();
 				savUsersFormerNonCarUsers = savFixCostHandler.getSavUsersFormerNonCarUsers();
 				paymentsSAVUserFormerCarUser = savFixCostHandler.getTotalSAVFixCostPaidBySAVusersFormerCarUsers();
-				paymentsSAVUserFormerNonCarUser = savFixCostHandler.getTotalSAVFixCostPaidBySAVusersFormerNonCarUsers();
 			}
 			
 			// TODO: other money payments by users?
@@ -761,9 +759,6 @@ public class PersonTripAnalysis {
 			bw.newLine();
 			
 			bw.write("fixed cost payments by taxi users (former car users) (sample size) [monetary units];" + paymentsSAVUserFormerCarUser);
-			bw.newLine();
-			
-			bw.write("fixed cost payments by taxi users (former non-car users) (sample size) [monetary units];" + paymentsSAVUserFormerNonCarUser);
 			bw.newLine();
 			
 			bw.write("-----------");
@@ -784,7 +779,7 @@ public class PersonTripAnalysis {
 				bw.newLine();
 			}
 			
-			double tollAndFarePaymentsByUsers = moneyPaymentsByUsers - paymentsSAVUserFormerCarUser - paymentsSAVUserFormerNonCarUser;
+			double tollAndFarePaymentsByUsers = moneyPaymentsByUsers - paymentsSAVUserFormerCarUser;
 			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + tollAndFarePaymentsByUsers);
 			bw.newLine();
 			
