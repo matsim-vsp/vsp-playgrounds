@@ -735,7 +735,7 @@ public class IKAnalysisRun {
 		for (String mode : modes) {
 			analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, mode, personId2userBenefit, basicHandler, null);
 		}
-		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, personId2userBenefit, basicHandler, null, null, delayAnalysis, savFixCostAnalysis);
+		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, personId2userBenefit, basicHandler, null, personTripMoneyHandler, delayAnalysis, savFixCostAnalysis);
 		
 		// time-specific trip distance analysis
 		for (String mode : modes) {
