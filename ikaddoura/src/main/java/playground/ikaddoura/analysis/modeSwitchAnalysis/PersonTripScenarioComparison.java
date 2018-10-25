@@ -384,11 +384,13 @@ public class PersonTripScenarioComparison {
 		
 		{
 			BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_all-non-stucking-persons.csv");
-	        writer.write("PersonId;homeCoordX;homeCoordY;totalTrips;score0 [utils];score1 [utils]");
+	        writer.write("PersonId;homeCoordX;homeCoordY;totalTrips;score0 [utils];score1 [utils];monetary payments 0 [EUR]; monetary payments 1 [EUR]");
 	        writer.newLine();
 	       
 	        double score0Sum = 0.;
 	        double score1Sum = 0.;
+	        double tolls0Sum = 0.;
+	        double tolls1Sum = 0.;
 	        
 			for (Id<Person> personId : scenario1.getPopulation().getPersons().keySet()) {
 				
@@ -405,7 +407,21 @@ public class PersonTripScenarioComparison {
 				if (analyzePerson) {
 					double score0 = scenarioToCompareWith.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
 			        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
-								        
+					
+			        double tolls0 = 0.;
+			        if (basicHandlerToCompareWith.getPersonId2tripNumber2payment().get(personId) != null) {
+			        	for (Double toll : basicHandlerToCompareWith.getPersonId2tripNumber2payment().get(personId).values()) {
+				        	tolls0 += toll;
+				        }
+			        }
+			        
+			        double tolls1 = 0.;
+			        if (basicHandler1.getPersonId2tripNumber2payment().get(personId) != null) {
+			        	for (Double toll : basicHandler1.getPersonId2tripNumber2payment().get(personId).values()) {
+				        	tolls1 += toll;
+				        }
+			        }
+			        
 			        int numberOfTrips = 0;
 			        if (basicHandler1.getPersonId2tripNumber2legMode().get(personId) != null) {
 			        		numberOfTrips = basicHandler1.getPersonId2tripNumber2legMode().get(personId).size();
@@ -426,25 +442,33 @@ public class PersonTripScenarioComparison {
 	    	        + homeY + ";"    
 		        	+ numberOfTrips + ";"
 		        	+ score0 + ";"
-		        	+ score1
+		        	+ score1 + ";"
+		        	+ tolls0 + ";"
+		        	+ tolls1
 					);
 		        	
 					writer.newLine();
 		        	
 		        	score0Sum += score0;
 		        	score1Sum += score1;
+		        	tolls0Sum += tolls0;
+		        	tolls1Sum += tolls1;
 				}
 				
 	        } 
 			
 			writer.newLine();
-        	writer.write("Score sum base case: " +  score0Sum);
+        	writer.write("Score sum base case; " +  score0Sum);
 			writer.newLine();
-        	writer.write("Score sum policy case: " +  score1Sum);
+        	writer.write("Score sum policy case; " +  score1Sum);
 			writer.newLine();
-        	writer.write("Number of agents: " + scenario1.getPopulation().getPersons().size() );
+			writer.write("Tolls sum base case; " +  tolls0Sum);
 			writer.newLine();
-        	writer.write("Average score difference per agent: " + (score1Sum - score0Sum) / (double) scenario1.getPopulation().getPersons().size() );
+        	writer.write("Tolls sum policy case; " +  tolls1Sum);
+			writer.newLine();
+        	writer.write("Number of agents; " + scenario1.getPopulation().getPersons().size() );
+			writer.newLine();
+        	writer.write("Average score difference per agent; " + (score1Sum - score0Sum) / (double) scenario1.getPopulation().getPersons().size() );
 			writer.newLine();	
         	writer.close();
 		}
