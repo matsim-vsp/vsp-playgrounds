@@ -37,13 +37,13 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.decongestion.handler.DelayAnalysis;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.vehicles.Vehicle;
 
 import playground.ikaddoura.analysis.carOwnerShip.SAVInsteadOfCarAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
+import playground.ikaddoura.savPricing.SAVPricingModule;
 
 /**
  * @author ikaddoura
@@ -773,8 +773,8 @@ public class PersonTripAnalysis {
 			bw.newLine();
 
 			double distanceBasedSAVoCost = 0.;
-			if (basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) != null) {
-				distanceBasedSAVoCost = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
+			if (basicHandler.getScenario().getConfig().planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER) != null) {
+				distanceBasedSAVoCost = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).getMonetaryDistanceRate();
 				bw.write("taxi operating costs (sample size) [monetary units];" + distanceBasedSAVoCost);
 				bw.newLine();
 			}

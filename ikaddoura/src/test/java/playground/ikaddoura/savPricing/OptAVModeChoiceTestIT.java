@@ -32,7 +32,6 @@ import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
@@ -76,7 +75,7 @@ public class OptAVModeChoiceTestIT {
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
-		config1.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
+		config1.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 		config1.planCalcScore().getModes().get(TransportMode.taxi).setDailyMonetaryConstant(-1000.);
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "1");
 		SAVPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, SAVPricingConfigGroup.class);
@@ -130,7 +129,7 @@ public class OptAVModeChoiceTestIT {
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
-		config2.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
+		config2.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 		config2.planCalcScore().getModes().get(TransportMode.taxi).setDailyMonetaryConstant(10000.);
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "2");
 		SAVPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, SAVPricingConfigGroup.class);
@@ -208,7 +207,7 @@ public class OptAVModeChoiceTestIT {
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
-		config1.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
+		config1.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 		config1.planCalcScore().getModes().get(TransportMode.taxi).setDailyMonetaryConstant(-1000.);
 
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "1");
@@ -263,7 +262,7 @@ public class OptAVModeChoiceTestIT {
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
-		config2.planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
+		config2.planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 		config2.planCalcScore().getModes().get(TransportMode.taxi).setDailyMonetaryConstant(-1000.);
 
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "2");
