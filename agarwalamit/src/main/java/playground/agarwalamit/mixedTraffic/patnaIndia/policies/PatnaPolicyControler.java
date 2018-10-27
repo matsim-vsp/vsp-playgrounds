@@ -140,7 +140,7 @@ public class PatnaPolicyControler {
 
 			// sensitivity
 			double factor = PatnaUtils.BIKE_TRACK_LEGNTH_REDUCTION_FACTOR / bike_track_length_reductionFactor_sensitivity;
-			if (factor==1) {
+			if (factor==1.0) {
 				// this is same as before i.e. track lengths are halved.
 			} else {
 				scenario.getNetwork()

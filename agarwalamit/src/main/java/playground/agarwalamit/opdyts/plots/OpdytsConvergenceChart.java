@@ -99,7 +99,7 @@ public class OpdytsConvergenceChart {
 
     public void plotData(final String outFile){
         LOGGER.info("Plotting file "+outFile);
-        NumberAxis range = new NumberAxis("value of objection function");
+//        NumberAxis range = new NumberAxis("value of objection function");
 //        range.setRange(new Range(0.0,1.0));
 
         XYScatterChart chart = new XYScatterChart(rawVale+" & "+avgValue,"Iteration","value of objection function");
