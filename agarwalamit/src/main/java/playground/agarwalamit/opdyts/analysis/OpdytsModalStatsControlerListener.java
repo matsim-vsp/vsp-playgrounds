@@ -90,9 +90,9 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
         this.realCounts = this.referenceStudyDistri.getMode2DistanceBasedLegs();
     }
 
-    public OpdytsModalStatsControlerListener() {
-        this(Arrays.asList(TransportMode.car, TransportMode.pt), null);
-    }
+//    public OpdytsModalStatsControlerListener() {
+//        this(Arrays.asList(TransportMode.car, TransportMode.pt), null);
+//    }
 
     @Override
     public void notifyStartup(StartupEvent event) {

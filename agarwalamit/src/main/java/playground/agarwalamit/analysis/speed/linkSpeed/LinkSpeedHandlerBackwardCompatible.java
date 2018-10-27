@@ -19,6 +19,7 @@
 
 package playground.agarwalamit.analysis.speed.linkSpeed;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,8 @@ import org.matsim.vehicles.Vehicle;
  * Created by amit on 18.01.18.
  */
 
-public class LinkSpeedHandlerBackwardCompatible implements LinkEnterEventHandler, LinkLeaveEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
+public class LinkSpeedHandlerBackwardCompatible implements LinkEnterEventHandler, LinkLeaveEventHandler, 
+PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
 
     private Map<Id<Link>,Map<Id<Person>,Double>> link2PersonEnterTime = new HashMap<>();
     private SortedMap<Double,Map<Id<Link>,Double>> time2link2SpeedSum = new TreeMap<>();
@@ -61,7 +63,7 @@ public class LinkSpeedHandlerBackwardCompatible implements LinkEnterEventHandler
     private final Map<Id<Vehicle>, Id<Person>> driverAgents = new HashMap<>();
 
     public LinkSpeedHandlerBackwardCompatible(double simulationEndTime, int noOfTimeBins, Network network){
-        this(simulationEndTime, noOfTimeBins, network, null);
+        this(simulationEndTime, noOfTimeBins, network, new ArrayList<>());
     }
 
     public LinkSpeedHandlerBackwardCompatible(double simulationEndTime, int noOfTimeBins, Network network, List<String> modesUnderConsideration){
