@@ -66,9 +66,6 @@ public class PatnaEmissionsAnalyzer {
         events.addHandler(new Vehicle2DriverEventHandler());
 
         EmissionEventsReader emissionEventsReader = new EmissionEventsReader(events);
-        MatsimEventsReader eventsReader = new MatsimEventsReader(events);
-
-//        eventsReader.readFile(eventsFile);
         emissionEventsReader.readFile(emissionEventsFile);
 
         // probably just use the total directly from event handler; (need to test first) amit June'17

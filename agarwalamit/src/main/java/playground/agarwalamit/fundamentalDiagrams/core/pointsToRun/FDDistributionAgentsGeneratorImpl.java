@@ -76,7 +76,7 @@ public class FDDistributionAgentsGeneratorImpl implements  FDAgentsGenerator {
             );
         }
 
-        FDModule.LOG.warn("The modal share in PCU is : " + modalShareInPCU);
+        FDModule.LOG.warn("The modal share in PCU is : " + Arrays.toString(modalShareInPCU));
         this.scenario= scenario;
 
         init();

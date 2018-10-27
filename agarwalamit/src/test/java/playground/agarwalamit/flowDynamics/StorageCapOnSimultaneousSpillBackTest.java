@@ -101,11 +101,11 @@ public class StorageCapOnSimultaneousSpillBackTest {
 		Map<Id<Vehicle>, Tuple<Double,Double>> vehicle2EnterTime = getVehicle2LinkEnterTime(startLinkIds);
 
 //		if (this.isUsingFastCapacityUpdate ) {
-			Assert.assertEquals("Person 3 is entering on link 2 at wrong time.", 13.0, vehicle2EnterTime.get(Id.createPersonId(3)).getFirst(),MatsimTestUtils.EPSILON);
-			Assert.assertEquals("Person 3 is leaving from link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createPersonId(3)).getSecond(),MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 3 is entering on link 2 at wrong time.", 13.0, vehicle2EnterTime.get(Id.createVehicleId(3)).getFirst().doubleValue(),MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 3 is leaving from link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createVehicleId(3)).getSecond().doubleValue(),MatsimTestUtils.EPSILON);
 
-			Assert.assertEquals("Person 4 is entering on link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createPersonId(4)).getFirst(),MatsimTestUtils.EPSILON);
-			Assert.assertEquals("Person 4 is leaving from link 2 at wrong time.", 33.0, vehicle2EnterTime.get(Id.createPersonId(4)).getSecond(),MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 4 is entering on link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createVehicleId(4)).getFirst().doubleValue(), MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 4 is leaving from link 2 at wrong time.", 33.0, vehicle2EnterTime.get(Id.createVehicleId(4)).getSecond().doubleValue(), MatsimTestUtils.EPSILON);
 
 //		} else { // here are some rounding errors --> person 1 leave, link blocked for 10 sec, person 2 leave after 11 sec, link blocked again for 10 sec, person 2 leave after 10 sec.
 //			Assert.assertEquals("Person 3 is entering on link 2 at wrong time.", 14.0, vehicle2EnterTime.get(Id.createPersonId(3)).getFirst(),MatsimTestUtils.EPSILON);
@@ -125,11 +125,11 @@ public class StorageCapOnSimultaneousSpillBackTest {
 		vehicle2EnterTime = getVehicle2LinkEnterTime(startLinkIds);
 
 //		if(this.isUsingFastCapacityUpdate) { 
-			Assert.assertEquals("Person 3 is entering on link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createPersonId(3)).getFirst(),MatsimTestUtils.EPSILON);
-			Assert.assertEquals("Person 3 is leaving from link 2 at wrong time.", 33.0, vehicle2EnterTime.get(Id.createPersonId(3)).getSecond(),MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 3 is entering on link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createVehicleId(3)).getFirst(),MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 3 is leaving from link 2 at wrong time.", 33.0, vehicle2EnterTime.get(Id.createVehicleId(3)).getSecond(),MatsimTestUtils.EPSILON);
 
-			Assert.assertEquals("Person 4 is entering on link 2 at wrong time.", 13.0, vehicle2EnterTime.get(Id.createPersonId(4)).getFirst(),MatsimTestUtils.EPSILON);
-			Assert.assertEquals("Person 4 is leaving from link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createPersonId(4)).getSecond(),MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 4 is entering on link 2 at wrong time.", 13.0, vehicle2EnterTime.get(Id.createVehicleId(4)).getFirst(),MatsimTestUtils.EPSILON);
+			Assert.assertEquals("Person 4 is leaving from link 2 at wrong time.", 23.0, vehicle2EnterTime.get(Id.createVehicleId(4)).getSecond(),MatsimTestUtils.EPSILON);
 //		} else {
 //			Assert.assertEquals("Person 3 is entering on link 2 at wrong time.", 24.0, vehicle2EnterTime.get(Id.createPersonId(3)).getFirst(),MatsimTestUtils.EPSILON);
 //			Assert.assertEquals("Person 3 is leaving from link 2 at wrong time.", 34.0, vehicle2EnterTime.get(Id.createPersonId(3)).getSecond(),MatsimTestUtils.EPSILON);

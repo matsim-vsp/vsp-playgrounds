@@ -84,7 +84,7 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 
 	@Override
 	public void handleEvent(ColdEmissionEvent event) {
- 		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
+// 		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
 
 		if (this.af!=null ) { // area filtering
 			if (this.af.isLinkInsideShape(network.getLinks().get(event.getLinkId()))) {
@@ -99,7 +99,7 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 
 	@Override
 	public void handleEvent(WarmEmissionEvent event) {
-		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
+//		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
 
 		if (this.af!=null ) { // area filtering
 			if (this.af.isLinkInsideShape(network.getLinks().get(event.getLinkId()))) {
