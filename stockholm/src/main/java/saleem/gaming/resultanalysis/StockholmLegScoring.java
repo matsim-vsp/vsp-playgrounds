@@ -32,8 +32,8 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.gbl.Gbl;
-import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.scoring.functions.ModeUtilityParameters;
+import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.PtConstants;
 

@@ -19,9 +19,6 @@
  */ 
 package gunnar.ihop2.scaper;
 
-import gunnar.ihop2.regent.demandreading.ZonalSystem;
-import gunnar.ihop2.regent.demandreading.Zone;
-
 import static gunnar.utils.ShapeUtils.drawPointFromGeometry;
 
 import java.util.logging.Logger;
@@ -34,6 +31,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.xml.sax.helpers.DefaultHandler;
 
+import gunnar.ihop2.regent.demandreading.ZonalSystem;
+import gunnar.ihop2.regent.demandreading.Zone;
 import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**

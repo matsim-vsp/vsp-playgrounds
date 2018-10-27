@@ -30,7 +30,6 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
-import org.matsim.contrib.drt.optimizer.DefaultDrtOptimizer;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -76,7 +75,7 @@ public class DrtPricingTestIT {
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
-		config1.planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
+		config1.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config1.controler().setOutputDirectory(testUtils.getOutputDirectory() + "bc1");
 		SAVPricingConfigGroup optAVParams1 = ConfigUtils.addOrGetModule(config1, SAVPricingConfigGroup.class);
@@ -117,7 +116,7 @@ public class DrtPricingTestIT {
 				new TaxiFareConfigGroup(),
 				new OTFVisConfigGroup(),
 				new NoiseConfigGroup());
-		config2.planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
+		config2.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-0.01);
 
 		config2.controler().setOutputDirectory(testUtils.getOutputDirectory() + "n");
 		SAVPricingConfigGroup optAVParams2 = ConfigUtils.addOrGetModule(config2, SAVPricingConfigGroup.class);
@@ -162,7 +161,7 @@ public class DrtPricingTestIT {
 				new NoiseConfigGroup());
 		
 		config3.controler().setOutputDirectory(testUtils.getOutputDirectory() + "n-with-operating-costs");
-		config3.planCalcScore().getModes().get(DefaultDrtOptimizer.DRT_OPTIMIZER).setMonetaryDistanceRate(-9999999.0);
+		config3.planCalcScore().getModes().get(SAVPricingModule.DRT_OPTIMIZER).setMonetaryDistanceRate(-9999999.0);
 		ConfigUtils.addOrGetModule(config3, TaxiFareConfigGroup.class).setDistanceFare_m(0.02);
 		
 		SAVPricingConfigGroup optAVParams3 = ConfigUtils.addOrGetModule(config3, SAVPricingConfigGroup.class);

@@ -139,6 +139,9 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	// @Inject
 	// private PSimProvider pSimProvider;
 
+	@Inject
+	private GreedoProgressListener greedoProgressListener;
+	
 	// -------------------- NON-INJECTED MEMBERS --------------------
 
 	private Set<Id<Person>> replanners = null;
@@ -188,6 +191,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	}
 
 	private void setWeightOfHypotheticalReplanning(final double weight) {
+		this.greedoProgressListener.setWeightOfHypotheticalReplanning(weight);
 		final StrategyManager strategyManager = this.services.getStrategyManager();
 		for (GenericPlanStrategy<Plan, Person> strategy : strategyManager.getStrategies(null)) {
 			if (strategy instanceof AcceptIntendedReplanningStrategy) {
@@ -314,6 +318,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	@Override
 	public void notifyStartup(final StartupEvent event) {
 
+		this.greedoProgressListener.callToNotifyStartup_greedo(event);
+		
 		// TODO What would be the typed access structures this deprecation refers to?
 		this.accelerationConfig = (AccelerationConfigGroup) this.services.getConfig()
 				.getModule(AccelerationConfigGroup.GROUP_NAME);
@@ -378,6 +384,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 	@Override
 	public void reset(final int iteration) {
+		this.greedoProgressListener.callToReset_greedo(iteration);
 		this.slotUsageListener.reset(iteration);
 		// this.matsimIVMobsimUsageListener.reset(iteration);
 		// this.matsimOVMobsimUsageListener.reset(iteration);
@@ -445,12 +452,15 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	@Override
 	public void notifyIterationEnds(final IterationEndsEvent event) {
 
+		this.greedoProgressListener.callToNotifyIterationEnds_greedo(event);
+		
 		if (this.mobsimSwitcher.isQSimIteration()) {
 			log.info("physical mobsim run in iteration " + event.getIteration() + " ends");
 			if (!this.nextMobsimIsExpectedToBePhysical) {
 				throw new RuntimeException("Did not expect a physical mobsim run!");
 			}
 			this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
+			this.greedoProgressListener.extractedLastPhysicalPopulationState(event.getIteration());			
 			this.lastPhysicalSlotUsages = this.slotUsageListener.getNewIndicatorView();
 			log.info("number of physical slot usage indicators " + this.lastPhysicalSlotUsages.size());
 			// this.lastPhysicalLinkUsages =
@@ -478,6 +488,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		if (this.pseudoSimIterationCnt == (ConfigUtils.addOrGetModule(this.services.getConfig(), PSimConfigGroup.class)
 				.getIterationsPerCycle() - 1)) {
 
+			this.greedoProgressListener.observedLastPSimIterationWithinABlock(event.getIteration());
 			// this.stopInteractionListener.setEnabled(true);
 
 			/*
@@ -679,6 +690,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			// this.lastExpectedScoreChangeList =
 			// replannerIdentifier.getExpectedScoreChangeListView();
 
+			this.greedoProgressListener.madeReplanningDecisions(event.getIteration());
+			
 			this.nextMobsimIsExpectedToBePhysical = true;
 			this.setWeightOfHypotheticalReplanning(1e9);
 

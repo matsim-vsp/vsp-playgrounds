@@ -52,7 +52,7 @@ public class RunBerlinTaxiPricingScenario2 {
 	private static String configFileName;
 	private static String overridingConfigFileName;
 	private static String serviceAreaShapeFile;
-	private static double dailyRewardDrtInsteadOfPrivateCar;
+	private static double dailyRewardTaxiInsteadOfPrivateCar;
 	private static String runId;
 	private static String outputDirectory;
 	private static String visualizationScriptDirectory;
@@ -64,7 +64,7 @@ public class RunBerlinTaxiPricingScenario2 {
 			configFileName = args[0];
 			overridingConfigFileName = args[1];
 			serviceAreaShapeFile = args[2];
-			dailyRewardDrtInsteadOfPrivateCar = Double.parseDouble(args[3]);
+			dailyRewardTaxiInsteadOfPrivateCar = Double.parseDouble(args[3]);
 			runId = args[4];
 			outputDirectory = args[5];
 			visualizationScriptDirectory = args[6];
@@ -75,7 +75,7 @@ public class RunBerlinTaxiPricingScenario2 {
 			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-taxi2-v5.2-1pct.config.xml";
 			overridingConfigFileName = null;
 			serviceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/shp-inner-city-area/inner-city-area.shp";
-			dailyRewardDrtInsteadOfPrivateCar = 0.;
+			dailyRewardTaxiInsteadOfPrivateCar = 0.;
 			runId = "taxi2-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
@@ -90,7 +90,7 @@ public class RunBerlinTaxiPricingScenario2 {
 	}
 	
 	private void run() {
-		RunBerlinTaxiScenario2 berlin = new RunBerlinTaxiScenario2(configFileName, overridingConfigFileName, serviceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
+		RunBerlinTaxiScenario2 berlin = new RunBerlinTaxiScenario2(configFileName, overridingConfigFileName, serviceAreaShapeFile, dailyRewardTaxiInsteadOfPrivateCar);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
@@ -123,6 +123,10 @@ public class RunBerlinTaxiPricingScenario2 {
 		final String zonesCRS = null;
 		final String homeActivity = "home";
 		final int scalingFactor = scaleFactor;
+		
+		final String taxiMode = TransportMode.taxi;
+		final String carMode = TransportMode.car;
+		final double rewardSAVformerCarUser = 0.;
 		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
@@ -157,7 +161,10 @@ public class RunBerlinTaxiPricingScenario2 {
 				scalingFactor,
 				filters,
 				null,
-				modes);
+				modes,
+				taxiMode,
+				carMode,
+				rewardSAVformerCarUser);
 		analysis.run();
 		
 		// noise post-analysis

@@ -23,7 +23,6 @@ import org.matsim.utils.objectattributes.ObjectAttributeUtils2;
 import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlReader;
 
-import gunnar.ihop2.regent.RegentDictionary;
 import gunnar.ihop2.regent.demandreading.ZonalSystem;
 
 @Deprecated

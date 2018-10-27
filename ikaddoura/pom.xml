@@ -107,7 +107,7 @@
 	<dependency>
 	    <groupId>com.github.matsim-vsp</groupId>
 	    <artifactId>matsim-berlin</artifactId>
-	    <version>-SNAPSHOT</version>
+	    <version>sav-SNAPSHOT</version>
 	</dependency>
 	
 <!-- 	<dependency> -->

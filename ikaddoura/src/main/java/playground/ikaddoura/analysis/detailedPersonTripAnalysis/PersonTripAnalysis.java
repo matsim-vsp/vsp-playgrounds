@@ -37,13 +37,13 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.decongestion.handler.DelayAnalysis;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
-import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.vehicles.Vehicle;
 
+import playground.ikaddoura.analysis.carOwnerShip.SAVInsteadOfCarAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
+import playground.ikaddoura.savPricing.SAVPricingModule;
 
 /**
  * @author ikaddoura
@@ -490,7 +490,7 @@ public class PersonTripAnalysis {
 			NoiseAnalysisHandler noiseHandler,
 			PersonMoneyLinkHandler moneyHandler,
 			DelayAnalysis delayAnalysis,
-			DailyRewardHandlerSAVInsteadOfCar savFixCostHandler
+			SAVInsteadOfCarAnalysisHandler savFixCostHandler
 			) {
 	
 		String fileName = outputPath + "aggregated_info.csv";
@@ -740,7 +740,6 @@ public class PersonTripAnalysis {
 			bw.newLine();
 						
 			double paymentsSAVUserFormerCarUser = 0.;
-			double paymentsSAVUserFormerNonCarUser = 0.;
 
 			int savUsersFormerCarUsers = 0;
 			int savUsersFormerNonCarUsers = 0;
@@ -749,7 +748,6 @@ public class PersonTripAnalysis {
 				savUsersFormerCarUsers = savFixCostHandler.getSavUsersFormerCarUsers();
 				savUsersFormerNonCarUsers = savFixCostHandler.getSavUsersFormerNonCarUsers();
 				paymentsSAVUserFormerCarUser = savFixCostHandler.getTotalSAVFixCostPaidBySAVusersFormerCarUsers();
-				paymentsSAVUserFormerNonCarUser = savFixCostHandler.getTotalSAVFixCostPaidBySAVusersFormerNonCarUsers();
 			}
 			
 			// TODO: other money payments by users?
@@ -761,9 +759,6 @@ public class PersonTripAnalysis {
 			bw.newLine();
 			
 			bw.write("fixed cost payments by taxi users (former car users) (sample size) [monetary units];" + paymentsSAVUserFormerCarUser);
-			bw.newLine();
-			
-			bw.write("fixed cost payments by taxi users (former non-car users) (sample size) [monetary units];" + paymentsSAVUserFormerNonCarUser);
 			bw.newLine();
 			
 			bw.write("-----------");
@@ -778,13 +773,13 @@ public class PersonTripAnalysis {
 			bw.newLine();
 
 			double distanceBasedSAVoCost = 0.;
-			if (basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER) != null) {
-				distanceBasedSAVoCost = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).getMonetaryDistanceRate();
+			if (basicHandler.getScenario().getConfig().planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER) != null) {
+				distanceBasedSAVoCost = (-1) * taxiVehicleDistance * basicHandler.getScenario().getConfig().planCalcScore().getModes().get(SAVPricingModule.TAXI_OPTIMIZER).getMonetaryDistanceRate();
 				bw.write("taxi operating costs (sample size) [monetary units];" + distanceBasedSAVoCost);
 				bw.newLine();
 			}
 			
-			double tollAndFarePaymentsByUsers = moneyPaymentsByUsers - paymentsSAVUserFormerCarUser - paymentsSAVUserFormerNonCarUser;
+			double tollAndFarePaymentsByUsers = moneyPaymentsByUsers - paymentsSAVUserFormerCarUser;
 			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + tollAndFarePaymentsByUsers);
 			bw.newLine();
 			

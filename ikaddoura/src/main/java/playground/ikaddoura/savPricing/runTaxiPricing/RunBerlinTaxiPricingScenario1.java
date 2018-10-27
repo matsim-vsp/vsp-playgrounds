@@ -58,6 +58,7 @@ public class RunBerlinTaxiPricingScenario1 {
 	private static String outputDirectory;
 	private static String visualizationScriptDirectory;
 	private static Integer scaleFactor;
+	private static double dailyRewardTaxiInsteadOfPrivateCar;
 		
 	public static void main(String[] args) {
 
@@ -71,6 +72,7 @@ public class RunBerlinTaxiPricingScenario1 {
 			outputDirectory = args[6];
 			visualizationScriptDirectory = args[7];
 			scaleFactor = Integer.parseInt(args[8]);
+			dailyRewardTaxiInsteadOfPrivateCar = Double.parseDouble(args[9]);
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
@@ -83,6 +85,7 @@ public class RunBerlinTaxiPricingScenario1 {
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
 			scaleFactor = 100;
+			dailyRewardTaxiInsteadOfPrivateCar = 0.;
 		}
 			
 		log.info("run Id: " + runId);
@@ -93,7 +96,7 @@ public class RunBerlinTaxiPricingScenario1 {
 	}
 	
 	private void run() {
-		RunBerlinTaxiScenario1 berlin = new RunBerlinTaxiScenario1(configFileName, overridingConfigFileName, restrictedCarAreaShapeFile, serviceAreaShapeFile, transitStopCoordinatesSFile);
+		RunBerlinTaxiScenario1 berlin = new RunBerlinTaxiScenario1(configFileName, overridingConfigFileName, restrictedCarAreaShapeFile, serviceAreaShapeFile, transitStopCoordinatesSFile, dailyRewardTaxiInsteadOfPrivateCar);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
@@ -161,7 +164,10 @@ public class RunBerlinTaxiPricingScenario1 {
 				scalingFactor,
 				filters,
 				null,
-				modes);
+				modes,
+				null,
+				null,
+				0.);
 		analysis.run();
 		
 		// noise post-analysis

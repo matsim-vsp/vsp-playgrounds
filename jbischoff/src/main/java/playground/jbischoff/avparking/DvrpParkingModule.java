@@ -167,7 +167,7 @@ public final class DvrpParkingModule extends AbstractModule {
 			int i = 0;
 
 			for (Class<? extends MobsimListener> l : listeners) {
-				bindMobsimListener("listener_" + (i++)).to(l);
+				addNamedComponent(l,"listener_" + (i++));
 			}
 		}
 	}

@@ -40,28 +40,43 @@ public class SampledPlansMerger {
 
     public static void main(String[] args) {
     	String plansBaseDir = "../../shared-svn/studies/countries/de/open_berlin_scenario/be_5/population/500";
-        int numberOfFirstPlansFile = 500;
+    	int numberOfFirstPlansFile = 500;
+    	String firstPlanFileName = "plans_10pct.xml.gz";
+    	int numberOfPlans = 2;
         String plansFolderPrefix = "pop_";
         String plansFolderSuffix = "_1-0";
-        int numberOfPlans = 2;
-        String outPlans = plansBaseDir + "/plans_500-10-1_10pct.xml.gz";
+        String otherPlansFileNames = "plans.xml.gz";
+        String outputPlansFileName = plansBaseDir + "/plans_500-10-1_10pct.xml.gz";
         boolean addStayHomePlan = true;
 
         if (args.length > 0) {
-            numberOfFirstPlansFile = Integer.valueOf(args[0]);
-            numberOfPlans = Integer.valueOf(args[1]);
-            plansBaseDir = args[2];
-            outPlans = args[3];
+        	plansBaseDir = args[0];
+        	numberOfFirstPlansFile = Integer.valueOf(args[1]);
+        	firstPlanFileName = args[2];
+            numberOfPlans = Integer.valueOf(args[3]);
             plansFolderPrefix = args[4];
             plansFolderSuffix = args[5];
-            addStayHomePlan = Boolean.parseBoolean(args[6]);
+            otherPlansFileNames = args[6];
+            outputPlansFileName = args[7];
+            addStayHomePlan = Boolean.parseBoolean(args[8]);
+            
+            // Until 2018-10-24, this was the numbering
+//          numberOfFirstPlansFile = Integer.valueOf(args[0]);
+//          numberOfPlans = Integer.valueOf(args[1]);
+//          plansBaseDir = args[2];
+//          outPlans = args[3];
+//          plansFolderPrefix = args[4];
+//          plansFolderSuffix = args[5];
+//          addStayHomePlan = Boolean.parseBoolean(args[6]);
         }
 
-        String sampledPlans = plansBaseDir + "/" + plansFolderPrefix + numberOfFirstPlansFile + plansFolderSuffix + "/plans_10pct.xml.gz";
+//      String sampledPlans = plansBaseDir + "/" + plansFolderPrefix + numberOfFirstPlansFile + plansFolderSuffix + "/plans_10pct.xml.gz"; // hardcoded until 2018-10-24
+        String sampledPlans = plansBaseDir + "/" + plansFolderPrefix + numberOfFirstPlansFile + plansFolderSuffix + "/" + firstPlanFileName;
         Population sampledPop = getPopulation(sampledPlans);
 
         for (int planNumber = 1; planNumber < numberOfPlans; planNumber++) {
-            String unsampledPlans = plansBaseDir + "/" + plansFolderPrefix + (numberOfFirstPlansFile + planNumber) + plansFolderSuffix + "/plans.xml.gz";
+//          String unsampledPlans = plansBaseDir + "/" + plansFolderPrefix + (numberOfFirstPlansFile + planNumber) + plansFolderSuffix + "/plans.xml.gz"; // hardcoded until 2018-10-24
+            String unsampledPlans = plansBaseDir + "/" + plansFolderPrefix + (numberOfFirstPlansFile + planNumber) + plansFolderSuffix + "/" + otherPlansFileNames;
             Population unsampledPop = getPopulation(unsampledPlans);
 
             for (Person sampledPerson : sampledPop.getPersons().values()) {
@@ -101,7 +116,7 @@ public class SampledPlansMerger {
 			}
 		}
         
-        new PopulationWriter(sampledPop).write(outPlans);
+        new PopulationWriter(sampledPop).write(outputPlansFileName);
     }
 
     private static Population getPopulation (String plansFile) {

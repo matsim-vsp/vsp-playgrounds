@@ -383,6 +383,97 @@ public class PersonTripScenarioComparison {
 		}
 		
 		{
+			BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_all-non-stucking-persons.csv");
+	        writer.write("PersonId;homeCoordX;homeCoordY;totalTrips;score0 [utils];score1 [utils];monetary payments 0 [EUR]; monetary payments 1 [EUR]");
+	        writer.newLine();
+	       
+	        double score0Sum = 0.;
+	        double score1Sum = 0.;
+	        double tolls0Sum = 0.;
+	        double tolls1Sum = 0.;
+	        
+			for (Id<Person> personId : scenario1.getPopulation().getPersons().keySet()) {
+				
+				boolean analyzePerson = true;
+				if (basicHandler1.getPersonId2tripNumber2stuckAbort().get(personId) != null) {
+					log.info("Person " + personId + " is stucking in policy case. Excluding person from score comparison.");
+					analyzePerson = false;
+				}
+				if (basicHandlerToCompareWith.getPersonId2tripNumber2stuckAbort().get(personId) != null) {
+					log.info("Person " + personId + " is stucking in base case. Excluding person from score comparison.");
+					analyzePerson = false;
+				}
+				
+				if (analyzePerson) {
+					double score0 = scenarioToCompareWith.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+			        double score1 = scenario1.getPopulation().getPersons().get(personId).getSelectedPlan().getScore();
+					
+			        double tolls0 = 0.;
+			        if (basicHandlerToCompareWith.getPersonId2tripNumber2payment().get(personId) != null) {
+			        	for (Double toll : basicHandlerToCompareWith.getPersonId2tripNumber2payment().get(personId).values()) {
+				        	tolls0 += toll;
+				        }
+			        }
+			        
+			        double tolls1 = 0.;
+			        if (basicHandler1.getPersonId2tripNumber2payment().get(personId) != null) {
+			        	for (Double toll : basicHandler1.getPersonId2tripNumber2payment().get(personId).values()) {
+				        	tolls1 += toll;
+				        }
+			        }
+			        
+			        int numberOfTrips = 0;
+			        if (basicHandler1.getPersonId2tripNumber2legMode().get(personId) != null) {
+			        		numberOfTrips = basicHandler1.getPersonId2tripNumber2legMode().get(personId).size();
+			        }
+			        
+			        double homeX = 0.;
+			        double homeY = 0.;
+			        
+			        if (personId2homeActCoord.get(personId) == null) {
+			        		log.warn("No home coordinate for " + personId + ".");
+			        } else {
+			        		homeX = personId2homeActCoord.get(personId).getX();
+			        		homeY = personId2homeActCoord.get(personId).getY();
+			        }
+			        
+					writer.write(personId + ";"
+	    	        + homeX + ";"
+	    	        + homeY + ";"    
+		        	+ numberOfTrips + ";"
+		        	+ score0 + ";"
+		        	+ score1 + ";"
+		        	+ tolls0 + ";"
+		        	+ tolls1
+					);
+		        	
+					writer.newLine();
+		        	
+		        	score0Sum += score0;
+		        	score1Sum += score1;
+		        	tolls0Sum += tolls0;
+		        	tolls1Sum += tolls1;
+				}
+				
+	        } 
+			
+			writer.newLine();
+        	writer.write("Score sum base case; " +  score0Sum);
+			writer.newLine();
+        	writer.write("Score sum policy case; " +  score1Sum);
+			writer.newLine();
+			writer.write("Tolls sum base case; " +  tolls0Sum);
+			writer.newLine();
+        	writer.write("Tolls sum policy case; " +  tolls1Sum);
+			writer.newLine();
+        	writer.write("Number of agents; " + scenario1.getPopulation().getPersons().size() );
+			writer.newLine();
+        	writer.write("Average score difference per agent; " + (score1Sum - score0Sum) / (double) scenario1.getPopulation().getPersons().size() );
+			writer.newLine();	
+        	writer.close();
+		}
+		
+		{
 	        for (String modeA : modes) {
 				BufferedWriter writer = IOUtils.getBufferedWriter(analysisOutputDirectory + "/winner-loser-analysis_" + modeA + "2" +  modeA + ".csv");
 				writer.write("PersonId;homeCoordX;homeCoordY;totalTrips;mode2modeTrips;score0 [utils];score1 [utils]");

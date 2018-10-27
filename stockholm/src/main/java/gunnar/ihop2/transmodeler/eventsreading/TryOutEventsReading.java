@@ -19,7 +19,9 @@
  */ 
 package gunnar.ihop2.transmodeler.eventsreading;
 
-import floetteroed.utilities.Time;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.matsim.analysis.VolumesAnalyzer;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -33,8 +35,7 @@ import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import floetteroed.utilities.Time;
 
 /**
  * 
