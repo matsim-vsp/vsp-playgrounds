@@ -149,7 +149,6 @@ public class RunBerlinTaxiPricingScenario1 {
 		filters.add(filter3);
 		
 		List<String> modes = new ArrayList<>();
-		modes.add(TransportMode.car);
 		modes.add(RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg);
 		modes.add(TransportMode.taxi);
 
@@ -165,9 +164,9 @@ public class RunBerlinTaxiPricingScenario1 {
 				filters,
 				null,
 				modes,
-				null,
-				null,
-				0.);
+				TransportMode.taxi,
+				RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg,
+				dailyRewardTaxiInsteadOfPrivateCar);
 		analysis.run();
 		
 		// noise post-analysis
