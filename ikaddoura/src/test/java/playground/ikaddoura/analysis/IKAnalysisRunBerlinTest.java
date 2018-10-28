@@ -91,6 +91,10 @@ public class IKAnalysisRunBerlinTest {
 		final String carMode = TransportMode.car;
 		final double rewardSAVformerCarUser = 5.3;
 		
+//		final String taxiMode = null;
+//		final String carMode = null;
+//		final double rewardSAVformerCarUser = 5.3;
+		
 		// optional: person attributes file to replace the output person attributes file
 		final String personAttributesFile = null;
 
