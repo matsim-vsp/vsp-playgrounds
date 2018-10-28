@@ -442,8 +442,8 @@ public class IKAnalysisRun {
 			events1 = EventsUtils.createEventsManager();
 			events1.addHandler(basicHandler1);
 			events1.addHandler(delayAnalysis1);
-			events1.addHandler(savTrackingHandler1);
-			events1.addHandler(savFixCostAnalysis1);
+			if (savTrackingHandler1 != null) events1.addHandler(savTrackingHandler1);
+			if (savFixCostAnalysis1 != null) events1.addHandler(savFixCostAnalysis1);
 			events1.addHandler(trafficVolumeAnalysis1);
 			events1.addHandler(dynamicTrafficVolumeAnalysis1);
 			events1.addHandler(personTripMoneyHandler1);
@@ -492,8 +492,8 @@ public class IKAnalysisRun {
 			events0 = EventsUtils.createEventsManager();
 			events0.addHandler(basicHandler0);
 			events0.addHandler(delayAnalysis0);
-			events0.addHandler(savTrackingHandler0);
-			events0.addHandler(savFixCostAnalysis0);
+			if (savTrackingHandler0 != null) events0.addHandler(savTrackingHandler0);
+			if (savFixCostAnalysis0 != null) events0.addHandler(savFixCostAnalysis0);
 			events0.addHandler(trafficVolumeAnalysis0);
 			events0.addHandler(dynamicTrafficVolumeAnalysis0);
 			events0.addHandler(personTripMoneyHandler0);
