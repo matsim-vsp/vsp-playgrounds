@@ -304,7 +304,7 @@ public class IKAnalysisRun {
 			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
 			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes, String taxiMode, String carMode, double rewardSAVuserFormerCarUser) {
 
-		this.outputDirectoryName = this.outputDirectoryName + "-comparison";
+		if (scenario0 != null) this.outputDirectoryName = this.outputDirectoryName + "-comparison";
 		
 		String runDirectory = scenario1.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
