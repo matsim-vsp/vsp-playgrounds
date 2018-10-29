@@ -22,12 +22,13 @@ package cba.toynet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import floetteroed.utilities.TimeDiscretization;
-import floetteroed.utilities.Units;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
+
+import floetteroed.utilities.TimeDiscretization;
+import floetteroed.utilities.Units;
 
 /**
  * 

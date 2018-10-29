@@ -19,12 +19,12 @@
  */ 
 package matsimintegration;
 
+import org.matsim.core.config.Config;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import floetteroed.utilities.TimeDiscretization;
-
-import org.matsim.core.config.Config;
 
 /**
  * Throws Gunnar's TimeDiscretization into the MATSim/Guice machinery.

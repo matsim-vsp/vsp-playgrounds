@@ -141,7 +141,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 	@Inject
 	private GreedoProgressListener greedoProgressListener;
-	
+
 	// -------------------- NON-INJECTED MEMBERS --------------------
 
 	private Set<Id<Person>> replanners = null;
@@ -319,7 +319,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	public void notifyStartup(final StartupEvent event) {
 
 		this.greedoProgressListener.callToNotifyStartup_greedo(event);
-		
+
 		// TODO What would be the typed access structures this deprecation refers to?
 		this.accelerationConfig = (AccelerationConfigGroup) this.services.getConfig()
 				.getModule(AccelerationConfigGroup.GROUP_NAME);
@@ -453,14 +453,14 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	public void notifyIterationEnds(final IterationEndsEvent event) {
 
 		this.greedoProgressListener.callToNotifyIterationEnds_greedo(event);
-		
+
 		if (this.mobsimSwitcher.isQSimIteration()) {
 			log.info("physical mobsim run in iteration " + event.getIteration() + " ends");
 			if (!this.nextMobsimIsExpectedToBePhysical) {
 				throw new RuntimeException("Did not expect a physical mobsim run!");
 			}
 			this.lastPhysicalPopulationState = new PopulationState(this.services.getScenario().getPopulation());
-			this.greedoProgressListener.extractedLastPhysicalPopulationState(event.getIteration());			
+			this.greedoProgressListener.extractedLastPhysicalPopulationState(event.getIteration());
 			this.lastPhysicalSlotUsages = this.slotUsageListener.getNewIndicatorView();
 			log.info("number of physical slot usage indicators " + this.lastPhysicalSlotUsages.size());
 			// this.lastPhysicalLinkUsages =
@@ -535,71 +535,45 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 				// Compute target percentile and corresponding delta for the next iteration.
 
-				// final double upperBound =
-				// this.expectedUtilityChangeSumUniform.mostRecentValue()
-				// + Math.max(0, this.realizedUtilityChangeSum.mostRecentValue());
-				// double currentVal = this.expectedUtilityChangeSumUniform.mostRecentValue();
-
 				final double upperBound = Math.max(0.0, this.realizedUtilityChangeSum.average());
 				double utilityPredictionError = 0.0; // between accelerated and greedy score, starting at delta=inf
-
 				int percentileIndex = this.individualReplanningResultsList.size() - 1;
 
 				while ((Math.abs(utilityPredictionError) < upperBound) && (percentileIndex > 0)) {
 					percentileIndex--;
 					final IndividualReplanningResult individualResult = this.individualReplanningResultsList
 							.get(percentileIndex);
-					if (individualResult.wouldBeGreedyReplanner) {
-						if (!individualResult.wouldBeUniformReplanner) {
-							utilityPredictionError += individualResult.expectedScoreChange;
-						}
-					} else { // would not be greedy
-						if (individualResult.wouldBeUniformReplanner) {
-							utilityPredictionError -= individualResult.expectedScoreChange;
-						}
+					if (individualResult.wouldBeGreedyReplanner != individualResult.wouldBeUniformReplanner) {
+						utilityPredictionError += utilityStatsBeforeReplanning.currentExpectedUtilitySum
+								/ this.individualReplanningResultsList.size();
 					}
 				}
 				if (Math.abs(utilityPredictionError) < upperBound) {
 					percentileIndex = Math.min(this.individualReplanningResultsList.size() - 1, percentileIndex + 1);
 				}
 
-				// if (currentVal > upperBound) { // TODO Use relative threshold?
-				//
-				// while ((currentVal > upperBound)
-				// && (percentileIndex + 1 < this.individualReplanningResultsList.size())) {
-				// percentileIndex++;
-				// final IndividualReplanningResult individualResult =
-				// this.individualReplanningResultsList
-				// .get(percentileIndex);
-				// if (individualResult.isActualReplanner &&
-				// !individualResult.wouldBeUniformReplanner) {
-				// currentVal -= individualResult.expectedScoreChange;
-				// } else if (!individualResult.isActualReplanner &&
-				// individualResult.wouldBeUniformReplanner) {
-				// currentVal += individualResult.expectedScoreChange;
-				// }
-				// }
-				//
-				// } else { // TODO Use relative threshold?
-				//
-				// while ((currentVal < upperBound) && (percentileIndex - 1 >= 0)) {
+				// >>>>>>>>>> TODO WORKING RECIPE >>>>>>>>>>
+				// while ((Math.abs(utilityPredictionError) < upperBound) && (percentileIndex >
+				// 0)) {
 				// percentileIndex--;
 				// final IndividualReplanningResult individualResult =
 				// this.individualReplanningResultsList
 				// .get(percentileIndex);
-				// if (individualResult.isActualReplanner &&
-				// !individualResult.wouldBeUniformReplanner) {
-				// currentVal += individualResult.expectedScoreChange;
-				// } else if (!individualResult.isActualReplanner &&
-				// individualResult.wouldBeUniformReplanner) {
-				// currentVal -= individualResult.expectedScoreChange;
+				// if (individualResult.wouldBeGreedyReplanner) {
+				// if (!individualResult.wouldBeUniformReplanner) {
+				// utilityPredictionError += individualResult.expectedScoreChange;
+				// }
+				// } else { // would not be greedy
+				// if (individualResult.wouldBeUniformReplanner) {
+				// utilityPredictionError -= individualResult.expectedScoreChange;
 				// }
 				// }
-				// if (currentVal > upperBound) {
+				// }
+				// if (Math.abs(utilityPredictionError) < upperBound) {
 				// percentileIndex = Math.min(this.individualReplanningResultsList.size() - 1,
 				// percentileIndex + 1);
 				// }
-				// }
+				// <<<<<<<<<< TODO WORKING RECIPE <<<<<<<<<<
 
 				this.targetDeltaPercentile = Math.max(0, Math.min(100,
 						(percentileIndex * 100.0) / this.services.getScenario().getPopulation().getPersons().size()));
@@ -691,7 +665,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			// replannerIdentifier.getExpectedScoreChangeListView();
 
 			this.greedoProgressListener.madeReplanningDecisions(event.getIteration());
-			
+
 			this.nextMobsimIsExpectedToBePhysical = true;
 			this.setWeightOfHypotheticalReplanning(1e9);
 

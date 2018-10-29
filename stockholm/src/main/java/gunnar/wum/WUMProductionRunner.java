@@ -155,7 +155,9 @@ public class WUMProductionRunner {
 			QSimComponentsConfig provideQSimComponentsConfig(Config config) {
 				QSimComponentsConfig components = new QSimComponentsConfig();
 				new StandardQSimComponentConfigurator(config).configure(components);
-				SBBTransitEngineQSimModule.configure(components);
+				// >>>>> FIXME Commenting this out until SBB project is updated. >>>>>
+				// SBBTransitEngineQSimModule.configure(components);
+				// <<<<< FIXME Commenting this out until SBB project is updated. <<<<<
 				return components;
 			}
 		});

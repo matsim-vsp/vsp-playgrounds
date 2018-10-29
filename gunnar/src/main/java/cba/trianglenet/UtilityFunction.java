@@ -20,8 +20,13 @@
 package cba.trianglenet;
 
 import static java.lang.Math.log;
-import java.util.*;
-import com.google.inject.Provider;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -31,6 +36,8 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
+
+import com.google.inject.Provider;
 
 /**
  * 

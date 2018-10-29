@@ -334,7 +334,10 @@ public class Greedo extends AbstractModule {
 		QSimComponentsConfig components = new QSimComponentsConfig();
 		new StandardQSimComponentConfigurator(this.config).configure(components);
 		if (this.config.transit().isUseTransit()) {
-			SBBTransitEngineQSimModule.configure(components);
+			// >>>>> FIXME Commenting this out until SBB project is updated. >>>>>
+			// SBBTransitEngineQSimModule.configure(components);
+			throw new RuntimeException("Waiting for qSim/SBB merge.");
+			// <<<<< FIXME Commenting this out until SBB project is updated. <<<<<
 		}
 		return components;
 	}
@@ -402,7 +405,9 @@ public class Greedo extends AbstractModule {
 			QSimComponentsConfig provideQSimComponentsConfig() {
 				QSimComponentsConfig components = new QSimComponentsConfig();
 				new StandardQSimComponentConfigurator(config).configure(components);
-				SBBTransitEngineQSimModule.configure(components);
+				// >>>>> FIXME Commenting this out until SBB project is updated. >>>>>
+				// SBBTransitEngineQSimModule.configure(components);
+				// <<<<< FIXME Commenting this out until SBB project is updated. <<<<<
 				return components;
 			}
 		});

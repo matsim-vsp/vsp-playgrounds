@@ -22,7 +22,6 @@ package org.matsim.contrib.pseudosimulation.searchacceleration.datastructures;
 import java.util.Collection;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.matsim.contrib.pseudosimulation.searchacceleration.utils.SetUtils;
 
 import floetteroed.utilities.DynamicData;

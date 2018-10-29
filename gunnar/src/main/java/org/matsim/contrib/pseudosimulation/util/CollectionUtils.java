@@ -19,13 +19,13 @@
  * *********************************************************************** */
 package org.matsim.contrib.pseudosimulation.util;
 
-import org.matsim.contrib.pseudosimulation.mobsim.PSim;
-
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import org.matsim.contrib.pseudosimulation.mobsim.PSim;
 
 
 /**
