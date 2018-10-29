@@ -26,20 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class DeltaForUniformReplanningExact implements Statistic<LogDataWrapper> {
+public class TargetNonUniformReplannerPercentile implements Statistic<LogDataWrapper> {
 
-	public DeltaForUniformReplanningExact() {
-	}
-	
 	@Override
 	public String label() {
-		return "CritDeltaExact";
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return "DEPRECATED"; // return Statistic.toString(arg0.getDeltaForUniformReplanningExact());
+		return Statistic.toString(arg0.getTargetNonUniformReplannerPercentile());
 	}
-}
 
+}

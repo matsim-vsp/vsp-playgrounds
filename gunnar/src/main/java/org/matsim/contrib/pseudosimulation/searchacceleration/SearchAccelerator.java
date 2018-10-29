@@ -50,11 +50,7 @@ import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmul
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Utilities;
 import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.SlotUsageListener;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageDeltaForUniformReplanning;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageReplanningEfficiency;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageUtility;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DeltaForUniformReplanning;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DeltaForUniformReplanningExact;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DeltaPercentile;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DriversInPhysicalSim;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DriversInPseudoSim;
@@ -67,11 +63,11 @@ import org.matsim.contrib.pseudosimulation.searchacceleration.logging.MeanReplan
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RealizedDeltaUtility;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RealizedGreedyScoreChange;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RegularizationWeight;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ReplanningEfficiency;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareNeverReplanned;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareScoreImprovingReplanners;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TTSum;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TargetPercentile;
+import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TargetNonUniformReplannerPercentile;
+import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TargetPopulationPercentile;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformGreedyScoreChange;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplannerShare;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplanningObjectiveFunctionValue;
@@ -174,7 +170,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	// private List<Double> lastExpectedScoreChangeList = null;
 
 	private Double previouslyRealizedDeltaPercentile = null;
-	private Double targetDeltaPercentile = null;
+	private Double targetPopulationPercentile=null;
+	private Double targetNonUniformReplannerPercentile = null;
 
 	public Double lastAverageUtility = null;
 
@@ -303,8 +300,12 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		return this.realizedUtilityChangeSum.average();
 	}
 
-	public Double getTargetPercentile() {
-		return this.targetDeltaPercentile;
+	public Double getTargetPopulationPercentile() {
+		return this.targetPopulationPercentile;
+	}
+
+	public Double getTargetNonUniformReplannerPercentile() {
+		return this.targetNonUniformReplannerPercentile;
 	}
 
 	public Double getLastAverageUtility() {
@@ -355,7 +356,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.statsWriter.addSearchStatistic(new DriversInPhysicalSim());
 		this.statsWriter.addSearchStatistic(new DriversInPseudoSim());
 		this.statsWriter.addSearchStatistic(new DeltaPercentile());
-		this.statsWriter.addSearchStatistic(new TargetPercentile());
+		this.statsWriter.addSearchStatistic(new TargetPopulationPercentile());
+		this.statsWriter.addSearchStatistic(new TargetNonUniformReplannerPercentile());
 		this.statsWriter.addSearchStatistic(new RegularizationWeight());
 		this.statsWriter.addSearchStatistic(new MeanReplanningRate());
 		this.statsWriter.addSearchStatistic(new EffectiveReplanningRate());
@@ -367,11 +369,11 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.statsWriter.addSearchStatistic(new ShareScoreImprovingReplanners());
 		this.statsWriter.addSearchStatistic(new WeightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new TTSum());
-		this.statsWriter.addSearchStatistic(new ReplanningEfficiency());
-		this.statsWriter.addSearchStatistic(new AverageReplanningEfficiency());
-		this.statsWriter.addSearchStatistic(new DeltaForUniformReplanning());
-		this.statsWriter.addSearchStatistic(new DeltaForUniformReplanningExact());
-		this.statsWriter.addSearchStatistic(new AverageDeltaForUniformReplanning());
+		// this.statsWriter.addSearchStatistic(new ReplanningEfficiency());
+		// this.statsWriter.addSearchStatistic(new AverageReplanningEfficiency());
+		// this.statsWriter.addSearchStatistic(new DeltaForUniformReplanning());
+		// this.statsWriter.addSearchStatistic(new DeltaForUniformReplanningExact());
+		// this.statsWriter.addSearchStatistic(new AverageDeltaForUniformReplanning());
 		this.statsWriter.addSearchStatistic(new UniformReplannerShare());
 		// this.statsWriter.addSearchStatistic(new ReplanningSignalAKF());
 		this.statsWriter.addSearchStatistic(new AverageUtility());
@@ -547,7 +549,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 					}
 				}
 
-				// Identify the critical delta by successively increasing the number of greedy re-planners.
+				// Identify the critical delta by successively increasing the number of greedy
+				// re-planners.
 				int nonUniformReplannerCnt = 0;
 				int percentileIndex = this.individualReplanningResultsList.size() - 1;
 				while ((nonUniformReplannerCnt < eta * maxNonUniformReplannerCnt) && (percentileIndex > 0)) {
@@ -558,15 +561,18 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 						nonUniformReplannerCnt++;
 					}
 				}
-
+				
 				// This is over the entire population, not just the non-uniform replanners.
-				this.targetDeltaPercentile = Math.max(0, Math.min(100,
-						(percentileIndex * 100.0) / this.services.getScenario().getPopulation().getPersons().size()));
+				this.targetPopulationPercentile = 
+						(percentileIndex * 100.0) / this.services.getScenario().getPopulation().getPersons().size();
+
+				// This is just over the non-uniform re-planners. Merely for debugging.
+				this.targetNonUniformReplannerPercentile = (nonUniformReplannerCnt * 100.0) / maxNonUniformReplannerCnt;
 				
 				// This is what actually controls the algorithm.
 				this.currentDelta = Math.max(0.0,
 						this.individualReplanningResultsList.get(percentileIndex).criticalDelta);
-				
+
 				// >>>>>>>>>> TODO USED IN ALL PREVIOUS RECIPES >>>>>>>>>>
 				// final double upperBound = Math.max(0.0,
 				// this.realizedUtilityChangeSum.average());

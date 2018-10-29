@@ -26,16 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class TargetPercentile implements Statistic<LogDataWrapper> {
+public class TargetPopulationPercentile implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return "TargetPercentile";
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getTargetPercentile());
+		return Statistic.toString(arg0.getTargetPopulationPercentile());
 	}
 
 }

@@ -26,6 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class AverageReplanningEfficiency implements Statistic<LogDataWrapper> {
 
 	public static final String LABEL = AverageReplanningEfficiency.class.getSimpleName();

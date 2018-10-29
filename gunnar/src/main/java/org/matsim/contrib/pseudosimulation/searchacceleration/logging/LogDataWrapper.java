@@ -44,17 +44,17 @@ public class LogDataWrapper {
 		this.driversInPseudoSim = driversInPseudoSim;
 	}
 
-//	public double getDeltaForUniformReplanning() {
-//		return accelerator.getDeltaForUniformReplanning();
-//	}
+	// public double getDeltaForUniformReplanning() {
+	// return accelerator.getDeltaForUniformReplanning();
+	// }
 
-//	public double getDeltaForUniformReplanningExact() {
-//		return accelerator.getDeltaForUniformReplanningExact();
-//	}
+	// public double getDeltaForUniformReplanningExact() {
+	// return accelerator.getDeltaForUniformReplanningExact();
+	// }
 
-//	public double getAverageDeltaForUniformReplanning() {
-//		return accelerator.getAverageDeltaForUniformReplanning();
-//	}
+	// public double getAverageDeltaForUniformReplanning() {
+	// return accelerator.getAverageDeltaForUniformReplanning();
+	// }
 
 	public Integer getDriversInPhysicalSim() {
 		return this.accelerator.getDriversInPhysicalSim();
@@ -80,13 +80,13 @@ public class LogDataWrapper {
 		return this.accelerator.getRegularizationWeight();
 	}
 
-//	public Double getReplanningEfficiency() {
-//		return this.accelerator.getReplanningEfficiency();
-//	}
+	// public Double getReplanningEfficiency() {
+	// return this.accelerator.getReplanningEfficiency();
+	// }
 
-//	public Double getAverageReplanningEfficiency() {
-//		return this.accelerator.getAverageReplanningEfficiency();
-//	}
+	// public Double getAverageReplanningEfficiency() {
+	// return this.accelerator.getAverageReplanningEfficiency();
+	// }
 
 	public Double getShareNeverReplanned() {
 		return this.accelerator.getShareNeverReplanned();
@@ -140,10 +140,14 @@ public class LogDataWrapper {
 		return this.accelerator.getLastRealizedUtilityChangeSum();
 	}
 
-	public Double getTargetPercentile() {
-		return this.accelerator.getTargetPercentile();
+	public Double getTargetPopulationPercentile() {
+		return this.accelerator.getTargetPopulationPercentile();
 	}
-	
+
+	public Double getTargetNonUniformReplannerPercentile() {
+		return this.accelerator.getTargetNonUniformReplannerPercentile();
+	}
+
 	public Double getAverageUtility() {
 		return this.accelerator.getLastAverageUtility();
 	}
