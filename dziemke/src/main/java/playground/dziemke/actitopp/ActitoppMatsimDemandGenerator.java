@@ -75,16 +75,17 @@ public class ActitoppMatsimDemandGenerator {
 
 		// Use: int age = (int) ...getAttributes().get("age"); don't use toString; the object knows its type and throws an error.
 		int age = (int) attr.getAttribute(CEMDAPPersonAttributes.age.toString());
+		
 		int employment = getEmploymentClass((boolean) attr.getAttribute(CEMDAPPersonAttributes.employed.toString()),
 				(boolean) attr.getAttribute(CEMDAPPersonAttributes.student.toString()));
 
 		// Don't use integer coding. See: Bloch, Effective Java, "Use enums instead of int constants".
 		// E.g. public enum GenderFromActitopp {female, male};
-		int gender = getGenderClass(
-				Gender.valueOf((String) attr.getAttribute(CEMDAPPersonAttributes.gender.toString())));
+		int gender = getGenderClass(Gender.valueOf((String) attr.getAttribute(CEMDAPPersonAttributes.gender.toString())));
 
 		int areaType = getAreaType(); // TODO
 		int numberOfCarsInHousehold = getNumberOfCarsInHousehold(); // TODO
+		
 		double commutingDistanceToWork = getDistanceEstimate(
 				Integer.parseInt((String) attr.getAttribute(CEMDAPPersonAttributes.householdId.toString())),
 				Integer.parseInt((String) attr.getAttribute(CEMDAPPersonAttributes.locationOfWork.toString())));
@@ -207,8 +208,7 @@ public class ActitoppMatsimDemandGenerator {
 	}
 
 	// Information from "https://github.com/mobitopp/actitopp"
-	// Commuting distance to work in kilometers (0 if non existing) or
-	// commuting distance to school/university in kilometers (0 if non existing)
+	// Commuting distance to work in kilometers (0 if non existing) or commuting distance to school/university in kilometers (0 if non existing)
 	private static double getDistanceEstimate(int householdId, int destinationZoneId) {
 		// TODO Right now everybody makes trips of 5 kilometers
 		return 5.;
