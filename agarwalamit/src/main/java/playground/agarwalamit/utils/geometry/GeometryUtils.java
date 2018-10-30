@@ -23,17 +23,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
+
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 
 /**
  * @author amit
@@ -146,7 +148,7 @@ public final class GeometryUtils {
 //		return new Tuple<>(minY, maxY);
 //	}
 
-	public static Geometry getGeometryFromListOfFeatures(final List<SimpleFeature> features) {
+	public static Geometry getGeometryFromListOfFeatures(final Collection<SimpleFeature> features) {
 		List<Geometry> geoms = features.stream().map(f -> (Geometry)f.getDefaultGeometry()).collect(Collectors.toList());
 		return playground.vsp.corineLandcover.GeometryUtils.combine(geoms);
 	}
