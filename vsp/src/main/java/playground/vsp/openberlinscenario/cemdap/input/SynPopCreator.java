@@ -55,8 +55,8 @@ import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
  * 
  * @author dziemke
  */
-public class DemandGeneratorCensus {
-	private static final Logger LOG = Logger.getLogger(DemandGeneratorCensus.class);
+public class SynPopCreator {
+	private static final Logger LOG = Logger.getLogger(SynPopCreator.class);
 	
 	private static final Random random = MatsimRandom.getLocalInstance(); // Make sure that stream of random variables is reproducible.
 
@@ -114,7 +114,7 @@ public class DemandGeneratorCensus {
 		// Choosing this too high effects that too many commuter relations are created, which is uncritical as relative shares will still be correct.
 		// Choosing this too low effects that employed people (according to the census) are left without workplace. Minimize this number!
 
-		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
+		SynPopCreator demandGeneratorCensus = new SynPopCreator(commuterFilesOutgoing, censusFile, outputBase, numberOfPlansPerPerson,
 				idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultCensusEmployeesToCommutersRatio);
 		demandGeneratorCensus.setWriteMatsimPlanFiles(true);
 		demandGeneratorCensus.setShapeFileForSpatialRefinement("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2016/Planungsraum_PLN_ID.shp");
@@ -126,7 +126,7 @@ public class DemandGeneratorCensus {
 	}
 
 	
-	public DemandGeneratorCensus(String[] commuterFilesOutgoing, String censusFile, String outputBase, int numberOfPlansPerPerson, 
+	public SynPopCreator(String[] commuterFilesOutgoing, String censusFile, String outputBase, int numberOfPlansPerPerson, 
 			List<String> idsOfFederalStatesIncluded, double defaultAdultsToEmployeesRatio, double defaultEmployeesToCommutersRatio) {
 		LogToOutputSaver.setOutputDirectory(outputBase);
 		

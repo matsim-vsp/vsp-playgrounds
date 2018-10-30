@@ -17,7 +17,7 @@ import java.util.Objects;
 /**
  * @author GabrielT on 15.11.2016.
  */
-public class DemandGeneratorCensusTest {
+public class SynPopCreatorTest {
 
 	@Rule
 	public MatsimTestUtils utils = new MatsimTestUtils();
@@ -37,7 +37,7 @@ public class DemandGeneratorCensusTest {
 		double defaultAdultsToEmployeesRatio = 1.23;  // Calibrated based on sum value from Zensus 2011.
 		double defaultEmployeesToCommutersRatio = 2.5;  // This is an assumption, oriented on observed values, deliberately chosen slightly too high.
 
-		DemandGeneratorCensus demandGeneratorCensus = new DemandGeneratorCensus(commuterFilesOutgoing, censusFile, utils.getOutputDirectory(),
+		SynPopCreator demandGeneratorCensus = new SynPopCreator(commuterFilesOutgoing, censusFile, utils.getOutputDirectory(),
 				numberOfPlansPerPerson, idsOfFederalStatesIncluded, defaultAdultsToEmployeesRatio, defaultEmployeesToCommutersRatio);
 		
 		demandGeneratorCensus.setShapeFileForSpatialRefinement(utils.getInputDirectory() + "Bezirksregion_EPSG_25833.shp");
