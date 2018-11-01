@@ -144,8 +144,8 @@ public class LogDataWrapper {
 		return this.accelerator.getTargetPopulationPercentile();
 	}
 
-	public Double getTargetNonUniformReplannerPercentile() {
-		return this.accelerator.getTargetNonUniformReplannerPercentile();
+	public Double getShareOfAllowedDeviationsFromUniformity() {
+		return this.accelerator.getShareOfAllowedDeviationsFromUniformity();
 	}
 
 	public Double getAverageUtility() {

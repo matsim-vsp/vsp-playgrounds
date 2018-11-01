@@ -310,6 +310,24 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		this.binomialNumberOfReplanners = binomialNumberOfReplanners;
 	}
 
+	// -------------------- coolingStrategy --------------------
+
+	public static enum CoolingStrategy {
+		fullPopulationPercentile, nonUniformReplannerPercentile
+	};
+
+	private CoolingStrategy coolingStrategyField = CoolingStrategy.nonUniformReplannerPercentile;
+
+	@StringGetter("coolingStrategy")
+	public CoolingStrategy getCoolingStrategy() {
+		return this.coolingStrategyField;
+	}
+
+	@StringSetter("coolingStrategy")
+	public void setCoolingStrategy(final CoolingStrategy coolingStrategyField) {
+		this.coolingStrategyField = coolingStrategyField;
+	}
+
 	// ==================== SUPPLEMENTARY FUNCTIONALITY ====================
 
 	// -------------------- STATIC UTILITIES --------------------

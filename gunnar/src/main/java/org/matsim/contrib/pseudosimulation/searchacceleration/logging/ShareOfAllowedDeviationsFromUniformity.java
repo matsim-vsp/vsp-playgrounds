@@ -26,7 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class TargetNonUniformReplannerPercentile implements Statistic<LogDataWrapper> {
+public class ShareOfAllowedDeviationsFromUniformity implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
@@ -35,7 +35,7 @@ public class TargetNonUniformReplannerPercentile implements Statistic<LogDataWra
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getTargetNonUniformReplannerPercentile());
+		return Statistic.toString(arg0.getShareOfAllowedDeviationsFromUniformity());
 	}
 
 }
