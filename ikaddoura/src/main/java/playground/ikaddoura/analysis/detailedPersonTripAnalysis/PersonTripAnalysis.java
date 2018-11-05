@@ -719,6 +719,12 @@ public class PersonTripAnalysis {
 			bw.write("total payments (sample size) (including pt and taxi drivers) [monetary units];" + basicHandler.getTotalPayments());
 			bw.newLine();
 			
+			bw.write("total rewards (sample size) (including pt and taxi drivers) [monetary units];" + basicHandler.getTotalRewards());
+			bw.newLine();
+			
+			bw.write("total amounts (sample size) (including pt and taxi drivers) [monetary units];" + basicHandler.getTotalAmounts());
+			bw.newLine();
+			
 			bw.write("caused noise damage costs (sample size) (caused by car users or passengers) [monetary units];" + causedNoiseCost);
 			bw.newLine();
 			
@@ -758,7 +764,10 @@ public class PersonTripAnalysis {
 			bw.write("number of taxi users (former non-car users) (sample size);" + savUsersFormerNonCarUsers);
 			bw.newLine();
 			
-			bw.write("fixed cost payments by taxi users (former car users) (sample size) [monetary units];" + paymentsSAVUserFormerCarUser);
+			bw.write("total reward of all taxi users (former car users) (sample size) [monetary units];" + paymentsSAVUserFormerCarUser);
+			bw.newLine();
+			
+			bw.write("total reward of all transport users (sample size) [monetary units];" + basicHandler.getTotalRewardsByPersons());
 			bw.newLine();
 			
 			bw.write("-----------");
@@ -779,11 +788,13 @@ public class PersonTripAnalysis {
 				bw.newLine();
 			}
 			
-			double tollAndFarePaymentsByUsers = moneyPaymentsByUsers - paymentsSAVUserFormerCarUser;
-			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + tollAndFarePaymentsByUsers);
+			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + moneyPaymentsByUsers);
 			bw.newLine();
 			
-			double welfare = tollAndFarePaymentsByUsers - distanceBasedSAVoCost + userBenefitsIncludingMonetaryPayments  - affectedNoiseCost;
+			bw.write("revenues (sample size) (tolls/fares paid by private car users or passengers) [monetary units];" + basicHandler.getTotalPaymentsByPersons());
+			bw.newLine();
+			
+			double welfare = moneyPaymentsByUsers - distanceBasedSAVoCost + userBenefitsIncludingMonetaryPayments  - affectedNoiseCost;
 			bw.write("system welfare (sample size) [monetary units];" + welfare);
 			bw.newLine();
 		
