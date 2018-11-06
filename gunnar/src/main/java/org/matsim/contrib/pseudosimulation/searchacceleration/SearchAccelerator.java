@@ -345,9 +345,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		// computations
 		this.realizedUtilityChangeSum = new RecursiveMovingAverage(this.replanningParameters().getAverageIterations());
 
-		this.utilities = new Utilities(
-				// this.replanningParameters().getAverageIterations()
-				1);
+		this.utilities = new Utilities(this.replanningParameters().getIndividualConvergenceIterations());
 
 		this.statsWriter = new StatisticsWriter<>(
 				new File(this.services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(),
@@ -502,7 +500,9 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				final double realizedUtility = this.lastPhysicalPopulationState.getSelectedPlan(person.getId())
 						.getScore();
 				final double expectedUtility = person.getSelectedPlan().getScore();
-				this.utilities.update(person.getId(), realizedUtility, expectedUtility);
+				this.utilities.update(person.getId(), realizedUtility, expectedUtility,
+						this.replanningParameters().getIndividualConvergenceIterations(),
+						this.replanningParameters().getDeltaScorePerIterationThreshold());
 			}
 
 			final Utilities.SummaryStatistics utilityStatsBeforeReplanning = this.utilities.newSummaryStatistics();
@@ -535,126 +535,59 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				}
 				this.expectedUtilityChangeSumAccelerated.add(previousExpectedUtilityChangeSumAcceleratedTmp);
 
-				// Compute target percentile and corresponding delta for the next iteration.
+				// Compute delta for the next iteration.
 
-				final double utilityPredictionEfficiency = Math.max(0.0,
-						Math.min(1.0, this.realizedUtilityChangeSum.average()
-								/ Math.max(1e-8, this.expectedUtilityChangeSumAccelerated.average())));
-
-				final AccelerationConfigGroup.CoolingStrategy coolingStrategy = ConfigUtils
-						.addOrGetModule(this.services.getConfig(), AccelerationConfigGroup.class).getCoolingStrategy();
-
-				if (AccelerationConfigGroup.CoolingStrategy.fullPopulationPercentile.equals(coolingStrategy)) {
-
-				} else if (AccelerationConfigGroup.CoolingStrategy.nonUniformReplannerPercentile
-						.equals(coolingStrategy)) {
-
-					int maxNonUniformReplannerCnt = 0;
-					for (IndividualReplanningResult individualResult : this.individualReplanningResultsList) {
-						if (individualResult.wouldBeGreedyReplanner != individualResult.wouldBeUniformReplanner) {
-							maxNonUniformReplannerCnt++;
-						}
+				int optimalDeltaIndex = -1; // all indices above this are greedy
+				int minimalBehaviorGap = 0;
+				for (int index = 0; index < this.individualReplanningResultsList.size(); index++) {
+					final IndividualReplanningResult individualResult = this.individualReplanningResultsList.get(index);
+					final boolean desiredReplanning;
+					if (this.utilities.getUtilities(individualResult.personId).isConverged()) {
+						desiredReplanning = individualResult.wouldBeUniformReplanner;
+					} else {
+						desiredReplanning = individualResult.wouldBeGreedyReplanner;
 					}
-
-					int nonUniformReplannerCnt = 0;
-					int percentileIndex = this.individualReplanningResultsList.size();
-					 // The following loop is entered at least once.
-					while ((nonUniformReplannerCnt <= utilityPredictionEfficiency * maxNonUniformReplannerCnt)
-							&& (percentileIndex > 0)) {
-						percentileIndex--;
-						final IndividualReplanningResult individualResult = this.individualReplanningResultsList
-								.get(percentileIndex);
-						if (individualResult.wouldBeGreedyReplanner != individualResult.wouldBeUniformReplanner) {
-							nonUniformReplannerCnt++;
-						}
+					final boolean actualReplanning;
+					if (optimalDeltaIndex < index) {
+						actualReplanning = individualResult.wouldBeGreedyReplanner;
+					} else {
+						actualReplanning = individualResult.wouldBeUniformReplanner;
 					}
-
-					// This is over the entire population, not just the non-uniform replanners.
-					// this.targetPopulationPercentile = (percentileIndex * 100.0)
-					// / this.services.getScenario().getPopulation().getPersons().size();
-
-					// This is just over the non-uniform re-planners. Merely for debugging.
-					// this.shareOfAllowedDeviationsFromUniformity = (nonUniformReplannerCnt *
-					// 100.0)
-					// / maxNonUniformReplannerCnt;
-
-					this.currentDelta = Math.max(0.0,
-							this.individualReplanningResultsList.get(percentileIndex).criticalDelta);
-
-				} else {
-					throw new RuntimeException("Unknown coolingStrategy: " + coolingStrategy);
+					if (desiredReplanning != actualReplanning) {
+						minimalBehaviorGap++;
+					}
 				}
 
-				// >>>>>>>>>> TODO USED IN ALL PREVIOUS RECIPES >>>>>>>>>>
-				// final double upperBound = Math.max(0.0,
-				// this.realizedUtilityChangeSum.average());
-				// double utilityPredictionError = 0.0; // between accelerated and greedy score,
-				// starting at delta=inf
-				// int percentileIndex = this.individualReplanningResultsList.size() - 1;
-				// <<<<<<<<<< TODO USED IN ALL PREVIOUS RECIPES <<<<<<<<<<
+				int candidateBehaviorGap = minimalBehaviorGap;
+				for (int candidateDeltaIndex = 0; candidateDeltaIndex < this.individualReplanningResultsList
+						.size(); candidateDeltaIndex++) {
+					final IndividualReplanningResult individualResult = this.individualReplanningResultsList
+							.get(candidateDeltaIndex);
 
-				// final double eta = Math.max(0.0, Math.min(1.0,
-				// this.realizedUtilityChangeSum.average()
-				// / Math.max(1e-8, this.expectedUtilityChangeSumAccelerated.average())));
-				// this.targetDeltaPercentile = (1.0 - eta) * 100.0;
-				// final int percentileIndex = Math.min((int) ((1.0 - eta) *
-				// this.individualReplanningResultsList.size()),
-				// this.individualReplanningResultsList.size() - 1);
-				// this.currentDelta = Math.max(0.0,
-				// this.individualReplanningResultsList.get(percentileIndex).criticalDelta);
+					final boolean desiredReplanning;
+					if (this.utilities.getUtilities(individualResult.personId).isConverged()) {
+						desiredReplanning = individualResult.wouldBeUniformReplanner;
+					} else {
+						desiredReplanning = individualResult.wouldBeGreedyReplanner;
+					}
 
-				// >>>>>>>>>> TODO NEW RECIPE AS OF 2018-10-29 >>>>>>>>>>
-				// while ((Math.abs(utilityPredictionError) < upperBound) && (percentileIndex >
-				// 0)) {
-				// percentileIndex--;
-				// final IndividualReplanningResult individualResult =
-				// this.individualReplanningResultsList
-				// .get(percentileIndex);
-				// if (individualResult.wouldBeGreedyReplanner !=
-				// individualResult.wouldBeUniformReplanner) {
-				// utilityPredictionError +=
-				// utilityStatsBeforeReplanning.currentExpectedUtilitySum
-				// / this.individualReplanningResultsList.size();
-				// }
-				// }
-				// if (Math.abs(utilityPredictionError) < upperBound) {
-				// percentileIndex = Math.min(this.individualReplanningResultsList.size() - 1,
-				// percentileIndex + 1);
-				// }
-				// this.targetDeltaPercentile = Math.max(0, Math.min(100,
-				// (percentileIndex * 100.0) /
-				// this.services.getScenario().getPopulation().getPersons().size()));
-				// this.currentDelta = Math.max(0.0,
-				// this.individualReplanningResultsList.get(percentileIndex).criticalDelta);
-				// <<<<<<<<<< TODO NEW RECIPE AS OF 2018-10-29 <<<<<<<<<<
+					// and now this individual has just switched from being greedy to being uniform
+					final boolean replanningBeforeSwitch = individualResult.wouldBeGreedyReplanner;
+					final boolean replanningAfterSwitch = individualResult.wouldBeUniformReplanner;
+					if (replanningBeforeSwitch != desiredReplanning) {
+						candidateBehaviorGap--;
+					}
+					if (replanningAfterSwitch != desiredReplanning) {
+						candidateBehaviorGap++;
+					}
 
-				// >>>>>>>>>> TODO WORKING RECIPE UP TO 2018-10-28 >>>>>>>>>>
-				// while ((Math.abs(utilityPredictionError) < upperBound) && (percentileIndex >
-				// 0)) {
-				// percentileIndex--;
-				// final IndividualReplanningResult individualResult =
-				// this.individualReplanningResultsList
-				// .get(percentileIndex);
-				// if (individualResult.wouldBeGreedyReplanner) {
-				// if (!individualResult.wouldBeUniformReplanner) {
-				// utilityPredictionError += individualResult.expectedScoreChange;
-				// }
-				// } else { // would not be greedy
-				// if (individualResult.wouldBeUniformReplanner) {
-				// utilityPredictionError -= individualResult.expectedScoreChange;
-				// }
-				// }
-				// }
-				// if (Math.abs(utilityPredictionError) < upperBound) {
-				// percentileIndex = Math.min(this.individualReplanningResultsList.size() - 1,
-				// percentileIndex + 1);
-				// }
-				// this.targetDeltaPercentile = Math.max(0, Math.min(100,
-				// (percentileIndex * 100.0) /
-				// this.services.getScenario().getPopulation().getPersons().size()));
-				// this.currentDelta = Math.max(0.0,
-				// this.individualReplanningResultsList.get(percentileIndex).criticalDelta);
-				// <<<<<<<<<< TODO WORKING RECIPE <<<<<<<<<<
+					if (candidateBehaviorGap <= minimalBehaviorGap) { // take the largest possible delta
+						optimalDeltaIndex = candidateDeltaIndex;
+					}
+				}
+
+				this.currentDelta = Math.max(0.0,
+						this.individualReplanningResultsList.get(optimalDeltaIndex).criticalDelta);
 			}
 
 			/*

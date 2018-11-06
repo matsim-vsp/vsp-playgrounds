@@ -49,6 +49,8 @@ public class Utilities {
 		private double currentRealizedUtility;
 		private double currentExpectedUtility;
 
+		private boolean isConverged = false;
+
 		private Entry(final double newRealizedUtility, final double newExpectedUtility, final int memoryLength) {
 			this.currentRealizedUtility = newRealizedUtility;
 			this.currentExpectedUtility = newExpectedUtility;
@@ -56,7 +58,8 @@ public class Utilities {
 			this.averageRealizedImprovement = new RecursiveMovingAverage(memoryLength);
 		}
 
-		public void updateBeforeReplanning(final double newRealizedUtility, final double newExpectedUtility) {
+		public void updateBeforeReplanning(final double newRealizedUtility, final double newExpectedUtility,
+				final int individualConvergenceIterations, final double deltaScorePerIterationThreshold) {
 			this.previousRealizedUtility = this.currentRealizedUtility;
 			this.previousExpectedUtility = this.currentExpectedUtility;
 			this.currentRealizedUtility = newRealizedUtility;
@@ -64,6 +67,9 @@ public class Utilities {
 
 			this.averageExpectedImprovement.add(this.previousExpectedUtility - this.previousRealizedUtility);
 			this.averageRealizedImprovement.add(this.currentRealizedUtility - this.previousRealizedUtility);
+
+			this.isConverged |= (this.averageRealizedImprovement.size() >= individualConvergenceIterations)
+					&& (this.averageRealizedImprovement.average() <= deltaScorePerIterationThreshold);
 		}
 
 		public boolean previousDataValid() {
@@ -100,6 +106,10 @@ public class Utilities {
 		// * this.averageExpectedImprovement.average());
 		// }
 		// }
+
+		public boolean isConverged() {
+			return this.isConverged;
+		}
 	}
 
 	// -------------------- INNER SummaryStatistics CLASS --------------------
@@ -131,8 +141,8 @@ public class Utilities {
 				final Map<Id<Person>, Double> personId2currentDeltaUtility, final double currentDeltaUtilitySum,
 				final boolean previousDataValid, final Double previousRealizedUtilitySum,
 				final Double previousExpectedUtilitySum
-				// , final Double shareOfImprovers
-				) {
+		// , final Double shareOfImprovers
+		) {
 
 			this.currentRealizedUtilitySum = currentRealizedUtilitySum;
 			this.currentExpectedUtilitySum = currentExpectedUtilitySum;
@@ -171,12 +181,14 @@ public class Utilities {
 
 	// -------------------- CONTENT ACCESS --------------------
 
-	public void update(final Id<Person> personId, final Double newRealizedUtility, final double newExpectedUtility) {
+	public void update(final Id<Person> personId, final Double newRealizedUtility, final double newExpectedUtility,
+			final int individualConvergenceIterations, final double deltaScorePerIterationThreshold) {
 		Entry entry = this.personId2entry.get(personId);
 		if (entry == null) {
 			this.personId2entry.put(personId, new Entry(newRealizedUtility, newExpectedUtility, this.memoryLength));
 		} else {
-			entry.updateBeforeReplanning(newRealizedUtility, newExpectedUtility);
+			entry.updateBeforeReplanning(newRealizedUtility, newExpectedUtility, individualConvergenceIterations,
+					deltaScorePerIterationThreshold);
 		}
 	}
 
@@ -200,7 +212,7 @@ public class Utilities {
 			boolean previousDataValid = true;
 			double previousRealizedUtilitySum = 0.0;
 			double previousExpectedUtilitySum = 0.0;
-//			double improverCnt = 0.0;
+			// double improverCnt = 0.0;
 
 			for (Map.Entry<Id<Person>, Entry> mapEntry : this.personId2entry.entrySet()) {
 				final Id<Person> personId = mapEntry.getKey();
@@ -217,9 +229,9 @@ public class Utilities {
 				if (previousDataValid) {
 					previousRealizedUtilitySum += entry.getPreviousRealizedUtility();
 					previousExpectedUtilitySum += entry.getPreviousExpectedUtility();
-//					if (entry.isImprover(relativeImprovementThreshold)) {
-//						improverCnt++;
-//					}
+					// if (entry.isImprover(relativeImprovementThreshold)) {
+					// improverCnt++;
+					// }
 				}
 			}
 
@@ -234,8 +246,8 @@ public class Utilities {
 					personId2currentDeltaUtility, currentDeltaUtilitySum, previousDataValid,
 					previousDataValid ? previousRealizedUtilitySum : null,
 					previousDataValid ? previousExpectedUtilitySum : null
-//							, previousDataValid ? improverCnt : null
-									);
+			// , previousDataValid ? improverCnt : null
+			);
 		}
 	}
 }

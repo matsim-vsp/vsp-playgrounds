@@ -194,9 +194,9 @@ public class ReplannerIdentifier {
 			final Map<Id<?>, Double> slotWeights, final Population population,
 			final Map<Id<Person>, Double> personId2UtilityChange, final double totalUtilityChange, final double delta) {
 
-//		System.out.println(slotWeights);
-//		System.out.println(slotWeights.size());
-//		System.exit(0);
+		// System.out.println(slotWeights);
+		// System.out.println(slotWeights.size());
+		// System.exit(0);
 
 		this.replanningParameters = replanningParameters;
 		this.population = population;
@@ -355,9 +355,9 @@ public class ReplannerIdentifier {
 			// this.expectedScoreChangeList.add(this.personId2utilityChange.get(driverId));
 			// this.deltaForUniformReplanningList.add(uniformScoreUpdater.getDeltaForUniformReplanning());
 
-			this.individualReplanningResults.add(new IndividualReplanningResult(uniformScoreUpdater.getCriticalDelta(),
-					this.personId2utilityChange.get(driverId), replanner, scoreUpdater.wouldBeUniformReplanner,
-					scoreUpdater.wouldBeGreedyReplanner));
+			this.individualReplanningResults.add(new IndividualReplanningResult(driverId,
+					uniformScoreUpdater.getCriticalDelta(), this.personId2utilityChange.get(driverId), replanner,
+					scoreUpdater.wouldBeUniformReplanner, scoreUpdater.wouldBeGreedyReplanner));
 		}
 
 		this.shareOfScoreImprovingReplanners = ((double) scoreImprovingReplanners) / allPersonIdsShuffled.size();

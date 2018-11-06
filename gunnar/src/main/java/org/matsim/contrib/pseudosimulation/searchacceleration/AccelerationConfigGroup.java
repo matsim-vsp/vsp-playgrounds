@@ -311,21 +311,50 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	// -------------------- coolingStrategy --------------------
+	//
+	// public static enum CoolingStrategy {
+	// fullPopulationPercentile, nonUniformReplannerPercentile
+	// };
+	//
+	// private CoolingStrategy coolingStrategyField =
+	// CoolingStrategy.nonUniformReplannerPercentile;
+	//
+	// @StringGetter("coolingStrategy")
+	// public CoolingStrategy getCoolingStrategy() {
+	// return this.coolingStrategyField;
+	// }
+	//
+	// @StringSetter("coolingStrategy")
+	// public void setCoolingStrategy(final CoolingStrategy coolingStrategyField) {
+	// this.coolingStrategyField = coolingStrategyField;
+	// }
 
-	public static enum CoolingStrategy {
-		fullPopulationPercentile, nonUniformReplannerPercentile
-	};
+	// -------------------- deltaScorePerIterationThreshold --------------------
 
-	private CoolingStrategy coolingStrategyField = CoolingStrategy.nonUniformReplannerPercentile;
+	private double deltaScorePerIterationThreshold = 0.0;
 
-	@StringGetter("coolingStrategy")
-	public CoolingStrategy getCoolingStrategy() {
-		return this.coolingStrategyField;
+	@StringGetter("deltaScorePerIterationThreshold")
+	public double getDeltaScorePerIterationThreshold() {
+		return this.deltaScorePerIterationThreshold;
 	}
 
-	@StringSetter("coolingStrategy")
-	public void setCoolingStrategy(final CoolingStrategy coolingStrategyField) {
-		this.coolingStrategyField = coolingStrategyField;
+	@StringSetter("deltaScorePerIterationThreshold")
+	public void setDeltaScorePerIterationThreshold(final double deltaScorePerIterationThreshold) {
+		this.deltaScorePerIterationThreshold = deltaScorePerIterationThreshold;
+	}
+
+	// -------------------- individualConvergenceIterations --------------------
+
+	private int individualConvergenceIterations = 5;
+
+	@StringGetter("individualConvergenceIterations")
+	public int getIndividualConvergenceIterations() {
+		return this.individualConvergenceIterations;
+	}
+
+	@StringSetter("deltaScorePerIterationThreshold")
+	public void setIndividualConvergenceIterations(final int individualConvergenceIterations) {
+		this.individualConvergenceIterations = individualConvergenceIterations;
 	}
 
 	// ==================== SUPPLEMENTARY FUNCTIONALITY ====================
