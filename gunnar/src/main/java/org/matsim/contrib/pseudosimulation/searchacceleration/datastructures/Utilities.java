@@ -134,15 +134,17 @@ public class Utilities {
 		public final Double realizedUtilityImprovementSum;
 
 		public final Double previousExpectedUtilityImprovementSum;
+		
+		public final int numberOfConvergedAgents;
 
 		// public final Double shareOfImprovers;
 
 		private SummaryStatistics(final double currentRealizedUtilitySum, final double currentExpectedUtilitySum,
 				final Map<Id<Person>, Double> personId2currentDeltaUtility, final double currentDeltaUtilitySum,
 				final boolean previousDataValid, final Double previousRealizedUtilitySum,
-				final Double previousExpectedUtilitySum
+				final Double previousExpectedUtilitySum,
 		// , final Double shareOfImprovers
-		) {
+		final int numberOfConvergedAgents) {
 
 			this.currentRealizedUtilitySum = currentRealizedUtilitySum;
 			this.currentExpectedUtilitySum = currentExpectedUtilitySum;
@@ -164,6 +166,8 @@ public class Utilities {
 				this.previousExpectedUtilityImprovementSum = null;
 				// this.shareOfImprovers = null;
 			}
+			
+			this.numberOfConvergedAgents = numberOfConvergedAgents;
 		}
 	}
 
@@ -213,7 +217,8 @@ public class Utilities {
 			double previousRealizedUtilitySum = 0.0;
 			double previousExpectedUtilitySum = 0.0;
 			// double improverCnt = 0.0;
-
+			int numberOfConvergedAgents = 0;
+			
 			for (Map.Entry<Id<Person>, Entry> mapEntry : this.personId2entry.entrySet()) {
 				final Id<Person> personId = mapEntry.getKey();
 				final Entry entry = mapEntry.getValue();
@@ -233,6 +238,10 @@ public class Utilities {
 					// improverCnt++;
 					// }
 				}
+				
+				if (entry.isConverged) {
+					numberOfConvergedAgents++;
+				}
 			}
 
 			final int cnt = this.personId2entry.size();
@@ -245,9 +254,9 @@ public class Utilities {
 			return new SummaryStatistics(currentRealizedUtilitySum, currentExpectedUtilitySum,
 					personId2currentDeltaUtility, currentDeltaUtilitySum, previousDataValid,
 					previousDataValid ? previousRealizedUtilitySum : null,
-					previousDataValid ? previousExpectedUtilitySum : null
+					previousDataValid ? previousExpectedUtilitySum : null,
 			// , previousDataValid ? improverCnt : null
-			);
+			numberOfConvergedAgents);
 		}
 	}
 }

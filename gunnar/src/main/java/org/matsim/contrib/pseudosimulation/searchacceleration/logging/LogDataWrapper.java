@@ -124,8 +124,8 @@ public class LogDataWrapper {
 		return this.identifier.getReplanningSignalAKF();
 	}
 
-	public Double getPercentile() {
-		return this.accelerator.getPercentile();
+	public Double getDeltaPercentile() {
+		return this.accelerator.getDeltaPercentile();
 	}
 
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
@@ -150,6 +150,10 @@ public class LogDataWrapper {
 
 	public Double getAverageUtility() {
 		return this.accelerator.getLastAverageUtility();
+	}
+	
+	public Integer getNumberOfConvergedAgents() {
+		return this.accelerator.getNumberOfConvergedAgents();
 	}
 
 }

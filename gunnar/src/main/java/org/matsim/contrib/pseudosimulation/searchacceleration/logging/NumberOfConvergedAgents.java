@@ -26,16 +26,17 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class DeltaPercentile implements Statistic<LogDataWrapper> {
+public class NumberOfConvergedAgents implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return "DeltaPercentile";
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getDeltaPercentile());
+		return Statistic.toString(arg0.getNumberOfConvergedAgents());
 	}
 
 }
+

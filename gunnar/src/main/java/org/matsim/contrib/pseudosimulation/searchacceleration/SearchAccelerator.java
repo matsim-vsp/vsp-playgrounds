@@ -60,14 +60,13 @@ import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ExpectedDe
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.FinalObjectiveFunctionValue;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.LogDataWrapper;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.MeanReplanningRate;
+import org.matsim.contrib.pseudosimulation.searchacceleration.logging.NumberOfConvergedAgents;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RealizedDeltaUtility;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RealizedGreedyScoreChange;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RegularizationWeight;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareNeverReplanned;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareOfAllowedDeviationsFromUniformity;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareScoreImprovingReplanners;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TTSum;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TargetPopulationPercentile;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformGreedyScoreChange;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplannerShare;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplanningObjectiveFunctionValue;
@@ -148,6 +147,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 	private double currentDelta = 0.0;
 
+	private int numberOfConvergedAgents = 0;
+
 	// >>> created upon startup >>>
 
 	private SlotUsageListener slotUsageListener;
@@ -169,7 +170,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	// private List<Double> lastCriticalDeltaList = null;
 	// private List<Double> lastExpectedScoreChangeList = null;
 
-	private Double previouslyRealizedDeltaPercentile = null;
+	private Double deltaPercentile = null;
 	private Double targetPopulationPercentile = null;
 	private Double shareOfAllowedDeviationsFromUniformity = null;
 
@@ -284,8 +285,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		return this.currentDelta;
 	}
 
-	public Double getPercentile() {
-		return this.previouslyRealizedDeltaPercentile;
+	public Double getDeltaPercentile() {
+		return this.deltaPercentile;
 	}
 
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
@@ -310,6 +311,10 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 	public Double getLastAverageUtility() {
 		return this.lastAverageUtility;
+	}
+
+	public Integer getNumberOfConvergedAgents() {
+		return this.numberOfConvergedAgents;
 	}
 
 	// --------------- IMPLEMENTATION OF StartupListener ---------------
@@ -353,9 +358,11 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
 		this.statsWriter.addSearchStatistic(new DriversInPhysicalSim());
 		this.statsWriter.addSearchStatistic(new DriversInPseudoSim());
+		this.statsWriter.addSearchStatistic(new NumberOfConvergedAgents());
 		this.statsWriter.addSearchStatistic(new DeltaPercentile());
-		this.statsWriter.addSearchStatistic(new TargetPopulationPercentile());
-		this.statsWriter.addSearchStatistic(new ShareOfAllowedDeviationsFromUniformity());
+		// this.statsWriter.addSearchStatistic(new TargetPopulationPercentile());
+		// this.statsWriter.addSearchStatistic(new
+		// ShareOfAllowedDeviationsFromUniformity());
 		this.statsWriter.addSearchStatistic(new RegularizationWeight());
 		this.statsWriter.addSearchStatistic(new MeanReplanningRate());
 		this.statsWriter.addSearchStatistic(new EffectiveReplanningRate());
@@ -506,6 +513,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			}
 
 			final Utilities.SummaryStatistics utilityStatsBeforeReplanning = this.utilities.newSummaryStatistics();
+			this.numberOfConvergedAgents = utilityStatsBeforeReplanning.numberOfConvergedAgents;
 
 			/*
 			 * Book-keeping and program control parameter update.
@@ -537,57 +545,57 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 				// Compute delta for the next iteration.
 
-				int optimalDeltaIndex = -1; // all indices above this are greedy
-				int minimalBehaviorGap = 0;
-				for (int index = 0; index < this.individualReplanningResultsList.size(); index++) {
-					final IndividualReplanningResult individualResult = this.individualReplanningResultsList.get(index);
-					final boolean desiredReplanning;
-					if (this.utilities.getUtilities(individualResult.personId).isConverged()) {
-						desiredReplanning = individualResult.wouldBeUniformReplanner;
-					} else {
-						desiredReplanning = individualResult.wouldBeGreedyReplanner;
-					}
-					final boolean actualReplanning;
-					if (optimalDeltaIndex < index) {
-						actualReplanning = individualResult.wouldBeGreedyReplanner;
-					} else {
-						actualReplanning = individualResult.wouldBeUniformReplanner;
-					}
-					if (desiredReplanning != actualReplanning) {
-						minimalBehaviorGap++;
-					}
-				}
+				System.out.println();
+				System.out.println("DELTA COMPUTATION");
+				System.out.println();
+				System.out.println("currentDelta\tcurrentGap\toptimaDelta\toptimalGap");
 
-				int candidateBehaviorGap = minimalBehaviorGap;
-				for (int candidateDeltaIndex = 0; candidateDeltaIndex < this.individualReplanningResultsList
-						.size(); candidateDeltaIndex++) {
-					final IndividualReplanningResult individualResult = this.individualReplanningResultsList
-							.get(candidateDeltaIndex);
+				this.deltaPercentile = 0.0;
+				this.currentDelta = 0.0; // meaning that everybody is greedy
+				int minimalGap = 0; // reference gap value if all person indices are greedy
+
+				System.out
+						.println(this.currentDelta + "\t" + minimalGap + "\t" + this.currentDelta + "\t" + minimalGap);
+
+				int candidateDeltaIndex = 0; // only for logging
+				int candidateGap = minimalGap;
+				for (IndividualReplanningResult individualResult : this.individualReplanningResultsList) {
+					candidateDeltaIndex++;
 
 					final boolean desiredReplanning;
 					if (this.utilities.getUtilities(individualResult.personId).isConverged()) {
+						// A converged individual should replan uniformly.
 						desiredReplanning = individualResult.wouldBeUniformReplanner;
 					} else {
+						// A non-converged individual should replan greedily.
 						desiredReplanning = individualResult.wouldBeGreedyReplanner;
 					}
 
-					// and now this individual has just switched from being greedy to being uniform
 					final boolean replanningBeforeSwitch = individualResult.wouldBeGreedyReplanner;
 					final boolean replanningAfterSwitch = individualResult.wouldBeUniformReplanner;
+					// Remove effect of greedy replanning.
 					if (replanningBeforeSwitch != desiredReplanning) {
-						candidateBehaviorGap--;
+						candidateGap--;
 					}
+					// Include effect of uniform replanning.
 					if (replanningAfterSwitch != desiredReplanning) {
-						candidateBehaviorGap++;
+						candidateGap++;
 					}
 
-					if (candidateBehaviorGap <= minimalBehaviorGap) { // take the largest possible delta
-						optimalDeltaIndex = candidateDeltaIndex;
+					// keep the largest possible delta as long as the gap does not increase
+					if (candidateGap <= minimalGap) {
+						this.deltaPercentile = (100.0 * candidateDeltaIndex)
+								/ this.individualReplanningResultsList.size();
+						this.currentDelta = Math.max(0.0, individualResult.criticalDelta);
+						minimalGap = candidateGap;
 					}
+
+					System.out.println(individualResult.criticalDelta + "\t" + candidateGap + "\t" + this.currentDelta
+							+ "\t" + minimalGap);
 				}
 
-				this.currentDelta = Math.max(0.0,
-						this.individualReplanningResultsList.get(optimalDeltaIndex).criticalDelta);
+				// System.exit(0);
+
 			}
 
 			/*

@@ -352,7 +352,7 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		return this.individualConvergenceIterations;
 	}
 
-	@StringSetter("deltaScorePerIterationThreshold")
+	@StringSetter("individualConvergenceIterations")
 	public void setIndividualConvergenceIterations(final int individualConvergenceIterations) {
 		this.individualConvergenceIterations = individualConvergenceIterations;
 	}
