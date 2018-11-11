@@ -38,6 +38,7 @@ import org.matsim.contrib.pseudosimulation.searchacceleration.recipes.Accelerati
 import org.matsim.contrib.pseudosimulation.searchacceleration.recipes.Mah2007Recipe;
 import org.matsim.contrib.pseudosimulation.searchacceleration.recipes.Mah2009Recipe;
 import org.matsim.contrib.pseudosimulation.searchacceleration.recipes.ReplannerIdentifierRecipe;
+import org.matsim.contrib.pseudosimulation.searchacceleration.recipes.TreatConvergedAgentsSeparately;
 import org.matsim.contrib.pseudosimulation.searchacceleration.recipes.UniformReplanningRecipe;
 
 import floetteroed.utilities.DynamicData;
@@ -58,6 +59,8 @@ public class ReplannerIdentifier {
 	private final double delta;
 
 	private final Population population;
+	private final Set<Id<Person>> convergedAgentIds;
+	private final Set<Id<Person>> nonConvergedAgentIds;
 
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage;
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage;
@@ -192,7 +195,8 @@ public class ReplannerIdentifier {
 			// final Map<Id<Person>, SpaceTimeIndicators<Id<?>>>
 			// passengerId2pseudoSimTransitVehicleUsage,
 			final Map<Id<?>, Double> slotWeights, final Population population,
-			final Map<Id<Person>, Double> personId2UtilityChange, final double totalUtilityChange, final double delta) {
+			final Map<Id<Person>, Double> personId2UtilityChange, final double totalUtilityChange, final double delta,
+			final Set<Id<Person>> convergedAgentIds, final Set<Id<Person>> nonConvergedAgentIds) {
 
 		// System.out.println(slotWeights);
 		// System.out.println(slotWeights.size());
@@ -212,6 +216,9 @@ public class ReplannerIdentifier {
 				slotWeights, this.replanningParameters.getTimeDiscretization());
 		this.sumOfWeightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
+
+		this.convergedAgentIds = convergedAgentIds;
+		this.nonConvergedAgentIds = nonConvergedAgentIds;
 
 		// this.driverId2physicalLinkUsage = driverId2physicalLinkUsage;
 		// this.driverId2pseudoSimLinkUsage = driverId2pseudoSimLinkUsage;
@@ -267,22 +274,28 @@ public class ReplannerIdentifier {
 		// Select the replanning recipe.
 
 		final ReplannerIdentifierRecipe recipe;
-		if (AccelerationConfigGroup.ModeType.off == this.replanningParameters.getModeTypeField()) {
-			recipe = new UniformReplanningRecipe(this.lambda);
-		} else if (AccelerationConfigGroup.ModeType.accelerate == this.replanningParameters.getModeTypeField()) {
-			recipe = new AccelerationRecipe(this.lambda);
-		} else if (AccelerationConfigGroup.ModeType.mah2007 == this.replanningParameters.getModeTypeField()) {
-			recipe = new Mah2007Recipe(this.personId2utilityChange, this.lambda);
-		} else if (AccelerationConfigGroup.ModeType.mah2009 == this.replanningParameters.getModeTypeField()) {
-			recipe = new Mah2009Recipe(this.personId2utilityChange, this.lambda);
-		} else {
-			throw new RuntimeException("Unknown mode: " + this.replanningParameters.getModeTypeField());
+		{
+			final ReplannerIdentifierRecipe recipeForNonConvergedAgents;
+			if (AccelerationConfigGroup.ModeType.off == this.replanningParameters.getModeTypeField()) {
+				recipeForNonConvergedAgents = new UniformReplanningRecipe(this.lambda);
+			} else if (AccelerationConfigGroup.ModeType.accelerate == this.replanningParameters.getModeTypeField()) {
+				recipeForNonConvergedAgents = new AccelerationRecipe();
+			} else if (AccelerationConfigGroup.ModeType.mah2007 == this.replanningParameters.getModeTypeField()) {
+				recipeForNonConvergedAgents = new Mah2007Recipe(this.personId2utilityChange, this.lambda);
+			} else if (AccelerationConfigGroup.ModeType.mah2009 == this.replanningParameters.getModeTypeField()) {
+				recipeForNonConvergedAgents = new Mah2009Recipe(this.personId2utilityChange, this.lambda);
+			} else {
+				throw new RuntimeException("Unknown mode: " + this.replanningParameters.getModeTypeField());
+			}
+			recipe = new TreatConvergedAgentsSeparately(this.convergedAgentIds,
+					new UniformReplanningRecipe(this.lambda), recipeForNonConvergedAgents);
 		}
 
 		// Go through all vehicles and decide which driver gets to re-plan.
 
 		final Set<Id<Person>> replanners = new LinkedHashSet<>();
 		final List<Id<Person>> allPersonIdsShuffled = new ArrayList<>(this.population.getPersons().keySet());
+
 		Collections.shuffle(allPersonIdsShuffled);
 
 		this.score = this.getUniformReplanningObjectiveFunctionValue();

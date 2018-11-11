@@ -545,56 +545,63 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 				// Compute delta for the next iteration.
 
-				System.out.println();
-				System.out.println("DELTA COMPUTATION");
-				System.out.println();
-				System.out.println("currentDelta\tcurrentGap\toptimaDelta\toptimalGap");
+				this.currentDelta = 0.0;
 
-				this.deltaPercentile = 0.0;
-				this.currentDelta = 0.0; // meaning that everybody is greedy
-				int minimalGap = 0; // reference gap value if all person indices are greedy
-
-				System.out
-						.println(this.currentDelta + "\t" + minimalGap + "\t" + this.currentDelta + "\t" + minimalGap);
-
-				int candidateDeltaIndex = 0; // only for logging
-				int candidateGap = minimalGap;
-				for (IndividualReplanningResult individualResult : this.individualReplanningResultsList) {
-					candidateDeltaIndex++;
-
-					final boolean desiredReplanning;
-					if (this.utilities.getUtilities(individualResult.personId).isConverged()) {
-						// A converged individual should replan uniformly.
-						desiredReplanning = individualResult.wouldBeUniformReplanner;
-					} else {
-						// A non-converged individual should replan greedily.
-						desiredReplanning = individualResult.wouldBeGreedyReplanner;
-					}
-
-					final boolean replanningBeforeSwitch = individualResult.wouldBeGreedyReplanner;
-					final boolean replanningAfterSwitch = individualResult.wouldBeUniformReplanner;
-					// Remove effect of greedy replanning.
-					if (replanningBeforeSwitch != desiredReplanning) {
-						candidateGap--;
-					}
-					// Include effect of uniform replanning.
-					if (replanningAfterSwitch != desiredReplanning) {
-						candidateGap++;
-					}
-
-					// keep the largest possible delta as long as the gap does not increase
-					if (candidateGap <= minimalGap) {
-						this.deltaPercentile = (100.0 * candidateDeltaIndex)
-								/ this.individualReplanningResultsList.size();
-						this.currentDelta = Math.max(0.0, individualResult.criticalDelta);
-						minimalGap = candidateGap;
-					}
-
-					System.out.println(individualResult.criticalDelta + "\t" + candidateGap + "\t" + this.currentDelta
-							+ "\t" + minimalGap);
-				}
-
-				// System.exit(0);
+				// System.out.println();
+				// System.out.println("DELTA COMPUTATION");
+				// System.out.println();
+				// System.out.println("currentDelta\tcurrentGap\toptimaDelta\toptimalGap");
+				//
+				// this.deltaPercentile = 0.0;
+				// this.currentDelta = 0.0; // meaning that everybody is greedy
+				// int minimalGap = 0; // reference gap value if all person indices are greedy
+				//
+				// System.out
+				// .println(this.currentDelta + "\t" + minimalGap + "\t" + this.currentDelta +
+				// "\t" + minimalGap);
+				//
+				// int candidateDeltaIndex = 0; // only for logging
+				// int candidateGap = minimalGap;
+				// for (IndividualReplanningResult individualResult :
+				// this.individualReplanningResultsList) {
+				// candidateDeltaIndex++;
+				//
+				// final boolean desiredReplanning;
+				// if (this.utilities.getUtilities(individualResult.personId).isConverged()) {
+				// // A converged individual should replan uniformly.
+				// desiredReplanning = individualResult.wouldBeUniformReplanner;
+				// } else {
+				// // A non-converged individual should replan greedily.
+				// desiredReplanning = individualResult.wouldBeGreedyReplanner;
+				// }
+				//
+				// final boolean replanningBeforeSwitch =
+				// individualResult.wouldBeGreedyReplanner;
+				// final boolean replanningAfterSwitch =
+				// individualResult.wouldBeUniformReplanner;
+				// // Remove effect of greedy replanning.
+				// if (replanningBeforeSwitch != desiredReplanning) {
+				// candidateGap--;
+				// }
+				// // Include effect of uniform replanning.
+				// if (replanningAfterSwitch != desiredReplanning) {
+				// candidateGap++;
+				// }
+				//
+				// // keep the largest possible delta as long as the gap does not increase
+				// if (candidateGap <= minimalGap) {
+				// this.deltaPercentile = (100.0 * candidateDeltaIndex)
+				// / this.individualReplanningResultsList.size();
+				// this.currentDelta = Math.max(0.0, individualResult.criticalDelta);
+				// minimalGap = candidateGap;
+				// }
+				//
+				// System.out.println(individualResult.criticalDelta + "\t" + candidateGap +
+				// "\t" + this.currentDelta
+				// + "\t" + minimalGap);
+				// }
+				//
+				// // System.exit(0);
 
 			}
 
@@ -664,7 +671,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 					event.getIteration(), this.lastPhysicalSlotUsages, lastPseudoSimSlotUsages,
 					this.slotUsageListener.getWeightView(), this.services.getScenario().getPopulation(),
 					utilityStatsBeforeReplanning.personId2currentDeltaUtility,
-					utilityStatsBeforeReplanning.currentDeltaUtilitySum, this.currentDelta);
+					utilityStatsBeforeReplanning.currentDeltaUtilitySum, this.currentDelta,
+					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds());
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
 			this.individualReplanningResultsList = replannerIdentifier.getIndividualReplanningResultListView();

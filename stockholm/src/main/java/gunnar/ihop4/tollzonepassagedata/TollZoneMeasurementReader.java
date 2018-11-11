@@ -23,14 +23,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.matsim.contrib.opdyts.buildingblocks.calibration.DiscretizationChanger;
-import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.CountMeasurement;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.CountMeasurementSpecification;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.CountMeasurements;
+import org.matsim.core.config.Config;
 
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.TimeDiscretization;
@@ -71,7 +72,7 @@ public class TollZoneMeasurementReader {
 		return result;
 	}
 
-	static Map<String, CountMeasurement> loadLinkStr2countMeas() {
+	static CountMeasurements loadLinkStr2countMeas(final Config config) {
 
 		final int maxVehicleLength_m = 20;
 
@@ -118,37 +119,45 @@ public class TollZoneMeasurementReader {
 
 		// CREATION OF ACTUAL SENSOR DATA
 
-		final Map<String, CountMeasurement> linkStr2countMeas = new LinkedHashMap<>();
+		final CountMeasurements measurements = new CountMeasurements(config);
 
 		final DynamicData<String> allData = dataAnalyzer.getData();
-		final Set<String> linksWithAllDayData = keysWithDataOutsideOfTollTime(allData, guaranteedBeforeToll_s,
-				guaranteedAfterToll_s);
 
 		for (String linkStr : allData.keySet()) {
+
+			// TODO CONTINUE HERE
 
 			final double[] singleSensorData = new double[allDayTimeDiscr.getBinCnt()];
 			for (int bin = 0; bin < allDayTimeDiscr.getBinCnt(); bin++) {
 				singleSensorData[bin] = allData.getBinValue(linkStr, bin);
 			}
 
-			if (linksWithAllDayData.contains(linkStr)) {
-				linkStr2countMeas.put(linkStr, new CountMeasurement(singleSensorData, allDayTimeDiscr));
-			} else {
-				final DiscretizationChanger discretizationChanger = new DiscretizationChanger(allDayTimeDiscr,
-						singleSensorData, DiscretizationChanger.DataType.TOTALS);
-				discretizationChanger.run(tollTimeOnlyTimeDiscr);
-				linkStr2countMeas.put(linkStr,
-						new CountMeasurement(discretizationChanger.getToTotalsCopy(), tollTimeOnlyTimeDiscr));
-			}
-		}
+			CountMeasurementSpecification spec = new CountMeasurementSpecification(Id.createLinkId(linkStr), null,
+					null);
 
-		return linkStr2countMeas;
+			measurements.addMeasurement(spec, singleSensorData);
+
+			// if (linksWithAllDayData.contains(linkStr)) {
+			// linkStr2countMeas.put(linkStr, new CountMeasurement(singleSensorData,
+			// allDayTimeDiscr));
+			// } else {
+			// final DiscretizationChanger discretizationChanger = new
+			// DiscretizationChanger(allDayTimeDiscr,
+			// singleSensorData, DiscretizationChanger.DataType.TOTALS);
+			// discretizationChanger.run(tollTimeOnlyTimeDiscr);
+			// linkStr2countMeas.put(linkStr,
+			// new CountMeasurement(discretizationChanger.getToTotalsCopy(),
+			// tollTimeOnlyTimeDiscr));
+			// }
+		}
+		
+		return measurements;
 	}
-	
+
 	public static void main(String[] args) {
 
-		loadLinkStr2countMeas();
-		
+		loadLinkStr2countMeas(null);
+
 	}
 
 }

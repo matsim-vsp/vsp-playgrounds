@@ -357,6 +357,20 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		this.individualConvergenceIterations = individualConvergenceIterations;
 	}
 
+	// -------------------- separateOutConvergedAgents --------------------
+
+	private boolean separateOutConvergedAgents = true;
+
+	@StringGetter("separateOutConvergedAgents")
+	public boolean getSeparateOutConvergedAgents() {
+		return this.separateOutConvergedAgents;
+	}
+
+	@StringSetter("separateOutConvergedAgents")
+	public void setSeparateOutConvergedAgents(final boolean separateOutConvergedAgents) {
+		this.separateOutConvergedAgents = separateOutConvergedAgents;
+	}
+
 	// ==================== SUPPLEMENTARY FUNCTIONALITY ====================
 
 	// -------------------- STATIC UTILITIES --------------------

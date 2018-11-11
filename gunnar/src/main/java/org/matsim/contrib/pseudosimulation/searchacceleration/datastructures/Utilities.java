@@ -21,7 +21,9 @@ package org.matsim.contrib.pseudosimulation.searchacceleration.datastructures;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
@@ -200,6 +202,24 @@ public class Utilities {
 		return this.personId2entry.get(personId);
 	}
 
+	private Set<Id<Person>> getAgentsIfConvergedOrNot(final boolean requiringConverged) {
+		final LinkedHashSet<Id<Person>> result = new LinkedHashSet<>();
+		for (Map.Entry<Id<Person>, Entry> entry : this.personId2entry.entrySet()) {
+			if (entry.getValue().isConverged == requiringConverged) {
+				result.add(entry.getKey());
+			}
+		}
+		return result;
+	}
+	
+	public Set<Id<Person>> getConvergedAgentIds() {
+		return this.getAgentsIfConvergedOrNot(true);
+	}
+	
+	public Set<Id<Person>> getNonConvergedAgentIds() {
+		return this.getAgentsIfConvergedOrNot(false);
+	}
+	
 	public SummaryStatistics newSummaryStatistics() {
 
 		if (this.personId2entry.size() == 0) {
