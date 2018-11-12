@@ -92,7 +92,7 @@ import java.util.Map;
  *                                  |
  *                                 (d)
  *
- * @author gthunig
+ * @author gthunig, tthunig
  * 
  */
 public final class TtCreateParallelNetworkAndLanes {
@@ -104,7 +104,7 @@ public final class TtCreateParallelNetworkAndLanes {
 	private static final double LINK_LENGTH = 300.0; // m
 	private static final double FREESPEED = 10.0; // m/s
 
-	private double capacity; // veh/h
+	private double capacity = 3600; // veh/h
 
 	private boolean useSecondODPair = false;
 
@@ -334,7 +334,7 @@ public final class TtCreateParallelNetworkAndLanes {
 		link.setLength(length);
 		// agents have to reach the end of the link before the time step ends to
 		// be able to travel forward in the next time step (matsim time step logic)
-		link.setFreespeed(freeSpeed);
+		link.setFreespeed(freeSpeed + 0.1);
 	}
 
 	/**
@@ -342,8 +342,8 @@ public final class TtCreateParallelNetworkAndLanes {
 	 */
 	private void createLanes() {
 		
-		Lanes laneDef20 = this.scenario.getLanes();
-		LanesFactory fac = laneDef20.getFactory();
+		Lanes lanes = this.scenario.getLanes();
+		LanesFactory fac = lanes.getFactory();
 
 		// create link assignment of link 1_2
 		LanesToLinkAssignment linkAssignment = fac.createLanesToLinkAssignment(links.get("1_2"));
@@ -356,14 +356,14 @@ public final class TtCreateParallelNetworkAndLanes {
 
 			LanesUtils.createAndAddLane(linkAssignment, fac,
 					Id.create("1_2.l", Lane.class), capacity,
-					LINK_LENGTH / 2, -1, 1,
+					LINK_LENGTH / 2, 1, 1,
 					Collections.singletonList(links.get("2_3")), null);
 			LanesUtils.createAndAddLane(linkAssignment, fac,
 					Id.create("1_2.r", Lane.class), capacity,
-					LINK_LENGTH / 2, 1, 1,
+					LINK_LENGTH / 2, -1, 1,
 					Collections.singletonList(links.get("2_7")), null);
 
-		laneDef20.addLanesToLinkAssignment(linkAssignment);
+		lanes.addLanesToLinkAssignment(linkAssignment);
 
 		// create link assignment of link 6_5
 		linkAssignment = fac.createLanesToLinkAssignment(links.get("6_5"));
@@ -376,14 +376,14 @@ public final class TtCreateParallelNetworkAndLanes {
 
 		LanesUtils.createAndAddLane(linkAssignment, fac,
 				Id.create("6_5.l", Lane.class), capacity,
-				LINK_LENGTH / 2, -1, 1,
+				LINK_LENGTH / 2, 1, 1,
 				Collections.singletonList(links.get("5_8")), null);
 		LanesUtils.createAndAddLane(linkAssignment, fac,
 				Id.create("6_5.r", Lane.class), capacity,
-				LINK_LENGTH / 2, 1, 1,
+				LINK_LENGTH / 2, -1, 1,
 				Collections.singletonList(links.get("5_4")), null);
 
-		laneDef20.addLanesToLinkAssignment(linkAssignment);
+		lanes.addLanesToLinkAssignment(linkAssignment);
 
 		if (useSecondODPair) {
 			// create link assignment of link 9_10
@@ -397,14 +397,14 @@ public final class TtCreateParallelNetworkAndLanes {
 
 			LanesUtils.createAndAddLane(linkAssignment, fac,
 					Id.create("9_10.l", Lane.class), capacity,
-					LINK_LENGTH / 2, -1, 1,
+					LINK_LENGTH / 2, 1, 1,
 					Collections.singletonList(links.get("10_4")), null);
 			LanesUtils.createAndAddLane(linkAssignment, fac,
 					Id.create("9_10.r", Lane.class), capacity,
-					LINK_LENGTH / 2, 1, 1,
+					LINK_LENGTH / 2, -1, 1,
 					Collections.singletonList(links.get("10_3")), null);
 
-			laneDef20.addLanesToLinkAssignment(linkAssignment);
+			lanes.addLanesToLinkAssignment(linkAssignment);
 
 			// create link assignment of link 12_11
 			linkAssignment = fac.createLanesToLinkAssignment(links.get("12_11"));
@@ -417,14 +417,14 @@ public final class TtCreateParallelNetworkAndLanes {
 
 			LanesUtils.createAndAddLane(linkAssignment, fac,
 					Id.create("12_11.l", Lane.class), capacity,
-					LINK_LENGTH / 2, -1, 1,
+					LINK_LENGTH / 2, 1, 1,
 					Collections.singletonList(links.get("11_7")), null);
 			LanesUtils.createAndAddLane(linkAssignment, fac,
 					Id.create("12_11.r", Lane.class), capacity,
-					LINK_LENGTH / 2, 1, 1,
+					LINK_LENGTH / 2, -1, 1,
 					Collections.singletonList(links.get("11_8")), null);
 
-			laneDef20.addLanesToLinkAssignment(linkAssignment);
+			lanes.addLanesToLinkAssignment(linkAssignment);
 		}
 	}
 

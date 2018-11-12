@@ -21,17 +21,22 @@
  */
 package scenarios.illustrative.parallel.createInput;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
-import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.routes.RouteUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class to create a population for the parallel scenario.
@@ -41,7 +46,7 @@ import java.util.List;
  * 	- whether they should get an initial route and 
  *  - the score of the initial route.
  * 
- * @author gthunig
+ * @author gthunig, tthunig
  */
 public final class TtCreateParallelPopulation {
 	
@@ -49,15 +54,21 @@ public final class TtCreateParallelPopulation {
 			.getLogger(TtCreateParallelPopulation.class);
 
 	private Population population;
-	private Network network;
 
+	private boolean useSecondODPair = false;
+	
 	private int numberOfPersons;
-	private boolean initRoutes = false;
 	private Double initPlanScore = null;
+	private InitRoutesType initType = InitRoutesType.ALL_RIGHT;
+	public enum InitRoutesType {
+		NONE,
+		ALL_RIGHT,
+		OSZILLATING,
+		ALL_N_W // north-west (oncoming traffic on same route, i.e. just one intersection relevant)
+	}
 
 	public TtCreateParallelPopulation(Population pop, Network net) {
 		this.population = pop;
-		this.network = net;
 	}
 
 	/**
@@ -80,16 +91,16 @@ public final class TtCreateParallelPopulation {
 	 *            initial score for all plans the persons will get. Use null for
 	 *            no scores.
 	 */
-	public void createPersons(int numberOfPersons, boolean initRoutes, Double initPlanScore) {
+	public void createPersons(int numberOfPersons, InitRoutesType initType, Double initPlanScore) {
 		this.numberOfPersons = numberOfPersons;
-		this.initRoutes = initRoutes;
+		this.initType = initType;
 		this.initPlanScore = initPlanScore;
 		
 		log.info("Create population ...");
 		
 		createWestEastDemand();
 		createEastWestDemand();
-		if (TtCreateParallelNetworkAndLanes.checkNetworkForSecondODPair(this.network)) {
+		if (useSecondODPair) {
 			createNorthSouthDemand();
 			createSouthNorthDemand();
 		}
@@ -121,17 +132,29 @@ public final class TtCreateParallelPopulation {
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
 					"dummy", Id.createLinkId("6_b"));
 
-			if (initRoutes) {
+			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createWestEastLeg(true);
 				Plan planNorth = createPlan(startAct, leg, drainAct, initPlanScore);
 				leg = createWestEastLeg(false);
 				Plan planSouth = createPlan(startAct, leg, drainAct, initPlanScore);
 				person.addPlan(planNorth);
 				person.addPlan(planSouth);
-				if (i % 2 == 0) {
-					person.setSelectedPlan(planNorth);
-				} else {
+				switch (initType) {
+				case ALL_RIGHT:
 					person.setSelectedPlan(planSouth);
+					break;
+				case OSZILLATING:
+					if (i % 2 == 0) {
+						person.setSelectedPlan(planNorth);
+					} else {
+						person.setSelectedPlan(planSouth);
+					}
+					break;
+				case ALL_N_W:
+					person.setSelectedPlan(planNorth);
+					break;
+				default:
+					break;
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
@@ -184,17 +207,27 @@ public final class TtCreateParallelPopulation {
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
 					"dummy", Id.createLinkId("1_a"));
 
-			if (initRoutes) {
+			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createEastWestLeg(true);
 				Plan planNorth = createPlan(startAct, leg, drainAct, initPlanScore);
 				leg = createEastWestLeg(false);
 				Plan planSouth = createPlan(startAct, leg, drainAct, initPlanScore);
 				person.addPlan(planNorth);
 				person.addPlan(planSouth);
-				if (i % 2 == 0) {
+				switch (initType) {
+				case ALL_RIGHT:
+				case ALL_N_W:
 					person.setSelectedPlan(planNorth);
-				} else {
-					person.setSelectedPlan(planSouth);
+					break;
+				case OSZILLATING:
+					if (i % 2 == 0) {
+						person.setSelectedPlan(planNorth);
+					} else {
+						person.setSelectedPlan(planSouth);
+					}
+					break;
+				default:
+					break;
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
@@ -246,17 +279,27 @@ public final class TtCreateParallelPopulation {
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
 					"dummy", Id.createLinkId("12_d"));
 
-			if (initRoutes) {
+			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createNorthSouthLeg(true);
 				Plan planWest = createPlan(startAct, leg, drainAct, initPlanScore);
 				leg = createNorthSouthLeg(false);
 				Plan planEast = createPlan(startAct, leg, drainAct, initPlanScore);
 				person.addPlan(planWest);
 				person.addPlan(planEast);
-				if (i % 2 == 0) {
+				switch (initType) {
+				case ALL_RIGHT:
+				case ALL_N_W:
 					person.setSelectedPlan(planWest);
-				} else {
-					person.setSelectedPlan(planEast);
+					break;
+				case OSZILLATING:
+					if (i % 2 == 0) {
+						person.setSelectedPlan(planWest);
+					} else {
+						person.setSelectedPlan(planEast);
+					}
+					break;
+				default:
+					break;
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
@@ -308,17 +351,29 @@ public final class TtCreateParallelPopulation {
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
 					"dummy", Id.createLinkId("9_c"));
 
-			if (initRoutes) {
+			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createSouthNorthLeg(true);
 				Plan planWest = createPlan(startAct, leg, drainAct, initPlanScore);
 				leg = createSouthNorthLeg(false);
 				Plan planEast = createPlan(startAct, leg, drainAct, initPlanScore);
 				person.addPlan(planWest);
 				person.addPlan(planEast);
-				if (i % 2 == 0) {
-					person.setSelectedPlan(planWest);
-				} else {
+				switch (initType) {
+				case ALL_RIGHT:
 					person.setSelectedPlan(planEast);
+					break;
+				case OSZILLATING:
+					if (i % 2 == 0) {
+						person.setSelectedPlan(planWest);
+					} else {
+						person.setSelectedPlan(planEast);
+					}
+					break;
+				case ALL_N_W:
+					person.setSelectedPlan(planWest);
+					break;
+				default:
+					break;
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
@@ -364,5 +419,9 @@ public final class TtCreateParallelPopulation {
 		plan.setScore(initPlanScore);
 		
 		return plan;
+	}
+
+	public void setUseSecondODPair(boolean useSecondOdPair) {
+		this.useSecondODPair = useSecondOdPair;
 	}
 }
