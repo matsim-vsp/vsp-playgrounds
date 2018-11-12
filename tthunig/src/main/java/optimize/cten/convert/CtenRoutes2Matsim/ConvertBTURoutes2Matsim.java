@@ -484,10 +484,12 @@ public class ConvertBTURoutes2Matsim {
 
 		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/"
 //				+ "2015-02-25_minflow_50.0_morning_peak_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
-				+ "2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+//				+ "2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+				+ "2018-09-20_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 
 //		String btuRoutesFilename = "routeComparison/paths.xml";
-		String btuRoutesFilename = "btu/solution_splits_expanded.xml";
+//		String btuRoutesFilename = "btu/solution_splits_expanded.xml";
+		String btuRoutesFilename = "random_coords/coord0.xml";
 		String networkFilename = "network_small_simplified.xml.gz";
 		String populationFile = "trip_plans_from_morning_peak_ks_commodities_minFlow50.0.xml";
 
@@ -495,7 +497,8 @@ public class ConvertBTURoutes2Matsim {
 		String outputFilename = directory
 //				+ "routeComparison/2015-03-10_sameEndTimes_ksOptTripPlans_"
 //				+ "btu/2018-07-09_sameEndTimes_ksOptTripPlans_agent2com_"
-				+ "btu/2018-08-16_ksOptTripPlans_scale" + POP_SCALE + "_"
+//				+ "btu/2018-08-16_ksOptTripPlans_scale" + POP_SCALE + "_"
+				+ "btu/2018-10-30_ksRandom0TripPlans_scale" + POP_SCALE + "_"
 				+ filenameAttributes[filenameAttributes.length - 1];
 		
 		// set this to true, if you want to use the same start times for all agents as
