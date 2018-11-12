@@ -721,8 +721,11 @@ public class SingleCrossingScenario {
 				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId2, 0, g2));
 				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1,
 						g2 + intergreen, g2 + intergreen + g1));
-				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1l,
+				if (useLanes) {
+					// a separate group for left turns is only used if signals are grouped and lanes are used
+					signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1l,
 						g2 + intergreen, g2 + intergreen + g1));
+				}
 			}
 		} else { 
 			if (this.signalControl.equals(SignalControl.FIXED_PROTECTED_LEFT_TURN)) {
