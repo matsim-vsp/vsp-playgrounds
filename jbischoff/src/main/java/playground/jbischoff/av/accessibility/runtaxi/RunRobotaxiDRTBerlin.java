@@ -39,7 +39,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 public class RunRobotaxiDRTBerlin {
 
     public static void main(String[] args) {
-        for (int i = 4; i < 10; i++) {
+        for (int i = 3; i < 4; i++) {
             String configFile = "D:/runs-svn/avsim/av_accessibility/input/drtconfig.xml";
 
             RunRobotaxiDRTBerlin.run(configFile, false, i);
