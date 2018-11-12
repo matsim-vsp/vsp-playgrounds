@@ -168,8 +168,8 @@ public final class RunBraessSimulation {
 		
 		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
 		// TODO modify sylvia config parameter here if you like
-		sylviaConfig.setSignalGroupMaxGreenScale(2);
-		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
+		sylviaConfig.setSignalGroupMaxGreenScale(1.5);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 
 		// set brain exp beta
 		config.planCalcScore().setBrainExpBeta(2);
