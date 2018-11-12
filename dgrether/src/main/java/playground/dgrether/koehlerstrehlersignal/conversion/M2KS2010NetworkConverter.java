@@ -189,10 +189,10 @@ public class M2KS2010NetworkConverter {
 					SignalSystemData system = this.getSignalSystem4SignalizedLinkId(signalsData.getSignalSystemsData(), link.getId());
 					// remember system - crossing relation
 					systemToCrossingMap.put(system.getId(), crossing.getId());
-					this.createCrossing4SignalizedLink(crossing, link, inLinkToNode, backLinkId, l2l, system, signalsData);
+					this.createCrossing4SignalizedLink(net, crossing, link, inLinkToNode, backLinkId, l2l, system, signalsData);
 				} else {
 					LOG.debug("link: " + link.getId() + " not signalized...");
-					this.createCrossing4NotSignalizedLink(crossing, link, inLinkToNode, backLinkId, l2l);
+					this.createCrossing4NotSignalizedLink(net, crossing, link, inLinkToNode, backLinkId, l2l);
 				}
 			}
 		}
@@ -473,7 +473,7 @@ public class M2KS2010NetworkConverter {
 	 *            the target crossing of the fromLink
 	 * @return the id of the created light
 	 */
-	private Id<DgStreet> createLights( Link fromLink, Lane fromLane, Id<Link> outLinkId, Id<Link> backLinkId, DgCrossingNode inLinkToNode,
+	private Id<DgStreet> createLights( Network net, Link fromLink, Lane fromLane, Id<Link> outLinkId, Id<Link> backLinkId, DgCrossingNode inLinkToNode,
 						     DgCrossing crossing, Id<Signal> signalId) {
 		if (backLinkId != null && backLinkId.equals(outLinkId)) {
 			return null; // do nothing if it is the backlink
@@ -498,9 +498,9 @@ public class M2KS2010NetworkConverter {
 		DgStreet street = new DgStreet(lightId, inLinkToNode, outLinkFromNode);
 		street.setCost(0);
 		if (fromLane != null) {
-			street.setCapacity(fromLane.getCapacityVehiclesPerHour());
+			street.setCapacity(fromLane.getCapacityVehiclesPerHour() / net.getCapacityPeriod() * this.timeInterval);
 		} else {
-			street.setCapacity(fromLink.getCapacity());
+			street.setCapacity(fromLink.getCapacity() / net.getCapacityPeriod() * this.timeInterval);
 		}
 		if (crossing.getType().equals(TtCrossingType.FLEXIBLE)) {
 			// TODO adapt this when no min green time should be used
@@ -531,7 +531,7 @@ public class M2KS2010NetworkConverter {
 	 * @param system
 	 * @param signalsData
 	 */
-	private void createCrossing4SignalizedLink(DgCrossing crossing, Link link, DgCrossingNode inLinkToNode, Id<Link> backLinkId,
+	private void createCrossing4SignalizedLink(Network net, DgCrossing crossing, Link link, DgCrossingNode inLinkToNode, Id<Link> backLinkId,
 			LanesToLinkAssignment l2l, SignalSystemData system, SignalsData signalsData) {
 
 		DgProgram program = null;
@@ -572,7 +572,7 @@ public class M2KS2010NetworkConverter {
 				// create lights and green settings
 				for (Id<Link> outLinkId : outLinkIds) {
 					LOG.debug("    outLinkId: " + outLinkId);
-					lightId = this.createLights(link, null, outLinkId, backLinkId, inLinkToNode, crossing, signal.getId());
+					lightId = this.createLights(net, link, null, outLinkId, backLinkId, inLinkToNode, crossing, signal.getId());
 					if (lightId != null) {
 						LOG.debug("    created Light " + lightId);
 						fillProgramForFixedCrossings(system, signalsData, program, signal, lightId);
@@ -585,7 +585,7 @@ public class M2KS2010NetworkConverter {
 						// no turning move restrictions for signal -> outlinks come from lane
 						for (Id<Link> outLinkId : lane.getToLinkIds()) {
 							LOG.debug("    outLinkId: " + outLinkId);
-							lightId = this.createLights(link, lane, outLinkId, backLinkId, inLinkToNode, crossing, signal.getId());
+							lightId = this.createLights(net, link, lane, outLinkId, backLinkId, inLinkToNode, crossing, signal.getId());
 							if (lightId != null) {
 								LOG.debug("    created Light " + lightId);
 								fillProgramForFixedCrossings(system, signalsData, program, signal, lightId);
@@ -594,7 +594,7 @@ public class M2KS2010NetworkConverter {
 					} else { // turning move restrictions on signal -> outlinks taken from signal
 						for (Id<Link> outLinkId : signal.getTurningMoveRestrictions()) {
 							LOG.debug("    outLinkId: " + outLinkId);
-							lightId = this.createLights(link, lane, outLinkId, backLinkId, inLinkToNode, crossing, signal.getId());
+							lightId = this.createLights(net, link, lane, outLinkId, backLinkId, inLinkToNode, crossing, signal.getId());
 							if (lightId != null) {
 								LOG.debug("    created Light " + lightId);
 								fillProgramForFixedCrossings(system, signalsData, program, signal, lightId);
@@ -635,13 +635,13 @@ public class M2KS2010NetworkConverter {
 	 * @param backLinkId
 	 * @param l2l
 	 */
-	private void createCrossing4NotSignalizedLink(DgCrossing crossing, Link link, DgCrossingNode inLinkToNode, Id<Link> backLinkId,
+	private void createCrossing4NotSignalizedLink(Network net, DgCrossing crossing, Link link, DgCrossingNode inLinkToNode, Id<Link> backLinkId,
 			LanesToLinkAssignment l2l) {
 
 		if (l2l == null) { // create lights for link without lanes
 			List<Id<Link>> toLinks = this.getTurningMoves4LinkWoLanes(link);
 			for (Id<Link> outLinkId : toLinks) {
-				this.createLights(link, null, outLinkId, backLinkId, inLinkToNode, crossing, null);
+				this.createLights(net, link, null, outLinkId, backLinkId, inLinkToNode, crossing, null);
 			}
 		} else {
 			for (Lane lane : l2l.getLanes().values()) {
@@ -649,7 +649,7 @@ public class M2KS2010NetworkConverter {
 				// outlanes, i.e. "last lanes" of a link)
 				if (lane.getToLaneIds() == null || lane.getToLaneIds().isEmpty()) {
 					for (Id<Link> outLinkId : lane.getToLinkIds()) {
-						this.createLights(link, lane, outLinkId, backLinkId, inLinkToNode, crossing, null);
+						this.createLights(net, link, lane, outLinkId, backLinkId, inLinkToNode, crossing, null);
 					}
 				}
 			}
