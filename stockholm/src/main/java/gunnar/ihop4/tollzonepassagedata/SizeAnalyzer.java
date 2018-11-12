@@ -32,56 +32,51 @@ import floetteroed.utilities.tabularfileparser.TabularFileParser;
  * @author Gunnar Flötteröd
  *
  */
-public class SizeAnalyzer {
+class SizeAnalyzer {
 
-	private final int[] totalVehiclesPerMeterLengthClass;
 	private final int[] relevantIdentifiedVehiclesPerMeterLengthClass;
 	private final int[] identifiedVehiclesPerMeterLengthClass;
 
-	public SizeAnalyzer(final int maxLength_m) {
-		this.totalVehiclesPerMeterLengthClass = new int[maxLength_m];
+	SizeAnalyzer(final int maxLength_m) {
 		this.relevantIdentifiedVehiclesPerMeterLengthClass = new int[maxLength_m];
 		this.identifiedVehiclesPerMeterLengthClass = new int[maxLength_m];
 	}
 
-	public void parse(final String file) {
+	void parse(final String file) {
 
 		final TabularFileParser parser = new TabularFileParser();
 		parser.setDelimiterTags(new String[] { "," });
 		parser.setOmitEmptyColumns(false);
 
-		final SizeAnalysisHandler handler = new SizeAnalysisHandler(this.totalVehiclesPerMeterLengthClass,
-				this.relevantIdentifiedVehiclesPerMeterLengthClass, this.identifiedVehiclesPerMeterLengthClass);
+		final SizeAnalysisHandler handler = new SizeAnalysisHandler(this.relevantIdentifiedVehiclesPerMeterLengthClass,
+				this.identifiedVehiclesPerMeterLengthClass);
 		try {
 			parser.parse(file, handler);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	public double[] getRelevantProbaPerMeterLengthClass() {
-		final double[] result = new double[this.totalVehiclesPerMeterLengthClass.length];
-		for (int i = 0; i < this.totalVehiclesPerMeterLengthClass.length; i++) {
+
+	double[] getRelevanceProbabilityPerMeterLengthClass() {
+		final double[] result = new double[this.identifiedVehiclesPerMeterLengthClass.length];
+		for (int i = 0; i < this.identifiedVehiclesPerMeterLengthClass.length; i++) {
 			final double relevantIdentified = this.relevantIdentifiedVehiclesPerMeterLengthClass[i];
 			final double identified = this.identifiedVehiclesPerMeterLengthClass[i];
 			if (identified > 0) {
-				result[i] = relevantIdentified / identified;				
+				result[i] = relevantIdentified / identified;
 			}
-			
 		}
 		return result;
 	}
 
 	@Override
 	public String toString() {
-		final double[] relevantProba = this.getRelevantProbaPerMeterLengthClass();
-		final StringBuffer result = new StringBuffer("length[m]\ttotal\tidentified\trelevantIdentified\tP(relevant)\n");
-		for (int i = 0; i < this.totalVehiclesPerMeterLengthClass.length; i++) {
-			final int total = this.totalVehiclesPerMeterLengthClass[i];
+		final double[] relevantProba = this.getRelevanceProbabilityPerMeterLengthClass();
+		final StringBuffer result = new StringBuffer("length[m]\tidentified\trelevantIdentified\tPr(relevant)\n");
+		for (int i = 0; i < this.identifiedVehiclesPerMeterLengthClass.length; i++) {
 			final int relevantIdentified = this.relevantIdentifiedVehiclesPerMeterLengthClass[i];
 			final int identified = this.identifiedVehiclesPerMeterLengthClass[i];
-			result.append(i + "\t" + total + "\t" + identified + "\t" + relevantIdentified + "\t"
-					+ (((double) relevantIdentified) / identified) + "\t" + relevantProba[i] + "\n");
+			result.append(i + "\t" + identified + "\t" + relevantIdentified + "\t" + relevantProba[i] + "\n");
 		}
 		return result.toString();
 	}

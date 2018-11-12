@@ -32,30 +32,24 @@ class PassageDataHandler extends AbstractTollZonePassageDataHandler {
 
 	private final double[] weightPerMeterLengthClass;
 
-	private final boolean includeChargingPointId;
-
-	PassageDataHandler(final DynamicData<String> data, final double[] weightPerMeterLengthClass,
-			final boolean includeChargingPointId) {
+	PassageDataHandler(final DynamicData<String> data, final double[] weightPerMeterLengthClass) {
 		this.data = data;
 		this.weightPerMeterLengthClass = weightPerMeterLengthClass;
-		this.includeChargingPointId = includeChargingPointId;
 	}
 
 	@Override
 	protected void processFields() {
 
-		final String key = this.linkStr + (this.includeChargingPointId ? "(" + this.chargingPointStr + ")" : "");
-
 		if (this.containsRegisterData) {
 			if (this.registerDataFeasible) {
-				this.data.add(key, this.data.bin((int) this.time_s), 1.0);
+				this.data.add(super.linkStr, this.data.bin((int) this.time_s), 1.0);
 			}
 		} else { // contains no register data -> weight by length class
 			int lengthClass = this.vehicleLength_cm / 100;
 			if (lengthClass < this.weightPerMeterLengthClass.length) {
-				this.data.add(key, this.data.bin((int) this.time_s), this.weightPerMeterLengthClass[lengthClass]);
+				this.data.add(super.linkStr, this.data.bin((int) this.time_s),
+						this.weightPerMeterLengthClass[lengthClass]);
 			}
 		}
 	}
-
 }

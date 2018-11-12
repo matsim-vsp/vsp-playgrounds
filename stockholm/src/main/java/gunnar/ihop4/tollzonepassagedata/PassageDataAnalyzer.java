@@ -36,29 +36,33 @@ import floetteroed.utilities.tabularfileparser.TabularFileParser;
  * @author Gunnar Flötteröd
  *
  */
-public class PassageDataAnalyzer {
+class PassageDataAnalyzer {
 
 	private final DynamicData<String> data;
 
 	private final double[] weightPerVehicleLengthClass;
 
-	public PassageDataAnalyzer(final TimeDiscretization timeDiscr, final double[] weightPerVehicleLengthClass) {
+	PassageDataAnalyzer(final TimeDiscretization timeDiscr, final double[] weightPerVehicleLengthClass) {
 		this.data = new DynamicData<>(timeDiscr);
 		this.weightPerVehicleLengthClass = weightPerVehicleLengthClass;
 	}
 
-	public void parse(final String file) {
+	void parse(final String file) {
 
 		final TabularFileParser parser = new TabularFileParser();
 		parser.setDelimiterTags(new String[] { "," });
 		parser.setOmitEmptyColumns(false);
 
-		final PassageDataHandler handler = new PassageDataHandler(this.data, this.weightPerVehicleLengthClass, false);
+		final PassageDataHandler handler = new PassageDataHandler(this.data, this.weightPerVehicleLengthClass);
 		try {
 			parser.parse(file, handler);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	DynamicData<String> getData() {
+		return this.data;
 	}
 
 	@Override
@@ -80,19 +84,16 @@ public class PassageDataAnalyzer {
 		}
 		return result.toString();
 	}
-	
-	public DynamicData<String> getData() {
-		return this.data;
-	}
 
 	public static void main(String[] args) throws IOException {
 
-		final TimeDiscretization timeDiscr = new TimeDiscretization(0, 3600, 24);
+		final TimeDiscretization timeDiscr = new TimeDiscretization(0, 3600 / 2, 24 * 2);
 
 		final List<String> days = Arrays.asList("2016-10-11", "2016-10-12", "2016-10-13", "2016-10-18", "2016-10-19",
 				"2016-10-20", "2016-10-25", "2016-10-26", "2016-10-27");
 
-		PassageDataAnalyzer dataAnalyzer = new PassageDataAnalyzer(timeDiscr, null);
+		PassageDataAnalyzer dataAnalyzer = new PassageDataAnalyzer(timeDiscr,
+				new double[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1});
 
 		for (String day : days) {
 			for (String postfix : new String[] { "-01", "-02" }) {

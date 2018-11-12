@@ -29,12 +29,18 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.AbsoluteLinkEntryCountDeviationObjectiveFunction;
 import org.matsim.contrib.pseudosimulation.searchacceleration.Greedo;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.events.BeforeMobsimEvent;
+import org.matsim.core.controler.listener.BeforeMobsimListener;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
 
 /**
  *
@@ -90,32 +96,48 @@ public class IHOP4ProductionRunner {
 		final Controler controler = new Controler(scenario);
 		if (greedo != null) {
 			controler.addOverridingModule(greedo);
-			// greedo.meet(controler);
 		}
 
 		// Toll zone link flows.
 
-		// final LinkFlowTimeSeries tollZoneFlows = new LinkFlowTimeSeries(new
-		// TimeDiscretization(0, 3600, 30));
-		// tollZoneFlows.setLogFileName("tollZoneFlows.data");
-		// for (String linkName : new String[] { "101350_NW", "112157_SE", "9216_N",
-		// "13354_W", "18170_SE", "35424_NW",
-		// "44566_NE", "51930_W", "53064_SE", "68760_SW", "74188_NW", "79555_NE",
-		// "90466_SE", "122017_NW",
-		// "122017_SE", "22626_W", "77626_W", "90317_W", "92866_E", "110210_E",
-		// "2453_SW", "6114_S", "6114_N",
-		// "25292_NE", "28480_S", "34743_NE", "124791_W", "71617_SW", "71617_SE",
-		// "80449_N", "96508_NW",
-		// "96508_SE", "108353_SE", "113763_NW", "121908_N", "121908_S", "52416_NE",
-		// "125425_N" }) {
-		// tollZoneFlows.addObservedLink(linkName);
-		// }
-		// controler.addOverridingModule(new AbstractModule() {
-		// @Override
-		// public void install() {
-		// this.addEventHandlerBinding().toInstance(tollZoneFlows);
-		// }
-		// });
+		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
+		measReader.run();
+		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
+			controler.addOverridingModule(module);
+		}
+		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
+			controler.addOverridingModule(module);
+		}
+
+		// Checking if this really works:
+
+		final int testIteration = 10;
+
+		BeforeMobsimListener testListener = new BeforeMobsimListener() {
+			@Override
+			public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+				if (event.getIteration() == testIteration) {
+					for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader.getAllDayMeasurements().getObjectiveFunctions()) {
+						System.out.println();
+						System.out.println(objFct);
+					}
+					for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
+						System.out.println();
+						System.out.println(objFct);
+					}
+					System.out.println();
+					System.out.println("TERMINATING IN ITERATION " + event.getIteration());
+					System.exit(0);
+				}
+			}
+		};
+
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				this.addControlerListenerBinding().toInstance(testListener);
+			}
+		});
 
 		// ... and run.
 

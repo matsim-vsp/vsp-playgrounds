@@ -28,10 +28,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.AbsoluteLinkEntryCountDeviationObjectiveFunction;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.CountMeasurementSpecification;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.CountMeasurements;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.Filter;
 import org.matsim.core.config.Config;
+import org.matsim.vehicles.Vehicle;
 
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.TimeDiscretization;
@@ -43,7 +46,49 @@ import floetteroed.utilities.TimeDiscretization;
  */
 public class TollZoneMeasurementReader {
 
-	static void replaceByInterpolation(final DynamicData<String> data, final int interpolateTime_s) {
+	// -------------------- CONSTANTS --------------------
+
+	private final String pathStr;
+
+	private final Config config;
+
+	private final int maxVehicleLength_m;
+
+	private final TimeDiscretization allDayTimeDiscr;
+
+	private final TimeDiscretization tollTimeOnlyTimeDiscr;
+
+	private final List<String> days;
+
+	// -------------------- MEMBERS --------------------
+
+	private CountMeasurements allDayMeasurements = null;
+
+	private CountMeasurements onlyTollTimeMeasurements = null;
+
+	// -------------------- CONSTRUCTION --------------------
+
+	public TollZoneMeasurementReader(final String path, final Config config, final int maxVehicleLength_m,
+			final TimeDiscretization allDayTimeDiscr, final TimeDiscretization tollTimeOnlyTimeDiscr,
+			final List<String> days) {
+		this.pathStr = path;
+		this.config = config;
+		this.maxVehicleLength_m = maxVehicleLength_m;
+		this.allDayTimeDiscr = allDayTimeDiscr;
+		this.tollTimeOnlyTimeDiscr = tollTimeOnlyTimeDiscr;
+		this.days = days;
+	}
+
+	public TollZoneMeasurementReader(final Config config) {
+		this("/Users/GunnarF/NoBackup/data-workspace/ihop4/2016-10-xx_passagedata", config, 20,
+				new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24),
+				Arrays.asList("2016-10-11", "2016-10-12", "2016-10-13", "2016-10-18", "2016-10-19", "2016-10-20",
+						"2016-10-25", "2016-10-26", "2016-10-27"));
+	}
+
+	// -------------------- IMPLEMENTATION --------------------
+
+	private void replaceByInterpolation(final DynamicData<String> data, final int interpolateTime_s) {
 		int bin = data.bin(interpolateTime_s);
 		for (String key : data.keySet()) {
 			final double prevValue = data.getBinValue(key, bin - 1);
@@ -52,7 +97,7 @@ public class TollZoneMeasurementReader {
 		}
 	}
 
-	static Set<String> keysWithDataOutsideOfTollTime(final DynamicData<String> data, final int tollStart_s,
+	private Set<String> keysWithDataOutsideOfTollTime(final DynamicData<String> data, final int tollStart_s,
 			final int tollEnd_s) {
 		final Set<String> result = new LinkedHashSet<>();
 		for (int bin = 0; bin < data.bin(tollStart_s); bin++) {
@@ -72,38 +117,27 @@ public class TollZoneMeasurementReader {
 		return result;
 	}
 
-	static CountMeasurements loadLinkStr2countMeas(final Config config) {
+	public void run() {
 
-		final int maxVehicleLength_m = 20;
-
-		final TimeDiscretization allDayTimeDiscr = new TimeDiscretization(0, 1800, 48);
-		final TimeDiscretization tollTimeOnlyTimeDiscr = new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24);
-		final int guaranteedBeforeToll_s = 6 * 3600;
-		final int guaranteedAfterToll_s = 19 * 3600;
-
-		final List<String> days = Arrays.asList("2016-10-11", "2016-10-12", "2016-10-13", "2016-10-18", "2016-10-19",
-				"2016-10-20", "2016-10-25", "2016-10-26", "2016-10-27");
-
-		final List<String> files = new ArrayList<>(days.size() * 2);
-		for (String day : days) {
+		final List<String> files = new ArrayList<>(this.days.size() * 2);
+		for (String day : this.days) {
 			for (String postfix : new String[] { "-01", "-02" }) {
-				final Path path = Paths.get("/Users/GunnarF/NoBackup/data-workspace/ihop4/2016-10-xx_passagedata",
-						"wsp-passages-vtr-" + day + postfix + ".csv");
+				final Path path = Paths.get(this.pathStr, "wsp-passages-vtr-" + day + postfix + ".csv");
 				files.add(path.toString());
 			}
 		}
 
-		final SizeAnalyzer sizeAnalyzer = new SizeAnalyzer(maxVehicleLength_m);
+		final SizeAnalyzer sizeAnalyzer = new SizeAnalyzer(this.maxVehicleLength_m);
 		for (String file : files) {
-			System.out.println(file);
+			System.out.println("size analysis: " + file);
 			sizeAnalyzer.parse(file);
 		}
 		System.out.println(sizeAnalyzer.toString());
 
-		final PassageDataAnalyzer dataAnalyzer = new PassageDataAnalyzer(allDayTimeDiscr,
-				sizeAnalyzer.getRelevantProbaPerMeterLengthClass());
+		final PassageDataAnalyzer dataAnalyzer = new PassageDataAnalyzer(this.allDayTimeDiscr,
+				sizeAnalyzer.getRelevanceProbabilityPerMeterLengthClass());
 		for (String file : files) {
-			System.out.println(file);
+			System.out.println("passage analysis: " + file);
 			dataAnalyzer.parse(file);
 		}
 		System.out.println(dataAnalyzer.toString());
@@ -112,51 +146,78 @@ public class TollZoneMeasurementReader {
 		replaceByInterpolation(dataAnalyzer.getData(), 18 * 3600 + 45 * 60);
 		System.out.println(dataAnalyzer.toString());
 
-		for (String key : keysWithDataOutsideOfTollTime(dataAnalyzer.getData(), 6 * 3600, 19 * 3600)) {
-			System.out.print(key + "\t");
-		}
-		System.out.println();
-
 		// CREATION OF ACTUAL SENSOR DATA
 
-		final CountMeasurements measurements = new CountMeasurements(config);
+		this.allDayMeasurements = new CountMeasurements(this.config);
+		this.onlyTollTimeMeasurements = new CountMeasurements(this.config);
 
 		final DynamicData<String> allData = dataAnalyzer.getData();
+		final Set<String> linksWithDataOutsideOfTollTime = keysWithDataOutsideOfTollTime(allData, 6 * 3600, 19 * 3600);
 
 		for (String linkStr : allData.keySet()) {
 
-			// TODO CONTINUE HERE
-
-			final double[] singleSensorData = new double[allDayTimeDiscr.getBinCnt()];
-			for (int bin = 0; bin < allDayTimeDiscr.getBinCnt(); bin++) {
-				singleSensorData[bin] = allData.getBinValue(linkStr, bin);
+			final TimeDiscretization singleSensorTimeDiscr;
+			if (linksWithDataOutsideOfTollTime.contains(linkStr)) {
+				singleSensorTimeDiscr = this.allDayTimeDiscr;
+			} else {
+				singleSensorTimeDiscr = this.tollTimeOnlyTimeDiscr;
 			}
 
-			CountMeasurementSpecification spec = new CountMeasurementSpecification(Id.createLinkId(linkStr), null,
-					null);
+			final CountMeasurementSpecification spec = new CountMeasurementSpecification(singleSensorTimeDiscr,
+					new Filter<Id<Vehicle>>() {
+						@Override
+						public boolean test(Id<Vehicle> arg0) {
+							return true;
+						}
+					}, new LinkedHashSet<Id<Link>>(Arrays.asList(Id.createLinkId(linkStr))));
 
-			measurements.addMeasurement(spec, singleSensorData);
+			final double[] singleSensorData = new double[singleSensorTimeDiscr.getBinCnt()];
+			for (int singleSensorTimeBin = 0; singleSensorTimeBin < singleSensorTimeDiscr
+					.getBinCnt(); singleSensorTimeBin++) {
+				final int allDayTimeBin = this.allDayTimeDiscr
+						.getBin(singleSensorTimeDiscr.getBinCenterTime_s(singleSensorTimeBin));
+				singleSensorData[singleSensorTimeBin] = allData.getBinValue(linkStr, allDayTimeBin);
+			}
 
-			// if (linksWithAllDayData.contains(linkStr)) {
-			// linkStr2countMeas.put(linkStr, new CountMeasurement(singleSensorData,
-			// allDayTimeDiscr));
-			// } else {
-			// final DiscretizationChanger discretizationChanger = new
-			// DiscretizationChanger(allDayTimeDiscr,
-			// singleSensorData, DiscretizationChanger.DataType.TOTALS);
-			// discretizationChanger.run(tollTimeOnlyTimeDiscr);
-			// linkStr2countMeas.put(linkStr,
-			// new CountMeasurement(discretizationChanger.getToTotalsCopy(),
-			// tollTimeOnlyTimeDiscr));
-			// }
+			if (linksWithDataOutsideOfTollTime.contains(linkStr)) {
+				this.allDayMeasurements.addMeasurement(spec, singleSensorData);
+			} else {
+				this.onlyTollTimeMeasurements.addMeasurement(spec, singleSensorData);
+			}
 		}
 		
-		return measurements;
+		this.allDayMeasurements.build();
+		this.onlyTollTimeMeasurements.build();		
 	}
+
+	public CountMeasurements getAllDayMeasurements() {
+		return this.allDayMeasurements;
+	}
+
+	public CountMeasurements getOnlyTollTimeMeasurements() {
+		return this.onlyTollTimeMeasurements;
+	}
+	
+
 
 	public static void main(String[] args) {
 
-		loadLinkStr2countMeas(null);
+		TollZoneMeasurementReader reader = new TollZoneMeasurementReader(null);
+		reader.run();
+
+		System.out.println("\nALL-DAY SENSORS");
+		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : reader.getAllDayMeasurements()
+				.getObjectiveFunctions()) {
+			System.out.println(objFct.getSpecification().getLinks() + ": " + objFct.getSpecification().getTimeDiscretization());
+		}
+
+		System.out.println("\nONLY-TOLL SENSORS");
+		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : reader.getOnlyTollTimeMeasurements()
+				.getObjectiveFunctions()) {
+			System.out.println(objFct.getSpecification().getLinks() + ": " + objFct.getSpecification().getTimeDiscretization());
+		}
+
+		System.out.println("DONE");
 
 	}
 

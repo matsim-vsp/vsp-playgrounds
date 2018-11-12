@@ -26,29 +26,26 @@ package gunnar.ihop4.tollzonepassagedata;
  */
 class SizeAnalysisHandler extends AbstractTollZonePassageDataHandler {
 
-	private final int[] totalVehiclesPerMeterLengthClass;
 	private final int[] relevantIdentifiedVehiclesPerMeterLengthClass;
 	private final int[] identifiedVehiclesPerMeterLengthClass;
 
-	SizeAnalysisHandler(final int[] totalVehiclesPerMeterLengthClass, final int[] relevantVehiclesPerMeterLengthClass,
+	SizeAnalysisHandler(final int[] relevantIdentifiedVehiclesPerMeterLengthClass,
 			final int[] identifiedVehiclesPerMeterLengthClass) {
-		this.totalVehiclesPerMeterLengthClass = totalVehiclesPerMeterLengthClass;
-		this.relevantIdentifiedVehiclesPerMeterLengthClass = relevantVehiclesPerMeterLengthClass;
+		this.relevantIdentifiedVehiclesPerMeterLengthClass = relevantIdentifiedVehiclesPerMeterLengthClass;
 		this.identifiedVehiclesPerMeterLengthClass = identifiedVehiclesPerMeterLengthClass;
 	}
 
 	@Override
 	protected void processFields() {
 
-		final int lengthClass = this.vehicleLength_cm / 100;
-		if ((lengthClass < 0) || (lengthClass >= this.totalVehiclesPerMeterLengthClass.length)) {
+		final int lengthClass = super.vehicleLength_cm / 100;
+		if ((lengthClass < 0) || (lengthClass >= this.identifiedVehiclesPerMeterLengthClass.length)) {
 			return;
 		}
-		this.totalVehiclesPerMeterLengthClass[lengthClass]++;
 
-		if (this.containsRegisterData) {
+		if (super.containsRegisterData) {
 			this.identifiedVehiclesPerMeterLengthClass[lengthClass]++;
-			if (this.registerDataFeasible) {
+			if (super.registerDataFeasible) {
 				this.relevantIdentifiedVehiclesPerMeterLengthClass[lengthClass]++;
 			}
 		}

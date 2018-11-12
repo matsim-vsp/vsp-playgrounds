@@ -21,9 +21,7 @@ package gunnar.ihop4.tollzonepassagedata;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *

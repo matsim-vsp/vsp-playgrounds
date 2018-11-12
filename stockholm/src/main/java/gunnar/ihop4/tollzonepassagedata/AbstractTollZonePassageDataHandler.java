@@ -69,7 +69,7 @@ abstract class AbstractTollZonePassageDataHandler extends AbstractTabularFileHan
 
 	@Override
 	public final void startDataRow(String[] args) {
-		
+
 		this.time_s = null;
 		this.chargingPointStr = null;
 		this.linkStr = null;
