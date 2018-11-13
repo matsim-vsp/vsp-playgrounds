@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.prepare;
+package playground.ikaddoura.savPricing.generateSAV;
 
 import java.util.ArrayList;
 import java.util.Collection;

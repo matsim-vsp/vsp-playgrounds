@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.savPricing.runTaxiPricing;
+package playground.ikaddoura.savPricing.runSetupA;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.sav.runTaxi.RunBerlinTaxiScenario1;
+import org.matsim.sav.runDRT.RunBerlinDrtScenario2;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
@@ -46,69 +46,66 @@ import playground.ikaddoura.savPricing.SAVPricingModule;
 * @author ikaddoura
 */
 
-public class RunBerlinTaxiPricingScenario1 {
-	private static final Logger log = Logger.getLogger(RunBerlinTaxiPricingScenario1.class);
+public class RunBerlinDrtPricingScenarioA {
+	private static final Logger log = Logger.getLogger(RunBerlinDrtPricingScenarioA.class);
 
 	private static String configFileName;
 	private static String overridingConfigFileName;
-	private static String restrictedCarAreaShapeFile;
-	private static String serviceAreaShapeFile;
-	private static String transitStopCoordinatesSFile;
+	private static String drtServiceAreaShapeFile;
+	private static double dailyRewardDrtInsteadOfPrivateCar;
 	private static String runId;
 	private static String outputDirectory;
 	private static String visualizationScriptDirectory;
 	private static Integer scaleFactor;
-	private static double dailyRewardTaxiInsteadOfPrivateCar;
-		
+
 	public static void main(String[] args) {
 
 		if (args.length > 0) {		
 			configFileName = args[0];
 			overridingConfigFileName = args[1];
-			restrictedCarAreaShapeFile = args[2];
-			serviceAreaShapeFile = args[3];
-			transitStopCoordinatesSFile = args[4];
-			runId = args[5];
-			outputDirectory = args[6];
-			visualizationScriptDirectory = args[7];
-			scaleFactor = Integer.parseInt(args[8]);
-			dailyRewardTaxiInsteadOfPrivateCar = Double.parseDouble(args[9]);
+			drtServiceAreaShapeFile = args[2];
+			dailyRewardDrtInsteadOfPrivateCar = Double.parseDouble(args[3]);
+			runId = args[4];
+			outputDirectory = args[5];
+			visualizationScriptDirectory = args[6];
+			scaleFactor = Integer.parseInt(args[7]);
 			
 		} else {		
 			String baseDirectory = "/Users/ihab/Documents/workspace/matsim-berlin/";	
-			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-taxi1-v5.2-1pct.config.xml";
+			configFileName = baseDirectory + "scenarios/berlin-v5.2-1pct/input/berlin-drtB-v5.2-1pct.config.xml";
 			overridingConfigFileName = null;
-			restrictedCarAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/shp-inner-city-area/inner-city-area.shp";
-			serviceAreaShapeFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/shp-inner-city-area/inner-city-area.shp";
-			transitStopCoordinatesSFile = baseDirectory + "scenarios/berlin-v5.2-10pct/input/berlin-v5.2.transit-stop-coordinates_S-zoneC.csv";
-			runId = "taxi1-test-1";
+			drtServiceAreaShapeFile = "http://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/berlin/berlin-sav-v5.2-10pct/input/shp-inner-city-area/inner-city-area.shp";
+			dailyRewardDrtInsteadOfPrivateCar = 0.;
+			runId = "drtB-test-1";
 			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/savPricing/output/output-local-run_" + runId + "/";
 			visualizationScriptDirectory = "./visualization-scripts/";
 			scaleFactor = 100;
-			dailyRewardTaxiInsteadOfPrivateCar = 0.;
 		}
 			
 		log.info("run Id: " + runId);
 		log.info("output directory: " + outputDirectory);
 		
-		RunBerlinTaxiPricingScenario1 drtPricing = new RunBerlinTaxiPricingScenario1();
+		RunBerlinDrtPricingScenarioA drtPricing = new RunBerlinDrtPricingScenarioA();
 		drtPricing.run();
 	}
 	
 	private void run() {
-		RunBerlinTaxiScenario1 berlin = new RunBerlinTaxiScenario1(configFileName, overridingConfigFileName, restrictedCarAreaShapeFile, serviceAreaShapeFile, transitStopCoordinatesSFile, dailyRewardTaxiInsteadOfPrivateCar);
+		RunBerlinDrtScenario2 berlin = new RunBerlinDrtScenario2(configFileName, overridingConfigFileName, drtServiceAreaShapeFile, dailyRewardDrtInsteadOfPrivateCar);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
 		config.controler().setRunId(runId);
 		config.controler().setOutputDirectory(outputDirectory);
-						
+			
+		SAVPricingConfigGroup optAVParamsDrt = ConfigUtils.addOrGetModule(config, SAVPricingConfigGroup.class);
+		optAVParamsDrt.setSavMode(TransportMode.drt);
+		
 		Scenario scenario = berlin.prepareScenario();
 		
 		Controler controler = berlin.prepareControler();		
 
 		// sav pricing
-		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg));
+		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinDrtScenario2.modeToReplaceCarTripsInBrandenburg));
 		
 		// modal split analysis
 		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {	
@@ -130,6 +127,10 @@ public class RunBerlinTaxiPricingScenario1 {
 		final String homeActivity = "home";
 		final int scalingFactor = scaleFactor;
 		
+		final String taxiMode = TransportMode.drt;
+		final String carMode = TransportMode.car;
+		final double rewardSAVformerCarUser = 5.3;
+		
 		List<AgentAnalysisFilter> filters = new ArrayList<>();
 
 		AgentAnalysisFilter filter1 = new AgentAnalysisFilter(scenario);
@@ -149,8 +150,8 @@ public class RunBerlinTaxiPricingScenario1 {
 		filters.add(filter3);
 		
 		List<String> modes = new ArrayList<>();
-		modes.add(RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg);
-		modes.add(TransportMode.taxi);
+		modes.add(TransportMode.car);
+		modes.add(TransportMode.drt);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				controler.getScenario(),
@@ -164,9 +165,9 @@ public class RunBerlinTaxiPricingScenario1 {
 				filters,
 				null,
 				modes,
-				TransportMode.taxi,
-				RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg,
-				dailyRewardTaxiInsteadOfPrivateCar);
+				taxiMode,
+				carMode,
+				rewardSAVformerCarUser);
 		analysis.run();
 		
 		// noise post-analysis

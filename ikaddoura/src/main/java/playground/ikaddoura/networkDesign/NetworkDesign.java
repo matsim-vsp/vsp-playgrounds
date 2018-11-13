@@ -52,8 +52,12 @@ public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandl
 
 	private final int networkAdjustmentInterval = 5;
 	private final int networkAdjustmentStartIteration = 0;
-	
-	private final double revenuesPerAgentAndMeter = 0.006; // Energiesteuer 0.60 EUR / l ; 10 l pro 100 km
+		
+	private final double minimumCapacity = 250.;
+	private final double minimumNumberOfLanes = 1.;
+
+	private final boolean accountForProfit = false;
+	private final double revenuesPerCarUserAndMeter = 0.006; // Energiesteuer 0.60 EUR / l ; 10 l pro 100 km
 	private final double infrastructureCostPerLaneAndMeter = 0.05; // 20. / 365.
 	
 	private final double absoluteCapacityAdjustment = 250;
@@ -67,7 +71,6 @@ public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandl
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		
-				
 		if (event.getIteration() >= networkAdjustmentStartIteration && event.getIteration() % networkAdjustmentInterval == 0.) {
 			log.info("Adjusting network...");
 			
@@ -75,23 +78,25 @@ public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandl
 				Link link = scenario.getNetwork().getLinks().get(linkId);
 
 				double volume = 0;
-				if (linkId2Volume.get(linkId) != null) volume = linkId2Volume.get(linkId);
-				final double revenues = volume  * link.getLength() * revenuesPerAgentAndMeter;
-				final double infrastructureCosts = link.getNumberOfLanes() * link.getLength() * infrastructureCostPerLaneAndMeter;	
-				final double subsidy = 0.; // TODO: account for user benefits, accessibility, ...
-				final double toll = 0.; // TODO: noise, ...
-				final double profit = revenues - infrastructureCosts + subsidy - toll;
-				
-				log.info(linkId + " // profit: " + profit);
-				
+				if (linkId2Volume.get(linkId) != null) volume = linkId2Volume.get(linkId) / scenario.getConfig().qsim().getFlowCapFactor();
+								
 				if (volume > link.getCapacity()) {
-					increaseCapacity(link);
 					
-//					if (profit > 0.) {
-//						increaseCapacity(link);
-//					} else {
-//						reduceCapacity(link);
-//					}
+					if (accountForProfit) {
+						final double revenues = volume  * link.getLength() * revenuesPerCarUserAndMeter;
+						final double infrastructureCosts = link.getNumberOfLanes() * link.getLength() * infrastructureCostPerLaneAndMeter;	
+						final double subsidy = 0.; // TODO: account for user benefits, accessibility, ...
+						final double toll = 0.; // TODO: noise, ...
+						final double profit = revenues - infrastructureCosts + subsidy - toll;
+						
+						if (profit > 0.) {
+							increaseCapacity(link);
+						} else {
+							reduceCapacity(link);
+						}
+					} else {
+						increaseCapacity(link);
+					}
 				} else {
 					reduceCapacity(link);
 				}
@@ -109,10 +114,10 @@ public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandl
 		link.setCapacity(link.getCapacity() - absoluteCapacityAdjustment);
 		link.setNumberOfLanes(link.getNumberOfLanes() - absoluteLaneAdjustment);
 	
-		if (Double.isInfinite(link.getCapacity()) || link.getCapacity() < 0. ||
-				Double.isInfinite(link.getNumberOfLanes()) || link.getNumberOfLanes() < 0.) {
-			link.setCapacity(0.);
-			link.setNumberOfLanes(0.);
+		if (Double.isInfinite(link.getCapacity()) || link.getCapacity() < minimumCapacity ||
+				Double.isInfinite(link.getNumberOfLanes()) || link.getNumberOfLanes() < minimumNumberOfLanes) {
+			link.setCapacity(minimumCapacity);
+			link.setNumberOfLanes(minimumNumberOfLanes);
 		}
 	}
 
