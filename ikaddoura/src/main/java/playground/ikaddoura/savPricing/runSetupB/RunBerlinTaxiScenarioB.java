@@ -41,8 +41,6 @@ import org.matsim.core.router.TripRouter;
 import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.sav.SAVPassengerTracker;
 import org.matsim.sav.SAVPassengerTrackerImpl;
-import org.matsim.sav.prepare.BerlinNetworkModification;
-import org.matsim.sav.prepare.BerlinPlansModificationSplitTrips;
 import org.matsim.sav.prepare.BerlinPlansModificationTagFormerCarUsers;
 import org.matsim.sav.prepare.BerlinShpUtils;
 import org.matsim.sav.prepare.PersonAttributesModification;
@@ -50,6 +48,9 @@ import org.matsim.sav.runTaxi.RunBerlinTaxiScenario;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinNetworkModification;
+import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinPlansModificationSplitTrips;
 
 /**
  * This class starts a simulation run with taxis.

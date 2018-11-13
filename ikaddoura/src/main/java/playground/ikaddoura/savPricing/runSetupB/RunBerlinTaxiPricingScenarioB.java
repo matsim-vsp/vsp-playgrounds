@@ -34,7 +34,6 @@ import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.sav.runTaxi.RunBerlinTaxiScenario1;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
@@ -96,7 +95,7 @@ public class RunBerlinTaxiPricingScenarioB {
 	}
 	
 	private void run() {
-		RunBerlinTaxiScenario1 berlin = new RunBerlinTaxiScenario1(configFileName, overridingConfigFileName, restrictedCarAreaShapeFile, serviceAreaShapeFile, transitStopCoordinatesSFile, dailyRewardTaxiInsteadOfPrivateCar);
+		RunBerlinTaxiScenarioB berlin = new RunBerlinTaxiScenarioB(configFileName, overridingConfigFileName, restrictedCarAreaShapeFile, serviceAreaShapeFile, transitStopCoordinatesSFile, dailyRewardTaxiInsteadOfPrivateCar);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
@@ -108,7 +107,7 @@ public class RunBerlinTaxiPricingScenarioB {
 		Controler controler = berlin.prepareControler();		
 
 		// sav pricing
-		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg));
+		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinTaxiScenarioB.modeToReplaceCarTripsInBrandenburg));
 		
 		// modal split analysis
 		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {	
@@ -149,7 +148,7 @@ public class RunBerlinTaxiPricingScenarioB {
 		filters.add(filter3);
 		
 		List<String> modes = new ArrayList<>();
-		modes.add(RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg);
+		modes.add(RunBerlinTaxiScenarioB.modeToReplaceCarTripsInBrandenburg);
 		modes.add(TransportMode.taxi);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
@@ -165,7 +164,7 @@ public class RunBerlinTaxiPricingScenarioB {
 				null,
 				modes,
 				TransportMode.taxi,
-				RunBerlinTaxiScenario1.modeToReplaceCarTripsInBrandenburg,
+				RunBerlinTaxiScenarioB.modeToReplaceCarTripsInBrandenburg,
 				dailyRewardTaxiInsteadOfPrivateCar);
 		analysis.run();
 		

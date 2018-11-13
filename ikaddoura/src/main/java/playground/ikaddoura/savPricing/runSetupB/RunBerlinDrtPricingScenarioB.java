@@ -34,7 +34,6 @@ import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.sav.runDRT.RunBerlinDrtScenario1;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
@@ -93,7 +92,7 @@ public class RunBerlinDrtPricingScenarioB {
 	}
 	
 	private void run() {
-		RunBerlinDrtScenario1 berlin = new RunBerlinDrtScenario1(configFileName, overridingConfigFileName, carRestrictedAreaShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile);
+		RunBerlinDrtScenarioB berlin = new RunBerlinDrtScenarioB(configFileName, overridingConfigFileName, carRestrictedAreaShapeFile, drtServiceAreaShapeFile, transitStopCoordinatesSFile);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
@@ -108,7 +107,7 @@ public class RunBerlinDrtPricingScenarioB {
 		Controler controler = berlin.prepareControler();		
 
 		// sav pricing
-		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinDrtScenario1.modeToReplaceCarTripsInBrandenburg));
+		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinDrtScenarioB.modeToReplaceCarTripsInBrandenburg));
 		
 		// modal split analysis
 		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {	
@@ -154,7 +153,7 @@ public class RunBerlinDrtPricingScenarioB {
 		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
-		modes.add(RunBerlinDrtScenario1.modeToReplaceCarTripsInBrandenburg);
+		modes.add(RunBerlinDrtScenarioB.modeToReplaceCarTripsInBrandenburg);
 		modes.add(TransportMode.drt);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(

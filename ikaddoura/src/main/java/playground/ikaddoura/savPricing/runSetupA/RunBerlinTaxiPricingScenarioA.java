@@ -34,7 +34,7 @@ import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.sav.runTaxi.RunBerlinTaxiScenario2;
+import org.matsim.sav.runTaxi.RunBerlinTaxiScenarioA;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
@@ -90,7 +90,7 @@ public class RunBerlinTaxiPricingScenarioA {
 	}
 	
 	private void run() {
-		RunBerlinTaxiScenario2 berlin = new RunBerlinTaxiScenario2(configFileName, overridingConfigFileName, serviceAreaShapeFile, dailyRewardTaxiInsteadOfPrivateCar);
+		RunBerlinTaxiScenarioA berlin = new RunBerlinTaxiScenarioA(configFileName, overridingConfigFileName, serviceAreaShapeFile, dailyRewardTaxiInsteadOfPrivateCar);
 		
 		ConfigGroup[] modulesToAdd = {new SAVPricingConfigGroup(), new DecongestionConfigGroup(), new NoiseConfigGroup()};
 		Config config = berlin.prepareConfig(modulesToAdd);
@@ -102,7 +102,7 @@ public class RunBerlinTaxiPricingScenarioA {
 		Controler controler = berlin.prepareControler();		
 
 		// sav pricing
-		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinTaxiScenario2.modeToReplaceCarTripsInBrandenburg));
+		controler.addOverridingModule(new SAVPricingModule(scenario, RunBerlinTaxiScenarioA.modeToReplaceCarTripsInBrandenburg));
 		
 		// modal split analysis
 		controler.addOverridingModule(new org.matsim.core.controler.AbstractModule() {	
