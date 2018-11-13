@@ -26,6 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class TargetPopulationPercentile implements Statistic<LogDataWrapper> {
 
 	@Override
@@ -35,7 +36,7 @@ public class TargetPopulationPercentile implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getTargetPopulationPercentile());
+		return null; // Statistic.toString(arg0.getTargetPopulationPercentile());
 	}
 
 }

@@ -34,7 +34,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
-import org.matsim.vehicles.Vehicles;
 
 import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.Units;
@@ -61,7 +60,7 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	// TODO No way to access the network directly?
 	public void configure(final Scenario scenario, final int pSimIterations) {
 		this.network = scenario.getNetwork();
-		this.transitVehicles = scenario.getTransitVehicles();
+		// this.transitVehicles = scenario.getTransitVehicles();
 		this.populationSize = scenario.getPopulation().getPersons().size();
 		this.pSimIterations = pSimIterations;
 	}
@@ -266,18 +265,18 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	// }
 
 	// --------------------replanningEfficiencyThreshold--------------------
-
-	private int averageIterations = 1; // TODO revisit
-
-	@StringGetter("averageIterations")
-	public int getAverageIterations() {
-		return this.averageIterations;
-	}
-
-	@StringSetter("averageIterations")
-	public void setAverageIterations(final int averageIterations) {
-		this.averageIterations = averageIterations;
-	}
+	//
+	// private int averageIterations = 1; // TODO revisit
+	//
+	// @StringGetter("averageIterations")
+	// public int getAverageIterations() {
+	// return this.averageIterations;
+	// }
+	//
+	// @StringSetter("averageIterations")
+	// public void setAverageIterations(final int averageIterations) {
+	// this.averageIterations = averageIterations;
+	// }
 
 	// -------------------- deltaRecipe --------------------
 	//
@@ -331,16 +330,16 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- deltaScorePerIterationThreshold --------------------
 
-	private double deltaScorePerIterationThreshold = 0.0;
+	private double scoreImprovementPerIterationThreshold = 0.0;
 
-	@StringGetter("deltaScorePerIterationThreshold")
-	public double getDeltaScorePerIterationThreshold() {
-		return this.deltaScorePerIterationThreshold;
+	@StringGetter("scoreImprovementPerIterationThreshold")
+	public double getScoreImprovementPerIterationThreshold() {
+		return this.scoreImprovementPerIterationThreshold;
 	}
 
-	@StringSetter("deltaScorePerIterationThreshold")
-	public void setDeltaScorePerIterationThreshold(final double deltaScorePerIterationThreshold) {
-		this.deltaScorePerIterationThreshold = deltaScorePerIterationThreshold;
+	@StringSetter("scoreImprovementPerIterationThreshold")
+	public void setScoreImprovementPerIterationThreshold(final double scoreImprovementPerIterationThreshold) {
+		this.scoreImprovementPerIterationThreshold = scoreImprovementPerIterationThreshold;
 	}
 
 	// -------------------- individualConvergenceIterations --------------------
@@ -358,18 +357,19 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	// -------------------- separateOutConvergedAgents --------------------
-
-	private boolean separateOutConvergedAgents = true;
-
-	@StringGetter("separateOutConvergedAgents")
-	public boolean getSeparateOutConvergedAgents() {
-		return this.separateOutConvergedAgents;
-	}
-
-	@StringSetter("separateOutConvergedAgents")
-	public void setSeparateOutConvergedAgents(final boolean separateOutConvergedAgents) {
-		this.separateOutConvergedAgents = separateOutConvergedAgents;
-	}
+	//
+	// private boolean separateOutConvergedAgents = true;
+	//
+	// @StringGetter("separateOutConvergedAgents")
+	// public boolean getSeparateOutConvergedAgents() {
+	// return this.separateOutConvergedAgents;
+	// }
+	//
+	// @StringSetter("separateOutConvergedAgents")
+	// public void setSeparateOutConvergedAgents(final boolean
+	// separateOutConvergedAgents) {
+	// this.separateOutConvergedAgents = separateOutConvergedAgents;
+	// }
 
 	// ==================== SUPPLEMENTARY FUNCTIONALITY ====================
 
@@ -401,7 +401,7 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	private Network network = null; // needs to be explicitly set
 
-	private Vehicles transitVehicles = null; // needs to be explicitly set
+	// private Vehicles transitVehicles = null; // needs to be explicitly set
 
 	private Integer populationSize = null; // needs to be explicitly set
 

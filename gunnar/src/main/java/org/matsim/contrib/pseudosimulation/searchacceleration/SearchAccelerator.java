@@ -23,7 +23,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,7 +50,6 @@ import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Spa
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Utilities;
 import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.SlotUsageListener;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageUtility;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DeltaPercentile;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DriversInPhysicalSim;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DriversInPseudoSim;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.EffectiveReplanningRate;
@@ -62,12 +60,9 @@ import org.matsim.contrib.pseudosimulation.searchacceleration.logging.LogDataWra
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.MeanReplanningRate;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.NumberOfConvergedAgents;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RealizedDeltaUtility;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RealizedGreedyScoreChange;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RegularizationWeight;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareNeverReplanned;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareScoreImprovingReplanners;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TTSum;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformGreedyScoreChange;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplannerShare;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplanningObjectiveFunctionValue;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.WeightedCountDifferences2;
@@ -123,16 +118,6 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 	@Inject
 	private TransitEmulator transitEmulator;
-	// private FifoTransitPerformance fifoTransitPerformance;
-
-	// @Inject
-	// private WaitTime waitTime;
-
-	// @Inject
-	// private StopStopTime stopStopTime;
-
-	// @Inject
-	// private PSimProvider pSimProvider;
 
 	@Inject
 	private GreedoProgressListener greedoProgressListener;
@@ -145,36 +130,37 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 	private PopulationState hypotheticalPopulationState = null;
 
-	private double currentDelta = 0.0;
+	// private double currentDelta = 0.0;
 
 	private int numberOfConvergedAgents = 0;
 
 	// >>> created upon startup >>>
 
 	private SlotUsageListener slotUsageListener;
-	// private LinkUsageListener matsimIVMobsimUsageListener;
-	// private TransitVehicleUsageListener matsimOVMobsimUsageListener;
 
-	// >>> created upon startup >>>
 	private StatisticsWriter<LogDataWrapper> statsWriter;
+
 	private Utilities utilities;
+
 	private RecursiveMovingAverage expectedUtilityChangeSumAccelerated;
+
 	private RecursiveMovingAverage expectedUtilityChangeSumUniform;
+
 	private RecursiveMovingAverage realizedUtilityChangeSum;
 
 	// <<< created upon startup <<<
 
-	private List<IndividualReplanningResult> individualReplanningResultsList = null;
-	// private List<Byte> lastActualReplanIndicatorList = null;
-	// private List<Byte> lastUniformReplanIndicatorList = null;
-	// private List<Double> lastCriticalDeltaList = null;
-	// private List<Double> lastExpectedScoreChangeList = null;
+	// private List<IndividualReplanningResult> individualReplanningResultsList =
+	// null;
 
-	private Double deltaPercentile = null;
-	private Double targetPopulationPercentile = null;
-	private Double shareOfAllowedDeviationsFromUniformity = null;
+	// private Double deltaPercentile = null;
 
-	public Double lastAverageUtility = null;
+	// private Double targetPopulationPercentile = null;
+
+	// private Double shareOfAllowedDeviationsFromUniformity = null;
+
+	// TODO This should be available through Utilities
+	private Double lastAverageUtility = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -206,32 +192,6 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		}
 	}
 
-	// public Double getReplanningEfficiency() {
-	// if ((this.expectedUtilityImprovementSum.size() == 0) ||
-	// (this.realizedUtilityImprovementSum.size() == 0)) {
-	// return null;
-	// } else {
-	// final double expected = Math.max(1e-8,
-	// this.expectedUtilityImprovementSum.mostRecentValue());
-	// final double realized = Math.max(1e-8,
-	// this.realizedUtilityImprovementSum.mostRecentValue());
-	// return realized / expected;
-	// }
-	// }
-
-	// public Double getAverageReplanningEfficiency() {
-	// if ((this.expectedUtilityImprovementSum.size() == 0) ||
-	// (this.realizedUtilityImprovementSum.size() == 0)) {
-	// return null;
-	// } else {
-	// final double expected = Math.max(1e-8,
-	// this.expectedUtilityImprovementSum.sum());
-	// final double realized = Math.max(1e-8,
-	// this.realizedUtilityImprovementSum.sum());
-	// return realized / expected;
-	// }
-	// }
-
 	public Double getPhysicalTravelTimeSum_h() {
 		double ttSum_s = 0;
 		for (Link link : this.services.getScenario().getNetwork().getLinks().values()) {
@@ -255,39 +215,13 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				/ this.services.getScenario().getPopulation().getPersons().size();
 	}
 
-	// public Double getDeltaForUniformReplanning() {
-	// if (this.averageDeltaForUniformReplanning == null ||
-	// this.averageDeltaForUniformReplanning.size() == 0) {
-	// return null;
-	// } else {
-	// return this.averageDeltaForUniformReplanning.mostRecentValue();
-	// }
+	// public Double getRegularizationWeight() {
+	// return this.currentDelta;
 	// }
 
-	// public Double getDeltaForUniformReplanningExact() {
-	// if (this.averageDeltaForUniformReplanningExact == null
-	// || this.averageDeltaForUniformReplanningExact.size() == 0) {
-	// return null;
-	// } else {
-	// return this.averageDeltaForUniformReplanningExact.mostRecentValue();
+	// public Double getDeltaPercentile() {
+	// return this.deltaPercentile;
 	// }
-	// }
-
-	// public Double getAverageDeltaForUniformReplanning() {
-	// if (this.averageDeltaForUniformReplanning == null) {
-	// return null;
-	// } else {
-	// return this.averageDeltaForUniformReplanning.average();
-	// }
-	// }
-
-	public Double getRegularizationWeight() {
-		return this.currentDelta;
-	}
-
-	public Double getDeltaPercentile() {
-		return this.deltaPercentile;
-	}
 
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
 		return this.expectedUtilityChangeSumAccelerated.average();
@@ -301,13 +235,13 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		return this.realizedUtilityChangeSum.average();
 	}
 
-	public Double getTargetPopulationPercentile() {
-		return this.targetPopulationPercentile;
-	}
+	// public Double getTargetPopulationPercentile() {
+	// return this.targetPopulationPercentile;
+	// }
 
-	public Double getShareOfAllowedDeviationsFromUniformity() {
-		return this.shareOfAllowedDeviationsFromUniformity;
-	}
+	// public Double getShareOfAllowedDeviationsFromUniformity() {
+	// return this.shareOfAllowedDeviationsFromUniformity;
+	// }
 
 	public Double getLastAverageUtility() {
 		return this.lastAverageUtility;
@@ -332,23 +266,11 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 		this.slotUsageListener = new SlotUsageListener(this.services.getScenario().getPopulation(),
 				this.services.getScenario().getTransitVehicles(), this.accelerationConfig);
-		// this.matsimIVMobsimUsageListener = new
-		// LinkUsageListener(this.replanningParameters().getTimeDiscretization());
-		// this.matsimOVMobsimUsageListener = new TransitVehicleUsageListener(
-		// this.replanningParameters().getTimeDiscretization(),
-		// this.services.getScenario().getPopulation());
 
-		this.expectedUtilityChangeSumAccelerated = new RecursiveMovingAverage(
-				// this.replanningParameters().getAverageIterations()
-				1);
-		this.expectedUtilityChangeSumUniform = new RecursiveMovingAverage(
-				// this.replanningParameters().getAverageIterations()
-				1);
-
-		// TODO filtering only this because its expectation is a convergence measure
-		// TODO this could as well be consequence of 0/0 numerics in the critical delta
-		// computations
-		this.realizedUtilityChangeSum = new RecursiveMovingAverage(this.replanningParameters().getAverageIterations());
+		// TODO Initialize upon construction
+		this.expectedUtilityChangeSumAccelerated = new RecursiveMovingAverage(1);
+		this.expectedUtilityChangeSumUniform = new RecursiveMovingAverage(1);
+		this.realizedUtilityChangeSum = new RecursiveMovingAverage(1);
 
 		this.utilities = new Utilities(this.replanningParameters().getIndividualConvergenceIterations());
 
@@ -359,17 +281,17 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.statsWriter.addSearchStatistic(new DriversInPhysicalSim());
 		this.statsWriter.addSearchStatistic(new DriversInPseudoSim());
 		this.statsWriter.addSearchStatistic(new NumberOfConvergedAgents());
-		this.statsWriter.addSearchStatistic(new DeltaPercentile());
+		// this.statsWriter.addSearchStatistic(new DeltaPercentile());
 		// this.statsWriter.addSearchStatistic(new TargetPopulationPercentile());
 		// this.statsWriter.addSearchStatistic(new
 		// ShareOfAllowedDeviationsFromUniformity());
-		this.statsWriter.addSearchStatistic(new RegularizationWeight());
+		// this.statsWriter.addSearchStatistic(new RegularizationWeight());
 		this.statsWriter.addSearchStatistic(new MeanReplanningRate());
 		this.statsWriter.addSearchStatistic(new EffectiveReplanningRate());
-		this.statsWriter.addSearchStatistic(new RealizedGreedyScoreChange());
-		this.statsWriter.addSearchStatistic(new UniformGreedyScoreChange());
+		// this.statsWriter.addSearchStatistic(new RealizedGreedyScoreChange());
+		// this.statsWriter.addSearchStatistic(new UniformGreedyScoreChange());
 		this.statsWriter.addSearchStatistic(new ShareNeverReplanned());
-		this.statsWriter.addSearchStatistic(new UniformReplanningObjectiveFunctionValue());
+		// this.statsWriter.addSearchStatistic(new UniformReplanningObjectiveFunctionValue());
 		this.statsWriter.addSearchStatistic(new FinalObjectiveFunctionValue());
 		this.statsWriter.addSearchStatistic(new ShareScoreImprovingReplanners());
 		this.statsWriter.addSearchStatistic(new WeightedCountDifferences2());
@@ -379,7 +301,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		// this.statsWriter.addSearchStatistic(new DeltaForUniformReplanning());
 		// this.statsWriter.addSearchStatistic(new DeltaForUniformReplanningExact());
 		// this.statsWriter.addSearchStatistic(new AverageDeltaForUniformReplanning());
-		this.statsWriter.addSearchStatistic(new UniformReplannerShare());
+		// this.statsWriter.addSearchStatistic(new UniformReplannerShare());
 		// this.statsWriter.addSearchStatistic(new ReplanningSignalAKF());
 		this.statsWriter.addSearchStatistic(new AverageUtility());
 		this.statsWriter.addSearchStatistic(new RealizedDeltaUtility());
@@ -414,26 +336,10 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		}
 	}
 
-	// @Override
-	// public void handleEvent(final TransitDriverStartsEvent event) {
-	// if (this.mobsimSwitcher.isQSimIteration()) {
-	// this.stopInteractionListener.handleEvent(event);
-	// }
-	// }
-
-	// @Override
-	// public void handleEvent(final VehicleDepartsAtFacilityEvent event) {
-	// if (this.mobsimSwitcher.isQSimIteration()) {
-	// this.stopInteractionListener.handleEvent(event);
-	// }
-	// }
-
 	@Override
 	public void handleEvent(final PersonEntersVehicleEvent event) {
 		if (this.mobsimSwitcher.isQSimIteration()) {
 			this.slotUsageListener.handleEvent(event);
-			// this.matsimOVMobsimUsageListener.handleEvent(event);
-			// this.stopInteractionListener.handleEvent(event);
 		}
 	}
 
@@ -441,8 +347,6 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	public void handleEvent(final PersonLeavesVehicleEvent event) {
 		if (this.mobsimSwitcher.isQSimIteration()) {
 			this.slotUsageListener.handleEvent(event);
-			// this.matsimOVMobsimUsageListener.handleEvent(event);
-			// this.stopInteractionListener.handleEvent(event);
 		}
 	}
 
@@ -470,8 +374,6 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			this.greedoProgressListener.extractedLastPhysicalPopulationState(event.getIteration());
 			this.lastPhysicalSlotUsages = this.slotUsageListener.getNewIndicatorView();
 			log.info("number of physical slot usage indicators " + this.lastPhysicalSlotUsages.size());
-			// this.lastPhysicalLinkUsages =
-			// this.matsimIVMobsimUsageListener.getAndClearIndicators();
 
 			this.pseudoSimIterationCnt = 0;
 
@@ -480,9 +382,6 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				this.lastAverageUtility += person.getSelectedPlan().getScore();
 			}
 			this.lastAverageUtility /= this.services.getScenario().getPopulation().getPersons().size();
-
-			// this.stopInteractionListener.analyzeResult(this.services.getScenario().getTransitSchedule());
-			// this.stopInteractionListener.setEnabled(false);
 
 		} else {
 			log.info("pseudoSim run in iteration " + event.getIteration() + " ends");
@@ -496,7 +395,6 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				.getIterationsPerCycle() - 1)) {
 
 			this.greedoProgressListener.observedLastPSimIterationWithinABlock(event.getIteration());
-			// this.stopInteractionListener.setEnabled(true);
 
 			/*
 			 * Extract, for each agent, the expected (hypothetical) score change and do some
@@ -509,7 +407,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				final double expectedUtility = person.getSelectedPlan().getScore();
 				this.utilities.update(person.getId(), realizedUtility, expectedUtility,
 						this.replanningParameters().getIndividualConvergenceIterations(),
-						this.replanningParameters().getDeltaScorePerIterationThreshold());
+						this.replanningParameters().getScoreImprovementPerIterationThreshold());
 			}
 
 			final Utilities.SummaryStatistics utilityStatsBeforeReplanning = this.utilities.newSummaryStatistics();
@@ -523,7 +421,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 				// Merely a safeguard.
 
-				if ((this.replanners == null) || (this.individualReplanningResultsList == null)) {
+				if (this.replanners == null) { // || (this.individualReplanningResultsList == null)) {
 					throw new RuntimeException(
 							"Previous data is valid but previous replanners have not been registered.");
 				}
@@ -544,65 +442,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				this.expectedUtilityChangeSumAccelerated.add(previousExpectedUtilityChangeSumAcceleratedTmp);
 
 				// Compute delta for the next iteration.
-
-				this.currentDelta = 0.0;
-
-				// System.out.println();
-				// System.out.println("DELTA COMPUTATION");
-				// System.out.println();
-				// System.out.println("currentDelta\tcurrentGap\toptimaDelta\toptimalGap");
-				//
-				// this.deltaPercentile = 0.0;
-				// this.currentDelta = 0.0; // meaning that everybody is greedy
-				// int minimalGap = 0; // reference gap value if all person indices are greedy
-				//
-				// System.out
-				// .println(this.currentDelta + "\t" + minimalGap + "\t" + this.currentDelta +
-				// "\t" + minimalGap);
-				//
-				// int candidateDeltaIndex = 0; // only for logging
-				// int candidateGap = minimalGap;
-				// for (IndividualReplanningResult individualResult :
-				// this.individualReplanningResultsList) {
-				// candidateDeltaIndex++;
-				//
-				// final boolean desiredReplanning;
-				// if (this.utilities.getUtilities(individualResult.personId).isConverged()) {
-				// // A converged individual should replan uniformly.
-				// desiredReplanning = individualResult.wouldBeUniformReplanner;
-				// } else {
-				// // A non-converged individual should replan greedily.
-				// desiredReplanning = individualResult.wouldBeGreedyReplanner;
-				// }
-				//
-				// final boolean replanningBeforeSwitch =
-				// individualResult.wouldBeGreedyReplanner;
-				// final boolean replanningAfterSwitch =
-				// individualResult.wouldBeUniformReplanner;
-				// // Remove effect of greedy replanning.
-				// if (replanningBeforeSwitch != desiredReplanning) {
-				// candidateGap--;
-				// }
-				// // Include effect of uniform replanning.
-				// if (replanningAfterSwitch != desiredReplanning) {
-				// candidateGap++;
-				// }
-				//
-				// // keep the largest possible delta as long as the gap does not increase
-				// if (candidateGap <= minimalGap) {
-				// this.deltaPercentile = (100.0 * candidateDeltaIndex)
-				// / this.individualReplanningResultsList.size();
-				// this.currentDelta = Math.max(0.0, individualResult.criticalDelta);
-				// minimalGap = candidateGap;
-				// }
-				//
-				// System.out.println(individualResult.criticalDelta + "\t" + candidateGap +
-				// "\t" + this.currentDelta
-				// + "\t" + minimalGap);
-				// }
-				//
-				// // System.exit(0);
-
+				// this.currentDelta = 0.0;
 			}
 
 			/*
@@ -624,21 +464,10 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				final SlotUsageListener pSimSlotUsageListener = new SlotUsageListener(
 						this.services.getScenario().getPopulation(), this.services.getScenario().getTransitVehicles(),
 						this.accelerationConfig);
-				// final LinkUsageListener pSimLinkUsageListener = new LinkUsageListener(
-				// this.replanningParameters().getTimeDiscretization());
 				final EventsManager eventsManager = EventsUtils.createEventsManager();
 				eventsManager.addHandler(pSimSlotUsageListener);
 				final PSim pSim = new PSim(this.services.getScenario(), eventsManager, selectedHypotheticalPlans,
 						this.linkTravelTimes, this.transitEmulator);
-				// new PSim(this.services.getScenario(), eventsManager,
-				// selectedHypotheticalPlans,
-				// this.linkTravelTimes, this.fifoTransitPerformance);
-				// final PSim pSim = new PSim(this.services.getScenario(), eventsManager,
-				// selectedHypotheticalPlans,
-				// this.linkTravelTimes, waitTime, stopStopTime, null);
-				// final PSim pSim = new PSim(this.services.getScenario(), eventsManager,
-				// selectedHypotheticalPlans,
-				// this.linkTravelTimes);
 				pSim.run();
 				lastPseudoSimSlotUsages = pSimSlotUsageListener.getNewIndicatorView();
 				log.info("number of pSim slot usage indicators " + lastPseudoSimSlotUsages.size());
@@ -671,23 +500,15 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 					event.getIteration(), this.lastPhysicalSlotUsages, lastPseudoSimSlotUsages,
 					this.slotUsageListener.getWeightView(), this.services.getScenario().getPopulation(),
 					utilityStatsBeforeReplanning.personId2currentDeltaUtility,
-					utilityStatsBeforeReplanning.currentDeltaUtilitySum, this.currentDelta,
+					utilityStatsBeforeReplanning.currentDeltaUtilitySum, // this.currentDelta,
 					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds());
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
-			this.individualReplanningResultsList = replannerIdentifier.getIndividualReplanningResultListView();
+			// this.individualReplanningResultsList =
+			// replannerIdentifier.getIndividualReplanningResultListView();
 
 			final LogDataWrapper data = new LogDataWrapper(this, replannerIdentifier, lastPseudoSimSlotUsages.size());
 			this.statsWriter.writeToFile(data);
-
-			// this.lastActualReplanIndicatorList =
-			// replannerIdentifier.getActualReplanIndicatorListView();
-			// this.lastUniformReplanIndicatorList =
-			// replannerIdentifier.getUniformReplanIndicatorListView();
-			// this.lastCriticalDeltaList =
-			// replannerIdentifier.getDeltaForUniformReplanningListView();
-			// this.lastExpectedScoreChangeList =
-			// replannerIdentifier.getExpectedScoreChangeListView();
 
 			this.greedoProgressListener.madeReplanningDecisions(event.getIteration());
 

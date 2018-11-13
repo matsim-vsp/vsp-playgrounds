@@ -19,8 +19,6 @@
  */
 package org.matsim.contrib.pseudosimulation.searchacceleration.logging;
 
-import java.util.List;
-
 import org.matsim.contrib.pseudosimulation.searchacceleration.ReplannerIdentifier;
 import org.matsim.contrib.pseudosimulation.searchacceleration.SearchAccelerator;
 
@@ -76,9 +74,9 @@ public class LogDataWrapper {
 		return this.identifier.getMeanReplanningRate();
 	}
 
-	public Double getRegularizationWeight() {
-		return this.accelerator.getRegularizationWeight();
-	}
+	// public Double getRegularizationWeight() {
+	// return this.accelerator.getRegularizationWeight();
+	// }
 
 	// public Double getReplanningEfficiency() {
 	// return this.accelerator.getReplanningEfficiency();
@@ -100,33 +98,33 @@ public class LogDataWrapper {
 		return this.accelerator.getPhysicalTravelTimeSum_h();
 	}
 
-	public Double getUniformReplanningObjectiveFunctionValue() {
-		return this.identifier.getUniformReplanningObjectiveFunctionValue();
-	}
+	// public Double getUniformReplanningObjectiveFunctionValue() {
+	// return this.identifier.getUniformReplanningObjectiveFunctionValue();
+	// }
 
 	public Double getSumOfWeightedCountDifferences2() {
 		return this.identifier.getSumOfWeightedCountDifferences2();
 	}
 
-	public Double getUniformGreedyScoreChange() {
-		return this.identifier.getUniformGreedyScoreChange();
-	}
+	// public Double getUniformGreedyScoreChange() {
+	// return this.identifier.getUniformGreedyScoreChange();
+	// }
 
-	public Double getRealizedGreedyScoreChange() {
-		return this.identifier.getRealizedGreedyScoreChange();
-	}
+	// public Double getRealizedGreedyScoreChange() {
+	// return this.identifier.getRealizedGreedyScoreChange();
+	// }
 
-	public Double getUniformReplannerShare() {
-		return this.identifier.getUniformReplannerShare();
-	}
+	// public Double getUniformReplannerShare() {
+	// return this.identifier.getUniformReplannerShare();
+	// }
 
-	public List<Double> getReplaningSignalAKF() {
-		return this.identifier.getReplanningSignalAKF();
-	}
+	// public List<Double> getReplaningSignalAKF() {
+	// return this.identifier.getReplanningSignalAKF();
+	// }
 
-	public Double getDeltaPercentile() {
-		return this.accelerator.getDeltaPercentile();
-	}
+	// public Double getDeltaPercentile() {
+	// return this.accelerator.getDeltaPercentile();
+	// }
 
 	public Double getLastExpectedUtilityChangeSumAccelerated() {
 		return this.accelerator.getLastExpectedUtilityChangeSumAccelerated();
@@ -140,18 +138,18 @@ public class LogDataWrapper {
 		return this.accelerator.getLastRealizedUtilityChangeSum();
 	}
 
-	public Double getTargetPopulationPercentile() {
-		return this.accelerator.getTargetPopulationPercentile();
-	}
+	// public Double getTargetPopulationPercentile() {
+	// return this.accelerator.getTargetPopulationPercentile();
+	// }
 
-	public Double getShareOfAllowedDeviationsFromUniformity() {
-		return this.accelerator.getShareOfAllowedDeviationsFromUniformity();
-	}
+	// public Double getShareOfAllowedDeviationsFromUniformity() {
+	// return this.accelerator.getShareOfAllowedDeviationsFromUniformity();
+	// }
 
 	public Double getAverageUtility() {
 		return this.accelerator.getLastAverageUtility();
 	}
-	
+
 	public Integer getNumberOfConvergedAgents() {
 		return this.accelerator.getNumberOfConvergedAgents();
 	}

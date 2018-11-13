@@ -67,7 +67,7 @@ public class IHOP4ProductionRunner {
 		log.info("after strict-car filter: " + scenario.getPopulation().getPersons().size());
 	}
 
-	static void run(boolean useGreedo) {
+	static void run(boolean useGreedo, boolean useData) {
 
 		final Greedo greedo = (useGreedo ? new Greedo() : null);
 		if (greedo != null) {
@@ -98,46 +98,52 @@ public class IHOP4ProductionRunner {
 			controler.addOverridingModule(greedo);
 		}
 
-		// Toll zone link flows.
+		if (useData) {
 
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
-		measReader.run();
-		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
-			controler.addOverridingModule(module);
-		}
-		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
-			controler.addOverridingModule(module);
-		}
+			// Toll zone link flows.
 
-		// Checking if this really works:
+			final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
+			measReader.run();
+			for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
+				controler.addOverridingModule(module);
+			}
+			for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
+				controler.addOverridingModule(module);
+			}
 
-		final int testIteration = 10;
+			// Checking if this really works:
 
-		BeforeMobsimListener testListener = new BeforeMobsimListener() {
-			@Override
-			public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-				if (event.getIteration() == testIteration) {
-					for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader.getAllDayMeasurements().getObjectiveFunctions()) {
+			final int testIteration = 10;
+
+			BeforeMobsimListener testListener = new BeforeMobsimListener() {
+				@Override
+				public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+					if (event.getIteration() == testIteration) {
+						for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader
+								.getAllDayMeasurements().getObjectiveFunctions()) {
+							System.out.println();
+							System.out.println(objFct);
+						}
+						for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader
+								.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
+							System.out.println();
+							System.out.println(objFct);
+						}
 						System.out.println();
-						System.out.println(objFct);
+						System.out.println("TERMINATING IN ITERATION " + event.getIteration());
+						System.exit(0);
 					}
-					for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-						System.out.println();
-						System.out.println(objFct);
-					}
-					System.out.println();
-					System.out.println("TERMINATING IN ITERATION " + event.getIteration());
-					System.exit(0);
 				}
-			}
-		};
+			};
 
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				this.addControlerListenerBinding().toInstance(testListener);
-			}
-		});
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					this.addControlerListenerBinding().toInstance(testListener);
+				}
+			});
+
+		}
 
 		// ... and run.
 
@@ -266,7 +272,8 @@ public class IHOP4ProductionRunner {
 
 	public static void main(String[] args) {
 		final boolean useGreedo = true;
-		run(useGreedo);
+		final boolean useData = false;
+		run(useGreedo, useData);
 		// optimize(useGreedo);
 	}
 }

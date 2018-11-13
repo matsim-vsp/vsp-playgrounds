@@ -26,6 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class ReplanningSignalAKF implements Statistic<LogDataWrapper> {
 
 	@Override
@@ -35,12 +36,13 @@ public class ReplanningSignalAKF implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		final StringBuffer result = new StringBuffer(arg0.getReplaningSignalAKF().get(0).toString());
-		for (int shift = 1; shift < arg0.getReplaningSignalAKF().size(); shift++) {
-			result.append(";");
-			result.append(arg0.getReplaningSignalAKF().get(shift));
-		}
-		return result.toString();
+		return null;
+//		final StringBuffer result = new StringBuffer(arg0.getReplaningSignalAKF().get(0).toString());
+//		for (int shift = 1; shift < arg0.getReplaningSignalAKF().size(); shift++) {
+//			result.append(";");
+//			result.append(arg0.getReplaningSignalAKF().get(shift));
+//		}
+//		return result.toString();
 	}
 
 }

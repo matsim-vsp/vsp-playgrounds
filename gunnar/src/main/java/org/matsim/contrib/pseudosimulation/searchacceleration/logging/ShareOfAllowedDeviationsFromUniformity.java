@@ -26,6 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class ShareOfAllowedDeviationsFromUniformity implements Statistic<LogDataWrapper> {
 
 	@Override
@@ -35,7 +36,7 @@ public class ShareOfAllowedDeviationsFromUniformity implements Statistic<LogData
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getShareOfAllowedDeviationsFromUniformity());
+		return null; // return Statistic.toString(arg0.getShareOfAllowedDeviationsFromUniformity());
 	}
 
 }
