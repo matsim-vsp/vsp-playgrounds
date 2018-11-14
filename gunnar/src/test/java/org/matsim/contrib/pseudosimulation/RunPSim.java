@@ -63,7 +63,8 @@ public class RunPSim {
 
 		this.matsimControler = new Controler(scenario);
 
-		MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConfigGroup,scenario);
+		// MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConfigGroup, scenario);
+		MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(scenario);
 		matsimControler.addControlerListener(mobSimSwitcher);
 
 		matsimControler.addOverridingModule(new AbstractModule() {

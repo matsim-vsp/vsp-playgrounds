@@ -20,69 +20,20 @@ import com.google.inject.Singleton;
 @Singleton
 public class PSimProvider implements Provider<Mobsim> {
 
-    @Inject private PlanCatcher plans;
-    @Inject private TravelTime travelTime;
-//    @Inject private WaitTime waitTime;
-//    @Inject private StopStopTime stopStopTime;
-//    private TransitPerformance transitPerformance;
-    @Inject TransitEmulator transitEmulator;
-//    private final Scenario scenario;
-//    private final EventsManager eventsManager;
-    @Inject private Scenario scenario;
-    @Inject private EventsManager eventsManager;
-    
-//    @Inject
-//	public PSimProvider(Scenario scenario, EventsManager eventsManager) {
-//        this.scenario = scenario;
-//        this.eventsManager = eventsManager;
-//    }
+	@Inject
+	private PlanCatcher plans;
+	@Inject
+	private TravelTime travelTime;
+	@Inject
+	private TransitEmulator transitEmulator;
+	@Inject
+	private Scenario scenario;
+	@Inject
+	private EventsManager eventsManager;
 
-    @Override
-    public Mobsim get() {
-//		if (iteration > 0)
-//			eventsManager.resetHandlers(iteration++);
-//		else
-//			iteration++;
-    	
-//        if (waitTime != null) {
-//            return new PSim(scenario, eventsManager, plans.getPlansForPSim(), travelTime, waitTime, stopStopTime, transitPerformance);
-//
-//        } else {
-//            return new PSim(scenario, eventsManager, plans.getPlansForPSim(), travelTime);
-//        }
-        
-        return new PSim(scenario, eventsManager, plans.getPlansForPSim(), travelTime, transitEmulator);
-    }
-
-    public void setTravelTime(TravelTime travelTime) {
-        this.travelTime = travelTime;
-    }
-
-//    public void setWaitTime(WaitTime waitTime) {
-//    	throw new RuntimeException("Use an instance of " + TransitEmulator.class.getSimpleName() + " instead.");
-////    	this.waitTime = waitTime;
-//    }
-//
-//    public void setStopStopTime(StopStopTime stopStopTime) {
-//    	throw new RuntimeException("Use an instance of " + TransitEmulator.class.getSimpleName() + " instead.");
-////    	this.stopStopTime = stopStopTime;
-//    }
-//
-//    public void setTransitPerformance(TransitPerformance transitPerformance) {
-//    	throw new RuntimeException("Use an instance of " + TransitEmulator.class.getSimpleName() + " instead.");
-////    	this.transitPerformance = transitPerformance;
-//    }
-//
-//    public void setTimes(TravelTime travelTime, WaitTime waitTime, StopStopTime stopStopTime) {
-//    	throw new RuntimeException("Use an instance of " + TransitEmulator.class.getSimpleName() + " instead.");
-////    	this.travelTime = travelTime;
-////        this.waitTime = waitTime;
-////        this.stopStopTime = stopStopTime;
-//    }
-//
-//    @Deprecated
-//    //will replace where necessary
-//    public Mobsim createMobsim(Scenario scenario, EventsManager events) {
-//        return get();
-//    }
+	@Override
+	public Mobsim get() {
+		return new PSim(this.scenario, this.eventsManager, this.plans.getPlansForPSim(), this.travelTime,
+				this.transitEmulator);
+	}
 }

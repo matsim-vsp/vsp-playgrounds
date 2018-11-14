@@ -293,8 +293,9 @@ public class Greedo extends AbstractModule {
 		// }
 
 		// General-purpose + car-specific PSim.
-		final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(this.config, PSimConfigGroup.class);
-		final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf, this.scenario);
+		// final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(this.config, PSimConfigGroup.class);
+		// final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf, this.scenario);
+		final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(this.scenario);
 		this.addControlerListenerBinding().toInstance(mobSimSwitcher);
 		this.bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
 		this.bindMobsim().toProvider(SwitchingMobsimProvider.class);

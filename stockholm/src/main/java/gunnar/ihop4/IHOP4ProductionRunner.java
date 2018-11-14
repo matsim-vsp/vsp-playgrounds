@@ -293,6 +293,7 @@ public class IHOP4ProductionRunner {
 
 	public static void main(String[] args) {
 		final boolean useGreedo = true;
-		calibrate(useGreedo);
+		run(useGreedo);
+		// calibrate(useGreedo);
 	}
 }
