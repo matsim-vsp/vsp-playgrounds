@@ -55,16 +55,12 @@ import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DriversInP
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.EffectiveReplanningRate;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ExpectedDeltaUtilityAccelerated;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ExpectedDeltaUtilityUniform;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.FinalObjectiveFunctionValue;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.LogDataWrapper;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.MeanReplanningRate;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.NumberOfConvergedAgents;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.RealizedDeltaUtility;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareNeverReplanned;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareScoreImprovingReplanners;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TTSum;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplannerShare;
-import org.matsim.contrib.pseudosimulation.searchacceleration.logging.UniformReplanningObjectiveFunctionValue;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.WeightedCountDifferences2;
 import org.matsim.contrib.pseudosimulation.searchacceleration.utils.RecursiveMovingAverage;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -291,9 +287,10 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		// this.statsWriter.addSearchStatistic(new RealizedGreedyScoreChange());
 		// this.statsWriter.addSearchStatistic(new UniformGreedyScoreChange());
 		this.statsWriter.addSearchStatistic(new ShareNeverReplanned());
-		// this.statsWriter.addSearchStatistic(new UniformReplanningObjectiveFunctionValue());
-		this.statsWriter.addSearchStatistic(new FinalObjectiveFunctionValue());
-		this.statsWriter.addSearchStatistic(new ShareScoreImprovingReplanners());
+		// this.statsWriter.addSearchStatistic(new
+		// UniformReplanningObjectiveFunctionValue());
+		// this.statsWriter.addSearchStatistic(new FinalObjectiveFunctionValue());
+		// this.statsWriter.addSearchStatistic(new ShareScoreImprovingReplanners());
 		this.statsWriter.addSearchStatistic(new WeightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new TTSum());
 		// this.statsWriter.addSearchStatistic(new ReplanningEfficiency());

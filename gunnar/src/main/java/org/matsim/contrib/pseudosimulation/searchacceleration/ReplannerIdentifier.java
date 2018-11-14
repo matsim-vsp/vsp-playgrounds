@@ -69,8 +69,8 @@ public class ReplannerIdentifier {
 	private final Map<Id<Person>, Double> personId2utilityChange;
 	private final double totalUtilityChange;
 
-	private Double shareOfScoreImprovingReplanners = null;
-	private Double score = null;
+	// private Double shareOfScoreImprovingReplanners = null;
+	// private Double score = null;
 
 	// private SortedSet<IndividualReplanningResult> individualReplanningResults =
 	// new TreeSet<>();
@@ -87,13 +87,13 @@ public class ReplannerIdentifier {
 	// (this.sumOfWeightedCountDifferences2 + this.delta);
 	// }
 
-	public Double getShareOfScoreImprovingReplanners() {
-		return this.shareOfScoreImprovingReplanners;
-	}
+	// public Double getShareOfScoreImprovingReplanners() {
+	// return this.shareOfScoreImprovingReplanners;
+	// }
 
-	public Double getFinalObjectiveFunctionValue() {
-		return this.score;
-	}
+	// public Double getFinalObjectiveFunctionValue() {
+	// return this.score;
+	// }
 
 	public Double getSumOfWeightedCountDifferences2() {
 		return this.sumOfWeightedCountDifferences2;
@@ -199,10 +199,9 @@ public class ReplannerIdentifier {
 
 		Collections.shuffle(allPersonIdsShuffled);
 
-		// TODO Not clear how useful this number is at all.
-		this.score = 0.0; // this.getUniformReplanningObjectiveFunctionValue();
+		// this.score = 0.0; // this.getUniformReplanningObjectiveFunctionValue();
 
-		int scoreImprovingReplanners = 0;
+		// int scoreImprovingReplanners = 0;
 
 		// this.realizedGreedyScoreChange = 0.0;
 		// this.uniformGreedyScoreChange = 0.0;
@@ -234,20 +233,22 @@ public class ReplannerIdentifier {
 					scoreUpdater.getScoreChangeIfZero());
 			if (replanner) {
 				replanners.add(driverId);
-				this.score += scoreUpdater.getScoreChangeIfOne();
+				// this.score += scoreUpdater.getScoreChangeIfOne();
 				// realizedGreedyScoreChange += scoreUpdater.getGreedyScoreChangeIfOne();
-			} else {
-				this.score += scoreUpdater.getScoreChangeIfZero();
-				// realizedGreedyScoreChange += scoreUpdater.getGreedyScoreChangeIfZero();
 			}
+			// else {
+			// this.score += scoreUpdater.getScoreChangeIfZero();
+			// realizedGreedyScoreChange += scoreUpdater.getGreedyScoreChangeIfZero();
+			// }
 
 			// this.uniformGreedyScoreChange += this.lambda *
 			// scoreUpdater.getGreedyScoreChangeIfOne()
 			// + (1.0 - this.lambda) * scoreUpdater.getGreedyScoreChangeIfZero();
 
-			if (Math.min(scoreUpdater.getScoreChangeIfOne(), scoreUpdater.getScoreChangeIfZero()) < 0) {
-				scoreImprovingReplanners++;
-			}
+			// if (Math.min(scoreUpdater.getScoreChangeIfOne(),
+			// scoreUpdater.getScoreChangeIfZero()) < 0) {
+			// scoreImprovingReplanners++;
+			// }
 
 			// if (replanner == uniformScoreUpdater.wouldBeUniformReplanner) {
 			// uniformReplanners++;
@@ -279,7 +280,8 @@ public class ReplannerIdentifier {
 			// scoreUpdater.wouldBeUniformReplanner, scoreUpdater.wouldBeGreedyReplanner));
 		}
 
-		this.shareOfScoreImprovingReplanners = ((double) scoreImprovingReplanners) / allPersonIdsShuffled.size();
+		// this.shareOfScoreImprovingReplanners = ((double) scoreImprovingReplanners) /
+		// allPersonIdsShuffled.size();
 		// this.uniformReplannerShare = ((double) uniformReplanners) /
 		// allPersonIdsShuffled.size();
 

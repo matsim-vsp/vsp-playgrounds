@@ -66,9 +66,9 @@ public class LogDataWrapper {
 		return this.accelerator.getEffectiveReplanningRate();
 	}
 
-	public Double getFinalObjectiveFunctionValue() {
-		return this.identifier.getFinalObjectiveFunctionValue();
-	}
+	// public Double getFinalObjectiveFunctionValue() {
+	// return this.identifier.getFinalObjectiveFunctionValue();
+	// }
 
 	public Double getMeanReplanningRate() {
 		return this.identifier.getMeanReplanningRate();
@@ -90,9 +90,9 @@ public class LogDataWrapper {
 		return this.accelerator.getShareNeverReplanned();
 	}
 
-	public Double getShareOfScoreImprovingReplanners() {
-		return this.identifier.getShareOfScoreImprovingReplanners();
-	}
+	// public Double getShareOfScoreImprovingReplanners() {
+	// return this.identifier.getShareOfScoreImprovingReplanners();
+	// }
 
 	public Double getTTSum_h() {
 		return this.accelerator.getPhysicalTravelTimeSum_h();
