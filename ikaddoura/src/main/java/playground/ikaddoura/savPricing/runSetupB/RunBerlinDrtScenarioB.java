@@ -25,7 +25,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.run.DrtConfigs;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.controler.AbstractModule;
@@ -201,7 +202,7 @@ public final class RunBerlinDrtScenarioB {
 	public Config prepareConfig(ConfigGroup... modulesToAdd) {
 		
 		config = berlin.prepareConfig(modulesToAdd);			
-		DrtControlerCreator.adjustDrtConfig(config);
+		DrtConfigs.adjustDrtConfig(DrtConfigGroup.get(config), config.planCalcScore());
 		
 		hasPreparedConfig = true ;
 		return config ;
