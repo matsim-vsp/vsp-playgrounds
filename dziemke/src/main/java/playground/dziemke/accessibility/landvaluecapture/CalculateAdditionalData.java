@@ -69,7 +69,7 @@ public class CalculateAdditionalData {
 		double minY = 5802000;
 		double maxX = 4620000;
 		double maxY = 5839000;
-		double gridSize = 1000;
+		int gridSize = 1000;
 		
 		ActivityFacilitiesImpl measuringPoints = GridUtils.createGridLayerByGridSizeByBoundingBoxV2(minX, minY, maxX, maxY, gridSize);		
 		

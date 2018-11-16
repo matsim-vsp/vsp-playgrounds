@@ -57,7 +57,7 @@ public class CreateMatrixBasedPtInputs {
 		
 		// Parameters
 		Boolean measuringPointsAsPTStops = true; // if "true" -> use regular, user-defined locations instead of stops from schedule
-		Double cellSize = 1000.; // only relevant if "meauringPointsAsPTStops = true"
+		int cellSize = 1000; // only relevant if "meauringPointsAsPTStops = true"
 //		Double cellSize = 500.; // only relevant if "meauringPointsAsPTStops = true"
 		Double departureTime = 8. * 60 * 60;
 		Integer numberOfThreads = 1;
@@ -71,7 +71,7 @@ public class CreateMatrixBasedPtInputs {
 			transitScheduleFile = args[1];
 			outputRoot = args[2];
 			measuringPointsAsPTStops = Boolean.parseBoolean(args[3]);
-			cellSize = Double.parseDouble(args[4]);
+			cellSize = Integer.parseInt(args[4]);
 			departureTime = Double.parseDouble(args[5]);
 			numberOfThreads = Integer.parseInt(args[6]);
 			bounds = args[7];

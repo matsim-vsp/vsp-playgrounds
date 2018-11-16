@@ -9,6 +9,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.AccessibilityModule;
+import org.matsim.contrib.accessibility.Labels;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
@@ -51,7 +52,7 @@ public class AccessibilityComputationBerlinV3 {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		// Accessibility configurations
-		Double cellSize = 500.;
+		int tileSize_m = 500;
 		boolean push2Geoserver = false; // Set true for run on server
 		boolean createQGisOutput = true; // Set false for run on server
 		
@@ -63,7 +64,7 @@ public class AccessibilityComputationBerlinV3 {
 		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromShapeFile);
 		acg.setShapeFileCellBasedAccessibility("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp");
 		acg.setEnvelope(envelope);
-		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setTileSize_m(tileSize_m);
 //		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, false);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.car, true);
@@ -74,7 +75,7 @@ public class AccessibilityComputationBerlinV3 {
 //		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
 		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
 		
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork()); // will be aggregated in downstream code!
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.POPULATION_DENSITIY, scenario.getNetwork()); // will be aggregated in downstream code!
 		
 		Controler controler = new Controler(scenario);
 		
@@ -110,7 +111,7 @@ public class AccessibilityComputationBerlinV3 {
 			final Integer range = 9; // In the current implementation, this must always be 9
 			final Double lowerBound = -3.5; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
 			final Double upperBound = 3.5;
-			final int populationThreshold = (int) (0 / (1000/cellSize * 1000/cellSize));
+			final int populationThreshold = (int) (0 / (1000/tileSize_m * 1000/tileSize_m));
 			
 			String osName = System.getProperty("os.name");
 			String workingDirectory = config.controler().getOutputDirectory();
@@ -118,7 +119,7 @@ public class AccessibilityComputationBerlinV3 {
 				String actSpecificWorkingDirectory = workingDirectory + actType + "/";
 				for (Modes4Accessibility mode : acg.getIsComputingMode()) {
 					VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode.toString(), envelope, workingDirectory,
-							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, cellSize.intValue(), populationThreshold);
+							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, tileSize_m, populationThreshold);
 					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode.toString(), osName);
 				}
 			}

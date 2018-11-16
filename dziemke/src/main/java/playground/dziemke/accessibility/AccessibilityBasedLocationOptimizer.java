@@ -46,7 +46,7 @@ import javax.inject.Provider;
 public class AccessibilityBasedLocationOptimizer {
 	public static final Logger log = Logger.getLogger(AccessibilityBasedLocationOptimizer.class) ;
 
-	private static final double cellSize = 500.;
+	private static final int tileSize_m = 500;
 
 	public static void main(String[] args) {
 		// Input and output
@@ -81,7 +81,7 @@ public class AccessibilityBasedLocationOptimizer {
 
 		// for optimization
 		ActivityFacilities analysisPoints =
-				AccessibilityUtils.createMeasuringPointsFromNetworkBounds(scenario.getNetwork(), cellSize);
+				AccessibilityUtils.createMeasuringPointsFromNetworkBounds(scenario.getNetwork(), tileSize_m);
 
 		ActivityFacilitiesFactory activityFacilityFactory = new ActivityFacilitiesFactoryImpl();
 
@@ -118,9 +118,9 @@ public class AccessibilityBasedLocationOptimizer {
 							@Override
 							public ControlerListener get() {
 								BoundingBox bb = BoundingBox.createBoundingBox(scenario.getNetwork());
-								ActivityFacilitiesImpl measuringPoints = GridUtils.createGridLayerByGridSizeByBoundingBoxV2(bb.getXMin(), bb.getYMin(), bb.getXMax(), bb.getYMax(), cellSize);
-								AccessibilityCalculator accessibilityCalculator = new AccessibilityCalculator(scenario, measuringPoints);
-								GridBasedAccessibilityShutdownListenerV3 listener = new GridBasedAccessibilityShutdownListenerV3(accessibilityCalculator, activityFacilites, null, scenario, bb.getXMin(), bb.getYMin(), bb.getXMax(),bb.getYMax(), cellSize);
+								ActivityFacilitiesImpl measuringPoints = GridUtils.createGridLayerByGridSizeByBoundingBoxV2(bb.getXMin(), bb.getYMin(), bb.getXMax(), bb.getYMax(), tileSize_m);
+								AccessibilityCalculator accessibilityCalculator = new AccessibilityCalculator(scenario, measuringPoints, scenario.getNetwork());
+								GridBasedAccessibilityShutdownListenerV3 listener = new GridBasedAccessibilityShutdownListenerV3(accessibilityCalculator, activityFacilites, null, scenario, bb.getXMin(), bb.getYMin(), bb.getXMax(),bb.getYMax(), tileSize_m);
 								
 								if ( true ) {
 									throw new RuntimeException("the following needs to be replaced with more flexible syntax. kai, nov'16") ;
