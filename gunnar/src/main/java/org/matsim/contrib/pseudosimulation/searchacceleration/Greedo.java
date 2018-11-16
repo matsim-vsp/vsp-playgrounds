@@ -31,14 +31,11 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.mobsim.PSimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.SwitchingMobsimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.NoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
-import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.FifoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.FifoTransitPerformance;
+import org.matsim.contrib.pseudosimulation.PSimTravelTimeCalculator;
+import org.matsim.contrib.pseudosimulation.SwitchingMobsimProvider;
 import org.matsim.contrib.pseudosimulation.searchacceleration.utils.PTCapacityAdjusmentPerSample;
-import org.matsim.contrib.pseudosimulation.trafficinfo.PSimTravelTimeCalculator;
+import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -120,7 +117,7 @@ public class Greedo extends AbstractModule {
 	public void setAdjustStrategyWeights(boolean adjustStrategyWeights) {
 		this.adjustStrategyWeights = adjustStrategyWeights;
 	}
-	
+
 	public void setGreedoProgressListener(GreedoProgressListener greedoProgressListener) {
 		this.greedoProgressListener = greedoProgressListener;
 	}
@@ -292,32 +289,39 @@ public class Greedo extends AbstractModule {
 		// }
 
 		// General-purpose + car-specific PSim.
-		// final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(this.config, PSimConfigGroup.class);
-		// final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf, this.scenario);
-		final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher();
-		this.addControlerListenerBinding().toInstance(mobSimSwitcher);
-		this.bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
+		// final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(this.config,
+		// PSimConfigGroup.class);
+		// final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf,
+		// this.scenario);
+
+		// final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher();
+		// this.addControlerListenerBinding().toInstance(mobSimSwitcher);
+		// this.bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
+		// this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
+
+		this.bind(MobSimSwitcher.class);
+		this.addControlerListenerBinding().to(MobSimSwitcher.class);
 		this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
 		this.bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
 		this.bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
-		
+
 		// this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
 
 		// this.bind(PSimProvider.class).toInstance(new PSimProvider(this.scenario,
 		// this.controler.getEvents()));
-		this.bind(PSimProvider.class);
 
 		// Transit-specific PSim. TODO Allow only for SBB transit.
-		if (this.config.transit().isUseTransit()) {
-			final FifoTransitPerformance transitPerformance = new FifoTransitPerformance(mobSimSwitcher,
-					this.scenario.getPopulation(), this.scenario.getTransitVehicles(),
-					this.scenario.getTransitSchedule());
-			this.bind(FifoTransitPerformance.class).toInstance(transitPerformance);
-			this.addEventHandlerBinding().toInstance(transitPerformance);
-			this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
-		} else {
-			this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
-		}
+		// if (this.config.transit().isUseTransit()) {
+		// final FifoTransitPerformance transitPerformance = new
+		// FifoTransitPerformance(mobSimSwitcher,
+		// this.scenario.getPopulation(), this.scenario.getTransitVehicles(),
+		// this.scenario.getTransitSchedule());
+		// this.bind(FifoTransitPerformance.class).toInstance(transitPerformance);
+		// this.addEventHandlerBinding().toInstance(transitPerformance);
+		// this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
+		// } else {
+		this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
+		// }
 
 		this.bind(QSimProvider.class);
 

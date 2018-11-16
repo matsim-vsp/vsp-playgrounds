@@ -29,16 +29,15 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.mobsim.PSimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.SwitchingMobsimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
+import org.matsim.contrib.pseudosimulation.PSimTravelTimeCalculator;
+import org.matsim.contrib.pseudosimulation.SwitchingMobsimProvider;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AcceptIntendedReplanningStragetyProvider;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AcceptIntendedReplanningStrategy;
 import org.matsim.contrib.pseudosimulation.searchacceleration.SearchAccelerator;
-import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.FifoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.FifoTransitPerformance;
-import org.matsim.contrib.pseudosimulation.trafficinfo.PSimTravelTimeCalculator;
+import org.matsim.contrib.pseudosimulation.transit.FifoTransitEmulator;
+import org.matsim.contrib.pseudosimulation.transit.FifoTransitPerformance;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -173,7 +172,7 @@ public class WUMProductionRunner {
 				// this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
 								
 				// this.bind(PSimProvider.class).toInstance(new PSimProvider(scenario, controler.getEvents()));
-				this.bind(PSimProvider.class);
+				// this.bind(PSimProvider.class);
 				
 				// Transit-specific PSim.
 				final FifoTransitPerformance transitPerformance = new FifoTransitPerformance(mobSimSwitcher,

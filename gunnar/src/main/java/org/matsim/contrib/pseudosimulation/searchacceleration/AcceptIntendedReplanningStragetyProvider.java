@@ -19,11 +19,12 @@
  */
 package org.matsim.contrib.pseudosimulation.searchacceleration;
 
-import javax.inject.Provider;
+
 
 import org.matsim.core.replanning.PlanStrategy;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 /**
  * 

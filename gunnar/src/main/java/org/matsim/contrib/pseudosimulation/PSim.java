@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.matsim.contrib.pseudosimulation.mobsim;
+package org.matsim.contrib.pseudosimulation;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -35,8 +35,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Route;
-import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
-import org.matsim.contrib.pseudosimulation.util.CollectionUtils;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.config.ConfigUtils;
@@ -146,7 +145,7 @@ public class PSim implements Mobsim {
          * split collection in approx even segments
 		 */
         int n = Math.min(plans.size(), threads.length);
-        List<Plan>[] segments = CollectionUtils.split(plans, n);
+        List<Plan>[] segments = PSimUtils.split(plans, n);
 		/*
 		 * submit tasks
 		 */

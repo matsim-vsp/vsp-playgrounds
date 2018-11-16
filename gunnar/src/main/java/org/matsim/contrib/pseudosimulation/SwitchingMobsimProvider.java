@@ -20,31 +20,49 @@
  *  * ***********************************************************************
  */
 
-package org.matsim.contrib.pseudosimulation.mobsim;
+package org.matsim.contrib.pseudosimulation;
 
-import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.qsim.QSimProvider;
+import org.matsim.core.router.util.TravelTime;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
+@Singleton
 public class SwitchingMobsimProvider implements Provider<Mobsim> {
 
 	@Inject
-	private MobSimSwitcher mobSimSwitcher;
+	private TravelTime travelTime;
+
 	@Inject
-	private PSimProvider pSimProvider;
+	private TransitEmulator transitEmulator;
+
+	@Inject
+	private Scenario scenario;
+
+	@Inject
+	private EventsManager eventsManager;
+
+	@Inject
+	private MobSimSwitcher mobSimSwitcher;
+	
 	@Inject
 	private QSimProvider qsimProvider;
 
 	@Override
 	public Mobsim get() {
-		if (mobSimSwitcher.isQSimIteration()) {
-			return qsimProvider.get();
+		if (this.mobSimSwitcher.isQSimIteration()) {
+			return this.qsimProvider.get();
 		} else {
-			return pSimProvider.get();
+			return new PSim(this.scenario, this.eventsManager, 
+					this.mobSimSwitcher.getPlansForPSim(),
+					this.travelTime,
+					this.transitEmulator);
 		}
-	}
-
+	}	
 }

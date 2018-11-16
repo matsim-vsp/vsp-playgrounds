@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.matsim.contrib.pseudosimulation.trafficinfo;
+package org.matsim.contrib.pseudosimulation;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -10,7 +10,6 @@ import org.matsim.api.core.v01.events.VehicleAbortsEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.api.experimental.events.VehicleArrivesAtFacilityEvent;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup;
@@ -23,11 +22,13 @@ import com.google.inject.Provider;
 /**
  * @author fouriep
  */
-public class PSimTravelTimeCalculator extends TravelTimeCalculator implements Provider<TravelTime>{
+public class PSimTravelTimeCalculator extends TravelTimeCalculator implements Provider<TravelTime> {
+
 	private final MobSimSwitcher switcher;
 
 	@Inject
-	PSimTravelTimeCalculator(TravelTimeCalculatorConfigGroup ttconfigGroup, EventsManager eventsManager, Network network, MobSimSwitcher switcher) {
+	PSimTravelTimeCalculator(TravelTimeCalculatorConfigGroup ttconfigGroup, EventsManager eventsManager,
+			Network network, MobSimSwitcher switcher) {
 		super(network, ttconfigGroup);
 		this.switcher = switcher;
 		eventsManager.addHandler(this);
@@ -36,12 +37,10 @@ public class PSimTravelTimeCalculator extends TravelTimeCalculator implements Pr
 	@Override
 	public void reset(int iteration) {
 		if (switcher == null || switcher.isQSimIteration()) {
-			Logger.getLogger(this.getClass()).error(
-					"Calling reset on traveltimecalc");
+			Logger.getLogger(this.getClass()).error("Calling reset on traveltimecalc");
 			super.reset(iteration);
 		} else {
-			Logger.getLogger(this.getClass()).error(
-					"Not resetting travel times as this is a PSim iteration");
+			Logger.getLogger(this.getClass()).error("Not resetting travel times as this is a PSim iteration");
 		}
 	}
 

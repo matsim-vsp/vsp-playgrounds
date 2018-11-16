@@ -17,14 +17,13 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.pseudosimulation.searchacceleration.listeners;
+package org.matsim.contrib.pseudosimulation.transit;
 
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
 import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;

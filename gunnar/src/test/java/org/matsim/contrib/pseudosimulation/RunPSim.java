@@ -22,9 +22,6 @@
 package org.matsim.contrib.pseudosimulation;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.pseudosimulation.mobsim.PSimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.SwitchingMobsimProvider;
-import org.matsim.contrib.pseudosimulation.trafficinfo.PSimTravelTimeCalculator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -48,7 +45,7 @@ public class RunPSim {
 	private Controler matsimControler;
 
 	// private PlanCatcher plancatcher;
-	private PSimProvider pSimProvider;
+	// private PSimProvider pSimProvider;
 
 	public RunPSim(Config config, PSimConfigGroup pSimConfigGroup) {
 		this.config = config;
@@ -68,6 +65,7 @@ public class RunPSim {
 		matsimControler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
+								
 				bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
 				bindMobsim().toProvider(SwitchingMobsimProvider.class);
 //				bind(WaitTimeCalculator.class).to(PSimWaitTimeCalculator.class);
@@ -80,7 +78,7 @@ public class RunPSim {
 				// bind(PlanCatcher.class).toInstance(new PlanCatcher());
 				
 				// bind(PSimProvider.class).toInstance(new PSimProvider(scenario,matsimControler.getEvents()));
-				bind(PSimProvider.class);
+				// bind(PSimProvider.class);
 				
 				bind(QSimProvider.class);
 			}

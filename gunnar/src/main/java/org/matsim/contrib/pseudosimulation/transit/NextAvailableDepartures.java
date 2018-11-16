@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.pseudosimulation.searchacceleration.listeners;
+package org.matsim.contrib.pseudosimulation.transit;
 
 import java.util.ArrayList;
 import java.util.Collections;

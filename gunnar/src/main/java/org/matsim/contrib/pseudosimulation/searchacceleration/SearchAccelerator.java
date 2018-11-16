@@ -43,9 +43,8 @@ import org.matsim.api.core.v01.population.HasPlansAndId;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
+import org.matsim.contrib.pseudosimulation.PSim;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.mobsim.PSim;
-import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Utilities;
 import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.SlotUsageListener;
@@ -63,6 +62,7 @@ import org.matsim.contrib.pseudosimulation.searchacceleration.logging.ShareNever
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.TTSum;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.WeightedCountDifferences2;
 import org.matsim.contrib.pseudosimulation.searchacceleration.utils.RecursiveMovingAverage;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;

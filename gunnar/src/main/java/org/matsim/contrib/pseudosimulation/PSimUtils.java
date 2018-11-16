@@ -17,15 +17,13 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package org.matsim.contrib.pseudosimulation.util;
+package org.matsim.contrib.pseudosimulation;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import org.matsim.contrib.pseudosimulation.mobsim.PSim;
 
 
 /**
@@ -34,7 +32,7 @@ import org.matsim.contrib.pseudosimulation.mobsim.PSim;
  *         Used to divide tasks between threads in {@link PSim}. Copied here to
  *         avoid dependence.
  */
-public class CollectionUtils {
+public class PSimUtils {
     /**
      * Works on arrys instead of collections
      * @param array

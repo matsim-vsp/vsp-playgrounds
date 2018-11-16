@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.pseudosimulation.mobsim.transitperformance;
+package org.matsim.contrib.pseudosimulation.transit;
 
 import org.matsim.api.core.v01.population.Leg;
 
