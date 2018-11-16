@@ -15,25 +15,26 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class PlanCatcher {
-    @Inject
-	public PlanCatcher(){}
 
-    private Map<Id,Plan> plansForPSim;
+	@Inject
+	public PlanCatcher() {
+	}
 
-    public Collection<Plan> getPlansForPSim() {
-        return plansForPSim.values();
-    }
+	private Map<Id<?>, Plan> plansForPSim;
 
-    public void addPlansForPsim(Plan plan) {
-        if (plansForPSim == null)
-            plansForPSim = new HashMap<>();
-        plansForPSim.put(plan.getPerson().getId(),plan);
-    }
+	public Collection<Plan> getPlansForPSim() {
+		return plansForPSim.values();
+	}
 
-    public void init() {
-        plansForPSim = new HashMap<>();
-    }
+	public void addPlansForPsim(Plan plan) {
+		if (plansForPSim == null)
+			plansForPSim = new HashMap<>();
+		plansForPSim.put(plan.getPerson().getId(), plan);
+	}
 
+	public void init() {
+		plansForPSim = new HashMap<>();
+	}
 
 	public void removeExistingPlanOrAddNewPlan(Plan plan) {
 		if (plansForPSim == null)
@@ -41,6 +42,6 @@ public class PlanCatcher {
 		if (plansForPSim.get(plan.getPerson().getId()) == plan)
 			plansForPSim.remove(plan.getPerson().getId());
 		else
-			plansForPSim.put(plan.getPerson().getId(),plan);
+			plansForPSim.put(plan.getPerson().getId(), plan);
 	}
 }

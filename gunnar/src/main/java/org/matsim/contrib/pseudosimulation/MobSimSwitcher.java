@@ -23,11 +23,11 @@ import org.matsim.core.controler.listener.IterationStartsListener;
 import com.google.inject.Inject;
 
 public class MobSimSwitcher implements IterationEndsListener, IterationStartsListener, BeforeMobsimListener {
-	// private final ArrayList<Integer> qsimIters = new ArrayList<>();
+
 	private final Scenario scenario;
+	
 	private boolean isQSimIteration = true;
-	// private int psimIterationCount = 0;
-	// private int iterationsPerCycle = 0;
+
 	private Map<Id<Person>, Double> selectedPlanScoreMemory;
 	@Inject
 	private PlanCatcher plancatcher;
@@ -38,9 +38,7 @@ public class MobSimSwitcher implements IterationEndsListener, IterationStartsLis
 
 	@Inject
 	public MobSimSwitcher(
-			// PSimConfigGroup pSimConfigGroup,
 			Scenario scenario) {
-		// iterationsPerCycle = pSimConfigGroup.getIterationsPerCycle();
 		this.scenario = scenario;
 	}
 
@@ -52,17 +50,12 @@ public class MobSimSwitcher implements IterationEndsListener, IterationStartsLis
 		return isQSimIteration;
 	}
 
-	// public ArrayList<Integer> getQSimIters() {
-	// return qsimIters;
-	// }
-
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
 
 		this.isQSimIteration = (event.getIteration()
 				% ConfigUtils.addOrGetModule(this.config, PSimConfigGroup.class).getIterationsPerCycle() == 0);
 
-		// if (determineIfQSimIter(event.getIteration())) {
 		if (this.isQSimIteration) {
 			Logger.getLogger(this.getClass()).warn("Running full queue simulation");
 		} else {
@@ -74,38 +67,6 @@ public class MobSimSwitcher implements IterationEndsListener, IterationStartsLis
 
 		}
 	}
-
-	// private boolean determineIfQSimIter(int iteration) {
-	//
-	// this.isQSimIteration = (iteration
-	// % ConfigUtils.addOrGetModule(this.config,
-	// PSimConfigGroup.class).getIterationsPerCycle() == 0);
-	// return this.isQSimIteration;
-	//
-	// // if (iteration == scenario.getConfig().controler().getLastIteration()
-	// // || iteration == scenario.getConfig().controler().getFirstIteration()) {
-	// // isQSimIteration = true;
-	// // return isQSimIteration;
-	// // }
-	// // if (isQSimIteration && psimIterationCount == 0) {
-	// // isQSimIteration = false;
-	// // psimIterationCount++;
-	// // return isQSimIteration;
-	// // }
-	// // if (psimIterationCount >= iterationsPerCycle - 1) {
-	// // isQSimIteration = true;
-	// // // qsimIters.add(iteration);
-	// // psimIterationCount = 0;
-	// // return isQSimIteration;
-	// // }
-	// // if (isQSimIteration) {
-	// // // qsimIters.add(iteration);
-	// // } else {
-	// // psimIterationCount++;
-	// //
-	// // }
-	// // return isQSimIteration;
-	// }
 
 	@Override
 	public void notifyBeforeMobsim(BeforeMobsimEvent event) {
