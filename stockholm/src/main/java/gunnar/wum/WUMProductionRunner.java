@@ -164,7 +164,7 @@ public class WUMProductionRunner {
 				// General-purpose + car-specific PSim.
 				// final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class);
 				// final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf, scenario);
-				final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(scenario);
+				final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher();
 				this.addControlerListenerBinding().toInstance(mobSimSwitcher);
 				this.bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
 				this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
