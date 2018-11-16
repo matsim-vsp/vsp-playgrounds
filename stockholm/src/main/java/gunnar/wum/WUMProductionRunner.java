@@ -32,7 +32,6 @@ import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
 import org.matsim.contrib.pseudosimulation.mobsim.PSimProvider;
 import org.matsim.contrib.pseudosimulation.mobsim.SwitchingMobsimProvider;
 import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
-import org.matsim.contrib.pseudosimulation.replanning.PlanCatcher;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AcceptIntendedReplanningStragetyProvider;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AcceptIntendedReplanningStrategy;
@@ -171,7 +170,7 @@ public class WUMProductionRunner {
 				this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
 				this.bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
 				this.bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
-				this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
+				// this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
 								
 				// this.bind(PSimProvider.class).toInstance(new PSimProvider(scenario, controler.getEvents()));
 				this.bind(PSimProvider.class);
