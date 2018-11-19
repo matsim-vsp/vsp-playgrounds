@@ -25,12 +25,18 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.drt.data.validator.DrtRequestValidator;
+import org.matsim.contrib.drt.routing.DrtRoute;
+import org.matsim.contrib.drt.routing.DrtRouteFactory;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtConfigs;
+import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
@@ -39,9 +45,13 @@ import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripRouter;
+import org.matsim.run.RunBerlinScenario;
+import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
+import org.matsim.sav.SAVPassengerTracker;
+import org.matsim.sav.SAVPassengerTrackerImpl;
 import org.matsim.sav.prepare.BerlinShpUtils;
 import org.matsim.sav.prepare.PersonAttributesModification;
-import org.matsim.sav.runDRT.RunBerlinDrtScenario;
+import org.matsim.sav.runDRT.DrtServiceAreaRequestValidator;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -88,11 +98,13 @@ public final class RunBerlinDrtScenarioB {
 	private Config config;
 	private Scenario scenario;
 	private Controler controler;
-	private RunBerlinDrtScenario berlin;
+	private RunBerlinScenario berlin;
 	
 	private boolean hasPreparedConfig = false ;
 	private boolean hasPreparedScenario = false ;
 	private boolean hasPreparedControler = false ;
+	
+	private double dailyRewardDrtInsteadOfPrivateCar;
 
 	public static void main(String[] args) {
 		
@@ -120,7 +132,7 @@ public final class RunBerlinDrtScenarioB {
 		this.transitStopCoordinatesSFile = transitStopCoordinatesSFile;
 		this.carRestrictedAreaShapeFile = carRestrictedAreaShapeFile;
 		this.drtServiceAreaShapeFile = drtServiceAreaShapeFile;	
-		this.berlin = new RunBerlinDrtScenario( configFileName, overridingConfigFileName );
+		this.berlin = new RunBerlinScenario( configFileName, overridingConfigFileName );
 	}
 
 	public Controler prepareControler() {
@@ -129,6 +141,40 @@ public final class RunBerlinDrtScenarioB {
 		}
 		
 		controler = berlin.prepareControler();
+		
+		// drt + dvrp module
+		DrtControlerCreator.addDrtAsSingleDvrpModeToControler(controler);
+		
+		// reject drt requests outside the service area
+		controler.addOverridingModule(new AbstractModule() {	
+			@Override
+			public void install() {
+				this.bind(DrtRequestValidator.class).toInstance(new DrtServiceAreaRequestValidator());
+			}
+		});
+		
+		// TODO: Add drt-specific fare module
+//		controler.addOverridingModule(new AbstractModule() {
+//			@Override
+//			public void install() {
+//				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
+//			}
+//		});
+		
+		if (dailyRewardDrtInsteadOfPrivateCar != 0.) {
+			// rewards for no longer owning a car
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					
+					this.addEventHandlerBinding().toInstance(new DailyRewardHandlerSAVInsteadOfCar(dailyRewardDrtInsteadOfPrivateCar, modeToReplaceCarTripsInBrandenburg));
+					
+					SAVPassengerTrackerImpl tracker = new SAVPassengerTrackerImpl(TransportMode.drt);		
+					this.bind(SAVPassengerTracker.class).toInstance(tracker);
+					this.addEventHandlerBinding().toInstance(tracker);
+				}
+			});
+		}
 		
 		// different modes for different subpopulations
 		controler.addOverridingModule(new AbstractModule() {
@@ -180,6 +226,9 @@ public final class RunBerlinDrtScenarioB {
 		
 		scenario = berlin.prepareScenario();
 		
+		RouteFactories routeFactories = scenario.getPopulation().getFactory().getRouteFactories();
+		routeFactories.setRouteFactory(DrtRoute.class, new DrtRouteFactory());
+		
 		BerlinShpUtils shpUtils = new BerlinShpUtils(carRestrictedAreaShapeFile, drtServiceAreaShapeFile);
 		new BerlinNetworkModification(shpUtils).addSAVandReplaceCarMode(scenario, taxiNetworkMode, modeToReplaceCarTripsInBrandenburg, drtServiceAreaAttribute);	
 		new BerlinPlansModificationSplitTrips(transitStopCoordinatesSFile,
@@ -200,6 +249,20 @@ public final class RunBerlinDrtScenarioB {
 	}
 	
 	public Config prepareConfig(ConfigGroup... modulesToAdd) {
+		
+		// dvrp, drt config groups
+		List<ConfigGroup> drtModules = new ArrayList<>();
+		drtModules.add(new DvrpConfigGroup());
+		drtModules.add(new DrtConfigGroup());
+		// TODO: Add drt-specific fare config group
+		
+		List<ConfigGroup> modules = new ArrayList<>();		
+		for (ConfigGroup module : drtModules) {
+			modules.add(module);
+		}	
+		for (ConfigGroup module : modulesToAdd) {
+			modules.add(module);
+		}
 		
 		config = berlin.prepareConfig(modulesToAdd);			
 		DrtConfigs.adjustDrtConfig(DrtConfigGroup.get(config), config.planCalcScore());

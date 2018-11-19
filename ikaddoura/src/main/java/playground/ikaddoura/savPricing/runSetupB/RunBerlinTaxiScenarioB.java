@@ -25,6 +25,11 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
+import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.taxi.data.validator.TaxiRequestValidator;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
@@ -38,13 +43,14 @@ import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripRouter;
+import org.matsim.run.RunBerlinScenario;
 import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.sav.SAVPassengerTracker;
 import org.matsim.sav.SAVPassengerTrackerImpl;
 import org.matsim.sav.prepare.BerlinPlansModificationTagFormerCarUsers;
 import org.matsim.sav.prepare.BerlinShpUtils;
 import org.matsim.sav.prepare.PersonAttributesModification;
-import org.matsim.sav.runTaxi.RunBerlinTaxiScenario;
+import org.matsim.sav.runTaxi.TaxiServiceAreaRequestValidator;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -91,7 +97,7 @@ public final class RunBerlinTaxiScenarioB {
 	private Config config;
 	private Scenario scenario;
 	private Controler controler;
-	private RunBerlinTaxiScenario berlin;
+	private RunBerlinScenario berlin;
 	
 	private boolean hasPreparedConfig = false ;
 	private boolean hasPreparedScenario = false ;
@@ -129,7 +135,7 @@ public final class RunBerlinTaxiScenarioB {
 		this.carRestrictedAreaShapeFile = carRestrictedAreaShapeFile;
 		this.serviceAreaShapeFile = drtServiceAreaShapeFile;
 		this.dailyRewardTaxiInsteadOfPrivateCar = dailyRewardTaxiInsteadOfPrivateCar;				
-		this.berlin = new RunBerlinTaxiScenario( configFileName, overridingConfigFileName );
+		this.berlin = new RunBerlinScenario( configFileName, overridingConfigFileName );
 	}
 
 	public Controler prepareControler() {
@@ -138,6 +144,25 @@ public final class RunBerlinTaxiScenarioB {
 		}
 		
 		controler = berlin.prepareControler();
+		
+		// taxi + dvrp module
+		TaxiControlerCreator.addTaxiAsSingleDvrpModeToControler(controler);
+		
+		// reject taxi requests outside the service area
+		controler.addOverridingModule(new AbstractModule() {	
+			@Override
+			public void install() {
+				this.bind(TaxiRequestValidator.class).toInstance(new TaxiServiceAreaRequestValidator());
+			}
+		});
+		
+		// taxi fares
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
+			}
+		});
 		
 		if (dailyRewardTaxiInsteadOfPrivateCar != 0.) {
 			// rewards for no longer owning a car
@@ -227,6 +252,19 @@ public final class RunBerlinTaxiScenarioB {
 	}
 	
 	public Config prepareConfig(ConfigGroup... modulesToAdd) {
+		
+		List<ConfigGroup> drtModules = new ArrayList<>();
+		drtModules.add(new DvrpConfigGroup());
+		drtModules.add(new TaxiConfigGroup());
+		drtModules.add(new TaxiFareConfigGroup());
+		
+		List<ConfigGroup> modules = new ArrayList<>();		
+		for (ConfigGroup module : drtModules) {
+			modules.add(module);
+		}	
+		for (ConfigGroup module : modulesToAdd) {
+			modules.add(module);
+		}
 		
 		config = berlin.prepareConfig(modulesToAdd);					
 		TaxiControlerCreator.adjustTaxiConfig(config);
