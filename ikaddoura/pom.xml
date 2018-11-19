@@ -112,10 +112,16 @@
 	
 	<dependency>
 	    <groupId>com.github.matsim-vsp</groupId>
-	    <artifactId>matsim-berlin</artifactId>
-<!-- 	    <version>sav-SNAPSHOT</version> -->
-		<version>sav-2a8e73304b-1</version>
+	    <artifactId>avoev</artifactId>
+	    <version>master-SNAPSHOT</version>
 	</dependency>
+	
+	<!-- <dependency>
+	    <groupId>com.github.matsim-vsp</groupId>
+	    <artifactId>matsim-berlin</artifactId>
+	    <version>sav-SNAPSHOT</version>
+		<version>sav-2a8e73304b-1</version>
+	</dependency> -->
 
 <!-- 	<dependency> -->
 <!-- 	    <groupId>org.matsim</groupId> -->
