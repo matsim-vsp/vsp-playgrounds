@@ -41,6 +41,7 @@ import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
 import org.matsim.contrib.opdyts.objectivefunction.MATSimObjectiveFunction;
 import org.matsim.contrib.opdyts.objectivefunction.MATSimObjectiveFunctionSum;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
+import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.Greedo;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -76,21 +77,18 @@ public class IHOP4ProductionRunner {
 		}
 		log.info("after strict-car filter: " + scenario.getPopulation().getPersons().size());
 	}
+	
+	static void simulate(final Config config) {
 
-	static void run(boolean useGreedo) {
-
-		final Greedo greedo = (useGreedo ? new Greedo() : null);
-		if (greedo != null) {
+		// Greedo.
+		
+		final Greedo greedo;
+		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
+			greedo = new Greedo();
 			greedo.setAdjustStrategyWeights(true);
-		}
-
-		// Config.
-
-		final Config config = ConfigUtils
-				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/config.xml");
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		if (greedo != null) {
-			greedo.meet(config);
+			greedo.meet(config);			
+		} else {
+			greedo = null;
 		}
 
 		// Scenario.
@@ -108,116 +106,32 @@ public class IHOP4ProductionRunner {
 			controler.addOverridingModule(greedo);
 		}
 
-		// if (calibrate) {
-		//
-		// final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new
-		// MATSimObjectiveFunctionSum<>();
-		//
-		// /*
-		// * (1) Load sensor data and build objective function.
-		// */
-		//
-		// final TollZoneMeasurementReader measReader = new
-		// TollZoneMeasurementReader(config);
-		// measReader.run();
-		//
-		// for (MATSimObjectiveFunction<MATSimState> objectiveFunctionComponent :
-		// measReader.getAllDayMeasurements().getObjectiveFunctions()) {
-		// overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
-		// }
-		//
-		// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
-		// {
-		// controler.addOverridingModule(module);
-		// }
-		// for (AbstractModule module :
-		// measReader.getOnlyTollTimeMeasurements().getModules()) {
-		// controler.addOverridingModule(module);
-		// }
-		//
-		// /*
-		// * (2) Create decision variable.
-		// */
-		//
-		//
-		//
-		// // Checking if this really works:
-		//
-		// final int testIteration = 10;
-		//
-		// BeforeMobsimListener testListener = new BeforeMobsimListener() {
-		// @Override
-		// public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-		// if (event.getIteration() == testIteration) {
-		// for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader
-		// .getAllDayMeasurements().getObjectiveFunctions()) {
-		// System.out.println();
-		// System.out.println(objFct);
-		// }
-		// for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : measReader
-		// .getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-		// System.out.println();
-		// System.out.println(objFct);
-		// }
-		// System.out.println();
-		// System.out.println("TERMINATING IN ITERATION " + event.getIteration());
-		// System.exit(0);
-		// }
-		// }
-		// };
-		//
-		// controler.addOverridingModule(new AbstractModule() {
-		// @Override
-		// public void install() {
-		// this.addControlerListenerBinding().toInstance(testListener);
-		// }
-		// });
-		//
-		// }
-
 		// ... and run.
 
 		controler.run();
-	}
 
-	static void calibrate(boolean useGreedo) {
+		
+	}
+	
+	static void calibrate(final Config config) {
 
 		final OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
 
-		final Greedo greedo = (useGreedo ? new Greedo() : null);
-		if (greedo != null) {
+		// Greedo
+		
+		final Greedo greedo;
+		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
+			greedo = new Greedo();
 			greedo.setAdjustStrategyWeights(true);
 			greedo.setGreedoProgressListener(progressListener);
-		}
-
-		// Config.
-
-		final Config config = ConfigUtils
-				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/config.xml");
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		if (greedo != null) {
-			greedo.meet(config);
+			greedo.meet(config);			
+		} else {
+			greedo = null;
 		}
 
 		// Opdyts configuration.
 
 		final OpdytsConfigGroup opdytsConfig = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.class);
-		opdytsConfig.setBinCount(24 * 12);
-		opdytsConfig.setBinSize(3600 / 12);
-		opdytsConfig.setInertia(0.9);
-		opdytsConfig.setInitialEquilibriumGapWeight(0.0);
-		opdytsConfig.setInitialUniformityGapWeight(0.0);
-		opdytsConfig.setMaxIteration(100);
-		opdytsConfig.setMaxMemoryPerTrajectory(Integer.MAX_VALUE);
-		opdytsConfig.setMaxTotalMemory(Integer.MAX_VALUE);
-		opdytsConfig.setMaxTransition(Integer.MAX_VALUE);
-		opdytsConfig.setNoisySystem(true);
-		opdytsConfig.setNumberOfIterationsForAveraging(5); // TODO REMOVE
-		opdytsConfig.setNumberOfIterationsForConvergence(10); // TODO REMOVE
-		opdytsConfig.setSelfTuningWeightScale(1.0);
-		opdytsConfig.setStartTime(0);
-		opdytsConfig.setUseAllWarmUpIterations(true);
-		opdytsConfig.setWarmUpIterations(1);
 
 		if (greedo != null) {
 			opdytsConfig.setEnBlockSimulationIterations(
@@ -231,13 +145,6 @@ public class IHOP4ProductionRunner {
 		if (greedo != null) {
 			greedo.meet(scenario);
 		}
-
-		// // Controler.
-		//
-		// final Controler controler = new Controler(scenario);
-		// if (greedo != null) {
-		// controler.addOverridingModule(greedo);
-		// }
 
 		// Decision variables.
 
@@ -292,8 +199,21 @@ public class IHOP4ProductionRunner {
 	}
 
 	public static void main(String[] args) {
-		final boolean useGreedo = true;
-		run(useGreedo);
+
+		final Config config = ConfigUtils
+				.loadConfig(args[0]);
+		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+
+		if (config.getModules().containsKey(OpdytsConfigGroup.GROUP_NAME)) {
+			calibrate(config);
+		} else {
+			simulate(config);			
+		}
+		
+		
+		
+		
+		
 		// calibrate(useGreedo);
 	}
 }

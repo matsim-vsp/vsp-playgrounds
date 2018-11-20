@@ -16,7 +16,7 @@
  *
  * contact: gunnar.flotterod@gmail.com
  *
- */ 
+ */
 package gunnar.ihop2;
 
 import java.io.IOException;
@@ -50,8 +50,8 @@ public class ProductionRunner {
 		 * ALL POSSIBLE PARAMETERS
 		 */
 
-		final String path = "/Users/GunnarF/NoBackup/data-workspace/ihop2/ihop2-data/";
-		
+		final String path = "/Users/GunnarF/OneDrive - VTI/My Data/ihop2/ihop2-data/";
+
 		final String nodesFile = path + "network-input/Nodes.csv";
 		final String segmentsFile = path + "network-input/Segments.csv";
 		final String lanesFile = path + "network-input/Lanes.csv";
@@ -64,15 +64,12 @@ public class ProductionRunner {
 		final String matsimLanesFile = path + "network-output/lanes.xml";
 		final String matsimTollFile = path + "network-output/toll.xml";
 
-		final double populationSample = 0.25;
 		final String zonesShapeFileName = path + "demand-input/sverige_TZ_EPSG3857.shp";
 		final String buildingShapeFileName = path + "demand-input/by_full_EPSG3857_2.shp";
 		final String populationFileName = path + "demand-input/trips.xml";
 
-		final String initialPlansFile = path + "demand-output/25PctAllModes.xml";
-		// final String initialPlansFile = path + "demand-output/1PctCarAndPt.xml";
-				// "./ihop2-data/without-toll/ITERS/it.200/200.plans.xml.gz";
-		// "./ihop2-data/demand-output/initial-plans_" + populationSample + ".xml";
+		final double populationSample = 0.20;
+		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/20PctAllModes.xml";
 
 		final String configFileName = path + "matsim-input/matsim-config.xml";
 		final double networkUpscaleFactor = 2;
@@ -88,7 +85,7 @@ public class ProductionRunner {
 
 		final boolean doNetworkConversion = false;
 		final boolean doPopulationGeneration = false;
-		final boolean checkPopulation = true;
+		final boolean checkPopulation = false;
 		final boolean runMATSim = false;
 
 		/*
@@ -96,11 +93,9 @@ public class ProductionRunner {
 		 */
 
 		if (doNetworkConversion) {
-			final Transmodeler2MATSimNetwork tm2MATSim = new Transmodeler2MATSimNetwork(
-					nodesFile, linksFile, segmentsFile, lanesFile,
-					laneConnectorsFile, matsimNetworkFile,
-					matsimFullNetworkFile, linkAttributesFile,
-					matsimLanesFile, matsimTollFile);
+			final Transmodeler2MATSimNetwork tm2MATSim = new Transmodeler2MATSimNetwork(nodesFile, linksFile,
+					segmentsFile, lanesFile, laneConnectorsFile, matsimNetworkFile, matsimFullNetworkFile,
+					linkAttributesFile, matsimLanesFile, matsimTollFile);
 			tm2MATSim.run();
 		}
 
@@ -108,24 +103,22 @@ public class ProductionRunner {
 		 * REGENT -> MATSIM POPULATION CONVERSION
 		 */
 		if (doPopulationGeneration) {
-			
-			final PopulationCreator populationCreator = new PopulationCreator(
-					matsimNetworkFile, zonesShapeFileName,
-					StockholmTransformationFactory.WGS84_EPSG3857,
-					populationFileName);
+
+			final PopulationCreator populationCreator = new PopulationCreator(matsimNetworkFile, zonesShapeFileName,
+					StockholmTransformationFactory.WGS84_EPSG3857, populationFileName);
 			populationCreator.setBuildingsFileName(buildingShapeFileName);
 			populationCreator.setPopulationSampleFactor(populationSample);
-			populationCreator.run(initialPlansFile);			
+			populationCreator.run(initialPlansFile);
 		}
-		
+
 		if (checkPopulation) {
 			ObjectAttributeStatistics personAttrStats = new ObjectAttributeStatistics(populationFileName);
 			PopulationStatistics populationStats = new PopulationStatistics(initialPlansFile);
-			
+
 			System.out.println("------------------------------------------------------");
 			System.out.println("FROM ATTRIBUTES FILE");
 			personAttrStats.printSummaryStatistic();
-			
+
 			System.out.println("------------------------------------------------------");
 			System.out.println("FROM POPULATION FILE");
 			populationStats.printSummaryStatistic();
@@ -135,27 +128,21 @@ public class ProductionRunner {
 		 * MATSIM ITERATIONS
 		 */
 		if (runMATSim) {
-			final Config config = ConfigUtils.loadConfig(configFileName,
-					new RoadPricingConfigGroup());
+			final Config config = ConfigUtils.loadConfig(configFileName, new RoadPricingConfigGroup());
 			config.getModule("qsim").addParam("flowCapacityFactor",
 					Double.toString(networkUpscaleFactor * populationSample));
 			config.getModule("qsim").addParam("storageCapacityFactor",
 					Double.toString(networkUpscaleFactor * populationSample));
-			config.getModule("network").addParam("inputNetworkFile",
-					matsimNetworkFile);
-			config.getModule("plans").addParam("inputPlansFile",
-					initialPlansFile);
-			config.getModule("controler").addParam("lastIteration",
-					lastIteration);
+			config.getModule("network").addParam("inputNetworkFile", matsimNetworkFile);
+			config.getModule("plans").addParam("inputPlansFile", initialPlansFile);
+			config.getModule("controler").addParam("lastIteration", lastIteration);
 			config.controler()
-					.setOverwriteFileSetting(
-							OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+					.setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
 			if (useLanes) {
 				config.network().setLaneDefinitionsFile(matsimLanesFile);
 				config.qsim().setUseLanes(true);
-				config.travelTimeCalculator()
-						.setCalculateLinkToLinkTravelTimes(true);
+				config.travelTimeCalculator().setCalculateLinkToLinkTravelTimes(true);
 				config.controler().setLinkToLinkRoutingEnabled(true);
 				config.getModule("qsim").addParam("stuckTime", "1e6");
 				config.getModule("qsim").addParam("endTime", "99:00:00");
@@ -164,32 +151,28 @@ public class ProductionRunner {
 			}
 
 			if (doRouteChoice) {
-				config.getModule("strategy").addParam("ModuleProbability_2",
-						"0.1");
+				config.getModule("strategy").addParam("ModuleProbability_2", "0.1");
 			} else {
-				config.getModule("strategy").addParam("ModuleProbability_2",
-						"0.0");
+				config.getModule("strategy").addParam("ModuleProbability_2", "0.0");
 			}
 
 			if (doTimeChoice) {
-				config.getModule("strategy").addParam("ModuleProbability_3",
-						"0.1");
+				config.getModule("strategy").addParam("ModuleProbability_3", "0.1");
 			} else {
-				config.getModule("strategy").addParam("ModuleProbability_3",
-						"0.0");
+				config.getModule("strategy").addParam("ModuleProbability_3", "0.0");
 			}
 
 			final Controler controler = new Controler(config);
 
-			//LinkToLinkRouting is added automatically when config.controler.linkToLinkRoutingEnabled == true
-	        //michalm, jan'17
-//			if (useLanes) {
-//				controler
-//						.addOverridingModule(new LinkToLinkRoutingGuiceModule());
-//			}
+			// LinkToLinkRouting is added automatically when
+			// config.controler.linkToLinkRoutingEnabled == true
+			// michalm, jan'17
+			// if (useLanes) {
+			// controler
+			// .addOverridingModule(new LinkToLinkRoutingGuiceModule());
+			// }
 			if (useRoadPricing) {
-				controler
-						.setModules(new ControlerDefaultsWithRoadPricingModule());
+				controler.setModules(new ControlerDefaultsWithRoadPricingModule());
 			}
 
 			controler.run();
