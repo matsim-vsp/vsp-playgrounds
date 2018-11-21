@@ -50,7 +50,7 @@ public class ScoreUpdater<L> {
 
 	private double inertiaResidual;
 
-	private double regularizationResidual;
+	// private double regularizationResidual;
 
 	private final double individualUtilityChange;
 
@@ -60,31 +60,33 @@ public class ScoreUpdater<L> {
 
 	private final double scoreChangeIfOne;
 
-	private final double greedyScoreChangeIfOne;
+	// private final double greedyScoreChangeIfOne;
 
-	private final double greedyScoreChangeIfZero;
+	// private final double greedyScoreChangeIfZero;
 
 	private boolean residualsUpdated = false;
 
-	private final double deltaForUniformReplanning;
+	// private final double deltaForUniformReplanning;
 
 	private double sumOfInteractionResiduals2;
 
-	public final boolean wouldBeUniformReplanner;
+	// public final boolean wouldBeUniformReplanner;
 
-	public final boolean wouldBeGreedyReplanner;
+	// public final boolean wouldBeGreedyReplanner;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
-			final Map<Id<?>, Double> weights,
-			final double meanLambda, final double beta, final double delta, final DynamicData<L> interactionResiduals,
-			final double inertiaResidual, final double regularizationResidual, final AccelerationConfigGroup replParams,
+			final Map<Id<?>, Double> weights, final double meanLambda, final double beta,
+			// final double delta,
+			final DynamicData<L> interactionResiduals, final double inertiaResidual,
+			// final double regularizationResidual, 
+			final AccelerationConfigGroup replParams,
 			final double individualUtilityChange, final double totalUtilityChange, Double sumOfInteractionResiduals2) {
 
 		this.interactionResiduals = interactionResiduals;
 		this.inertiaResidual = inertiaResidual;
-		this.regularizationResidual = regularizationResidual;
+		// this.regularizationResidual = regularizationResidual;
 
 		this.individualUtilityChange = individualUtilityChange;
 
@@ -115,7 +117,7 @@ public class ScoreUpdater<L> {
 
 		this.inertiaResidual -= (1.0 - meanLambda) * this.individualUtilityChange;
 
-		this.regularizationResidual -= meanLambda;
+		// this.regularizationResidual -= meanLambda;
 
 		// Compute individual score terms.
 
@@ -142,26 +144,35 @@ public class ScoreUpdater<L> {
 		final double inertiaIfOne = this.expectedInertia(1.0, individualUtilityChange, inertiaResidual);
 		final double inertiaIfMean = this.expectedInertia(meanLambda, individualUtilityChange, inertiaResidual);
 		final double inertiaIfZero = this.expectedInertia(0.0, individualUtilityChange, inertiaResidual);
-		final double regularizationIfOne = this.expectedRegularization(1.0, regularizationResidual);
-		final double regularizationIfMean = this.expectedRegularization(meanLambda, regularizationResidual);
-		final double regularizationIfZero = this.expectedRegularization(0.0, regularizationResidual);
+		// final double regularizationIfOne = this.expectedRegularization(1.0,
+		// regularizationResidual);
+		// final double regularizationIfMean = this.expectedRegularization(meanLambda,
+		// regularizationResidual);
+		// final double regularizationIfZero = this.expectedRegularization(0.0,
+		// regularizationResidual);
 
-		this.greedyScoreChangeIfOne = (interactionIfOne - interactionIfMean) + beta * (inertiaIfOne - inertiaIfMean);
-		this.greedyScoreChangeIfZero = (interactionIfZero - interactionIfMean) + beta * (inertiaIfZero - inertiaIfMean);
+		this.scoreChangeIfOne = (interactionIfOne - interactionIfMean) + beta * (inertiaIfOne - inertiaIfMean);
+		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean) + beta * (inertiaIfZero - inertiaIfMean);
 
-		this.scoreChangeIfOne = this.greedyScoreChangeIfOne + delta * (regularizationIfOne - regularizationIfMean);
-		this.scoreChangeIfZero = this.greedyScoreChangeIfZero + delta * (regularizationIfZero - regularizationIfMean);
+		// this.scoreChangeIfOne = greedyScoreChangeIfOne; // + delta *
+		// (regularizationIfOne - regularizationIfMean);
+		// this.scoreChangeIfZero = greedyScoreChangeIfZero; // + delta *
+		// (regularizationIfZero - regularizationIfMean);
 
-		final double deltaInteraction = interactionIfOne - interactionIfZero;
-		final double deltaInertia = inertiaIfOne - inertiaIfZero;
-		final double deltaRegularization = regularizationIfOne - regularizationIfZero;
+		// final double deltaInteraction = interactionIfOne - interactionIfZero;
+		// final double deltaInertia = inertiaIfOne - inertiaIfZero;
+		// final double deltaRegularization = regularizationIfOne -
+		// regularizationIfZero;
 
-		final double deltaRegularizationWellBehaved = Math.signum(deltaRegularization)
-				* Math.max(1.0, Math.abs(deltaRegularization));
-		this.deltaForUniformReplanning = -(deltaInteraction + beta * deltaInertia) / deltaRegularizationWellBehaved;
+		// final double deltaRegularizationWellBehaved =
+		// Math.signum(deltaRegularization)
+		// * Math.max(1.0, Math.abs(deltaRegularization));
+		// this.deltaForUniformReplanning = -(deltaInteraction + beta * deltaInertia) /
+		// deltaRegularizationWellBehaved;
 
-		this.wouldBeUniformReplanner = (this.regularizationResidual <= -0.5);
-		this.wouldBeGreedyReplanner = (this.greedyScoreChangeIfOne <= this.greedyScoreChangeIfZero);
+		// this.wouldBeUniformReplanner = (this.regularizationResidual <= -0.5);
+		// this.wouldBeGreedyReplanner = (this.greedyScoreChangeIfOne <=
+		// this.greedyScoreChangeIfZero);
 	}
 
 	private double expectedInteraction(final double lambda, final double sumOfWeightedIndividualChanges2,
@@ -176,10 +187,11 @@ public class ScoreUpdater<L> {
 		return (1.0 - lambda) * individualUtilityChange + inertiaResidual;
 	}
 
-	private double expectedRegularization(final double lambda, final double regularizationResidual) {
-		return lambda * lambda + 2.0 * lambda * regularizationResidual
-				+ regularizationResidual * regularizationResidual;
-	}
+	// private double expectedRegularization(final double lambda, final double
+	// regularizationResidual) {
+	// return lambda * lambda + 2.0 * lambda * regularizationResidual
+	// + regularizationResidual * regularizationResidual;
+	// }
 
 	// -------------------- IMPLEMENTATION --------------------
 
@@ -200,7 +212,7 @@ public class ScoreUpdater<L> {
 			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
 		this.inertiaResidual += (1.0 - newLambda) * this.individualUtilityChange;
-		this.regularizationResidual += newLambda;
+		// this.regularizationResidual += newLambda;
 	}
 
 	// -------------------- GETTERS --------------------
@@ -212,12 +224,12 @@ public class ScoreUpdater<L> {
 		return this.inertiaResidual;
 	}
 
-	public double getUpdatedRegularizationResidual() {
-		if (!this.residualsUpdated) {
-			throw new RuntimeException("Residuals have not yet updated.");
-		}
-		return this.regularizationResidual;
-	}
+	// public double getUpdatedRegularizationResidual() {
+	// if (!this.residualsUpdated) {
+	// throw new RuntimeException("Residuals have not yet updated.");
+	// }
+	// return this.regularizationResidual;
+	// }
 
 	public double getScoreChangeIfOne() {
 		return this.scoreChangeIfOne;
@@ -227,17 +239,17 @@ public class ScoreUpdater<L> {
 		return this.scoreChangeIfZero;
 	}
 
-	public double getGreedyScoreChangeIfOne() {
-		return this.greedyScoreChangeIfOne;
-	}
+	// public double getGreedyScoreChangeIfOne() {
+	// return this.greedyScoreChangeIfOne;
+	// }
 
-	public double getGreedyScoreChangeIfZero() {
-		return this.greedyScoreChangeIfZero;
-	}
+	// public double getGreedyScoreChangeIfZero() {
+	// return this.greedyScoreChangeIfZero;
+	// }
 
-	public Double getCriticalDelta() {
-		return this.deltaForUniformReplanning;
-	}
+	// public Double getCriticalDelta() {
+	// return this.deltaForUniformReplanning;
+	// }
 
 	public double getUpdatedSumOfInteractionResiduals2() {
 		if (!this.residualsUpdated) {

@@ -26,6 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class DeltaForUniformReplanningExact implements Statistic<LogDataWrapper> {
 
 	public DeltaForUniformReplanningExact() {

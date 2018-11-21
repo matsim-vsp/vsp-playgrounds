@@ -25,8 +25,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
-import com.google.inject.Provider;
-import matsimintegration.TimeDiscretizationInjection;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PopulationWriter;
@@ -42,6 +41,10 @@ import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
+
+import com.google.inject.Provider;
+
+import matsimintegration.TimeDiscretizationInjection;
 
 /**
  * 

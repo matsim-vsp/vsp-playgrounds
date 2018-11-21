@@ -29,17 +29,15 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.mobsim.PSimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.SwitchingMobsimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.transitperformance.TransitEmulator;
-import org.matsim.contrib.pseudosimulation.replanning.PlanCatcher;
+import org.matsim.contrib.pseudosimulation.PSimTravelTimeCalculator;
+import org.matsim.contrib.pseudosimulation.SwitchingMobsimProvider;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AcceptIntendedReplanningStragetyProvider;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AcceptIntendedReplanningStrategy;
 import org.matsim.contrib.pseudosimulation.searchacceleration.SearchAccelerator;
-import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.FifoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.FifoTransitPerformance;
-import org.matsim.contrib.pseudosimulation.trafficinfo.PSimTravelTimeCalculator;
+import org.matsim.contrib.pseudosimulation.transit.FifoTransitEmulator;
+import org.matsim.contrib.pseudosimulation.transit.FifoTransitPerformance;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -47,8 +45,8 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.QSimProvider;
-import org.matsim.core.mobsim.qsim.components.QSimComponents;
-import org.matsim.core.mobsim.qsim.components.StandardQSimComponentsConfigurator;
+import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
+import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
@@ -152,9 +150,9 @@ public class WUMProductionRunner {
 			}
 
 			@Provides
-			QSimComponents provideQSimComponents() {
-				QSimComponents components = new QSimComponents();
-				new StandardQSimComponentsConfigurator(config).configure(components);
+			QSimComponentsConfig provideQSimComponentsConfig(Config config) {
+				QSimComponentsConfig components = new QSimComponentsConfig();
+				new StandardQSimComponentConfigurator(config).configure(components);
 				SBBTransitEngineQSimModule.configure(components);
 				return components;
 			}
@@ -163,17 +161,18 @@ public class WUMProductionRunner {
 			@Override
 			public void install() {
 				// General-purpose + car-specific PSim.
-				final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class);
-				final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf, scenario);
+				// final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class);
+				// final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf, scenario);
+				final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher();
 				this.addControlerListenerBinding().toInstance(mobSimSwitcher);
 				this.bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
 				this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
 				this.bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
 				this.bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
-				this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
+				// this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
 								
 				// this.bind(PSimProvider.class).toInstance(new PSimProvider(scenario, controler.getEvents()));
-				this.bind(PSimProvider.class);
+				// this.bind(PSimProvider.class);
 				
 				// Transit-specific PSim.
 				final FifoTransitPerformance transitPerformance = new FifoTransitPerformance(mobSimSwitcher,

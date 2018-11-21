@@ -304,20 +304,20 @@ public class MultiModeNetworkTest {
         {
             //person 0
             Id<Person> personId = Id.createPersonId("0");
-            Assert.assertEquals("Wrong mode for person "+ personId + person2departurelink2mode.get(personId).getSecond(), "bike" );
-            Assert.assertEquals("Wrong departure link for person "+ personId + person2departurelink2mode.get(personId).getFirst(), Id.createLinkId("12_bike"));
+            Assert.assertEquals("Wrong mode for person "+ personId, person2departurelink2mode.get(personId).getSecond(), "bike" );
+            Assert.assertEquals("Wrong departure link for person "+ personId,  person2departurelink2mode.get(personId).getFirst(), Id.createLinkId("12_bike").toString());
 
-            Assert.assertEquals("Wrong mode for person "+ personId + person2arrivallink2mode.get(personId).getSecond(), "bike" );
-            Assert.assertEquals("Wrong departure link for person "+ personId + person2arrivallink2mode.get(personId).getFirst(), Id.createLinkId("3_bike"));
+            Assert.assertEquals("Wrong mode for person "+ personId,  person2arrivallink2mode.get(personId).getSecond(), "bike" );
+            Assert.assertEquals("Wrong departure link for person "+ personId, person2arrivallink2mode.get(personId).getFirst(), Id.createLinkId("3_bike").toString());
         }
         {
             //person 1
             Id<Person> personId = Id.createPersonId("1");
-            Assert.assertEquals("Wrong mode for person "+ personId + person2departurelink2mode.get(personId).getSecond(), "car" );
-            Assert.assertEquals("Wrong departure link for person "+ personId + person2departurelink2mode.get(personId).getFirst(), Id.createLinkId("1") );
+            Assert.assertEquals("Wrong mode for person "+ personId, person2departurelink2mode.get(personId).getSecond(), "car" );
+            Assert.assertEquals("Wrong departure link for person "+ personId, person2departurelink2mode.get(personId).getFirst(), Id.createLinkId("1").toString() );
 
-            Assert.assertEquals("Wrong mode for person "+ personId + person2arrivallink2mode.get(personId).getSecond(), "car" );
-            Assert.assertEquals("Wrong departure link for person "+ personId + person2arrivallink2mode.get(personId).getFirst(), Id.createLinkId("3") );
+            Assert.assertEquals("Wrong mode for person "+ personId, person2arrivallink2mode.get(personId).getSecond(), "car" );
+            Assert.assertEquals("Wrong departure link for person "+ personId, person2arrivallink2mode.get(personId).getFirst(), Id.createLinkId("3").toString() );
         }
     }
 

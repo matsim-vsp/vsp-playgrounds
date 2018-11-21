@@ -19,7 +19,10 @@
 
 package playground.ikaddoura.savPricing.disutility;
 
+import java.lang.annotation.Annotation;
+
 import org.matsim.core.controler.AbstractModule;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 
 import com.google.inject.Inject;
 
@@ -32,7 +35,7 @@ import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 
 public class SAVMoneyTravelDisutilityModule extends AbstractModule {
 	
-	private final String mode;
+	private final Class<? extends Annotation> savOptimizerModeAnnotation;
 	private final SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory;
 	
 	@Inject(optional = true)
@@ -40,14 +43,14 @@ public class SAVMoneyTravelDisutilityModule extends AbstractModule {
 	
 	private final AgentFilter agentFilterToBind;
 	
-	public SAVMoneyTravelDisutilityModule(String mode, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory, AgentFilter agentFilter) {
-		this.mode = mode;
+	public SAVMoneyTravelDisutilityModule(Class<? extends Annotation> savOptimizerModeAnnotation, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory, AgentFilter agentFilter) {
+		this.savOptimizerModeAnnotation = savOptimizerModeAnnotation;
 		this.factory = factory;
 		this.agentFilterToBind = agentFilter;
 	}
 
-	public SAVMoneyTravelDisutilityModule(String mode, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory) {
-		this.mode = mode;
+	public SAVMoneyTravelDisutilityModule(Class<? extends Annotation> savOptimizerModeAnnotation, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory) {
+		this.savOptimizerModeAnnotation = savOptimizerModeAnnotation;
 		this.factory = factory;
 		this.agentFilterToBind = null;
 	}
@@ -59,7 +62,7 @@ public class SAVMoneyTravelDisutilityModule extends AbstractModule {
 			this.bind(AgentFilter.class).toInstance(agentFilterToBind);
 		}
 		
-		this.addTravelDisutilityFactoryBinding(mode).toInstance(factory);
+		this.bind(TravelDisutilityFactory.class).annotatedWith(savOptimizerModeAnnotation).toInstance(factory);
 		
 		this.bind(MoneyEventAnalysis.class).asEagerSingleton();	
 		this.addControlerListenerBinding().to(MoneyEventAnalysis.class);

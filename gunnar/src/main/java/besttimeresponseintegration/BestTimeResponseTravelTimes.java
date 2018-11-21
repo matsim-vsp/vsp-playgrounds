@@ -21,8 +21,6 @@ package besttimeresponseintegration;
 
 import java.util.List;
 import java.util.Map;
-import besttimeresponse.TripTravelTimes;
-import floetteroed.utilities.TimeDiscretization;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -34,6 +32,9 @@ import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.facilities.Facility;
+
+import besttimeresponse.TripTravelTimes;
+import floetteroed.utilities.TimeDiscretization;
 
 /**
  * 

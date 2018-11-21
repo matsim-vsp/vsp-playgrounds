@@ -21,11 +21,7 @@ package besttimeresponseintegration;
 
 import java.util.ArrayList;
 import java.util.List;
-import besttimeresponse.PlannedActivity;
-import besttimeresponse.TimeAllocator;
-import besttimeresponse.TripTravelTimes;
-import floetteroed.utilities.TimeDiscretization;
-import floetteroed.utilities.Units;
+
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -37,6 +33,12 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.facilities.Facility;
 import org.matsim.pt.router.TransitActsRemover;
+
+import besttimeresponse.PlannedActivity;
+import besttimeresponse.TimeAllocator;
+import besttimeresponse.TripTravelTimes;
+import floetteroed.utilities.TimeDiscretization;
+import floetteroed.utilities.Units;
 
 /**
  * This class separates the functionality of the BestTimeResponseStrategyModule

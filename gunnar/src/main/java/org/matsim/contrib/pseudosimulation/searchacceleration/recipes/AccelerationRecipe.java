@@ -35,17 +35,18 @@ public class AccelerationRecipe implements ReplannerIdentifierRecipe {
 
 	// private final double baselineLambda;
 
-	private final double meanLambda;
+	// private final double meanLambda;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public AccelerationRecipe(
 			// final boolean randomizeIfNotScoreImprover,
 			// final double baselineLambda,
-			final double meanLambda) {
+			// final double meanLambda
+			) {
 		// this.randomizeIfNotScoreImprover = randomizeIfNotScoreImprover;
 		// this.baselineLambda = baselineLambda;
-		this.meanLambda = meanLambda;
+		// this.meanLambda = meanLambda;
 	}
 
 	// --------------- IMPLEMENTATION OF AccelerationRecipe ---------------

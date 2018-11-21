@@ -91,7 +91,7 @@ public class ObjectiveFunctionEvaluator {
             double[] realValue = theEntry.getValue() ;
             double[] simValue = simCounts.get(mode);
             
-			log.info("simValue=" + simValue );
+			log.info("simValue=" + Arrays.toString(simValue) );
             
             final double sum = Arrays.stream(simValue).sum();
             mode2share.put(mode, sum);

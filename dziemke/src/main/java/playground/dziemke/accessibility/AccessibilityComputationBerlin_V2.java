@@ -29,6 +29,7 @@ import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.AccessibilityModule;
 import org.matsim.contrib.accessibility.FacilityTypes;
+import org.matsim.contrib.accessibility.Labels;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
@@ -129,7 +130,7 @@ public class AccessibilityComputationBerlin_V2 {
 		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromShapeFile);
 		acg.setShapeFileCellBasedAccessibility("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp");
 		acg.setEnvelope(envelope);
-		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setTileSize_m(cellSize.intValue());
 //		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
 //		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, false);
 //		acg.setComputingAccessibilityForMode(Modes4Accessibility.car, true);
@@ -170,7 +171,7 @@ public class AccessibilityComputationBerlin_V2 {
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
 //		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
 		
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork()); // will be aggregated in downstream code!
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.POPULATION_DENSITIY, scenario.getNetwork()); // will be aggregated in downstream code!
 		
 		final Controler controler = new Controler(scenario);
 		

@@ -30,7 +30,7 @@
 			<groupId>com.github.gunnarfloetteroed</groupId>
     		<artifactId>java</artifactId>
     		<version>master-SNAPSHOT</version>
-		</dependency>
+	  	</dependency>
 
 		<!--  
 	  	<dependency>
@@ -114,7 +114,7 @@
    		<dependency>
   			<groupId>com.github.simunto</groupId>
   			<artifactId>matsim-sbb-extensions</artifactId>
-  			<version>0.11.0-2018w40</version>
+  			<version>0.11.0-2018w44</version>
   		</dependency>  
   		
 	</dependencies>

@@ -19,9 +19,10 @@
  */ 
 package cba.toynet;
 
+import org.matsim.api.core.v01.population.Plan;
+
 import cba.resampling.Alternative;
 import cba.resampling.EpsilonDistribution;
-import org.matsim.api.core.v01.population.Plan;
 
 /**
  * 

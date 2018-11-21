@@ -135,7 +135,10 @@ public class RunBerlin {
 				scalingFactor,
 				filters,
 				null,
-				modes);
+				modes,
+				null,
+				null,
+				0.);
 		analysis.run();
 				
 		log.info("Done.");

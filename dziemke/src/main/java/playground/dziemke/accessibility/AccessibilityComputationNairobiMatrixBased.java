@@ -28,6 +28,7 @@ import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.AccessibilityModule;
 import org.matsim.contrib.accessibility.FacilityTypes;
+import org.matsim.contrib.accessibility.Labels;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
@@ -52,7 +53,7 @@ public class AccessibilityComputationNairobiMatrixBased {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationNairobiMatrixBased.class);
 
 	public static void main(String[] args) {
-		Double cellSize = 500.;
+		int tileSize_m = 500;
 		boolean push2Geoserver = false; // Set true for run on server
 		boolean createQGisOutput = true; // Set false for run on server
 
@@ -66,14 +67,14 @@ public class AccessibilityComputationNairobiMatrixBased {
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setOutputDirectory("../../shared-svn/projects/maxess/data/nairobi/output/matrix-based/");
 		config.controler().setLastIteration(0);
-		config.controler().setRunId("ke_nairobi_" + cellSize.toString().split("\\.")[0] + "work_matrix-based");
+		config.controler().setRunId("ke_nairobi_" + tileSize_m + "work_matrix-based");
 		
 		config.global().setCoordinateSystem(scenarioCRS);
 
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
 		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
 		acg.setEnvelope(envelope);
-		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setTileSize_m(tileSize_m);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.matrixBasedPt, true);
@@ -100,7 +101,7 @@ public class AccessibilityComputationNairobiMatrixBased {
 		
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.WORK});
 
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(scenario.getNetwork());
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.POPULATION_DENSITIY, scenario.getNetwork());
 
 		final Controler controler = new Controler(scenario);
 
@@ -126,7 +127,7 @@ public class AccessibilityComputationNairobiMatrixBased {
 			final Integer range = 9; // In the current implementation, this must always be 9
 			final Double lowerBound = -7.; // (upperBound - lowerBound) ideally	nicely divisible by (range - 2)
 			final Double upperBound = 0.;
-			final int populationThreshold = (int) (50 / (1000 / cellSize * 1000 / cellSize));
+			final int populationThreshold = (int) (50 / (1000 / tileSize_m * 1000 / tileSize_m));
 
 			String osName = System.getProperty("os.name");
 			String workingDirectory = config.controler().getOutputDirectory();
@@ -134,8 +135,7 @@ public class AccessibilityComputationNairobiMatrixBased {
 				String actSpecificWorkingDirectory = workingDirectory + actType + "/";
 				for (Modes4Accessibility mode : acg.getIsComputingMode()) {
 					VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode.toString(), envelope, workingDirectory,
-							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, cellSize.intValue(),
-							populationThreshold);
+							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, tileSize_m, populationThreshold);
 					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode.toString(), osName);
 				}
 			}

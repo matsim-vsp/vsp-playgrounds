@@ -22,10 +22,6 @@
 package org.matsim.contrib.pseudosimulation;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.pseudosimulation.mobsim.PSimProvider;
-import org.matsim.contrib.pseudosimulation.mobsim.SwitchingMobsimProvider;
-import org.matsim.contrib.pseudosimulation.replanning.PlanCatcher;
-import org.matsim.contrib.pseudosimulation.trafficinfo.PSimTravelTimeCalculator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -48,8 +44,8 @@ public class RunPSim {
 //	private TransitPerformanceRecorder transitPerformanceRecorder;
 	private Controler matsimControler;
 
-	private PlanCatcher plancatcher;
-	private PSimProvider pSimProvider;
+	// private PlanCatcher plancatcher;
+	// private PSimProvider pSimProvider;
 
 	public RunPSim(Config config, PSimConfigGroup pSimConfigGroup) {
 		this.config = config;
@@ -63,12 +59,13 @@ public class RunPSim {
 
 		this.matsimControler = new Controler(scenario);
 
-		MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConfigGroup,scenario);
+		MobSimSwitcher mobSimSwitcher = new MobSimSwitcher();
 		matsimControler.addControlerListener(mobSimSwitcher);
 
 		matsimControler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
+								
 				bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
 				bindMobsim().toProvider(SwitchingMobsimProvider.class);
 //				bind(WaitTimeCalculator.class).to(PSimWaitTimeCalculator.class);
@@ -78,10 +75,10 @@ public class RunPSim {
 				bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
 				bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
 //				bind(TransitRouter.class).toProvider(TransitRouterEventsWSFactory.class);
-				bind(PlanCatcher.class).toInstance(new PlanCatcher());
+				// bind(PlanCatcher.class).toInstance(new PlanCatcher());
 				
 				// bind(PSimProvider.class).toInstance(new PSimProvider(scenario,matsimControler.getEvents()));
-				bind(PSimProvider.class);
+				// bind(PSimProvider.class);
 				
 				bind(QSimProvider.class);
 			}

@@ -87,6 +87,10 @@ public class IKAnalysisRunBerlinTest {
 		final String homeActivityPrefix = "h";
 		final int scalingFactor = 100;
 		
+		final String taxiMode = TransportMode.taxi;
+		final String carMode = TransportMode.car;
+		final double rewardSAVformerCarUser = 5.3;
+		
 		// optional: person attributes file to replace the output person attributes file
 		final String personAttributesFile = null;
 
@@ -120,6 +124,8 @@ public class IKAnalysisRunBerlinTest {
 		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
+		modes.add(TransportMode.pt);
+		modes.add("bicycle");
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
@@ -132,7 +138,10 @@ public class IKAnalysisRunBerlinTest {
 				scalingFactor,
 				filters1,
 				filters0,
-				modes);
+				modes,
+				taxiMode,
+				carMode,
+				rewardSAVformerCarUser);
 		analysis.run();
 	
 		log.info("Done.");

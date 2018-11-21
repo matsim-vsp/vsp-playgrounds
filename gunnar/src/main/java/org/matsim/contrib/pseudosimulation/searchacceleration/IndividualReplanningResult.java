@@ -19,6 +19,9 @@
  */
 package org.matsim.contrib.pseudosimulation.searchacceleration;
 
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -26,25 +29,28 @@ package org.matsim.contrib.pseudosimulation.searchacceleration;
  */
 class IndividualReplanningResult implements Comparable<IndividualReplanningResult> {
 
+	final Id<Person> personId;
 	final double criticalDelta;
 	final double expectedScoreChange;
 	final boolean isActualReplanner;
 	final boolean wouldBeUniformReplanner;
 	final boolean wouldBeGreedyReplanner;
 
-	IndividualReplanningResult(final double deltaForUniformReplanning, final double expectedScoreChange,
-			final boolean isActualReplanner, final boolean wouldBeUniformReplanner, final boolean wouldBeGreedyReplanner) {
+	IndividualReplanningResult(final Id<Person> personId, final double deltaForUniformReplanning,
+			final double expectedScoreChange, final boolean isActualReplanner, final boolean wouldBeUniformReplanner,
+			final boolean wouldBeGreedyReplanner) {
+		this.personId = personId;
 		this.criticalDelta = deltaForUniformReplanning;
 		this.expectedScoreChange = expectedScoreChange;
 		this.isActualReplanner = isActualReplanner;
 		this.wouldBeUniformReplanner = wouldBeUniformReplanner;
 		this.wouldBeGreedyReplanner = wouldBeGreedyReplanner;
 	}
-	
+
 	int getIsActualReplannerIndicator() {
 		return (this.isActualReplanner ? 1 : 0);
 	}
-	
+
 	int getWouldBeUniformReplannerIndicator() {
 		return (this.wouldBeUniformReplanner ? 1 : 0);
 	}

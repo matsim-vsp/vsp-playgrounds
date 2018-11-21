@@ -26,6 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class UniformReplannerShare implements Statistic<LogDataWrapper> {
 
 	public static final String LABEL = UniformReplannerShare.class.getSimpleName();
@@ -37,7 +38,7 @@ public class UniformReplannerShare implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getUniformReplannerShare());
+		return null; // Statistic.toString(arg0.getUniformReplannerShare());
 	}
 
 }

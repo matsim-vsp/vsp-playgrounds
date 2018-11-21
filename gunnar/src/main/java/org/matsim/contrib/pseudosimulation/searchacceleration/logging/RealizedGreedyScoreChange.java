@@ -26,6 +26,7 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
+@Deprecated
 public class RealizedGreedyScoreChange implements Statistic<LogDataWrapper> {
 
 	public static final String LABEL = "RealizedGreedyScoreChange";
@@ -37,7 +38,7 @@ public class RealizedGreedyScoreChange implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getRealizedGreedyScoreChange());
+		return null; // Statistic.toString(arg0.getRealizedGreedyScoreChange());
 	}
 
 }

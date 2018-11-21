@@ -20,13 +20,9 @@
 package cba.toynet;
 
 import java.util.Map;
+
 import javax.inject.Provider;
-import besttimeresponse.TimeAllocator;
-import besttimeresponse.TripTravelTimes;
-import besttimeresponseintegration.BestTimeResponseStrategyFunctionality;
-import besttimeresponseintegration.BestTimeResponseTravelTimes;
-import floetteroed.utilities.TimeDiscretization;
-import matsimintegration.TimeDiscretizationFactory;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Plan;
@@ -34,6 +30,13 @@ import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
 import org.matsim.facilities.Facility;
+
+import besttimeresponse.TimeAllocator;
+import besttimeresponse.TripTravelTimes;
+import besttimeresponseintegration.BestTimeResponseStrategyFunctionality;
+import besttimeresponseintegration.BestTimeResponseTravelTimes;
+import floetteroed.utilities.TimeDiscretization;
+import matsimintegration.TimeDiscretizationFactory;
 
 /**
  * Computes optimal time structures for given travel plans.

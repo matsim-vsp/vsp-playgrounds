@@ -59,7 +59,7 @@ public class PathFeasibilityTester {
 		final TransmodelerLinksReader linksReader = new TransmodelerLinksReader(
 				tmLinksFileName, nodesReader.id2node);
 		final TransmodelerSegmentsReader segmentsReader = new TransmodelerSegmentsReader(
-				tmSegmentsFileName, linksReader.id2link);
+				tmSegmentsFileName, linksReader.id2link, null);
 		final TransmodelerLaneReader lanesReader = new TransmodelerLaneReader(
 				tmLanesFileName, segmentsReader.unidirSegmentId2link);
 		final TransmodelerLaneConnectorReader connectorsReader = new TransmodelerLaneConnectorReader(

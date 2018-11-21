@@ -19,14 +19,23 @@
  */ 
 package cba.trianglenet;
 
-import java.util.*;
-import com.google.inject.Provider;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
+
+import com.google.inject.Provider;
 
 /**
  * 

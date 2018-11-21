@@ -1,33 +1,10 @@
 package cba.misc;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.ActivityEndEvent;
-import org.matsim.api.core.v01.events.ActivityStartEvent;
-import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
-import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
-import org.matsim.core.scenario.ScenarioUtils;
 
 import floetteroed.utilities.Time;
-import floetteroed.utilities.Tuple;
-import floetteroed.utilities.math.Histogram;
-import floetteroed.utilities.math.Vector;
-//import gunnar.ihop2.regent.demandreading.ZonalSystem;
-//import gunnar.ihop2.regent.demandreading.Zone;
-//import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 
 /**
  * 
