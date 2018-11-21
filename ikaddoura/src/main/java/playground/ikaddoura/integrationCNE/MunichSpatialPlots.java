@@ -46,8 +46,19 @@ import playground.agarwalamit.utils.LoadMyScenarios;
 
 public class MunichSpatialPlots {
 
-	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run0_muc_bc/";
-	private final double countScaleFactor = 1;
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run0_muc_bc";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run0b_muc_bc";
+	
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run3_muc_c_DecongestionPID";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run3b_muc_c_DecongestionPID";
+//	
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4_muc_cne_DecongestionPID";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4b_muc_cne_DecongestionPID";
+//
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run7_muc_n";
+	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run7b_muc_n";
+
+	private final double countScaleFactor = 100;
 	private static double gridSize ;
 	private static double smoothingRadius ;
 	private final int noOfBins = 1;
@@ -57,11 +68,18 @@ public class MunichSpatialPlots {
 	private static final double yMin = 5324955.;
 	private static final double yMax = 5345755.;
 	
+//	private static double xMin=4452550.25;
+//	private static double xMax=4479483.33;
+//	private static double yMin=5324955.00;
+//	private static double yMax=5345696.81;
+	
 	private final CoordinateReferenceSystem targetCRS = MGC.getCRS("EPSG:31468");
+//	private final CoordinateReferenceSystem targetCRS = MGC.getCRS("EPSG:20004");
 
 	public static void main(String[] args) {
 		
-		gridSize = 250;
+		gridSize = 100;
+//		gridSize = 500;
 		smoothingRadius = 500;
 		
 		MunichSpatialPlots plots = new MunichSpatialPlots();
@@ -73,15 +91,15 @@ public class MunichSpatialPlots {
 		Map<Double,Map<Id<Link>,SortedMap<String,Double>>> linkEmissionsPolicy = new HashMap<>();
 
 		// setting of input data
-		SpatialDataInputs inputs = new SpatialDataInputs(LinkWeightMethod.line,runDir);
+		SpatialDataInputs inputs = new SpatialDataInputs(LinkWeightMethod.line, runDir);
 		inputs.setBoundingBox(xMin, xMax, yMin, yMax);
 		inputs.setTargetCRS(targetCRS);
 		inputs.setGridInfo(GridType.SQUARE, gridSize);
 		inputs.setSmoothingRadius(smoothingRadius);
 
-		SpatialInterpolation plot = new SpatialInterpolation(inputs,runDir+"/analysis/spatialPlots/"+noOfBins+"timeBins/");
+		SpatialInterpolation plot = new SpatialInterpolation(inputs, runDir+"/analysis/spatialPlots/"+noOfBins+"timeBins/");
 
-		EmissionLinkAnalyzer emsLnkAna = new EmissionLinkAnalyzer(LoadMyScenarios.getSimulationEndTime(inputs.initialCaseConfig), inputs.initialCaseEmissionEventsFile, noOfBins);
+		EmissionLinkAnalyzer emsLnkAna = new EmissionLinkAnalyzer(LoadMyScenarios.getSimulationEndTime(inputs.initialCaseConfig), inputs.initialCaseEventsFile, noOfBins);
 		emsLnkAna.preProcessData();
 		emsLnkAna.postProcessData();
 		linkEmissionsBau = emsLnkAna.getLink2TotalEmissions();
