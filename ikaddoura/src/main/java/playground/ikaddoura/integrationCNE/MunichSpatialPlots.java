@@ -60,6 +60,7 @@ public class MunichSpatialPlots {
 
 	private final double countScaleFactor = 100;
 	private static double gridSize ;
+	private static GridType gridType;
 	private static double smoothingRadius ;
 	private final int noOfBins = 1;
 	
@@ -80,6 +81,8 @@ public class MunichSpatialPlots {
 		
 		gridSize = 100;
 //		gridSize = 500;
+		gridType = GridType.SQUARE;
+//		gridType = GridType.HEX;
 		smoothingRadius = 500;
 		
 		MunichSpatialPlots plots = new MunichSpatialPlots();
@@ -94,7 +97,7 @@ public class MunichSpatialPlots {
 		SpatialDataInputs inputs = new SpatialDataInputs(LinkWeightMethod.line, runDir);
 		inputs.setBoundingBox(xMin, xMax, yMin, yMax);
 		inputs.setTargetCRS(targetCRS);
-		inputs.setGridInfo(GridType.SQUARE, gridSize);
+		inputs.setGridInfo(gridType, gridSize);
 		inputs.setSmoothingRadius(smoothingRadius);
 
 		SpatialInterpolation plot = new SpatialInterpolation(inputs, runDir+"/analysis/spatialPlots/"+noOfBins+"timeBins/");
@@ -107,7 +110,7 @@ public class MunichSpatialPlots {
 		Scenario sc = LoadMyScenarios.loadScenarioFromNetwork(inputs.initialCaseNetworkFile);
 
 		EmissionTimebinDataWriter writer = new EmissionTimebinDataWriter();
-		writer.openWriter(runDir+"/analysis/spatialPlots/"+noOfBins+"timeBins/"+"viaData_NOX_"+GridType.SQUARE+"_"+gridSize+"_"+smoothingRadius+"_line.txt");
+		writer.openWriter(runDir+"/analysis/spatialPlots/"+noOfBins+"timeBins/"+"viaData_NOX_"+gridType+"_"+gridSize+"_"+smoothingRadius+"_line.txt");
 
 		for(double time :linkEmissionsBau.keySet()){
 			for(Link l : sc.getNetwork().getLinks().values()){
