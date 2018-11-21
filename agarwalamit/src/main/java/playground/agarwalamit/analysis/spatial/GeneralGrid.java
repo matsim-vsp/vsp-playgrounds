@@ -201,8 +201,16 @@ public class GeneralGrid{
 	 * 		  on the coordinate points of the centroids.  
 	 */
 	public void writeGrid(final String folder, final String originalCRS){
-		String filename = String.format("%s%s%s%s_%.0f.csv",
-				new Object[]{folder, (folder.endsWith("/") ? "" : "/"), this.type, this.width, ".csv"});
+		
+		String folderNew = folder.endsWith("/") ? "" : "/";
+			
+		String filename = folderNew + this.type + String.valueOf(this.width) + ".csv";
+
+		// I was getting a weird runtime exception with the following lines. ihab nov'18
+		
+//		String filename = String.format("%s%s%s%s_%.0f.csv",
+//				new Object[]{folder, (folder.endsWith("/") ? "" : "/"), this.type, String.valueOf(this.width), ".csv"});
+
 		LOG.info("Writing grid to file: " + filename);
 
 		CoordinateTransformation ct = null;
