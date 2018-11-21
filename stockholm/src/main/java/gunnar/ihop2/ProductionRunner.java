@@ -68,8 +68,8 @@ public class ProductionRunner {
 		final String buildingShapeFileName = path + "demand-input/by_full_EPSG3857_2.shp";
 		final String populationFileName = path + "demand-input/trips.xml";
 
-		final double populationSample = 0.20;
-		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/20PctAllModes.xml";
+		final double populationSample = 0.05;
+		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/5PctAllModes.xml";
 
 		final String configFileName = path + "matsim-input/matsim-config.xml";
 		final double networkUpscaleFactor = 2;

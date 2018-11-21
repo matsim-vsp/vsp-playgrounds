@@ -77,16 +77,16 @@ public class IHOP4ProductionRunner {
 		}
 		log.info("after strict-car filter: " + scenario.getPopulation().getPersons().size());
 	}
-	
+
 	static void simulate(final Config config) {
 
 		// Greedo.
-		
+
 		final Greedo greedo;
 		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
 			greedo = new Greedo();
 			greedo.setAdjustStrategyWeights(true);
-			greedo.meet(config);			
+			greedo.meet(config);
 		} else {
 			greedo = null;
 		}
@@ -110,21 +110,20 @@ public class IHOP4ProductionRunner {
 
 		controler.run();
 
-		
 	}
-	
+
 	static void calibrate(final Config config) {
 
 		final OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
 
 		// Greedo
-		
+
 		final Greedo greedo;
 		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
 			greedo = new Greedo();
 			greedo.setAdjustStrategyWeights(true);
 			greedo.setGreedoProgressListener(progressListener);
-			greedo.meet(config);			
+			greedo.meet(config);
 		} else {
 			greedo = null;
 		}
@@ -173,6 +172,11 @@ public class IHOP4ProductionRunner {
 			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
 		}
 
+		for (MATSimObjectiveFunction<MATSimState> objectiveFunctionComponent : measReader.getOnlyTollTimeMeasurements()
+				.getObjectiveFunctions()) {
+			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
+		}
+
 		// Opdyts runner.
 
 		final MATSimOpdytsRunner<CompositeDecisionVariable, MATSimState> runner = new MATSimOpdytsRunner<>(scenario,
@@ -200,20 +204,15 @@ public class IHOP4ProductionRunner {
 
 	public static void main(String[] args) {
 
-		final Config config = ConfigUtils
-				.loadConfig(args[0]);
+		final Config config = ConfigUtils.loadConfig(args[0]);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		if (config.getModules().containsKey(OpdytsConfigGroup.GROUP_NAME)) {
 			calibrate(config);
 		} else {
-			simulate(config);			
+			simulate(config);
 		}
-		
-		
-		
-		
-		
+
 		// calibrate(useGreedo);
 	}
 }
