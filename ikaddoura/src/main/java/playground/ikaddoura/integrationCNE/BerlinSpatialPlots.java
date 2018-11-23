@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.emissions.types.ColdPollutant;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -48,12 +48,12 @@ import playground.agarwalamit.analysis.spatial.SpatialInterpolation;
  */
 
 public class BerlinSpatialPlots {
+	private static final Logger log = Logger.getLogger(BerlinSpatialPlots.class);	
 
-	private final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
-	private final String emissionEventsFile = "berlin-v5.2-1pct.500.emission.events.offline.xml.gz";
-	private final String configFile = "berlin-v5.2-1pct.output_config.xml";
+	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
+	private final String runId = "bc-0c";
 	
-	private final double countScaleFactor = 1;
+	private final double countScaleFactor = 10;
 	private static double gridSize ;
 	private static double smoothingRadius ;
 	private final int noOfBins = 1;
@@ -67,7 +67,7 @@ public class BerlinSpatialPlots {
 
 	public static void main(String[] args) {
 		
-		gridSize = 500;
+		gridSize = 250;
 		smoothingRadius = 500;
 		
 		BerlinSpatialPlots plots = new BerlinSpatialPlots();
@@ -86,8 +86,10 @@ public class BerlinSpatialPlots {
 
 		SpatialInterpolation plot = new SpatialInterpolation(inputs, runDir + "/analysis/spatialPlots/"+noOfBins+"timeBins/");
 		
-		Config config = ConfigUtils.loadConfig(runDir + configFile);
+		Config config = ConfigUtils.loadConfig(runDir + runId + ".output_config.xml");
 		config.plans().setInputFile(null);
+		
+		final String emissionEventsFile = runId + "." + config.controler().getLastIteration() + ".emission.events.offline.xml.gz";
 
 		EmissionLinkAnalyzer emsLnkAna = new EmissionLinkAnalyzer(config.qsim().getEndTime(), runDir + emissionEventsFile, noOfBins);
 		emsLnkAna.preProcessData();
@@ -100,9 +102,11 @@ public class BerlinSpatialPlots {
 		writer.openWriter(runDir+"/analysis/spatialPlots/"+noOfBins+"timeBins/"+"viaData_NOX_"+GridType.SQUARE+"_"+gridSize+"_"+smoothingRadius+"_line.txt");
 
 		for (double time :linkEmissions.keySet()){
+			int counter = 0;
+			
 			for (Link l : sc.getNetwork().getLinks().values()){
 				Id<Link> id = l.getId();
-
+				if (counter % 1000 == 0.) log.info("link #" + counter);
 				if(plot.isInResearchArea(l)){
 					double emiss = 0;
 					if (linkEmissions.get(time).containsKey(id)) {
@@ -111,6 +115,7 @@ public class BerlinSpatialPlots {
 					plot.processLink(l,  emiss);
 					
 				}
+				counter++;
 			}
 			writer.writeData(time, plot.getCellWeights());
 			plot.reset();
