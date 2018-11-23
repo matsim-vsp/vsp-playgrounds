@@ -109,7 +109,7 @@ public class BerlinSpatialPlots {
 			
 			for (Link l : sc.getNetwork().getLinks().values()){
 				Id<Link> id = l.getId();
-				if (counter % 1000 == 0.) log.info("link #" + counter);
+				if (counter % 1000 == 0.) log.info("link #" + counter + " // " + (int) (100 * (counter / (double) sc.getNetwork().getLinks().size())) + "%" );
 				if(plot.isInResearchArea(l)){
 					double emiss = 0;
 					if (linkEmissions.get(time).containsKey(id)) {
