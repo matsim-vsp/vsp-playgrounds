@@ -67,7 +67,7 @@ public class BerlinSpatialPlots {
 
 	public static void main(String[] args) {
 		
-		gridSize = 250;
+		gridSize = 500;
 		smoothingRadius = 500;
 		
 		BerlinSpatialPlots plots = new BerlinSpatialPlots();
