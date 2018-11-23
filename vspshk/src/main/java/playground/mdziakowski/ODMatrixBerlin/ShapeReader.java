@@ -30,7 +30,7 @@ public class ShapeReader {
 	public static void main(String[] args) throws IOException {
 
 		String shapeFile = "D:\\Arbeit\\Berlin\\Weitere Aufgaben\\Bezirke shp\\dhdn gk4\\Bezirke_GK4.shp";
-		String outFile = "D:/Arbeit/Berlin/MatrixTest.csv";
+		String outFile = "D:/Arbeit/Berlin/TripListe.csv";
 		String plans1pct = "D:/Arbeit/Berlin/git/scenarios/berlin-v5.2-1pct/output-berlin-v5.2-1pct_2018-09-04/berlin-v5.2-1pct.output_plans.xml.gz";
 		
 		Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
@@ -99,6 +99,9 @@ public class ShapeReader {
 						}
 
 						if (anfang && ende) {
+							if (mode == null) {
+								mode = "walk";
+							}
 //							System.out.println(person.getId() + ";" + startdistrict + ";" + enddistrict + ";" + mode
 //									+ ";" + act.getType() + ";" + clockTime + ";" + movingclockTime + ";" + travelTime);
 							writer.write(person.getId() + ";" + startdistrict + ";" + enddistrict + ";" + mode + ";"

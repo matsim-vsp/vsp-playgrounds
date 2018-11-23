@@ -3,11 +3,11 @@ package playground.mdziakowski.ODMatrixBerlin;
 public class District {
 	
 	private String name;
-	private int id;
+	private int id = nextId++;
+	private static int nextId = 0;
 	
-	public District(String name, int id) {
+	public District(String name) {
 		this.name = name;
-		this.id = id;
 	}
 
 	public String getName() {
