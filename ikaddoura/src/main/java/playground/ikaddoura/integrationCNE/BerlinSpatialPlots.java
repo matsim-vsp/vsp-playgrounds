@@ -50,8 +50,11 @@ import playground.agarwalamit.analysis.spatial.SpatialInterpolation;
 public class BerlinSpatialPlots {
 	private static final Logger log = Logger.getLogger(BerlinSpatialPlots.class);	
 
-	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
-	private final String runId = "bc-0c";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
+//	private final String runId = "bc-0c";
+	
+	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0/";
+	private final String runId = "savA-0";
 	
 	private final double countScaleFactor = 10;
 	private static double gridSize ;
