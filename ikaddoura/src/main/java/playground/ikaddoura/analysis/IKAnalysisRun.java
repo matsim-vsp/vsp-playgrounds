@@ -213,7 +213,7 @@ public class IKAnalysisRun {
 			homeActivityPrefix = "home";
 			scalingFactor = 10;
 			
-			modesString = TransportMode.car;
+			modesString = TransportMode.car + "," + TransportMode.pt;
 			
 			taxiMode = TransportMode.taxi;
 			carMode = "car";

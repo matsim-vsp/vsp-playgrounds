@@ -94,8 +94,16 @@ public class VisualizationScriptAdjustment {
 			e1.printStackTrace();
 		}
 		// template adjustments
-		content = content.replaceAll(rundIdToCompareWithMarker, this.runIdToCompareWith);
-		content = content.replaceAll(runIdMarker, this.runId);
+		if (this.runIdToCompareWith != "" && this.runIdToCompareWith != null) {
+			content = content.replaceAll(rundIdToCompareWithMarker, this.runIdToCompareWith);
+		} else {
+			content = content.replaceAll(rundIdToCompareWithMarker + ".", "");
+		}
+		if (this.runId != "" && this.runId != null) {
+			content = content.replaceAll(runIdMarker, this.runId);
+		} else {
+			content = content.replaceAll(runIdMarker + ".", "");
+		}
 		content = content.replaceAll(scaleFactorMarker, this.scalingFactor);
 		
 		if (this.scenarioCRS != null) {
