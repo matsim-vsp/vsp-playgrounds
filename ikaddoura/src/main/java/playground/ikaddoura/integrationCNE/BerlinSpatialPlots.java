@@ -107,7 +107,6 @@ public class BerlinSpatialPlots {
 					double emiss = 0;
 					if (linkEmissions.get(time).containsKey(id)) {
 						emiss = countScaleFactor * linkEmissions.get(time).get(id).get(WarmPollutant.NOX.toString());
-//						emiss = countScaleFactor * linkEmissions.get(time).get(id).get(WarmPollutant.NOX.toString() + countScaleFactor * linkEmissions.get(time).get(id).get(ColdPollutant.NOX.toString()));
 					}
 					plot.processLink(l,  emiss);
 					
