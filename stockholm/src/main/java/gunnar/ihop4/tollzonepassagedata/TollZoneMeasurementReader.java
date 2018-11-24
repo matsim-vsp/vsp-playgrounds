@@ -60,6 +60,8 @@ public class TollZoneMeasurementReader {
 
 	private final List<String> days;
 
+	private final double simulatedPopulationShare;
+
 	// -------------------- MEMBERS --------------------
 
 	private CountMeasurements allDayMeasurements = null;
@@ -70,20 +72,22 @@ public class TollZoneMeasurementReader {
 
 	public TollZoneMeasurementReader(final String path, final Config config, final int maxVehicleLength_m,
 			final TimeDiscretization allDayTimeDiscr, final TimeDiscretization tollTimeOnlyTimeDiscr,
-			final List<String> days) {
+			final List<String> days, final double simulatedPopulationShare) {
 		this.pathStr = path;
 		this.config = config;
 		this.maxVehicleLength_m = maxVehicleLength_m;
 		this.allDayTimeDiscr = allDayTimeDiscr;
 		this.tollTimeOnlyTimeDiscr = tollTimeOnlyTimeDiscr;
 		this.days = days;
+		this.simulatedPopulationShare = simulatedPopulationShare;
 	}
 
-	public TollZoneMeasurementReader(final Config config) {
+	public TollZoneMeasurementReader(final Config config, final double simulatedPopulationShare) {
 		this("/Users/GunnarF/NoBackup/data-workspace/ihop4/2016-10-xx_passagedata", config, 20,
 				new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24),
 				Arrays.asList("2016-10-11", "2016-10-12", "2016-10-13", "2016-10-18", "2016-10-19", "2016-10-20",
-						"2016-10-25", "2016-10-26", "2016-10-27"));
+						"2016-10-25", "2016-10-26", "2016-10-27"),
+				simulatedPopulationShare);
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -148,8 +152,8 @@ public class TollZoneMeasurementReader {
 
 		// CREATION OF ACTUAL SENSOR DATA
 
-		this.allDayMeasurements = new CountMeasurements(this.config);
-		this.onlyTollTimeMeasurements = new CountMeasurements(this.config);
+		this.allDayMeasurements = new CountMeasurements(this.simulatedPopulationShare);
+		this.onlyTollTimeMeasurements = new CountMeasurements(this.simulatedPopulationShare);
 
 		final DynamicData<String> allData = dataAnalyzer.getData();
 		final Set<String> linksWithDataOutsideOfTollTime = keysWithDataOutsideOfTollTime(allData, 6 * 3600, 19 * 3600);
@@ -185,9 +189,31 @@ public class TollZoneMeasurementReader {
 				this.onlyTollTimeMeasurements.addMeasurement(spec, singleSensorData);
 			}
 		}
-		
+
 		this.allDayMeasurements.build();
-		this.onlyTollTimeMeasurements.build();		
+		this.onlyTollTimeMeasurements.build();
+
+		System.out.println("\nALL-DAY SENSORS");
+		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : this.allDayMeasurements
+				.getObjectiveFunctions()) {
+			System.out.print(objFct.getSpecification().getLinks() + ": "
+					+ objFct.getSpecification().getTimeDiscretization() + ": ");
+			for (double val : objFct.getRealData()) {
+				System.out.print(val + " ");
+			}
+			System.out.println();
+		}
+
+		System.out.println("\nONLY-TOLL SENSORS");
+		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : this.onlyTollTimeMeasurements
+				.getObjectiveFunctions()) {
+			System.out.print(objFct.getSpecification().getLinks() + ": "
+					+ objFct.getSpecification().getTimeDiscretization() + ": ");
+			for (double val : objFct.getRealData()) {
+				System.out.print(val + " ");
+			}
+			System.out.println();
+		}
 	}
 
 	public CountMeasurements getAllDayMeasurements() {
@@ -197,25 +223,11 @@ public class TollZoneMeasurementReader {
 	public CountMeasurements getOnlyTollTimeMeasurements() {
 		return this.onlyTollTimeMeasurements;
 	}
-	
-
 
 	public static void main(String[] args) {
 
-		TollZoneMeasurementReader reader = new TollZoneMeasurementReader(null);
+		TollZoneMeasurementReader reader = new TollZoneMeasurementReader(null, 1.0);
 		reader.run();
-
-		System.out.println("\nALL-DAY SENSORS");
-		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : reader.getAllDayMeasurements()
-				.getObjectiveFunctions()) {
-			System.out.println(objFct.getSpecification().getLinks() + ": " + objFct.getSpecification().getTimeDiscretization());
-		}
-
-		System.out.println("\nONLY-TOLL SENSORS");
-		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : reader.getOnlyTollTimeMeasurements()
-				.getObjectiveFunctions()) {
-			System.out.println(objFct.getSpecification().getLinks() + ": " + objFct.getSpecification().getTimeDiscretization());
-		}
 
 		System.out.println("DONE");
 
