@@ -19,13 +19,14 @@
  */ 
 package saleem.ptoptimisation.optimisationintegration;
 
-import floetteroed.opdyts.SimulatorState;
-import floetteroed.utilities.math.Vector;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.opdyts.MATSimState;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.vehicles.Vehicles;
+
+import floetteroed.opdyts.SimulatorState;
+import floetteroed.utilities.math.Vector;
 import saleem.ptoptimisation.utils.ScenarioHelper;
 
 /**

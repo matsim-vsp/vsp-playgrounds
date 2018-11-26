@@ -125,7 +125,7 @@ public class SantiagoAVScenarioRunnerWithDrt {
 
 		Controler controler = new Controler(scenario);
 
-		DrtControlerCreator.addDrtToControler(controler);
+		DrtControlerCreator.addDrtAsSingleDvrpModeToControler(controler);
 
 		// adding other network modes than car requires some router; here, the same values as for car are used
 		setNetworkModeRouting(controler);

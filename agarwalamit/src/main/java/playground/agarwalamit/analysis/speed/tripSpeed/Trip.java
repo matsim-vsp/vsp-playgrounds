@@ -30,7 +30,7 @@ import org.matsim.vehicles.Vehicle;
  * Created by amit on 20.04.18.
  */
 
-public class Trip {
+ class Trip {
 
     private final Id<Person> personId;
     private final String mode;
@@ -41,8 +41,6 @@ public class Trip {
     private Id<Vehicle> vehicleId;
     private double tripEndTime = 0.;
     private double distance = 0; //m
-    private double travelTime = 0.; // sec
-    private double speed = 0.; //m_per_s
     private Id<Link> arrivalLink ;
 
     //links for network modes only

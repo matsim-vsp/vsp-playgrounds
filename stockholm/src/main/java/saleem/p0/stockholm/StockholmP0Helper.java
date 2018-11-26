@@ -36,8 +36,8 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 
-import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 import au.com.bytecode.opencsv.CSVReader;
+import saleem.stockholmmodel.utils.StockholmTransformationFactory;
 /**
  * A helper class to set up P0 by finding relevant signalised junctions in network,
  * inlinks of junctions, outlinks of junctions etc.

@@ -85,7 +85,6 @@ public class TollAnalyzer extends AbstractAnalysisModule {
 	}
 
 	public static void main(String[] args) {
-		MunichPersonFilter pf = new MunichPersonFilter();
 
 		String scenario = "ei";
 		String eventsFile = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/hEART/output/"+scenario+"/ITERS/it.1500/1500.events.xml.gz";

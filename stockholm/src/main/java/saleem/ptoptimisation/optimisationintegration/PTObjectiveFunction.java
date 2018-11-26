@@ -19,13 +19,14 @@
  */ 
 package saleem.ptoptimisation.optimisationintegration;
 
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.SimulatorState;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.contrib.opdyts.MATSimState;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
+
+import floetteroed.opdyts.ObjectiveFunction;
+import floetteroed.opdyts.SimulatorState;
 import saleem.ptoptimisation.utils.ScenarioHelper;
 
 /**

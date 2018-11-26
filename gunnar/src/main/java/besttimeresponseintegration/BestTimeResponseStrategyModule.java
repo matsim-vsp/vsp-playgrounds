@@ -20,8 +20,6 @@
 package besttimeresponseintegration;
 
 import java.util.Map;
-import besttimeresponse.TimeAllocator;
-import floetteroed.utilities.TimeDiscretization;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.matsim.api.core.v01.Scenario;
@@ -34,6 +32,9 @@ import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.facilities.Facility;
+
+import besttimeresponse.TimeAllocator;
+import floetteroed.utilities.TimeDiscretization;
 
 /**
  * 

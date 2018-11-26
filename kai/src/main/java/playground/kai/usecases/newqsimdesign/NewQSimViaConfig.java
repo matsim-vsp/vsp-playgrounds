@@ -28,10 +28,10 @@ class NewQSimViaConfig {
 		config.controler().setLastIteration( 1 );
 		
 		final QSimComponentsConfigGroup componentsConfig = ConfigUtils.addOrGetModule( config, QSimComponentsConfigGroup.class );;
-		final List<String> sources = componentsConfig.getActiveAgentSources();;
+		final List<String> sources = componentsConfig.getActiveComponents();
 		final String MY_AGENT_SOURCE = "MyAgentSource";
 		sources.add( MY_AGENT_SOURCE ) ;
-		componentsConfig.setActiveAgentSources( sources );
+		componentsConfig.setActiveComponents( sources );
 		
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
@@ -47,7 +47,7 @@ class NewQSimViaConfig {
 						builder.addQSimModule( new AbstractQSimModule() {
 							@Override
 							protected void configureQSim() {
-								this.bindAgentSource(  MY_AGENT_SOURCE ).to( MyAgentSource.class ) ;
+								this.addNamedComponent( MyAgentSource.class, MY_AGENT_SOURCE ) ;
 							}
 						} ) ;
 						return builder.build( scenario, events ) ;

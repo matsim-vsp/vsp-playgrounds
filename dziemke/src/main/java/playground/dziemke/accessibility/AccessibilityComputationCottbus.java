@@ -45,7 +45,7 @@ public class AccessibilityComputationCottbus {
 	public static final Logger LOG = Logger.getLogger(AccessibilityComputationCottbus.class);
 	
 	public static void main(String[] args) {
-		Double cellSize = 2000.;
+		int tileSize_m = 2000;
 		boolean push2Geoserver = false;
 		boolean createQGisOutput = true;
 		
@@ -64,13 +64,13 @@ public class AccessibilityComputationCottbus {
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.controler().setOutputDirectory(accessibilityOutputDirectory);
 		config.controler().setLastIteration(0);
-		config.controler().setRunId("de_cottbus_" + cellSize.toString().split("\\.")[0]);
+		config.controler().setRunId("de_cottbus_" + tileSize_m);
 		
 //		config.transit().setTransitScheduleFile(runOutputFolder + "output_transitSchedule.xml.gz");
 //		config.transit().setVehiclesFile(runOutputFolder + "output_transitVehicles.xml.gz");
 		
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
-		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setTileSize_m(tileSize_m);
 		acg.setEnvelope(envelope);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.walk, true);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, true);
@@ -106,7 +106,7 @@ public class AccessibilityComputationCottbus {
 			final Integer range = 9; // In the current implementation, this must always be 9
 			final Double lowerBound = 0.; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
 			final Double upperBound = 3.5;
-			final int populationThreshold = (int) (50 / (1000/cellSize * 1000/cellSize));
+			final int populationThreshold = (int) (50 / (1000/tileSize_m * 1000/tileSize_m));
 
 			String osName = System.getProperty("os.name");
 			String workingDirectory = config.controler().getOutputDirectory();
@@ -114,7 +114,7 @@ public class AccessibilityComputationCottbus {
 				String actSpecificWorkingDirectory = workingDirectory + actType + "/";
 				for (Modes4Accessibility mode : acg.getIsComputingMode()) {
 					VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode.toString(), envelope, workingDirectory,
-							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, cellSize.intValue(), populationThreshold);
+							scenarioCRS, includeDensityLayer, lowerBound, upperBound, range, tileSize_m, populationThreshold);
 					VisualizationUtils.createSnapshot(actSpecificWorkingDirectory, mode.toString(), osName);
 				}
 			}

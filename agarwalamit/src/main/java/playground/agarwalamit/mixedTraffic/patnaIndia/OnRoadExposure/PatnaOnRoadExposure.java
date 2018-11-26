@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -46,6 +46,9 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
+
+import com.vividsolutions.jts.geom.Geometry;
+
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.agarwalamit.emissions.onRoadExposure.OnRoadExposureTable.OnRoadTripExposureInfo;
@@ -55,7 +58,7 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.MapUtils;
-import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
+import playground.vsp.airPollution.CombinedEmissionEventsReader;
 
 /**
  * Created by amit on 17.11.17.
@@ -168,7 +171,7 @@ private static final String data_dates [] = {"_22Nov2017"};
         OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, network);
         eventsManager.addHandler(onRoadExposureHandler);
 
-        CombinedMatsimEventsReader eventsReader = new CombinedMatsimEventsReader(eventsManager);
+        CombinedEmissionEventsReader eventsReader = new CombinedEmissionEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
 
         TreeSet<String> pollutants = new TreeSet<>();

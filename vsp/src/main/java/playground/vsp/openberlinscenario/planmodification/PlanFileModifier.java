@@ -31,8 +31,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
-import org.matsim.core.config.Config;
+
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.population.io.PopulationReader;
@@ -40,9 +39,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.IdentityTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-
-import com.vividsolutions.jts.geom.Envelope;
-
 
 /**
  * @author dziemke
@@ -227,8 +223,12 @@ public class PlanFileModifier {
 		Id<Person> id = person.getId();
 		Person person2 = population.getFactory().createPerson(id);
 		
+		// Keeping the attributes of a person
+		for (String attributeKey : person.getAttributes().getAsMap().keySet()) {
+			person2.getAttributes().putAttribute(attributeKey, person.getAttributes().getAttribute(attributeKey));
+		}
+		
 		if (onlyTransferSelectedPlan) {
-
 			transformCoordinates(selectedPlan);
 			if (removeLinksAndRoutes) {
 				removeLinksAndRoutes(selectedPlan);
@@ -236,11 +236,9 @@ public class PlanFileModifier {
 			person2.addPlan(selectedPlan);
 			person2.setSelectedPlan(selectedPlan);
 			population.addPerson(person2);
-
 		} else {
 			for (int i=0; i < person.getPlans().size(); i++) {
 				boolean considerPlan = true;
-				
 				Plan plan = person.getPlans().get(i);
 				int numberOfPlanElements = plan.getPlanElements().size();
 
@@ -249,7 +247,6 @@ public class PlanFileModifier {
 						considerPlan = false;
 					}
 				}
-				
 				if (considerPlan) {
 					transformCoordinates(plan);
 					if (removeLinksAndRoutes) {
@@ -258,14 +255,7 @@ public class PlanFileModifier {
 					person2.addPlan(plan);
 				}
 			}
-
 			person2.setSelectedPlan(selectedPlan);
-
-			// Keeping the attributes of a person
-			for (String attributeKey : person.getAttributes().getAsMap().keySet()) {
-				person2.getAttributes().putAttribute(attributeKey, person.getAttributes().getAttribute(attributeKey));
-			}
-			
 			population.addPerson(person2);
 		}
 	}
@@ -277,6 +267,39 @@ public class PlanFileModifier {
 			}
 			if (pe instanceof Leg) {
 				((Leg) pe).setRoute(null); // Remove route
+			}
+		}
+	}
+
+	private static void removePtWalksAndInteractions(Plan plan) {
+		for(int i = 0; i < plan.getPlanElements().size(); i++) {
+			PlanElement pe = plan.getPlanElements().get(i);
+			if (pe instanceof Activity) {
+				if (((Activity) pe).getType().equals("pt interaction")) {
+					plan.getPlanElements().remove(pe);
+					i--;
+				}
+			}
+			if (pe instanceof Leg) {
+				if (((Leg) pe).getMode().equals(TransportMode.transit_walk) ||
+						((Leg) pe).getMode().equals(TransportMode.egress_walk) ||
+						((Leg) pe).getMode().equals(TransportMode.access_walk)) {
+					plan.getPlanElements().remove(pe);
+					i--;
+				}
+			}
+		}
+	}
+
+	private static void removeLegFollowingLegs(Plan plan) {
+		for(int i = 0; i < plan.getPlanElements().size(); i++) {
+			PlanElement pe = plan.getPlanElements().get(i);
+			if (pe instanceof Leg) {
+				PlanElement nextPe = plan.getPlanElements().get(i+1);
+				if (nextPe != null && nextPe instanceof Leg) {
+					plan.getPlanElements().remove(nextPe);
+					i--;
+				}
 			}
 		}
 	}

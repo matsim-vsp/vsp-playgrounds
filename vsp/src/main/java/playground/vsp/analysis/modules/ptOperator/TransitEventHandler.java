@@ -92,10 +92,10 @@ public class TransitEventHandler implements TransitDriverStartsEventHandler, Lin
 	public void handleEvent(LinkLeaveEvent event) {
 		Id personId = delegate.getDriverOfVehicle(event.getVehicleId());
 		if (this.ptDriverIdAnalyzer.isPtDriver(personId)){
-			System.out.println(network.toString()); 
 			try {
 				this.vehicleKm = this.vehicleKm + network.getLinks().get(event.getLinkId()).getLength() / 1000;
 			} catch (NullPointerException e) {
+				log.error("NullPointerException for agent " + personId.toString() + ", set vehicleKm = .0");
 				// TODO repair this!
 				this.vehicleKm = .0;
 				

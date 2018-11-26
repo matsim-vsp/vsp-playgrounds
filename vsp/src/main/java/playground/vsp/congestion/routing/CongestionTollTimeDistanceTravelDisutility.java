@@ -76,7 +76,7 @@ public class CongestionTollTimeDistanceTravelDisutility implements TravelDisutil
 
 	@Override
 	public double getLinkMinimumTravelDisutility(Link link) {
-		throw new UnsupportedOperationException();
+		return this.randomizedTimeDistanceTravelDisutility.getLinkMinimumTravelDisutility(link);
 	}
 
 	private double calculateExpectedTollDisutility(Id<Link> linkId, double time, Id<Person> personId) {

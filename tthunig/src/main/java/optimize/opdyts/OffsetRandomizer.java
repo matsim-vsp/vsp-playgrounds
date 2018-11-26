@@ -29,14 +29,13 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
-import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.utils.SignalUtils;
+import org.matsim.core.gbl.MatsimRandom;
 
 import floetteroed.opdyts.DecisionVariableRandomizer;
-import org.matsim.core.gbl.MatsimRandom;
 
 /**
  * Axially vary the offset decision variables.

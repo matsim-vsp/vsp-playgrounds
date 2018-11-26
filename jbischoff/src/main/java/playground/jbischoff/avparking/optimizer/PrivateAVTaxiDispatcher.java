@@ -37,6 +37,7 @@ import org.matsim.contrib.dvrp.schedule.Schedules;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.contrib.parking.parkingsearch.search.RandomParkingSearchLogic;
+import org.matsim.contrib.taxi.data.validator.TaxiRequestValidator;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
@@ -44,6 +45,7 @@ import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.contrib.taxi.schedule.TaxiTask.TaxiTaskType;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.contrib.util.distance.DistanceUtils;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
@@ -58,13 +60,14 @@ import playground.jbischoff.avparking.AvParkingContext;
 public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	public static PrivateAVTaxiDispatcher create(TaxiConfigGroup taxiCfg, Fleet fleet, Network network,
 			MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility, TaxiScheduler scheduler,
-			DefaultTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context) {
+			DefaultTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context,
+			TaxiRequestValidator requestValidator, EventsManager events) {
 		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
 		PrivateAVRequestInserter requestInserter = new PrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
 				parkingManger, router);
 		return new PrivateAVTaxiDispatcher(taxiCfg, fleet, network, timer, travelTime, scheduler, params, parkingManger,
-				context, router, requestInserter);
+				context, router, requestInserter, requestValidator, events);
 	}
 
 	public enum AVParkBehavior {
@@ -95,8 +98,8 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
 			TravelTime travelTime, TaxiScheduler scheduler, DefaultTaxiOptimizerParams params,
 			ParkingSearchManager parkingManger, AvParkingContext context, LeastCostPathCalculator router,
-			PrivateAVRequestInserter requestInserter) {
-		super(taxiCfg, fleet, scheduler, params, requestInserter);
+			PrivateAVRequestInserter requestInserter, TaxiRequestValidator requestValidator, EventsManager events) {
+		super(taxiCfg, fleet, scheduler, params, requestInserter, requestValidator, events);
 		this.fleet = fleet;
 		this.scheduler = scheduler;
 		this.network = network;

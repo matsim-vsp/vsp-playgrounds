@@ -19,12 +19,16 @@
 
 package playground.michalm.audiAV.flowPaper;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.taxi.schedule.reconstruct.ScheduleReconstructor;
-import org.matsim.contrib.taxi.util.stats.*;
+import org.matsim.contrib.taxi.util.stats.TaxiHistogramsWriter;
+import org.matsim.contrib.taxi.util.stats.TaxiStatsCalculator;
+import org.matsim.contrib.taxi.util.stats.TaxiStatsWriter;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 
@@ -44,14 +48,14 @@ public class RecalcStatsAudiAVFlowPaper {
 
 				service.execute(() -> {
 					Fleet fleet = ScheduleReconstructor.reconstructFromFile(network,
-							path + id + "/" + id + ".output_events.xml.gz");
+							path + id + "/" + id + ".output_events.xml.gz", TransportMode.taxi);
 
 					TaxiStatsCalculator calculator = new TaxiStatsCalculator(fleet.getVehicles().values());
 					String prefix = path + id + "/ITERS/it.50/" + id + ".50.";
 
 					new TaxiStatsWriter(calculator.getTaxiStats()).write(prefix + "hourly_stats_new_stats.txt");
-					new TaxiHistogramsWriter(calculator.getTaxiStats())
-							.write(prefix + "hourly_histograms_new_stats.txt");
+					new TaxiHistogramsWriter(calculator.getTaxiStats()).write(
+							prefix + "hourly_histograms_new_stats.txt");
 				});
 			}
 		}

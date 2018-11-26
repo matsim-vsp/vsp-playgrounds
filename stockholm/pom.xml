@@ -26,25 +26,55 @@
   
 	<dependencies>
   
+   <!-- 
+   <dependency>
+     <groupId>com.github.SchweizerischeBundesbahnen</groupId>
+     <artifactId>matsim-sbb-extensions</artifactId>
+     <version>0.10.1</version>
+ 	</dependency>
+ 	-->
+ 
+ 		<!-- 
+  		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>matsim-gtfs</artifactId>
+			<version>0.10.0</version>
+  		</dependency>
+  		 -->
+
+		<!--    		 
+		<dependency>
+  			<groupId>org.matsim.contrib</groupId>
+  			<artifactId>pseudosimulation</artifactId>
+  			<version>0.11.0-SNAPSHOT</version>
+  		</dependency>
+  		-->
+  
 	  	<dependency>
 			<groupId>com.github.gunnarfloetteroed</groupId>
     		<artifactId>java</artifactId>
     		<version>master-SNAPSHOT</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+			<artifactId>gunnar</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>		
+	 	
 	  	<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>cadytsIntegration</artifactId>
 			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
   	
+  		<!--  
 		<dependency>
-			<!--This is available via github. Amit Apr'18-->
-			<!--<groupId>org.matsim</groupId>-->
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
-			<version>-SNAPSHOT</version>
+			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
+		-->
 	
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>

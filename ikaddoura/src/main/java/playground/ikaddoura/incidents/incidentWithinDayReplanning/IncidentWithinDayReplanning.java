@@ -161,7 +161,7 @@ public class IncidentWithinDayReplanning {
 				
 		controler.run();		
 		
-		IKAnalysisRun analysis = new IKAnalysisRun(scenario, crs);
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario, crs, 100);
 		analysis.run();
 	}
 	

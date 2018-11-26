@@ -54,10 +54,10 @@ public class MergeCSVFiles {
 	
 	private static final Logger log = Logger.getLogger(MergeCSVFiles.class);
 	
-	private static final String directory = "/Users/ihab/Desktop/ils4a/kaddoura/cne_berlin10pct/output/";
-	private static final String fileName = "aggregated_info_car";
+	private static final String directory = "/Users/ihab/Desktop/ils4a/kaddoura/sav-pricing/";
+	private static final String fileName = "aggregated_info";
 	private static final String separator = ";";
-	private static final int finalIteration = 200;
+	private static final String[] skipDirectorySubStrings = {"ITERS", "bc", "comparison"};
 	
 	private static TreeMap<String, LinkedHashMap<String, String>> path2key2Value = new TreeMap<>();
 	
@@ -68,7 +68,7 @@ public class MergeCSVFiles {
 
 		for (File f : fileList) {
 			
-			if (!f.getName().startsWith("merged") && f.getName().endsWith(fileName + ".csv")) {
+			if (!f.getName().startsWith(".") && !f.getName().startsWith("merged") && f.getName().endsWith(fileName + ".csv")) {
 				
 				log.info("*** file: " + f.getPath());
 				
@@ -85,12 +85,12 @@ public class MergeCSVFiles {
 						String value = null;
 
 						for(int i = 0; i < columns.length; i++){
-							switch(i){
-							case 0: key = columns[i];
-							break;
-							case 1: value = columns[i];
-							break;
-							default: throw new RuntimeException("More than two columns. Aborting...");
+							switch(i) {
+								case 0: key = columns[i];
+								break;
+								case 1: value = columns[i];
+								break;
+								default: throw new RuntimeException("More than two columns. Aborting...");
 							}
 						}
 						
@@ -109,7 +109,7 @@ public class MergeCSVFiles {
 			
 		if (path2key2Value.size() > 0) {
 			
-			String outputFile = directory + "merged_it." + finalIteration + "_" + fileName + ".csv";
+			String outputFile = directory + "merged" + "_" + fileName + ".csv";
 
 			try ( BufferedWriter bw = IOUtils.getBufferedWriter(outputFile) ) {
 
@@ -123,9 +123,12 @@ public class MergeCSVFiles {
 				
 				for (String key : path2key2Value.firstEntry().getValue().keySet()) {
 
-					bw.write(key);					
-					for (String path : path2key2Value.keySet()) {						
-						bw.write(separator + path2key2Value.get(path).get(key));						
+					bw.write(key);
+					
+					for (String path : path2key2Value.keySet()) {	
+						String value = path2key2Value.get(path).get(key);
+						if (value == null) value = "";
+						bw.write(separator + value);						
 					}
 					bw.newLine();
 				}
@@ -150,14 +153,17 @@ public class MergeCSVFiles {
 		
 		if (files != null) {
 			for (File f : files) {
-				if (f.isDirectory()) {
-					if(f.getName().toString().startsWith("it")) {
-						if (f.getName().toString().equals("it." + finalIteration)) {
-							collectAllFilesInDirectory(f, fileList);
-						} else {
-							// skip other iterations
-							log.info("... skipping " + f.getName().toString());
+				if (f.isDirectory()) {	
+					
+					boolean skipDirectory = false;
+					for (String substring : skipDirectorySubStrings) {
+						if(f.getName().toString().contains(substring)) {
+							skipDirectory = true;
 						}
+					}
+					
+					if(skipDirectory) {
+						log.info("... skipping " + f.getName().toString());
 					} else {
 						collectAllFilesInDirectory(f, fileList);
 					}

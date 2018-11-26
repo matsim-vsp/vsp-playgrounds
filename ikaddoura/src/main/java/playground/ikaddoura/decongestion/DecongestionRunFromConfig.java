@@ -106,8 +106,6 @@ public class DecongestionRunFromConfig {
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists);
         controler.run();
 		
-		IKAnalysisRun analysis = new IKAnalysisRun(scenario, TransformationFactory.DHDN_GK4);
-		analysis.run();
 	}
 }
 

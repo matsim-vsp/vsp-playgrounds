@@ -44,6 +44,7 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.actDurations.ActDurationHandler;
+import playground.ikaddoura.analysis.carOwnerShip.SAVInsteadOfCarAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripAnalysis;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
@@ -58,6 +59,7 @@ import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
 import playground.ikaddoura.analysis.shapes.Network2Shape;
 import playground.ikaddoura.analysis.visualizationScripts.VisualizationScriptAdjustment;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
+import playground.ikaddoura.savPricing.SAVPassengerTrackerImpl;
 
 /**
  * 
@@ -112,10 +114,16 @@ public class IKAnalysisRun {
 	private final String runIdToCompareWith;
 	private final Scenario scenario0;
 	private final List<AgentAnalysisFilter> filters0;
+	
+	private final List<String> modes;
 
-	private final String outputDirectoryName = "analysis-ik-v1.2";
+	private String outputDirectoryName = "analysis-ik-v1.5";
 
 	private final String visualizationScriptInputDirectory;
+
+	private final String taxiMode;
+	private final String carMode;
+	private final double rewardSAVuserFormerCarUser;
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -129,6 +137,10 @@ public class IKAnalysisRun {
 		String zonesCRS = null;
 		String homeActivityPrefix = null;
 		int scalingFactor;
+		String modesString = null;
+		String taxiMode = "taxi";
+		String carMode = "car_bb";
+		double rewardSAVuserFormerCarUser = 5.3;
 		
 		if (args.length > 0) {
 			if (!args[0].equals("null")) runDirectory = args[0];
@@ -160,7 +172,19 @@ public class IKAnalysisRun {
 		
 			if (!args[9].equals("null")) visualizationScriptInputDirectory = args[9];
 			log.info("Visualization script input directory: " + visualizationScriptInputDirectory);
-
+			
+			if (!args[10].equals("null")) modesString = args[10];
+			log.info("modes: " + modesString);
+			
+			if (!args[10].equals("null")) taxiMode = args[11];
+			log.info("taxiMode: " + taxiMode);
+			
+			if (!args[10].equals("null")) carMode = args[12];
+			log.info("carMode: " + carMode);
+			
+			rewardSAVuserFormerCarUser = Double.valueOf(args[13]);
+			log.info("rewardSAVuserFormerCarUser: " + rewardSAVuserFormerCarUser);
+			
 		} else {
 			
 //			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_oAV_B1_1pct/";
@@ -187,7 +211,13 @@ public class IKAnalysisRun {
 //			zonesCRS = TransformationFactory.DHDN_SoldnerBerlin;
 			
 			homeActivityPrefix = "home";
-			scalingFactor = 10;			
+			scalingFactor = 10;
+			
+			modesString = TransportMode.car + "," + TransportMode.pt;
+			
+			taxiMode = TransportMode.taxi;
+			carMode = "car";
+			rewardSAVuserFormerCarUser = 5.3;
 		}
 		
 		Scenario scenario1 = loadScenario(runDirectory, runId, null);
@@ -214,6 +244,11 @@ public class IKAnalysisRun {
 		filter1.add(filter1c);
 		
 		List<AgentAnalysisFilter> filter0 = null;
+		
+		List<String> modes = new ArrayList<>();
+		for (String mode : modesString.split(",")) {
+			modes.add(mode);
+		}
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
@@ -225,21 +260,15 @@ public class IKAnalysisRun {
 				homeActivityPrefix,
 				scalingFactor,
 				filter1,
-				filter0);
+				filter0,
+				modes,
+				taxiMode,
+				carMode,
+				rewardSAVuserFormerCarUser);
 		analysis.run();
 	}
 	
-	@Deprecated
-	public IKAnalysisRun(Scenario scenario, String scenarioCRS) {
-		this(scenario, scenarioCRS, 1);
-	}
-	
-	@Deprecated
-	public IKAnalysisRun(Scenario scenario, String scenarioCRS, int scalingFactor) {
-		this(scenario, "./visualization-scripts/", scenarioCRS, scalingFactor);
-	}
-	
-	public IKAnalysisRun(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor) {
+	public IKAnalysisRun(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor, List<String> modes, String taxiMode, String carMode, double rewardSAVuserFormerCarUser) {
 		
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
@@ -263,20 +292,20 @@ public class IKAnalysisRun {
 		
 		this.filters0 = null;
 		this.filters1 = null;
-	}
-	
-	@Deprecated
-	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
-			String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
-			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
 		
-		this(scenario1, scenario0, "./visualization-scripts/", scenarioCRS, shapeFileZones, zonesCRS, homeActivityPrefix, scalingFactor, filters1, filters0);
+		this.modes = modes;
+		
+		this.taxiMode = taxiMode;
+		this.carMode = carMode;
+		this.rewardSAVuserFormerCarUser = rewardSAVuserFormerCarUser;
 	}
 	
 	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
 			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
-			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0) {
+			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes, String taxiMode, String carMode, double rewardSAVuserFormerCarUser) {
 
+		if (scenario0 != null) this.outputDirectoryName = this.outputDirectoryName + "-comparison";
+		
 		String runDirectory = scenario1.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
 
@@ -307,6 +336,44 @@ public class IKAnalysisRun {
 		
 		this.filters0 = filters0;
 		this.filters1 = filters1;
+		
+		this.modes = modes;
+		
+		this.taxiMode = taxiMode;
+		this.carMode = carMode;
+		this.rewardSAVuserFormerCarUser = rewardSAVuserFormerCarUser;
+	}
+
+	public IKAnalysisRun(Scenario scenario, String crs, int scaleFactor) {
+		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
+		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
+
+		this.scenario1 = scenario;
+		this.runDirectory = runDirectory;
+		this.runId = scenario.getConfig().controler().getRunId();
+		
+		// scenario 0 will not be analyzed
+		this.scenario0 = null;
+		this.runDirectoryToCompareWith = null;
+		this.runIdToCompareWith = null;
+		
+		this.visualizationScriptInputDirectory = null;
+		
+		this.scenarioCRS = crs;
+		this.shapeFileZones = null;
+		this.zonesCRS = null;
+		this.homeActivityPrefix = null;
+		this.scalingFactor = scaleFactor;
+		
+		this.filters0 = null;
+		this.filters1 = null;
+		
+		this.modes = new ArrayList<>();
+		modes.add(TransportMode.car);
+		
+		this.taxiMode = null;
+		this.carMode = TransportMode.car;
+		this.rewardSAVuserFormerCarUser = 0.;
 	}
 
 	public void run() {
@@ -338,6 +405,9 @@ public class IKAnalysisRun {
 		
 		BasicPersonTripAnalysisHandler basicHandler1 = null;
 		DelayAnalysis delayAnalysis1 = null;
+		SAVPassengerTrackerImpl savTrackingHandler1 = null;
+		SAVInsteadOfCarAnalysisHandler savFixCostAnalysis1 = null;
+
 		LinkDemandEventHandler trafficVolumeAnalysis1 = null;
 		DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis1 = null;
 		PersonMoneyLinkHandler personTripMoneyHandler1 = null;
@@ -351,6 +421,11 @@ public class IKAnalysisRun {
 
 			delayAnalysis1 = new DelayAnalysis();
 			delayAnalysis1.setScenario(scenario1);
+			
+			if (taxiMode != null) {
+				savTrackingHandler1 = new SAVPassengerTrackerImpl(taxiMode);
+				savFixCostAnalysis1 = new SAVInsteadOfCarAnalysisHandler(scenario1, savTrackingHandler1, rewardSAVuserFormerCarUser, carMode );
+			}
 			
 			trafficVolumeAnalysis1 = new LinkDemandEventHandler(scenario1.getNetwork());
 			dynamicTrafficVolumeAnalysis1 = new DynamicLinkDemandEventHandler(scenario1.getNetwork());
@@ -367,6 +442,8 @@ public class IKAnalysisRun {
 			events1 = EventsUtils.createEventsManager();
 			events1.addHandler(basicHandler1);
 			events1.addHandler(delayAnalysis1);
+			if (savTrackingHandler1 != null) events1.addHandler(savTrackingHandler1);
+			if (savFixCostAnalysis1 != null) events1.addHandler(savFixCostAnalysis1);
 			events1.addHandler(trafficVolumeAnalysis1);
 			events1.addHandler(dynamicTrafficVolumeAnalysis1);
 			events1.addHandler(personTripMoneyHandler1);
@@ -379,6 +456,8 @@ public class IKAnalysisRun {
 		
 		BasicPersonTripAnalysisHandler basicHandler0 = null;
 		DelayAnalysis delayAnalysis0 = null;
+		SAVPassengerTrackerImpl savTrackingHandler0 = null;
+		SAVInsteadOfCarAnalysisHandler savFixCostAnalysis0 = null;
 		LinkDemandEventHandler trafficVolumeAnalysis0 = null;
 		DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis0 = null;
 		PersonMoneyLinkHandler personTripMoneyHandler0 = null;
@@ -393,6 +472,11 @@ public class IKAnalysisRun {
 			delayAnalysis0 = new DelayAnalysis();
 			delayAnalysis0.setScenario(scenario0);
 			
+			if (taxiMode != null) {
+				savTrackingHandler0 = new SAVPassengerTrackerImpl(taxiMode);
+				savFixCostAnalysis0 = new SAVInsteadOfCarAnalysisHandler(scenario0, savTrackingHandler0, rewardSAVuserFormerCarUser, carMode);
+			}
+
 			trafficVolumeAnalysis0 = new LinkDemandEventHandler(scenario0.getNetwork());
 			dynamicTrafficVolumeAnalysis0 = new DynamicLinkDemandEventHandler(scenario0.getNetwork());
 			
@@ -408,6 +492,8 @@ public class IKAnalysisRun {
 			events0 = EventsUtils.createEventsManager();
 			events0.addHandler(basicHandler0);
 			events0.addHandler(delayAnalysis0);
+			if (savTrackingHandler0 != null) events0.addHandler(savTrackingHandler0);
+			if (savFixCostAnalysis0 != null) events0.addHandler(savFixCostAnalysis0);
 			events0.addHandler(trafficVolumeAnalysis0);
 			events0.addHandler(dynamicTrafficVolumeAnalysis0);
 			events0.addHandler(personTripMoneyHandler0);
@@ -473,13 +559,15 @@ public class IKAnalysisRun {
 				analysisOutputDirectory,
 				personId2userBenefit1, basicHandler1,
 				delayAnalysis1,
+				savFixCostAnalysis1,
 				personTripMoneyHandler1,
 				trafficVolumeAnalysis1,
 				dynamicTrafficVolumeAnalysis1,
 				personMoneyHandler1,
 				actHandler1,
 				modeAnalysisList1,
-				vttsHandler1);
+				vttsHandler1,
+				modes);
 		
 		log.info("Printing results...");
 		if (scenario0 != null) printResults(scenario0,
@@ -487,13 +575,15 @@ public class IKAnalysisRun {
 				personId2userBenefit0,
 				basicHandler0,
 				delayAnalysis0,
+				savFixCostAnalysis0,
 				personTripMoneyHandler0,
 				trafficVolumeAnalysis0,
 				dynamicTrafficVolumeAnalysis0,
 				personMoneyHandler0,
 				actHandler0,
 				modeAnalysisList0,
-				vttsHandler0);
+				vttsHandler0,
+				modes);
 
 		// #####################################
 		// Scenario comparison
@@ -506,7 +596,7 @@ public class IKAnalysisRun {
 			personTripScenarioComparisonOutputDirectory = analysisOutputDirectory + "scenario-comparison_" + runId + "-vs-" + runIdToCompareWith + "/";
 			createDirectory(personTripScenarioComparisonOutputDirectory);
 
-			PersonTripScenarioComparison scenarioComparison = new PersonTripScenarioComparison(this.homeActivityPrefix, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0);
+			PersonTripScenarioComparison scenarioComparison = new PersonTripScenarioComparison(this.homeActivityPrefix, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0, modes);
 			try {
 				scenarioComparison.analyzeByMode();
 				scenarioComparison.analyzeByScore(0.0);
@@ -608,13 +698,15 @@ public class IKAnalysisRun {
 			Map<Id<Person>, Double> personId2userBenefit,
 			BasicPersonTripAnalysisHandler basicHandler,
 			DelayAnalysis delayAnalysis,
+			SAVInsteadOfCarAnalysisHandler savFixCostAnalysis,
 			PersonMoneyLinkHandler personTripMoneyHandler,
 			LinkDemandEventHandler trafficVolumeAnalysis,
 			DynamicLinkDemandEventHandler dynamicTrafficVolumeAnalysis,
 			MoneyExtCostHandler personMoneyHandler,
 			ActDurationHandler actHandler,
 			List<ModeAnalysis> modeAnalysisList,
-			VTTSHandler vttsHandler) {
+			VTTSHandler vttsHandler,
+			List<String> modes) {
 		
 		// #####################################
 		// Print results: person / trip analysis
@@ -627,44 +719,51 @@ public class IKAnalysisRun {
 		PersonTripAnalysis analysis = new PersonTripAnalysis();
 
 		// trip-based analysis
-		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, basicHandler, null, null);
-		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, basicHandler, null, null);
 		analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, null, basicHandler, null, null);
+		for (String mode : modes) {
+			analysis.printTripInformation(personTripAnalysisOutputDirectoryWithPrefix, mode, basicHandler, null, null);
+		}
 
 		// person-based analysis
-		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);	
-		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, personId2userBenefit, basicHandler, null);	
+		analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, null, personId2userBenefit, basicHandler, null);
+		for (String mode : modes) {
+			analysis.printPersonInformation(personTripAnalysisOutputDirectoryWithPrefix, mode, personId2userBenefit, basicHandler, null);	
+		}
 
 		// aggregated analysis
-		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.car, personId2userBenefit, basicHandler, null);
-		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, TransportMode.taxi, personId2userBenefit, basicHandler, null);
 		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, null, personId2userBenefit, basicHandler, null);
-		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, personId2userBenefit, basicHandler, null, null, delayAnalysis, null);
+		for (String mode : modes) {
+			analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, mode, personId2userBenefit, basicHandler, null);
+		}
+		analysis.printAggregatedResults(personTripAnalysisOutputDirectoryWithPrefix, personId2userBenefit, basicHandler, null, personTripMoneyHandler, delayAnalysis, savFixCostAnalysis);
 		
 		// time-specific trip distance analysis
-		SortedMap<Double, List<Double>> departureTime2traveldistance = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2tripDistance(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "distancePerDepartureTime_car_3600.csv", departureTime2traveldistance);
-		
-		// time-specific trip travel time analysis
-		SortedMap<Double, List<Double>> departureTime2travelTime = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2travelTime(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "travelTimePerDepartureTime_car_3600.csv", departureTime2travelTime);
-	
-		// time-specific toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "tollsPerDepartureTime_car_3600.csv", departureTime2tolls);
+		for (String mode : modes) {
+			SortedMap<Double, List<Double>> departureTime2traveldistance = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2tripDistance(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "distancePerDepartureTime_" + mode + "_3600.csv", departureTime2traveldistance);
 			
-		// time-specific congestion toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2congestionTolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2congestionPayment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "congestionTollsPerDepartureTime_car_3600.csv", departureTime2congestionTolls);
+			// time-specific trip travel time analysis
+			SortedMap<Double, List<Double>> departureTime2travelTime = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2travelTime(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "travelTimePerDepartureTime_" + mode + "_3600.csv", departureTime2travelTime);
 		
-		// time-specific noise toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2noiseTolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2noisePayment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "noiseTollsPerDepartureTime_car_3600.csv", departureTime2noiseTolls);
-		
-		// time-specific air pollution toll payments analysis
-		SortedMap<Double, List<Double>> departureTime2airPollutionTolls = analysis.getParameter2Values(TransportMode.car, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2airPollutionPayment(), 3600., 30 * 3600.);
-		analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "airPollutionTollsPerDepartureTime_car_3600.csv", departureTime2airPollutionTolls);
-		
+			// time-specific toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2tolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), basicHandler.getPersonId2tripNumber2payment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "tollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2tolls);
+				
+			// time-specific congestion toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2congestionTolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2congestionPayment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "congestionTollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2congestionTolls);
+			
+			// time-specific noise toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2noiseTolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2noisePayment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "noiseTollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2noiseTolls);
+			
+			// time-specific air pollution toll payments analysis
+			SortedMap<Double, List<Double>> departureTime2airPollutionTolls = analysis.getParameter2Values(mode, basicHandler, basicHandler.getPersonId2tripNumber2departureTime(), personTripMoneyHandler.getPersonId2tripNumber2airPollutionPayment(), 3600., 30 * 3600.);
+			analysis.printAvgValuePerParameter(personTripAnalysisOutputDirectoryWithPrefix + "airPollutionTollsPerDepartureTime_"+ mode +"_3600.csv", departureTime2airPollutionTolls);
+			
+		}
+
 		// #####################################
 		// Print results: link traffic volumes
 		// #####################################
@@ -778,16 +877,17 @@ public class IKAnalysisRun {
 		}
 		log.info("Creating leg histogram video for all modes... Done.");
 
-		for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
-			try {
-				log.info("Creating leg histogram video for mode " + mode);
-				MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
-				log.info("Creating leg histogram video for mode " + mode + " Done.");
-			} catch (IOException e) {
-				e.printStackTrace();
+		if (scenario.getConfig().controler().getLastIteration() - scenario.getConfig().controler().getFirstIteration() > 0) {
+			for (String mode : scenario.getConfig().plansCalcRoute().getNetworkModes()) {
+				try {
+					log.info("Creating leg histogram video for mode " + mode);
+					MATSimVideoUtils.createVideo(scenario.getConfig().controler().getOutputDirectory(), scenario.getConfig().controler().getRunId(), legHistogramOutputDirectory, 1, "legHistogram_" + mode);
+					log.info("Creating leg histogram video for mode " + mode + " Done.");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
-
 	}
 	
 	private void createDirectory(String directory) {
@@ -820,15 +920,11 @@ public class IKAnalysisRun {
 		if (new File(runDirectory + runId + ".output_config.xml").exists()) {
 			
 			configFile = runDirectory + runId + ".output_config.xml";
-
-//			networkFile = runDirectory + runId + ".output_network.xml.gz";
-//			populationFile = runDirectory + runId + ".output_plans.xml.gz";
 			
 			networkFile = runId + ".output_network.xml.gz";
 			populationFile = runId + ".output_plans.xml.gz";
 			
 			if (personAttributesFileToReplaceOutputFile == null) {
-//				personAttributesFile = runDirectory + runId + ".output_personAttributes.xml.gz";
 				personAttributesFile = runId + ".output_personAttributes.xml.gz";
 			} else {
 				personAttributesFile = personAttributesFileToReplaceOutputFile;
@@ -837,15 +933,11 @@ public class IKAnalysisRun {
 		} else {
 			
 			configFile = runDirectory + "output_config.xml";
-
-//			networkFile = runDirectory + "output_network.xml.gz";
-//			populationFile = runDirectory + "output_plans.xml.gz";
 			
 			networkFile = "output_network.xml.gz";
 			populationFile = "output_plans.xml.gz";
 			
 			if (personAttributesFileToReplaceOutputFile == null) {
-//				personAttributesFile = runDirectory + "output_personAttributes.xml.gz";
 				personAttributesFile = "output_personAttributes.xml.gz";
 			} else {
 				personAttributesFile = personAttributesFileToReplaceOutputFile;

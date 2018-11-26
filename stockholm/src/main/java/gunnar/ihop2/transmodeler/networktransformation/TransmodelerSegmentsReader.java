@@ -67,12 +67,16 @@ class TransmodelerSegmentsReader extends AbstractTabularFileHandlerWithHeaderLin
 	final Map<String, TransmodelerLink> unidirSegmentId2link = new LinkedHashMap<>();
 
 	private int ignoredSegmentCnt;
+	
+	private SegmentAnalyzer segmentAnalyzer = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	TransmodelerSegmentsReader(final String segmentFileName,
-			final Map<String, TransmodelerLink> linkId2link) throws IOException {
+			final Map<String, TransmodelerLink> linkId2link,
+			final SegmentAnalyzer segmentAnalyzer) throws IOException {
 		this.linkId2link = linkId2link;
+		this.segmentAnalyzer = segmentAnalyzer;
 		this.ignoredSegmentCnt = 0;
 		final TabularFileParser parser = new TabularFileParser();
 		parser.setDelimiterTags(new String[] { "," });
@@ -106,6 +110,11 @@ class TransmodelerSegmentsReader extends AbstractTabularFileHandlerWithHeaderLin
 			this.unidirSegmentId2link.put(unidirectionalSegmentId, link);
 			link.segments.add(segment);
 			System.out.println("read segment: " + segment);
+			
+			if (this.segmentAnalyzer != null) {
+				this.segmentAnalyzer.add(bidirectionalSegmentId, 
+						unidirectionalSegmentId, link.getId());
+			}
 		}
 	}
 

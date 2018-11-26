@@ -21,9 +21,12 @@ package playground.ikaddoura.analysis.modeSwitchAnalysis;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -128,7 +131,10 @@ public class ModeSwitchAnalysisMain {
 			log.info("Loading scenario1 and reading events... Done.");
 		}
 		
-		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0);
+		List<String> modes = new ArrayList<>();
+		modes.add(TransportMode.car);
+		modes.add(TransportMode.taxi);
+		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes);
 		modeSwitchAnalysis.analyzeByMode();
     }
 }

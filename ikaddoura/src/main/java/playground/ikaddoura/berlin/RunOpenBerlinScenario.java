@@ -238,6 +238,9 @@ public class RunOpenBerlinScenario {
 		filter3.setPersonAttributeName("home-activity-zone");
 		filter3.preProcess(scenario);
 		filters.add(filter3);
+		
+		List<String> modes = new ArrayList<>();
+		modes.add(TransportMode.car);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario,
@@ -249,7 +252,11 @@ public class RunOpenBerlinScenario {
 				homeActivity,
 				scalingFactor,
 				filters,
-				null);
+				null,
+				modes,
+				null,
+				null,
+				0.);
 		analysis.run();
 	
 		log.info("Done.");

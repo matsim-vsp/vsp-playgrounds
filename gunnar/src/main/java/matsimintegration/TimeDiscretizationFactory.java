@@ -19,9 +19,10 @@
  */ 
 package matsimintegration;
 
+import org.matsim.core.config.Config;
+
 import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.Units;
-import org.matsim.core.config.Config;
 
 /**
  * 

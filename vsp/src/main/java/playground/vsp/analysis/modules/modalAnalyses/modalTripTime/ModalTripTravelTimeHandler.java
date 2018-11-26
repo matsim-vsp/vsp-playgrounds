@@ -154,23 +154,18 @@ TransitDriverStartsEventHandler, ActivityStartEventHandler, StageActivityTypes {
 
 	private String getMainMode(List<String> modes){
 		if (modes.size()==1) return modes.get(0).equals(TransportMode.transit_walk) ? TransportMode.walk: modes.get(0);
-		else if (modes.contains(TransportMode.transit_walk)) {
-			if (modes.contains(TransportMode.pt)) return TransportMode.pt;
-			else return TransportMode.walk;
-
-		} else if (modes.contains(TransportMode.car)) return TransportMode.car;
-		else if (modes.contains(TransportMode.bike)) return TransportMode.bike;
-		else if (modes.contains(TransportMode.walk)) return TransportMode.walk;
-		else if (modes.contains(TransportMode.ride)) return TransportMode.ride;
-		else {
-
-			new ArrayList<>(modes).stream().filter(m->m.startsWith("access")||m.startsWith("egress")).forEach(modes::remove);
-
-			if (modes.size()==0) return TransportMode.walk;
-			else if (modes.size()==1) return modes.get(0);
-			else throw new RuntimeException("Unknown mode(s) "+ modes.toString());
-
-		}
+		
+		if (modes.contains(TransportMode.pt)) return TransportMode.pt;
+		if (modes.contains(TransportMode.car)) return TransportMode.car;
+		if (modes.contains(TransportMode.bike)) return TransportMode.bike;
+		if (modes.contains(TransportMode.walk)) return TransportMode.walk;
+		if (modes.contains(TransportMode.ride)) return TransportMode.ride;
+		
+		if (modes.contains(TransportMode.transit_walk) || modes.contains(TransportMode.access_walk) || modes.contains(TransportMode.egress_walk)) {
+			return TransportMode.walk;
+		} 
+		
+		throw new RuntimeException("Unknown mode(s) "+ modes.toString());
 	}
 
 	private void storeData(final Id<Person> personId, final String legMode, final double travelTime){

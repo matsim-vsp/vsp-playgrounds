@@ -45,7 +45,10 @@ public class SelectedPlansAnalyzer {
 	private static final  Map<Integer, Integer> ptPlansMap = new HashMap<>();
 	private static final  Map<Integer, Integer> slowPtPlansMap = new HashMap<>();
 	private static final  Map<Integer, Integer> walkPlansMap = new HashMap<>();
-	
+	private static final  Map<Integer, Integer> bicyclePlansMap = new HashMap<>();
+	private static final  Map<Integer, Integer> ridePlansMap = new HashMap<>();
+	private static final  Map<Integer, Integer> freightPlansMap = new HashMap<>();
+
 	
 	public static void main(String[] args) {
 		if (args.length != 0) {
@@ -103,6 +106,9 @@ public class SelectedPlansAnalyzer {
 		int counterPtPlans = 0;
 		int counterPtSlowPlans = 0;
 		int counterWalkPlans = 0;
+		int counterBicyclePlans = 0;
+		int counterRidePlans = 0;
+		int counterFreightPlans = 0;
 		String mode;
 		
 		// iterate over persons
@@ -136,6 +142,24 @@ public class SelectedPlansAnalyzer {
 							case "walk":
 								counterWalkPlans++;
 								break;
+//							case "access_walk":
+//								counterWalkPlans++;
+//								break;
+//							case "egress_walk":
+//								counterWalkPlans++;
+//								break;
+//							case "transit_walk":
+//								counterPtPlans++;
+//								break;
+							case "bicycle":
+								counterBicyclePlans++;
+								break;
+							case "ride":
+								counterRidePlans++;
+								break;
+							case "freight":
+								counterFreightPlans++;
+								break;
 							default:
 								throw new RuntimeException("Unknown mode: " + mode + ". In current implementation leg mode must either be car, pt, slowPt or walk");
 						}
@@ -159,6 +183,9 @@ public class SelectedPlansAnalyzer {
 		ptPlansMap.put(iteration, counterPtPlans);
 		slowPtPlansMap.put(iteration, counterPtSlowPlans);
 		walkPlansMap.put(iteration, counterWalkPlans);
+		bicyclePlansMap.put(iteration, counterBicyclePlans);
+		ridePlansMap.put(iteration, counterRidePlans);
+		freightPlansMap.put(iteration, counterFreightPlans);
 	}
 
 	
@@ -183,13 +210,13 @@ public class SelectedPlansAnalyzer {
 			
 			// Header
 			bufferedWriter.write("It." + "\t" + "stayHomePlans" + "\t" + "otherPlans" + "\t" 
-					+ "carPlans" + "\t" + "ptPlans" + "\t" + "slowPtPlans" + "\t" + "walkPlans");
+					+ "carPlans" + "\t" + "ptPlans" + "\t" + "slowPtPlans" + "\t" + "walkPlans" + "\t" + "bicyclePlans" + "\t" + "ridePlans" + "\t" + "freightPlans");
 			bufferedWriter.newLine();
 			
 			for (int iteration : stayHomePlansMap.keySet()) {
     			bufferedWriter.write(iteration + "\t" + stayHomePlansMap.get(iteration) + "\t" + otherPlansMap.get(iteration) + "\t" 
     					+ carPlansMap.get(iteration) + "\t" + ptPlansMap.get(iteration) + "\t" + slowPtPlansMap.get(iteration) + "\t"
-    					+ walkPlansMap.get(iteration));
+    					+ walkPlansMap.get(iteration) + "\t" + bicyclePlansMap.get(iteration) + "\t" + ridePlansMap.get(iteration) + "\t" + freightPlansMap.get(iteration));
     			bufferedWriter.newLine();
     		}    		
 	    } catch (IOException ex) {
