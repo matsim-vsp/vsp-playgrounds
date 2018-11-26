@@ -189,18 +189,18 @@ public class Greedo extends AbstractModule {
 					pSimConf.setIterationsPerCycle(2);
 				}
 			}
-			// Adjust iteration numbers to pSim iteration overhead.
-			config.controler()
-					.setLastIteration(config.controler().getLastIteration() * pSimConf.getIterationsPerCycle());
-			config.controler().setWriteEventsInterval(
-					config.controler().getWriteEventsInterval() * pSimConf.getIterationsPerCycle());
-			config.controler().setWritePlansInterval(
-					config.controler().getWritePlansInterval() * pSimConf.getIterationsPerCycle());
-			config.controler().setWriteSnapshotsInterval(
-					config.controler().getWriteSnapshotsInterval() * pSimConf.getIterationsPerCycle());
-			// TODO: Deprecate this, allow for SBB transit only:
-			pSimConf.setFullTransitPerformanceTransmission(false);
 		}
+
+		// Adjust iteration numbers to pSim iteration overhead.
+		config.controler().setLastIteration(config.controler().getLastIteration() * pSimConf.getIterationsPerCycle());
+		config.controler()
+				.setWriteEventsInterval(config.controler().getWriteEventsInterval() * pSimConf.getIterationsPerCycle());
+		config.controler()
+				.setWritePlansInterval(config.controler().getWritePlansInterval() * pSimConf.getIterationsPerCycle());
+		config.controler().setWriteSnapshotsInterval(
+				config.controler().getWriteSnapshotsInterval() * pSimConf.getIterationsPerCycle());
+		// TODO: Deprecate this, allow for SBB transit only:
+		pSimConf.setFullTransitPerformanceTransmission(false);
 
 		/*
 		 * Ensure a valid acceleration configuration; fall back to default values if not

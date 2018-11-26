@@ -19,8 +19,8 @@ public class CreatingODMatrix {
 	public static void main(String[] args) throws IOException {
 
 //		sets input file and output location
-		String inputFile = "D:/Arbeit/Berlin/Matrix10.csv";
-		String outputFile = "D:/Arbeit/Berlin/10Test.txt";
+		String inputFile = "D:/Arbeit/Berlin/TripListe.csv";
+		String outputFile = "D:/Arbeit/Berlin/ODMatrix.txt";
 		
 //		for specific modes set allModes to false and add the modes to the List mode
 		boolean allModes = true;				
@@ -96,14 +96,13 @@ public class CreatingODMatrix {
 	private static Map<String, District> countingDistricts(List<MyTrip> listMyTrip) {
 		List<String> stringDistricts = new ArrayList<>();
 		Map<String, District> districts = new HashMap<>();
-		int districtId = 0;
 		for (MyTrip trip : listMyTrip) {
 			if (!(stringDistricts.contains(trip.getStartdistrict()))) {
 				stringDistricts.add(trip.getStartdistrict());
 			}
 		}
 		for (String d : stringDistricts) {
-			districts.put(d,new District(d, districtId++));
+			districts.put(d,new District(d));
 		}
 		return districts;
 	}
