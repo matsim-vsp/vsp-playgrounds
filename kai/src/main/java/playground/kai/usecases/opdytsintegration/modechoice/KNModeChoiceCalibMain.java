@@ -182,7 +182,9 @@ class KNModeChoiceCalibMain {
 			// // if not provided created by default using opdytsConfigGroup. Amit July'17
 
 			// opdytsControler.run(simulator, new ModeChoiceRandomizer(scenario), initialDecisionVariable, new ModeChoiceObjectiveFunction(equil));
-			opdytsControler.run(new ModeChoiceRandomizer(scenario), initialDecisionVariable, new ModeChoiceObjectiveFunction(equil));
+
+//			opdytsControler.run(new ModeChoiceRandomizer(scenario), initialDecisionVariable, new ModeChoiceObjectiveFunction(equil));
+			// yyyyyy did not compile
 
 		} else {
 			config.controler().setLastIteration(1000);

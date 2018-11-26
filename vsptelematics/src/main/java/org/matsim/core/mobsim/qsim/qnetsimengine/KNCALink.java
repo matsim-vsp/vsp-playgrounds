@@ -127,7 +127,7 @@ public class KNCALink {
 								return VehicleUtils.getDefaultVehicleType() ;
 							}
 						} ;
-						caVeh.qVehicle = new QVehicle(veh) ;
+						caVeh.qVehicle = new QVehicleImpl(veh) ;
 						caVeh.qVehicle.setDriver( new MobsimDriverAgent(){
 							@Override public Id<Person> getId() {
 								return driverId ;

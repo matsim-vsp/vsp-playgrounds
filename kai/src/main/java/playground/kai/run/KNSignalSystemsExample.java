@@ -19,18 +19,17 @@
  * *********************************************************************** */
 package playground.kai.run;
 
-import java.io.File;
-
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.contrib.signals.data.SignalsData;
+
+import java.io.File;
 
 
 /**
@@ -76,7 +75,10 @@ public class KNSignalSystemsExample {
 
 		// add the signals module to the simulation:
 		Controler c = new Controler( scenario );
-		c.addOverridingModule(new SignalsModule());
+//		c.addOverridingModule(new SignalsModule());
+		if ( true ){
+			throw new RuntimeException( "broken" );
+		}
 		
 		//do it, do it, do it, now
 		c.getConfig().controler().setOverwriteFileSetting(

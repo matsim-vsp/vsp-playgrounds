@@ -37,24 +37,31 @@ class NewQSimViaConfig {
 		
 		Controler controler = new Controler( scenario ) ;
 		
-		controler.addOverridingModule( new AbstractModule() {
-			@Override public void install() {
-				this.bindMobsim().toProvider( new Provider<Mobsim>(){
-					@Inject EventsManager events ;
-					@Override public Mobsim get() {
-						final QSimBuilder builder = new QSimBuilder( config );
-						builder.useDefaults() ;
-						builder.addQSimModule( new AbstractQSimModule() {
-							@Override
-							protected void configureQSim() {
-								this.addNamedComponent( MyAgentSource.class, MY_AGENT_SOURCE ) ;
-							}
-						} ) ;
-						return builder.build( scenario, events ) ;
-					}
-				} ) ;
+//		controler.addOverridingModule( new AbstractModule() {
+//			@Override public void install() {
+//				this.bindMobsim().toProvider( new Provider<Mobsim>(){
+//					@Inject EventsManager events ;
+//					@Override public Mobsim get() {
+//						final QSimBuilder builder = new QSimBuilder( config );
+//						builder.useDefaults() ;
+//						builder.addQSimModule( new AbstractQSimModule() {
+//							@Override
+//							protected void configureQSim() {
+//								this.addNamedComponent( MyAgentSource.class, MY_AGENT_SOURCE ) ;
+//							}
+//						} ) ;
+//						return builder.build( scenario, events ) ;
+//					}
+//				} ) ;
+//			}
+//		} );
+
+		controler.addOverridingQSimModule( new AbstractQSimModule(){
+			@Override
+			protected void configureQSim(){
+				this.addNamedComponent( MyAgentSource.class, MY_AGENT_SOURCE );
 			}
-		} );
+		} ) ;
 		
 		controler.run() ;
 		
