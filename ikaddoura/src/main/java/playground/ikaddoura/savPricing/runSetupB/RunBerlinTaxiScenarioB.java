@@ -27,8 +27,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.taxi.data.validator.TaxiRequestValidator;
+import org.matsim.contrib.taxi.run.Taxi;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
@@ -47,10 +48,11 @@ import org.matsim.run.RunBerlinScenario;
 import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.sav.SAVPassengerTracker;
 import org.matsim.sav.SAVPassengerTrackerImpl;
+import org.matsim.sav.ServiceAreaRequestValidator;
 import org.matsim.sav.prepare.BerlinPlansModificationTagFormerCarUsers;
 import org.matsim.sav.prepare.BerlinShpUtils;
 import org.matsim.sav.prepare.PersonAttributesModification;
-import org.matsim.sav.runTaxi.TaxiServiceAreaRequestValidator;
+import org.matsim.sav.runTaxi.RunBerlinTaxiScenarioA;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -152,7 +154,9 @@ public final class RunBerlinTaxiScenarioB {
 		controler.addOverridingModule(new AbstractModule() {	
 			@Override
 			public void install() {
-				this.bind(TaxiRequestValidator.class).toInstance(new TaxiServiceAreaRequestValidator());
+				this.bind(PassengerRequestValidator.class)
+						.annotatedWith(Taxi.class)
+						.toInstance(new ServiceAreaRequestValidator(RunBerlinTaxiScenarioA.taxiServiceAreaAttribute));
 			}
 		});
 		
