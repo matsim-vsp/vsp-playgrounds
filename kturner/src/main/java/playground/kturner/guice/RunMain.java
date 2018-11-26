@@ -22,13 +22,20 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 public class RunMain {
+	
+	public static SomeInterface someInterface;		//Old stuff
 
 	public static void main(String[] args) {
 		Injector injector = Guice.createInjector(new BasicModule());
 		SomeClass someClasss = injector.getInstance(SomeClass.class);
-		
 		someClasss.run();
 
+//		//Old way of doing it.
+//		someInterface = new someClassImplemenation2();
+//		SomeClass someClass2 = new SomeClass();
+//		someClass2.run();
+//		
+		
 	}
 
 }

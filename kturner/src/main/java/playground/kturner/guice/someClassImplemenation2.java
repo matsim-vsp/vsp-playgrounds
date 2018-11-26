@@ -17,15 +17,13 @@
  * *********************************************************************** */
   
 package playground.kturner.guice;
+  
+public class someClassImplemenation2 implements SomeInterface {
 
-import com.google.inject.Inject;
- class SomeClass {
-	
-	 
-	@Inject SomeInterface someInterface;
-	
-	void run() {
-		someInterface.doSomething();
+	@Override
+	public void doSomething() {
+		System.out.println("Use the old way -> Implementation2");
+
 	}
-	
+
 }
