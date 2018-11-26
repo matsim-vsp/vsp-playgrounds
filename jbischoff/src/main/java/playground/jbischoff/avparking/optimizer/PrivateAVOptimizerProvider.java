@@ -25,10 +25,10 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
-import org.matsim.contrib.taxi.data.validator.TaxiRequestValidator;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.Taxi;
@@ -57,8 +57,8 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 
 	private final ParkingSearchManager manager;
 	private final AvParkingContext context;
-	
-	private final TaxiRequestValidator requestValidator;
+
+	private final PassengerRequestValidator requestValidator;
 	private final EventsManager events;
 
 	@Inject
@@ -67,7 +67,7 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
 			@Taxi TravelDisutility travelDisutility,
 			TaxiScheduler scheduler, ParkingSearchManager manager, AvParkingContext context,
-			TaxiRequestValidator requestValidator, EventsManager events) {
+			@Taxi PassengerRequestValidator requestValidator, EventsManager events) {
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
 		this.network = network;

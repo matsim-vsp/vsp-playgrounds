@@ -25,10 +25,9 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
-import org.matsim.contrib.taxi.data.validator.TaxiRequestValidator;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.Taxi;
@@ -40,6 +39,7 @@ import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
@@ -55,7 +55,7 @@ public class TSPrivateAVOptimizerProvider implements Provider<TaxiOptimizer>{
 	private Fleet fleet;
 	private TaxiScheduler scheduler;
 	private TSPrivateAVRequestInserter requestInserter;
-	private TaxiRequestValidator requestValidator;
+	private PassengerRequestValidator requestValidator;
 	private EventsManager events;
 	private MobsimTimer timer;
 	private TravelTime travelTime;
@@ -67,8 +67,8 @@ public class TSPrivateAVOptimizerProvider implements Provider<TaxiOptimizer>{
 			TaxiScheduler scheduler, MobsimTimer timer,
 			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network,
 			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
-			@Taxi TravelDisutility travelDisutility,
-			TaxiRequestValidator requestValidator, EventsManager events) {
+			@Taxi TravelDisutility travelDisutility, @Taxi PassengerRequestValidator requestValidator,
+			EventsManager events) {
 			this.taxiCfg = taxiCfg;
 			this.fleet = fleet;
 			this.scheduler = scheduler;

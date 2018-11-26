@@ -29,6 +29,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelData;
 import org.matsim.contrib.dvrp.path.VrpPathWithTravelDataImpl;
 import org.matsim.contrib.dvrp.path.VrpPaths;
@@ -37,7 +38,6 @@ import org.matsim.contrib.dvrp.schedule.Schedules;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
 import org.matsim.contrib.parking.parkingsearch.search.RandomParkingSearchLogic;
-import org.matsim.contrib.taxi.data.validator.TaxiRequestValidator;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
@@ -61,7 +61,7 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	public static PrivateAVTaxiDispatcher create(TaxiConfigGroup taxiCfg, Fleet fleet, Network network,
 			MobsimTimer timer, TravelTime travelTime, TravelDisutility travelDisutility, TaxiScheduler scheduler,
 			DefaultTaxiOptimizerParams params, ParkingSearchManager parkingManger, AvParkingContext context,
-			TaxiRequestValidator requestValidator, EventsManager events) {
+			PassengerRequestValidator requestValidator, EventsManager events) {
 		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, travelDisutility,
 				travelTime);
 		PrivateAVRequestInserter requestInserter = new PrivateAVRequestInserter(fleet, scheduler, timer, travelTime,
@@ -87,18 +87,11 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	private final ParkingSearchLogic parkingLogic;
 	private final List<Link> avParkings;
 
-	/**
-	 * @param optimContext
-	 * @param params
-	 * @param avParkings
-	 * @param unplannedRequests
-	 * @param doUnscheduleAwaitingRequests
-	 * @param doUpdateTimelines
-	 */
 	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
 			TravelTime travelTime, TaxiScheduler scheduler, DefaultTaxiOptimizerParams params,
 			ParkingSearchManager parkingManger, AvParkingContext context, LeastCostPathCalculator router,
-			PrivateAVRequestInserter requestInserter, TaxiRequestValidator requestValidator, EventsManager events) {
+			PrivateAVRequestInserter requestInserter, PassengerRequestValidator requestValidator,
+			EventsManager events) {
 		super(taxiCfg, fleet, scheduler, params, requestInserter, requestValidator, events);
 		this.fleet = fleet;
 		this.scheduler = scheduler;

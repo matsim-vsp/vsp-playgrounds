@@ -33,9 +33,9 @@ import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.drt.data.DrtRequest;
-import org.matsim.contrib.drt.data.validator.DefaultDrtRequestValidator;
-import org.matsim.contrib.drt.data.validator.DrtRequestValidator;
+import org.matsim.contrib.dvrp.passenger.DefaultPassengerRequestValidator;
+import org.matsim.contrib.dvrp.passenger.PassengerRequest;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.core.utils.geometry.geotools.MGC;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -44,20 +44,13 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * @author jbischoff
  */
-
-/**
- *
- */
-public class ZonalBasedRequestValidator implements DrtRequestValidator {
+public class ZonalBasedRequestValidator implements PassengerRequestValidator {
 
 	private Map<String, Geometry> zones;
 	private Map<Id<Link>, String> link2zone = new HashMap<>();
 	private Network network;
-	DefaultDrtRequestValidator delegate = new DefaultDrtRequestValidator();
+	private final DefaultPassengerRequestValidator delegate = new DefaultPassengerRequestValidator();
 
-	/**
-	 *
-	 */
 	@Inject
 	public ZonalBasedRequestValidator(Network network, ZonalSystem initialZones) {
 		this.zones = initialZones.getZones();
@@ -65,13 +58,10 @@ public class ZonalBasedRequestValidator implements DrtRequestValidator {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.matsim.contrib.drt.data.validator.DrtRequestValidator#validateDrtRequest(org.matsim.contrib.drt.data.DrtRequest)
-	 */
 	@Override
-	public Set<String> validateDrtRequest(DrtRequest request) {
+	public Set<String> validateRequest(PassengerRequest request) {
 		//fail-fast ==> return the first encountered cause
-		Set<String> causes = delegate.validateDrtRequest(request);
+		Set<String> causes = delegate.validateRequest(request);
 		if (!causes.isEmpty()) {
 			return causes;
 		}
