@@ -22,12 +22,10 @@
 package playground.tschlenther.pave.av;
 
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerParams;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
-import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeSimStepEvent;
 
 /**
@@ -42,13 +40,10 @@ public class TSPrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	 * @param scheduler
 	 * @param params
 	 * @param requestInserter
-	 * @param requestValidator
-	 * @param eventsManager
 	 */
 	public TSPrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, TaxiScheduler scheduler,
-			DefaultTaxiOptimizerParams params, TSPrivateAVRequestInserter requestInserter,
-			PassengerRequestValidator requestValidator, EventsManager eventsManager) {
-		super(taxiCfg, fleet, scheduler, params, requestInserter, requestValidator, eventsManager);
+			DefaultTaxiOptimizerParams params, TSPrivateAVRequestInserter requestInserter) {
+		super(taxiCfg, fleet, scheduler, params, requestInserter);
 		// TODO Auto-generated constructor stub
 	}
 

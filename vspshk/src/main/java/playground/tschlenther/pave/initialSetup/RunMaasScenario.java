@@ -28,6 +28,7 @@ import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.passenger.DefaultPassengerRequestValidator;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelDisutilityProvider;
 import org.matsim.contrib.dynagent.run.DynRoutingModule;
@@ -117,7 +118,7 @@ public class RunMaasScenario {
 					// add more time profiles if necessary
 				}
 
-				bind(PassengerRequestValidator.class).annotatedWith(Taxi.class)
+				bind(DvrpModes.key(PassengerRequestValidator.class, taxiCfg.getMode()))
 						.to(DefaultPassengerRequestValidator.class);
 			}
 		});

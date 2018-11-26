@@ -44,10 +44,10 @@ import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEvent;
-import org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEventHandler;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEventHandler;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEvent;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEventHandler;
 import org.matsim.core.api.experimental.events.AgentWaitingForPtEvent;
 import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.api.experimental.events.handler.AgentWaitingForPtEventHandler;
@@ -97,8 +97,8 @@ import org.matsim.vehicles.Vehicle;
  */
 public class DrtPtTripEventHandler implements ActivityStartEventHandler, ActivityEndEventHandler,
 PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, 
-LinkEnterEventHandler, TeleportationArrivalEventHandler, AgentWaitingForPtEventHandler, 
-DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
+LinkEnterEventHandler, TeleportationArrivalEventHandler, AgentWaitingForPtEventHandler, DrtRequestSubmittedEventHandler,
+		PassengerRequestRejectedEventHandler {
 	
 	private final static Logger log = Logger.getLogger(DrtPtTripEventHandler.class);
 	
@@ -385,7 +385,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	}
 
 	@Override
-	public void handleEvent(DrtRequestRejectedEvent event) {
+	public void handleEvent(PassengerRequestRejectedEvent event) {
 		// Save ExperiencedLeg and remove temporary data
 //		agent2CurrentTripExperiencedLegs.get(event.getPersonId()).add(new ExperiencedLeg(
 //				event.getPersonId(), agent2CurrentLegStartLink.get(event.getPersonId()), 

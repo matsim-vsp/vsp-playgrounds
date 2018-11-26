@@ -29,7 +29,7 @@ import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.taxi.run.Taxi;
+import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
@@ -154,8 +154,7 @@ public final class RunBerlinTaxiScenarioB {
 		controler.addOverridingModule(new AbstractModule() {	
 			@Override
 			public void install() {
-				this.bind(PassengerRequestValidator.class)
-						.annotatedWith(Taxi.class)
+				this.bind(DvrpModes.key(PassengerRequestValidator.class, TransportMode.taxi))
 						.toInstance(new ServiceAreaRequestValidator(RunBerlinTaxiScenarioA.taxiServiceAreaAttribute));
 			}
 		});

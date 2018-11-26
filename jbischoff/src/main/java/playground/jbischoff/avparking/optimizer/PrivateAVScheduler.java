@@ -56,7 +56,6 @@ public class PrivateAVScheduler extends TaxiScheduler {
 	 * @param network
 	 * @param fleet
 	 * @param timer
-	 * @param params
 	 * @param travelTime
 	 * @param travelDisutility
 	 */

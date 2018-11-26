@@ -18,7 +18,7 @@
  * *********************************************************************** */
 
 /**
- * 
+ *
  */
 package playground.jbischoff.sharedTaxiBerlin.saturdaynight;
 
@@ -30,44 +30,41 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEvent;
-import org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEventHandler;
 import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEventHandler;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEventHandler;
 import org.matsim.contrib.dvrp.data.Request;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEvent;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEventHandler;
 import org.matsim.core.api.experimental.events.EventsManager;
 
 /**
- * @author  jbischoff
- *
+ * @author jbischoff
  */
+
 /**
  *
  */
-public class SharedTaxiFareCalculator
-		implements DrtRequestRejectedEventHandler, DrtRequestScheduledEventHandler, DrtRequestSubmittedEventHandler {
-	
-	
-	Map<Id<Link>,MutableDouble> faresPerLink = new HashMap<>();
+public class SharedTaxiFareCalculator implements PassengerRequestRejectedEventHandler, DrtRequestScheduledEventHandler,
+		DrtRequestSubmittedEventHandler {
+
+	Map<Id<Link>, MutableDouble> faresPerLink = new HashMap<>();
 	Map<Id<Request>, DrtRequestSubmittedEvent> requests = new HashMap<>();
 	double fareFactor = 0.5;
-	
 
 	@Inject
 	/**
-	 * 
-	 */
-	public SharedTaxiFareCalculator(EventsManager events) {
+	 *
+	 */ public SharedTaxiFareCalculator(EventsManager events) {
 		events.addHandler(this);
 	}
-	
+
 	@Override
 	public void reset(int iteration) {
 		faresPerLink.clear();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEventHandler#handleEvent(org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEvent)
 	 */
@@ -83,18 +80,18 @@ public class SharedTaxiFareCalculator
 	public void handleEvent(DrtRequestScheduledEvent event) {
 		DrtRequestSubmittedEvent submission = requests.remove(event.getRequestId());
 		double fare = calcFare(submission.getUnsharedRideDistance());
-		if (faresPerLink.containsKey(submission.getFromLinkId())){
-			faresPerLink.get(submission.getFromLinkId()).add(fare*0.5);
+		if (faresPerLink.containsKey(submission.getFromLinkId())) {
+			faresPerLink.get(submission.getFromLinkId()).add(fare * 0.5);
 		} else {
-			faresPerLink.put(submission.getFromLinkId(), new MutableDouble(fare*0.5));
+			faresPerLink.put(submission.getFromLinkId(), new MutableDouble(fare * 0.5));
 		}
-		
-		if (faresPerLink.containsKey(submission.getToLinkId())){
-			faresPerLink.get(submission.getToLinkId()).add(fare*0.5);
+
+		if (faresPerLink.containsKey(submission.getToLinkId())) {
+			faresPerLink.get(submission.getToLinkId()).add(fare * 0.5);
 		} else {
-			faresPerLink.put(submission.getToLinkId(), new MutableDouble(fare*0.5));
+			faresPerLink.put(submission.getToLinkId(), new MutableDouble(fare * 0.5));
 		}
-		
+
 	}
 
 	/**
@@ -102,27 +99,25 @@ public class SharedTaxiFareCalculator
 	 * @return
 	 */
 	private double calcFare(double unsharedRideDistance) {
-		double lowFareDistance = unsharedRideDistance>7000?unsharedRideDistance-7000:0;
-		double highFareDistance = unsharedRideDistance>7000?7000:unsharedRideDistance;
-		double taxifare = 3.9 + 2*highFareDistance/1000. +1.5* lowFareDistance/1000.;
-		return taxifare*fareFactor;
+		double lowFareDistance = unsharedRideDistance > 7000 ? unsharedRideDistance - 7000 : 0;
+		double highFareDistance = unsharedRideDistance > 7000 ? 7000 : unsharedRideDistance;
+		double taxifare = 3.9 + 2 * highFareDistance / 1000. + 1.5 * lowFareDistance / 1000.;
+		return taxifare * fareFactor;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEventHandler#handleEvent(org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEvent)
 	 */
 	@Override
-	public void handleEvent(DrtRequestRejectedEvent event) {
+	public void handleEvent(PassengerRequestRejectedEvent event) {
 		requests.remove(event.getRequestId());
 	}
-	
+
 	/**
 	 * @return the faresPerLink
 	 */
 	public Map<Id<Link>, MutableDouble> getFaresPerLink() {
 		return faresPerLink;
 	}
-
-	
 
 }
