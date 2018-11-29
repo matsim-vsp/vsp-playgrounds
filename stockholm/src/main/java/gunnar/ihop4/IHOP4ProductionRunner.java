@@ -19,9 +19,12 @@
  */
 package gunnar.ihop4;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -32,6 +35,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
 import org.matsim.contrib.opdyts.OpdytsConfigGroup;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.AbsoluteLinkEntryCountDeviationObjectiveFunction;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.CountTrajectorySummarizer;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.TrajectoryPlotter;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.activitytimes.ActivityTimesUtils;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.CompositeDecisionVariable;
@@ -48,9 +52,15 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.controler.events.BeforeMobsimEvent;
+import org.matsim.core.controler.events.StartupEvent;
+import org.matsim.core.controler.listener.BeforeMobsimListener;
+import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 
+import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
+import floetteroed.utilities.TimeDiscretization;
 import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
 
 /**
@@ -80,7 +90,7 @@ public class IHOP4ProductionRunner {
 
 	// ==================== SIMULATE ====================
 
-	static void simulate(final Config config, final double simulatedPopulationShare) {
+	static void simulate(final Config config) {
 
 		// Greedo.
 
@@ -96,7 +106,7 @@ public class IHOP4ProductionRunner {
 		// Trajectory plotting.
 
 		final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter("trajectories", 1);
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config, simulatedPopulationShare);
+		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
 		measReader.run();
 		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
 				.getAllDayMeasurements().getObjectiveFunctions()) {
@@ -105,6 +115,20 @@ public class IHOP4ProductionRunner {
 		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
 				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
 			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+		}
+
+		trajectoryPlotter.addSummarizer(new CountTrajectorySummarizer(new TimeDiscretization(0, 1800, 48)));
+
+		// Objective function, ONLY FOR EVALUATION.
+
+		final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new MATSimObjectiveFunctionSum<>();
+		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
+				.getAllDayMeasurements().getObjectiveFunctions()) {
+			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
+		}
+		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
+				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
+			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
 		}
 
 		// Scenario.
@@ -135,6 +159,40 @@ public class IHOP4ProductionRunner {
 			controler.addOverridingModule(greedo);
 		}
 
+		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
+			controler.addOverridingModule(module);
+		}
+		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
+			controler.addOverridingModule(module);
+		}
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				this.addControlerListenerBinding().toInstance(new StartupListener() {
+					@Override
+					public void notifyStartup(StartupEvent event) {
+						FileUtils.deleteQuietly(new File("objfct.log"));
+					}
+				});
+				this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
+					@Override
+					public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+						if ((event.getIteration() > 0)
+						// && (event.getIteration() % ConfigUtils
+						// .addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)
+						) {
+							try {
+								FileUtils.writeStringToFile(new File("objfct.log"),
+										overallObjectiveFunction.value(null) + "\n", true);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					}
+				});
+			}
+		});
+
 		// ... and run.
 
 		controler.run();
@@ -143,7 +201,7 @@ public class IHOP4ProductionRunner {
 
 	// ==================== CALIBRATE ====================
 
-	static void calibrate(final Config config, final double simulatedPopulationShare) {
+	static void calibrate(final Config config) {
 
 		final OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
 
@@ -193,7 +251,7 @@ public class IHOP4ProductionRunner {
 		final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new MATSimObjectiveFunctionSum<>();
 
 		final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter("trajectories", 1);
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config, simulatedPopulationShare);
+		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
 		measReader.run();
 
 		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
@@ -235,21 +293,25 @@ public class IHOP4ProductionRunner {
 			runner.addOverridingModule(greedo);
 		}
 		runner.setOpdytsProgressListener(progressListener);
-		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(2.5));
+
+		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1000.0));
+		runner.setConvergenceCriterion(new FixedIterationNumberConvergenceCriterion(2, 1));
+
 		runner.run(decisionVariableRandomizer, allActivityTimesDecisionVariable, overallObjectiveFunction);
 	}
 
 	public static void main(String[] args) {
 
-		final double simulatedPopulationShare = 0.05;
-
 		final Config config = ConfigUtils.loadConfig(args[0]);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
+			throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
+		}
 
 		if (config.getModules().containsKey(OpdytsConfigGroup.GROUP_NAME)) {
-			calibrate(config, simulatedPopulationShare);
+			calibrate(config);
 		} else {
-			simulate(config, simulatedPopulationShare);
+			simulate(config);
 		}
 
 	}
