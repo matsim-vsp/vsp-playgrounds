@@ -71,7 +71,7 @@ public class EquilOpdytsIT {
 
     private static URL EQUIL_DIR = ExamplesUtils.getTestScenarioURL("equil-mixedTraffic");
 
-    @Test
+    // @Test
     public void runTest(){
         List<String> modes2consider = Arrays.asList("car","bicycle");
 
