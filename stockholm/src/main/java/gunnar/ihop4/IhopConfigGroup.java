@@ -19,6 +19,8 @@
  */
 package gunnar.ihop4;
 
+import java.util.function.Function;
+
 import org.matsim.core.config.ReflectiveConfigGroup;
 
 /**
@@ -34,6 +36,20 @@ public class IhopConfigGroup extends ReflectiveConfigGroup {
 		super(GROUP_NAME);
 	}
 
+	// -------------------- tollZoneCountsFolder --------------------
+
+	private String tollZoneCountsFolder = null;
+
+	@StringSetter("tollZoneCountsFolder")
+	public void setTollZoneCountsFolder(final String tollZoneCountsFolder) {
+		this.tollZoneCountsFolder = tollZoneCountsFolder;
+	}
+
+	@StringGetter("tollZoneCountsFolder")
+	public String getTollZoneCountsFolder() {
+		return this.tollZoneCountsFolder;
+	}
+
 	// -------------------- simulatedPopulationShare --------------------
 
 	private Double simulatedPopulationShare = null;
@@ -46,6 +62,34 @@ public class IhopConfigGroup extends ReflectiveConfigGroup {
 	@StringGetter("simulatedPopulationShare")
 	public Double getSimulatedPopulationShare() {
 		return this.simulatedPopulationShare;
+	}
+
+	// -------------------- countResidualMagnitude --------------------
+
+	public static enum CountResidualMagnitudeType {
+		absolute, square
+	};
+
+	private CountResidualMagnitudeType countResidualMagnitude = null;
+
+	@StringGetter("countResidualMagnitude")
+	public CountResidualMagnitudeType getCountResidualMagnitude() {
+		return this.countResidualMagnitude;
+	}
+
+	@StringSetter("countResidualMagnitude")
+	public void setCountResidualMagnitude(final CountResidualMagnitudeType countResidualMagnitude) {
+		this.countResidualMagnitude = countResidualMagnitude;
+	}
+
+	public Function<Double, Double> newCountResidualMagnitudeFunction() {
+		if (CountResidualMagnitudeType.absolute.equals(this.countResidualMagnitude)) {
+			return (Double res) -> Math.abs(res);
+		} else if (CountResidualMagnitudeType.square.equals(this.countResidualMagnitude)) {
+			return (Double res) -> res * res;
+		} else {
+			throw new RuntimeException("Unknown countResidualMagnitude: " + this.countResidualMagnitude);
+		}
 	}
 
 }

@@ -19,8 +19,11 @@
 
 package org.matsim.contrib.opdyts;
 
+import org.matsim.contrib.opdyts.buildingblocks.convergencecriteria.AR1ConvergenceCriterion;
 import org.matsim.core.config.ReflectiveConfigGroup;
 
+import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
+import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
 import floetteroed.opdyts.searchalgorithms.RandomSearch;
 import floetteroed.opdyts.searchalgorithms.SelfTuner;
 
@@ -228,7 +231,7 @@ public class OpdytsConfigGroup extends ReflectiveConfigGroup {
 	// ==================== EN BLOCK SIMULATION ITERATIONS ====================
 
 	public static final int DEFAULT_ENBLOCKSIMULATIONITERATIONS = 1;
-	
+
 	private int enBlockSimulationIterations = DEFAULT_ENBLOCKSIMULATIONITERATIONS;
 
 	@StringGetter("enBlockSimulationIterations")
@@ -241,7 +244,39 @@ public class OpdytsConfigGroup extends ReflectiveConfigGroup {
 		this.enBlockSimulationIterations = enBlockSimulationIterations;
 	}
 
-	// =============== FIXED-ITERATION-NUMBER CONVERGENCE CRITERION ===============
+	// ==================== CONVERGENCE CRITERION ====================
+
+	private enum ConvergenceCriterionType {
+		fixed, ar1
+	};
+
+	private ConvergenceCriterionType convergenceCriterion = null;
+
+	@StringGetter("convergenceCriterion")
+	public ConvergenceCriterionType getConvergenceCriterion() {
+		return this.convergenceCriterion;
+	}
+
+	@StringSetter("convergenceCriterion")
+	public void setConvergenceCriterion(final ConvergenceCriterionType convergenceCriterion) {
+		this.convergenceCriterion = convergenceCriterion;
+	}
+
+	// for ar1 convergence criterion
+
+	private Double convergencePrecision = null;
+
+	@StringGetter("convergencePrecision")
+	public Double getConvergencePrecision() {
+		return this.convergencePrecision;
+	}
+
+	@StringSetter("convergencePrecision")
+	public void setConvergencePrecision(final Double convergencePrecision) {
+		this.convergencePrecision = convergencePrecision;
+	}
+
+	// for fixed convergence criterion
 
 	private Integer numberOfIterationsForAveraging = null;
 
@@ -266,4 +301,18 @@ public class OpdytsConfigGroup extends ReflectiveConfigGroup {
 	public void setNumberOfIterationsForConvergence(int numberOfIterationsForConvergence) {
 		this.numberOfIterationsForConvergence = numberOfIterationsForConvergence;
 	}
+
+	// convenience factory
+	
+	public ConvergenceCriterion newConvergenceCriterion() {
+		if (ConvergenceCriterionType.ar1.equals(this.convergenceCriterion)) {
+			return new AR1ConvergenceCriterion(this.convergencePrecision);
+		} else if (ConvergenceCriterionType.fixed.equals(this.convergenceCriterion)) {
+			return new FixedIterationNumberConvergenceCriterion(this.numberOfIterationsForConvergence,
+					this.numberOfIterationsForAveraging);
+		} else {
+			throw new RuntimeException("Unknown convergence criterion: " + this.convergenceCriterion);
+		}
+	}
+
 }

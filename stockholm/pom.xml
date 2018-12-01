@@ -72,7 +72,7 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
-			<version>0.11.0-SNAPSHOT</version>
+			<version>-SNAPSHOT</version>
 		</dependency>
 		-->
 	

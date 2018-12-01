@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.matsim.core.controler.AbstractModule;
 
@@ -39,16 +40,19 @@ public class CountMeasurements {
 
 	private final double simulatedPopulationShare;
 
+	final Function<Double, Double> residualEvaluator;
+
 	// -------------------- MEMBERS --------------------
 
 	private List<AbstractModule> modules = null;
 
-	private List<AbsoluteLinkEntryCountDeviationObjectiveFunction> objectiveFunctions = null;
+	private List<LinkEntryCountDeviationObjectiveFunction> objectiveFunctions = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public CountMeasurements(final double simulatedPopulationShare) {
+	public CountMeasurements(final double simulatedPopulationShare, final Function<Double, Double> residualEvaluator) {
 		this.simulatedPopulationShare = simulatedPopulationShare;
+		this.residualEvaluator = residualEvaluator;
 	}
 
 	// -------------------- COMPOSITION --------------------
@@ -84,8 +88,8 @@ public class CountMeasurements {
 			}
 
 			final double[] data = entry.getValue();
-			this.objectiveFunctions.add(new AbsoluteLinkEntryCountDeviationObjectiveFunction(data, simCounter,
-					this.simulatedPopulationShare));
+			this.objectiveFunctions.add(new LinkEntryCountDeviationObjectiveFunction(data, simCounter,
+					this.simulatedPopulationShare, this.residualEvaluator));
 		}
 	}
 
@@ -95,7 +99,7 @@ public class CountMeasurements {
 		return this.modules;
 	}
 
-	public List<AbsoluteLinkEntryCountDeviationObjectiveFunction> getObjectiveFunctions() {
+	public List<LinkEntryCountDeviationObjectiveFunction> getObjectiveFunctions() {
 		return this.objectiveFunctions;
 	}
 

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.matsim.core.config.Config;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 
@@ -47,9 +48,7 @@ public class TrajectoryPlotter implements IterationEndsListener {
 
 	// -------------------- CONSTANTS --------------------
 
-	private final String fileSuffix = ".data";
-
-	private final String filePrefix;
+	private final Config config;
 
 	private final int logInterval;
 
@@ -61,10 +60,9 @@ public class TrajectoryPlotter implements IterationEndsListener {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public TrajectoryPlotter(final String filePrefix, final int logInterval) {
-		this.filePrefix = filePrefix;
+	public TrajectoryPlotter(final Config config, final int logInterval) {
+		this.config = config;
 		this.logInterval = logInterval;
-		Logger.getLogger(TrajectoryPlotter.class).info("Created the trajectory plotter.");
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -118,7 +116,8 @@ public class TrajectoryPlotter implements IterationEndsListener {
 			for (TrajectoryDataSummarizer summarizer : this.summarizers) {
 				summarizer.clear();
 			}
-			final Path path = Paths.get(this.filePrefix + "_it" + event.getIteration() + this.fileSuffix);
+			final Path path = Paths.get(
+					this.config.controler().getOutputDirectory() + "/trajectories." + event.getIteration() + ".data");
 			try {
 				final PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
 				for (TrajectoryPlotDataSource dataSource : this.dataSources) {
@@ -126,7 +125,7 @@ public class TrajectoryPlotter implements IterationEndsListener {
 					for (TrajectoryDataSummarizer summarizer : this.summarizers) {
 						summarizer.offerCandidate(dataSource);
 					}
-				}				
+				}
 				for (TrajectoryDataSummarizer summarizer : this.summarizers) {
 					summarizer.build();
 					this.printBlock(summarizer, writer);

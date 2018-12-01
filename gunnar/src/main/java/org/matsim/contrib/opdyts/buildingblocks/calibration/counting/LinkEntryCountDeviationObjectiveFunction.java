@@ -20,6 +20,7 @@
 package org.matsim.contrib.opdyts.buildingblocks.calibration.counting;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -35,8 +36,18 @@ import floetteroed.utilities.TimeDiscretization;
  * @author Gunnar Flötteröd
  *
  */
-public class AbsoluteLinkEntryCountDeviationObjectiveFunction
+public class LinkEntryCountDeviationObjectiveFunction
 		implements MATSimObjectiveFunction<MATSimState>, TrajectoryPlotDataSource {
+
+	// -------------------- (FUNCTIONAL) INTERFACE --------------------
+
+	public static interface ResidualEvaluator {
+
+		public double magnitude(double residual);
+
+	}
+
+	// -------------------- MEMBERS --------------------
 
 	private final double[] realData;
 
@@ -44,43 +55,35 @@ public class AbsoluteLinkEntryCountDeviationObjectiveFunction
 
 	private final double simulatedPopulationShare;
 
-	public AbsoluteLinkEntryCountDeviationObjectiveFunction(final double[] realData,
-			final LinkEntryCounter simulationCounter, final double simulatedPopulationShare) {
+	private final Function<Double, Double> residualMagnitude;
+
+	// -------------------- CONSTRUCTION --------------------
+
+	public LinkEntryCountDeviationObjectiveFunction(final double[] realData, final LinkEntryCounter simulationCounter,
+			final double simulatedPopulationShare, final Function<Double, Double> residualEvaluator) {
 		this.realData = realData;
 		this.simulationCounter = simulationCounter;
 		this.simulatedPopulationShare = simulatedPopulationShare;
+		this.residualMagnitude = residualEvaluator;
 	}
+
+	// -------------------- IMPLEMENTATION --------------------
 
 	public CountMeasurementSpecification getSpecification() {
 		return this.simulationCounter.getSpecification();
 	}
+
+	// -------------------- IMPLEMENTATION OF ObjectiveFunction --------------------
 
 	@Override
 	public double value(final MATSimState state) {
 		final int[] simData = this.simulationCounter.getDataOfLastCompletedIteration();
 		double result = 0;
 		for (int i = 0; i < this.realData.length; i++) {
-			result += Math.abs(this.realData[i] - simData[i] / this.simulatedPopulationShare);
+			final double residual = this.realData[i] - simData[i] / this.simulatedPopulationShare;
+			result += this.residualMagnitude.apply(residual);
 		}
 		return result;
-	}
-
-	@Override
-	public String toString() {
-		final StringBuffer result = new StringBuffer();
-		result.append("LINKS: " + this.getSpecification().getLinks() + "\n");
-		result.append("TIMES: " + this.getSpecification().getTimeDiscretization() + "\n");
-		result.append("real: ");
-		for (double val : this.realData) {
-			result.append("\t" + val);
-		}
-		result.append("\n");
-		result.append("simu: ");
-		for (int val : this.simulationCounter.getDataOfLastCompletedIteration()) {
-			result.append("\t" + val / this.simulatedPopulationShare);
-		}
-		result.append("\n");
-		return result.toString();
 	}
 
 	// --------------- IMPLEMENTATION OF TrajectoryPlotDataSource ---------------
@@ -114,12 +117,29 @@ public class AbsoluteLinkEntryCountDeviationObjectiveFunction
 	public double[] getRealData() {
 		return this.realData;
 	}
-	
+
 	@Override
 	public String getDataType() {
 		return CountTrajectorySummarizer.DATA_TYPE;
 	}
 
+	// -------------------- OVERRIDING OF Object --------------------
 
-
+	@Override
+	public String toString() {
+		final StringBuffer result = new StringBuffer();
+		result.append("LINKS: " + this.getSpecification().getLinks() + "\n");
+		result.append("TIMES: " + this.getSpecification().getTimeDiscretization() + "\n");
+		result.append("real: ");
+		for (double val : this.realData) {
+			result.append("\t" + val);
+		}
+		result.append("\n");
+		result.append("simu: ");
+		for (int val : this.simulationCounter.getDataOfLastCompletedIteration()) {
+			result.append("\t" + val / this.simulatedPopulationShare);
+		}
+		result.append("\n");
+		return result.toString();
+	}
 }

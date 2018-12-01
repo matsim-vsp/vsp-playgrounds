@@ -17,7 +17,6 @@ import org.matsim.core.gbl.MatsimRandom;
 import floetteroed.opdyts.DecisionVariable;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.convergencecriteria.ConvergenceCriterion;
-import floetteroed.opdyts.convergencecriteria.FixedIterationNumberConvergenceCriterion;
 import floetteroed.opdyts.searchalgorithms.RandomSearch;
 import floetteroed.opdyts.searchalgorithms.RandomSearchBuilder;
 import floetteroed.opdyts.searchalgorithms.SelfTuner;
@@ -80,9 +79,10 @@ public class MATSimOpdytsRunner<U extends DecisionVariable, X extends MATSimStat
 			}
 		});
 
-		this.convergenceCriterion = new FixedIterationNumberConvergenceCriterion(
-				this.opdytsConfig.getNumberOfIterationsForConvergence(),
-				this.opdytsConfig.getNumberOfIterationsForAveraging());
+		this.convergenceCriterion = this.opdytsConfig.newConvergenceCriterion();
+		// this.convergenceCriterion = new FixedIterationNumberConvergenceCriterion(
+		// this.opdytsConfig.getNumberOfIterationsForConvergence(),
+		// this.opdytsConfig.getNumberOfIterationsForAveraging());
 
 		this.selfTuner = new SelfTuner(this.opdytsConfig.getInitialEquilibriumGapWeight(),
 				this.opdytsConfig.getInitialUniformityGapWeight());
