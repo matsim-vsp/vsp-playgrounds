@@ -48,6 +48,8 @@ public class CountMeasurements {
 
 	private List<LinkEntryCountDeviationObjectiveFunction> objectiveFunctions = null;
 
+	private Double sumOfEvaluatedResidualsAtZeroSimulation = null;
+
 	// -------------------- CONSTRUCTION --------------------
 
 	public CountMeasurements(final double simulatedPopulationShare, final Function<Double, Double> residualEvaluator) {
@@ -64,6 +66,8 @@ public class CountMeasurements {
 	// -------------------- BUILDING --------------------
 
 	public void build() {
+
+		this.sumOfEvaluatedResidualsAtZeroSimulation = 0.0;
 
 		this.modules = new ArrayList<>(this.measSpec2data.size());
 		this.objectiveFunctions = new ArrayList<>(this.measSpec2data.size());
@@ -90,6 +94,9 @@ public class CountMeasurements {
 			final double[] data = entry.getValue();
 			this.objectiveFunctions.add(new LinkEntryCountDeviationObjectiveFunction(data, simCounter,
 					this.simulatedPopulationShare, this.residualEvaluator));
+			for (Double count : data) {
+				this.sumOfEvaluatedResidualsAtZeroSimulation += this.residualEvaluator.apply(count);
+			}
 		}
 	}
 
@@ -101,6 +108,10 @@ public class CountMeasurements {
 
 	public List<LinkEntryCountDeviationObjectiveFunction> getObjectiveFunctions() {
 		return this.objectiveFunctions;
+	}
+
+	public Double getSumOfEvaluatdResidualsAtZeroSimulation() {
+		return this.sumOfEvaluatedResidualsAtZeroSimulation;
 	}
 
 }

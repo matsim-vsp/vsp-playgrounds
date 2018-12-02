@@ -21,7 +21,12 @@ package gunnar.ihop4;
 
 import java.util.function.Function;
 
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.CompositeDecisionVariable;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.OneAtATimeRandomizer;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.RandomCombinationRandomizer;
 import org.matsim.core.config.ReflectiveConfigGroup;
+
+import floetteroed.opdyts.DecisionVariableRandomizer;
 
 /**
  *
@@ -89,6 +94,69 @@ public class IhopConfigGroup extends ReflectiveConfigGroup {
 			return (Double res) -> res * res;
 		} else {
 			throw new RuntimeException("Unknown countResidualMagnitude: " + this.countResidualMagnitude);
+		}
+	}
+
+	// -------------------- DECISION VARIABLE RANDOMIZATION --------------------
+
+	// TODO one could move this into OpdytsIntegration?
+
+	// randomizer
+
+	public static enum DecisionVariableRandomizerType {
+		coordByCoord, randomRecombination
+	};
+
+	private DecisionVariableRandomizerType decisionVariableRandomizer = null;
+
+	@StringGetter("decisionVariableRandomizer")
+	public DecisionVariableRandomizerType getDecisionVariableRandomizer() {
+		return this.decisionVariableRandomizer;
+	}
+
+	@StringSetter("decisionVariableRandomizer")
+	public void setRandomizer(final DecisionVariableRandomizerType randomizer) {
+		this.decisionVariableRandomizer = randomizer;
+	}
+
+	// numberOfVariations
+
+	private Integer numberOfDecisionVariableVariations = null;
+
+	@StringGetter("numberOfDecisionVariableVariations")
+	public Integer getNumberOfDecisionVariableVariations() {
+		return this.numberOfDecisionVariableVariations;
+	}
+
+	@StringSetter("numberOfDecisionVariableVariations")
+	public void setNumberOfDecisionVariableVariations(final Integer numberOfVariations) {
+		this.numberOfDecisionVariableVariations = numberOfVariations;
+	}
+
+	// innovationProba
+
+	private Double decisionVariableInnovationProba = null;
+
+	@StringGetter("decisionVariableInnovationProba")
+	public Double getDecisionVariableInnovationProba() {
+		return this.decisionVariableInnovationProba;
+	}
+
+	@StringSetter("decisionVariableInnovationProba")
+	public void setDecisionVariableInnovationProba(final Double decisionVariableInnovationProba) {
+		this.decisionVariableInnovationProba = decisionVariableInnovationProba;
+	}
+
+	// convenience factory method
+
+	public DecisionVariableRandomizer<CompositeDecisionVariable> newDecisionVariableRandomizer() {
+		if (DecisionVariableRandomizerType.coordByCoord.equals(this.decisionVariableRandomizer)) {
+			return new OneAtATimeRandomizer();
+		} else if (DecisionVariableRandomizerType.randomRecombination.equals(this.decisionVariableRandomizer)) {
+			return new RandomCombinationRandomizer(this.numberOfDecisionVariableVariations,
+					this.decisionVariableInnovationProba);
+		} else {
+			throw new RuntimeException("Unknown decision variable randomizer: " + this.decisionVariableRandomizer);
 		}
 	}
 

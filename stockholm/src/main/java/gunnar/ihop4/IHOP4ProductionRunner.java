@@ -37,10 +37,8 @@ import org.matsim.contrib.opdyts.OpdytsConfigGroup;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.LinkEntryCountDeviationObjectiveFunction;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.CountTrajectorySummarizer;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.TrajectoryPlotter;
-import org.matsim.contrib.opdyts.buildingblocks.convergencecriteria.AR1ConvergenceCriterion;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.activitytimes.ActivityTimesUtils;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.CompositeDecisionVariable;
-import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.OneAtATimeRandomizer;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
@@ -62,6 +60,7 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 
+import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.utilities.TimeDiscretization;
 import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
 
@@ -110,8 +109,8 @@ public class IHOP4ProductionRunner {
 		final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter(config, 1);
 		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
 		measReader.run();
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
-				.getAllDayMeasurements().getObjectiveFunctions()) {
+		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
+				.getObjectiveFunctions()) {
 			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
 		}
 		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
@@ -122,14 +121,18 @@ public class IHOP4ProductionRunner {
 
 		// Objective function, ONLY FOR EVALUATION.
 
+		final double normalizingFactor = 1.0
+				/ (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
+						+ measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
+
 		final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new MATSimObjectiveFunctionSum<>();
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
-				.getAllDayMeasurements().getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
+		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
+				.getObjectiveFunctions()) {
+			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
 		}
 		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
 				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
+			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
 		}
 
 		// Scenario.
@@ -195,7 +198,7 @@ public class IHOP4ProductionRunner {
 		});
 
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
-		
+
 		// ... and run.
 
 		controler.run();
@@ -205,7 +208,7 @@ public class IHOP4ProductionRunner {
 	// ==================== CALIBRATE ====================
 
 	static void calibrate(final Config config) {
-		
+
 		final OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
 
 		// Greedo
@@ -247,7 +250,13 @@ public class IHOP4ProductionRunner {
 
 		// Randomizer.
 
-		final OneAtATimeRandomizer decisionVariableRandomizer = new OneAtATimeRandomizer();
+		// final OneAtATimeRandomizer decisionVariableRandomizer = new
+		// OneAtATimeRandomizer();
+		// final RandomCombinationRandomizer decisionVariableRandomizer = new
+		// RandomCombinationRandomizer(2, 1.0);
+
+		final DecisionVariableRandomizer<CompositeDecisionVariable> decisionVariableRandomizer = ConfigUtils
+				.addOrGetModule(config, IhopConfigGroup.class).newDecisionVariableRandomizer();
 
 		// --------------- OBJECTIVE FUNCTION & TRAJECTORY PLOTTING ---------------
 
@@ -257,20 +266,24 @@ public class IHOP4ProductionRunner {
 		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
 		measReader.run();
 
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
-				.getAllDayMeasurements().getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
+		final double normalizingFactor = 1.0
+				/ (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
+						+ measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
+
+		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
+				.getObjectiveFunctions()) {
+			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
 			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
 		}
 
 		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
 				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, 1.0);
+			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
 			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
 		}
 
 		trajectoryPlotter.addSummarizer(new CountTrajectorySummarizer(new TimeDiscretization(0, 1800, 48)));
-		
+
 		// -------------------- OPDYTS RUNNER --------------------
 
 		final MATSimOpdytsRunner<CompositeDecisionVariable, MATSimState> runner = new MATSimOpdytsRunner<>(scenario,
@@ -299,12 +312,14 @@ public class IHOP4ProductionRunner {
 		}
 
 		runner.setReplacingModules(new ControlerDefaultsWithRoadPricingModule());
-		
+
 		runner.setOpdytsProgressListener(progressListener);
 
 		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1e5)); // square
-		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1000.0)); // absolute
-		// runner.setConvergenceCriterion(new FixedIterationNumberConvergenceCriterion(2, 1));
+		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1000.0)); //
+		// absolute
+		// runner.setConvergenceCriterion(new
+		// FixedIterationNumberConvergenceCriterion(2, 1));
 
 		runner.run(decisionVariableRandomizer, allActivityTimesDecisionVariable, overallObjectiveFunction);
 	}
@@ -312,7 +327,7 @@ public class IHOP4ProductionRunner {
 	public static void main(String[] args) {
 
 		final Config config = ConfigUtils.loadConfig(args[0], new RoadPricingConfigGroup());
-		
+
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
 			throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
