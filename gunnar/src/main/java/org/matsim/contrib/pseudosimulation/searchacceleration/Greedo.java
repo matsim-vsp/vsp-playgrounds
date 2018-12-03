@@ -145,7 +145,7 @@ public class Greedo extends AbstractModule {
 		 * PSim, which generates events person-after-person.
 		 */
 		config.parallelEventHandling().setSynchronizeOnSimSteps(false);
-		config.parallelEventHandling().setNumberOfThreads(1);
+		// config.parallelEventHandling().setNumberOfThreads(1); // FIXME Why was this ever set to one?
 
 		/*
 		 * Preliminary analysis of innovation strategies.

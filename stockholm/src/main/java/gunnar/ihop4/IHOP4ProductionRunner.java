@@ -175,18 +175,17 @@ public class IHOP4ProductionRunner {
 				this.addControlerListenerBinding().toInstance(new StartupListener() {
 					@Override
 					public void notifyStartup(StartupEvent event) {
-						FileUtils.deleteQuietly(new File("objfct.log"));
+						FileUtils.deleteQuietly(new File(config.controler().getOutputDirectory(), "objfct.log"));
 					}
 				});
 				this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
 					@Override
 					public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-						if ((event.getIteration() > 0)
-						// && (event.getIteration() % ConfigUtils
-						// .addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)
-						) {
+						if ((event.getIteration() > 0) && (event.getIteration() % ConfigUtils
+								.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)) {
 							try {
-								FileUtils.writeStringToFile(new File("objfct.log"),
+								FileUtils.writeStringToFile(
+										new File(config.controler().getOutputDirectory(), "objfct.log"),
 										overallObjectiveFunction.value(null) + "\n", true);
 							} catch (IOException e) {
 								throw new RuntimeException(e);
