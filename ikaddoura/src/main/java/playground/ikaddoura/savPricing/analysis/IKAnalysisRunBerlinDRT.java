@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.integrationCNE;
+package playground.ikaddoura.savPricing.analysis;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,33 +33,105 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import playground.ikaddoura.analysis.IKAnalysisRun;
+import playground.ikaddoura.analysis.modalSplitUserType.AgentAnalysisFilter;
 
 
-public class IKAnalysisRunMunich {
-	private static final Logger log = Logger.getLogger(IKAnalysisRunMunich.class);
+public class IKAnalysisRunBerlinDRT {
+	private static final Logger log = Logger.getLogger(IKAnalysisRunBerlinDRT.class);
 			
 	public static void main(String[] args) throws IOException {
-
-		Scenario scenario1 = loadScenario("/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4b_muc_cne_DecongestionPID/", "policyCase", null);
-
-		Scenario scenario0 = loadScenario("/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run0b_muc_bc/", "baseCase", null);
 		
-		final String visualizationScriptInputDirectory = "./visualization-scripts/";
+		String runId;
+		String runDirectory;
+		
+		String runIdBaseCase;
+		String runDirectoryBaseCase;
+		
+		String shapeFileZones;
+		
+		String visualizationScriptInputDirectory;
+		
+		if (args.length > 0) {
+			
+			runId = args[0];
+			runDirectory = args[1];
+			
+			runIdBaseCase = args[2];
+			runDirectoryBaseCase = args[3];
+			
+			shapeFileZones = args[4];
+			visualizationScriptInputDirectory = args[5];
+			
+		} else {
+			
+			runId = "berlin-drtA-v5.2-1pct-Berlkoenig";
+			runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/projects/avoev/berlin-sav-v5.2-1pct/berlin-drtA-v5.2-1pct-Berlkoenig/";
+			
+			runIdBaseCase = "berlin-v5.2-1pct";
+			runDirectoryBaseCase = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
 
+			shapeFileZones = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/berlin/shapeFiles/berlin_grid_2500/berlin_grid_2500.shp";
+			visualizationScriptInputDirectory = "./visualization-scripts/";
+		}
+			
 		final String scenarioCRS = TransformationFactory.DHDN_GK4;
-		final String shapeFileZones = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/plz_gk4/plz.shp";
 		final String zonesCRS = TransformationFactory.DHDN_GK4;
 		final String homeActivityPrefix = "home";
-		final int scalingFactor = 100;
-				
+		final int scalingFactor = 10;
+		final String taxiMode = TransportMode.drt;
+		final String carMode = TransportMode.car;
+		final double rewardSAVformerCarUser = 0.;
+		
+		// optional: person attributes file to replace the output person attributes file
+		final String personAttributesFile = null;
+
+		Scenario scenario1 = loadScenario(runDirectory, runId, personAttributesFile);
+		Scenario scenario0 = loadScenario(runDirectoryBaseCase, runIdBaseCase, personAttributesFile);
+		
+		List<AgentAnalysisFilter> filters1 = new ArrayList<>();
+
+		AgentAnalysisFilter filter1a = new AgentAnalysisFilter(scenario1);
+		filter1a.setPersonAttribute("berlin");
+		filter1a.setPersonAttributeName("home-activity-zone");
+		filter1a.preProcess(scenario1);
+		filters1.add(filter1a);
+		
+		AgentAnalysisFilter filter1b = new AgentAnalysisFilter(scenario1);
+		filter1b.preProcess(scenario1);
+		filters1.add(filter1b);
+		
+		AgentAnalysisFilter filter1c = new AgentAnalysisFilter(scenario1);
+		filter1c.setPersonAttribute("brandenburg");
+		filter1c.setPersonAttributeName("home-activity-zone");
+		filter1c.preProcess(scenario1);
+		filters1.add(filter1c);
+		
+		List<AgentAnalysisFilter> filters0 = new ArrayList<>();
+
+		AgentAnalysisFilter filter0a = new AgentAnalysisFilter(scenario0);
+		filter0a.setPersonAttribute("berlin");
+		filter0a.setPersonAttributeName("home-activity-zone");
+		filter0a.preProcess(scenario0);
+		filters0.add(filter0a);
+		
+		AgentAnalysisFilter filter0b = new AgentAnalysisFilter(scenario0);
+		filter0b.preProcess(scenario0);
+		filters0.add(filter0b);
+		
+		AgentAnalysisFilter filter0c = new AgentAnalysisFilter(scenario0);
+		filter0c.setPersonAttribute("brandenburg");
+		filter0c.setPersonAttributeName("home-activity-zone");
+		filter0c.preProcess(scenario0);
+		filters0.add(filter0c);
+		
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
+		modes.add(TransportMode.drt);
 		modes.add(TransportMode.pt);
-		modes.add("bicycle");
-		modes.add(TransportMode.bike);
-		modes.add("pt_COMMUTER_REV_COMMUTER");
-		modes.add(TransportMode.ride);
 		modes.add(TransportMode.walk);
+		modes.add(TransportMode.transit_walk);
+		modes.add("bicycle");
+		modes.add(TransportMode.ride);
 
 		IKAnalysisRun analysis = new IKAnalysisRun(
 				scenario1,
@@ -70,12 +142,12 @@ public class IKAnalysisRunMunich {
 				zonesCRS,
 				homeActivityPrefix,
 				scalingFactor,
-				new ArrayList<>(),
-				new ArrayList<>(),
+				filters1,
+				filters0,
 				modes,
-				null,
-				null,
-				0.);
+				taxiMode,
+				carMode,
+				rewardSAVformerCarUser);
 		analysis.run();
 	
 		log.info("Done.");
