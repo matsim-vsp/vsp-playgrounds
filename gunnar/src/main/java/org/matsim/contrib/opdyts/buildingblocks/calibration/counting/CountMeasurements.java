@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.matsim.core.controler.AbstractModule;
 
@@ -38,7 +39,7 @@ public class CountMeasurements {
 
 	private Map<CountMeasurementSpecification, double[]> measSpec2data = new LinkedHashMap<>();
 
-	private final double simulatedPopulationShare;
+	private final Supplier<Double> simulatedPopulationShare;
 
 	final Function<Double, Double> residualEvaluator;
 
@@ -52,7 +53,8 @@ public class CountMeasurements {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public CountMeasurements(final double simulatedPopulationShare, final Function<Double, Double> residualEvaluator) {
+	public CountMeasurements(final Supplier<Double> simulatedPopulationShare,
+			final Function<Double, Double> residualEvaluator) {
 		this.simulatedPopulationShare = simulatedPopulationShare;
 		this.residualEvaluator = residualEvaluator;
 	}
@@ -93,7 +95,7 @@ public class CountMeasurements {
 
 			final double[] data = entry.getValue();
 			this.objectiveFunctions.add(new LinkEntryCountDeviationObjectiveFunction(data, simCounter,
-					this.simulatedPopulationShare, this.residualEvaluator));
+					this.residualEvaluator, this.simulatedPopulationShare));
 			for (Double count : data) {
 				this.sumOfEvaluatedResidualsAtZeroSimulation += this.residualEvaluator.apply(count);
 			}
