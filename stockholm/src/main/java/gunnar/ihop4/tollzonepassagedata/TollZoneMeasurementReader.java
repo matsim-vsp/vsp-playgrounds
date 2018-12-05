@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
@@ -161,9 +160,9 @@ public class TollZoneMeasurementReader {
 						+ dayCount + " observed days.");
 
 		final IhopConfigGroup ihopConfig = ConfigUtils.addOrGetModule(this.config, IhopConfigGroup.class);
-		this.allDayMeasurements = new CountMeasurements(ihopConfig.getSimulatedPopulationShare(),
+		this.allDayMeasurements = new CountMeasurements(() -> ihopConfig.getSimulatedPopulationShare(),
 				ihopConfig.newCountResidualMagnitudeFunction());
-		this.onlyTollTimeMeasurements = new CountMeasurements(ihopConfig.getSimulatedPopulationShare(),
+		this.onlyTollTimeMeasurements = new CountMeasurements(() -> ihopConfig.getSimulatedPopulationShare(),
 				ihopConfig.newCountResidualMagnitudeFunction());
 
 		final DynamicData<String> allData = dataAnalyzer.getData();

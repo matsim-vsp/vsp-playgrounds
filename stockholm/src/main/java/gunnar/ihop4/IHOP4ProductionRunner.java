@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -38,7 +39,10 @@ import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.LinkEntryCo
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.CountTrajectorySummarizer;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.TrajectoryPlotter;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.activitytimes.ActivityTimesUtils;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.capacityscaling.SimulatedDemandShare;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.CompositeDecisionVariable;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.CompositeDecisionVariableBuilder;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.ScalarRandomizer;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
@@ -175,18 +179,17 @@ public class IHOP4ProductionRunner {
 				this.addControlerListenerBinding().toInstance(new StartupListener() {
 					@Override
 					public void notifyStartup(StartupEvent event) {
-						FileUtils.deleteQuietly(new File("objfct.log"));
+						FileUtils.deleteQuietly(new File(config.controler().getOutputDirectory(), "objfct.log"));
 					}
 				});
 				this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
 					@Override
 					public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-						if ((event.getIteration() > 0)
-						// && (event.getIteration() % ConfigUtils
-						// .addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)
-						) {
+						if ((event.getIteration() > 0) && (event.getIteration() % ConfigUtils
+								.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)) {
 							try {
-								FileUtils.writeStringToFile(new File("objfct.log"),
+								FileUtils.writeStringToFile(
+										new File(config.controler().getOutputDirectory(), "objfct.log"),
 										overallObjectiveFunction.value(null) + "\n", true);
 							} catch (IOException e) {
 								throw new RuntimeException(e);
@@ -223,13 +226,14 @@ public class IHOP4ProductionRunner {
 			greedo = null;
 		}
 
-		// Opdyts configuration
+		// Configuration
 
 		final OpdytsConfigGroup opdytsConfig = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.class);
 		if (greedo != null) {
 			opdytsConfig.setEnBlockSimulationIterations(
 					ConfigUtils.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle());
 		}
+		final IhopConfigGroup ihopConfig = ConfigUtils.addOrGetModule(config, IhopConfigGroup.class);
 
 		// Scenario
 
@@ -241,19 +245,28 @@ public class IHOP4ProductionRunner {
 
 		// -------------------- DECISION VARIABLES --------------------
 
+		final CompositeDecisionVariableBuilder builder = new CompositeDecisionVariableBuilder();
+
 		// Activity times
 
 		final double timeVariationStepSize_s = 15 * 60;
 		final double searchStageExponent = 0.0;
-		final CompositeDecisionVariable allActivityTimesDecisionVariable = ActivityTimesUtils
-				.newAllActivityTimesDecisionVariable(config, timeVariationStepSize_s, searchStageExponent);
+		builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config, timeVariationStepSize_s,
+				searchStageExponent));
 
-		// Randomizer.
+		// SimulatedPopulationShare
 
-		// final OneAtATimeRandomizer decisionVariableRandomizer = new
-		// OneAtATimeRandomizer();
-		// final RandomCombinationRandomizer decisionVariableRandomizer = new
-		// RandomCombinationRandomizer(2, 1.0);
+		final double simulatedPopulationShareStepSize = 0.01;
+		builder.add(new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(), new Consumer<Double>() {
+			@Override
+			public void accept(Double simulatedPopulationShare) {
+				ihopConfig.setSimulatedPopulationShare(simulatedPopulationShare);
+			}
+		}), new ScalarRandomizer<>(simulatedPopulationShareStepSize));
+
+		// Build decision variable and matching randomizer.
+
+		final CompositeDecisionVariable decisionVariable = builder.buildDecisionVariable();
 
 		final DecisionVariableRandomizer<CompositeDecisionVariable> decisionVariableRandomizer = ConfigUtils
 				.addOrGetModule(config, IhopConfigGroup.class).newDecisionVariableRandomizer();
@@ -289,6 +302,7 @@ public class IHOP4ProductionRunner {
 		final MATSimOpdytsRunner<CompositeDecisionVariable, MATSimState> runner = new MATSimOpdytsRunner<>(scenario,
 				new MATSimStateFactoryImpl<>());
 		runner.addOverridingModule(new AbstractModule() {
+
 			@Override
 			public void install() {
 				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
@@ -321,7 +335,7 @@ public class IHOP4ProductionRunner {
 		// runner.setConvergenceCriterion(new
 		// FixedIterationNumberConvergenceCriterion(2, 1));
 
-		runner.run(decisionVariableRandomizer, allActivityTimesDecisionVariable, overallObjectiveFunction);
+		runner.run(decisionVariableRandomizer, decisionVariable, overallObjectiveFunction);
 	}
 
 	public static void main(String[] args) {

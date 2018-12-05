@@ -19,74 +19,65 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.decisionvariables.capacityscaling;
 
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
+import java.util.function.Consumer;
+
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.ScalarDecisionVariable;
 import org.matsim.core.config.Config;
-
-import floetteroed.utilities.Units;
 
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class NetworkCapacityScaling implements ScalarDecisionVariable<NetworkCapacityScaling> {
-
-	// -------------------- STATIC HELPERS --------------------
-
-	public static double factorFromAbsoluteChange_veh_h(final double absAvgChange_veh_h, final Network network) {
-		int linkCnt = 0;
-		double linkCapSum_veh_h = 0.0;		
-		for (Link link : network.getLinks().values()) {
-			final double linkCap_veh_h = link.getFlowCapacityPerSec() * Units.VEH_H_PER_VEH_S;
-			if (linkCap_veh_h > 0) {
-				linkCnt++;
-				linkCapSum_veh_h += linkCap_veh_h;
-			}
-		}
-		if (linkCnt == 0) {
-			throw new RuntimeException("There are no links with a positive capacity.");
-		}
-		return (absAvgChange_veh_h * linkCnt)  / linkCapSum_veh_h;
-	}
+public class SimulatedDemandShare implements ScalarDecisionVariable<SimulatedDemandShare> {
 
 	// -------------------- CONSTANTS --------------------
 
 	private final Config config;
 
+	// TODO This could be the basis for an AbstractScalarDecisionVariable.
+	private final Consumer<Double> optionalConsumer;
+
 	// -------------------- MEMBERS --------------------
 
-	private double factor;
+	private double value;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public NetworkCapacityScaling(final Config config, final double factor) {
+	public SimulatedDemandShare(final Config config, final double factor, final Consumer<Double> optionalConsumer) {
 		this.config = config;
-		this.factor = factor;
+		this.value = factor;
+		this.optionalConsumer = optionalConsumer;
 	}
 
 	// --------------- IMPLEMENTATION OF ScalarDecisionVariable ---------------
 
 	@Override
 	public void implementInSimulation() {
-		this.config.qsim().setFlowCapFactor(this.factor);
-		this.config.qsim().setStorageCapFactor(this.factor);
+		this.config.qsim().setFlowCapFactor(this.value);
+		this.config.qsim().setStorageCapFactor(this.value);
+		if (this.optionalConsumer != null) {
+			this.optionalConsumer.accept(this.value);
+		}
 	}
 
 	@Override
 	public void setValue(final double val) {
-		this.factor = val;
+		this.value = val;
 	}
 
 	@Override
 	public double getValue() {
-		return this.factor;
+		return this.value;
 	}
 
 	@Override
-	public NetworkCapacityScaling newDeepCopy() {
-		return new NetworkCapacityScaling(this.config, this.factor);
+	public SimulatedDemandShare newDeepCopy() {
+		return new SimulatedDemandShare(this.config, this.value, this.optionalConsumer);
 	}
 
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "(" + this.value + ")";
+	}
 }

@@ -45,7 +45,7 @@ import org.matsim.api.core.v01.network.Network;
 public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 	private static final Logger log = Logger.getLogger(LinkDemandEventHandler.class);
 	private Network network;
-	private String taxiPrefix;
+	private String vehTypePrefix;
 	
 	private Map<Id<Link>,Integer> linkId2demand = new HashMap<Id<Link>, Integer>();
 	private Map<Id<Link>,Integer> linkId2otherVehicles = new HashMap<Id<Link>, Integer>();
@@ -53,7 +53,7 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 
 	public LinkDemandEventHandler(Network network, String taxiPrefix) {
 		this.network = network;
-		this.taxiPrefix = taxiPrefix;
+		this.vehTypePrefix = taxiPrefix;
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 			this.linkId2demand.put(event.getLinkId(), 1);
 		}
 		
-		if (event.getVehicleId().toString().startsWith(taxiPrefix)) {
+		if (event.getVehicleId().toString().startsWith(vehTypePrefix)) {
 			
 			if (this.linkId2taxiVehicles.containsKey(event.getLinkId())) {
 				int agents = this.linkId2taxiVehicles.get(event.getLinkId());
@@ -101,7 +101,7 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 		
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			bw.write("link;agents;taxiVehicles;otherVehicles");
+			bw.write("link;agents;" + vehTypePrefix + "_vehicles;otherVehicles");
 			bw.newLine();
 			
 			for (Id<Link> linkId : this.network.getLinks().keySet()){

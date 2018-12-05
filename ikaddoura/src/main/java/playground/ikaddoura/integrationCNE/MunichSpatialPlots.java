@@ -56,8 +56,11 @@ public class MunichSpatialPlots {
 //	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4b_muc_cne_DecongestionPID";
 //
 //	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run7_muc_n";
-	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run7b_muc_n";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run7b_muc_n";
 
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run8_muc_n";
+	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run8b_muc_e";
+	
 	private final double countScaleFactor = 100;
 	private static double gridSize ;
 	private static GridType gridType;

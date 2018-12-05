@@ -21,6 +21,7 @@ package org.matsim.contrib.opdyts.buildingblocks.calibration.counting;
 
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -39,32 +40,24 @@ import floetteroed.utilities.TimeDiscretization;
 public class LinkEntryCountDeviationObjectiveFunction
 		implements MATSimObjectiveFunction<MATSimState>, TrajectoryPlotDataSource {
 
-	// -------------------- (FUNCTIONAL) INTERFACE --------------------
-
-	public static interface ResidualEvaluator {
-
-		public double magnitude(double residual);
-
-	}
-
 	// -------------------- MEMBERS --------------------
 
 	private final double[] realData;
 
 	private final LinkEntryCounter simulationCounter;
 
-	private final double simulatedPopulationShare;
-
 	private final Function<Double, Double> residualMagnitude;
+
+	private final Supplier<Double> simulatedPopulationShare;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public LinkEntryCountDeviationObjectiveFunction(final double[] realData, final LinkEntryCounter simulationCounter,
-			final double simulatedPopulationShare, final Function<Double, Double> residualEvaluator) {
+			final Function<Double, Double> residualEvaluator, final Supplier<Double> simulatedPopulationShare) {
 		this.realData = realData;
 		this.simulationCounter = simulationCounter;
-		this.simulatedPopulationShare = simulatedPopulationShare;
 		this.residualMagnitude = residualEvaluator;
+		this.simulatedPopulationShare = simulatedPopulationShare;
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -77,10 +70,11 @@ public class LinkEntryCountDeviationObjectiveFunction
 
 	@Override
 	public double value(final MATSimState state) {
+
 		final int[] simData = this.simulationCounter.getDataOfLastCompletedIteration();
 		double result = 0;
 		for (int i = 0; i < this.realData.length; i++) {
-			final double residual = this.realData[i] - simData[i] / this.simulatedPopulationShare;
+			final double residual = this.realData[i] - simData[i] / this.simulatedPopulationShare.get();
 			result += this.residualMagnitude.apply(residual);
 		}
 		return result;
@@ -107,7 +101,7 @@ public class LinkEntryCountDeviationObjectiveFunction
 		} else {
 			final double[] result = new double[source.length];
 			for (int i = 0; i < result.length; i++) {
-				result[i] = source[i] / this.simulatedPopulationShare;
+				result[i] = source[i] / this.simulatedPopulationShare.get();
 			}
 			return result;
 		}
@@ -137,7 +131,7 @@ public class LinkEntryCountDeviationObjectiveFunction
 		result.append("\n");
 		result.append("simu: ");
 		for (int val : this.simulationCounter.getDataOfLastCompletedIteration()) {
-			result.append("\t" + val / this.simulatedPopulationShare);
+			result.append("\t" + val / this.simulatedPopulationShare.get());
 		}
 		result.append("\n");
 		return result.toString();
