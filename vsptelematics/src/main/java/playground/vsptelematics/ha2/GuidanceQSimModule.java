@@ -28,8 +28,8 @@ public class GuidanceQSimModule extends AbstractQSimModule {
 		bind(PopulationAgentSource.class).asEagerSingleton();
 		bind(AgentFactory.class).to(GuidanceAgentFactory.class);
 		bind(Guidance.class).toInstance(guidance);
-		
-		addNamedComponent(Guidance.class, GUIDANCE_LISTENER);
+
+		this.addQSimComponentBinding( GUIDANCE_LISTENER ).to( Guidance.class ) ;
 	}
 	
 	@Provides

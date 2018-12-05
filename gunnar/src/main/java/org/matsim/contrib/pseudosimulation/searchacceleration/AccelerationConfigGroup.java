@@ -19,12 +19,8 @@
  */
 package org.matsim.contrib.pseudosimulation.searchacceleration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import floetteroed.utilities.TimeDiscretization;
+import floetteroed.utilities.Units;
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.Well19937c;
@@ -35,8 +31,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
 
-import floetteroed.utilities.TimeDiscretization;
-import floetteroed.utilities.Units;
+import java.util.*;
 
 /**
  *
