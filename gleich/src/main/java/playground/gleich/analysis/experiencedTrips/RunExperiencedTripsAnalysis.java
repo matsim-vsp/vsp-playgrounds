@@ -47,6 +47,8 @@ import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
  * Runner that guesses configuration based on output directory path (1 arg)
  * Otherwise detailed configuration (7 args[]) is also available
  * 
+ * TODO: gz, run without transit schedule, move to contribs/analysis, multiple drt modes, test
+ * 
  * @author gleich
  *
  */
@@ -57,6 +59,7 @@ public class RunExperiencedTripsAnalysis {
 
 	private final Scenario scenario;
 	private final Set<String> monitoredModes;
+	private final String drtModeName;
 
 	public RunExperiencedTripsAnalysis(String string) {
 		// got only output directory path, guess the details
@@ -84,6 +87,7 @@ public class RunExperiencedTripsAnalysis {
 				}
 			}
 		}
+		drtModeName = TransportMode.drt;
 	}
 
 	public RunExperiencedTripsAnalysis(String[] args) {
@@ -96,6 +100,7 @@ public class RunExperiencedTripsAnalysis {
 		for (String mode : args[4].split(",")) {
 			monitoredModes.add(mode);
 		}
+		drtModeName = args[7];
         scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
         new MatsimNetworkReader(scenario.getNetwork()).readFile(networkFile);
         new TransitScheduleReader(scenario).readFile(scheduleFile);
@@ -110,7 +115,7 @@ public class RunExperiencedTripsAnalysis {
 			runner = new RunExperiencedTripsAnalysis(args[0]);
 			experiencedTripsFile = args[0] + "experiencedTrips.csv";
 			experiencedLegsFile = args[0] + "experiencedLegs.csv";
-		} else if (args.length == 7) {
+		} else if (args.length == 8) {
 			runner = new RunExperiencedTripsAnalysis(args);
 			experiencedTripsFile = args[5];
 			experiencedLegsFile = args[6];
@@ -120,7 +125,8 @@ public class RunExperiencedTripsAnalysis {
 					+ "monitoredStartAndEndLinksFile (use null if you want all links in the analysis.), "
 					+ "monitoredModes (separated by ,),"
 					+ "experiencedTripsFile (use null to switch off), "
-					+ "experiencedLegsFile (use null to switch off)");
+					+ "experiencedLegsFile (use null to switch off), "
+					+ "drtModeName");
 		}
 
 		ExperiencedTripsWriter tripsWriter = new ExperiencedTripsWriter(runner.calcAgent2trips(),
@@ -140,7 +146,7 @@ public class RunExperiencedTripsAnalysis {
 		Set<Id<Link>> monitoredStartAndEndLinks = readMonitoredStartAndEndLinks();
 
 		DrtPtTripEventHandler eventHandler = new DrtPtTripEventHandler(scenario.getNetwork(),
-				scenario.getTransitSchedule(), monitoredModes, monitoredStartAndEndLinks);
+				scenario.getTransitSchedule(), monitoredModes, monitoredStartAndEndLinks, drtModeName);
 		events.addHandler(eventHandler);
 		new DrtEventsReader(events).readFile(eventsFile);
 
