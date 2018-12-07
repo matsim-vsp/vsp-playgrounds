@@ -129,10 +129,10 @@ public class Mid2PopulationParser {
 
                     Activity aimActivity = createActivity(parseActAfterTrip());
                     plan.addActivity(aimActivity);
-
                     personTripIterator.remove(); // avoids a ConcurrentModificationException
                 }
 
+                currentPerson.addPlan(plan);
                 population.addPerson(currentPerson);
                 iterator.remove(); // avoids a ConcurrentModificationException
             } catch(InadequatTimeException e) {
