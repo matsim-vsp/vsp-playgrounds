@@ -21,6 +21,7 @@
 package playground.vsp.airPollution;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Locale;
 import java.util.Stack;
 
@@ -104,5 +105,10 @@ public class CombinedEmissionEventsReader implements MatsimReader {
 			this.emissionsDelegate.endTag(name, content, context);
 		}
 
+	}
+
+	@Override
+	public void readURL(URL url) {
+		throw new RuntimeException("Not yet implemented. Aborting...");
 	}
 }
