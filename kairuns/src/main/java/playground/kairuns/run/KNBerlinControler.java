@@ -79,7 +79,7 @@ public final class KNBerlinControler {
 				addTravelTimeBinding(TransportMode.walk).to(BerlinUtils.WalkTravelTime.class);
 //				addTravelTimeBinding(TransportMode.pt).to(BerlinUtils.PtTravelTime.class);
 				
-				this.bind( PrepareForSim.class ).to( PrepareForSimMultimodalImpl.class ) ;
+//				this.bind( PrepareForSim.class ).to( PrepareForSimMultimodalImpl.class ) ;
 			}
 		} ;
 		return overrides;

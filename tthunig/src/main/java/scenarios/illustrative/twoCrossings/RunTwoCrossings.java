@@ -24,7 +24,6 @@ package scenarios.illustrative.twoCrossings;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -40,6 +39,13 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
+import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
@@ -54,7 +60,6 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactoryImpl;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
@@ -63,26 +68,23 @@ import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
-import signals.CombinedSignalsModule;
-import signals.laemmer.model.LaemmerConfig;
-import signals.laemmer.model.LaemmerSignalController;
-import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.data.DgSylviaPreprocessData;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
+import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 
 /**
  * @author tthunig
@@ -103,6 +105,15 @@ public class RunTwoCrossings {
 		// make links visible beyond screen edge
 		otfvisConfig.setScaleQuadTreeRect(true);
 		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
+		laemmerConfigGroup.setIntergreenTime(5);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setMaxCycleTime(90);
+		
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
+//		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+//		sylviaConfig.setSignalGroupMaxGreenScale(2);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -118,31 +129,29 @@ public class RunTwoCrossings {
 		controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-//			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-//			sylviaConfig.setSignalGroupMaxGreenScale(2);
-			signalsModule.setSylviaConfig(sylviaConfig);
-			
-			LaemmerConfig laemmerConfig = new LaemmerConfig();
-	        laemmerConfig.setDefaultIntergreenTime(5);
-	        laemmerConfig.setDesiredCycleTime(60);
-	        laemmerConfig.setMaxCycleTime(90);
-	        signalsModule.setLaemmerConfig(laemmerConfig);
-//	        LaemmerSignalController.log.setLevel(Level.OFF);
-//	        LaemmerSignalController.signalLog.setLevel(Level.OFF);
-			
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller
+			// by default and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+					DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+					GershensonSignalController.GershensonFactory.class);
 			controler.addOverridingModule(signalsModule);
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
+					GershensonConfig gershensonConfig = new GershensonConfig();
+					bind(GershensonConfig.class).toInstance(gershensonConfig);
+					
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class).asEagerSingleton();
-					this.addEventHandlerBinding().to(TtSignalAnalysisTool.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class).asEagerSingleton();
+					this.addEventHandlerBinding().to(SignalAnalysisTool.class);
+					this.addControlerListenerBinding().to(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 				}
 			});
 		}
@@ -159,7 +168,7 @@ public class RunTwoCrossings {
 
 		// able or enable signals
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems(true);
 		}
 
@@ -356,7 +365,7 @@ public class RunTwoCrossings {
 			signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, Id.create(signalNorth.getId(), SignalGroup.class), 30, 55));	
 			tmpSignalControl.addSignalSystemControllerData(signalSystemControl);
 			// create the sylvia signal control by shorten the temporary signal control
-			DgSylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
+			SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 			break;
 		case LAEMMER:
 			signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);

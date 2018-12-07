@@ -27,6 +27,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.gis.ShapeFileReader;
 
 import com.vividsolutions.jts.geom.Geometry;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 
 /**
  * @author amit

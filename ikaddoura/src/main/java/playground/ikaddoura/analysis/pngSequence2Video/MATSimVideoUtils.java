@@ -37,68 +37,109 @@ import org.matsim.core.config.ConfigUtils;
 public class MATSimVideoUtils {
 	private static final Logger log = Logger.getLogger(MATSimVideoUtils.class);
 
+	public static void createLegHistogramVideo(String runDirectory, String runId, String outputDirectory) throws IOException {
+		createVideo(runDirectory, runId, outputDirectory, 1, "legHistogram_all");
+	}
+	
 	public static void createLegHistogramVideo(String runDirectory) throws IOException {
-		createVideo(runDirectory, 1, "legHistogram_all");
+		createVideo(runDirectory, null, runDirectory, 1, "legHistogram_all");
 	}
 
-	public static void createVideo(String outputDirectory, int interval, String pngFileName) throws IOException {
+	public static void createVideo(String runDirectory, String runId, String outputDirectory, int interval, String pngFileName) throws IOException {
+		createVideoX(runDirectory, runId, outputDirectory, interval, pngFileName);
+	}
+	
+	public static void createVideo(String runDirectory, int interval, String pngFileName) throws IOException {
+		createVideoX(runDirectory, null, runDirectory, interval, pngFileName);
+	}
+	
+	private static void createVideoX(String runDirectory, String runId, String outputDirectory, int interval, String pngFileName) throws IOException {
 
-		log.info("Generating a video using a png sequence...");
+		log.info("Generating a video using a png sequence... (file name: " + pngFileName + ", iteration interval: " + interval + ")");
+		
+		if (!runDirectory.endsWith("/")) {
+			runDirectory = runDirectory + "/";
+		}
 		
 		if (!outputDirectory.endsWith("/")) {
 			outputDirectory = outputDirectory + "/";
 		}
-		String outputFile = outputDirectory + pngFileName + ".mp4";
+		
+		String configFile;
+		String outputDirectoryWithRunId;
+		if (runId != null) {
+			configFile = runDirectory + runId + ".output_config.xml";
+			outputDirectoryWithRunId = outputDirectory + runId + ".";
+		} else {
+			configFile = runDirectory + "output_config.xml";
+			outputDirectoryWithRunId = outputDirectory;
+		}
+		
+		String outputFile = outputDirectoryWithRunId + pngFileName + ".mp4";
 		SequenceEncoder enc = new SequenceEncoder(new File(outputFile));
 			
-		Config config = null;
-		if (new File(outputDirectory + "output_config.xml.gz").exists()) {
-			config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml.gz");
+		Config config;
+		
+		if (new File(configFile).exists()) {
+			config = ConfigUtils.loadConfig(configFile);		
+		} else if (new File(runDirectory + "output_config.xml").exists()) {
+			config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");			
 		} else {
-			if (new File(outputDirectory + "output_config.xml").exists()) {
-				config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
-			} else {
-				throw new RuntimeException("No (output) config file. Aborting...");
-			}
+			throw new RuntimeException("No (output) config file: " + configFile + ". Aborting...");
 		}
 
 		int counter = 0;
+		int counterNoImage = 0;
 		for (int i = config.controler().getFirstIteration(); i<= config.controler().getLastIteration(); i++) {
 			
 			if (counter % interval == 0) {
+				
+				if (counter % 10 == 0) log.info("Creating frame for iteration " + counter);
+				
 				String pngFile = null;
 				BufferedImage image = null;
 				
 				try {
-					pngFile = outputDirectory + "ITERS/it." + i + "/" + i + "." + pngFileName + ".png";
-//					log.info("Trying to read " + pngFile + "...");
+					if (runId == null) {
+						pngFile = runDirectory + "ITERS/it." + i + "/" + i + "." + pngFileName + ".png";
+					} else {
+						pngFile = runDirectory + "ITERS/it." + i + "/" + runId + "." + i + "." + pngFileName + ".png";
+					}
 					image = ImageIO.read(new File(pngFile));
-				
+
 				} catch (IOException e) {
-//					log.info("File does not exist.");
-					
+
 					try {
-						pngFile = outputDirectory + "ITERS/it." + i + "/" + pngFileName + ".png";
-//						log.info("Trying to read " + pngFile + "...");
+						pngFile = runDirectory + "ITERS/it." + i + "/" + i + "." + pngFileName + ".png";
 						image = ImageIO.read(new File(pngFile));
+
 					} catch (IOException e2){
-						log.warn("Skipping...");
+						log.warn("Couldn't find png for iteration " + i + "." );
+						counterNoImage++;
 					}
 				}
 								
 				if (image != null) {
-//					log.info("... File successfully read.");
 					enc.encodeImage(image);
 				} else {
-					log.warn("Skipping...");
+//					log.warn("Skipping image...");
 				}
 			}
 			counter++;
 		}
 		
-		enc.finish();
-		
-		log.info("Generating a video using a png sequence... Done. Video written to " + outputFile);
+		try { 
+			
+			if (counterNoImage < counter) {
+				enc.finish();
+				log.info("Generating a video using a png sequence... Done. Video written to " + outputFile);
+			} else {
+				log.warn("Couldn't create a video." );
+			}
+
+		} catch (IOException e) {
+			log.warn("Couldn't create a video." );
+		}
 	}
 
 }

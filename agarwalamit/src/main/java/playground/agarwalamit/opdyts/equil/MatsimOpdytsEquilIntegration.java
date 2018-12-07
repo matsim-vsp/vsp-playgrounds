@@ -48,8 +48,8 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.clustering.ClusterAlgorithm;
 import playground.agarwalamit.clustering.ClusterUtils;
 import playground.agarwalamit.opdyts.DistanceDistribution;
@@ -116,7 +116,7 @@ public class MatsimOpdytsEquilIntegration {
 
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
-		opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+		opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
 		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
 		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);

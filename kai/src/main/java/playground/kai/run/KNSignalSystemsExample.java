@@ -19,18 +19,17 @@
  * *********************************************************************** */
 package playground.kai.run;
 
-import java.io.File;
-
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.contrib.signals.data.SignalsData;
+
+import java.io.File;
 
 
 /**
@@ -60,12 +59,12 @@ public class KNSignalSystemsExample {
 		
 		// the following makes the contrib load  the signalSystems files, but not to do anything with them:
 		// (this switch will eventually go away)
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setUseSignalSystems(true);
 
 		// these are the paths to the signal systems definition files:
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalSystemFile(inputDir + "signalSystems_v2.0.xml");
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(inputDir + "signalGroups_v2.0.xml");
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class).setSignalControlFile(inputDir + "signalControl_v2.0.xml");
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalSystemFile(inputDir + "signalSystems_v2.0.xml");
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalGroupsFile(inputDir + "signalGroups_v2.0.xml");
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class).setSignalControlFile(inputDir + "signalControl_v2.0.xml");
 		
 //		config.travelTimeCalculator().setCalculateLinkToLinkTravelTimes(true);
 //		config.controler().setLinkToLinkRoutingEnabled(true);
@@ -76,7 +75,10 @@ public class KNSignalSystemsExample {
 
 		// add the signals module to the simulation:
 		Controler c = new Controler( scenario );
-		c.addOverridingModule(new SignalsModule());
+//		c.addOverridingModule(new SignalsModule());
+		if ( true ){
+			throw new RuntimeException( "broken" );
+		}
 		
 		//do it, do it, do it, now
 		c.getConfig().controler().setOverwriteFileSetting(

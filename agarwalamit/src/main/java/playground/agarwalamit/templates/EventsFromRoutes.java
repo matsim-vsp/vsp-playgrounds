@@ -36,7 +36,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 
@@ -81,7 +81,7 @@ public class EventsFromRoutes {
 		manager.addHandler(eventWriterXML);
 
 		PrepareForSimUtils.createDefaultPrepareForSim(net).run();
-		QSim qSim = QSimUtils.createDefaultQSim(net,manager);
+		QSim qSim = new QSimBuilder(net.getConfig()).useDefaults().build(net, manager);
 		qSim.run();
 		eventWriterXML.closeFile();
 	}
@@ -98,11 +98,8 @@ public class EventsFromRoutes {
 		@Override
 		public void handleEvent(LinkEnterEvent event) {
 			Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
-			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(personId);
-			if (travelTimes == null) {
-				travelTimes = new HashMap<>();
-				this.personLinkTravelTimes.put(personId, travelTimes);
-			}
+			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.computeIfAbsent(personId,
+					k -> new HashMap<>());
 			travelTimes.put(event.getLinkId(), Double.valueOf(event.getTime()));
 		}
 

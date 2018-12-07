@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -45,6 +46,8 @@ class UccCarrierCreator {
 	 * 
 	 * UCC: Urban Consolidation Center -> transshipment center 
 	 */
+	
+private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//TODO: Logging-Level ansehen und ggf anpassen.
 
 	private Carriers carriers ;
 	private CarrierVehicleTypes vehicleTypes  ;	
@@ -158,7 +161,7 @@ class UccCarrierCreator {
 		//		ignoriert werden (und somit nicht alle Depots genutzt werden).
 		splittedCarriers = renameVehId(splittedCarriers); 				
 
-		System.out.println("### ENDE: UCCCarriers.run ###");
+		log.info("### ENDE: UCCCarriers.run ###");
 	}
 
 	//Step 1: Analyse der Carrier hier entfernt und in Package PreWork gelassen.
@@ -208,7 +211,7 @@ class UccCarrierCreator {
 			throw new RuntimeException(e);
 		}
 
-		Set<Id<Link>> tolledLinkIds = scheme.getTolledLinkIds();  //Link-Ids des MautSchemas
+		Set<Id<Link>> tolledLinkIds = scheme.getTolledLinkIds();  //Link-Ids des MautSchemas			//TODO: Umbenennen, sodass nicht mehr direkt auf Mautlinks abziehlt. Belieferungszone kann ja auch ohne Maut-Szenario exisiteren ;)
 		//Liste der zum UCC-Carrier übertragenen Services -> wird später aus normalen Carrier entfernt
 		Set<CarrierService> serviceToRemove= new HashSet<CarrierService>(); 	
 
@@ -234,10 +237,10 @@ class UccCarrierCreator {
 			//Fahrzeug für jedes Lieferzeitfenster erstellen (analog Schröder/Liedtke, da jsprit keine Wartezeiten berücksichtigt.
 			if (!uccCarrier.getServices().isEmpty()){		//keinen UCC ohne Nachfrage übernehmen.
 				ArrayList<TimeWindow> timeWindows = calcTimeWindows(uccCarrier);
-				System.out.println("Zeitfenster: " + timeWindows.toString());
+				log.info("Zeitfenster: " + timeWindows.toString());
 				for (TimeWindow tw : timeWindows) {
-					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 
-							Math.max(0, tw.getStart() -uccEarlierOpeningTime), Math.min(24*3500, tw.getEnd() +uccLaterClosingTime)); 
+					addVehicles(uccCarrier, vehicleTypes, uccDepotsLinkIds2, 															//TODO: Warum für jeden service ein Fahrzeug mit diesen Zeiten erstellen? -> zusammenfassen (gerade/zunächst bei fleetSize = Infinity)? KMT Feb/18	
+							Math.max(0, tw.getStart() -uccEarlierOpeningTime), Math.min(24*3500, tw.getEnd() +uccLaterClosingTime));  //TODO: Warum 3500? KMT feb/18
 				}
 				checkCapacity(uccCarrier, vehicleTypes);
 				uccCarrier.getCarrierCapabilities().setFleetSize(FleetSize.INFINITE);
@@ -415,8 +418,8 @@ class UccCarrierCreator {
 	}
 
 	Carriers createServicesToUCC(Carriers uccCarriers,	Carriers nonUccCarriers) {
-		//Services aus den UCC für die Non-UCC erstellen -> Funktioniert grundsätzlich, KT 02.05.15
 		for (Carrier uccC : uccCarriers.getCarriers().values()){
+			int capacityOfSmallestVehicleTyp = calcCapacityOfSmallestVehicleTyp(uccC); 
 			for (Carrier nonUccC : nonUccCarriers.getCarriers().values()){
 				//TODO: Sicherstellen, dass jeder Service auch erstellt wird--> Sicherheitsabfrage, ansonsten Fehler erzeugen!	
 				if (uccC.getId().toString().equals(uccC_prefix+nonUccC.getId().toString())){
@@ -446,13 +449,19 @@ class UccCarrierCreator {
 					//TODO: Sicherstellen (assert), dass bisher kein Service mit UCC_Prefix existiert, da sonst doppelte Einträge -> Fehler
 					//TODO: Absicherung einbauen, dass UCC von den Zeitfenstern her beliefert werden kann. -> ggf Zeitfenster anpassen, an 
 					//neue Services erstellen des nonUccC zum Depot des uccC.
-					for (Id<Link> linkId : demandAtUCC.keySet()){				//Nun erstelle die ganzen Services
-						for (int i = 1; i<=demandAtUCC.get(linkId); i++){
+					for (Id<Link> linkId : demandAtUCC.keySet()){//Nun erstelle die ganzen Services
+						int demandToCreate = demandAtUCC.get(linkId);
+						int numberOfServicesToCreate = (int) demandToCreate / capacityOfSmallestVehicleTyp; //TODO: Vielleicht umbennen um Nutzen klarer zu machen (Anz Services mit "voller nachfrage") kmt/feb18
+						//Kleinste Liefereinheit an UCC entspricht der Kapa des kleinsten Trucks 
+						//TODO Macht das Sinn oder welche Größe sollte da gewählt werden? 1 war jedenfalls schlecht, da Services dann überall an andere Toruen rangebaut wurden und so vermutlcih unrealisitsche Touren entstehen, ehe jsprit einen neuen Truck aufmacht. KMT feb/18
+						
+						int remainingDemand = demandToCreate % capacityOfSmallestVehicleTyp;  //Rest
+						for (int i = 1; i<=numberOfServicesToCreate; i++){
 							double earliestVehDepUCC = calcEarliestDep(uccC ,linkId);	
 							CarrierService.Builder csBuilder = CarrierService.Builder
 									.newInstance(Id.create("to_"+uccC_prefix+linkId.toString()+"_"+i, CarrierService.class), linkId)
 									//Jeder Service nur Nachfrage = 1, damit Fzg Aufteilung frei erfolgen kann
-									.setCapacityDemand(1)		
+									.setCapacityDemand(capacityOfSmallestVehicleTyp)										
 									.setServiceDuration(60)	//60sec = 1min
 									// Innerhalb der ersten 2 Stunden nach Öffnungszeit soll die Ware dort ankommen 
 									//(Da aus Gründen der Vergleichbarkeit bisher die Öffnungszeiten der Hauptdepots nicht verändert werden)
@@ -460,12 +469,39 @@ class UccCarrierCreator {
 											Math.max(0, earliestVehDepUCC), Math.max(0, earliestVehDepUCC +7200 ))); 
 							nonUccC.getServices().add(csBuilder.build());
 						}	
+						// Service für Restnachfrage erstellen, so größer 0.
+						if (remainingDemand >0) {
+							double earliestVehDepUCC = calcEarliestDep(uccC ,linkId);	
+							CarrierService.Builder csBuilder = CarrierService.Builder
+									.newInstance(Id.create("to_"+uccC_prefix+linkId.toString()+"_"+ numberOfServicesToCreate+1, CarrierService.class), linkId)
+									//Jeder Service nur Nachfrage = 1, damit Fzg Aufteilung frei erfolgen kann
+									.setCapacityDemand(remainingDemand)											//TODO: Hier mal einen höheren Wert einsetzen, z.B. Kapa kleinstes Fzg oder die hälfte davon -> Muss klar sein, wie oft und wie groß der Rest ist , kmt /feb18
+									.setServiceDuration(60)	//60sec = 1min
+									// Innerhalb der ersten 2 Stunden nach Öffnungszeit soll die Ware dort ankommen 
+									//(Da aus Gründen der Vergleichbarkeit bisher die Öffnungszeiten der Hauptdepots nicht verändert werden)
+									.setServiceStartTimeWindow(TimeWindow.newInstance(
+											Math.max(0, earliestVehDepUCC), Math.max(0, earliestVehDepUCC +7200 ))); 
+							nonUccC.getServices().add(csBuilder.build());
+						}
 					}
 
 				} //end if
 			}
 		}
 		return nonUccCarriers;	
+	}
+
+	private int calcCapacityOfSmallestVehicleTyp(Carrier uccC) {
+		// TODO Auto-generated method stub
+		int minCapacity = 1000;					//TODO: Willkürlich ganz hoch angesetzt. -> Anpassen, besserer Lösung finden
+		for(CarrierVehicle vehicle : uccC.getCarrierCapabilities().getCarrierVehicles()) {
+			int vehicleCapacity = vehicle.getVehicleType().getCarrierVehicleCapacity() ;
+			if(vehicleCapacity < minCapacity) { 
+				minCapacity = vehicleCapacity;
+			}
+		}
+		log.debug("Capacity of smallest vehicle of " + uccC.getId() + " is " + minCapacity );
+		return minCapacity;
 	}
 
 	//Früheste Abfahrt eines Fahrzeuges des Carriers vom angebenenen Depot
@@ -531,8 +567,8 @@ class UccCarrierCreator {
 			TimeWindow tw = TimeWindow.newInstance(startTime, endTime);
 			if (!timeInTimeWindow(timeWindows, tw)) {
 				timeWindows.add(tw);
-				System.out.println("added TimeWindow: " + tw.toString());
-			} else System.out.println("Nicht hinzugefügt");
+				log.debug("added TimeWindow: " + tw.toString());
+			} else log.debug("Not added");
 		}
 		return timeWindows;
 	}
@@ -540,11 +576,11 @@ class UccCarrierCreator {
 	private boolean timeInTimeWindow(ArrayList<TimeWindow> timeWindows ,TimeWindow timewindow){
 		for (TimeWindow tw : timeWindows){
 			if (tw.getStart() == timewindow.getStart() && tw.getEnd() == timewindow.getEnd()) {
-				System.out.println("TW ist bereits enthalten");
+				log.info("TW ist bereits enthalten");
 				return true;
 			}
 		}
-		System.out.println("TW bisher nicht enthalten");
+		log.info("TW bisher nicht enthalten");
 		return false;
 	}
 }

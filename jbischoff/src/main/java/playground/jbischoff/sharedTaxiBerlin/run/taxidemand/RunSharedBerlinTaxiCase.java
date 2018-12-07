@@ -23,32 +23,22 @@
 package playground.jbischoff.sharedTaxiBerlin.run.taxidemand;
 
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalModule;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
-import org.matsim.contrib.drt.optimizer.rebalancing.DemandBasedRebalancingStrategy;
-import org.matsim.contrib.drt.optimizer.rebalancing.RebalancingStrategy;
-import org.matsim.contrib.drt.run.*;
+import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingParams;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
-import com.google.inject.Binder;
 
 /**
  * @author  jbischoff
  *
  */
-/**
- *
- */
 public class RunSharedBerlinTaxiCase {
 
 	public static void main(String[] args) {
-
-		
 			String runId = "testreb";
 			String configFile = "../../../shared-svn/projects/sustainability-w-michal-and-dlr/data/scenarios/drt/config0.1.xml";
 			Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
@@ -61,29 +51,16 @@ public class RunSharedBerlinTaxiCase {
 			drt.setNumberOfThreads(7);
 			drt.setMaxTravelTimeAlpha(5);
 			drt.setMaxTravelTimeBeta(3000);
-			drt.setkNearestVehicles(7);
-			drt.setRebalancingInterval(1800);
+			
+			MinCostFlowRebalancingParams rebalancingParams = drt.getMinCostFlowRebalancing();
+			rebalancingParams.setInterval(1800);
+			rebalancingParams.setCellSize(2000);
 			
 			config.controler().setRunId(runId);
 			config.controler().setLastIteration(5);
 			config.controler().setOutputDirectory("D:/runs-svn/sharedTaxi/testReb");
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 			org.matsim.core.controler.Controler controler = DrtControlerCreator.createControler(config, false);
-			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 2000);
-
-			controler.addOverridingModule(new AbstractModule() {
-		
-				@Override
-				public void install() {
-					bind(DrtZonalSystem.class).toInstance(zones);
-					bind(RebalancingStrategy.class).to(DemandBasedRebalancingStrategy.class).asEagerSingleton();
-				}
-			});
-			controler.addOverridingModule(new DrtZonalModule());
 			controler.run();
-		
 	}
-		
-		
-	
 }

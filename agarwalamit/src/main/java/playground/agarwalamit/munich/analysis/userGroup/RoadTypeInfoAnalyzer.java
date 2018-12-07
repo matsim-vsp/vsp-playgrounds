@@ -70,7 +70,7 @@ public class RoadTypeInfoAnalyzer {
 				writer.write(rn+"\t");
 				writer.write(roadNr2roadType.get(Integer.valueOf(rn))+"\t");
 				for (String rc : runCases){
-					int count = runCase2RoadType2Count.get(rc).containsKey(rn) ? runCase2RoadType2Count.get(rc).get(rn) : 0;
+					int count = runCase2RoadType2Count.get(rc).getOrDefault(rn, 0);
 					writer.write( count +"\t");
 				}
 				writer.newLine();

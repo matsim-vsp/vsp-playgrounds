@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
+import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -43,11 +44,7 @@ import playground.agarwalamit.utils.MapUtils;
  * Created by amit on 23/12/2016.
  */
 
-
 public class PatnaEmissionsAnalyzer {
-
-    private final EmissionUtilsExtended emissionUtilsExtended = new EmissionUtilsExtended();
-
     public static void main(String[] args) {
         String policyCase = "BT-mb";
         String emissionEventsFile = FileUtils.RUNS_SVN+"patnaIndia/run108/jointDemand/policies/0.15pcu/"+policyCase+"/output_emissions_events.xml.gz";
@@ -69,17 +66,14 @@ public class PatnaEmissionsAnalyzer {
         events.addHandler(new Vehicle2DriverEventHandler());
 
         EmissionEventsReader emissionEventsReader = new EmissionEventsReader(events);
-        MatsimEventsReader eventsReader = new MatsimEventsReader(events);
-
-//        eventsReader.readFile(eventsFile);
         emissionEventsReader.readFile(emissionEventsFile);
 
         // probably just use the total directly from event handler; (need to test first) amit June'17
-        Map<String, Double> coldEmissions = emissionUtilsExtended.getTotalColdEmissions(emissionPersonEventHandler.getPersonId2ColdEmissions(
+        Map<String, Double> coldEmissions = EmissionUtilsExtended.getTotalColdEmissions(emissionPersonEventHandler.getPersonId2ColdEmissions(
                 PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
-        Map<String, Double> warmEmissions = emissionUtilsExtended.getTotalWarmEmissions(emissionPersonEventHandler.getPersonId2WarmEmissions(PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
+        Map<String, Double> warmEmissions = EmissionUtilsExtended.getTotalWarmEmissions(emissionPersonEventHandler.getPersonId2WarmEmissions(PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
 
-        Map<String, Double> totalEmissions = MapUtils.addMaps(coldEmissions, warmEmissions);
+        Map<String, Double> totalEmissions = MapUtils.mergeMaps(coldEmissions, warmEmissions);
 
 //        BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
 //        try {
@@ -92,7 +86,7 @@ public class PatnaEmissionsAnalyzer {
 //            throw new RuntimeException("Data is not written/read. Reason : " + e);
 //        }
 
-        Map<Id<Vehicle>, SortedMap<String, Double>> vehicle2totalEmissions = emissionUtilsExtended.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
+        Map<Id<Vehicle>, SortedMap<String, Double>> vehicle2totalEmissions = EmissionUtils.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
         SortedMap<String, SortedMap<String, Double>> mode2emissions=  getModalEmissions(vehicle2totalEmissions);
 
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);

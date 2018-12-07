@@ -34,8 +34,6 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
-import playground.ikaddoura.PricingHandler;
-
 /**
  * Simply plugging everything together and starting a run for an empty scenario.
  * 

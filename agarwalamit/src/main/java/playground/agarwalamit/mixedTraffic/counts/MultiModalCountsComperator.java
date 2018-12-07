@@ -129,12 +129,8 @@ public class MultiModalCountsComperator {
 				String linkId = parts[1];
 				
 				OuterCordonLinks ocl = new OuterCordonLinks(PatnaUtils.PATNA_NETWORK_TYPE);
-				Map<String, Map<Integer,Double>> mode2time2count = link2mode2time2count_input.get(linkId);
-
-				if ( mode2time2count == null) {
-					mode2time2count = new HashMap<>();
-					link2mode2time2count_input.put(linkId, mode2time2count);
-				} 
+				Map<String, Map<Integer, Double>> mode2time2count = link2mode2time2count_input.computeIfAbsent(linkId,
+						k -> new HashMap<>());
 
 				Integer time = Integer.valueOf(parts[2]);
 

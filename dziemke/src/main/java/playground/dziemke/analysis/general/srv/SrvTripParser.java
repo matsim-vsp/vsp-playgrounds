@@ -28,7 +28,7 @@ public class SrvTripParser {
     //class atributes
     private Map<String, Integer> columnNumbers;
     private Population population;
-    private Map<Id<Person>, List<FromSrvTrip>> person2Trips = new HashMap<>();
+    private Map<Id<Person>, List<SrvTrip>> person2Trips = new HashMap<>();
 
     private String[] entries;
 
@@ -78,9 +78,9 @@ public class SrvTripParser {
         return population;
     }
 
-    public List<FromSrvTrip> getTrips() {
-        List<FromSrvTrip> result = new ArrayList<>();
-        for (List<FromSrvTrip> trips : this.person2Trips.values()) {
+    public List<SrvTrip> getTrips() {
+        List<SrvTrip> result = new ArrayList<>();
+        for (List<SrvTrip> trips : this.person2Trips.values()) {
             result.addAll(trips);
         }
         return result;
@@ -89,7 +89,7 @@ public class SrvTripParser {
     private void parseAndAddLeg(String[] entries) {
         this.entries = entries;
 
-        FromSrvTrip trip = new FromSrvTrip();
+        SrvTrip trip = new SrvTrip();
         trip.setTripId(getTripId());
         trip.setLegMode(getLegMode());
         //endingActivity
@@ -114,12 +114,12 @@ public class SrvTripParser {
         addTripToPerson2Trips(person, trip);
     }
 
-    private void addTripToPerson2Trips(Person person, FromSrvTrip trip) {
-        List<FromSrvTrip> trips = getTrips(person);
+    private void addTripToPerson2Trips(Person person, SrvTrip trip) {
+        List<SrvTrip> trips = getTrips(person);
         trips.add(trip);
     }
 
-    private List<FromSrvTrip> getTrips(Person person) {
+    private List<SrvTrip> getTrips(Person person) {
         return this.person2Trips.computeIfAbsent(person.getId(), k -> new ArrayList<>());
     }
 
@@ -179,6 +179,9 @@ public class SrvTripParser {
     }
 
     private String getLegMode() {
+        if (getRide()) {
+            return TransportMode.ride;
+        }
         int hvm_4 = Integer.parseInt(entries[columnNumbers.get(SrvTripUtils.MODE)]);
         switch (hvm_4) {
             case 1:
@@ -194,19 +197,25 @@ public class SrvTripParser {
         }
     }
 
+    private boolean getRide() {
+        boolean rideWithHomeownCar = "1".equals(entries[columnNumbers.get(SrvTripUtils.USE_HOUSEHOLD_CAR_POOL)]);
+        boolean rideWithOtherCar = "1".equals(entries[columnNumbers.get(SrvTripUtils.USE_OTHER_CAR_POOL)]);
+        return rideWithHomeownCar || rideWithOtherCar;
+    }
+
     private void addTripsToPopulation() {
         for (Map.Entry<Id<Person>, ? extends Person> entry : population.getPersons().entrySet()) {
-            List<FromSrvTrip> trips = this.person2Trips.get(entry.getKey());
+            List<SrvTrip> trips = this.person2Trips.get(entry.getKey());
             if (trips != null) {
                 sortTrips(trips);
-                for (FromSrvTrip trip : trips)
+                for (SrvTrip trip : trips)
                     addTripToPerson(entry.getValue(), trip);
             }
 
         }
     }
 
-    private void addTripToPerson(Person person, FromSrvTrip trip) {
+    private void addTripToPerson(Person person, SrvTrip trip) {
         Plan plan = getPlan(person);
 
         Activity endingActivity;
@@ -263,7 +272,7 @@ public class SrvTripParser {
         return plan;
     }
 
-    private static void sortTrips(List<FromSrvTrip> trips) {
+    private static void sortTrips(List<SrvTrip> trips) {
         trips.sort((trip1, trip2) -> {
             // -1 - less than, 1 - greater than, 0 - equal
             return trip1.getDepartureTime_s() < trip2.getDepartureTime_s() ? -1 :

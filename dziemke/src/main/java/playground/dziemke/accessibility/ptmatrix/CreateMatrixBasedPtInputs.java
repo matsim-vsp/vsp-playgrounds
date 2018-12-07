@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.gis.GridUtils;
@@ -56,7 +57,7 @@ public class CreateMatrixBasedPtInputs {
 		
 		// Parameters
 		Boolean measuringPointsAsPTStops = true; // if "true" -> use regular, user-defined locations instead of stops from schedule
-		Double cellSize = 1000.; // only relevant if "meauringPointsAsPTStops = true"
+		int cellSize = 1000; // only relevant if "meauringPointsAsPTStops = true"
 //		Double cellSize = 500.; // only relevant if "meauringPointsAsPTStops = true"
 		Double departureTime = 8. * 60 * 60;
 		Integer numberOfThreads = 1;
@@ -70,7 +71,7 @@ public class CreateMatrixBasedPtInputs {
 			transitScheduleFile = args[1];
 			outputRoot = args[2];
 			measuringPointsAsPTStops = Boolean.parseBoolean(args[3]);
-			cellSize = Double.parseDouble(args[4]);
+			cellSize = Integer.parseInt(args[4]);
 			departureTime = Double.parseDouble(args[5]);
 			numberOfThreads = Integer.parseInt(args[6]);
 			bounds = args[7];
@@ -170,7 +171,11 @@ public class CreateMatrixBasedPtInputs {
 //		}
 		
 		for ( Facility fac : ptMatrixLocationsMap.values() ) {
-			mapOfLocationFacilitiesMaps.get(arrayNumber).put( fac.getId(), fac ) ;
+			if ( fac instanceof Identifiable ) {
+				mapOfLocationFacilitiesMaps.get( arrayNumber ).put( ( (Identifiable) fac ).getId(), fac );
+			} else {
+				throw new RuntimeException( Facility.FACILITY_NO_LONGER_IDENTIFIABLE ) ;
+			}
 			locationsAdded++;
 			if (locationsAdded == (numberOfMeasuringPoints / numberOfThreads) + 1) {
 				arrayNumber++;

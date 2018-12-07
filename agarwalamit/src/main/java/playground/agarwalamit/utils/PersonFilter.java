@@ -33,4 +33,9 @@ public interface PersonFilter {
 
 	List<String> getUserGroupsAsStrings();
 
+	default boolean includePerson(Id<Person> personId){
+		throw new RuntimeException("This method is not implemented yet, user other methods instead. " +
+				"The idea is to use this method if a user group is not provided for filtering i.e. setting up a default user group in the filter itself.");
+	}
+
 }

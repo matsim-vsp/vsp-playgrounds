@@ -1,64 +1,64 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <groupId>org.matsim</groupId>
-    <artifactId>vsp-playgrounds</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>vsp-playground</groupId>
-  <artifactId>vspshk</artifactId>
-  <name>vspshk</name>
-  <dependencies>
-<!--  	<dependency>
-		<groupId>junit</groupId>
-		<artifactId>junit</artifactId>
-		<version>4.12</version>
-		<scope>test</scope>
-	</dependency>
-  -->
-  <!--  
-      <dependency>
-          <groupId>vsp-playground</groupId>
-          <artifactId>gunnar</artifactId>
-          <version>0.10.0-SNAPSHOT</version>
-      </dependency>
-      -->
-      <dependency>
-  		<groupId>org.matsim.contrib</groupId>
-  		<artifactId>carsharing</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.matsim.contrib</groupId>
-  		<artifactId>dvrp</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		  <groupId>vsp-playground</groupId>
-  		<artifactId>jbischoff</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.processing</groupId>
-  		<artifactId>core</artifactId>
-  		<version>3.0.1</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.jogamp.jogl</groupId>
-  		<artifactId>jogl-all-main</artifactId>
-  		<version>2.3.2</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.jogamp.gluegen</groupId>
-  		<artifactId>gluegen-rt-main</artifactId>
-  		<version>2.3.2</version>
-  	</dependency>
-  	 <dependency>
-        <groupId>org.apache.poi</groupId>
-        <artifactId>poi-ooxml</artifactId>
-        <version>3.12</version>
-    </dependency>
-    <dependency>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<groupId>org.matsim.vsp</groupId>
+		<artifactId>vsp-playgrounds</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+	<artifactId>vspshk</artifactId>
+	<name>vspshk</name>
+	<dependencies>
+	
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>carsharing</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>accessibility</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>dvrp</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.processing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.jogl</groupId>
+			<artifactId>jogl-all-main</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jogamp.gluegen</groupId>
+			<artifactId>gluegen-rt-main</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.12</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>matsim-gtfs</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-coverage</artifactId>
 			<version>14.0</version>
@@ -71,9 +71,19 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>multimodal</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
-		
-		
-  </dependencies>
+		<dependency>
+			  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+			<artifactId>vsp</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+			<artifactId>jbischoff</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
+		</dependency>
+
+
+	</dependencies>
 </project>

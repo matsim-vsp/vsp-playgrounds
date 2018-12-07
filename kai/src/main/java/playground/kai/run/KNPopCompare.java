@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.matsim.analysis.TransportPlanningMainModeIdentifier;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -42,6 +43,8 @@ import org.matsim.contrib.analysis.kai.KNAnalysisEventsHandler;
 import org.matsim.contrib.matrixbasedptrouter.utils.BoundingBox;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.MainModeIdentifierImpl;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
@@ -56,25 +59,31 @@ import org.matsim.facilities.ActivityFacility;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.pt.PtConstants;
 
+import static org.matsim.contrib.analysis.kai.KNAnalysisEventsHandler.*;
+
 /**
  * @author nagel
  *
  */
 public class KNPopCompare {
+	private static final Logger logger = Logger.getLogger( KNPopCompare.class );
 
 	// statistics types:
 	private static enum StatType { ttime1, ttime2, ttimeDiff, payments1, payments2, paymentsDiff } ;
 	// container that contains the statistics containers:
-	final Map<StatType,DataMap<String>> sumsContainer = new TreeMap<>() ;
-	final Map<StatType,DataMap<String>> cntsContainer = new TreeMap<>() ;
-	private Network network;
-
+	private final Map<StatType,DataMap<String>> sumsContainer = new TreeMap<>() ;
+	private final Map<StatType,DataMap<String>> cntsContainer = new TreeMap<>() ;
+	
+	private Scenario scenario1 ;
+	private Scenario scenario2 ;
+	
 	public static void main(String[] args) {
 		if ( args.length != 4 && args.length != 5 ) {
 			System.out.println( "arg[0]: plans_base");
 			System.out.println( "arg[1]: plans_policy");
 			System.out.println( "arg[2]: extendedPersonAttribs_base");
 			System.out.println( "arg[3]: extendedPersonAttribs_policy");
+			System.out.println( "arg[4]: network") ;
 			System.exit(-1) ;
 		}
 		
@@ -92,19 +101,18 @@ public class KNPopCompare {
 			//				config.network().setInputFile(args[2]);
 			//			}
 			if ( args.length>2 && args[2]!=null && args[2]!="" ) {
-				Logger.getLogger(KNPopCompare.class).info("setting person attributes file to: " + args[3] ); 
+				logger.info("setting person attributes file to: " + args[3] );
 				config.plans().setInputPersonAttributeFile(args[2]);
 			} else {
 				throw new RuntimeException("no person attributes") ;
 			}
 			if ( args.length > 4 && args[4] != null && args[4] != "" ) {
-				Logger.getLogger(KNPopCompare.class).info("setting network file to: " + args[4] );
+				logger.info("setting network file to: " + args[4] );
 				config.network().setInputFile( args[4] );
 			}
 
-			Scenario scenario1 = ScenarioUtils.loadScenario( config ) ;
+			scenario1 = ScenarioUtils.loadScenario( config ) ;
 			pop1 = scenario1.getPopulation() ;
-			network = scenario1.getNetwork() ;
 			ff = ((MutableScenario)scenario1).getActivityFacilities().getFactory() ;
 		}
 
@@ -112,28 +120,20 @@ public class KNPopCompare {
 		{
 			Config config2 = ConfigUtils.createConfig();
 			config2.plans().setInputFile(args[1]); 
-			if ( args.length>3 && args[3]!=null && args[3]!="" ) {
-				Logger.getLogger(KNPopCompare.class).info("setting person attributes file to: " + args[3] ); 
+			if ( args.length>3 && args[3]!=null && !args[3].equals( "" ) ) {
+				logger.info("setting person attributes file to: " + args[3] );
 				config2.plans().setInputPersonAttributeFile(args[3]);
 			} else {
 				throw new RuntimeException("no person attributes") ;
 			}
 			if ( args.length > 4 && args[4] != null && args[4] != "" ) {
-				Logger.getLogger(KNPopCompare.class).info("setting network file to: " + args[4] );
+				logger.info("setting network file to: " + args[4] );
 				config2.network().setInputFile( args[4] );
 			}
-			Scenario scenario1 = ScenarioUtils.loadScenario( config2 ) ;
-			pop2 = scenario1.getPopulation() ;
+			scenario2 = ScenarioUtils.loadScenario( config2 ) ;
+			pop2 = scenario2.getPopulation() ;
 		}
 		
-		
-		
-		List<SpatialGrid> spatialGrids = new ArrayList<>() ;
-		ActivityFacilities homesWithScoreDifferences = FacilitiesUtils.createActivityFacilities("scoreDifferencesAtHome") ;
-		ActivityFacilities homesWithMoneyDifferences = FacilitiesUtils.createActivityFacilities("moneyDifferencesAtHome") ;
-		ActivityFacilities homesWithTtimeDifferences = FacilitiesUtils.createActivityFacilities("ttimeDifferencesAtHome") ;
-
-
 		// yy could try to first sort the person files and then align them
 		for ( Person person1 : pop1.getPersons().values() ) {
 				Person person2 = pop2.getPersons().get( person1.getId() ) ;
@@ -150,15 +150,14 @@ public class KNPopCompare {
 
 					ActivityFacility fac = ff.createActivityFacility(Id.create(person1.getId().toString(), ActivityFacility.class), coord);
 					fac.getCustomAttributes().put(GridUtils.WEIGHT, deltaScore ) ;
-					homesWithScoreDifferences.addActivityFacility(fac);
 				}
 				List<String> popTypes = new ArrayList<>() ;
 				{ // process money differences:
-					Double payments1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.PAYMENTS ) ;
+					Double payments1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), PAYMENTS ) ;
 					if ( payments1==null ) {
 						payments1 = 0. ;
 					}
-					Double payments2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.PAYMENTS ) ;
+					Double payments2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), PAYMENTS ) ;
 					if ( payments2==null ) {
 						payments2 = 0. ;
 					}
@@ -168,13 +167,12 @@ public class KNPopCompare {
 					
 					ActivityFacility fac = ff.createActivityFacility(Id.create(person1.getId().toString(), ActivityFacility.class), coord) ;
 					fac.getCustomAttributes().put(GridUtils.WEIGHT, deltaPayments ) ; 
-					homesWithMoneyDifferences.addActivityFacility(fac);
 
 					// to which subPopType does the agent belong?
 					popTypes.add( "zz_all" ) ; 
 					
 					final String subpopAttrName = config.plans().getSubpopulationAttributeName() ;
-					final String subpopName = KNAnalysisEventsHandler.getSubpopName( person1.getId(), pop1.getPersonAttributes(), subpopAttrName);
+					final String subpopName = getSubpopName( person1.getId(), pop1.getPersonAttributes(), subpopAttrName);
 					popTypes.add( "yy_" + subpopName ) ;
 
 					if ( payments2!=0.) { // is a toll payer
@@ -183,8 +181,7 @@ public class KNPopCompare {
 						popTypes.add( subpopName + "_nonPayer") ;
 					}
 					
-					Double certainLinksCnt = (Double) pop1.getPersonAttributes().getAttribute( person1.getId().toString(), 
-							KNAnalysisEventsHandler.CERTAIN_LINKS_CNT ) ;
+					Double certainLinksCnt = (Double) pop1.getPersonAttributes().getAttribute( person1.getId().toString(), CERTAIN_LINKS_CNT ) ;
 					if ( certainLinksCnt != null && payments2==0. ) {
 						popTypes.add( subpopName + "_avoid" ) ;
 					}
@@ -195,11 +192,11 @@ public class KNPopCompare {
 
 				}
 				{ // process travtime differences:
-					Double item1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.TRAV_TIME ) ;
+					Double item1 = (Double) pop1.getPersonAttributes().getAttribute(person1.getId().toString(), TRAV_TIME ) ;
 					if ( item1==null ) {
 						item1 = 0. ;
 					}
-					Double item2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), KNAnalysisEventsHandler.TRAV_TIME ) ;
+					Double item2 = (Double) pop2.getPersonAttributes().getAttribute(person1.getId().toString(), TRAV_TIME ) ;
 					if ( item2==null ) {
 						item2 = 0. ;
 					}
@@ -209,7 +206,6 @@ public class KNPopCompare {
 					
 					ActivityFacility fac = ff.createActivityFacility(Id.create(person1.getId().toString(), ActivityFacility.class), coord) ;
 					fac.getCustomAttributes().put(GridUtils.WEIGHT, deltaTtime ) ;
-					homesWithTtimeDifferences.addActivityFacility(fac);
 					
 					addItemToStatsContainer( StatType.ttime1, popTypes, item1 ) ;
 					addItemToStatsContainer( StatType.ttime2, popTypes, item2 ) ;
@@ -218,6 +214,11 @@ public class KNPopCompare {
 				}
 //			}
 		}
+//		generateAndWriteSpatialGrids( network, spatialGrids, homesWithScoreDifferences, homesWithMoneyDifferences, homesWithTtimeDifferences );
+		writePersonSpecificRecords( pop1, pop2 );
+	}
+	
+	private void generateAndWriteSpatialGrids( final Network network, final List<SpatialGrid> spatialGrids, final ActivityFacilities homesWithScoreDifferences, final ActivityFacilities homesWithMoneyDifferences, final ActivityFacilities homesWithTtimeDifferences ) {
 		BoundingBox bbox = null ;
 		if ( network != null ) {
 			bbox = BoundingBox.createBoundingBox( network );
@@ -227,7 +228,7 @@ public class KNPopCompare {
 		
 		double resolution = 2000.;
 		{
-			SpatialGrid spatialGrid = new SpatialGrid( bbox, resolution, 0. ) ; 
+			SpatialGrid spatialGrid = new SpatialGrid( bbox, resolution, 0. ) ;
 			spatialGrid.setLabel("scoreDiffSum");
 			SpatialGrid spatialGridCnt = new SpatialGrid( bbox, resolution, 0. ) ;
 			spatialGridCnt.setLabel("scoreDiffCnt");
@@ -238,7 +239,7 @@ public class KNPopCompare {
 			spatialGrids.add( spatialGridCnt ) ;
 			spatialGrids.add( spatialGridAv ) ;
 		}
-
+		
 		{
 			SpatialGrid spatialGrid = new SpatialGrid( bbox, resolution, 0. ) ;
 			spatialGrid.setLabel("moneyDiffSum");
@@ -251,7 +252,7 @@ public class KNPopCompare {
 			spatialGrids.add( spatialGridCnt ) ;
 			spatialGrids.add( spatialGridAv ) ;
 		}
-
+		
 		{
 			SpatialGrid spatialGrid = new SpatialGrid( bbox, resolution, 0. ) ;
 			spatialGrid.setLabel("ttimeDiffSum");
@@ -264,10 +265,10 @@ public class KNPopCompare {
 			spatialGrids.add( spatialGridCnt ) ;
 			spatialGrids.add( spatialGridAv ) ;
 		}
-
+		
 		GridUtils.writeSpatialGrids(spatialGrids, "popcompare_grid.csv");
-
-		try ( BufferedWriter writer = IOUtils.getBufferedWriter("popcompare.txt") ) { 
+		
+		try ( BufferedWriter writer = IOUtils.getBufferedWriter("popcompare.txt") ) {
 			// the excel "open" trick works only with txt (and tab, I think)
 			writer.write( "#subpoptype") ;
 			for ( StatType statType : StatType.values() ) {
@@ -290,17 +291,23 @@ public class KNPopCompare {
 				writer.newLine();
 			}
 			writer.close();
-		} catch (IOException e) {
+		} catch ( IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void writePersonSpecificRecords( final Population pop1, final Population pop2 ) {
+		StageActivityTypes stateActivityTypes = activityType -> activityType.contains( " interaction" ) ;
+		MainModeIdentifier mainModeIdentifier = new TransportPlanningMainModeIdentifier() ;
+		
 		try ( BufferedWriter writer = IOUtils.getBufferedWriter("personscompare.txt") ) {
 
 			boolean first = true ;
 			for ( Person person : pop1.getPersons().values() ) {
 				if ( first ) {
 					first = false ;
-					writer.write("personId\tx\ty\tdeltaPt");
-					for ( Object key : person.getCustomAttributes().keySet() ) { // design is such that this might vary person by peron :-(
+					writer.write("personId\tx\ty\tdeltaPt\tdeltaBicycle\tmode1\tmode2");
+					for ( Object key : person.getCustomAttributes().keySet() ) { // design is such that this might vary person by person :-(
 						writer.write( "\t" + key );
 					}
 					writer.newLine() ;
@@ -308,46 +315,56 @@ public class KNPopCompare {
 				// ===
 				writer.write( person.getId().toString() ) ;
 				// ---
-				Coord coord = ((Activity) person.getSelectedPlan().getPlanElements().get(0)).getCoord() ;
+				final Activity activity = (Activity) person.getSelectedPlan().getPlanElements().get( 0 );
+				Coord coord = PopulationUtils.decideOnCoordForActivity( activity, scenario1 ) ;
+				
+				
 				writer.write( "\t" + coord.getX() + "\t" + coord.getY() );
 				// ---
 				double deltaPt = 0 ;
+				double deltaBicycle = 0 ;
+				String mode1="" ;
 				{
 					// pop1 is base
-					List<Trip> trips = TripStructureUtils.getTrips( person.getSelectedPlan(), new StageActivityTypesImpl(PtConstants.TRANSIT_ACTIVITY_TYPE) ) ;
+					List<Trip> trips = TripStructureUtils.getTrips( person.getSelectedPlan(), stateActivityTypes ) ;
 					//				for ( Trip trip : trips ) {
 					Trip trip = trips.get(0) ;
-					String mode = new MainModeIdentifierImpl().identifyMainMode( trip.getTripElements() ) ;
-					if ( mode.equals( TransportMode.pt ) ) {
+					mode1 = mainModeIdentifier.identifyMainMode( trip.getTripElements() ) ;
+					if ( mode1.equals( TransportMode.pt ) ) {
 						deltaPt -- ;
+					} else if ( mode1.equals( TransportMode.bike ) ) {
+						deltaBicycle-- ;
 					}
 					//				}
 				}
+				String mode2="" ;
 				{
 					// pop1 is policy
 					Person person2 = pop2.getPersons().get( person.getId() ) ;
-					List<Trip> trips = TripStructureUtils.getTrips( person2.getSelectedPlan(), new StageActivityTypesImpl(PtConstants.TRANSIT_ACTIVITY_TYPE) ) ;
+					List<Trip> trips = TripStructureUtils.getTrips( person2.getSelectedPlan(), stateActivityTypes ) ;
 					//				for ( Trip trip : trips ) {
 					Trip trip = trips.get(0) ;
-					String mode = new MainModeIdentifierImpl().identifyMainMode( trip.getTripElements() ) ;
-					if ( mode.equals( TransportMode.pt ) ) {
+					mode2 = mainModeIdentifier.identifyMainMode( trip.getTripElements() ) ;
+					if ( mode2.equals( TransportMode.pt ) ) {
 						deltaPt ++ ;
+					} else if ( mode2.equals( TransportMode.bike ) ) {
+						deltaBicycle ++ ;
 					}
 					//				}
 				}
-				writer.write("\t" + deltaPt  );
+				writer.write("\t" + deltaPt + "\t" + deltaBicycle + "\t" + mode1 + "\t" + mode2 );
 				// ---
 				for ( Entry<String,Object> entry : person.getCustomAttributes().entrySet() ) {
 					writer.write( /* "\t" + entry.getKey() + */ "\t" + entry.getValue() ) ;
 				}
-				writer.newLine(); 
+				writer.newLine();
 			}
 			
 		} catch ( IOException ee ) {
 			ee.printStackTrace();
 		}
 	}
-
+	
 	private void addItemToStatsContainer(StatType statType, List<String> popTypes, Double item) {
 		DataMap<String> sums = sumsContainer.get( statType ) ;
 		if ( sums == null ) {

@@ -140,33 +140,42 @@ public class AdvancedMarginalCongestionPricingHandler implements CongestionEvent
 	}
 	
 	@Override
-	public void handleEvent(ActivityStartEvent event) {		
-		this.personId2currentActivityStartTime.put(event.getPersonId(), event.getTime());
-		this.personId2currentActivityType.put(event.getPersonId(), event.getActType());
+	public void handleEvent(ActivityStartEvent event) {
+		
+		if (event.getActType().contains("interaction")) {
+			// skip
+		} else {
+			this.personId2currentActivityStartTime.put(event.getPersonId(), event.getTime());
+			this.personId2currentActivityType.put(event.getPersonId(), event.getActType());
+		}
 	}
 
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
 		
-		if (this.personId2currentActivityStartTime.containsKey(event.getPersonId())) {
-			// This is not the first activity...
-						
-			// ... now process all congestion events thrown during the trip to the activity which has just ended, ...
-			processCongestionEventsForAffectedPerson(event.getPersonId(), event.getTime(), event.getLinkId());
-			
-			// ... update the status of the 'current' activity...
-			this.personId2currentActivityType.remove(event.getPersonId());
-			this.personId2currentActivityStartTime.remove(event.getPersonId());
-			
-			// ... and remove all processed congestion events. 
-			this.affectedPersonId2congestionEventsToProcess.remove(event.getPersonId());
-			this.affectedPersonId2delayToProcess.remove(event.getPersonId());
-	
+		if (event.getActType().contains("interaction")) {
+			// skip
 		} else {
-			// This is the first activity. The first and last / overnight activity are / is considered in a final step.
-			// Therefore, the relevant information has to be stored.
-			this.personId2firstActivityEndTime.put(event.getPersonId(), event.getTime());
-			this.personId2firstActivityType.put(event.getPersonId(), event.getActType());
+			if (this.personId2currentActivityStartTime.containsKey(event.getPersonId())) {
+				// This is not the first activity...
+							
+				// ... now process all congestion events thrown during the trip to the activity which has just ended, ...
+				processCongestionEventsForAffectedPerson(event.getPersonId(), event.getTime(), event.getLinkId());
+				
+				// ... update the status of the 'current' activity...
+				this.personId2currentActivityType.remove(event.getPersonId());
+				this.personId2currentActivityStartTime.remove(event.getPersonId());
+				
+				// ... and remove all processed congestion events. 
+				this.affectedPersonId2congestionEventsToProcess.remove(event.getPersonId());
+				this.affectedPersonId2delayToProcess.remove(event.getPersonId());
+		
+			} else {
+				// This is the first activity. The first and last / overnight activity are / is considered in a final step.
+				// Therefore, the relevant information has to be stored.
+				this.personId2firstActivityEndTime.put(event.getPersonId(), event.getTime());
+				this.personId2firstActivityType.put(event.getPersonId(), event.getActType());
+			}
 		}
 	}
 

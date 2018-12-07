@@ -67,7 +67,7 @@ public class GeometryUtilsTest {
                 new Coordinate(-20,-5),
                 new Coordinate(20,-5) } );
 
-        Point point = playground.vsp.demandde.corineLandcover.GeometryUtils.getPointInteriorToGeometries(combinedGeom, intersectingGeom);
+        Point point = playground.vsp.corineLandcover.GeometryUtils.getPointInteriorToGeometry(combinedGeom, intersectingGeom);
         System.out.println(point.toString());
 
         // this point must be within (geometry 1 OR geometry2) AND withing intersecting geom

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE network SYSTEM "http://matsim.org/files/dtd/network_v1.dtd">
+
+<network name="network for test scenario">
+<!--
+
+		
+
+(0)<=>(3) ===================== link_3_6 ====================> (6)<=>(9)
+	   A 													   A
+	   |   												       |
+	   V 													   |
+	  (7) ===================== link_7_8 ====================> (8)
+
+					   	 (short, bottleneck)
+	
+-->
+
+<nodes>
+	<node id="0" x="-1000" y="9000" />	
+
+	<node id="3" x="0" y="9000" />
+	<node id="6" x="10000" y="9000" />
+
+	<node id="7" x="0" y="0" />
+	<node id="8" x="10000" y="0" />	
+	<node id="9" x="11000" y="9000" />	
+</nodes>
+
+<links capperiod="1:00:00">
+
+
+	<link id="link_3_7" from="3" to="7" length="1000.00" capacity="7200" freespeed="10.123" modes="car" permlanes="2" />
+	<link id="link_7_3" from="7" to="3" length="1.00" capacity="7200" freespeed="9999999.123" modes="car" permlanes="2" />
+	
+	<link id="link_7_8" from="7" to="8" length="4000.00" capacity="10" freespeed="10.123" modes="car" permlanes="2" />
+	<link id="link_8_6" from="8" to="6" length="1.00" capacity="7200" freespeed="9999999.123" modes="car" permlanes="2" />
+	
+	<link id="link_3_6" from="3" to="6" length="5100.00" capacity="7200" freespeed="10.123" modes="car" permlanes="2" />
+	<link id="link_6_3" from="6" to="3" length="5100.00" capacity="7200" freespeed="10.123" modes="car" permlanes="2" />
+	
+	
+	<link id="link_0_3" from="0" to="3" length="1000.00" capacity="7200" freespeed="10.123" modes="car" permlanes="2" />
+	<link id="link_3_0" from="3" to="0" length="1000.00" capacity="7200" freespeed="10.123" modes="car" permlanes="2" />
+	<link id="link_6_9" from="6" to="9" length="1000.00" capacity="7200" freespeed="10.123" modes="car" permlanes="2" />
+	<link id="link_9_6" from="9" to="6" length="1000.00" capacity="7200" freespeed="10.123" modes="car" permlanes="2" />
+	
+</links>
+</network>

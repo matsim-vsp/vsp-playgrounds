@@ -53,7 +53,7 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 		this.sc = scenario;
 		actType2TypDur = new TreeMap<>();
 		LOG.info("Least integer [Math.floor()] of stated activity duration of an activity is set to typical duration.");
-		LOG.info("A person is skipped if first and last acitity are different and last activity starts after mid night.");
+		LOG.info("A person is skipped if first and last activities are different and last activity starts after mid night.");
 		//TODO : might make more sense if I check above for all intermediate activities as well.
 	}
 

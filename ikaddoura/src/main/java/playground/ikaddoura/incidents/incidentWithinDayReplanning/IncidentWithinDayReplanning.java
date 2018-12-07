@@ -35,11 +35,12 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.withinday.trafficmonitoring.TravelTimeCollector;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
+import playground.ikaddoura.analysis.IKAnalysisRun;
 import playground.ikaddoura.incidents.NetworkChangeEventsUtils;
 
 /**
@@ -50,29 +51,30 @@ public class IncidentWithinDayReplanning {
 
 // ############################################################################################################################################
 
-	private static String day = "2016-03-15";
-
-	private static String populationFile = "../../../runs-svn/incidents/input/bvg.run189.10pct.100.plans.selected.genericPt_baseCase100it_output_plans.xml.gz";
-	private static String networkFile = "../../../runs-svn/incidents/input/network.xml";
-	private static String configFile = "../../../runs-svn/incidents/input/baseCase_output_config_updated.xml";
-	private static String networkChangeEventsFile = "../../../runs-svn/incidents/input/networkChangeEvents_" + day + ".xml.gz";
-	private static String runOutputBaseDirectory = "../../../runs-svn/incidents/output/";
-		
-	private static final boolean reducePopulationToAffectedAgents = true;
-	private static final String reducedPopulationFile = "../../../runs-svn/incidents/input/" + day + "_reduced-population.xml.gz";
+	private final String day = "2016-02-11";
+//	private final String day = "2016-03-15";
 	
-	private static final boolean applyNetworkChangeEventsAndRunWithinDayReplanning = false;
+	private final String configFile = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/input/config_short-term.xml";
+	private final String runOutputBaseDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents-longterm-shortterm/output/output_departureTimeInterval_";
+	private final String runId = "run1";
+	
+	private final boolean reducePopulationToAffectedAgents = false;
+	private final String reducedPopulationFile = "path-to-reduced-population.xml.gz";
+	
+	private final boolean applyNetworkChangeEvents = true;
+	private final boolean applyWithinDayReplanning = true;
+	private final int withinDayReplanInterval = 300;
+	
+	private final String crs = TransformationFactory.DHDN_GK4;
 		
 // ############################################################################################################################################
 	
-	private static final Logger log = Logger.getLogger(IncidentWithinDayReplanning.class);
+	private final Logger log = Logger.getLogger(IncidentWithinDayReplanning.class);
 	
 	public static void main(String[] args) {
 		
 		if (args.length > 0) {
-			
-			// TODO
-			
+			throw new RuntimeException("Not implemented. Aborting...");
 		}
 		
 		IncidentWithinDayReplanning incidentWithinDayReplanning = new IncidentWithinDayReplanning();
@@ -80,80 +82,87 @@ public class IncidentWithinDayReplanning {
 	}
 
 	private void run() {
-		OutputDirectoryLogging.catchLogEntries();
-		try {
-			OutputDirectoryLogging.initLoggingWithOutputDirectory(runOutputBaseDirectory);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
 		
 		final Config config = ConfigUtils.loadConfig(configFile);
-		config.network().setInputFile(networkFile);
-		config.plans().setRemovingUnneccessaryPlanAttributes(true);
-		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(0);
-				
-		if (applyNetworkChangeEventsAndRunWithinDayReplanning) {
-			
-			config.controler().setOutputDirectory(runOutputBaseDirectory + day + "_within-day-replanning" + "/");
-			
-			// consider the network change events
-			config.network().setChangeEventsInputFile(networkChangeEventsFile);
-			config.network().setTimeVariantNetwork(true);
-			
-			config.plans().setInputFile(populationFile);
-			
-		} else {
-			config.controler().setOutputDirectory(runOutputBaseDirectory + day + "_baseCase" + "/");
+		
+		config.controler().setRunId(runId);
 
-			if (reducePopulationToAffectedAgents) {
-				// use the reduced population
-				config.plans().setInputFile(reducedPopulationFile);
-			} else {
-				config.plans().setInputFile(populationFile);
+		config.plans().setRemovingUnneccessaryPlanAttributes(true);
+
+		config.controler().setOutputDirectory(runOutputBaseDirectory + day
+				+ "_networkChangeEvents-" + applyNetworkChangeEvents
+				+ "_withinDayReplanning-" + applyWithinDayReplanning
+				+ "_replanInterval-" + withinDayReplanInterval
+				+ "/");
+		
+		if (applyNetworkChangeEvents) {
+			if (config.network().getChangeEventsInputFile() == null) {
+				throw new RuntimeException("No network change events file provided. Aborting...");
 			}
+			config.network().setTimeVariantNetwork(true);			
+		} else {
+			log.info("Not considering any network change events.");
+			config.network().setChangeEventsInputFile(null);
+			config.network().setTimeVariantNetwork(false);			
 		}
-				
+		
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		final Controler controler = new Controler(scenario);
-		controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+		controler.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
 		
-		if (applyNetworkChangeEventsAndRunWithinDayReplanning) {
+		if (reducePopulationToAffectedAgents) {
+			log.warn("Reduced population should only be used for testing purposes.");
 			
-			if (reducePopulationToAffectedAgents) {
-				log.info("Reducing the population size from " + scenario.getPopulation().getPersons().size() + "...");
+			log.info("Reducing the population size from " + scenario.getPopulation().getPersons().size() + "...");
 
-				Set<Id<Link>> incidentLinkIds = NetworkChangeEventsUtils.getIncidentLinksFromNetworkChangeEventsFile(scenario);
-				Set<Id<Person>> personIdsToKeepInPopulation = NetworkChangeEventsUtils.getPersonIDsOfAgentsDrivingAlongSpecificLinks(scenario, incidentLinkIds);
-				NetworkChangeEventsUtils.filterPopulation(scenario, personIdsToKeepInPopulation);
+			Set<Id<Link>> incidentLinkIds = NetworkChangeEventsUtils.getIncidentLinksFromNetworkChangeEventsFile(scenario);
+			Set<Id<Person>> personIdsToKeepInPopulation = NetworkChangeEventsUtils.getPersonIDsOfAgentsDrivingAlongSpecificLinks(scenario, incidentLinkIds);
+			NetworkChangeEventsUtils.filterPopulation(scenario, personIdsToKeepInPopulation);
 
-				log.info("... to " + scenario.getPopulation().getPersons().size() + " agents (= those agents driving along incident links).");
-				PopulationWriter writer = new PopulationWriter(scenario.getPopulation());
-				writer.write(reducedPopulationFile);
-			}
+			log.info("... to " + scenario.getPopulation().getPersons().size() + " agents (= those agents driving along incident links).");
+			PopulationWriter writer = new PopulationWriter(scenario.getPopulation());
+			writer.write(reducedPopulationFile);
+		} else {
+			log.info("Using the normal population.");
+		}
+		
+		if (applyWithinDayReplanning) {
 			
-			// start within day replanning
-
 			Set<String> analyzedModes = new HashSet<>();
 			analyzedModes.add(TransportMode.car);
-			final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
-							
+			final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
+		
+//			Set<Id<Link>> links = NetworkChangeEventsUtils.getIncidentLinksFromNetworkChangeEventsFile(scenario);
+//			Set<Id<Person>> personIds = NetworkChangeEventsUtils.getPersonIDsOfAgentsDrivingAlongSpecificLinks(scenario, links);
+			Set<Id<Person>> personIds = scenario.getPopulation().getPersons().keySet();
+			
+			WithinDayReplanningDepartureTimeIntervals incidentMobsimListener = new WithinDayReplanningDepartureTimeIntervals(personIds, withinDayReplanInterval);
+			
+			// within-day replanning
 			controler.addOverridingModule( new AbstractModule() {
 				@Override public void install() {
 					
-					this.bind(IncidentBestRouteMobsimListener.class).asEagerSingleton();
-					this.addMobsimListenerBinding().to(IncidentBestRouteMobsimListener.class);
-					this.addControlerListenerBinding().to(IncidentBestRouteMobsimListener.class);
-
+					this.addMobsimListenerBinding().toInstance(incidentMobsimListener);
+					this.addControlerListenerBinding().toInstance(incidentMobsimListener);
+					this.addEventHandlerBinding().toInstance(incidentMobsimListener);
+					
 					this.bind(TravelTime.class).toInstance(travelTime);
 					this.addEventHandlerBinding().toInstance(travelTime);
-					this.addMobsimListenerBinding().toInstance(travelTime);
+					this.addMobsimListenerBinding().toInstance(travelTime);			
 				}
 			}) ;
+			
+		} else {
+			if (applyNetworkChangeEvents) {
+				log.warn("Applying network change events without within-day replanning.");
+			}
 		}
 				
 		controler.run();		
+		
+		IKAnalysisRun analysis = new IKAnalysisRun(scenario, crs, 100);
+		analysis.run();
 	}
 	
 }

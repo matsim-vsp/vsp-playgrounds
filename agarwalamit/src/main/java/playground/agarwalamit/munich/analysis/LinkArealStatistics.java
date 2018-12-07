@@ -36,7 +36,7 @@ import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.agarwalamit.utils.FileUtils;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 import playground.agarwalamit.utils.ListUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 
@@ -65,12 +65,12 @@ public class LinkArealStatistics {
 		String eventsFile = DIR+"/"+runCase+"/ITERS/it.1500/1500.events.xml.gz";
 		network = LoadMyScenarios.loadScenarioFromNetwork(networkFile).getNetwork();
 
-		Collection<SimpleFeature> features_city = new ArrayList<>();
-		features_city.addAll( new ShapeFileReader().readFileAndInitialize(shapeFileCity) );
+		Collection<SimpleFeature> features_city = new ArrayList<>(new ShapeFileReader().readFileAndInitialize(
+				shapeFileCity));
 		Collection<Geometry> simplifiedGeoms_city = GeometryUtils.getSimplifiedGeometries(features_city);
 
-		Collection<SimpleFeature> features_mma = new ArrayList<>();
-		features_mma.addAll( new ShapeFileReader().readFileAndInitialize(shapeFileMMA) );
+		Collection<SimpleFeature> features_mma = new ArrayList<>(new ShapeFileReader().readFileAndInitialize(
+				shapeFileMMA));
 		Collection<Geometry> simplifiedGeoms_mma = GeometryUtils.getSimplifiedGeometries(features_mma);
 
 		BufferedWriter writer = IOUtils.getBufferedWriter(DIR+"/analysis/linkArealStatistics_"+runCase+".txt");

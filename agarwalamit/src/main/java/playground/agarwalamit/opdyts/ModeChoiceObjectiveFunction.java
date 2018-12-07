@@ -19,8 +19,12 @@
 
 package playground.agarwalamit.opdyts;
 
-import java.util.*;
-import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import com.google.inject.Inject;
 import floetteroed.opdyts.ObjectiveFunction;
 import floetteroed.opdyts.SimulatorState;
 import org.apache.log4j.Logger;
@@ -28,7 +32,11 @@ import org.matsim.analysis.TransportPlanningMainModeIdentifier;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.analysis.kai.DataMap;
 import org.matsim.contrib.analysis.kai.Databins;
 import org.matsim.contrib.opdyts.MATSimState;
@@ -46,16 +54,19 @@ import playground.agarwalamit.opdyts.equil.EquilMixedTrafficObjectiveFunctionPen
  *
  */
 public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
-    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger( ModeChoiceObjectiveFunction.class );
 
     private final MainModeIdentifier mainModeIdentifier ;
-    private final DistanceDistribution distriInfo ;
+
+    private DistanceDistribution distriInfo ;
 
     @Inject private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
     @Inject private TripRouter tripRouter ;
     @Inject private Network network ;
-    // Documentation: "Guice injects ... fields of all values that are bound using toInstance(). These are injected at injector-creation time."
+
+    @Inject
+    private ObjectiveFunctionEvaluator objectiveFunctionEvaluator;
+	// Documentation: "Guice injects ... fields of all values that are bound using toInstance(). These are injected at injector-creation time."
     // https://github.com/google/guice/wiki/InjectionPoints
     // I read that as "the fields are injected (every time again) when the instance is injected".
     // This is the behavior that we want here.  kai, sep'16
@@ -68,8 +79,12 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     private final Map<StatType,Databins<String>> simStatsContainer = new TreeMap<>() ;
     private final Map<StatType,DataMap<String>> sumsContainer  = new TreeMap<>() ;
     private final Map<StatType,Databins<String>> refStatsContainer = new TreeMap<>() ;
-
-     public ModeChoiceObjectiveFunction(final DistanceDistribution distriInfo) {
+	
+	public ModeChoiceObjectiveFunction(
+	        final DistanceDistribution distriInfo
+//									   ,ObjectiveFunctionType objectiveFunctionType
+    ) {
+//		this.objectiveFunctionType = objectiveFunctionType;
         this.distriInfo = distriInfo;
         for ( StatType statType : StatType.values() ) {
             // define the bin boundaries:
@@ -108,7 +123,8 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
                     }
                 };
                 break;
-            default: throw new RuntimeException("not implemented");
+            default:
+                throw new RuntimeException("not implemented");
         }
     }
 
@@ -144,7 +160,6 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
             }
         }
 
-        ObjectiveFunctionEvaluator objectiveFunctionEvaluator = new ObjectiveFunctionEvaluator();
         double objectiveFnValue = 0.;
 
         for ( Map.Entry<StatType, Databins<String>> entry : simStatsContainer.entrySet() ) {
@@ -171,9 +186,7 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     private void resetContainers() {
         for ( StatType statType : StatType.values() ) {
             this.simStatsContainer.get(statType).clear() ;
-            if ( this.sumsContainer.get(statType)==null ) {
-                this.sumsContainer.put( statType, new DataMap<>() ) ;
-            }
+            this.sumsContainer.computeIfAbsent(statType, k -> new DataMap<>());
             this.sumsContainer.get(statType).clear() ;
         }
     }

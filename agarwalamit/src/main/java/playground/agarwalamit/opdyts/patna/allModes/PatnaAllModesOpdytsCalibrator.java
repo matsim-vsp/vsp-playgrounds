@@ -20,13 +20,10 @@
 package playground.agarwalamit.opdyts.patna.allModes;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.Set;
-import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
 import org.matsim.api.core.v01.Scenario;
@@ -41,15 +38,12 @@ import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.controler.events.ShutdownEvent;
-import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.core.utils.io.IOUtils;
-import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
-import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
-import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.clustering.ClusterAlgorithm;
 import playground.agarwalamit.clustering.ClusterUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
@@ -57,12 +51,13 @@ import playground.agarwalamit.opdyts.DistanceDistribution;
 import playground.agarwalamit.opdyts.ModeChoiceDecisionVariable;
 import playground.agarwalamit.opdyts.ModeChoiceObjectiveFunction;
 import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
+import playground.agarwalamit.opdyts.OpdytsModeChoiceUtils;
 import playground.agarwalamit.opdyts.OpdytsScenario;
 import playground.agarwalamit.opdyts.RandomizedUtilityParametersChoser;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
-import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
-import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
 import playground.agarwalamit.opdyts.teleportationModes.Zone;
 import playground.agarwalamit.utils.FileUtils;
@@ -87,6 +82,7 @@ public class PatnaAllModesOpdytsCalibrator {
 		String OUT_DIR = null;
 		String relaxedPlans ;
 		ModeChoiceRandomizer.ASCRandomizerStyle ascRandomizeStyle;
+		boolean useConfigRandomSeed = true;
 
 		double stepSize = 1.0;
 		int iterations2Convergence = 800;
@@ -106,6 +102,7 @@ public class PatnaAllModesOpdytsCalibrator {
 			iterations2Convergence = Integer.valueOf(args[5]);
 			selfTuningWt = Double.valueOf(args[6]);
 			warmUpItrs = Integer.valueOf(args[7]);
+			useConfigRandomSeed = Boolean.valueOf(args[8]);
 
 			if (args.length>8) patnaTeleportationModesZonesType = PatnaTeleportationModesZonesType.valueOf(args[8]);
 		} else {
@@ -123,15 +120,17 @@ public class PatnaAllModesOpdytsCalibrator {
 		config.controler().setOutputDirectory(OUT_DIR);
 
 		// from GF, every run should have a different random seed.
-		int randomSeed = new Random().nextInt(9999);
-		config.global().setRandomSeed(randomSeed);
-
+		if (!useConfigRandomSeed) {
+			int randomSeed = new Random().nextInt(9999);
+			config.global().setRandomSeed(randomSeed);
+		}
+		
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
-		opdytsConfigGroup.setVariationSizeOfRandomizeDecisionVariable(stepSize);
+		opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
 		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
 		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
@@ -202,56 +201,10 @@ public class PatnaAllModesOpdytsCalibrator {
 				// adding pt fare system based on distance
 				this.addEventHandlerBinding().to(PtFareEventHandler.class);
 
-				addControlerListenerBinding().toInstance(new ShutdownListener() {
-					@Override
-					public void notifyShutdown(ShutdownEvent event) {
-						// copy the state vector elements files before removing ITERS dir
-						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizeFiles/";
-						new File(outDir).mkdirs();
+				this.bind(ObjectiveFunctionType.class).toInstance(ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED);
+				this.bind(ObjectiveFunctionEvaluator.class).asEagerSingleton();
 
-						int firstIt = event.getServices().getConfig().controler().getFirstIteration();
-						int lastIt = event.getServices().getConfig().controler().getLastIteration();
-						int plotEveryItr = 50;
-
-						for (int itr = firstIt+1; itr <=lastIt; itr++) {
-							if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(event.getServices().getControlerIO().getIterationPath(itr)).exists() ) {
-								{
-									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_networkModes.txt");
-									String sinkFile =  outDir+"/"+itr+".stateVector_networkModes.txt";
-									try {
-										Files.copy(new File(sourceFile), new File(sinkFile));
-									} catch (IOException e) {
-										throw new RuntimeException("Data is not copied. Reason : " + e);
-									}
-								}
-								{
-									String sourceFile = event.getServices().getControlerIO().getIterationFilename(itr,"stateVector_teleportationModes.txt");
-									String sinkFile =  outDir+"/"+itr+".stateVector_teleportationModes.txt";
-									try {
-										Files.copy(new File(sourceFile), new File(sinkFile));
-									} catch (IOException e) {
-										throw new RuntimeException("Data is not copied. Reason : " + e);
-									}
-								}
-							}
-						}
-
-						String dir2remove = event.getServices().getControlerIO().getOutputPath()+"/ITERS/";
-						IOUtils.deleteDirectoryRecursively(new File(dir2remove).toPath());
-
-						// post-process
-						String opdytsConvergencefile = finalOUT_DIR +"/opdyts.con";
-						if (new File(opdytsConvergencefile).exists()) {
-							OpdytsConvergenceChart opdytsConvergencePlotter = new OpdytsConvergenceChart();
-							opdytsConvergencePlotter.readFile(finalOUT_DIR +"/opdyts.con");
-							opdytsConvergencePlotter.plotData(finalOUT_DIR +"/convergence.png");
-						}
-
-						BestSolutionVsDecisionVariableChart bestSolutionVsDecisionVariableChart = new BestSolutionVsDecisionVariableChart(new ArrayList<>(allModes));
-						bestSolutionVsDecisionVariableChart.readFile(finalOUT_DIR +"/opdyts.log");
-						bestSolutionVsDecisionVariableChart.plotData(finalOUT_DIR +"/decisionVariableVsASC.png");
-					}
-				});
+				this.addControlerListenerBinding().toInstance(OpdytsModeChoiceUtils.copyVectorFilesToParentDirAndRemoveITERSDir(true));
 			}
 		});
 

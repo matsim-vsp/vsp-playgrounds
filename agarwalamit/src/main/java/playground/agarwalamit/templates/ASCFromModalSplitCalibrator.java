@@ -21,12 +21,11 @@ package playground.agarwalamit.templates;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -36,10 +35,7 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.controler.listener.StartupListener;
-
-import com.google.inject.Inject;
-
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.utils.MapUtils;
 
 /**
@@ -124,11 +120,7 @@ public class ASCFromModalSplitCalibrator implements StartupListener, IterationSt
 
 	// asc update is required only for modes which are available for mode choice
 	private void updateModes( SortedMap<String,Integer> mode2legs){
-		Iterator<Entry<String,Integer>> it = mode2legs.entrySet().iterator();
-		while(it.hasNext()){
-			Entry<String,Integer> e = it.next();
-			if (! this.availableModes.contains(e.getKey()) ) it.remove(); 
-		}
+		mode2legs.entrySet().removeIf(e -> !this.availableModes.contains(e.getKey()));
 	}
 	
 	@Override

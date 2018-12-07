@@ -214,7 +214,7 @@ public class SeepageSchematicPlotter {
 			Node node3 = NetworkUtils.createAndAddNode(network, Id.createNodeId("3"), new Coord(0.0, 1100.0));
 			Node node4 = NetworkUtils.createAndAddNode(network, Id.createNodeId("4"), new Coord(0.0, 1200.0));
 
-			Set<String> allowedModes = new HashSet<>(); allowedModes.addAll(Arrays.asList(TransportMode.car,TransportMode.bike,"motorbike"));
+            Set<String> allowedModes = new HashSet<>(Arrays.asList(TransportMode.car, TransportMode.bike, "motorbike"));
 
 			link1 = NetworkUtils.createAndAddLink(network, Id.createLinkId("1"), node1, node2, 100, 25, 36000, 1, null, "22"); 
 			link2 = NetworkUtils.createAndAddLink(network, Id.createLinkId("2"), node2, node3, 1000, 25, 60, 1, null, "22");	//flow capacity is 1 PCU per min.
@@ -238,11 +238,8 @@ public class SeepageSchematicPlotter {
 		@Override
 		public void handleEvent(LinkEnterEvent event) {
 			System.out.println(event.toString());
-			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(Id.createPersonId(event.getVehicleId()));
-			if (travelTimes == null) {
-				travelTimes = new HashMap<>();
-				this.personLinkTravelTimes.put(Id.createPersonId(event.getVehicleId()), travelTimes);
-			}
+			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.computeIfAbsent(Id.createPersonId(event.getVehicleId()),
+					k -> new HashMap<>());
 			travelTimes.put(event.getLinkId(), Double.valueOf(event.getTime()));
 			if ( event.getLinkId().equals( Id.createLinkId("2") ) ) {
 				log.info( event );

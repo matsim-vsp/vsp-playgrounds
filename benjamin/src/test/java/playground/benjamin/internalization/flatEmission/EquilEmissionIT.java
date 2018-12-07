@@ -113,6 +113,8 @@ public class EquilEmissionIT {
 
 		emissionSettings(sc);
 		ScenarioUtils.loadScenario(sc); // need to load vehicles. Amit Sep 2016
+		
+		// ---
 
 		Controler controler = new Controler(sc);
 		String outputDirectory = helper.getOutputDirectory() + "/" + (isConsideringCO2Costs ? "considerCO2Costs/" : "notConsiderCO2Costs/");

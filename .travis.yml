@@ -1,0 +1,55 @@
+language: java
+jdk: oraclejdk8
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer  # https://github.com/travis-ci/travis-ci/issues/3259
+
+# This skips the mvn install that is otherwise run (implausibly, the setting has to be "true")
+# https://docs.travis-ci.com/user/customizing-the-build/#Skipping-the-Installation-Step
+install: true
+
+# define the order of the stages:
+stages:
+  - package
+  - test
+  - deploy
+
+script:
+  - mvn install --also-make --projects ${MODULE} -DskipTests && cd ${TRAVIS_BUILD_DIR}/${MODULE} && mvn failsafe:integration-test failsafe:verify -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
+
+jobs:
+  include:
+    - stage: package
+      script: mvn package -B -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true --fail-at-end
+    - stage: deploy
+      script: "mvn --settings .travis.settings.xml -DskipTests=true -B clean deploy"
+      skip_cleanup: true
+
+env:
+  global:
+    - MAVEN_OPTS="-Xmx2g"
+  matrix:
+    - MODULE=vsp            # 5 min 29 sec
+    # sorted from longest to shortest (to minimise the overall test stage duration)
+    - MODULE=ikaddoura      # 28 min 51 sec
+    - MODULE=tthunig        # 10 min 34 sec
+    - MODULE=kai            # 8 min 39 sec
+    - MODULE=agarwalamit    # 8 min 9 sec
+    - MODULE=benjamin       # 6 min 31 sec
+    - MODULE=dziemke        # 4 min 35 sec
+    - MODULE=kturner        # 3 min 31 sec
+    - MODULE=jbischoff      # 3 min 22 sec
+    - MODULE=santiago       # 3 min 17 sec
+    - MODULE=michalm        # 3 min 16 sec
+    - MODULE=vspshk         # 2 min 54 sec
+    - MODULE=gleich         # 2 min 52 sec
+    - MODULE=stockholm      # 2 min 27 sec
+    - MODULE=gunnar         # 2 min 25 sec
+    - MODULE=dgrether       # 2 min 24 sec
+    - MODULE=vsptelematics  # 2 min 15 sec
+    - MODULE=kairuns        # 2 min 4 sec
+    
+cache:
+  directories:
+  - $HOME/.m2

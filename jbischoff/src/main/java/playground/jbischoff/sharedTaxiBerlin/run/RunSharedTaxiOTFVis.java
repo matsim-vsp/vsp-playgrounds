@@ -23,18 +23,14 @@
 package playground.jbischoff.sharedTaxiBerlin.run;
 
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalModule;
-import org.matsim.contrib.drt.analysis.zonal.DrtZonalSystem;
-import org.matsim.contrib.drt.run.*;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
-import com.google.inject.Binder;
 
 /**
  * @author  jbischoff
@@ -65,21 +61,6 @@ public class RunSharedTaxiOTFVis {
 			config.controler().setRunId(runId);
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 			Controler controler = DrtControlerCreator.createControler(config, true);
-			DrtZonalSystem zones = new DrtZonalSystem(controler.getScenario().getNetwork(), 2000);
-			
-			controler.addOverridingModule(new AbstractModule() {
-				
-				
-				@Override
-				public void install() {
-					bind(DrtZonalSystem.class).toInstance(zones);
-					
-				}
-			});
-			controler.addOverridingModule(new DrtZonalModule());
 			controler.run();
-		
-		
-		
 	}
 }

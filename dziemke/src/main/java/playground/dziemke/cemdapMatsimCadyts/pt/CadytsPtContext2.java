@@ -65,7 +65,9 @@ import org.matsim.counts.algorithms.CountSimComparisonKMLWriter;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
 import org.matsim.pt.transitSchedule.api.TransitRouteStop;
+import org.matsim.pt.transitSchedule.api.TransitStopArea;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 
 import cadyts.calibrators.analytical.AnalyticalCalibrator;
 import cadyts.measurements.SingleLinkMeasurement.TYPE;
@@ -352,17 +354,22 @@ CadytsContextI<TransitStopFacility> {
 		public String getName() {
 			return null;
 		}
-	
+
 		@Override
-		public String getStopPostAreaId() {
+		public Attributes getAttributes() {
+			// TODO Auto-generated method stub
 			return null;
 		}
-	
+
 		@Override
-		public void setStopPostAreaId(String stopPostAreaId) {
-	
+		public Id<TransitStopArea> getStopAreaId() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public void setStopAreaId(Id<TransitStopArea> stopAreaId) {
+			// TODO Auto-generated method stub
 		}
 	}
-
-
 }

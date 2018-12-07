@@ -179,7 +179,7 @@ public class EquilMixedTrafficIT {
 
         //
         StrategyConfigGroup.StrategySettings ss = new StrategyConfigGroup.StrategySettings();
-        ss.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode.name());
+        ss.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
         ss.setWeight(0.2);
 
         scenario.getConfig().strategy().addStrategySettings(ss);

@@ -19,12 +19,29 @@
  * *********************************************************************** */
 package playground.agarwalamit.analysis.tripDistance;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.*;
-import org.matsim.api.core.v01.events.handler.*;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.events.LinkLeaveEvent;
+import org.matsim.api.core.v01.events.PersonArrivalEvent;
+import org.matsim.api.core.v01.events.PersonDepartureEvent;
+import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -45,7 +62,7 @@ public class TripDistanceHandler implements PersonDepartureEventHandler, LinkLea
 	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2distances = new TreeMap<>();
 	private final SortedMap<String, Map<Id<Person>, Double>> mode2PersonId2OneTripdist = new TreeMap<>();
 	private final SortedMap<String, Map<Id<Person>, Double>> mode2PersonId2TeleportDist = new TreeMap<>();
-	private final List<String> mainModes = new ArrayList<>();
+	private final List<String> mainModes;
 	private final Map<Id<Person>, String> personId2LegModes = new HashMap<>();
 	private double maxDist = Double.NEGATIVE_INFINITY;
 	private final SortedMap<String, Double> mode2NumberOfLegs = new TreeMap<>();
@@ -55,8 +72,17 @@ public class TripDistanceHandler implements PersonDepartureEventHandler, LinkLea
 	public TripDistanceHandler(final Scenario scenario){
 		LOG.info("Route distance will be calculated based on events.");
 		LOG.warn("During distance calculation, link from which person is departed or arrived will not be considered.");
-		this.mainModes.addAll(scenario.getConfig().qsim().getMainModes());
+		this.mainModes = new ArrayList<>(scenario.getConfig().qsim().getMainModes());
+		LOG.info("Following modes are considered: "+this.mainModes);
 		this.network = scenario.getNetwork();
+	}
+
+	public TripDistanceHandler(final Network network){
+		LOG.info("Route distance will be calculated based on events.");
+		LOG.warn("During distance calculation, link from which person is departed or arrived will not be considered.");
+		this.mainModes = Arrays.asList(TransportMode.car);
+		LOG.info("Following modes are considered: "+this.mainModes);
+		this.network = network;
 	}
 
 	@Override
@@ -170,8 +196,7 @@ public class TripDistanceHandler implements PersonDepartureEventHandler, LinkLea
 	}
 
 	public SortedSet<String> getUsedModes (){
-		SortedSet<String> modes = new TreeSet<>();
-		modes.addAll(mode2PersonId2distances.keySet());
+		SortedSet<String> modes = new TreeSet<>(mode2PersonId2distances.keySet());
 		return modes;
 	}
 

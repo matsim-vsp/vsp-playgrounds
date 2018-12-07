@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v6.dtd">
+
+<population>
+	<person id="person_0">
+		<plan score="143.84663813387084" selected="yes">
+			<activity type="home" link="link_0_3" x="-500.0" y="9000.0" end_time="08:00:00" >
+			</activity>
+			<leg mode="car" dep_time="08:00:00" trav_time="00:00:26">
+				<route type="links" start_link="link_0_3" end_link="link_6_9" trav_time="00:00:26" distance="27200.0">link_0_3 link_3_7 link_7_8 link_8_6 link_6_9</route>
+			</leg>
+			<activity type="work" link="link_6_9" x="10500.0" y="9000.0" end_time="16:00:00" >
+			</activity>
+			<leg mode="car" dep_time="16:00:00" trav_time="00:00:15">
+				<route type="links" start_link="link_6_9" end_link="link_0_3" trav_time="00:00:15" distance="17000.0">link_6_9 link_9_6 link_6_2 link_2_1 link_1_3 link_3_0 link_0_3</route>
+			</leg>
+			<activity type="home" link="link_0_3" x="-500.0" y="9000.0" >
+			</activity>
+		</plan>
+	</person>
+	<person id="person_1">
+		<plan score="143.84663813387084" selected="yes">
+			<activity type="home" link="link_0_3" x="-500.0" y="9000.0" end_time="08:00:01" >
+			</activity>
+			<leg mode="car" dep_time="08:00:00" trav_time="00:00:26">
+				<route type="links" start_link="link_0_3" end_link="link_6_9" trav_time="00:00:26" distance="27200.0">link_0_3 link_3_7 link_7_8 link_8_6 link_6_9</route>
+			</leg>
+			<activity type="work" link="link_6_9" x="10500.0" y="9000.0" end_time="16:00:01" >
+			</activity>
+			<leg mode="car" dep_time="16:00:00" trav_time="00:00:15">
+				<route type="links" start_link="link_6_9" end_link="link_0_3" trav_time="00:00:15" distance="17000.0">link_6_9 link_9_6 link_6_2 link_2_1 link_1_3 link_3_0 link_0_3</route>
+			</leg>
+			<activity type="home" link="link_0_3" x="-500.0" y="9000.0" >
+			</activity>
+		</plan>
+	</person>
+</population>

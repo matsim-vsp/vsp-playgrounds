@@ -27,7 +27,7 @@ import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 import playground.jbischoff.csberlin.evaluation.ParkingSearchEventsReader;
 
 /**
- * @author schlenther,jbischoff
+ * @author tschlenther,jbischoff
  */
 public class TSParkingSearchEvaluation {
 

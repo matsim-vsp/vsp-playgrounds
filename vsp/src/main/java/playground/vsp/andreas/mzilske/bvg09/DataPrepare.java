@@ -21,6 +21,8 @@ package playground.vsp.andreas.mzilske.bvg09;
 
 import java.util.Collection;
 
+import javax.inject.Provider;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
@@ -36,7 +38,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
@@ -70,8 +72,6 @@ import org.matsim.visum.VisumNetwork;
 import org.matsim.visum.VisumNetworkReader;
 
 import playground.vsp.andreas.mzilske.pt.queuesim.GreedyUmlaufBuilderImpl;
-
-import javax.inject.Provider;
 
 public class DataPrepare {
 
@@ -218,7 +218,7 @@ public class DataPrepare {
 
 		log.info("start visualizer");
 		EventsManager events = EventsUtils.createEventsManager();
-		QSim otfVisQSim = QSimUtils.createDefaultQSim(visScenario, events);
+		QSim otfVisQSim = new QSimBuilder(visScenario.getConfig()).useDefaults().build(visScenario, events);
 		OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(visScenario.getConfig(), visScenario, events, otfVisQSim);
 		OTFClientLive.run(visScenario.getConfig(), server);
 		otfVisQSim.run();

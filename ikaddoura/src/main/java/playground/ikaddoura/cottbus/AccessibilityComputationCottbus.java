@@ -24,12 +24,11 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
-import org.matsim.contrib.accessibility.AccessibilityModule;
-import org.matsim.contrib.accessibility.FacilityTypes;
-import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
-import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
+import org.matsim.contrib.accessibility.AccessibilityModule;
+import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.VisualizationUtils;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.Config;
@@ -39,12 +38,10 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.facilities.ActivityFacilities;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-import playground.dziemke.utils.LogToOutputSaver;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
+import playground.vsp.openberlinscenario.cemdap.LogToOutputSaver;
 
 /**
  * @author dziemke, ikaddoura
@@ -61,7 +58,7 @@ public class AccessibilityComputationCottbus {
 		String accessibilityOutputDirectory = runOutputFolder + "accessibilities/";	
 		
 		// Parameters
-		final Double cellSize = 500.;
+		final int tileSize_m = 500;
 		Envelope envelope = new Envelope(4572000,4619000,5806000,5836000);
 		final boolean push2Geoserver = false;
 		
@@ -72,7 +69,7 @@ public class AccessibilityComputationCottbus {
 		Double upperBound = 3.5;
 		Integer range = 9;
 		int symbolSize = 110;
-		int populationThreshold = (int) (200 / (1000/cellSize * 1000/cellSize));
+		int populationThreshold = (int) (200 / (1000/tileSize_m * 1000/tileSize_m));
 		
 		// Storage objects
 		final List<String> modes = new ArrayList<>();
@@ -94,7 +91,7 @@ public class AccessibilityComputationCottbus {
 		config.plansCalcRoute().setTeleportedModeSpeed(TransportMode.walk, 1.3888889);
 		
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
-		acg.setCellSizeCellBasedAccessibility(cellSize.intValue());
+		acg.setTileSize_m(tileSize_m);
 		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox);
 		acg.setEnvelope(envelope);
 		acg.setComputingAccessibilityForMode(Modes4Accessibility.freespeed, true); // if this is not set to true, output CSV will give NaN values

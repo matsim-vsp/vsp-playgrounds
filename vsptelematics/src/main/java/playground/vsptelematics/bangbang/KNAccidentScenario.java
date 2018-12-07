@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -55,6 +56,8 @@ import org.matsim.core.network.NetworkChangeEvent.ChangeType;
 import org.matsim.core.network.NetworkChangeEvent.ChangeValue;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.replanning.StrategyManager;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.strategies.KeepLastExecutedAsPlanStrategy;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.util.TravelTime;
@@ -62,7 +65,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.withinday.controller.ExecutedPlansServiceImpl;
 import org.matsim.withinday.mobsim.MobsimDataProvider;
-import org.matsim.withinday.trafficmonitoring.TravelTimeCollector;
+import org.matsim.withinday.trafficmonitoring.WithinDayTravelTime;
 
 /**
  * @author nagel
@@ -99,12 +102,12 @@ public class KNAccidentScenario {
 
 		// ===
 
-		final Config config = ConfigUtils.loadConfig("../../../shared-svn/studies/countries/de/berlin/telematics/funkturm-example/baseconfig.xml") ;
-
-		config.network().setInputFile("../../counts/iv_counts/network.xml.gz");
+		final Config config = ConfigUtils.loadConfig("../../shared-svn/studies/countries/de/berlin/telematics/funkturm-example/baseconfig.xml") ;
+		
+		config.network().setInputFile("../../counts/iv_counts/network.xml.gz"); // note that this path is relative to path of config!
 		config.network().setTimeVariantNetwork(true);
 
-		config.plans().setInputFile("reduced-plans.xml.gz");
+		config.plans().setInputFile("reduced-plans.xml.gz"); // relative to path of config
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 
 		config.controler().setFirstIteration(9);
@@ -117,11 +120,9 @@ public class KNAccidentScenario {
 		config.qsim().setStorageCapFactor(0.06);
 		config.qsim().setStuckTime(100.);
 		config.qsim().setStartTime(6.*3600.);
-		config.qsim().setTrafficDynamics(TrafficDynamics.withHoles);
+//		config.qsim().setTrafficDynamics(TrafficDynamics.withHoles);
+		config.qsim().setTrafficDynamics(TrafficDynamics.queue);
 
-		for ( ActivityParams params : config.planCalcScore().getActivityParams() ) {
-			params.setTypicalDurationScoreComputation( TypicalDurationScoreComputation.relative );
-		}
 		{
 			ModeParams params = new ModeParams( "undefined" ) ;
 			config.planCalcScore().addModeParams(params);
@@ -136,12 +137,24 @@ public class KNAccidentScenario {
 		config.vspExperimental().setVspDefaultsCheckingLevel( VspDefaultsCheckingLevel.warn );
 		config.vspExperimental().setWritingOutputEvents(true);
 
-		OTFVisConfigGroup otfConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class ) ;
+		OTFVisConfigGroup otfConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class ) ;
 		otfConfig.setAgentSize(200);
+		otfConfig.setLinkWidth(10);
+		otfConfig.setDrawTime(true);
 
 		// ===
 
 		final Scenario scenario = ScenarioUtils.loadScenario( config ) ;
+		
+		for ( Link link : scenario.getNetwork().getLinks().values() ) {
+			if ( link.getAllowedModes().contains( TransportMode.walk ) ) {
+				Set<String> modes = new HashSet<>( link.getAllowedModes() ) ;
+				modes.add( "segway");
+				link.setAllowedModes(modes);
+			}
+		}
+		
+		
 		preparePopulation(scenario);
 		scheduleAccident(scenario); 
 
@@ -160,24 +173,22 @@ public class KNAccidentScenario {
 
 		Set<String> analyzedModes = new HashSet<>() ;
 		analyzedModes.add( TransportMode.car ) ;
-		final TravelTimeCollector travelTime = new TravelTimeCollector(controler.getScenario(), analyzedModes);
+		final WithinDayTravelTime travelTime = new WithinDayTravelTime(controler.getScenario(), analyzedModes);
 		
-//		final MyTravelTime travelTime = new MyTravelTime(scenario) ;
-
 		controler.addOverridingModule( new OTFVisLiveModule() );
 
 		controler.addOverridingModule( new AbstractModule(){
 			@Override public void install() {
-				MobsimDataProvider mdp = new MobsimDataProvider() ;
-				bind( MobsimDataProvider.class ).toInstance( mdp ) ;
-				addMobsimListenerBinding().toInstance( mdp ) ;	
-
-				bind( ExecutedPlansServiceImpl.class ).asEagerSingleton(); 
+			
+				bind( MobsimDataProvider.class ).in(Singleton.class) ;
+				addMobsimListenerBinding().to( MobsimDataProvider.class) ;
+				bind( ExecutedPlansServiceImpl.class ).in(Singleton.class) ;
 				addControlerListenerBinding().to( ExecutedPlansServiceImpl.class ) ;
+				// (note that this is different from EXPERIENCEDPlansService! kai, apr'18)
 //				
 				addPlanStrategyBinding(KEEP_LAST_EXECUTED).toProvider(KeepLastExecutedAsPlanStrategy.class) ;
 
-				this.bind( MyIterationCounter.class ).asEagerSingleton();
+				this.bind( MyIterationCounter.class ).in(Singleton.class) ;
 				
 
 				// ===
@@ -187,11 +198,16 @@ public class KNAccidentScenario {
 				this.bind( TravelTime.class ).toInstance( travelTime );
 				
 				// ---
-				// These are the possible strategies.  They have various pre-requisites.
-				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
-//				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
-//				this.addMobsimListenerBinding().to( WithinDayReRouteMobsimListener.class );
-
+				// These are the possible strategies.  Only some of the above bindings are needed for each of them.
+//				this.addMobsimListenerBinding().to( ManualDetour.class ) ;
+				this.addMobsimListenerBinding().to( WithinDayBangBangMobsimListener.class );
+				
+//				WithinDayReRouteMobsimListener abc = new WithinDayReRouteMobsimListener();;
+//				this.addMobsimListenerBinding().toInstance( abc ) ;
+////				abc.setLastReplanningIteration(9);
+//				abc.setReplanningProba(1.0);
+				
+				
 			}
 		}) ;
 

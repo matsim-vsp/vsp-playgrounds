@@ -19,22 +19,20 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.ids;
 
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.lanes.data.Lane;
-
+import org.matsim.lanes.Lane;
 import playground.dgrether.koehlerstrehlersignal.data.DgCommodity;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossing;
 import playground.dgrether.koehlerstrehlersignal.data.DgCrossingNode;
-import playground.dgrether.koehlerstrehlersignal.data.DgGreen;
 import playground.dgrether.koehlerstrehlersignal.data.DgProgram;
 import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.data.TtPath;
+
+import java.util.List;
 
 
 /**
@@ -99,6 +97,22 @@ public class DgIdConverter {
 	}
 	
 	/**
+	 * converts back. see convertLinkId2FromCrossingNodeId(...)
+	 * 
+	 * @param fromCrossingNodeId the id of a crossing node in the ks-model network
+	 * @return the id of the matsim link corresponding to the street starting in this crossing node
+	 */
+	public Id<Link> convertFromCrossingNodeId2LinkId(Id<DgCrossingNode> fromCrossingNodeId){
+		Integer ksIntFromCrossingNodeId = Integer.parseInt(fromCrossingNodeId.toString());
+		String matsimStringLinkId = this.idPool.getStringId(ksIntFromCrossingNodeId);
+		if (matsimStringLinkId.endsWith("11")){
+			Id<Link> id = Id.create(matsimStringLinkId.substring(0, matsimStringLinkId.length() - 2), Link.class);
+			return id;
+		}
+		throw new IllegalStateException("Can not convert " + matsimStringLinkId + " to link id");
+	}
+	
+	/**
 	 * creates a light id for a link to link relationship
 	 * 
 	 * @param fromLinkId
@@ -106,7 +120,7 @@ public class DgIdConverter {
 	 * @param toLinkId
 	 * @return the light id
 	 */
-	public Id<DgStreet> convertFromLinkIdToLinkId2LightId(Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> toLinkId){
+	public Id<DgStreet> convertFromLinkIdToLinkId2LightId( Id<Link> fromLinkId, Id<Lane> fromLaneId, Id<Link> toLinkId){
 		String id =  null;
 		if (fromLaneId == null){
 			id = fromLinkId.toString()  + "55" + toLinkId.toString();

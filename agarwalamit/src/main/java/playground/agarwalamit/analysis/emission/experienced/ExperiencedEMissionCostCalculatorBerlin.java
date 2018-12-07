@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
@@ -33,9 +34,10 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
+
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.MapUtils;
-import playground.kai.usecases.combinedEventsReader.CombinedMatsimEventsReader;
+import playground.vsp.airPollution.CombinedEmissionEventsReader;
 import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.IntervalHandler;
@@ -61,43 +63,35 @@ public class ExperiencedEMissionCostCalculatorBerlin {
         final int noOfTimeBins = 360;
 
         // berlin
-		String dir = "/Users/ihab/Documents/workspace/runs-svn/cne/berlin-dz-1pct-simpleNetwork/output_selectedPlans_flowCapFactor0.015_randomization/";
+		String dir = "/Users/ihab/Desktop/ils4a/kaddoura/cne_berlin10pct/output/";
 
         // berlin
 		String [] cases = {
-//				"m_r_output_run0_bln_bc"
-//				,"m_r_output_run1_bln_c_QBPV3"
-//				,"m_r_output_run2_bln_c_QBPV9"
-//				,"m_r_output_run3_bln_c_DecongestionPID"
-//				,"m_r_output_run3b_bln_c_DecongestionBangBang"
-				"m_r_output_run4_bln_cne_DecongestionPID"
-//				,"m_r_output_run4b_bln_cne_DecongestionBangBang",
-//				"m_r_output_run5_bln_cne_QBPV3",
-//				"m_r_output_run6_bln_cne_QBPV9",
-//				"m_r_output_run7_bln_n",
-//				"m_r_output_run8_bln_e",
-//
-//				"r_output_run0_bln_bc"
-//				,"r_output_run1_bln_c_QBPV3"
-//				,"r_output_run2_bln_c_QBPV9"
-//				,"r_output_run3_bln_c_DecongestionPID"
-//				,"r_output_run3b_bln_c_DecongestionBangBang"
-				,"r_output_run4_bln_cne_DecongestionPID"
-//				,"r_output_run4b_bln_cne_DecongestionBangBang",
-//				"r_output_run5_bln_cne_QBPV3",
-//				"r_output_run6_bln_cne_QBPV9",
-//				"r_output_run7_bln_n",
-//				"r_output_run8_bln_e"
+//				"m_r_output_c"
+//				,"m_r_output_c_0.01"
+//				,"m_r_output_cne"
+//				,"m_r_output_cne_0.01"
+//				,"m_r_output_e"
+//				,"m_r_output_n"
+//				,"m_r_output_run0_baseCase"
+				
+				"r_output_c"
+				,"r_output_c_0.01"
+				,"r_output_cne"
+				,"r_output_cne_0.01"
+				,"r_output_e"
+				,"r_output_n"
+//				,"r_output_run0_baseCase"
 		};
-		int [] its = {100};
-
+		int [] its = {200};
+ 
         try(BufferedWriter writer = IOUtils.getBufferedWriter(dir +"airPolluationExposureCosts.txt")) {
             writer.write("case \t itNr \t costsInEur \t tollValuesEUR \n");
 
             for(String str : cases) {
                 for(int itr : its) {
                     String networkFile = dir+str+"/output_network.xml.gz";
-                    String configFile = dir+str+"/output_config.xml.gz";
+                    String configFile = dir+str+"/output_config.xml";
                     String eventsFile = dir + str + "/ITERS/it." + itr + "/" + itr + ".events.xml.gz";
 
                     if( ! new File(networkFile).exists() || ! new File(configFile).exists() || ! new File(eventsFile).exists() ) {
@@ -140,10 +134,11 @@ public class ExperiencedEMissionCostCalculatorBerlin {
 
                     EventsManager events = EventsUtils.createEventsManager();
                     events.addHandler(handler);
-                    CombinedMatsimEventsReader reader = new CombinedMatsimEventsReader(events);
+                    CombinedEmissionEventsReader reader = new CombinedEmissionEventsReader(events);
                     reader.readFile(eventsFile);
 
-                    handler.getUserGroup2TotalEmissionCosts().entrySet().forEach(e -> System.out.println(e.getKey()+"\t"+e.getValue()));
+                    handler.getUserGroup2TotalEmissionCosts()
+                           .forEach((key, value) -> System.out.println(key + "\t" + value));
                     writer.write(str+"\t"+itr+"\t"+ MapUtils.doubleValueSum(handler.getUserGroup2TotalEmissionCosts())+"\t");
 
                     writer.write(MapUtils.doubleValueSum(person2toll)+"\n");

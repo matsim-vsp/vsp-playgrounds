@@ -27,6 +27,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.PersonFilter;
@@ -59,18 +60,19 @@ public class ModeSwitchersTripTime {
 		}
 	}
 
-	private final SortedMap<Tuple<String, String>, ModeSwitcherInfoCollector> modeSwitchType2InfoCollector = new TreeMap<>((o1, o2) -> o1.toString().compareTo(o2.toString()));
+	private final SortedMap<Tuple<String, String>, ModeSwitcherInfoCollector> modeSwitchType2InfoCollector = new TreeMap<>(
+			Comparator.comparing(Tuple::toString));
 	private final Map<Id<Person>,List<Tuple<String, String>>> personId2ModeInfos = new HashMap<>();
 
 	public static void main(String[] args) {
 
-		String dir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/otherRuns/output/1pct/run9/";
-		String runCases[] ={"baseCaseCtd","ei","ci","eci"};
+		String dir = "../../runs-svn/detEval/emissionCongestionInternalization/hEART/output/";
+		String runCases[] ={"bau","ei","5ei","10ei"};
 
 		for(String runNr : runCases){
-			ModeSwitchersTripTime mstt = new ModeSwitchersTripTime();
-			Scenario scenario = LoadMyScenarios.loadScenarioFromNetworkAndConfig(dir+"/output_network.xml.gz", dir+"output_config.xml.gz");
-			scenario.getConfig().controler().setOutputDirectory(dir);
+			ModeSwitchersTripTime mstt = new ModeSwitchersTripTime(MunichPersonFilter.MunichUserGroup.Rev_Commuter.toString(), new MunichPersonFilter());
+			Scenario scenario = LoadMyScenarios.loadScenarioFromNetworkAndConfig(dir+runNr+"/output_network.xml.gz", dir+runNr+"/output_config.xml");
+			scenario.getConfig().controler().setOutputDirectory(dir+runNr);
 			mstt.processEventsFiles(scenario);
 			mstt.writeResults(dir+runNr+"/analysis/");
 		}
@@ -183,7 +185,12 @@ public class ModeSwitchersTripTime {
 	}
 
 	public void writeResults(final String outputFolder){
-		String outFile = outputFolder+"modeSwitchersTripTimes.txt";
+		String outFile = outputFolder+"modeSwitchersTripTimes";
+		if (this.userGroup==null) {
+			outFile += ".txt";
+		} else {
+			outFile += "_"+this.userGroup+".txt";
+		}
 		BufferedWriter writer =  IOUtils.getBufferedWriter(outFile);
 		try {
 			writer.write("firstMode \t lastMode \t numberOfLegs \t totalTripTimesForFirstIterationInHr \t totalTripTimesForLastIterationInHr \n");

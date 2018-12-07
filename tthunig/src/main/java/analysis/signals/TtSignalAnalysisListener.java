@@ -28,7 +28,7 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.dziemke.analysis.GnuplotUtils;
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * Class to bind the signal analyze and writing tool to the simulation. 
@@ -43,7 +43,7 @@ public class TtSignalAnalysisListener implements IterationEndsListener {
 	private Scenario scenario;
 	
 	@Inject
-	private TtSignalAnalysisWriter writer;
+	private SignalAnalysisWriter writer;
 	
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
@@ -67,11 +67,11 @@ public class TtSignalAnalysisListener implements IterationEndsListener {
 	 * @param iteration
 	 */
 	private void runGnuplotScript(String gnuplotScriptName, int iteration){
-		String pathToSpecificAnalysisDir = scenario.getConfig().controler().getOutputDirectory() + "ITERS/it." + iteration + "/analysis";		
-		String relativePathToGnuplotScript = "../../../../../analysis/" + gnuplotScriptName  + ".p";
+		String pathToSpecificAnalysisDir = scenario.getConfig().controler().getOutputDirectory() + "/ITERS/it." + iteration + "/analysis";		
+		String relativePathToGnuplotScript = "../../../../../../../shared-svn/studies/tthunig/gnuplotScripts/" + gnuplotScriptName  + ".p";
 		
-		log.info("execute command: cd " + pathToSpecificAnalysisDir);
-		log.info("and afterwards: gnuplot " + relativePathToGnuplotScript);
+//		log.info("execute command: cd " + pathToSpecificAnalysisDir);
+//		log.info("and afterwards: gnuplot " + relativePathToGnuplotScript);
 		
 		GnuplotUtils.runGnuplotScript(pathToSpecificAnalysisDir, relativePathToGnuplotScript);
 		

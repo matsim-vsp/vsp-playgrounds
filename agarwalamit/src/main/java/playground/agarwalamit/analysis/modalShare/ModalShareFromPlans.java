@@ -90,8 +90,8 @@ public class ModalShareFromPlans implements ModalShare{
 					) continue;
 
 				noOfLegs += person.getSelectedPlan().getPlanElements().stream()
-								  .filter(pe -> pe instanceof Leg)
-								  .map(pe -> (Leg) pe)
+								  .filter(Leg.class::isInstance)
+								  .map(Leg.class::cast)
 								  .map(Leg::getMode)
 								  .filter(legMode -> legMode.equals(mode))
 								  .count();

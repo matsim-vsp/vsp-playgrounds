@@ -22,12 +22,12 @@ package playground.agarwalamit.opdyts.teleportationModes;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import floetteroed.utilities.TimeDiscretization;
 import floetteroed.utilities.math.Vector;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.contrib.opdyts.MATSimCountingStateAnalyzer;
 import org.matsim.contrib.opdyts.SimulationStateAnalyzerProvider;
-import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.events.handler.EventHandler;
 
 /**

@@ -30,8 +30,12 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.lanes.data.LanesUtils;
-import org.matsim.lanes.data.*;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesFactory;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.LanesWriter;
 
 import java.util.Arrays;
 import java.util.Collections;

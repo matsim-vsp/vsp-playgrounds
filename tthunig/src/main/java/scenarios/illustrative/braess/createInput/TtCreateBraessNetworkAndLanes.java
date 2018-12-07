@@ -21,11 +21,6 @@
  */
 package scenarios.illustrative.braess.createInput;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -34,12 +29,17 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.core.network.io.NetworkWriter;
-import org.matsim.lanes.data.LanesUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesFactory;
-import org.matsim.lanes.data.LanesToLinkAssignment;
-import org.matsim.lanes.data.LanesWriter;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesFactory;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesUtils;
+import org.matsim.lanes.LanesWriter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class to create network and lanes for the breass scenario.
@@ -66,6 +66,7 @@ public final class TtCreateBraessNetworkAndLanes {
 	
 	private boolean simulateInflowCap = false;
 	private boolean middleLinkExists = true;
+	private boolean byPassExists = false;
 	private LaneType laneType = LaneType.NONE; 
 	private boolean btuRun = false;
 	private int numberOfPersons;
@@ -92,6 +93,9 @@ public final class TtCreateBraessNetworkAndLanes {
 	private double linkTTBig; // [s]
 	// travel time for inflow links and links that all agents have to use
 	private double minimalLinkTT; // [s]
+	// travel time for the by-pass route
+	private double byPassTT = 1200; // [s]
+
 
 	public TtCreateBraessNetworkAndLanes(Scenario scenario) {		
 		this.scenario = scenario;
@@ -166,6 +170,10 @@ public final class TtCreateBraessNetworkAndLanes {
 				new Coord(600, 200)));
 		net.addNode(fac.createNode(Id.createNodeId(6),
 				new Coord(800, 200)));
+		if (byPassExists) {
+			net.addNode(fac.createNode(Id.createNodeId(7), new Coord(0, 600)));
+			net.addNode(fac.createNode(Id.createNodeId(8), new Coord(600, 600)));
+		}
 		
 		if (simulateInflowCap){
 			net.addNode(fac.createNode(Id.createNodeId(23),
@@ -186,7 +194,8 @@ public final class TtCreateBraessNetworkAndLanes {
 		l = fac.createLink(Id.createLinkId("1_2"),
 				net.getNodes().get(Id.createNodeId(1)),
 				net.getNodes().get(Id.createNodeId(2)));
-		setLinkAttributes(l, capFirstLast, linkLengthSmall, minimalLinkTT);
+		// use a big link length here such that no spill back occurs on the first link and vehicles can use the by-pass without congestion
+		setLinkAttributes(l, capFirstLast, 5*linkLengthBig, minimalLinkTT);	
 		net.addLink(l);
 		
 		if (simulateInflowCap){
@@ -269,6 +278,18 @@ public final class TtCreateBraessNetworkAndLanes {
 				net.getNodes().get(Id.createNodeId(6)));
 		setLinkAttributes(l, capFirstLast, linkLengthSmall, minimalLinkTT);
 		net.addLink(l);
+		
+		if (byPassExists) {
+			l = fac.createLink(Id.createLinkId("1_7"), net.getNodes().get(Id.createNodeId(1)), net.getNodes().get(Id.createNodeId(7)));
+			setLinkAttributes(l, capFirstLast, linkLengthBig, byPassTT/3);
+			net.addLink(l);
+			l = fac.createLink(Id.createLinkId("7_8"), net.getNodes().get(Id.createNodeId(7)), net.getNodes().get(Id.createNodeId(8)));
+			setLinkAttributes(l, capFirstLast, linkLengthBig, byPassTT/3);
+			net.addLink(l);
+			l = fac.createLink(Id.createLinkId("8_5"), net.getNodes().get(Id.createNodeId(8)), net.getNodes().get(Id.createNodeId(5)));
+			setLinkAttributes(l, capFirstLast, linkLengthBig, byPassTT/3);
+			net.addLink(l);
+		}
 	}
 
 	private static void setLinkAttributes(Link link, double capacity,
@@ -441,6 +462,14 @@ public final class TtCreateBraessNetworkAndLanes {
 
 	public void setCapFirstLast(double capFirstLast) {
 		this.capFirstLast = capFirstLast;
+	}
+
+	public void setByPassExists(boolean bypass) {
+		this.byPassExists  = bypass;
+	}
+
+	public void setByPassTT(double byPassTT) {
+		this.byPassTT = byPassTT;
 	}
 
 }

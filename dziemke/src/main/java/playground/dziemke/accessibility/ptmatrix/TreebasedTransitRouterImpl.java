@@ -25,7 +25,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -35,6 +34,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.core.router.InitialNode;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -44,16 +44,18 @@ import org.matsim.pt.router.*;
 import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkLink;
 import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkNode;
 import org.matsim.pt.routes.ExperimentalTransitRoute;
-import org.matsim.pt.transitSchedule.api.*;
-
-import java.util.*;
+import org.matsim.pt.transitSchedule.api.TransitLine;
+import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.pt.transitSchedule.api.TransitRouteStop;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 /**
  * Not thread-safe because TransitLeastCostPathTree is not. Does not expect the TransitSchedule to change once constructed! michaz '13
  *
  * @author mrieser, gthunig
  */
-public class TreebasedTransitRouterImpl implements TransitRouter {
+public class TreebasedTransitRouterImpl extends AbstractTransitRouter implements TransitRouter {
 
     private final TransitRouterNetwork transitNetwork;
 
@@ -64,15 +66,17 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
 
     private TransitLeastCostPathTree transitLeastCostPathTree;
 
-    private Facility<?> fromFacility;
+    private Facility fromFacility;
 
     public TreebasedTransitRouterImpl(final TransitRouterConfig config, final TransitSchedule schedule) {
+        super(config);
         this.preparedTransitSchedule = new PreparedTransitSchedule(schedule);
         TransitRouterNetworkTravelTimeAndDisutility transitRouterNetworkTravelTimeAndDisutility = new TransitRouterNetworkTravelTimeAndDisutility(config, preparedTransitSchedule);
         this.travelTime = transitRouterNetworkTravelTimeAndDisutility;
         this.config = config;
         this.travelDisutility = transitRouterNetworkTravelTimeAndDisutility;
         this.transitNetwork = TransitRouterNetwork.createFromSchedule(schedule, config.getBeelineWalkConnectionDistance());
+        this.setTransitTravelDisutility(travelDisutility);
     }
 
     public TreebasedTransitRouterImpl(
@@ -81,6 +85,7 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
             final TransitRouterNetwork routerNetwork,
             final TravelTime travelTime,
             final TransitTravelDisutility travelDisutility) {
+        super(config, travelDisutility);
         this.config = config;
         this.transitNetwork = routerNetwork;
         this.travelTime = travelTime;
@@ -88,7 +93,7 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
         this.preparedTransitSchedule = preparedTransitSchedule;
     }
 
-    private Map<Node, TransitLeastCostPathTree.InitialNode> locateWrappedNearestTransitNodes(Person person, Coord coord, double departureTime) {
+    private Map<Node, InitialNode> locateWrappedNearestTransitNodes(Person person, Coord coord, double departureTime) {
         Collection<TransitRouterNetworkNode> nearestNodes = this.transitNetwork.getNearestNodes(coord, this.config.getSearchRadius());
         if (nearestNodes.size() < 2) {
             // also enlarge search area if only one stop found, maybe a second one is near the border of the search area
@@ -96,30 +101,22 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
             double distance = CoordUtils.calcEuclideanDistance(coord, nearestNode.stop.getStopFacility().getCoord());
             nearestNodes = this.transitNetwork.getNearestNodes(coord, distance + this.config.getExtensionRadius());
         }
-        Map<Node, TransitLeastCostPathTree.InitialNode> wrappedNearestNodes = new LinkedHashMap<>();
+        Map<Node, InitialNode> wrappedNearestNodes = new LinkedHashMap<>();
         for (TransitRouterNetworkNode node : nearestNodes) {
             Coord toCoord = node.stop.getStopFacility().getCoord();
             double initialTime = getWalkTime(person, coord, toCoord);
             double initialCost = getWalkDisutility(person, coord, toCoord);
-            wrappedNearestNodes.put(node, new TransitLeastCostPathTree.InitialNode(initialCost, initialTime + departureTime));
+            wrappedNearestNodes.put(node, new InitialNode(initialCost, initialTime + departureTime));
         }
         return wrappedNearestNodes;
     }
 
-    private double getWalkTime(Person person, Coord coord, Coord toCoord) {
-        return travelDisutility.getWalkTravelTime(person, coord, toCoord);
-    }
-
-    private double getWalkDisutility(Person person, Coord coord, Coord toCoord) {
-        return travelDisutility.getWalkTravelDisutility(person, coord, toCoord);
-    }
-
     @Override
-    public List<Leg> calcRoute(final Facility<?> fromFacility, final Facility<?> toFacility, final double departureTime, final Person person) {
+    public List<Leg> calcRoute( final Facility fromFacility, final Facility toFacility, final double departureTime, final Person person) {
         // find possible start stops
-        Map<Node, TransitLeastCostPathTree.InitialNode> wrappedFromNodes = this.locateWrappedNearestTransitNodes(person, fromFacility.getCoord(), departureTime);
+        Map<Node, InitialNode> wrappedFromNodes = this.locateWrappedNearestTransitNodes(person, fromFacility.getCoord(), departureTime);
         // find possible end stops
-        Map<Node, TransitLeastCostPathTree.InitialNode> wrappedToNodes = this.locateWrappedNearestTransitNodes(person, toFacility.getCoord(), departureTime);
+        Map<Node, InitialNode> wrappedToNodes = this.locateWrappedNearestTransitNodes(person, toFacility.getCoord(), departureTime);
 
         if (this.fromFacility == null || !this.fromFacility.getCoord().equals(fromFacility.getCoord())) {
             transitLeastCostPathTree = new TransitLeastCostPathTree(this.transitNetwork, this.travelDisutility,
@@ -142,18 +139,6 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
             return this.createDirectWalkLegList(null, fromFacility.getCoord(), toFacility.getCoord());
         }
         return convertPathToLegList(departureTime, p, fromFacility.getCoord(), toFacility.getCoord(), person);
-    }
-
-    private List<Leg> createDirectWalkLegList(Person person, Coord fromCoord, Coord toCoord) {
-        List<Leg> legs = new ArrayList<>();
-        Leg leg = PopulationUtils.createLeg(TransportMode.transit_walk);
-        double walkTime = getWalkTime(person, fromCoord, toCoord);
-        leg.setTravelTime(walkTime);
-        Route walkRoute = RouteUtils.createGenericRouteImpl(null, null);
-        walkRoute.setTravelTime(walkTime);
-        leg.setRoute(walkRoute);
-        legs.add(leg);
-        return legs;
     }
 
     protected List<Leg> convertPathToLegList(double departureTime, Path path, Coord fromCoord, Coord toCoord, Person person) {
@@ -277,10 +262,6 @@ public class TreebasedTransitRouterImpl implements TransitRouter {
 
     protected TransitRouterNetwork getTransitNetwork() {
         return transitNetwork;
-    }
-
-    protected TransitRouterConfig getConfig() {
-        return config;
     }
 
 }

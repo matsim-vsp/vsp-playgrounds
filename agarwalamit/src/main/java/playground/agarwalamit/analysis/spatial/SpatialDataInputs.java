@@ -85,6 +85,11 @@ public class SpatialDataInputs {
 		setInitialFiles();
 	}
 	
+	public SpatialDataInputs(final LinkWeightMethod linkWeightMethod) {
+		this.linkWeigthMethod = linkWeightMethod;
+		this.initialCase = null;
+	}
+	
 	/**
 	 * If comparing two scenarios. By default, events file from last iteration and other output files (network, plans, config) are taken.
 	 */

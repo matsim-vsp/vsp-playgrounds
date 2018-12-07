@@ -7,6 +7,7 @@ import org.matsim.core.population.PersonUtils;
 import playground.dziemke.analysis.general.Trip;
 import playground.dziemke.analysis.general.TripFilter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class SrvTripFilterImpl implements TripFilter {
 
     // Parameters
     private boolean onlyAnalyzeTripsWithMode;
-    private String mode;
+    private List<String> modes = new ArrayList<>();
 
     private boolean onlyAnalyzeTripInteriorOfArea; // formerly results labelled as "int"
     private boolean onlyAnalyzeTripsStartingOrEndingInArea; // formerly results labelled as "ber" (Berlin-based) <----------
@@ -43,9 +44,9 @@ public class SrvTripFilterImpl implements TripFilter {
     private double minDepartureTime_s;
     private double maxDepartureTime_s;
 
-    public void activateModeChoice(String mode) {
+    public void activateMode(String mode) {
         onlyAnalyzeTripsWithMode = true;
-        this.mode = mode;
+        this.modes.add(mode);
     }
 
     public void activateInt(String... areIds) {
@@ -89,12 +90,12 @@ public class SrvTripFilterImpl implements TripFilter {
 
     public List<? extends Trip> filter(List<? extends Trip> inputTrips) {
         log.info("Unfiltered trips size: " + inputTrips.size());
-        List<FromSrvTrip> filteredTrips = new LinkedList<>();
+        List<SrvTrip> filteredTrips = new LinkedList<>();
         boolean printedWarn1 = false;
         boolean printedWarn2 = false;
 
         for (Trip currentTrip : inputTrips) {
-            FromSrvTrip trip = (FromSrvTrip)currentTrip;
+            SrvTrip trip = (SrvTrip)currentTrip;
             // Choose if trip will be considered
             if (onlyAnalyzeTripInteriorOfArea || onlyAnalyzeTripsStartingOrEndingInArea) {
                 boolean startingInArea = Arrays.asList(areaIds).contains(trip.getDepartureZoneId().toString());
@@ -114,7 +115,7 @@ public class SrvTripFilterImpl implements TripFilter {
             }
 
             if (onlyAnalyzeTripsWithMode) {
-                if (!trip.getLegMode().equals(mode)) {
+                if (!modes.contains(trip.getLegMode())) {
                     continue;
                 }
             }
@@ -173,7 +174,9 @@ public class SrvTripFilterImpl implements TripFilter {
 
     public String adaptOutputDirectory(String outputDirectory) {
         if (onlyAnalyzeTripsWithMode) {
-            outputDirectory = outputDirectory + "_" + mode;
+            for (String mode : modes) {
+                outputDirectory = outputDirectory + "_" + mode;
+            }
         }
         if (onlyAnalyzeTripInteriorOfArea) {
             outputDirectory = outputDirectory + "_inside-" + areaIds[0];

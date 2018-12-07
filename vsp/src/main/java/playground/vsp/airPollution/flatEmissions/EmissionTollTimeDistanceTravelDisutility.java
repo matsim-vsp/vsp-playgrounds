@@ -28,6 +28,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.WarmEmissionAnalysisModule;
 import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
@@ -120,9 +121,11 @@ public class EmissionTollTimeDistanceTravelDisutility implements TravelDisutilit
         WarmEmissionAnalysisModule warmEmissionAnalysisModule = this.emissionModule.getWarmEmissionAnalysisModule();
         Map<WarmPollutant, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
                 vehicle,
-                Integer.parseInt(NetworkUtils.getType(((Link) link))),
-                link.getFreespeed(),
-                distance,
+////                NetworkUtils.getType(((Link) link)),
+//                    EmissionUtils.getHbefaRoadType( link ),
+//                link.getFreespeed(),
+//                distance,
+                link,
                 linkTravelTime
         );
         double expectedEmissionCosts = this.emissionCostModule.calculateWarmEmissionCosts(expectedWarmEmissions);

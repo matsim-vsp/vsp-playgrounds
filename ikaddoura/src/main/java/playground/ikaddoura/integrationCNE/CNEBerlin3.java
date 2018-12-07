@@ -27,6 +27,8 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.noise.utils.MergeNoiseCSVFile;
@@ -39,15 +41,13 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
 
 /**
- * run class for DZ's berlin scenario, 1 pct sample size
+ * run class for DZ's berlin scenario
  * 
  * @author ikaddoura
  *
@@ -78,7 +78,8 @@ public class CNEBerlin3 {
 	private static double sigma;
 	
 	private static CongestionTollingApproach congestionTollingApproach;
-	private static double kP; // TODO: move to config file (decongestion)
+	private static double kP;
+	private static double toleratedDelay;
 		
 	public static void main(String[] args) throws IOException {
 		
@@ -120,6 +121,9 @@ public class CNEBerlin3 {
 			kP = Double.parseDouble(args[7]);
 			log.info("kP: " + kP);
 			
+			toleratedDelay = Double.parseDouble(args[8]);
+			log.info("toleratedDelay" + toleratedDelay);
+			
 		} else {
 			
 			outputDirectory = "../../../runs-svn/cne/berlin-dz-1pct/output/test/";
@@ -132,7 +136,8 @@ public class CNEBerlin3 {
 			sigma = 0.;
 			
 			congestionTollingApproach = CongestionTollingApproach.DecongestionPID;
-			kP = 2 * ( 10 / 3600. );			
+			kP = 2 * ( 10 / 3600. );	
+			toleratedDelay = 30.;
 		}
 				
 		CNEBerlin3 cnControler = new CNEBerlin3();
@@ -168,33 +173,33 @@ public class CNEBerlin3 {
 		// decongestion pricing Berlin settings
 		
 		final DecongestionConfigGroup decongestionSettings = (DecongestionConfigGroup) controler.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
-		
+
 		if (congestionTollingApproach.toString().equals(CongestionTollingApproach.DecongestionPID.toString())) {
 			
 			decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
 			decongestionSettings.setKp(kP);
 			decongestionSettings.setKi(0.);
 			decongestionSettings.setKd(0.);
-			
+						
 			decongestionSettings.setMsa(true);
 			
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
-			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
+			decongestionSettings.setToleratedAverageDelaySec(toleratedDelay);
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setWriteOutputIteration(controler.getConfig().controler().getLastIteration());
 
 		} else if (congestionTollingApproach.toString().equals(CongestionTollingApproach.DecongestionBangBang.toString())) {
 
 			decongestionSettings.setDecongestionApproach(DecongestionApproach.BangBang);
-			decongestionSettings.setINITIAL_TOLL(0.01);
-			decongestionSettings.setTOLL_ADJUSTMENT(1.0);
+			decongestionSettings.setInitialToll(0.01);
+			decongestionSettings.setTollAdjustment(1.0);
 			
 			decongestionSettings.setMsa(false);
 			
-			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
-			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
-			decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(30.);
-			decongestionSettings.setWRITE_OUTPUT_ITERATION(controler.getConfig().controler().getLastIteration());
+			decongestionSettings.setToleratedAverageDelaySec(toleratedDelay);
+			decongestionSettings.setRunFinalAnalysis(false);
+			decongestionSettings.setWriteLinkInfoCharts(false);
+			decongestionSettings.setWriteOutputIteration(controler.getConfig().controler().getLastIteration());
 			
 		} else {
 			// for V3, V9 and V10: no additional settings

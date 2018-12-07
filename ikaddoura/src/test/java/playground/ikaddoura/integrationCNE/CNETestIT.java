@@ -27,6 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.ConfigUtils;
@@ -35,7 +36,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
@@ -192,6 +192,9 @@ public class CNETestIT {
 		
 		Scenario scenario1 = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile, new NoiseConfigGroup(), new EmissionsConfigGroup()));
 		
+		EmissionsConfigGroup emissionConfigGroup1 = (EmissionsConfigGroup) scenario1.getConfig().getModules().get(EmissionsConfigGroup.GROUP_NAME);
+		emissionConfigGroup1.setConsideringCO2Costs(true);
+		
 		GridTools gt = new GridTools(scenario1.getNetwork().getLinks(),xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
 		ResponsibilityGridTools rgt = new ResponsibilityGridTools(timeBinSize, noOfTimeBins, gt);
 		
@@ -208,6 +211,10 @@ public class CNETestIT {
 
 		// e
 		Scenario scenario2 = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile, new NoiseConfigGroup(), new EmissionsConfigGroup()));
+		
+		EmissionsConfigGroup emissionConfigGroup2 = (EmissionsConfigGroup) scenario2.getConfig().getModules().get(EmissionsConfigGroup.GROUP_NAME);
+		emissionConfigGroup2.setConsideringCO2Costs(true);
+		
 		scenario2.getConfig().controler().setOutputDirectory(testUtils.getOutputDirectory() + "e/");
 		Controler controler2 = new Controler(scenario2);
 
@@ -234,8 +241,10 @@ public class CNETestIT {
 						
 		// (congestion +) air pollution + noise pricing
 		Scenario scenario4 = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile, new NoiseConfigGroup(), new EmissionsConfigGroup(), new DecongestionConfigGroup()));
+		EmissionsConfigGroup emissionConfigGroup4 = (EmissionsConfigGroup) scenario4.getConfig().getModules().get(EmissionsConfigGroup.GROUP_NAME);
+		emissionConfigGroup4.setConsideringCO2Costs(true);
 		DecongestionConfigGroup decongestionConfigGroup4 = (DecongestionConfigGroup) scenario4.getConfig().getModules().get(DecongestionConfigGroup.GROUP_NAME);
-		decongestionConfigGroup4.setRUN_FINAL_ANALYSIS(false);
+		decongestionConfigGroup4.setRunFinalAnalysis(false);
 		scenario4.getConfig().controler().setOutputDirectory(testUtils.getOutputDirectory() + "cne/");
 		Controler controler4 = new Controler(scenario4);
 		CNEIntegration cneIntegration4 = new CNEIntegration(controler4, gt, rgt );

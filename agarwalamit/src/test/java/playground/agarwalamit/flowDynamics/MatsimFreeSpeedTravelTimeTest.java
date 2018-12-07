@@ -43,8 +43,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.LinkNetworkRouteFactory;
 import org.matsim.core.population.routes.NetworkRoute;
@@ -84,8 +83,7 @@ public class MatsimFreeSpeedTravelTimeTest {
 		manager.addHandler(tth);
 
 		PrepareForSimUtils.createDefaultPrepareForSim(net.scenario).run();
-		QSim qsim = QSimUtils.createDefaultQSim(net.scenario, manager);
-		qsim.run();
+		new QSimBuilder(net.scenario.getConfig()).useDefaults().build(net.scenario, manager).run();
 		return tth.travelTime;
 	}
 

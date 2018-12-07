@@ -6,17 +6,10 @@ package playground.tschlenther.parkingSearch.analysis;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.SortedSet;
-
-import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.log4j.Logger;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.core.config.Config;
-import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.MatsimServices;
-import org.matsim.core.controler.events.IterationEndsEvent;
-import org.matsim.core.controler.listener.ControlerListener;
-import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.mobsim.framework.events.MobsimAfterSimStepEvent;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeCleanupEvent;
 import org.matsim.core.mobsim.framework.listeners.MobsimAfterSimStepListener;
@@ -28,7 +21,7 @@ import com.google.inject.Inject;
 import playground.tschlenther.parkingSearch.utils.ZoneParkingManager;
 
 /**
- * @author Work
+ * @author tschlenther
  *
  */
 public class ZoneParkingOccupationListener implements MobsimBeforeCleanupListener, MobsimAfterSimStepListener{

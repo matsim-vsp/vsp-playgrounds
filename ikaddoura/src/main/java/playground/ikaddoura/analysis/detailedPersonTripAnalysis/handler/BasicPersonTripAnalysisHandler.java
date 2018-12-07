@@ -52,7 +52,6 @@ import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
-import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
@@ -67,7 +66,8 @@ PersonDepartureEventHandler , PersonArrivalEventHandler , LinkEnterEventHandler,
 PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	
 	private final static Logger log = Logger.getLogger(BasicPersonTripAnalysisHandler.class);
-	
+	private final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+	private final String helpActivitySubString = "interaction";
 	@Inject
 	private Scenario scenario;
 	
@@ -92,11 +92,21 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2waitingTime = new HashMap<>();
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2inVehicleTime = new HashMap<>();
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistance = new HashMap<>();
+
+	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2amount = new HashMap<>();
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2payment = new HashMap<>();
+	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2reward = new HashMap<>();
+
 	private final Map<Id<Person>,Map<Integer,Boolean>> personId2tripNumber2stuckAbort = new HashMap<>();
-	
+	private final Map<Id<Person>,Integer> personId2stuckAndAbortEvents = new HashMap<>();	
+
+	private final Map<Id<Person>, Double> personId2totalamounts = new HashMap<>();
 	private final Map<Id<Person>, Double> personId2totalpayments = new HashMap<>();
+	private final Map<Id<Person>, Double> personId2totalrewards = new HashMap<>();
+	
+	private double totalAmounts = 0.;
 	private double totalPayments = 0.;
+	private double totalRewards = 0.;
 	
 	private int warnCnt0 = 0;
 	private int warnCnt1 = 0;
@@ -116,7 +126,9 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 		personId2tripNumber2arrivalTime.clear();
 		personId2tripNumber2tripDistance.clear();
 		personId2tripNumber2travelTime.clear();
-		personId2tripNumber2payment.clear();
+		personId2tripNumber2payment.clear(); // negative amounts
+		personId2tripNumber2reward.clear(); // positive amounts
+		personId2tripNumber2amount.clear(); // all amounts
 		personId2tripNumber2stuckAbort.clear();
 		personId2tripNumber2legMode.clear();
 		personId2tripNumber2enterVehicleTime.clear();
@@ -125,13 +137,18 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 		personId2tripNumber2waitingTime.clear();
 		ptVehicleId2totalDistance.clear();
 		personId2totalpayments.clear();
+		personId2totalrewards.clear();
+		personId2totalamounts.clear();
 		totalPayments = 0.;
+		totalRewards = 0.;
+		totalAmounts = 0.;
 		personId2distanceEnterValue.clear();
 		ptDrivers.clear();
 		ptVehicles.clear();
 		taxiDrivers.clear();
 		taxiVehicleId2totalDistance.clear();
 		carVehicleId2totalDistance.clear();
+		personId2stuckAndAbortEvents.clear();
 	}
 	
 	@Override
@@ -147,8 +164,13 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			}
 		}
 		
-		totalPayments = totalPayments + ( -1. * event.getAmount() );
-		
+		if (event.getAmount() < 0.) {
+			totalPayments += ( -1. * event.getAmount() );
+		} else if (event.getAmount() > 0.) {
+			totalRewards += event.getAmount();
+		}
+		totalAmounts += event.getAmount();
+
 		// trip
 		
 		if (this.taxiDrivers.contains(event.getPersonId()) || this.ptDrivers.contains(event.getPersonId())) {
@@ -168,20 +190,55 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			
 			int tripNumber = this.personId2currentTripNumber.get(event.getPersonId());
 			
-			double paymentBefore = personId2tripNumber2payment.get(event.getPersonId()).get(tripNumber);
-			double updatedPayment = paymentBefore + (-1. * event.getAmount());
-			Map<Integer,Double> tripNumber2payment = personId2tripNumber2payment.get(event.getPersonId());
-			tripNumber2payment.put(tripNumber, updatedPayment);
-			personId2tripNumber2payment.put(event.getPersonId(), tripNumber2payment);
+			if (event.getAmount() < 0.) {
+				double paymentBefore = personId2tripNumber2payment.get(event.getPersonId()).get(tripNumber);
+				double updatedPayment = paymentBefore + (-1. * event.getAmount());
+				Map<Integer,Double> tripNumber2payment = personId2tripNumber2payment.get(event.getPersonId());
+				tripNumber2payment.put(tripNumber, updatedPayment);
+				personId2tripNumber2payment.put(event.getPersonId(), tripNumber2payment);
+			} else if (event.getAmount() > 0.) {
+				double valueBefore = personId2tripNumber2reward.get(event.getPersonId()).get(tripNumber);
+				double updatedValue = valueBefore + event.getAmount();
+				Map<Integer,Double> tripNumber2value = personId2tripNumber2reward.get(event.getPersonId());
+				tripNumber2value.put(tripNumber, updatedValue);
+				personId2tripNumber2reward.put(event.getPersonId(), tripNumber2value);
+			}
+			double valueBefore = personId2tripNumber2amount.get(event.getPersonId()).get(tripNumber);
+			double updatedValue = valueBefore + event.getAmount();
+			Map<Integer,Double> tripNumber2value = personId2tripNumber2amount.get(event.getPersonId());
+			tripNumber2value.put(tripNumber, updatedValue);
+			personId2tripNumber2amount.put(event.getPersonId(), tripNumber2value);
 			
 			// person
 			
-			if (this.personId2totalpayments.get(event.getPersonId()) == null) {
-				this.personId2totalpayments.put(event.getPersonId(), event.getAmount() * (-1.));
+			if (event.getAmount() < 0.) {
+				if (this.personId2totalpayments.get(event.getPersonId()) == null) {
+					this.personId2totalpayments.put(event.getPersonId(), event.getAmount() * (-1.));
+
+				} else {
+					double amountSoFar = this.personId2totalpayments.get(event.getPersonId());
+					double amountNew = amountSoFar + ( event.getAmount() * (-1.) );
+					this.personId2totalpayments.put(event.getPersonId(), amountNew);
+				}
+				
+			} else if (event.getAmount() > 0.) {
+				if (this.personId2totalrewards.get(event.getPersonId()) == null) {
+					this.personId2totalrewards.put(event.getPersonId(), event.getAmount());
+
+				} else {
+					double amountSoFar = this.personId2totalrewards.get(event.getPersonId());
+					double amountNew = amountSoFar + event.getAmount();
+					this.personId2totalrewards.put(event.getPersonId(), amountNew);
+				}
+			}
+			
+			if (this.personId2totalamounts.get(event.getPersonId()) == null) {
+				this.personId2totalamounts.put(event.getPersonId(), event.getAmount());
+
 			} else {
-				double amountSoFar = this.personId2totalpayments.get(event.getPersonId());
-				double amountNew = amountSoFar + ( event.getAmount() * (-1.) );
-				this.personId2totalpayments.put(event.getPersonId(), amountNew);
+				double amountSoFar = this.personId2totalamounts.get(event.getPersonId());
+				double amountNew = amountSoFar + event.getAmount();
+				this.personId2totalamounts.put(event.getPersonId(), amountNew);
 			}
 		}
 	}
@@ -229,8 +286,8 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			// activities by pt or taxi drivers are not considered
 			
 		} else {
-			if (event.getActType().toString().equals("pt interaction")){
-				// pseudo activities by normal persons are excluded
+			if (event.getActType().toString().contains(helpActivitySubString)){
+				// pseudo activities are excluded
 				
 			} else {
 				// a "real" activity
@@ -247,9 +304,17 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 					tripNumber2tripDistance.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
 					personId2tripNumber2tripDistance.put(event.getPersonId(), tripNumber2tripDistance);
 						
-					Map<Integer,Double> tripNumber2amount = personId2tripNumber2payment.get(event.getPersonId());
+					Map<Integer,Double> tripNumber2payment = personId2tripNumber2payment.get(event.getPersonId());
+					tripNumber2payment.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
+					personId2tripNumber2payment.put(event.getPersonId(), tripNumber2payment);
+					
+					Map<Integer,Double> tripNumber2reward = personId2tripNumber2reward.get(event.getPersonId());
+					tripNumber2reward.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
+					personId2tripNumber2reward.put(event.getPersonId(), tripNumber2reward);
+					
+					Map<Integer,Double> tripNumber2amount = personId2tripNumber2amount.get(event.getPersonId());
 					tripNumber2amount.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
-					personId2tripNumber2payment.put(event.getPersonId(), tripNumber2amount);
+					personId2tripNumber2amount.put(event.getPersonId(), tripNumber2amount);
 			
 				} else {
 					// the following trip is the person's first trip
@@ -263,9 +328,17 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 					tripNumber2tripDistance.put(1, 0.0);
 					personId2tripNumber2tripDistance.put(event.getPersonId(), tripNumber2tripDistance);
 					
+					Map<Integer,Double> tripNumber2payment = new HashMap<Integer, Double>();
+					tripNumber2payment.put(1, 0.0);
+					personId2tripNumber2payment.put(event.getPersonId(), tripNumber2payment);
+					
+					Map<Integer,Double> tripNumber2reward = new HashMap<Integer, Double>();
+					tripNumber2reward.put(1, 0.0);
+					personId2tripNumber2reward.put(event.getPersonId(), tripNumber2reward);
+					
 					Map<Integer,Double> tripNumber2amount = new HashMap<Integer, Double>();
 					tripNumber2amount.put(1, 0.0);
-					personId2tripNumber2payment.put(event.getPersonId(), tripNumber2amount);
+					personId2tripNumber2amount.put(event.getPersonId(), tripNumber2amount);
 				}
 			}	
 		}
@@ -281,27 +354,31 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 				// at least the person's second trip
 				int tripNumber = personId2currentTripNumber.get(event.getPersonId());
 				Map<Integer,String> tripNumber2legMode = personId2tripNumber2legMode.get(event.getPersonId());
-				if (tripNumber2legMode.containsKey(tripNumber)){
-					if (!tripNumber2legMode.get(tripNumber).toString().equals("pt")){
-						throw new RuntimeException("A leg mode has already been listed.");
-					}
-				} else {
-					String legMode = event.getLegMode();
-					if((event.getLegMode().toString().equals(TransportMode.transit_walk))){
-						legMode = TransportMode.pt;
-					}
-					tripNumber2legMode.put(personId2currentTripNumber.get(event.getPersonId()), legMode);
+				
+				if (tripNumber2legMode.get(tripNumber) == null) {
+					// save the help leg mode (better than to have nothing; there may be transit_walk trips without any main mode leg)
+					tripNumber2legMode.put(personId2currentTripNumber.get(event.getPersonId()), event.getLegMode());
 					personId2tripNumber2legMode.put(event.getPersonId(), tripNumber2legMode);
+				
+				} else {
+					// there is already a mode stored for the current trip, only overwrite help leg modes
+					boolean isHelpLeg = false;
+					for (String helpLegMode : helpLegModes) {
+						if(event.getLegMode().toString().equals(helpLegMode)) {
+							isHelpLeg = true;
+						}
+					}
+					if (!isHelpLeg) {
+						// no help leg -> save the leg mode
+						tripNumber2legMode.put(personId2currentTripNumber.get(event.getPersonId()), event.getLegMode());
+						personId2tripNumber2legMode.put(event.getPersonId(), tripNumber2legMode);	
+					}
 				}
 				
 			} else {
 				// the person's first trip
 				Map<Integer,String> tripNumber2legMode = new HashMap<Integer,String>();
-				String legMode = event.getLegMode();
-				if((event.getLegMode().toString().equals(TransportMode.transit_walk))){
-					legMode = TransportMode.pt;
-				}
-				tripNumber2legMode.put(1, legMode);
+				tripNumber2legMode.put(1, event.getLegMode());
 				personId2tripNumber2legMode.put(event.getPersonId(), tripNumber2legMode);
 			}
 		}		
@@ -346,7 +423,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			if (tripNumber2legMode.get(tripNumber).equals(TransportMode.pt)) {
 				distanceTravelled = (ptVehicleId2totalDistance.get(event.getVehicleId()) - personId2distanceEnterValue.get(event.getPersonId())); 
 			
-			} else if (tripNumber2legMode.get(tripNumber).equals(TaxiModule.TAXI_MODE)) {
+			} else if (tripNumber2legMode.get(tripNumber).equals(TransportMode.taxi)) {
 				distanceTravelled = (taxiVehicleId2totalDistance.get(event.getVehicleId()) - personId2distanceEnterValue.get(event.getPersonId())); 
 
 			} else if (tripNumber2legMode.get(tripNumber).equals(TransportMode.car)) {
@@ -424,7 +501,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 			if ((tripNumber2legMode.get(tripNumber)).equals(TransportMode.pt)){
 				personId2distanceEnterValue.put(event.getPersonId(), ptVehicleId2totalDistance.get(event.getVehicleId()));
 			
-			} else if ((tripNumber2legMode.get(tripNumber)).equals(TaxiModule.TAXI_MODE)){
+			} else if ((tripNumber2legMode.get(tripNumber)).equals(TransportMode.taxi)){
 				personId2distanceEnterValue.put(event.getPersonId(), taxiVehicleId2totalDistance.get(event.getVehicleId()));
 
 			} else if ((tripNumber2legMode.get(tripNumber)).equals(TransportMode.car)){
@@ -525,6 +602,13 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 				
 				tripNr2StuckAbort.put(currentTripNumber, true);
 				this.personId2tripNumber2stuckAbort.put(event.getPersonId(), tripNr2StuckAbort);
+				
+				if (this.personId2stuckAndAbortEvents.get(event.getPersonId()) == null) {
+					this.personId2stuckAndAbortEvents.put(event.getPersonId(), 1);
+				} else {
+					int updatedValue = this.personId2stuckAndAbortEvents.get(event.getPersonId()) + 1;
+					this.personId2stuckAndAbortEvents.put(event.getPersonId(), updatedValue);
+				}
 			
 			} else {
 				// the agent has not yet departed
@@ -578,17 +662,45 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 
 		return personId2tripNumber2payment;
 	}
+	
+	int nn = 0;
+	public Map<Id<Person>, Map<Integer, Double>> getPersonId2tripNumber2reward() {
+		
+		if (nn == 0) {
+			log.warn("No guarantee that monetary rewards are ascribed to the right trip (money events, i.e. tolls, may be charged after the person has started the next trip).");
+			log.warn("Additional warnings of this type are suppressed.");
+		}
+		nn++;
+
+		return personId2tripNumber2reward;
+	}
 
 	public double getTotalPayments() {
 		return totalPayments;
 	}
 	
+	public double getTotalAmounts() {
+		return totalAmounts;
+	}
+
+	public double getTotalRewards() {
+		return totalRewards;
+	}
+
 	public double getTotalPaymentsByPersons() {
 		double totalPaymentsByPersons = 0.;
 		for (Id<Person> id : this.personId2totalpayments.keySet()) {
 			totalPaymentsByPersons += this.personId2totalpayments.get(id);
 		}
 		return totalPaymentsByPersons;
+	}
+	
+	public double getTotalRewardsByPersons() {
+		double totalRewardsByPersons = 0.;
+		for (Id<Person> id : this.personId2totalrewards.keySet()) {
+			totalRewardsByPersons += this.personId2totalrewards.get(id);
+		}
+		return totalRewardsByPersons;
 	}
 	
 	public Set<Id<Person>> getTaxiDrivers() {
@@ -640,7 +752,9 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	public Map<Id<Vehicle>, Double> getCarVehicleId2totalDistance() {
 		return carVehicleId2totalDistance;
 	}
-	
-	
 
+	public Map<Id<Person>, Integer> getPersonId2stuckAndAbortEvents() {
+		return personId2stuckAndAbortEvents;
+	}
+	
 }

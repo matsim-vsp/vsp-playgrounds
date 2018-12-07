@@ -49,8 +49,9 @@ import org.matsim.core.population.routes.RouteUtils;
  */
 public final class TtCreateBraessPopulation {
 	
+	/** ALL means: initialize all 3 routes, select the outer ones */
 	public enum InitRoutes{
-		ALL, ONLY_MIDDLE, ONLY_OUTER, NONE
+		ALL, ONLY_MIDDLE, ONLY_OUTER, NONE, EVERY_FOURTH_Z_REST_BYPASS, EVERY_SECOND_OUTER_REST_BYPASS
 	}
 	
 	private Population population;
@@ -119,10 +120,9 @@ public final class TtCreateBraessPopulation {
 	 */
 	public void createPersons(InitRoutes initRouteSpecification, Double initPlanScore) {
 		
-		if (initRouteSpecification.equals(InitRoutes.ONLY_MIDDLE)
-				&& !this.middleLinkExists){
-			throw new IllegalArgumentException("You are trying to create agents "
-					+ "with an initial middle route, although no middle link exists.");
+		if (!this.middleLinkExists && 
+				(initRouteSpecification.equals(InitRoutes.ONLY_MIDDLE) || initRouteSpecification.equals(InitRoutes.EVERY_FOURTH_Z_REST_BYPASS))){
+			throw new IllegalArgumentException("You are trying to create agents with an initial middle route, although no middle link exists.");
 		}
 		
 		for (int i = 0; i < this.numberOfPersons * this.simulationPeriod; i++) {
@@ -146,10 +146,12 @@ public final class TtCreateBraessPopulation {
 			// fill the leg if necessary
 			switch (initRouteSpecification){
 			case ONLY_MIDDLE:
+			case EVERY_FOURTH_Z_REST_BYPASS:
 			case ALL:
 				leg1 = createMiddleLeg();
 				break;
 			case ONLY_OUTER:
+			case EVERY_SECOND_OUTER_REST_BYPASS:
 				leg1 = createUpperLeg();
 				break;
 			default:
@@ -161,8 +163,11 @@ public final class TtCreateBraessPopulation {
 			// store information in population
 			person.addPlan(plan1);
 			
-			// select plan1 for every second person (with odd id) if only outer routes are initialized
 			if (initRouteSpecification.equals(InitRoutes.ONLY_OUTER) && (i % 2 == 1)){
+				// select plan1 for every second person (with odd id) if only outer routes are initialized
+				person.setSelectedPlan(plan1);
+			} else if ((initRouteSpecification.equals(InitRoutes.EVERY_FOURTH_Z_REST_BYPASS) || initRouteSpecification.equals(InitRoutes.EVERY_SECOND_OUTER_REST_BYPASS)) && (i % 4 == 0)) {
+				// select plan1 for every fourth person. with 7200 veh/h this results in 1800 veh on this route
 				person.setSelectedPlan(plan1);
 			}
 			
@@ -170,29 +175,45 @@ public final class TtCreateBraessPopulation {
 
 			// create further plans if different routes should be initialized
 			if (initRouteSpecification.equals(InitRoutes.ONLY_OUTER) 
-					|| initRouteSpecification.equals(InitRoutes.ALL)) {
+					|| initRouteSpecification.equals(InitRoutes.ALL)
+					|| initRouteSpecification.equals(InitRoutes.EVERY_SECOND_OUTER_REST_BYPASS)
+					|| initRouteSpecification.equals(InitRoutes.EVERY_FOURTH_Z_REST_BYPASS)) {
 				
 				// create a second plan for the person (with the same start and
 				// end activity but a different leg)
 				Leg leg2 = createLowerLeg();
+				if (initRouteSpecification.equals(InitRoutes.EVERY_FOURTH_Z_REST_BYPASS)) {
+					leg2 = createByPassLeg();
+				}
 				Plan plan2 = createPlan(startAct, leg2, drainAct, initPlanScore);	
 				person.addPlan(plan2);
 				
-				// select plan2 for every second person (with even id)
-				if (i % 2 == 0){
+				if (initRouteSpecification.equals(InitRoutes.EVERY_FOURTH_Z_REST_BYPASS) && (i % 4 != 0)) {
+					// select bypass for 3 of 4 persons
+					person.setSelectedPlan(plan2);
+				} else if (initRouteSpecification.equals(InitRoutes.EVERY_SECOND_OUTER_REST_BYPASS) && (i % 4 == 1)) {
+					// select lower route for every other fourth person. with 7200 veh/h this results in 1800 veh on this route
+					person.setSelectedPlan(plan2);
+				} else if ((initRouteSpecification.equals(InitRoutes.ALL) || initRouteSpecification.equals(InitRoutes.ONLY_OUTER))
+						&& (i % 2 == 0)) {
+					// select plan2 for every second person (with even id)
 					person.setSelectedPlan(plan2);
 				}
 
-				if (initRouteSpecification.equals(InitRoutes.ALL)) {
-					// create a third plan for the person (with the same start
-					// and
-					// end activity but a different leg)
+				if (initRouteSpecification.equals(InitRoutes.ALL) || initRouteSpecification.equals(InitRoutes.EVERY_SECOND_OUTER_REST_BYPASS)) {
+					// create a third plan for the person (with the same start and end activity but a different leg)
 					Leg leg3 = createUpperLeg();
+					if (initRouteSpecification.equals(InitRoutes.EVERY_SECOND_OUTER_REST_BYPASS)) {
+						leg3 = createByPassLeg();
+					}
 					Plan plan3 = createPlan(startAct, leg3, drainAct, initPlanScore);
 					person.addPlan(plan3);
 
-					// select plan3 for every second person (with odd id)
-					if (i % 2 == 1) {
+					if (initRouteSpecification.equals(InitRoutes.ALL) && i % 2 == 1) {
+						// select plan3 for every second person (with odd id)
+						person.setSelectedPlan(plan3);
+					} else if (initRouteSpecification.equals(InitRoutes.EVERY_SECOND_OUTER_REST_BYPASS) && i % 4 != 0 && i % 4 != 1) {
+						// select bypass for 2 of 4 persons
 						person.setSelectedPlan(plan3);
 					}
 				}
@@ -300,6 +321,19 @@ public final class TtCreateBraessPopulation {
 		
 		legDown.setRoute(routeDown);
 		return legDown;
+	}
+
+	private Leg createByPassLeg() {
+		Leg legByPass = population.getFactory().createLeg(TransportMode.car);
+		
+		List<Id<Link>> pathByPass = new ArrayList<>();
+		pathByPass.add(Id.createLinkId("1_7"));
+		pathByPass.add(Id.createLinkId("7_8"));
+		pathByPass.add(Id.createLinkId("8_5"));
+		Route routeDown = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("0_1"), pathByPass, Id.createLinkId("5_6"));
+		
+		legByPass.setRoute(routeDown);
+		return legByPass;
 	}
 
 	public void setNumberOfPersons(int numberOfPersons) {

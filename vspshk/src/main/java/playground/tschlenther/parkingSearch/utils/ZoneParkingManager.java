@@ -3,14 +3,11 @@
  */
 package playground.tschlenther.parkingSearch.utils;
 
-import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.axis2.util.IOUtils;
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -53,9 +50,6 @@ public class ZoneParkingManager extends FacilityBasedParkingManager {
 		for(String zone: pathToZoneTxtFiles){
 			readZone(zone);
 		}
-		
-//		readZone(mierendorffLinks);
-//		readZone(klausenerLinks);
 		
 		for(String zone: this.linksOfZone.keySet()){
 			calculateTotalZoneParkCapacity(zone);
@@ -136,7 +130,7 @@ public class ZoneParkingManager extends FacilityBasedParkingManager {
 				if(linksOfZone.get(zone).contains(parkingLink)){
 					double newOcc = this.occupationOfZone.get(zone) - 1;
 					if(newOcc < 0 ){
-						//throw new RuntimeException("occupancy of zone " + zone + " is negative. Capacity= " + this.totalCapOfZone.get(zone) + "  occupancy=" + newOcc);
+						//in iteration 0 agents can "leave parking spaces" (get into traffic), but the manager didn't record them to be parked  
 						newOcc = 0;
 					}
 					this.occupationOfZone.put(zone,newOcc);

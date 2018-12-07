@@ -19,10 +19,8 @@
  * *********************************************************************** */
 package playground.vsptelematics.ha2;
 
-import com.google.inject.Provider;
-
-import playground.vsptelematics.common.TelematicsConfigGroup;
-import playground.vsptelematics.common.TelematicsConfigGroup.Infotype;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -33,16 +31,13 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
-import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
-import org.matsim.core.mobsim.qsim.changeeventsengine.NetworkChangeEventsEngine;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineModule;
+import org.matsim.core.mobsim.qsim.PopulationModule;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import com.google.inject.Provider;
+
+import playground.vsptelematics.common.TelematicsConfigGroup;
+import playground.vsptelematics.common.TelematicsConfigGroup.Infotype;
 
 
 /**
@@ -90,27 +85,13 @@ public class GuidanceMobsimFactory implements Provider<Mobsim>, ShutdownListener
 			throw new NullPointerException(
 					"There is no configuration set for the QSim. Please add the module 'qsim' to your config file.");
 		}
-        QSim qSim = new QSim(scenario, eventsManager);
-		ActivityEngine activityEngine = new ActivityEngine(eventsManager, qSim.getAgentCounter());
-		qSim.addMobsimEngine(activityEngine);
-		qSim.addActivityHandler(activityEngine);
-        QNetsimEngineModule.configure(qSim);
-		DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(scenario, eventsManager);
-		qSim.addMobsimEngine(teleportationEngine);
-
-		if (scenario.getConfig().network().isTimeVariantNetwork()) {
-			qSim.addMobsimEngine(new NetworkChangeEventsEngine());
-		}
-
-		this.initGuidance(scenario.getNetwork());
-		eventsManager.addHandler(this.guidance);
-		qSim.addQueueSimulationListeners(this.guidance);
-		AgentFactory agentFactory = new GuidanceAgentFactory(qSim, equipmentFraction, this.guidance, this.ttObserver);
-		PopulationAgentSource agentSource = new PopulationAgentSource(scenario.getPopulation(), agentFactory,
-				qSim);
-		qSim.addAgentSource(agentSource);
-		return qSim;
-
+		
+		return new QSimBuilder(scenario.getConfig()) //
+				.useDefaults() //
+				.removeModule(PopulationModule.class) //
+				.addQSimModule(new GuidanceQSimModule(guidance, equipmentFraction, ttObserver)) //
+				.configureComponents(GuidanceQSimModule::configureComponents) //
+				.build(scenario, eventsManager);
 	}
 
 	@Override

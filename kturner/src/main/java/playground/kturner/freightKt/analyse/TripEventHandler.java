@@ -26,49 +26,6 @@ import org.matsim.vehicles.VehicleType;
 class TripEventHandler  implements ActivityEndEventHandler, LinkEnterEventHandler, 
 PersonDepartureEventHandler, PersonArrivalEventHandler {
 
-	public class VehicleTypeSpezificCapabilities{
-		private double fixCosts;
-		private double costsPerMeter;
-		private double costsPerSecond;
-		private double fuelConsumtion;
-		private double emissionsPerMeter; //TODO: Wird nicht mit eingelesen in CarrierVehicleTypeReader -> Eigenen Reader und eigene Klassen bauen; Zur Not erstmal per Hand setzen...
-		private int capacity;
-		
-		VehicleTypeSpezificCapabilities(double fixCosts, double costsPerMeter,
-				double costsPerSecond, double fuelConsumtion, double emissionsPerMeter, int capacity) {
-			this.fixCosts = fixCosts;
-			this.costsPerMeter = costsPerMeter;
-			this.costsPerSecond = costsPerSecond;
-			this.fuelConsumtion = fuelConsumtion;
-			this.emissionsPerMeter = emissionsPerMeter;
-			this.capacity = capacity;
-		}
-
-		double getFixCosts() {
-			return fixCosts;
-		}
-
-		double getCostsPerMeter() {
-			return costsPerMeter;
-		}
-
-		double getCostsPerSecond() {
-			return costsPerSecond;
-		}
-
-		double getCapacity() {
-			return capacity;
-		}	
-		
-		double getFuelConsumtion() {
-			return fuelConsumtion;
-		}	
-		
-		double getEmissionsPerMeter() {
-			return emissionsPerMeter;
-		}	
-	}
-
 	private final static Logger log = Logger.getLogger(TripEventHandler.class);
 
 	private Scenario scenario;
@@ -106,7 +63,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	private void readVehicleTypeCapabilities() {
 		for (CarrierVehicleType vehType : vehicleTypes.getVehicleTypes().values()){
 		//Emissionswerte nicht über Eigenschaften einlesbar :(	
-			double emissionsPerMeter = -99999.0;
+			double emissionsPerMeter = -99999.0;			//TODO: log.warn wenn vehType nochjt definiert ist... kmt feb/18
 			switch (vehType.getId().toString()) {
 			case "heavy40t" : emissionsPerMeter = 0.917;
 				break;
@@ -280,7 +237,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 	
 	//Beachte: Personen sind die Agenten, die in ihrer ID auch den Namen ihres FEhrzeugs (und dieses bei ordentlicher Definition ihres FzgTypes enthalten)
 	public Map<Id<VehicleType>,Double> getVehTypId2TourDistances(Id<VehicleType> vehTypeId) {
-		System.out.println("Distance für fzgTyp soll ermittelt werden " + vehTypeId.toString());
+		log.info("Calculate distances for vehicleTyp " + vehTypeId.toString());
 		Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new HashMap<Id<VehicleType>, Double>();
 		for(Id<Person> personId: personId2tripNumber2tripDistance.keySet()){
 			for(int i : personId2tripNumber2tripDistance.get(personId).keySet()){
@@ -289,10 +246,10 @@ PersonDepartureEventHandler, PersonArrivalEventHandler {
 						double distance = personId2tripNumber2tripDistance.get(personId).get(i);
 						if (vehTypeId2TourDistances.containsKey(vehTypeId)){
 							vehTypeId2TourDistances.put(vehTypeId, vehTypeId2TourDistances.get(vehTypeId) + distance);
-							System.out.println("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Aktuelle Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
 						} else {
 							vehTypeId2TourDistances.put(vehTypeId, distance);
-							System.out.println("Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
+							log.debug("Distance für Person " + personId.toString() + " ; " + "_" +vehTypeId.toString() + "_" + "added: " + distance);
 						}
 					}
 				}else{

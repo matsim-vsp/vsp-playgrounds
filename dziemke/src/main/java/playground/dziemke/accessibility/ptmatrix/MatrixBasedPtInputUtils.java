@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.io.MatsimNetworkReader;
@@ -37,7 +38,7 @@ public class MatrixBasedPtInputUtils {
 		TransitScheduleReader transitScheduleReader = new TransitScheduleReader(scenario);
 		transitScheduleReader.readFile(transitScheduleFile);
 		
-//		Map<Id<Facility<?>>, Facility<?>> ptMatrixLocationsMap = new HashMap<>();
+//		Map<Id<Facility>, Facility> ptMatrixLocationsMap = new HashMap<>();
 		
 //		for (TransitStopFacility transitStopFacility: scenario.getTransitSchedule().getFacilities().values()) {
 //			Id<Coord> id = Id.create(transitStopFacility.getId(), Coord.class);
@@ -68,7 +69,11 @@ public class MatrixBasedPtInputUtils {
 		stopsWriter.writeNewLine();
 
 		for (Facility fac : locationFacilitiesMap.values() ) {
-			stopsWriter.writeField(fac.getId());
+			if ( fac instanceof Identifiable ) {
+				stopsWriter.writeField( ((Identifiable)fac).getId() );
+			} else {
+				throw new RuntimeException( Facility.FACILITY_NO_LONGER_IDENTIFIABLE ) ;
+			}
 			stopsWriter.writeField(fac.getCoord().getX());
 			stopsWriter.writeField(fac.getCoord().getY());
 			stopsWriter.writeNewLine();

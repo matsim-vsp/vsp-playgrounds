@@ -21,10 +21,9 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.input.extDemand;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
-
 import javax.inject.Inject;
-
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -59,27 +58,22 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.counts.Counts;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
-
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
-
-import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
-import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
-import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
-import playground.agarwalamit.mixedTraffic.counts.MultiModeCountsControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+import playground.agarwalamit.mixedTraffic.counts.CountsInserter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.joint.JointCalibrationControler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForTruck;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
-import playground.agarwalamit.multiModeCadyts.CountsInserter;
-import playground.agarwalamit.multiModeCadyts.ModalCadytsContext;
-import playground.agarwalamit.multiModeCadyts.ModalLink;
 import playground.agarwalamit.utils.plans.SelectedPlansFilter;
+import playground.vsp.cadyts.multiModeCadyts.ModalCountsCadytsContext;
+import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
+import playground.vsp.cadyts.multiModeCadyts.MultiModalCountsCadytsModule;
 
 /**
  * @author amit
@@ -153,8 +147,6 @@ public class OuterCordonCadytsControler {
 
 				this.bind(ModalTripTravelTimeHandler.class);
 				this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
-
-				this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
 			}
 		});
 
@@ -183,27 +175,18 @@ public class OuterCordonCadytsControler {
 		jcg.processInputFile( inputLocation+"/raw/counts/externalDemandCountsFile/outerCordonData_allCounts_shpNetwork.txt" );
 		jcg.run();
 		
-		Counts<ModalLink> modalLinkCounts = jcg.getModalLinkCounts();
+		Counts<ModalCountsLinkIdentifier> modalLinkCounts = jcg.getModalLinkCounts();
 		modalLinkCounts.setYear(2008);
 		modalLinkCounts.setName("Patna_counts");
 		
-		Map<String, ModalLink> modalLinkContainer = jcg.getModalLinkContainer();
+		Map<Id<ModalCountsLinkIdentifier>, ModalCountsLinkIdentifier> modalLinkContainer = jcg.getModalLinkContainer();
 		
 		String modes = CollectionUtils.setToString(new HashSet<>(PatnaUtils.EXT_MAIN_MODES));
 		config.counts().setAnalyzedModes(modes);
 		config.counts().setFilterModes(true);
 		config.strategy().setMaxAgentPlanMemorySize(10);
 
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				bind(Key.get(new TypeLiteral<Counts<ModalLink>>(){}, Names.named("calibration"))).toInstance(modalLinkCounts);
-				bind(Key.get(new TypeLiteral<Map<String,ModalLink>>(){})).toInstance(modalLinkContainer);
-				
-				bind(ModalCadytsContext.class).asEagerSingleton();
-				addControlerListenerBinding().to(ModalCadytsContext.class);
-			}
-		});
+		controler.addOverridingModule(new MultiModalCountsCadytsModule(modalLinkCounts, modalLinkContainer));
 		
 		CadytsConfigGroup cadytsConfigGroup = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		cadytsConfigGroup.setStartTime(0);
@@ -215,7 +198,7 @@ public class OuterCordonCadytsControler {
 			@Inject
             Network network;
 			@Inject
-            ModalCadytsContext cContext;
+			ModalCountsCadytsContext cContext;
 			@Override
 			public ScoringFunction createNewScoringFunction(Person person) {
 				final ScoringParameters params = parameters.getScoringParameters( person );
@@ -225,7 +208,7 @@ public class OuterCordonCadytsControler {
 				sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
 				sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
-				final CadytsScoring<ModalLink> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cContext);
+				final CadytsScoring<ModalCountsLinkIdentifier> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cContext);
 				final double cadytsScoringWeight = 15.0;
 				scoringFunction.setWeightOfCadytsCorrection(cadytsScoringWeight) ;
 				sumScoringFunction.addScoringFunction(scoringFunction );
@@ -262,12 +245,12 @@ public class OuterCordonCadytsControler {
 		config.controler().setWriteEventsInterval(50);
 
 		StrategySettings reRoute = new StrategySettings();
-		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
+		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 		reRoute.setWeight(0.3);
 		config.strategy().addStrategySettings(reRoute);
 
 		StrategySettings expChangeBeta = new StrategySettings();
-		expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
+		expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 		expChangeBeta.setWeight(0.7);
 		config.strategy().addStrategySettings(expChangeBeta);
 

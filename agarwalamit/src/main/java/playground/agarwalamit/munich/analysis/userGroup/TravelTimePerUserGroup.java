@@ -45,12 +45,15 @@ import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 public class TravelTimePerUserGroup  {
 
 	public TravelTimePerUserGroup() {
-		this.sc = LoadMyScenarios.loadScenarioFromPlansNetworkAndConfig(this.populationFile, this.networkFile, this.configFile);
+        String configFile = outputDir + "/output_config.xml";
+        String networkFile = outputDir + "/output_network.xml.gz";
+        String populationFile = outputDir + "/output_plans.xml.gz";
+        this.sc = LoadMyScenarios.loadScenarioFromPlansNetworkAndConfig(populationFile, networkFile, configFile);
 		
 		this.usrGrpExtended = new UserGroupUtilsExtended();
 		this.userGrpToBoxPlotData = new TreeMap<>();
 		
-		int lastIteration = LoadMyScenarios.getLastIteration(this.configFile);
+		int lastIteration = LoadMyScenarios.getLastIteration(configFile);
 		String eventsFile = this.outputDir+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";
 		this.travelTimeAnalyzer = new ModalTravelTimeAnalyzer(eventsFile);
 	}
@@ -61,11 +64,8 @@ public class TravelTimePerUserGroup  {
 	private Map<String, Map<Id<Person>, List<Double>>> mode2PersonId2TravelTimes;
 	
 	private final String outputDir = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/otherRuns/output/1pct/run10/policies/backcasting/exposure/25ExI/";
-	private final String populationFile =outputDir+ "/output_plans.xml.gz";//"/network.xml";
-	private final String networkFile =outputDir+ "/output_network.xml.gz";//"/network.xml";
-	private final String configFile = outputDir+"/output_config.xml";//"/config.xml";//
 
-	private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MeanTime = new TreeMap<>();
+    private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MeanTime = new TreeMap<>();
 	private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MedianTime = new TreeMap<>();
 	
 	private final UserGroupUtilsExtended usrGrpExtended;

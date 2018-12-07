@@ -24,7 +24,9 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
@@ -37,6 +39,7 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.pt.config.TransitConfigGroup;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 class KNTransitControler {
@@ -49,13 +52,24 @@ class KNTransitControler {
 			useOTFVis = Boolean.parseBoolean(args[1]) ;
 		}
 
-		Config config = new Config();
-		config.addCoreModules();
-		new ConfigReader(config).readFile(args[0]);
+//		Config config = new Config();
+//		config.addCoreModules();
+//		new ConfigReader(config).readFile(args[0]);
+//		Config config = ConfigUtils.loadConfig(
+////				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/1pct-config-local.xml"
+//				"/Users/kainagel/runs-svn/berlin-bvg09/presentation_20100408/bb_10p/config-kai-local.xml"
+//		) ;
+		
+		
+		Config config = ConfigUtils.loadConfig( args[0] ) ;
+		
+		config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.queue );
+		
 		if ( useTransit ) {
 			config.transit().setUseTransit(true);
+			config.transit().setBoardingAcceptance( TransitConfigGroup.BoardingAcceptance.checkStopOnly );
 			
-			OTFVisConfigGroup visConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class ) ;
+			OTFVisConfigGroup visConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class ) ;
 			visConfig.setColoringScheme( OTFVisConfigGroup.ColoringScheme.bvg ) ;
 			visConfig.setDrawTime(true);
 			visConfig.setDrawNonMovingItems(true);
@@ -67,6 +81,8 @@ class KNTransitControler {
 
 		config.qsim().setVehicleBehavior( QSimConfigGroup.VehicleBehavior.teleport ) ;
 		//		config.otfVis().setShowTeleportedAgents(true) ;
+		
+		// ---
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config) ;
 		
@@ -80,6 +96,12 @@ class KNTransitControler {
 					if ( act.getType().equals("pickup") || act.getType().equals("dropoff") ) {
 						it.remove(); 
 						break ;
+					}
+				}
+				if ( pe instanceof Leg) {
+					Leg leg = (Leg) pe;
+					if ( leg.getMode().equals("undefined") ) {
+						leg.setMode(TransportMode.ride);
 					}
 				}
 			}
@@ -100,9 +122,10 @@ class KNTransitControler {
 //			pop.getPersons().remove( pid ) ;
 //		}
 		
+		// ---
+		
 		final Controler controler = new Controler(scenario) ;
 		controler.getConfig().controler().setOverwriteFileSetting( OverwriteFileSetting.overwriteExistingFiles ) ;
-//		controler.setDirtyShutdown(true);
 
 		//		Logger.getLogger("main").warn("warning: using randomized pt router!!!!") ;
 		//		tc.addOverridingModule(new RandomizedTransitRouterModule());
@@ -130,6 +153,8 @@ class KNTransitControler {
 		params.setScoringThisActivityAtAll(false);
 		controler.getConfig().planCalcScore().addActivityParams(params);
 
+		// ---
+		
 		controler.run();
 	}
 

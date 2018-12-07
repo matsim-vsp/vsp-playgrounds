@@ -25,11 +25,11 @@ package playground.ikaddoura;
 
 
 import java.io.IOException;
+
 import org.apache.log4j.Logger;
 import org.matsim.contrib.otfvis.OTFVisFileWriterModule;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.vis.otfvis.OTFFileWriterFactory;
 
 /**
  * @author ikaddoura
@@ -48,7 +48,7 @@ public class IKControler {
 			log.info("configFile: "+ configFile);
 			
 		} else {
-			configFile = "/Users/ihab/Documents/workspace/shared-svn/studies/ihab/cottbus/input/config.xml";
+			configFile = "../../shared-svn/studies/ihab/cottbus/input/config.xml";
 		}
 		
 		IKControler main = new IKControler();
@@ -58,10 +58,15 @@ public class IKControler {
 	private void run() {
 		
 		Controler controler = new Controler(configFile);
-		controler.getConfig().controler().setOverwriteFileSetting(
-				OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles );
-		//		services.addControlerListener(new IKControlerListener(services.getScenario()));
 		controler.addOverridingModule(new OTFVisFileWriterModule());
+		
+		controler.addOverridingModule(new AbstractModule(){
+			@Override
+			public void install() {
+				this.addControlerListenerBinding().to(IKControlerListener.class);
+			}
+		});	
+		
 		controler.run();
 	}
 }

@@ -53,22 +53,21 @@ public class Incident2Network {
 
 	private Network carNetwork = null;
 	private Scenario scenario = null;
-	private Map<String, TrafficItem> trafficItems = null;
 	
 	private final Map<String, Path> trafficItemId2path = new HashMap<>();
-	private final Set<String> trafficItemsToCheck = new HashSet<>();
+	private final Set<String> trafficItemsImplausibleRouteGeometry = new HashSet<>();
+	private final Set<String> trafficItemsImplausibleRouteLength = new HashSet<>();
 	
-	public Incident2Network(Scenario scenario, Map<String, TrafficItem> trafficItems, String targetCRS) {
+	public Incident2Network(Scenario scenario, String targetCRS) {
 		this.scenario = scenario;
 		this.carNetwork = loadCarNetwork(scenario);
-		this.trafficItems = trafficItems;
 		ct = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, targetCRS);
 	}
 
-	public void computeIncidentPaths() {
+	public void computeIncidentPaths(Map<String, TrafficItem> trafficItems, Set<String> relevantTrafficItemIds) {
 		log.info("Processing traffic items...");
 		
-		for (String id : trafficItems.keySet()) {
+		for (String id : relevantTrafficItemIds) {
 						
 			final Coord coordFromWGS84 = new Coord(Double.valueOf(trafficItems.get(id).getOrigin().getLongitude()), Double.valueOf(trafficItems.get(id).getOrigin().getLatitude()));
 			final Coord coordToWGS84 = new Coord(Double.valueOf(trafficItems.get(id).getTo().getLongitude()), Double.valueOf(trafficItems.get(id).getTo().getLatitude()));
@@ -121,8 +120,8 @@ public class Incident2Network {
 
 				if (incidentPath.links.size() > 0 && linkIDsToCutOut.size() == incidentPath.links.size()) {
 					log.warn("All network links of incident " + id + " have a different direction than the incident itself. "
-							+ "The inplausible paths will be written into 'incidentsLinksToBeChecked.shp'");
-					this.trafficItemsToCheck.add(id);
+							+ "The inplausible paths will be written into 'trafficItemsImplausibleRouteGeometry.shp'");
+					this.trafficItemsImplausibleRouteGeometry.add(id);
 
 				} else {
 					
@@ -142,8 +141,8 @@ public class Incident2Network {
 			
 			if (computePathDistance(incidentPath) > 2. * beelineDistance) {
 				log.warn("No good path identified for incident " + id + ". The path distance is at least twice as long as the beeline distance."
-						+ "The inplausible paths will be written into 'incidentsLinksToBeChecked.shp'. Maybe try a better network resolution.");
-				this.trafficItemsToCheck.add(id);
+						+ "The inplausible paths will be written into 'trafficItemsImplausibleRouteLength.shp'. Maybe try a better network resolution.");
+				this.trafficItemsImplausibleRouteLength.add(id);
 			}
 			
 			if (incidentPath == null || incidentPath.links.size() == 0) {
@@ -210,8 +209,12 @@ public class Incident2Network {
 		return trafficItemId2path;
 	}
 
-	public Set<String> getTrafficItemsToCheck() {
-		return trafficItemsToCheck;
+	public Set<String> getTrafficItemsImplausibleRouteGeometry() {
+		return trafficItemsImplausibleRouteGeometry;
+	}
+
+	public Set<String> getTrafficItemsImplausibleRouteLength() {
+		return trafficItemsImplausibleRouteLength;
 	}
 
 }

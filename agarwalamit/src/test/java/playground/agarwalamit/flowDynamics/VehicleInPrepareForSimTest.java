@@ -19,7 +19,15 @@
 
 package playground.agarwalamit.flowDynamics;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
@@ -33,7 +41,11 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -52,7 +64,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.Vehicles;
 
 /**
  * Created by amit on 28.08.17.
@@ -67,14 +78,7 @@ public class VehicleInPrepareForSimTest {
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
 
-    private Scenario scenario ;
-    private Link link1;
-    private Link link2;
-    private Link link3;
-
     private final String transportModes [] = new String [] {"bike","car"};
-
-    private final Map<Id<Person>, Map<Integer, List<Vehicle>>> personId2Iteration2Vehicles = new HashMap<>();
 
     public VehicleInPrepareForSimTest(QSimConfigGroup.VehiclesSource vehicleSource, boolean modeChoice) {
         this.vehicleSource = vehicleSource;
@@ -98,10 +102,10 @@ public class VehicleInPrepareForSimTest {
      */
     @Test
     public void vehicleTest() {
-        scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+        Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
-        createNetwork();
-        createPlans();
+        createNetwork(scenario);
+        createPlans(scenario);
 
         Config config = scenario.getConfig();
 
@@ -122,10 +126,10 @@ public class VehicleInPrepareForSimTest {
 
         StrategyConfigGroup.StrategySettings strategySettings = new StrategyConfigGroup.StrategySettings();
         if (this.modeChoice) {
-            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.name());
+            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
             config.changeMode().setModes(transportModes);
         } else {
-            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
+            strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         }
         strategySettings.setWeight(1);
 
@@ -147,6 +151,8 @@ public class VehicleInPrepareForSimTest {
         final Controler cont = new Controler(scenario);
         cont.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
+        final Map<Id<Person>, Map<Integer, List<Vehicle>>> personId2Iteration2Vehicles = new HashMap<>();
+
         cont.addControlerListener(new BeforeMobsimListener() {
             @Inject private Scenario injectedScenario;
             @Override
@@ -159,7 +165,14 @@ public class VehicleInPrepareForSimTest {
                         iteration2vehicles = new HashMap<>();
                     }
 
-                    List<Vehicle> vehicleList = getVehicles(person.getId(), injectedScenario.getVehicles());
+                    List<Vehicle> vehicleList = injectedScenario.getVehicles()
+                                                                .getVehicles()
+                                                                .values()
+                                                                .stream()
+                                                                .filter(v -> v.getId()
+                                                                              .toString()
+                                                                              .startsWith(person.getId().toString()))
+                                                                .collect(Collectors.toList());
 
                     iteration2vehicles.put(event.getIteration(), vehicleList);
                     personId2Iteration2Vehicles.put(person.getId(), iteration2vehicles);
@@ -171,14 +184,21 @@ public class VehicleInPrepareForSimTest {
 
         // now check if the vehicles are same in all iterations.
 
-        for(Id<Person> personId : this.personId2Iteration2Vehicles.keySet()) {
+        for(Id<Person> personId : personId2Iteration2Vehicles.keySet()) {
             boolean allVehiclesSame = true;
-            Iterator<List<Vehicle>> vehiclesListIterator = this.personId2Iteration2Vehicles.get(personId).values().iterator();
+            Iterator<List<Vehicle>> vehiclesListIterator = personId2Iteration2Vehicles.get(personId).values().iterator();
             List<Vehicle> firstIterationVehicles = vehiclesListIterator.next();
 
             // if using mode choice, different vehicles are created on the first place based on the network modes
             if (this.vehicleSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData) && this.modeChoice ) {
                 Assert.assertEquals(" Number of vehicles for person must be two.", 2, firstIterationVehicles.size(), MatsimTestUtils.EPSILON);
+
+                Assert.assertTrue("None of the vehicle id has suffix bike.",
+                        firstIterationVehicles.stream()
+                                              .filter(v -> v.getId().toString().split("_").length>1)
+                                              .map(v -> v.getId().toString().split("_")[1])
+                                              .collect(Collectors.toList())
+                                              .contains("bike"));
             }
 
             while (vehiclesListIterator.hasNext()) {
@@ -205,17 +225,7 @@ public class VehicleInPrepareForSimTest {
         }
     }
 
-    private List<Vehicle> getVehicles(Id<Person> personId, Vehicles vehicles) {
-        List<Vehicle> vehicleList = new ArrayList<>();
-        for( Vehicle vehicle : vehicles.getVehicles().values()) {
-            if(vehicle.getId().toString().startsWith(personId.toString())) {
-                vehicleList.add(vehicle);
-            }
-        }
-        return vehicleList;
-    }
-
-    private void createNetwork(){
+    private void createNetwork(Scenario scenario){
         Network network = scenario.getNetwork();
 
         double x = -100.0;
@@ -224,18 +234,16 @@ public class VehicleInPrepareForSimTest {
         Node node3 = NetworkUtils.createAndAddNode(network, Id.create("3", Node.class), new Coord(0.0, 1000.0));
         Node node4 = NetworkUtils.createAndAddNode(network, Id.create("4", Node.class), new Coord(0.0, 1100.0));
 
-        link1 = NetworkUtils.createAndAddLink(network,Id.create("1", Link.class), node1, node2, (double) 100, (double) 25, (double) 600, (double) 1, null, "22");
-        link2 = NetworkUtils.createAndAddLink(network,Id.create("2", Link.class), node2, node3, (double) 1000, (double) 25, (double) 600, (double) 1, null, "22");
-        link3 = NetworkUtils.createAndAddLink(network,Id.create("3", Link.class), node3, node4, (double) 100, (double) 25, (double) 600, (double) 1, null, "22");
-
-        Set<String> networkModes = new HashSet<>(Arrays.asList( transportModes));
+        Link link1 = NetworkUtils.createAndAddLink(network,Id.create("1", Link.class), node1, node2, (double) 100, (double) 25, (double) 600, (double) 1, null, "22");
+        Link link2 = NetworkUtils.createAndAddLink(network,Id.create("2", Link.class), node2, node3, (double) 1000, (double) 25, (double) 600, (double) 1, null, "22");
+        Link link3 = NetworkUtils.createAndAddLink(network,Id.create("3", Link.class), node3, node4, (double) 100, (double) 25, (double) 600, (double) 1, null, "22");
 
         link1.setAllowedModes(new HashSet<>(Arrays.asList(transportModes)));
         link2.setAllowedModes(new HashSet<>(Arrays.asList(transportModes)));
         link3.setAllowedModes(new HashSet<>(Arrays.asList(transportModes)));
     }
 
-    private void createPlans(){
+    private void createPlans(Scenario scenario){
 
         Population population = scenario.getPopulation();
 
@@ -254,17 +262,17 @@ public class VehicleInPrepareForSimTest {
             Person p = population.getFactory().createPerson(id);
             Plan plan = population.getFactory().createPlan();
             p.addPlan(plan);
-            Activity a1 = population.getFactory().createActivityFromLinkId("h", link1.getId());
+            Activity a1 = population.getFactory().createActivityFromLinkId("h", Id.createLinkId("1"));
             a1.setEndTime(8*3600+i*5);
             Leg leg = population.getFactory().createLeg(transportModes[i]);
             plan.addActivity(a1);
             plan.addLeg(leg);
             LinkNetworkRouteFactory factory = new LinkNetworkRouteFactory();
-            NetworkRoute route = (NetworkRoute) factory.createRoute(link1.getId(), link3.getId());
-            route.setLinkIds(link1.getId(), Arrays.asList(link2.getId()), link3.getId());
+            NetworkRoute route = (NetworkRoute) factory.createRoute(Id.createLinkId("1"), Id.createLinkId("3"));
+            route.setLinkIds(Id.createLinkId("1"), Arrays.asList(Id.createLinkId("2")), Id.createLinkId("3"));
             leg.setRoute(route);
 
-            Activity a2 = population.getFactory().createActivityFromLinkId("w", link3.getId());
+            Activity a2 = population.getFactory().createActivityFromLinkId("w", Id.createLinkId("3"));
             plan.addActivity(a2);
             population.addPerson(p);
 
@@ -292,5 +300,4 @@ public class VehicleInPrepareForSimTest {
             }
         }
     }
-
 }

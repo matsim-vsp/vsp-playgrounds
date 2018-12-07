@@ -84,14 +84,6 @@ public class PrivateAVTaxiDispatcher extends DefaultTaxiOptimizer {
 	private final ParkingSearchLogic parkingLogic;
 	private final List<Link> avParkings;
 
-	/**
-	 * @param optimContext
-	 * @param params
-	 * @param avParkings
-	 * @param unplannedRequests
-	 * @param doUnscheduleAwaitingRequests
-	 * @param doUpdateTimelines
-	 */
 	public PrivateAVTaxiDispatcher(TaxiConfigGroup taxiCfg, Fleet fleet, Network network, MobsimTimer timer,
 			TravelTime travelTime, TaxiScheduler scheduler, DefaultTaxiOptimizerParams params,
 			ParkingSearchManager parkingManger, AvParkingContext context, LeastCostPathCalculator router,

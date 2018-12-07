@@ -1,14 +1,15 @@
 package playground.dziemke.analysis.general;
 
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import playground.dziemke.analysis.GnuplotUtils;
-
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * @author on 04.04.2017.
@@ -27,10 +28,10 @@ public class GeneralTripAnalyzer {
     private static Map<String, Double> otherInformationMap = new TreeMap<>();
 
     public static void analyze(List<Trip> trips, String outputDir) {
-        analyze(trips, 0, outputDir);
+        analyze(trips, 0, 0, outputDir);
     }
 
-    public static void analyze(List<Trip> trips, int noPreviousEndOfActivityCounter, String outputDir) {
+    public static void analyze(List<Trip> trips, int noPreviousEndOfActivityCounter, int personStuckCounter, String outputDir) {
         /* Do calculations and write-out*/
 
         double averageTripDuration;
@@ -76,7 +77,8 @@ public class GeneralTripAnalyzer {
 
 
         /* Other information */
-        otherInformationMap.put("Aggregated weight of trips that have no previous activity", (double) noPreviousEndOfActivityCounter);
+        otherInformationMap.put("Number of trips that have no previous activity", (double) noPreviousEndOfActivityCounter);
+        otherInformationMap.put("Number of stuck persons", (double) personStuckCounter);
         otherInformationMap.put("Aggregated weight of trips that have negative distance (beeline, from survey)", aggregatedWeightOfConsideredTrips - aggregatedWeightOfTripsWithNonNegativeDistanceBeeline);
         otherInformationMap.put("Aggregated weight of trips that have negative distance (routed, from survey)", aggregatedWeightOfConsideredTrips - aggregatedWeightOfTripsWithNonNegativeDistanceRouted);
         otherInformationMap.put("Aggregated weight of trips that have no calculable speed beeline", aggregatedWeightOfConsideredTrips - aggregatedWeightOfTripsWithCalculableSpeedBeeline);

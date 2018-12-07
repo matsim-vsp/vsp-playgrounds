@@ -23,7 +23,6 @@ package scenarios.illustrative.braess.run;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
 
 import org.apache.log4j.Logger;
@@ -32,16 +31,26 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup;
+import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
+import org.matsim.contrib.decongestion.DecongestionModule;
+import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsWriter20;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsWriter20;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.TravelTimeCalculatorConfigGroup.TravelTimeCalculatorType;
 import org.matsim.core.controler.AbstractModule;
@@ -54,16 +63,11 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
-import org.matsim.lanes.data.LanesWriter;
+import org.matsim.lanes.LanesWriter;
+import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
-import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup;
-import playground.ikaddoura.decongestion.DecongestionConfigGroup.DecongestionApproach;
-import playground.ikaddoura.decongestion.DecongestionModule;
-import playground.ikaddoura.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -77,6 +81,8 @@ import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
 import scenarios.illustrative.analysis.TtAnalyzedResultsWriter;
 import scenarios.illustrative.analysis.TtListenerToBindAndWriteAnalysis;
 import scenarios.illustrative.braess.analysis.TtAnalyzeBraess;
+import scenarios.illustrative.braess.analysis.TtAnalyzeBraessWithByPass;
+import scenarios.illustrative.braess.analysis.TtListenerToBindAndWriteAnalysisForBraessWithByPass;
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes;
 import scenarios.illustrative.braess.createInput.TtCreateBraessNetworkAndLanes.LaneType;
 import scenarios.illustrative.braess.createInput.TtCreateBraessPopulation;
@@ -85,9 +91,10 @@ import scenarios.illustrative.braess.createInput.TtCreateBraessSignals;
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalBasePlan;
 import scenarios.illustrative.braess.createInput.TtCreateBraessSignals.SignalControlLogic;
 import scenarios.illustrative.braess.signals.ResponsiveLocalDelayMinimizingSignal;
-import signals.CombinedSignalsModule;
-import signals.laemmer.model.LaemmerConfig;
-import signals.sylvia.controler.DgSylviaConfig;
+import signals.downstreamSensor.DownstreamPlanbasedSignalController;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
 
 /**
@@ -99,8 +106,7 @@ import utils.OutputUtils;
  */
 public final class RunBraessSimulation {
 
-	private static final Logger log = Logger
-			.getLogger(RunBraessSimulation.class);
+	private static final Logger log = Logger.getLogger(RunBraessSimulation.class);
 
 	/* population parameter */
 	
@@ -113,19 +119,24 @@ public final class RunBraessSimulation {
 	private static final Double INIT_PLAN_SCORE = null;
 	
 	// defines which kind of signals should be used. use 'SIGNAL_LOGIC = SignalControlLogic.NONE' if signals should not be used
-	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.NONE;
+	private static final SignalBasePlan SIGNAL_BASE_PLAN = SignalBasePlan.SIGNAL4_X_SECOND_Z_V2Z;
 	// if SignalBasePlan SIGNAL4_X_Seconds_Z.. is used, SECONDS_Z_GREEN gives the green time for Z
-	private static final int SECONDS_Z_GREEN = 30;
+	private static final int SECONDS_Z_GREEN = 1;
 	private static final SignalControlLogic SIGNAL_LOGIC = SignalControlLogic.NONE;
 	
 	// defines which kind of lanes should be used
 	private static final LaneType LANE_TYPE = LaneType.NONE;
+	// defines whether an alternative (upper bound; by-pass; bicycle etc.) route should exist
+	private static final boolean BYPASS = false;
+	private static final double BYPASS_TT = 1200;
 	
 	// defines which kind of pricing should be used
 	private static final PricingType PRICING_TYPE = PricingType.NONE;
 	public enum PricingType{
 		NONE, V3, V4, V7, V8, V9, V10, FLOWBASED, GREGOR, INTERVALBASED
 	}
+	
+	private static final boolean VIS = false;
 
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
@@ -133,7 +144,7 @@ public final class RunBraessSimulation {
 		
 	private static final boolean WRITE_INITIAL_FILES = true;
 	
-	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/intervalBased/";
+	private static final String OUTPUT_BASE_DIR = "../../runs-svn/braess/byPass/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -141,32 +152,31 @@ public final class RunBraessSimulation {
 		Controler controler = prepareController(scenario);
 	
 		controler.run();
-		
-		try {
-			MATSimVideoUtils.createLegHistogramVideo(config.controler().getOutputDirectory());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (PRICING_TYPE.equals(PricingType.INTERVALBASED)) {
-			try {
-				MATSimVideoUtils.createVideo(config.controler().getOutputDirectory(), 1, "toll_perLinkAndTimeBin");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	private static Config defineConfig() {
 		Config config = ConfigUtils.createConfig();
 
 		// set number of iterations
-		config.controler().setLastIteration(200);
+		config.controler().setLastIteration(2000);
 
 		// able or enable signals and lanes
 		config.qsim().setUseLanes(LANE_TYPE.equals(LaneType.NONE) ? false : true);
-		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems(SIGNAL_LOGIC.equals(SignalControlLogic.NONE) ? false : true);
 		config.qsim().setUsingFastCapacityUpdate(false);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
+		// TODO modify laemmer config parameter here if you like
+		laemmerConfigGroup.setMaxCycleTime(90);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setIntergreenTime(0);
+		laemmerConfigGroup.setMinGreenTime(0);
+		
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
+		// TODO modify sylvia config parameter here if you like
+		sylviaConfig.setSignalGroupMaxGreenScale(2);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
 
 		// set brain exp beta
 		config.planCalcScore().setBrainExpBeta(2);
@@ -180,7 +190,8 @@ public final class RunBraessSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
 		// set travelTimeBinSize (only has effect if reRoute is used)
-		config.travelTimeCalculator().setTraveltimeBinSize(60);
+//		config.travelTimeCalculator().setTraveltimeBinSize(60);
+		config.travelTimeCalculator().setTraveltimeBinSize(10);
 //		config.travelTimeCalculator().setMaxTime((int) (3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 2)));
 		config.travelTimeCalculator().setMaxTime(3600 * 24);
 
@@ -191,11 +202,12 @@ public final class RunBraessSimulation {
 		config.timeAllocationMutator().setMutationRange(60);
 
 		// define strategies:
-		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
+//		config.strategy().setFractionOfIterationsToDisableInnovation(.8);
+		config.strategy().setFractionOfIterationsToDisableInnovation(.9);
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultStrategy.ReRoute.toString());
-			strat.setWeight(0.1);
+			strat.setWeight(0.01);
 //			strat.setDisableAfter(config.controler().getLastIteration() - 20);
 			config.strategy().addStrategySettings(strat);
 		}
@@ -216,7 +228,7 @@ public final class RunBraessSimulation {
 		{
 			StrategySettings strat = new StrategySettings();
 			strat.setStrategyName(DefaultSelector.ChangeExpBeta.toString());
-			strat.setWeight(0.9);
+			strat.setWeight(0.99);
 			strat.setDisableAfter(config.controler().getLastIteration());
 			config.strategy().addStrategySettings(strat);
 		}
@@ -237,13 +249,14 @@ public final class RunBraessSimulation {
 
 		config.strategy().setMaxAgentPlanMemorySize(5);
 
-		config.qsim().setStuckTime(3600 * 10.);
+//		config.qsim().setStuckTime(3600 * 10.);
+		config.qsim().setStuckTime(300);
 		config.qsim().setRemoveStuckVehicles(false);
 
 		config.qsim().setStartTime(3600 * SIMULATION_START_TIME);
 		// set end time to shorten simulation run time: 2 hours after the last agent departs
-//		config.qsim().setEndTime(3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 2));
-		config.qsim().setEndTime(3600 * 24);
+		config.qsim().setEndTime(3600 * (SIMULATION_START_TIME + SIMULATION_PERIOD + 5));
+//		config.qsim().setEndTime(3600 * 24);
 		
 		// adapt monetary distance cost rate (should be negative)
 		config.planCalcScore().getModes().get(TransportMode.car).setMonetaryDistanceRate(-0.0);
@@ -268,23 +281,30 @@ public final class RunBraessSimulation {
 
 		// decongestion relevant parameters
 		DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
-		decongestionSettings.setWRITE_OUTPUT_ITERATION(1);
-		decongestionSettings.setUPDATE_PRICE_INTERVAL(1);
-		decongestionSettings.setTOLL_BLEND_FACTOR(1.0);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_START_PRICE_ADJUSTMENT(0.05);
-		decongestionSettings.setFRACTION_OF_ITERATIONS_TO_END_PRICE_ADJUSTMENT(1.0);
-		decongestionSettings.setTOLERATED_AVERAGE_DELAY_SEC(2);
-		decongestionSettings.setWRITE_LINK_INFO_CHARTS(true);
+		decongestionSettings.setWriteOutputIteration(1);
+		decongestionSettings.setUpdatePriceInterval(10);
+		decongestionSettings.setTollBlendFactor(1.0);
+		decongestionSettings.setFractionOfIterationsToStartPriceAdjustment(0.05);
+		decongestionSettings.setFractionOfIterationsToEndPriceAdjustment(1.0);
+		decongestionSettings.setToleratedAverageDelaySec(2);
+		decongestionSettings.setWriteLinkInfoCharts(true);
 		decongestionSettings.setMsa(true);
 		
 		decongestionSettings.setDecongestionApproach(DecongestionApproach.PID);
-		decongestionSettings.setTOLL_ADJUSTMENT(1);
-		decongestionSettings.setINITIAL_TOLL(1);
+		decongestionSettings.setTollAdjustment(1);
+		decongestionSettings.setInitialToll(1);
 		decongestionSettings.setKp(0.1);
 		decongestionSettings.setKi(0.);
 		decongestionSettings.setKd(0.);
 		
 		config.addModule(decongestionSettings);
+		
+		if (VIS) {
+			OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
+			otfvisConfig.setDrawTime(true);
+			otfvisConfig.setAgentSize(80f);
+			config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+		}
 		
 		return config;
 	}
@@ -297,7 +317,7 @@ public final class RunBraessSimulation {
 	
 		// add missing scenario elements
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-				SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 			createSignals(scenario);
@@ -327,22 +347,25 @@ public final class RunBraessSimulation {
 			});
 			break;
 		default:
-			// add combined signals module (works for different signal types as sylvia, downstream or planbased)
-			boolean alwaysSameMobsimSeed = false;
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			signalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-			// TODO modify sylvia config parameter here if you like
-			sylviaConfig.setSignalGroupMaxGreenScale(1.5);
-			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-			signalsModule.setSylviaConfig(sylviaConfig);
-			LaemmerConfig laemmerConfig = new LaemmerConfig();
-			// TODO modify laemmer config parameter here if you like
-			laemmerConfig.setMaxCycleTime(90);
-			laemmerConfig.setDesiredCycleTime(60);
-			laemmerConfig.setDefaultIntergreenTime(0);
-			signalsModule.setLaemmerConfig(laemmerConfig);
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller
+			// by default and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+					DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+					GershensonSignalController.GershensonFactory.class);
 			controler.addOverridingModule(signalsModule);
+
+			// bind gershenson config
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					GershensonConfig gershensonConfig = new GershensonConfig();
+					bind(GershensonConfig.class).toInstance(gershensonConfig);
+				}
+			});
 			break;
 		}
 		
@@ -457,25 +480,30 @@ public final class RunBraessSimulation {
 			});
 		}
 		
+		if (VIS) {
+			controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+		}
+		
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
-//				this.bind(TtAnalyzeBraess.class).asEagerSingleton();
-//				this.addEventHandlerBinding().to(TtAnalyzeBraess.class);
-				this.bind(TtAbstractAnalysisTool.class).to(TtAnalyzeBraess.class).asEagerSingleton();
+				if (BYPASS) {
+					this.bind(TtAbstractAnalysisTool.class).to(TtAnalyzeBraessWithByPass.class).asEagerSingleton();
+					this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysisForBraessWithByPass.class);
+				} else {
+					this.bind(TtAbstractAnalysisTool.class).to(TtAnalyzeBraess.class).asEagerSingleton();
+					this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysis.class);
+				}
 				this.addEventHandlerBinding().to(TtAbstractAnalysisTool.class);
 				this.bind(TtAnalyzedResultsWriter.class);
-				this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysis.class);
 				
 				SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
-						SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+						SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 				if (signalsConfigGroup.isUseSignalSystems()) {
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class).asEagerSingleton();
-					this.addEventHandlerBinding().to(TtSignalAnalysisTool.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 				}
 			}
 		});
@@ -489,8 +517,10 @@ public final class RunBraessSimulation {
 //		netCreator.setUseBTUProperties( false );
 		netCreator.setSimulateInflowCap( false );
 		netCreator.setMiddleLinkExists( true );
+		netCreator.setByPassExists( BYPASS );
+		netCreator.setByPassTT(BYPASS_TT);
 		
-		netCreator.setCapFirstLast(3600);
+//		netCreator.setCapFirstLast(3600); // default is numberOfPersons
 		netCreator.setCapZ(1800);
 		netCreator.setCapFast(1800);
 		netCreator.setCapSlow(1800);
@@ -591,6 +621,10 @@ public final class RunBraessSimulation {
 			}
 		}
 		
+		if (BYPASS) {
+			runName += "_bypass" + BYPASS_TT;
+		}
+		
 		if (scenario.getNetwork().getNodes().containsKey(Id.createNodeId(23))){
 			runName += "_inflow";
 			
@@ -644,7 +678,7 @@ public final class RunBraessSimulation {
 				runName += "_node";
 		}			
 
-		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME,
+		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
 			switch (SIGNAL_LOGIC){
 			case SIMPLE_RESPONSIVE:
@@ -742,7 +776,7 @@ public final class RunBraessSimulation {
 			new SignalSystemsWriter20(signalsData.getSignalSystemsData()).write(outputDir + "signalSystems.xml");
 			new SignalControlWriter20(signalsData.getSignalControlData()).write(outputDir + "signalControl.xml");
 			new SignalGroupsWriter20(signalsData.getSignalGroupsData()).write(outputDir + "signalGroups.xml");
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setSignalSystemFile("signalSystems.xml");
 			signalConfigGroup.setSignalControlFile("signalControl.xml");
 			signalConfigGroup.setSignalGroupsFile("signalGroups.xml");

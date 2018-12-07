@@ -22,6 +22,7 @@
 package analysis;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,29 +36,36 @@ import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author tthunig
  *
  */
-public final class TtGeneralAnalysis implements PersonDepartureEventHandler, PersonArrivalEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
+@Singleton
+public final class TtGeneralAnalysis implements PersonDepartureEventHandler, PersonArrivalEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, PersonStuckEventHandler {
 
 	private int totalNumberOfTrips = 0;
 	private double totalDistance = 0.0;
 	private double totalTt = 0.0;
 	private double sumOfSpeedsMessured = 0.0;
+	private int stuckedAgents = 0;
+	private int totalNumberOfLinkLeaves = 0;
 	
 	private Map<Id<Vehicle>, List<Double>> ttPerVehiclePerTrip = new HashMap<>();
 	private Map<Id<Vehicle>, LinkedList<Double>> delayPerVehiclePerTrip = new HashMap<>();
@@ -73,6 +81,10 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 //	private Map<Id<Link>, Map<Double, Integer>> numberOfVehPerLinkPerHour;
 //	private Map<Id<Link>, Double> avgSpeedPerLink;
 //	private Map<Id<Link>, Map<Double, Double>> avgSpeedPerLinkPerHour;
+	private Map<Id<Link>,LinkedList<Id<Person>>> agentsStuckedAtLink = new HashMap<>();
+	
+	private Map<Double, Integer> delayRatioMap = new TreeMap<>();
+	
 	
 	/* in all these maps the key gives the start of the interval */
 	// in 100 m steps
@@ -86,11 +98,16 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 	// in 100 s steps
 	private Map<Double, Integer> numberOfArrivalsPerTimeInterval = new TreeMap<>();
 	
-	private Network network;
+	private final Network network;
 	
-	@Inject
 	public TtGeneralAnalysis(Network network) {
 		this.network = network;
+	}
+	
+	@Inject
+	public TtGeneralAnalysis(Network network, EventsManager em) {
+		this(network);
+		em.addHandler(this);
 	}
 	
 	@Override
@@ -99,6 +116,7 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 		this.totalDistance = 0.0;
 		this.totalTt = 0.0;
 		this.sumOfSpeedsMessured = 0.0;
+		this.stuckedAgents = 0;
 		this.ttPerVehiclePerTrip.clear();
 		this.delayPerVehiclePerTrip.clear();
 		this.distancePerVehiclePerTrip.clear();
@@ -112,6 +130,7 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 		this.numberOfTripsPerTripSpeedInterval.clear();
 		this.numberOfDeparturesPerTimeInterval.clear();
 		this.numberOfArrivalsPerTimeInterval.clear();
+		this.agentsStuckedAtLink.clear();
 	}
 
 	@Override
@@ -146,6 +165,7 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
+		this.totalNumberOfLinkLeaves++;
 		Link currentLink = network.getLinks().get(event.getLinkId());
 		
 		// remove the distance of the last trip temporarily from the list
@@ -171,6 +191,12 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 		double previousDelay = delayPerVehiclePerTrip.get(event.getVehicleId()).pollLast();
 		// add it again as updated delay
 		delayPerVehiclePerTrip.get(event.getVehicleId()).add(previousDelay + currentDelay);
+		
+		// increase the counter for this exact delay value
+		if (!this.delayRatioMap.containsKey(currentDelay)) {
+			this.delayRatioMap.put(currentDelay, 0);
+		}
+		this.delayRatioMap.put(currentDelay, (this.delayRatioMap.get(currentDelay)+1));
 		
 		int vehCount = numberOfVehPerLink.get(event.getLinkId());
 		numberOfVehPerLink.put(event.getLinkId(), ++vehCount);
@@ -237,6 +263,17 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 		int entry = numberOfArrivalsPerTimeInterval.get(timeInterval);
 		numberOfArrivalsPerTimeInterval.put(timeInterval, ++entry);
 	}
+	
+	//Method to see which agents are stucked at a certain Link
+	@Override
+	public void handleEvent(PersonStuckEvent event) {
+		stuckedAgents++;
+		if (!agentsStuckedAtLink.containsKey(event.getLinkId())) {
+			agentsStuckedAtLink.put(event.getLinkId(), new LinkedList<Id<Person>>());
+		}
+		agentsStuckedAtLink.get(event.getLinkId()).add(event.getPersonId());
+	}
+	
 
 	public Map<Double, Double> getRelativeCumulativeFrequencyOfTripsPerDuration(){
 		return determineRelCumFreqMapOfCountsPerInterval(numberOfTripsPerTripDurationInterval);
@@ -315,5 +352,40 @@ public final class TtGeneralAnalysis implements PersonDepartureEventHandler, Per
 	public Map<Id<Link>, Integer> getNumberOfVehPerLink(){
 		return numberOfVehPerLink;
 	}
-
+	
+	public int getstuckedAgents() {
+		return stuckedAgents;
+	}
+	
+	public Map<Id<Link>,LinkedList<Id<Person>>> getPostitionsOfStuckedAgents(){
+		return agentsStuckedAtLink;
+	}
+	
+	private void cleanDelayRatioMap(){
+		// look for the maximum delay
+		Iterator<Double> iterator = delayRatioMap.keySet().iterator();
+		double max = iterator.next();
+		while (iterator.hasNext()) {
+			max = iterator.next();
+		}
+		// complete map if keys are missing
+		for (int delay = 0; delay <= max; delay++) {
+			if (!delayRatioMap.containsKey((double)delay)) {
+				delayRatioMap.put((double)delay, 0);
+			}
+		}
+	}
+	
+	public Map<Double, Double> getRelativeComulativeFrequencyOfDelays(){
+		cleanDelayRatioMap();
+		
+		Map<Double, Double> relativeComulativeFrequency = new TreeMap<>();
+		double relCumFreqOfCurrentInterval = 0.0;
+		for (Entry<Double, Integer> entry : delayRatioMap.entrySet()){
+			relCumFreqOfCurrentInterval += (entry.getValue() * 1. / totalNumberOfLinkLeaves);
+			relativeComulativeFrequency.put(entry.getKey(), relCumFreqOfCurrentInterval);
+		}
+		return relativeComulativeFrequency;
+	}
+	
 }

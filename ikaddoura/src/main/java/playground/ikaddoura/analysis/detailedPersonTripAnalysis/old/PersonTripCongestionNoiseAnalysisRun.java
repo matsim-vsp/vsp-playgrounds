@@ -103,7 +103,7 @@ public class PersonTripCongestionNoiseAnalysisRun {
 
 	public void run() {
 		
-		String configFile = runDirectory + "output_config.xml.gz";
+		String configFile = runDirectory + "output_config.xml";
 		String networkFile = "output_network.xml.gz";
 		String populationFile = "output_plans.xml.gz";
 

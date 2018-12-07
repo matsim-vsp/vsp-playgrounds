@@ -19,12 +19,14 @@
 
 package playground.ikaddoura.analysis.detailedPersonTripAnalysis;
 
+import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.core.controler.AbstractModule;
 
+import playground.ikaddoura.analysis.carOwnerShip.SAVInsteadOfCarAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
+import playground.ikaddoura.savPricing.SAVPassengerTrackerImpl;
 
 public class PersonTripAnalysisModule extends AbstractModule {
 	

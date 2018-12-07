@@ -21,9 +21,11 @@ package playground.dgrether.signalsystems.cottbus;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -56,10 +58,10 @@ public class CottbusFootballTraveltimeWriter {
 			writer.append(CottbusFootballStrings.SEPARATOR);
 			writer.newLine();
 			if (! traveltimeHandler.getArrivalTimesCB2FB().isEmpty() && ! traveltimeHandler.getArrivalTimesSPN2FB().isEmpty()){
-				writer.append(Collections.max(traveltimeHandler.getArrivalTimesCB2FB().values()) + CottbusFootballStrings.SEPARATOR
-						+ Collections.max(traveltimeHandler.getArrivalTimesSPN2FB().values()) + CottbusFootballStrings.SEPARATOR
-						+ Collections.max(traveltimeHandler.getArrivalTimesFB2CB().values()) + CottbusFootballStrings.SEPARATOR
-						+ Collections.max(traveltimeHandler.getArrivalTimesFB2SPN().values()) + CottbusFootballStrings.SEPARATOR);
+				writer.append(max(traveltimeHandler.getArrivalTimesCB2FB().values()) + CottbusFootballStrings.SEPARATOR
+						+ max(traveltimeHandler.getArrivalTimesSPN2FB().values()) + CottbusFootballStrings.SEPARATOR
+						+ max(traveltimeHandler.getArrivalTimesFB2CB().values()) + CottbusFootballStrings.SEPARATOR
+						+ max(traveltimeHandler.getArrivalTimesFB2SPN().values()) + CottbusFootballStrings.SEPARATOR);
 			}
 			writer.flush();
 			writer.close();
@@ -84,6 +86,15 @@ public class CottbusFootballTraveltimeWriter {
 			e1.printStackTrace();
 		}
 
+	}
+	
+	private static double max(Collection<Double> collection) {
+		try {
+			return Collections.max(collection);
+		} catch (NoSuchElementException e) {
+			// the collection is empty (i.e. no arrivals in this category). return 0
+			return 0;
+		}
 	}
 
 }

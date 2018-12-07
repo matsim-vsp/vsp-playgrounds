@@ -27,33 +27,33 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.contrib.signals.model.SignalController;
+import org.matsim.contrib.signals.controller.SignalController;
+import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.sensor.DownstreamSensor;
 
-import com.google.inject.Provider;
+import com.google.inject.Inject;
 
 /**
  * @author tthunig
  *
  */
-public class DownstreamPlanbasedSignalController implements SignalController {
+public final class DownstreamPlanbasedSignalController implements SignalController {
 
 	private static final Logger log = Logger.getLogger(DownstreamPlanbasedSignalController.class);
 
 	public final static String IDENTIFIER = "DownstreamSignalControl";
 
-	public final static class SignalControlProvider implements Provider<SignalController> {
-		private final DownstreamSensor downstreamSensor;
-
-		public SignalControlProvider(DownstreamSensor downstreamSensor) {
-			this.downstreamSensor = downstreamSensor;
-		}
+	public final static class DownstreamFactory implements SignalControllerFactory {
+		@Inject private DownstreamSensor downstreamSensor;
 
 		@Override
-		public DownstreamPlanbasedSignalController get() {
-			return new DownstreamPlanbasedSignalController(downstreamSensor);
+		public SignalController createSignalSystemController(SignalSystem signalSystem) {
+			SignalController controller = new DownstreamPlanbasedSignalController(downstreamSensor);
+			controller.setSignalSystem(signalSystem);
+			return controller;
 		}
 	}
 
@@ -131,11 +131,6 @@ public class DownstreamPlanbasedSignalController implements SignalController {
 		}
 
 		// TODO try alternatives: e.g. switch to next phase when downstream link occupied
-	}
-
-	@Override
-	public void reset(Integer iterationNumber) {
-		// nothing is to do. init() is only needed once
 	}
 
 	/**

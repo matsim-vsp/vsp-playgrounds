@@ -49,7 +49,7 @@ public class PeakHourTripTollPerKmAnalyzer {
 	private final TripTollHandler tollHandler ;
 	private final ModeFilterTripDistanceHandler distHandler;
 
-	private final List<Double> pkHrs = new ArrayList<>(Arrays.asList(new Double []{8., 9., 10., 16., 17., 18.,})); // => 7-10 and 15-18
+	private final List<Double> pkHrs = new ArrayList<>(Arrays.asList(8., 9., 10., 16., 17., 18.)); // => 7-10 and 15-18
 	private final MunichPersonFilter pf = new MunichPersonFilter();
 	private final Map<Id<Person>,List<Double>> person2TollsPerKmPkHr = new HashMap<>();
 	private final Map<Id<Person>,List<Double>> person2TollsPerKmOffPkHr = new HashMap<>();

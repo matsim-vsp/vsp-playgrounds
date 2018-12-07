@@ -44,7 +44,6 @@ import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.mobsim.qsim.interfaces.Netsim;
 import org.matsim.core.mobsim.qsim.interfaces.NetsimLink;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.population.routes.RouteFactories;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculatorFactory;
@@ -61,36 +60,49 @@ import playground.vsptelematics.bangbang.KNAccidentScenario.MyIterationCounter;
  *
  */
 class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
+	
+	static class Config {
+	
+	}
 
 	private static final Logger log = Logger.getLogger(WithinDayReRouteMobsimListener.class);
 
-	private final Scenario scenario;
-	private EditRoutes editRoutes ;
-
-	private MyIterationCounter iterationCounter;
+	@Inject private Scenario scenario;
+	@Inject private LeastCostPathCalculatorFactory pathAlgoFactory;
+	@Inject private TravelTime travelTime;
+	@Inject private Map<String, TravelDisutilityFactory> travelDisutilityFactories;
+	@Inject private MyIterationCounter iterationCounter;
 	
-	@Inject
-	WithinDayReRouteMobsimListener(Scenario scenario, LeastCostPathCalculatorFactory pathAlgoFactory, TravelTime travelTime,
-			Map<String, TravelDisutilityFactory> travelDisutilityFactories, MyIterationCounter ic ) {
-		this.scenario = scenario ;
-		{
-			TravelDisutility travelDisutility = travelDisutilityFactories.get(TransportMode.car).createTravelDisutility( travelTime ) ;
-			LeastCostPathCalculator pathAlgo = pathAlgoFactory.createPathCalculator(scenario.getNetwork(), travelDisutility, travelTime) ;
-			 PopulationFactory pf = scenario.getPopulation().getFactory() ;
-			this.editRoutes = new EditRoutes( scenario.getNetwork(), pathAlgo, pf ) ;
-			this.iterationCounter = ic ;
-		}
+	private boolean init = true ;
+	
+	private EditRoutes editRoutes ;
+	
+	private double lastReplanningIteration = Double.POSITIVE_INFINITY ;
+	void setLastReplanningIteration(double lastReplanningIteration) {
+		this.lastReplanningIteration = lastReplanningIteration;
 	}
 
+	private double replanningProba = 1.0 ;
+	public void setReplanningProba(double replanningProba) {
+		this.replanningProba = replanningProba;
+	}
+	
 	@Override
 	public void notifyMobsimBeforeSimStep(@SuppressWarnings("rawtypes") MobsimBeforeSimStepEvent event) {
-		if ( this.iterationCounter.getIteration() >= 11 ) {
+		if ( this.iterationCounter.getIteration() > this.lastReplanningIteration ) {
 			log.warn("NOT replanning"); 
 			return ;
 		}
 		
+		if ( init ){
+			init= false ;
+			TravelDisutility travelDisutility = travelDisutilityFactories.get(TransportMode.car).createTravelDisutility( travelTime ) ;
+			LeastCostPathCalculator pathAlgo = pathAlgoFactory.createPathCalculator(scenario.getNetwork(), travelDisutility, travelTime) ;
+			PopulationFactory pf = scenario.getPopulation().getFactory() ;
+			this.editRoutes = new EditRoutes( scenario.getNetwork(), pathAlgo, pf ) ;
+		}
 		
-		Collection<MobsimAgent> agentsToReplan = getAgentsToReplan( (Netsim) event.getQueueSimulation() ); 
+		Collection<MobsimAgent> agentsToReplan = getAgentsToReplan( (Netsim) event.getQueueSimulation(), replanningProba);
 		
 		for (MobsimAgent ma : agentsToReplan) {
 			doReplanning(ma, (Netsim) event.getQueueSimulation());
@@ -99,12 +111,12 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 	
 	private static int cnt2 = 0 ;
 
-	static List<MobsimAgent> getAgentsToReplan(Netsim mobsim ) {
+	static List<MobsimAgent> getAgentsToReplan(Netsim mobsim, double replanningProba) {
 
 		List<MobsimAgent> set = new ArrayList<>();
 
 		final double now = mobsim.getSimTimer().getTimeOfDay();
-		if ( now < 8.*3600. || Math.floor(now) % 10 != 0 ) {
+		if ( now < 8.*3600. || now > 10.*3600. || Math.floor(now) % 10 != 0 ) {
 			return set;
 		}
 
@@ -114,13 +126,12 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 			for (MobsimVehicle vehicle : link.getAllNonParkedVehicles()) {
 				MobsimDriverAgent agent=vehicle.getDriver();
 				if ( KNAccidentScenario.replanningLinkIds.contains( agent.getCurrentLinkId() ) ) {
-					double proba = 1. ;
-//					System.out.println("found agent");
+					//					System.out.println("found agent");
 					if ( cnt2==0 ) {
-						log.warn("only replanning with proba=" + proba + "!" );
+						log.warn("only replanning with proba=" + replanningProba + "!" );
 						cnt2++ ;
 					}
-					if ( MatsimRandom.getRandom().nextDouble() < proba ) {
+					if ( MatsimRandom.getRandom().nextDouble() < replanningProba) {
 						set.add(agent);
 					}
 				}
@@ -174,4 +185,3 @@ class WithinDayReRouteMobsimListener implements MobsimBeforeSimStepListener {
 	}
 
 }
-

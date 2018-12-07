@@ -28,7 +28,7 @@ import org.matsim.api.core.v01.population.Person;
 
 public class BerlinAgentFilter implements AgentFilter {
 
-	private String[] vehicleTypeIdPrefixes = {"lkw"};
+	private String[] vehicleTypeIdPrefixes = {"freight"};
 
 	@Override
 	public String getAgentTypeFromId(Id<Person> id) {

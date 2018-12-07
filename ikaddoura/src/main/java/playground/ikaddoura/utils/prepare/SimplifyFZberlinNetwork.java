@@ -21,10 +21,11 @@ package playground.ikaddoura.utils.prepare;
 
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.algorithms.NetworkSimplifier;
 import org.matsim.core.network.io.NetworkWriter;
-
-import playground.agarwalamit.utils.LoadMyScenarios;
+import org.matsim.core.scenario.ScenarioUtils;
 
 /**
 * @author ikaddoura
@@ -34,7 +35,10 @@ public class SimplifyFZberlinNetwork {
 
 	public static void main(String[] args) {
 		
-		Network network = LoadMyScenarios.loadScenarioFromNetwork("/Users/ihab/Documents/workspace/shared-svn/studies/fzwick/BerlinNetworkV0_GK4.xml").getNetwork();
+		Config config = ConfigUtils.createConfig();
+		config.network().setInputFile("/Users/ihab/Documents/workspace/shared-svn/studies/fzwick/BerlinNetworkV0_GK4.xml");
+		
+		Network network = ScenarioUtils.loadScenario(config).getNetwork();
 		
 		for (Link link : network.getLinks().values()) {
 			link.getAttributes().clear();

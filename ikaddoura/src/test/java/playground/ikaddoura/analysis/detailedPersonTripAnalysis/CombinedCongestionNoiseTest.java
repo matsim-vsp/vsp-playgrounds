@@ -18,7 +18,7 @@ import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPer
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.CongestionAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.integrationCNE.CNEventsReader;
-import playground.tschlenther.createNetwork.ForkNetworkCreator;
+import playground.vsp.createTestNetworks.ForkNetworkCreator;
 
 /**
  * @author gthunig, ikaddoura

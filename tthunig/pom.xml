@@ -1,44 +1,106 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <groupId>org.matsim</groupId>
-    <artifactId>vsp-playgrounds</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>vsp-playground</groupId>
-  <artifactId>tthunig</artifactId>
-  <name>tthunig</name>
-  <dependencies>
-  	<dependency>
-  		<groupId>org.apache.commons</groupId>
-  		<artifactId>commons-math</artifactId>
-  	</dependency>
-  	<dependency>
-  		  <groupId>vsp-playground</groupId>
-  		<artifactId>dgrether</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		  <groupId>vsp-playground</groupId>
-  		<artifactId>ikaddoura</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-  		  <groupId>vsp-playground</groupId>
-  		<artifactId>dziemke</artifactId>
-  		<version>0.10.0-SNAPSHOT</version>
-  	</dependency>
-  	<!-- <dependency> 
-  		<groupId>gurobi</groupId> 
-  		<artifactId>gurobi</artifactId> 
-		<version>6.0.0</version> 
-		<scope>system</scope> 
-		<systemPath>${basedir}/lib/gurobi-6.0.0.jar</systemPath>
-	</dependency> -->
-	<!-- <dependency>
-		<groupId>net.sf.jmpi</groupId>
-		<artifactId>jmpi-solver-gurobi</artifactId>
-		<version>0.6</version>
-	</dependency>  -->
-  </dependencies>
+	<parent>
+		<groupId>org.matsim.vsp</groupId>
+		<artifactId>vsp-playgrounds</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+	<artifactId>tthunig</artifactId>
+	<name>tthunig</name>
+	<repositories>
+		<repository>
+			<id>mvn-central</id>
+			<name>maven central</name>
+			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+	<dependencies>
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-math</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.contrib</groupId>
+		<artifactId>signals</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+		<artifactId>dgrether</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+		<artifactId>agarwalamit</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+		<artifactId>vsp</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.contrib</groupId>
+		<artifactId>decongestion</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+		<scope>compile</scope>
+	</dependency>
+	<dependency>
+		<groupId>org.matsim.contrib</groupId>
+		<artifactId>locationchoice</artifactId>
+		<version>0.11.0-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.github.matsim-org</groupId>
+		<artifactId>Opdyts-MATSim-Integration</artifactId>
+		<!-- <version>-77a4cad5f1-1</version> -->
+		<!--  <version>-835082313a-1</version> -->
+		<version>0.0.1-aa6d8cd2f3-1</version>
+		<!-- <version>-SNAPSHOT</version> -->
+	</dependency>
+		<!-- <dependency>
+			<groupId>gurobi</groupId>
+			<artifactId>gurobi</artifactId>
+			<version>6.0.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/gurobi-6.0.0.jar</systemPath>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>net.sf.jmpi</groupId>
+			<artifactId>jmpi-solver-gurobi</artifactId>
+			<version>0.6</version>
+		</dependency>  -->
+	<dependency>
+		<groupId>com.google.code.gson</groupId>
+		<artifactId>gson</artifactId>
+		<version>2.8.2</version>
+	</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<!--This is the version from matsim, probably overkill for this playground, but I want to-->
+				<!--try the headless command.  kai, aug'18-->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19</version>
+				<configuration>
+					<excludes>
+						<exclude>**/*$*</exclude> <!-- exclude all inner classes -->
+						<exclude>org/matsim/testcases/TestDepth.java</exclude>
+						<exclude>org/matsim/testcases/MatsimTestCase.java</exclude>
+					</excludes>
+					<forkMode>once</forkMode>
+					<!-- avoid out of memory errors: -->
+					<argLine>-Xmx700m -Djava.awt.headless=true
+						-Dmatsim.preferLocalDtds=true</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

@@ -45,10 +45,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import com.google.inject.Inject;
 
-import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
-import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
-import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.agarwalamit.utils.FileUtils;
 
@@ -61,13 +61,12 @@ public class PatnaTravelTimeCalculatorReplacementTest {
 
     private static final String configDir = FileUtils.RUNS_SVN+"/patnaIndia/run111/opdyts/input/";
 
-    private static String configFile;
     private static String OUT_DIR = FileUtils.RUNS_SVN+"/patnaIndia/run111/opdyts/outputTravelTime_withoutReplacement/";
 
     private static Map<String, TravelTime> modalTravelTimeForReplacement = new HashMap<>();
 
     public static void main(String[] args) {
-        configFile = configDir+"/config_urban_1pct.xml";
+        String configFile = configDir + "/config_urban_1pct.xml";
 
         //=========== 1 ==================
         // run for 20 itertaions

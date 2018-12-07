@@ -28,10 +28,11 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
-import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
-import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
 import playground.agarwalamit.opdyts.OpdytsScenario;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.utils.FileUtils;
@@ -52,7 +53,7 @@ class PatnaNetworkModesPlansRelaxor {
 			outDir = args[1];
 		} else {
 			configFile = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/inputs/config_networkModesOnly.xml";
-			outDir = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output/";
+			outDir = FileUtils.RUNS_SVN+"/opdyts/patna/networkModes/relaxedPlans/output_selectExpBeta/";
 		}
 
 		Config config= ConfigUtils.loadConfig(configFile);
@@ -80,6 +81,8 @@ class PatnaNetworkModesPlansRelaxor {
 				this.addControlerListenerBinding().toInstance(
 						new OpdytsModalStatsControlerListener(modes2consider, new PatnaNetworkModesOneBinDistanceDistribution(
 						OpdytsScenario.PATNA_1Pct)));
+
+				this.bind(ObjectiveFunctionType.class).toInstance(ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED);
 			}
 		});
 

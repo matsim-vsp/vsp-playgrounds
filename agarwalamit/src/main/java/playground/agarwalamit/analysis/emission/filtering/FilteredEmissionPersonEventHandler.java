@@ -84,7 +84,7 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 
 	@Override
 	public void handleEvent(ColdEmissionEvent event) {
- 		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
+// 		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
 
 		if (this.af!=null ) { // area filtering
 			if (this.af.isLinkInsideShape(network.getLinks().get(event.getLinkId()))) {
@@ -99,7 +99,7 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 
 	@Override
 	public void handleEvent(WarmEmissionEvent event) {
-		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
+//		Id<Person> driverId = this.vehicleId2PersonId2.get(event.getVehicleId());
 
 		if (this.af!=null ) { // area filtering
 			if (this.af.isLinkInsideShape(network.getLinks().get(event.getLinkId()))) {
@@ -130,7 +130,7 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 
 	public Map<Id<Person>, Map<ColdPollutant, Double>> getPersonId2ColdEmissions(String userGroup, PersonFilter personFilter) {
 		return delegate.getPersonId2ColdEmissions().entrySet().parallelStream().filter(entry -> personFilter.getUserGroupAsStringFromPersonId(entry.getKey()).equals(userGroup)).collect(
-				Collectors.toMap(e -> e.getKey(),e-> e.getValue()));
+				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	public Map<Id<Person>, Map<WarmPollutant, Double>> getPersonId2WarmEmissions() {
@@ -139,7 +139,7 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 
 	public Map<Id<Person>, Map<WarmPollutant, Double>> getPersonId2WarmEmissions(String userGroup, PersonFilter personFilter) {
 		return delegate.getPersonId2WarmEmissions().entrySet().parallelStream().filter(entry -> personFilter.getUserGroupAsStringFromPersonId(entry.getKey()).equals(userGroup)).collect(
-				Collectors.toMap(e -> e.getKey(),e-> e.getValue()));
+				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	public Map<Id<Vehicle>, Map<ColdPollutant, Double>> getVehicleId2ColdEmissions() {
@@ -160,7 +160,7 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 
 	public Map<Id<Person>, Map<String, Double>> getPersonId2TotalEmissions(String userGroup, PersonFilter personFilter){
 		return delegate.getPersonId2TotalEmissions().entrySet().parallelStream().filter(entry -> personFilter.getUserGroupAsStringFromPersonId(entry.getKey()).equals(userGroup)).collect(
-				Collectors.toMap(e -> e.getKey(),e-> e.getValue()));
+				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 }

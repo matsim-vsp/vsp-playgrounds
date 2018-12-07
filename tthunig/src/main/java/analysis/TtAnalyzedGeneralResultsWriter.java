@@ -25,20 +25,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.PolygonFeatureFactory;
-import org.matsim.core.utils.gis.ShapeFileWriter;
 import org.matsim.utils.gis.matsim2esri.network.PolygonFeatureGenerator;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -64,7 +61,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 	private int lastIteration;
 	
 	private enum RelCumFreqType {
-		DepPerTime, ArrPerTime, TripsPerDuration, TripsPerDist, TripsPerAvgSpeed
+		DepPerTime, ArrPerTime, TripsPerDuration, TripsPerDist, TripsPerAvgSpeed, LinkLeavesPerDelay
 	}
 	
 	private CoordinateReferenceSystem crs = MGC.getCRS(TransformationFactory.WGS84_UTM33N);
@@ -82,7 +79,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 
 	private void prepareOverallItWriting() {
 		// create output dir for overall iteration analysis
-		String lastItDir = this.outputDirBase + "ITERS/it." + this.lastIteration + "/";
+		String lastItDir = this.outputDirBase + "/ITERS/it." + this.lastIteration + "/";
 		new File(lastItDir).mkdir();
 		String lastItOutputDir = lastItDir + "analysis/";
 		new File(lastItOutputDir).mkdir();
@@ -96,7 +93,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 		}
 
 		// write header
-		String header = "it\ttotal tt[s]\ttotal delay[s]\ttotal dist[m]\tavg trip speed[m/s]";
+		String header = "it\ttotal tt[s]\ttotal delay[s]\ttotal dist[m]\tavg trip speed[m/s]\ttot stucked agents";
 		this.overallItWritingStream.println(header);
 	}
 
@@ -112,17 +109,17 @@ public final class TtAnalyzedGeneralResultsWriter {
 		double totalDealyIt = handler.getTotalDelay();
 		double totalDistIt = handler.getTotalDistance();
 		double avgTripSpeedIt = handler.getAverageTripSpeed();
-		
+		int stuckedAgents = handler.getstuckedAgents();
 		// write results
 		StringBuffer line = new StringBuffer();
 		line.append(iteration + "\t" + totalTTIt + "\t" + totalDealyIt + "\t" 
-				+ totalDistIt + "\t" + avgTripSpeedIt);
+				+ totalDistIt + "\t" + avgTripSpeedIt + "\t" + stuckedAgents);
 		this.overallItWritingStream.println(line.toString());
 	}
 
 	private void writeItOnlyResults(int iteration) {
 		// create output dir for this iteration analysis
-		String outputDir = this.outputDirBase + "ITERS/it." + iteration + "/analysis/";
+		String outputDir = this.outputDirBase + "/ITERS/it." + iteration + "/analysis/";
 		new File(outputDir).mkdir();
 
 		// write iteration specific analysis
@@ -132,6 +129,7 @@ public final class TtAnalyzedGeneralResultsWriter {
 		writeRelCumFreqData(outputDir, RelCumFreqType.TripsPerDuration, handler.getRelativeCumulativeFrequencyOfTripsPerDuration());
 		writeRelCumFreqData(outputDir, RelCumFreqType.TripsPerDist, handler.getRelativeCumulativeFrequencyOfTripsPerDistance());
 		writeRelCumFreqData(outputDir, RelCumFreqType.TripsPerAvgSpeed, handler.getRelativeCumulativeFrequencyOfTripsPerSpeed());
+		writeRelCumFreqData(outputDir, RelCumFreqType.LinkLeavesPerDelay, handler.getRelativeComulativeFrequencyOfDelays());
 	}
 
 	private void writeRelCumFreqData(String outputDir, RelCumFreqType type, Map<Double, Double> relCumFreqMap) {
@@ -160,6 +158,9 @@ public final class TtAnalyzedGeneralResultsWriter {
 			break;
 		case TripsPerAvgSpeed:
 			header = "avg trip speed\trelative cumulative frequency of trips";
+			break;
+		case LinkLeavesPerDelay:
+			header = "delay\trelative cumulative frequency of link leaves";
 			break;
 		}
 		stream.println(header);

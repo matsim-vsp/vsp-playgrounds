@@ -19,7 +19,7 @@
 
 package playground.agarwalamit.opdyts.equil;
 
-import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
+import playground.vsp.parametricRuns.PrepareParametricRuns;
 
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
@@ -34,7 +34,7 @@ public class ParametricRunsEquilnet {
         int runCounter= 100;
         String baseDir = "/net/ils4/agarwal/equilOpdyts/carPt/output/";
         StringBuilder buffer = new StringBuilder();
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
 
         String ascStyles [] = {"axial_fixedVariation","axial_randomVariation"};
         double [] stepSizes = {0.25, 0.5, 1.0};
@@ -42,7 +42,8 @@ public class ParametricRunsEquilnet {
         double [] selfTuningWts = {1.0};
         Integer [] warmUpIts = {1, 5, 10};
 
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts"+ PrepareParametricRuns.newLine);
+        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts")
+              .append(PrepareParametricRuns.newLine);
 
         int cnt = runCounter;
         for (String ascStyle : ascStyles ) {
@@ -74,14 +75,17 @@ public class ParametricRunsEquilnet {
 
 
                             parametricRuns.run(additionalLines, baseDir, jobName);
-                            buffer.append(jobName+"\t" + arg.replace(' ','\t') + PrepareParametricRuns.newLine);
+                            buffer.append(jobName)
+                                  .append("\t")
+                                  .append(arg.replace(' ', '\t'))
+                                  .append(PrepareParametricRuns.newLine);
                         }
                     }
                 }
             }
         }
 
-        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseDir+"/runInfo.txt");
+        parametricRuns.writeNewOrAppendToRemoteFile(buffer, baseDir+"/runInfo.txt");
         parametricRuns.close();
     }
 }

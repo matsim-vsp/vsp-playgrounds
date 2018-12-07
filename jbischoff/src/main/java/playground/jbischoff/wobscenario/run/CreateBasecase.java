@@ -180,6 +180,7 @@ static void prepareConfig(Config config, boolean useCadyts){
 	cadyts.setStartTime(6*3600);
 	cadyts.setEndTime(21*3600+1);
 	cadyts.setTimeBinSize(3600);
+	
 	cadyts.addParam("calibratedLinks","65601,48358,62489,71335,44441,53098" );
 	}
 	

@@ -1,7 +1,5 @@
 package org.matsim.core.mobsim.qsim.qnetsimengine;
 
-import javax.inject.Inject;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -17,8 +15,10 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLink
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCalculator;
 import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.FIFOVehicleQ;
 import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.VehicleQ;
-import org.matsim.lanes.data.Lane;
+import org.matsim.lanes.Lane;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
+
+import javax.inject.Inject;
 
 public final class AssignmentEmulatingQLaneNetworkFactory extends QNetworkFactory {
 	

@@ -28,8 +28,9 @@ import org.matsim.core.config.Config;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.corelisteners.PlansScoring;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
+import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
@@ -116,18 +117,18 @@ public class SimplifiedControlerUtils {
 	 * no promises about what it does, nor about stability over time.  May be used as a starting point for own variants.
 	 */
 	static void runMobsimDefault(Scenario sc, EventsManager ev, int iteration, OutputDirectoryHierarchy controlerIO ) {
-		QSim qSim = new QSim( sc, ev ) ;
-		ActivityEngine activityEngine = new ActivityEngine(ev, qSim.getAgentCounter());
-		qSim.addMobsimEngine(activityEngine);
-		qSim.addActivityHandler(activityEngine);
-		QNetsimEngine netsimEngine = new QNetsimEngine(qSim);
-		qSim.addMobsimEngine(netsimEngine);
-		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
-		DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, ev);
-		qSim.addMobsimEngine(teleportationEngine);
-		AgentFactory agentFactory = new DefaultAgentFactory(qSim);
-	    PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
-	    qSim.addAgentSource(agentSource);
+		QSim qSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, ev);
+//		ActivityEngine activityEngine = new ActivityEngine(ev, qSim.getAgentCounter());
+//		qSim.addMobsimEngine(activityEngine);
+//		qSim.addActivityHandler(activityEngine);
+//		QNetsimEngine netsimEngine = new QNetsimEngine(qSim);
+//		qSim.addMobsimEngine(netsimEngine);
+//		qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
+//		DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, ev);
+//		qSim.addMobsimEngine(teleportationEngine);
+//		AgentFactory agentFactory = new DefaultAgentFactory(qSim);
+//	    PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
+//	    qSim.addAgentSource(agentSource);
 		if (sc.getConfig().controler().getWriteSnapshotsInterval() != 0 && iteration % sc.getConfig().controler().getWriteSnapshotsInterval() == 0) {
 			// yyyy would be nice to have the following encapsulated in some way:
 			// === begin ===

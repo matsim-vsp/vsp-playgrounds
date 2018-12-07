@@ -112,7 +112,6 @@ public class SpatialAveragingDemandEmissions {
 	SortedSet<String> listOfPollutants;
 	Network network;
 	
-	EmissionUtils emissionUtils = new EmissionUtils();
 	EmissionsPerLinkWarmEventHandler warmHandler;
 	EmissionsPerLinkColdEventHandler coldHandler;
 	String outPathStub;
@@ -123,7 +122,7 @@ public class SpatialAveragingDemandEmissions {
 		this.lf = new LocationFilter();
 		
 		this.simulationEndTime = getEndTime(configFile1);
-		this.listOfPollutants = emissionUtils.getListOfPollutants();
+		this.listOfPollutants = EmissionUtils.getListOfPollutants();
 		Scenario scenario = loadScenario(netFile1);
 		this.network = scenario.getNetwork();		
 		
@@ -341,7 +340,7 @@ public class SpatialAveragingDemandEmissions {
 		Map<Double, Map<Id<Link>, SortedMap<String, Double>>> time2EmissionsTotalFilled = new HashMap<>();
 		
 		for(double endOfTimeInterval : time2EmissionsTotal.keySet()){
-			Map<Id<Link>, SortedMap<String, Double>> emissionsTotalFilled = this.emissionUtils.setNonCalculatedEmissionsForNetwork(this.network, time2EmissionsTotal.get(endOfTimeInterval));
+			Map<Id<Link>, SortedMap<String, Double>> emissionsTotalFilled = EmissionUtils.setNonCalculatedEmissionsForNetwork(this.network, time2EmissionsTotal.get(endOfTimeInterval));
 			time2EmissionsTotalFilled.put(endOfTimeInterval, emissionsTotalFilled);
 		}
 		return time2EmissionsTotalFilled;
@@ -378,12 +377,12 @@ public class SpatialAveragingDemandEmissions {
 			Map<Id<T>, SortedMap<String, Double>> totalEmissions = new HashMap<>();
 			if (time2coldEmissionsTotal.get(endOfTimeInterval) == null) {
 				for (Id<T> id : warmEmissions.keySet()) {
-					SortedMap<String, Double> warmEmissionsOfLink = this.emissionUtils.convertWarmPollutantMap2String(warmEmissions.get(id));
+					SortedMap<String, Double> warmEmissionsOfLink = EmissionUtils.convertWarmPollutantMap2String(warmEmissions.get(id));
 					totalEmissions.put(id, warmEmissionsOfLink);
 				}
 			} else {
 				Map<Id<T>, Map<ColdPollutant, Double>> coldEmissions = time2coldEmissionsTotal.get(endOfTimeInterval);
-				totalEmissions = this.emissionUtils.sumUpEmissionsPerId(warmEmissions, coldEmissions);
+				totalEmissions = EmissionUtils.sumUpEmissionsPerId(warmEmissions, coldEmissions);
 			}
 			time2totalEmissions.put(endOfTimeInterval, totalEmissions);
 		}

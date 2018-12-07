@@ -67,9 +67,8 @@ public class EmissionsPerPersonAnalysis {
 		ema.preProcessData();
 		ema.postProcessData();
 		
-		EmissionUtils emu = new EmissionUtils();
 		Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-		Map<Id<Person>, SortedMap<String, Double>> filledTotalEmissions = emu.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions);
+		Map<Id<Person>, SortedMap<String, Double>> filledTotalEmissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions);
 
 		EmissionWriter emissionWriter = new EmissionWriter();
 		//		emissionWriter.writeHomeLocation2TotalEmissions(

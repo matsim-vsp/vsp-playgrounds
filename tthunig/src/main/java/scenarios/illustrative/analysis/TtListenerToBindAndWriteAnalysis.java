@@ -28,7 +28,7 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 
 import com.google.inject.Inject;
 
-import playground.dziemke.analysis.GnuplotUtils;
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * Class to bind the analyze and writing tool to the simulation. 
@@ -47,18 +47,21 @@ public class TtListenerToBindAndWriteAnalysis implements IterationEndsListener {
 	@Inject
 	private TtAnalyzedResultsWriter writer;
 	
+	protected String scriptNameRouteDistribution = "plot_routeDistribution";
+	protected String scriptNameRoutesAndTTs = "plot_routesAndTTs";
+	
 	@Override
 	public void notifyIterationEnds(IterationEndsEvent event) {
 		// write analyzed data
 		writer.writeIterationResults(event.getIteration());
-		runGnuplotScript("plot_routeDistribution", event.getIteration());
+		runGnuplotScript(scriptNameRouteDistribution, event.getIteration());
 
 		// handle last iteration
 		if (event.getIteration() == scenario.getConfig().controler().getLastIteration()) {
 			// close overall writing stream
 			writer.closeAllStreams();
 			// plot overall iteration results
-			runGnuplotScript("plot_routesAndTTs", event.getIteration());
+			runGnuplotScript(scriptNameRoutesAndTTs, event.getIteration());
 		}
 	}
 	

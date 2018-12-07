@@ -159,10 +159,8 @@ public class AgentPositionWriterOld {
 				List<String> strs = Arrays.asList( row ) ;
 
 				if ( row[0].substring(0, 1).matches("[A-Za-z]") ) {
-					if ( row[0].startsWith("hole") ) return; 
-					for ( String str : strs ) {
-						labels.add( str ) ;
-					}
+					if ( row[0].startsWith("hole") ) return;
+                    labels.addAll(strs);
 				} else {
 					double time = Double.parseDouble( strs.get( labels.indexOf( Labels.TIME.toString() ) ) ) ;
 					double easting = Double.parseDouble( strs.get( labels.indexOf( Labels.EASTING.toString() ) ) ) ;

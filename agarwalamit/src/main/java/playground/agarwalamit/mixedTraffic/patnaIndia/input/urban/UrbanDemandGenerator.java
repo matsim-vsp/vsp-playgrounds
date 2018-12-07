@@ -48,7 +48,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.mixedTraffic.patnaIndia.input.urban.scenarioSetup.PatnaCalibrationUtils.PatnaDemandLabels;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils.PatnaUrbanActivityTypes;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 /**
  * The number of trips from trip diaries are 2% (not 1%).
  * @author amit
@@ -127,9 +127,7 @@ public class UrbanDemandGenerator {
 				if( row[0].substring(0, 1).matches("[A-Za-z]") // labels 
 						&& !row[0].startsWith("NA") // "NA" could also be inside the data 
 						) {
-					for (String s : strs){ 
-						labels.add(s); 
-					}
+					labels.addAll(strs);
 				} else { // main data
 
 					//				String[] parts = line.split("\t");

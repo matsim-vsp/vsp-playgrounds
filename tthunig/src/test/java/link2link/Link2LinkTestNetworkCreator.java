@@ -2,7 +2,7 @@ package link2link;
 
 import org.matsim.api.core.v01.Scenario;
 
-import playground.tschlenther.createNetwork.ForkNetworkCreator;
+import playground.vsp.createTestNetworks.ForkNetworkCreator;
 
 public class Link2LinkTestNetworkCreator extends ForkNetworkCreator {
 

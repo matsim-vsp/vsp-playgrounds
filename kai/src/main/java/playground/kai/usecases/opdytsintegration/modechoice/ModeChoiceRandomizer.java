@@ -22,7 +22,7 @@ final class ModeChoiceRandomizer implements DecisionVariableRandomizer<ModeChoic
 		// (careful with using matsim-random since it is always the same sequence in one run)
 	}
 
-	@Override public List<ModeChoiceDecisionVariable> newRandomVariations( ModeChoiceDecisionVariable decisionVariable ) {
+	@Override public List<ModeChoiceDecisionVariable> newRandomVariations( ModeChoiceDecisionVariable decisionVariable, int searchIteration ) {
 		final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();
 		List<ModeChoiceDecisionVariable> result = new ArrayList<>() ;
 		{

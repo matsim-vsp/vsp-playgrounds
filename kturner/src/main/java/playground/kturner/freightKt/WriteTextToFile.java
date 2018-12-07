@@ -3,6 +3,7 @@ package playground.kturner.freightKt;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 /**
  * @author kt
@@ -29,8 +30,10 @@ class WriteTextToFile {
 			
 		try {
 			writer = new FileWriter(file);  //Neuer File (überschreibt im Zweifel den alten - der jedoch nicht existieren dürfte!
-
+			
+			writer.write("System date and time writing this file: " + LocalDateTime.now() + System.getProperty("line.separator") + System.getProperty("line.separator"));
 			writer.write("explizit ausgegebene Textzeilen beliebiger Art" +System.getProperty("line.separator"));
+			writer.write("Datum und Uhrzeit zu der diese Datei erstellt wurde: " + LocalDateTime.now());
 			writer.write(System.getProperty("line.separator"));
 
 			// Schreibt den Stream in die Datei

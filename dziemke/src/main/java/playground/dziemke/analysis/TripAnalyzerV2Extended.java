@@ -1,7 +1,10 @@
 package playground.dziemke.analysis;
 
 import java.io.File;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.jfree.util.Log;
@@ -21,6 +24,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import playground.dziemke.utils.ShapeReader;
+import playground.vsp.analysis.utils.GnuplotUtils;
 
 /**
  * @author dziemke
@@ -29,8 +33,10 @@ public class TripAnalyzerV2Extended {
 	public static final Logger LOG = Logger.getLogger(TripAnalyzerV2Extended.class);
 	
 	// Parameters
-	private static String runId = "be_124"; // <----------
-	private static String iterationForAnalysis = "300";
+//	private static String runId = "be_124"; // <----------
+	private static String runId = "be400mt_58_v6"; // <----------
+//	private static String iterationForAnalysis = "300";
+	private static String iterationForAnalysis = "";
 	private static final String cemdapPersonsInputFileId = "21"; // Check if this number corresponds correctly to the runId
 
 	private static boolean onlyAnalyzeTripsWithMode = true; // <----------
@@ -61,11 +67,17 @@ public class TripAnalyzerV2Extended {
 	private static String gnuplotScriptName = "plot_rel_path_run.gnu";
 
 	// Input and output
-	private static String networkFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
-	private static String eventsFile = "../../../runs-svn/berlin_scenario_2016/" + runId + "/" + runId + ".output_events.xml.gz";
+	private static final String RUN_DIRECTORY_ROOT = "../../runs-svn/open_berlin_scenario"; // To be adjusted
+//	private static String networkFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/network_counts/network_shortIds.xml.gz"; // <----------
+	private static String networkFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_network.xml.gz";
+//	private static String eventsFile = "../../../runs-svn/berlin_scenario_2016/" + runId + "/" + runId + ".output_events.xml.gz";
+	private static String eventsFile = RUN_DIRECTORY_ROOT + "/" + runId + "/" + runId + ".output_events.xml.gz";
 	private static String cemdapPersonsInputFile = "../../../shared-svn/projects/cemdapMatsimCadyts/scenario/cemdap_berlin/" + cemdapPersonsInputFileId + "/persons1.dat"; // TODO
-	private static String areaShapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
-	private static String outputDirectory = "../../../runs-svn/berlin_scenario_2016/" + runId + "/analysis";
+//	private static String areaShapeFile = "../../../shared-svn/studies/countries/de/berlin_scenario_2016/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
+	private static String areaShapeFile = "../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp";
+//	private static String outputDirectory = "../../../runs-svn/berlin_scenario_2016/" + runId + "/analysis";
+	private static String outputDirectory = RUN_DIRECTORY_ROOT + "/" + runId + "/analysis";
+	
 
 	// Variables to store objects
 	private static Geometry areaGeometry;

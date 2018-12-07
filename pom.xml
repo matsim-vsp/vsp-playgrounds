@@ -2,16 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.matsim</groupId>
+	<groupId>org.matsim.vsp</groupId>
 	<artifactId>vsp-playgrounds</artifactId>
 	<packaging>pom</packaging>
-	<version>0.10.0-SNAPSHOT</version>
+	<version>0.11.0-SNAPSHOT</version>
 	<name>VSP-Playgrounds</name>
 
 	<scm>
-		<url>https://github.com/matsim-org/matsim</url>
-		<connection>scm:git:git://github.com/matsim-org/matsim.git</connection>
-		<developerConnection>scm:git:git@github.com:matsim-org/matsim.git</developerConnection>
+		<url>https://github.com/matsim-vsp/vsp-playgrounds.git</url>
+		<connection>scm:git:git://github.com/matsim-vsp/vsp-playgrounds.git</connection>
+		<developerConnection>scm:git:git@github.com:matsim-vsp/vsp-playgrounds.git</developerConnection>
 	</scm>
 	<repositories>
 	<repository>
@@ -39,14 +39,22 @@
 			<id>jsprit-releases</id>
 			<url>https://github.com/jsprit/mvn-rep/raw/master/releases</url>
 		</repository>
-		<repository>
-			<!-- Some custom-hosted dependencies on our web page, maintained by mrieser -->
-			<id>matsim-custom</id>
-			<url>http://matsim.org/m2repo</url>
-		</repository>
+		<!--commenting following to get rid of warnings, (I think) it is related to https://matsim.atlassian.net/browse/MATSIM-783 Amit Feb'18-->
+		<!--<repository>-->
+			<!--&lt;!&ndash; Some custom-hosted dependencies on our web page, maintained by mrieser &ndash;&gt;-->
+			<!--<id>matsim-custom</id>-->
+			<!--<url>http://matsim.org/m2repo</url>-->
+		<!--</repository>-->
 
 	</repositories>
 	<build>
+		<extensions>
+			<extension>
+				<groupId>io.packagecloud.maven.wagon</groupId>
+				<artifactId>maven-packagecloud-wagon</artifactId>
+				<version>0.0.6</version>
+			</extension>
+		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -57,6 +65,9 @@
 					<target>1.8</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -131,6 +142,8 @@
 		<module>benjamin</module>
 		<module>dgrether</module>
 		<module>dziemke</module>
+		<module>gleich</module>
+		<module>gunnar</module>
 		<module>ikaddoura</module>
 		<module>jbischoff</module>
 		<module>kai</module>
@@ -138,6 +151,7 @@
 		<module>kturner</module>
 		<module>michalm</module>
 		<module>santiago</module>
+		<module>stockholm</module>
 		<module>tthunig</module>
 		<module>vsp</module>
 		<module>vspshk</module>
@@ -155,21 +169,21 @@
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.11.0-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.11.0-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim-examples</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.11.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -260,6 +274,17 @@
 			</build>
 		</profile>
 	</profiles>
+	
+	<distributionManagement>
+		<repository>
+			<id>packagecloud-matsim-vsp</id>
+			<url>packagecloud+https://packagecloud.io/matsim-vsp/vsp-playgrounds</url>
+		</repository>
+		<snapshotRepository>
+			<id>packagecloud-matsim-vsp</id>
+			<url>packagecloud+https://packagecloud.io/matsim-vsp/vsp-playgrounds</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 	<dependencyManagement>
 		<dependencies>

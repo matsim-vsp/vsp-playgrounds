@@ -60,9 +60,6 @@ public class HereMapsTrafficItemXMLReader {
 		
 		log.info("Reading stream from file: " + trafficItemXMLFile);
 		
-		String[] fileNameData = trafficItemXMLFile.split("_");
-		long downloadTime = Long.valueOf(fileNameData[2]);
-		
 		XMLStreamReader in = null;
 		
 		if (trafficItemXMLFile.endsWith(".xml.gz")) {
@@ -75,6 +72,14 @@ public class HereMapsTrafficItemXMLReader {
 
 		} else {
 			throw new RuntimeException("This traffic item xml reader can only read *.xml or *.xml.gz files. Aborting...");
+		}
+		
+		String[] fileNameData = new File(trafficItemXMLFile).getName().split("_");
+		long downloadTime;
+		if (fileNameData.length >= 3) {
+			downloadTime = Long.valueOf(fileNameData[2]);
+		} else {
+			throw new RuntimeException("Unknown file name format. Aborting...");
 		}
 		
 		this.readStream(in, downloadTime);

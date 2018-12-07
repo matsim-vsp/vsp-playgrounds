@@ -47,13 +47,13 @@ import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.*;
 import playground.agarwalamit.analysis.StatsWriter;
-import playground.agarwalamit.analysis.modalShare.ModalShareControlerListener;
-import playground.agarwalamit.analysis.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
-import playground.agarwalamit.analysis.tripTime.ModalTravelTimeControlerListener;
-import playground.agarwalamit.analysis.tripTime.ModalTripTravelTimeHandler;
-import playground.agarwalamit.mixedTraffic.counts.MultiModeCountsControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
@@ -70,19 +70,22 @@ public class PatnaPolicyControler {
 
 	private static String dir = FileUtils.RUNS_SVN + "/patnaIndia/run108/jointDemand/policies/0.15pcu/";
 	private static String configFile = dir + "/input/configBaseCaseCtd.xml";
-	private static boolean addBikeTrack = false;
+	private static boolean addBikeTrack = true;
 	private static boolean isAllwoingMotorbikeOnBikeTrack = false;
 
 	public static void main(String[] args) {
 
 		Config config = ConfigUtils.createConfig();
 		String outputDir ;
+		double bike_track_length_reductionFactor_sensitivity = PatnaUtils.BIKE_TRACK_LEGNTH_REDUCTION_FACTOR; // same as before
 
 		if(args.length>0){
 			dir = args[0];
 			configFile = args[1];
 			addBikeTrack = Boolean.valueOf(args[2]);
 			isAllwoingMotorbikeOnBikeTrack = Boolean.valueOf(args[3]);
+			bike_track_length_reductionFactor_sensitivity = Double.valueOf(args[4]);
+
 		}  else {
 			//nothing to do
 		}
@@ -134,6 +137,20 @@ public class PatnaPolicyControler {
 			scenario.getNetwork().getLinks().values().stream().filter(
 					link -> link.getId().toString().startsWith(PatnaUtils.BIKE_TRACK_CONNECTOR_PREFIX) && link.getFreespeed() == 0.01
 			).collect(Collectors.toList()).forEach(link -> scenario.getNetwork().removeLink(link.getId()));
+
+			// sensitivity
+			double factor = PatnaUtils.BIKE_TRACK_LEGNTH_REDUCTION_FACTOR / bike_track_length_reductionFactor_sensitivity;
+			if (factor==1.0) {
+				// this is same as before i.e. track lengths are halved.
+			} else {
+				scenario.getNetwork()
+						.getLinks()
+						.values()
+						.stream()
+						.filter(l -> l.getId().toString().startsWith(PatnaUtils.BIKE_TRACK_CONNECTOR_PREFIX) ||
+									 l.getId().toString().startsWith(PatnaUtils.BIKE_TRACK_PREFIX))
+						.forEach(l -> l.setLength(l.getLength() * factor));
+			}
 		}
 
 		if ( isAllwoingMotorbikeOnBikeTrack ) {
@@ -214,7 +231,7 @@ public class PatnaPolicyControler {
 		StatsWriter.run(outputDir);
 	}
 
-	private static void addScoringFunction(final Controler controler){
+	public static void addScoringFunction(final Controler controler){
 		// scoring function
 		controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
 			final ScoringParametersForPerson parameters = new SubpopulationScoringParameters( controler.getScenario() );

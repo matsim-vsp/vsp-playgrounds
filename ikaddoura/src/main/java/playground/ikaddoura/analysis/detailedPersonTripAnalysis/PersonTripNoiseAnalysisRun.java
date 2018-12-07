@@ -31,6 +31,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.decongestion.handler.DelayAnalysis;
 import org.matsim.contrib.noise.events.NoiseEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -42,7 +43,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.BasicPersonTripAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.NoiseAnalysisHandler;
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.handler.PersonMoneyLinkHandler;
-import playground.ikaddoura.decongestion.handler.DelayAnalysis;
 
 /**
  * 
@@ -74,7 +74,7 @@ public class PersonTripNoiseAnalysisRun {
 		
 		} else {
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4b_muc_cne_DecongestionPID";
+			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/incidents/berlin/output/output_2016-02-11_networkChangeEvents-true_withinDayReplanning-true-5minutes";
 			log.info("Run directory " + runDirectory);
 		}
 		
@@ -102,8 +102,7 @@ public class PersonTripNoiseAnalysisRun {
 		
 		String networkFile = runDirectory + "output_network.xml.gz";
 		String populationFile = runDirectory + "output_plans.xml.gz";
-//		String eventsFile = runDirectory + "output_events.xml.gz";
-		String eventsFile = runDirectory + "ITERS/it.1500/1500.events.xml.gz";
+		String eventsFile = runDirectory + "output_events.xml.gz";
 
 		Config config = ConfigUtils.createConfig();	
 		config.plans().setInputFile(populationFile);
@@ -178,7 +177,7 @@ public class PersonTripNoiseAnalysisRun {
 		
 		// print the results
 		
-		PersonTripNoiseAnalysis analysis = new PersonTripNoiseAnalysis();
+		PersonTripAnalysis analysis = new PersonTripAnalysis();
 		
 		log.info("Print trip information...");
 		analysis.printTripInformation(outputPath, TransportMode.car, basicHandler, noiseHandler, moneyHandler);

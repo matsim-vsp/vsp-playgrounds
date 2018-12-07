@@ -20,7 +20,6 @@ package playground.agarwalamit.munich.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -42,8 +41,6 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
-import org.matsim.core.scenario.MutableScenario;
-
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.MarginalCongestionPricingHandler;
@@ -74,7 +71,7 @@ public class EventsFilterAndWriter {
 		EventsManager events = EventsUtils.createEventsManager();
 		MatsimEventsReader  reader = new MatsimEventsReader(events);
 		events.addHandler(new CongestionHandlerImplV3(events, sc));
-		events.addHandler(new MarginalCongestionPricingHandler(events, (MutableScenario) sc));
+		events.addHandler(new MarginalCongestionPricingHandler(events, sc));
 		EventWriterXML ewxml = new EventWriterXML(eventsDir+"/1500.events_congestionAndMoneyEvent.xml.gz");
 		events.addHandler(ewxml);
 		reader.readFile(outEventsFile);

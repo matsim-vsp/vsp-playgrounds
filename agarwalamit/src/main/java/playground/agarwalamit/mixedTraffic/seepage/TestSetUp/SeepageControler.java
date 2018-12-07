@@ -34,7 +34,7 @@ import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.QSimUtils;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -84,7 +84,7 @@ public class SeepageControler {
 		EventWriterXML eventWriterXML = new EventWriterXML(OUTPUT_DIR+"/events.xml");
 		manager.addHandler(eventWriterXML);
 		
-		QSim qSim = QSimUtils.createDefaultQSim(sc, manager);
+		QSim qSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, manager);
 		qSim.run();
 		eventWriterXML.closeFile();
 		

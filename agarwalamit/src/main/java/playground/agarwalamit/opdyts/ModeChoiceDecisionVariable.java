@@ -21,20 +21,23 @@ package playground.agarwalamit.opdyts;
 
 import java.util.Collection;
 import java.util.Map;
-import floetteroed.opdyts.DecisionVariable;
+import java.util.Map.Entry;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ScoringParameterSet;
+
+import floetteroed.opdyts.DecisionVariable;
 
 /**
  * Created by amit on 13/10/16.
  */
 
-
-@SuppressWarnings("DefaultFileTemplate")
 public class ModeChoiceDecisionVariable implements DecisionVariable {
 
-    private final playground.kai.usecases.opdytsintegration.modechoice.ModeChoiceDecisionVariable delegate ;
+	private final Scenario scenario;
 
     private final OpdytsScenario opdytsScenario;
     private final String subPopulation;
@@ -42,10 +45,10 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
 
     private final Collection<String> considerdModes ;
 
-    public ModeChoiceDecisionVariable(final PlanCalcScoreConfigGroup neScoreConfig, final Scenario scenario,
+    public ModeChoiceDecisionVariable(final PlanCalcScoreConfigGroup newScoreConfig, final Scenario scenario,
                                       final OpdytsScenario opdytsScenario, final Collection<String> considerdModes, final String subPopulatioun){
-        delegate = new playground.kai.usecases.opdytsintegration.modechoice.ModeChoiceDecisionVariable(neScoreConfig,scenario);
-        this.newScoreConfig = neScoreConfig;
+        this.scenario = scenario;
+    	this.newScoreConfig = newScoreConfig;
         this.opdytsScenario = opdytsScenario;
         this.subPopulation = subPopulatioun;
         this.considerdModes = considerdModes;
@@ -55,10 +58,16 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
                                final OpdytsScenario opdytsScenario){
         this (newScoreConfig, scenario, opdytsScenario, considerdModes, null);
     }
-
+    
     @Override
     public void implementInSimulation() {
-        delegate.implementInSimulation();
+    	for ( Entry<String, ScoringParameterSet> entry : newScoreConfig.getScoringParametersPerSubpopulation().entrySet() ) {
+			String subPopName = entry.getKey() ;
+			ScoringParameterSet newParameterSet = entry.getValue() ;
+			for ( ModeParams newModeParams : newParameterSet.getModes().values() ) {
+				scenario.getConfig().planCalcScore().getScoringParameters( subPopName ).addModeParams( newModeParams ) ;
+			}
+		}
     }
 
     @Override
@@ -73,11 +82,20 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
                 for(String mode : considerdModes) {
                     PlanCalcScoreConfigGroup.ModeParams mp = allModes.get(mode);
                     if(mp.getMode().equals(TransportMode.other)) continue;
-                    str.append(mp.getMode() + ": "+ mp.getConstant() + " + "+
-                            mp.getMarginalUtilityOfTraveling()+ " * ttime " + " + "+
-                            mp.getMarginalUtilityOfDistance() + " * tdist " + " + "+
-                            mp.getMonetaryDistanceRate() +" * " + this.newScoreConfig.getMarginalUtilityOfMoney() + " * tdist;"
-                    );
+                    str.append(mp.getMode())
+                       .append(": ")
+                       .append(mp.getConstant())
+                       .append(" + ")
+                       .append(mp.getMarginalUtilityOfTraveling())
+                       .append(" * ttime ")
+                       .append(" + ")
+                       .append(mp.getMarginalUtilityOfDistance())
+                       .append(" * tdist ")
+                       .append(" + ")
+                       .append(mp.getMonetaryDistanceRate())
+                       .append(" * ")
+                       .append(this.newScoreConfig.getMarginalUtilityOfMoney())
+                       .append(" * tdist;");
                 }
                 return str.toString();
             default:
@@ -86,6 +104,6 @@ public class ModeChoiceDecisionVariable implements DecisionVariable {
         }
 
     public PlanCalcScoreConfigGroup getScoreConfig() {
-        return this.delegate.getScoreConfig();
+        return this.newScoreConfig;
     }
 }

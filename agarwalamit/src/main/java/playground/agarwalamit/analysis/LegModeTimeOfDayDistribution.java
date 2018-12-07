@@ -112,7 +112,7 @@ public class LegModeTimeOfDayDistribution extends AbstractAnalysisModule{
 			SortedMap<String, Integer> mode2Count = new TreeMap<>();
 
 			for(String mode : this.lmtdh.modes){
-				mode2Count.put(mode, timeBin2Mode2Count.get(d).containsKey(mode) ? timeBin2Mode2Count.get(d).get(mode) : 0 );
+				mode2Count.put(mode, timeBin2Mode2Count.get(d).getOrDefault(mode, 0));
 			}
 			outMap.put(d, mode2Count);
 		}

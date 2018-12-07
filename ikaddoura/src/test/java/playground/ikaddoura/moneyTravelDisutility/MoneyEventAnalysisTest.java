@@ -62,10 +62,10 @@ public class MoneyEventAnalysisTest {
 	public final void test1() {
 		
 		final Id<Person> personId1 = Id.createPersonId("person1");
-		final Id<Person> personId2 = Id.createPersonId("lkw2");
+		final Id<Person> personId2 = Id.createPersonId("freight2");
 		final Id<Person> personId3 = Id.createPersonId("person3");
 		final Id<Person> personId4 = Id.createPersonId("person4");
-		final Id<Person> personId5 = Id.createPersonId("lkw5");
+		final Id<Person> personId5 = Id.createPersonId("freight5");
 
 		final Id<Vehicle> vehicleId1 = Id.createVehicleId("vehicle1");
 		final Id<Vehicle> vehicleId2 = Id.createVehicleId("vehicle2");
@@ -172,10 +172,10 @@ public class MoneyEventAnalysisTest {
 		
 		// test the average amount per agent type for each link with agent money events
 		Assert.assertNull("should be null (no agent of type 'other' pays a toll)", moneyAnalysis.getLinkId2info().get(linkId2).getTimeBinNr2timeBin().get(1).getAgentTypeId2avgAmount().get("other"));
-		Assert.assertEquals("wrong average amount", -99., moneyAnalysis.getLinkId2info().get(linkId2).getTimeBinNr2timeBin().get(1).getAgentTypeId2avgAmount().get("lkw"), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("wrong average amount", -99., moneyAnalysis.getLinkId2info().get(linkId2).getTimeBinNr2timeBin().get(1).getAgentTypeId2avgAmount().get("freight"), MatsimTestUtils.EPSILON);
 
 		Assert.assertEquals("wrong average amount", - 8. / 3., moneyAnalysis.getLinkId2info().get(linkId3).getTimeBinNr2timeBin().get(4).getAgentTypeId2avgAmount().get("other"), MatsimTestUtils.EPSILON);
-		Assert.assertEquals("wrong average amount", - 123. / 2, moneyAnalysis.getLinkId2info().get(linkId3).getTimeBinNr2timeBin().get(4).getAgentTypeId2avgAmount().get("lkw"), MatsimTestUtils.EPSILON);
+		Assert.assertEquals("wrong average amount", - 123. / 2, moneyAnalysis.getLinkId2info().get(linkId3).getTimeBinNr2timeBin().get(4).getAgentTypeId2avgAmount().get("freight"), MatsimTestUtils.EPSILON);
 	}
 	
 	// one vehicle type for which there are no money events
@@ -187,7 +187,7 @@ public class MoneyEventAnalysisTest {
 		final Id<Person> personId3 = Id.createPersonId("person3");
 		final Id<Person> personId4 = Id.createPersonId("person4");
 		final Id<Person> personId5 = Id.createPersonId("person5");
-		final Id<Person> personId6 = Id.createPersonId("lkw6");
+		final Id<Person> personId6 = Id.createPersonId("freight6");
 
 		final Id<Vehicle> vehicleId1 = Id.createVehicleId("vehicle1");
 		final Id<Vehicle> vehicleId2 = Id.createVehicleId("vehicle2");
@@ -296,10 +296,10 @@ public class MoneyEventAnalysisTest {
 		Assert.assertEquals("wrong average amount", (-123 - 8.) / 6., moneyAnalysis.getLinkId2info().get(linkId3).getTimeBinNr2timeBin().get(4).getAverageAmount(), MatsimTestUtils.EPSILON);
 		
 		// test the average amount per agent type for each link with agent money events
-		Assert.assertNull("should be null (no agent of type 'lkw' pays a toll)", moneyAnalysis.getLinkId2info().get(linkId2).getTimeBinNr2timeBin().get(1).getAgentTypeId2avgAmount().get("lkw"));
+		Assert.assertNull("should be null (no agent of type 'freight' pays a toll)", moneyAnalysis.getLinkId2info().get(linkId2).getTimeBinNr2timeBin().get(1).getAgentTypeId2avgAmount().get("freight"));
 		Assert.assertEquals("wrong average amount", -99./3, moneyAnalysis.getLinkId2info().get(linkId2).getTimeBinNr2timeBin().get(1).getAgentTypeId2avgAmount().get("other"), MatsimTestUtils.EPSILON);
 
-		Assert.assertNull("should be null (no agent of type 'lkw' pays a toll)", moneyAnalysis.getLinkId2info().get(linkId3).getTimeBinNr2timeBin().get(4).getAgentTypeId2avgAmount().get("lkw"));
+		Assert.assertNull("should be null (no agent of type 'freight' pays a toll)", moneyAnalysis.getLinkId2info().get(linkId3).getTimeBinNr2timeBin().get(4).getAgentTypeId2avgAmount().get("freight"));
 		Assert.assertEquals("wrong average amount", (-123 - 8.) / 5., moneyAnalysis.getLinkId2info().get(linkId3).getTimeBinNr2timeBin().get(4).getAgentTypeId2avgAmount().get("other"), MatsimTestUtils.EPSILON);
 	}
 	

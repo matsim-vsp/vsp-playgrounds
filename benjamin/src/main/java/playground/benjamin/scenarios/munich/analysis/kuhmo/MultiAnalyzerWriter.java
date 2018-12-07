@@ -49,14 +49,12 @@ public class MultiAnalyzerWriter {
 
 	File outputDir;
 	String runName;
-	EmissionUtils emissionUtils;
 	PersonFilter personFilter;
 
 	public MultiAnalyzerWriter(String outputPath){
 		this.outputDir = new File(outputPath + "analysis");
 		this.outputDir.mkdir();
 		
-		emissionUtils = new EmissionUtils();
 		personFilter = new PersonFilter();
 	}
 
@@ -113,7 +111,7 @@ public class MultiAnalyzerWriter {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
 			bw.write("user group");
-			for(String pollutant : emissionUtils.getListOfPollutants()){
+			for(String pollutant : EmissionUtils.getListOfPollutants()){
 				bw.write("\t" + pollutant);
 			}
 			bw.newLine();

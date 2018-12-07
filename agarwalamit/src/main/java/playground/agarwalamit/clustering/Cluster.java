@@ -66,11 +66,11 @@ public class Cluster {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("[Cluster: " + id.toString()+"]\n");
-        stringBuilder.append("[Centroid: " + centroid + "]\n");
+        stringBuilder.append("[Cluster: ").append(id.toString()).append("]\n");
+        stringBuilder.append("[Centroid: ").append(centroid).append("]\n");
         stringBuilder.append("[Points: \n");
         for(Point p : points) {
-            stringBuilder.append(p.toString()+"\t");
+            stringBuilder.append(p.toString()).append("\t");
         }
         stringBuilder.append("]");
         return stringBuilder.toString();

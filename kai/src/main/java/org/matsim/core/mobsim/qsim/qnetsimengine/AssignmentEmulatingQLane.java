@@ -19,12 +19,6 @@
 
 package org.matsim.core.mobsim.qsim.qnetsimengine;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
@@ -41,10 +35,16 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.VehicleQ;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.misc.Time;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.vis.VisLinkWLanes;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.VisLinkWLanes;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 
@@ -235,7 +235,12 @@ class AssignmentEmulatingQLane implements QLaneI {
 	public final boolean isNotOfferingVehicle() {
 		return buffer.isEmpty();
 	}
-
+	
+//	@Override
+	public QVehicle getFirstVehicleOnLink() {
+		throw new RuntimeException( "not implemented" );
+	}
+	
 	@Override
 	public final void clearVehicles() {
 		double now = context.getSimTimer().getTimeOfDay() ;
@@ -266,7 +271,9 @@ class AssignmentEmulatingQLane implements QLaneI {
 
 		double now = context.getSimTimer().getTimeOfDay() ;
 
-		qLink.activateLink();
+//		qLink.activateLink();
+		// yyyyyyyy
+
 		veh.setLinkEnterTime(now);
 
 
@@ -424,14 +431,24 @@ class AssignmentEmulatingQLane implements QLaneI {
 	@Override public final void addTransitSlightlyUpstreamOfStop( final QVehicle veh) {
 		this.vehQueue.addFirst(veh) ;
 	}
-
-	@Override public final void changeUnscaledFlowCapacityPerSecond( final double val ) {
-		// irrelevant so we ignore it
+	
+	@Override
+	public void changeUnscaledFlowCapacityPerSecond(double val) {
+		throw new RuntimeException("not implemented");
+	}
+	
+	@Override
+	public void changeEffectiveNumberOfLanes(double val) {
+		throw new RuntimeException("not implemented");
 	}
 
-	@Override public final void changeEffectiveNumberOfLanes( final double val ) {
-		// this variable will not do anything so we will ignore it.
-	}
+//	@Override public final void changeUnscaledFlowCapacityPerSecond( final double val ) {
+//		// irrelevant so we ignore it
+//	}
+//
+//	@Override public final void changeEffectiveNumberOfLanes( final double val ) {
+//		// this variable will not do anything so we will ignore it.
+//	}
 
 	@Override public Id<Lane> getId() {
 		// need this so we can generate lane events although we do not need them here. kai, sep'13
@@ -498,13 +515,19 @@ class AssignmentEmulatingQLane implements QLaneI {
 	public double getSimulatedFlowCapacityPerTimeStep() {
 		throw new RuntimeException("not implemented") ;
 	}
+	
+	@Override
+	public void recalcTimeVariantAttributes() {
+		throw new RuntimeException("not implemented");
+	}
+	
 	@Override
 	public double getStorageCapacity() {
 		return Double.POSITIVE_INFINITY ;
 	}
-	@Override public void changeSpeedMetersPerSecond( double val ) {
-		throw new RuntimeException("not implemented") ;
-	}
+//	@Override public void changeSpeedMetersPerSecond( double val ) {
+//		throw new RuntimeException("not implemented") ;
+//	}
 	@Override public double getLoadIndicator() {
 		throw new RuntimeException("not implemented") ;
 	}

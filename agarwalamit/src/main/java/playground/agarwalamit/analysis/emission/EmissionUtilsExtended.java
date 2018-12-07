@@ -36,21 +36,23 @@ import org.matsim.contrib.emissions.utils.EmissionUtils;
  * @author amit
  *
  */
-public class EmissionUtilsExtended extends EmissionUtils{
+public final class EmissionUtilsExtended {
 
-	public  <T> Map<Id<T>, SortedMap<String, Double>> convertPerPersonColdEmissions2String (final Map<Id<T>, Map<ColdPollutant, Double>> coldEmiss) {
+	private EmissionUtilsExtended () {}
+
+	public static <T> Map<Id<T>, SortedMap<String, Double>> convertPerPersonColdEmissions2String (final Map<Id<T>, Map<ColdPollutant, Double>> coldEmiss) {
 		return coldEmiss.entrySet().stream().collect(Collectors.toMap(
-			e -> e.getKey(), e->convertColdPollutantMap2String(e.getValue())
+                Map.Entry::getKey, e->EmissionUtils.convertColdPollutantMap2String(e.getValue())
 		));
 	}
 
-	public  <T> Map<Id<T>, SortedMap<String, Double>> convertPerPersonWarmEmissions2String (final Map<Id<T>, Map<WarmPollutant, Double>> warmEmiss) {
+	public static  <T> Map<Id<T>, SortedMap<String, Double>> convertPerPersonWarmEmissions2String (final Map<Id<T>, Map<WarmPollutant, Double>> warmEmiss) {
 		return warmEmiss.entrySet().stream().collect(Collectors.toMap(
-			e -> e.getKey(), e -> convertWarmPollutantMap2String(e.getValue())
+                Map.Entry::getKey, e -> EmissionUtils.convertWarmPollutantMap2String(e.getValue())
 		));
 	}
 
-	public Map<String, Double> getTotalColdEmissions(final Map<Id<Person>, Map<ColdPollutant, Double>> person2TotalColdEmissions) {
+	public static Map<String, Double> getTotalColdEmissions(final Map<Id<Person>, Map<ColdPollutant, Double>> person2TotalColdEmissions) {
 		Map<String, Double> totalColdEmissions = new TreeMap<>();
 
 		for(Id<Person> personId : person2TotalColdEmissions.keySet()){
@@ -68,7 +70,7 @@ public class EmissionUtilsExtended extends EmissionUtils{
 		return totalColdEmissions;
 	}
 
-	public Map<String, Double> getTotalWarmEmissions(final Map<Id<Person>, Map<WarmPollutant, Double>> person2TotalWarmEmissions) {
+	public static Map<String, Double> getTotalWarmEmissions(final Map<Id<Person>, Map<WarmPollutant, Double>> person2TotalWarmEmissions) {
 		Map<String, Double> totalWarmEmissions = new TreeMap<>();
 
 		for(Id<Person> personId : person2TotalWarmEmissions.keySet()){
@@ -86,36 +88,36 @@ public class EmissionUtilsExtended extends EmissionUtils{
 		return totalWarmEmissions;
 	}
 
-	public  Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkColdEmissions2String (final Network net, final Map<Double,Map<Id<Link>, Map<ColdPollutant, Double>>> coldEmiss) {
+	public static  Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkColdEmissions2String (final Network net, final Map<Double,Map<Id<Link>, Map<ColdPollutant, Double>>> coldEmiss) {
 		Map<Double, Map<Id<Link>, SortedMap<String, Double>>> outColdEmiss = new HashMap<>();
 		for(double t:coldEmiss.keySet()) {
 			Map<Id<Link>, SortedMap<String, Double>> tempMap = coldEmiss.get(t).entrySet().stream().collect(Collectors
-									.toMap(e -> e.getKey(), e -> convertColdPollutantMap2String(e.getValue())));
-			outColdEmiss.put(t,setNonCalculatedEmissionsForNetwork(net, tempMap));
+									.toMap(Map.Entry::getKey, e -> EmissionUtils.convertColdPollutantMap2String(e.getValue())));
+			outColdEmiss.put(t,EmissionUtils.setNonCalculatedEmissionsForNetwork(net, tempMap));
 		}
 		return outColdEmiss;
 	}
 
-	public  Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkWarmEmissions2String (final Network net, final Map<Double,Map<Id<Link>, Map<WarmPollutant, Double>>> warmEmiss) {
+	public static  Map<Double, Map<Id<Link>, SortedMap<String, Double>>> convertPerLinkWarmEmissions2String (final Network net, final Map<Double,Map<Id<Link>, Map<WarmPollutant, Double>>> warmEmiss) {
 		Map<Double, Map<Id<Link>, SortedMap<String, Double>>> outWarmEmiss = new HashMap<>();
 		for(double t:warmEmiss.keySet()) {
 			Map<Id<Link>, SortedMap<String, Double>> tempMap = warmEmiss.get(t).entrySet().stream().collect(Collectors.toMap(
-					e -> e.getKey(), e -> convertWarmPollutantMap2String(e.getValue())
+                    Map.Entry::getKey, e -> EmissionUtils.convertWarmPollutantMap2String(e.getValue())
 			));
-			outWarmEmiss.put(t, setNonCalculatedEmissionsForNetwork(net, tempMap));
+			outWarmEmiss.put(t, EmissionUtils.setNonCalculatedEmissionsForNetwork(net, tempMap));
 		}
 		return outWarmEmiss;
 	}
 
-	public Map<WarmPollutant, Double> addTwoWarmEmissionsMap (final Map<WarmPollutant, Double> warmEmission1, final Map<WarmPollutant, Double> warmEmission2){
+	public static Map<WarmPollutant, Double> addTwoWarmEmissionsMap (final Map<WarmPollutant, Double> warmEmission1, final Map<WarmPollutant, Double> warmEmission2){
 		return warmEmission1.entrySet().stream().collect(Collectors.toMap(
-				e -> e.getKey(), e -> e.getValue() + warmEmission2.get(e.getKey())
+                Map.Entry::getKey, e -> e.getValue() + warmEmission2.get(e.getKey())
 		));
 	}
 
-	public Map<WarmPollutant, Double> subtractTwoWarmEmissionsMap (final Map<WarmPollutant, Double> warmEmissionBigger, final Map<WarmPollutant, Double> warmEmissionSmaller){
+	public static Map<WarmPollutant, Double> subtractTwoWarmEmissionsMap (final Map<WarmPollutant, Double> warmEmissionBigger, final Map<WarmPollutant, Double> warmEmissionSmaller){
 		return warmEmissionBigger.entrySet().stream().collect(Collectors.toMap(
-				e -> e.getKey(), e -> e.getValue() - warmEmissionSmaller.get(e.getKey())
+                Map.Entry::getKey, e -> e.getValue() - warmEmissionSmaller.get(e.getKey())
 		));
 	}
 }

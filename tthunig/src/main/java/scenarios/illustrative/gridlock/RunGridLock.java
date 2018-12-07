@@ -42,6 +42,13 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
+import org.matsim.contrib.signals.controller.sylvia.SylviaPreprocessData;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
@@ -49,6 +56,7 @@ import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataImpl;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
@@ -56,7 +64,6 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactoryImpl;
-import org.matsim.contrib.signals.model.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
@@ -72,19 +79,18 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.data.LanesUtils;
-import org.matsim.lanes.data.Lane;
-import org.matsim.lanes.data.Lanes;
-import org.matsim.lanes.data.LanesFactory;
-import org.matsim.lanes.data.LanesToLinkAssignment;
+import org.matsim.lanes.Lane;
+import org.matsim.lanes.Lanes;
+import org.matsim.lanes.LanesFactory;
+import org.matsim.lanes.LanesToLinkAssignment;
+import org.matsim.lanes.LanesUtils;
 
-import analysis.signals.TtSignalAnalysisListener;
-import analysis.signals.TtSignalAnalysisTool;
-import analysis.signals.TtSignalAnalysisWriter;
-import signals.CombinedSignalsModule;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
-import signals.sylvia.controler.DgSylviaConfig;
-import signals.sylvia.data.DgSylviaPreprocessData;
+import signals.gershenson.GershensonConfig;
+import signals.gershenson.GershensonSignalController;
+import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 
 /**
  * @author tthunig
@@ -94,13 +100,13 @@ public class RunGridLock {
 
 	private static final Logger log = Logger.getLogger(RunGridLock.class);
 	
-	private enum SignalType { NONE, PLANBASED, DOWNSTREAM, SYLVIA}
-	private static final SignalType SIGNALTYPE = SignalType.PLANBASED;
+	private enum SignalType { NONE, PLANBASED, DOWNSTREAM, SYLVIA, LAEMMER}
+	private static final SignalType SIGNALTYPE = SignalType.LAEMMER;
 	
 	private enum SignalBasis { GREEN, CONFLICTING, TWO_ALTERNATING }
-	private static final SignalBasis SIGNALBASIS = SignalBasis.CONFLICTING;
+	private static final SignalBasis SIGNALBASIS = SignalBasis.TWO_ALTERNATING;
 	
-	private static final double MIDDLE_LINK_CAP = 1800;
+	private static final double MIDDLE_LINK_CAP = 3600;
 	// no grid lock for 3600 and planbased signals: they let only 1800 vehicles enter the system
 	
 	private static final int DEMAND_START_TIME_OFFSET  = 0; // choose 0 if both streams should start at the same time
@@ -113,6 +119,17 @@ public class RunGridLock {
 //		OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class ) ;
 //		otfvisConfig.setDrawTime(true);
 //		otfvisConfig.setAgentSize(80f);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
+		laemmerConfigGroup.setIntergreenTime(1);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setMaxCycleTime(90);
+		laemmerConfigGroup.setCheckDownstream(false); // TODO try this out
+		
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
+//		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+//		sylviaConfig.setSignalGroupMaxGreenScale(2);
+//		sylviaConfig.setCheckDownstream(true);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -126,25 +143,30 @@ public class RunGridLock {
 //		controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
-			CombinedSignalsModule signalsModule = new CombinedSignalsModule();
-			DgSylviaConfig sylviaConfig = new DgSylviaConfig();
-//			sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
-//			sylviaConfig.setSignalGroupMaxGreenScale(2);
-//			sylviaConfig.setCheckDownstream(true);
-			signalsModule.setSylviaConfig(sylviaConfig);
+			SignalsModule signalsModule = new SignalsModule();
+			// the signals module works for planbased, sylvia and laemmer signal controller
+			// by default and is pluggable for your own signal controller like this:
+			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+					DownstreamPlanbasedSignalController.DownstreamFactory.class);
+			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
+			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+					GershensonSignalController.GershensonFactory.class);
 			controler.addOverridingModule(signalsModule);
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
+					// bind gershenson config
+					GershensonConfig gershensonConfig = new GershensonConfig();
+					bind(GershensonConfig.class).toInstance(gershensonConfig);
+					
 					// TODO inflow and outflow analysis so far in TtRunPostAnalysis
 
 					// bind tool to analyze signals
-					this.bind(TtSignalAnalysisTool.class).asEagerSingleton();
-					this.addEventHandlerBinding().to(TtSignalAnalysisTool.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisTool.class);
-					this.bind(TtSignalAnalysisWriter.class);
-					this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
 				}
 			});
 		}
@@ -154,14 +176,14 @@ public class RunGridLock {
 	
 	private static Config defineConfig() {
 		Config config = ConfigUtils.createConfig();
-		config.controler().setOutputDirectory("../../runs-svn/gridlock/twoStream/"+SIGNALTYPE+"_basis"+SIGNALBASIS+MIDDLE_LINK_CAP+"_demand"+DEMAND_INTENSITY+"_offset"+DEMAND_START_TIME_OFFSET+"/");
+		config.controler().setOutputDirectory("../../runs-svn/gridlock/laemmer/"+SIGNALTYPE+"_basis"+SIGNALBASIS+MIDDLE_LINK_CAP+"_demand"+DEMAND_INTENSITY+"_offset"+DEMAND_START_TIME_OFFSET+"/");
 
 		// set number of iterations
 		config.controler().setLastIteration(0);
 
 		// able or enable signals and lanes
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
-			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+			SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 			signalConfigGroup.setUseSignalSystems(true);
 		}
 		config.qsim().setUseLanes(true);
@@ -398,8 +420,12 @@ public class RunGridLock {
 		signalUTurn.addLaneId(Id.create(TwoLaneLinkId + ".l", Lane.class));
 		signalUTurn.addTurningMoveRestriction(incommingToLinkId);
 
-		// create a group for all signals each (one element groups)
-		SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem);
+		if (!SIGNALTYPE.equals(SignalType.LAEMMER)) {
+			// create a group for all signals each (one element groups)
+			SignalUtils.createAndAddSignalGroups4Signals(signalGroups, signalSystem);
+		} else {
+			// define groups later while setting signal control
+		}
 
 		// create the signal control
 		SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
@@ -452,11 +478,35 @@ public class RunGridLock {
 			}
 			signalControl.addSignalSystemControllerData(signalSystemControl);
 			break;
+		case LAEMMER:
+			signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+			switch (SIGNALBASIS){
+			case GREEN:
+				throw new UnsupportedOperationException("Laemmer can not be combined with basis " + SignalBasis.GREEN + ". It needs information about signal groups.");
+			case CONFLICTING:
+				throw new UnsupportedOperationException("The current implementation of Laemmer signals can not be combined with basis " + SignalBasis.CONFLICTING + ". It needs disjunct signal groups.");
+			case TWO_ALTERNATING:
+				log.info("Create two alternating signal phases");
+				// create disjunct groups
+				SignalGroupData incommingGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("incomming"+systemNodeId, SignalGroup.class));
+				incommingGroup.addSignalId(signalIncomming.getId());
+				signalGroups.addSignalGroupData(incommingGroup);
+				SignalGroupData outgoingUturnGroup = signalGroups.getFactory().createSignalGroupData(signalSystemId, Id.create("outgoingUturn"+systemNodeId, SignalGroup.class));
+				outgoingUturnGroup.addSignalId(signalOutgoing.getId());
+				outgoingUturnGroup.addSignalId(signalUTurn.getId());
+				signalGroups.addSignalGroupData(outgoingUturnGroup);
+				// add control
+				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, incommingGroup.getId(), 0, 29));
+				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, outgoingUturnGroup.getId(), 30, 59));
+				break;
+			}
+			signalControl.addSignalSystemControllerData(signalSystemControl);
+			break;
 		case SYLVIA:
 			signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
 			switch (SIGNALBASIS) {
 			case GREEN:
-				throw new UnsupportedOperationException("Sylvia can only be combined with signal basis " + SignalBasis.TWO_ALTERNATING);
+				throw new UnsupportedOperationException("Sylvia can not be combined with basis " + SignalBasis.GREEN);
 			case CONFLICTING:
 				log.info("Create alternating signal phases for conflicting streams");
 				signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, Id.create(signalIncomming.getId(), SignalGroup.class), 0, 29));
@@ -472,7 +522,7 @@ public class RunGridLock {
 			}
 			tmpSignalControl.addSignalSystemControllerData(signalSystemControl);
 			// create the sylvia signal control by shorten the temporary signal control
-			DgSylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
+			SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 			break;
 		default:
 			break;

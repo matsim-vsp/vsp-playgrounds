@@ -77,7 +77,7 @@ public class CadytsEquilControllerBasedOnDistributions {
 
 		{
 			StrategySettings strategySettings = new StrategySettings() ;
-			strategySettings.setStrategyName( DefaultStrategy.ReRoute.name() );
+			strategySettings.setStrategyName( DefaultStrategy.ReRoute );
 			strategySettings.setWeight(0.1);
 			strategySettings.setDisableAfter(90);
 			config.strategy().addStrategySettings(strategySettings);

@@ -22,7 +22,7 @@ package playground.dgrether;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVisFileWriterModule;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -46,7 +46,7 @@ public class DgController {
 		Scenario scenario = ScenarioUtils.loadScenario( config ) ;
 		
 		// add missing scenario elements
-		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfigGroup.isUseSignalSystems()) {
 			scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 		}
@@ -61,7 +61,8 @@ public class DgController {
 //		SylviaSignalsModule sylviaSignalsModule = new SylviaSignalsModule();
 //		sylviaSignalsModule.setAlwaysSameMobsimSeed(alwaysSameMobsimSeed);
 //		c.addOverridingModule(sylviaSignalsModule);
-		c.addOverridingModule(new SignalsModule());
+//		c.addOverridingModule(new SignalsModule());
+		Signals.configure( c );
 		/* sylvia moved to playground tthunig. If you want to use sylvia use e.g. TtBasicController in playground tthunig. theresa, apr'17 */
 		
 		c.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);

@@ -39,7 +39,6 @@ public class ReadAndAddSubActivities {
 		this.sc = sc;
 	}
 
-	private Config config;
 	private final String inputConfig;
 	private final Scenario sc;
 	
@@ -58,7 +57,7 @@ public class ReadAndAddSubActivities {
 	}
 	
 	private void addDataAndWriteConfig(String outConfig, String outPlans){
-		config = ConfigUtils.loadConfig(inputConfig);
+		Config config = ConfigUtils.loadConfig(inputConfig);
 		
 		ActivityClassifier newPlans= new ActivityClassifier(sc);
 		newPlans.run();

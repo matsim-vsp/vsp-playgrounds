@@ -1,53 +1,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
-		<groupId>org.matsim</groupId>
+		<groupId>org.matsim.vsp</groupId>
 		<artifactId>vsp-playgrounds</artifactId>
-		<version>0.10.0-SNAPSHOT</version>
+		<version>0.11.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	  <groupId>vsp-playground</groupId>
+	  <groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 	<artifactId>kturner</artifactId>
 	<name>kturner</name>
 	<dependencies>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>freight</artifactId>
-			<version>0.10.0-SNAPSHOT</version>
+			<version>0.11.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
-		<!--  Jsprit 1.4.2
+		
+		<!-- https://mvnrepository.com/artifact/com.graphhopper/jsprit-core -->
 		<dependency>
-			<groupId>jsprit</groupId>
-			<artifactId>jsprit-core</artifactId>
-			<version>1.4.2</version>
+		    <groupId>com.graphhopper</groupId>
+		    <artifactId>jsprit-core</artifactId>
+		    <version>1.7.2</version>
 		</dependency>
+		
 		<dependency>
-			<groupId>jsprit</groupId>
-			<artifactId>jsprit-analysis</artifactId>
-			<version>1.4.2</version>
+		    <groupId>com.graphhopper</groupId>
+		    <artifactId>jsprit-analysis</artifactId>
+		    <version>1.7.2</version>
 		</dependency>
+		
 		<dependency>
-			<groupId>jsprit</groupId>
-			<artifactId>jsprit-instances</artifactId>
-			<version>1.4.2</version>
-		</dependency> -->
-		<!-- JSprit 1.5 Dez. 2014 -->
-		<dependency>
-			<groupId>jsprit</groupId>
-			<artifactId>jsprit-core</artifactId>
-			<version>1.5</version>
+		    <groupId>com.graphhopper</groupId>
+		    <artifactId>jsprit-io</artifactId>
+		    <version>1.7.2</version>
 		</dependency>
-		<dependency>
-			<groupId>jsprit</groupId>
-			<artifactId>jsprit-analysis</artifactId>
-			<version>1.5</version>
-		</dependency>
-		<dependency>
-			<groupId>jsprit</groupId>
-			<artifactId>jsprit-instances</artifactId>
-			<version>1.5</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

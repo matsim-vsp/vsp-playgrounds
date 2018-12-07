@@ -41,9 +41,11 @@ public class TtTotalTravelTime implements PersonDepartureEventHandler, PersonArr
 	private double totalTt = 0.0;
 	private Map<Id<Person>, Double> pers2lastDepatureTime = new HashMap<>();
 	
+	private double previousTotalTT = 0.0;
 	
 	@Override
 	public void reset(int iteration) {
+		previousTotalTT = totalTt;
 		totalTt = 0.0;
 		pers2lastDepatureTime.clear();
 	}
@@ -61,6 +63,10 @@ public class TtTotalTravelTime implements PersonDepartureEventHandler, PersonArr
 
 	public double getTotalTt(){
 		return totalTt;
+	}
+	
+	public double getPreviousTotalTT() {
+		return previousTotalTT;
 	}
 	
 }

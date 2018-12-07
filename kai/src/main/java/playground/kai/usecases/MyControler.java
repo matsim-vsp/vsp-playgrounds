@@ -16,8 +16,9 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.framework.MobsimFactory;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
+import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
@@ -75,24 +76,24 @@ class MyControler {
 	        }
 
 	        // construct the QSim:
-			QSim qSim = new QSim(sc, eventsManager);
+			//QSim qSim = new QSim(sc, eventsManager);
 
 			// add the actsim engine:
-			ActivityEngine activityEngine = new ActivityEngine(eventsManager, qSim.getAgentCounter());
-			qSim.addMobsimEngine(activityEngine);
-			qSim.addActivityHandler(activityEngine);
+			//ActivityEngine activityEngine = new ActivityEngine(eventsManager, qSim.getAgentCounter());
+			//qSim.addMobsimEngine(activityEngine);
+			//qSim.addActivityHandler(activityEngine);
 
 			// add the netsim engine:
 
-			QNetsimEngine netsimEngine = new QNetsimEngine(qSim) ;
+			//QNetsimEngine netsimEngine = new QNetsimEngine(qSim) ;
 //			QNetsimEngine netsimEngine = netsimEngFactory.createQSimEngine(qSim, MatsimRandom.getRandom());
-			qSim.addMobsimEngine(netsimEngine);
-			qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
+			//qSim.addMobsimEngine(netsimEngine);
+			//qSim.addDepartureHandler(netsimEngine.getDepartureHandler());
 
-			DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, eventsManager);
-			qSim.addMobsimEngine(teleportationEngine);
+			//DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(sc, eventsManager);
+			//qSim.addMobsimEngine(teleportationEngine);
 	        
-			AgentFactory agentFactory;
+			//AgentFactory agentFactory;
 //	        if (sc.getConfig().transit().isUseTransit()) {
 //	            agentFactory = new TransitAgentFactory(qSim);
 //	            TransitQSimEngine transitEngine = new TransitQSimEngine(qSim);
@@ -102,13 +103,13 @@ class MyControler {
 //	            qSim.addAgentSource(transitEngine);
 //	            qSim.addMobsimEngine(transitEngine);
 //	        } else {
-			agentFactory = new DefaultAgentFactory(qSim);
+			//agentFactory = new DefaultAgentFactory(qSim);
 //	        }
 //	        if (sc.getConfig().network().isTimeVariantNetwork()) {
 //				qSim.addMobsimEngine(new NetworkChangeEventsEngine());		
 //			}
 
-	        PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
+	        //PopulationAgentSource agentSource = new PopulationAgentSource(sc.getPopulation(), agentFactory, qSim);
 			//	        setter for ModeVehicleTypes to agent source is gone now. Amit May'17
 //	        Map<String, VehicleType> modeVehicleTypes = new HashMap<String, VehicleType>();
 //
@@ -134,7 +135,9 @@ class MyControler {
 //
 //			agentSource.setModeVehicleTypes(modeVehicleTypes);
 	        
-	        qSim.addAgentSource(agentSource);
+	        //qSim.addAgentSource(agentSource);
+	        
+	        QSim qSim = new QSimBuilder(sc.getConfig()).useDefaults().build(sc, eventsManager);
 			
 			if ( useOTFVis ) {
 				// otfvis configuration.  There is more you can do here than via file!

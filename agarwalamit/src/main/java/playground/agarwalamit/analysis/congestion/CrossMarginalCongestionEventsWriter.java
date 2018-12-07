@@ -20,15 +20,12 @@ package playground.agarwalamit.analysis.congestion;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.events.handler.EventHandler;
-import org.matsim.core.scenario.MutableScenario;
-
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.CongestionEventHandler;
@@ -86,7 +83,7 @@ public class CrossMarginalCongestionEventsWriter {
 				conEvents.add(event);
 			}
 		});
-		MarginalCongestionPricingHandler moneyEventHandler = new MarginalCongestionPricingHandler(manager,  (MutableScenario)this.sc);
+		MarginalCongestionPricingHandler moneyEventHandler = new MarginalCongestionPricingHandler(manager, this.sc);
 		manager.addHandler(moneyEventHandler);
 		reader.readFile(this.inputEventsFile);
 		writer.closeFile();

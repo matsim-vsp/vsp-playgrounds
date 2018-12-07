@@ -88,7 +88,7 @@ public class TripTollHandler implements PersonMoneyEventHandler, PersonDeparture
 				tolls.add(0.);
 			} else {//first trip
 				personId2TripCount.put(personId, 1);
-				personId2TripToll.put(personId, new ArrayList<>(Arrays.asList(new Double [] {0.0})) );
+				personId2TripToll.put(personId, new ArrayList<>(Arrays.asList(0.0)) );
 			}
 		} else {//first person and first trip
 			Map<Id<Person>,Integer> personId2TripCount = new HashMap<>();
@@ -96,7 +96,7 @@ public class TripTollHandler implements PersonMoneyEventHandler, PersonDeparture
 			timeBin2Person2TripsCount.put(time, personId2TripCount);
 
 			Map<Id<Person>,List<Double>> personId2TripToll =  new HashMap<>();
-			personId2TripToll.put(personId, new ArrayList<>(Arrays.asList(new Double [] {0.0})) );
+			personId2TripToll.put(personId, new ArrayList<>(Arrays.asList(0.0)) );
 			timeBin2Person2TripToll.put(time, personId2TripToll);
 		}
 	}

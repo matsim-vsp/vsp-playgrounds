@@ -19,7 +19,8 @@
 
 package playground.agarwalamit.opdyts.patna.allModes;
 
-import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
+import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
+import playground.vsp.parametricRuns.PrepareParametricRuns;
 
 /**
  * A class to create a job script, write it on remote and then run the job based on the given parameters.
@@ -30,21 +31,29 @@ import playground.agarwalamit.parametricRuns.PrepareParametricRuns;
 public class ParametricRunsPatnaAllModes {
 
     public static void main(String[] args) {
-        int runCounter= 401;
+        int runCounter= 485;
 
         String baseOutDir = "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/output/";
-        String matsimDir = "r_87b4237ac664bb1068965f2e8797e6bd3cfa7e1f_patnaOpdyts_25Oct";
+        String matsimDir = "r_5a207c4ba06fa4017620044f18a82170122eacf4_patnaOpdyts_26Oct";
 
         StringBuilder buffer = new StringBuilder();
-        PrepareParametricRuns parametricRuns = new PrepareParametricRuns();
+        PrepareParametricRuns parametricRuns = new PrepareParametricRuns("~/.ssh/known_hosts","~/.ssh/id_rsa_tub_math","agarwal");
 
-        String ascStyles [] = {"axial_randomVariation","diagonal_randomVariation","axial_fixedVariation","diagonal_fixedVariation"};
-        double [] stepSizes = {0.5, 0.75, 1.0};
+        String ascStyles [] = {
+                ModeChoiceRandomizer.ASCRandomizerStyle.axial_fixedVariation.toString(),
+                ModeChoiceRandomizer.ASCRandomizerStyle.grid_fixedVariation.toString(),
+                ModeChoiceRandomizer.ASCRandomizerStyle.axial_randomVariation.toString(),
+                ModeChoiceRandomizer.ASCRandomizerStyle.grid_randomVariation.toString()
+        };
+        double [] stepSizes = {0.05, 0.1, 0.2};
         Integer [] convIterations = {600};
         double [] selfTuningWts = {1.0};
-        Integer [] warmUpIts = {1, 5, 10};
+        Integer [] warmUpIts = {5};
 
-        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts\tteleportationModesZoneType"+ PrepareParametricRuns.newLine);
+//        buffer.append("runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts\tteleportationModesZoneType"+ PrepareParametricRuns.newLine);
+        buffer.append(
+                "runNr\tascStyle\tstepSize\titerations2Convergence\tselfTunerWt\twarmUpIts\tteleportationModesZoneType" + "\tinputPlans")
+              .append(PrepareParametricRuns.newLine);
 
         for (String ascStyle : ascStyles ) {
             for(double stepSize :stepSizes){
@@ -68,21 +77,28 @@ public class ParametricRunsPatnaAllModes {
 
                                     "java -Djava.awt.headless=true -Xmx29G -cp agarwalamit-0.10.0-SNAPSHOT.jar " +
                                             "playground/agarwalamit/opdyts/patna/allModes/PatnaAllModesOpdytsCalibrator " +
-                                            "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/inputs/config_allModes.xml " +
+//                                            "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/inputs/config_allModes.xml " +
+                                            "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/inputs/config_allModes_418_8.xml " +
                                             "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/output/"+jobName+"/ " +
-                                            "/net/ils4/agarwal/patnaOpdyts/allModes/relaxedPlans/output/output_plans.xml.gz "+
+//                                            "/net/ils4/agarwal/patnaOpdyts/allModes/relaxedPlans/output/output_plans.xml.gz "+
+                                            "/net/ils4/agarwal/patnaOpdyts/allModes/calibration/output/run418/_8/output_plans.xml.gz "+
                                             params+" "
                             };
 
                             parametricRuns.run(additionalLines, baseOutDir, jobName);
-                            buffer.append(jobName+"\t" + params.replace(' ','\t') + PrepareParametricRuns.newLine);
+//                            buffer.append(jobName+"\t" + params.replace(' ','\t') + PrepareParametricRuns.newLine);
+                            buffer.append(jobName)
+                                  .append("\t")
+                                  .append(params.replace(' ', '\t'))
+                                  .append("\trun418/_8/output_plans.xml.gz")
+                                  .append(PrepareParametricRuns.newLine);
                         }
                     }
                 }
             }
         }
 
-        parametricRuns.writeNewOrAppendRemoteFile(buffer, baseOutDir+"/runInfo.txt");
+        parametricRuns.writeNewOrAppendToRemoteFile(buffer, baseOutDir+"/runInfo.txt");
         parametricRuns.close();
     }
 

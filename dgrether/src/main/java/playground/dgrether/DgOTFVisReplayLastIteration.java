@@ -1,18 +1,12 @@
 package playground.dgrether;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collection;
-
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.util.Types;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
@@ -20,11 +14,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.controler.AbstractModule;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.ControlerDefaultsModule;
-import org.matsim.core.controler.Injector;
-import org.matsim.core.controler.NewControlerModule;
+import org.matsim.core.controler.*;
 import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModule;
 import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.framework.listeners.MobsimListener;
@@ -34,9 +24,12 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OnTheFlyServer;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.util.Types;
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
 
 /* *********************************************************************** *
  * project: org.matsim.*
@@ -85,7 +78,7 @@ public class DgOTFVisReplayLastIteration {
 		if (config.network().getLaneDefinitionsFile() != null || config.qsim().isUseLanes()) {
 			config.network().setLaneDefinitionsFile(inputPreFix + Controler.FILENAME_LANES);
 		}
-		SignalSystemsConfigGroup signalsConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		SignalSystemsConfigGroup signalsConfig = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		if (signalsConfig.isUseSignalSystems()) {
 			signalsConfig.setSignalSystemFile(inputPreFix + SignalsScenarioWriter.FILENAME_SIGNAL_SYSTEMS);
 			signalsConfig.setSignalGroupsFile(inputPreFix + SignalsScenarioWriter.FILENAME_SIGNAL_GROUPS);
@@ -110,7 +103,8 @@ public class DgOTFVisReplayLastIteration {
 				install(new ControlerDefaultsModule());
 				install(new ScenarioByInstanceModule(sc));
 				// signal specific module
-				install(new SignalsModule());
+//				install(new SignalsModule());
+				throw new RuntimeException("don't know an easy way to retrofit this.  kai, nov'18") ;
 			}
 		});
 

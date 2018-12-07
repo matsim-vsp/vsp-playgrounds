@@ -109,19 +109,19 @@ public class SubPopInputs4Munich {
 			// once subPop attribute is set, strategy for all sub pop groups neet to set seprately.
 			String ug = MunichUserGroup.Rev_Commuter.toString();
 			StrategySettings reroute = new StrategySettings();
-			reroute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
+			reroute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 			reroute.setSubpopulation(ug);
 			reroute.setWeight(0.15);
 			config.strategy().addStrategySettings(reroute);
 
 			StrategySettings expBeta = new StrategySettings();
-			expBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
+			expBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			expBeta.setSubpopulation(ug);
 			expBeta.setWeight(0.7);
 			config.strategy().addStrategySettings(expBeta);
 
 			StrategySettings modeChoiceComm = new StrategySettings();
-			modeChoiceComm.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.name().concat("_").concat(ug));
+			modeChoiceComm.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat(ug));
 			modeChoiceComm.setWeight(0.15);
 			modeChoiceComm.setSubpopulation(ug);
 			config.strategy().addStrategySettings(modeChoiceComm);
@@ -140,13 +140,13 @@ public class SubPopInputs4Munich {
 		{
 			String ug = MunichUserGroup.Freight.toString();
 			StrategySettings reroute = new StrategySettings();
-			reroute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name());
+			reroute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 			reroute.setSubpopulation(ug);
 			reroute.setWeight(0.30);
 			config.strategy().addStrategySettings(reroute);
 
 			StrategySettings expBeta = new StrategySettings();
-			expBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
+			expBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			expBeta.setSubpopulation(ug);
 			expBeta.setWeight(0.70);
 			config.strategy().addStrategySettings(expBeta);

@@ -51,7 +51,7 @@ public class PatnaPolicyLinkVolumeWriter {
 		Map<Id<Link>, Double> linkVol_bau = linkid2Volume_bau.entrySet().stream().collect(
 				Collectors.toMap(
 //						entry -> entry.getKey(), entry -> MapUtils.doubleValueSum(entry.getValue())
-						entry -> entry.getKey(), entry -> entry.getValue().containsKey(timeSlot) ? entry.getValue().get(timeSlot) : 0.
+                        Map.Entry::getKey, entry -> entry.getValue().getOrDefault(timeSlot, 0.)
 				)
 		);
 
@@ -63,7 +63,7 @@ public class PatnaPolicyLinkVolumeWriter {
 		Map<Id<Link>, Double> linkVol_policy = linkid2Volume_policy.entrySet().stream().collect(
 				Collectors.toMap(
 //						entry -> entry.getKey(), entry -> MapUtils.doubleValueSum(entry.getValue())
-						entry -> entry.getKey(), entry -> entry.getValue().containsKey(timeSlot) ? entry.getValue().get(timeSlot) : 0.
+                        Map.Entry::getKey, entry -> entry.getValue().getOrDefault(timeSlot, 0.)
 				)
 		);
 

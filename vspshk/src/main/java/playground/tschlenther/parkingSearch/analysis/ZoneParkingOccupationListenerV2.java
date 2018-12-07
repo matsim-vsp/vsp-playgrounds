@@ -8,19 +8,12 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.io.output.WriterOutputStream;
 import org.apache.log4j.Logger;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.core.config.Config;
-import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.MatsimServices;
-import org.matsim.core.controler.events.IterationEndsEvent;
-import org.matsim.core.controler.listener.ControlerListener;
-import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.mobsim.framework.events.MobsimAfterSimStepEvent;
 import org.matsim.core.mobsim.framework.events.MobsimBeforeCleanupEvent;
 import org.matsim.core.mobsim.framework.listeners.MobsimAfterSimStepListener;
@@ -33,7 +26,7 @@ import playground.tschlenther.parkingSearch.utils.ParkingTuple;
 import playground.tschlenther.parkingSearch.utils.ZoneParkingManager;
 
 /**
- * @author Work
+ * @author tschlenther
  *
  */
 public class ZoneParkingOccupationListenerV2 implements MobsimBeforeCleanupListener, MobsimAfterSimStepListener{
@@ -128,9 +121,9 @@ public class ZoneParkingOccupationListenerV2 implements MobsimBeforeCleanupListe
 							break;
 						}
 						else{
-							String timeString = "So sieht der TreeSet aus :\n" + timeSet.toString() + "\n So sieht das Original aus:\n" + this.allMonitoredTimeStamps.toString();
-							throw new RuntimeException("Timestamp von zone " + zone + " wurde nicht aufgenommen.\n timeStamp von zone = " + ff.getTime() + "\t headerSpalte: " + time
-									+ "\n\n" + timeString + "\n So sieht die Datei aus:\n" + head + "\n" + line);
+							String timeString = "This is what the TreeSet looks like:\n" + timeSet.toString() + "\n This is what the original looks like:\n" + this.allMonitoredTimeStamps.toString();
+							throw new RuntimeException("timestamp of zone " + zone + " wasn't recorded.\n timeStamp of zone = " + ff.getTime() + "\t header column: " + time
+									+ "\n\n" + timeString + "\n This is that the file looks like:\n" + head + "\n" + line);
 						}
 						oldOcc = ff.getOccupancy();
 					}
@@ -189,7 +182,7 @@ public class ZoneParkingOccupationListenerV2 implements MobsimBeforeCleanupListe
 					ratios[i] = oldRatio;
 				}
 				else{
-					throw new RuntimeException("timeSlot höher als aufgenommene Zeit. TimeSlot: " + slotTimes[i] + "\t Zeit: " + tuple.getTime());
+					throw new RuntimeException("timeSlot number is higher than recorded time. timeSlot: " + slotTimes[i] + "\t time: " + tuple.getTime());
 				}
 			}
 			

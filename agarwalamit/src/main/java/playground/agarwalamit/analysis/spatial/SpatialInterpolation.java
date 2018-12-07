@@ -40,7 +40,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import playground.agarwalamit.analysis.spatial.GeneralGrid.GridType;
-import playground.agarwalamit.utils.GeometryUtils;
+import playground.agarwalamit.utils.geometry.GeometryUtils;
 
 /**
  * A class to interpolate effect of emissions (or ...) on each link on other parts of study area.
@@ -181,16 +181,15 @@ public class SpatialInterpolation {
 		Coordinate actCoordinate = new Coordinate (act.getCoord().getX(),act.getCoord().getY());
 		Point actLocation = gf.createPoint(actCoordinate);
 
-		this.cellWeights.keySet().stream().filter(p -> this.grid.getCellGeometry(p).covers(actLocation)).forEach(p -> {
-			this.cellWeights.put(p, this.cellWeights.get(p) + 1 * countScaleFactor);
-		});
+		this.cellWeights.keySet().stream().filter(p -> this.grid.getCellGeometry(p).covers(actLocation)).forEach(p -> this.cellWeights.put(p, this.cellWeights.get(p) + 1 * countScaleFactor));
 	}
 
 	/**
 	 * @param fromNodeCoord
 	 * @param toNodeCoord
 	 * @param cellCentroid
-	 * @return The outcome is derived assuming constant emission on link and then integrating effect of emission on link on the cell centroid.
+	 * @return The outcome is derived assuming constant emission throughout the (linear) link and
+	 * then integrating effect of emission on the link at the cell centroid.
 	 */
 	private double calculateWeightFromLine(final Coordinate fromNodeCoord, final Coordinate toNodeCoord, final Coordinate cellCentroid){
 		double constantA = fromNodeCoord.distance(cellCentroid) * fromNodeCoord.distance(cellCentroid);

@@ -40,6 +40,7 @@ import org.matsim.contrib.parking.parkingsearch.manager.WalkLegFactory;
 import org.matsim.contrib.parking.parkingsearch.manager.vehicleteleportationlogic.VehicleTeleportationLogic;
 import org.matsim.contrib.parking.parkingsearch.routing.ParkingRouter;
 import org.matsim.contrib.parking.parkingsearch.search.ParkingSearchLogic;
+import org.matsim.contrib.parking.parkingsearch.sim.ParkingSearchConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.utils.collections.Tuple;
@@ -61,7 +62,8 @@ import playground.jbischoff.ffcs.manager.FreefloatingCarsharingManager;
 public class CarsharingParkingAgentLogic extends ParkingAgentLogic {
 
 	private FreefloatingCarsharingManager ffcmanager;
-	FFCSConfigGroup ffcsconfig;
+	private FFCSConfigGroup ffcsconfig;
+	private ParkingSearchConfigGroup configGroup;
 	/**
 	 * @param plan
 	 * @param parkingManager
@@ -71,15 +73,16 @@ public class CarsharingParkingAgentLogic extends ParkingAgentLogic {
 	 * @param parkingLogic
 	 * @param timer
 	 * @param teleportationLogic
-	 * @param FreefloatingCarsharingManager
-	 * @param FFCSConfigGroup
+	 * @param ffcmanager
+	 * @param ffcsconfig
 	 */
 	public CarsharingParkingAgentLogic(Plan plan, ParkingSearchManager parkingManager, WalkLegFactory walkLegFactory,
 			ParkingRouter parkingRouter, EventsManager events, ParkingSearchLogic parkingLogic, MobsimTimer timer,
-			VehicleTeleportationLogic teleportationLogic, FreefloatingCarsharingManager ffcmanager, FFCSConfigGroup ffcsconfig) {
-		super(plan, parkingManager, walkLegFactory, parkingRouter, events, parkingLogic, timer, teleportationLogic);
+			VehicleTeleportationLogic teleportationLogic, FreefloatingCarsharingManager ffcmanager, FFCSConfigGroup ffcsconfig, ParkingSearchConfigGroup configGroup) {
+		super(plan, parkingManager, walkLegFactory, parkingRouter, events, parkingLogic, timer, teleportationLogic, configGroup);
 		this.ffcmanager = ffcmanager;
 		this.ffcsconfig = ffcsconfig;
+		this.configGroup = configGroup;
 	}
 	
 	@Override
@@ -94,7 +97,7 @@ public class CarsharingParkingAgentLogic extends ParkingAgentLogic {
 		this.lastParkActionState = LastParkActionState.PARKACTIVITY;
 		this.currentlyAssignedVehicleId = null;
 		this.parkingLogic.reset();
-		return new StaticDynActivity(this.stageInteractionType,now + ParkingUtils.PARKDURATION);}
+		return new StaticDynActivity(this.stageInteractionType,now + configGroup.getParkduration());}
 		else throw new RuntimeException ("No parking possible");
 	}
 	

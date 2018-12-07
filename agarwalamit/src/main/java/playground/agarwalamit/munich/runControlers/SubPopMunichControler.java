@@ -104,7 +104,7 @@ public class SubPopMunichControler {
 			@Override
 			public void install() {
 				String ug = "COMMUTER_REV_COMMUTER";
-				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.name().concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 					@Inject
 					Scenario sc;
 					@Inject
@@ -123,7 +123,7 @@ public class SubPopMunichControler {
 			@Override
 			public void install() {
 				String ug = "COMMUTER_REV_COMMUTER";
-				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.name().concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "pt_".concat(ug)};
 					final String[] chainBasedModes = {"car", "bike"};
 					@Inject
@@ -134,7 +134,12 @@ public class SubPopMunichControler {
 					@Override
 					public PlanStrategy get() {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
-						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, tripRouterProvider));
+						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(),
+								availableModes,
+								chainBasedModes,
+								false,
+								0.0, //prob, 0.0 for backward compatiblity
+								tripRouterProvider));
 						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
 						return builder.build();
 					}

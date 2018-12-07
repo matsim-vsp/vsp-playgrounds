@@ -13,11 +13,11 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class CleaningPlans {
 
-	static String originalPlansFile = "../../../runs-svn/santiago/baseCase1pct/inputForStepSP1_0/step.0_100.plans.xml.gz";
+	static String originalPlansFile = "../../../runs-svn/santiago/baseCase1pct/outputOfStep0/output_plans.xml.gz";
 	
 	//for step1-e1 and step1-e2, stepA1, stepP1_1, stepSP1_0
 	
-	static String selectedPlansFile = "../../../runs-svn/santiago/baseCase1pct/inputForStepSP1_0/selected_step.0_100.plans.xml.gz";
+	static String selectedPlansFile = "../../../runs-svn/santiago/baseCase1pct/outputOfStep0/selected_output_plans.xml.gz";
 	
 	public static void main(String[] args) {
 		

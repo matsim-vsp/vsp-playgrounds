@@ -69,7 +69,7 @@ public class ScoringByModeAnalyzer {
 
         // take avg scores and then simply get the c_mode_0 for each mode
         Map<String, Double> mode2avgScore = mode2Counter.entrySet().parallelStream().collect(Collectors.toMap(
-           e -> e.getKey(), e -> mode2scores.get(e.getKey())/e.getValue()
+                Map.Entry::getKey, e -> mode2scores.get(e.getKey())/e.getValue()
         ));
 
         mode2avgScore.entrySet().parallelStream().forEach(e -> System.out.println("mode :"+e.getKey() + "; avgScore: "+ e.getValue()));

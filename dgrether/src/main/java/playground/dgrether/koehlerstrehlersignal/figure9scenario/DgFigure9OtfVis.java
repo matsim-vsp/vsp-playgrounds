@@ -19,12 +19,12 @@
  * *********************************************************************** */
 package playground.dgrether.koehlerstrehlersignal.figure9scenario;
 
-import java.util.Collection;
-
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.util.Types;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.controler.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -44,12 +44,9 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
-
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.util.Types;
-
 import playground.dgrether.DgOTFVis;
+
+import java.util.Collection;
 
 
 
@@ -61,7 +58,7 @@ public class DgFigure9OtfVis {
 		String conf = "../../../shared-svn/studies/dgrether/koehlerStrehler2010/scenario5/config_signals_coordinated.xml";
 		
 		Config config = ConfigUtils.loadConfig(conf);
-		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUPNAME, SignalSystemsConfigGroup.class);
+		ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
 		ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class).setAgentSize(40.0f);
 		MatsimRandom.reset(config.global().getRandomSeed());
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -76,7 +73,8 @@ public class DgFigure9OtfVis {
 				install(new ControlerDefaultsModule());
 				install(new ScenarioByInstanceModule(scenario));
 				// signal specific module
-				install(new SignalsModule());
+//				install(new SignalsModule());
+				throw new RuntimeException("don't know an easy way to fix this.  kai, nov'18") ;
 			}
 		});
 	

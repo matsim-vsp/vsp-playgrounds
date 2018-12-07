@@ -29,7 +29,6 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.matrices.Matrix;
 
 import playground.michalm.demand.*;
-import playground.michalm.demand.taxi.PersonCreatorWithRandomTaxiMode;
 import playground.michalm.util.array2d.*;
 import playground.michalm.util.matrices.MatrixUtils;
 

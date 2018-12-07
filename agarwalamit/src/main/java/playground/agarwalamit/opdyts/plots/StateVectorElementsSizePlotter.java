@@ -36,20 +36,16 @@ import playground.agarwalamit.utils.FileUtils;
 public class StateVectorElementsSizePlotter {
 
     public static void main(String[] args) {
-//        String inputFile = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/ITERS/it.1/1.stateVector_network modes.txt";
-//        String outputFile = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/calib_trails/_0/ITERS/it.1/1.stateVector_network modes.png";
-//        String identifier = "networkModes";
-//        new StateVectorElementsSizePlotter().run(inputFile,outputFile, identifier);
-
-
         // plot the size of the state vector elements
-        String outDir = FileUtils.RUNS_SVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_5/"+"/vectorElementSizeFiles/";
+        String runsSVN = "../../";
+        if (System.getProperty("user.name").equals("amit")) {
+            runsSVN = FileUtils.RUNS_SVN;
+        }
+        String outDir = runsSVN+"/opdyts/patna/output_allModes/stateVectorFiles/warmUpItr5/stepSize1_axialRnd/_5/"+"/vectorElementSizeFiles/";
         new File(outDir+"/plots_log/").mkdir();
         int firstIt = 0;
         int lastIt = 1000;
         int plotEveryItr = 50;
-
-
 
         for (int itr = firstIt+1; itr <=lastIt; itr++) {
             if ( (itr == firstIt+1 || itr%plotEveryItr ==0) && new File(outDir).exists() ) {
@@ -93,19 +89,25 @@ public class StateVectorElementsSizePlotter {
 
     public static void gnuHistogramPlot(final String inputFile, final String outputFile, final String identifier) {
         String cmd = "gnuplot -c histogram.gnu ";
-        cmd += " "+inputFile;
-        cmd += " "+outputFile;
+        cmd += " "+new File(inputFile).getAbsolutePath();
+        cmd += " "+new File(outputFile).getAbsolutePath();
         cmd += " "+identifier;
 
-        ExeRunner.run(cmd, FileUtils.GNU_SCRIPT_DIR+"/gnulog.log", 99999 ,FileUtils.GNU_SCRIPT_DIR);
+        ExeRunner.run(cmd,
+                new File(FileUtils.GNU_SCRIPT_DIR + "/gnulog.log").getAbsolutePath(),
+                99999,
+                new File(FileUtils.GNU_SCRIPT_DIR).getAbsolutePath());
     }
 
     public static void gnuHistogramLogScalePlot(final String inputFile, final String outputFile, final String identifier) {
         String cmd = "gnuplot -c histogram_log.gnu ";
-        cmd += " "+inputFile;
-        cmd += " "+outputFile;
+        cmd += " "+new File(inputFile).getAbsolutePath();
+        cmd += " "+new File(outputFile).getAbsolutePath();
         cmd += " "+identifier;
 
-        ExeRunner.run(cmd, FileUtils.GNU_SCRIPT_DIR+"/gnulog.log", 99999 ,FileUtils.GNU_SCRIPT_DIR);
+        ExeRunner.run(cmd,
+                new File(FileUtils.GNU_SCRIPT_DIR + "/gnulog.log").getAbsolutePath(),
+                99999,
+                new File(FileUtils.GNU_SCRIPT_DIR).getAbsolutePath());
     }
 }

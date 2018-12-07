@@ -26,9 +26,12 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.filter.NetworkFilterManager;
 import org.matsim.core.network.filter.NetworkLinkFilter;
 import org.matsim.core.network.io.MatsimNetworkReader;
+
+import playground.vsp.andreas.mzilske.bvg09.MergeNetworks;
 
 /**
  * @author  jbischoff
@@ -40,7 +43,7 @@ import org.matsim.core.network.io.MatsimNetworkReader;
 public class FilterNetwork {
 public static void main(String[] args) {
 	Network network = NetworkUtils.createNetwork();
-	new MatsimNetworkReader(network).readFile("C:/Users/Joschka/Documents/shared-svn/projects/vw_rufbus/projekt2/input/network/networkpt-av-jun17.xml.gz");
+	new MatsimNetworkReader(network).readFile("D:/cemdap-vw/input/networkpt-av-nov17.xml.gz");
 	
 	NetworkFilterManager nfm = new NetworkFilterManager(network);
 	nfm.addLinkFilter(new NetworkLinkFilter() {
@@ -48,11 +51,19 @@ public static void main(String[] args) {
 		@Override
 		public boolean judgeLink(Link l) {
 			if (l.getAllowedModes().contains("car"))
+//			if (l.getAllowedModes().contains("pt"))
 			return true;
 			else return false;
 		}
 	});
 	Network net2 = nfm.applyFilters();
-	new NetworkWriter(net2).write("C:/Users/Joschka/Documents/shared-svn/projects/vw_rufbus/projekt2/input/network/networkcar-jun17.xml.gz");
+	new NetworkCleaner().run(net2);
+	new NetworkWriter(net2).write("D:/cemdap-vw/input/network_car_av_cleaned.xml.gz");
+	
+	Network networkpt = NetworkUtils.createNetwork();
+	new MatsimNetworkReader(networkpt).readFile("D:/cemdap-vw/input/networkpt.xml.gz");
+	MergeNetworks.merge(net2, "", networkpt);
+	new NetworkWriter(net2).write("D:/cemdap-vw/input/networkpt-av-nov17_cleaned.xml.gz");
+
 }
 }
