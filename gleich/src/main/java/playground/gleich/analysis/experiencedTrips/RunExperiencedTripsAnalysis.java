@@ -45,9 +45,11 @@ import org.matsim.pt.transitSchedule.api.TransitScheduleReader;
 
 /**
  * Runner that guesses configuration based on output directory path (1 arg)
- * Otherwise detailed configuration (7 args[]) is also available
+ * Otherwise detailed configuration (7 args[]) is also available.
  * 
- * TODO: gz, run without transit schedule, move to contribs/analysis, multiple drt modes, test
+ * 
+ * 
+ * TODO: run without transit schedule, move to contribs/analysis, multiple drt modes (-> stageActivities), test
  * 
  * @author gleich
  *
@@ -113,8 +115,8 @@ public class RunExperiencedTripsAnalysis {
 
 		if (args.length == 1) {
 			runner = new RunExperiencedTripsAnalysis(args[0]);
-			experiencedTripsFile = args[0] + "experiencedTrips.csv";
-			experiencedLegsFile = args[0] + "experiencedLegs.csv";
+			experiencedTripsFile = args[0] + "experiencedTrips.csv.gz";
+			experiencedLegsFile = args[0] + "experiencedLegs.csv.gz";
 		} else if (args.length == 8) {
 			runner = new RunExperiencedTripsAnalysis(args);
 			experiencedTripsFile = args[5];
@@ -124,17 +126,17 @@ public class RunExperiencedTripsAnalysis {
 					+ "Should be either only path to output directory or \n" + "networkFile, scheduleFile, eventsFile, "
 					+ "monitoredStartAndEndLinksFile (use null if you want all links in the analysis.), "
 					+ "monitoredModes (separated by ,),"
-					+ "experiencedTripsFile (use null to switch off), "
-					+ "experiencedLegsFile (use null to switch off), "
+					+ "experiencedTripsFile (use null to switch off, a path ending .gz will cause the output to be zipped), "
+					+ "experiencedLegsFile (use null to switch off, a path ending .gz will cause the output to be zipped), "
 					+ "drtModeName");
 		}
 
 		ExperiencedTripsWriter tripsWriter = new ExperiencedTripsWriter(runner.calcAgent2trips(),
 				runner.monitoredModes);
-		if (experiencedTripsFile != null) {
+		if (experiencedTripsFile != null && ! experiencedTripsFile.equals("")) {
 			tripsWriter.writeExperiencedTrips(experiencedTripsFile);
 		}
-		if (experiencedLegsFile != null) {
+		if (experiencedLegsFile != null && ! experiencedLegsFile.equals("")) {
 			tripsWriter.writeExperiencedLegs(experiencedLegsFile);
 		}
 
