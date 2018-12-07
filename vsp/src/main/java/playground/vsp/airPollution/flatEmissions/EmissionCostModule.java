@@ -51,10 +51,14 @@ public class EmissionCostModule {
 		}
 	}
 
-	public double calculateWarmEmissionCosts(Map<WarmPollutant, Double> warmEmissions) {
+	public double calculateWarmEmissionCosts(Map<String, Double> warmEmissions) {
 		double warmEmissionCosts = 0.0;
 		
-		for(WarmPollutant wp : warmEmissions.keySet()){
+		for(String wp : warmEmissions.keySet()){
+			if ( true ) {
+				throw new RuntimeException("typed emissions are no longer there; need to hedge against changing headers in the input file.  kai, dec'18") ;
+			}
+
 			if(wp.equals(WarmPollutant.CO2_TOTAL) && ! considerCO2Costs) {
 				// do nothing
 			} else {
@@ -65,10 +69,10 @@ public class EmissionCostModule {
 		return this.emissionCostFactor * warmEmissionCosts;
 	}
 	
-	public double calculateColdEmissionCosts(Map<ColdPollutant, Double> coldEmissions) {
+	public double calculateColdEmissionCosts(Map<String, Double> coldEmissions) {
 		double coldEmissionCosts = 0.0;
 		
-		for(ColdPollutant cp : coldEmissions.keySet()){
+		for(String cp : coldEmissions.keySet()){
 			double costFactor = EmissionCostFactors.getCostFactor(cp.toString());
 			coldEmissionCosts += costFactor * coldEmissions.get(cp);
 		}

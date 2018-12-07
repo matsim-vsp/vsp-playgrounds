@@ -58,38 +58,43 @@ public class TestWarmEmissionHandler {
 		Id<Link> link2 = Id.create("2", Link.class);
 		
 		//first event: create and handle
-			Map<WarmPollutant,Double> warmEm1 = new HashMap<WarmPollutant, Double>();
-			warmEm1.put(WarmPollutant.CO, 7.1);
-			warmEm1.put(WarmPollutant.NOX, 11.9);
+			Map<String,Double> warmEm1 = new HashMap<String, Double>();
+			warmEm1.put(WarmPollutant.CO.getText(), 7.1);
+			warmEm1.put(WarmPollutant.NOX.getText(), 11.9);
 			WarmEmissionEvent event1 = new WarmEmissionEvent(0., link2, vehicle1, warmEm1);
 			handler.handleEvent(event1);
 		
 		//second event: create and handle
-				Map<WarmPollutant,Double> warmEm2 = new HashMap<WarmPollutant, Double>();
-				warmEm2.put(WarmPollutant.CO, 23.9);
-				warmEm2.put(WarmPollutant.PM, 18.1);
+				Map<String,Double> warmEm2 = new HashMap<String, Double>();
+				warmEm2.put(WarmPollutant.CO.getText(), 23.9);
+				warmEm2.put(WarmPollutant.PM.getText(), 18.1);
 				WarmEmissionEvent event2 = new WarmEmissionEvent(0.8, link1, vehicle2, warmEm2);
 				handler.handleEvent(event2);
 				
 		//third event: create and handle
-				Map<WarmPollutant,Double> warmEm3 = new HashMap<WarmPollutant, Double>();
-				warmEm3.put(WarmPollutant.NOX, 12.4);
+				Map<String,Double> warmEm3 = new HashMap<String, Double>();
+				warmEm3.put(WarmPollutant.NOX.getText(), 12.4);
 				WarmEmissionEvent event3 = new WarmEmissionEvent(0., link2, vehicle1, warmEm3);
 				handler.handleEvent(event3);
 						
 		//fourth event: create and handle
-				Map<WarmPollutant,Double> warmEm4 = new HashMap<WarmPollutant, Double>();
+				Map<String,Double> warmEm4 = new HashMap<String, Double>();
 				WarmEmissionEvent event4 = new WarmEmissionEvent(20., link2, vehicle2, warmEm4);
 				handler.handleEvent(event4);
 				
 		//fifth event: create and handle
-				Map<WarmPollutant,Double> warmEm5 = new HashMap<WarmPollutant, Double>();
-				warmEm5.put(WarmPollutant.NOX, 19.8);
-				warmEm5.put(WarmPollutant.CO, 10.0);
+				Map<String,Double> warmEm5 = new HashMap<String, Double>();
+				warmEm5.put(WarmPollutant.NOX.getText(), 19.8);
+				warmEm5.put(WarmPollutant.CO.getText(), 10.0);
 				WarmEmissionEvent event5 = new WarmEmissionEvent(55., link1, vehicle1, warmEm5);
 				handler.handleEvent(event5);
-				
-		Map<Id<Person>, Map<WarmPollutant, Double>> wepp = handler.getWarmEmissionsPerPerson();
+
+
+				if ( true ) {
+					throw new RuntimeException("code below will probably no longer work since keys are now strings not enums.  kai, dec'18") ;
+				}
+
+		Map<Id<Person>, Map<String, Double>> wepp = handler.getWarmEmissionsPerPerson();
 		//CO vehicle 1
 		if(wepp.get(Id.create("v1", Person.class)).containsKey(WarmPollutant.CO)){
 			Double actualCO1 = wepp.get(Id.create("v1", Person.class)).get(WarmPollutant.CO);
