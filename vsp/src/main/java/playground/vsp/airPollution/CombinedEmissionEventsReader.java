@@ -21,7 +21,6 @@
 package playground.vsp.airPollution;
 
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Locale;
 import java.util.Stack;
 
@@ -32,7 +31,6 @@ import org.matsim.core.api.internal.MatsimReader;
 import org.matsim.core.events.EventsReaderXMLv1;
 import org.matsim.core.utils.io.MatsimXmlParser;
 import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -70,11 +68,6 @@ public class CombinedEmissionEventsReader implements MatsimReader {
 		} else {
 			throw new IllegalArgumentException("Cannot recognize the format of the events-file " + filename);
 		}
-	}
-
-	@Override
-	public void readURL( final URL url  ){
-		new MyXmlEventsReader( this.events ).parse( url );
 	}
 
 	public void readStream(final InputStream stream) {

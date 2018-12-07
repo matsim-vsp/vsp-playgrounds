@@ -45,7 +45,6 @@ import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.data.SignalsData;
@@ -192,8 +191,7 @@ public class RunOpdytsForGreenWaves {
 		} else {
 			// simply start a matsim simulation
 			Controler controler = new Controler(scenario);
-//			controler.addOverridingModule(new SignalsModule());
-			Signals.configure( controler );
+			controler.addOverridingModule(new SignalsModule());
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {

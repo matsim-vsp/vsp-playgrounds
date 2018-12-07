@@ -18,7 +18,6 @@
  * *********************************************************************** */
 package playground.vsptelematics.utils;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -96,11 +95,6 @@ public class TransimsTVeh2OTFVisMvi implements MatsimReader {
 		// ---
 		reader.parse(config, handler);
 		
-	}
-
-	@Override
-	public void readURL( URL url ){
-		throw new RuntimeException( "not implemented: this class never seems to be used so no point in implementing this method.  kai, nov'18" );
 	}
 
 	private void testForAndPossiblyDoSnapshot(final double time) {

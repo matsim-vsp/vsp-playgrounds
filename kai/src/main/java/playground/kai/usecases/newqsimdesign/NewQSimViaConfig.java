@@ -1,11 +1,17 @@
 package playground.kai.usecases.newqsimdesign;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.mobsim.framework.AgentSource;
+import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.qsim.AbstractQSimModule;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfigGroup;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -53,7 +59,7 @@ class NewQSimViaConfig {
 		controler.addOverridingQSimModule( new AbstractQSimModule(){
 			@Override
 			protected void configureQSim(){
-//				this.addQSimComponentBinding( MY_AGENT_SOURCE ).to( MyAgentSource.class ) ;
+				this.addNamedComponent( MyAgentSource.class, MY_AGENT_SOURCE );
 			}
 		} ) ;
 		

@@ -19,21 +19,6 @@
  * *********************************************************************** */
 package playground.dgrether.signalsystems.cottbus;
 
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.signals.builder.Signals;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigReader;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.io.IOUtils;
-import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
-import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballStrings;
-import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -43,6 +28,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigReader;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
+
+import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
+import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFootballStrings;
+import playground.dgrether.signalsystems.cottbus.footballdemand.SimpleCottbusFanCreator;
 
 
 /**
@@ -100,8 +101,7 @@ public class CottbusFootballBatch {
 			//add the signals module
 //			controler.addOverridingModule(new SylviaSignalsModule());
 			/* sylvia moved to playground tthunig. If you want to use sylvia use e.g. CombinedSignalsModule in playground tthunig. theresa, apr'17 */
-//			controler.addOverridingModule(new SignalsModule());
-			Signals.configure(controler);
+			controler.addOverridingModule(new SignalsModule());
 			
 			controler.run();
 			if (cbfbControllerListener.getAverageTraveltime() != null){

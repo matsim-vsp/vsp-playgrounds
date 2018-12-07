@@ -43,8 +43,6 @@ import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicleImpl;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.facilities.ActivityFacilities;
@@ -162,9 +160,7 @@ public final class FreefloatingParkingPopulationAgentSource implements AgentSour
 							}
 						} else {
 							this.seenVehicleIds.put( vehicleId, vehicleLinkId ) ;
-//							qsim.createAndParkVehicleOnLink(vehicle, vehicleLinkId);
-							QVehicle qVeh = new QVehicleImpl( vehicle ) ;
-							qsim.addParkedVehicle( qVeh, vehicleLinkId );
+							qsim.createAndParkVehicleOnLink(vehicle, vehicleLinkId);
 						}
 						seenModes.add(leg.getMode());
 					}

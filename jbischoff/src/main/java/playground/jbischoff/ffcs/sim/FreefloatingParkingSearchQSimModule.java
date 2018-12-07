@@ -57,9 +57,8 @@ class FreefloatingParkingSearchQSimModule extends com.google.inject.AbstractModu
 			bind(FFCSVehicleAgentSource.class).asEagerSingleton();
 			bind(FreefloatingParkingPopulationAgentSource.class).asEagerSingleton();
 			
-			this.addQSimComponentBinding( FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE ).to( FreefloatingParkingPopulationAgentSource.class ) ;
-			this.addQSimComponentBinding( FFCS_VEHICLE_AGENT_SOURCE ).to( FFCSVehicleAgentSource.class ) ;
-
+			bindNamedComponent(FreefloatingParkingPopulationAgentSource.class, FREEFLOATING_PARKING_POPULATION_AGENT_SOURCE);
+			bindNamedComponent(FFCSVehicleAgentSource.class, FFCS_VEHICLE_AGENT_SOURCE);
 		}
 	}
 	

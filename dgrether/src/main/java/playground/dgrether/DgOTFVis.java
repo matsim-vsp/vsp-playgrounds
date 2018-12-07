@@ -1,12 +1,14 @@
 package playground.dgrether;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.util.Types;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Collection;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.builder.SignalsModule;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -26,11 +28,12 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
-import playground.dgrether.utils.DgOTFVisUtils;
 
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Collection;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.util.Types;
+
+import playground.dgrether.utils.DgOTFVisUtils;
 
 /* *********************************************************************** *
  * project: org.matsim.*
@@ -77,8 +80,7 @@ public class DgOTFVis {
 				install(new ControlerDefaultsModule());
 				install(new ScenarioByInstanceModule(scenario));
 				// signal specific module
-//				install(new SignalsModule());
-				throw new RuntimeException("don't know an easy way to retrofit this.  kai, nov'18") ;
+				install(new SignalsModule());
 			}
 		});
 	

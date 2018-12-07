@@ -29,7 +29,6 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicleImpl;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleUtils;
 
@@ -64,9 +63,7 @@ public class FFCSVehicleAgentSource implements AgentSource {
 	@Override
 	public void insertAgentsIntoMobsim() {
 		for (Entry<Id<Vehicle>, Id<Link>> e: manager.getIdleVehicleLocations().entrySet()){
-			final Vehicle vehicle = VehicleUtils.getFactory().createVehicle( e.getKey(), VehicleUtils.getDefaultVehicleType() );
-//			qsim.createAndParkVehicleOnLink( vehicle, e.getValue() );
-			qsim.addParkedVehicle( new QVehicleImpl( vehicle ) , e.getValue() );
+			qsim.createAndParkVehicleOnLink(VehicleUtils.getFactory().createVehicle(e.getKey(), VehicleUtils.getDefaultVehicleType()), e.getValue());
 		}
 	}
 
