@@ -19,7 +19,10 @@
  * *********************************************************************** */
 package playground.benjamin.scenarios.munich.analysis.nectar;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 
 import org.matsim.api.core.v01.Id;
@@ -67,8 +70,10 @@ public class EmissionsPerPersonAnalysis {
 		ema.preProcessData();
 		ema.postProcessData();
 		
+		Set<String> pollutants = new HashSet<>(Arrays.asList("CO", "CO2(total)", "FC", "HC", "NMHC", "NOx", "NO2","PM", "SO2"));
+		
 		Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-		Map<Id<Person>, SortedMap<String, Double>> filledTotalEmissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions);
+		Map<Id<Person>, SortedMap<String, Double>> filledTotalEmissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions, pollutants);
 
 		EmissionWriter emissionWriter = new EmissionWriter();
 		//		emissionWriter.writeHomeLocation2TotalEmissions(
@@ -82,6 +87,7 @@ public class EmissionsPerPersonAnalysis {
 		emissionWriter.writeHomeLocation2TotalEmissions(
 				scenario.getPopulation(),
 				filledTotalEmissions,
+				pollutants,
 				runDirectory + runNumber + "." + lastIteration + ".emissionsTotalPerHomeLocation.txt");
 	}
 

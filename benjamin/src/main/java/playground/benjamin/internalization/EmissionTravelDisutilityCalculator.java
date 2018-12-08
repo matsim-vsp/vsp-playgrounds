@@ -120,7 +120,7 @@ public class EmissionTravelDisutilityCalculator implements TravelDisutility {
 		location choice (not implemented)! */
 
 		WarmEmissionAnalysisModule warmEmissionAnalysisModule = this.emissionModule.getWarmEmissionAnalysisModule();
-		Map<WarmPollutant, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
+		Map<String, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
 				vehicle,
 //				NetworkUtils.getType( link ),
 //				EmissionUtils.getHbefaRoadType( link ),

@@ -125,7 +125,7 @@ public class FilteredColdEmissionHandler implements VehicleEntersTrafficEventHan
 		}
 	}
 
-	public Map<Double, Map<Id<Link>, Map<ColdPollutant, Double>>> getColdEmissionsPerLinkAndTimeInterval() {
+	public Map<Double, Map<Id<Link>, Map<String, Double>>> getColdEmissionsPerLinkAndTimeInterval() {
 		return delegate.getColdEmissionsPerLinkAndTimeInterval();
 	}
 

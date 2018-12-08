@@ -110,8 +110,8 @@ public class LinkSpeedEmissionWriter {
         EmissionEventsReader reader2 = new EmissionEventsReader(eventsManager2);
         reader2.readFile(emissionEventsFile);
 
-        Map<Double, Map<Id<Link>, Map<WarmPollutant, Double>>> time2warmEmissionsTotal = warmEmissionHandler.getWarmEmissionsPerLinkAndTimeInterval();
-        Map<Double, Map<Id<Link>, Map<ColdPollutant, Double>>> time2coldEmissionsTotal = coldEmissionHandler.getColdEmissionsPerLinkAndTimeInterval();
+        Map<Double, Map<Id<Link>, Map<String, Double>>> time2warmEmissionsTotal = warmEmissionHandler.getWarmEmissionsPerLinkAndTimeInterval();
+        Map<Double, Map<Id<Link>, Map<String, Double>>> time2coldEmissionsTotal = coldEmissionHandler.getColdEmissionsPerLinkAndTimeInterval();
 
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
         try {
