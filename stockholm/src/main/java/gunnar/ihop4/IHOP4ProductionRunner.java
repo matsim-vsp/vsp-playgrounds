@@ -39,6 +39,7 @@ import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.LinkEntryCo
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.CountTrajectorySummarizer;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.TrajectoryPlotter;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.activitytimes.ActivityTimesUtils;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.behavioralparameters.PerformingCoefficient;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.capacityscaling.SimulatedDemandShare;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.CompositeDecisionVariable;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.composite.CompositeDecisionVariableBuilder;
@@ -247,22 +248,30 @@ public class IHOP4ProductionRunner {
 
 		final CompositeDecisionVariableBuilder builder = new CompositeDecisionVariableBuilder();
 
+		// Performing
+		if (ihopConfig.getPerformingStepSize_utils_hr() != null) {
+			builder.add(new PerformingCoefficient(config, config.planCalcScore().getPerforming_utils_hr()),
+					new ScalarRandomizer<>(ihopConfig.getPerformingStepSize_utils_hr()));
+		}
+
 		// Activity times
 
-		final double timeVariationStepSize_s = 15 * 60;
-		final double searchStageExponent = 0.0;
-		builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config, timeVariationStepSize_s,
-				searchStageExponent));
+		if (ihopConfig.getActivityTimeStepSize_s() != null) {
+			builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config, ihopConfig.getActivityTimeStepSize_s(),
+					0.0));
+		}
 
 		// SimulatedPopulationShare
 
-		final double simulatedPopulationShareStepSize = 0.01;
-		builder.add(new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(), new Consumer<Double>() {
-			@Override
-			public void accept(Double simulatedPopulationShare) {
-				ihopConfig.setSimulatedPopulationShare(simulatedPopulationShare);
-			}
-		}), new ScalarRandomizer<>(simulatedPopulationShareStepSize));
+		if (ihopConfig.getSimulatedPopulationShareStepSize() != null) {
+			builder.add(
+					new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(), new Consumer<Double>() {
+						@Override
+						public void accept(Double simulatedPopulationShare) {
+							ihopConfig.setSimulatedPopulationShare(simulatedPopulationShare);
+						}
+					}), new ScalarRandomizer<>(ihopConfig.getSimulatedPopulationShareStepSize()));
+		}
 
 		// Build decision variable and matching randomizer.
 
@@ -302,7 +311,6 @@ public class IHOP4ProductionRunner {
 		final MATSimOpdytsRunner<CompositeDecisionVariable, MATSimState> runner = new MATSimOpdytsRunner<>(scenario,
 				new MATSimStateFactoryImpl<>());
 		runner.addOverridingModule(new AbstractModule() {
-
 			@Override
 			public void install() {
 				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);

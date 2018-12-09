@@ -69,7 +69,7 @@ public class ProductionRunner {
 		final String populationFileName = path + "demand-input/trips.xml";
 
 		final double populationSample = 0.05;
-		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/5PctAllModes.xml";
+		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/5PctAllModesWithIntermediateHome.xml";
 
 		final String configFileName = path + "matsim-input/matsim-config.xml";
 		final double networkUpscaleFactor = 2;

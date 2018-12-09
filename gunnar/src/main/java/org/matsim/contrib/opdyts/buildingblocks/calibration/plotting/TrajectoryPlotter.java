@@ -90,7 +90,7 @@ public class TrajectoryPlotter implements IterationEndsListener {
 
 	private void printBlock(final TrajectoryPlotDataSource dataSource, final PrintWriter writer) {
 		// 1st row: The description
-		writer.println(dataSource.getDescription());
+		writer.println(dataSource.getIdentifier());
 		// 2nd row: The time line
 		final TimeDiscretization timeDiscr = dataSource.getTimeDiscretization();
 		writer.print("time");
@@ -118,23 +118,27 @@ public class TrajectoryPlotter implements IterationEndsListener {
 			}
 			final Path path = Paths.get(
 					this.config.controler().getOutputDirectory() + "/trajectories." + event.getIteration() + ".data");
-			try {
-				final PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
-				for (TrajectoryPlotDataSource dataSource : this.dataSources) {
-					this.printBlock(dataSource, writer);
-					for (TrajectoryDataSummarizer summarizer : this.summarizers) {
-						summarizer.offerCandidate(dataSource);
-					}
-				}
+			this.writeToFile(path);
+		}
+	}
+	
+	public void writeToFile(final Path path) {
+		try {
+			final PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path));
+			for (TrajectoryPlotDataSource dataSource : this.dataSources) {
+				this.printBlock(dataSource, writer);
 				for (TrajectoryDataSummarizer summarizer : this.summarizers) {
-					summarizer.build();
-					this.printBlock(summarizer, writer);
+					summarizer.offerCandidate(dataSource);
 				}
-				writer.flush();
-				writer.close();
-			} catch (IOException e) {
-				Logger.getLogger(this.getClass()).error(e);
 			}
+			for (TrajectoryDataSummarizer summarizer : this.summarizers) {
+				summarizer.build();
+				this.printBlock(summarizer, writer);
+			}
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			Logger.getLogger(this.getClass()).error(e);
 		}
 	}
 }

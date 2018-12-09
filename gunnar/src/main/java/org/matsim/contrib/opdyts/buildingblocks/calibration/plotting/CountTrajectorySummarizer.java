@@ -21,6 +21,7 @@ package org.matsim.contrib.opdyts.buildingblocks.calibration.plotting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.matsim.contrib.opdyts.buildingblocks.utils.DiscretizationChanger;
 import org.matsim.contrib.opdyts.buildingblocks.utils.DiscretizationChanger.DataType;
@@ -36,13 +37,15 @@ public class CountTrajectorySummarizer implements TrajectoryDataSummarizer {
 
 	// -------------------- CONSTANTS --------------------
 
-	public static final String DATA_TYPE = "counts";
+	public static final String COUNT_DATA_TYPE = "counts";
 
 	private final TimeDiscretization timeDiscr;
 
 	// -------------------- MEMBERS --------------------
 
 	private final List<TrajectoryPlotDataSource> dataSources = new ArrayList<>();
+
+	private Predicate<TrajectoryPlotDataSource> dataSourcePredicate = null;
 
 	private double[] simData = null;
 
@@ -52,6 +55,8 @@ public class CountTrajectorySummarizer implements TrajectoryDataSummarizer {
 
 	public CountTrajectorySummarizer(final TimeDiscretization timeDiscr) {
 		this.timeDiscr = timeDiscr;
+		this.setDataSourcePredicate(
+				(TrajectoryPlotDataSource dataSource) -> COUNT_DATA_TYPE.equals(dataSource.getDataType()));
 	}
 
 	// --------------- IMPLEMENTATION OF TrajectoryDataSummarizer ---------------
@@ -62,8 +67,13 @@ public class CountTrajectorySummarizer implements TrajectoryDataSummarizer {
 		this.realData = null;
 	}
 
+	public void setDataSourcePredicate(final Predicate<TrajectoryPlotDataSource> candidatePredicate) {
+		this.dataSourcePredicate = candidatePredicate;
+	}
+
 	public void offerCandidate(final TrajectoryPlotDataSource dataSource) {
-		if (DATA_TYPE.equals(dataSource.getDataType())) {
+		// if (COUNT_DATA_TYPE.equals(dataSource.getDataType())) {
+		if (this.dataSourcePredicate.test(dataSource)) {
 			this.dataSources.add(dataSource);
 		}
 	}
@@ -99,7 +109,7 @@ public class CountTrajectorySummarizer implements TrajectoryDataSummarizer {
 	}
 
 	@Override
-	public String getDescription() {
+	public String getIdentifier() {
 		return "Trajectory data summary of data type " + this.getDataType();
 	}
 
@@ -120,7 +130,7 @@ public class CountTrajectorySummarizer implements TrajectoryDataSummarizer {
 
 	@Override
 	public String getDataType() {
-		return DATA_TYPE;
+		return COUNT_DATA_TYPE;
 	}
 
 }

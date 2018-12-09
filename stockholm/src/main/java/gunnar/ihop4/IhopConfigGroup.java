@@ -160,4 +160,46 @@ public class IhopConfigGroup extends ReflectiveConfigGroup {
 		}
 	}
 
+	// timeStepSize_s
+
+	private Double activityTimeStepSize_s = null;
+
+	@StringGetter("activityTimeStepSize_s")
+	public Double getActivityTimeStepSize_s() {
+		return this.activityTimeStepSize_s;
+	}
+
+	@StringSetter("activityTimeStepSize_s")
+	public void setActivityTimeStepSize_(final Double activityTimeStepSize_s) {
+		this.activityTimeStepSize_s = activityTimeStepSize_s;
+	}
+
+	// timeStepSize_s
+
+	private Double performingStepSize_utils_hr = null;
+
+	@StringGetter("performingStepSize_utils_hr")
+	public Double getPerformingStepSize_utils_hr() {
+		return this.performingStepSize_utils_hr;
+	}
+
+	@StringSetter("performingStepSize_utils_hr")
+	public void setPerformingStepSize_utils_hr(final Double performingStepSize_utils_hr) {
+		this.performingStepSize_utils_hr = performingStepSize_utils_hr;
+	}
+
+	// simulatedPopulationShareStepSize
+
+	private Double simulatedPopulationShareStepSize = null;
+
+	@StringGetter("simulatedPopulationShareStepSize")
+	public Double getSimulatedPopulationShareStepSize() {
+		return this.simulatedPopulationShareStepSize;
+	}
+
+	@StringSetter("simulatedPopulationShareStepSize")
+	public void setSimulatedPopulationShareStepSize(final Double simulatedPopulationShareStepSize) {
+		this.simulatedPopulationShareStepSize = simulatedPopulationShareStepSize;
+	}
+
 }

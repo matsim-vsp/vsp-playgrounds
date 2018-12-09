@@ -47,6 +47,9 @@ public class CountMeasurements {
 
 	private List<AbstractModule> modules = null;
 
+	// 2018-12-06 New, for event file analysis.
+	private List<LinkEntryCounter> handlers = null;
+
 	private List<LinkEntryCountDeviationObjectiveFunction> objectiveFunctions = null;
 
 	private Double sumOfEvaluatedResidualsAtZeroSimulation = null;
@@ -72,6 +75,7 @@ public class CountMeasurements {
 		this.sumOfEvaluatedResidualsAtZeroSimulation = 0.0;
 
 		this.modules = new ArrayList<>(this.measSpec2data.size());
+		this.handlers = new ArrayList<>(this.measSpec2data.size());
 		this.objectiveFunctions = new ArrayList<>(this.measSpec2data.size());
 		final Map<CountMeasurementSpecification, LinkEntryCounter> measSpec2linkEntryCounter = new LinkedHashMap<>();
 
@@ -91,6 +95,7 @@ public class CountMeasurements {
 						this.addControlerListenerBinding().toInstance(simCounter);
 					}
 				});
+				this.handlers.add(simCounter);
 			}
 
 			final double[] data = entry.getValue();
@@ -103,6 +108,10 @@ public class CountMeasurements {
 	}
 
 	// -------------------- GETTERS --------------------
+
+	public List<LinkEntryCounter> getHandlers() {
+		return this.handlers;
+	}
 
 	public List<AbstractModule> getModules() {
 		return this.modules;

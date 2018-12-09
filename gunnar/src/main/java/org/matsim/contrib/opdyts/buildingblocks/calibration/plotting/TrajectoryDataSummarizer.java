@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.calibration.plotting;
 
+import java.util.function.Predicate;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -31,6 +33,8 @@ public interface TrajectoryDataSummarizer extends TrajectoryPlotDataSource {
 	public void offerCandidate(TrajectoryPlotDataSource dataSource);
 	
 	public void build();
+	
+	public void setDataSourcePredicate(Predicate<TrajectoryPlotDataSource> predicate);
 
 }
 

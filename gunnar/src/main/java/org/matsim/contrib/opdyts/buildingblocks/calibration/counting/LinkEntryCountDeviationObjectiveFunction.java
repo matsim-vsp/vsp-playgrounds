@@ -19,12 +19,9 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.calibration.counting;
 
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.CountTrajectorySummarizer;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.TrajectoryPlotDataSource;
 import org.matsim.contrib.opdyts.microstate.MATSimState;
@@ -83,9 +80,12 @@ public class LinkEntryCountDeviationObjectiveFunction
 	// --------------- IMPLEMENTATION OF TrajectoryPlotDataSource ---------------
 
 	@Override
-	public String getDescription() {
-		final Set<Id<Link>> linkIds = this.simulationCounter.getSpecification().getLinks();
-		return "Traffic counts on link" + (linkIds.size() > 1 ? "s " : " ") + linkIds;
+	public String getIdentifier() {
+		return this.simulationCounter.getSpecification().getLinks().iterator().next().toString();
+		// final Set<Id<Link>> linkIds =
+		// this.simulationCounter.getSpecification().getLinks();
+		// return "Traffic counts on link" + (linkIds.size() > 1 ? "s " : " ") +
+		// linkIds;
 	}
 
 	@Override
@@ -114,7 +114,7 @@ public class LinkEntryCountDeviationObjectiveFunction
 
 	@Override
 	public String getDataType() {
-		return CountTrajectorySummarizer.DATA_TYPE;
+		return CountTrajectorySummarizer.COUNT_DATA_TYPE;
 	}
 
 	// -------------------- OVERRIDING OF Object --------------------
