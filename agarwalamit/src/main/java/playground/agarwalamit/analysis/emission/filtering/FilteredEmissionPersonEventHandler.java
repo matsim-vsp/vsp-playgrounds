@@ -21,6 +21,7 @@ package playground.agarwalamit.analysis.emission.filtering;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -33,9 +34,8 @@ import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.contrib.emissions.types.ColdPollutant;
-import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.vehicles.Vehicle;
+
 import playground.agarwalamit.analysis.emission.EmissionPersonEventHandler;
 import playground.agarwalamit.utils.AreaFilter;
 import playground.agarwalamit.utils.PersonFilter;
