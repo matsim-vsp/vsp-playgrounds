@@ -171,7 +171,7 @@ public class AccessibilityComputationBerlin_V2 {
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
 //		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
 		
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.POPULATION_DENSITIY, scenario.getNetwork()); // will be aggregated in downstream code!
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.DENSITIY, scenario.getNetwork()); // will be aggregated in downstream code!
 		
 		final Controler controler = new Controler(scenario);
 		
