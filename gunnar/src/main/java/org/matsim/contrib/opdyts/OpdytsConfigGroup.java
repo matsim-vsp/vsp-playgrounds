@@ -314,5 +314,19 @@ public class OpdytsConfigGroup extends ReflectiveConfigGroup {
 			throw new RuntimeException("Unknown convergence criterion: " + this.convergenceCriterion);
 		}
 	}
+	
+	// ==================== SMALLEST ACCEPTED IMPROVEMENT ====================
 
+	private double smallestAcceptedImprovement = RandomSearch.DEFAULT_SMALLESTACCEPTEDIMPROVEMENT;
+	
+	@StringGetter("smallestAcceptedImprovement")
+	public double getSmallestAcceptedImprovement() {
+		return this.smallestAcceptedImprovement;
+	}
+
+	@StringSetter("smallestAcceptedImprovement")
+	public void setSmallestAcceptedImprovement(final double smallestAcceptedImprovement) {
+		this.smallestAcceptedImprovement = smallestAcceptedImprovement;
+	}
+	
 }
