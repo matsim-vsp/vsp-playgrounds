@@ -9,6 +9,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.AccessibilityModule;
+import org.matsim.contrib.accessibility.FacilityTypes;
 import org.matsim.contrib.accessibility.Labels;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.utils.AccessibilityUtils;
@@ -35,7 +36,7 @@ public class AccessibilityComputationBerlinV3 {
 		Config config = ConfigUtils.loadConfig("../../matsim-berlin/scenarios/berlin-v5.0-1pct-2018-06-18/input/berlin-5.0_config.xml");
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/v3/500_car_edu_16/");
+		config.controler().setOutputDirectory("../../shared-svn/projects/accessibility_berlin/output/v3/500_car_edu_neu/");
 
 		config.facilities().setInputFile(new File("../../shared-svn/projects/accessibility_berlin/osm/berlin/amenities/2018-05-30/facilities.xml").getAbsolutePath());
 		
@@ -60,7 +61,7 @@ public class AccessibilityComputationBerlinV3 {
 		String scenarioCRS = "EPSG:31468"; // EPSG:31468 = DHDN GK4
 		
 		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
-		acg.setTimeOfDay(16*60.*60.);
+//		acg.setTimeOfDay(16*60.*60.);
 		acg.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromShapeFile);
 		acg.setShapeFileCellBasedAccessibility("../../shared-svn/studies/countries/de/open_berlin_scenario/input/shapefiles/2013/Berlin_DHDN_GK4.shp");
 		acg.setEnvelope(envelope);
@@ -72,10 +73,10 @@ public class AccessibilityComputationBerlinV3 {
 		acg.setOutputCrs(scenarioCRS);
 		
 //		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION, "s"});
-//		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
-		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
+		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
+//		final List<String> activityTypes = Arrays.asList(new String[]{"s"});
 		
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.POPULATION_DENSITIY, scenario.getNetwork()); // will be aggregated in downstream code!
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.DENSITIY, scenario.getNetwork()); // will be aggregated in downstream code!
 		
 		Controler controler = new Controler(scenario);
 		
