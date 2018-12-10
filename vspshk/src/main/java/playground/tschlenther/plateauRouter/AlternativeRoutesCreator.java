@@ -1,4 +1,4 @@
-package playground.gthunig.plateauRouter;
+package playground.tschlenther.plateauRouter;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -17,7 +17,6 @@ import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.vsp.openberlinscenario.planmodification.PlanFileModifier;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -1,4 +1,4 @@
-package playground.gthunig.plateauRouter;
+package playground.tschlenther.plateauRouter;
 
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.router.util.LeastCostPathCalculator;

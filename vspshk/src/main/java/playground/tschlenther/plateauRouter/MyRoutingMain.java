@@ -1,4 +1,4 @@
-package playground.gthunig.plateauRouter;
+package playground.tschlenther.plateauRouter;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
