@@ -159,7 +159,8 @@ public class MATSimOpdytsRunner<U extends DecisionVariable, X extends MATSimStat
 		randomSearch.setMaxMemoryPerTrajectory(this.opdytsConfig.getMaxMemoryPerTrajectory());
 		randomSearch.setWarmupIterations(this.opdytsConfig.getWarmUpIterations());
 		randomSearch.setUseAllWarmupIterations(this.opdytsConfig.getUseAllWarmUpIterations());
-
+		randomSearch.setSmallestAcceptedImprovement(this.opdytsConfig.getSmallestAcceptedImprovement());
+		
 		randomSearch.run();
 	}
 }
