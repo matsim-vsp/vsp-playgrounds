@@ -13,17 +13,17 @@ public class DZNetworkCreator {
 
 	public static void main(String[] args) {
 		// Input and output
-		String osmFile = "../../shared-svn/projects/silo/maryland/other/osm/md_and_surroundings.osm";
-		String networkFile = "../../shared-svn/projects/silo/maryland/other/network/06/network.xml.gz";
-//		String osmFile = "/Users/dominik/Downloads/oberbayern-latest.osm";
-//		String networkFile = "/Users/dominik/Downloads/network.xml";
+//		String osmFile = "../../shared-svn/projects/silo/maryland/other/osm/md_and_surroundings.osm";
+//		String networkFile = "../../shared-svn/projects/silo/maryland/network/10/network.xml.gz";
+		String osmFile = "/Users/dominik/Downloads/oberbayern-latest.osm";
+		String networkFile = "/Users/dominik/Downloads/network_coarse.xml";
 		
 		// Parameters
 		String inputCRS = "EPSG:4326"; // WGS84
-//		String outputCRS = "EPSG:31468"; // DHDN GK4, for Berlin; DE
+		String outputCRS = "EPSG:31468"; // DHDN GK4, for Berlin; DE
 //		String outputCRS = TransformationFactory.WGS84_SA_Albers;
 //		String outputCRS = "EPSG:21037"; // Arc 1960 / UTM zone 37S, for Nairobi, KE
-		String outputCRS = "EPSG:26918"; // NAD83 / UTM zone 18N, for Maryland, US
+//		String outputCRS = "EPSG:26918"; // NAD83 / UTM zone 18N, for Maryland, US
 
 		// Infrastructure
 		Network network = (ScenarioUtils.createScenario(ConfigUtils.createConfig())).getNetwork();
