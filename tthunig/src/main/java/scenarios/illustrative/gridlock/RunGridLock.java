@@ -21,11 +21,8 @@
  */
 package scenarios.illustrative.gridlock;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -35,15 +32,10 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
@@ -53,13 +45,7 @@ import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataImpl;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
+import org.matsim.contrib.signals.data.signalgroups.v20.*;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
@@ -79,18 +65,16 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.lanes.Lane;
-import org.matsim.lanes.Lanes;
-import org.matsim.lanes.LanesFactory;
-import org.matsim.lanes.LanesToLinkAssignment;
-import org.matsim.lanes.LanesUtils;
-
-import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisWriter;
+import org.matsim.lanes.*;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author tthunig
@@ -143,16 +127,17 @@ public class RunGridLock {
 //		controler.addOverridingModule( new OTFVisWithSignalsLiveModule() ) ;
 		if (!SIGNALTYPE.equals(SignalType.NONE)) {
 			// add signal module
-			SignalsModule signalsModule = new SignalsModule();
+//			SignalsModule signalsModule = new SignalsModule();
+			Signals.Configurator configurator = new Signals.Configurator( controler ) ;
 			// the signals module works for planbased, sylvia and laemmer signal controller
 			// by default and is pluggable for your own signal controller like this:
-			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+			configurator.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
 					DownstreamPlanbasedSignalController.DownstreamFactory.class);
-			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+			configurator.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
 					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+			configurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 					GershensonSignalController.GershensonFactory.class);
-			controler.addOverridingModule(signalsModule);
+//			controler.addOverridingModule(signalsModule);
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
