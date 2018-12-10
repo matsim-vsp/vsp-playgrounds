@@ -1,7 +1,8 @@
-package playground.dziemke.analysis.mid;
+package playground.dziemke.analysis.mid.other;
 
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.population.PopulationUtils;
+import playground.dziemke.analysis.mid.Mid2PopulationParser;
 
 import java.io.File;
 import java.io.IOException;
