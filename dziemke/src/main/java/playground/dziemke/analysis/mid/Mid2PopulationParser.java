@@ -7,6 +7,7 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.households.Household;
+import playground.dziemke.analysis.mid.other.SurveyAdditionalAttributeHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,9 +95,12 @@ public class Mid2PopulationParser {
     private Population parsePopulation() {
 
         Population population = PopulationUtils.createPopulation(ConfigUtils.createConfig());
+        population.getAttributes().putAttribute(SurveyAdditionalAttributeHandler.SURVEY, SurveyAdditionalAttributeHandler.MID);
+
         populationFactory = population.getFactory();
 
         Iterator iterator = person2sortedTripId2TripLine.entrySet().iterator();
+        int personsNotWritten = 0;
         while (iterator.hasNext()) {
             Map.Entry<Id<Person>, Map<Integer, String>> personInformation = (Map.Entry)iterator.next();
 
@@ -118,11 +122,11 @@ public class Mid2PopulationParser {
                     currentLeg.setDepartureTime(parseDepartureTime_s());
                     currentLeg.setTravelTime(parseDuration_s());
                     currentLeg.getAttributes().putAttribute(
-                            PopulationAnalysisAdditionalAttributes.DISTANCE_BEELINE_M,
+                            SurveyAdditionalAttributeHandler.DISTANCE_BEELINE_M,
                             parseDistanceBeeline_m()
                     );
                     currentLeg.getAttributes().putAttribute(
-                            PopulationAnalysisAdditionalAttributes.SPEED_M_S,
+                            SurveyAdditionalAttributeHandler.SPEED_M_S,
                             parseSpeed_m_s()
                     );
                     plan.addLeg(currentLeg);
@@ -135,8 +139,8 @@ public class Mid2PopulationParser {
                 currentPerson.addPlan(plan);
                 population.addPerson(currentPerson);
                 iterator.remove(); // avoids a ConcurrentModificationException
-            } catch(InadequatTimeException e) {
-                log.warn("InadequatTimeException");
+            } catch(InadequateInformationException e) {
+                log.warn("InadequateInformationException number " + ++personsNotWritten);
             }
         }
 
@@ -186,36 +190,37 @@ public class Mid2PopulationParser {
         return Id.create(idString, Household.class);
     }
 
-    private double parseDepartureTime_s() throws InadequatTimeException {
+    private double parseDepartureTime_s() throws InadequateInformationException {
 
         return parseTime_s(DEPARTURE_TIME_H, DEPARTURE_TIME_M);
     }
 
-    private double parseArrivalTime_s() throws InadequatTimeException {
+    private double parseArrivalTime_s() throws InadequateInformationException {
 
         return parseTime_s(ARRIVAL_TIME_H, ARRIVAL_TIME_M);
     }
 
-    private double parseTime_s(String columnOfHours, String columnOfMinutes) throws InadequatTimeException {
+    private double parseTime_s(String columnOfHours, String columnOfMinutes) throws InadequateInformationException {
 
         try {
             int depHours = Integer.parseInt(currentMidAttributes[headerMap.get(columnOfHours)]);
             int depMinutes = Integer.parseInt(currentMidAttributes[headerMap.get(columnOfMinutes)]);
             int depTime = depHours * 3600 + depMinutes * 60;
-            if (depTime > 86400) throw new InadequatTimeException();
+            if (depTime > 86400) throw new InadequateInformationException();
             return depTime;
         } catch (Exception e) {
-            throw new InadequatTimeException();
+            throw new InadequateInformationException();
         }
     }
 
-    private double parseDuration_s() {
+    private double parseDuration_s() throws InadequateInformationException {
 
-        int duration = Integer.parseInt(currentMidAttributes[headerMap.get(DURATION)]) * 60;
-        return duration;
+        int duration = Integer.parseInt(currentMidAttributes[headerMap.get(DURATION)]);
+        if (duration > 480) throw new InadequateInformationException();
+        return duration * 60;
     }
 
-    private double parseDistanceBeeline_m() {
+    private double parseDistanceBeeline_m() throws InadequateInformationException {
 
         String distanceBeelineString = currentMidAttributes[headerMap.get(DISTANCE_BEELINE)];
         NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
@@ -226,10 +231,11 @@ public class Mid2PopulationParser {
             e.printStackTrace();
         }
         double distanceBeeline = number.doubleValue();
+        if (distanceBeeline > 950) throw new InadequateInformationException();
         return distanceBeeline * 1000;
     }
 
-    private double parseSpeed_m_s() {
+    private double parseSpeed_m_s() throws InadequateInformationException {
 
         String tempoString = currentMidAttributes[headerMap.get(SPEED)];
         NumberFormat format = NumberFormat.getInstance(Locale.GERMANY);
@@ -240,16 +246,17 @@ public class Mid2PopulationParser {
             e.printStackTrace();
         }
         double tempo = number.doubleValue();
+        if (tempo > 640) throw new InadequateInformationException();
         return tempo/3.6;
     }
 
-    private String parseMode() {
+    private String parseMode() throws InadequateInformationException {
 
         int modeType = Integer.parseInt(currentMidAttributes[headerMap.get(MODE)]);
         return transformModeType(modeType);
     }
 
-    private String transformModeType(int modeType) {
+    private String transformModeType(int modeType) throws InadequateInformationException {
 
         switch (modeType) {
             case 1: return "walk";
@@ -261,5 +268,9 @@ public class Mid2PopulationParser {
             default:
                 return "car";
         }
+    }
+
+    private class InadequateInformationException extends Throwable {
+
     }
 }
