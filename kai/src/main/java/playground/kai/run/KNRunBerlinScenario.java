@@ -16,6 +16,7 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import org.matsim.run.RunBerlinScenario;
 
 import java.util.ArrayList;
 import java.util.HashSet;
