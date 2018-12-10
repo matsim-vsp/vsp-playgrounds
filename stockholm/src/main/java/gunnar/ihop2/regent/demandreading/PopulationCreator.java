@@ -70,6 +70,9 @@ public class PopulationCreator {
 	public static final String WORK = "work";
 	public static final String OTHER = "other";
 
+	// TODO NEW 2018-12-06
+	public static final String INTERMEDIATE_HOME = "intermediate_home";
+
 	public static final String MATSIM_INCOME = "income_SEK_yr";
 
 	public static final int REFERENCE_YEAR = 2015;
@@ -289,7 +292,9 @@ public class PopulationCreator {
 
 			final double intermediateHomeEndTime_s = workEndTime_s + this.tripDuration_s
 					+ this.intermediateHomeDuration_s;
-			this.addHomeActivity(plan, homeCoord, intermediateHomeEndTime_s, HOME);
+			// TODO NEW 2018-12-06
+			// this.addHomeActivity(plan, homeCoord, intermediateHomeEndTime_s, HOME);
+			this.addHomeActivity(plan, homeCoord, intermediateHomeEndTime_s, INTERMEDIATE_HOME);
 
 			final double otherEndTime_s = intermediateHomeEndTime_s + this.tripDuration_s + this.otherDuration_s;
 			this.addTour(plan, OTHER, otherCoord, otherTourModeMATSim, otherEndTime_s);
@@ -332,7 +337,7 @@ public class PopulationCreator {
 		}
 
 		PopulationWriter popwriter = new PopulationWriter(scenario.getPopulation(), this.scenario.getNetwork());
-		popwriter.write(initialPlansFile);		
+		popwriter.write(initialPlansFile);
 	}
 
 	// MAIN-FUNCTION

@@ -159,7 +159,7 @@ public class EquilEmissionIT {
 		// first coldEmission event is on departure link, thus compare money event and coldEmissionEvent
 		double firstMoneyEventToll = personMoneyHandler.events.get(0).getAmount();
 
-		Map<ColdPollutant, Double> coldEmiss = emissEventHandler.coldEvents.get(0).getColdEmissions();
+		Map<String, Double> coldEmiss = emissEventHandler.coldEvents.get(0).getColdEmissions();
 		double totalColdEmissAmount = 0.;
 		/*
 		 * departure time is 21600, so at this time. distance = 1.0km, parking duration = 12h, vehType="PASSENGER_CAR;petrol (4S);&gt;=2L;PC-P-Euro-0"
@@ -167,7 +167,7 @@ public class EquilEmissionIT {
 		 * Thus coldEmissionCost = 0 * 384500. / (1000. * 1000.) + 45.12 * 1700. / (1000. * 1000.) + -0.03 * 9600. / (1000. * 1000.) = 0.008416 
 		 */
 
-		for (ColdPollutant cp :coldEmiss.keySet() ){
+		for (String cp :coldEmiss.keySet() ){
 			totalColdEmissAmount += EmissionCostFactors.getCostFactor(cp.toString()) * coldEmiss.get(cp);
 		}
 
@@ -182,10 +182,10 @@ public class EquilEmissionIT {
 		 *  +   0.00503000011667609 * 5 * 384500. / (1000. * 1000.) = 0.027613043
 		 *  if co2costs are considerd, then warmEmissCost = 0.01787566 +  241.78 * 5 * 70. / (1000. * 1000.) = 0.112236043
 		 */
-		Map<WarmPollutant, Double> warmEmiss = emissEventHandler.warmEvents.get(2).getWarmEmissions();
+		Map<String, Double> warmEmiss = emissEventHandler.warmEvents.get(2).getWarmEmissions();
 		double warmEmissTime = emissEventHandler.warmEvents.get(2).getTime();
 		double totalWarmEmissAmount = 0.;
-		for ( WarmPollutant wp : warmEmiss.keySet() ) {
+		for ( String wp : warmEmiss.keySet() ) {
 			if( wp.toString().equalsIgnoreCase(WarmPollutant.CO2_TOTAL.toString()) && !isConsideringCO2Costs ) {
 				//nothing to do 
 			} else {

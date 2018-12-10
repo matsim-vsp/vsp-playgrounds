@@ -24,6 +24,17 @@
  */
 package playground.vsp.analysis.modules.emissionsAnalyzer;
 
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.events.EmissionEventsReader;
+import org.matsim.contrib.emissions.utils.EmissionUtils;
+import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.events.EventsUtils;
+import org.matsim.core.events.handler.EventHandler;
+import org.matsim.core.scenario.MutableScenario;
+import playground.vsp.analysis.modules.AbstractAnalysisModule;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -32,20 +43,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.emissions.events.EmissionEventsReader;
-import org.matsim.contrib.emissions.types.ColdPollutant;
-import org.matsim.contrib.emissions.types.WarmPollutant;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
-import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.handler.EventHandler;
-import org.matsim.core.scenario.MutableScenario;
-
-import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
 /**
  * This module requires an emissions events file.
@@ -65,8 +62,8 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 	private final String emissionEventsFile;
 	private EmissionsPerPersonWarmEventHandler warmHandler;
 	private EmissionsPerPersonColdEventHandler coldHandler;
-	private Map<Id<Person>, Map<WarmPollutant, Double>> person2warmEmissions;
-	private Map<Id<Person>, Map<ColdPollutant, Double>> person2coldEmissions;
+	private Map<Id<Person>, Map<String, Double>> person2warmEmissions;
+	private Map<Id<Person>, Map<String, Double>> person2coldEmissions;
 	private Map<Id<Person>, SortedMap<String, Double>> person2totalEmissions;
 	private SortedMap<String, Double> totalEmissions;
 	
@@ -103,7 +100,10 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 	public void postProcessData() {
 		this.person2warmEmissions = this.warmHandler.getWarmEmissionsPerPerson();
 		this.person2coldEmissions = this.coldHandler.getColdEmissionsPerPerson();
-		this.person2totalEmissions = EmissionUtils.sumUpEmissionsPerId(person2warmEmissions, person2coldEmissions);
+		if ( true ) {
+			throw new RuntimeException("function below is no longer there; don't know what to do.  kai, dec'18") ;
+		}
+//		this.person2totalEmissions = EmissionUtils.sumUpEmissionsPerId(person2warmEmissions, person2coldEmissions);
 		this.totalEmissions = EmissionUtils.getTotalEmissions(this.person2totalEmissions);
 	}
 
@@ -116,9 +116,13 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
-			for(String pollutant : EmissionUtils.getListOfPollutants()){
-				bw.write(pollutant + "\t");
+			if ( true ) {
+				throw new RuntimeException("functionality below is no longer there; don't know what to do.  kai, dec'18") ;
 			}
+
+//			for(String pollutant : EmissionUtils.getListOfPollutants()){
+//				bw.write(pollutant + "\t");
+//			}
 			bw.newLine();
 
 			for(String pollutant : this.totalEmissions.keySet()){
@@ -139,11 +143,11 @@ public class EmissionsAnalyzer extends AbstractAnalysisModule{
 		return totalEmissions;
 	}
 
-	public Map<Id<Person>, Map<WarmPollutant, Double>> getPerson2warmEmissions() {
+	public Map<Id<Person>, Map<String, Double>> getPerson2warmEmissions() {
 		return person2warmEmissions;
 	}
 
-	public Map<Id<Person>, Map<ColdPollutant, Double>> getPerson2coldEmissions() {
+	public Map<Id<Person>, Map<String, Double>> getPerson2coldEmissions() {
 		return person2coldEmissions;
 	}
 

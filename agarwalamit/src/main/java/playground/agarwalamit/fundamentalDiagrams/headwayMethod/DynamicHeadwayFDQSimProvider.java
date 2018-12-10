@@ -65,7 +65,7 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
 				.useDefaults() //
 				.removeModule(PopulationModule.class) //
-				.addOverridingControllerModule(new AbstractModule() {
+				.addOverridingModule(new AbstractModule() {
 					@Override
 					public void install() {
 						bind(QNetworkFactory.class).toInstance(qnetworkFactory);

@@ -24,16 +24,17 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
+
 import playground.agarwalamit.analysis.emission.EmissionUtilsExtended;
 import playground.agarwalamit.analysis.emission.filtering.FilteredEmissionPersonEventHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
@@ -86,7 +87,7 @@ public class PatnaEmissionsAnalyzer {
 //            throw new RuntimeException("Data is not written/read. Reason : " + e);
 //        }
 
-        Map<Id<Vehicle>, SortedMap<String, Double>> vehicle2totalEmissions = EmissionUtils.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
+        Map<Id<Vehicle>, Map<String, Double>> vehicle2totalEmissions = EmissionUtils.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
         SortedMap<String, SortedMap<String, Double>> mode2emissions=  getModalEmissions(vehicle2totalEmissions);
 
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
@@ -109,13 +110,13 @@ public class PatnaEmissionsAnalyzer {
         }
     }
 
-    private SortedMap<String, SortedMap<String, Double>> getModalEmissions(final Map<Id<Vehicle>, SortedMap<String, Double>> vehicle2emissions){
+    private SortedMap<String, SortedMap<String, Double>> getModalEmissions(final Map<Id<Vehicle>, Map<String, Double>> vehicle2emissions){
        SortedMap<String, SortedMap<String, Double>> mode2emissions = new TreeMap<>();
        for (Id<Vehicle> vehicleId : vehicle2emissions.keySet()) {
            String mode = getModeFromVehicleIdForPatna(vehicleId.toString());
            SortedMap<String, Double> emissions = mode2emissions.get(mode);
            if (emissions == null) {
-               emissions = vehicle2emissions.get(vehicleId);
+               emissions = new TreeMap<>(vehicle2emissions.get(vehicleId));
                mode2emissions.put(mode, emissions);
            } else {
                for (Map.Entry<String, Double> e : vehicle2emissions.get(vehicleId).entrySet()) {

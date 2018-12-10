@@ -28,7 +28,7 @@ import floetteroed.utilities.TimeDiscretization;
  */
 public interface TrajectoryPlotDataSource {
 
-	public String getDescription();
+	public String getIdentifier();
 	
 	public TimeDiscretization getTimeDiscretization();
 	

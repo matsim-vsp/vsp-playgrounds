@@ -286,7 +286,7 @@ public class OnRoadExposureForMixedTrafficTest {
 
         @Override
         public void handleEvent(ColdEmissionEvent event) {
-            Map<String, Double> emiss = EmissionUtils.convertColdPollutantMap2String(event.getColdEmissions())
+            Map<String, Double> emiss = event.getColdEmissions()
                                                      .entrySet()
                                                      .stream()
                                                      .collect(Collectors.toMap(e -> e.getKey(),
@@ -315,7 +315,7 @@ public class OnRoadExposureForMixedTrafficTest {
 
         @Override
         public void handleEvent(WarmEmissionEvent event) {
-            Map<String, Double> emiss = EmissionUtils.convertWarmPollutantMap2String(event.getWarmEmissions())
+            Map<String, Double> emiss = event.getWarmEmissions()
                                                              .entrySet()
                                                              .stream()
                                                              .collect(Collectors.toMap(e -> e.getKey(),

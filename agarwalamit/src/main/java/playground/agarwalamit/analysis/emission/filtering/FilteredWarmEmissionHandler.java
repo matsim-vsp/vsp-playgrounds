@@ -130,7 +130,7 @@ public class FilteredWarmEmissionHandler implements VehicleEntersTrafficEventHan
 		return delegate.getTime2linkIdLeaveCount();
 	}
 
-	public Map<Double, Map<Id<Link>, Map<WarmPollutant, Double>>> getWarmEmissionsPerLinkAndTimeInterval() {
+	public Map<Double, Map<Id<Link>, Map<String, Double>>> getWarmEmissionsPerLinkAndTimeInterval() {
 		return delegate.getWarmEmissionsPerLinkAndTimeInterval();
 	}
 

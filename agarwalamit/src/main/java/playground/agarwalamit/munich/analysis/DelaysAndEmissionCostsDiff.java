@@ -20,8 +20,11 @@ package playground.agarwalamit.munich.analysis;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -164,7 +167,8 @@ public class DelaysAndEmissionCostsDiff {
 		ema.preProcessData();
 		ema.postProcessData();
 		Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-		Map<Id<Person>, SortedMap<String, Double>> personId2Emissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(sc.getPopulation(), totalEmissions);
+		Set<String> pollutants = new HashSet<>(Arrays.asList("CO", "CO2(total)", "FC", "HC", "NMHC", "NOx", "NO2","PM", "SO2"));
+		Map<Id<Person>, SortedMap<String, Double>> personId2Emissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(sc.getPopulation(), totalEmissions, pollutants);
 		Map<Id<Person>, Double> personId2EmissionsCosts= new HashMap<>();
 		boolean considerCO2Costs = true;
 

@@ -37,17 +37,20 @@ public class ActivityTimesUtils {
 			final double timeVariationStepSize_s, final double searchStageExponent) {
 		final CompositeDecisionVariableBuilder builder = new CompositeDecisionVariableBuilder();
 		for (ActivityParams actParams : config.planCalcScore().getActivityParams()) {
-			if (!Time.isUndefinedTime(actParams.getOpeningTime())) {
-				builder.add(new OpeningTime(config, actParams.getActivityType(), actParams.getOpeningTime()),
-						new ScalarRandomizer<OpeningTime>(timeVariationStepSize_s, searchStageExponent));
-			}
-			if (!Time.isUndefinedTime(actParams.getClosingTime())) {
-				builder.add(new ClosingTime(config, actParams.getActivityType(), actParams.getClosingTime()),
-						new ScalarRandomizer<ClosingTime>(timeVariationStepSize_s, searchStageExponent));
-			}
-			if (!Time.isUndefinedTime(actParams.getTypicalDuration())) {
-				builder.add(new TypicalDuration(config, actParams.getActivityType(), actParams.getTypicalDuration()),
-						new ScalarRandomizer<TypicalDuration>(timeVariationStepSize_s, searchStageExponent));
+			if (!"dummy".equals(actParams.getActivityType())) { // magic act in PlanCalcScoreConfigGroup
+				if (!Time.isUndefinedTime(actParams.getOpeningTime())) {
+					builder.add(new OpeningTime(config, actParams.getActivityType(), actParams.getOpeningTime()),
+							new ScalarRandomizer<OpeningTime>(timeVariationStepSize_s, searchStageExponent));
+				}
+				if (!Time.isUndefinedTime(actParams.getClosingTime())) {
+					builder.add(new ClosingTime(config, actParams.getActivityType(), actParams.getClosingTime()),
+							new ScalarRandomizer<ClosingTime>(timeVariationStepSize_s, searchStageExponent));
+				}
+				if (!Time.isUndefinedTime(actParams.getTypicalDuration())) {
+					builder.add(
+							new TypicalDuration(config, actParams.getActivityType(), actParams.getTypicalDuration()),
+							new ScalarRandomizer<TypicalDuration>(timeVariationStepSize_s, searchStageExponent));
+				}
 			}
 		}
 		return builder.buildDecisionVariable();

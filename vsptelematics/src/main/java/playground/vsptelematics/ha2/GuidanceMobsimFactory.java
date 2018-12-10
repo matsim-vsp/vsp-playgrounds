@@ -90,7 +90,7 @@ public class GuidanceMobsimFactory implements Provider<Mobsim>, ShutdownListener
 				.useDefaults() //
 				.removeModule(PopulationModule.class) //
 				.addQSimModule(new GuidanceQSimModule(guidance, equipmentFraction, ttObserver)) //
-				.configureComponents(GuidanceQSimModule::configureComponents) //
+				.configureQSimComponents(GuidanceQSimModule::configureComponents) //
 				.build(scenario, eventsManager);
 	}
 

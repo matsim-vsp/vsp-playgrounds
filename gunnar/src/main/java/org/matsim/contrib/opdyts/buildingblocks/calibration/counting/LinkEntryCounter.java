@@ -72,7 +72,7 @@ public class LinkEntryCounter implements LinkEnterEventHandler, AfterMobsimListe
 		System.arraycopy(this.counter.getData(), 0, this.countsOfLastCompletedIteration, 0,
 				this.counter.getData().length);
 	}
-
+	
 	// -------------------- CONTENT ACCESS --------------------
 
 	public CountMeasurementSpecification getSpecification() {

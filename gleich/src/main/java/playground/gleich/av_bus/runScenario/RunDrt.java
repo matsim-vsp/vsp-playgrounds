@@ -72,7 +72,7 @@ public class RunDrt {
 		}
 		
 		DrtPtTripEventHandler eventHandler = new DrtPtTripEventHandler(scenario.getNetwork(), scenario.getTransitSchedule(), 
-				monitoredModes, monitoredStartAndEndLinks);
+				monitoredModes, monitoredStartAndEndLinks, TransportMode.drt);
 		events.addHandler(eventHandler);
 		new DrtEventsReader(events).readFile(config.controler().getOutputDirectory() + "/output_events.xml.gz");
 		
