@@ -19,14 +19,13 @@
 
 package playground.ikaddoura.savPricing.runSetupB;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModes;
@@ -53,12 +52,11 @@ import org.matsim.sav.prepare.BerlinPlansModificationTagFormerCarUsers;
 import org.matsim.sav.prepare.BerlinShpUtils;
 import org.matsim.sav.prepare.PersonAttributesModification;
 import org.matsim.sav.runTaxi.RunBerlinTaxiScenarioA;
-
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-
 import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinNetworkModification;
 import playground.ikaddoura.savPricing.runSetupB.prepare.BerlinPlansModificationSplitTrips;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class starts a simulation run with taxis.

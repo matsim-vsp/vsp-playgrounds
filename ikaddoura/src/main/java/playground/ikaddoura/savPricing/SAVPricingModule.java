@@ -19,12 +19,10 @@
 
 package playground.ikaddoura.savPricing;
 
-import java.lang.annotation.Annotation;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.drt.run.Drt;
 import org.matsim.contrib.noise.NoiseConfigGroup;
@@ -33,7 +31,6 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
-
 import playground.ikaddoura.moneyTravelDisutility.MoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.moneyTravelDisutility.MoneyTravelDisutilityModule;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
@@ -41,6 +38,8 @@ import playground.ikaddoura.savPricing.congestionSAV.DecongestionModuleSAV;
 import playground.ikaddoura.savPricing.disutility.SAVMoneyTravelDisutilityModule;
 import playground.ikaddoura.savPricing.disutility.SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory;
 import playground.ikaddoura.savPricing.noiseSAV.NoiseComputationModuleSAV;
+
+import java.lang.annotation.Annotation;
 
 /**
  * Idea:
