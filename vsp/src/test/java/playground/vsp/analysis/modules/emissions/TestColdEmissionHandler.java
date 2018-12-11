@@ -93,17 +93,17 @@ public class TestColdEmissionHandler {
 
 		Map<Id<Person>, Map<String, Double>> cepp = handler.getColdEmissionsPerPerson();
 		Double actualCO1 =0.0, actualNOX1 =0.0, actualPM1=0.0, actualCO2=.0, actualNOX2=.0, actualPM2 =0.0;
+//
+//		if ( true ) {
+//			throw new RuntimeException("code below will possibly no longer work, since keys are now strings not enums.  kai, dec'18") ;
+//		}
 
-		if ( true ) {
-			throw new RuntimeException("code below will possibly no longer work, since keys are now strings not enums.  kai, dec'18") ;
-		}
-
-		if(cepp.get(Id.create("v1", Person.class)).containsKey(ColdPollutant.CO))actualCO1 = cepp.get(Id.create("v1", Person.class)).get(ColdPollutant.CO);
-		if(cepp.get(Id.create("v1", Person.class)).containsKey(ColdPollutant.NOX))actualNOX1 = cepp.get(Id.create("v1", Person.class)).get(ColdPollutant.NOX);
-		if(cepp.get(Id.create("v1", Person.class)).containsKey(ColdPollutant.PM))actualPM1 = cepp.get(Id.create("v1", Person.class)).get(ColdPollutant.PM);
-		if(cepp.get(Id.create("v2", Person.class)).containsKey(ColdPollutant.CO))actualCO2 = cepp.get(Id.create("v2", Person.class)).get(ColdPollutant.CO);
-		if(cepp.get(Id.create("v2", Person.class)).containsKey(ColdPollutant.NOX))actualNOX2 = cepp.get(Id.create("v2", Person.class)).get(ColdPollutant.NOX);
-		if(cepp.get(Id.create("v2", Person.class)).containsKey(ColdPollutant.PM))actualPM2 = cepp.get(Id.create("v2", Person.class)).get(ColdPollutant.PM);
+		if(cepp.get(Id.create("v1", Person.class)).containsKey(ColdPollutant.CO.getText()))actualCO1 = cepp.get(Id.create("v1", Person.class)).get(ColdPollutant.CO.getText());
+		if(cepp.get(Id.create("v1", Person.class)).containsKey(ColdPollutant.NOX.getText()))actualNOX1 = cepp.get(Id.create("v1", Person.class)).get(ColdPollutant.NOX.getText());
+		if(cepp.get(Id.create("v1", Person.class)).containsKey(ColdPollutant.PM.getText()))actualPM1 = cepp.get(Id.create("v1", Person.class)).get(ColdPollutant.PM.getText());
+		if(cepp.get(Id.create("v2", Person.class)).containsKey(ColdPollutant.CO.getText()))actualCO2 = cepp.get(Id.create("v2", Person.class)).get(ColdPollutant.CO.getText());
+		if(cepp.get(Id.create("v2", Person.class)).containsKey(ColdPollutant.NOX.getText()))actualNOX2 = cepp.get(Id.create("v2", Person.class)).get(ColdPollutant.NOX.getText());
+		if(cepp.get(Id.create("v2", Person.class)).containsKey(ColdPollutant.PM.getText()))actualPM2 = cepp.get(Id.create("v2", Person.class)).get(ColdPollutant.PM.getText());
 
 		// assert that values were set correctly
 		Assert.assertEquals("CO of vehicle 1 should be 17.1 but was "+actualCO1, new Double(17.1), actualCO1, MatsimTestUtils.EPSILON);
