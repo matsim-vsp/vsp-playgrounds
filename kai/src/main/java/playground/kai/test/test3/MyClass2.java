@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  * @author nagel
  *
  */
-public class MyClass2 {
+class MyClass2 {
 	
 	@Inject
 	public MyClass2( MyClass1 class1 ) {

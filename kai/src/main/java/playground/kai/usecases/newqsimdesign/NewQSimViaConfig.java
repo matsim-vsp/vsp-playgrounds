@@ -56,12 +56,12 @@ class NewQSimViaConfig {
 //			}
 //		} );
 
-		controler.addOverridingQSimModule( new AbstractQSimModule(){
-			@Override
-			protected void configureQSim(){
-				this.addNamedComponent( MyAgentSource.class, MY_AGENT_SOURCE );
-			}
-		} ) ;
+//		controler.addOverridingQSimModule( new AbstractQSimModule(){
+//			@Override
+//			protected void configureQSim(){
+//				this.addNamedComponent( MyAgentSource.class, MY_AGENT_SOURCE );
+//			}
+//		} ) ;
 		
 		controler.run() ;
 		

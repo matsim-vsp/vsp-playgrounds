@@ -22,13 +22,11 @@
  */
 package playground.jbischoff.pt.scenario;
 
-import java.util.Collections;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.intermodal.router.VariableAccessTransitRouterModule;
 import org.matsim.contrib.av.intermodal.router.config.VariableAccessConfigGroup;
 import org.matsim.contrib.av.intermodal.router.config.VariableAccessModeConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
@@ -42,6 +40,8 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import java.util.Collections;
 
 /**
  * @author jbischoff

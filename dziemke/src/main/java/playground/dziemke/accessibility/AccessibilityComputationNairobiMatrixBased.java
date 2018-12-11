@@ -101,7 +101,7 @@ public class AccessibilityComputationNairobiMatrixBased {
 		
 		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.WORK});
 
-		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.POPULATION_DENSITIY, scenario.getNetwork());
+		final ActivityFacilities densityFacilities = AccessibilityUtils.createFacilityForEachLink(Labels.DENSITIY, scenario.getNetwork());
 
 		final Controler controler = new Controler(scenario);
 

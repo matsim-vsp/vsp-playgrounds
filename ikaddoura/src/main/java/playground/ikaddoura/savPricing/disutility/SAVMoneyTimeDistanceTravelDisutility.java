@@ -28,7 +28,6 @@ import org.matsim.contrib.noise.personLinkMoneyEvents.PersonLinkMoneyEvent;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
-
 import playground.ikaddoura.moneyTravelDisutility.MoneyEventAnalysis;
 import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 import playground.ikaddoura.moneyTravelDisutility.data.LinkInfo;
@@ -79,7 +78,7 @@ public class SAVMoneyTimeDistanceTravelDisutility implements TravelDisutility {
 		if (marginalUtilityOfMoney < 0.) log.warn("Check marginalUtilityOfMoney: " + marginalUtilityOfMoney);
 
 		if (marginalUtilityOfTime_sec >= 0. && marginalUtilityOfTime_sec >= 0.) {
-			throw new RuntimeException("Check scoring parameters for " + savOptimizerMode + ".");
+            throw new RuntimeException("Check fares parameters for " + savOptimizerMode + ".");
 		}
 		
 		this.vehicleFilter = vehicleFilter;

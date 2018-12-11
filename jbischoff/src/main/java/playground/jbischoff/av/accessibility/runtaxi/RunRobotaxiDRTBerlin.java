@@ -29,7 +29,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 /**
- * This class runs an example robotaxi scenario including scoring. The simulation runs for 10 iterations, this takes
+ * This class runs an example robotaxi scenario including fares. The simulation runs for 10 iterations, this takes
  * quite a bit time (25 minutes or so). You may switch on OTFVis visualisation in the main method below. The scenario
  * should run out of the box without any additional files. If required, you may find all input files in the resource
  * path or in the jar maven has downloaded). There are two vehicle files: 2000 vehicles and 5000, which may be set in

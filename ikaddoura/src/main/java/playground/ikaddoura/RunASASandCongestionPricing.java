@@ -31,7 +31,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
 import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingConfigGroup;
 import playground.ikaddoura.agentSpecificActivityScheduling.AgentSpecificActivitySchedulingModule;
 
@@ -99,7 +98,7 @@ public class RunASASandCongestionPricing {
 		Controler controler = new Controler(scenario);
 		
 		// #############################
-		// activity scoring
+        // activity fares
 		// #############################
 		
 		controler.addOverridingModule(new AgentSpecificActivitySchedulingModule(scenario));

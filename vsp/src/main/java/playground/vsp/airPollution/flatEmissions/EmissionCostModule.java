@@ -55,11 +55,11 @@ public class EmissionCostModule {
 		double warmEmissionCosts = 0.0;
 		
 		for(String wp : warmEmissions.keySet()){
-			if ( true ) {
-				throw new RuntimeException("typed emissions are no longer there; need to hedge against changing headers in the input file.  kai, dec'18") ;
-			}
+//			if ( true ) {
+//				throw new RuntimeException("typed emissions are no longer there; need to hedge against changing headers in the input file.  kai, dec'18") ;
+//			}
 
-			if(wp.equals(WarmPollutant.CO2_TOTAL) && ! considerCO2Costs) {
+			if(wp.equals(WarmPollutant.CO2_TOTAL.getText()) && ! considerCO2Costs) {
 				// do nothing
 			} else {
 				double costFactor = EmissionCostFactors.getCostFactor(wp.toString());

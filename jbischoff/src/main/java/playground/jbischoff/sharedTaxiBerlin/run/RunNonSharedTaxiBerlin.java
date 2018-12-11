@@ -19,20 +19,23 @@
 
 package playground.jbischoff.sharedTaxiBerlin.run;
 
-import java.util.Collections;
-
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
-import org.matsim.contrib.taxi.run.*;
+import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
+import org.matsim.contrib.taxi.run.TaxiConfigGroup;
+import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.contrib.taxi.run.TaxiQSimModule;
-import org.matsim.core.config.*;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
+import java.util.Collections;
 
 
 public class RunNonSharedTaxiBerlin {
