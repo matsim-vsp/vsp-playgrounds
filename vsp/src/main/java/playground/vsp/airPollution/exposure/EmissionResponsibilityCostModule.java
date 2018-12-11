@@ -68,11 +68,11 @@ public class EmissionResponsibilityCostModule {
 		double warmEmissionCosts = 0.0;
 		
 		for(String wp : warmEmissions.keySet()){
-			if( ! wp.equals(WarmPollutant.CO2_TOTAL) ) {
+			if( ! wp.equals(WarmPollutant.CO2_TOTAL.getText()) ) {
 
-				if ( true ) {
-					throw new RuntimeException("pollutants are no longer enums; need to hedge against header changes in upstream input file") ;
-				}
+//				if ( true ) {
+//					throw new RuntimeException("pollutants are no longer enums; need to hedge against header changes in upstream input file") ;
+//				}
 
 				double costFactor = EmissionCostFactors.getCostFactor(wp.toString());
 				warmEmissionCosts += warmEmissions.get(wp) * costFactor ;
@@ -83,7 +83,7 @@ public class EmissionResponsibilityCostModule {
 		if(this.considerCO2Costs) {
 			WarmPollutant co2Total = WarmPollutant.CO2_TOTAL;
 			return this.emissionCostMultiplicationFactor * warmEmissionCosts * relativeDensity
-					+ warmEmissions.get(co2Total) * EmissionCostFactors.getCostFactor(co2Total.toString());
+					+ warmEmissions.get(co2Total.getText()) * EmissionCostFactors.getCostFactor(co2Total.toString());
 		} else {
 			return this.emissionCostMultiplicationFactor * warmEmissionCosts * relativeDensity;
 		}
