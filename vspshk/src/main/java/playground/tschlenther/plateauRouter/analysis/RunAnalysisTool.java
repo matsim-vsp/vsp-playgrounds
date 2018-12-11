@@ -25,14 +25,18 @@ class RunAnalysisTool {
 				Map<Id<Link>,String> pop1routes = new HashMap<>();
 				Map<Id<Link>,String> pop2routes = new HashMap<>();
 				
-				pop1routes.put(Id.createLinkId(1660),"pop1 östlicher ring"); //pop1 östlicher ring
-				pop1routes.put(Id.createLinkId(11842),"pop1 östliches stadtzentrum"); //pop1 östliches stadtzentrum
+//				pop1routes.put(Id.createLinkId(1660),"pop1 öestlicher ring"); //pop1 östlicher ring
+				pop1routes.put(Id.createLinkId(1660),"pop1 oeestlicher ring"); //pop1 östlicher ring
+//				pop1routes.put(Id.createLinkId(11842),"pop1 östliches stadtzentrum"); //pop1 östliches stadtzentrum
+				pop1routes.put(Id.createLinkId(11842),"pop1 oestliches stadtzentrum"); //pop1 östliches stadtzentrum
 				pop1routes.put(Id.createLinkId(8281),"pop1 westliches zentrum = DIJKSTRA"); //pop1 westliches zentrum = DIJSTRA-route
 				pop1routes.put(Id.createLinkId(12711),"pop1 westlicher ring"); //pop1 westlicher ring
 				
-				pop2routes.put(Id.createLinkId(5601),"pop2 östlicher ring = DIJKSTRA"); 
-				pop2routes.put(Id.createLinkId(17757),"pop2 B109 westlicher Ring, östliche variante"); 
-				pop2routes.put(Id.createLinkId(15395),"pop2 B96 westlicher Ring, westliche variante"); 
+//				pop2routes.put(Id.createLinkId(5601),"pop2 östlicher ring = DIJKSTRA");
+				pop2routes.put(Id.createLinkId(5601),"pop2 oestlicher ring = DIJKSTRA");
+//				pop2routes.put(Id.createLinkId(17757),"pop2 B109 westlicher Ring, östliche variante");
+				pop2routes.put(Id.createLinkId(17757),"pop2 B109 westlicher Ring, oestliche variante");
+				pop2routes.put(Id.createLinkId(15395),"pop2 B96 westlicher Ring, westliche variante");
 				pop2routes.put(Id.createLinkId(9798),"pop2 Stadtzentrum"); 
 				
 				//prepare the StringBuilders
