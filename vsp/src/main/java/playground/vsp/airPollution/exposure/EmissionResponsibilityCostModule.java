@@ -83,7 +83,8 @@ public class EmissionResponsibilityCostModule {
 		if(this.considerCO2Costs) {
 			WarmPollutant co2Total = WarmPollutant.CO2_TOTAL;
 			return this.emissionCostMultiplicationFactor * warmEmissionCosts * relativeDensity
-					+ warmEmissions.get(co2Total.getText()) * EmissionCostFactors.getCostFactor(co2Total.toString());
+					+ warmEmissions.get(co2Total.getText())
+					* EmissionCostFactors.getCostFactor(co2Total.toString());
 		} else {
 			return this.emissionCostMultiplicationFactor * warmEmissionCosts * relativeDensity;
 		}
