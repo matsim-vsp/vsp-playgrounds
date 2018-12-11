@@ -25,7 +25,7 @@ package org.matsim.contrib.emissions.types;
  */
 public enum WarmPollutant {
 	
-	CO("CO"), CO2_TOTAL("CO2(total)"), FC("FC"), HC("HC"), NMHC("NMHC"), NOX("NOx"), NO2("NO2"), PM("PM"),	SO2("SO2");
+	CO("CO"), CO2_TOTAL("CO2total"), FC("FC"), HC("HC"), NMHC("NMHC"), NOX("NOx"), NO2("NO2"), PM("PM"),	SO2("SO2");
 	
 	private final String key;
 
