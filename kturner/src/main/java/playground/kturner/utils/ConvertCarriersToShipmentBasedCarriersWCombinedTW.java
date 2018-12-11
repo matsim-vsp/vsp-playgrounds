@@ -51,8 +51,8 @@ public class ConvertCarriersToShipmentBasedCarriersWCombinedTW {
 
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 	
-	private static final String CARRIERFILE_NAME_INPUT = "Ia-BaseE_carrierLEH_v2_withFleet_Shipment.xml" ;
-	private static final String CARRIERFILE_NAME_OUTPUT = "Ia-BaseE_carrierLEH_v2_withFleet_Shipment_OneTW.xml";
+	private static final String CARRIERFILE_NAME_INPUT = "I-Base_carrierLEH_v2_withFleet_Shipment.xml" ;
+	private static final String CARRIERFILE_NAME_OUTPUT = "I-Base_carrierLEH_v2_withFleet_Shipment_OneTW.xml";
 //	private static final String ABC = CARRIERFILE_NAME_INPUT.substring(CARRIERFILE_NAME_INPUT.length() - 4, CARRIERFILE_NAME_INPUT.length()) + "_Shipments.mxl";
 	
 	private static final String CARRIERFILE_INPUT = INPUT_DIR + CARRIERFILE_NAME_INPUT;

@@ -23,6 +23,8 @@ package playground.kturner.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -83,29 +85,28 @@ class CombineTimeWindowsforCarrier {
 	}
 	
 	private static void createAndSetCarrierCapabilities(Carrier carrierComb, Carrier carrier, TimeWindow timeWindow) {
-		//TODO collect veh abh. von location und vehicleType
-		//TODO: IRGENDWIE merkt er sich zu viele VehTypes und erstellt die dann neu. Zeitfenster und Orte passen. KMT 10.12.18
-		HashMap<Id<Link>, ArrayList<Id<VehicleType>>> vehTypesAtDepot = new HashMap<>();
+		LinkedHashMap<Id<Link>, LinkedList<Id<VehicleType>>> vehTypesAtDepot = new LinkedHashMap<>();
 		
 		CarrierCapabilities cc = CarrierCapabilities.newInstance();
 		
 		for (CarrierVehicle carrierVehicle : carrier.getCarrierCapabilities().getCarrierVehicles()) {
 			if (!vehTypesAtDepot.containsKey(carrierVehicle.getLocation())) {
-				ArrayList<Id<VehicleType>> arrayList = new ArrayList();
-				log.debug(carrierVehicle.toString() + " vehType: " + carrierVehicle.getVehicleTypeId());
-				arrayList.add(carrierVehicle.getVehicleTypeId());
-				vehTypesAtDepot.put(carrierVehicle.getLocation(), arrayList); 
+				LinkedList<Id<VehicleType>> vehTypesAtDepotList = new LinkedList();
+				log.debug("Found " + carrierVehicle.toString() + " vehType: " + carrierVehicle.getVehicleTypeId());
+				vehTypesAtDepotList.add(carrierVehicle.getVehicleTypeId());
+				vehTypesAtDepot.put(carrierVehicle.getLocation(), vehTypesAtDepotList); 
 			} else if (!vehTypesAtDepot.get(carrierVehicle.getLocation()).contains(carrierVehicle.getVehicleTypeId())) {
-				ArrayList<Id<VehicleType>> arrayList = vehTypesAtDepot.get(carrierVehicle.getLocation());
-				arrayList.add(carrierVehicle.getVehicleTypeId());
-				vehTypesAtDepot.put(carrierVehicle.getLocation(), arrayList); 
+				log.debug("Found " + carrierVehicle.toString() + " vehType: " + carrierVehicle.getVehicleTypeId());
+				LinkedList<Id<VehicleType>> vehTypesAtDepotList = vehTypesAtDepot.get(carrierVehicle.getLocation());
+				vehTypesAtDepotList.add(carrierVehicle.getVehicleTypeId());
+				vehTypesAtDepot.put(carrierVehicle.getLocation(), vehTypesAtDepotList); 
 			}
 		}
 		
 		//add Vehicles
 		for (Id<Link> vehLocationId :  vehTypesAtDepot.keySet()) {
 			for (Id<VehicleType> vehTypeId : vehTypesAtDepot.get(vehLocationId)) {
-				CarrierVehicle carrierVehicle = CarrierVehicle.Builder.newInstance(Id.createVehicleId(vehTypeId.toString()), vehLocationId)
+				CarrierVehicle carrierVehicle = CarrierVehicle.Builder.newInstance(Id.createVehicleId(vehTypeId.toString() + "_" + vehLocationId.toString()), vehLocationId)
 						.setEarliestStart(timeWindow.getStart())
 						.setLatestEnd(timeWindow.getEnd())
 						.setTypeId(vehTypeId)
