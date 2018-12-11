@@ -27,8 +27,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
@@ -42,7 +42,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
 
 /**
