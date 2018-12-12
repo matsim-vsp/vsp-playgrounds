@@ -50,11 +50,13 @@
   		</dependency>
   		-->
   
+  		<!-- 
 	  	<dependency>
 			<groupId>com.github.gunnarfloetteroed</groupId>
     		<artifactId>java</artifactId>
     		<version>master-SNAPSHOT</version>
 		</dependency>
+		 -->
 
 		<dependency>
 			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
