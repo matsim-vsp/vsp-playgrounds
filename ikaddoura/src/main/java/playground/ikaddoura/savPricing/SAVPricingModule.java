@@ -22,7 +22,7 @@ package playground.ikaddoura.savPricing;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.drt.run.Drt;
 import org.matsim.contrib.noise.NoiseConfigGroup;
