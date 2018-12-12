@@ -19,56 +19,45 @@
 
 package playground.ikaddoura.analysis.od;
 
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.core.router.StageActivityTypes;
+import org.matsim.core.router.StageActivityTypesImpl;
+import org.matsim.sav.analysis.od.ODAnalysis;
 
 /**
 * @author ikaddoura
 */
 
-public class ODTrip {
+public class RunODAnalysis {
 	
-	private String origin;
-	private String destination;
-	private String mode;
-	private Id<Person> personId;
-	private double departureTime;
-	
-	public String getOrigin() {
-		return origin;
-	}
-	public void setOrigin(String origin) {
-		this.origin = origin;
-	}
-	public String getDestination() {
-		return destination;
-	}
-	public void setDestination(String destination) {
-		this.destination = destination;
-	}
-	public String getMode() {
-		return mode;
-	}
-	public void setMode(String mode) {
-		this.mode = mode;
-	}
-	public Id<Person> getPersonId() {
-		return personId;
-	}
-	public void setPersonId(Id<Person> personId) {
-		this.personId = personId;
-	}
-	public double getDepartureTime() {
-		return departureTime;
-	}
-	public void setDepartureTime(double departureTime) {
-		this.departureTime = departureTime;
-	}
-	@Override
-	public String toString() {
-		return "ODTrip [origin=" + origin + ", destination=" + destination + ", mode=" + mode + ", personId=" + personId
-				+ ", departureTime=" + departureTime + "]";
-	}
+	public static void main(String[] args) throws IOException {
 		
+		String rootDirectory = null;
+		
+		if (args.length == 1) {
+			rootDirectory = args[0];
+		} else {
+			throw new RuntimeException("Please set the root directory. Aborting...");
+		}
+		
+		if (!rootDirectory.endsWith("/")) rootDirectory = rootDirectory + "/";
+		
+		final String shapeFile = rootDirectory + "public-svn/matsim/scenarios/countries/de/berlin/projects/avoev/berlin-sav-v5.2-10pct/input/shp-berlin-hundekopf-areas/berlin_hundekopf.shp";
+		final String runId = "berlin-v5.2-10pct";
+		final String runDirectory = rootDirectory + "public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
+		
+		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "drt interaction");
+		final String zoneId = "SCHLUESSEL";
+		final List<String> modes = new ArrayList<>();
+		modes.add(TransportMode.drt);
+				
+		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, zoneId, stageActivities, modes);
+		reader.run();
+	}
+
 }
 
