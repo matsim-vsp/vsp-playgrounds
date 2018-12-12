@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.core.router.StageActivityTypes;
-import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.sav.analysis.od.ODAnalysis;
 
 /**
@@ -45,17 +43,22 @@ public class RunODAnalysis {
 		}
 		
 		if (!rootDirectory.endsWith("/")) rootDirectory = rootDirectory + "/";
-		
-		final String shapeFile = rootDirectory + "public-svn/matsim/scenarios/countries/de/berlin/projects/avoev/berlin-sav-v5.2-10pct/input/shp-berlin-hundekopf-areas/berlin_hundekopf.shp";
-		final String runId = "berlin-v5.2-10pct";
+
 		final String runDirectory = rootDirectory + "public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
+		final String runId = "berlin-v5.2-10pct";
+		final String shapeFile = rootDirectory + "public-svn/matsim/scenarios/countries/de/berlin/projects/avoev/berlin-sav-v5.2-10pct/input/shp-berlin-hundekopf-areas/berlin_hundekopf.shp";
+		final String[] helpLegModes = {TransportMode.transit_walk, TransportMode.access_walk, TransportMode.egress_walk};
+		final String stageActivitySubString = "interaction";
 		
-		final StageActivityTypes stageActivities = new StageActivityTypesImpl("pt interaction", "car interaction", "ride interaction", "drt interaction");
 		final String zoneId = "SCHLUESSEL";
 		final List<String> modes = new ArrayList<>();
-		modes.add(TransportMode.drt);
+		modes.add(TransportMode.car);
+		modes.add(TransportMode.pt);
+		modes.add(TransportMode.walk);
+		modes.add("bicycle");
+		modes.add(TransportMode.ride);
 				
-		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, zoneId, stageActivities, modes);
+		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, zoneId, modes, helpLegModes, stageActivitySubString);
 		reader.run();
 	}
 
