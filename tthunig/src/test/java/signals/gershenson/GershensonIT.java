@@ -356,8 +356,8 @@ public class GershensonIT {
 		Controler controler = new Controler(scenario);
 		// add the signals module with gershenson controller
 //		SignalsModule signalsModule = new SignalsModule();
-		Signals.Configurator signalsModule = new Signals.Configurator( controler ) ;
-		signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+		Signals.Configurator configurator = new Signals.Configurator( controler ) ;
+		configurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 				GershensonSignalController.GershensonFactory.class);
 //		controler.addOverridingModule(signalsModule);
         
