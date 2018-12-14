@@ -21,27 +21,24 @@
  */
 package scenarios.cottbus;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
-
+import analysis.TtAnalyzedGeneralResultsWriter;
+import analysis.TtGeneralAnalysis;
+import analysis.TtListenerToBindGeneralAnalysis;
+import analysis.cten.TtCommodityTravelTimeAnalyzer;
+import analysis.cten.TtWriteComAnalysis;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
+import analysis.signals.TtQueueLengthAnalysisTool;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
@@ -75,23 +72,8 @@ import org.matsim.lanes.LanesWriter;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.roadpricing.RoadPricingModule;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
-import analysis.TtAnalyzedGeneralResultsWriter;
-import analysis.TtGeneralAnalysis;
-import analysis.TtListenerToBindGeneralAnalysis;
-import analysis.cten.TtCommodityTravelTimeAnalyzer;
-import analysis.cten.TtWriteComAnalysis;
-import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisWriter;
-import analysis.signals.TtQueueLengthAnalysisTool;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV7;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
-import playground.vsp.congestion.handlers.TollHandler;
+import playground.vsp.congestion.handlers.*;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.gershenson.GershensonConfig;
@@ -101,6 +83,12 @@ import utils.ModifyNetwork;
 import utils.ModifyPopulation;
 import utils.OutputUtils;
 import utils.SignalizeScenario;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class to run a cottbus simulation.
@@ -1076,16 +1064,17 @@ public class TtRunCottbusSimulation {
 		// add the signals module if signal systems are used
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
 				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
-		SignalsModule signalsModule = new SignalsModule();
+//		SignalsModule signalsModule = new SignalsModule();
+		Signals.Configurator configurator = new Signals.Configurator( controler ) ;
 		// the signals module works for planbased, sylvia and laemmer signal controller
 		// by default and is pluggable for your own signal controller like this:
-		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+		configurator.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
 				DownstreamPlanbasedSignalController.DownstreamFactory.class);
-		signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+		configurator.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
 				FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-		signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+		configurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 				GershensonSignalController.GershensonFactory.class);
-		controler.addOverridingModule(signalsModule);
+//		controler.addOverridingModule(configurator);
 
 		// bind gershenson config
 		controler.addOverridingModule(new AbstractModule() {

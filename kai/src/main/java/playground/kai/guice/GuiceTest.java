@@ -2,15 +2,13 @@ package playground.kai.guice;
 
 import com.google.inject.*;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public final class GuiceTest {
 	private static final Logger log = Logger.getLogger( GuiceTest.class ) ;
@@ -26,10 +24,17 @@ public final class GuiceTest {
 		modules.add(  new AbstractModule(){
 			@Override
 			protected void configure(){
-				MapBinder<Annotation, MyInterface> mapBinder = MapBinder.newMapBinder( this.binder(), Annotation.class, MyInterface.class );
-				mapBinder.permitDuplicates() ;
-				mapBinder.addBinding( Names.named("abc") ).to( MyImpl1.class ) ;
+//				MapBinder<Annotation, MyInterface> mapBinder = MapBinder.newMapBinder( this.binder(), Annotation.class, MyInterface.class );
+//				mapBinder.permitDuplicates() ;
+//				mapBinder.addBinding( Names.named("abc") ).to( MyImpl1.class ) ;
 //				mapBinder.addBinding(Names.named("abc") ).to( MyImpl2.class ) ;
+
+				Multibinder<MyInterface> multiBinder = Multibinder.newSetBinder( this.binder(), MyInterface.class, Names.named( "someAnnotation" ) );;
+//				Multibinder<MyInterface> multiBinder = Multibinder.newSetBinder( this.binder(), MyInterface.class );;
+				multiBinder.permitDuplicates() ;
+				multiBinder.addBinding().to( MyImpl1.class ) ;
+				multiBinder.addBinding().to( MyImpl2.class ) ;
+
 			}
 		} ) ;
 		Injector injector = Guice.createInjector( modules );
@@ -43,12 +48,14 @@ public final class GuiceTest {
 		}
 		log.info("") ;
 
-//		injector.injectMembers( this );
-//
-//		Set<Provider<MyInterface>> set = map.get( Names.named("abc" ) ) ;
-//		for( Provider<MyInterface> provider : set ){
-//			provider.get() ;
-//		}
+		Collection<Provider<MyInterface>> set = injector.getInstance( Key.get( new TypeLiteral<Collection<Provider<MyInterface>>>(){} , Names.named( "someAnnotation" )) );
+
+		//		Map<Annotation, Set<Provider<MyInterface>>> map = injector.getInstance( Key.get( new TypeLiteral<Map<Annotation, Set<Provider<MyInterface>>>>(){} ) );;
+		//		Set<Provider<MyInterface>> set = map.get( Names.named("abc" ) ) ;
+
+		for( Provider<MyInterface> provider : set ){
+			provider.get() ;
+		}
 
 	}
 
