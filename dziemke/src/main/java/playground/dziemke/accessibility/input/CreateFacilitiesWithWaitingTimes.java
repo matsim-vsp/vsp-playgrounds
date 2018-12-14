@@ -19,13 +19,14 @@ import org.matsim.facilities.FacilitiesWriter;
 public class CreateFacilitiesWithWaitingTimes {
 	private static final Logger LOG = Logger.getLogger(CreateFacilitiesWithWaitingTimes.class);
 	
-//	private static final String DIR = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebalancing/";
-	private static final String DIR = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid/";
+	private static final String DIR = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebal_180/";
+//	private static final String DIR = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid/";
 //	private static final String INPUT_FILE = DIR + "merged_10_rebalancing.csv";
+	private static final String INPUT_FILE = DIR + "merged_10_rebal_180.csv";
 //	private static final String INPUT_FILE = DIR + "merged_10.csv";
-	private static final String INPUT_FILE = DIR + "merged_10_short.csv";
-//	private static final String OUTPUT_FILE = DIR + "facilities.xml";
-	private static final String OUTPUT_FILE = DIR + "facilities_short.xml";
+//	private static final String INPUT_FILE = DIR + "merged_10_short.csv";
+	private static final String OUTPUT_FILE = DIR + "facilities_2.xml";
+//	private static final String OUTPUT_FILE = DIR + "facilities_short.xml";
 
 	public static void main(String[] args) {
 		

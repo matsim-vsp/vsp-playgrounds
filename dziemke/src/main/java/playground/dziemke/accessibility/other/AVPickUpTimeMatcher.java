@@ -36,10 +36,13 @@ public class AVPickUpTimeMatcher {
 	
 	private static final String ZONES_FILE = "../../shared-svn/projects/accessibility_berlin/av/grid/zones.csv";
 //	private static final String SAV_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid/averageTaxiWaitTimes_dominik_10runs.csv";
-	private static final String SAV_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebalancing/averageTaxiWaitTimes_with_rebalancing_10runs.csv";
+//	private static final String SAV_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebalancing/averageTaxiWaitTimes_with_rebalancing_10runs.csv";
+	private static final String SAV_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebal_180/averageTaxiWaitTimes_with_rebalancing_10runs_180.csv";
 //	private static final String OUTPUT_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid/merged_10.csv";
-	private static final String OUTPUT_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebalancing/merged_10_rebalancing.csv";
+//	private static final String OUTPUT_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebalancing/merged_10_rebalancing.csv";
+	private static final String OUTPUT_FILE = "../../shared-svn/projects/accessibility_berlin/av/waittimes_500_access_grid_rebal_180/merged_10_rebal_180.csv";
 
+	
 	public static void main(String[] args) {
 		Map<Integer, String> zonesLinesPerId = new HashMap<>();
 		Map<Integer, String> savLinesPerId = new HashMap<>();

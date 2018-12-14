@@ -29,16 +29,21 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 //		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_fs-car_shop/";
 //		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at-car_edu/";
 //		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_car-pt_edu/";
-		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at-pt_edu/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at-pt_edu/";
 //		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at-pt_edu/";
 //		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at_edu/";
 //		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_car_edu/";
-//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_pt-called-car_edu_old/";
+		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at_rebal-at_mall/";
 //		String workingDirectory = "../../upretoria/data/nmb/output_500_6_work/";
 //		String workingDirectory = "../../upretoria/data/nmb/output_500_6_work_motherwell_road/";
 //		String workingDirectory = "../../shared-svn/projects/maxess/data/capetown/output/02/";
 //		String workingDirectory = "../../upretoria/data/capetown/output_500/";
 //		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/pt_200/";
+		
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_car-at_mall/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at_rebal_180_mall/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at_rebal-at_mall/";
+//		String workingDirectory = "../../shared-svn/projects/accessibility_berlin/output/v3/500_at_rebal_180-at_rebal_mall/";
 		
 //		int cellSize = 200;
 //		int cellSize = 1000;
@@ -48,7 +53,8 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 //		final List<String> activityTypes = Arrays.asList(new String[]{"composite"});
 //		final List<String> activityTypes = Arrays.asList(new String[]{"work"});
 //		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION, FacilityTypes.SHOPPING});
-		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
+//		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.EDUCATION});
+		final List<String> activityTypes = Arrays.asList(new String[]{FacilityTypes.MALL});
 //		final List<String> activityTypes = Arrays.asList("S");
 		
 //		final List<String> modes = Arrays.asList(new String[]{TransportMode.car, TransportMode.bike, TransportMode.walk, "freespeed"});
@@ -77,10 +83,10 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 //		final boolean includeDensityLayer = false;
 		final Integer range = 9; // In the current implementation, this must always be 9
 		
-//		final Double lowerBound = 2.; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
-//		final Double upperBound = 5.5;
 //		final Double lowerBound = -3.5; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
 //		final Double upperBound = 3.5;
+//		final Double lowerBound = -5.; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
+//		final Double upperBound = 2.;
 //		final Double lowerBound = -1.75; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
 //		final Double upperBound = 1.75;
 //		final Double lowerBound = -7.; // (upperBound - lowerBound) ideally nicely divisible by (range - 2)
@@ -109,8 +115,8 @@ public class CreateQGisVisualsForAccessibiliyComputation {
 			for (String mode : modes) {
 				VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode, envelope, workingDirectory, scenarioCRS, includeDensityLayer,
 						lowerBound, upperBound, range, cellSize, populationThreshold);
-//				VisualizationUtils.createQGisOutputRuleBasedStandardColorRange(actType, mode, envelope, workingDirectory, scenarioCRS, includeDensityLayer,
-//						lowerBound, upperBound, range, cellSize, populationThreshold); // Does not work anymore after polygon-based changes, 2018-12-11
+//				VisualizationUtils.createQGisOutputRuleBasedStandardColorRange(actType, mode, envelope, workingDirectory, scenarioCRS,
+//						lowerBound, upperBound, range, populationThreshold); // Does not work anymore after polygon-based changes, 2018-12-11
 //				VisualizationUtils.createQGisOutputGraduatedStandardColorRange(actType, mode, new Envelope(100000,180000,-3720000,-3675000), workingDirectory, TransformationFactory.WGS84_SA_Albers, includeDensityLayer,
 //						lowerBound, upperBound, range, cellSize, populationThreshold);
 //				VisualizationUtils.createQGisOutput(actType, mode, new Envelope(251800.0, 258300.0, 9854300.0, 9858700.0), workingDirectory, "EPSG:21037", includeDensityLayer,

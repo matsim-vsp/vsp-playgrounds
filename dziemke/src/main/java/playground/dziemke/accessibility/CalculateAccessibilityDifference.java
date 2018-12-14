@@ -60,9 +60,13 @@ public class CalculateAccessibilityDifference {
 		
 		String directoryRoot = "../../shared-svn/projects/accessibility_berlin/output/v3/";
 //		String directoryRootBase = directoryRoot + "500_pt-called-car_edu_old/";
-		String directoryRootBase = directoryRoot + "500_pt-called-car_edu_old/";
-		String directoryRootPolicy = directoryRoot + "500_at_edu/";
-		String identifier = "500_at-pt_edu/";
+//		String directoryRootBase = directoryRoot + "500_pt-called-car_edu_old/";
+//		String directoryRootPolicy = directoryRoot + "500_at_edu/";
+//		String identifier = "500_at-pt_edu/";
+		
+		String directoryRootBase = directoryRoot + "500_at_mall/";
+		String directoryRootPolicy = directoryRoot + "500_at_rebal_mall/";
+		String identifier = "500_at_rebal-at_mall/";
 		
 //		String directoryRoot = "../../upretoria/data/nmb/";
 //		String directoryRootBase = directoryRoot + "output_1000_ptnw_6/";
@@ -70,7 +74,10 @@ public class CalculateAccessibilityDifference {
 //		String identifier = "motherwell-rail-base/";
 		
 //		String directoryRoot = "../../../shared-svn/projects/maxess/data/nmb/output/17compRestricted500/";
-		String activityType = FacilityTypes.EDUCATION;
+//		String activityType = FacilityTypes.EDUCATION;
+		
+		String activityType = FacilityTypes.MALL;
+		
 //		String activityType = "s";
 //		String activityType = FacilityTypes.LEISURE;
 //		String activityType = FacilityTypes.SHOPPING;
