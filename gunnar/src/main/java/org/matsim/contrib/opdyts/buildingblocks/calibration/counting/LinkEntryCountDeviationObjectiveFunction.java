@@ -47,6 +47,9 @@ public class LinkEntryCountDeviationObjectiveFunction
 
 	private final Supplier<Double> simulatedPopulationShare;
 
+	private int startBin; // inclusive
+	private int endBin; // exclusive
+
 	// -------------------- CONSTRUCTION --------------------
 
 	public LinkEntryCountDeviationObjectiveFunction(final double[] realData, final LinkEntryCounter simulationCounter,
@@ -55,10 +58,25 @@ public class LinkEntryCountDeviationObjectiveFunction
 		this.simulationCounter = simulationCounter;
 		this.residualMagnitude = residualEvaluator;
 		this.simulatedPopulationShare = simulatedPopulationShare;
+
+		this.setStartEndBin(0, realData.length);
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
+	public void setStartEndBin(final int startBin_inclusive, final int endBin_exclusive) {
+		this.startBin = startBin_inclusive;
+		this.endBin = endBin_exclusive;
+	}
+
+	public int getStartBin() {
+		return this.startBin;
+	}
+	
+	public int getEndBin() {
+		return this.endBin;
+	}
+	
 	public CountMeasurementSpecification getSpecification() {
 		return this.simulationCounter.getSpecification();
 	}
@@ -67,10 +85,10 @@ public class LinkEntryCountDeviationObjectiveFunction
 
 	@Override
 	public double value(final MATSimState state) {
-
 		final int[] simData = this.simulationCounter.getDataOfLastCompletedIteration();
 		double result = 0;
-		for (int i = 0; i < this.realData.length; i++) {
+		// for (int i = 0; i < this.realData.length; i++) {
+		for (int i = this.startBin; i < this.endBin; i++) {
 			final double residual = this.realData[i] - simData[i] / this.simulatedPopulationShare.get();
 			result += this.residualMagnitude.apply(residual);
 		}

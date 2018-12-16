@@ -28,6 +28,8 @@ import java.util.function.Supplier;
 
 import org.matsim.core.controler.AbstractModule;
 
+import floetteroed.utilities.TimeDiscretization;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -70,7 +72,48 @@ public class CountMeasurements {
 
 	// -------------------- BUILDING --------------------
 
-	public void build() {
+	// public void build() {
+	//
+	// this.sumOfEvaluatedResidualsAtZeroSimulation = 0.0;
+	//
+	// this.modules = new ArrayList<>(this.measSpec2data.size());
+	// this.handlers = new ArrayList<>(this.measSpec2data.size());
+	// this.objectiveFunctions = new ArrayList<>(this.measSpec2data.size());
+	// final Map<CountMeasurementSpecification, LinkEntryCounter>
+	// measSpec2linkEntryCounter = new LinkedHashMap<>();
+	//
+	// for (Map.Entry<CountMeasurementSpecification, double[]> entry :
+	// this.measSpec2data.entrySet()) {
+	// final CountMeasurementSpecification spec = entry.getKey();
+	//
+	// final LinkEntryCounter simCounter;
+	// if (measSpec2linkEntryCounter.containsKey(spec)) {
+	// simCounter = measSpec2linkEntryCounter.get(spec);
+	// } else {
+	// simCounter = new LinkEntryCounter(spec);
+	// measSpec2linkEntryCounter.put(spec, simCounter);
+	// this.modules.add(new AbstractModule() {
+	// @Override
+	// public void install() {
+	// this.addEventHandlerBinding().toInstance(simCounter);
+	// this.addControlerListenerBinding().toInstance(simCounter);
+	// }
+	// });
+	// this.handlers.add(simCounter);
+	// }
+	//
+	// final double[] data = entry.getValue();
+	// this.objectiveFunctions.add(new
+	// LinkEntryCountDeviationObjectiveFunction(data, simCounter,
+	// this.residualEvaluator, this.simulatedPopulationShare));
+	// for (Double count : data) {
+	// this.sumOfEvaluatedResidualsAtZeroSimulation +=
+	// this.residualEvaluator.apply(count);
+	// }
+	// }
+	// }
+
+	public void build(final int startTime_s, final int endTime_s) {
 
 		this.sumOfEvaluatedResidualsAtZeroSimulation = 0.0;
 
@@ -98,11 +141,21 @@ public class CountMeasurements {
 				this.handlers.add(simCounter);
 			}
 
+			final TimeDiscretization timeDiscr = spec.getTimeDiscretization();
+			final int startBin_inclusive = Math.max(0, timeDiscr.getBin(startTime_s));
+			final int endBin_exclusive = Math.min(timeDiscr.getBin(endTime_s), timeDiscr.getBinCnt() - 1) + 1;
+
 			final double[] data = entry.getValue();
-			this.objectiveFunctions.add(new LinkEntryCountDeviationObjectiveFunction(data, simCounter,
-					this.residualEvaluator, this.simulatedPopulationShare));
-			for (Double count : data) {
-				this.sumOfEvaluatedResidualsAtZeroSimulation += this.residualEvaluator.apply(count);
+			final LinkEntryCountDeviationObjectiveFunction objFct = new LinkEntryCountDeviationObjectiveFunction(data,
+					simCounter, this.residualEvaluator, this.simulatedPopulationShare);
+			objFct.setStartEndBin(startBin_inclusive, endBin_exclusive);
+			this.objectiveFunctions.add(objFct);
+			// for (Double count : data) {
+			// this.sumOfEvaluatedResidualsAtZeroSimulation +=
+			// this.residualEvaluator.apply(count);
+			// }
+			for (int bin = startBin_inclusive; bin < endBin_exclusive; bin++) {
+				this.sumOfEvaluatedResidualsAtZeroSimulation += this.residualEvaluator.apply(data[bin]);
 			}
 		}
 	}
