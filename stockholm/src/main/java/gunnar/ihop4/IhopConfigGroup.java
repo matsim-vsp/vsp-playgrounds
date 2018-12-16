@@ -55,6 +55,22 @@ public class IhopConfigGroup extends ReflectiveConfigGroup {
 		return this.tollZoneCountsFolder;
 	}
 
+	// -------------------- tollZoneTimeIntervall --------------------
+
+	public enum TollZoneTimeIntervallType {morningPeak, eveningPeak, bothPeaks, allDay};
+
+	private TollZoneTimeIntervallType tollZoneTimeIntervall = null;
+	
+	@StringSetter("tollZoneTimeIntervall")
+	public void setTollZoneTimeIntervall(final TollZoneTimeIntervallType tollZoneTimeIntervall) {
+		this.tollZoneTimeIntervall = tollZoneTimeIntervall;
+	}
+
+	@StringGetter("tollZoneTimeIntervall")
+	public TollZoneTimeIntervallType getTollZoneTimeIntervall() {
+		return this.tollZoneTimeIntervall;
+	}
+
 	// -------------------- simulatedPopulationShare --------------------
 
 	private Double simulatedPopulationShare = null;

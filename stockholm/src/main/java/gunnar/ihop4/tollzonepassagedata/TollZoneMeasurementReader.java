@@ -39,6 +39,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.vehicles.Vehicle;
 
+import cadyts.utilities.misc.Units;
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.TimeDiscretization;
 import gunnar.ihop4.IhopConfigGroup;
@@ -64,6 +65,10 @@ public class TollZoneMeasurementReader {
 
 	// -------------------- MEMBERS --------------------
 
+	private int startTime_s = 0;
+	
+	private int endTime_s = (int) Units.S_PER_D;
+	
 	private CountMeasurements allDayMeasurements = null;
 
 	private CountMeasurements onlyTollTimeMeasurements = null;
@@ -86,6 +91,11 @@ public class TollZoneMeasurementReader {
 
 	// -------------------- IMPLEMENTATION --------------------
 
+	public void setStartEndTime_s(final int startTime_s, final int endTime_s) {
+		this.startTime_s = startTime_s;
+		this.endTime_s = endTime_s;
+	}
+	
 	private void replaceByInterpolation(final DynamicData<String> data, final int interpolateTime_s) {
 		int bin = data.bin(interpolateTime_s);
 		for (String key : data.keySet()) {
@@ -200,8 +210,8 @@ public class TollZoneMeasurementReader {
 			}
 		}
 
-		this.allDayMeasurements.build();
-		this.onlyTollTimeMeasurements.build();
+		this.allDayMeasurements.build(this.startTime_s, this.endTime_s);
+		this.onlyTollTimeMeasurements.build(this.startTime_s, this.endTime_s);
 
 		System.out.println("\nALL-DAY SENSORS");
 		for (LinkEntryCountDeviationObjectiveFunction objFct : this.allDayMeasurements.getObjectiveFunctions()) {
