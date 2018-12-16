@@ -22,6 +22,8 @@ package gunnar.ihop4;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -65,6 +67,7 @@ import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.roadpricing.ControlerDefaultsWithRoadPricingModule;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 
+import cadyts.utilities.misc.Units;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.utilities.TimeDiscretization;
 import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
@@ -211,6 +214,37 @@ public class IHOP4ProductionRunner {
 
 	// ==================== CALIBRATE ====================
 
+	static void readAndAddData(final int startTime_s, final int endTime_s,
+			MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction, final List<AbstractModule> modules,
+			final TrajectoryPlotter trajectoryPlotter, final Config config) {
+
+		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
+		measReader.setStartEndTime_s(startTime_s, endTime_s);
+		measReader.run();
+
+		final double normalizingFactor = 1.0
+				/ (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
+						+ measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
+
+		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
+				.getObjectiveFunctions()) {
+			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+		}
+		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
+			modules.add(module);
+		}
+
+		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
+				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
+			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+		}
+		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
+			modules.add(module);
+		}
+	}
+
 	static void calibrate(final Config config) {
 
 		final OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
@@ -257,8 +291,8 @@ public class IHOP4ProductionRunner {
 		// Activity times
 
 		if (ihopConfig.getActivityTimeStepSize_s() != null) {
-			builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config, ihopConfig.getActivityTimeStepSize_s(),
-					0.0));
+			builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config,
+					ihopConfig.getActivityTimeStepSize_s(), 0.0));
 		}
 
 		// SimulatedPopulationShare
@@ -282,26 +316,31 @@ public class IHOP4ProductionRunner {
 
 		// --------------- OBJECTIVE FUNCTION & TRAJECTORY PLOTTING ---------------
 
+		final int morningPeakStart_s = 0;
+		final int morningPeakEnd_s = 10 * 3600 - 1;
+
+		final int eveningPeakStart_s = 15 * 3600;
+		final int eveningPeakEnd_s = (int) Units.S_PER_D - 1;
+
 		final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new MATSimObjectiveFunctionSum<>();
-
+		final List<AbstractModule> modules = new LinkedList<>();
 		final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter(config, 1);
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
-		measReader.run();
 
-		final double normalizingFactor = 1.0
-				/ (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
-						+ measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
-
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
-				.getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
-			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
-		}
-
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
-				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
-			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+		if (IhopConfigGroup.TollZoneTimeIntervallType.allDay.equals(ihopConfig.getTollZoneTimeIntervall())) {
+			readAndAddData(0, (int) Units.S_PER_D, overallObjectiveFunction, modules, trajectoryPlotter, config);
+		} else {
+			if (IhopConfigGroup.TollZoneTimeIntervallType.morningPeak.equals(ihopConfig.getTollZoneTimeIntervall())
+					|| IhopConfigGroup.TollZoneTimeIntervallType.bothPeaks
+							.equals(ihopConfig.getTollZoneTimeIntervall())) {
+				readAndAddData(morningPeakStart_s, morningPeakEnd_s, overallObjectiveFunction, modules,
+						trajectoryPlotter, config);
+			}
+			if (IhopConfigGroup.TollZoneTimeIntervallType.eveningPeak.equals(ihopConfig.getTollZoneTimeIntervall())
+					|| IhopConfigGroup.TollZoneTimeIntervallType.bothPeaks
+							.equals(ihopConfig.getTollZoneTimeIntervall())) {
+				readAndAddData(eveningPeakStart_s, eveningPeakEnd_s, overallObjectiveFunction, modules,
+						trajectoryPlotter, config);
+			}
 		}
 
 		trajectoryPlotter.addSummarizer(new CountTrajectorySummarizer(new TimeDiscretization(0, 1800, 48)));
@@ -316,10 +355,15 @@ public class IHOP4ProductionRunner {
 				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
 			}
 		});
-		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
-			runner.addOverridingModule(module);
-		}
-		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
+		// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
+		// {
+		// runner.addOverridingModule(module);
+		// }
+		// for (AbstractModule module :
+		// measReader.getOnlyTollTimeMeasurements().getModules()) {
+		// runner.addOverridingModule(module);
+		// }
+		for (AbstractModule module : modules) {
 			runner.addOverridingModule(module);
 		}
 		runner.addOverridingModule(new AbstractModule() {
