@@ -19,6 +19,8 @@
  */
 package org.matsim.contrib.pseudosimulation.searchacceleration.logging;
 
+import java.util.List;
+
 import org.matsim.contrib.pseudosimulation.searchacceleration.ReplannerIdentifier;
 import org.matsim.contrib.pseudosimulation.searchacceleration.SearchAccelerator;
 
@@ -152,6 +154,10 @@ public class LogDataWrapper {
 
 	public Integer getNumberOfConvergedAgents() {
 		return this.accelerator.getNumberOfConvergedAgents();
+	}
+	
+	public List<Integer> getSortedAgesView() {
+		return this.accelerator.getSortedAgesView();
 	}
 
 }

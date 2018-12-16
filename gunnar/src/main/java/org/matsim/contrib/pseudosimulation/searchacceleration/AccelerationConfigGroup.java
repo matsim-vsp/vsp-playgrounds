@@ -356,6 +356,20 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		this.individualConvergenceIterations = individualConvergenceIterations;
 	}
 
+	// -------------------- ageInertia --------------------
+
+	private double ageInertia = 1.0;
+
+	@StringGetter("ageInertia")
+	public double getAgeInertia() {
+		return this.ageInertia;
+	}
+
+	@StringSetter("ageInertia")
+	public void setAgeInertia(final double ageInertia) {
+		this.ageInertia = ageInertia;
+	}
+
 	// -------------------- separateOutConvergedAgents --------------------
 	//
 	// private boolean separateOutConvergedAgents = true;

@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,9 +46,11 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSim;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
+import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Ages;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Utilities;
 import org.matsim.contrib.pseudosimulation.searchacceleration.listeners.SlotUsageListener;
+import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AgesPercentile;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.AverageUtility;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DriversInPhysicalSim;
 import org.matsim.contrib.pseudosimulation.searchacceleration.logging.DriversInPseudoSim;
@@ -137,6 +140,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	private StatisticsWriter<LogDataWrapper> statsWriter;
 
 	private Utilities utilities;
+
+	private Ages ages;
 
 	private RecursiveMovingAverage expectedUtilityChangeSumAccelerated;
 
@@ -247,6 +252,10 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		return this.numberOfConvergedAgents;
 	}
 
+	public List<Integer> getSortedAgesView() {
+		return this.ages.getSortedAgesView();
+	}
+
 	// --------------- IMPLEMENTATION OF StartupListener ---------------
 
 	private AccelerationConfigGroup accelerationConfig = null;
@@ -269,6 +278,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.realizedUtilityChangeSum = new RecursiveMovingAverage(1);
 
 		this.utilities = new Utilities(this.replanningParameters().getIndividualConvergenceIterations());
+		this.ages = new Ages(this.replanningParameters().getAgeInertia(),
+				this.services.getScenario().getPopulation().getPersons().keySet());
 
 		this.statsWriter = new StatisticsWriter<>(
 				new File(this.services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(),
@@ -304,6 +315,10 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.statsWriter.addSearchStatistic(new RealizedDeltaUtility());
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityAccelerated());
+
+		this.statsWriter.addSearchStatistic(new AgesPercentile(1));
+		this.statsWriter.addSearchStatistic(new AgesPercentile(50));
+		this.statsWriter.addSearchStatistic(new AgesPercentile(99));
 	}
 
 	// -------------------- IMPLEMENTATION OF EventHandlers --------------------
@@ -501,6 +516,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds());
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
+			this.ages.update(this.replanners);
 			// this.individualReplanningResultsList =
 			// replannerIdentifier.getIndividualReplanningResultListView();
 
