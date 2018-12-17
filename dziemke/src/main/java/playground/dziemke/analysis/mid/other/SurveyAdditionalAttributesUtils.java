@@ -32,7 +32,7 @@ public class SurveyAdditionalAttributesUtils {
         person.getAttributes().putAttribute(SurveyAdditionalAttributes.AGE, Integer.toString(age));
     }
 
-    public static double getAge(Person person) {
+    public static int getAge(Person person) {
 
         return Integer.parseInt(person.getAttributes().getAttribute(SurveyAdditionalAttributes.AGE).toString());
     }
