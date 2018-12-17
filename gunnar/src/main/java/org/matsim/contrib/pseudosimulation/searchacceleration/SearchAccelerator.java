@@ -87,7 +87,7 @@ import floetteroed.utilities.statisticslogging.TimeStampStatistic;
 /**
  * 
  * @author Gunnar Flötteröd
- *
+ * 
  */
 @Singleton
 public class SearchAccelerator implements StartupListener, IterationEndsListener, LinkEnterEventHandler,
