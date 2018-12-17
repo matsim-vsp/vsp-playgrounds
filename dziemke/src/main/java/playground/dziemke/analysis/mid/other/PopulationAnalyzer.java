@@ -1,12 +1,8 @@
 package playground.dziemke.analysis.mid.other;
 
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.*;
-import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.utils.geometry.CoordUtils;
 import playground.dziemke.analysis.AnalysisFileWriter;
 import playground.dziemke.analysis.AnalysisUtils;
 
@@ -24,8 +20,12 @@ public class PopulationAnalyzer {
 
     private final PopulationAnalyzerBinWidhtConfig config;
 
+    private TripFilter tripFilter;
+
+    private Map<Person, List<Trip>> person2TripsMap = new HashMap<>();
+
     private AnalysisFileWriter writer = new AnalysisFileWriter();
-    private final double aggregatedWeightOfConsideredTrips;
+    private double aggregatedWeightOfConsideredTrips;
 
     PopulationAnalyzer(PopulationAnalyzerBinWidhtConfig config, Population population) {
 
@@ -33,20 +33,15 @@ public class PopulationAnalyzer {
         this.population = population;
         this.source = SurveyAdditionalAttributesUtils.getSource(population);
         this.useWeight = source.equals(SurveyAdditionalAttributes.Source.SRV.name());
-        this.aggregatedWeightOfConsideredTrips = getAggregatedWeight();
     }
 
     private double getAggregatedWeight() {
 
         double aggregatedWeightOfConsideredTrips = 0;
-        for (Person person : population.getPersons().values()) {
 
-            for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
-
-                if (planElement instanceof Leg) {
-
-                    aggregatedWeightOfConsideredTrips += getWeight((Leg) planElement);
-                }
+        for (List<Trip> trips : person2TripsMap.values()) {
+            for (Trip trip : trips) {
+                aggregatedWeightOfConsideredTrips += trip.getWeight();
             }
         }
         return aggregatedWeightOfConsideredTrips;
@@ -54,6 +49,10 @@ public class PopulationAnalyzer {
 
     public void setNetwork(Network network) {
         this.network = network;
+    }
+
+    public void setTripFilter(TripFilter tripFilter) {
+        this.tripFilter = tripFilter;
     }
 
     private boolean isNetworkNeededButNotProvided() {
@@ -69,6 +68,9 @@ public class PopulationAnalyzer {
 
     void analyzeAndWrite(String outputDirectory) {
 
+        fillPerson2TripsMap();
+
+        aggregatedWeightOfConsideredTrips = getAggregatedWeight();
         if (isNetworkNeededButNotProvided()) printNetworkNotProvidedWarning();
         else analyzeAndWriteBeelineDistanceAndSpeed(outputDirectory);
         analyzeAndWriteDuration(outputDirectory);
@@ -79,25 +81,54 @@ public class PopulationAnalyzer {
         }
     }
 
+    private void fillPerson2TripsMap() {
+
+        population.getPersons().values().forEach(person -> {
+
+            List<Trip> personsTrips = new ArrayList<>();
+            List<PlanElement> planElements = person.getSelectedPlan().getPlanElements();
+            for (int i = 0; i < planElements.size(); i++) {
+
+                if (planElements.get(i) instanceof Leg) {
+
+                    assert (planElements.get(i-1) instanceof Activity);
+                    Activity activityBeforeTrip = (Activity)planElements.get(i-1);
+                    Leg leg = (Leg)planElements.get(i);
+                    assert (planElements.get(i+1) instanceof Activity);
+                    Activity activityAfterTrip = (Activity)planElements.get(i+1);
+                    Trip trip = new Trip(activityBeforeTrip, leg, activityAfterTrip, source, useWeight);
+                    trip.setNetwork(network);
+                    if (tripFilter == null || (tripFilter.isTripValid(trip))) personsTrips.add(trip);
+                }
+            }
+
+            person2TripsMap.put(person, personsTrips);
+        });
+    }
+
     private void analyzeAndWriteDuration(String outputDirectory) {
 
         Map<Integer, Double> tripDurationMap = new TreeMap<>();
         List<Double> travelTimes = new ArrayList<>();
-        population.getPersons().values().forEach(person -> {
+        person2TripsMap.values().forEach(trips -> {
 
-            for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
+            trips.forEach(trip -> {
 
-                if (planElement instanceof Leg) {
-
-                    double travelTime = ((Leg) planElement).getTravelTime() / 60;
-                    travelTimes.add(travelTime);
-                    AnalysisUtils.addToMapIntegerKeyCeiling(tripDurationMap, travelTime, config.getBinWidthDuration_min(), getWeight((Leg) planElement));
-                }
-            }
+                double travelTime_min = trip.getTravelTime_h() * 60;
+                travelTimes.add(travelTime_min);
+                AnalysisUtils.addToMapIntegerKeyCeiling(tripDurationMap, travelTime_min, config.getBinWidthDuration_min(), trip.getWeight());
+            });
         });
+
         OptionalDouble average = travelTimes.stream().mapToDouble(a -> a).average();
-        assert average.isPresent();
-        double averageTripDuration = average.getAsDouble();
+        double averageTripDuration;
+        if (!average.isPresent()) {
+            averageTripDuration = -1;
+            log.warn("No average trip duration present.");
+        } else {
+            averageTripDuration = average.getAsDouble();
+        }
+
         writer.writeToFileIntegerKey(tripDurationMap, outputDirectory + "/tripDuration.txt",
                 config.getBinWidthDuration_min(), aggregatedWeightOfConsideredTrips, averageTripDuration);
         writer.writeToFileIntegerKeyCumulative(tripDurationMap, outputDirectory + "/tripDurationCumulative.txt",
@@ -108,20 +139,18 @@ public class PopulationAnalyzer {
     private void analyzeAndWriteDepartureTime(String outputDirectory) {
 
         Map <Integer, Double> departureTimeMap = new TreeMap<>();
-        population.getPersons().values().forEach(person -> {
 
-            for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
+        person2TripsMap.values().forEach(trips -> {
 
-                if (planElement instanceof Leg) {
+            trips.forEach(trip -> {
 
-                    double departureTime_h = ((Leg) planElement).getDepartureTime() / 3600;
+                double departureTime_h = trip.getDepartureTime_h();
 
-        		    // Note: Here, "floor" is used instead of "ceiling". A departure at 6:43 should go into the 6.a.m. bin.
-                    AnalysisUtils.addToMapIntegerKeyFloor(departureTimeMap, departureTime_h, config.getBinWidthTime_h(), getWeight((Leg) planElement));
-                }
-            }
+                // Note: Here, "floor" is used instead of "ceiling". A departure at 6:43 should go into the 6.a.m. bin.
+                AnalysisUtils.addToMapIntegerKeyFloor(departureTimeMap, departureTime_h, config.getBinWidthTime_h(), trip.getWeight());
+
+            });
         });
-
 
         writer.writeToFileIntegerKey(departureTimeMap, outputDirectory + "/departureTime.txt",
                 config.getBinWidthTime_h(), aggregatedWeightOfConsideredTrips, Double.NaN);
@@ -130,18 +159,15 @@ public class PopulationAnalyzer {
     private void analyzeAndWriteActivityTypes(String outputDirectory) {
 
         Map<String, Double> activityTypeMap = new TreeMap<>();
-        population.getPersons().values().forEach(person -> {
 
-            List<PlanElement> planElements = person.getSelectedPlan().getPlanElements();
-            for (int i = 0; i < planElements.size(); i++) {
+        person2TripsMap.values().forEach(trips -> {
 
-                if (planElements.get(i) instanceof Leg) {
+            trips.forEach(trip -> {
 
-                    assert planElements.get(i+1) instanceof Activity;
-                    String activityType = ((Activity) planElements.get(i+1)).getType();
-                    AnalysisUtils.addToMapStringKey(activityTypeMap, activityType, getWeight((Leg) planElements.get(i)));
-                }
-            }
+                String activityType = trip.getActivityTypeAfterTrip();
+                AnalysisUtils.addToMapStringKey(activityTypeMap, activityType, trip.getWeight());
+
+            });
         });
 
         writer.writeToFileStringKey(activityTypeMap, outputDirectory + "/activityTypes.txt", aggregatedWeightOfConsideredTrips);
@@ -157,31 +183,33 @@ public class PopulationAnalyzer {
         Map<Integer, Double> averageTripSpeedMap = new TreeMap<>();
         List<Double> speeds = new ArrayList<>();
 
-        population.getPersons().values().forEach(person -> {
+        person2TripsMap.values().forEach(trips -> {
 
-            for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
+            trips.forEach(trip -> {
 
-                if (planElement instanceof Leg) {
+                //beelineDistance
+                double distanceBeeline_km = trip.getBeelineDistance_km();
+                beelineDistances.add(distanceBeeline_km);
+                AnalysisUtils.addToMapIntegerKeyCeiling(tripDistanceBeelineMap, distanceBeeline_km, config.getBinWidthDistance_km(), trip.getWeight());
 
-                    //beelineDistance
-                    double distanceBeeline_km = getBeelineDistance_m((Leg) planElement) / 1000;
-                    beelineDistances.add(distanceBeeline_km);
-                    AnalysisUtils.addToMapIntegerKeyCeiling(tripDistanceBeelineMap, distanceBeeline_km, config.getBinWidthDistance_km(), getWeight((Leg) planElement));
+                //speed
+                double speed = trip.getSpeed_km_h();
+                speeds.add(speed);
+                AnalysisUtils.addToMapIntegerKeyCeiling(averageTripSpeedMap, speed,
+                        config.getBinWidthSpeed_km_h(), trip.getWeight());
 
-                    //speed
-                    double travelTime_h = ((Leg) planElement).getTravelTime() / 3600;
-                    double speed = distanceBeeline_km / travelTime_h;
-                    speeds.add(speed);
-                    AnalysisUtils.addToMapIntegerKeyCeiling(averageTripSpeedMap, speed,
-                            config.getBinWidthSpeed_km_h(), getWeight((Leg) planElement));
-                }
-            }
+            });
         });
 
         //beelineDistance
-        OptionalDouble average = beelineDistances.stream().mapToDouble(a -> a).average();
-        assert average.isPresent();
-        double averageTripDistanceBeeline_km = average.getAsDouble();
+        OptionalDouble averageDistance = beelineDistances.stream().mapToDouble(a -> a).average();
+        double averageTripDistanceBeeline_km;
+        if (!averageDistance.isPresent()) {
+            averageTripDistanceBeeline_km = -1;
+            log.warn("No average trip duration present.");
+        } else {
+            averageTripDistanceBeeline_km = averageDistance.getAsDouble();
+        }
         writer.writeToFileIntegerKey(tripDistanceBeelineMap, outputDirectory + "/tripDistanceBeeline.txt",
                 config.getBinWidthDistance_km(), aggregatedWeightOfConsideredTrips, averageTripDistanceBeeline_km);
         writer.writeToFileIntegerKeyCumulative(tripDistanceBeelineMap, outputDirectory + "/tripDistanceBeelineCumulative.txt",
@@ -189,9 +217,13 @@ public class PopulationAnalyzer {
 
         //routedSpeed
         OptionalDouble averageSpeed = speeds.stream().mapToDouble(a -> a).average();
-        assert averageSpeed.isPresent();
-        double averageSpeed_km_h = averageSpeed.getAsDouble();
-
+        double averageSpeed_km_h;
+        if (!averageSpeed.isPresent()) {
+            averageSpeed_km_h = -1;
+            log.warn("No average trip duration present.");
+        } else {
+            averageSpeed_km_h = averageSpeed.getAsDouble();
+        }
         writer.writeToFileIntegerKey(averageTripSpeedMap, outputDirectory + "/averageTripSpeedBeeline.txt",
                 config.getBinWidthSpeed_km_h(), aggregatedWeightOfConsideredTrips, averageSpeed_km_h);
         writer.writeToFileIntegerKeyCumulative(averageTripSpeedMap, outputDirectory + "/averageTripSpeedBeelineCumulative.txt",
@@ -208,85 +240,48 @@ public class PopulationAnalyzer {
         Map<Integer, Double> averageTripSpeedRoutedMap = new TreeMap<>();
         List<Double> routedSpeeds = new ArrayList<>();
 
-        population.getPersons().values().forEach(person -> {
+        person2TripsMap.values().forEach(trips -> {
 
-            for (PlanElement planElement : person.getSelectedPlan().getPlanElements()) {
+            trips.forEach(trip -> {
 
-                if (planElement instanceof Leg) {
+                //routedDistance
+                double tripDistanceRouted_km = trip.getRoutedDistance_km();
+                routedDistances.add(tripDistanceRouted_km);
+                AnalysisUtils.addToMapIntegerKeyCeiling(tripDistanceRoutedMap, tripDistanceRouted_km,
+                        config.getBinWidthDistance_km(), trip.getWeight());
 
-                    //routedDistance
-                    Route route = ((Leg) planElement).getRoute();
-                    if (!(route instanceof NetworkRoute)) return;
-                    List<Id<Link>> linkIds =((NetworkRoute) route).getLinkIds();
-                    double tripDistance_m = 0;
-                    if (linkIds.isEmpty()) {
-                        log.warn("List of links is empty.");
-                        return;
-                    }
-                    for (Id<Link> linkId : linkIds) {
-                        Link link = network.getLinks().get(linkId);
-                        tripDistance_m += link.getLength();
-                    }
+                //routedSpeed
+                double routedSpeed = trip.getRoutedSpeed_km_h();
+                routedSpeeds.add(routedSpeed);
+                AnalysisUtils.addToMapIntegerKeyCeiling(averageTripSpeedRoutedMap, routedSpeed,
+                        config.getBinWidthSpeed_km_h(), trip.getWeight());
 
-                    double tripDistanceRouted_km = tripDistance_m / 1000;
-                    routedDistances.add(tripDistanceRouted_km);
-                    AnalysisUtils.addToMapIntegerKeyCeiling(tripDistanceRoutedMap, tripDistanceRouted_km,
-                            config.getBinWidthDistance_km(), getWeight((Leg) planElement));
-
-                    //routedSpeed
-                    double travelTime_h = ((Leg) planElement).getTravelTime() / 3600;
-                    double routedSpeed = tripDistanceRouted_km / travelTime_h;
-                    routedSpeeds.add(routedSpeed);
-                    AnalysisUtils.addToMapIntegerKeyCeiling(averageTripSpeedRoutedMap, routedSpeed,
-                            config.getBinWidthSpeed_km_h(), getWeight((Leg) planElement));
-                }
-            }
+            });
         });
 
         //routedDistance
         OptionalDouble averageDistance = routedDistances.stream().mapToDouble(a -> a).average();
-        assert averageDistance.isPresent();
-        double averageTripDistanceRouted_km = averageDistance.getAsDouble();
+        double averageTripDistanceRouted_km;
+        if (!averageDistance.isPresent()) {
+            averageTripDistanceRouted_km = -1;
+            log.warn("No average trip duration present.");
+        } else {
+            averageTripDistanceRouted_km = averageDistance.getAsDouble();
+        }
         writer.writeToFileIntegerKey(tripDistanceRoutedMap, outputDirectory + "/tripDistanceRouted.txt",
                 config.getBinWidthDistance_km(), aggregatedWeightOfConsideredTrips, averageTripDistanceRouted_km);
 
         //routedSpeed
         OptionalDouble averageSpeed = routedSpeeds.stream().mapToDouble(a -> a).average();
-        assert averageSpeed.isPresent();
-        double averageRoutedSpeed_km_h = averageSpeed.getAsDouble();
-
+        double averageRoutedSpeed_km_h;
+        if (!averageSpeed.isPresent()) {
+            averageRoutedSpeed_km_h = -1;
+            log.warn("No average trip duration present.");
+        } else {
+            averageRoutedSpeed_km_h = averageSpeed.getAsDouble();
+        }
         writer.writeToFileIntegerKey(averageTripSpeedRoutedMap, outputDirectory + "/averageTripSpeedRouted.txt",
                 config.getBinWidthSpeed_km_h(), aggregatedWeightOfConsideredTrips, averageRoutedSpeed_km_h);
     }
-
-    private double getWeight(Leg leg) {
-
-        if (useWeight) {
-            return SurveyAdditionalAttributesUtils.getWeight(leg);
-        } else {
-            return 1;
-        }
-    }
-
-    private double getBeelineDistance_m(Leg leg) {
-
-        //TODO: for the long term use beeline between activities for MATSim source
-        if (source.equals(SurveyAdditionalAttributes.Source.MATSIM.name())) {
-            assert network != null;
-            return calculateBeelineDistance_m(leg.getRoute().getStartLinkId(), leg.getRoute().getEndLinkId());
-        } else {
-            return SurveyAdditionalAttributesUtils.getDistanceBeeline_m(leg);
-        }
-    }
-
-    @Deprecated
-    private double calculateBeelineDistance_m(Id<Link> departureLinkId, Id<Link> arrivalLinkId) {
-
-        Link departureLink = network.getLinks().get(departureLinkId);
-        Link arrivalLink = network.getLinks().get(arrivalLinkId);
-
-        return CoordUtils.calcEuclideanDistance(departureLink.getCoord(), arrivalLink.getCoord());
-    }
-
 
 }
