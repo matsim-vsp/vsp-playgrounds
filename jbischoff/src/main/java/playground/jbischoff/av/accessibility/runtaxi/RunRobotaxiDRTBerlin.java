@@ -39,7 +39,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 public class RunRobotaxiDRTBerlin {
 
     public static void main(String[] args) {
-        for (int i = 3; i < 4; i++) {
+        for (int i = 8; i < 10; i++) {
             String configFile = "D:/runs-svn/avsim/av_accessibility/input/drtconfig.xml";
 
             RunRobotaxiDRTBerlin.run(configFile, false, i);
@@ -51,7 +51,7 @@ public class RunRobotaxiDRTBerlin {
         Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
                 new OTFVisConfigGroup());
         DrtConfigGroup.get(config).setRequestRejection(false);
-        DrtConfigGroup.get(config).setMaxWaitTime(400);
+        DrtConfigGroup.get(config).setMaxWaitTime(180);
         config.controler().setOutputDirectory(config.controler().getOutputDirectory() + run);
         config.plans().setInputFile("taxiplans_" + run + ".xml.gz");
         Controler controler = DrtControlerCreator.createControler(config, false);
