@@ -1,6 +1,7 @@
 package playground.dziemke.analysis.mid.other;
 
 import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 
 public class SurveyAdditionalAttributesUtils {
@@ -24,6 +25,16 @@ public class SurveyAdditionalAttributesUtils {
     public static double getWeight(Population population) {
 
         return Double.parseDouble(population.getAttributes().getAttribute(SurveyAdditionalAttributes.AGGREGATED_WEIGHT).toString());
+    }
+
+    public static void setAge(Person person, int age) {
+
+        person.getAttributes().putAttribute(SurveyAdditionalAttributes.AGE, Integer.toString(age));
+    }
+
+    public static double getAge(Person person) {
+
+        return Integer.parseInt(person.getAttributes().getAttribute(SurveyAdditionalAttributes.AGE).toString());
     }
 
     public static void setWeight(Leg leg, double weight) {

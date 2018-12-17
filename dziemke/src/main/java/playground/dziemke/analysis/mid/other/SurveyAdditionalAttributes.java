@@ -11,6 +11,9 @@ public class SurveyAdditionalAttributes {
     }
     static final String AGGREGATED_WEIGHT = "aggregatedWeightOfAllTrips";
 
+    //person
+    static final String AGE = "age";
+
     //leg
     static final String DISTANCE_BEELINE_M = "distanceBeeline_m";
     static final String SPEED_M_S = "speed_m_s";
