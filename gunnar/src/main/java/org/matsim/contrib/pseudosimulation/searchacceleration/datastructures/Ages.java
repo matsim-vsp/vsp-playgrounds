@@ -21,6 +21,7 @@ package org.matsim.contrib.pseudosimulation.searchacceleration.datastructures;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,4 +78,12 @@ public class Ages {
 		return Collections.unmodifiableList(this.sortedAges);
 	}
 
+	public Map<Id<Person>, Double> getWeightsView() {
+		final Map<Id<Person>, Double> result = new LinkedHashMap<>(this.personId2age.size());
+		for (Id<Person> personId : this.personId2age.keySet()) {
+			// TODO Bad code, getWeight then again accesses personId2age.
+			result.put(personId, this.getWeight(personId));
+		}		
+		return Collections.unmodifiableMap(result);
+	}
 }

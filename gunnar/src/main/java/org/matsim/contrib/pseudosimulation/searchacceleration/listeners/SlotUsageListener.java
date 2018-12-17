@@ -68,10 +68,23 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		this.accelerationConfig = accelerationConfig;
 		this.personId2indicators = new ConcurrentHashMap<>(); // Shared by different listeners.
 		this.privateTrafficLinkUsageListener = new PrivateTrafficLinkUsageListener(
-				this.accelerationConfig.getTimeDiscretization(), population, this.personId2indicators);
+				this.accelerationConfig.getTimeDiscretization(), population, this.personId2indicators,
+				this.accelerationConfig.getLinkWeightView());
 		this.transitVehicleUsageListener = new TransitVehicleUsageListener(
 				this.accelerationConfig.getTimeDiscretization(), population, transitVehicles, this.personId2indicators);
 	}
+
+	// -------------------- SETTERS --------------------
+
+	public void setPersonWeights(final Map<Id<Person>, Double> personWeights) {
+		this.privateTrafficLinkUsageListener.setPersonWeights(personWeights);
+		this.transitVehicleUsageListener.setPersonWeights(personWeights);
+	}
+
+	// public void setSpaceObjectWeight(final Map<Id<?>, Double> spaceObjectWeights)
+	// {
+	// this.spaceObjectWeights = spaceObjectWeights;
+	// }
 
 	// -------------------- CONTENT ACCESS --------------------
 
@@ -80,11 +93,12 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
 
-	public Map<Id<?>, Double> getWeightView() {
-		final Map<Id<?>, Double> result = new LinkedHashMap<>(this.accelerationConfig.getLinkWeightView());
-		result.putAll(this.transitVehicleUsageListener.newTransitWeightView());
-		return result;
-	}
+	// public Map<Id<?>, Double> getWeightView() {
+	// final Map<Id<?>, Double> result = new
+	// LinkedHashMap<>(this.accelerationConfig.getLinkWeightView());
+	// result.putAll(this.transitVehicleUsageListener.newTransitWeightView());
+	// return result;
+	// }
 
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
 
