@@ -70,7 +70,13 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 	private final Map<Id<Vehicle>, Double> vehicleId2entryCnt = new LinkedHashMap<>();
 
 	private final boolean debug = false;
-	
+
+	// 2018-12-17 TODO Assume for now that these are guaranteed to be set after
+	// construction.
+	private Map<Id<Person>, Double> personWeights = null;
+
+	private final Map<Id<Vehicle>, Double> transitVehicleWeights;
+
 	// -------------------- CONSTRUCTION --------------------
 
 	public TransitVehicleUsageListener(final TimeDiscretization timeDiscretization, final Population population,
@@ -83,15 +89,11 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 		Logger.getLogger(this.getClass()).info("registered population size is " + population.getPersons().size());
 		Logger.getLogger(this.getClass())
 				.info("register transit fleet size is " + transitVehicles.getVehicles().size());
+		this.transitVehicleWeights = this.newTransitWeightView();
 	}
 
-	// -------------------- IMPLEMENTATION --------------------
-
-	Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getIndicatorView() {
-		return Collections.unmodifiableMap(this.passengerId2EntryIndicators);
-	}
-
-	Map<Id<Vehicle>, Double> newTransitWeightView() {
+	// TODO This should not be state-dependent!
+	private Map<Id<Vehicle>, Double> newTransitWeightView() {
 
 		final Map<Id<Vehicle>, Double> result = new LinkedHashMap<>();
 		double usedVehiclesOriginalCapacitySum = 0.0;
@@ -134,6 +136,18 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 		return Collections.unmodifiableMap(result);
 	}
 
+	// -------------------- SETTERS -------------------
+
+	public void setPersonWeights(final Map<Id<Person>, Double> personWeights) {
+		this.personWeights = personWeights;
+	}
+
+	// -------------------- IMPLEMENTATION --------------------
+
+	Map<Id<Person>, SpaceTimeIndicators<Id<?>>> getIndicatorView() {
+		return Collections.unmodifiableMap(this.passengerId2EntryIndicators);
+	}
+
 	// --------------- IMPLEMENTATION OF EventHandler INTERFACES ---------------
 
 	@Override
@@ -146,6 +160,7 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 
 	@Override
 	public void handleEvent(final PersonEntersVehicleEvent event) {
+
 		final Id<Vehicle> vehicleId = event.getVehicleId();
 		final Id<Person> passengerId = event.getPersonId();
 
@@ -167,8 +182,11 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 
 					}
 				}
-				indicators.visit(event.getVehicleId(), this.timeDiscretization.getBin(time_s));
+				indicators.visit(event.getVehicleId(), this.timeDiscretization.getBin(time_s),
+						this.personWeights.get(passengerId) * this.transitVehicleWeights.get(vehicleId));
 			}
+
+			throw new RuntimeException("First update transit vehicle weighting; see comment in code.");
 		}
 	}
 
@@ -184,6 +202,9 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 			final double onBoardTime_s = time_s - this.passengerId2lastEntryTime.remove(passengerId);
 			this.vehicleId2sumOfOnboardTimes.put(event.getVehicleId(),
 					this.vehicleId2sumOfOnboardTimes.getOrDefault(vehicleId, 0.0) + onBoardTime_s);
+
+			throw new RuntimeException("First update transit vehicle weighting; see comment in code.");
+
 		}
 	}
 }

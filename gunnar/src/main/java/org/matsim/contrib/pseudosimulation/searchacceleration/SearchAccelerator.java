@@ -280,6 +280,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.utilities = new Utilities(this.replanningParameters().getIndividualConvergenceIterations());
 		this.ages = new Ages(this.replanningParameters().getAgeInertia(),
 				this.services.getScenario().getPopulation().getPersons().keySet());
+		this.slotUsageListener.setPersonWeights(this.ages.getWeightsView());
 
 		this.statsWriter = new StatisticsWriter<>(
 				new File(this.services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(),
@@ -510,13 +511,15 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 			final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.replanningParameters(),
 					event.getIteration(), this.lastPhysicalSlotUsages, lastPseudoSimSlotUsages,
-					this.slotUsageListener.getWeightView(), this.services.getScenario().getPopulation(),
+					// this.slotUsageListener.getWeightView(),
+					this.services.getScenario().getPopulation(),
 					utilityStatsBeforeReplanning.personId2currentDeltaUtility,
 					utilityStatsBeforeReplanning.currentDeltaUtilitySum, // this.currentDelta,
-					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds());
+					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds(), this.ages);
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
 			this.ages.update(this.replanners);
+			this.slotUsageListener.setPersonWeights(this.ages.getWeightsView());
 			// this.individualReplanningResultsList =
 			// replannerIdentifier.getIndividualReplanningResultListView();
 

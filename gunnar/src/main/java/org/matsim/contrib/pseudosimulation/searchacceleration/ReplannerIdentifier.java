@@ -29,6 +29,7 @@ import java.util.Set;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Ages;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.CountIndicatorUtils;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.ScoreUpdater;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
@@ -59,7 +60,7 @@ public class ReplannerIdentifier {
 
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage;
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage;
-	private final Map<Id<?>, Double> slotWeights;
+	// private final Map<Id<?>, Double> slotWeights;
 	private final DynamicData<Id<?>> currentWeightedCounts;
 	private final DynamicData<Id<?>> upcomingWeightedCounts;
 	private final double sumOfWeightedCountDifferences2;
@@ -126,10 +127,11 @@ public class ReplannerIdentifier {
 	ReplannerIdentifier(final AccelerationConfigGroup replanningParameters, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage,
-			final Map<Id<?>, Double> slotWeights, final Population population,
-			final Map<Id<Person>, Double> personId2UtilityChange, final double totalUtilityChange,
+			// final Map<Id<?>, Double> slotWeights,
+			final Population population, final Map<Id<Person>, Double> personId2UtilityChange,
+			final double totalUtilityChange,
 			// final double delta,
-			final Set<Id<Person>> convergedAgentIds, final Set<Id<Person>> nonConvergedAgentIds) {
+			final Set<Id<Person>> convergedAgentIds, final Set<Id<Person>> nonConvergedAgentIds, final Ages ages) {
 
 		this.replanningParameters = replanningParameters;
 		this.population = population;
@@ -138,11 +140,17 @@ public class ReplannerIdentifier {
 
 		this.personId2physicalSlotUsage = personId2physicalSlotUsage;
 		this.personId2pseudoSimSlotUsage = personId2pseudoSimSlotUsage;
-		this.slotWeights = slotWeights;
-		this.currentWeightedCounts = CountIndicatorUtils.newWeightedCounts(this.personId2physicalSlotUsage.values(),
-				slotWeights, this.replanningParameters.getTimeDiscretization());
-		this.upcomingWeightedCounts = CountIndicatorUtils.newWeightedCounts(this.personId2pseudoSimSlotUsage.values(),
-				slotWeights, this.replanningParameters.getTimeDiscretization());
+		// this.slotWeights = slotWeights;
+		// this.currentWeightedCounts =
+		// CountIndicatorUtils.newWeightedCounts(this.personId2physicalSlotUsage.values(),
+		// slotWeights, this.replanningParameters.getTimeDiscretization());
+		this.currentWeightedCounts = CountIndicatorUtils.newCounts(this.replanningParameters.getTimeDiscretization(),
+				this.personId2physicalSlotUsage.values());
+		// this.upcomingWeightedCounts =
+		// CountIndicatorUtils.newWeightedCounts(this.personId2pseudoSimSlotUsage.values(),
+		// slotWeights, this.replanningParameters.getTimeDiscretization());
+		this.upcomingWeightedCounts = CountIndicatorUtils.newCounts(this.replanningParameters.getTimeDiscretization(),
+				this.personId2pseudoSimSlotUsage.values());
 		this.sumOfWeightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
@@ -211,7 +219,9 @@ public class ReplannerIdentifier {
 		for (Id<Person> driverId : allPersonIdsShuffled) {
 
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(driverId),
-					this.personId2pseudoSimSlotUsage.get(driverId), this.slotWeights, this.lambda, this.beta,
+					this.personId2pseudoSimSlotUsage.get(driverId),
+					// this.slotWeights,
+					this.lambda, this.beta,
 					// this.delta,
 					interactionResiduals, inertiaResidual,
 					// regularizationResidual,

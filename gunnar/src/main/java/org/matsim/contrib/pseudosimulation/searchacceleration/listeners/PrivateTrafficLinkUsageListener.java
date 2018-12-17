@@ -60,13 +60,27 @@ class PrivateTrafficLinkUsageListener implements LinkEnterEventHandler, VehicleE
 
 	private final Map<Id<Vehicle>, Id<Person>> privateVehicleId2DriverId = new LinkedHashMap<>();
 
+	// 2018-12-17 TODO Assume for now that these are guaranteed to be set after
+	// construction.
+	private Map<Id<Person>, Double> personWeights = null;
+
+	private final Map<Id<?>, Double> linkWeights;
+
 	// -------------------- CONSTRUCTION --------------------
 
 	PrivateTrafficLinkUsageListener(final TimeDiscretization timeDiscretization, final Population population,
-			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> driverId2indicators) {
+			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> driverId2indicators,
+			final Map<Id<?>, Double> linkWeights) {
 		this.timeDiscretization = timeDiscretization;
 		this.population = population;
 		this.driverId2indicators = driverId2indicators;
+		this.linkWeights = linkWeights;
+	}
+
+	// -------------------- SETTERS -------------------
+
+	public void setPersonWeights(final Map<Id<Person>, Double> personWeights) {
+		this.personWeights = personWeights;
 	}
 
 	// -------------------- RESULT ACCESS --------------------
@@ -86,7 +100,8 @@ class PrivateTrafficLinkUsageListener implements LinkEnterEventHandler, VehicleE
 				indicators = new SpaceTimeIndicators<Id<?>>(this.timeDiscretization.getBinCnt());
 				this.driverId2indicators.put(driverId, indicators);
 			}
-			indicators.visit(linkId, this.timeDiscretization.getBin(time_s));
+			indicators.visit(linkId, this.timeDiscretization.getBin(time_s),
+					this.personWeights.get(driverId) * this.linkWeights.get(linkId));
 		}
 	}
 
@@ -126,7 +141,7 @@ class PrivateTrafficLinkUsageListener implements LinkEnterEventHandler, VehicleE
 		final Controler controler = new Controler(scenario);
 		final TimeDiscretization timeDiscr = new TimeDiscretization(0, 3600, 24);
 		final PrivateTrafficLinkUsageListener loa = new PrivateTrafficLinkUsageListener(timeDiscr,
-				scenario.getPopulation(), new LinkedHashMap<Id<Person>, SpaceTimeIndicators<Id<?>>>());
+				scenario.getPopulation(), new LinkedHashMap<Id<Person>, SpaceTimeIndicators<Id<?>>>(), null);
 		controler.getEvents().addHandler(loa);
 
 		controler.run();

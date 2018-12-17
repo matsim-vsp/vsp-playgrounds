@@ -21,7 +21,6 @@ package org.matsim.contrib.pseudosimulation.searchacceleration.datastructures;
 
 import java.util.Map;
 
-import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 
 import floetteroed.utilities.DynamicData;
@@ -77,7 +76,8 @@ public class ScoreUpdater<L> {
 	// -------------------- CONSTRUCTION --------------------
 
 	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
-			final Map<Id<?>, Double> weights, final double meanLambda, final double beta,
+			// final Map<Id<?>, Double> weights, 
+			final double meanLambda, final double beta,
 			// final double delta,
 			final DynamicData<L> interactionResiduals, final double inertiaResidual,
 			// final double regularizationResidual, 
@@ -95,8 +95,8 @@ public class ScoreUpdater<L> {
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
 
-		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators, weights); // replParams.getLinkWeightView());
-		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators, weights)); // replParams.getLinkWeightView()));
+		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators); // , weights); // replParams.getLinkWeightView());
+		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators)); // , weights)); // replParams.getLinkWeightView()));
 
 		// Update the residuals.
 
