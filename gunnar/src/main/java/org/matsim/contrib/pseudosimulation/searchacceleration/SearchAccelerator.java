@@ -391,7 +391,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			}
 			this.lastAverageUtility /= this.services.getScenario().getPopulation().getPersons().size();
 			// <<<<< This is the actual utility, not the scaled one! <<<<<
-			
+
 		} else {
 			log.info("pseudoSim run in iteration " + event.getIteration() + " ends");
 			if (this.nextMobsimIsExpectedToBePhysical) {
@@ -423,7 +423,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			this.numberOfConvergedAgents = utilityStatsBeforeReplanning.numberOfConvergedAgents;
 
 			// Up to here, everything goes through Utilities
-			
+
 			/*
 			 * Book-keeping and program control parameter update.
 			 */
@@ -440,7 +440,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 				// Update aggregate utility statistics.
 
 				// THESE STATS BECOME MEANINGLESS ONCE THE UTILITIES CLASS SCALES UTILS
-				
+
 				this.realizedUtilityChangeSum.add(utilityStatsBeforeReplanning.currentRealizedUtilitySum
 						- utilityStatsBeforeReplanning.previousRealizedUtilitySum);
 				this.expectedUtilityChangeSumUniform
@@ -514,7 +514,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 					// this.slotUsageListener.getWeightView(),
 					this.services.getScenario().getPopulation(),
 					utilityStatsBeforeReplanning.personId2currentDeltaUtility,
-					utilityStatsBeforeReplanning.currentDeltaUtilitySum, // this.currentDelta,
+					// utilityStatsBeforeReplanning.currentDeltaUtilitySum,
+					// this.currentDelta,
 					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds(), this.ages);
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
