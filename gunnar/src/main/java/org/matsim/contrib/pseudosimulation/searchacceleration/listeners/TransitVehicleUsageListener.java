@@ -81,7 +81,8 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 
 	public TransitVehicleUsageListener(final TimeDiscretization timeDiscretization, final Population population,
 			final Vehicles transitVehicles,
-			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> passengerId2EntryIndicators) {
+			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> passengerId2EntryIndicators,
+			final Map<Id<Person>, Double> personWeights) {
 		this.timeDiscretization = timeDiscretization;
 		this.population = population;
 		this.transitVehicles = transitVehicles;
@@ -90,6 +91,7 @@ class TransitVehicleUsageListener implements PersonEntersVehicleEventHandler, Pe
 		Logger.getLogger(this.getClass())
 				.info("register transit fleet size is " + transitVehicles.getVehicles().size());
 		this.transitVehicleWeights = this.newTransitWeightView();
+		this.personWeights = personWeights;
 	}
 
 	// TODO This should not be state-dependent!

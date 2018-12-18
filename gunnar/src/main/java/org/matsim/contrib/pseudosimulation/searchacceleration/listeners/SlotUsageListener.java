@@ -61,7 +61,7 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	// -------------------- CONSTRUCTION --------------------
 
 	public SlotUsageListener(final Population population, final Vehicles transitVehicles,
-			final AccelerationConfigGroup accelerationConfig) {
+			final AccelerationConfigGroup accelerationConfig, final Map<Id<Person>, Double> personWeights) {
 		if (!SetUtils.disjoint(population.getPersons().keySet(), transitVehicles.getVehicles().keySet())) {
 			throw new RuntimeException("Population ids and transit vehicle ids are not disjoint.");
 		}
@@ -69,9 +69,10 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		this.personId2indicators = new ConcurrentHashMap<>(); // Shared by different listeners.
 		this.privateTrafficLinkUsageListener = new PrivateTrafficLinkUsageListener(
 				this.accelerationConfig.getTimeDiscretization(), population, this.personId2indicators,
-				this.accelerationConfig.getLinkWeightView());
+				this.accelerationConfig.getLinkWeightView(), personWeights);
 		this.transitVehicleUsageListener = new TransitVehicleUsageListener(
-				this.accelerationConfig.getTimeDiscretization(), population, transitVehicles, this.personId2indicators);
+				this.accelerationConfig.getTimeDiscretization(), population, transitVehicles, this.personId2indicators,
+				personWeights);
 	}
 
 	// -------------------- SETTERS --------------------
