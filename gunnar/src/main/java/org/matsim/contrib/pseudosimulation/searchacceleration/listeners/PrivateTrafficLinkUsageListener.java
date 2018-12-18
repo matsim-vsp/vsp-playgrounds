@@ -60,21 +60,20 @@ class PrivateTrafficLinkUsageListener implements LinkEnterEventHandler, VehicleE
 
 	private final Map<Id<Vehicle>, Id<Person>> privateVehicleId2DriverId = new LinkedHashMap<>();
 
-	// 2018-12-17 TODO Assume for now that these are guaranteed to be set after
-	// construction.
-	private Map<Id<Person>, Double> personWeights = null;
-
 	private final Map<Id<?>, Double> linkWeights;
+
+	private Map<Id<Person>, Double> personWeights;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	PrivateTrafficLinkUsageListener(final TimeDiscretization timeDiscretization, final Population population,
-			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> driverId2indicators,
-			final Map<Id<?>, Double> linkWeights) {
+			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> driverId2indicators, final Map<Id<?>, Double> linkWeights,
+			final Map<Id<Person>, Double> personWeights) {
 		this.timeDiscretization = timeDiscretization;
 		this.population = population;
 		this.driverId2indicators = driverId2indicators;
 		this.linkWeights = linkWeights;
+		this.personWeights = personWeights;
 	}
 
 	// -------------------- SETTERS -------------------
@@ -100,8 +99,26 @@ class PrivateTrafficLinkUsageListener implements LinkEnterEventHandler, VehicleE
 				indicators = new SpaceTimeIndicators<Id<?>>(this.timeDiscretization.getBinCnt());
 				this.driverId2indicators.put(driverId, indicators);
 			}
-			indicators.visit(linkId, this.timeDiscretization.getBin(time_s),
-					this.personWeights.get(driverId) * this.linkWeights.get(linkId));
+
+			try {
+
+				indicators.visit(linkId, this.timeDiscretization.getBin(time_s),
+						this.personWeights.get(driverId) * this.linkWeights.get(linkId));
+
+			} catch (Exception e) {
+
+				System.out.println("this.linkWeights   = " + this.linkWeights);
+				System.out.println("this.personWeights = " + this.personWeights);
+
+				System.out.println("linkId   = " + linkId);
+				System.out.println("driverId = " + driverId);
+
+				System.out.println("driver has weight: " + this.personWeights.containsKey(driverId));
+				System.out.println("link has weight: " + this.linkWeights.containsKey(linkId));
+
+				throw e;
+			}
+
 		}
 	}
 
@@ -141,7 +158,7 @@ class PrivateTrafficLinkUsageListener implements LinkEnterEventHandler, VehicleE
 		final Controler controler = new Controler(scenario);
 		final TimeDiscretization timeDiscr = new TimeDiscretization(0, 3600, 24);
 		final PrivateTrafficLinkUsageListener loa = new PrivateTrafficLinkUsageListener(timeDiscr,
-				scenario.getPopulation(), new LinkedHashMap<Id<Person>, SpaceTimeIndicators<Id<?>>>(), null);
+				scenario.getPopulation(), new LinkedHashMap<Id<Person>, SpaceTimeIndicators<Id<?>>>(), null, null);
 		controler.getEvents().addHandler(loa);
 
 		controler.run();
