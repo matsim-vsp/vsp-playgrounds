@@ -37,6 +37,7 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
 
 import floetteroed.utilities.TimeDiscretization;
+import gunnar.ihop4.IhopConfigGroup;
 
 /**
  *
@@ -51,7 +52,12 @@ public class TollZoneMeasurementAnalyzer {
 		final Config config = ConfigUtils.loadConfig(args[0]);
 		final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter(config, 1);
 
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
+		// final TollZoneMeasurementReader measReader = new
+		// TollZoneMeasurementReader(config);
+		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(
+				ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
+				new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24), 1);
+
 		measReader.run();
 		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
 				.getObjectiveFunctions()) {
@@ -81,19 +87,19 @@ public class TollZoneMeasurementAnalyzer {
 		}
 
 		// >>> EVENTS PARSING >>>
-		
+
 		final String path = "/Users/GunnarF/NoBackup/data-workspace/ihop4/2018-12-06/it.2000/";
 		final String eventsFileName = path + "2000.events.xml.gz";
 
 		final EventsManager events = EventsUtils.createEventsManager(config);
-		
+
 		for (EventHandler handler : measReader.getAllDayMeasurements().getHandlers()) {
 			events.addHandler(handler);
 		}
 		for (EventHandler handler : measReader.getOnlyTollTimeMeasurements().getHandlers()) {
 			events.addHandler(handler);
-		}		
-		
+		}
+
 		final MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFileName);
 
@@ -102,12 +108,12 @@ public class TollZoneMeasurementAnalyzer {
 		}
 		for (LinkEntryCounter handler : measReader.getOnlyTollTimeMeasurements().getHandlers()) {
 			handler.notifyAfterMobsim(new AfterMobsimEvent(null, 0));
-		}		
-		
+		}
+
 		// <<< EVENTS PARSING <<<
 
 		trajectoryPlotter.writeToFile(Paths.get("analysis.plot"));
-		
+
 		System.out.println("... DONE");
 	}
 }

@@ -63,12 +63,14 @@ public class TollZoneMeasurementReader {
 
 	private final TimeDiscretization tollTimeOnlyTimeDiscr;
 
+	private final int simulatedSensorDataExtractionInterval;
+
 	// -------------------- MEMBERS --------------------
 
 	private int startTime_s = 0;
-	
+
 	private int endTime_s = (int) Units.S_PER_D;
-	
+
 	private CountMeasurements allDayMeasurements = null;
 
 	private CountMeasurements onlyTollTimeMeasurements = null;
@@ -76,18 +78,22 @@ public class TollZoneMeasurementReader {
 	// -------------------- CONSTRUCTION --------------------
 
 	public TollZoneMeasurementReader(final String path, final Config config, final int maxVehicleLength_m,
-			final TimeDiscretization allDayTimeDiscr, final TimeDiscretization tollTimeOnlyTimeDiscr) {
+			final TimeDiscretization allDayTimeDiscr, final TimeDiscretization tollTimeOnlyTimeDiscr,
+			final int simulatedSensorDataExtractionInterval) {
 		this.pathStr = path;
 		this.config = config;
 		this.maxVehicleLength_m = maxVehicleLength_m;
 		this.allDayTimeDiscr = allDayTimeDiscr;
 		this.tollTimeOnlyTimeDiscr = tollTimeOnlyTimeDiscr;
+		this.simulatedSensorDataExtractionInterval = simulatedSensorDataExtractionInterval;
 	}
 
-	public TollZoneMeasurementReader(final Config config) {
-		this(ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
-				new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24));
-	}
+	// public TollZoneMeasurementReader(final Config config) {
+	// this(ConfigUtils.addOrGetModule(config,
+	// IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
+	// new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 *
+	// 60, 1800, 24));
+	// }
 
 	// -------------------- IMPLEMENTATION --------------------
 
@@ -95,7 +101,7 @@ public class TollZoneMeasurementReader {
 		this.startTime_s = startTime_s;
 		this.endTime_s = endTime_s;
 	}
-	
+
 	private void replaceByInterpolation(final DynamicData<String> data, final int interpolateTime_s) {
 		int bin = data.bin(interpolateTime_s);
 		for (String key : data.keySet()) {
@@ -170,10 +176,15 @@ public class TollZoneMeasurementReader {
 						+ dayCount + " observed days.");
 
 		final IhopConfigGroup ihopConfig = ConfigUtils.addOrGetModule(this.config, IhopConfigGroup.class);
+
 		this.allDayMeasurements = new CountMeasurements(() -> ihopConfig.getSimulatedPopulationShare(),
 				ihopConfig.newCountResidualMagnitudeFunction());
+		this.allDayMeasurements.setSimulatedSensorDataExtractionInterval(this.simulatedSensorDataExtractionInterval);
+
 		this.onlyTollTimeMeasurements = new CountMeasurements(() -> ihopConfig.getSimulatedPopulationShare(),
 				ihopConfig.newCountResidualMagnitudeFunction());
+		this.onlyTollTimeMeasurements
+				.setSimulatedSensorDataExtractionInterval(this.simulatedSensorDataExtractionInterval);
 
 		final DynamicData<String> allData = dataAnalyzer.getData();
 		final Set<String> linksWithDataOutsideOfTollTime = keysWithDataOutsideOfTollTime(allData, 6 * 3600, 19 * 3600);
