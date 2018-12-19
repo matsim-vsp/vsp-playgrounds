@@ -53,8 +53,17 @@ public class BerlinSpatialPlots {
 //	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
 //	private final String runId = "bc-0c";
 	
+//	private final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
+//	private final String runId = "berlin-v5.2-1pct";
+	
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0/";
+//	private final String runId = "savA-0";
+	
 	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2/";
 	private final String runId = "savA-2";
+	
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3/";
+//	private final String runId = "savA-3";
 	
 	private final double countScaleFactor = 10;
 	private static double gridSize ;
@@ -87,7 +96,7 @@ public class BerlinSpatialPlots {
 		inputs.setGridInfo(GridType.SQUARE, gridSize);
 		inputs.setSmoothingRadius(smoothingRadius);
 
-		SpatialInterpolation plot = new SpatialInterpolation(inputs, runDir + "/analysis/spatialPlots/"+noOfBins+"timeBins/");
+		SpatialInterpolation plot = new SpatialInterpolation(inputs, runDir + "/air-pollution-analysis/spatialPlots/"+noOfBins+"timeBins/");
 		
 		Config config = ConfigUtils.loadConfig(runDir + runId + ".output_config.xml");
 		config.plans().setInputFile(null);
@@ -102,7 +111,7 @@ public class BerlinSpatialPlots {
 		Scenario sc = ScenarioUtils.loadScenario(config);
 
 		EmissionTimebinDataWriter writer = new EmissionTimebinDataWriter();
-		writer.openWriter(runDir+"/analysis/spatialPlots/"+noOfBins+"timeBins/"+"viaData_NOX_"+GridType.SQUARE+"_"+gridSize+"_"+smoothingRadius+"_line.txt");
+		writer.openWriter(runDir+"/air-pollution-analysis/spatialPlots/"+noOfBins+"timeBins/"+"viaData_NOX_"+GridType.SQUARE+"_"+gridSize+"_"+smoothingRadius+"_line.txt");
 
 		for (double time :linkEmissions.keySet()){
 			int counter = 0;
@@ -113,7 +122,7 @@ public class BerlinSpatialPlots {
 				if(plot.isInResearchArea(l)){
 					double emiss = 0;
 					if (linkEmissions.get(time).containsKey(id)) {
-						emiss = countScaleFactor * linkEmissions.get(time).get(id).get(WarmPollutant.NOX.toString());
+						emiss = countScaleFactor * linkEmissions.get(time).get(id).get(WarmPollutant.NOX.getText());
 					}
 					plot.processLink(l,  emiss);
 					

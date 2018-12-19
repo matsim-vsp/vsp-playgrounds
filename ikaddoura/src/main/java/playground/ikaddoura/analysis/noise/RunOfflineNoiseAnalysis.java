@@ -68,10 +68,10 @@ public class RunOfflineNoiseAnalysis {
 			log.info("tunnelLinkIdFile: " + tunnelLinkIdFile);
 			
 		} else {
-			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
-			runId = "bc-0c";
+
+			runId = "savA-3";
+			runDirectory = "/Users/ihab/Desktop/ils4/kaddoura/sav-pricing-setupA/output_" + runId + "/";
+			outputDirectory = runDirectory;
 			
 			tunnelLinkIdFile = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/input/berlin-v5.1.tunnel-linkIDs.csv";
 			receiverPointGap = 100.;
@@ -125,12 +125,11 @@ public class RunOfflineNoiseAnalysis {
 		noiseParameters.setTimeBinSizeNoiseComputation(timeBinSize);
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		
 		NoiseOfflineCalculation noiseCalculation = new NoiseOfflineCalculation(scenario, outputDirectory);
 		noiseCalculation.run();	
 		
 		// some processing of the output data
-		String outputFilePath = outputDirectory + "nosie-analysis/";
+		String outputFilePath = outputDirectory + "noise-analysis/";
 		ProcessNoiseImmissions process = new ProcessNoiseImmissions(outputFilePath + "immissions/", outputFilePath + "receiverPoints/receiverPoints.csv", noiseParameters.getReceiverPointGap());
 		process.run();
 				
