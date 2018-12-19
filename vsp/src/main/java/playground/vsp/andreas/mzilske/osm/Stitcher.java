@@ -29,6 +29,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
@@ -128,11 +129,25 @@ public class Stitcher {
 		}
 		List<Id<Link>> links = new ArrayList<Id<Link>>();
 		FreespeedTravelTimeAndDisutility cost = new FreespeedTravelTimeAndDisutility(-1, 0, 0);
-		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(networkForThisRoute, cost, cost);
+		//		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(networkForThisRoute, cost, cost);
+		LeastCostPathCalculator router = new DijkstraFactory().createPathCalculator(network, cost, cost);
 		Iterator<Id<Node>> i = stopNodes.iterator();
 		Node previous = network.getNodes().get(i.next());
+
+//		final Node prev2 = networkForThisRoute.getNodes().get( previous.getId() );
+//		Gbl.assertNotNull( prev2 );
+
 		while (i.hasNext()) {
 			Node next = network.getNodes().get(i.next());
+
+//			final Node next2 = networkForThisRoute.getNodes().get( next.getId() );
+//			Gbl.assertNotNull( next2 );
+
+			// This may have been a bug.  The old router would use the network that was connected to the origin node, _not_ the one that was given by the constructor.
+			// This evidently started being a problem with mode-specific sub-networks.  Christoph found this at some point and put in a test.  Now (many years later) the
+			// code failed that test.  I first tried to repair the nodes, but it turns out that I should not pass the networkForThisRoute but instead the full network to
+			// the router.  kai, dec'18
+
 			Path leastCostPath = router.calcLeastCostPath(previous, next, 0, null, null);
 			if (leastCostPath == null) {
 				System.out.println("No route.");

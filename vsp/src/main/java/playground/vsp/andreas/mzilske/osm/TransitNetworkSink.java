@@ -224,10 +224,10 @@ public class TransitNetworkSink implements Sink {
 				name = name.replace('&', ' ').trim();
 			}
 			String networkOperator = tags.get("network");
-//			System.out.println(networkOperator + " // " + route + " // " + ref + " // " + operator + " // " + name);
+			System.out.println(networkOperator + " // " + route + " // " + ref + " // " + operator + " // " + name);
 			TransitLine line = transitSchedule.getFactory().createTransitLine(Id.create(operator + "-" + route + "-" + ref + "-" + name + "-" + relation.getId(), TransitLine.class));
-			LinkedList<Node> stopsH = new LinkedList<Node>();
-			LinkedList<Node> stopsR = new LinkedList<Node>();
+			LinkedList<Node> stopsH = new LinkedList<>();
+			LinkedList<Node> stopsR = new LinkedList<>();
 			Stitcher stitcher = new Stitcher(network);
 			
 			for (RelationMember relationMember : relation.getMembers()) {
@@ -255,7 +255,7 @@ public class TransitNetworkSink implements Sink {
 						Node node = nodeReader.get(relationMember.getMemberId()).getEntity();
 						Coord coordinate = coordinateTransformation.transform(new Coord(node.getLongitude(), node.getLatitude()));
 						String role = relationMember.getMemberRole();
-						if (role.isEmpty() || role.startsWith("stop")) {
+						if (role.isEmpty() || role.startsWith("stop")  /* || role.startsWith("platform") */ ) {
 							stopsH.addLast(node);
 							stopsR.addFirst(node);
 							stitcher.addForwardStop(node);
