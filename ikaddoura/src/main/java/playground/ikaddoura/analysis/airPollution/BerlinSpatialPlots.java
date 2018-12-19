@@ -56,11 +56,11 @@ public class BerlinSpatialPlots {
 //	private final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
 //	private final String runId = "berlin-v5.2-1pct";
 	
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0/";
-//	private final String runId = "savA-0";
+	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0/";
+	private final String runId = "savA-0";
 	
-	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2/";
-	private final String runId = "savA-2";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2/";
+//	private final String runId = "savA-2";
 	
 //	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3/";
 //	private final String runId = "savA-3";
