@@ -85,7 +85,7 @@ public class LinkEntryCountDeviationObjectiveFunction
 
 	@Override
 	public double value(final MATSimState state) {
-		final int[] simData = this.simulationCounter.getDataOfLastCompletedIteration();
+		final int[] simData = this.simulationCounter.getDataOfLastExtractedIteration();
 		double result = 0;
 		// for (int i = 0; i < this.realData.length; i++) {
 		for (int i = this.startBin; i < this.endBin; i++) {
@@ -113,7 +113,7 @@ public class LinkEntryCountDeviationObjectiveFunction
 
 	@Override
 	public double[] getSimulatedData() {
-		final int[] source = this.simulationCounter.getDataOfLastCompletedIteration();
+		final int[] source = this.simulationCounter.getDataOfLastExtractedIteration();
 		if (source == null) {
 			return null;
 		} else {
@@ -148,7 +148,7 @@ public class LinkEntryCountDeviationObjectiveFunction
 		}
 		result.append("\n");
 		result.append("simu: ");
-		for (int val : this.simulationCounter.getDataOfLastCompletedIteration()) {
+		for (int val : this.simulationCounter.getDataOfLastExtractedIteration()) {
 			result.append("\t" + val / this.simulatedPopulationShare.get());
 		}
 		result.append("\n");

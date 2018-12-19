@@ -37,15 +37,23 @@ public class LinkEntryCounter implements LinkEnterEventHandler, AfterMobsimListe
 
 	private final CountMeasurementSpecification specification;
 
-	private Integer lastCompletedIteration = null;
+	private int simulatedDataExtractionInterval = 1;
 
-	private int[] countsOfLastCompletedIteration = null;
+	private Integer lastExtractedIteration = null;
+
+	private int[] countsOfLastExtractedIteration = null;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public LinkEntryCounter(final CountMeasurementSpecification specification) {
 		this.counter = new Counter(specification.getTimeDiscretization());
 		this.specification = specification;
+	}
+
+	// -------------------- SETTERS --------------------
+
+	public void setSimulatedDataExtractionInterval(final int extractionInterval) {
+		this.simulatedDataExtractionInterval = extractionInterval;
 	}
 
 	// --------------- IMPLEMENTATION OF LinkEnterEventHandler ---------------
@@ -67,23 +75,25 @@ public class LinkEntryCounter implements LinkEnterEventHandler, AfterMobsimListe
 
 	@Override
 	public void notifyAfterMobsim(final AfterMobsimEvent event) {
-		this.lastCompletedIteration = event.getIteration();
-		this.countsOfLastCompletedIteration = new int[this.counter.getData().length];
-		System.arraycopy(this.counter.getData(), 0, this.countsOfLastCompletedIteration, 0,
-				this.counter.getData().length);
+		if (event.getIteration() % this.simulatedDataExtractionInterval == 0) {
+			this.lastExtractedIteration = event.getIteration();
+			this.countsOfLastExtractedIteration = new int[this.counter.getData().length];
+			System.arraycopy(this.counter.getData(), 0, this.countsOfLastExtractedIteration, 0,
+					this.counter.getData().length);
+		}
 	}
-	
+
 	// -------------------- CONTENT ACCESS --------------------
 
 	public CountMeasurementSpecification getSpecification() {
 		return this.specification;
 	}
 
-	public Integer getLastCompletedIteration() {
-		return this.lastCompletedIteration;
+	public Integer getLastExtractedIteration() {
+		return this.lastExtractedIteration;
 	}
 
-	public int[] getDataOfLastCompletedIteration() {
-		return this.countsOfLastCompletedIteration;
+	public int[] getDataOfLastExtractedIteration() {
+		return this.countsOfLastExtractedIteration;
 	}
 }

@@ -244,6 +244,22 @@ public class OpdytsConfigGroup extends ReflectiveConfigGroup {
 		this.enBlockSimulationIterations = enBlockSimulationIterations;
 	}
 
+	// ==================== STATE EXTRACTION OFFSET ====================
+
+	public static final int DEFAULT_STATEEXTRACTIONOFFSET = 0;
+
+	private int stateExtractionOffset = DEFAULT_STATEEXTRACTIONOFFSET;
+
+	@StringGetter("stateExtractionOffset")
+	public int getStateExtractionOffset() {
+		return this.stateExtractionOffset;
+	}
+
+	@StringSetter("stateExtractionOffset")
+	public void setStateExtractionOffset(int stateExtractionOffset) {
+		this.stateExtractionOffset = stateExtractionOffset;
+	}
+
 	// ==================== CONVERGENCE CRITERION ====================
 
 	private enum ConvergenceCriterionType {

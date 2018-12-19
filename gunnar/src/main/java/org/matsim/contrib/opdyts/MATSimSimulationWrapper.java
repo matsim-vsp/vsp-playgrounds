@@ -34,6 +34,8 @@ class MATSimSimulationWrapper<U extends DecisionVariable, X extends SimulatorSta
 
 	private final int numberOfEnBlockMatsimIterations;
 
+	private final int stateExtractionOffset;
+	
 	private DecisionVariable directlyAdjustedDecisionVariable = null;
 
 	private AbstractModule[] replacingModules = null;
@@ -50,11 +52,12 @@ class MATSimSimulationWrapper<U extends DecisionVariable, X extends SimulatorSta
 	// -------------------- CONSTRUCTION --------------------
 
 	MATSimSimulationWrapper(final Scenario scenario, final MATSimStateFactory<U, X> stateFactory,
-			final int numberOfEnBlockMATSimIterations) {
+			final int numberOfEnBlockMATSimIterations, final int stateExtractionOffset) {
 		this.stateFactory = stateFactory;
 		this.scenario = scenario;
 		this.numberOfEnBlockMatsimIterations = numberOfEnBlockMATSimIterations;
-
+		this.stateExtractionOffset = stateExtractionOffset;
+		
 		// Because the simulation is run multiple times.
 		final String outputDirectory = this.scenario.getConfig().controler().getOutputDirectory();
 		this.scenario.getConfig().controler().setOutputDirectory(outputDirectory + "_0");
@@ -119,7 +122,9 @@ class MATSimSimulationWrapper<U extends DecisionVariable, X extends SimulatorSta
 
 		final WireOpdytsIntoMATSimControlerListener<U, X> wireOpdytsIntoMATSimControlerListener = new WireOpdytsIntoMATSimControlerListener<>(
 				trajectorySampler, this.stateFactory, this.simulationStateAnalyzers,
-				this.numberOfEnBlockMatsimIterations, this.directlyAdjustedDecisionVariable);
+				this.numberOfEnBlockMatsimIterations, 
+				this.stateExtractionOffset,
+				this.directlyAdjustedDecisionVariable);
 
 		/*
 		 * (3) Create, configure, and run a new MATSim Controler.

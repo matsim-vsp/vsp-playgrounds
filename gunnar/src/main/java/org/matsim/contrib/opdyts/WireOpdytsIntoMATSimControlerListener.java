@@ -39,6 +39,8 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 
 	private final int numberOfEnBlockMatsimIterations;
 
+	private final int stateExtractionOffset;
+
 	// -------------------- MEMBERS --------------------
 
 	private final TrajectorySampler<U, X> trajectorySampler;
@@ -71,11 +73,14 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 	WireOpdytsIntoMATSimControlerListener(final TrajectorySampler<U, X> trajectorySampler,
 			final MATSimStateFactory<U, X> stateFactory,
 			final List<SimulationMacroStateAnalyzer> simulationStateAnalyzers,
-			final int numberOfEnBlockMatsimIterations, final DecisionVariable directlyAdjustedDecisionVariable) {
+			final int numberOfEnBlockMatsimIterations, 
+			final int stateExtractionOffset,
+			final DecisionVariable directlyAdjustedDecisionVariable) {
 		this.trajectorySampler = trajectorySampler;
 		this.stateFactory = stateFactory;
 		this.simulationStateAnalyzers = simulationStateAnalyzers;
 		this.numberOfEnBlockMatsimIterations = numberOfEnBlockMatsimIterations;
+		this.stateExtractionOffset = stateExtractionOffset;
 		this.directlyAdjustedDecisionVariable = directlyAdjustedDecisionVariable;
 	}
 
@@ -187,9 +192,13 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 				if (this.directlyAdjustedDecisionVariable != null) {
 					this.directlyAdjustedDecisionVariable.implementInSimulation();
 				}
-				
+
 				this.opdytsProgressListener.extractedStateAndCalledTrajectorySampler(event.getIteration());
 			}
+
+		}
+
+		if (event.getIteration() % this.numberOfEnBlockMatsimIterations == this.stateExtractionOffset) {
 
 			/*
 			 * (5) This is before a relevant mobsim iteration. Reset and register the macro
@@ -209,9 +218,9 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 
 		this.opdytsProgressListener.callToNotifyAfterMobsim_opdyts(event);
 
-		if (event.getIteration() % this.numberOfEnBlockMatsimIterations == 0) {
+		if (event.getIteration() % this.numberOfEnBlockMatsimIterations == this.stateExtractionOffset) {
 			/*
-			 * This is after a physical mobsim. Remove the macro state analyzers.
+			 * This is after a relevant mobsim. Remove the macro state analyzers.
 			 */
 			this.opdytsProgressListener.expectToBeAfterAPhysicalMobsimRun(event.getIteration());
 			for (SimulationMacroStateAnalyzer analyzer : this.simulationStateAnalyzers) {
