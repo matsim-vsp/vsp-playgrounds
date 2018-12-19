@@ -49,8 +49,23 @@ public class RunOfflineNoiseAnalysis {
 		
 		if (args.length > 0) {
 						
-			log.warn("Not yet implemented.");
-			throw new RuntimeException();
+			runDirectory = args[0];		
+			log.info("run directory: " + runDirectory);
+						
+			outputDirectory = args[1];		
+			log.info("output directory: " + outputDirectory);
+			
+			runId = args[2];		
+			log.info("run Id: " + runId);
+			
+			receiverPointGap = Double.valueOf(args[3]);		
+			log.info("Receiver point gap: " + receiverPointGap);
+			
+			timeBinSize = Double.valueOf(args[4]);		
+			log.info("Time bin size: " + timeBinSize);
+			
+			tunnelLinkIdFile = args[5];		
+			log.info("tunnelLinkIdFile: " + tunnelLinkIdFile);
 			
 		} else {
 			
