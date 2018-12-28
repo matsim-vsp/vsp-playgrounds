@@ -33,6 +33,8 @@ public class Trip {
     private double routedDistance_km = -1;
     private double routedSpeed_km_h = -1;
 
+    private String mode;
+
     private double weight = -1;
 
     public Trip(Activity activityBeforeTrip, Leg leg, Activity activityAfterTrip, String source, boolean useWeight) {
@@ -97,13 +99,13 @@ public class Trip {
 
     public double getRoutedDistance_km() {
 
-        if (routedDistance_km == -1) calculateRoutedDistance_km();
+        if (routedDistance_km == -1 && areLinkIdsPresent()) calculateRoutedDistance_km();
         return routedDistance_km;
     }
 
     public double getRoutedSpeed_km_h() {
 
-        if (routedSpeed_km_h == -1) calculateRoutedSpeed_km_h();
+        if (routedSpeed_km_h == -1 && areLinkIdsPresent()) calculateRoutedSpeed_km_h();
         return routedSpeed_km_h;
     }
 
@@ -130,6 +132,12 @@ public class Trip {
         } else {
             this.weight = 1;
         }
+    }
+
+    private boolean areLinkIdsPresent() {
+
+        Route route = leg.getRoute();
+        return route instanceof NetworkRoute;
     }
 
     private void calculateRoutedSpeed_km_h() {
