@@ -52,11 +52,11 @@ public class RunODAnalysis {
 		
 		final String zoneId = "SCHLUESSEL";
 		final List<String> modes = new ArrayList<>();
-		modes.add(TransportMode.car);
-		modes.add(TransportMode.pt);
-		modes.add(TransportMode.walk);
-		modes.add("bicycle");
-		modes.add(TransportMode.ride);
+//		modes.add(TransportMode.car);
+//		modes.add(TransportMode.pt);
+//		modes.add(TransportMode.walk);
+//		modes.add("bicycle");
+//		modes.add(TransportMode.ride);
 				
 		ODAnalysis reader = new ODAnalysis(runDirectory, runDirectory, runId, shapeFile, zoneId, modes, helpLegModes, stageActivitySubString);
 		reader.run();

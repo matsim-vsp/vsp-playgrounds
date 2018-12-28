@@ -47,6 +47,8 @@ public class CountMeasurements {
 
 	// -------------------- MEMBERS --------------------
 
+	private int simulatedSensorDataExtractionInterval = 1;
+
 	private List<AbstractModule> modules = null;
 
 	// 2018-12-06 New, for event file analysis.
@@ -62,6 +64,12 @@ public class CountMeasurements {
 			final Function<Double, Double> residualEvaluator) {
 		this.simulatedPopulationShare = simulatedPopulationShare;
 		this.residualEvaluator = residualEvaluator;
+	}
+
+	// -------------------- SETTERS --------------------
+
+	public void setSimulatedSensorDataExtractionInterval(final int extractionInterval) {
+		this.simulatedSensorDataExtractionInterval = extractionInterval;
 	}
 
 	// -------------------- COMPOSITION --------------------
@@ -129,7 +137,10 @@ public class CountMeasurements {
 			if (measSpec2linkEntryCounter.containsKey(spec)) {
 				simCounter = measSpec2linkEntryCounter.get(spec);
 			} else {
+				
 				simCounter = new LinkEntryCounter(spec);
+				simCounter.setSimulatedDataExtractionInterval(this.simulatedSensorDataExtractionInterval);
+				
 				measSpec2linkEntryCounter.put(spec, simCounter);
 				this.modules.add(new AbstractModule() {
 					@Override

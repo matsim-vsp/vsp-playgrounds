@@ -21,6 +21,7 @@ package org.matsim.contrib.pseudosimulation.searchacceleration;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ import java.util.Set;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.Ages;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.CountIndicatorUtils;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.ScoreUpdater;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
@@ -59,15 +61,15 @@ public class ReplannerIdentifier {
 
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage;
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage;
-	private final Map<Id<?>, Double> slotWeights;
+	// private final Map<Id<?>, Double> slotWeights;
 	private final DynamicData<Id<?>> currentWeightedCounts;
 	private final DynamicData<Id<?>> upcomingWeightedCounts;
 	private final double sumOfWeightedCountDifferences2;
 
 	private final double beta;
 
-	private final Map<Id<Person>, Double> personId2utilityChange;
-	private final double totalUtilityChange;
+	private final Map<Id<Person>, Double> personId2ageWeightedUtilityChange;
+	private final double totalAgeWeightedUtilityChange;
 
 	// private Double shareOfScoreImprovingReplanners = null;
 	// private Double score = null;
@@ -126,30 +128,48 @@ public class ReplannerIdentifier {
 	ReplannerIdentifier(final AccelerationConfigGroup replanningParameters, final int iteration,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2physicalSlotUsage,
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage,
-			final Map<Id<?>, Double> slotWeights, final Population population,
-			final Map<Id<Person>, Double> personId2UtilityChange, final double totalUtilityChange,
+			// final Map<Id<?>, Double> slotWeights,
+			final Population population, final Map<Id<Person>, Double> personId2UtilityChange,
+			// final double totalUtilityChange,
 			// final double delta,
-			final Set<Id<Person>> convergedAgentIds, final Set<Id<Person>> nonConvergedAgentIds) {
+			final Set<Id<Person>> convergedAgentIds, final Set<Id<Person>> nonConvergedAgentIds, final Ages ages) {
 
 		this.replanningParameters = replanningParameters;
 		this.population = population;
-		this.personId2utilityChange = personId2UtilityChange;
-		this.totalUtilityChange = totalUtilityChange;
+
+		this.personId2ageWeightedUtilityChange = new LinkedHashMap<>(personId2UtilityChange.size());
+		personId2UtilityChange.entrySet().stream().forEach(entry -> {
+			final Id<Person> personId = entry.getKey();
+			final double weightedUtilityChange = ages.getWeight(personId) * entry.getValue();
+			this.personId2ageWeightedUtilityChange.put(personId, weightedUtilityChange);
+		});
+		// this.personId2utilityChange = personId2UtilityChange;
+		// this.totalUtilityChange = totalUtilityChange;
+		this.totalAgeWeightedUtilityChange = this.personId2ageWeightedUtilityChange.values().stream()
+				.mapToDouble(utlChange -> utlChange).sum();
 
 		this.personId2physicalSlotUsage = personId2physicalSlotUsage;
 		this.personId2pseudoSimSlotUsage = personId2pseudoSimSlotUsage;
-		this.slotWeights = slotWeights;
-		this.currentWeightedCounts = CountIndicatorUtils.newWeightedCounts(this.personId2physicalSlotUsage.values(),
-				slotWeights, this.replanningParameters.getTimeDiscretization());
-		this.upcomingWeightedCounts = CountIndicatorUtils.newWeightedCounts(this.personId2pseudoSimSlotUsage.values(),
-				slotWeights, this.replanningParameters.getTimeDiscretization());
+		// this.slotWeights = slotWeights;
+		// this.currentWeightedCounts =
+		// CountIndicatorUtils.newWeightedCounts(this.personId2physicalSlotUsage.values(),
+		// slotWeights, this.replanningParameters.getTimeDiscretization());
+		this.currentWeightedCounts = CountIndicatorUtils.newCounts(this.replanningParameters.getTimeDiscretization(),
+				this.personId2physicalSlotUsage.values());
+		// this.upcomingWeightedCounts =
+		// CountIndicatorUtils.newWeightedCounts(this.personId2pseudoSimSlotUsage.values(),
+		// slotWeights, this.replanningParameters.getTimeDiscretization());
+		this.upcomingWeightedCounts = CountIndicatorUtils.newCounts(this.replanningParameters.getTimeDiscretization(),
+				this.personId2pseudoSimSlotUsage.values());
 		this.sumOfWeightedCountDifferences2 = CountIndicatorUtils.sumOfDifferences2(this.currentWeightedCounts,
 				this.upcomingWeightedCounts);
 
 		this.convergedAgentIds = convergedAgentIds;
 
 		this.lambda = this.replanningParameters.getMeanReplanningRate(iteration);
-		this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 / this.totalUtilityChange;
+		// this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 /
+		// this.totalUtilityChange;
+		this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 / this.totalAgeWeightedUtilityChange;
 		// this.delta = delta;
 	}
 
@@ -161,7 +181,8 @@ public class ReplannerIdentifier {
 
 		final DynamicData<Id<?>> interactionResiduals = CountIndicatorUtils
 				.newWeightedDifference(this.upcomingWeightedCounts, this.currentWeightedCounts, this.lambda);
-		double inertiaResidual = (1.0 - this.lambda) * this.totalUtilityChange;
+		// double inertiaResidual = (1.0 - this.lambda) * this.totalUtilityChange;
+		double inertiaResidual = (1.0 - this.lambda) * this.totalAgeWeightedUtilityChange;
 		// double regularizationResidual = 0;
 		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
 
@@ -182,9 +203,13 @@ public class ReplannerIdentifier {
 			} else if (AccelerationConfigGroup.ModeType.accelerate == this.replanningParameters.getModeTypeField()) {
 				recipeForNonConvergedAgents = new AccelerationRecipe();
 			} else if (AccelerationConfigGroup.ModeType.mah2007 == this.replanningParameters.getModeTypeField()) {
-				recipeForNonConvergedAgents = new Mah2007Recipe(this.personId2utilityChange, this.lambda);
+				// recipeForNonConvergedAgents = new Mah2007Recipe(this.personId2utilityChange,
+				// this.lambda);
+				recipeForNonConvergedAgents = new Mah2007Recipe(this.personId2ageWeightedUtilityChange, this.lambda);
 			} else if (AccelerationConfigGroup.ModeType.mah2009 == this.replanningParameters.getModeTypeField()) {
-				recipeForNonConvergedAgents = new Mah2009Recipe(this.personId2utilityChange, this.lambda);
+				// recipeForNonConvergedAgents = new Mah2009Recipe(this.personId2utilityChange,
+				// this.lambda);
+				recipeForNonConvergedAgents = new Mah2009Recipe(this.personId2ageWeightedUtilityChange, this.lambda);
 			} else {
 				throw new RuntimeException("Unknown mode: " + this.replanningParameters.getModeTypeField());
 			}
@@ -211,11 +236,15 @@ public class ReplannerIdentifier {
 		for (Id<Person> driverId : allPersonIdsShuffled) {
 
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(driverId),
-					this.personId2pseudoSimSlotUsage.get(driverId), this.slotWeights, this.lambda, this.beta,
+					this.personId2pseudoSimSlotUsage.get(driverId),
+					// this.slotWeights,
+					this.lambda, this.beta,
 					// this.delta,
 					interactionResiduals, inertiaResidual,
 					// regularizationResidual,
-					this.replanningParameters, this.personId2utilityChange.get(driverId), this.totalUtilityChange,
+					this.replanningParameters,
+					// this.personId2utilityChange.get(driverId), this.totalUtilityChange,
+					this.personId2ageWeightedUtilityChange.get(driverId), this.totalAgeWeightedUtilityChange,
 					sumOfInteractionResiduals2);
 
 			// final ScoreUpdater<Id<?>> uniformScoreUpdater = new ScoreUpdater<>(

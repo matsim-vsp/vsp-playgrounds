@@ -97,120 +97,135 @@ public class IHOP4ProductionRunner {
 		log.info("after strict-car filter: " + scenario.getPopulation().getPersons().size());
 	}
 
-	// ==================== SIMULATE ====================
-
-	static void simulate(final Config config) {
-
-		// Greedo.
-
-		final Greedo greedo;
-		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
-			greedo = new Greedo();
-			greedo.setAdjustStrategyWeights(true);
-			greedo.meet(config);
-		} else {
-			greedo = null;
-		}
-
-		// Trajectory plotting.
-
-		final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter(config, 1);
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
-		measReader.run();
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
-				.getObjectiveFunctions()) {
-			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
-		}
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
-				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
-		}
-		trajectoryPlotter.addSummarizer(new CountTrajectorySummarizer(new TimeDiscretization(0, 1800, 48)));
-
-		// Objective function, ONLY FOR EVALUATION.
-
-		final double normalizingFactor = 1.0
-				/ (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
-						+ measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
-
-		final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new MATSimObjectiveFunctionSum<>();
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
-				.getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
-		}
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
-				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
-		}
-
-		// Scenario.
-
-		final Scenario scenario = ScenarioUtils.loadScenario(config);
-		keepOnlyStrictCarUsers(scenario);
-		if (greedo != null) {
-			greedo.meet(scenario);
-		}
-
-		// Controler.
-
-		final Controler controler = new Controler(scenario);
-
-		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
-			controler.addOverridingModule(module);
-		}
-		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
-			controler.addOverridingModule(module);
-		}
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				this.addControlerListenerBinding().toInstance(trajectoryPlotter);
-			}
-		});
-		if (greedo != null) {
-			controler.addOverridingModule(greedo);
-		}
-
-		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
-			controler.addOverridingModule(module);
-		}
-		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
-			controler.addOverridingModule(module);
-		}
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				this.addControlerListenerBinding().toInstance(new StartupListener() {
-					@Override
-					public void notifyStartup(StartupEvent event) {
-						FileUtils.deleteQuietly(new File(config.controler().getOutputDirectory(), "objfct.log"));
-					}
-				});
-				this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
-					@Override
-					public void notifyBeforeMobsim(BeforeMobsimEvent event) {
-						if ((event.getIteration() > 0) && (event.getIteration() % ConfigUtils
-								.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)) {
-							try {
-								FileUtils.writeStringToFile(
-										new File(config.controler().getOutputDirectory(), "objfct.log"),
-										overallObjectiveFunction.value(null) + "\n", true);
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						}
-					}
-				});
-			}
-		});
-
-		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
-
-		// ... and run.
-
-		controler.run();
-
-	}
+	// // ==================== SIMULATE ====================
+	//
+	// static void simulate(final Config config) {
+	//
+	// // Greedo.
+	//
+	// final Greedo greedo;
+	// if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
+	// greedo = new Greedo();
+	// greedo.setAdjustStrategyWeights(true);
+	// greedo.meet(config);
+	// } else {
+	// greedo = null;
+	// }
+	//
+	// // Trajectory plotting.
+	//
+	// final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter(config, 1);
+	// final TollZoneMeasurementReader measReader = new
+	// TollZoneMeasurementReader(config);
+	// measReader.run();
+	// for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent :
+	// measReader.getAllDayMeasurements()
+	// .getObjectiveFunctions()) {
+	// trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+	// }
+	// for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent :
+	// measReader
+	// .getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
+	// trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+	// }
+	// trajectoryPlotter.addSummarizer(new CountTrajectorySummarizer(new
+	// TimeDiscretization(0, 1800, 48)));
+	//
+	// // Objective function, ONLY FOR EVALUATION.
+	//
+	// final double normalizingFactor = 1.0
+	// /
+	// (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
+	// +
+	// measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
+	//
+	// final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new
+	// MATSimObjectiveFunctionSum<>();
+	// for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent :
+	// measReader.getAllDayMeasurements()
+	// .getObjectiveFunctions()) {
+	// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+	// }
+	// for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent :
+	// measReader
+	// .getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
+	// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+	// }
+	//
+	// // Scenario.
+	//
+	// final Scenario scenario = ScenarioUtils.loadScenario(config);
+	// keepOnlyStrictCarUsers(scenario);
+	// if (greedo != null) {
+	// greedo.meet(scenario);
+	// }
+	//
+	// // Controler.
+	//
+	// final Controler controler = new Controler(scenario);
+	//
+	// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
+	// {
+	// controler.addOverridingModule(module);
+	// }
+	// for (AbstractModule module :
+	// measReader.getOnlyTollTimeMeasurements().getModules()) {
+	// controler.addOverridingModule(module);
+	// }
+	// controler.addOverridingModule(new AbstractModule() {
+	// @Override
+	// public void install() {
+	// this.addControlerListenerBinding().toInstance(trajectoryPlotter);
+	// }
+	// });
+	// if (greedo != null) {
+	// controler.addOverridingModule(greedo);
+	// }
+	//
+	// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
+	// {
+	// controler.addOverridingModule(module);
+	// }
+	// for (AbstractModule module :
+	// measReader.getOnlyTollTimeMeasurements().getModules()) {
+	// controler.addOverridingModule(module);
+	// }
+	// controler.addOverridingModule(new AbstractModule() {
+	// @Override
+	// public void install() {
+	// this.addControlerListenerBinding().toInstance(new StartupListener() {
+	// @Override
+	// public void notifyStartup(StartupEvent event) {
+	// FileUtils.deleteQuietly(new File(config.controler().getOutputDirectory(),
+	// "objfct.log"));
+	// }
+	// });
+	// this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
+	// @Override
+	// public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+	// if ((event.getIteration() > 0) && (event.getIteration() % ConfigUtils
+	// .addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0))
+	// {
+	// try {
+	// FileUtils.writeStringToFile(
+	// new File(config.controler().getOutputDirectory(), "objfct.log"),
+	// overallObjectiveFunction.value(null) + "\n", true);
+	// } catch (IOException e) {
+	// throw new RuntimeException(e);
+	// }
+	// }
+	// }
+	// });
+	// }
+	// });
+	//
+	// controler.setModules(new ControlerDefaultsWithRoadPricingModule());
+	//
+	// // ... and run.
+	//
+	// controler.run();
+	//
+	// }
 
 	// ==================== CALIBRATE ====================
 
@@ -218,7 +233,21 @@ public class IHOP4ProductionRunner {
 			MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction, final List<AbstractModule> modules,
 			final TrajectoryPlotter trajectoryPlotter, final Config config) {
 
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(config);
+		final int simulatedSensorDataExtractionInterval;
+		if (config.getModules().containsKey(PSimConfigGroup.GROUP_NAME)) {
+			simulatedSensorDataExtractionInterval = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class)
+					.getIterationsPerCycle();
+		} else {
+			simulatedSensorDataExtractionInterval = 1;
+		}
+
+		// final TollZoneMeasurementReader measReader = new
+		// TollZoneMeasurementReader(config);
+		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(
+				ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
+				new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24),
+				simulatedSensorDataExtractionInterval);
+
 		measReader.setStartEndTime_s(startTime_s, endTime_s);
 		measReader.run();
 
@@ -245,9 +274,181 @@ public class IHOP4ProductionRunner {
 		}
 	}
 
-	static void calibrate(final Config config) {
+	// static void calibrate(final Config config) {
+	//
+	// final OpdytsGreedoProgressListener progressListener = new
+	// OpdytsGreedoProgressListener("progress.log");
+	//
+	// // Greedo
+	//
+	// final Greedo greedo;
+	// if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
+	// greedo = new Greedo();
+	// greedo.setAdjustStrategyWeights(true);
+	// greedo.setGreedoProgressListener(progressListener);
+	// greedo.meet(config);
+	// } else {
+	// greedo = null;
+	// }
+	//
+	// // Configuration
+	//
+	// final OpdytsConfigGroup opdytsConfig = ConfigUtils.addOrGetModule(config,
+	// OpdytsConfigGroup.class);
+	// if (greedo != null) {
+	// opdytsConfig.setEnBlockSimulationIterations(
+	// ConfigUtils.addOrGetModule(config,
+	// PSimConfigGroup.class).getIterationsPerCycle());
+	// }
+	// final IhopConfigGroup ihopConfig = ConfigUtils.addOrGetModule(config,
+	// IhopConfigGroup.class);
+	//
+	// // Scenario
+	//
+	// final Scenario scenario = ScenarioUtils.loadScenario(config);
+	// keepOnlyStrictCarUsers(scenario);
+	// if (greedo != null) {
+	// greedo.meet(scenario);
+	// }
+	//
+	// // -------------------- DECISION VARIABLES --------------------
+	//
+	// final CompositeDecisionVariableBuilder builder = new
+	// CompositeDecisionVariableBuilder();
+	//
+	// // Performing
+	// if (ihopConfig.getPerformingStepSize_utils_hr() != null) {
+	// builder.add(new PerformingCoefficient(config,
+	// config.planCalcScore().getPerforming_utils_hr()),
+	// new ScalarRandomizer<>(ihopConfig.getPerformingStepSize_utils_hr()));
+	// }
+	//
+	// // Activity times
+	//
+	// if (ihopConfig.getActivityTimeStepSize_s() != null) {
+	// builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config,
+	// ihopConfig.getActivityTimeStepSize_s(), 0.0));
+	// }
+	//
+	// // SimulatedPopulationShare
+	//
+	// if (ihopConfig.getSimulatedPopulationShareStepSize() != null) {
+	// builder.add(
+	// new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(),
+	// new Consumer<Double>() {
+	// @Override
+	// public void accept(Double simulatedPopulationShare) {
+	// ihopConfig.setSimulatedPopulationShare(simulatedPopulationShare);
+	// }
+	// }), new
+	// ScalarRandomizer<>(ihopConfig.getSimulatedPopulationShareStepSize()));
+	// }
+	//
+	// // Build decision variable and matching randomizer.
+	//
+	// final CompositeDecisionVariable decisionVariable =
+	// builder.buildDecisionVariable();
+	//
+	// final DecisionVariableRandomizer<CompositeDecisionVariable>
+	// decisionVariableRandomizer = ConfigUtils
+	// .addOrGetModule(config,
+	// IhopConfigGroup.class).newDecisionVariableRandomizer();
+	//
+	// // --------------- OBJECTIVE FUNCTION & TRAJECTORY PLOTTING ---------------
+	//
+	// final int morningPeakStart_s = 0;
+	// final int morningPeakEnd_s = 10 * 3600 - 1;
+	//
+	// final int eveningPeakStart_s = 15 * 3600;
+	// final int eveningPeakEnd_s = (int) Units.S_PER_D - 1;
+	//
+	// final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new
+	// MATSimObjectiveFunctionSum<>();
+	// final List<AbstractModule> modules = new LinkedList<>();
+	// final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter(config, 1);
+	//
+	// if
+	// (IhopConfigGroup.TollZoneTimeIntervallType.allDay.equals(ihopConfig.getTollZoneTimeIntervall()))
+	// {
+	// readAndAddData(0, (int) Units.S_PER_D, overallObjectiveFunction, modules,
+	// trajectoryPlotter, config);
+	// } else {
+	// if
+	// (IhopConfigGroup.TollZoneTimeIntervallType.morningPeak.equals(ihopConfig.getTollZoneTimeIntervall())
+	// || IhopConfigGroup.TollZoneTimeIntervallType.bothPeaks
+	// .equals(ihopConfig.getTollZoneTimeIntervall())) {
+	// readAndAddData(morningPeakStart_s, morningPeakEnd_s,
+	// overallObjectiveFunction, modules,
+	// trajectoryPlotter, config);
+	// }
+	// if
+	// (IhopConfigGroup.TollZoneTimeIntervallType.eveningPeak.equals(ihopConfig.getTollZoneTimeIntervall())
+	// || IhopConfigGroup.TollZoneTimeIntervallType.bothPeaks
+	// .equals(ihopConfig.getTollZoneTimeIntervall())) {
+	// readAndAddData(eveningPeakStart_s, eveningPeakEnd_s,
+	// overallObjectiveFunction, modules,
+	// trajectoryPlotter, config);
+	// }
+	// }
+	//
+	// trajectoryPlotter.addSummarizer(new CountTrajectorySummarizer(new
+	// TimeDiscretization(0, 1800, 48)));
+	//
+	// // -------------------- OPDYTS RUNNER --------------------
+	//
+	// final MATSimOpdytsRunner<CompositeDecisionVariable, MATSimState> runner = new
+	// MATSimOpdytsRunner<>(scenario,
+	// new MATSimStateFactoryImpl<>());
+	// runner.addOverridingModule(new AbstractModule() {
+	// @Override
+	// public void install() {
+	// bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
+	// }
+	// });
+	// // for (AbstractModule module :
+	// measReader.getAllDayMeasurements().getModules())
+	// // {
+	// // runner.addOverridingModule(module);
+	// // }
+	// // for (AbstractModule module :
+	// // measReader.getOnlyTollTimeMeasurements().getModules()) {
+	// // runner.addOverridingModule(module);
+	// // }
+	// for (AbstractModule module : modules) {
+	// runner.addOverridingModule(module);
+	// }
+	// runner.addOverridingModule(new AbstractModule() {
+	// @Override
+	// public void install() {
+	// this.addControlerListenerBinding().toInstance(trajectoryPlotter);
+	// }
+	// });
+	// if (greedo != null) {
+	// // runner.addWantsControlerReferenceBeforeInjection(greedo);
+	// runner.addOverridingModule(greedo);
+	// }
+	//
+	// runner.setReplacingModules(new ControlerDefaultsWithRoadPricingModule());
+	//
+	// runner.setOpdytsProgressListener(progressListener);
+	//
+	// // runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1e5)); //
+	// square
+	// // runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1000.0)); //
+	// // absolute
+	// // runner.setConvergenceCriterion(new
+	// // FixedIterationNumberConvergenceCriterion(2, 1));
+	//
+	// runner.run(decisionVariableRandomizer, decisionVariable,
+	// overallObjectiveFunction);
+	// }
 
-		final OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener("progress.log");
+	static void run(final Config config) {
+
+		final boolean optimize = config.getModules().containsKey(OpdytsConfigGroup.GROUP_NAME);
+
+		final OpdytsGreedoProgressListener progressListener = new OpdytsGreedoProgressListener(
+				new File(config.controler().getOutputDirectory(), "progress.log").toString());
 
 		// Greedo
 
@@ -263,11 +464,16 @@ public class IHOP4ProductionRunner {
 
 		// Configuration
 
-		final OpdytsConfigGroup opdytsConfig = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.class);
-		if (greedo != null) {
-			opdytsConfig.setEnBlockSimulationIterations(
-					ConfigUtils.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle());
-		}
+		// if (optimize) {
+		// final OpdytsConfigGroup opdytsConfig = ConfigUtils.addOrGetModule(config,
+		// OpdytsConfigGroup.class);
+		// if (greedo != null) {
+		// opdytsConfig.setEnBlockSimulationIterations(
+		// ConfigUtils.addOrGetModule(config,
+		// PSimConfigGroup.class).getIterationsPerCycle());
+		// }
+		// }
+
 		final IhopConfigGroup ihopConfig = ConfigUtils.addOrGetModule(config, IhopConfigGroup.class);
 
 		// Scenario
@@ -280,39 +486,51 @@ public class IHOP4ProductionRunner {
 
 		// -------------------- DECISION VARIABLES --------------------
 
-		final CompositeDecisionVariableBuilder builder = new CompositeDecisionVariableBuilder();
+		final CompositeDecisionVariable decisionVariable;
+		final DecisionVariableRandomizer<CompositeDecisionVariable> decisionVariableRandomizer;
 
-		// Performing
-		if (ihopConfig.getPerformingStepSize_utils_hr() != null) {
-			builder.add(new PerformingCoefficient(config, config.planCalcScore().getPerforming_utils_hr()),
-					new ScalarRandomizer<>(ihopConfig.getPerformingStepSize_utils_hr()));
+		if (optimize) {
+
+			final CompositeDecisionVariableBuilder builder = new CompositeDecisionVariableBuilder();
+
+			// Performing
+			if (ihopConfig.getPerformingStepSize_utils_hr() != null) {
+				builder.add(new PerformingCoefficient(config, config.planCalcScore().getPerforming_utils_hr()),
+						new ScalarRandomizer<>(ihopConfig.getPerformingStepSize_utils_hr()));
+			}
+
+			// Activity times
+
+			if (ihopConfig.getActivityTimeStepSize_s() != null) {
+				builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config,
+						ihopConfig.getActivityTimeStepSize_s(), 0.0));
+			}
+
+			// SimulatedPopulationShare
+
+			if (ihopConfig.getSimulatedPopulationShareStepSize() != null) {
+				builder.add(new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(),
+						new Consumer<Double>() {
+							@Override
+							public void accept(Double simulatedPopulationShare) {
+								ihopConfig.setSimulatedPopulationShare(simulatedPopulationShare);
+							}
+						}), new ScalarRandomizer<>(ihopConfig.getSimulatedPopulationShareStepSize()));
+			}
+
+			// Build decision variable and matching randomizer.
+
+			decisionVariable = builder.buildDecisionVariable();
+
+			decisionVariableRandomizer = ConfigUtils.addOrGetModule(config, IhopConfigGroup.class)
+					.newDecisionVariableRandomizer();
+
+		} else {
+
+			decisionVariable = null;
+			decisionVariableRandomizer = null;
+
 		}
-
-		// Activity times
-
-		if (ihopConfig.getActivityTimeStepSize_s() != null) {
-			builder.add(ActivityTimesUtils.newAllActivityTimesDecisionVariable(config,
-					ihopConfig.getActivityTimeStepSize_s(), 0.0));
-		}
-
-		// SimulatedPopulationShare
-
-		if (ihopConfig.getSimulatedPopulationShareStepSize() != null) {
-			builder.add(
-					new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(), new Consumer<Double>() {
-						@Override
-						public void accept(Double simulatedPopulationShare) {
-							ihopConfig.setSimulatedPopulationShare(simulatedPopulationShare);
-						}
-					}), new ScalarRandomizer<>(ihopConfig.getSimulatedPopulationShareStepSize()));
-		}
-
-		// Build decision variable and matching randomizer.
-
-		final CompositeDecisionVariable decisionVariable = builder.buildDecisionVariable();
-
-		final DecisionVariableRandomizer<CompositeDecisionVariable> decisionVariableRandomizer = ConfigUtils
-				.addOrGetModule(config, IhopConfigGroup.class).newDecisionVariableRandomizer();
 
 		// --------------- OBJECTIVE FUNCTION & TRAJECTORY PLOTTING ---------------
 
@@ -345,49 +563,153 @@ public class IHOP4ProductionRunner {
 
 		trajectoryPlotter.addSummarizer(new CountTrajectorySummarizer(new TimeDiscretization(0, 1800, 48)));
 
-		// -------------------- OPDYTS RUNNER --------------------
+		// -------------------- OPDYTS / PLAIN RUNNER --------------------
 
-		final MATSimOpdytsRunner<CompositeDecisionVariable, MATSimState> runner = new MATSimOpdytsRunner<>(scenario,
-				new MATSimStateFactoryImpl<>());
-		runner.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
+		if (optimize) {
+
+			final MATSimOpdytsRunner<CompositeDecisionVariable, MATSimState> runner = new MATSimOpdytsRunner<>(scenario,
+					new MATSimStateFactoryImpl<>());
+			runner.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					bind(ScoringParametersForPerson.class).to(EveryIterationScoringParameters.class);
+				}
+			});
+			// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
+			// {
+			// runner.addOverridingModule(module);
+			// }
+			// for (AbstractModule module :
+			// measReader.getOnlyTollTimeMeasurements().getModules()) {
+			// runner.addOverridingModule(module);
+			// }
+			for (AbstractModule module : modules) {
+				runner.addOverridingModule(module);
 			}
-		});
-		// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
-		// {
-		// runner.addOverridingModule(module);
-		// }
-		// for (AbstractModule module :
-		// measReader.getOnlyTollTimeMeasurements().getModules()) {
-		// runner.addOverridingModule(module);
-		// }
-		for (AbstractModule module : modules) {
-			runner.addOverridingModule(module);
-		}
-		runner.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				this.addControlerListenerBinding().toInstance(trajectoryPlotter);
+			runner.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					this.addControlerListenerBinding().toInstance(trajectoryPlotter);
+				}
+			});
+			if (greedo != null) {
+				// runner.addWantsControlerReferenceBeforeInjection(greedo);
+				runner.addOverridingModule(greedo);
 			}
-		});
-		if (greedo != null) {
-			// runner.addWantsControlerReferenceBeforeInjection(greedo);
-			runner.addOverridingModule(greedo);
+
+			// >>>> TODO FOR TESTING >>>>
+
+			runner.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					this.addControlerListenerBinding().toInstance(new StartupListener() {
+						@Override
+						public void notifyStartup(StartupEvent event) {
+							FileUtils.deleteQuietly(new File(config.controler().getOutputDirectory(), "objfct.log"));
+						}
+					});
+					this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
+						@Override
+						public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+							if ((event.getIteration() > 0)
+							// && (event.getIteration() % ConfigUtils
+							// .addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)
+							) {
+								try {
+									FileUtils.writeStringToFile(
+											new File(config.controler().getOutputDirectory(), "objfct.log"),
+											overallObjectiveFunction.value(null) + "\n", true);
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+						}
+					});
+				}
+			});
+
+			// <<<< TODO FOR TESTING <<<<
+
+			runner.setReplacingModules(new ControlerDefaultsWithRoadPricingModule());
+
+			runner.setOpdytsProgressListener(progressListener);
+
+			// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1e5)); // square
+			// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1000.0)); //
+			// absolute
+			// runner.setConvergenceCriterion(new
+			// FixedIterationNumberConvergenceCriterion(2, 1));
+
+			runner.run(decisionVariableRandomizer, decisionVariable, overallObjectiveFunction);
+
+		} else {
+
+			final Controler controler = new Controler(scenario);
+
+			// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
+			// {
+			// controler.addOverridingModule(module);
+			// }
+			// for (AbstractModule module :
+			// measReader.getOnlyTollTimeMeasurements().getModules()) {
+			// controler.addOverridingModule(module);
+			// }
+			for (AbstractModule module : modules) {
+				controler.addOverridingModule(module);
+			}
+
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					this.addControlerListenerBinding().toInstance(trajectoryPlotter);
+				}
+			});
+			if (greedo != null) {
+				controler.addOverridingModule(greedo);
+			}
+
+			// for (AbstractModule module : measReader.getAllDayMeasurements().getModules())
+			// {
+			// controler.addOverridingModule(module);
+			// }
+			// for (AbstractModule module :
+			// measReader.getOnlyTollTimeMeasurements().getModules()) {
+			// controler.addOverridingModule(module);
+			// }
+			controler.addOverridingModule(new AbstractModule() {
+				@Override
+				public void install() {
+					this.addControlerListenerBinding().toInstance(new StartupListener() {
+						@Override
+						public void notifyStartup(StartupEvent event) {
+							FileUtils.deleteQuietly(new File(config.controler().getOutputDirectory(), "objfct.log"));
+						}
+					});
+					this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
+						@Override
+						public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+							if ((event.getIteration() > 0) && (event.getIteration() % ConfigUtils
+									.addOrGetModule(config, PSimConfigGroup.class).getIterationsPerCycle() == 0)) {
+								try {
+									FileUtils.writeStringToFile(
+											new File(config.controler().getOutputDirectory(), "objfct.log"),
+											overallObjectiveFunction.value(null) + "\n", true);
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+						}
+					});
+				}
+			});
+
+			controler.setModules(new ControlerDefaultsWithRoadPricingModule());
+
+			// ... and run.
+
+			controler.run();
+
 		}
-
-		runner.setReplacingModules(new ControlerDefaultsWithRoadPricingModule());
-
-		runner.setOpdytsProgressListener(progressListener);
-
-		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1e5)); // square
-		// runner.setConvergenceCriterion(new AR1ConvergenceCriterion(1000.0)); //
-		// absolute
-		// runner.setConvergenceCriterion(new
-		// FixedIterationNumberConvergenceCriterion(2, 1));
-
-		runner.run(decisionVariableRandomizer, decisionVariable, overallObjectiveFunction);
 	}
 
 	public static void main(String[] args) {
@@ -399,11 +721,13 @@ public class IHOP4ProductionRunner {
 			throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
 		}
 
-		if (config.getModules().containsKey(OpdytsConfigGroup.GROUP_NAME)) {
-			calibrate(config);
-		} else {
-			simulate(config);
-		}
+		// if (config.getModules().containsKey(OpdytsConfigGroup.GROUP_NAME)) {
+		// calibrate(config);
+		// } else {
+		// simulate(config);
+		// }
+
+		run(config);
 
 	}
 }

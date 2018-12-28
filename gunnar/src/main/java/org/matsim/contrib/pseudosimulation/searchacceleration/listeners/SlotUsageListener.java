@@ -61,17 +61,31 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	// -------------------- CONSTRUCTION --------------------
 
 	public SlotUsageListener(final Population population, final Vehicles transitVehicles,
-			final AccelerationConfigGroup accelerationConfig) {
+			final AccelerationConfigGroup accelerationConfig, final Map<Id<Person>, Double> personWeights) {
 		if (!SetUtils.disjoint(population.getPersons().keySet(), transitVehicles.getVehicles().keySet())) {
 			throw new RuntimeException("Population ids and transit vehicle ids are not disjoint.");
 		}
 		this.accelerationConfig = accelerationConfig;
 		this.personId2indicators = new ConcurrentHashMap<>(); // Shared by different listeners.
 		this.privateTrafficLinkUsageListener = new PrivateTrafficLinkUsageListener(
-				this.accelerationConfig.getTimeDiscretization(), population, this.personId2indicators);
+				this.accelerationConfig.getTimeDiscretization(), population, this.personId2indicators,
+				this.accelerationConfig.getLinkWeightView(), personWeights);
 		this.transitVehicleUsageListener = new TransitVehicleUsageListener(
-				this.accelerationConfig.getTimeDiscretization(), population, transitVehicles, this.personId2indicators);
+				this.accelerationConfig.getTimeDiscretization(), population, transitVehicles, this.personId2indicators,
+				personWeights);
 	}
+
+	// -------------------- SETTERS --------------------
+
+	public void setPersonWeights(final Map<Id<Person>, Double> personWeights) {
+		this.privateTrafficLinkUsageListener.setPersonWeights(personWeights);
+		this.transitVehicleUsageListener.setPersonWeights(personWeights);
+	}
+
+	// public void setSpaceObjectWeight(final Map<Id<?>, Double> spaceObjectWeights)
+	// {
+	// this.spaceObjectWeights = spaceObjectWeights;
+	// }
 
 	// -------------------- CONTENT ACCESS --------------------
 
@@ -80,11 +94,12 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
 
-	public Map<Id<?>, Double> getWeightView() {
-		final Map<Id<?>, Double> result = new LinkedHashMap<>(this.accelerationConfig.getLinkWeightView());
-		result.putAll(this.transitVehicleUsageListener.newTransitWeightView());
-		return result;
-	}
+	// public Map<Id<?>, Double> getWeightView() {
+	// final Map<Id<?>, Double> result = new
+	// LinkedHashMap<>(this.accelerationConfig.getLinkWeightView());
+	// result.putAll(this.transitVehicleUsageListener.newTransitWeightView());
+	// return result;
+	// }
 
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
 

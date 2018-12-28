@@ -87,7 +87,7 @@ import floetteroed.utilities.statisticslogging.TimeStampStatistic;
 /**
  * 
  * @author Gunnar Flötteröd
- *
+ * 
  */
 @Singleton
 public class SearchAccelerator implements StartupListener, IterationEndsListener, LinkEnterEventHandler,
@@ -170,10 +170,6 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	}
 
 	// -------------------- HELPERS --------------------
-
-	private AccelerationConfigGroup replanningParameters() {
-		return ConfigUtils.addOrGetModule(this.services.getConfig(), AccelerationConfigGroup.class);
-	}
 
 	private void setWeightOfHypotheticalReplanning(final double weight) {
 		this.greedoProgressListener.setWeightOfHypotheticalReplanning(weight);
@@ -265,21 +261,17 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 		this.greedoProgressListener.callToNotifyStartup_greedo(event);
 
-		// TODO What would be the typed access structures this deprecation refers to?
-		this.accelerationConfig = (AccelerationConfigGroup) this.services.getConfig()
-				.getModule(AccelerationConfigGroup.GROUP_NAME);
+		this.accelerationConfig = ConfigUtils.addOrGetModule(this.services.getConfig(), AccelerationConfigGroup.class);
 
-		this.slotUsageListener = new SlotUsageListener(this.services.getScenario().getPopulation(),
-				this.services.getScenario().getTransitVehicles(), this.accelerationConfig);
-
-		// TODO Initialize upon construction
 		this.expectedUtilityChangeSumAccelerated = new RecursiveMovingAverage(1);
 		this.expectedUtilityChangeSumUniform = new RecursiveMovingAverage(1);
 		this.realizedUtilityChangeSum = new RecursiveMovingAverage(1);
+		this.utilities = new Utilities(this.accelerationConfig.getIndividualConvergenceIterations());
 
-		this.utilities = new Utilities(this.replanningParameters().getIndividualConvergenceIterations());
-		this.ages = new Ages(this.replanningParameters().getAgeInertia(),
+		this.ages = new Ages(this.accelerationConfig.getAgeInertia(),
 				this.services.getScenario().getPopulation().getPersons().keySet());
+		this.slotUsageListener = new SlotUsageListener(this.services.getScenario().getPopulation(),
+				this.services.getScenario().getTransitVehicles(), this.accelerationConfig, this.ages.getWeightsView());
 
 		this.statsWriter = new StatisticsWriter<>(
 				new File(this.services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(),
@@ -317,7 +309,9 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityAccelerated());
 
 		this.statsWriter.addSearchStatistic(new AgesPercentile(1));
+		this.statsWriter.addSearchStatistic(new AgesPercentile(5));
 		this.statsWriter.addSearchStatistic(new AgesPercentile(50));
+		this.statsWriter.addSearchStatistic(new AgesPercentile(95));
 		this.statsWriter.addSearchStatistic(new AgesPercentile(99));
 	}
 
@@ -389,11 +383,14 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 			this.pseudoSimIterationCnt = 0;
 
+			// >>>>> This is the actual utility, not the scaled one! >>>>>
+			// TODO Used only for logging. Encapsulate elsewhere.
 			this.lastAverageUtility = 0.0;
 			for (Person person : this.services.getScenario().getPopulation().getPersons().values()) {
 				this.lastAverageUtility += person.getSelectedPlan().getScore();
 			}
 			this.lastAverageUtility /= this.services.getScenario().getPopulation().getPersons().size();
+			// <<<<< This is the actual utility, not the scaled one! <<<<<
 
 		} else {
 			log.info("pseudoSim run in iteration " + event.getIteration() + " ends");
@@ -418,12 +415,14 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 						.getScore();
 				final double expectedUtility = person.getSelectedPlan().getScore();
 				this.utilities.update(person.getId(), realizedUtility, expectedUtility,
-						this.replanningParameters().getIndividualConvergenceIterations(),
-						this.replanningParameters().getScoreImprovementPerIterationThreshold());
+						this.accelerationConfig.getIndividualConvergenceIterations(),
+						this.accelerationConfig.getScoreImprovementPerIterationThreshold());
 			}
 
 			final Utilities.SummaryStatistics utilityStatsBeforeReplanning = this.utilities.newSummaryStatistics();
 			this.numberOfConvergedAgents = utilityStatsBeforeReplanning.numberOfConvergedAgents;
+
+			// Up to here, everything goes through Utilities
 
 			/*
 			 * Book-keeping and program control parameter update.
@@ -440,10 +439,12 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 				// Update aggregate utility statistics.
 
+				// THESE STATS BECOME MEANINGLESS ONCE THE UTILITIES CLASS SCALES UTILS
+
 				this.realizedUtilityChangeSum.add(utilityStatsBeforeReplanning.currentRealizedUtilitySum
 						- utilityStatsBeforeReplanning.previousRealizedUtilitySum);
 				this.expectedUtilityChangeSumUniform
-						.add(this.replanningParameters().getMeanReplanningRate(event.getIteration())
+						.add(this.accelerationConfig.getMeanReplanningRate(event.getIteration())
 								* (utilityStatsBeforeReplanning.previousExpectedUtilitySum
 										- utilityStatsBeforeReplanning.previousRealizedUtilitySum));
 				double previousExpectedUtilityChangeSumAcceleratedTmp = 0.0;
@@ -475,7 +476,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			{
 				final SlotUsageListener pSimSlotUsageListener = new SlotUsageListener(
 						this.services.getScenario().getPopulation(), this.services.getScenario().getTransitVehicles(),
-						this.accelerationConfig);
+						this.accelerationConfig, this.ages.getWeightsView());
 				final EventsManager eventsManager = EventsUtils.createEventsManager();
 				eventsManager.addHandler(pSimSlotUsageListener);
 				final PSim pSim = new PSim(this.services.getScenario(), eventsManager, selectedHypotheticalPlans,
@@ -508,15 +509,18 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			 * 
 			 */
 
-			final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.replanningParameters(),
+			final ReplannerIdentifier replannerIdentifier = new ReplannerIdentifier(this.accelerationConfig,
 					event.getIteration(), this.lastPhysicalSlotUsages, lastPseudoSimSlotUsages,
-					this.slotUsageListener.getWeightView(), this.services.getScenario().getPopulation(),
+					// this.slotUsageListener.getWeightView(),
+					this.services.getScenario().getPopulation(),
 					utilityStatsBeforeReplanning.personId2currentDeltaUtility,
-					utilityStatsBeforeReplanning.currentDeltaUtilitySum, // this.currentDelta,
-					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds());
+					// utilityStatsBeforeReplanning.currentDeltaUtilitySum,
+					// this.currentDelta,
+					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds(), this.ages);
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
 			this.ages.update(this.replanners);
+			this.slotUsageListener.setPersonWeights(this.ages.getWeightsView());
 			// this.individualReplanningResultsList =
 			// replannerIdentifier.getIndividualReplanningResultListView();
 

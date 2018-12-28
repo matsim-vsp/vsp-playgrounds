@@ -27,8 +27,9 @@ import java.util.Set;
 import floetteroed.utilities.Tuple;
 
 /**
- * Stores integer (counting) data in a map with keys consisting of (space, time)
- * tuples. "Space" is represented by the generic class L (e.g. a network link).
+ * Stores real-valued (weighted counting) data in a map with keys consisting of
+ * (space, time) tuples. "Space" is represented by the generic class L (e.g. a
+ * network link).
  * 
  * This minimal class exists only to speed up numerical operations in
  * {@link ScoreUpdater} that require iterating over all map entries. For a less
@@ -49,11 +50,16 @@ class SpaceTimeCounts<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	SpaceTimeCounts(final SpaceTimeIndicators<L> parent, final Map<?, Double> weights) {
+	SpaceTimeCounts(final SpaceTimeIndicators<L> parent
+	// , final Map<?, Double> weights
+	) {
 		if (parent != null) {
 			for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
-				for (L spaceObj : parent.getVisitedSpaceObjects(timeBin)) {
-					this.add(this.newKey(spaceObj, timeBin), weights.get(spaceObj));
+				// for (L spaceObj : parent.getVisitedSpaceObjects(timeBin)) {
+				// this.add(this.newKey(spaceObj, timeBin), weights.get(spaceObj));
+				// }
+				for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
+					this.add(this.newKey(visit.spaceObject, timeBin), visit.weight);
 				}
 			}
 		}
