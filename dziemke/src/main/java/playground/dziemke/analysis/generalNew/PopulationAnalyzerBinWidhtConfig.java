@@ -1,4 +1,4 @@
-package playground.dziemke.analysis.mid.other;
+package playground.dziemke.analysis.generalNew;
 
 public class PopulationAnalyzerBinWidhtConfig {
 

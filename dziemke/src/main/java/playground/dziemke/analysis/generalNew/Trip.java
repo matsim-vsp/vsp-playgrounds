@@ -1,4 +1,4 @@
-package playground.dziemke.analysis.mid.other;
+package playground.dziemke.analysis.generalNew;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;

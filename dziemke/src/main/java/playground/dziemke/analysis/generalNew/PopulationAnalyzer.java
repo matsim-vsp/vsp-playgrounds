@@ -1,4 +1,4 @@
-package playground.dziemke.analysis.mid.other;
+package playground.dziemke.analysis.generalNew;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -10,7 +10,6 @@ import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
 import playground.dziemke.analysis.AnalysisFileWriter;
 import playground.dziemke.analysis.AnalysisUtils;
-import playground.dziemke.analysis.general.TripUtils;
 
 import java.io.File;
 import java.util.*;
