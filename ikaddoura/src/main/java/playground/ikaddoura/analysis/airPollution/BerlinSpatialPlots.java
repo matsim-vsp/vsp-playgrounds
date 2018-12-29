@@ -50,20 +50,20 @@ import playground.agarwalamit.analysis.spatial.SpatialInterpolation;
 public class BerlinSpatialPlots {
 	private static final Logger log = Logger.getLogger(BerlinSpatialPlots.class);	
 
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
-//	private final String runId = "bc-0c";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
+//	private final String runId = "bc-0";
 	
 //	private final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
 //	private final String runId = "berlin-v5.2-1pct";
 	
-	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0/";
-	private final String runId = "savA-0";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
+//	private final String runId = "savA-0d";
 	
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2/";
-//	private final String runId = "savA-2";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d/";
+//	private final String runId = "savA-2d";
 	
-//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3/";
-//	private final String runId = "savA-3";
+	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
+	private final String runId = "savA-3d";
 	
 	private final double countScaleFactor = 10;
 	private static double gridSize ;
