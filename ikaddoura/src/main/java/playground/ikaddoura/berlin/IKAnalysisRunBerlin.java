@@ -93,7 +93,7 @@ public class IKAnalysisRunBerlin {
 				modes,
 				null,
 				null,
-				0.);
+				0., null);
 		analysis.run();
 	
 		log.info("Done.");
