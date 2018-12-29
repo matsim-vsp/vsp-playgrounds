@@ -54,12 +54,12 @@ public class ModeSwitchAnalysisMain {
 		final String subpopulation = "person_potential-sav-user";
     	
         // 0: base case
-    	String directory0 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0c/";
-    	String runId0 = "bc-0c";
+    	String directory0 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
+    	String runId0 = "bc-0";
     	
 		// 1: policy case
-    	String directory1 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0/";
-    	String runId1 = "savA-0";
+    	String directory1 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
+    	String runId1 = "savA-0d";
     	
     	// ################
     	
