@@ -165,7 +165,7 @@ public class RunBerlinTaxiPricingScenarioA {
 				modes,
 				TransportMode.taxi,
 				TransportMode.car,
-				dailyRewardTaxiInsteadOfPrivateCar);
+				dailyRewardTaxiInsteadOfPrivateCar, null);
 		analysis.run();
 		
 		// noise post-analysis

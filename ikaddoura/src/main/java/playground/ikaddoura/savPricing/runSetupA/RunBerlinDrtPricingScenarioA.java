@@ -167,7 +167,7 @@ public class RunBerlinDrtPricingScenarioA {
 				modes,
 				taxiMode,
 				carMode,
-				rewardSAVformerCarUser);
+				rewardSAVformerCarUser, null);
 		analysis.run();
 		
 		// noise post-analysis
