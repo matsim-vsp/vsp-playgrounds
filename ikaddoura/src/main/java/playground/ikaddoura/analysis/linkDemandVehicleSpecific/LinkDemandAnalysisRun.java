@@ -30,10 +30,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class LinkDemandAnalysisRun {
 	
-	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/cne/munich/output-final/output_run4b_muc_cne_DecongestionPID";
-	private String runId = null;
+	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0";
+	private String runId = "bc-0";
 	private String outputDirectory;
-	private String vehicleTypePrefix = "5";
+	private String vehicleTypePrefix = "rt";
 
 	public LinkDemandAnalysisRun(String outputDirectory) {
 		this.outputDirectory = outputDirectory;
@@ -76,11 +76,11 @@ public class LinkDemandAnalysisRun {
 		String eventsFile;
 		String analysis_output_file;
 		if (runId != null) {
-			eventsFile = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + runId + "." + config.controler().getLastIteration() + ".events.xml.gz";
-			analysis_output_file = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + runId + ".link_dailyDemand_vehicleType.csv";
+			eventsFile = outputDirectory + runId + ".output_events.xml.gz";
+			analysis_output_file = outputDirectory + runId + ".link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
 		} else {
-			eventsFile = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + config.controler().getLastIteration() + ".events.xml.gz";
-			analysis_output_file = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/"  + "link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
+			eventsFile = outputDirectory + "output_events.xml.gz";
+			analysis_output_file = outputDirectory  + "link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
 		}
 		
 		MatsimEventsReader reader = new MatsimEventsReader(events);
