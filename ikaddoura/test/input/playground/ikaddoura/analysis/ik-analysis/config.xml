@@ -13,6 +13,7 @@
 
 	<module name="plans">
 		<param name="inputPlansFile" value="plans100.xml" />
+		<param name="inputPersonAttributesFile" value="person-attributes.xml" />
 	</module>
 
 	<module name="controler">
@@ -75,17 +76,39 @@
 		<parameterset type="strategysettings">
 			<param name="strategyName" value="BestScore"/>
 			<param name="weight" value="0.1"/>
+			<param name="subpopulation" value="null"/>
+		</parameterset>
+		
+		<parameterset type="strategysettings">
+			<param name="strategyName" value="BestScore"/>
+			<param name="weight" value="0.1"/>
+			<param name="subpopulation" value="person_no-potential-sav-user"/>
 		</parameterset>
 
 		<parameterset type="strategysettings">
 			<param name="strategyName" value="ReRoute"/>
 			<param name="weight" value="1.0"/>
+			<param name="subpopulation" value="null"/>
+		</parameterset>
+		
+		<parameterset type="strategysettings">
+			<param name="strategyName" value="ReRoute"/>
+			<param name="weight" value="1.0"/>
+			<param name="subpopulation" value="person_no-potential-sav-user"/>
 		</parameterset>
 		
 		<parameterset type="strategysettings">
 			<param name="strategyName" value="ChangeTripMode"/>
 			<param name="weight" value="1.0"/>
+			<param name="subpopulation" value="null"/>
 		</parameterset>
+		
+		<parameterset type="strategysettings">
+			<param name="strategyName" value="ChangeTripMode"/>
+			<param name="weight" value="1.0"/>
+			<param name="subpopulation" value="person_no-potential-sav-user"/>
+		</parameterset>
+		
 	</module>
 
 </config>
