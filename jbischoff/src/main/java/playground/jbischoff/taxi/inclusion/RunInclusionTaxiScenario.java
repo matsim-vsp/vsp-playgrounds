@@ -33,8 +33,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import playground.jbischoff.taxi.setup.JbTaxiOptimizerProvider;
-
 public class RunInclusionTaxiScenario {
 	public static void run(String configFile, boolean otfvis) {
 
@@ -68,7 +66,7 @@ public class RunInclusionTaxiScenario {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		Controler controler = new Controler(scenario);
-		controler.addQSimModule(new TaxiQSimModule(JbTaxiOptimizerProvider.class));
+		controler.addQSimModule(new TaxiQSimModule());//FIXME this will not enable JBJbTaxiOptimizer !!!
 		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(mode));
 		controler.addOverridingModule(new TaxiModule());
 
