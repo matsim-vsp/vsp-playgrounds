@@ -19,13 +19,10 @@
 
 package playground.jbischoff.taxi.inclusion;
 
-import java.util.Collections;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
@@ -72,7 +69,7 @@ public class RunInclusionTaxiScenario {
 
 		Controler controler = new Controler(scenario);
 		controler.addQSimModule(new TaxiQSimModule(JbTaxiOptimizerProvider.class));
-		controler.addOverridingModule(DvrpModule.createModule(mode, Collections.singleton(TaxiOptimizer.class)));
+		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(mode));
 		controler.addOverridingModule(new TaxiModule());
 
 		if (otfvis) {

@@ -29,7 +29,6 @@ import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
@@ -40,9 +39,8 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.jbischoff.pt.strategy.ChangeSingleLegModeWithPredefinedFromModesModule;
 
-import java.util.Collections;
+import playground.jbischoff.pt.strategy.ChangeSingleLegModeWithPredefinedFromModesModule;
 
 /**
  * @author jbischoff
@@ -66,10 +64,7 @@ public class RunRWPTComboBerlincase {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 		controler.addQSimModule(new TaxiQSimModule());
-		controler.addOverridingModule(DvrpModule.createModule(mode,
-				Collections.singleton(TaxiOptimizer.class)));
-		controler.addQSimModule(new TaxiQSimModule());
-		controler.addOverridingModule(DvrpModule.createModule(mode, Collections.singleton(TaxiOptimizer.class)));
+		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(mode));
 
 		controler.addOverridingModule(new TaxiModule());
 		controler.addOverridingModule(new VariableAccessTransitRouterModule());

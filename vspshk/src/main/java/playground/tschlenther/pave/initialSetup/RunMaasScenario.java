@@ -21,8 +21,6 @@
  */
 package playground.tschlenther.pave.initialSetup;
 
-import java.util.Collections;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.dvrp.data.Fleet;
 import org.matsim.contrib.dvrp.passenger.DefaultPassengerRequestValidator;
@@ -32,7 +30,6 @@ import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelDisutilityProvider;
 import org.matsim.contrib.dynagent.run.DynRoutingModule;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.passenger.SubmittedTaxiRequestsCollector;
 import org.matsim.contrib.taxi.run.Taxi;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
@@ -86,11 +83,9 @@ public class RunMaasScenario {
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 
-		TSPrivateAVFleetGenerator  fleet = new TSPrivateAVFleetGenerator(scenario);  
-		
-	
-		controler.addOverridingModule(DvrpModule.createModule(taxiCfg.getMode(),
-				Collections.singleton(TaxiOptimizer.class)));
+		TSPrivateAVFleetGenerator  fleet = new TSPrivateAVFleetGenerator(scenario);
+
+		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(taxiCfg.getMode()));
 		
 		controler.addOverridingModule(new AbstractModule() {
 			@Override

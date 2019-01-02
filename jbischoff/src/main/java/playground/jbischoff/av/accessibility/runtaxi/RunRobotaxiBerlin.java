@@ -19,12 +19,10 @@
 
 package playground.jbischoff.av.accessibility.runtaxi;
 
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
@@ -36,7 +34,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
-import java.util.Collections;
+import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
 /**
  * This class runs an example robotaxi scenario including fares. The simulation runs for 10 iterations, this takes
@@ -68,8 +66,7 @@ public class RunRobotaxiBerlin {
 
         Controler controler = new Controler(scenario);
         controler.addQSimModule(new TaxiQSimModule());
-        controler.addOverridingModule(DvrpModule.createModule(mode,
-                Collections.singleton(TaxiOptimizer.class)));
+		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(mode));
         controler.addOverridingModule(new TaxiModule());
 
         controler.addOverridingModule(new AbstractModule() {
