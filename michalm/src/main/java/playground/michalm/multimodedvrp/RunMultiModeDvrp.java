@@ -54,10 +54,10 @@ public class RunMultiModeDvrp {
 		TaxiControlerCreator.addTaxiWithoutDvrpModuleToControler(controler);
 
 		String taxiMode = TaxiConfigGroup.get(controler.getConfig()).getMode();
-		DvrpModeQSimModule taxiModeQSimModule = new DvrpModeQSimModule.Builder(taxiMode).build();
+		DvrpModeQSimModule taxiModeQSimModule = new DvrpModeQSimModule(taxiMode);
 
 		String drtMode = DrtConfigGroup.get(controler.getConfig()).getMode();
-		DvrpModeQSimModule drtModeQSimModule = new DvrpModeQSimModule.Builder(drtMode).build();
+		DvrpModeQSimModule drtModeQSimModule = new DvrpModeQSimModule(drtMode);
 
 		controler.addOverridingModule(new DvrpModule(taxiModeQSimModule, drtModeQSimModule));
 		if (otfvis) {
