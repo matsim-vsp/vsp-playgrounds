@@ -21,16 +21,12 @@
 package playground.michalm.multimodedvrp;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.drt.optimizer.DrtOptimizer;
-import org.matsim.contrib.drt.optimizer.insertion.DefaultUnplannedRequestInserter;
-import org.matsim.contrib.drt.optimizer.insertion.ParallelPathDataProvider;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
@@ -58,14 +54,10 @@ public class RunMultiModeDvrp {
 		TaxiControlerCreator.addTaxiWithoutDvrpModuleToControler(controler);
 
 		String taxiMode = TaxiConfigGroup.get(controler.getConfig()).getMode();
-		DvrpModeQSimModule taxiModeQSimModule = new DvrpModeQSimModule.Builder(taxiMode).addListener(
-				TaxiOptimizer.class).build();
+		DvrpModeQSimModule taxiModeQSimModule = new DvrpModeQSimModule.Builder(taxiMode).build();
 
 		String drtMode = DrtConfigGroup.get(controler.getConfig()).getMode();
-		DvrpModeQSimModule drtModeQSimModule = new DvrpModeQSimModule.Builder(drtMode).addListener(DrtOptimizer.class)
-				.addListener(DefaultUnplannedRequestInserter.class)
-				.addListener(ParallelPathDataProvider.class)
-				.build();
+		DvrpModeQSimModule drtModeQSimModule = new DvrpModeQSimModule.Builder(drtMode).build();
 
 		controler.addOverridingModule(new DvrpModule(taxiModeQSimModule, drtModeQSimModule));
 		if (otfvis) {
