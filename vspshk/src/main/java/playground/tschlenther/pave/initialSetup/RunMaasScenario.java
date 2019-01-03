@@ -85,7 +85,7 @@ public class RunMaasScenario {
 
 		TSPrivateAVFleetGenerator  fleet = new TSPrivateAVFleetGenerator(scenario);
 
-		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(taxiCfg.getMode()));
+		controler.addOverridingModule(new DvrpModule(taxiCfg.getMode()));
 		
 		controler.addOverridingModule(new AbstractModule() {
 			@Override

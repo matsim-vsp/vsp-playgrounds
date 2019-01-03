@@ -201,7 +201,7 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		// }
 		// });
 		String mode = TaxiConfigGroup.get(controler.getConfig()).getMode();
-		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(mode));
+		controler.addOverridingModule(new DvrpModule(mode));
 		controler.addOverridingModule(new TaxiModule());
 
 		boolean otfvis = false;

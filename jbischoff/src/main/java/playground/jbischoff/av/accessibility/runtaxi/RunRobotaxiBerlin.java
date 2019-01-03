@@ -64,7 +64,7 @@ public class RunRobotaxiBerlin {
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         Controler controler = new Controler(scenario);
-		controler.addOverridingModule(DvrpModule.createModuleWithDefaultDvrpModeQSimModule(mode));
+        controler.addOverridingModule(new DvrpModule(mode));
         controler.addOverridingModule(new TaxiModule());
 
         controler.addOverridingModule(new AbstractModule() {
