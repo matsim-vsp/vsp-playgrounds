@@ -41,6 +41,7 @@ import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
@@ -201,8 +202,9 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		// }
 		// });
 		String mode = TaxiConfigGroup.get(controler.getConfig()).getMode();
-		controler.addOverridingModule(new DvrpModule(mode));
+		controler.addOverridingModule(new DvrpModule());
 		controler.addOverridingModule(new TaxiModule());
+		controler.configureQSimComponents(DvrpQSimComponents.activateModes(mode));
 
 		boolean otfvis = false;
 		if (otfvis) {

@@ -28,6 +28,7 @@ import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelDisutilityProvider;
 import org.matsim.contrib.dynagent.run.DynRoutingModule;
 import org.matsim.contrib.taxi.passenger.SubmittedTaxiRequestsCollector;
@@ -85,8 +86,9 @@ public class RunMaasScenario {
 
 		TSPrivateAVFleetGenerator  fleet = new TSPrivateAVFleetGenerator(scenario);
 
-		controler.addOverridingModule(new DvrpModule(taxiCfg.getMode()));
-		
+		controler.addOverridingModule(new DvrpModule());
+		controler.configureQSimComponents(DvrpQSimComponents.activateModes(taxiCfg.getMode()));
+
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
