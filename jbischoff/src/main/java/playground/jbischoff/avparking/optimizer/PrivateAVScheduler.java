@@ -18,7 +18,7 @@
  * *********************************************************************** */
 
 /**
- * 
+ *
  */
 package playground.jbischoff.avparking.optimizer;
 
@@ -42,7 +42,6 @@ import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 
-import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 /**
@@ -59,9 +58,9 @@ public class PrivateAVScheduler extends TaxiScheduler {
 	 * @param travelTime
 	 * @param travelDisutility
 	 */
-	@Inject
-	public PrivateAVScheduler(TaxiConfigGroup taxiCfg, @Taxi Fleet fleet, @Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network,
-			MobsimTimer timer, @Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
+	public PrivateAVScheduler(TaxiConfigGroup taxiCfg, Fleet fleet,
+			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, MobsimTimer timer,
+			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
 			@Taxi TravelDisutility travelDisutility) {
 		super(taxiCfg, fleet, network, timer, travelTime, travelDisutility);
 	}
