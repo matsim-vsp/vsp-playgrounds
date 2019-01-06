@@ -29,7 +29,6 @@ import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
-import org.matsim.contrib.taxi.run.Taxi;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
@@ -58,8 +57,7 @@ public class TSPrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 
 	public TSPrivateAVOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet, TaxiScheduler scheduler,
 			MobsimTimer timer, @Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network,
-			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
-			@Taxi TravelDisutility travelDisutility) {
+			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime, TravelDisutility travelDisutility) {
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
 		this.scheduler = scheduler;
