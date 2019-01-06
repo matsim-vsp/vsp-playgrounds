@@ -780,7 +780,10 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = org/matsim
+INPUT                  = org/matsim/api \
+                         org/matsim/core/mobsim/qsim \
+                         org/matsim/core/mobsim/framework \
+                         org/matsim/core/network
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -836,7 +839,9 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */jaxb/*
+EXCLUDE_PATTERNS       = */jaxb/* \
+                         *Impl.java \
+                         Abstract*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -894,7 +899,7 @@ IMAGE_PATH             =
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by doxygen.
 
-INPUT_FILTER           = ../../../../../playgrounds/kai/src/main/java/playground/kai/other/myfilter.sh
+INPUT_FILTER           = ../../../../../vsp-playgrounds/kai/src/main/java/playground/kai/other/myfilter.sh
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the

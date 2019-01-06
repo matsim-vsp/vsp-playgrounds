@@ -10,6 +10,11 @@
 	<artifactId>kai</artifactId>
 	<name>kai</name>
 
+	<properties>
+		<kotlin.version>1.2.0</kotlin.version>
+		<matsim.version>0.11.0-SNAPSHOT</matsim.version>
+	</properties>
+
 	<build>
 		<defaultGoal>compiler:compile</defaultGoal>
 		<resources>
@@ -159,6 +164,14 @@
 			<artifactId>matsim-berlin</artifactId>
 			<version>v5.2</version>
 		</dependency>
+
+		<!--to get ExamplesUtils:-->
+		<dependency>
+			<groupId>org.matsim</groupId>
+			<artifactId>matsim-examples</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+
 
 	</dependencies>
 </project>
