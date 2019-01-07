@@ -43,7 +43,7 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.framework.MobsimTimer;
-import org.matsim.core.router.util.TravelDisutility;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
 
@@ -120,12 +120,12 @@ public class RunMaasScenario {
 							private TravelTime travelTime;
 
 							@Inject
-							private TravelDisutility travelDisutility;
+							private TravelDisutilityFactory travelDisutilityFactory;
 
 							@Override
 							public TaxiScheduler get() {
 								return new PrivateAVScheduler(taxiCfg, fleet, network, timer, travelTime,
-										travelDisutility);
+										travelDisutilityFactory.createTravelDisutility(travelTime));
 							}
 						}).asEagerSingleton();
 					}
