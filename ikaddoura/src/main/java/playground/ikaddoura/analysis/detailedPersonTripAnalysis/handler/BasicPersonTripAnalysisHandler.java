@@ -794,7 +794,9 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 				
 			} else {
 				// a "real" activity
-				
+				if (personId2currentTripNumber.get(event.getPersonId()) == null) {
+					throw new RuntimeException("This should not happen. Activity start event without activity end event?!");
+				}
 				int tripNumber = personId2currentTripNumber.get(event.getPersonId());
 				
 				Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getCoord();

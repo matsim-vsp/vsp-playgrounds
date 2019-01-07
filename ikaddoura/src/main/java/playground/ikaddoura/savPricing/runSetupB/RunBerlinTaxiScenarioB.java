@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModes;
@@ -166,12 +166,7 @@ public final class RunBerlinTaxiScenarioB {
 		});
 		
 		// taxi fares
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler.addOverridingModule(new TaxiFareModule());
 		
 		if (dailyRewardTaxiInsteadOfPrivateCar != 0.) {
 			// rewards for no longer owning a car
