@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
@@ -37,7 +37,6 @@ import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
@@ -101,12 +100,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-				}
-			});
+			controler.addOverridingModule(new TaxiFareModule());
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 
@@ -143,12 +137,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
 			// taxi fares
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-				}
-			});
+			controler.addOverridingModule(new TaxiFareModule());
 			
 			handler1 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
 			controler.getEvents().addHandler(handler1);
@@ -201,13 +190,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			handler2 = new LinkDemandEventHandler(controler.getScenario().getNetwork());
 			controler.getEvents().addHandler(handler2);
 			
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-				}
-			});
-			
+			controler.addOverridingModule(new TaxiFareModule());
 			
 			controler.getConfig().controler().setCreateGraphs(false);
 	        controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
@@ -252,12 +235,7 @@ public class OptAVCarUserSAVDriverPricingTestIT {
 			Controler controler = TaxiControlerCreator.createControler(config, otfvis);
 			controler.addOverridingModule(new SAVPricingModule(controler.getScenario(), TransportMode.car));
 			
-			controler.addOverridingModule(new AbstractModule() {
-				@Override
-				public void install() {
-					addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-				}
-			});
+			controler.addOverridingModule(new TaxiFareModule());
 			
 			if (otfvis) controler.addOverridingModule(new OTFVisLiveModule());
 

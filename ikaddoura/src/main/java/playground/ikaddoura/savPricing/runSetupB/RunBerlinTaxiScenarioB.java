@@ -25,12 +25,15 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModes;
+import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
+import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiControlerCreator;
+import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.controler.AbstractModule;
@@ -146,8 +149,11 @@ public final class RunBerlinTaxiScenarioB {
 		controler = berlin.prepareControler();
 		
 		// taxi + dvrp module
-		TaxiControlerCreator.addTaxiAsSingleDvrpModeToControler(controler);
-		
+		controler.addOverridingModule(new TaxiModule());
+		controler.addOverridingModule(new DvrpModule());
+		controler.configureQSimComponents(
+				DvrpQSimComponents.activateModes(TaxiConfigGroup.get(controler.getConfig()).getMode()));
+
 		// reject taxi requests outside the service area
 		controler.addOverridingModule(new AbstractModule() {	
 			@Override
@@ -158,12 +164,7 @@ public final class RunBerlinTaxiScenarioB {
 		});
 		
 		// taxi fares
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler.addOverridingModule(new TaxiFareModule());
 		
 		if (dailyRewardTaxiInsteadOfPrivateCar != 0.) {
 			// rewards for no longer owning a car
@@ -266,10 +267,12 @@ public final class RunBerlinTaxiScenarioB {
 		for (ConfigGroup module : modulesToAdd) {
 			modules.add(module);
 		}
-		
-		config = berlin.prepareConfig(modulesToAdd);					
-		TaxiControlerCreator.adjustTaxiConfig(config);
-		
+
+		config = berlin.prepareConfig(modulesToAdd);
+		//no special adjustments (in contrast to Drt)
+		config.addConfigConsistencyChecker(new TaxiConfigConsistencyChecker());
+		config.checkConsistency();
+
 		hasPreparedConfig = true ;
 		return config ;
 	}

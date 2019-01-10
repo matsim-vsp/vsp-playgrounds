@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
@@ -87,12 +87,7 @@ public class OptAVModeChoiceTestIT {
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 		
 		// taxi fares
-		controler1.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler1.addOverridingModule(new TaxiFareModule());
 		
 		// rewards for no longer owning a car
 		controler1.addOverridingModule(new AbstractModule() {
@@ -141,12 +136,7 @@ public class OptAVModeChoiceTestIT {
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
 		// taxi fares
-		controler2.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler2.addOverridingModule(new TaxiFareModule());
 		
 		// rewards for no longer owning a car
 		controler2.addOverridingModule(new AbstractModule() {
@@ -220,12 +210,7 @@ public class OptAVModeChoiceTestIT {
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));	
 
 		// taxi fares
-		controler1.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler1.addOverridingModule(new TaxiFareModule());
 		
 		// rewards for no longer owning a car
 		controler1.addOverridingModule(new AbstractModule() {
@@ -275,12 +260,7 @@ public class OptAVModeChoiceTestIT {
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));	
 
 		// taxi fares
-		controler2.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler2.addOverridingModule(new TaxiFareModule());
 		
 		// rewards for no longer owning a car
 		controler2.addOverridingModule(new AbstractModule() {

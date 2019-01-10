@@ -29,10 +29,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
@@ -42,6 +44,7 @@ import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
+import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
@@ -52,6 +55,7 @@ import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.vehicles.Vehicle;
 
 import com.google.inject.Inject;
@@ -61,7 +65,7 @@ import com.google.inject.Inject;
  * @author ikaddoura , lkroeger
  *
  */
-public class BasicPersonTripAnalysisHandler implements PersonMoneyEventHandler, TransitDriverStartsEventHandler, ActivityEndEventHandler, 
+public class BasicPersonTripAnalysisHandler implements PersonMoneyEventHandler, TransitDriverStartsEventHandler, ActivityEndEventHandler, ActivityStartEventHandler,
 PersonDepartureEventHandler , PersonArrivalEventHandler , LinkEnterEventHandler, PersonEntersVehicleEventHandler ,
 PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	
@@ -74,6 +78,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	// temporary information
 	private final Map<Id<Person>,Integer> personId2currentTripNumber = new HashMap<>();
 	private final Map<Id<Person>,Double> personId2distanceEnterValue = new HashMap<>();
+	private final Map<Id<Person>, Coord> personId2enterCoord = new HashMap<>();
 	private final Map<Id<Vehicle>,Double> ptVehicleId2totalDistance = new HashMap<>();
 	private final Map<Id<Vehicle>,Double> taxiVehicleId2totalDistance = new HashMap<>();
 	private final Map<Id<Vehicle>,Double> carVehicleId2totalDistance = new HashMap<>();
@@ -92,6 +97,7 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2waitingTime = new HashMap<>();
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2inVehicleTime = new HashMap<>();
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripDistance = new HashMap<>();
+	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2tripBeelineDistance = new HashMap<>();
 
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2amount = new HashMap<>();
 	private final Map<Id<Person>,Map<Integer,Double>> personId2tripNumber2payment = new HashMap<>();
@@ -125,6 +131,8 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 		personId2tripNumber2departureTime.clear();
 		personId2tripNumber2arrivalTime.clear();
 		personId2tripNumber2tripDistance.clear();
+		personId2enterCoord.clear();
+		personId2tripNumber2tripBeelineDistance.clear();
 		personId2tripNumber2travelTime.clear();
 		personId2tripNumber2payment.clear(); // negative amounts
 		personId2tripNumber2reward.clear(); // positive amounts
@@ -303,6 +311,13 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 					Map<Integer,Double> tripNumber2tripDistance = personId2tripNumber2tripDistance.get(event.getPersonId());
 					tripNumber2tripDistance.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
 					personId2tripNumber2tripDistance.put(event.getPersonId(), tripNumber2tripDistance);
+					
+					Coord coord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getCoord();
+					personId2enterCoord.put(event.getPersonId(), coord );
+					
+					Map<Integer,Double> tripNumber2tripBeelineDistance = personId2tripNumber2tripBeelineDistance.get(event.getPersonId());
+					tripNumber2tripBeelineDistance.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
+					personId2tripNumber2tripBeelineDistance.put(event.getPersonId(), tripNumber2tripBeelineDistance);
 						
 					Map<Integer,Double> tripNumber2payment = personId2tripNumber2payment.get(event.getPersonId());
 					tripNumber2payment.put(personId2currentTripNumber.get(event.getPersonId()), 0.0);
@@ -327,6 +342,13 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 					Map<Integer,Double> tripNumber2tripDistance = new HashMap<Integer, Double>();
 					tripNumber2tripDistance.put(1, 0.0);
 					personId2tripNumber2tripDistance.put(event.getPersonId(), tripNumber2tripDistance);
+					
+					Coord coord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getCoord();
+					personId2enterCoord.put(event.getPersonId(), coord );
+					
+					Map<Integer,Double> tripNumber2tripBeelineDistance = new HashMap<Integer, Double>();
+					tripNumber2tripBeelineDistance.put(1, 0.0);
+					personId2tripNumber2tripBeelineDistance.put(event.getPersonId(), tripNumber2tripBeelineDistance);
 					
 					Map<Integer,Double> tripNumber2payment = new HashMap<Integer, Double>();
 					tripNumber2payment.put(1, 0.0);
@@ -650,6 +672,10 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 	public Map<Id<Person>, Map<Integer, Double>> getPersonId2tripNumber2tripDistance() {
 		return personId2tripNumber2tripDistance;
 	}
+	
+	public Map<Id<Person>, Map<Integer, Double>> getPersonId2tripNumber2tripBeelineDistance() {
+		return personId2tripNumber2tripBeelineDistance;
+	}
 
 	int n = 0;
 	public Map<Id<Person>, Map<Integer, Double>> getPersonId2tripNumber2payment() {
@@ -755,6 +781,34 @@ PersonLeavesVehicleEventHandler , PersonStuckEventHandler {
 
 	public Map<Id<Person>, Integer> getPersonId2stuckAndAbortEvents() {
 		return personId2stuckAndAbortEvents;
+	}
+
+	@Override
+	public void handleEvent(ActivityStartEvent event) {
+		if (ptDrivers.contains(event.getPersonId()) || taxiDrivers.contains(event.getPersonId())){
+			// activities by pt or taxi drivers are not considered
+			
+		} else {
+			if (event.getActType().toString().contains(helpActivitySubString)){
+				// pseudo activities are excluded
+				
+			} else {
+				// a "real" activity
+				if (personId2currentTripNumber.get(event.getPersonId()) == null) {
+					throw new RuntimeException("This should not happen. Activity start event without activity end event?!");
+				}
+				int tripNumber = personId2currentTripNumber.get(event.getPersonId());
+				
+				Coord destinationCoord = this.scenario.getNetwork().getLinks().get(event.getLinkId()).getCoord();
+				Coord originCoord = this.personId2enterCoord.get(event.getPersonId());
+				
+				double beelineDistance = NetworkUtils.getEuclideanDistance(originCoord, destinationCoord);
+
+				Map<Integer,Double> tripNumber2beelinedistance = personId2tripNumber2tripBeelineDistance.get(event.getPersonId());
+				tripNumber2beelinedistance.put(tripNumber, beelineDistance);
+				
+			}	
+		}
 	}
 	
 }

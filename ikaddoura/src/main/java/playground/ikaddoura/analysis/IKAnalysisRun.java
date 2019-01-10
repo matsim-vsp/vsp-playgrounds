@@ -117,13 +117,15 @@ public class IKAnalysisRun {
 	
 	private final List<String> modes;
 
-	private String outputDirectoryName = "analysis-ik-v1.5";
+	private String outputDirectoryName = "analysis-ik-v1.6";
 
 	private final String visualizationScriptInputDirectory;
 
 	private final String taxiMode;
 	private final String carMode;
 	private final double rewardSAVuserFormerCarUser;
+	
+	private final String analyzeSubpopulation;
 			
 	public static void main(String[] args) throws IOException {
 			
@@ -141,6 +143,7 @@ public class IKAnalysisRun {
 		String taxiMode = "taxi";
 		String carMode = "car_bb";
 		double rewardSAVuserFormerCarUser = 5.3;
+		String analyzeSubpopulation = null;
 		
 		if (args.length > 0) {
 			if (!args[0].equals("null")) runDirectory = args[0];
@@ -185,6 +188,9 @@ public class IKAnalysisRun {
 			rewardSAVuserFormerCarUser = Double.valueOf(args[13]);
 			log.info("rewardSAVuserFormerCarUser: " + rewardSAVuserFormerCarUser);
 			
+			analyzeSubpopulation = args[14];
+			log.info("analyzeSubpopulation: " + analyzeSubpopulation);
+			
 		} else {
 			
 //			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_oAV_B1_1pct/";
@@ -218,6 +224,8 @@ public class IKAnalysisRun {
 			taxiMode = TransportMode.taxi;
 			carMode = "car";
 			rewardSAVuserFormerCarUser = 5.3;
+			
+			analyzeSubpopulation = null;
 		}
 		
 		Scenario scenario1 = loadScenario(runDirectory, runId, null);
@@ -264,11 +272,12 @@ public class IKAnalysisRun {
 				modes,
 				taxiMode,
 				carMode,
-				rewardSAVuserFormerCarUser);
+				rewardSAVuserFormerCarUser,
+				analyzeSubpopulation);
 		analysis.run();
 	}
 	
-	public IKAnalysisRun(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor, List<String> modes, String taxiMode, String carMode, double rewardSAVuserFormerCarUser) {
+	public IKAnalysisRun(Scenario scenario, String visualizationScriptInputDirectory, String scenarioCRS, int scalingFactor, List<String> modes, String taxiMode, String carMode, double rewardSAVuserFormerCarUser, String analyzeSubpopulation) {
 		
 		String runDirectory = scenario.getConfig().controler().getOutputDirectory();
 		if (!runDirectory.endsWith("/")) runDirectory = runDirectory + "/";
@@ -298,11 +307,13 @@ public class IKAnalysisRun {
 		this.taxiMode = taxiMode;
 		this.carMode = carMode;
 		this.rewardSAVuserFormerCarUser = rewardSAVuserFormerCarUser;
+		
+		this.analyzeSubpopulation = analyzeSubpopulation;
 	}
 	
 	public IKAnalysisRun(Scenario scenario1, Scenario scenario0,
 			String visualizationScriptInputDirectory, String scenarioCRS, String shapeFileZones, String zonesCRS, String homeActivityPrefix, int scalingFactor,
-			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes, String taxiMode, String carMode, double rewardSAVuserFormerCarUser) {
+			List<AgentAnalysisFilter> filters1, List<AgentAnalysisFilter> filters0, List<String> modes, String taxiMode, String carMode, double rewardSAVuserFormerCarUser, String analyzeSubpopulation) {
 
 		if (scenario0 != null) this.outputDirectoryName = this.outputDirectoryName + "-comparison";
 		
@@ -342,6 +353,8 @@ public class IKAnalysisRun {
 		this.taxiMode = taxiMode;
 		this.carMode = carMode;
 		this.rewardSAVuserFormerCarUser = rewardSAVuserFormerCarUser;
+		
+		this.analyzeSubpopulation = analyzeSubpopulation;
 	}
 
 	public IKAnalysisRun(Scenario scenario, String crs, int scaleFactor) {
@@ -374,6 +387,8 @@ public class IKAnalysisRun {
 		this.taxiMode = null;
 		this.carMode = TransportMode.car;
 		this.rewardSAVuserFormerCarUser = 0.;
+		
+		this.analyzeSubpopulation = null;
 	}
 
 	public void run() {
@@ -596,13 +611,25 @@ public class IKAnalysisRun {
 			personTripScenarioComparisonOutputDirectory = analysisOutputDirectory + "scenario-comparison_" + runId + "-vs-" + runIdToCompareWith + "/";
 			createDirectory(personTripScenarioComparisonOutputDirectory);
 
-			PersonTripScenarioComparison scenarioComparison = new PersonTripScenarioComparison(this.homeActivityPrefix, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0, modes);
+			PersonTripScenarioComparison scenarioComparisonAllSubpopulations = new PersonTripScenarioComparison(null, this.homeActivityPrefix, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0, modes);
+			PersonTripScenarioComparison scenarioComparisonSpecificSubpopulation = new PersonTripScenarioComparison(analyzeSubpopulation, this.homeActivityPrefix, personTripScenarioComparisonOutputDirectory, scenario1, basicHandler1, scenario0, basicHandler0, modes);
 			try {
-				scenarioComparison.analyzeByMode();
-				scenarioComparison.analyzeByScore(0.0);
-				scenarioComparison.analyzeByScore(1.0);
-				scenarioComparison.analyzeByScore(10.0);
-				scenarioComparison.analyzeByScore(100.0);
+				
+				scenarioComparisonAllSubpopulations.analyzeByMode();
+				scenarioComparisonAllSubpopulations.analyzeByScore(0.0);
+				scenarioComparisonAllSubpopulations.analyzeByScore(1.0);
+				scenarioComparisonAllSubpopulations.analyzeByScore(10.0);
+				scenarioComparisonAllSubpopulations.analyzeByScore(100.0);
+				
+				if (analyzeSubpopulation != null && !analyzeSubpopulation.equals("null") && !analyzeSubpopulation.equals("")) {
+					log.info("Running subpopulation-specific scenario comparison... (subpopulation: " + analyzeSubpopulation + ")");
+					scenarioComparisonSpecificSubpopulation.analyzeByMode();
+					scenarioComparisonSpecificSubpopulation.analyzeByScore(0.0);
+					scenarioComparisonSpecificSubpopulation.analyzeByScore(1.0);
+					scenarioComparisonSpecificSubpopulation.analyzeByScore(10.0);
+					scenarioComparisonSpecificSubpopulation.analyzeByScore(100.0);
+				}
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

@@ -19,7 +19,6 @@
 
 package playground.santiago.run;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,11 +41,10 @@ import org.matsim.contrib.cadyts.car.CadytsContext;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.TaxiQSimModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
@@ -79,11 +77,12 @@ import playground.santiago.SantiagoScenarioConstants;
 
 /**
  * @author benjamin
- *
  */
 public class SantiagoAVScenarioRunnerWithTaxi {
 
-	/** GENERAL **/
+	/**
+	 * GENERAL
+	 **/
 	private static String gantriesFile;
 	private static int policy;
 	private static int sigma;
@@ -203,11 +202,9 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 		// }
 		// });
 		String mode = TaxiConfigGroup.get(controler.getConfig()).getMode();
-
-		controler.addQSimModule(new TaxiQSimModule());
-		controler.addOverridingModule(DvrpModule.createModule(mode,
-				Collections.singleton(TaxiOptimizer.class)));
+		controler.addOverridingModule(new DvrpModule());
 		controler.addOverridingModule(new TaxiModule());
+		controler.configureQSimComponents(DvrpQSimComponents.activateModes(mode));
 
 		boolean otfvis = false;
 		if (otfvis) {
@@ -264,13 +261,13 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 				addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
 				addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());
 				addTravelTimeBinding(SantiagoScenarioConstants.Modes.taxi.toString()).to(networkTravelTime());
-				addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.taxi.toString())
-						.to(carTravelDisutilityFactoryKey());
+				addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.taxi.toString()).to(
+						carTravelDisutilityFactoryKey());
 				// addTravelTimeBinding(SantiagoScenarioConstants.Modes.colectivo.toString()).to(networkTravelTime());
 				// addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.colectivo.toString()).to(carTravelDisutilityFactoryKey());
 				addTravelTimeBinding(SantiagoScenarioConstants.Modes.other.toString()).to(networkTravelTime());
-				addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.other.toString())
-						.to(carTravelDisutilityFactoryKey());
+				addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.other.toString()).to(
+						carTravelDisutilityFactoryKey());
 			}
 		});
 	}
@@ -322,14 +319,14 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 				final String[] availableModes1 = { TransportMode.car, TransportMode.walk, TransportMode.pt,
 						SantiagoScenarioConstants.COLECTIVOMODE };
 				final String[] chainBasedModes1 = { TransportMode.car };
-				addPlanStrategyBinding(nameMcCarAvail)
-						.toProvider(new SubtourModeChoiceProvider(availableModes1, chainBasedModes1));
+				addPlanStrategyBinding(nameMcCarAvail).toProvider(
+						new SubtourModeChoiceProvider(availableModes1, chainBasedModes1));
 				Log.info("Adding SubtourModeChoice for the rest of the agents...");
 				final String[] availableModes2 = { TransportMode.walk, TransportMode.pt,
 						SantiagoScenarioConstants.COLECTIVOMODE };
 				final String[] chainBasedModes2 = {};
-				addPlanStrategyBinding(nameMcNonCarAvail)
-						.toProvider(new SubtourModeChoiceProvider(availableModes2, chainBasedModes2));
+				addPlanStrategyBinding(nameMcNonCarAvail).toProvider(
+						new SubtourModeChoiceProvider(availableModes2, chainBasedModes2));
 			}
 		});
 
@@ -337,7 +334,6 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 
 	/**
 	 * @author benjamin
-	 *
 	 */
 	private static final class SubtourModeChoiceProvider implements javax.inject.Provider<PlanStrategy> {
 		@Inject
@@ -358,10 +354,10 @@ public class SantiagoAVScenarioRunnerWithTaxi {
 			Log.info("Available modes are " + availableModes);
 			Log.info("Chain-based modes are " + chainBasedModes);
 			final Builder builder = new Builder(new RandomPlanSelector<Plan, Person>());
-			builder.addStrategyModule(new SubtourModeChoice(scenario.getConfig().global().getNumberOfThreads(),
-					availableModes, chainBasedModes, false,
-					0.0, // using value of 0.0 (=default) for backward compatibility
-					tripRouterProvider));
+			builder.addStrategyModule(
+					new SubtourModeChoice(scenario.getConfig().global().getNumberOfThreads(), availableModes,
+							chainBasedModes, false, 0.0, // using value of 0.0 (=default) for backward compatibility
+							tripRouterProvider));
 			builder.addStrategyModule(new ReRoute(scenario, tripRouterProvider));
 			return builder.build();
 		}

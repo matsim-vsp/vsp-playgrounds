@@ -19,8 +19,6 @@
 
 package playground.jbischoff.avparking.optimizer;
 
-import javax.inject.Inject;
-
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
@@ -30,7 +28,6 @@ import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
-import org.matsim.contrib.taxi.run.Taxi;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.core.mobsim.framework.MobsimTimer;
@@ -56,12 +53,10 @@ public class PrivateAVOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final ParkingSearchManager manager;
 	private final AvParkingContext context;
 
-	@Inject
-	public PrivateAVOptimizerProvider(TaxiConfigGroup taxiCfg, @Taxi Fleet fleet,
+	public PrivateAVOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet,
 			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, MobsimTimer timer,
-			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime,
-			@Taxi TravelDisutility travelDisutility, TaxiScheduler scheduler, ParkingSearchManager manager,
-			AvParkingContext context) {
+			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime, TravelDisutility travelDisutility,
+			TaxiScheduler scheduler, ParkingSearchManager manager, AvParkingContext context) {
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;
 		this.network = network;

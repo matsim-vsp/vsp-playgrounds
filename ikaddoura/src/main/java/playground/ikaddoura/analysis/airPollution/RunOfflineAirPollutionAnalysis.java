@@ -46,11 +46,17 @@ public class RunOfflineAirPollutionAnalysis {
 //	final static String runDirectory = "public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";	
 //	final static String runId = "berlin-v5.2-1pct";
 	
-//	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_bc-0c/";	
-//	final static String runId = "bc-0c";
+	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_bc-0/";	
+	final static String runId = "bc-0";
 
-	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-0/";	
-	final static String runId = "savA-0";
+//	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-0d/";	
+//	final static String runId = "savA-0d";
+	
+//	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-2d/";	
+//	final static String runId = "savA-2d";
+	
+//	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-3d/";	
+//	final static String runId = "savA-3d";
 	
 //	final static String runDirectory = "runs-svn/sav-pricing-setupA/output_savA-2/";	
 //	final static String runId = "savA-2";

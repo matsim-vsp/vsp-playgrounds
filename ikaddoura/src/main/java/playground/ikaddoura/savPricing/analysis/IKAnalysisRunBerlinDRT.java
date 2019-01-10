@@ -147,7 +147,7 @@ public class IKAnalysisRunBerlinDRT {
 				modes,
 				taxiMode,
 				carMode,
-				rewardSAVformerCarUser);
+				rewardSAVformerCarUser, null);
 		analysis.run();
 	
 		log.info("Done.");

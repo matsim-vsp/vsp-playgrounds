@@ -9,8 +9,8 @@ Case;VehCat;Year;TrafficScenario;Component;RoadCat;TrafficSit;Gradient;V_weighte
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NO2;Urban;URB/Local/50/St+Go;0%;9999.99;9999.99
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NOx;Urban;URB/Local/50/Freeflow;0%;9999.99;9999.99
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NOx;Urban;URB/Local/50/St+Go;0%;9999.99;9999.99
-2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2(total);Urban;URB/Local/50/Freeflow;0%;9999.99;9999.99
-2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2(total);Urban;URB/Local/50/St+Go;0%;9999.99;9999.99
+2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2_TOTAL;Urban;URB/Local/50/Freeflow;0%;9999.99;9999.99
+2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2_TOTAL;Urban;URB/Local/50/St+Go;0%;9999.99;9999.99
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);PM;Urban;URB/Local/50/Freeflow;0%;9999.99;9999.991
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);PM;Urban;URB/Local/50/St+Go;0%;9999.99;9999.99
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NMHC;Urban;URB/Local/50/Freeflow;0%;9999.99;9999.99
@@ -27,8 +27,8 @@ Case;VehCat;Year;TrafficScenario;Component;RoadCat;TrafficSit;Gradient;V_weighte
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NO2;Urban;URB/Access/30/St+Go;0%;0.01;0.01
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NOx;Urban;URB/Access/30/Freeflow;0%;0.01;0.01
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NOx;Urban;URB/Access/30/St+Go;0%;0.01;0.01
-2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2(total);Urban;URB/Access/30/Freeflow;0%;0.01;0.01
-2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2(total);Urban;URB/Access/30/St+Go;0%;0.01;0.01
+2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2_TOTAL;Urban;URB/Access/30/Freeflow;0%;0.01;0.01
+2005HotAverage[3.1];pass. car;2005;"BAU" (D);CO2_TOTAL;Urban;URB/Access/30/St+Go;0%;0.01;0.01
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);PM;Urban;URB/Access/30/Freeflow;0%;0.01;0.01
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);PM;Urban;URB/Access/30/St+Go;0%;0.01;0.01
 2005HotAverage[3.1];pass. car;2005;"BAU" (D);NMHC;Urban;URB/Access/30/Freeflow;0%;0.01;0.01

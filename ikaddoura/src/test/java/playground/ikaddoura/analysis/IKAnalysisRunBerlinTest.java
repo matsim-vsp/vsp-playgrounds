@@ -91,6 +91,8 @@ public class IKAnalysisRunBerlinTest {
 		final String carMode = TransportMode.car;
 		final double rewardSAVformerCarUser = 5.3;
 		
+		final String analyzeSubpopulation = "person_no-potential-sav-user";
+		
 		// optional: person attributes file to replace the output person attributes file
 		final String personAttributesFile = null;
 
@@ -141,7 +143,8 @@ public class IKAnalysisRunBerlinTest {
 				modes,
 				taxiMode,
 				carMode,
-				rewardSAVformerCarUser);
+				rewardSAVformerCarUser,
+				analyzeSubpopulation);
 		analysis.run();
 	
 		log.info("Done.");

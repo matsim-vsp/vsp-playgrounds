@@ -1,14 +1,23 @@
 package playground.kai.guice;
 
-import com.google.inject.*;
-import com.google.inject.multibindings.MapBinder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Binding;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import java.lang.annotation.Annotation;
-import java.util.*;
 
 public final class GuiceTest {
 	private static final Logger log = Logger.getLogger( GuiceTest.class ) ;

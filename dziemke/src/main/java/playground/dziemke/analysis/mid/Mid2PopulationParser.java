@@ -7,8 +7,8 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.households.Household;
-import playground.dziemke.analysis.mid.other.SurveyAdditionalAttributes;
-import playground.dziemke.analysis.mid.other.SurveyAdditionalAttributesUtils;
+import playground.dziemke.analysis.generalNew.SurveyAdditionalAttributes;
+import playground.dziemke.analysis.generalNew.SurveyAdditionalAttributesUtils;
 
 import java.io.File;
 import java.io.IOException;
