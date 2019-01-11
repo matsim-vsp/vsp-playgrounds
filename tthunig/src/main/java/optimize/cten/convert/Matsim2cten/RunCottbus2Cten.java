@@ -86,7 +86,8 @@ public class RunCottbus2Cten {
 		int cellsX = 5; // = default value
 		int cellsY = 5; // = default value
 		/* other parameters */
-		String scenarioDescription = "changed: lanes corrected in matsim. lights with lane capacities; no conflicts when base case fixed-time plans show green together; no u-turns; lights grouped; demand: 100it 0.7cap output plans between 05:30 and 09:30";
+		String scenarioDescription = "changed: round up travel times. lanes corrected in matsim. lights with (correct) lane capacities; no conflicts when base case fixed-time plans show green together; no u-turns; " //lights grouped; 
+				+ "demand: 100it 0.7cap output plans between 05:30 and 09:30";
 //		String scenarioDescription = "changed: same as 2018-05-04 but with base case fixed-time plans; Dreifertstrasse and Wilhem-Kuelz_Str. run 100it 0.7cap output plans between 05:30 and 09:30";
 		// String scenarioDescription =
 		// "run run1728 output plans between 13:30 and 18:30";

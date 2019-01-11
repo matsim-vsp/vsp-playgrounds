@@ -225,28 +225,29 @@ public class RunCtenSignalPlans2MatsimConversion {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String inputFilename = "but/solution_splits_expanded.xml";
-		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-09-20_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+//		String inputFilename = "btu/solution_splits_expanded.xml";
+		String inputFilename = "btu/optimized.xml";
+		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v1_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
 		
-		FileWriter fw = new FileWriter(new File(directory + "random_coords/tt_cten.txt"));
-		BufferedWriter out = new BufferedWriter(fw);
-		out.write("coord \ttotal_cost_cten \ttotal_driving_time_cten \ttotal_waiting_time_cten");
-		out.newLine();
+//		FileWriter fw = new FileWriter(new File(directory + "randoms/tt_cten.txt"));
+//		BufferedWriter out = new BufferedWriter(fw);
+//		out.write("coord \ttotal_cost_cten \ttotal_driving_time_cten \ttotal_waiting_time_cten");
+//		out.newLine();
 
-		for (int i=0; i<=42; i++) {
-			inputFilename = "random_coords/coord" + i + ".xml";
+//		for (int i=0; i<=49; i++) {
+//			inputFilename = "randoms/coord" + i + ".xml";
 			CtenSignalPlanXMLParser solParser = convertOptimalSignalPlans(
 					directory,
 					inputFilename);
 			
 			// write out total cost and delay for plotting
-			out.write("coord" + i + "\t" + solParser.getTotalCost()/solParser.getCycleTime() 
-					+ "\t" + solParser.getTotalDrivingTime()/solParser.getCycleTime()
-					+ "\t" + solParser.getTotalWaitingTime()/solParser.getCycleTime());
-			out.newLine();
-		}
-		
-		out.close();
+//			out.write("coord" + i + "\t" + solParser.getTotalCost()/solParser.getCycleTime() 
+//					+ "\t" + solParser.getTotalDrivingTime()/solParser.getCycleTime()
+//					+ "\t" + solParser.getTotalWaitingTime()/solParser.getCycleTime());
+//			out.newLine();
+//		}
+//		
+//		out.close();
 		System.out.println("done :)");
 	}
 

@@ -65,6 +65,8 @@ public class DgMatsimPopulation2Links {
 
 	private Map<Id<Link>, Id<Link>> originalToSimplifiedLinkIdMatching;
 	
+//	static int counter;
+	
 	public DgZones convert2Links(Network network, Network smallNetwork, Map<Id<Link>, Id<Link>> originalToSimplifiedLinkIdMatching, Population pop, DgZones cells, 
 			Envelope networkBoundingBox, double startTime, double endTime) {
 		this.fullNetwork = network;
@@ -100,6 +102,8 @@ public class DgMatsimPopulation2Links {
 				}
 			}
 		}
+//		System.err.println("nb of legs through the subnetwork: " + counter);
+//		System.out.println("stop :)");
 	}
 	
 	private void addFromLinkToLinkRelationshipToGrid(Link startLink, Link endLink){
@@ -146,6 +150,7 @@ public class DgMatsimPopulation2Links {
 			if (! route.isEmpty()){
 				Tuple<Link, Link> nextFromTo = this.getNextFromToOnSmallNetworkOfRoute(route);
 				if (nextFromTo != null){
+//					counter++;
 					this.addFromLinkToLinkRelationshipToGrid(nextFromTo.getFirst(), nextFromTo.getSecond());
 				}
 			}

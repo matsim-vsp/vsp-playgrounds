@@ -86,6 +86,7 @@ public class M2KS2010NetworkConverter {
 	private static final int DEFAULT_CLEAR_TIME = 3;
 	// TODO adapt this if necessary (90 seconds is the cycle time of fixed-time and laemmer signals in the cottbus scenario)
 	private static final int DEFAULT_CYCLE_TIME = 90;
+//	private static final int DEFAULT_CYCLE_TIME = 60;
 
 	private Integer cycle = null;
 
@@ -379,13 +380,22 @@ public class M2KS2010NetworkConverter {
 
 			DgStreet street = new DgStreet(this.idConverter.convertLinkId2StreetId(link.getId()), fromNode, toNode);
 			double fsd = link.getLength() / link.getFreespeed();
-			long fs = Math.round(fsd);
-			if (fs != 0) {
-				street.setCost(fs);
+			// this is the earliest time where matsim sets the agent to the next link
+			long matsimFsd = (long) Math.floor(fsd + 1);
+			if (matsimFsd != 0) {
+				street.setCost(matsimFsd);
 			} else {
-				LOG.warn("Street id " + street.getId() + " has a freespeed tt of " + fsd + " that is rounded to " + fs + " replacing by 1");
-				street.setCost(0);
+				LOG.warn("Street id " + street.getId() + " has a freespeed tt of " + fsd + " that is rounded to " + matsimFsd + " replacing by 1");
+				street.setCost(1);
 			}
+//			// old travel time conversion:
+//			long fs = Math.round(fsd);
+//			if (fs != 0) {
+//				street.setCost(fs);
+//			} else {
+//				LOG.warn("Street id " + street.getId() + " has a freespeed tt of " + fsd + " that is rounded to " + fs + " replacing by 1");
+//				street.setCost(0);
+//			}
 			double capacity = link.getCapacity() / net.getCapacityPeriod() * this.timeInterval;
 			street.setCapacity(capacity);
 			ksnet.addStreet(street);
