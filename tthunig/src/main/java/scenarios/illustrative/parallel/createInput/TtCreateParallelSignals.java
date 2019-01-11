@@ -77,34 +77,35 @@ public final class TtCreateParallelSignals {
     private static final int INTERGREEN_TIME = 3;
     private static final int MIN_G = 1;
     
-    private SignalGroupType groupType = SignalGroupType.SINGLE_GROUPS;
+    private SignalGroupType groupTypeBranchingNodes = SignalGroupType.SINGLE_GROUPS;
+    private SignalGroupType groupTypeInnerNodes = SignalGroupType.SINGLE_GROUPS;
     public enum SignalGroupType {
-    		SINGLE_GROUPS,
-    		COMBINE_OUTER_TRAFFIC_AT_BRANCHING_POINTS, // single groups elsewhere
-    		COMBINE_ONCOMING_TRAFFIC, // combine outer traffic at branching points
-    		COMBINE_ONCOMING_TRAFFIC_ALL_GREEN_AT_BRANCHING_POINTS,
-    		ALL_GREEN_AT_BRANCHING_POINTS, // single groups elsewhere
-    		COMBINE_ONCOMING_TRAFFIC_EVERYWHERE, // combine oncoming traffic everywhere, also at branching points
-    		COMBINE_ONCOMING_TRAFFIC_AT_BRANCHING_POINTS // single elsewhere
+		SINGLE_GROUPS,
+		COMBINE_OUTER_TRAFFIC, // only for branching nodes
+		COMBINE_ONCOMING_TRAFFIC,
+		ALL_IN_ONE_GROUP // only for branching nodes
     }
     
-    private SignalControlType controlType = SignalControlType.FIXED_SAME_25_FOR_SAME_OD;
+    private SignalControlType controlTypeBranchingNodes = SignalControlType.FIXED_ALL_GREEN;
+    private SignalControlType controlTypeInnerNodes = SignalControlType.FIXED_ALL_OD_COMBINE_HALF_HALF_OFFSET_OPT_ALL_RIGHT;
     public enum SignalControlType {
-    		FIXED_SAME_25_FOR_SAME_OD, // give green to each signal group of the same OD pair at the same 25 seconds each cycle (i.e. unrealistic)
-    		FIXED_ALL_RIGHT,
-    		FIXED_ALL_RIGHT_AND_ALL_GREEN_AT_BRANCHING_POINTS,
-    		FIXED_ALL_RIGHT_SECOND_OD_AND_ALL_GREEN_AT_BRANCHING_POINTS,
-    		FIXED_ALL_N_W_AND_ALL_GREEN_AT_BRANCHING_POINTS,
-    		FIXED_EQUALLY_DISTRIBUTED, // equally distribute cycle time to all non-conflicting directions for each system (i.e. realistic)
-    		FIXED_EQUALLY_DISTRIBUTED_REVERSE,
-    		FIXED_ALL_GREEN_BRANCHING_POINTS, // 30:30 else
-    		FIXED_ALL_GREEN_BRANCHING_POINTS_REVERSE,
-    		FIXED_ALL_GREEN_BRANCHING_POINTS_SECOND_OD, // combine oncoming traffic
-    		FIXED_ALL_GREEN_BRANCHING_POINTS_ALL_CONFLICTING_ELSE, // 15:15:15:15 at inner nodes
-    		LAEMMER_WITH_GROUPS,
-    		LAEMMER_FLEX
+		FIXED_ALL_GREEN,
+		FIXED_ALL_GREEN_OFFSET_OPT_ALL_RIGHT,
+		FIXED_ONLY_EW_ALL_RIGHT,
+		FIXED_ONLY_EW_HALF_HALF,
+		FIXED_ONLY_EW_HALF_HALF_REVERSE,
+		FIXED_ALL_OD_CONFLICTING_EQUALLY, // 15:15:15:15
+		FIXED_ALL_OD_CONFLICTING_ALL_RIGHT,
+		FIXED_ALL_OD_COMBINE_ALL_N_W,
+		FIXED_ALL_OD_COMBINE_HALF_HALF,
+		FIXED_ALL_OD_COMBINE_HALF_HALF_OFFSET_OPT_ALL_RIGHT, // optimal offsets for link travel time 15sec
+		FIXED_PULK_ALL_OD_OFFSET_OPT, // only for branching nodes: 0..27 green
+		FIXED_PULK_ONLY_EW_OFFSET_OPT, // only for branching nodes: pulks only in EW direction, all green in NS direction
+		LAEMMER_WITH_GROUPS,
+		LAEMMER_FLEX
     }
-    private boolean useSylvia = false;
+    private boolean useSylviaAtInnerNodes = false;
+    private boolean useSylviaAtBranchingNodes = false;
 
     private Scenario scenario;
 
@@ -112,16 +113,22 @@ public final class TtCreateParallelSignals {
     private Set<Id<SignalGroup>> signalGroupsFirstODPair = new HashSet<>();
     private Set<Id<SignalGroup>> signalGroupsAllRight = new HashSet<>();
     private Set<Id<SignalGroup>> signalGroupsAllNW = new HashSet<>();
+    private Set<Id<SignalGroup>> signalGroupsOutgoing = new HashSet<>();
 	private Set<Id<SignalSystem>> branchingSystems = new HashSet<>();
     
     public TtCreateParallelSignals(Scenario scenario) {
         this.scenario = scenario;
     }
 
-    public void createSignals(SignalControlType signalControl, SignalGroupType signalGroups) {
-        log.info("Create signals ...");
-        this.controlType = signalControl;
-        this.groupType = signalGroups;
+    public void createSignals(SignalControlType signalControlBranchingNodes, SignalControlType signalControlInnerNodes, 
+    			SignalGroupType signalGroupsBranchingNodes, SignalGroupType singleGroupsInnerNodes) {
+        
+    		log.info("Create signals ...");
+        
+    		this.controlTypeBranchingNodes = signalControlBranchingNodes;
+        this.controlTypeInnerNodes = signalControlInnerNodes;
+        this.groupTypeBranchingNodes = signalGroupsBranchingNodes;
+        this.groupTypeInnerNodes = singleGroupsInnerNodes;
 
         initPossibleSignalMoves();
         prepareSignalControlInfo();
@@ -131,8 +138,12 @@ public final class TtCreateParallelSignals {
         createSignalControlData();
     }
     
-    public void setUseSylvia(boolean useSylvia) {
-    		this.useSylvia = useSylvia;
+    public void setUseSylviaAtInnerNodes(boolean useSylvia) {
+    		this.useSylviaAtInnerNodes = useSylvia;
+    }
+    
+    public void setUseSylviaAtBranchingNodes(boolean useSylvia) {
+		this.useSylviaAtBranchingNodes = useSylvia;
     }
 
     private void initPossibleSignalMoves() {
@@ -166,6 +177,7 @@ public final class TtCreateParallelSignals {
                 new ArrayList<>(Collections.singletonList(Id.createLinkId("11_12"))));
         possibleSignalMoves.put(Id.createLinkId("8_11"),
                 new ArrayList<>(Collections.singletonList(Id.createLinkId("11_12"))));
+        // TODO
         possibleSignalMoves.put(Id.createLinkId("12_11"),
                 new ArrayList<>(Arrays.asList(Id.createLinkId("11_7"), Id.createLinkId("11_8"))));
 
@@ -270,6 +282,15 @@ public final class TtCreateParallelSignals {
 		branchingSystems.add(idSystem5);
 		branchingSystems.add(idSystem10);
 		branchingSystems.add(idSystem11);
+		
+		signalGroupsOutgoing.add(Id.create("signal3_2.2_1", SignalGroup.class));
+		signalGroupsOutgoing.add(Id.create("signal7_2.2_1", SignalGroup.class));
+		signalGroupsOutgoing.add(Id.create("signal7_11.11_12", SignalGroup.class));
+		signalGroupsOutgoing.add(Id.create("signal8_11.11_12", SignalGroup.class));
+		signalGroupsOutgoing.add(Id.create("signal8_5.5_6", SignalGroup.class));
+		signalGroupsOutgoing.add(Id.create("signal4_5.5_6", SignalGroup.class));
+		signalGroupsOutgoing.add(Id.create("signal4_10.10_9", SignalGroup.class));
+		signalGroupsOutgoing.add(Id.create("signal3_10.10_9", SignalGroup.class));
 	}
 
     /**
@@ -333,53 +354,40 @@ public final class TtCreateParallelSignals {
         SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
         SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
 
-        switch (groupType) {
-        case COMBINE_ONCOMING_TRAFFIC:
-        		createGroupsForBranchPoints(signalGroups);
-			createGroupsForOncomingTraffic(signalGroups);
-        		break;
-		case COMBINE_ONCOMING_TRAFFIC_ALL_GREEN_AT_BRANCHING_POINTS:
-			createCommonGroupForBranchPoints(signalGroups);
-			createGroupsForOncomingTraffic(signalGroups);
-			break;
+		switch (groupTypeBranchingNodes) {
 		case SINGLE_GROUPS:
 			for (SignalSystemData system : signalSystems.getSignalSystemData().values()) {
-				SignalUtils.createAndAddSignalGroups4Signals(signalGroups, system);
-			}
-			break;
-		case COMBINE_OUTER_TRAFFIC_AT_BRANCHING_POINTS:
-			for (SignalSystemData system : signalSystems.getSignalSystemData().values()) {
-				if (!branchingSystems.contains(system.getId()))
-					// create single groups for all non branching points
+				if (branchingSystems.contains(system.getId()))
 					SignalUtils.createAndAddSignalGroups4Signals(signalGroups, system);
 			}
+			break;
+		case COMBINE_OUTER_TRAFFIC:
 			createGroupsForBranchPoints(signalGroups);
 			break;
-		case ALL_GREEN_AT_BRANCHING_POINTS:
-			for (SignalSystemData system : signalSystems.getSignalSystemData().values()) {
-				if (!branchingSystems.contains(system.getId()))
-					// create single groups for all non branching points
-					SignalUtils.createAndAddSignalGroups4Signals(signalGroups, system);
-			}
+		case COMBINE_ONCOMING_TRAFFIC:
+			createOncomingGroupsForBranchPoints(signalGroups);
+			break;
+		case ALL_IN_ONE_GROUP:
 			createCommonGroupForBranchPoints(signalGroups);
 			break;
-		case COMBINE_ONCOMING_TRAFFIC_EVERYWHERE:
-			createOncomingGroupsForBranchPoints(signalGroups);
-			createGroupsForOncomingTraffic(signalGroups);
-			break;
-		case COMBINE_ONCOMING_TRAFFIC_AT_BRANCHING_POINTS:
-			createOncomingGroupsForBranchPoints(signalGroups);
+		}
+		switch (groupTypeInnerNodes) {
+		case SINGLE_GROUPS:
 			for (SignalSystemData system : signalSystems.getSignalSystemData().values()) {
 				if (!branchingSystems.contains(system.getId()))
-					// create single groups for all non branching points
 					SignalUtils.createAndAddSignalGroups4Signals(signalGroups, system);
 			}
 			break;
-        }
+		case COMBINE_ONCOMING_TRAFFIC:
+			createGroupsForOncomingTrafficAtInnerNodes(signalGroups);
+			break;
+		default:
+			throw new RuntimeException("Signal group " + groupTypeInnerNodes + " does not make sense for inner nodes.");
+		}
     }
 
     // for systems 3,4,7,8
-	private void createGroupsForOncomingTraffic(SignalGroupsData signalGroups) {
+	private void createGroupsForOncomingTrafficAtInnerNodes(SignalGroupsData signalGroups) {
 		// create groups for system 3
 		Id<SignalSystem> idSystem3 = Id.create("signalSystem3", SignalSystem.class);
 		SignalGroupData groupEW_3 = signalGroups.getFactory().createSignalGroupData(idSystem3, 
@@ -629,195 +637,281 @@ public final class TtCreateParallelSignals {
         // creates a signal control for all signal systems
 		for (SignalSystemData signalSystem : signalSystems.getSignalSystemData().values()) {
 
-			SignalSystemControllerData signalSystemControl = fac.createSignalSystemControllerData(signalSystem.getId());
-			// add the signalSystemControl to the (final or temporary) signalControl
-			if (useSylvia) {
-				tmpSignalControl.addSignalSystemControllerData(signalSystemControl);
-			} else {
-				signalControl.addSignalSystemControllerData(signalSystemControl);
-			}
-
-			switch (controlType) {
-			case FIXED_SAME_25_FOR_SAME_OD:
-				SignalPlanData signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				// specify signal group settings for all signal groups of this signal system
-				for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-					create25EachFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId());
-	            }
-				break;
-			case FIXED_ALL_RIGHT:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-	            // specify signal group settings for all signal groups of this signal system
-				for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-					createAllRightFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId());
-	            }
-				break;
-			case FIXED_ALL_RIGHT_AND_ALL_GREEN_AT_BRANCHING_POINTS:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				if (branchingSystems.contains(signalSystem.getId())) {
-					// create all green control for branching systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllGreenFixedSignalControl(fac, signalPlan, signalGroup.getId());
-					}
-				} else {
-					// create all right control for all other systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllRightFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId());
-					}
-				}
-				break;
-			case FIXED_ALL_RIGHT_SECOND_OD_AND_ALL_GREEN_AT_BRANCHING_POINTS:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				if (branchingSystems.contains(signalSystem.getId())) {
-					// create all green control for branching systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllGreenFixedSignalControl(fac, signalPlan, signalGroup.getId());
-					}
-				} else {
-					// create all right control for all other systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllRightSecondODFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId());
-					}
-				}
-				break;
-			case FIXED_ALL_N_W_AND_ALL_GREEN_AT_BRANCHING_POINTS:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				if (branchingSystems.contains(signalSystem.getId())) {
-					// create all green control for branching systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllGreenFixedSignalControl(fac, signalPlan, signalGroup.getId());
-					}
-				} else {
-					// create all N-W control for all other systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllNWFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId(), signalSystem.getId());
-					}
-				}
-				break;
-			case FIXED_EQUALLY_DISTRIBUTED:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				// specify signal group settings for all signal groups of this signal system
-				for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-					createEquallyDistributedFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId(), signalSystem.getId());
-	            }
-				break;
-			case FIXED_EQUALLY_DISTRIBUTED_REVERSE:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				// specify signal group settings for all signal groups of this signal system
-				for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-					createReverseEquallyDistributedFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId(), signalSystem.getId());
-	            }
-				break;
-			case FIXED_ALL_GREEN_BRANCHING_POINTS:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				// specify signal group settings for all signal groups of this signal system
-				for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-					createAllGreenFixedSignalControlAtBranchingPoints(fac, signalPlan, signalGroup.getId(), signalSystem.getId());
-	            }
-				break;
-			case FIXED_ALL_GREEN_BRANCHING_POINTS_REVERSE:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				// specify signal group settings for all signal groups of this signal system
-				for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-					createAllGreenFixedSignalControlAtBranchingPointsReverse(fac, signalPlan, signalGroup.getId(), signalSystem.getId());
-	            }
-				break;
-			case FIXED_ALL_GREEN_BRANCHING_POINTS_SECOND_OD:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				if (branchingSystems.contains(signalSystem.getId())) {
-					// create all green control for branching systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllGreenFixedSignalControl(fac, signalPlan, signalGroup.getId());
-					}
-				} else {
-					// create 30:30 control for all other systems, combine oncoming traffic
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						create25EachFixedSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId());
-					}
-				}
-				break;
-			case FIXED_ALL_GREEN_BRANCHING_POINTS_ALL_CONFLICTING_ELSE:
-				signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
-				if (branchingSystems.contains(signalSystem.getId())) {
-					// create all green control for branching systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllGreenFixedSignalControl(fac, signalPlan, signalGroup.getId());
-					}
-				} else {
-					// create 15:15:15:15 control for all other systems
-					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
-						createAllConflictingEqualSignalControlForSignalGroup(fac, signalPlan, signalGroup.getId());
-					}
-				}
-				break;
-			case LAEMMER_WITH_GROUPS:
-				signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
-				break;
-			case LAEMMER_FLEX:
-				if (!groupType.equals(SignalGroupType.SINGLE_GROUPS)) {
-					throw new RuntimeException("please select SINGLE_GROUPS when using flexible laemmer signals");
-				}
-				signalSystemControl.setControllerIdentifier(FullyAdaptiveLaemmerSignalController.IDENTIFIER);
-				// TODO create conflicts
+			// distinguish between branching and inner nodes
+			if (branchingSystems.contains(signalSystem.getId())) {
+				// branching node
 				
+				SignalSystemControllerData signalSystemControl = fac.createSignalSystemControllerData(signalSystem.getId());
+				// add the signalSystemControl to the (final or temporary) signalControl
+				if (useSylviaAtBranchingNodes) {
+					tmpSignalControl.addSignalSystemControllerData(signalSystemControl);
+				} else {
+					signalControl.addSignalSystemControllerData(signalSystemControl);
+				}
 				
-				throw new UnsupportedOperationException();
-//				break;
+				switch (controlTypeBranchingNodes) {
+				case FIXED_ALL_GREEN:
+					SignalPlanData signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSingleGreenFixedSignalControl(fac, signalPlan, signalGroup.getId(), 60);
+					}
+					break;
+				case FIXED_ALL_GREEN_OFFSET_OPT_ALL_RIGHT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSingleGreenFixedSignalControl(fac, signalPlan, signalGroup.getId(), 60);
+					}
+					// set offset
+					switch (signalSystem.getId().toString()) {
+					case "signalSystem10":
+						signalPlan.setOffset(0 + 30);
+						break;
+					case "signalSystem2":
+						signalPlan.setOffset(15);
+						break;
+					case "signalSystem11":
+						signalPlan.setOffset(30 + 30);
+						break;
+					case "signalSystem5":
+						signalPlan.setOffset(45);
+						break;
+					}
+					break;
+				case FIXED_ONLY_EW_ALL_RIGHT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createOneOdAllRightSignalControl(fac, signalPlan, signalGroup.getId());
+		            }
+					break;
+				case FIXED_ONLY_EW_HALF_HALF:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+		            		createOneOdHalfHalfRightLeftSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_ONLY_EW_HALF_HALF_REVERSE:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+		            		createOneOdHalfHalfRightLeftSignalControlReverse(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_ALL_OD_CONFLICTING_EQUALLY:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSecondOdAllConflictingEqualSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_ALL_OD_CONFLICTING_ALL_RIGHT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSecondOdAllRightSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+		            break;
+				case FIXED_ALL_OD_COMBINE_HALF_HALF:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+		            		createSecondOd30EachFixedSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_PULK_ALL_OD_OFFSET_OPT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						if (signalGroupsOutgoing.contains(signalGroup.getId())) {
+							createSingleGreenFixedSignalControl(fac, signalPlan, signalGroup.getId(), 60);
+						} else { // ingoing 							
+							createSingleGreenFixedSignalControl(fac, signalPlan, signalGroup.getId(), 30);
+						}
+					}
+					// set offset
+					switch (signalSystem.getId().toString()) {
+					case "signalSystem10":
+						signalPlan.setOffset(0 + 30);
+						break;
+					case "signalSystem2":
+						signalPlan.setOffset(15);
+						break;
+					case "signalSystem11":
+						signalPlan.setOffset(30 + 30);
+						break;
+					case "signalSystem5":
+						signalPlan.setOffset(45);
+						break;
+					}
+					break;
+				case FIXED_PULK_ONLY_EW_OFFSET_OPT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						if (!signalGroupsFirstODPair.contains(signalGroup.getId()) || signalGroupsOutgoing.contains(signalGroup.getId())) {
+							createSingleGreenFixedSignalControl(fac, signalPlan, signalGroup.getId(), 60);
+						} else { // ingoing signal group of the first od pair							
+							createSingleGreenFixedSignalControl(fac, signalPlan, signalGroup.getId(), 30);
+						}
+					}
+					// set offset
+					switch (signalSystem.getId().toString()) {
+					case "signalSystem10":
+						signalPlan.setOffset(0 + 30);
+						break;
+					case "signalSystem2":
+						signalPlan.setOffset(15);
+						break;
+					case "signalSystem11":
+						signalPlan.setOffset(30 + 30);
+						break;
+					case "signalSystem5":
+						signalPlan.setOffset(45);
+						break;
+					}
+					break;
+				case LAEMMER_WITH_GROUPS:
+					signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+					break;
+				case LAEMMER_FLEX:
+					signalSystemControl.setControllerIdentifier(FullyAdaptiveLaemmerSignalController.IDENTIFIER);
+					// TODO create conflicts
+					throw new UnsupportedOperationException();
+//					break;
+				default:
+					throw new RuntimeException("It does not make sense to use " + controlTypeBranchingNodes + " for branching nodes.");
+				}
+			} 
+			// ---------------------------------------------------------------------------------------------------------------------------------------
+			else { // inner node
+				
+				SignalSystemControllerData signalSystemControl = fac.createSignalSystemControllerData(signalSystem.getId());
+				// add the signalSystemControl to the (final or temporary) signalControl
+				if (useSylviaAtInnerNodes) {
+					tmpSignalControl.addSignalSystemControllerData(signalSystemControl);
+				} else {
+					signalControl.addSignalSystemControllerData(signalSystemControl);
+				}
+				
+				switch (controlTypeInnerNodes) {
+				case FIXED_ALL_GREEN:
+					SignalPlanData signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+					for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSingleGreenFixedSignalControl(fac, signalPlan, signalGroup.getId(), 60);
+					}
+					break;
+				case FIXED_ONLY_EW_ALL_RIGHT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createOneOdAllRightSignalControl(fac, signalPlan, signalGroup.getId());
+		            }
+					break;
+				case FIXED_ONLY_EW_HALF_HALF:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+		            		createOneOdHalfHalfRightLeftSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_ONLY_EW_HALF_HALF_REVERSE:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+		            		createOneOdHalfHalfRightLeftSignalControlReverse(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_ALL_OD_CONFLICTING_EQUALLY:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSecondOdAllConflictingEqualSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_ALL_OD_CONFLICTING_ALL_RIGHT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSecondOdAllRightSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+		            break;
+				case FIXED_ALL_OD_COMBINE_ALL_N_W:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+						createSecondOdAllNWSignalControl(fac, signalPlan, signalGroup.getId(), signalSystem.getId());
+					}
+		            break;
+				case FIXED_ALL_OD_COMBINE_HALF_HALF:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+		            		createSecondOd30EachFixedSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+					break;
+				case FIXED_ALL_OD_COMBINE_HALF_HALF_OFFSET_OPT_ALL_RIGHT:
+					signalPlan = createBasisFixedTimePlan(fac, signalSystemControl);
+		            for (SignalGroupData signalGroup : signalGroups.getSignalGroupDataBySystemId(signalSystem.getId()).values()) {
+		            		createSecondOd30EachFixedSignalControl(fac, signalPlan, signalGroup.getId());
+					}
+		            // set offset
+					switch (signalSystem.getId().toString()) {
+					case "signalSystem4":
+						signalPlan.setOffset(0);
+						break;
+					case "signalSystem3":
+						signalPlan.setOffset(15);
+						break;
+					case "signalSystem7":
+						signalPlan.setOffset(30);
+						break;
+					case "signalSystem8":
+						signalPlan.setOffset(45);
+						break;
+					}
+					break;
+				case LAEMMER_WITH_GROUPS:
+					signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+					break;
+				case LAEMMER_FLEX:
+					signalSystemControl.setControllerIdentifier(FullyAdaptiveLaemmerSignalController.IDENTIFIER);
+					// TODO create conflicts
+					throw new UnsupportedOperationException();
+//					break;
+				default:
+					throw new RuntimeException("It does not make sense to use " + controlTypeInnerNodes + " for inner nodes.");
+				}
 			}
         }
 		
 		// convert basis fixed time plan to sylvia plan
-		if (useSylvia) {
+		if (useSylviaAtBranchingNodes || useSylviaAtInnerNodes) {
 			SylviaPreprocessData.convertSignalControlData(tmpSignalControl, signalControl);
 		}
     }
 
-	private void createAllGreenFixedSignalControl(SignalControlDataFactory fac, SignalPlanData signalPlan,
-			Id<SignalGroup> id) {
+	private void createSingleGreenFixedSignalControl(SignalControlDataFactory fac, SignalPlanData signalPlan,
+			Id<SignalGroup> id, int greenSeconds) {
 		int onset = 0; 
-		int dropping = 60 - INTERGREEN_TIME;
+		int dropping = greenSeconds - INTERGREEN_TIME;
 		int signalSystemOffset = 0;
 		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac, id, onset, dropping));
 		signalPlan.setOffset(signalSystemOffset);
 	}
 
-	private void createAllGreenFixedSignalControlAtBranchingPoints(SignalControlDataFactory fac,
-			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId, Id<SignalSystem> signalSystemId) {
+	private void createOneOdHalfHalfRightLeftSignalControl(SignalControlDataFactory fac,
+			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
 		int onset; 
 		int dropping;
 		int signalSystemOffset = 0;
-		if (branchingSystems.contains(signalSystemId)) {
+		if (signalGroupsAllRight.contains(signalGroupId)) {
 			onset = 0;
-			dropping = 60 - INTERGREEN_TIME;
+			dropping = 30 - INTERGREEN_TIME;
 		} else {
-			if (signalGroupsAllRight.contains(signalGroupId)) {
-				onset = 0;
-				dropping = 30 - INTERGREEN_TIME;
-			} else {
-				onset = 30;
-				dropping = 60 - INTERGREEN_TIME;
-			}
+			onset = 30;
+			dropping = 60 - INTERGREEN_TIME;
 		}
 		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac, signalGroupId, onset, dropping));
 		signalPlan.setOffset(signalSystemOffset);
 	}
 	
-	private void createAllGreenFixedSignalControlAtBranchingPointsReverse(SignalControlDataFactory fac,
-			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId, Id<SignalSystem> signalSystemId) {
+	private void createOneOdHalfHalfRightLeftSignalControlReverse(SignalControlDataFactory fac,
+			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
 		int onset; 
 		int dropping;
 		int signalSystemOffset = 0;
-		if (branchingSystems.contains(signalSystemId)) {
-			onset = 0;
+		if (signalGroupsAllRight.contains(signalGroupId)) {
+			onset = 30;
 			dropping = 60 - INTERGREEN_TIME;
 		} else {
-			if (signalGroupsAllRight.contains(signalGroupId)) {
-				onset = 30;
-				dropping = 60 - INTERGREEN_TIME;
-			} else {
-				onset = 0;
-				dropping = 30 - INTERGREEN_TIME;
-			}
+			onset = 0;
+			dropping = 30 - INTERGREEN_TIME;
 		}
 		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac, signalGroupId, onset, dropping));
 		signalPlan.setOffset(signalSystemOffset);
@@ -825,8 +919,12 @@ public final class TtCreateParallelSignals {
 
 	private SignalPlanData createBasisFixedTimePlan(SignalControlDataFactory fac,
 			SignalSystemControllerData signalSystemControl) {
-		if (!groupType.equals(SignalGroupType.SINGLE_GROUPS)) {
-			throw new RuntimeException("please select SINGLE_GROUPS when using fixed-time signals");
+		if (branchingSystems.contains(signalSystemControl.getSignalSystemId())) {
+			if (!groupTypeBranchingNodes.equals(SignalGroupType.SINGLE_GROUPS)) {
+				throw new RuntimeException("please select SINGLE_GROUPS when using fixed-time signals");
+			}
+		} else if (!groupTypeInnerNodes.equals(SignalGroupType.SINGLE_GROUPS)) {
+			throw new RuntimeException("please select SINGLE_GROUPS when using fixed-time signals");			
 		}
 		
 		signalSystemControl.setControllerIdentifier(DefaultPlanbasedSignalSystemController.IDENTIFIER);
@@ -836,75 +934,7 @@ public final class TtCreateParallelSignals {
 		return signalPlan;
 	}
 
-	private void createEquallyDistributedFixedSignalControlForSignalGroup(SignalControlDataFactory fac,
-			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId, Id<SignalSystem> signalSystemId) {
-		int onset;
-		int dropping;
-		int signalSystemOffset = 0;
-		if (signalGroupsAllRight.contains(signalGroupId)) {
-			onset = 0;
-			if (branchingSystems.contains(signalSystemId)) {
-				dropping = 20 - INTERGREEN_TIME;
-			} else {
-				dropping = 30 - INTERGREEN_TIME;
-			}
-		} else {
-			if (signalGroupId.equals(Id.create("signal1_2.2_3", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal6_5.5_8", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal9_10.10_4", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal12_11.11_7", SignalGroup.class)) ) {
-				onset = 20;
-				dropping = 40 - INTERGREEN_TIME;
-			} else if (signalGroupId.equals(Id.create("signal7_2.2_1", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal4_5.5_6", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal3_10.10_9", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal8_11.11_12", SignalGroup.class)) ) {
-				onset = 40;
-				dropping = 60 - INTERGREEN_TIME;
-			} else { // no branching node
-				onset = 30;
-				dropping = 60 - INTERGREEN_TIME;
-			}
-		}
-		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac, signalGroupId, onset, dropping));
-		signalPlan.setOffset(signalSystemOffset);
-	}
-	
-	private void createReverseEquallyDistributedFixedSignalControlForSignalGroup(SignalControlDataFactory fac,
-			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId, Id<SignalSystem> signalSystemId) {
-		int onset;
-		int dropping;
-		int signalSystemOffset = 0;
-		if (signalGroupsAllRight.contains(signalGroupId)) {
-			if (branchingSystems.contains(signalSystemId)) {
-				onset = 40;
-			} else {
-				onset = 30;
-			}
-			dropping = 60 - INTERGREEN_TIME;
-		} else {
-			if (signalGroupId.equals(Id.create("signal1_2.2_3", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal6_5.5_8", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal9_10.10_4", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal12_11.11_7", SignalGroup.class)) ) {
-				onset = 0;
-				dropping = 20 - INTERGREEN_TIME;
-			} else if (signalGroupId.equals(Id.create("signal7_2.2_1", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal4_5.5_6", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal3_10.10_9", SignalGroup.class))
-					|| signalGroupId.equals(Id.create("signal8_11.11_12", SignalGroup.class)) ) {
-				onset = 20;
-				dropping = 40 - INTERGREEN_TIME;
-			} else { // no branching node
-				onset = 0;
-				dropping = 30 - INTERGREEN_TIME;
-			}
-		}
-		signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac, signalGroupId, onset, dropping));
-		signalPlan.setOffset(signalSystemOffset);
-	}
-
-	private void createAllRightFixedSignalControlForSignalGroup(SignalControlDataFactory fac, SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
+	private void createOneOdAllRightSignalControl(SignalControlDataFactory fac, SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
 		int onset;
 		int dropping;
 		int signalSystemOffset;
@@ -921,7 +951,7 @@ public final class TtCreateParallelSignals {
 		signalPlan.setOffset(signalSystemOffset);
 	}
 
-	private void createAllRightSecondODFixedSignalControlForSignalGroup(SignalControlDataFactory fac,
+	private void createSecondOdAllRightSignalControl(SignalControlDataFactory fac,
 			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
 		int onset;
 		int dropping;
@@ -951,7 +981,7 @@ public final class TtCreateParallelSignals {
 		signalPlan.setOffset(signalSystemOffset);
 	}
 
-	private void createAllNWFixedSignalControlForSignalGroup(SignalControlDataFactory fac, SignalPlanData signalPlan,
+	private void createSecondOdAllNWSignalControl(SignalControlDataFactory fac, SignalPlanData signalPlan,
 			Id<SignalGroup> signalGroupId, Id<SignalSystem> signalSystemId) {
 		int onset;
 		int dropping;
@@ -993,7 +1023,7 @@ public final class TtCreateParallelSignals {
 		signalPlan.setOffset(signalSystemOffset);
 	}
 
-	private void create25EachFixedSignalControlForSignalGroup(SignalControlDataFactory fac, SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
+	private void createSecondOd30EachFixedSignalControl(SignalControlDataFactory fac, SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
 		int onset;
 		int dropping;
 		int signalSystemOffset;
@@ -1012,7 +1042,7 @@ public final class TtCreateParallelSignals {
 		signalPlan.setOffset(signalSystemOffset);
     }
 
-    private void createAllConflictingEqualSignalControlForSignalGroup(SignalControlDataFactory fac,
+    private void createSecondOdAllConflictingEqualSignalControl(SignalControlDataFactory fac,
 			SignalPlanData signalPlan, Id<SignalGroup> signalGroupId) {
     		int onset;
 		int dropping;

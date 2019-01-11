@@ -28,8 +28,10 @@ import scenarios.illustrative.analysis.TtListenerToBindAndWriteAnalysis;
 public class TtListenerToBindAndWriteAnalysisForParallelWithoutTolls extends TtListenerToBindAndWriteAnalysis{
 
 	public TtListenerToBindAndWriteAnalysisForParallelWithoutTolls() {
-		this.scriptNameRouteDistribution = "plot_routeDistribution_withoutTolls";
-		this.scriptNameRoutesAndTTs = "plot_routesAndTTs_withoutTolls";
+//		this.scriptNameRouteDistribution = "plot_routeDistribution_withoutTolls";
+//		this.scriptNameRoutesAndTTs = "plot_routesAndTTs_withoutTolls";
+		this.scriptNameRouteDistribution = "plot_routeDistribution_withoutTolls_secondOD";
+		this.scriptNameRoutesAndTTs = "plot_routesAndTTs_withoutTolls_secondOD";
 	}
 	
 	

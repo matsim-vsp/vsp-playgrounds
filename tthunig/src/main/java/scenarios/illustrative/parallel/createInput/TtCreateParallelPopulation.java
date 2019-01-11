@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -37,6 +38,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.population.routes.RouteUtils;
+import org.matsim.utils.objectattributes.ObjectAttributes;
 
 /**
  * Class to create a population for the parallel scenario.
@@ -54,8 +56,15 @@ public final class TtCreateParallelPopulation {
 			.getLogger(TtCreateParallelPopulation.class);
 
 	private Population population;
+	private ObjectAttributes personAtt;
 
-	private boolean useSecondODPair = false;
+	private DemandType demandType = DemandType.SINGLE_OD;
+	public enum DemandType {
+		SINGLE_OD,
+		CROSSING_ROAD, // S-N traffic without route choice (all east)
+		CROSSING_ROADS, // S-N and N-S traffic without route choice (all right)
+		SECOND_OD
+	}
 	
 	private int numberOfPersons;
 	private Double initPlanScore = null;
@@ -63,12 +72,14 @@ public final class TtCreateParallelPopulation {
 	public enum InitRoutesType {
 		NONE,
 		ALL_RIGHT,
+		ALL_LEFT,
 		OSZILLATING,
 		ALL_N_W // north-west (oncoming traffic on same route, i.e. just one intersection relevant)
 	}
 
-	public TtCreateParallelPopulation(Population pop, Network net) {
-		this.population = pop;
+	public TtCreateParallelPopulation(Scenario sc) {
+		this.population = sc.getPopulation();
+		this.personAtt = sc.getPopulation().getPersonAttributes();
 	}
 
 	/**
@@ -100,9 +111,19 @@ public final class TtCreateParallelPopulation {
 		
 		createWestEastDemand();
 		createEastWestDemand();
-		if (useSecondODPair) {
+		
+		switch (demandType) {
+		case CROSSING_ROAD:
+			createCrossingDemandSouthNorth();
+			break;
+		case CROSSING_ROADS:
+			createCrossingDemandSouthNorth();
+			createCrossingDemandNorthSouth();
+			break;
+		case SECOND_OD:
 			createNorthSouthDemand();
 			createSouthNorthDemand();
+			break;
 		}
 	}
 
@@ -120,23 +141,25 @@ public final class TtCreateParallelPopulation {
 
 			// create a person
 			Person person = population.getFactory().createPerson(
-					Id.createPersonId(Integer.toString(i) + "_ab"));
+					Id.createPersonId(Integer.toString(i) + "_we"));
+//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
+			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
-					.createActivityFromLinkId("dummy", Id.createLinkId("a_1"));
+					.createActivityFromLinkId("dummy", Id.createLinkId("w_1"));
 			// distribute agents uniformly between 8 and 9 am.
 			startAct.setEndTime(8 * 3600 + (double)(i)/numberOfPersons * 3600);
 
 			// create a drain activity
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
-					"dummy", Id.createLinkId("6_b"));
+					"dummy", Id.createLinkId("6_e"));
 
 			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createWestEastLeg(true);
-				Plan planNorth = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planNorth = createPlan(startAct, leg, drainAct);
 				leg = createWestEastLeg(false);
-				Plan planSouth = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planSouth = createPlan(startAct, leg, drainAct);
 				person.addPlan(planNorth);
 				person.addPlan(planSouth);
 				switch (initType) {
@@ -150,6 +173,7 @@ public final class TtCreateParallelPopulation {
 						person.setSelectedPlan(planSouth);
 					}
 					break;
+				case ALL_LEFT:
 				case ALL_N_W:
 					person.setSelectedPlan(planNorth);
 					break;
@@ -158,7 +182,7 @@ public final class TtCreateParallelPopulation {
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
-				Plan plan = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan plan = createPlan(startAct, leg, drainAct);
 				person.addPlan(plan);
 			}
 
@@ -184,7 +208,7 @@ public final class TtCreateParallelPopulation {
 
 		path.add(Id.createLinkId("5_6"));
 
-		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("a_1"), path, Id.createLinkId("6_b"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("w_1"), path, Id.createLinkId("6_e"));
 
 		leg.setRoute(route);
 		return leg;
@@ -195,23 +219,25 @@ public final class TtCreateParallelPopulation {
 
 			// create a person
 			Person person = population.getFactory().createPerson(
-					Id.createPersonId(Integer.toString(i) + "_ba"));
+					Id.createPersonId(Integer.toString(i) + "_ew"));
+//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
+			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
-					.createActivityFromLinkId("dummy", Id.createLinkId("b_6"));
+					.createActivityFromLinkId("dummy", Id.createLinkId("e_6"));
 			// distribute agents uniformly between 8 and 9 am.
 			startAct.setEndTime(8 * 3600 + (double)(i)/numberOfPersons * 3600);
 
 			// create a drain activity
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
-					"dummy", Id.createLinkId("1_a"));
+					"dummy", Id.createLinkId("1_w"));
 
 			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createEastWestLeg(true);
-				Plan planNorth = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planNorth = createPlan(startAct, leg, drainAct);
 				leg = createEastWestLeg(false);
-				Plan planSouth = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planSouth = createPlan(startAct, leg, drainAct);
 				person.addPlan(planNorth);
 				person.addPlan(planSouth);
 				switch (initType) {
@@ -226,12 +252,15 @@ public final class TtCreateParallelPopulation {
 						person.setSelectedPlan(planSouth);
 					}
 					break;
+				case ALL_LEFT:
+					person.setSelectedPlan(planSouth);
+					break;
 				default:
 					break;
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
-				Plan plan = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan plan = createPlan(startAct, leg, drainAct);
 				person.addPlan(plan);
 			}
 
@@ -256,7 +285,7 @@ public final class TtCreateParallelPopulation {
 		}
 		path.add(Id.createLinkId("2_1"));
 
-		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("b_6"), path, Id.createLinkId("1_a"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("e_6"), path, Id.createLinkId("1_w"));
 
 		leg.setRoute(route);
 		return leg;
@@ -267,23 +296,25 @@ public final class TtCreateParallelPopulation {
 
 			// create a person
 			Person person = population.getFactory().createPerson(
-					Id.createPersonId(Integer.toString(i) + "_cd"));
+					Id.createPersonId(Integer.toString(i) + "_ns"));
+//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
+			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
-					.createActivityFromLinkId("dummy", Id.createLinkId("c_9"));
+					.createActivityFromLinkId("dummy", Id.createLinkId("n_9"));
 			// distribute agents uniformly between 8 and 9 am.
 			startAct.setEndTime(8 * 3600 + (double)(i)/numberOfPersons * 3600);
 
 			// create a drain activity
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
-					"dummy", Id.createLinkId("12_d"));
+					"dummy", Id.createLinkId("12_s"));
 
 			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createNorthSouthLeg(true);
-				Plan planWest = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planWest = createPlan(startAct, leg, drainAct);
 				leg = createNorthSouthLeg(false);
-				Plan planEast = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planEast = createPlan(startAct, leg, drainAct);
 				person.addPlan(planWest);
 				person.addPlan(planEast);
 				switch (initType) {
@@ -298,12 +329,15 @@ public final class TtCreateParallelPopulation {
 						person.setSelectedPlan(planEast);
 					}
 					break;
+				case ALL_LEFT:
+					person.setSelectedPlan(planEast);
+					break;
 				default:
 					break;
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
-				Plan plan = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan plan = createPlan(startAct, leg, drainAct);
 				person.addPlan(plan);
 			}
 
@@ -328,7 +362,7 @@ public final class TtCreateParallelPopulation {
 		}
 		path.add(Id.createLinkId("11_12"));
 
-		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("c_9"), path, Id.createLinkId("12_d"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("n_9"), path, Id.createLinkId("12_s"));
 
 		leg.setRoute(route);
 		return leg;
@@ -339,23 +373,25 @@ public final class TtCreateParallelPopulation {
 
 			// create a person
 			Person person = population.getFactory().createPerson(
-					Id.createPersonId(Integer.toString(i) + "_dc"));
+					Id.createPersonId(Integer.toString(i) + "_sn"));
+//			person.getAttributes().putAttribute("subpopulation", "symTraffic");
+			personAtt.putAttribute(person.getId().toString(), "subpopulation", "symTraffic");
 
 			// create a start activity
 			Activity startAct = population.getFactory()
-					.createActivityFromLinkId("dummy", Id.createLinkId("d_12"));
+					.createActivityFromLinkId("dummy", Id.createLinkId("s_12"));
 			// distribute agents uniformly between 8 and 9 am.
 			startAct.setEndTime(8 * 3600 + (double)(i)/numberOfPersons * 3600);
 
 			// create a drain activity
 			Activity drainAct = population.getFactory().createActivityFromLinkId(
-					"dummy", Id.createLinkId("9_c"));
+					"dummy", Id.createLinkId("9_n"));
 
 			if (!initType.equals(InitRoutesType.NONE)) {
 				Leg leg = createSouthNorthLeg(true);
-				Plan planWest = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planWest = createPlan(startAct, leg, drainAct);
 				leg = createSouthNorthLeg(false);
-				Plan planEast = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan planEast = createPlan(startAct, leg, drainAct);
 				person.addPlan(planWest);
 				person.addPlan(planEast);
 				switch (initType) {
@@ -370,6 +406,7 @@ public final class TtCreateParallelPopulation {
 					}
 					break;
 				case ALL_N_W:
+				case ALL_LEFT:
 					person.setSelectedPlan(planWest);
 					break;
 				default:
@@ -377,7 +414,7 @@ public final class TtCreateParallelPopulation {
 				}
 			} else {
 				Leg leg = population.getFactory().createLeg(TransportMode.car);
-				Plan plan = createPlan(startAct, leg, drainAct, initPlanScore);
+				Plan plan = createPlan(startAct, leg, drainAct);
 				person.addPlan(plan);
 			}
 
@@ -402,14 +439,71 @@ public final class TtCreateParallelPopulation {
 		}
 		path.add(Id.createLinkId("10_9"));
 
-		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("d_12"), path, Id.createLinkId("9_c"));
+		Route route = RouteUtils.createLinkNetworkRouteImpl(Id.createLinkId("s_12"), path, Id.createLinkId("9_n"));
 
 		leg.setRoute(route);
 		return leg;
 	}
 
-	private Plan createPlan(Activity startAct, Leg leg, Activity drainAct,
-			Double initPlanScore) {
+	private void createCrossingDemandSouthNorth() {
+		for (int i = 0; i < this.numberOfPersons; i++) {
+			// create a person
+			Person person = population.getFactory().createPerson(
+					Id.createPersonId(Integer.toString(i) + "_sn"));
+//			person.getAttributes().putAttribute("subpopulation", "crossingTraffic");
+			personAtt.putAttribute(person.getId().toString(), "subpopulation", "crossingTraffic");
+
+			// create a start activity
+			Activity startAct = population.getFactory()
+					.createActivityFromLinkId("dummy", Id.createLinkId("s_12"));
+			// distribute agents uniformly between 8 and 9 am.
+			startAct.setEndTime(8 * 3600 + (double)(i)/numberOfPersons * 3600);
+
+			// create a drain activity
+			Activity drainAct = population.getFactory().createActivityFromLinkId(
+					"dummy", Id.createLinkId("9_n"));
+
+			// initialize eastern route and stick to this during replanning
+			Leg leg = createSouthNorthLeg(false);
+			Plan planEast = createPlan(startAct, leg, drainAct);
+			person.addPlan(planEast);
+			person.setSelectedPlan(planEast);
+
+			// store information in population
+			population.addPerson(person);
+		}
+	}
+	
+	private void createCrossingDemandNorthSouth() {
+		for (int i = 0; i < this.numberOfPersons; i++) {
+			// create a person
+			Person person = population.getFactory().createPerson(
+					Id.createPersonId(Integer.toString(i) + "_ns"));
+//			person.getAttributes().putAttribute("subpopulation", "crossingTraffic");
+			personAtt.putAttribute(person.getId().toString(), "subpopulation", "crossingTraffic");
+
+			// create a start activity
+			Activity startAct = population.getFactory()
+					.createActivityFromLinkId("dummy", Id.createLinkId("n_9"));
+			// distribute agents uniformly between 8 and 9 am.
+			startAct.setEndTime(8 * 3600 + (double)(i)/numberOfPersons * 3600);
+
+			// create a drain activity
+			Activity drainAct = population.getFactory().createActivityFromLinkId(
+					"dummy", Id.createLinkId("12_s"));
+
+			// initialize western route and stick to this during replanning
+			Leg leg = createNorthSouthLeg(true);
+			Plan planWest = createPlan(startAct, leg, drainAct);
+			person.addPlan(planWest);
+			person.setSelectedPlan(planWest);
+
+			// store information in population
+			population.addPerson(person);
+		}
+	}
+
+	private Plan createPlan(Activity startAct, Leg leg, Activity drainAct) {
 		
 		Plan plan = population.getFactory().createPlan();
 
@@ -421,7 +515,7 @@ public final class TtCreateParallelPopulation {
 		return plan;
 	}
 
-	public void setUseSecondODPair(boolean useSecondOdPair) {
-		this.useSecondODPair = useSecondOdPair;
+	public void setDemandType(DemandType demandType) {
+		this.demandType = demandType;
 	}
 }

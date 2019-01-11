@@ -61,6 +61,7 @@ import scenarios.illustrative.parallel.analysis.TtAnalyzeParallel;
 import scenarios.illustrative.parallel.analysis.TtListenerToBindAndWriteAnalysisForParallelWithoutTolls;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelNetworkAndLanes;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelPopulation;
+import scenarios.illustrative.parallel.createInput.TtCreateParallelPopulation.DemandType;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelPopulation.InitRoutesType;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelSignals;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelSignals.SignalControlType;
@@ -83,14 +84,17 @@ public final class RunParallelSimulation {
 	private static final int NUMBER_OF_PERSONS = 1620;
 	private static final InitRoutesType INIT_ROUTES_TYPE = InitRoutesType.OSZILLATING;
 	// initial score for all initial plans. choose null for no score
-	private static final Double INIT_PLAN_SCORE = null;
+	private static final Double INIT_PLAN_SCORE = 121.5;
 
-	private static final boolean USE_SECOND_OD_PAIR = true;
+	private static final DemandType DEMAND_TYPE = DemandType.CROSSING_ROADS;
 	
 	private static final boolean USE_SIGNALS = true;
-	private static final SignalControlType SIGNAL_CONTROL = SignalControlType.LAEMMER_WITH_GROUPS;
-	private static final boolean USE_SYLVIA = false; // to be able to choose base fixed time plan above
-	private static final SignalGroupType SIGNAL_GROUPS = SignalGroupType.ALL_GREEN_AT_BRANCHING_POINTS;
+	private static final SignalControlType SIGNAL_CONTROL_BRANCHING_NODES = SignalControlType.FIXED_PULK_ONLY_EW_OFFSET_OPT;
+	private static final SignalControlType SIGNAL_CONTROL_INNER_NODES = SignalControlType.FIXED_ALL_OD_COMBINE_HALF_HALF_OFFSET_OPT_ALL_RIGHT;
+	private static final boolean USE_SYLVIA_BRANCHING_NODES = false; // to be able to choose base fixed time plan above
+	private static final boolean USE_SYLVIA_INNER_NODES = true; // to be able to choose base fixed time plan above
+	private static final SignalGroupType SIGNAL_GROUPS_BRANCHING_NODES = SignalGroupType.SINGLE_GROUPS;
+	private static final SignalGroupType SIGNAL_GROUPS_INNER_NODES = SignalGroupType.SINGLE_GROUPS;
 	// TODO intersection modeling: conflicts...
 	
 //	// defines which kind of pricing should be used
@@ -101,12 +105,12 @@ public final class RunParallelSimulation {
 
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
-	private static final double SIGMA = 0.0;	
+	private static final double SIGMA = 0.;
 		
 	private static final boolean WRITE_INITIAL_FILES = false;
 
 	
-	private static String OUTPUT_BASE_DIR = "../../runs-svn/parallel/secondOD_interG3_minG1_300m/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/parallel/crossingRoads_greenWaves_interG3_200m_15ms/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -257,10 +261,10 @@ public final class RunParallelSimulation {
 		laemmerConfigGroup.setMaxCycleTime(90);
 		laemmerConfigGroup.setDesiredCycleTime(60);
 		laemmerConfigGroup.setIntergreenTime(3);
-		laemmerConfigGroup.setMinGreenTime(1);
+		laemmerConfigGroup.setMinGreenTime(5);
 		
 		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
-		sylviaConfig.setSignalGroupMaxGreenScale(3);
+		sylviaConfig.setSignalGroupMaxGreenScale(1.5);
 		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 //		sylviaConfig.setCheckDownstream(true);
 
@@ -287,6 +291,7 @@ public final class RunParallelSimulation {
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultStrategy.ReRoute.toString() );
 			strat.setWeight( 0.1 ) ;
+			strat.setSubpopulation("symTraffic");
 			strat.setDisableAfter( config.controler().getLastIteration() - 30 );
 			config.strategy().addStrategySettings(strat);
 		}
@@ -294,6 +299,7 @@ public final class RunParallelSimulation {
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.SelectRandom.toString() );
 			strat.setWeight( 0.0 ) ;
+			strat.setSubpopulation("symTraffic");
 			strat.setDisableAfter( config.controler().getLastIteration() - 30 );
 			config.strategy().addStrategySettings(strat);
 		}
@@ -301,9 +307,18 @@ public final class RunParallelSimulation {
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.ChangeExpBeta.toString() );
 			strat.setWeight( 0.9 ) ;
+			strat.setSubpopulation("symTraffic");
 			strat.setDisableAfter( config.controler().getLastIteration() );
 			config.strategy().addStrategySettings(strat);
 		}
+//		{
+//			StrategySettings strat = new StrategySettings() ;
+//			strat.setStrategyName( DefaultSelector.KeepLastSelected.toString() );
+//			strat.setWeight( 0.8 ) ;
+//			strat.setSubpopulation("symTraffic");
+//			strat.setDisableAfter( config.controler().getLastIteration() );
+//			config.strategy().addStrategySettings(strat);
+//		}
 		{
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.BestScore.toString() );
@@ -314,13 +329,14 @@ public final class RunParallelSimulation {
 		{
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.KeepLastSelected.toString() );
-			strat.setWeight( 0.0 ) ;
+			strat.setWeight( 1.0 ) ;
+			strat.setSubpopulation("crossingTraffic");
 			strat.setDisableAfter( config.controler().getLastIteration() );
 			config.strategy().addStrategySettings(strat);
 		}
 
 		// choose maximal number of plans per agent. 0 means unlimited
-		config.strategy().setMaxAgentPlanMemorySize( 0 );
+		config.strategy().setMaxAgentPlanMemorySize( 5 );
 		
 		config.qsim().setStuckTime(3600 * 10.);
 		
@@ -361,15 +377,14 @@ public final class RunParallelSimulation {
 		// TODO
 //		netCreator.setCapacity(NUMBER_OF_PERSONS);
 		netCreator.setCapacity(3600);
-		netCreator.setUseSecondODPair(USE_SECOND_OD_PAIR);
+		netCreator.setDemandType(DEMAND_TYPE);
 		netCreator.createNetworkWithLanes();
 	}
 
 	private static void createPopulation(Scenario scenario) {
 		
-		TtCreateParallelPopulation popCreator = 
-				new TtCreateParallelPopulation(scenario.getPopulation(), scenario.getNetwork());
-		popCreator.setUseSecondODPair(USE_SECOND_OD_PAIR);
+		TtCreateParallelPopulation popCreator = new TtCreateParallelPopulation(scenario);
+		popCreator.setDemandType(DEMAND_TYPE);
 		popCreator.createPersons(NUMBER_OF_PERSONS, INIT_ROUTES_TYPE, INIT_PLAN_SCORE);
 	}
 
@@ -377,8 +392,9 @@ public final class RunParallelSimulation {
 		// this method is only called when signal systems are used
 		
 		TtCreateParallelSignals signalsCreator = new TtCreateParallelSignals(scenario);
-		signalsCreator.setUseSylvia(USE_SYLVIA);
-		signalsCreator.createSignals(SIGNAL_CONTROL, SIGNAL_GROUPS);
+		signalsCreator.setUseSylviaAtBranchingNodes(USE_SYLVIA_BRANCHING_NODES);
+		signalsCreator.setUseSylviaAtInnerNodes(USE_SYLVIA_INNER_NODES);
+		signalsCreator.createSignals(SIGNAL_CONTROL_BRANCHING_NODES, SIGNAL_CONTROL_INNER_NODES, SIGNAL_GROUPS_BRANCHING_NODES, SIGNAL_GROUPS_INNER_NODES);
 	}
 
 	private static void createRunNameAndOutputDir(Scenario scenario) {
@@ -387,8 +403,20 @@ public final class RunParallelSimulation {
 		
 		String runName = OutputUtils.getCurrentDateIncludingTime();
 		
-		if (USE_SECOND_OD_PAIR)
-			runName += "_secondODPair";
+		switch (DEMAND_TYPE) {
+		case SECOND_OD:
+			runName += "_secondOdPair";
+			break;
+		case CROSSING_ROAD:
+			runName += "_crossingRoad";
+			break;
+		case CROSSING_ROADS:
+			runName += "_crossingRoads";
+			break;
+		case SINGLE_OD:
+			runName += "_singleOdPair";
+			break;
+		}
 
 		runName += "_" + NUMBER_OF_PERSONS;
 		if (!INIT_ROUTES_TYPE.equals(InitRoutesType.NONE)){
@@ -398,79 +426,16 @@ public final class RunParallelSimulation {
 		}
 		
 		if (USE_SIGNALS) {
-			runName += "_signals"; // + SIGNAL_CONTROL;
-			switch(SIGNAL_CONTROL) {
-			case FIXED_ALL_GREEN_BRANCHING_POINTS:
-				runName+= "FixedBranchGreen";
-				break;
-			case FIXED_ALL_GREEN_BRANCHING_POINTS_REVERSE:
-				runName+= "FixedBranchGreenRev";
-				break;
-			case FIXED_EQUALLY_DISTRIBUTED:
-				runName+= "FixedEqDist";
-				break;
-			case FIXED_EQUALLY_DISTRIBUTED_REVERSE:
-				runName+= "FixedEqDistRev";
-				break;
-			case FIXED_SAME_25_FOR_SAME_OD:
-				runName+= "FixedOD25";
-				break;
-			case FIXED_ALL_RIGHT:
-				runName+= "FixedAllRight";
-				break;
-			case FIXED_ALL_RIGHT_AND_ALL_GREEN_AT_BRANCHING_POINTS:
-				runName+= "FixedAllRightBranchGreen";
-				break;
-			case LAEMMER_FLEX:
-				runName+= "LaemmerFlex";
-				break;
-			case LAEMMER_WITH_GROUPS:
-				runName+= "LaemmerFix";
-				break;
-			case FIXED_ALL_GREEN_BRANCHING_POINTS_SECOND_OD:
-				runName+= "FixedBranchGreenSecondOD";
-				break;
-			case FIXED_ALL_N_W_AND_ALL_GREEN_AT_BRANCHING_POINTS:
-				runName+= "FixedAllNW";
-				break;
-			case FIXED_ALL_RIGHT_SECOND_OD_AND_ALL_GREEN_AT_BRANCHING_POINTS:
-				runName+= "FixedAllRightSecondOD";
-				break;
-			case FIXED_ALL_GREEN_BRANCHING_POINTS_ALL_CONFLICTING_ELSE:
-				runName+= "FixedAllConflicting";
-				break;
-			default:
-				runName+= SIGNAL_CONTROL;
-				break;
+			runName+= "_branch" + SIGNAL_CONTROL_BRANCHING_NODES;
+			if (USE_SYLVIA_BRANCHING_NODES) runName += "_SYLVIA";
+			if (SIGNAL_CONTROL_BRANCHING_NODES.equals(SignalControlType.LAEMMER_WITH_GROUPS)) {
+				runName += "_groups" + SIGNAL_GROUPS_BRANCHING_NODES;
 			}
-			if (USE_SYLVIA) runName += "_SYLVIA";
 			
-			if (SIGNAL_CONTROL.equals(SignalControlType.LAEMMER_WITH_GROUPS)) {
-				switch (SIGNAL_GROUPS) {
-				case SINGLE_GROUPS:
-					runName += "_groupsSINGLE";
-					break;
-				case COMBINE_ONCOMING_TRAFFIC:
-					runName += "_groupsONCOMING";
-					break;
-				case COMBINE_OUTER_TRAFFIC_AT_BRANCHING_POINTS:
-					runName += "_groupsBRANCHING";
-					break;
-				case ALL_GREEN_AT_BRANCHING_POINTS:
-					runName += "_groupsGreenBranch";
-					break;
-				case COMBINE_ONCOMING_TRAFFIC_AT_BRANCHING_POINTS:
-					runName += "_groupsOncomingBranch";
-					break;
-				case COMBINE_ONCOMING_TRAFFIC_EVERYWHERE:
-					runName += "_groupsOncomingEverywhere";
-					break;
-				case COMBINE_ONCOMING_TRAFFIC_ALL_GREEN_AT_BRANCHING_POINTS:
-					runName += "_groupsOncomingGreenBranch";
-				default:
-					runName += SIGNAL_GROUPS;
-					break;
-				}
+			runName+= "_inner" + SIGNAL_CONTROL_INNER_NODES;
+			if (USE_SYLVIA_INNER_NODES) runName += "_SYLVIA";
+			if (SIGNAL_CONTROL_INNER_NODES.equals(SignalControlType.LAEMMER_WITH_GROUPS)) {
+				runName += "_groups" + SIGNAL_GROUPS_INNER_NODES;
 			}
 		}
 
