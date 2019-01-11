@@ -37,13 +37,13 @@ public class ModifyTxt {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws IOException {
-		String dir = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-09-20_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/random_coords/";
+		String dir = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-13_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/randoms/";
 		FileReader frCten = new FileReader(new File(dir + "tt_cten.txt"));
-		FileReader frMatsim = new FileReader(new File(dir + "tt_matsim_1000it_linkCap_tbs10_beta20_matsimRoutes.txt"));
+		FileReader frMatsim = new FileReader(new File(dir + "tt_matsim_1000it_tbs900_beta2_matsimRoutes.txt"));
 		BufferedReader inX = new BufferedReader(frCten);
 		BufferedReader inY = new BufferedReader(frMatsim);
 
-		FileWriter fw = new FileWriter(new File(dir + "tt_cten_matsim_1000it_linkCap_tbs10_beta20_matsimRoutes.txt"));
+		FileWriter fw = new FileWriter(new File(dir + "tt_cten_matsim_1000it_tbs900_beta2_matsimRoutes.txt"));
 		BufferedWriter out = new BufferedWriter(fw);
 		
 		// write header
