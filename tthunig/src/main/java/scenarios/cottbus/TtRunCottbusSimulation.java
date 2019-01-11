@@ -41,15 +41,14 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.contrib.common.diversitygeneration.planselectors.DiversityGeneratingPlansRemover;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
-import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup.DecongestionApproach;
+import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals.Configurator;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
@@ -103,7 +102,6 @@ import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
 import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
-import scenarios.illustrative.braess.run.RunBraessSimulation.PricingType;
 import signals.downstreamSensor.DownstreamPlanbasedSignalController;
 import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
@@ -1242,16 +1240,16 @@ public class TtRunCottbusSimulation {
 		// add the signals module if signal systems are used
 		SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
 				SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
-		SignalsModule signalsModule = new SignalsModule();
-		// the signals module works for planbased, sylvia and laemmer signal controller
-		// by default and is pluggable for your own signal controller like this:
-		signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+		
+		// the signals extensions works for planbased, sylvia and laemmer signal controller
+        // by default and is pluggable for your own signal controller like this:        
+        Configurator signalsConfigurator = new Configurator(controler);
+		signalsConfigurator.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
 				DownstreamPlanbasedSignalController.DownstreamFactory.class);
-		signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+        signalsConfigurator.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
 				FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-		signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+        signalsConfigurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 				GershensonSignalController.GershensonFactory.class);
-		controler.addOverridingModule(signalsModule);
 
 		// bind gershenson config
 		controler.addOverridingModule(new AbstractModule() {
