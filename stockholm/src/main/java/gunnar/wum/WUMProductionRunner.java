@@ -19,8 +19,6 @@
  */
 package gunnar.wum;
 
-import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -31,13 +29,11 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
-import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.utils.CreatePseudoNetwork;
@@ -51,7 +47,6 @@ import ch.sbb.matsim.config.SBBTransitConfigGroup;
 import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
 import ch.sbb.matsim.mobsim.qsim.SBBTransitModule;
 import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEngineQSimModule;
-import ch.sbb.matsim.routing.pt.raptor.IntermodalAwareRouterModeIdentifier;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
 /**
@@ -110,11 +105,12 @@ public class WUMProductionRunner {
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
 		// , new PSimConfigGroup(), new AccelerationConfigGroup());
 
-		config.controler().setLastIteration(0);
 		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		if (runLocally) {
+			config.controler().setLastIteration(100);
+			config.plans().setInputFile("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes.xml");
 			config.controler()
 					.setOutputDirectory("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/output");
 			config.transit().setTransitScheduleFile(

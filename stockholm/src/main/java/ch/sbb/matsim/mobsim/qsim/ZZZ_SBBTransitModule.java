@@ -12,7 +12,7 @@ import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEngineQSimModule;
 /**
  * @author Sebastian HÃ¶rl / ETHZ
  */
-public class SBBTransitModule extends AbstractModule {
+public class ZZZ_SBBTransitModule extends AbstractModule {
 	@Override
 	public void install() {
 		
