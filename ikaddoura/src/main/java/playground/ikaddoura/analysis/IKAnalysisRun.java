@@ -198,10 +198,10 @@ public class IKAnalysisRun {
 //			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/run_oAV_0_1pct/";
 //			runIdToCompareWith = "oAV_0_1pct";
 			
-			runDirectory = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/oAV_C7/";
-			runId = "oAV_C7";		
-			runDirectoryToCompareWith = "/Users/ihab/Documents/workspace/runs-svn/b5_optAV_congestion/output/oAV_0/";
-			runIdToCompareWith = "oAV_0";
+			runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
+			runId = "berlin-v5.2-10pct";		
+			runDirectoryToCompareWith = null;
+			runIdToCompareWith = null;
 			
 			visualizationScriptInputDirectory = "./visualization-scripts/";
 			
