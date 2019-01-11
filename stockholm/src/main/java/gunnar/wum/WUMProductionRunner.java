@@ -19,6 +19,8 @@
  */
 package gunnar.wum;
 
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -29,14 +31,17 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
+import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.utils.CreatePseudoNetwork;
+import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
 
@@ -46,6 +51,7 @@ import ch.sbb.matsim.config.SBBTransitConfigGroup;
 import ch.sbb.matsim.config.SwissRailRaptorConfigGroup;
 import ch.sbb.matsim.mobsim.qsim.SBBTransitModule;
 import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEngineQSimModule;
+import ch.sbb.matsim.routing.pt.raptor.IntermodalAwareRouterModeIdentifier;
 import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
 /**
@@ -56,7 +62,8 @@ import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 public class WUMProductionRunner {
 
 	static final String temporaryPath = "/Users/GunnarF/NoBackup/data-workspace/wum/";
-	static final String archivePath = "/Users/GunnarF/OneDrive - VTI/My Data/wum/";
+	// static final String archivePath = "/Users/GunnarF/OneDrive - VTI/My
+	// Data/wum/";
 
 	static void scaleTransitCapacities(final Scenario scenario, final double factor) {
 		for (VehicleType vehicleType : scenario.getTransitVehicles().getVehicleTypes().values()) {
@@ -88,14 +95,38 @@ public class WUMProductionRunner {
 
 	static void runProductionScenario() {
 
-		final String configFileName = FileUtils.getFile(temporaryPath, "production-scenario/config.xml").toString();
+		final boolean runLocally = true;
 		final String transitPrefix = "tr_";
 
-		final Config config = ConfigUtils.loadConfig(configFileName);
-//		, new SwissRailRaptorConfigGroup(),
-//				new SBBTransitConfigGroup());
+		
+		final String configFileName;
+		if (runLocally) {
+			configFileName = FileUtils.getFile(temporaryPath, "production-scenario/config.xml").toString();
+		} else {
+			configFileName = "./config.xml";
+		}
+
+		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
 		// , new PSimConfigGroup(), new AccelerationConfigGroup());
+
+		config.controler().setLastIteration(0);
+		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+
+		if (runLocally) {
+			config.controler()
+					.setOutputDirectory("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/output");
+			config.transit().setTransitScheduleFile(
+					"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitSchedule_reduced.xml.gz");
+			config.transit().setVehiclesFile(
+					"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitVehiclesDifferentiated.xml.gz");
+		}
+		
+		// VORSCHLAG KAI
+		// config.getModules().remove(SBBTransitConfigGroup.GROUP_NAME);
+		// config.transit().setUsingTransitInMobsim(false);
+		// config.transit().setUseTransit(true);
 
 		// >>> for acceleration >>>
 		// final StrategySettings acceptIntendedReplanningStrategySettings = new
@@ -106,20 +137,12 @@ public class WUMProductionRunner {
 		// config.strategy().addStrategySettings(acceptIntendedReplanningStrategySettings);
 		// <<< for acceleration <<<
 
-		// TODO EXPERIMENTAL
-		// ConfigUtils.addOrGetModule(config,
-		// PSimConfigGroup.class).setIterationsPerCycle(2);
-		// config.controler().setWriteEventsInterval(1);
-		// TODO EXPERIMENTAL
-
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
-
 		final Network network = scenario.getNetwork();
-		TransitSchedule schedule = scenario.getTransitSchedule();
+		final TransitSchedule schedule = scenario.getTransitSchedule();
 		new CreatePseudoNetwork(schedule, network, transitPrefix).createNetwork();
 
 		removeModeInformation(scenario);
-
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
 
 		// >>> for acceleration >>>
@@ -139,20 +162,17 @@ public class WUMProductionRunner {
 			public void install() {
 				this.install(new SBBTransitModule());
 				this.install(new SwissRailRaptorModule());
-				// this.bind(QSimProvider.class);
 			}
 
 			@Provides
-			QSimComponentsConfig provideQSimComponentsConfig(
-			// Config config
-			) {
+			QSimComponentsConfig provideQSimComponentsConfig() {
 				QSimComponentsConfig components = new QSimComponentsConfig();
 				new StandardQSimComponentConfigurator(config).configure(components);
 				SBBTransitEngineQSimModule.configure(components);
 				return components;
 			}
 		});
-		
+
 		// >>> for acceleration >>>
 		// controler.addOverridingModule(new AbstractModule() {
 		// @Override

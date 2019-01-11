@@ -25,6 +25,18 @@
 	</repositories>
   
 	<dependencies>
+
+		<!-- >>>>> BELOW AN ATTEMPT TO FIX VERSION NUMBERS >>>>> -->
+	
+		<dependency>
+			<groupId>org.matsim</groupId>
+			<artifactId>matsim</artifactId>
+			<version>0.11.0-2018w44</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+  
+  		<!-- <<<<< ABOVE AN ATTEMPT TO FIX VERSION NUMBERS <<<<< -->
   
 	  	<dependency>
 			<groupId>com.github.gunnarfloetteroed</groupId>
