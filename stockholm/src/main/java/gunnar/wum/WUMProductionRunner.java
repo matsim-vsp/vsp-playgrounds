@@ -90,7 +90,7 @@ public class WUMProductionRunner {
 
 	static void runProductionScenario() {
 
-		final boolean runLocally = true;
+		final boolean runLocally = false;
 		final String transitPrefix = "tr_";
 
 		
