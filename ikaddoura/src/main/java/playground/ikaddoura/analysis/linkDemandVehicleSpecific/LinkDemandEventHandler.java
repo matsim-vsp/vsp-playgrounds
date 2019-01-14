@@ -37,6 +37,7 @@ import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.core.utils.collections.Tuple;
 
 /**
  * @author Ihab
@@ -46,6 +47,7 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 	private static final Logger log = Logger.getLogger(LinkDemandEventHandler.class);
 	private Network network;
 	private String vehTypePrefix;
+	private Tuple<Double, Double> timeBin;
 	
 	private Map<Id<Link>,Integer> linkId2demand = new HashMap<Id<Link>, Integer>();
 	private Map<Id<Link>,Integer> linkId2otherVehicles = new HashMap<Id<Link>, Integer>();
@@ -54,6 +56,13 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 	public LinkDemandEventHandler(Network network, String taxiPrefix) {
 		this.network = network;
 		this.vehTypePrefix = taxiPrefix;
+		this.timeBin = null;
+	}
+	
+	public LinkDemandEventHandler(Network network, String taxiPrefix, Tuple<Double, Double> timeBin) {
+		this.network = network;
+		this.vehTypePrefix = taxiPrefix;
+		this.timeBin = timeBin;
 	}
 
 	@Override
@@ -64,36 +73,49 @@ public class LinkDemandEventHandler implements  LinkLeaveEventHandler {
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
 		
-		if (this.linkId2demand.containsKey(event.getLinkId())) {
-			int agents = this.linkId2demand.get(event.getLinkId());
-			this.linkId2demand.put(event.getLinkId(), agents + 1);
-			
+		boolean accountForEvent = false;
+					
+		if (timeBin == null) {
+			accountForEvent = true;
 		} else {
-			this.linkId2demand.put(event.getLinkId(), 1);
+			if (event.getTime() >= timeBin.getFirst() && event.getTime() < timeBin.getSecond()) {
+				accountForEvent = true;
+			} else {
+				accountForEvent = false;
+			}
 		}
 		
-		if (event.getVehicleId().toString().startsWith(vehTypePrefix)) {
-			
-			if (this.linkId2taxiVehicles.containsKey(event.getLinkId())) {
-				int agents = this.linkId2taxiVehicles.get(event.getLinkId());
-				this.linkId2taxiVehicles.put(event.getLinkId(), agents + 1);
+		if (accountForEvent) {
+			if (this.linkId2demand.containsKey(event.getLinkId())) {
+				int agents = this.linkId2demand.get(event.getLinkId());
+				this.linkId2demand.put(event.getLinkId(), agents + 1);
 				
 			} else {
-				this.linkId2taxiVehicles.put(event.getLinkId(), 1);
+				this.linkId2demand.put(event.getLinkId(), 1);
 			}
 			
-		} else {
-			
-			if (this.linkId2otherVehicles.containsKey(event.getLinkId())) {
-				int agents = this.linkId2otherVehicles.get(event.getLinkId());
-				this.linkId2otherVehicles.put(event.getLinkId(), agents + 1);
+			if (event.getVehicleId().toString().startsWith(vehTypePrefix)) {
+				
+				if (this.linkId2taxiVehicles.containsKey(event.getLinkId())) {
+					int agents = this.linkId2taxiVehicles.get(event.getLinkId());
+					this.linkId2taxiVehicles.put(event.getLinkId(), agents + 1);
+					
+				} else {
+					this.linkId2taxiVehicles.put(event.getLinkId(), 1);
+				}
 				
 			} else {
-				this.linkId2otherVehicles.put(event.getLinkId(), 1);
+				
+				if (this.linkId2otherVehicles.containsKey(event.getLinkId())) {
+					int agents = this.linkId2otherVehicles.get(event.getLinkId());
+					this.linkId2otherVehicles.put(event.getLinkId(), agents + 1);
+					
+				} else {
+					this.linkId2otherVehicles.put(event.getLinkId(), 1);
+				}
+				
 			}
-			
 		}
-		
 	}
 
 	public void printResults(String fileName) {
