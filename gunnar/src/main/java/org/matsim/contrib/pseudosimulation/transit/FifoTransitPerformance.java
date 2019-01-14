@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Identifiable;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
@@ -50,6 +51,9 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import floetteroed.utilities.Tuple;
 
 /**
@@ -57,6 +61,7 @@ import floetteroed.utilities.Tuple;
  * @author Gunnar Flötteröd
  *
  */
+@Singleton
 public class FifoTransitPerformance
 		implements TransitDriverStartsEventHandler, AgentWaitingForPtEventHandler, VehicleArrivesAtFacilityEventHandler,
 		VehicleDepartsAtFacilityEventHandler, PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
@@ -130,12 +135,16 @@ public class FifoTransitPerformance
 	/**
 	 * Schedule-based initialization.
 	 */
-	public FifoTransitPerformance(final MobSimSwitcher mobsimSwitcher, final Population population,
-			final Vehicles transitVehicles, final TransitSchedule transitSchedule) {
+	@Inject
+	public FifoTransitPerformance(final MobSimSwitcher mobsimSwitcher, final Scenario scenario
+	// final Population population,
+	// final Vehicles transitVehicles,
+	// final TransitSchedule transitSchedule
+	) {
 		this.mobsimSwitcher = mobsimSwitcher;
-		this.population = population;
-		this.transitVehicles = transitVehicles;
-		this.transitSchedule = transitSchedule;
+		this.population = scenario.getPopulation();
+		this.transitVehicles = scenario.getTransitVehicles();
+		this.transitSchedule = scenario.getTransitSchedule();
 		this.resetToSchedule();
 	}
 

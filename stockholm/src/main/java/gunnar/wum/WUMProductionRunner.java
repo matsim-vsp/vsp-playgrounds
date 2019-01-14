@@ -27,14 +27,25 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
+import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
+import org.matsim.contrib.pseudosimulation.PSimTravelTimeCalculator;
+import org.matsim.contrib.pseudosimulation.SwitchingMobsimProvider;
+import org.matsim.contrib.pseudosimulation.transit.FifoTransitEmulator;
+import org.matsim.contrib.pseudosimulation.transit.FifoTransitPerformance;
+import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
+import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
+import org.matsim.core.mobsim.qsim.QSimProvider;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.utils.CreatePseudoNetwork;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
@@ -91,9 +102,9 @@ public class WUMProductionRunner {
 	static void runProductionScenario() {
 
 		final boolean runLocally = false;
+
 		final String transitPrefix = "tr_";
 
-		
 		final String configFileName;
 		if (runLocally) {
 			configFileName = FileUtils.getFile(temporaryPath, "production-scenario/config.xml").toString();
@@ -102,15 +113,15 @@ public class WUMProductionRunner {
 		}
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
-				new SBBTransitConfigGroup(), new RoadPricingConfigGroup());
-		// , new PSimConfigGroup(), new AccelerationConfigGroup());
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup());
+		// , new AccelerationConfigGroup());
 
-		
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		if (runLocally) {
 			config.controler().setLastIteration(100);
-			config.plans().setInputFile("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes.xml");
+			config.plans()
+					.setInputFile("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes.xml");
 			config.controler()
 					.setOutputDirectory("/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/output");
 			config.transit().setTransitScheduleFile(
@@ -118,7 +129,7 @@ public class WUMProductionRunner {
 			config.transit().setVehiclesFile(
 					"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitVehiclesDifferentiated.xml.gz");
 		}
-		
+
 		// VORSCHLAG KAI
 		// config.getModules().remove(SBBTransitConfigGroup.GROUP_NAME);
 		// config.transit().setUsingTransitInMobsim(false);
@@ -167,6 +178,38 @@ public class WUMProductionRunner {
 				SBBTransitEngineQSimModule.configure(components);
 				return components;
 			}
+		});
+
+		// TODO 2019-01-13 Re-inserting pSim, for now without Greedo.
+		controler.addOverridingModule(new AbstractModule() {
+
+			@Override
+			public void install() {
+
+				this.bind(MobSimSwitcher.class);
+				this.addControlerListenerBinding().to(MobSimSwitcher.class);
+				this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
+				this.bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
+				this.bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
+
+				if (config.transit().isUseTransit()) {
+					this.bind(FifoTransitPerformance.class);
+					// final FifoTransitPerformance transitPerformance = new
+					// FifoTransitPerformance(mobSimSwitcher,
+					// scenario.getPopulation(), scenario.getTransitVehicles(),
+					// scenario.getTransitSchedule());
+					// this.bind(FifoTransitPerformance.class).toInstance(transitPerformance);
+					// this.addEventHandlerBinding().toInstance(transitPerformance);
+					this.addEventHandlerBinding().to(FifoTransitPerformance.class);
+					this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
+				} else {
+					this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
+					throw new RuntimeException("WUM requires transit!");
+				}
+				
+				this.bind(QSimProvider.class);
+			}
+
 		});
 
 		// >>> for acceleration >>>
