@@ -43,6 +43,12 @@ import java.util.Map;
 
 public class BerlinSpatialPlots {
 	private static final Logger log = Logger.getLogger(BerlinSpatialPlots.class);	
+	
+	private final String runDir = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
+	private final String runId = "berlin-v5.2-1pct";
+	
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
+//	private final String runId = "bc-0";
 
 //	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
 //	private final String runId = "bc-0";
@@ -56,8 +62,8 @@ public class BerlinSpatialPlots {
 //	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d/";
 //	private final String runId = "savA-2d";
 	
-	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
-	private final String runId = "savA-3d";
+//	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
+//	private final String runId = "savA-3d";
 	
 	private final double countScaleFactor = 10;
 	private static double gridSize ;
@@ -73,7 +79,7 @@ public class BerlinSpatialPlots {
 
 	public static void main(String[] args) {
 		
-		gridSize = 250;
+		gridSize = 1000;
 		smoothingRadius = 500;
 		
 		BerlinSpatialPlots plots = new BerlinSpatialPlots();
@@ -83,6 +89,7 @@ public class BerlinSpatialPlots {
     private void writeEmissionsToCSV() {
 
 		Config config = ConfigUtils.loadConfig(runDir + runId + ".output_config.xml");
+		config.plans().setInputFile(null);
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         double binSize = config.qsim().getEndTime() - config.qsim().getStartTime(); // this results in only one time bin
@@ -97,8 +104,9 @@ public class BerlinSpatialPlots {
                 .withGridType(EmissionGridAnalyzer.GridType.Square)
                 .build();
 
-        TimeBinMap<Grid<Map<Pollutant, Double>>> timeBins = analyzer.process(runId + "." + config.controler().getLastIteration() + ".emission.events.offline.xml.gz");
+        TimeBinMap<Grid<Map<Pollutant, Double>>> timeBins = analyzer.process(runDir + runId + "." + config.controler().getLastIteration() + ".emission.events.offline.xml.gz");
 
+        log.info("Writing to csv...");
         writeGridToCSV(timeBins, Pollutant.NOX);
     }
 
