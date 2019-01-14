@@ -18,30 +18,24 @@
  * *********************************************************************** */
 package playground.ikaddoura.analysis.airPollution;
 
-import java.io.BufferedWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.analysis.spatial.Grid;
+import org.matsim.contrib.analysis.time.TimeBinMap;
+import org.matsim.contrib.emissions.analysis.EmissionGridAnalyzer;
+import org.matsim.contrib.emissions.types.Pollutant;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.io.IOUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Point;
-
-import playground.agarwalamit.analysis.emission.EmissionLinkAnalyzer;
-import playground.agarwalamit.analysis.spatial.GeneralGrid.GridType;
-import playground.agarwalamit.analysis.spatial.SpatialDataInputs;
-import playground.agarwalamit.analysis.spatial.SpatialDataInputs.LinkWeightMethod;
-import playground.agarwalamit.analysis.spatial.SpatialInterpolation;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author amit, ihab
@@ -83,86 +77,46 @@ public class BerlinSpatialPlots {
 		smoothingRadius = 500;
 		
 		BerlinSpatialPlots plots = new BerlinSpatialPlots();
-		plots.writeEmissionToCells();
-	}
+        plots.writeEmissionsToCSV();
+    }
 
-	public void writeEmissionToCells(){
-		Map<Double,Map<Id<Link>,SortedMap<String,Double>>> linkEmissions = new HashMap<>();
+    private void writeEmissionsToCSV() {
 
-		// setting of input data
-		SpatialDataInputs inputs = new SpatialDataInputs(LinkWeightMethod.line);
-		inputs.setBoundingBox(xMin, xMax, yMin, yMax);
-		inputs.setTargetCRS(targetCRS);
-		inputs.setGridInfo(GridType.SQUARE, gridSize);
-		inputs.setSmoothingRadius(smoothingRadius);
-
-		SpatialInterpolation plot = new SpatialInterpolation(inputs, runDir + "/air-pollution-analysis/spatialPlots/"+noOfBins+"timeBins/");
-		
 		Config config = ConfigUtils.loadConfig(runDir + runId + ".output_config.xml");
-		config.plans().setInputFile(null);
-		
-		final String emissionEventsFile = runId + "." + config.controler().getLastIteration() + ".emission.events.offline.xml.gz";
+        Scenario scenario = ScenarioUtils.loadScenario(config);
 
-		EmissionLinkAnalyzer emsLnkAna = new EmissionLinkAnalyzer(config.qsim().getEndTime(), runDir + emissionEventsFile, noOfBins);
-		emsLnkAna.preProcessData();
-		emsLnkAna.postProcessData();
-		linkEmissions = emsLnkAna.getLink2TotalEmissions();
+        double binSize = config.qsim().getEndTime() - config.qsim().getStartTime(); // this results in only one time bin
+        Network network = scenario.getNetwork();
 
-		Scenario sc = ScenarioUtils.loadScenario(config);
+        EmissionGridAnalyzer analyzer = new EmissionGridAnalyzer.Builder()
+                .withGridSize(gridSize)
+                .withTimeBinSize(binSize)
+                .withNetwork(network)
+                .withSmoothingRadius(smoothingRadius)
+                .withCountScaleFactor(countScaleFactor)
+                .withGridType(EmissionGridAnalyzer.GridType.Square)
+                .build();
 
-		EmissionTimebinDataWriter writer = new EmissionTimebinDataWriter();
-		writer.openWriter(runDir+"/air-pollution-analysis/spatialPlots/"+noOfBins+"timeBins/"+"viaData_NOX_"+GridType.SQUARE+"_"+gridSize+"_"+smoothingRadius+"_line.txt");
+        TimeBinMap<Grid<Map<Pollutant, Double>>> timeBins = analyzer.process(runId + "." + config.controler().getLastIteration() + ".emission.events.offline.xml.gz");
 
-		for (double time :linkEmissions.keySet()){
-			int counter = 0;
-			
-			for (Link l : sc.getNetwork().getLinks().values()){
-				Id<Link> id = l.getId();
-				if (counter % 1000 == 0.) log.info("link #" + counter + " // " + (int) (100 * (counter / (double) sc.getNetwork().getLinks().size())) + "%" );
-				if(plot.isInResearchArea(l)){
-					double emiss = 0;
-					if (linkEmissions.get(time).containsKey(id)) {
-						emiss = countScaleFactor * linkEmissions.get(time).get(id).get(WarmPollutant.NOX.getText());
-					}
-					plot.processLink(l,  emiss);
-					
+        writeGridToCSV(timeBins, Pollutant.NOX);
+    }
+
+    private void writeGridToCSV(TimeBinMap<Grid<Map<Pollutant, Double>>> bins, Pollutant pollutant) {
+
+        String filename = runDir + "/air-pollution-analysis/spatialPlots/" + noOfBins + "timeBins/" + "viaData_NOX_" + EmissionGridAnalyzer.GridType.Square + "_" + gridSize + "_" + smoothingRadius + "_line.csv";
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(filename), CSVFormat.DEFAULT)) {
+            printer.printRecord("timeBinStartTime", "centroidX", "centroidY", "weight");
+
+            for (TimeBinMap.TimeBin<Grid<Map<Pollutant, Double>>> bin : bins.getTimeBins()) {
+                final double timeBinStartTime = bin.getStartTime();
+                for (Grid.Cell<Map<Pollutant, Double>> cell : bin.getValue().getCells()) {
+                    double weight = cell.getValue().containsKey(pollutant) ? cell.getValue().get(pollutant) : 0;
+                    printer.printRecord(timeBinStartTime, cell.getCoordinate().x, cell.getCoordinate().y, weight);
 				}
-				counter++;
 			}
-			writer.writeData(time, plot.getCellWeights());
-			plot.reset();
-		}
-		writer.closeWriter();
-	}
-
-	private class EmissionTimebinDataWriter{
-
-		BufferedWriter writer;
-		public void openWriter (final String outputFile){
-			writer = IOUtils.getBufferedWriter(outputFile);
-			try {
-				writer.write("timebin\t centroidX \t centroidY \t weight \n");
-			} catch (Exception e) {
-				throw new RuntimeException("Data is not written to file. Reason "+e);
-			}
-		}
-
-		public void writeData(final double timebin, final Map<Point,Double> cellWeights){
-			try {
-				for(Point p : cellWeights.keySet()){
-					writer.write(timebin+"\t"+p.getCentroid().getX()+"\t"+p.getCentroid().getY()+"\t"+cellWeights.get(p)+"\n");
-				}
-			} catch (Exception e) {
-				throw new RuntimeException("Data is not written to file. Reason "+e);
-			}
-		}
-
-		public void closeWriter (){
-			try {
-				writer.close();	
-			} catch (Exception e) {
-				throw new RuntimeException("Data is not written to file. Reason "+e);
-			}
+        } catch (IOException e) {
+            e.printStackTrace();
 		}
 	}
 }

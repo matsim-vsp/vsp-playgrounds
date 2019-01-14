@@ -84,21 +84,27 @@
 		<version>0.11.0-SNAPSHOT</version>
 		<scope>compile</scope>
 	  </dependency>
-  	
-  	<dependency>
+
+	  <dependency>
   		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
   		<artifactId>agarwalamit</artifactId>
   		<version>0.11.0-SNAPSHOT</version>
   		<scope>compile</scope>
   	</dependency>
-  	
+
   	<dependency>
     		<groupId>org.apache.commons</groupId>
     		<artifactId>commons-io</artifactId>
     		<version>1.3.2</version>
 	</dependency>
 
-  	<dependency>
+	  <dependency>
+		  <groupId>org.apache.commons</groupId>
+		  <artifactId>commons-csv</artifactId>
+		  <version>1.6</version>
+	  </dependency>
+
+	  <dependency>
   		<groupId>org.jcodec</groupId>
  		<artifactId>jcodec-javase</artifactId>
  		<version>0.1.9</version>
