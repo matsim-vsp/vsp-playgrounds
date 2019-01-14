@@ -117,7 +117,7 @@ public class IKAnalysisRun {
 	
 	private final List<String> modes;
 
-	private String outputDirectoryName = "analysis-ik-v1.6";
+	private String outputDirectoryName = "analysis-ik-v1.7";
 
 	private final String visualizationScriptInputDirectory;
 
