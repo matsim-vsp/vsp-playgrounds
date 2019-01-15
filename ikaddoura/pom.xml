@@ -104,7 +104,13 @@
 		  <version>1.6</version>
 	  </dependency>
 
-	  <dependency>
+      <dependency>
+          <groupId>com.beust</groupId>
+          <artifactId>jcommander</artifactId>
+          <version>1.72</version>
+      </dependency>
+
+      <dependency>
   		<groupId>org.jcodec</groupId>
  		<artifactId>jcodec-javase</artifactId>
  		<version>0.1.9</version>

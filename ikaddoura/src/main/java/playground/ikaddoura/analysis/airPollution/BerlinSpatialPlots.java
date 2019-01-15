@@ -18,6 +18,11 @@
  * *********************************************************************** */
 package playground.ikaddoura.analysis.airPollution;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.log4j.Logger;
@@ -35,6 +40,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -64,10 +70,10 @@ public class BerlinSpatialPlots {
 	
 //	private final String runDir = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d/";
 //	private final String runId = "savA-3d";
-	
-	private final double countScaleFactor = 10;
-	private static double gridSize ;
-	private static double smoothingRadius ;
+
+    private final double countScaleFactor;
+    private final double gridSize;
+    private final double smoothingRadius;
 	private final int noOfBins = 1;
 
 	private static final double xMin = 4565039.;
@@ -77,18 +83,25 @@ public class BerlinSpatialPlots {
 	
 	private final CoordinateReferenceSystem targetCRS = MGC.getCRS("EPSG:31468");
 
-	public static void main(String[] args) {
-		
-		gridSize = 1000;
-		smoothingRadius = 500;
-		
-		BerlinSpatialPlots plots = new BerlinSpatialPlots();
-        plots.writeEmissionsToCSV();
+    public BerlinSpatialPlots(final double gridSize, final double smoothingRadius, final double countScaleFactor) {
+        this.gridSize = gridSize;
+        this.smoothingRadius = smoothingRadius;
+        this.countScaleFactor = countScaleFactor;
     }
 
-    private void writeEmissionsToCSV() {
+	public static void main(String[] args) {
 
-		Config config = ConfigUtils.loadConfig(runDir + runId + ".output_config.xml");
+        InputArguments inputArguments = new InputArguments();
+        JCommander.newBuilder().addObject(inputArguments).build().parse(args);
+
+        BerlinSpatialPlots plots = new BerlinSpatialPlots(inputArguments.gridSize, inputArguments.smoothingRadius, inputArguments.countScaleFactor);
+        plots.writeEmissionsToCSV(inputArguments.config, inputArguments.events, inputArguments.outputFile);
+    }
+
+    private void writeEmissionsToCSV(Path configPath, Path eventsPath, Path outputPath) {
+
+        //Config config = ConfigUtils.loadConfig(runDir + runId + ".output_config.xml");
+        Config config = ConfigUtils.loadConfig(configPath.toString());
 		config.plans().setInputFile(null);
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
@@ -99,21 +112,24 @@ public class BerlinSpatialPlots {
                 .withGridSize(gridSize)
                 .withTimeBinSize(binSize)
                 .withNetwork(network)
+                .withBounds(createBoundingBox())
                 .withSmoothingRadius(smoothingRadius)
                 .withCountScaleFactor(countScaleFactor)
                 .withGridType(EmissionGridAnalyzer.GridType.Square)
                 .build();
 
-        TimeBinMap<Grid<Map<Pollutant, Double>>> timeBins = analyzer.process(runDir + runId + "." + config.controler().getLastIteration() + ".emission.events.offline.xml.gz");
+        //TimeBinMap<Grid<Map<Pollutant, Double>>> timeBins = analyzer.process(runDir + runId + "." + config.controler().getLastIteration() + ".emission.events.offline.xml.gz");
+        TimeBinMap<Grid<Map<Pollutant, Double>>> timeBins = analyzer.process(eventsPath.toString());
 
         log.info("Writing to csv...");
-        writeGridToCSV(timeBins, Pollutant.NOX);
+        writeGridToCSV(timeBins, Pollutant.NOX, outputPath);
     }
 
-    private void writeGridToCSV(TimeBinMap<Grid<Map<Pollutant, Double>>> bins, Pollutant pollutant) {
+    private void writeGridToCSV(TimeBinMap<Grid<Map<Pollutant, Double>>> bins, Pollutant pollutant, Path outputPath) {
 
-        String filename = runDir + "/air-pollution-analysis/spatialPlots/" + noOfBins + "timeBins/" + "viaData_NOX_" + EmissionGridAnalyzer.GridType.Square + "_" + gridSize + "_" + smoothingRadius + "_line.csv";
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(filename), CSVFormat.DEFAULT)) {
+        //String filename = runDir + "/air-pollution-analysis/spatialPlots/" + noOfBins + "timeBins/" + "viaData_NOX_" + EmissionGridAnalyzer.GridType.Square + "_" + gridSize + "_" + smoothingRadius + "_line.csv";
+
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(outputPath.toString()), CSVFormat.TDF)) {
             printer.printRecord("timeBinStartTime", "centroidX", "centroidY", "weight");
 
             for (TimeBinMap.TimeBin<Grid<Map<Pollutant, Double>>> bin : bins.getTimeBins()) {
@@ -127,4 +143,33 @@ public class BerlinSpatialPlots {
             e.printStackTrace();
 		}
 	}
+
+    private Geometry createBoundingBox() {
+        return new GeometryFactory().createPolygon(new Coordinate[]{
+                new Coordinate(xMin, yMin), new Coordinate(xMax, yMin),
+                new Coordinate(xMax, yMax), new Coordinate(xMin, yMax),
+                new Coordinate(xMin, yMin)
+        });
+    }
+
+    private static class InputArguments {
+
+        @Parameter(names = {"-gridSize", "-gs"})
+        private double gridSize = 250;
+
+        @Parameter(names = {"-smoothingRadius", "-sr"})
+        private double smoothingRadius = 500;
+
+        @Parameter(names = {"-countScaleFactor", "-csf"})
+        private double countScaleFactor = 10;
+
+        @Parameter(names = {"-events"}, required = true)
+        private Path events;
+
+        @Parameter(names = {"-config"}, required = true)
+        private Path config;
+
+        @Parameter(names = {"-output"}, required = true)
+        private Path outputFile;
+    }
 }
