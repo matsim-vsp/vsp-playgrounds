@@ -41,9 +41,8 @@ import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.contrib.emissions.types.HbefaVehicleCategory;
-import org.matsim.contrib.emissions.utils.EmissionSpecificationMarker;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
+import org.matsim.contrib.emissions.HbefaVehicleCategory;
+import org.matsim.contrib.emissions.EmissionSpecificationMarker;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -54,7 +53,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
-import playground.agarwalamit.analysis.emission.EmissionUtilsExtended;
 import playground.agarwalamit.utils.MapUtils;
 
 /**

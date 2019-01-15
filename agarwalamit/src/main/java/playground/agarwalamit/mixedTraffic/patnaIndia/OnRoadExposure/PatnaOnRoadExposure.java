@@ -37,6 +37,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
@@ -58,7 +59,6 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.MapUtils;
-import playground.vsp.airPollution.CombinedEmissionEventsReader;
 
 /**
  * Created by amit on 17.11.17.
@@ -171,7 +171,7 @@ private static final String data_dates [] = {"_22Nov2017"};
         OnRoadExposureHandler onRoadExposureHandler = new OnRoadExposureHandler(onRoadExposureConfigGroup, network);
         eventsManager.addHandler(onRoadExposureHandler);
 
-        CombinedEmissionEventsReader eventsReader = new CombinedEmissionEventsReader(eventsManager);
+        EmissionEventsReader eventsReader = new EmissionEventsReader(eventsManager);
         eventsReader.readFile(eventsFile);
 
         TreeSet<String> pollutants = new TreeSet<>();

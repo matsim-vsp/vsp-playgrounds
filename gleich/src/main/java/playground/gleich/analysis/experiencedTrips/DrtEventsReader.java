@@ -60,9 +60,9 @@ public class DrtEventsReader extends MatsimXmlParser {
 			
 			@Override
 			public DrtRequestSubmittedEvent apply(GenericEvent event) {
-				
+
 				Map<String, String> attributes = event.getAttributes();
-				
+
 				Double time = Double.parseDouble(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_TIME));
 				String mode = attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_MODE);
 				Id<Request> requestId = Id.create(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_REQUEST), Request.class);

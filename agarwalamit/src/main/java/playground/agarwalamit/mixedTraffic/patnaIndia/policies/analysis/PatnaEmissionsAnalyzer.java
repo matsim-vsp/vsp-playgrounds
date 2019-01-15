@@ -28,7 +28,7 @@ import java.util.TreeMap;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
+import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;

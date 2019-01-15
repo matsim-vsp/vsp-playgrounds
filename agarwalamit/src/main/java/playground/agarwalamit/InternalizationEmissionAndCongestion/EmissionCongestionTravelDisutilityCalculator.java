@@ -27,8 +27,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.WarmEmissionAnalysisModule;
-import org.matsim.contrib.emissions.types.WarmPollutant;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
