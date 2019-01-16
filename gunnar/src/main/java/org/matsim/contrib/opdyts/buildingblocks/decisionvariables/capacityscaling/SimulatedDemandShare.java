@@ -21,7 +21,7 @@ package org.matsim.contrib.opdyts.buildingblocks.decisionvariables.capacityscali
 
 import java.util.function.Consumer;
 
-import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.ScalarDecisionVariable;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.AbstractScalarDecisionVariable;
 import org.matsim.core.config.Config;
 
 /**
@@ -29,24 +29,25 @@ import org.matsim.core.config.Config;
  * @author Gunnar Flötteröd
  *
  */
-public class SimulatedDemandShare implements ScalarDecisionVariable<SimulatedDemandShare> {
+public class SimulatedDemandShare extends AbstractScalarDecisionVariable<SimulatedDemandShare> {
 
 	// -------------------- CONSTANTS --------------------
 
 	private final Config config;
 
-	// TODO This could be the basis for an AbstractScalarDecisionVariable.
+	// TODO This could be moved into AbstractScalarDecisionVariable.
 	private final Consumer<Double> optionalConsumer;
 
 	// -------------------- MEMBERS --------------------
 
-	private double value;
+	// private double value;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public SimulatedDemandShare(final Config config, final double factor, final Consumer<Double> optionalConsumer) {
+		super(factor);
 		this.config = config;
-		this.value = factor;
+		// this.value = factor;
 		this.optionalConsumer = optionalConsumer;
 	}
 
@@ -54,30 +55,38 @@ public class SimulatedDemandShare implements ScalarDecisionVariable<SimulatedDem
 
 	@Override
 	public void implementInSimulation() {
-		this.config.qsim().setFlowCapFactor(this.value);
-		this.config.qsim().setStorageCapFactor(this.value);
+		// this.config.qsim().setFlowCapFactor(this.value);
+		// this.config.qsim().setStorageCapFactor(this.value);
+		// if (this.optionalConsumer != null) {
+		// this.optionalConsumer.accept(this.value);
+		// }
+		this.config.qsim().setFlowCapFactor(this.getValue());
+		this.config.qsim().setStorageCapFactor(this.getValue());
 		if (this.optionalConsumer != null) {
-			this.optionalConsumer.accept(this.value);
+			this.optionalConsumer.accept(this.getValue());
 		}
 	}
 
-	@Override
-	public void setValue(final double val) {
-		this.value = val;
-	}
+	// @Override
+	// public void setValue(final double val) {
+	// this.value = val;
+	// }
 
-	@Override
-	public double getValue() {
-		return this.value;
-	}
+	// @Override
+	// public double getValue() {
+	// return this.value;
+	// }
 
 	@Override
 	public SimulatedDemandShare newDeepCopy() {
-		return new SimulatedDemandShare(this.config, this.value, this.optionalConsumer);
+		// return new SimulatedDemandShare(this.config, this.value,
+		// this.optionalConsumer);
+		return new SimulatedDemandShare(this.config, this.getValue(), this.optionalConsumer);
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(" + this.value + ")";
+		// return this.getClass().getSimpleName() + "(" + this.value + ")";
+		return this.getClass().getSimpleName() + "(" + this.getValue() + ")";
 	}
 }

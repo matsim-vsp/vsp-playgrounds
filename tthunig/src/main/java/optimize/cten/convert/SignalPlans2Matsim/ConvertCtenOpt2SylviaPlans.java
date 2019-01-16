@@ -35,8 +35,10 @@ public class ConvertCtenOpt2SylviaPlans {
 
 	public static void main(String[] args)
 			throws JAXBException, SAXException, ParserConfigurationException, IOException {
-		String signalControlFile = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/btu/signal_control_opt_expanded.xml";
-		String signalControlOutFile = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/btu/signal_control_opt_expanded_sylvia.xml";
+//		String optDir = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/btu/";
+		String optDir = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v3_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/btu/";
+		String signalControlFile = optDir + "signal_control_optimized.xml";
+		String signalControlOutFile = optDir + "signal_control_optimized_sylvia.xml";
 		String[] strArray = {signalControlFile, signalControlOutFile};
 		SylviaPreprocessData.main(strArray); 
 	}

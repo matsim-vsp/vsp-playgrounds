@@ -71,7 +71,7 @@ public class ModeAnalysis {
 //		final String runId = "test";
 		
 		final String runId = "berlin-v5.2-10pct";
-		final String runDirectory = "/Users/ihab/Desktop/ils4a/berlin/output-berlin-v5.2-10pct/";
+		final String runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/output-berlin-v5.2-10pct/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;

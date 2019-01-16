@@ -68,22 +68,30 @@ public class Ages {
 	}
 
 	public double getWeight(final Id<Person> personId) {
-		// Assume that 0 < inertia < 1. Having maxAge yields a weight of inertia^0 = 1;
-		// having just re-planned (i.e. zero age) yields a weight of inertia^maxAge < 1.
-		// An inertia of one means that the age plays no role.
-		return Math.pow(this.ageInertia, this.maxAge - this.personId2age.get(personId));
+		// Assume that 0 < inertia < 1. Having just re-planned (i.e. zero age) yields a
+		// weight of inertia^0 = 1. Having not re-planned for age iterations yields a
+		// weight of inertia^age < 1. An inertia of one means that the age plays no
+		// role.
+		return Math.pow(this.ageInertia, -this.personId2age.get(personId));
+		/*
+		 * // OLD VERSION: // Assume that 0 < inertia < 1. Having maxAge yields a weight
+		 * of inertia^0 = 1; // having just re-planned (i.e. zero age) yields a weight
+		 * of inertia^maxAge < 1. // An inertia of one means that the age plays no role.
+		 * return Math.pow(this.ageInertia, this.maxAge -
+		 * this.personId2age.get(personId));
+		 */
 	}
 
 	public List<Integer> getSortedAgesView() {
 		return Collections.unmodifiableList(this.sortedAges);
 	}
 
-	public Map<Id<Person>, Double> getWeightsView() {
+	public Map<Id<Person>, Double> getPersonWeights() {
 		final Map<Id<Person>, Double> result = new LinkedHashMap<>(this.personId2age.size());
 		for (Id<Person> personId : this.personId2age.keySet()) {
 			// TODO Bad code, getWeight then again accesses personId2age.
 			result.put(personId, this.getWeight(personId));
-		}		
-		return Collections.unmodifiableMap(result);
+		}
+		return result;
 	}
 }

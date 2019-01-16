@@ -1,20 +1,29 @@
 package org.matsim.contrib.opdyts;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.opdyts.macrostate.SimulationMacroStateAnalyzer;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactory;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
+import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
+import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
+import org.matsim.core.router.util.TravelTime;
 
 import com.google.inject.Inject;
 
@@ -29,7 +38,7 @@ import floetteroed.utilities.math.Vector;
  * 
  */
 class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extends SimulatorState>
-		implements StartupListener, BeforeMobsimListener, AfterMobsimListener, ShutdownListener {
+		implements StartupListener, BeforeMobsimListener, AfterMobsimListener, ShutdownListener, IterationEndsListener {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -73,8 +82,7 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 	WireOpdytsIntoMATSimControlerListener(final TrajectorySampler<U, X> trajectorySampler,
 			final MATSimStateFactory<U, X> stateFactory,
 			final List<SimulationMacroStateAnalyzer> simulationStateAnalyzers,
-			final int numberOfEnBlockMatsimIterations, 
-			final int stateExtractionOffset,
+			final int numberOfEnBlockMatsimIterations, final int stateExtractionOffset,
 			final DecisionVariable directlyAdjustedDecisionVariable) {
 		this.trajectorySampler = trajectorySampler;
 		this.stateFactory = stateFactory;
@@ -129,6 +137,13 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 		// analyzer.clear();
 		// this.eventsManager.addHandler(analyzer);
 		// }
+
+		// >>> TESTING >>>
+
+		FileUtils.deleteQuietly(new File(event.getServices().getControlerIO().getOutputFilename("planstats.log")));
+		FileUtils.deleteQuietly(new File(event.getServices().getControlerIO().getOutputFilename("statestats.log")));
+
+		// <<< TESTING <<<
 
 		this.justStarted = true;
 	}
@@ -198,6 +213,28 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 
 		}
 
+		// TESTING
+
+		try {
+			int planCnt = 0;
+			int selectedPlanElementCnt = 0;
+			double scoreSum = 0;
+			for (Person person : this.population.getPersons().values()) {
+				planCnt += person.getPlans().size();
+				selectedPlanElementCnt += person.getSelectedPlan().getPlanElements().size();
+				scoreSum += person.getSelectedPlan().getScore();
+			}
+			FileUtils.writeStringToFile(
+					new File(event.getServices().getControlerIO().getOutputFilename("planstats.log")),
+					"it=" + event.getIteration() + "  planCnt=" + planCnt + "  selectedPlanElementCnt="
+							+ selectedPlanElementCnt + "  scoreSum=" + scoreSum + "\n",
+					true);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		// TESTING
+
 		if (event.getIteration() % this.numberOfEnBlockMatsimIterations == this.stateExtractionOffset) {
 
 			/*
@@ -239,5 +276,28 @@ class WireOpdytsIntoMATSimControlerListener<U extends DecisionVariable, X extend
 	@Override
 	public void notifyShutdown(final ShutdownEvent event) {
 		this.finalState = this.newState();
+	}
+
+	@Inject
+	private TravelTime travelTime;
+
+	@Inject
+	private Network net;
+
+	@Override
+	public void notifyIterationEnds(IterationEndsEvent event) {
+		// >>> TESTING >>>
+		try {
+			double ttSum = 0;
+			for (Link link : this.net.getLinks().values()) {
+				ttSum += this.travelTime.getLinkTravelTime(link, 8 * 3600, null, null);
+			}
+			FileUtils.writeStringToFile(
+					new File(event.getServices().getControlerIO().getOutputFilename("statestats.log")), ttSum + "\n",
+					true);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		// <<< TESTING <<<
 	}
 }

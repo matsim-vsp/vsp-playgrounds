@@ -27,18 +27,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
-import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.datastructures.SpaceTimeIndicators;
-import org.matsim.contrib.pseudosimulation.searchacceleration.utils.SetUtils;
-import org.matsim.vehicles.Vehicles;
+import org.matsim.vehicles.Vehicle;
+
+import floetteroed.utilities.TimeDiscretization;
 
 /**
  *
@@ -46,11 +46,9 @@ import org.matsim.vehicles.Vehicles;
  *
  */
 public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
-		PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
+		PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
 
 	// -------------------- MEMBERS --------------------
-
-	private final AccelerationConfigGroup accelerationConfig;
 
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2indicators;
 
@@ -60,32 +58,21 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SlotUsageListener(final Population population, final Vehicles transitVehicles,
-			final AccelerationConfigGroup accelerationConfig, final Map<Id<Person>, Double> personWeights) {
-		if (!SetUtils.disjoint(population.getPersons().keySet(), transitVehicles.getVehicles().keySet())) {
-			throw new RuntimeException("Population ids and transit vehicle ids are not disjoint.");
-		}
-		this.accelerationConfig = accelerationConfig;
+	public SlotUsageListener(final TimeDiscretization timeDiscretization, final Map<Id<Person>, Double> personWeights,
+			final Map<Id<Link>, Double> linkWeights, final Map<Id<Vehicle>, Double> transitVehicleWeights) {
 		this.personId2indicators = new ConcurrentHashMap<>(); // Shared by different listeners.
-		this.privateTrafficLinkUsageListener = new PrivateTrafficLinkUsageListener(
-				this.accelerationConfig.getTimeDiscretization(), population, this.personId2indicators,
-				this.accelerationConfig.getLinkWeightView(), personWeights);
-		this.transitVehicleUsageListener = new TransitVehicleUsageListener(
-				this.accelerationConfig.getTimeDiscretization(), population, transitVehicles, this.personId2indicators,
-				personWeights);
+		this.privateTrafficLinkUsageListener = new PrivateTrafficLinkUsageListener(timeDiscretization,
+				this.personId2indicators, linkWeights, personWeights);
+		this.transitVehicleUsageListener = new TransitVehicleUsageListener(timeDiscretization, this.personId2indicators,
+				transitVehicleWeights, personWeights);
 	}
 
 	// -------------------- SETTERS --------------------
 
-	public void setPersonWeights(final Map<Id<Person>, Double> personWeights) {
-		this.privateTrafficLinkUsageListener.setPersonWeights(personWeights);
-		this.transitVehicleUsageListener.setPersonWeights(personWeights);
+	public void updatePersonWeights(final Map<Id<Person>, Double> personWeights) {
+		this.privateTrafficLinkUsageListener.updatePersonWeights(personWeights);
+		this.transitVehicleUsageListener.updatePersonWeights(personWeights);
 	}
-
-	// public void setSpaceObjectWeight(final Map<Id<?>, Double> spaceObjectWeights)
-	// {
-	// this.spaceObjectWeights = spaceObjectWeights;
-	// }
 
 	// -------------------- CONTENT ACCESS --------------------
 
@@ -93,13 +80,6 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 		// Need a deep copy because of subsequent (pSim) resets.
 		return Collections.unmodifiableMap(new LinkedHashMap<>(this.personId2indicators));
 	}
-
-	// public Map<Id<?>, Double> getWeightView() {
-	// final Map<Id<?>, Double> result = new
-	// LinkedHashMap<>(this.accelerationConfig.getLinkWeightView());
-	// result.putAll(this.transitVehicleUsageListener.newTransitWeightView());
-	// return result;
-	// }
 
 	// -------------------- IMPLEMENTATION OF *EventHandler --------------------
 
@@ -125,7 +105,7 @@ public class SlotUsageListener implements LinkEnterEventHandler, VehicleEntersTr
 	}
 
 	@Override
-	public void handleEvent(final PersonLeavesVehicleEvent event) {
-		this.transitVehicleUsageListener.handleEvent(event);
+	public void handleEvent(final VehicleLeavesTrafficEvent event) {
+		this.privateTrafficLinkUsageListener.handleEvent(event);
 	}
 }

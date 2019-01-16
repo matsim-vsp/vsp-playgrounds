@@ -20,10 +20,11 @@
 package org.matsim.contrib.pseudosimulation.searchacceleration;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -31,12 +32,13 @@ import org.apache.commons.math3.random.Well19937c;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.utils.misc.StringUtils;
+import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleCapacity;
 
 import floetteroed.utilities.TimeDiscretization;
-import floetteroed.utilities.Units;
 
 /**
  *
@@ -51,18 +53,10 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	public static final String GROUP_NAME = "acceleration";
 
-	// -------------------- CONSTRUCTION AND INITIALIZATION --------------------
+	// -------------------- CONSTRUCTION --------------------
 
 	public AccelerationConfigGroup() {
 		super(GROUP_NAME);
-	}
-
-	// TODO No way to access the network directly?
-	public void configure(final Scenario scenario, final int pSimIterations) {
-		this.network = scenario.getNetwork();
-		// this.transitVehicles = scenario.getTransitVehicles();
-		this.populationSize = scenario.getPopulation().getPersons().size();
-		this.pSimIterations = pSimIterations;
 	}
 
 	// -------------------- mode --------------------
@@ -139,21 +133,6 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		this.initialMeanReplanningRate = initialMeanReplanningRate;
 	}
 
-	// // -------------------- regularizationWeight --------------------
-	//
-	// private double initialRegularizationWeight = Double.NaN;
-	//
-	// @StringGetter("initialRegularizationWeight")
-	// public double getInitialRegularizationWeight() {
-	// return this.initialRegularizationWeight;
-	// }
-	//
-	// @StringSetter("initialRegularizationWeight")
-	// public void setInitialRegularizationWeight(double
-	// initialRegularizationWeight) {
-	// this.initialRegularizationWeight = initialRegularizationWeight;
-	// }
-
 	// -------------------- replanningRateIterationExponent --------------------
 
 	private double replanningRateIterationExponent = 0.0;
@@ -168,9 +147,23 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		this.replanningRateIterationExponent = replanningRateIterationExponent;
 	}
 
-	// // -------------------- replanningRateIterationExponent --------------------
+	// -------------------- regularizationWeight --------------------
+
+	private double initialRegularizationWeight = 0.0;
+
+	@StringGetter("initialRegularizationWeight")
+	public double getInitialRegularizationWeight() {
+		return this.initialRegularizationWeight;
+	}
+
+	@StringSetter("initialRegularizationWeight")
+	public void setInitialRegularizationWeight(double initialRegularizationWeight) {
+		this.initialRegularizationWeight = initialRegularizationWeight;
+	}
+
+	// -------------------- replanningRateIterationExponent --------------------
 	//
-	// private double regularizationIterationExponent = Double.NaN;
+	// private double regularizationIterationExponent = 0.0;
 	//
 	// @StringGetter("regularizationIterationExponent")
 	// public double getRegularizationIterationExponent() {
@@ -330,13 +323,16 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- deltaScorePerIterationThreshold --------------------
 
+	@Deprecated
 	private double scoreImprovementPerIterationThreshold = 0.0;
 
+	@Deprecated
 	@StringGetter("scoreImprovementPerIterationThreshold")
 	public double getScoreImprovementPerIterationThreshold() {
 		return this.scoreImprovementPerIterationThreshold;
 	}
 
+	@Deprecated
 	@StringSetter("scoreImprovementPerIterationThreshold")
 	public void setScoreImprovementPerIterationThreshold(final double scoreImprovementPerIterationThreshold) {
 		this.scoreImprovementPerIterationThreshold = scoreImprovementPerIterationThreshold;
@@ -344,13 +340,16 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- individualConvergenceIterations --------------------
 
-	private int individualConvergenceIterations = 5;
+	@Deprecated
+	private int individualConvergenceIterations = Integer.MAX_VALUE;
 
+	@Deprecated
 	@StringGetter("individualConvergenceIterations")
 	public int getIndividualConvergenceIterations() {
 		return this.individualConvergenceIterations;
 	}
 
+	@Deprecated
 	@StringSetter("individualConvergenceIterations")
 	public void setIndividualConvergenceIterations(final int individualConvergenceIterations) {
 		this.individualConvergenceIterations = individualConvergenceIterations;
@@ -368,6 +367,84 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	@StringSetter("ageInertia")
 	public void setAgeInertia(final double ageInertia) {
 		this.ageInertia = ageInertia;
+	}
+
+	// -------------------- adjustStrategyWeights --------------------
+
+	private boolean adjustStrategyWeights = true;
+
+	@StringGetter("adjustStrategyWeights")
+	public boolean getAdjustStrategyWeights() {
+		return this.adjustStrategyWeights;
+	}
+
+	@StringSetter("adjustStrategyWeights")
+	public void setAdjustStrategyWeights(final boolean adjustStrategyWeights) {
+		this.adjustStrategyWeights = adjustStrategyWeights;
+	}
+
+	// --------------- cheapStrategies, expensiveStrategies ---------------
+
+	// TODO UNTESTED
+
+	// helpers
+	
+	private static String listToString(final List<String> list) {
+		final StringBuilder builder = new StringBuilder();
+		if (list.size() > 0) {
+			builder.append(list.get(0));
+		}
+		for (int i = 1; i < list.size(); i++) {
+			builder.append(',');
+			builder.append(list.get(i));
+		}
+		return builder.toString();
+	}
+
+	private static List<String> stringToList(final String string) {
+		final ArrayList<String> result = new ArrayList<>();
+		for (String part : StringUtils.explode(string, ',')) {
+			result.add(part.trim().intern());
+		}
+		result.trimToSize();
+		return result;
+	}
+
+	// computationally cheap strategies
+	
+	private List<String> cheapStrategies = Arrays.asList("TimeAllocationMutator");
+
+	@StringGetter("cheapStrategies")
+	public String getCheapStrategies() {
+		return listToString(this.cheapStrategies);
+	}
+
+	@StringSetter("cheapStrategies")
+	public void setCheapStrategies(final String cheapStrategies) {
+		this.cheapStrategies = stringToList(cheapStrategies);
+	}
+
+	public List<String> getCheapStrategyList() {
+		return this.cheapStrategies;
+	}
+	
+	// computationally expensive strategies
+
+	private List<String> expensiveStrategies = Arrays.asList("ReRoute", "TimeAllocationMutator_ReRoute",
+			"ChangeLegMode", "ChangeTripMode", "ChangeSingleLegMode", "SubtourModeChoice");
+
+	@StringGetter("expensiveStrategies")
+	public String getExpensiveStrategies() {
+		return listToString(this.expensiveStrategies);
+	}
+
+	@StringSetter("expensiveStrategies")
+	public void setExpensiveStrategies(final String expensiveStrategies) {
+		this.expensiveStrategies = stringToList(expensiveStrategies);
+	}
+
+	public List<String> getExpensiveStrategyList() {
+		return this.expensiveStrategies;
 	}
 
 	// -------------------- separateOutConvergedAgents --------------------
@@ -389,44 +466,128 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- STATIC UTILITIES --------------------
 
-	public static Map<Id<?>, Double> newUniformLinkWeights(final Network network) {
-		final Map<Id<?>, Double> weights = new LinkedHashMap<>();
-		for (Link link : network.getLinks().values()) {
-			weights.put(link.getId(), 1.0);
-		}
-		return weights;
-	}
+	// @Deprecated
+	// public static Map<Id<?>, Double> newUniformLinkWeights(final Network network)
+	// {
+	// final Map<Id<?>, Double> weights = new LinkedHashMap<>();
+	// for (Link link : network.getLinks().values()) {
+	// weights.put(link.getId(), 1.0);
+	// }
+	// return weights;
+	// }
 
-	public static Map<Id<?>, Double> newOneOverCapacityLinkWeights(final Network network) {
-		final Map<Id<?>, Double> weights = new LinkedHashMap<>();
-		for (Link link : network.getLinks().values()) {
-			final double cap_veh_h = link.getFlowCapacityPerSec() * Units.VEH_H_PER_VEH_S;
-			if (cap_veh_h <= 1e-6) {
-				throw new RuntimeException("link " + link.getId() + " has capacity of " + cap_veh_h + " veh/h");
-			}
-			weights.put(link.getId(), 1.0 / cap_veh_h);
-		}
-		return weights;
-	}
+	// @Deprecated
+	// public static Map<Id<?>, Double> newOneOverCapacityLinkWeights(final Network
+	// network) {
+	// final Map<Id<?>, Double> weights = new LinkedHashMap<>();
+	// for (Link link : network.getLinks().values()) {
+	// final double cap_veh_h = link.getFlowCapacityPerSec() *
+	// Units.VEH_H_PER_VEH_S;
+	// if (cap_veh_h <= 1e-6) {
+	// throw new RuntimeException("link " + link.getId() + " has capacity of " +
+	// cap_veh_h + " veh/h");
+	// }
+	// weights.put(link.getId(), 1.0 / cap_veh_h);
+	// }
+	// return weights;
+	// }
+
+	// public static Map<Id<Link>, Double> newNetworkSlotWeights(final Network
+	// network) {
+	// final Map<Id<Link>, Double> weights = new LinkedHashMap<>();
+	// for (Id<Link> linkId : this.capacitatedLinkIds) {
+	// // for (Link link : network.getLinks().values()) {
+	// final Link link = network.getLinks().get(linkId);
+	// final double cap_veh = link.getFlowCapacityPerSec() * this.getBinSize_s();
+	// if (cap_veh <= 1e-3) {
+	// throw new RuntimeException("link " + link.getId() + " has capacity of " +
+	// cap_veh + " < 0.001 veh per "
+	// + this.getBinSize_s() + " sec.");
+	// }
+	// weights.put(link.getId(), 1.0 / cap_veh);
+	// }
+	// return Collections.unmodifiableMap(weights);
+	// }
+
+	// public static Map<Id<Vehicle>, Double> newTransitSlotWeights(final Vehicles
+	// transitVehicles) {
+	// final Map<Id<Vehicle>, Double> weights = new LinkedHashMap<>();
+	// for (Vehicle transitVehicle : transitVehicles.getVehicles().values()) {
+	// final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
+	// final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
+	// if (cap_persons < 1e-3) {
+	// throw new RuntimeException(
+	// "vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons + " <
+	// 0.001 persons.");
+	// }
+	// weights.put(transitVehicle.getId(), 1.0 / cap_persons);
+	// }
+	// return Collections.unmodifiableMap(weights);
+	// }
 
 	// -------------------- MEMBERS --------------------
 
 	private int pSimIterations;
 
-	private Network network = null; // needs to be explicitly set
+	// private Network network = null; // needs to be explicitly set
 
 	// private Vehicles transitVehicles = null; // needs to be explicitly set
 
 	private Integer populationSize = null; // needs to be explicitly set
 
+	// private Set<Id<Link>> capacitatedLinkIds = null; // needs to be explicitly
+	// set
+
 	private TimeDiscretization myTimeDiscretization = null; // lazy initialization
 
-	private Map<Id<?>, Double> linkWeights = null; // lazy initialization
+	private Map<Id<Link>, Double> linkWeights = null; // set in configure(..)
+
+	private Map<Id<Vehicle>, Double> transitVehicleWeights = null; // set in configure(..)
 
 	// keeping track of this to avoid a re-randomization
 	private List<Double> meanReplanningRates = new ArrayList<>();
 
+	// -------------------- INITIALIZATION --------------------
+
+	public void configure(final Scenario scenario, final int pSimIterations, final Set<Id<Link>> capacitatedLinkIds,
+			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
+
+		this.populationSize = scenario.getPopulation().getPersons().size();
+		this.pSimIterations = pSimIterations;
+
+		this.linkWeights = new LinkedHashMap<>();
+		for (Id<Link> linkId : capacitatedLinkIds) {
+			final Link link = scenario.getNetwork().getLinks().get(linkId);
+			final double cap_veh = link.getFlowCapacityPerSec() * this.getBinSize_s();
+			if (cap_veh <= 1e-3) {
+				throw new RuntimeException("link " + link.getId() + " has capacity of " + cap_veh + " < 0.001 veh per "
+						+ this.getBinSize_s() + " sec.");
+			}
+			this.linkWeights.put(link.getId(), 1.0 / cap_veh);
+		}
+
+		this.transitVehicleWeights = new LinkedHashMap<>();
+		for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
+			final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
+			final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
+			final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
+			if (cap_persons < 1e-3) {
+				throw new RuntimeException(
+						"vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons + " < 0.001 persons.");
+			}
+			this.transitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
+		}
+	}
+
 	// -------------------- IMPLEMENTATION --------------------
+
+	public Map<Id<Link>, Double> getLinkWeights() {
+		return this.linkWeights;
+	}
+
+	public Map<Id<Vehicle>, Double> getTransitVehicleWeights() {
+		return this.transitVehicleWeights;
+	}
 
 	public TimeDiscretization getTimeDiscretization() {
 		if (this.myTimeDiscretization == null) {
@@ -475,19 +636,21 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	// return result;
 	// }
 
-	public Map<Id<?>, Double> getLinkWeightView() {
-		if (this.linkWeights == null) {
-			if (this.weightingField == LinkWeighting.uniform) {
-				this.linkWeights = newUniformLinkWeights(this.network);
-			} else if (this.weightingField == LinkWeighting.oneOverCapacity) {
-				this.linkWeights = newOneOverCapacityLinkWeights(this.network);
-			} else {
-				throw new RuntimeException("unhandled link weighting \"" + this.weightingField + "\"");
-			}
-			this.linkWeights = Collections.unmodifiableMap(this.linkWeights);
-		}
-		return this.linkWeights;
-	}
+	// @Deprecated
+	// public Map<Id<?>, Double> getLinkWeightView() {
+	// if (this.linkWeights == null) {
+	// if (this.weightingField == LinkWeighting.uniform) {
+	// this.linkWeights = newUniformLinkWeights(this.network);
+	// } else if (this.weightingField == LinkWeighting.oneOverCapacity) {
+	// this.linkWeights = newOneOverCapacityLinkWeights(this.network);
+	// } else {
+	// throw new RuntimeException("unhandled link weighting \"" +
+	// this.weightingField + "\"");
+	// }
+	// this.linkWeights = Collections.unmodifiableMap(this.linkWeights);
+	// }
+	// return this.linkWeights;
+	// }
 
 	// public double getLinkWeight(Object linkId, int bin) {
 	// if (this.linkWeights == null) {

@@ -21,12 +21,17 @@
  */
 package scenarios.illustrative.parallel.run;
 
+import java.io.File;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.builder.Signals;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlWriter20;
@@ -47,15 +52,21 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.LanesWriter;
+
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
+import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
 import scenarios.illustrative.analysis.TtAnalyzedResultsWriter;
-import scenarios.illustrative.analysis.TtListenerToBindAndWriteAnalysis;
 import scenarios.illustrative.parallel.analysis.TtAnalyzeParallel;
+import scenarios.illustrative.parallel.analysis.TtListenerToBindAndWriteAnalysisForParallelWithoutTolls;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelNetworkAndLanes;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelPopulation;
+import scenarios.illustrative.parallel.createInput.TtCreateParallelPopulation.DemandType;
+import scenarios.illustrative.parallel.createInput.TtCreateParallelPopulation.InitRoutesType;
 import scenarios.illustrative.parallel.createInput.TtCreateParallelSignals;
-
-import java.io.File;
-import java.util.Calendar;
+import scenarios.illustrative.parallel.createInput.TtCreateParallelSignals.SignalControlType;
+import scenarios.illustrative.parallel.createInput.TtCreateParallelSignals.SignalGroupType;
+import utils.OutputUtils;
 
 /**
  * Class to run a simulation of the parallel scenario with or without signals. 
@@ -70,14 +81,21 @@ public final class RunParallelSimulation {
 			.getLogger(RunParallelSimulation.class);
 
 	/* population parameter */
-	private static final int NUMBER_OF_PERSONS = 2000;
-	private static final boolean INIT_ROUTES = true;
+	private static final int NUMBER_OF_PERSONS = 1620;
+	private static final InitRoutesType INIT_ROUTES_TYPE = InitRoutesType.OSZILLATING;
 	// initial score for all initial plans. choose null for no score
-	private static final Double INIT_PLAN_SCORE = null; // TODO choose appropriate score
+	private static final Double INIT_PLAN_SCORE = 121.5;
 
-	private static final boolean USE_SECOND_OD_PAIR = true;
+	private static final DemandType DEMAND_TYPE = DemandType.CROSSING_ROADS;
 	
 	private static final boolean USE_SIGNALS = true;
+	private static final SignalControlType SIGNAL_CONTROL_BRANCHING_NODES = SignalControlType.FIXED_PULK_ONLY_EW_OFFSET_OPT;
+	private static final SignalControlType SIGNAL_CONTROL_INNER_NODES = SignalControlType.FIXED_ALL_OD_COMBINE_HALF_HALF_OFFSET_OPT_ALL_RIGHT;
+	private static final boolean USE_SYLVIA_BRANCHING_NODES = false; // to be able to choose base fixed time plan above
+	private static final boolean USE_SYLVIA_INNER_NODES = true; // to be able to choose base fixed time plan above
+	private static final SignalGroupType SIGNAL_GROUPS_BRANCHING_NODES = SignalGroupType.SINGLE_GROUPS;
+	private static final SignalGroupType SIGNAL_GROUPS_INNER_NODES = SignalGroupType.SINGLE_GROUPS;
+	// TODO intersection modeling: conflicts...
 	
 //	// defines which kind of pricing should be used
 //	private static final PricingType PRICING_TYPE = PricingType.V3;
@@ -87,12 +105,12 @@ public final class RunParallelSimulation {
 
 	// choose a sigma for the randomized router
 	// (higher sigma cause more randomness. use 0.0 for no randomness.)
-	private static final double SIGMA = 0.0;	
+	private static final double SIGMA = 0.;
 		
 	private static final boolean WRITE_INITIAL_FILES = false;
 
 	
-	private static String OUTPUT_BASE_DIR = "../../../runs-svn/parallel/";
+	private static String OUTPUT_BASE_DIR = "../../runs-svn/parallel/crossingRoads_greenWaves_interG3_200m_15ms/";
 	
 	public static void main(String[] args) {
 		Config config = defineConfig();
@@ -207,10 +225,19 @@ public final class RunParallelSimulation {
 		controler.addOverridingModule(new AbstractModule() {			
 			@Override
 			public void install() {
-				this.bind(TtAnalyzeParallel.class).asEagerSingleton();
-				this.addEventHandlerBinding().to(TtAnalyzeParallel.class);
+				SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config,
+						SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
+				if (signalsConfigGroup.isUseSignalSystems()) {
+					// bind tool to analyze signals
+					this.bind(SignalAnalysisTool.class);
+					this.bind(SignalAnalysisWriter.class);
+					this.addControlerListenerBinding().to(SignalAnalysisListener.class);
+				}
+
+				this.bind(TtAbstractAnalysisTool.class).to(TtAnalyzeParallel.class).asEagerSingleton();
+				this.addEventHandlerBinding().to(TtAbstractAnalysisTool.class);
 				this.bind(TtAnalyzedResultsWriter.class);
-				this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysis.class);
+				this.addControlerListenerBinding().to(TtListenerToBindAndWriteAnalysisForParallelWithoutTolls.class);
 			}
 		});
 		
@@ -228,6 +255,18 @@ public final class RunParallelSimulation {
 				.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
 						SignalSystemsConfigGroup.class);
 		signalConfigGroup.setUseSignalSystems( USE_SIGNALS? true : false );
+		config.qsim().setUsingFastCapacityUpdate(false);
+		
+		LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.class);
+		laemmerConfigGroup.setMaxCycleTime(90);
+		laemmerConfigGroup.setDesiredCycleTime(60);
+		laemmerConfigGroup.setIntergreenTime(3);
+		laemmerConfigGroup.setMinGreenTime(5);
+		
+		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
+		sylviaConfig.setSignalGroupMaxGreenScale(1.5);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
+//		sylviaConfig.setCheckDownstream(true);
 
 		// set brain exp beta
 		config.planCalcScore().setBrainExpBeta( 20 );
@@ -240,7 +279,7 @@ public final class RunParallelSimulation {
 		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 		
 		// set travelTimeBinSize
-		config.travelTimeCalculator().setTraveltimeBinSize( USE_SIGNALS? 10 : 900 );
+		config.travelTimeCalculator().setTraveltimeBinSize( 10 );
 		
 		config.travelTimeCalculator().setTravelTimeCalculatorType(
 				TravelTimeCalculatorType.TravelTimeCalculatorHashMap.toString());
@@ -251,41 +290,53 @@ public final class RunParallelSimulation {
 		{
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultStrategy.ReRoute.toString() );
-			strat.setWeight( 0.0 ) ;
-			strat.setDisableAfter( config.controler().getLastIteration() - 50 );
+			strat.setWeight( 0.1 ) ;
+			strat.setSubpopulation("symTraffic");
+			strat.setDisableAfter( config.controler().getLastIteration() - 30 );
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.SelectRandom.toString() );
 			strat.setWeight( 0.0 ) ;
-			strat.setDisableAfter( config.controler().getLastIteration() - 50 );
+			strat.setSubpopulation("symTraffic");
+			strat.setDisableAfter( config.controler().getLastIteration() - 30 );
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.ChangeExpBeta.toString() );
-			strat.setWeight( 1.0 ) ;
+			strat.setWeight( 0.9 ) ;
+			strat.setSubpopulation("symTraffic");
 			strat.setDisableAfter( config.controler().getLastIteration() );
 			config.strategy().addStrategySettings(strat);
 		}
+//		{
+//			StrategySettings strat = new StrategySettings() ;
+//			strat.setStrategyName( DefaultSelector.KeepLastSelected.toString() );
+//			strat.setWeight( 0.8 ) ;
+//			strat.setSubpopulation("symTraffic");
+//			strat.setDisableAfter( config.controler().getLastIteration() );
+//			config.strategy().addStrategySettings(strat);
+//		}
 		{
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.BestScore.toString() );
 			strat.setWeight( 0.0 ) ;
-			strat.setDisableAfter( config.controler().getLastIteration() - 50 );
+			strat.setDisableAfter( config.controler().getLastIteration() - 30 );
 			config.strategy().addStrategySettings(strat);
 		}
 		{
 			StrategySettings strat = new StrategySettings() ;
 			strat.setStrategyName( DefaultSelector.KeepLastSelected.toString() );
-			strat.setWeight( 0.0 ) ;
+			strat.setWeight( 1.0 ) ;
+			strat.setSubpopulation("crossingTraffic");
 			strat.setDisableAfter( config.controler().getLastIteration() );
 			config.strategy().addStrategySettings(strat);
 		}
 
 		// choose maximal number of plans per agent. 0 means unlimited
-		config.strategy().setMaxAgentPlanMemorySize( 0 );
+		config.strategy().setMaxAgentPlanMemorySize( 5 );
 		
 		config.qsim().setStuckTime(3600 * 10.);
 		
@@ -323,49 +374,69 @@ public final class RunParallelSimulation {
 	private static void createNetwork(Scenario scenario) {	
 		
 		TtCreateParallelNetworkAndLanes netCreator = new TtCreateParallelNetworkAndLanes(scenario);
-		netCreator.setCapacity(NUMBER_OF_PERSONS);
-		netCreator.setUseSecondODPair(USE_SECOND_OD_PAIR);
+		// TODO
+//		netCreator.setCapacity(NUMBER_OF_PERSONS);
+		netCreator.setCapacity(3600);
+		netCreator.setDemandType(DEMAND_TYPE);
 		netCreator.createNetworkWithLanes();
 	}
 
 	private static void createPopulation(Scenario scenario) {
 		
-		TtCreateParallelPopulation popCreator = 
-				new TtCreateParallelPopulation(scenario.getPopulation(), scenario.getNetwork());
-		popCreator.createPersons(NUMBER_OF_PERSONS, INIT_ROUTES, INIT_PLAN_SCORE);
+		TtCreateParallelPopulation popCreator = new TtCreateParallelPopulation(scenario);
+		popCreator.setDemandType(DEMAND_TYPE);
+		popCreator.createPersons(NUMBER_OF_PERSONS, INIT_ROUTES_TYPE, INIT_PLAN_SCORE);
 	}
 
 	private static void createSignals(Scenario scenario) {
 		// this method is only called when signal systems are used
 		
 		TtCreateParallelSignals signalsCreator = new TtCreateParallelSignals(scenario);
-		signalsCreator.createSignals();
+		signalsCreator.setUseSylviaAtBranchingNodes(USE_SYLVIA_BRANCHING_NODES);
+		signalsCreator.setUseSylviaAtInnerNodes(USE_SYLVIA_INNER_NODES);
+		signalsCreator.createSignals(SIGNAL_CONTROL_BRANCHING_NODES, SIGNAL_CONTROL_INNER_NODES, SIGNAL_GROUPS_BRANCHING_NODES, SIGNAL_GROUPS_INNER_NODES);
 	}
 
 	private static void createRunNameAndOutputDir(Scenario scenario) {
 
 		Config config = scenario.getConfig();
 		
-		// get the current date in format "yyyy-mm-dd"
-		Calendar cal = Calendar.getInstance ();
-		// this class counts months from 0, but days from 1
-		int month = cal.get(Calendar.MONTH) + 1;
-		String monthStr = month + "";
-		if (month < 10)
-			monthStr = "0" + month;
-		String date = cal.get(Calendar.YEAR) + "-" 
-				+ monthStr + "-" + cal.get(Calendar.DAY_OF_MONTH);
+		String runName = OutputUtils.getCurrentDateIncludingTime();
 		
-		String runName = date;
-		
-		if (USE_SECOND_OD_PAIR)
-			runName += "_secondODPair";
+		switch (DEMAND_TYPE) {
+		case SECOND_OD:
+			runName += "_secondOdPair";
+			break;
+		case CROSSING_ROAD:
+			runName += "_crossingRoad";
+			break;
+		case CROSSING_ROADS:
+			runName += "_crossingRoads";
+			break;
+		case SINGLE_OD:
+			runName += "_singleOdPair";
+			break;
+		}
 
 		runName += "_" + NUMBER_OF_PERSONS;
-		if (INIT_ROUTES){
-			runName += "_initRoutes";
+		if (!INIT_ROUTES_TYPE.equals(InitRoutesType.NONE)){
+			runName += "_init" + INIT_ROUTES_TYPE;
 			if (INIT_PLAN_SCORE != null)
 				runName += "-score" + INIT_PLAN_SCORE;
+		}
+		
+		if (USE_SIGNALS) {
+			runName+= "_branch" + SIGNAL_CONTROL_BRANCHING_NODES;
+			if (USE_SYLVIA_BRANCHING_NODES) runName += "_SYLVIA";
+			if (SIGNAL_CONTROL_BRANCHING_NODES.equals(SignalControlType.LAEMMER_WITH_GROUPS)) {
+				runName += "_groups" + SIGNAL_GROUPS_BRANCHING_NODES;
+			}
+			
+			runName+= "_inner" + SIGNAL_CONTROL_INNER_NODES;
+			if (USE_SYLVIA_INNER_NODES) runName += "_SYLVIA";
+			if (SIGNAL_CONTROL_INNER_NODES.equals(SignalControlType.LAEMMER_WITH_GROUPS)) {
+				runName += "_groups" + SIGNAL_GROUPS_INNER_NODES;
+			}
 		}
 
 		runName += "_" + config.controler().getLastIteration() + "it";
@@ -388,28 +459,28 @@ public final class RunParallelSimulation {
 			}
 		}
 		
-		if (SIGMA != 0.0)
-			runName += "_sigma" + SIGMA;
-		if (config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate() != 0.0)
-			runName += "_distCost"
-					+ config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate();
-
-		if (config.controler().isLinkToLinkRoutingEnabled())
-			runName += "_link2link";
-		else
-			runName += "_node2node";
-
-		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
-				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
-			runName += "_signals";
-		}
+//		if (SIGMA != 0.0)
+//			runName += "_sigma" + SIGMA;
+//		if (config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate() != 0.0)
+//			runName += "_distCost"
+//					+ config.planCalcScore().getModes().get(TransportMode.car).getMonetaryDistanceRate();
+//
+//		if (config.controler().isLinkToLinkRoutingEnabled())
+//			runName += "_link2link";
+//		else
+//			runName += "_node2node";
+//
+//		if (ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME,
+//				SignalSystemsConfigGroup.class).isUseSignalSystems()) {
+//			runName += "_signals";
+//		}
 		
 //		if (!PRICING_TYPE.equals(PricingType.NONE)){
 //			runName += "_" + PRICING_TYPE.toString();
 //		}
 		
-		if (config.strategy().getMaxAgentPlanMemorySize() != 0)
-			runName += "_max" + config.strategy().getMaxAgentPlanMemorySize() + "plans";
+//		if (config.strategy().getMaxAgentPlanMemorySize() != 0)
+//			runName += "_max" + config.strategy().getMaxAgentPlanMemorySize() + "plans";
 
 		String outputDir = OUTPUT_BASE_DIR + runName + "/"; 
 		// create directory

@@ -22,11 +22,12 @@
  */
 package playground.jbischoff.sharedTaxiBerlin.saturdaynight;
 
-import org.matsim.contrib.drt.run.Drt;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
@@ -63,7 +64,8 @@ public class RunSharedTaxiWithDynamicZonesServer {
 				addControlerListenerBinding().to(TaxiZoneManager.class).asEagerSingleton();
 				bind(ZonalOccupancyAggregator.class).asEagerSingleton();
 				bind(SharedTaxiFareCalculator.class).asEagerSingleton();
-				bind(PassengerRequestValidator.class).annotatedWith(Drt.class).toInstance(validator);
+				bind(PassengerRequestValidator.class).annotatedWith(DvrpModes.mode(TransportMode.drt))
+						.toInstance(validator);
 				bind(ZonalBasedRequestValidator.class).toInstance(validator);
 				bind(ZonalSystem.class).toInstance(zones);
 

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <events version="1.0">
 
+	<event time="0" type="actend" person="1" link="Link4" facility="4" actType="home"  />
+
 	<event time="28800.0" type="actstart" person="1" link="Link4" facility="4" actType="home"  />
 	
 	<event time="28800.0" type="actend" person="0" link="Link1" facility="0" actType="home"  />

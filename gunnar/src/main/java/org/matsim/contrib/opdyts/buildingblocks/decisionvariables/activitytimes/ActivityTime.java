@@ -19,7 +19,7 @@
  */
 package org.matsim.contrib.opdyts.buildingblocks.decisionvariables.activitytimes;
 
-import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.ScalarDecisionVariable;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.AbstractScalarDecisionVariable;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 
@@ -30,7 +30,7 @@ import floetteroed.utilities.Time;
  * @author Gunnar Flötteröd
  *
  */
-public abstract class ActivityTime<U extends ScalarDecisionVariable<U>> implements ScalarDecisionVariable<U> {
+public abstract class ActivityTime<U extends ActivityTime<U>> extends AbstractScalarDecisionVariable<U> {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -40,14 +40,15 @@ public abstract class ActivityTime<U extends ScalarDecisionVariable<U>> implemen
 
 	// -------------------- MEMBERS --------------------
 
-	private double value_s;
+	// private double value_s;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public ActivityTime(final Config config, final String activityType, final double value_s) {
+		super(value_s);
 		this.config = config;
 		this.activityType = activityType;
-		this.value_s = value_s;
+		// this.value_s = value_s;
 	}
 
 	// -------------------- GETTERS AND SETTERS --------------------
@@ -66,15 +67,15 @@ public abstract class ActivityTime<U extends ScalarDecisionVariable<U>> implemen
 
 	// ---------- PARTIAL IMPLEMENTATION OF ScalarDecisionVariable ----------
 
-	@Override
-	public void setValue(double value_s) {
-		this.value_s = value_s;
-	}
+	// @Override
+	// public void setValue(double value_s) {
+	// this.value_s = value_s;
+	// }
 
-	@Override
-	public double getValue() {
-		return this.value_s;
-	}
+	// @Override
+	// public double getValue() {
+	// return this.value_s;
+	// }
 
 	// -------------------- OVERRIDING OF Object --------------------
 

@@ -54,7 +54,7 @@ public class ReplannerIdentifier {
 
 	private final AccelerationConfigGroup replanningParameters;
 	private final double lambda;
-	// private final double delta;
+	private final double delta;
 
 	private final Population population;
 	private final Set<Id<Person>> convergedAgentIds;
@@ -70,6 +70,8 @@ public class ReplannerIdentifier {
 
 	private final Map<Id<Person>, Double> personId2ageWeightedUtilityChange;
 	private final double totalAgeWeightedUtilityChange;
+
+	private final Ages ages;
 
 	// private Double shareOfScoreImprovingReplanners = null;
 	// private Double score = null;
@@ -134,6 +136,8 @@ public class ReplannerIdentifier {
 			// final double delta,
 			final Set<Id<Person>> convergedAgentIds, final Set<Id<Person>> nonConvergedAgentIds, final Ages ages) {
 
+		this.ages = ages;
+
 		this.replanningParameters = replanningParameters;
 		this.population = population;
 
@@ -170,7 +174,8 @@ public class ReplannerIdentifier {
 		// this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 /
 		// this.totalUtilityChange;
 		this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 / this.totalAgeWeightedUtilityChange;
-		// this.delta = delta;
+		this.delta = this.replanningParameters.getInitialRegularizationWeight() * 2.0
+				* this.sumOfWeightedCountDifferences2;
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -183,7 +188,7 @@ public class ReplannerIdentifier {
 				.newWeightedDifference(this.upcomingWeightedCounts, this.currentWeightedCounts, this.lambda);
 		// double inertiaResidual = (1.0 - this.lambda) * this.totalUtilityChange;
 		double inertiaResidual = (1.0 - this.lambda) * this.totalAgeWeightedUtilityChange;
-		// double regularizationResidual = 0;
+		double regularizationResidual = 0;
 		double sumOfInteractionResiduals2 = interactionResiduals.sumOfEntries2();
 
 		// final DynamicData<Id<?>> uniformInteractionResiduals = CountIndicatorUtils
@@ -238,11 +243,8 @@ public class ReplannerIdentifier {
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(driverId),
 					this.personId2pseudoSimSlotUsage.get(driverId),
 					// this.slotWeights,
-					this.lambda, this.beta,
-					// this.delta,
-					interactionResiduals, inertiaResidual,
-					// regularizationResidual,
-					this.replanningParameters,
+					this.lambda, this.ages.getWeight(driverId), this.beta, this.delta, interactionResiduals,
+					inertiaResidual, regularizationResidual, this.replanningParameters,
 					// this.personId2utilityChange.get(driverId), this.totalUtilityChange,
 					this.personId2ageWeightedUtilityChange.get(driverId), this.totalAgeWeightedUtilityChange,
 					sumOfInteractionResiduals2);
@@ -285,7 +287,7 @@ public class ReplannerIdentifier {
 
 			scoreUpdater.updateResiduals(replanner ? 1.0 : 0.0); // interaction residual by reference
 			inertiaResidual = scoreUpdater.getUpdatedInertiaResidual();
-			// regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
+			regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
 			sumOfInteractionResiduals2 = scoreUpdater.getUpdatedSumOfInteractionResiduals2();
 
 			// uniformScoreUpdater.updateResiduals(uniformScoreUpdater.wouldBeUniformReplanner

@@ -38,6 +38,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
 import org.matsim.contrib.opdyts.OpdytsConfigGroup;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.LinkEntryCountDeviationObjectiveFunction;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.TotalDeviationObjectiveFunctionEXPERIMENTAL;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.CountTrajectorySummarizer;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.plotting.TrajectoryPlotter;
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.activitytimes.ActivityTimesUtils;
@@ -49,7 +50,6 @@ import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.scalar.ScalarR
 import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
 import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
-import org.matsim.contrib.opdyts.objectivefunction.MATSimObjectiveFunctionSum;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
 import org.matsim.contrib.pseudosimulation.searchacceleration.Greedo;
@@ -230,8 +230,9 @@ public class IHOP4ProductionRunner {
 	// ==================== CALIBRATE ====================
 
 	static void readAndAddData(final int startTime_s, final int endTime_s,
-			MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction, final List<AbstractModule> modules,
-			final TrajectoryPlotter trajectoryPlotter, final Config config) {
+			// MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction,
+			final TotalDeviationObjectiveFunctionEXPERIMENTAL overallObjectiveFunction,
+			final List<AbstractModule> modules, final TrajectoryPlotter trajectoryPlotter, final Config config) {
 
 		final int simulatedSensorDataExtractionInterval;
 		if (config.getModules().containsKey(PSimConfigGroup.GROUP_NAME)) {
@@ -257,7 +258,8 @@ public class IHOP4ProductionRunner {
 
 		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
 				.getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+			// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+			overallObjectiveFunction.addDataSource(objectiveFunctionComponent);
 			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
 		}
 		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
@@ -266,7 +268,8 @@ public class IHOP4ProductionRunner {
 
 		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
 				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-			overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+			// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+			overallObjectiveFunction.addDataSource(objectiveFunctionComponent);
 			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
 		}
 		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
@@ -455,7 +458,6 @@ public class IHOP4ProductionRunner {
 		final Greedo greedo;
 		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
 			greedo = new Greedo();
-			greedo.setAdjustStrategyWeights(true);
 			greedo.setGreedoProgressListener(progressListener);
 			greedo.meet(config);
 		} else {
@@ -494,9 +496,12 @@ public class IHOP4ProductionRunner {
 			final CompositeDecisionVariableBuilder builder = new CompositeDecisionVariableBuilder();
 
 			// Performing
+
 			if (ihopConfig.getPerformingStepSize_utils_hr() != null) {
-				builder.add(new PerformingCoefficient(config, config.planCalcScore().getPerforming_utils_hr()),
-						new ScalarRandomizer<>(ihopConfig.getPerformingStepSize_utils_hr()));
+				PerformingCoefficient perfCoeff = new PerformingCoefficient(config,
+						config.planCalcScore().getPerforming_utils_hr());
+				// No technical reason to add bound constraints.
+				builder.add(perfCoeff, new ScalarRandomizer<>(ihopConfig.getPerformingStepSize_utils_hr()));
 			}
 
 			// Activity times
@@ -509,13 +514,15 @@ public class IHOP4ProductionRunner {
 			// SimulatedPopulationShare
 
 			if (ihopConfig.getSimulatedPopulationShareStepSize() != null) {
-				builder.add(new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(),
+				SimulatedDemandShare share = new SimulatedDemandShare(config, ihopConfig.getSimulatedPopulationShare(),
 						new Consumer<Double>() {
 							@Override
 							public void accept(Double simulatedPopulationShare) {
 								ihopConfig.setSimulatedPopulationShare(simulatedPopulationShare);
 							}
-						}), new ScalarRandomizer<>(ihopConfig.getSimulatedPopulationShareStepSize()));
+						});
+				share.setMinValue_s(0.001);
+				builder.add(share, new ScalarRandomizer<>(ihopConfig.getSimulatedPopulationShareStepSize()));
 			}
 
 			// Build decision variable and matching randomizer.
@@ -540,7 +547,11 @@ public class IHOP4ProductionRunner {
 		final int eveningPeakStart_s = 15 * 3600;
 		final int eveningPeakEnd_s = (int) Units.S_PER_D - 1;
 
-		final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new MATSimObjectiveFunctionSum<>();
+		// final MATSimObjectiveFunctionSum<MATSimState> overallObjectiveFunction = new
+		// MATSimObjectiveFunctionSum<>();
+		final TotalDeviationObjectiveFunctionEXPERIMENTAL overallObjectiveFunction = new TotalDeviationObjectiveFunctionEXPERIMENTAL(
+				new TimeDiscretization(0, 1800, 48));
+
 		final List<AbstractModule> modules = new LinkedList<>();
 		final TrajectoryPlotter trajectoryPlotter = new TrajectoryPlotter(config, 1);
 
@@ -627,6 +638,44 @@ public class IHOP4ProductionRunner {
 					});
 				}
 			});
+
+			// runner.addOverridingModule(new AbstractModule() {
+			// @Override
+			// public void install() {
+			// this.addControlerListenerBinding().toInstance(new StartupListener() {
+			// @Override
+			// public void notifyStartup(StartupEvent event) {
+			// FileUtils.deleteQuietly(new File(config.controler().getOutputDirectory(),
+			// "planstats.log"));
+			// }
+			// });
+			// this.addControlerListenerBinding().toInstance(new BeforeMobsimListener() {
+			// @Override
+			// public void notifyBeforeMobsim(BeforeMobsimEvent event) {
+			// try {
+			//
+			// int planCnt = 0;
+			// int selectedPlanElementCnt = 0;
+			// double scoreSum = 0;
+			// for (Person person : scenario.getPopulation().getPersons().values()) {
+			// planCnt += person.getPlans().size();
+			// selectedPlanElementCnt += person.getSelectedPlan().getPlanElements().size();
+			// scoreSum += person.getSelectedPlan().getScore();
+			// }
+			// FileUtils.writeStringToFile(
+			// new File(config.controler().getOutputDirectory(), "planstats.log"),
+			// "it=" + event.getIteration() + " planCnt=" + planCnt
+			// + " selectedPlanElementCnt=" + selectedPlanElementCnt + " scoreSum="
+			// + scoreSum + "\n",
+			// true);
+			//
+			// } catch (IOException e) {
+			// throw new RuntimeException(e);
+			// }
+			// }
+			// });
+			// }
+			// });
 
 			// <<<< TODO FOR TESTING <<<<
 

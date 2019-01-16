@@ -27,13 +27,25 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.collections.Tuple;
 
 public class LinkDemandAnalysisRun {
 	
-	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0";
-	private String runId = "bc-0";
-	private String outputDirectory;
+//	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0";
+//	private String runId = "bc-0";
+
+//	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d";
+//	private String runId = "savA-0d";
+	
+//	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d";
+//	private String runId = "savA-2d";
+	
+	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d";
+	private String runId = "savA-3d";
+
 	private String vehicleTypePrefix = "rt";
+	private Tuple<Double, Double> timeBin = new Tuple<Double, Double>(8. * 3600, 9. * 3600);
+	private String outputDirectory;
 
 	public LinkDemandAnalysisRun(String outputDirectory) {
 		this.outputDirectory = outputDirectory;
@@ -70,17 +82,25 @@ public class LinkDemandAnalysisRun {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 				
-		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork(), vehicleTypePrefix);
+		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork(), vehicleTypePrefix, timeBin);
 		events.addHandler(handler);
 		
 		String eventsFile;
 		String analysis_output_file;
 		if (runId != null) {
 			eventsFile = outputDirectory + runId + ".output_events.xml.gz";
-			analysis_output_file = outputDirectory + runId + ".link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
+			if (timeBin == null) {
+				analysis_output_file = outputDirectory + runId + ".link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
+			} else {
+				analysis_output_file = outputDirectory + runId + ".link_dailyDemand_" + this.vehicleTypePrefix + "_" + timeBin.getFirst() + "-" + timeBin.getSecond() + ".csv";
+			}
 		} else {
 			eventsFile = outputDirectory + "output_events.xml.gz";
-			analysis_output_file = outputDirectory  + "link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
+			if (timeBin == null) {
+				analysis_output_file = outputDirectory  + "link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
+			} else {
+				analysis_output_file = outputDirectory + "link_dailyDemand_" + this.vehicleTypePrefix + "_" + timeBin.getFirst() + "-" + timeBin.getSecond() + ".csv";
+			}
 		}
 		
 		MatsimEventsReader reader = new MatsimEventsReader(events);

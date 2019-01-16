@@ -19,8 +19,6 @@
 
 package playground.jbischoff.taxi.setup;
 
-import javax.inject.Inject;
-
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.matsim.api.core.v01.network.Network;
@@ -32,7 +30,6 @@ import org.matsim.contrib.taxi.optimizer.rules.IdleTaxiZonalRegistry;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizer;
 import org.matsim.contrib.taxi.optimizer.rules.RuleBasedTaxiOptimizerParams;
 import org.matsim.contrib.taxi.optimizer.rules.UnplannedRequestZonalRegistry;
-import org.matsim.contrib.taxi.run.Taxi;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
 import org.matsim.contrib.zone.SquareGridSystem;
@@ -57,10 +54,9 @@ public class JbTaxiOptimizerProvider implements Provider<TaxiOptimizer> {
 	private final TravelDisutility travelDisutility;
 	private final TaxiScheduler scheduler;
 
-	@Inject
-	public JbTaxiOptimizerProvider(TaxiConfigGroup taxiCfg, @Taxi Fleet fleet,
+	public JbTaxiOptimizerProvider(TaxiConfigGroup taxiCfg, Fleet fleet,
 			@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING) Network network, MobsimTimer timer,
-			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime, @Taxi TravelDisutility travelDisutility,
+			@Named(DvrpTravelTimeModule.DVRP_ESTIMATED) TravelTime travelTime, TravelDisutility travelDisutility,
 			TaxiScheduler scheduler) {
 		this.taxiCfg = taxiCfg;
 		this.fleet = fleet;

@@ -23,12 +23,13 @@ package playground.michalm.multimodedvrp;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.DrtModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpModule;
 import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiControlerCreator;
+import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -50,8 +51,8 @@ public class RunMultiModeDvrp {
 		config.controler()
 				.setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		Controler controler = new Controler(scenario);
-		DrtControlerCreator.addDrtWithoutDvrpModuleToControler(controler);
-		TaxiControlerCreator.addTaxiWithoutDvrpModuleToControler(controler);
+		controler.addOverridingModule(new DrtModule());
+		controler.addOverridingModule(new TaxiModule());
 
 		String taxiMode = TaxiConfigGroup.get(controler.getConfig()).getMode();
 		String drtMode = DrtConfigGroup.get(controler.getConfig()).getMode();

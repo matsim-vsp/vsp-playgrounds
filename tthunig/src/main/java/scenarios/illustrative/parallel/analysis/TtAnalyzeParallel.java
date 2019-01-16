@@ -43,35 +43,35 @@ public final class TtAnalyzeParallel extends TtAbstractAnalysisTool {
 		int route = -1;
 		switch (linkEnterEvent.getLinkId().toString()) {
 		case "2_3":
-			// upper route of A-B relation
+			// north route of W-E relation
 			route = 0;
 			break;
 		case "2_7":
-			// lower route of A-B relation
+			// south route of W-E relation
 			route = 1;
 			break;
 		case "5_4":
-			// upper route of B-A relation
+			// north route of E-W relation
 			route = 2;
 			break;
 		case "5_8":
-			// lower route of B-A relation
+			// south route of E-W relation
 			route = 3;
 			break;
-		case "10_3":
-			// left route of C-D relation
+		case "10_4":
+			// east route of N-S relation
 			route = 4;
 			break;
-		case "10_4":
-			// right route of C-D relation
+		case "10_3":
+			// west route of N-S relation
 			route = 5;
 			break;
-		case "11_7":
-			// left route of D-C relation
+		case "11_8":
+			// east route of S-N relation
 			route = 6;
 			break;
-		case "11_8":
-			// right route of D-C relation
+		case "11_7":
+			// west route of S-N relation
 			route = 7;
 			break;
 		default:

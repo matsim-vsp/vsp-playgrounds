@@ -37,7 +37,6 @@ import org.matsim.contrib.signals.controller.SignalController;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
@@ -118,19 +117,17 @@ public final class FullyAdaptiveLaemmerSignalController extends AbstractSignalCo
 			switch (laemmerConfig.getStabilizationStrategy()) {
 			case HEURISTIC:
 				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				((StabStratHeuristic) stabilisator).setSignalCombinationTool(this.signalCombinationConflicts);
 				break;
 			case USE_MAX_LANECOUNT:
-				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				this.stabilisator = new StabStratMaxLaneCount(this, network, lanes);
 				break;
 			case COMBINE_SIMILAR_REGULATIONTIME:
-				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				this.stabilisator = new StabStratCombineSimilarRegulationTime(this, network, lanes);
 				break;
 			case PRIORIZE_HIGHER_POSITIONS:
-				this.stabilisator = new StabStratHeuristic(this, network, lanes);
+				this.stabilisator = new StabStratPriorizeHigherPositions(this, network, lanes);
 				break;
-			}
-			if (laemmerConfig.getStabilizationStrategy().equals(StabilizationStrategy.HEURISTIC)) {
-				((StabStratHeuristic) stabilisator).setSignalCombinationTool(this.signalCombinationConflicts);
 			}
 		} catch (Exception e) {	e.printStackTrace(); }
 	}
