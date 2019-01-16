@@ -22,31 +22,21 @@ package gunnar.wum;
 import org.apache.commons.io.FileUtils;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.PSimTravelTimeCalculator;
-import org.matsim.contrib.pseudosimulation.SwitchingMobsimProvider;
-import org.matsim.contrib.pseudosimulation.transit.FifoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.transit.FifoTransitPerformance;
-import org.matsim.contrib.pseudosimulation.transit.NoTransitEmulator;
-import org.matsim.contrib.pseudosimulation.transit.TransitEmulator;
+import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
+import org.matsim.contrib.pseudosimulation.searchacceleration.Greedo;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.mobsim.qsim.QSimProvider;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 import org.matsim.core.mobsim.qsim.components.StandardQSimComponentConfigurator;
-import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.trafficmonitoring.TravelTimeCalculator;
-import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.utils.CreatePseudoNetwork;
 import org.matsim.roadpricing.RoadPricingConfigGroup;
 import org.matsim.vehicles.VehicleCapacity;
@@ -103,8 +93,6 @@ public class WUMProductionRunner {
 
 		final boolean runLocally = false;
 
-		final String transitPrefix = "tr_";
-
 		final String configFileName;
 		if (runLocally) {
 			configFileName = FileUtils.getFile(temporaryPath, "production-scenario/config.xml").toString();
@@ -113,8 +101,8 @@ public class WUMProductionRunner {
 		}
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
-				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup());
-		// , new AccelerationConfigGroup());
+				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup(),
+				new AccelerationConfigGroup());
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -130,39 +118,27 @@ public class WUMProductionRunner {
 					"/Users/GunnarF/OneDrive - VTI/My Data/wum/data/output/transitVehiclesDifferentiated.xml.gz");
 		}
 
-		// VORSCHLAG KAI
-		// config.getModules().remove(SBBTransitConfigGroup.GROUP_NAME);
-		// config.transit().setUsingTransitInMobsim(false);
-		// config.transit().setUseTransit(true);
-
-		// >>> for acceleration >>>
-		// final StrategySettings acceptIntendedReplanningStrategySettings = new
-		// StrategySettings();
-		// acceptIntendedReplanningStrategySettings.setStrategyName(AcceptIntendedReplanningStrategy.STRATEGY_NAME);
-		// acceptIntendedReplanningStrategySettings.setWeight(0.0); // changed
-		// dynamically
-		// config.strategy().addStrategySettings(acceptIntendedReplanningStrategySettings);
-		// <<< for acceleration <<<
+		final Greedo greedo;
+		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
+			greedo = new Greedo();
+			greedo.meet(config);
+		} else {
+			greedo = null;
+		}
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
-		final Network network = scenario.getNetwork();
-		final TransitSchedule schedule = scenario.getTransitSchedule();
-		new CreatePseudoNetwork(schedule, network, transitPrefix).createNetwork();
-
 		removeModeInformation(scenario);
 		scaleTransitCapacities(scenario, config.qsim().getStorageCapFactor());
 
-		// >>> for acceleration >>>
-		// ConfigUtils.addOrGetModule(config,
-		// AccelerationConfigGroup.class).configure(scenario,
-		// ConfigUtils.addOrGetModule(config,
-		// PSimConfigGroup.class).getIterationsPerCycle());
-		// <<< for acceleration <<<
+		if (greedo != null) {
+			// Assumes all at this point existing network links to be capacitated.
+			greedo.meet(scenario);
+		}
+
+		// Now add non-capacitated transit links.
+		new CreatePseudoNetwork(scenario.getTransitSchedule(), scenario.getNetwork(), "tr_").createNetwork();
 
 		final Controler controler = new Controler(scenario);
-
-		// controler.addOverridingModule(new SwissRailRaptorModule());
-		// controler.addOverridingModule(new SBBTransitModule());
 
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
@@ -180,76 +156,9 @@ public class WUMProductionRunner {
 			}
 		});
 
-		// TODO 2019-01-13 Re-inserting pSim, for now without Greedo.
-		controler.addOverridingModule(new AbstractModule() {
-
-			@Override
-			public void install() {
-
-				this.bind(MobSimSwitcher.class);
-				this.addControlerListenerBinding().to(MobSimSwitcher.class);
-				this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
-				this.bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
-				this.bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
-
-				if (config.transit().isUseTransit()) {
-					this.bind(FifoTransitPerformance.class);
-					// final FifoTransitPerformance transitPerformance = new
-					// FifoTransitPerformance(mobSimSwitcher,
-					// scenario.getPopulation(), scenario.getTransitVehicles(),
-					// scenario.getTransitSchedule());
-					// this.bind(FifoTransitPerformance.class).toInstance(transitPerformance);
-					// this.addEventHandlerBinding().toInstance(transitPerformance);
-					this.addEventHandlerBinding().to(FifoTransitPerformance.class);
-					this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
-				} else {
-					this.bind(TransitEmulator.class).to(NoTransitEmulator.class);
-					throw new RuntimeException("WUM requires transit!");
-				}
-				
-				this.bind(QSimProvider.class);
-			}
-
-		});
-
-		// >>> for acceleration >>>
-		// controler.addOverridingModule(new AbstractModule() {
-		// @Override
-		// public void install() {
-		// // General-purpose + car-specific PSim.
-		// // final PSimConfigGroup pSimConf = ConfigUtils.addOrGetModule(config,
-		// PSimConfigGroup.class);
-		// // final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher(pSimConf,
-		// scenario);
-		// final MobSimSwitcher mobSimSwitcher = new MobSimSwitcher();
-		// this.addControlerListenerBinding().toInstance(mobSimSwitcher);
-		// this.bind(MobSimSwitcher.class).toInstance(mobSimSwitcher);
-		// this.bindMobsim().toProvider(SwitchingMobsimProvider.class);
-		// this.bind(TravelTimeCalculator.class).to(PSimTravelTimeCalculator.class);
-		// this.bind(TravelTime.class).toProvider(PSimTravelTimeCalculator.class);
-		// // this.bind(PlanCatcher.class).toInstance(new PlanCatcher());
-		//
-		// // this.bind(PSimProvider.class).toInstance(new PSimProvider(scenario,
-		// controler.getEvents()));
-		// // this.bind(PSimProvider.class);
-		//
-		// // Transit-specific PSim.
-		// final FifoTransitPerformance transitPerformance = new
-		// FifoTransitPerformance(mobSimSwitcher,
-		// scenario.getPopulation(), scenario.getTransitVehicles(),
-		// scenario.getTransitSchedule());
-		// this.bind(FifoTransitPerformance.class).toInstance(transitPerformance);
-		// this.addEventHandlerBinding().toInstance(transitPerformance);
-		// this.bind(TransitEmulator.class).to(FifoTransitEmulator.class);
-		// // Acceleration logic.
-		// this.bind(SearchAccelerator.class).in(Singleton.class);
-		// this.addControlerListenerBinding().to(SearchAccelerator.class);
-		// this.addEventHandlerBinding().to(SearchAccelerator.class);
-		// this.addPlanStrategyBinding(AcceptIntendedReplanningStrategy.STRATEGY_NAME)
-		// .toProvider(AcceptIntendedReplanningStragetyProvider.class);
-		// }
-		// });
-		// <<< for acceleration <<<
+		if (greedo != null) {
+			controler.addOverridingModule(greedo);
+		}
 
 		controler.run();
 	}

@@ -458,7 +458,6 @@ public class IHOP4ProductionRunner {
 		final Greedo greedo;
 		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
 			greedo = new Greedo();
-			greedo.setAdjustStrategyWeights(true);
 			greedo.setGreedoProgressListener(progressListener);
 			greedo.meet(config);
 		} else {

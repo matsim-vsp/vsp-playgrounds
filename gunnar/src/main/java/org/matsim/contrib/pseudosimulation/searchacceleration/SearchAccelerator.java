@@ -33,12 +33,12 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
-import org.matsim.api.core.v01.events.PersonLeavesVehicleEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
+import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
+import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.HasPlansAndId;
 import org.matsim.api.core.v01.population.Person;
@@ -91,7 +91,7 @@ import floetteroed.utilities.statisticslogging.TimeStampStatistic;
  */
 @Singleton
 public class SearchAccelerator implements StartupListener, IterationEndsListener, LinkEnterEventHandler,
-		VehicleEntersTrafficEventHandler, PersonEntersVehicleEventHandler, PersonLeavesVehicleEventHandler {
+		VehicleEntersTrafficEventHandler, PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -270,8 +270,9 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 		this.ages = new Ages(this.accelerationConfig.getAgeInertia(),
 				this.services.getScenario().getPopulation().getPersons().keySet());
-		this.slotUsageListener = new SlotUsageListener(this.services.getScenario().getPopulation(),
-				this.services.getScenario().getTransitVehicles(), this.accelerationConfig, this.ages.getWeightsView());
+		this.slotUsageListener = new SlotUsageListener(this.accelerationConfig.getTimeDiscretization(),
+				this.ages.getPersonWeights(), this.accelerationConfig.getLinkWeights(),
+				this.accelerationConfig.getTransitVehicleWeights());
 
 		this.statsWriter = new StatisticsWriter<>(
 				new File(this.services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(),
@@ -350,7 +351,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	}
 
 	@Override
-	public void handleEvent(final PersonLeavesVehicleEvent event) {
+	public void handleEvent(final VehicleLeavesTrafficEvent event) {
 		if (this.mobsimSwitcher.isQSimIteration()) {
 			this.slotUsageListener.handleEvent(event);
 		}
@@ -475,8 +476,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> lastPseudoSimSlotUsages;
 			{
 				final SlotUsageListener pSimSlotUsageListener = new SlotUsageListener(
-						this.services.getScenario().getPopulation(), this.services.getScenario().getTransitVehicles(),
-						this.accelerationConfig, this.ages.getWeightsView());
+						this.accelerationConfig.getTimeDiscretization(), this.ages.getPersonWeights(),
+						this.accelerationConfig.getLinkWeights(), this.accelerationConfig.getTransitVehicleWeights());
 				final EventsManager eventsManager = EventsUtils.createEventsManager();
 				eventsManager.addHandler(pSimSlotUsageListener);
 				final PSim pSim = new PSim(this.services.getScenario(), eventsManager, selectedHypotheticalPlans,
@@ -520,7 +521,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
 			this.ages.update(this.replanners);
-			this.slotUsageListener.setPersonWeights(this.ages.getWeightsView());
+			this.slotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
 			// this.individualReplanningResultsList =
 			// replannerIdentifier.getIndividualReplanningResultListView();
 
