@@ -111,7 +111,10 @@ public class PersonTripScenarioComparison {
     	
 		Map<String, Map<String, Coord>> switchAndCoordType2Coord = new HashMap<>();
 		Map<String, Map<Id<Person>, Integer>> switchType2agents = new HashMap<>();
-		Map<String, List<Double>> switchType2tripTT = new HashMap<>();
+		Map<String, List<Double>> switchType2tripTTwithStuckingAgents = new HashMap<>();
+		Map<String, List<Double>> switchType2tripTTwithoutStuckingAgents = new HashMap<>();
+		Map<String, List<Double>> switchType2tripBeelineSpeedWithoutStuckingAgents = new HashMap<>();
+
 		Map<String, BufferedWriter> bufferedWriter = new HashMap<>();
 		
 		bufferedWriter.put("all", IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_all_subpopulation-" + analysisSubpopulation + ".csv"));
@@ -136,14 +139,23 @@ public class PersonTripScenarioComparison {
 
 			for (String mode2 : modes) {
 
-				switchType2tripTT.put(mode2 + "2" + mode2, new ArrayList<>());
+				switchType2tripTTwithStuckingAgents.put(mode2 + "2" + mode2, new ArrayList<>());
+				switchType2tripTTwithoutStuckingAgents.put(mode2 + "2" + mode2, new ArrayList<>());
+				switchType2tripBeelineSpeedWithoutStuckingAgents.put(mode2 + "2" + mode2, new ArrayList<>());
+
 
 				if (!mode2.equals(mode)) {
 					bufferedWriter.put(mode2 + "2" + mode, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode2 + "2" + mode + "_subpopulation-" + analysisSubpopulation + ".csv"));
 					bufferedWriter.put(mode + "2" + mode2, IOUtils.getBufferedWriter( analysisOutputDirectory + "modeSwitchAnalysis_" + mode + "2" + mode2 + "_subpopulation-" + analysisSubpopulation + ".csv"));
 					
-					switchType2tripTT.put(mode2 + "2" + mode, new ArrayList<>());
-					switchType2tripTT.put(mode + "2" + mode2, new ArrayList<>());
+					switchType2tripTTwithStuckingAgents.put(mode2 + "2" + mode, new ArrayList<>());
+					switchType2tripTTwithStuckingAgents.put(mode + "2" + mode2, new ArrayList<>());
+					
+					switchType2tripTTwithoutStuckingAgents.put(mode2 + "2" + mode, new ArrayList<>());
+					switchType2tripTTwithoutStuckingAgents.put(mode + "2" + mode2, new ArrayList<>());
+					
+					switchType2tripBeelineSpeedWithoutStuckingAgents.put(mode2 + "2" + mode, new ArrayList<>());
+					switchType2tripBeelineSpeedWithoutStuckingAgents.put(mode + "2" + mode2, new ArrayList<>());
 				}
 			}
 			
@@ -286,7 +298,15 @@ public class PersonTripScenarioComparison {
 							bufferedWriter.get(modeSwitchType).newLine();
 							
 							double ttDiff = basicHandler1.getPersonId2tripNumber2travelTime().get(personId).get(tripNr) - basicHandlerToCompareWith.getPersonId2tripNumber2travelTime().get(personId).get(tripNr);
-							switchType2tripTT.get(modeSwitchType).add(ttDiff);
+							switchType2tripTTwithStuckingAgents.get(modeSwitchType).add(ttDiff);
+							
+							if (stuck0.equals("no") && stuck1.equals("no") && !mode0.equals("unknown") && !mode1.equals("unknown")) {
+								double ttDiffnoStuck = basicHandler1.getPersonId2tripNumber2travelTime().get(personId).get(tripNr) - basicHandlerToCompareWith.getPersonId2tripNumber2travelTime().get(personId).get(tripNr);
+								switchType2tripTTwithoutStuckingAgents.get(modeSwitchType).add(ttDiffnoStuck);
+								
+								double beelineSpeedDiffnoStuck = (basicHandler1.getPersonId2tripNumber2tripBeelineDistance().get(personId).get(tripNr) / basicHandler1.getPersonId2tripNumber2travelTime().get(personId).get(tripNr)) - (basicHandlerToCompareWith.getPersonId2tripNumber2tripBeelineDistance().get(personId).get(tripNr) / basicHandlerToCompareWith.getPersonId2tripNumber2travelTime().get(personId).get(tripNr));
+								switchType2tripBeelineSpeedWithoutStuckingAgents.get(modeSwitchType).add(beelineSpeedDiffnoStuck);
+							}
 						
 							Map<Id<Person>, Integer> mode2modeAgents = switchType2agents.get(modeSwitchType);
 							
@@ -338,7 +358,15 @@ public class PersonTripScenarioComparison {
 									bufferedWriter.get(modeSwitchType).newLine();
 									
 									double ttDiff = basicHandler1.getPersonId2tripNumber2travelTime().get(personId).get(tripNr) - basicHandlerToCompareWith.getPersonId2tripNumber2travelTime().get(personId).get(tripNr);
-									switchType2tripTT.get(modeSwitchType).add(ttDiff);
+									switchType2tripTTwithStuckingAgents.get(modeSwitchType).add(ttDiff);
+									
+									if (stuck0.equals("no") && stuck1.equals("no") && !mode0.equals("unknown") && !mode1.equals("unknown")) {
+										double ttDiffnoStuck = basicHandler1.getPersonId2tripNumber2travelTime().get(personId).get(tripNr) - basicHandlerToCompareWith.getPersonId2tripNumber2travelTime().get(personId).get(tripNr);
+										switchType2tripTTwithoutStuckingAgents.get(modeSwitchType).add(ttDiffnoStuck);
+										
+										double beelineSpeedDiffnoStuck = (basicHandler1.getPersonId2tripNumber2tripBeelineDistance().get(personId).get(tripNr) / basicHandler1.getPersonId2tripNumber2travelTime().get(personId).get(tripNr)) - (basicHandlerToCompareWith.getPersonId2tripNumber2tripBeelineDistance().get(personId).get(tripNr) / basicHandlerToCompareWith.getPersonId2tripNumber2travelTime().get(personId).get(tripNr));
+										switchType2tripBeelineSpeedWithoutStuckingAgents.get(modeSwitchType).add(beelineSpeedDiffnoStuck);
+									}
 								}										
 							}
 						}
@@ -717,20 +745,40 @@ public class PersonTripScenarioComparison {
 		
 		{
 			BufferedWriter aggregatedTripWriter = IOUtils.getBufferedWriter(analysisOutputDirectory  + "/modeSwitchAnalysis_aggregated_subpopulation-" + analysisSubpopulation + ".csv");
-			aggregatedTripWriter.write("trip-switch-type;number of trips (sample size); average change in trip travel time [sec]");
+			aggregatedTripWriter.write("trip-switch-type;number of trips (with stucking agents, sample size);number of trips (without stucking agents, sample size);average change in trip travel time (with stucking agents) [sec];average change in trip travel time (without stucking agents) [sec];average change in beeline speed (without stucking agents) [m/s]");
 			aggregatedTripWriter.newLine();
 			
-			for (String switchType : switchType2tripTT.keySet()) {
+			for (String switchType : switchType2tripTTwithStuckingAgents.keySet()) {
 		       
-				double trips = switchType2tripTT.get(switchType).size();
-				double diffTTSum = 0.;
-				for (Double ttDiff : switchType2tripTT.get(switchType)) {
-	        		diffTTSum += ttDiff;
+				double tripsWithStuckingAgents = switchType2tripTTwithStuckingAgents.get(switchType).size();
+				double tripsWithoutStuckingAgents = switchType2tripTTwithoutStuckingAgents.get(switchType).size();
+				
+				double diffTTSumWithStuckingAgents = 0.;
+				for (Double ttDiff : switchType2tripTTwithStuckingAgents.get(switchType)) {
+	        		diffTTSumWithStuckingAgents += ttDiff;
 	        	}
 				
-				double avgDiffTT = 0.;
-				if (trips != 0.) avgDiffTT = diffTTSum / trips;
-				aggregatedTripWriter.write(switchType + ";" + trips + ";" + avgDiffTT);
+				double diffTTSumWithoutStuckingAgents = 0.;
+				for (Double ttDiff : switchType2tripTTwithoutStuckingAgents.get(switchType)) {
+					diffTTSumWithoutStuckingAgents += ttDiff;
+	        	}
+				
+				double diffBeelineSpeedSumWithoutStuckingAgents = 0.;
+				for (Double beelineSpeedDiff : switchType2tripBeelineSpeedWithoutStuckingAgents.get(switchType)) {
+					diffBeelineSpeedSumWithoutStuckingAgents += beelineSpeedDiff;
+	        	}
+				
+				double avgDiffTTwithStuckingAgents = Double.NaN;
+				double avgDiffTTwithoutStuckingAgents = Double.NaN;
+				double avgDiffBeelineSpedWithoutStuckingAgents = Double.NaN;
+				
+				if (tripsWithStuckingAgents != 0.) avgDiffTTwithStuckingAgents = diffTTSumWithStuckingAgents / tripsWithStuckingAgents;
+				if (tripsWithoutStuckingAgents != 0.) {
+					avgDiffTTwithoutStuckingAgents = diffTTSumWithoutStuckingAgents / tripsWithoutStuckingAgents;
+					avgDiffBeelineSpedWithoutStuckingAgents = diffBeelineSpeedSumWithoutStuckingAgents / tripsWithoutStuckingAgents;
+				}
+				
+				aggregatedTripWriter.write(switchType + ";" + tripsWithStuckingAgents + ";" + tripsWithoutStuckingAgents + ";" + avgDiffTTwithStuckingAgents + ";" + avgDiffTTwithoutStuckingAgents + ";" + avgDiffBeelineSpedWithoutStuckingAgents);
 				aggregatedTripWriter.newLine();
 			}
 			
@@ -758,13 +806,13 @@ public class PersonTripScenarioComparison {
 			    	double trips = 0;
 			        double diffTTSum = 0.;
 			        
-			    	for (String switchType : switchType2tripTT.keySet()) {
+			    	for (String switchType : switchType2tripTTwithStuckingAgents.keySet()) {
 				        String fromMode = switchType.split("2")[0];
 				        String toMode = switchType.split("2")[1];
 				        
 				        if (fromMode.equals(modeA) && toMode.equals(modeB)) {
-				        	trips = switchType2tripTT.get(switchType).size();
-				        	for (Double ttDiff : switchType2tripTT.get(switchType)) {
+				        	trips = switchType2tripTTwithStuckingAgents.get(switchType).size();
+				        	for (Double ttDiff : switchType2tripTTwithStuckingAgents.get(switchType)) {
 				        		diffTTSum += ttDiff;
 				        	}
 				        }
