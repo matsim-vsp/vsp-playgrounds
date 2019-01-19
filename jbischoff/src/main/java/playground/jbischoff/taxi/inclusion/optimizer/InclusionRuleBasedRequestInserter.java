@@ -73,14 +73,14 @@ public class InclusionRuleBasedRequestInserter implements UnplannedRequestInsert
 		Iterator<TaxiRequest> reqIter = unplannedRequests.iterator();
 		while (reqIter.hasNext() && idleCount > 0) {
 			TaxiRequest req = reqIter.next();
-			boolean barrierFreeRequest = req.getPassenger().getId().toString().startsWith(INCLUSION_CUSTOMER_PREFIX)
+			boolean barrierFreeRequest = req.getPassengerId().toString().startsWith(INCLUSION_CUSTOMER_PREFIX)
 					? true : false;
 
 			Stream<Vehicle> selectedVehs = idleTaxiRegistry.findNearestVehicles(req.getFromLink().getFromNode(),
 					Integer.MAX_VALUE, barrierFreeRequest ? this::isBarrierFree : null);
 
 			if (barrierFreeRequest) {
-				// Logger.getLogger(getClass()).info("barrier free request for : "+req.getPassenger().getId()+".
+				// Logger.getLogger(getClass()).info("barrier free request for : "+req.getPassengerId()+".
 				// Assigned Vehicles: "+selectedVehs.toString());
 			}
 
