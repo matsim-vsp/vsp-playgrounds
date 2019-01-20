@@ -42,7 +42,7 @@ public class RunDrt {
 		config.checkConsistency();
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		Controler controler = DrtControlerCreator.createControler(config, false);
+		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
 		controler.addOverridingModule(new VariableAccessTransitRouterModule());
 		controler.run();
 		

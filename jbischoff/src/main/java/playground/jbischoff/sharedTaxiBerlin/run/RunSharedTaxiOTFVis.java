@@ -60,7 +60,7 @@ public class RunSharedTaxiOTFVis {
 			
 			config.controler().setRunId(runId);
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-			Controler controler = DrtControlerCreator.createControler(config, true);
+		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, true);
 			controler.run();
 	}
 }

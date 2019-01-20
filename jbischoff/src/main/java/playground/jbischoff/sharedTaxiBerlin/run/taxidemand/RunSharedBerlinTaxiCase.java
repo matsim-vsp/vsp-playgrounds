@@ -60,7 +60,8 @@ public class RunSharedBerlinTaxiCase {
 			config.controler().setLastIteration(5);
 			config.controler().setOutputDirectory("D:/runs-svn/sharedTaxi/testReb");
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-			org.matsim.core.controler.Controler controler = DrtControlerCreator.createControler(config, false);
+		org.matsim.core.controler.Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config,
+				false);
 			controler.run();
 	}
 }

@@ -60,7 +60,7 @@ public class RunSharedTaxiBatch {
 			config.controler().setRunId(runId);
 			config.controler().setOutputDirectory("D:/runs-svn/bvg_sharedTaxi/demand02/c"+capacity[c]+"/"+runId);
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-			DrtControlerCreator.createControler(config, false).run();
+			DrtControlerCreator.createControlerWithSingleModeDrt(config, false).run();
 		}
 		}
 		

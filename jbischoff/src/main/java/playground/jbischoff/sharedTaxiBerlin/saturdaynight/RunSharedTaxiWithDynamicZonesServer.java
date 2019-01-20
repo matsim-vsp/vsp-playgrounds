@@ -53,7 +53,7 @@ public class RunSharedTaxiWithDynamicZonesServer {
 		ZonalSystem zones = new ZonalSystem(JbUtils.readShapeFileAndExtractGeometry(
 				ConfigGroup.getInputFileURL(config.getContext(), "shp/berlin_grid_1500.shp").getFile(), "ID"),
 				criterion);
-		Controler controler = DrtControlerCreator.createControler(config, false);
+		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
 		ZonalBasedRequestValidator validator = new ZonalBasedRequestValidator(controler.getScenario().getNetwork(),
 				zones);
 
