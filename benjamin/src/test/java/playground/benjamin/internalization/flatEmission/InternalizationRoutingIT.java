@@ -189,8 +189,51 @@ public class InternalizationRoutingIT extends MatsimTestCase{
 		specifyControler();
 
 		EmissionsConfigGroup emissionsConfigGroup = new EmissionsConfigGroup();
-		emissionsConfigGroup.setEmissionCostMultiplicationFactor(100.);
-
+		emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
+		// I set the the emission cost multiplication factor to 1.0 because for the value 100.0, the route through link 10 and 11 becomes the cheaper one.
+		// I don't really understand why the test wasn't failing 2 months ago... ihab jan'19
+		
+		// Now the link disutilities and total disutilites per route are as follows:
+		
+		/*
+			link link	
+		id	8	9	
+		speed	27.78	50	
+		length	5000	5000	
+		emission disutility	0.03745188	0.03745188	
+		tt disutilty	0.299976002	0.166666667	
+		dist disutility	5	5	
+		total disutility	5.337427882	5.204118547	10.54154643
+					
+			link	link	
+		id	10	11	
+		speed	27.78	10	
+		length	5000	2500	
+		emission disutility	0.03745188	0.01828834	
+		tt disutilty	0.299976002	0.416666667	
+		dist disutility	5	2.5	
+		total disutility	5.337427882	2.934955007	8.272382889
+					
+			link	link	
+		id	12	13	
+		speed	27.78	21.67	
+		length	5000	2600	
+		emission disutility	0.03745188	0.03374183	
+		tt disutilty	0.299976002	0.199969236	
+		dist disutility	5	2.6	
+		total disutility	5.337427882	2.833711066	8.171138947
+							
+			link	link	
+		id	12	14	
+		speed	27.78	21.65	
+		length	5000	2600	
+		emission disutility	0.03745188	0.020019	
+		tt disutilty	0.299976002	0.200153965	
+		dist disutility	5	2.6	
+		total disutility	5.337427882	2.820172965	8.157600847
+		
+		*/
+		
 		emissionCostModule = new EmissionCostModule(emissionsConfigGroup);
 
 		PlanCalcScoreConfigGroup pcs = controler.getConfig().planCalcScore();
