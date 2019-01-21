@@ -121,7 +121,7 @@ public class TripWriter {
 	 * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
 	 * @param carrierIdString
 	 */
-	public void writeVehicleResultsSingleCarrier(String carrierIdString) {
+	public void writeTourResultsSingleCarrier(String carrierIdString) {
 		
 		String fileName = this.outputFolder + "tour_infos_" + carrierIdString + ".csv";
 		File file = new File(fileName);
@@ -287,6 +287,95 @@ public class TripWriter {
 			e.printStackTrace();
 		}
 	}
+
+	
+	/**
+	 * Writes out the information of all tours in one file. One line per tour
+	 */
+	public void writeTourResultsAllCarrier() {
+		String fileName = this.outputFolder + "total_tour_infos_per_vehicleType.csv";
+		File file = new File(fileName);
+
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			bw.write(fileName);
+			bw.newLine();
+			bw.write("____________________________________________________________________________");
+			bw.newLine();
+
+			bw.write("personId; vehType Id;distance [m] ; distance [km] ;TravelTime [s]; TravelTime [h];" +
+					"FuelConsumption[l]; Emission [t Co2];  FuelConsumptionRate[l/100m]; " +
+					"EmissionRate [g/m]; ");
+			bw.newLine();
+
+
+
+			//			KT:
+			Map<Id<Person>, Double> personId2tourDistance = this.handler.getPersonId2TourDistances();
+			Map<Id<Person>, Double> personId2tourTravelTimes = this.handler.getPersonId2TravelTimes();
+
+			Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> vehTypId2Capabilities = new TreeMap<Id<VehicleType>, VehicleTypeSpezificCapabilities>();
+
+			CarrierVehicleTypes vehicleTypes = this.handler.getVehicleTypes();
+
+			//preparation:
+			for (Id<VehicleType> vehicleTypeId : vehicleTypes.getVehicleTypes().keySet()){
+				VehicleTypeSpezificCapabilities capabilities = this.handler.getVehTypId2Capabilities().get(vehicleTypeId);
+				if (capabilities != null){
+					vehTypId2Capabilities.put(vehicleTypeId, capabilities);
+				}
+
+			}
+
+			//write results:
+			for (Id<Person> personId :personId2tourDistance.keySet()) {
+
+				Double tourDistanceMeter = personId2tourDistance.get(personId);
+				Double tourTravelTimeSec = personId2tourTravelTimes.get(personId);
+
+				Id<VehicleType> vehTypeId = null;
+
+				for (Id<VehicleType> vehTypeIdsAvail : vehicleTypes.getVehicleTypes().keySet()) {
+					if(personId.toString().contains("_"+vehTypeIdsAvail.toString()+"_")){
+						if (vehTypeIdsAvail.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//only frozen
+							vehTypeId = vehTypeIdsAvail;
+						} else { //not "frozen"
+							vehTypeId = vehTypeIdsAvail;
+						}
+					}
+				}
+				
+				if (vehTypeId == null) {
+					log.error("Vehicle type for person not defined: " + personId);
+				}
+
+				double fuelConsuptionRate = (vehTypId2Capabilities.get(vehTypeId)).getFuelConsumtion()*1000; // Usually in  l/100km
+				double emissionsRatePerMeter = vehTypId2Capabilities.get(vehTypeId).getEmissionsPerMeter(); 
+
+				bw.write(personId + ";" +
+						vehTypeId + ";" +
+						tourDistanceMeter + ";" + 
+						tourDistanceMeter/1000 + ";" +  //km
+						tourTravelTimeSec + ";" + 
+						tourTravelTimeSec/3600 + ";" + 	//h
+						tourDistanceMeter*fuelConsuptionRate/100/1000 + ";" +  // rate is in [liter/100km]
+						tourDistanceMeter*emissionsRatePerMeter /1000000 +";" + 	// CO2-Ausstoss in t (= 1Mio g)
+						fuelConsuptionRate+ ";" + 
+						emissionsRatePerMeter  
+						);
+				bw.newLine();
+
+			}	
+			
+			log.info("Output written to " + fileName);
+			bw.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+		
+
 	
 	
 	
