@@ -35,6 +35,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.greedo.Greedo;
+import org.matsim.contrib.greedo.GreedoConfigGroup;
 import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
 import org.matsim.contrib.opdyts.OpdytsConfigGroup;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.LinkEntryCountDeviationObjectiveFunction;
@@ -51,8 +53,6 @@ import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIte
 import org.matsim.contrib.opdyts.microstate.MATSimState;
 import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
-import org.matsim.contrib.pseudosimulation.searchacceleration.Greedo;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -252,9 +252,11 @@ public class IHOP4ProductionRunner {
 		measReader.setStartEndTime_s(startTime_s, endTime_s);
 		measReader.run();
 
-		final double normalizingFactor = 1.0
-				/ (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
-						+ measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
+		// final double normalizingFactor = 1.0
+		// /
+		// (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
+		// +
+		// measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
 
 		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
 				.getObjectiveFunctions()) {
@@ -456,7 +458,7 @@ public class IHOP4ProductionRunner {
 		// Greedo
 
 		final Greedo greedo;
-		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
+		if (config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
 			greedo = new Greedo();
 			greedo.setGreedoProgressListener(progressListener);
 			greedo.meet(config);

@@ -26,9 +26,9 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.contrib.greedo.Greedo;
+import org.matsim.contrib.greedo.GreedoConfigGroup;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
-import org.matsim.contrib.pseudosimulation.searchacceleration.AccelerationConfigGroup;
-import org.matsim.contrib.pseudosimulation.searchacceleration.Greedo;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -102,7 +102,7 @@ public class WUMProductionRunner {
 
 		final Config config = ConfigUtils.loadConfig(configFileName, new SwissRailRaptorConfigGroup(),
 				new SBBTransitConfigGroup(), new RoadPricingConfigGroup(), new PSimConfigGroup(),
-				new AccelerationConfigGroup());
+				new GreedoConfigGroup());
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
@@ -119,7 +119,7 @@ public class WUMProductionRunner {
 		}
 
 		final Greedo greedo;
-		if (config.getModules().containsKey(AccelerationConfigGroup.GROUP_NAME)) {
+		if (config.getModules().containsKey(GreedoConfigGroup.GROUP_NAME)) {
 			greedo = new Greedo();
 			greedo.meet(config);
 		} else {
