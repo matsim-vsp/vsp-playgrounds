@@ -1,0 +1,125 @@
+/*
+ * Copyright 2018 Gunnar Flötteröd
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * contact: gunnar.flotterod@gmail.com
+ *
+ */
+package gunnar.ihop4.sampersutilities;
+
+import java.util.LinkedList;
+
+import org.matsim.api.core.v01.events.Event;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.scoring.ScoringFunction;
+
+/**
+ *
+ * @author Gunnar Flötteröd
+ *
+ */
+public class SampersScoringFunction implements ScoringFunction {
+
+	// -------------------- CONSTANTS --------------------
+
+	private final Person person;
+	
+	private final SampersTourUtilityFunction utlFct;
+	
+	// -------------------- MEMBERS --------------------
+
+	private final LinkedList<Activity> homeActivities = new LinkedList<>();
+
+	private final LinkedList<SampersTour> tours = new LinkedList<>();
+
+	private double score = 0.0;
+	
+	private double stuckScore = 0.0;
+	
+	// -------------------- CONSTRUCTION --------------------
+
+	public SampersScoringFunction(final Person person, final SampersTourUtilityFunction utlFct) {
+		this.person = person;
+		this.utlFct = utlFct;
+	}
+
+	// --------------- IMPLEMENTATION OF SampersUtilityFunction ---------------
+
+	@Override
+	public void handleActivity(final Activity activity) {
+		if (this.homeActivities.size() == 0) {
+			// first activity of the day
+			this.homeActivities.add(activity);
+		} else if (this.tours.size() > 0) {
+			if (!this.tours.getLast().isComplete()) {
+				// tour activity
+				this.tours.getLast().addActivity(activity);
+			} else if (this.homeActivities.size() == this.tours.size()) {
+				// intermediate home activity
+				this.homeActivities.add(activity);
+			} else {
+				throw new RuntimeException("Cannot add activity.");
+			}
+		} else {
+			throw new RuntimeException("Cannot add activity.");
+		}
+	}
+
+	@Override
+	public void handleLeg(final Leg leg) {
+		if (this.homeActivities.size() > 0) {
+			if ((this.tours.size() == 0) || this.tours.getLast().isComplete()) {
+				this.tours.add(new SampersTour());
+			}
+			this.tours.getLast().addLeg(leg);
+		} else {
+			throw new RuntimeException("Cannot add leg.");
+		}
+	}
+
+	@Override
+	public void agentStuck(double time) {
+		this.stuckScore += this.utlFct.getParameters().getStuckScore();
+
+	}
+
+	@Override
+	public void addMoney(double amount) {
+		if (this.tours.size() > 0) {
+			this.tours.getLast().addCost_SEK(amount);
+		} else {
+			throw new RuntimeException("Cannot add cost.");
+		}
+	}
+	
+	@Override
+	public void handleEvent(Event event) {
+	}
+
+	@Override
+	public void finish() {
+		this.score =this.stuckScore;
+		for (SampersTour tour : this.tours) {
+			this.score += this.utlFct.getUtility(tour, this.person);
+		}
+	}
+
+	@Override
+	public double getScore() {
+		return this.score;
+	}
+}
