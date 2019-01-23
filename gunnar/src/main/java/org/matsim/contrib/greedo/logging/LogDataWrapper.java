@@ -22,7 +22,7 @@ package org.matsim.contrib.greedo.logging;
 import java.util.List;
 
 import org.matsim.contrib.greedo.ReplannerIdentifier;
-import org.matsim.contrib.greedo.SearchAccelerator;
+import org.matsim.contrib.greedo.WireGreedoIntoMATSimListener;
 
 /**
  *
@@ -31,13 +31,13 @@ import org.matsim.contrib.greedo.SearchAccelerator;
  */
 public class LogDataWrapper {
 
-	private final SearchAccelerator accelerator;
+	private final WireGreedoIntoMATSimListener accelerator;
 
 	private final ReplannerIdentifier identifier;
 
 	private final Integer driversInPseudoSim;
 
-	public LogDataWrapper(final SearchAccelerator accelerator, final ReplannerIdentifier identifier,
+	public LogDataWrapper(final WireGreedoIntoMATSimListener accelerator, final ReplannerIdentifier identifier,
 			final Integer driversInPseudoSim) {
 		this.accelerator = accelerator;
 		this.identifier = identifier;

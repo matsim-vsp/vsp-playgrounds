@@ -36,7 +36,7 @@ public class AcceptIntendedReplanningStragetyProvider implements Provider<PlanSt
 	// -------------------- MEMBERS --------------------
 
 	@Inject
-	private SearchAccelerator searchAccelerator;
+	private WireGreedoIntoMATSimListener searchAccelerator;
 
 	// -------------------- IMPLEMENTATION OF Provider --------------------
 

@@ -84,7 +84,7 @@ import floetteroed.utilities.statisticslogging.TimeStampStatistic;
  * 
  */
 @Singleton
-public class SearchAccelerator implements StartupListener, IterationEndsListener, LinkEnterEventHandler,
+public class WireGreedoIntoMATSimListener implements StartupListener, IterationEndsListener, LinkEnterEventHandler,
 		VehicleEntersTrafficEventHandler, PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
 
 	// -------------------- CONSTANTS --------------------
@@ -144,7 +144,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 	// -------------------- CONSTRUCTION --------------------
 
 	@Inject
-	public SearchAccelerator() {
+	public WireGreedoIntoMATSimListener() {
 	}
 
 	// -------------------- GETTERS, MAINLY FOR LOGGING --------------------
