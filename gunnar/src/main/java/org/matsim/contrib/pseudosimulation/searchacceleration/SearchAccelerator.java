@@ -268,7 +268,9 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		this.realizedUtilityChangeSum = new RecursiveMovingAverage(1);
 		this.utilities = new Utilities(this.accelerationConfig.getIndividualConvergenceIterations());
 
-		this.ages = new Ages(this.accelerationConfig.getAgeInertia(),
+		// FIXME Ages do not function together with ageInertia that is derived from
+		// iteration-dependent replanning rate!
+		this.ages = new Ages(1.0 - this.accelerationConfig.getInitialMeanReplanningRate(),
 				this.services.getScenario().getPopulation().getPersons().keySet());
 		this.slotUsageListener = new SlotUsageListener(this.accelerationConfig.getTimeDiscretization(),
 				this.ages.getPersonWeights(), this.accelerationConfig.getLinkWeights(),
@@ -404,6 +406,8 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 		if (this.pseudoSimIterationCnt == (ConfigUtils.addOrGetModule(this.services.getConfig(), PSimConfigGroup.class)
 				.getIterationsPerCycle() - 1)) {
 
+			final int greedoIt = this.accelerationConfig.getGreedoIteration(event.getIteration());
+
 			this.greedoProgressListener.observedLastPSimIterationWithinABlock(event.getIteration());
 
 			/*
@@ -444,8 +448,9 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 
 				this.realizedUtilityChangeSum.add(utilityStatsBeforeReplanning.currentRealizedUtilitySum
 						- utilityStatsBeforeReplanning.previousRealizedUtilitySum);
-				this.expectedUtilityChangeSumUniform
-						.add(this.accelerationConfig.getMeanReplanningRate(event.getIteration())
+				this.expectedUtilityChangeSumUniform.add( // this.accelerationConfig.getMeanReplanningRate(event.getIteration())
+						this.accelerationConfig
+								.getMeanReplanningRate(this.accelerationConfig.getGreedoIteration(event.getIteration()))
 								* (utilityStatsBeforeReplanning.previousExpectedUtilitySum
 										- utilityStatsBeforeReplanning.previousRealizedUtilitySum));
 				double previousExpectedUtilityChangeSumAcceleratedTmp = 0.0;
@@ -520,7 +525,7 @@ public class SearchAccelerator implements StartupListener, IterationEndsListener
 					this.utilities.getConvergedAgentIds(), this.utilities.getNonConvergedAgentIds(), this.ages);
 			this.replanners = replannerIdentifier.drawReplanners();
 			this.everReplanners.addAll(this.replanners);
-			this.ages.update(this.replanners);
+			this.ages.update(this.replanners, this.accelerationConfig.getAgeWeights(greedoIt + 1));
 			this.slotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
 			// this.individualReplanningResultsList =
 			// replannerIdentifier.getIndividualReplanningResultListView();

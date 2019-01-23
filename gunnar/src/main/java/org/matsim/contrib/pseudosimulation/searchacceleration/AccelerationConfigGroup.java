@@ -32,6 +32,8 @@ import org.apache.commons.math3.random.Well19937c;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.misc.StringUtils;
@@ -147,19 +149,34 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		this.replanningRateIterationExponent = replanningRateIterationExponent;
 	}
 
+	// -------------------- regularizationThreshold --------------------
+
+	private double regularizationThreshold = 0.05;
+
+	@StringGetter("regularizationThreshold")
+	public double getRegularizationThreshold() {
+		return this.regularizationThreshold;
+	}
+
+	@StringSetter("regularizationThreshold")
+	public void setRegularizationThreshold(double regularizationThreshold) {
+		this.regularizationThreshold = regularizationThreshold;
+	}
+
 	// -------------------- regularizationWeight --------------------
 
-	private double initialRegularizationWeight = 0.0;
-
-	@StringGetter("initialRegularizationWeight")
-	public double getInitialRegularizationWeight() {
-		return this.initialRegularizationWeight;
-	}
-
-	@StringSetter("initialRegularizationWeight")
-	public void setInitialRegularizationWeight(double initialRegularizationWeight) {
-		this.initialRegularizationWeight = initialRegularizationWeight;
-	}
+	// private double initialRegularizationWeight = 0.0;
+	//
+	// @StringGetter("initialRegularizationWeight")
+	// public double getInitialRegularizationWeight() {
+	// return this.initialRegularizationWeight;
+	// }
+	//
+	// @StringSetter("initialRegularizationWeight")
+	// public void setInitialRegularizationWeight(double
+	// initialRegularizationWeight) {
+	// this.initialRegularizationWeight = initialRegularizationWeight;
+	// }
 
 	// -------------------- replanningRateIterationExponent --------------------
 	//
@@ -196,22 +213,26 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	// }
 
 	// -------------------- weighting --------------------
-
-	public static enum LinkWeighting {
-		uniform, oneOverCapacity
-	};
-
-	private LinkWeighting weightingField = LinkWeighting.oneOverCapacity;
-
-	@StringGetter("linkWeighting")
-	public LinkWeighting getWeighting() {
-		return this.weightingField;
-	}
-
-	@StringSetter("linkWeighting")
-	public void setWeighting(final LinkWeighting weightingField) {
-		this.weightingField = weightingField;
-	}
+	//
+	// @Deprecated
+	// public static enum LinkWeighting {
+	// uniform, oneOverCapacity
+	// };
+	//
+	// @Deprecated
+	// private LinkWeighting weightingField = LinkWeighting.oneOverCapacity;
+	//
+	// @Deprecated
+	// @StringGetter("linkWeighting")
+	// public LinkWeighting getWeighting() {
+	// return this.weightingField;
+	// }
+	//
+	// @Deprecated
+	// @StringSetter("linkWeighting")
+	// public void setWeighting(final LinkWeighting weightingField) {
+	// this.weightingField = weightingField;
+	// }
 
 	// // -------------------- baselineReplanningRate --------------------
 	//
@@ -357,17 +378,31 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- ageInertia --------------------
 
-	private double ageInertia = 1.0;
+	// private double ageInertia = 1.0;
 
-	@StringGetter("ageInertia")
-	public double getAgeInertia() {
-		return this.ageInertia;
-	}
+	// @StringGetter("ageInertia")
+	// public double getAgeInertia(final int iteration) {
+	// return (1.0 - this.getMeanReplanningRate(iteration));
+	// }
 
-	@StringSetter("ageInertia")
-	public void setAgeInertia(final double ageInertia) {
-		this.ageInertia = ageInertia;
-	}
+	// @StringSetter("ageInertia")
+	// public void setAgeInertia(final double ageInertia) {
+	// this.ageInertia = ageInertia;
+	// }
+
+	// -------------------- criticalAge --------------------
+
+	// private int criticalAge = 20;
+
+	// @StringGetter("criticalAge")
+	// public double getCriticalAge(final int iteration) {
+	// return 1.0 / this.getMeanReplanningRate(iteration);
+	// }
+
+	// @StringSetter("criticalAge")
+	// public void setCriticalAge(final int criticalAge) {
+	// this.criticalAge = criticalAge;
+	// }
 
 	// -------------------- adjustStrategyWeights --------------------
 
@@ -385,10 +420,8 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	// --------------- cheapStrategies, expensiveStrategies ---------------
 
-	// TODO UNTESTED
-
 	// helpers
-	
+
 	private static String listToString(final List<String> list) {
 		final StringBuilder builder = new StringBuilder();
 		if (list.size() > 0) {
@@ -411,7 +444,7 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	// computationally cheap strategies
-	
+
 	private List<String> cheapStrategies = Arrays.asList("TimeAllocationMutator");
 
 	@StringGetter("cheapStrategies")
@@ -427,7 +460,7 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	public List<String> getCheapStrategyList() {
 		return this.cheapStrategies;
 	}
-	
+
 	// computationally expensive strategies
 
 	private List<String> expensiveStrategies = Arrays.asList("ReRoute", "TimeAllocationMutator_ReRoute",
@@ -527,7 +560,7 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 
 	// -------------------- MEMBERS --------------------
 
-	private int pSimIterations;
+	private Integer pSimIterations = null;
 
 	// private Network network = null; // needs to be explicitly set
 
@@ -545,15 +578,37 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	private Map<Id<Vehicle>, Double> transitVehicleWeights = null; // set in configure(..)
 
 	// keeping track of this to avoid a re-randomization
-	private List<Double> meanReplanningRates = new ArrayList<>();
+	// private List<Double> meanReplanningRates = null;
+	private double[] replanningRates = null;
 
 	// -------------------- INITIALIZATION --------------------
 
-	public void configure(final Scenario scenario, final int pSimIterations, final Set<Id<Link>> capacitatedLinkIds,
+	public void configure(final Scenario scenario, final Set<Id<Link>> capacitatedLinkIds,
 			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
 
+		// Take over some constants.
+
 		this.populationSize = scenario.getPopulation().getPersons().size();
-		this.pSimIterations = pSimIterations;
+		this.pSimIterations = ConfigUtils.addOrGetModule(scenario.getConfig(), PSimConfigGroup.class)
+				.getIterationsPerCycle();
+
+		// Pre-compute re-planning rates for all Greedo-iterations.
+
+		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
+		final int lastGreedoIt = this.getGreedoIteration(scenario.getConfig().controler().getLastIteration());
+		this.replanningRates = new double[lastGreedoIt + 1];
+		for (int greedoIt = 0; greedoIt <= this
+				.getGreedoIteration(scenario.getConfig().controler().getLastIteration()); greedoIt++) {
+			double rate = this.getInitialMeanReplanningRate()
+					* Math.pow(1.0 + greedoIt, this.getReplanningRateIterationExponent());
+			if (this.getBinomialNumberOfReplanners()) {
+				final BinomialDistribution distr = new BinomialDistribution(rng, this.populationSize, rate);
+				rate = ((double) distr.sample()) / this.populationSize;
+			}
+			this.replanningRates[greedoIt] = rate;
+		}
+
+		// Compute link weights from flow capacities.
 
 		this.linkWeights = new LinkedHashMap<>();
 		for (Id<Link> linkId : capacitatedLinkIds) {
@@ -565,6 +620,8 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 			}
 			this.linkWeights.put(link.getId(), 1.0 / cap_veh);
 		}
+
+		// Compute transit vehicle weights from person capacities.
 
 		this.transitVehicleWeights = new LinkedHashMap<>();
 		for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
@@ -580,6 +637,10 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
+
+	public int getGreedoIteration(final int matsimIteration) {
+		return matsimIteration / this.pSimIterations;
+	}
 
 	public Map<Id<Link>, Double> getLinkWeights() {
 		return this.linkWeights;
@@ -597,19 +658,62 @@ public class AccelerationConfigGroup extends ReflectiveConfigGroup {
 		return this.myTimeDiscretization;
 	}
 
-	public double getMeanReplanningRate(int iteration) {
-		final int outerIteration = iteration / this.pSimIterations;
-		while (outerIteration >= this.meanReplanningRates.size()) {
-			double rate = this.getInitialMeanReplanningRate()
-					* Math.pow(1.0 + iteration / this.pSimIterations, this.getReplanningRateIterationExponent());
-			if (this.getBinomialNumberOfReplanners()) {
-				final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
-				final BinomialDistribution distr = new BinomialDistribution(rng, this.populationSize, rate);
-				rate = ((double) distr.sample()) / this.populationSize;
-			}
-			this.meanReplanningRates.add(rate);
+	public double getMeanReplanningRate(int greedoIteration) {
+		return this.replanningRates[greedoIteration];
+		// final int outerIteration = matsimIteration / this.pSimIterations;
+		// while (outerIteration >= this.meanReplanningRates.size()) {
+		// double rate = this.getInitialMeanReplanningRate()
+		// * Math.pow(1.0 + matsimIteration / this.pSimIterations,
+		// this.getReplanningRateIterationExponent());
+		// if (this.getBinomialNumberOfReplanners()) {
+		// final RandomGenerator rng = new
+		// Well19937c(MatsimRandom.getRandom().nextLong());
+		// final BinomialDistribution distr = new BinomialDistribution(rng,
+		// this.populationSize, rate);
+		// rate = ((double) distr.sample()) / this.populationSize;
+		// }
+		// this.meanReplanningRates.add(rate);
+		// }
+		// return this.meanReplanningRates.get(outerIteration);
+	}
+
+	// TODO This is extremely inefficient for large populations. Instead of trying
+	// to use closed forms (which would reduce flexibility), this may be cached
+	// somehow.
+	// public double getReplanningStateProbability(int age) {
+	// this.getMeanReplanningRate(this.pSimIterations * age); // to make sure that
+	// the list is up-to-date
+	// double result = 1.0; // multiplicative update!
+	// for (int greedoIt = Math.max(0, this.meanReplanningRates.length - age);
+	// greedoIt < this.meanReplanningRates
+	// length; greedoIt++) {
+	// result *= (1.0 - this.meanReplanningRates[greedoIt]);
+	// }
+	// return result;
+	// }
+
+	public double[] getAgeWeights(final int greedoIt) {
+		final double[] result = new double[greedoIt + 1];
+		result[0] = 1.0;
+		for (int age = 1; age < result.length; age++) {
+			result[age] = result[age - 1] * (1.0 - this.replanningRates[greedoIt - age]);
 		}
-		return this.meanReplanningRates.get(outerIteration);
+		return result;
+
+		// final List<Double> resultList = new ArrayList<>();
+		// double proba = 1.0;
+		//
+		// this.getMeanReplanningRate(this.pSimIterations * age); // to make sure that
+		// the list is up-to-date
+		// double result = 1.0; // multiplicative update!
+		// for (int greedoIt = Math.max(0, this.meanReplanningRates.size() - age);
+		// greedoIt < this.meanReplanningRates
+		// .size(); greedoIt++) {
+		// result *= (1.0 - this.meanReplanningRates.get(greedoIt));
+		// }
+		// return result;
+		//
+		// return null;
 	}
 
 	// public double getAdaptiveRegularizationWeight(final double

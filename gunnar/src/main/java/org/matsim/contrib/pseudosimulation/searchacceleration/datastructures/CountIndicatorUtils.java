@@ -22,6 +22,7 @@ package org.matsim.contrib.pseudosimulation.searchacceleration.datastructures;
 import java.util.Collection;
 
 import org.matsim.contrib.pseudosimulation.searchacceleration.utils.SetUtils;
+import org.matsim.core.utils.collections.Tuple;
 
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.TimeDiscretization;
@@ -36,21 +37,25 @@ public class CountIndicatorUtils {
 	private CountIndicatorUtils() {
 	}
 
-	// TODO 2018-12-17 Used to be called newUnweightedCounts.
-	public static <L> DynamicData<L> newCounts(final TimeDiscretization timeDiscr,
-			final Collection<SpaceTimeIndicators<L>> allIndicators) {
-		final DynamicData<L> result = new DynamicData<L>(timeDiscr);
+	public static <L> Tuple<DynamicData<L>, DynamicData<L>>
+			// DynamicData<L>
+			newWeightedAndUnweightedCounts(final TimeDiscretization timeDiscr,
+					final Collection<SpaceTimeIndicators<L>> allIndicators) {
+		final DynamicData<L> weightedCounts = new DynamicData<L>(timeDiscr);
+		final DynamicData<L> unweightedCounts = new DynamicData<L>(timeDiscr);
 		for (SpaceTimeIndicators<L> indicators : allIndicators) {
 			for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
 				// for (L locObj : indicators.getVisitedSpaceObjects(bin)) {
 				// result.add(locObj, bin, 1.0);
 				// }
 				for (SpaceTimeIndicators<L>.Visit visit : indicators.getVisits(bin)) {
-					result.add(visit.spaceObject, bin, visit.weight);
+					weightedCounts.add(visit.spaceObject, bin, visit.weight);
+					unweightedCounts.add(visit.spaceObject, bin, 1.0);
 				}
 			}
 		}
-		return result;
+		// return weightedCounts;
+		return new Tuple<>(weightedCounts, unweightedCounts);
 	}
 
 	// public static <L> DynamicData<L> newWeightedLinkCounts(final

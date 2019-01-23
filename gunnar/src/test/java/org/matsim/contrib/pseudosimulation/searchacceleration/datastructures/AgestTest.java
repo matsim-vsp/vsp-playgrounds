@@ -53,41 +53,60 @@ public class AgestTest {
 		if (verbose) {
 			System.out.println(ages.personId2age + ", max=" + ages.maxAge);
 		}
-		Map<Id<Person>, Integer> expected = new LinkedHashMap<>();
-		expected.put(tom, 0);
-		expected.put(ben, 0);
-		expected.put(joe, 0);
-		Assert.assertEquals(expected, ages.personId2age);
+		final Map<Id<Person>, Integer> expectedAges = new LinkedHashMap<>();
+		expectedAges.put(tom, 0);
+		expectedAges.put(ben, 0);
+		expectedAges.put(joe, 0);
+		Assert.assertEquals(expectedAges, ages.personId2age);
 		Assert.assertEquals(0, ages.maxAge);
+		final Map<Id<Person>, Double> expectedWeights = new LinkedHashMap<>();
+		expectedWeights.put(tom, 1.0);
+		expectedWeights.put(ben, 1.0);
+		expectedWeights.put(joe, 1.0);
+		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
 
-		ages.update(new LinkedHashSet<>());
+		ages.update(new LinkedHashSet<>(), new double[] { 1.0, 0.5 }); // max age 1 after update
 		if (verbose) {
 			System.out.println(ages.personId2age + ", max=" + ages.maxAge);
 		}
-		expected.put(tom, 1);
-		expected.put(ben, 1);
-		expected.put(joe, 1);
-		Assert.assertEquals(expected, ages.personId2age);
+		expectedAges.put(tom, 1);
+		expectedAges.put(ben, 1);
+		expectedAges.put(joe, 1);
+		Assert.assertEquals(expectedAges, ages.personId2age);
 		Assert.assertEquals(1, ages.maxAge);
-
-		ages.update(new LinkedHashSet<>(Arrays.asList(tom, ben)));
+		expectedWeights.put(tom, 0.5);
+		expectedWeights.put(ben, 0.5);
+		expectedWeights.put(joe, 0.5);
+		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
+		
+		ages.update(new LinkedHashSet<>(Arrays.asList(tom, ben)), new double[] { 1.0, 0.5, 0.25 }); // max age 2 after
+																									// update
 		if (verbose) {
 			System.out.println(ages.personId2age + ", max=" + ages.maxAge);
 		}
-		expected.put(tom, 0);
-		expected.put(ben, 0);
-		expected.put(joe, 2);
-		Assert.assertEquals(expected, ages.personId2age);
+		expectedAges.put(tom, 0);
+		expectedAges.put(ben, 0);
+		expectedAges.put(joe, 2);
+		Assert.assertEquals(expectedAges, ages.personId2age);
 		Assert.assertEquals(2, ages.maxAge);
-
-		ages.update(new LinkedHashSet<>(Arrays.asList(joe)));
+		expectedWeights.put(tom, 1.0);
+		expectedWeights.put(ben, 1.0);
+		expectedWeights.put(joe, 0.25);
+		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
+		
+		ages.update(new LinkedHashSet<>(Arrays.asList(joe)), new double[] { 1.0, 0.5 }); // max age 1 after update
 		if (verbose) {
 			System.out.println(ages.personId2age + ", max=" + ages.maxAge);
 		}
-		expected.put(tom, 1);
-		expected.put(ben, 1);
-		expected.put(joe, 0);
-		Assert.assertEquals(expected, ages.personId2age);
+		expectedAges.put(tom, 1);
+		expectedAges.put(ben, 1);
+		expectedAges.put(joe, 0);
+		Assert.assertEquals(expectedAges, ages.personId2age);
 		Assert.assertEquals(1, ages.maxAge);
+		expectedWeights.put(tom, 0.5);
+		expectedWeights.put(ben, 0.5);
+		expectedWeights.put(joe, 1.0);
+		Assert.assertEquals(expectedWeights, ages.getPersonWeights());
+
 	}
 }

@@ -31,8 +31,9 @@ import floetteroed.utilities.EmptyIterable;
  * minimize memory usage for very sparse data. "Space" is represented by the
  * generic class L (e.g. a network link).
  * 
- * 2018-12-17: The indicators may be real-valued in order to allow for the
- * counting of weighted events.
+ * The indicators may be real-valued in order to allow for the counting of
+ * weighted events. The un-weighted (integer) number of events can still be
+ * retrieved by counting <code>Visit</code> instances.
  * 
  * @author Gunnar Flötteröd
  * 

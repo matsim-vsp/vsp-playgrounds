@@ -215,7 +215,6 @@ public class Greedo extends AbstractModule {
 		this.scenario = scenario;
 
 		ConfigUtils.addOrGetModule(this.config, AccelerationConfigGroup.class).configure(this.scenario,
-				ConfigUtils.addOrGetModule(this.config, PSimConfigGroup.class).getIterationsPerCycle(),
 				this.scenario.getNetwork().getLinks().keySet(),
 				this.scenario.getTransitVehicles().getVehicles().keySet());
 	}
