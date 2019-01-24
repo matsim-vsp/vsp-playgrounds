@@ -46,6 +46,8 @@ import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.datastructures.Utilities;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgesPercentile;
+import org.matsim.contrib.greedo.logging.AverageAge;
+import org.matsim.contrib.greedo.logging.AverageAgeWeight;
 import org.matsim.contrib.greedo.logging.DriversInPhysicalSim;
 import org.matsim.contrib.greedo.logging.DriversInPseudoSim;
 import org.matsim.contrib.greedo.logging.EffectiveReplanningRate;
@@ -55,7 +57,10 @@ import org.matsim.contrib.greedo.logging.LogDataWrapper;
 import org.matsim.contrib.greedo.logging.MeanReplanningRate;
 import org.matsim.contrib.greedo.logging.RealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.RealizedUtilitySum;
+import org.matsim.contrib.greedo.logging.UnweightedCountDifferences2;
+import org.matsim.contrib.greedo.logging.UnweightedUtilityChangeSum;
 import org.matsim.contrib.greedo.logging.WeightedCountDifferences2;
+import org.matsim.contrib.greedo.logging.WeightedUtilityChangeSum;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSim;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
@@ -185,6 +190,14 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 		return this.ages.getSortedAgesView();
 	}
 
+	public Double getAveragAge() {
+		return this.ages.getAverageAge();
+	}
+
+	public Double getAverageWeight() {
+		return this.ages.getAverageWeight();
+	}
+
 	// --------------- IMPLEMENTATION OF StartupListener ---------------
 
 	private GreedoConfigGroup greedoConfig = null;
@@ -205,15 +218,27 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 				new File(this.services.getConfig().controler().getOutputDirectory(), "acceleration.log").toString(),
 				false);
 		this.statsWriter.addSearchStatistic(new TimeStampStatistic<>());
+
 		this.statsWriter.addSearchStatistic(new DriversInPhysicalSim());
 		this.statsWriter.addSearchStatistic(new DriversInPseudoSim());
+
 		this.statsWriter.addSearchStatistic(new MeanReplanningRate());
 		this.statsWriter.addSearchStatistic(new EffectiveReplanningRate());
+
+		this.statsWriter.addSearchStatistic(new AverageAge());
+		this.statsWriter.addSearchStatistic(new AverageAgeWeight());
+
+		this.statsWriter.addSearchStatistic(new UnweightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new WeightedCountDifferences2());
+
+		this.statsWriter.addSearchStatistic(new UnweightedUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new WeightedUtilityChangeSum());
+
 		this.statsWriter.addSearchStatistic(new RealizedUtilitySum());
 		this.statsWriter.addSearchStatistic(new RealizedDeltaUtility());
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityAccelerated());
+
 		this.statsWriter.addSearchStatistic(new AgesPercentile(1));
 		this.statsWriter.addSearchStatistic(new AgesPercentile(5));
 		this.statsWriter.addSearchStatistic(new AgesPercentile(50));

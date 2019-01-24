@@ -66,6 +66,7 @@ public class ReplannerIdentifier {
 
 	private final Map<Id<Person>, Double> personId2weightedUtilityChange;
 	private final double totalWeightedUtilityChange;
+	private final double totalUnweightedUtilityChange;
 
 	private final Ages ages;
 
@@ -94,6 +95,8 @@ public class ReplannerIdentifier {
 		});
 		this.totalWeightedUtilityChange = this.personId2weightedUtilityChange.values().stream()
 				.mapToDouble(utlChange -> utlChange).sum();
+		this.totalUnweightedUtilityChange = personId2UtilityChange.values().stream().mapToDouble(utlChange -> utlChange)
+				.sum();
 
 		final DynamicData<Id<?>> currentUnweightedCounts;
 		{
@@ -118,11 +121,20 @@ public class ReplannerIdentifier {
 				this.upcomingWeightedCounts);
 
 		this.lambda = this.greedoConfig.getReplanningRate(greedoIteration);
-		this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 / this.totalWeightedUtilityChange;
+
+		this.beta = 2.0 * this.lambda * Math.sqrt(this.sumOfWeightedCountDifferences2)
+				* Math.sqrt(this.sumOfUnweightedCountDifferences2) / this.totalUnweightedUtilityChange;
 		this.delta = Math
 				.pow(this.greedoConfig.getRegularizationThreshold()
 						/ (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
-				* this.sumOfUnweightedCountDifferences2;
+				* this.sumOfWeightedCountDifferences2 / Math.pow(ages.getAverageWeight(), 2.0);
+
+		// this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 /
+		// this.totalWeightedUtilityChange;
+		// this.delta = Math
+		// .pow(this.greedoConfig.getRegularizationThreshold()
+		// / (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
+		// * this.sumOfUnweightedCountDifferences2;
 	}
 
 	// -------------------- GETTERS (FOR LOGGING) --------------------
@@ -133,6 +145,14 @@ public class ReplannerIdentifier {
 
 	public Double getSumOfWeightedCountDifferences2() {
 		return this.sumOfWeightedCountDifferences2;
+	}
+
+	public Double getSumOfUnweightedUtilityChanges() {
+		return this.sumOfUnweightedCountDifferences2;
+	}
+
+	public Double getSumOfWeightedUtilityChanges() {
+		return this.getSumOfWeightedUtilityChanges();
 	}
 
 	public Double getMeanReplanningRate() {

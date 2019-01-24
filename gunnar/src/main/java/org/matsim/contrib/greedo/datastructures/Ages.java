@@ -42,7 +42,11 @@ public class Ages {
 
 	private List<Integer> sortedAges = null;
 
-	/* package for testing */ int maxAge = 0;
+	private double averageAge;
+
+	private double averageWeight;
+
+	/* package for testing */ int maxAge;
 
 	private Map<Id<Person>, Double> personId2weight = null;
 
@@ -57,11 +61,16 @@ public class Ages {
 	// -------------------- INTERNALS --------------------
 
 	private void internalUpdate(final double[] ageWeights) {
+
 		this.sortedAges = new ArrayList<>(this.personId2age.values());
 		Collections.sort(this.sortedAges);
 		this.maxAge = this.sortedAges.get(this.sortedAges.size() - 1);
+		this.averageAge = this.sortedAges.stream().mapToDouble(age -> age).average().getAsDouble();
+
 		this.personId2weight = Collections.unmodifiableMap(this.personId2age.entrySet().stream()
 				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> ageWeights[entry.getValue()])));
+		this.averageWeight = this.personId2weight.values().stream().mapToDouble(weight -> weight).average()
+				.getAsDouble();
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -79,5 +88,13 @@ public class Ages {
 
 	public Map<Id<Person>, Double> getPersonWeights() {
 		return this.personId2weight;
+	}
+
+	public double getAverageAge() {
+		return this.averageAge;
+	}
+
+	public double getAverageWeight() {
+		return this.averageWeight;
 	}
 }

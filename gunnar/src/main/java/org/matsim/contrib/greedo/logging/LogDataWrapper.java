@@ -64,6 +64,10 @@ public class LogDataWrapper {
 		return this.identifier.getSumOfWeightedCountDifferences2();
 	}
 
+	public Double getSumOfUnweightedCountDifferences2() {
+		return this.identifier.getSumOfUnweightedCountDifferences2();
+	}
+
 	public Double getLastRealizedUtilitySum() {
 		return this.accelerator.getLastRealizedUtilitySum();
 	}
@@ -83,5 +87,21 @@ public class LogDataWrapper {
 	public List<Integer> getSortedAgesView() {
 		return this.accelerator.getSortedAgesView();
 	}
+	
+	public Double getAverageAge() {
+		return this.accelerator.getAveragAge();
+	}
+	
+	public Double getAverageWeight() {
+		return this.accelerator.getAverageWeight();
+	}
 
+	public Double getSumOfUnweightedUtilityChanges() {
+		return this.identifier.getSumOfUnweightedUtilityChanges();
+	}
+	
+	public Double getSumOfWeightedUtilityChanges() {
+		return this.identifier.getSumOfWeightedUtilityChanges();
+	}
+	
 }
