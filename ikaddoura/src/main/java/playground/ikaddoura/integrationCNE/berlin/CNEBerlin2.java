@@ -20,7 +20,7 @@
 /**
  * 
  */
-package playground.ikaddoura.integrationCNE;
+package playground.ikaddoura.integrationCNE.berlin;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +46,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.old.PersonTripCongestionNoiseAnalysisRun;
+import playground.ikaddoura.integrationCNE.CNEIntegration;
 import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.ikaddoura.moneyTravelDisutility.data.BerlinAgentFilter;
 import playground.vsp.airPollution.exposure.GridTools;

@@ -17,7 +17,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.ikaddoura.integrationCNE;
+package playground.ikaddoura.integrationCNE.munich;
 
 import java.io.File;
 import java.io.IOException;
