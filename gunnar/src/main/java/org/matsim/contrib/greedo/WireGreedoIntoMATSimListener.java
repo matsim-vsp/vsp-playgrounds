@@ -42,6 +42,7 @@ import org.matsim.api.core.v01.population.HasPlansAndId;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.greedo.datastructures.Ages;
+import org.matsim.contrib.greedo.datastructures.PopulationState;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.datastructures.Utilities;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
@@ -239,11 +240,9 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityUniform());
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityAccelerated());
 
-		this.statsWriter.addSearchStatistic(new AgesPercentile(1));
-		this.statsWriter.addSearchStatistic(new AgesPercentile(5));
-		this.statsWriter.addSearchStatistic(new AgesPercentile(50));
-		this.statsWriter.addSearchStatistic(new AgesPercentile(95));
-		this.statsWriter.addSearchStatistic(new AgesPercentile(99));
+		for (int percent = 5; percent <= 95; percent++) {
+			this.statsWriter.addSearchStatistic(new AgesPercentile(percent));
+		}
 	}
 
 	// -------------------- IMPLEMENTATION OF EventHandlers --------------------
@@ -252,16 +251,12 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 	public void reset(final int iteration) {
 		this.greedoProgressListener.callToReset_greedo(iteration);
 		this.slotUsageListener.reset(iteration);
-		// this.matsimIVMobsimUsageListener.reset(iteration);
-		// this.matsimOVMobsimUsageListener.reset(iteration);
-		// this.stopInteractionListener.reset(iteration);
 	}
 
 	@Override
 	public void handleEvent(final VehicleEntersTrafficEvent event) {
 		if (this.mobsimSwitcher.isQSimIteration()) {
 			this.slotUsageListener.handleEvent(event);
-			// this.matsimIVMobsimUsageListener.handleEvent(event);
 		}
 	}
 
@@ -269,7 +264,6 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 	public void handleEvent(final LinkEnterEvent event) {
 		if (this.mobsimSwitcher.isQSimIteration()) {
 			this.slotUsageListener.handleEvent(event);
-			// this.matsimIVMobsimUsageListener.handleEvent(event);
 		}
 	}
 
@@ -294,8 +288,7 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 
 	private int pseudoSimIterationCnt = 0;
 
-	// A safeguard.
-	private boolean nextMobsimIsExpectedToBePhysical = true;
+	private boolean nextMobsimIsExpectedToBePhysical = true; // A safeguard.
 
 	@Override
 	public void notifyIterationEnds(final IterationEndsEvent event) {
@@ -303,7 +296,7 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 		this.greedoProgressListener.callToNotifyIterationEnds_greedo(event);
 
 		if (this.mobsimSwitcher.isQSimIteration()) {
-			log.info("physical mobsim run in iteration " + event.getIteration() + " ends");
+			log.info("physical mobsim run in iteration " + event.getIteration() + " ends.");
 			if (!this.nextMobsimIsExpectedToBePhysical) {
 				throw new RuntimeException("Did not expect a physical mobsim run!");
 			}
@@ -312,7 +305,7 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 			this.lastPhysicalSlotUsages = this.slotUsageListener.getNewIndicatorView();
 			this.pseudoSimIterationCnt = 0;
 		} else {
-			log.info("pseudoSim run in iteration " + event.getIteration() + " ends");
+			log.info("pseudoSim run in iteration " + event.getIteration() + " ends.");
 			if (this.nextMobsimIsExpectedToBePhysical) {
 				throw new RuntimeException("Expected a physical mobsim run!");
 			}
@@ -371,7 +364,7 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 			/*
 			 * Execute one pSim with the full population.
 			 * 
-			 * TODO This is probably not necessary.
+			 * TODO Can probably be avoided.
 			 */
 
 			final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> lastPseudoSimSlotUsages;
@@ -403,10 +396,9 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 			 * link usage statistics that would result from a 100% re-planning rate if
 			 * network congestion did not change (lastPseudoSimLinkUsages).
 			 * 
-			 * Now solve an optimization problem that aims at balancing simulation
-			 * advancement (changing link usage patterns) and simulation stabilization
-			 * (keeping link usage patterns as they are). Most of the code below prepares
-			 * the (heuristic) solution of this problem.
+			 * Now (approximately) solve an optimization problem that aims at balancing
+			 * simulation advancement (changing link usage patterns) and simulation
+			 * stabilization (keeping link usage patterns as they are).
 			 * 
 			 */
 
@@ -414,6 +406,8 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 					this.lastPhysicalSlotUsages, lastPseudoSimSlotUsages, this.services.getScenario().getPopulation(),
 					utilityStatsBeforeReplanning.personId2currentDeltaUtility, this.ages);
 			this.replanners = replannerIdentifier.drawReplanners();
+			// Passing (greedoIt + 1) to ages.update because it will be used in the next
+			// Greedo iteration.
 			this.ages.update(this.replanners, this.greedoConfig.getAgeWeights(greedoIt + 1));
 			this.slotUsageListener.updatePersonWeights(this.ages.getPersonWeights());
 

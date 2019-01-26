@@ -19,17 +19,23 @@
  */
 package gunnar.ihop4.sampersutilities;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.Population;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.population.PersonUtils;
+import org.matsim.core.population.PopulationUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 
+import gunnar.ihop2.regent.demandreading.PopulationCreator;
 import gunnar.ihop4.sampersutilities.SampersParameterUtils.Purpose;
 
 /**
@@ -39,30 +45,41 @@ import gunnar.ihop4.sampersutilities.SampersParameterUtils.Purpose;
  */
 public class AddDistributedSampersParameters {
 
-	private Set<Purpose> allActs = new LinkedHashSet<>();
+	private final double relativeTravelTimeOverhead;
+
+	// private Set<Purpose> allActs = new LinkedHashSet<>();
 
 	private Map<Purpose, Double> act2minDur_h = new LinkedHashMap<>();
 	private Map<Purpose, Double> act2maxDur_h = new LinkedHashMap<>();
-	private Map<Purpose, Double> act2minOpens_h = new LinkedHashMap<>();
-	private Map<Purpose, Double> act2maxOpens_h = new LinkedHashMap<>();
-	private Map<Purpose, Double> act2minCloses_h = new LinkedHashMap<>();
-	private Map<Purpose, Double> act2maxCloses_h = new LinkedHashMap<>();
 
-	public AddDistributedSampersParameters() {
+	private Map<Purpose, Double> act2OpeningTime_h = new LinkedHashMap<>();
+	private Map<Purpose, Double> act2ClosingTime_h = new LinkedHashMap<>();
+	// private Map<Purpose, Double> act2minOpens_h = new LinkedHashMap<>();
+	// private Map<Purpose, Double> act2maxOpens_h = new LinkedHashMap<>();
+	// private Map<Purpose, Double> act2minCloses_h = new LinkedHashMap<>();
+	// private Map<Purpose, Double> act2maxCloses_h = new LinkedHashMap<>();
+
+	public AddDistributedSampersParameters(final double relativeTravelTimeOverhead) {
+
+		this.relativeTravelTimeOverhead = relativeTravelTimeOverhead;
 
 		this.act2minDur_h.put(Purpose.work, 4.0);
 		this.act2maxDur_h.put(Purpose.work, 10.0);
-		this.act2minOpens_h.put(Purpose.work, 6.0);
-		this.act2maxOpens_h.put(Purpose.work, 10.0);
-		this.act2minCloses_h.put(Purpose.work, 14.0);
-		this.act2maxCloses_h.put(Purpose.work, 20.0);
+		this.act2OpeningTime_h.put(Purpose.work, 7.0);
+		this.act2ClosingTime_h.put(Purpose.work, 18.0);
+		// this.act2minOpens_h.put(Purpose.work, 6.0);
+		// this.act2maxOpens_h.put(Purpose.work, 10.0);
+		// this.act2minCloses_h.put(Purpose.work, 14.0);
+		// this.act2maxCloses_h.put(Purpose.work, 20.0);
 
 		this.act2minDur_h.put(Purpose.other, 0.5);
 		this.act2maxDur_h.put(Purpose.other, 2.0);
-		this.act2minOpens_h.put(Purpose.other, 6.0);
-		this.act2maxOpens_h.put(Purpose.other, 10.0);
-		this.act2minCloses_h.put(Purpose.other, 16.0);
-		this.act2maxCloses_h.put(Purpose.other, 23.0);
+		this.act2OpeningTime_h.put(Purpose.other, 8.0);
+		this.act2ClosingTime_h.put(Purpose.other, 22.0);
+		// this.act2minOpens_h.put(Purpose.other, 6.0);
+		// this.act2maxOpens_h.put(Purpose.other, 10.0);
+		// this.act2minCloses_h.put(Purpose.other, 16.0);
+		// this.act2maxCloses_h.put(Purpose.other, 23.0);
 
 	}
 
@@ -72,28 +89,82 @@ public class AddDistributedSampersParameters {
 
 	public void enrich(final Plan plan) {
 
-		final List<Purpose> purposes = new ArrayList<>();
-		
-		for (int planElementIndex = 2; planElementIndex < plan.getPlanElements().size(); planElementIndex += 4) {
-			final Activity act = (Activity) plan.getPlanElements().get(planElementIndex);
-			final Purpose purpose = Purpose.valueOf(act.getType());
-			purposes.add(purpose);
-			
-			// TODO continue here
-			
+		// for (int planElementIndex = 2; planElementIndex <
+		// plan.getPlanElements().size(); planElementIndex += 4) {
+		// final Activity act = (Activity) plan.getPlanElements().get(planElementIndex);
+		// final Purpose purpose = Purpose.valueOf(act.getType());
+		//
+		// System.out.print("purpose = " + purpose + ", ");
+		//
+		// final Double opens_h = this.act2OpeningTime_h.get(purpose);
+		// act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.opens_h.toString(),
+		// opens_h);
+		// System.out.print("opens = " + opens_h + ", ");
+		//
+		// final Double closes_h = this.act2ClosingTime_h.get(purpose);
+		// act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.closes_h.toString(),
+		// closes_h);
+		// System.out.print("closes = " + closes_h + ", ");
+		//
+		// final Double dur_h = drawUniform(this.act2minDur_h.get(purpose),
+		// this.act2maxDur_h.get(purpose));
+		// act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.duration_h.toString(),
+		// dur_h);
+		// System.out.println("dur = " + dur_h);
+		// }
+
+		for (PlanElement pe : plan.getPlanElements()) {
+			if (pe instanceof Activity) {
+				final Activity act = (Activity) pe;
+				if (!PopulationCreator.HOME.equals(act.getType())
+						&& (!PopulationCreator.INTERMEDIATE_HOME.equals(act.getType()))) {
+					final Purpose purpose = Purpose.valueOf(act.getType());
+
+					System.out.print("purpose = " + purpose + ", ");
+
+					final Double opens_h = this.act2OpeningTime_h.get(purpose);
+					act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.opens_h.toString(),
+							opens_h);
+					System.out.print("opens = " + opens_h + ", ");
+
+					final Double closes_h = this.act2ClosingTime_h.get(purpose);
+					act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.closes_h.toString(),
+							closes_h);
+					System.out.print("closes = " + closes_h + ", ");
+
+					final Double dur_h = drawUniform(this.act2minDur_h.get(purpose), this.act2maxDur_h.get(purpose));
+					act.getAttributes().putAttribute(SampersParameterUtils.ActivityAttribute.duration_h.toString(),
+							dur_h);
+					System.out.println("dur = " + dur_h);
+				}
+			}
 		}
+	}
 
+	public void enrich(final Population population) {
+		for (Person person : population.getPersons().values()) {
 
-		
-		for (Purpose purpose : this.allActs) {
+			if (person.getAttributes()
+					.getAttribute(SampersParameterUtils.PersonAttribute.income_SEK_yr.toString()) == null) {
+				person.getAttributes().putAttribute(SampersParameterUtils.PersonAttribute.income_SEK_yr.toString(), 0);
+			}
 
-			final double dur_h = drawUniform(this.act2minDur_h.get(purpose), this.act2maxDur_h.get(purpose));
-			double opens_h = drawUniform(this.act2minOpens_h.get(purpose), this.act2maxOpens_h.get(purpose));
-			double closes_h = drawUniform(this.act2minCloses_h.get(purpose), this.act2maxCloses_h.get(purpose));
-
-			final double center_h = 0.5 * (opens_h + closes_h);
-			opens_h = Math.min(opens_h, center_h - 0.5 * dur_h);
-			closes_h = Math.max(closes_h, center_h + 0.5 * dur_h);
+			PersonUtils.removeUnselectedPlans(person);
+			this.enrich(person.getSelectedPlan());
 		}
+	}
+
+	public static void main(String[] args) {
+
+		final Config config = ConfigUtils
+				.loadConfig("/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/config.xml");
+		final Scenario scenario = ScenarioUtils.loadScenario(config);
+
+		final AddDistributedSampersParameters enricher = new AddDistributedSampersParameters(0.2);
+		enricher.enrich(scenario.getPopulation());
+
+		PopulationUtils.writePopulation(scenario.getPopulation(),
+				"/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/enriched.xml");
+
 	}
 }

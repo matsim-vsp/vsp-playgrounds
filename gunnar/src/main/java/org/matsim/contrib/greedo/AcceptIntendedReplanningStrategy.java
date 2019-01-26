@@ -22,8 +22,6 @@ package org.matsim.contrib.greedo;
 import org.matsim.api.core.v01.population.HasPlansAndId;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.ReplanningContext;
 
@@ -38,28 +36,19 @@ public class AcceptIntendedReplanningStrategy implements PlanStrategy {
 
 	public static final String STRATEGY_NAME = "AcceptIntendedReplanning";
 
-	private final WireGreedoIntoMATSimListener searchAccelerator;
+	private final WireGreedoIntoMATSimListener greedoInMATSim;
 
 	// -------------------- CONSTRUCTION --------------------
 
 	public AcceptIntendedReplanningStrategy(final WireGreedoIntoMATSimListener searchAccelerator) {
-		this.searchAccelerator = searchAccelerator;
-	}
-
-	// -------------------- IMPLEMENTATION --------------------
-
-	public static void addOwnStrategySettings(final Config config) {
-		final StrategySettings stratSets = new StrategySettings();
-		stratSets.setStrategyName(AcceptIntendedReplanningStrategy.STRATEGY_NAME);
-		stratSets.setWeight(0.0); // changed dynamically
-		config.strategy().addStrategySettings(stratSets);
+		this.greedoInMATSim = searchAccelerator;
 	}
 
 	// -------------------- IMPLEMENTATION OF PlanStrategy --------------------
 
 	@Override
 	public void run(HasPlansAndId<Plan, Person> person) {
-		this.searchAccelerator.replan(person);
+		this.greedoInMATSim.replan(person);
 	}
 
 	@Override

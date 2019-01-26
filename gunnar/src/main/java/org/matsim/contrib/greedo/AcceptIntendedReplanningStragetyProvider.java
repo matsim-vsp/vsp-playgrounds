@@ -19,8 +19,6 @@
  */
 package org.matsim.contrib.greedo;
 
-
-
 import org.matsim.core.replanning.PlanStrategy;
 
 import com.google.inject.Inject;
@@ -36,13 +34,13 @@ public class AcceptIntendedReplanningStragetyProvider implements Provider<PlanSt
 	// -------------------- MEMBERS --------------------
 
 	@Inject
-	private WireGreedoIntoMATSimListener searchAccelerator;
+	private WireGreedoIntoMATSimListener greedoInMATSim;
 
 	// -------------------- IMPLEMENTATION OF Provider --------------------
 
 	@Override
 	public PlanStrategy get() {
-		return new AcceptIntendedReplanningStrategy(this.searchAccelerator);
+		return new AcceptIntendedReplanningStrategy(this.greedoInMATSim);
 	}
 
 }

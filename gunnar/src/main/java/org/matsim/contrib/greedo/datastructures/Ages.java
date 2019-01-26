@@ -46,6 +46,8 @@ public class Ages {
 
 	private double averageWeight;
 
+	private double weightAtAverageAge;
+
 	/* package for testing */ int maxAge;
 
 	private Map<Id<Person>, Double> personId2weight = null;
@@ -71,6 +73,12 @@ public class Ages {
 				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> ageWeights[entry.getValue()])));
 		this.averageWeight = this.personId2weight.values().stream().mapToDouble(weight -> weight).average()
 				.getAsDouble();
+
+		final int averageAgeFloor = (int) Math.floor(this.averageAge);
+		final int averageAgeCeil = (int) Math.ceil(this.averageAge);
+		final double ceilWeight = this.averageAge - averageAgeFloor;
+		this.weightAtAverageAge = (1.0 - ceilWeight) * ageWeights[averageAgeFloor]
+				+ ceilWeight * ageWeights[averageAgeCeil];
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -96,5 +104,9 @@ public class Ages {
 
 	public double getAverageWeight() {
 		return this.averageWeight;
+	}
+	
+	public double getWeightAtAverageAge() {
+		return this.weightAtAverageAge;
 	}
 }

@@ -21,6 +21,7 @@ package gunnar.ihop4.sampersutilities;
 
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 
 /**
  * TODO Make sure that String instances of enums defined here are used when
@@ -53,20 +54,20 @@ public class SampersParameterUtils {
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	public static int getIncome_sek_yr(final Person person) {
-		return (Integer) person.getCustomAttributes().get(PersonAttribute.income_SEK_yr.toString());
+	public static int getIncome_SEK_yr(final Person person) {
+		return (Integer) person.getAttributes().getAttribute(PersonAttribute.income_SEK_yr.toString());
 	}
 
-	public static double getActivityDuration_min(final Activity act) {
-		return 60.0 * (Double) act.getAttributes().getAttribute(ActivityAttribute.duration_h.toString());
+	public static double getActivityDuration_min(final Attributes actAttrs) {
+		return 60.0 * (Double) actAttrs.getAttribute(ActivityAttribute.duration_h.toString());
 	}
 
-	public static double getActivityOpens_min(final Activity act) {
-		return 60.0 * (Double) act.getAttributes().getAttribute(ActivityAttribute.opens_h.toString());
+	public static double getActivityOpens_min(final Attributes actAttrs) {
+		return 60.0 * (Double) actAttrs.getAttribute(ActivityAttribute.opens_h.toString());
 	}
 
-	public static double getActivityCloses_min(final Activity act) {
-		return 60.0 * (Double) act.getAttributes().getAttribute(ActivityAttribute.closes_h.toString());
+	public static double getActivityCloses_min(final Attributes actAttrs) {
+		return 60.0 * (Double) actAttrs.getAttribute(ActivityAttribute.closes_h.toString());
 	}
 
 	public static double getActivityStart_min(final Activity act) {

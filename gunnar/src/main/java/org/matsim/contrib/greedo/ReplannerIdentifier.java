@@ -32,7 +32,6 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.greedo.datastructures.Ages;
 import org.matsim.contrib.greedo.datastructures.CountIndicatorUtils;
-import org.matsim.contrib.greedo.datastructures.ScoreUpdater;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.recipes.AccelerationRecipe;
 import org.matsim.contrib.greedo.recipes.Mah2007Recipe;
@@ -60,13 +59,13 @@ public class ReplannerIdentifier {
 	private final Map<Id<Person>, SpaceTimeIndicators<Id<?>>> personId2pseudoSimSlotUsage;
 	private final DynamicData<Id<?>> currentWeightedCounts;
 	private final DynamicData<Id<?>> upcomingWeightedCounts;
-
-	private final double sumOfUnweightedCountDifferences2;
+	
+	private final double sumOfUnweightedCountDifferences2; // TODO only for logging/debugging
 	private final double sumOfWeightedCountDifferences2;
 
 	private final Map<Id<Person>, Double> personId2weightedUtilityChange;
 	private final double totalWeightedUtilityChange;
-	private final double totalUnweightedUtilityChange;
+	private final double totalUnweightedUtilityChange; // TODO only for logging/debugging
 
 	private final Ages ages;
 
@@ -122,19 +121,11 @@ public class ReplannerIdentifier {
 
 		this.lambda = this.greedoConfig.getReplanningRate(greedoIteration);
 
-		this.beta = 2.0 * this.lambda * Math.sqrt(this.sumOfWeightedCountDifferences2)
-				* Math.sqrt(this.sumOfUnweightedCountDifferences2) / this.totalUnweightedUtilityChange;
+		this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 / this.totalWeightedUtilityChange;
 		this.delta = Math
 				.pow(this.greedoConfig.getRegularizationThreshold()
 						/ (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
-				* this.sumOfWeightedCountDifferences2 / Math.pow(ages.getAverageWeight(), 2.0);
-
-		// this.beta = 2.0 * this.lambda * this.sumOfWeightedCountDifferences2 /
-		// this.totalWeightedUtilityChange;
-		// this.delta = Math
-		// .pow(this.greedoConfig.getRegularizationThreshold()
-		// / (1.0 - this.greedoConfig.getRegularizationThreshold()), 2.0)
-		// * this.sumOfUnweightedCountDifferences2;
+				* this.sumOfWeightedCountDifferences2 / Math.pow(ages.getWeightAtAverageAge(), 2.0);
 	}
 
 	// -------------------- GETTERS (FOR LOGGING) --------------------
@@ -148,11 +139,11 @@ public class ReplannerIdentifier {
 	}
 
 	public Double getSumOfUnweightedUtilityChanges() {
-		return this.sumOfUnweightedCountDifferences2;
+		return this.totalUnweightedUtilityChange;
 	}
 
 	public Double getSumOfWeightedUtilityChanges() {
-		return this.getSumOfWeightedUtilityChanges();
+		return this.totalWeightedUtilityChange;
 	}
 
 	public Double getMeanReplanningRate() {
@@ -208,7 +199,8 @@ public class ReplannerIdentifier {
 				replanners.add(personId);
 			}
 
-			scoreUpdater.updateResiduals(replanner ? 1.0 : 0.0); // interaction residual by reference
+			// interaction residuals are updated by reference
+			scoreUpdater.updateResiduals(replanner ? 1.0 : 0.0);
 			inertiaResidual = scoreUpdater.getUpdatedInertiaResidual();
 			regularizationResidual = scoreUpdater.getUpdatedRegularizationResidual();
 			sumOfInteractionResiduals2 = scoreUpdater.getUpdatedSumOfInteractionResiduals2();

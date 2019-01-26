@@ -32,8 +32,10 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.greedo.Greedo;
 import org.matsim.contrib.greedo.GreedoConfigGroup;
@@ -70,6 +72,8 @@ import org.matsim.roadpricing.RoadPricingConfigGroup;
 import cadyts.utilities.misc.Units;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.utilities.TimeDiscretization;
+import gunnar.ihop4.sampersutilities.SampersParameterUtils;
+import gunnar.ihop4.sampersutilities.SampersScoringFunctionModule;
 import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
 
 /**
@@ -763,22 +767,66 @@ public class IHOP4ProductionRunner {
 		}
 	}
 
+	static void runWithSampersDynamics(final Config config) {
+
+		config.getModules().remove(IhopConfigGroup.GROUP_NAME);
+		config.getModules().remove(PSimConfigGroup.GROUP_NAME);
+		config.getModules().remove(GreedoConfigGroup.GROUP_NAME);
+
+		final Scenario scenario = ScenarioUtils.loadScenario(config);
+		keepOnlyStrictCarUsers(scenario);
+		
+		// >>>>> TODO FOR DEBUGGING ONLY >>>>> 
+		
+		for (Person person : scenario.getPopulation().getPersons().values()) {
+			Plan plan = person.getSelectedPlan();
+			for (PlanElement pe : plan.getPlanElements()) {
+				if (pe instanceof Activity) {
+					Activity act = (Activity) pe;
+					if ("work".equals(act.getType()) || "other".equals(act.getType())) {
+						Object opens_h = act.getAttributes().getAttribute(SampersParameterUtils.ActivityAttribute.opens_h.toString());
+						Object closes_h = act.getAttributes().getAttribute(SampersParameterUtils.ActivityAttribute.closes_h.toString());
+						Object duration_h = act.getAttributes().getAttribute(SampersParameterUtils.ActivityAttribute.duration_h.toString());
+
+						System.out.println("person = " + person);
+						System.out.println("act = " + act);
+						System.out.println("opens_h = " + opens_h);
+						System.out.println("closes_h = " + closes_h);
+						System.out.println("duration_h = " + duration_h);
+
+						if (opens_h == null || closes_h == null || duration_h == null) {
+							System.exit(0);
+						}
+					
+					}
+				}
+			}
+		}
+		
+		// <<<<< TODO FOR DEBUGGING ONLY <<<<<
+		
+
+		final Controler controler = new Controler(scenario);
+		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
+		controler.addOverridingModule(new SampersScoringFunctionModule());
+
+		controler.run();
+
+	}
+
 	public static void main(String[] args) {
 
 		final Config config = ConfigUtils.loadConfig(args[0], new RoadPricingConfigGroup());
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+
 		if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
 			throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
 		}
-
-		// if (config.getModules().containsKey(OpdytsConfigGroup.GROUP_NAME)) {
-		// calibrate(config);
-		// } else {
-		// simulate(config);
-		// }
-
 		run(config);
+
+//		config.plans().setInputFile("enriched.xml");
+//		runWithSampersDynamics(config);
 
 	}
 }

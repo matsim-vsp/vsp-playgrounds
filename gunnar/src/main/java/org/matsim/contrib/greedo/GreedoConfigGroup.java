@@ -49,8 +49,6 @@ import floetteroed.utilities.TimeDiscretization;
  */
 public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
-	// ==================== MATSim-SPECIFICS ====================
-
 	// -------------------- CONSTANTS --------------------
 
 	public static final String GROUP_NAME = "greedo";
@@ -59,6 +57,144 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	public GreedoConfigGroup() {
 		super(GROUP_NAME);
+	}
+
+	// -------------------- CONFIGURATION --------------------
+
+	// members that are set through configure(..)
+
+	private Integer populationSize = null;
+
+	private Integer pSimIterations = null;
+
+	private TimeDiscretization myTimeDiscretization = null;
+
+	private Map<Id<Link>, Double> linkWeights = null;
+
+	private Map<Id<Vehicle>, Double> transitVehicleWeights = null;
+
+	private double[] replanningRates = null;
+
+	// the (necessary) configuration
+
+	public void configure(final Scenario scenario, final Set<Id<Link>> capacitatedLinkIds,
+			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
+
+		if (scenario.getConfig().controler().getFirstIteration() != 0) {
+			throw new RuntimeException("The first iteration must be numbered as 0.");
+		}
+
+		// Take over some constants.
+
+		this.populationSize = scenario.getPopulation().getPersons().size();
+		this.pSimIterations = ConfigUtils.addOrGetModule(scenario.getConfig(), PSimConfigGroup.class)
+				.getIterationsPerCycle();
+		this.myTimeDiscretization = new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(),
+				this.getBinCnt());
+
+		// Compute link weights from flow capacities.
+
+		this.linkWeights = new LinkedHashMap<>();
+		if (capacitatedLinkIds != null) {
+			for (Id<Link> linkId : capacitatedLinkIds) {
+				final Link link = scenario.getNetwork().getLinks().get(linkId);
+				final double cap_veh_timeBin = link.getFlowCapacityPerSec() * this.getBinSize_s();
+				if (cap_veh_timeBin <= 1e-3) {
+					throw new RuntimeException("link " + link.getId() + " has capacity of " + cap_veh_timeBin
+							+ " < 0.001 veh per " + this.getBinSize_s() + " sec.");
+				}
+				this.linkWeights.put(link.getId(), 1.0 / cap_veh_timeBin);
+			}
+		}
+
+		// Compute transit vehicle weights from person capacities.
+
+		this.transitVehicleWeights = new LinkedHashMap<>();
+		if (capacitatedTransitVehicleIds != null) {
+			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
+				final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
+				final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
+				final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
+				if (cap_persons < 1e-3) {
+					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
+							+ " < 0.001 persons.");
+				}
+				this.transitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
+			}
+		}
+
+		// Pre-compute re-planning rates for all Greedo-iterations.
+
+		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
+		final int lastGreedoIt = this.getGreedoIteration(scenario.getConfig().controler().getLastIteration());
+		this.replanningRates = new double[lastGreedoIt + 1];
+		for (int greedoIt = 0; greedoIt <= lastGreedoIt; greedoIt++) {
+			double rate = this.getInitialMeanReplanningRate()
+					* Math.pow(1.0 + greedoIt, this.getReplanningRateIterationExponent());
+			if (this.getBinomialNumberOfReplanners()) {
+				final BinomialDistribution distr = new BinomialDistribution(rng, this.populationSize, rate);
+				rate = ((double) distr.sample()) / this.populationSize;
+			}
+			this.replanningRates[greedoIt] = rate;
+		}
+	}
+
+	// static package private computation functions (like this for testing)
+
+	static double[] newReplanningRates(final int lastGreedoIt, final double initialMeanReplanningRate,
+			final double replanningRateIterationExponent, final boolean binomialNumberOfReplanners,
+			final int populationSize) {
+		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
+		final double[] replanningRates = new double[lastGreedoIt + 1];
+		for (int greedoIt = 0; greedoIt <= lastGreedoIt; greedoIt++) {
+			double rate = initialMeanReplanningRate * Math.pow(1.0 + greedoIt, replanningRateIterationExponent);
+			if (binomialNumberOfReplanners) {
+				final BinomialDistribution distr = new BinomialDistribution(rng, populationSize, rate);
+				rate = ((double) distr.sample()) / populationSize;
+			}
+			replanningRates[greedoIt] = rate;
+		}
+		return replanningRates;
+	}
+
+	static double[] newAgeWeights(final int greedoIteration, final double[] replanningRates) {
+		final double[] ageWeights = new double[greedoIteration + 1];
+		ageWeights[0] = 1.0;
+		for (int age = 1; age < ageWeights.length; age++) {
+			ageWeights[age] = ageWeights[age - 1] * (1.0 - replanningRates[greedoIteration - age]);
+		}
+		return ageWeights;
+	}
+
+	// getters
+
+	public TimeDiscretization getTimeDiscretization() {
+		return this.myTimeDiscretization;
+	}
+
+	public Map<Id<Link>, Double> getLinkWeights() {
+		return this.linkWeights;
+	}
+
+	public Map<Id<Vehicle>, Double> getTransitVehicleWeights() {
+		return this.transitVehicleWeights;
+	}
+
+	public int getGreedoIteration(final int matsimIteration) {
+		return (matsimIteration / this.pSimIterations);
+	}
+
+	public double getReplanningRate(int greedoIteration) {
+		return this.replanningRates[greedoIteration];
+	}
+
+	public double[] getAgeWeights(final int greedoIteration) {
+		final double[] ageWeights = new double[greedoIteration + 1];
+		ageWeights[0] = 1.0;
+		for (int age = 1; age < ageWeights.length; age++) {
+			ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
+		}
+		return ageWeights;
 	}
 
 	// -------------------- mode --------------------
@@ -251,116 +387,5 @@ public class GreedoConfigGroup extends ReflectiveConfigGroup {
 
 	public List<String> getExpensiveStrategyList() {
 		return this.expensiveStrategies;
-	}
-
-	// ==================== SUPPLEMENTARY FUNCTIONALITY ====================
-
-	// -------------------- MEMBERS (all set in configure(..)) --------------------
-
-	private Integer populationSize = null;
-
-	private Integer pSimIterations = null;
-
-	private TimeDiscretization myTimeDiscretization = null;
-
-	private Map<Id<Link>, Double> linkWeights = null;
-
-	private Map<Id<Vehicle>, Double> transitVehicleWeights = null;
-
-	private double[] replanningRates = null;
-
-	// -------------------- CONFIGURATION --------------------
-
-	public void configure(final Scenario scenario, final Set<Id<Link>> capacitatedLinkIds,
-			final Set<Id<Vehicle>> capacitatedTransitVehicleIds) {
-
-		if (scenario.getConfig().controler().getFirstIteration() != 0) {
-			throw new RuntimeException("The first iteration must be numbered as 0.");
-		}
-
-		// Take over some constants.
-
-		this.populationSize = scenario.getPopulation().getPersons().size();
-		this.pSimIterations = ConfigUtils.addOrGetModule(scenario.getConfig(), PSimConfigGroup.class)
-				.getIterationsPerCycle();
-		this.myTimeDiscretization = new TimeDiscretization(this.getStartTime_s(), this.getBinSize_s(),
-				this.getBinCnt());
-
-		// Compute link weights from flow capacities.
-
-		this.linkWeights = new LinkedHashMap<>();
-		if (capacitatedLinkIds != null) {
-			for (Id<Link> linkId : capacitatedLinkIds) {
-				final Link link = scenario.getNetwork().getLinks().get(linkId);
-				final double cap_veh_timeBin = link.getFlowCapacityPerSec() * this.getBinSize_s();
-				if (cap_veh_timeBin <= 1e-3) {
-					throw new RuntimeException("link " + link.getId() + " has capacity of " + cap_veh_timeBin
-							+ " < 0.001 veh per " + this.getBinSize_s() + " sec.");
-				}
-				this.linkWeights.put(link.getId(), 1.0 / cap_veh_timeBin);
-			}
-		}
-
-		// Compute transit vehicle weights from person capacities.
-
-		this.transitVehicleWeights = new LinkedHashMap<>();
-		if (capacitatedTransitVehicleIds != null) {
-			for (Id<Vehicle> vehicleId : capacitatedTransitVehicleIds) {
-				final Vehicle transitVehicle = scenario.getTransitVehicles().getVehicles().get(vehicleId);
-				final VehicleCapacity capacity = transitVehicle.getType().getCapacity();
-				final double cap_persons = capacity.getSeats() + capacity.getStandingRoom();
-				if (cap_persons < 1e-3) {
-					throw new RuntimeException("vehicle " + transitVehicle.getId() + " has capacity of " + cap_persons
-							+ " < 0.001 persons.");
-				}
-				this.transitVehicleWeights.put(transitVehicle.getId(), 1.0 / cap_persons);
-			}
-		}
-
-		// Pre-compute re-planning rates for all Greedo-iterations.
-
-		final RandomGenerator rng = new Well19937c(MatsimRandom.getRandom().nextLong());
-		final int lastGreedoIt = this.getGreedoIteration(scenario.getConfig().controler().getLastIteration());
-		this.replanningRates = new double[lastGreedoIt + 1];
-		for (int greedoIt = 0; greedoIt <= lastGreedoIt; greedoIt++) {
-			double rate = this.getInitialMeanReplanningRate()
-					* Math.pow(1.0 + greedoIt, this.getReplanningRateIterationExponent());
-			if (this.getBinomialNumberOfReplanners()) {
-				final BinomialDistribution distr = new BinomialDistribution(rng, this.populationSize, rate);
-				rate = ((double) distr.sample()) / this.populationSize;
-			}
-			this.replanningRates[greedoIt] = rate;
-		}
-	}
-
-	// -------------------- IMPLEMENTATION --------------------
-
-	public TimeDiscretization getTimeDiscretization() {
-		return this.myTimeDiscretization;
-	}
-
-	public Map<Id<Link>, Double> getLinkWeights() {
-		return this.linkWeights;
-	}
-
-	public Map<Id<Vehicle>, Double> getTransitVehicleWeights() {
-		return this.transitVehicleWeights;
-	}
-
-	public int getGreedoIteration(final int matsimIteration) {
-		return (matsimIteration / this.pSimIterations);
-	}
-
-	public double getReplanningRate(int greedoIteration) {
-		return this.replanningRates[greedoIteration];
-	}
-
-	public double[] getAgeWeights(final int greedoIteration) {
-		final double[] ageWeights = new double[greedoIteration + 1];
-		ageWeights[0] = 1.0;
-		for (int age = 1; age < ageWeights.length; age++) {
-			ageWeights[age] = ageWeights[age - 1] * (1.0 - this.replanningRates[greedoIteration - age]);
-		}
-		return ageWeights;
 	}
 }

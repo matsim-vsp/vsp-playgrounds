@@ -21,6 +21,7 @@ package gunnar.ihop4.sampersutilities;
 
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 
 import gunnar.ihop4.sampersutilities.SampersParameterUtils.Purpose;
 
@@ -37,6 +38,8 @@ class SampersTour {
 
 	private Activity act = null;
 
+	private Attributes activityAttrs = null;
+	
 	private Purpose purpose = null;
 
 	private Leg secondLeg = null;
@@ -64,9 +67,10 @@ class SampersTour {
 		}
 	}
 
-	void addActivity(final Activity act) {
+	void addActivity(final Activity act, final Attributes attrs) {
 		if ((this.firstLeg != null) && (this.act == null) && (this.secondLeg == null)) {
 			this.act = act;
+			this.activityAttrs = attrs;
 			this.purpose = SampersParameterUtils.Purpose.valueOf(act.getType());
 		} else {
 			throw new RuntimeException("Cannot add an activity: " + this.buildStatus());
@@ -93,6 +97,10 @@ class SampersTour {
 
 	Activity getActivity() {
 		return this.act;
+	}
+	
+	Attributes getActivityAttrs() {
+		return this.activityAttrs;
 	}
 
 	Purpose getPurpose() {

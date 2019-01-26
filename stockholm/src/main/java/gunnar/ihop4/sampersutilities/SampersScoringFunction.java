@@ -25,7 +25,9 @@ import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.scoring.ScoringFunction;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 
 /**
  *
@@ -37,9 +39,9 @@ public class SampersScoringFunction implements ScoringFunction {
 	// -------------------- CONSTANTS --------------------
 
 	private final Person person;
-	
+
 	private final SampersTourUtilityFunction utlFct;
-	
+
 	// -------------------- MEMBERS --------------------
 
 	private final LinkedList<Activity> homeActivities = new LinkedList<>();
@@ -47,9 +49,9 @@ public class SampersScoringFunction implements ScoringFunction {
 	private final LinkedList<SampersTour> tours = new LinkedList<>();
 
 	private double score = 0.0;
-	
+
 	private double stuckScore = 0.0;
-	
+
 	// -------------------- CONSTRUCTION --------------------
 
 	public SampersScoringFunction(final Person person, final SampersTourUtilityFunction utlFct) {
@@ -57,17 +59,32 @@ public class SampersScoringFunction implements ScoringFunction {
 		this.utlFct = utlFct;
 	}
 
+	// -------------------- INTERNALS --------------------
+
+	private Attributes getActivityAttributes(final String type) {
+		for (PlanElement pe : this.person.getSelectedPlan().getPlanElements()) {
+			if (pe instanceof Activity) {
+				Activity act = (Activity) pe;
+				if (type.equals(act.getType())) {
+					return act.getAttributes();
+				}
+			}
+		}
+		return null;
+	}
+
 	// --------------- IMPLEMENTATION OF SampersUtilityFunction ---------------
 
 	@Override
 	public void handleActivity(final Activity activity) {
+
 		if (this.homeActivities.size() == 0) {
 			// first activity of the day
 			this.homeActivities.add(activity);
 		} else if (this.tours.size() > 0) {
 			if (!this.tours.getLast().isComplete()) {
 				// tour activity
-				this.tours.getLast().addActivity(activity);
+				this.tours.getLast().addActivity(activity, this.getActivityAttributes(activity.getType()));
 			} else if (this.homeActivities.size() == this.tours.size()) {
 				// intermediate home activity
 				this.homeActivities.add(activity);
@@ -99,20 +116,21 @@ public class SampersScoringFunction implements ScoringFunction {
 
 	@Override
 	public void addMoney(double amount) {
-		if (this.tours.size() > 0) {
-			this.tours.getLast().addCost_SEK(amount);
-		} else {
-			throw new RuntimeException("Cannot add cost.");
-		}
+		// FIXME !!!
+		// Logger.getLogger(SampersScoringFunction.class).warn("Ignoring money event!");
+		// if (this.tours.size() > 0) {
+		// this.tours.getLast().addCost_SEK(amount);
+		// } else {
+		// }
 	}
-	
+
 	@Override
 	public void handleEvent(Event event) {
 	}
 
 	@Override
 	public void finish() {
-		this.score =this.stuckScore;
+		this.score = this.stuckScore;
 		for (SampersTour tour : this.tours) {
 			this.score += this.utlFct.getUtility(tour, this.person);
 		}

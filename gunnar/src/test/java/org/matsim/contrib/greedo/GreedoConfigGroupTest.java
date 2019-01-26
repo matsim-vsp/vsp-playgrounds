@@ -24,7 +24,6 @@ import java.util.LinkedHashSet;
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.greedo.GreedoConfigGroup;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -48,6 +47,46 @@ public class GreedoConfigGroupTest {
 				conf.getCheapStrategies());
 		Assert.assertEquals("expStrategy1,expStrategy2,expStrategy3,expStrategy4,expStrategy5",
 				conf.getExpensiveStrategies());
+	}
+
+	@Test
+	public void testReplanningRates() {
+
+		// constant re-planning
+		double[] rates = GreedoConfigGroup.newReplanningRates(3, 0.1, 0, false, 100);
+		Assert.assertArrayEquals(new double[] { 0.1, 0.1, 0.1, 0.1 }, rates, 1e-8);
+
+		// MSA re-planning rates
+		rates = GreedoConfigGroup.newReplanningRates(3, 1.0, -1.0, false, 100);
+		Assert.assertArrayEquals(new double[] { 1.0, 1.0 / 2, 1.0 / 3, 1.0 / 4 }, rates, 1e-8);
+	}
+
+	@Test
+	public void testAges() {
+
+		// constant re-planning
+		double[] rates = new double[] { 0.1, 0.1, 0.1, 0.1 }; // max greedoIt = 3
+		double[] weights = GreedoConfigGroup.newAgeWeights(0, rates);
+		Assert.assertArrayEquals(new double[] { 1.0 }, weights, 1e-8);
+		weights = GreedoConfigGroup.newAgeWeights(1, rates);
+		Assert.assertArrayEquals(new double[] { 1.0, 0.9 }, weights, 1e-8);
+		weights = GreedoConfigGroup.newAgeWeights(2, rates);
+		Assert.assertArrayEquals(new double[] { 1.0, 0.9, 0.9 * 0.9 }, weights, 1e-8);
+		weights = GreedoConfigGroup.newAgeWeights(3, rates);
+		Assert.assertArrayEquals(new double[] { 1.0, 0.9, 0.9 * 0.9, 0.9 * 0.9 * 0.9 }, weights, 1e-8);
+
+		// MSA re-planning
+		rates = new double[] { 1.0, 1.0 / 2, 1.0 / 3, 1.0 / 4 };
+		weights = GreedoConfigGroup.newAgeWeights(0, rates);
+		Assert.assertArrayEquals(new double[] { 1.0 }, weights, 1e-8);
+		weights = GreedoConfigGroup.newAgeWeights(1, rates);
+		Assert.assertArrayEquals(new double[] { 1.0, (1.0 - rates[0]) }, weights, 1e-8);
+		weights = GreedoConfigGroup.newAgeWeights(2, rates);
+		Assert.assertArrayEquals(new double[] { 1.0, (1.0 - rates[1]), (1.0 - rates[1]) * (1.0 - rates[0]) }, weights,
+				1e-8);
+		weights = GreedoConfigGroup.newAgeWeights(3, rates);
+		Assert.assertArrayEquals(new double[] { 1.0, (1.0 - rates[2]), (1.0 - rates[2]) * (1.0 - rates[1]),
+				(1.0 - rates[2]) * (1.0 - rates[1]) * (1.0 - rates[0]) }, weights, 1e-8);
 	}
 
 	@Test

@@ -45,13 +45,13 @@ class SampersTourUtilityFunction {
 	// -------------------- INTERNALS --------------------
 
 	private double arriveEarlyTimeLoss_min(final SampersTour tour, final Person person) {
-		return Math.max(0.0, SampersParameterUtils.getActivityOpens_min(tour.getActivity())
+		return Math.max(0.0, SampersParameterUtils.getActivityOpens_min(tour.getActivityAttrs())
 				- SampersParameterUtils.getActivityStart_min(tour.getActivity()));
 	}
 
 	private double departLateTimeLoss_min(final SampersTour tour, final Person person) {
 		return Math.max(0.0, SampersParameterUtils.getActivityEnd_min(tour.getActivity())
-				- SampersParameterUtils.getActivityCloses_min(tour.getActivity()));
+				- SampersParameterUtils.getActivityCloses_min(tour.getActivityAttrs()));
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
@@ -59,11 +59,11 @@ class SampersTourUtilityFunction {
 	SampersUtilityParameters getParameters() {
 		return this.utlParams;
 	}
-	
+
 	double getUtility(final SampersTour tour, final Person person) {
 
 		final Purpose purpose = tour.getPurpose();
-		final double income_money = (double) SampersParameterUtils.getIncome_sek_yr(person);
+		final double income_money = (double) SampersParameterUtils.getIncome_SEK_yr(person);
 
 		double result = this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_money)
 				* this.arriveEarlyTimeLoss_min(tour, person)

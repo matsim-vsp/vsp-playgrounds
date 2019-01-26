@@ -24,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.matsim.contrib.greedo.ScoreUpdater;
+
 import floetteroed.utilities.Tuple;
 
 /**
@@ -41,7 +43,7 @@ import floetteroed.utilities.Tuple;
  *            the space coordinate type
  *
  */
-class SpaceTimeCounts<L> {
+public class SpaceTimeCounts<L> {
 
 	// -------------------- MEMBERS --------------------
 
@@ -50,7 +52,7 @@ class SpaceTimeCounts<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	SpaceTimeCounts(final SpaceTimeIndicators<L> parent
+	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent
 	// , final Map<?, Double> weights
 	) {
 		if (parent != null) {
@@ -95,11 +97,11 @@ class SpaceTimeCounts<L> {
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	Set<Map.Entry<Tuple<L, Integer>, Double>> entriesView() {
+	public Set<Map.Entry<Tuple<L, Integer>, Double>> entriesView() {
 		return Collections.unmodifiableSet(this.data.entrySet());
 	}
 
-	void subtract(final SpaceTimeCounts<L> other) {
+	public void subtract(final SpaceTimeCounts<L> other) {
 		for (Map.Entry<Tuple<L, Integer>, Double> otherEntry : other.data.entrySet()) {
 			this.set(otherEntry.getKey(), this.get(otherEntry.getKey()) - otherEntry.getValue());
 		}

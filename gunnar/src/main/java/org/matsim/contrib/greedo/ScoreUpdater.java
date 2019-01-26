@@ -17,11 +17,12 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo.datastructures;
+package org.matsim.contrib.greedo;
 
 import java.util.Map;
 
-import org.matsim.contrib.greedo.GreedoConfigGroup;
+import org.matsim.contrib.greedo.datastructures.SpaceTimeCounts;
+import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.Tuple;
@@ -59,19 +60,9 @@ public class ScoreUpdater<L> {
 
 	private final double scoreChangeIfOne;
 
-	// private final double greedyScoreChangeIfOne;
-
-	// private final double greedyScoreChangeIfZero;
-
 	private boolean residualsUpdated = false;
 
-	// private final double deltaForUniformReplanning;
-
 	private double sumOfInteractionResiduals2;
-
-	// public final boolean wouldBeUniformReplanner;
-
-	// public final boolean wouldBeGreedyReplanner;
 
 	final double meanLambda;
 
@@ -80,7 +71,6 @@ public class ScoreUpdater<L> {
 	// -------------------- CONSTRUCTION --------------------
 
 	public ScoreUpdater(final SpaceTimeIndicators<L> currentIndicators, final SpaceTimeIndicators<L> upcomingIndicators,
-			// final Map<Id<?>, Double> weights,
 			final double meanLambda, final double ageWeight, final double beta, final double delta,
 			final DynamicData<L> interactionResiduals, final double inertiaResidual,
 			final double regularizationResidual, final GreedoConfigGroup replParams,
@@ -100,10 +90,8 @@ public class ScoreUpdater<L> {
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
 
-		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators); // , weights); //
-																						// replParams.getLinkWeightView());
-		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators)); // , weights)); //
-																							// replParams.getLinkWeightView()));
+		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators);
+		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators));
 
 		// Update the residuals.
 
@@ -117,8 +105,6 @@ public class ScoreUpdater<L> {
 			double oldResidual = this.interactionResiduals.getBinValue(spaceObj, timeBin);
 			double newResidual = oldResidual - meanLambda * weightedIndividualChange;
 			this.interactionResiduals.put(spaceObj, timeBin, newResidual);
-			// this.interactionResiduals.add(spaceObj, timeBin, -meanLambda *
-			// weightedIndividualChange);
 			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
 
@@ -159,26 +145,6 @@ public class ScoreUpdater<L> {
 				+ delta * (regularizationIfOne - regularizationIfMean);
 		this.scoreChangeIfZero = (interactionIfZero - interactionIfMean) + beta * (inertiaIfZero - inertiaIfMean)
 				+ delta * (regularizationIfZero - regularizationIfMean);
-
-		// this.scoreChangeIfOne = greedyScoreChangeIfOne; // + delta *
-		// (regularizationIfOne - regularizationIfMean);
-		// this.scoreChangeIfZero = greedyScoreChangeIfZero; // + delta *
-		// (regularizationIfZero - regularizationIfMean);
-
-		// final double deltaInteraction = interactionIfOne - interactionIfZero;
-		// final double deltaInertia = inertiaIfOne - inertiaIfZero;
-		// final double deltaRegularization = regularizationIfOne -
-		// regularizationIfZero;
-
-		// final double deltaRegularizationWellBehaved =
-		// Math.signum(deltaRegularization)
-		// * Math.max(1.0, Math.abs(deltaRegularization));
-		// this.deltaForUniformReplanning = -(deltaInteraction + beta * deltaInertia) /
-		// deltaRegularizationWellBehaved;
-
-		// this.wouldBeUniformReplanner = (this.regularizationResidual <= -0.5);
-		// this.wouldBeGreedyReplanner = (this.greedyScoreChangeIfOne <=
-		// this.greedyScoreChangeIfZero);
 	}
 
 	private double expectedInteraction(final double lambda, final double sumOfWeightedIndividualChanges2,
@@ -213,8 +179,6 @@ public class ScoreUpdater<L> {
 			final double oldResidual = this.interactionResiduals.getBinValue(spaceObj, timeBin);
 			final double newResidual = oldResidual + newLambda * entry.getValue();
 			this.interactionResiduals.put(spaceObj, timeBin, newResidual);
-			// this.interactionResiduals.add(spaceObj, timeBin, newLambda *
-			// entry.getValue());
 			this.sumOfInteractionResiduals2 += newResidual * newResidual - oldResidual * oldResidual;
 		}
 		this.inertiaResidual += (1.0 - newLambda) * this.individualUtilityChange;
@@ -237,26 +201,6 @@ public class ScoreUpdater<L> {
 		return this.regularizationResidual;
 	}
 
-	public double getScoreChangeIfOne() {
-		return this.scoreChangeIfOne;
-	}
-
-	public double getScoreChangeIfZero() {
-		return this.scoreChangeIfZero;
-	}
-
-	// public double getGreedyScoreChangeIfOne() {
-	// return this.greedyScoreChangeIfOne;
-	// }
-
-	// public double getGreedyScoreChangeIfZero() {
-	// return this.greedyScoreChangeIfZero;
-	// }
-
-	// public Double getCriticalDelta() {
-	// return this.deltaForUniformReplanning;
-	// }
-
 	public double getUpdatedSumOfInteractionResiduals2() {
 		if (!this.residualsUpdated) {
 			throw new RuntimeException("Residuals have not yet updated.");
@@ -264,4 +208,11 @@ public class ScoreUpdater<L> {
 		return this.sumOfInteractionResiduals2;
 	}
 
+	public double getScoreChangeIfOne() {
+		return this.scoreChangeIfOne;
+	}
+
+	public double getScoreChangeIfZero() {
+		return this.scoreChangeIfZero;
+	}
 }

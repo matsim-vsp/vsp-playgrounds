@@ -17,7 +17,7 @@
  * contact: gunnar.flotterod@gmail.com
  *
  */
-package org.matsim.contrib.greedo;
+package org.matsim.contrib.greedo.datastructures;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -37,7 +37,7 @@ import org.matsim.core.population.PopulationUtils;
  * @author Gunnar Flötteröd
  * 
  */
-class PopulationState {
+public class PopulationState {
 
 	// -------------------- MEMBERS --------------------
 
