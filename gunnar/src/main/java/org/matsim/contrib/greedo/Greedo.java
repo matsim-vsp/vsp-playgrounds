@@ -263,9 +263,9 @@ public class Greedo extends AbstractModule {
 		}
 
 		this.bind(GreedoProgressListener.class).toInstance(this.greedoProgressListener);
-		this.bind(WireGreedoIntoMATSimListener.class).in(Singleton.class);
-		this.addControlerListenerBinding().to(WireGreedoIntoMATSimListener.class);
-		this.addEventHandlerBinding().to(WireGreedoIntoMATSimListener.class);
+		this.bind(WireGreedoIntoMATSimControlerListener.class).in(Singleton.class);
+		this.addControlerListenerBinding().to(WireGreedoIntoMATSimControlerListener.class);
+		this.addEventHandlerBinding().to(WireGreedoIntoMATSimControlerListener.class);
 		this.addPlanStrategyBinding(AcceptIntendedReplanningStrategy.STRATEGY_NAME)
 				.toProvider(AcceptIntendedReplanningStragetyProvider.class);
 	}

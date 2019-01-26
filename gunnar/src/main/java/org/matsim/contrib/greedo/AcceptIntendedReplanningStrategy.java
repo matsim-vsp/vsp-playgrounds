@@ -36,11 +36,11 @@ public class AcceptIntendedReplanningStrategy implements PlanStrategy {
 
 	public static final String STRATEGY_NAME = "AcceptIntendedReplanning";
 
-	private final WireGreedoIntoMATSimListener greedoInMATSim;
+	private final WireGreedoIntoMATSimControlerListener greedoInMATSim;
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public AcceptIntendedReplanningStrategy(final WireGreedoIntoMATSimListener searchAccelerator) {
+	public AcceptIntendedReplanningStrategy(final WireGreedoIntoMATSimControlerListener searchAccelerator) {
 		this.greedoInMATSim = searchAccelerator;
 	}
 

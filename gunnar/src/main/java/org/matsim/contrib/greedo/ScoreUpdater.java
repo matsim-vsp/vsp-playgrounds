@@ -56,6 +56,8 @@ public class ScoreUpdater<L> {
 
 	private final SpaceTimeCounts<L> individualWeightedChanges;
 
+	// private final SpaceTimeCounts<L> individualUnweightedChanges;
+
 	private final double scoreChangeIfZero;
 
 	private final double scoreChangeIfOne;
@@ -89,9 +91,20 @@ public class ScoreUpdater<L> {
 		 * One has to go beyond 0/1 indicator arithmetics in the following because the
 		 * same vehicle may enter the same link multiple times during one time bin.
 		 */
-
 		this.individualWeightedChanges = new SpaceTimeCounts<L>(upcomingIndicators);
 		this.individualWeightedChanges.subtract(new SpaceTimeCounts<>(currentIndicators));
+		// {
+		// final Tuple<SpaceTimeCounts<L>, SpaceTimeCounts<L>>
+		// upcomingWeighedAndUnweighted = SpaceTimeCounts
+		// .newWeightedAndUnweighted(upcomingIndicators);
+		// this.individualWeightedChanges = upcomingWeighedAndUnweighted.getA();
+		// this.individualUnweightedChanges = upcomingWeighedAndUnweighted.getB();
+		// final Tuple<SpaceTimeCounts<L>, SpaceTimeCounts<L>>
+		// currentWeighedAndUnweighted = SpaceTimeCounts
+		// .newWeightedAndUnweighted(currentIndicators);
+		// this.individualWeightedChanges.subtract(currentWeighedAndUnweighted.getA());
+		// this.individualUnweightedChanges.subtract(currentWeighedAndUnweighted.getB());
+		// }
 
 		// Update the residuals.
 
@@ -186,6 +199,14 @@ public class ScoreUpdater<L> {
 	}
 
 	// -------------------- GETTERS --------------------
+
+	// public SpaceTimeCounts<L> getIndividualWeightedChanges() {
+	// return this.individualWeightedChanges;
+	// }
+
+	// public SpaceTimeCounts<L> getIndividualUnweightedChanges() {
+	// return this.individualUnweightedChanges;
+	// }
 
 	public double getUpdatedInertiaResidual() {
 		if (!this.residualsUpdated) {

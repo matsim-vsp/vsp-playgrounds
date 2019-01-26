@@ -26,18 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class MeanReplanningRate implements Statistic<LogDataWrapper> {
+public class UnweightedReplannerUtilityChangeSum implements Statistic<LogDataWrapper> {
 
-	public static final String LABEL = "MeanReplanningRate";
-	
 	@Override
 	public String label() {
-		return LABEL;
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getMeanReplanningRate());
+		return Statistic.toString(arg0.getUnweightedReplannerUtilityChangeSum());
 	}
 
 }

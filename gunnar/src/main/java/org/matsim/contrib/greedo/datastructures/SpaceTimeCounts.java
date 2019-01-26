@@ -52,26 +52,41 @@ public class SpaceTimeCounts<L> {
 
 	// -------------------- CONSTRUCTION --------------------
 
-	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent
-	// , final Map<?, Double> weights
-	) {
+	public SpaceTimeCounts(final SpaceTimeIndicators<L> parent) {
 		if (parent != null) {
 			for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
-				// for (L spaceObj : parent.getVisitedSpaceObjects(timeBin)) {
-				// this.add(this.newKey(spaceObj, timeBin), weights.get(spaceObj));
-				// }
 				for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
-					this.add(this.newKey(visit.spaceObject, timeBin), visit.weight);
+					this.add(newKey(visit.spaceObject, timeBin), visit.weight);
 				}
 			}
 		}
 	}
 
-	// -------------------- INTERNALS --------------------
-
-	private Tuple<L, Integer> newKey(final L spaceObj, final Integer timeBin) {
+	private static <L> Tuple<L, Integer> newKey(final L spaceObj, final Integer timeBin) {
 		return new Tuple<>(spaceObj, timeBin);
 	}
+
+	// private SpaceTimeCounts() {
+	// }
+
+	// public static <L> Tuple<SpaceTimeCounts<L>, SpaceTimeCounts<L>>
+	// newWeightedAndUnweighted(
+	// final SpaceTimeIndicators<L> parent) {
+	// final SpaceTimeCounts<L> weighted = new SpaceTimeCounts<>();
+	// final SpaceTimeCounts<L> unweighted = new SpaceTimeCounts<>();
+	// if (parent != null) {
+	// for (int timeBin = 0; timeBin < parent.getTimeBinCnt(); timeBin++) {
+	// for (SpaceTimeIndicators<L>.Visit visit : parent.getVisits(timeBin)) {
+	// final Tuple<L, Integer> key = new Tuple<>(visit.spaceObject, timeBin);
+	// weighted.add(key, visit.weight);
+	// unweighted.add(key, 1.0);
+	// }
+	// }
+	// }
+	// return new Tuple<>(weighted, unweighted);
+	// }
+
+	// -------------------- INTERNALS --------------------
 
 	private Double get(final Tuple<L, Integer> key) {
 		if (this.data.containsKey(key)) {

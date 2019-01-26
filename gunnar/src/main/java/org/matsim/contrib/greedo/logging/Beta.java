@@ -26,19 +26,17 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class AverageDeltaForUniformReplanning implements Statistic<LogDataWrapper> {
-
-	public AverageDeltaForUniformReplanning() {
-	}
+public class Beta implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return "AvgCritDelta";
+		return Beta.class.getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return "DEPRECATED"; // return Statistic.toString(arg0.getAverageDeltaForUniformReplanning());
+		return Statistic.toString(arg0.getBeta());
 	}
+
 }
+

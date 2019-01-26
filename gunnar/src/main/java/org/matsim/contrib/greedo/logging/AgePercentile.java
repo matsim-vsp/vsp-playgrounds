@@ -19,6 +19,11 @@
  */
 package org.matsim.contrib.greedo.logging;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
+import java.util.List;
+
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
@@ -26,19 +31,28 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class ShareScoreImprovingReplanners implements Statistic<LogDataWrapper> {
+public class AgePercentile implements Statistic<LogDataWrapper> {
 
-	public static final String LABEL = "ShareScoreImprovingReplanners";
+	private final int percent;
 
-	@Override
-	public String label() {
-		return LABEL;
+	public AgePercentile(final int percent) {
+		this.percent = percent;
 	}
 
 	@Override
-	public String value(LogDataWrapper arg0) {
-		return null; // Statistic.toString(arg0.getShareOfScoreImprovingReplanners());
+	public String label() {
+		return AgePercentile.class.getSimpleName() + this.percent;
+	}
+
+	@Override
+	public String value(final LogDataWrapper logData) {
+		final List<Integer> ages = logData.getSortedAgesView();
+		if (ages == null) {
+			return Statistic.toString(null);
+		} else {
+			final int index = max(0, min(ages.size() - 1, (int) ((this.percent / 100.0) * ages.size())));
+			return Statistic.toString(ages.get(index));
+		}
 	}
 
 }

@@ -26,20 +26,17 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class DeltaForUniformReplanning implements Statistic<LogDataWrapper> {
+public class TotalUnweightedUtilityChangeSum implements Statistic<LogDataWrapper> {
 
-	public DeltaForUniformReplanning() {
-	}
-	
 	@Override
 	public String label() {
-		return "CritDelta";
+		return TotalUnweightedUtilityChangeSum.class.getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return "DEPRECATED"; // return Statistic.toString(arg0.getDeltaForUniformReplanning());
+		return Statistic.toString(arg0.getSumOfUnweightedUtilityChanges());
 	}
+
 }
 

@@ -46,22 +46,32 @@ import org.matsim.contrib.greedo.datastructures.PopulationState;
 import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.datastructures.Utilities;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
-import org.matsim.contrib.greedo.logging.AgesPercentile;
+import org.matsim.contrib.greedo.logging.AgePercentile;
 import org.matsim.contrib.greedo.logging.AverageAge;
 import org.matsim.contrib.greedo.logging.AverageAgeWeight;
+import org.matsim.contrib.greedo.logging.Beta;
+import org.matsim.contrib.greedo.logging.Delta;
 import org.matsim.contrib.greedo.logging.DriversInPhysicalSim;
 import org.matsim.contrib.greedo.logging.DriversInPseudoSim;
-import org.matsim.contrib.greedo.logging.EffectiveReplanningRate;
 import org.matsim.contrib.greedo.logging.ExpectedDeltaUtilityAccelerated;
 import org.matsim.contrib.greedo.logging.ExpectedDeltaUtilityUniform;
+import org.matsim.contrib.greedo.logging.LambdaBar;
+import org.matsim.contrib.greedo.logging.LambdaRealized;
 import org.matsim.contrib.greedo.logging.LogDataWrapper;
-import org.matsim.contrib.greedo.logging.MeanReplanningRate;
 import org.matsim.contrib.greedo.logging.RealizedDeltaUtility;
 import org.matsim.contrib.greedo.logging.RealizedUtilitySum;
-import org.matsim.contrib.greedo.logging.UnweightedCountDifferences2;
-import org.matsim.contrib.greedo.logging.UnweightedUtilityChangeSum;
-import org.matsim.contrib.greedo.logging.WeightedCountDifferences2;
-import org.matsim.contrib.greedo.logging.WeightedUtilityChangeSum;
+import org.matsim.contrib.greedo.logging.SumOfUnweightedCountDifferences2;
+import org.matsim.contrib.greedo.logging.SumOfUnweightedNonReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.SumOfUnweightedReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.SumOfWeightedCountDifferences2;
+import org.matsim.contrib.greedo.logging.SumOfWeightedNonReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.SumOfWeightedReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.TotalUnweightedUtilityChangeSum;
+import org.matsim.contrib.greedo.logging.TotalWeightedUtilityChangeSum;
+import org.matsim.contrib.greedo.logging.UnweightedNonReplannerUtilityChangeSum;
+import org.matsim.contrib.greedo.logging.UnweightedReplannerUtilityChangeSum;
+import org.matsim.contrib.greedo.logging.WeightedNonReplannerUtilityChangeSum;
+import org.matsim.contrib.greedo.logging.WeightedReplannerUtilityChangeSum;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSim;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
@@ -90,8 +100,9 @@ import floetteroed.utilities.statisticslogging.TimeStampStatistic;
  * 
  */
 @Singleton
-public class WireGreedoIntoMATSimListener implements StartupListener, IterationEndsListener, LinkEnterEventHandler,
-		VehicleEntersTrafficEventHandler, PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
+public class WireGreedoIntoMATSimControlerListener
+		implements StartupListener, IterationEndsListener, LinkEnterEventHandler, VehicleEntersTrafficEventHandler,
+		PersonEntersVehicleEventHandler, VehicleLeavesTrafficEventHandler {
 
 	// -------------------- CONSTANTS --------------------
 
@@ -150,7 +161,7 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 	// -------------------- CONSTRUCTION --------------------
 
 	@Inject
-	public WireGreedoIntoMATSimListener() {
+	public WireGreedoIntoMATSimControlerListener() {
 	}
 
 	// -------------------- GETTERS, MAINLY FOR LOGGING --------------------
@@ -163,7 +174,7 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 		}
 	}
 
-	public Double getEffectiveReplanningRate() {
+	public Double getLambdaRealized() {
 		if (this.replanners == null) {
 			return null;
 		} else {
@@ -223,17 +234,29 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 		this.statsWriter.addSearchStatistic(new DriversInPhysicalSim());
 		this.statsWriter.addSearchStatistic(new DriversInPseudoSim());
 
-		this.statsWriter.addSearchStatistic(new MeanReplanningRate());
-		this.statsWriter.addSearchStatistic(new EffectiveReplanningRate());
+		this.statsWriter.addSearchStatistic(new LambdaRealized());
+		this.statsWriter.addSearchStatistic(new LambdaBar());
+		this.statsWriter.addSearchStatistic(new Beta());
+		this.statsWriter.addSearchStatistic(new Delta());
 
 		this.statsWriter.addSearchStatistic(new AverageAge());
 		this.statsWriter.addSearchStatistic(new AverageAgeWeight());
 
-		this.statsWriter.addSearchStatistic(new UnweightedCountDifferences2());
-		this.statsWriter.addSearchStatistic(new WeightedCountDifferences2());
+		this.statsWriter.addSearchStatistic(new SumOfUnweightedCountDifferences2());
+		this.statsWriter.addSearchStatistic(new SumOfUnweightedReplannerCountDifferences2());
+		this.statsWriter.addSearchStatistic(new SumOfUnweightedNonReplannerCountDifferences2());
 
-		this.statsWriter.addSearchStatistic(new UnweightedUtilityChangeSum());
-		this.statsWriter.addSearchStatistic(new WeightedUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new SumOfWeightedCountDifferences2());
+		this.statsWriter.addSearchStatistic(new SumOfWeightedReplannerCountDifferences2());
+		this.statsWriter.addSearchStatistic(new SumOfWeightedNonReplannerCountDifferences2());
+
+		this.statsWriter.addSearchStatistic(new TotalUnweightedUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new UnweightedReplannerUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new UnweightedNonReplannerUtilityChangeSum());
+
+		this.statsWriter.addSearchStatistic(new TotalWeightedUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new WeightedReplannerUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new WeightedNonReplannerUtilityChangeSum());
 
 		this.statsWriter.addSearchStatistic(new RealizedUtilitySum());
 		this.statsWriter.addSearchStatistic(new RealizedDeltaUtility());
@@ -241,7 +264,7 @@ public class WireGreedoIntoMATSimListener implements StartupListener, IterationE
 		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityAccelerated());
 
 		for (int percent = 5; percent <= 95; percent++) {
-			this.statsWriter.addSearchStatistic(new AgesPercentile(percent));
+			this.statsWriter.addSearchStatistic(new AgePercentile(percent));
 		}
 	}
 

@@ -26,20 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class UniformReplanningObjectiveFunctionValue implements Statistic<LogDataWrapper>{
+public class SumOfUnweightedNonReplannerCountDifferences2 implements Statistic<LogDataWrapper> {
 
-	public static final String LABEL = "UniformReplanningObjectiveFunctionValue";
-	
 	@Override
 	public String label() {
-		return LABEL;
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return null; // Statistic.toString(arg0.getUniformReplanningObjectiveFunctionValue());
+		return Statistic.toString(arg0.getSumOfUnweightedNonReplannerCountDifferences2());
 	}
 
 }
-

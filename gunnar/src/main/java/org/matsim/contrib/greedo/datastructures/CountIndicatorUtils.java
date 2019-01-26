@@ -44,18 +44,25 @@ public class CountIndicatorUtils {
 		final DynamicData<L> weightedCounts = new DynamicData<L>(timeDiscr);
 		final DynamicData<L> unweightedCounts = new DynamicData<L>(timeDiscr);
 		for (SpaceTimeIndicators<L> indicators : allIndicators) {
-			for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
-				// for (L locObj : indicators.getVisitedSpaceObjects(bin)) {
-				// result.add(locObj, bin, 1.0);
-				// }
-				for (SpaceTimeIndicators<L>.Visit visit : indicators.getVisits(bin)) {
-					weightedCounts.add(visit.spaceObject, bin, visit.weight);
-					unweightedCounts.add(visit.spaceObject, bin, 1.0);
-				}
+			// for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
+			// for (SpaceTimeIndicators<L>.Visit visit : indicators.getVisits(bin)) {
+			// weightedCounts.add(visit.spaceObject, bin, visit.weight);
+			// unweightedCounts.add(visit.spaceObject, bin, 1.0);
+			// }
+			// }
+			addIndicatorsToTotals(weightedCounts, unweightedCounts, indicators, 1.0);
+		}
+		return new Tuple<>(weightedCounts, unweightedCounts);
+	}
+
+	public static <L> void addIndicatorsToTotals(final DynamicData<L> weightedTotals,
+			final DynamicData<L> unweightedTotals, final SpaceTimeIndicators<L> indicators, final double factor) {
+		for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
+			for (SpaceTimeIndicators<L>.Visit visit : indicators.getVisits(bin)) {
+				weightedTotals.add(visit.spaceObject, bin, visit.weight);
+				unweightedTotals.add(visit.spaceObject, bin, 1.0);
 			}
 		}
-		// return weightedCounts;
-		return new Tuple<>(weightedCounts, unweightedCounts);
 	}
 
 	// public static <L> DynamicData<L> newWeightedLinkCounts(final
@@ -97,16 +104,16 @@ public class CountIndicatorUtils {
 	// return result;
 	// }
 
-	// public static <L> double sumOfEntries2(final DynamicData<L> data) {
-	// double result = 0.0;
-	// for (L locObj : data.keySet()) {
-	// for (int bin = 0; bin < data.getBinCnt(); bin++) {
-	// final double val = data.getBinValue(locObj, bin);
-	// result += val * val;
-	// }
-	// }
-	// return result;
-	// }
+	public static <L> double sumOfEntries2(final DynamicData<L> data) {
+		double result = 0.0;
+		for (L locObj : data.keySet()) {
+			for (int bin = 0; bin < data.getBinCnt(); bin++) {
+				final double val = data.getBinValue(locObj, bin);
+				result += val * val;
+			}
+		}
+		return result;
+	}
 
 	// public static <L> int count(final DynamicData<L> data, final double minVal) {
 	// int result = 0;

@@ -26,16 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class WeightedUtilityChangeSum implements Statistic<LogDataWrapper> {
+public class SumOfWeightedReplannerCountDifferences2 implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return WeightedUtilityChangeSum.class.getSimpleName();
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getSumOfWeightedUtilityChanges());
+		return Statistic.toString(arg0.getSumOfWeightedReplannerCountDifferences2());
 	}
 
 }

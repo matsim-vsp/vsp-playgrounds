@@ -34,7 +34,7 @@ public class AcceptIntendedReplanningStragetyProvider implements Provider<PlanSt
 	// -------------------- MEMBERS --------------------
 
 	@Inject
-	private WireGreedoIntoMATSimListener greedoInMATSim;
+	private WireGreedoIntoMATSimControlerListener greedoInMATSim;
 
 	// -------------------- IMPLEMENTATION OF Provider --------------------
 

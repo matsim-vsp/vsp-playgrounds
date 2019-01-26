@@ -26,18 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class WeightedCountDifferences2 implements Statistic<LogDataWrapper> {
-
-	public static final String LABEL = "WeightedCountDifferences2";
+public class LambdaBar implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return LABEL;
+		return LambdaBar.class.getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getSumOfWeightedCountDifferences2());
+		return Statistic.toString(arg0.getLambdaBar());
 	}
 
 }

@@ -26,20 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class UniformGreedyScoreChange implements Statistic<LogDataWrapper> {
+public class WeightedNonReplannerUtilityChangeSum implements Statistic<LogDataWrapper> {
 
-	public static final String LABEL = "UniformGreedyScoreChange";
-	
 	@Override
 	public String label() {
-		return LABEL;
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return null; // Statistic.toString(arg0.getUniformGreedyScoreChange());
+		return Statistic.toString(arg0.getWeightedNonReplannerUtilityChangeSum());
 	}
 
 }
-

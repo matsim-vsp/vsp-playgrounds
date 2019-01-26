@@ -26,23 +26,17 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class ReplanningSignalAKF implements Statistic<LogDataWrapper> {
+public class SumOfUnweightedCountDifferences2 implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return "ReplanningSignalAKF";
+		return SumOfUnweightedCountDifferences2.class.getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return null;
-//		final StringBuffer result = new StringBuffer(arg0.getReplaningSignalAKF().get(0).toString());
-//		for (int shift = 1; shift < arg0.getReplaningSignalAKF().size(); shift++) {
-//			result.append(";");
-//			result.append(arg0.getReplaningSignalAKF().get(shift));
-//		}
-//		return result.toString();
+		return Statistic.toString(arg0.getSumOfUnweightedCountDifferences2());
 	}
 
 }
+

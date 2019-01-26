@@ -26,19 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class ReplanningEfficiency implements Statistic<LogDataWrapper> {
-
-	public static final String LABEL = ReplanningEfficiency.class.getSimpleName();
+public class WeightedReplannerUtilityChangeSum implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return LABEL;
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return "DEPRECATED"; // return Statistic.toString(arg0.getReplanningEfficiency());
+		return Statistic.toString(arg0.getWeightedReplannerUtilityChangeSum());
 	}
 
 }

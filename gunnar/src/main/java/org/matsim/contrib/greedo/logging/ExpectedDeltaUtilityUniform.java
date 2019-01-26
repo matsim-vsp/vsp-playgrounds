@@ -26,11 +26,11 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class ExpectedDeltaUtilityUniform implements Statistic<LogDataWrapper>{
+public class ExpectedDeltaUtilityUniform implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return "ExpectedDeltaUtilityUniform";
+		return ExpectedDeltaUtilityUniform.class.getSimpleName();
 	}
 
 	@Override
@@ -39,4 +39,3 @@ public class ExpectedDeltaUtilityUniform implements Statistic<LogDataWrapper>{
 	}
 
 }
-

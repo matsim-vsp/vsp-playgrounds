@@ -19,11 +19,6 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
-import java.util.List;
-
 import floetteroed.utilities.statisticslogging.Statistic;
 
 /**
@@ -31,30 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class AgesPercentile implements Statistic<LogDataWrapper> {
-
-	public static final String LABEL_PREFIX = "AgePercentile";
-
-	private final int percent;
-
-	public AgesPercentile(final int percent) {
-		this.percent = percent;
-	}
+public class Delta implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return LABEL_PREFIX + this.percent;
+		return Delta.class.getSimpleName();
 	}
 
 	@Override
-	public String value(final LogDataWrapper logData) {
-		final List<Integer> ages = logData.getSortedAgesView();
-		if (ages == null) {
-			return Statistic.toString(null);
-		} else {
-			final int index = max(0, min(ages.size() - 1, (int) ((this.percent / 100.0) * ages.size())));
-			return Statistic.toString(ages.get(index));
-		}
+	public String value(LogDataWrapper arg0) {
+		return Statistic.toString(arg0.getDelta());
 	}
 
 }

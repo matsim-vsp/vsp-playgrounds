@@ -26,17 +26,17 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class DeltaPercentile implements Statistic<LogDataWrapper> {
+public class SumOfUnweightedReplannerCountDifferences2 implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return "DeltaPercentile";
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return null; // Statistic.toString(arg0.getDeltaPercentile());
+		return Statistic.toString(arg0.getSumOfUnweightedReplannerCountDifferences2());
 	}
 
 }
+

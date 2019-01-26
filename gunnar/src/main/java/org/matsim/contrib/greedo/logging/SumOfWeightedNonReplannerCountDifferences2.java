@@ -26,19 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-@Deprecated
-public class FinalObjectiveFunctionValue implements Statistic<LogDataWrapper> {
-
-	public static final String LABEL = "FinalObjectiveFunctionValue";
+public class SumOfWeightedNonReplannerCountDifferences2 implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return LABEL;
+		return this.getClass().getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return null; // Statistic.toString(arg0.getFinalObjectiveFunctionValue());
+		return Statistic.toString(arg0.getSumOfWeightedNonReplannerCountDifferences2());
 	}
 
 }

@@ -30,7 +30,7 @@ public class ExpectedDeltaUtilityAccelerated implements Statistic<LogDataWrapper
 
 	@Override
 	public String label() {
-		return "ExpectedDeltaUtilityAccelerated";
+		return ExpectedDeltaUtilityAccelerated.class.getSimpleName();
 	}
 
 	@Override
@@ -39,4 +39,3 @@ public class ExpectedDeltaUtilityAccelerated implements Statistic<LogDataWrapper
 	}
 
 }
-

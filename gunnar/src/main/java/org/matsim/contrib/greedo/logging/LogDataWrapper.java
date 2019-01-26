@@ -22,7 +22,7 @@ package org.matsim.contrib.greedo.logging;
 import java.util.List;
 
 import org.matsim.contrib.greedo.ReplannerIdentifier;
-import org.matsim.contrib.greedo.WireGreedoIntoMATSimListener;
+import org.matsim.contrib.greedo.WireGreedoIntoMATSimControlerListener;
 
 /**
  *
@@ -31,13 +31,13 @@ import org.matsim.contrib.greedo.WireGreedoIntoMATSimListener;
  */
 public class LogDataWrapper {
 
-	private final WireGreedoIntoMATSimListener accelerator;
+	private final WireGreedoIntoMATSimControlerListener accelerator;
 
 	private final ReplannerIdentifier identifier;
 
 	private final Integer driversInPseudoSim;
 
-	public LogDataWrapper(final WireGreedoIntoMATSimListener accelerator, final ReplannerIdentifier identifier,
+	public LogDataWrapper(final WireGreedoIntoMATSimControlerListener accelerator, final ReplannerIdentifier identifier,
 			final Integer driversInPseudoSim) {
 		this.accelerator = accelerator;
 		this.identifier = identifier;
@@ -52,12 +52,20 @@ public class LogDataWrapper {
 		return this.driversInPseudoSim;
 	}
 
-	public Double getEffectiveReplanninRate() {
-		return this.accelerator.getEffectiveReplanningRate();
+	public Double getLambdaRealized() {
+		return this.accelerator.getLambdaRealized();
 	}
 
-	public Double getMeanReplanningRate() {
-		return this.identifier.getMeanReplanningRate();
+	public Double getLambdaBar() {
+		return this.identifier.getLambdaBar();
+	}
+	
+	public Double getBeta() {
+		return this.identifier.getBeta();
+	}
+	
+	public Double getDelta() {
+		return this.identifier.getDelta();
 	}
 
 	public Double getSumOfWeightedCountDifferences2() {
@@ -104,4 +112,36 @@ public class LogDataWrapper {
 		return this.identifier.getSumOfWeightedUtilityChanges();
 	}
 	
+	public Double getSumOfUnweightedReplannerCountDifferences2() {
+		return this.identifier.getSumOfUnweightedReplannerCountDifferences2();
+	}
+
+	public Double getSumOfWeightedReplannerCountDifferences2() {
+		return this.identifier.getSumOfWeightedReplannerCountDifferences2();
+	}
+
+	public Double getUnweightedReplannerUtilityChangeSum() {
+		return this.identifier.getUnweightedReplannerUtilityChangeSum();
+	}
+
+	public Double getWeightedReplannerUtilityChangeSum() {
+		return this.identifier.getWeightedReplannerUtilityChangeSum();
+	}
+
+	public Double getSumOfUnweightedNonReplannerCountDifferences2() {
+		return this.identifier.getSumOfUnweightedNonReplannerCountDifferences2();
+	}
+
+	public Double getSumOfWeightedNonReplannerCountDifferences2() {
+		return this.identifier.getSumOfWeightedNonReplannerCountDifferences2();
+	}
+
+	public Double getUnweightedNonReplannerUtilityChangeSum() {
+		return this.identifier.getUnweightedNonReplannerUtilityChangeSum();
+	}
+
+	public Double getWeightedNonReplannerUtilityChangeSum() {
+		return this.identifier.getWeightedNonReplannerUtilityChangeSum();
+	}
+
 }

@@ -30,7 +30,7 @@ public class RealizedDeltaUtility implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return "RealizedDeltaUtility";
+		return RealizedDeltaUtility.class.getSimpleName();
 	}
 
 	@Override
