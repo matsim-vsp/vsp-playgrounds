@@ -143,5 +143,17 @@ public class LogDataWrapper {
 	public Double getWeightedNonReplannerUtilityChangeSum() {
 		return this.identifier.getWeightedNonReplannerUtilityChangeSum();
 	}
+	
+	public Integer getNumberOfReplanners() {
+		return this.accelerator.getNumberOfReplanners();
+	}
+	
+	public Integer getNumberOfNonReplanners() {
+		return this.accelerator.getNumberOfNonReplanners();
+	}
+	
+	public Integer getPopulationSize() {
+		return this.accelerator.getPopulationSize();
+	}
 
 }

@@ -64,8 +64,8 @@ class SampersUtilityParameters {
 		private final double maxIncome;
 		private final double parameterValue;
 
-		private ConcreteParameterPerStratum(final Purpose tourPurpose, final double minIncome,
-				final double maxIncome, final double parameterValue) {
+		private ConcreteParameterPerStratum(final Purpose tourPurpose, final double minIncome, final double maxIncome,
+				final double parameterValue) {
 			this.tourPurpose = tourPurpose;
 			this.minIncome = minIncome;
 			this.maxIncome = maxIncome;
@@ -98,11 +98,9 @@ class SampersUtilityParameters {
 
 	SampersUtilityParameters() {
 
-		this.linTimeCoeff_1_min
-				.addNext(new ConcreteParameterPerStratum(Purpose.work, 0.0, POSITIVE_INFINITY, -0.039));
+		this.linTimeCoeff_1_min.addNext(new ConcreteParameterPerStratum(Purpose.work, 0.0, POSITIVE_INFINITY, -0.039));
 		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(Purpose.work, 0, 200 * 1000, -0.019));
-		this.linCostCoeff_1_SEK
-				.addNext(new ConcreteParameterPerStratum(Purpose.work, 200 * 1000, 300 * 1000, -0.015));
+		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(Purpose.work, 200 * 1000, 300 * 1000, -0.015));
 		this.linCostCoeff_1_SEK
 				.addNext(new ConcreteParameterPerStratum(Purpose.work, 300 * 1000, POSITIVE_INFINITY, -0.005));
 		this.lnCostCoeff_lnArgInSEK
@@ -110,19 +108,18 @@ class SampersUtilityParameters {
 
 		this.linTimeCoeff_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 0.0, POSITIVE_INFINITY, -0.041));
+		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 0, 50 * 1000, -0.030));
 		this.linCostCoeff_1_SEK
-				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 0, 50 * 1000, -0.030));
-		this.linCostCoeff_1_SEK.addNext(
-				new ConcreteParameterPerStratum(Purpose.recreation, 50 * 1000, POSITIVE_INFINITY, -0.014));
-		this.lnCostCoeff_lnArgInSEK.addNext(
-				new ConcreteParameterPerStratum(Purpose.recreation, 50 * 1000, POSITIVE_INFINITY, -0.066));
+				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 50 * 1000, POSITIVE_INFINITY, -0.014));
+		this.lnCostCoeff_lnArgInSEK
+				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 50 * 1000, POSITIVE_INFINITY, -0.066));
 
-		this.linTimeCoeff_1_min.addNext(
-				new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -0.084));
-		this.linCostCoeff_1_SEK.addNext(
-				new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -0.015));
-		this.lnCostCoeff_lnArgInSEK.addNext(
-				new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -0.421));
+		this.linTimeCoeff_1_min
+				.addNext(new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -0.084));
+		this.linCostCoeff_1_SEK
+				.addNext(new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -0.015));
+		this.lnCostCoeff_lnArgInSEK
+				.addNext(new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -0.421));
 
 		this.linTimeCoeff_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.rareShopping, 0.0, POSITIVE_INFINITY, -0.042));
@@ -138,8 +135,8 @@ class SampersUtilityParameters {
 		this.lnCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(Purpose.gymnasium, 0.0, POSITIVE_INFINITY, -0.146));
 
-		this.linTimeCoeff_1_min.addNext(
-				new ConcreteParameterPerStratum(Purpose.adultEducation, 0.0, POSITIVE_INFINITY, -0.049));
+		this.linTimeCoeff_1_min
+				.addNext(new ConcreteParameterPerStratum(Purpose.adultEducation, 0.0, POSITIVE_INFINITY, -0.049));
 
 		this.linTimeCoeff_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.visit, 0.0, POSITIVE_INFINITY, -0.02973));
@@ -148,10 +145,10 @@ class SampersUtilityParameters {
 		this.lnCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(Purpose.visit, 0.0, POSITIVE_INFINITY, -0.2931));
 
-		this.linTimeCoeff_1_min.addNext(
-				new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -0.02843));
-		this.lnCostCoeff_lnArgInSEK.addNext(
-				new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -0.3137));
+		this.linTimeCoeff_1_min
+				.addNext(new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -0.02843));
+		this.lnCostCoeff_lnArgInSEK
+				.addNext(new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -0.3137));
 
 		this.linTimeCoeff_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.giveARide, 0.0, POSITIVE_INFINITY, -0.06061));
@@ -165,28 +162,26 @@ class SampersUtilityParameters {
 
 		this.linTimeCoeff_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.other, 0.0, POSITIVE_INFINITY, -0.0434));
-		this.linCostCoeff_1_SEK
-				.addNext(new ConcreteParameterPerStratum(Purpose.other, 0, 50 * 1000, -0.008927));
+		this.linCostCoeff_1_SEK.addNext(new ConcreteParameterPerStratum(Purpose.other, 0, 50 * 1000, -0.008927));
 		this.linCostCoeff_1_SEK
 				.addNext(new ConcreteParameterPerStratum(Purpose.other, 50 * 1000, 200 * 1000, -0.008269));
-		this.linCostCoeff_1_SEK.addNext(
-				new ConcreteParameterPerStratum(Purpose.other, 200 * 1000, POSITIVE_INFINITY, -0.004279));
-		this.lnCostCoeff_lnArgInSEK
-				.addNext(new ConcreteParameterPerStratum(Purpose.other, 0, 50 * 1000, -0.393));
+		this.linCostCoeff_1_SEK
+				.addNext(new ConcreteParameterPerStratum(Purpose.other, 200 * 1000, POSITIVE_INFINITY, -0.004279));
+		this.lnCostCoeff_lnArgInSEK.addNext(new ConcreteParameterPerStratum(Purpose.other, 0, 50 * 1000, -0.393));
 		this.lnCostCoeff_lnArgInSEK
 				.addNext(new ConcreteParameterPerStratum(Purpose.other, 50 * 1000, 200 * 1000, +0.3348));
-		this.lnCostCoeff_lnArgInSEK.addNext(
-				new ConcreteParameterPerStratum(Purpose.other, 200 * 1000, POSITIVE_INFINITY, +0.3382));
+		this.lnCostCoeff_lnArgInSEK
+				.addNext(new ConcreteParameterPerStratum(Purpose.other, 200 * 1000, POSITIVE_INFINITY, +0.3382));
 
-		// Below invented schedule delay costs; could perhaps be linked to
-		// activity-related travel times
+		// TODO Below invented schedule delay costs; these should probably be derived
+		// from activity-specific travel costs.
 
 		this.scheduleDelayCostEarly_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.work, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostEarly_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min.addNext(
-				new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -1.0));
+		this.scheduleDelayCostEarly_1_min
+				.addNext(new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostEarly_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.rareShopping, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostEarly_1_min
@@ -195,8 +190,8 @@ class SampersUtilityParameters {
 				.addNext(new ConcreteParameterPerStratum(Purpose.adultEducation, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostEarly_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.visit, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostEarly_1_min.addNext(
-				new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -1.0));
+		this.scheduleDelayCostEarly_1_min
+				.addNext(new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostEarly_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.giveARide, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostEarly_1_min
@@ -208,8 +203,8 @@ class SampersUtilityParameters {
 				.addNext(new ConcreteParameterPerStratum(Purpose.work, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostLate_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.recreation, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min.addNext(
-				new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -1.0));
+		this.scheduleDelayCostLate_1_min
+				.addNext(new ConcreteParameterPerStratum(Purpose.regularShopping, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostLate_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.rareShopping, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostLate_1_min
@@ -218,15 +213,14 @@ class SampersUtilityParameters {
 				.addNext(new ConcreteParameterPerStratum(Purpose.adultEducation, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostLate_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.visit, 0.0, POSITIVE_INFINITY, -1.0));
-		this.scheduleDelayCostLate_1_min.addNext(
-				new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -1.0));
+		this.scheduleDelayCostLate_1_min
+				.addNext(new ConcreteParameterPerStratum(Purpose.businessFromHome, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostLate_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.giveARide, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostLate_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.service, 0.0, POSITIVE_INFINITY, -1.0));
 		this.scheduleDelayCostLate_1_min
 				.addNext(new ConcreteParameterPerStratum(Purpose.other, 0.0, POSITIVE_INFINITY, -1.0));
-
 	}
 
 	// -------------------- PARAMETER GETTERS --------------------
@@ -244,14 +238,18 @@ class SampersUtilityParameters {
 	}
 
 	double getScheduleDelayCostEarly_1_min(final Purpose purpose, final Double income_money) {
-		return this.scheduleDelayCostEarly_1_min.getOrZero(purpose, income_money);
+		// A hopefully not completely nonsensical guess.
+		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money);
 	}
 
 	double getScheduleDelayCostLate_1_min(final Purpose purpose, final Double income_money) {
-		return this.scheduleDelayCostLate_1_min.getOrZero(purpose, income_money);
+		// A hopefully not completely nonsensical guess.
+		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money);
 	}
-	
-	double getStuckScore() {
-		return - 100.0; // TODO This is completely arbitrary
+
+	double getStuckScore(final SampersTour tour, final Double income_money) {
+		// A hopefully not completely nonsensical guess.
+		return this.linTimeCoeff_1_min.getOrZero(tour.getPurpose(), income_money)
+				* SampersParameterUtils.getActivityDuration_min(tour);
 	}
 }

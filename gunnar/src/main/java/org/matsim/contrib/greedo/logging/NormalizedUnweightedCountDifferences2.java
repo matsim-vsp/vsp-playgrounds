@@ -19,24 +19,22 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import floetteroed.utilities.statisticslogging.Statistic;
-
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class RealizedUtilitySum implements Statistic<LogDataWrapper> {
+public class NormalizedUnweightedCountDifferences2 extends PopulationAverageStatistic {
 
-	@Override
-	public String label() {
-		return RealizedUtilitySum.class.getSimpleName();
-	}
+	// @Override
+	// public String label() {
+	// return SumOfUnweightedCountDifferences2.class.getSimpleName();
+	// }
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getLastRealizedUtilitySum());
+		return this.averageOrEmpty(arg0.getSumOfUnweightedCountDifferences2(), arg0.getPopulationSize());
+		// return Statistic.toString(arg0.getSumOfUnweightedCountDifferences2());
 	}
 
 }
-

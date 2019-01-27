@@ -24,12 +24,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 
 /**
- * TODO Make sure that String instances of enums defined here are used when
- * creating the population.
- *
+ * 
  * @author Gunnar Flötteröd
- * 
- * 
+ *
  */
 public class SampersParameterUtils {
 
@@ -54,7 +51,7 @@ public class SampersParameterUtils {
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	public static int getIncome_SEK_yr(final Person person) {
+	public static double getIncome_SEK_yr(final Person person) {
 		return (Integer) person.getAttributes().getAttribute(PersonAttribute.income_SEK_yr.toString());
 	}
 
@@ -76,6 +73,26 @@ public class SampersParameterUtils {
 
 	public static double getActivityEnd_min(final Activity act) {
 		return act.getEndTime() / 60.0;
+	}
+
+	public static double getActivityDuration_min(final SampersTour tour) {
+		return getActivityDuration_min(tour.getActivityAttrs());
+	}
+
+	public static double getActivityOpens_min(final SampersTour tour) {
+		return getActivityOpens_min(tour.getActivityAttrs());
+	}
+
+	public static double getActivityCloses_min(final SampersTour tour) {
+		return getActivityCloses_min(tour.getActivityAttrs());
+	}
+
+	public static double getActivityStart_min(final SampersTour tour) {
+		return getActivityStart_min(tour.getActivity());
+	}
+
+	public static double getActivityEnd_min(final SampersTour tour) {
+		return getActivityEnd_min(tour.getActivity());
 	}
 
 }

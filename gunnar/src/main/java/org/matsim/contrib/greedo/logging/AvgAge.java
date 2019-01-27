@@ -26,16 +26,16 @@ import floetteroed.utilities.statisticslogging.Statistic;
  * @author Gunnar Flötteröd
  *
  */
-public class SumOfUnweightedNonReplannerCountDifferences2 implements Statistic<LogDataWrapper> {
+public class AvgAge implements Statistic<LogDataWrapper> {
 
 	@Override
 	public String label() {
-		return this.getClass().getSimpleName();
+		return AvgAge.class.getSimpleName();
 	}
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getSumOfUnweightedNonReplannerCountDifferences2());
+		return Statistic.toString(arg0.getAverageAge());
 	}
 
 }

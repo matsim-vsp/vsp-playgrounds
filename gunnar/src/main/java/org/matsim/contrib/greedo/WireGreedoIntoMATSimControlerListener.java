@@ -47,31 +47,31 @@ import org.matsim.contrib.greedo.datastructures.SpaceTimeIndicators;
 import org.matsim.contrib.greedo.datastructures.Utilities;
 import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgePercentile;
-import org.matsim.contrib.greedo.logging.AverageAge;
-import org.matsim.contrib.greedo.logging.AverageAgeWeight;
+import org.matsim.contrib.greedo.logging.AvgAge;
+import org.matsim.contrib.greedo.logging.AvgAgeWeight;
 import org.matsim.contrib.greedo.logging.Beta;
 import org.matsim.contrib.greedo.logging.Delta;
 import org.matsim.contrib.greedo.logging.DriversInPhysicalSim;
 import org.matsim.contrib.greedo.logging.DriversInPseudoSim;
-import org.matsim.contrib.greedo.logging.ExpectedDeltaUtilityAccelerated;
-import org.matsim.contrib.greedo.logging.ExpectedDeltaUtilityUniform;
+import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
+import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
 import org.matsim.contrib.greedo.logging.LogDataWrapper;
-import org.matsim.contrib.greedo.logging.RealizedDeltaUtility;
-import org.matsim.contrib.greedo.logging.RealizedUtilitySum;
-import org.matsim.contrib.greedo.logging.SumOfUnweightedCountDifferences2;
-import org.matsim.contrib.greedo.logging.SumOfUnweightedNonReplannerCountDifferences2;
-import org.matsim.contrib.greedo.logging.SumOfUnweightedReplannerCountDifferences2;
-import org.matsim.contrib.greedo.logging.SumOfWeightedCountDifferences2;
-import org.matsim.contrib.greedo.logging.SumOfWeightedNonReplannerCountDifferences2;
-import org.matsim.contrib.greedo.logging.SumOfWeightedReplannerCountDifferences2;
-import org.matsim.contrib.greedo.logging.TotalUnweightedUtilityChangeSum;
-import org.matsim.contrib.greedo.logging.TotalWeightedUtilityChangeSum;
-import org.matsim.contrib.greedo.logging.UnweightedNonReplannerUtilityChangeSum;
-import org.matsim.contrib.greedo.logging.UnweightedReplannerUtilityChangeSum;
-import org.matsim.contrib.greedo.logging.WeightedNonReplannerUtilityChangeSum;
-import org.matsim.contrib.greedo.logging.WeightedReplannerUtilityChangeSum;
+import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
+import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
+import org.matsim.contrib.greedo.logging.NormalizedUnweightedCountDifferences2;
+import org.matsim.contrib.greedo.logging.NormalizedUnweightedNonReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.NormalizedUnweightedReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.NormalizedWeightedCountDifferences2;
+import org.matsim.contrib.greedo.logging.NormalizedWeightedNonReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDifferences2;
+import org.matsim.contrib.greedo.logging.AvgUnweightedUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgWeightedUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgUnweightedNonReplannerUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgUnweightedReplannerUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgWeightedNonReplannerUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgWeightedReplannerUtilityChange;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSim;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
@@ -210,6 +210,26 @@ public class WireGreedoIntoMATSimControlerListener
 		return this.ages.getAverageWeight();
 	}
 
+	public Integer getPopulationSize() {
+		return this.services.getScenario().getPopulation().getPersons().size();
+	}
+
+	public Integer getNumberOfReplanners() {
+		if (this.replanners == null) {
+			return null;
+		} else {
+			return this.replanners.size();
+		}
+	}
+
+	public Integer getNumberOfNonReplanners() {
+		if (this.replanners == null) {
+			return null;
+		} else {
+			return (this.getPopulationSize() - this.replanners.size());
+		}
+	}
+	
 	// --------------- IMPLEMENTATION OF StartupListener ---------------
 
 	private GreedoConfigGroup greedoConfig = null;
@@ -239,31 +259,31 @@ public class WireGreedoIntoMATSimControlerListener
 		this.statsWriter.addSearchStatistic(new Beta());
 		this.statsWriter.addSearchStatistic(new Delta());
 
-		this.statsWriter.addSearchStatistic(new AverageAge());
-		this.statsWriter.addSearchStatistic(new AverageAgeWeight());
+		this.statsWriter.addSearchStatistic(new AvgAge());
+		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
 
-		this.statsWriter.addSearchStatistic(new SumOfUnweightedCountDifferences2());
-		this.statsWriter.addSearchStatistic(new SumOfUnweightedReplannerCountDifferences2());
-		this.statsWriter.addSearchStatistic(new SumOfUnweightedNonReplannerCountDifferences2());
+		this.statsWriter.addSearchStatistic(new NormalizedUnweightedCountDifferences2());
+		this.statsWriter.addSearchStatistic(new NormalizedUnweightedReplannerCountDifferences2());
+		this.statsWriter.addSearchStatistic(new NormalizedUnweightedNonReplannerCountDifferences2());
 
-		this.statsWriter.addSearchStatistic(new SumOfWeightedCountDifferences2());
-		this.statsWriter.addSearchStatistic(new SumOfWeightedReplannerCountDifferences2());
-		this.statsWriter.addSearchStatistic(new SumOfWeightedNonReplannerCountDifferences2());
+		this.statsWriter.addSearchStatistic(new NormalizedWeightedCountDifferences2());
+		this.statsWriter.addSearchStatistic(new NormalizedWeightedReplannerCountDifferences2());
+		this.statsWriter.addSearchStatistic(new NormalizedWeightedNonReplannerCountDifferences2());
 
-		this.statsWriter.addSearchStatistic(new TotalUnweightedUtilityChangeSum());
-		this.statsWriter.addSearchStatistic(new UnweightedReplannerUtilityChangeSum());
-		this.statsWriter.addSearchStatistic(new UnweightedNonReplannerUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new AvgUnweightedUtilityChange());
+		this.statsWriter.addSearchStatistic(new AvgUnweightedReplannerUtilityChange());
+		this.statsWriter.addSearchStatistic(new AvgUnweightedNonReplannerUtilityChange());
 
-		this.statsWriter.addSearchStatistic(new TotalWeightedUtilityChangeSum());
-		this.statsWriter.addSearchStatistic(new WeightedReplannerUtilityChangeSum());
-		this.statsWriter.addSearchStatistic(new WeightedNonReplannerUtilityChangeSum());
+		this.statsWriter.addSearchStatistic(new AvgWeightedUtilityChange());
+		this.statsWriter.addSearchStatistic(new AvgWeightedReplannerUtilityChange());
+		this.statsWriter.addSearchStatistic(new AvgWeightedNonReplannerUtilityChange());
 
-		this.statsWriter.addSearchStatistic(new RealizedUtilitySum());
-		this.statsWriter.addSearchStatistic(new RealizedDeltaUtility());
-		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityUniform());
-		this.statsWriter.addSearchStatistic(new ExpectedDeltaUtilityAccelerated());
+		this.statsWriter.addSearchStatistic(new AvgRealizedUtility());
+		this.statsWriter.addSearchStatistic(new AvgRealizedDeltaUtility());
+		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityUniform());
+		this.statsWriter.addSearchStatistic(new AvgExpectedDeltaUtilityAccelerated());
 
-		for (int percent = 5; percent <= 95; percent++) {
+		for (int percent = 5; percent <= 95; percent += 5) {
 			this.statsWriter.addSearchStatistic(new AgePercentile(percent));
 		}
 	}

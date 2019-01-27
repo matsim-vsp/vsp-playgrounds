@@ -50,7 +50,9 @@ public class SampersScoringFunction implements ScoringFunction {
 
 	private double score = 0.0;
 
-	private double stuckScore = 0.0;
+	private int stuck = 0;
+
+	private double money_SEK = 0.0;
 
 	// -------------------- CONSTRUCTION --------------------
 
@@ -103,6 +105,10 @@ public class SampersScoringFunction implements ScoringFunction {
 				this.tours.add(new SampersTour());
 			}
 			this.tours.getLast().addLeg(leg);
+			this.tours.getLast().addStuck(this.stuck);
+			this.stuck = 0;
+			this.tours.getLast().addMoney_SEK(this.money_SEK);
+			this.money_SEK = 0;
 		} else {
 			throw new RuntimeException("Cannot add leg.");
 		}
@@ -110,18 +116,12 @@ public class SampersScoringFunction implements ScoringFunction {
 
 	@Override
 	public void agentStuck(double time) {
-		this.stuckScore += this.utlFct.getParameters().getStuckScore();
-
+		this.stuck++;
 	}
 
 	@Override
 	public void addMoney(double amount) {
-		// FIXME !!!
-		// Logger.getLogger(SampersScoringFunction.class).warn("Ignoring money event!");
-		// if (this.tours.size() > 0) {
-		// this.tours.getLast().addCost_SEK(amount);
-		// } else {
-		// }
+		this.money_SEK += amount;
 	}
 
 	@Override
@@ -130,7 +130,12 @@ public class SampersScoringFunction implements ScoringFunction {
 
 	@Override
 	public void finish() {
-		this.score = this.stuckScore;
+		if (this.stuck > 0) {
+			throw new RuntimeException(this.stuck + " unprocessed stuck events.");
+		}
+		if (this.money_SEK > 0) {
+			throw new RuntimeException("Unprocessed money events of value " + this.money_SEK + " SEK.");
+		}
 		for (SampersTour tour : this.tours) {
 			this.score += this.utlFct.getUtility(tour, this.person);
 		}

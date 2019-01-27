@@ -19,23 +19,21 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import floetteroed.utilities.statisticslogging.Statistic;
-
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class AverageAge implements Statistic<LogDataWrapper> {
+public class AvgRealizedUtility extends PopulationAverageStatistic {
 
-	@Override
-	public String label() {
-		return AverageAge.class.getSimpleName();
-	}
+	// @Override
+	// public String label() {
+	// return AverageRealizedUtility.class.getSimpleName();
+	// }
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getAverageAge());
+		return this.averageOrEmpty(arg0.getLastRealizedUtilitySum(), arg0.getPopulationSize());
 	}
 
 }

@@ -32,7 +32,7 @@ class SampersTourUtilityFunction {
 
 	// -------------------- CONSTANTS --------------------
 
-	private static final double EPS = 1e-8;
+	private static final double eps = 1e-8;
 
 	private final SampersUtilityParameters utlParams;
 
@@ -44,44 +44,47 @@ class SampersTourUtilityFunction {
 
 	// -------------------- INTERNALS --------------------
 
-	private double arriveEarlyTimeLoss_min(final SampersTour tour, final Person person) {
-		return Math.max(0.0, SampersParameterUtils.getActivityOpens_min(tour.getActivityAttrs())
-				- SampersParameterUtils.getActivityStart_min(tour.getActivity()));
+	private double earlyArrivalTimeLoss_min(final SampersTour tour) {
+		return Math.max(0.0,
+				SampersParameterUtils.getActivityOpens_min(tour) - SampersParameterUtils.getActivityStart_min(tour));
 	}
 
-	private double departLateTimeLoss_min(final SampersTour tour, final Person person) {
-		return Math.max(0.0, SampersParameterUtils.getActivityEnd_min(tour.getActivity())
-				- SampersParameterUtils.getActivityCloses_min(tour.getActivityAttrs()));
+	private double lateDepartureTimeLoss_min(final SampersTour tour) {
+		return Math.max(0.0,
+				SampersParameterUtils.getActivityEnd_min(tour) - SampersParameterUtils.getActivityCloses_min(tour));
 	}
 
 	// -------------------- IMPLEMENTATION --------------------
 
-	SampersUtilityParameters getParameters() {
-		return this.utlParams;
-	}
-
 	double getUtility(final SampersTour tour, final Person person) {
 
 		final Purpose purpose = tour.getPurpose();
-		final double income_money = (double) SampersParameterUtils.getIncome_SEK_yr(person);
-
-		double result = this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_money)
-				* this.arriveEarlyTimeLoss_min(tour, person)
-				+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_money)
-						* this.departLateTimeLoss_min(tour, person);
+		final double income_SEK = SampersParameterUtils.getIncome_SEK_yr(person);
+		
+		double result = this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_SEK)
+				* this.earlyArrivalTimeLoss_min(tour)
+				+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_SEK)
+						* this.lateDepartureTimeLoss_min(tour);
 
 		final double travelTime_min = tour.getTravelTime_min();
-		if (travelTime_min > EPS) {
-			result += this.utlParams.getLinTimeCoeff_1_min(purpose, income_money) * travelTime_min;
+		if (travelTime_min > eps) {
+			result += this.utlParams.getLinTimeCoeff_1_min(purpose, income_SEK) * travelTime_min;
 		}
 
-		final double cost_SEK = tour.getCost_SEK();
-		if (cost_SEK > EPS) {
-			result += this.utlParams.getLinMoneyCoeff_1_SEK(purpose, income_money) * cost_SEK
-					+ this.utlParams.getLnMoneyCoeff_lnArgInSEK(purpose, income_money) * Math.log(cost_SEK);
+		final int stuck = tour.getStuck();
+		if (stuck > 0) {
+			result += this.utlParams.getStuckScore(tour, income_SEK) * stuck;
+		}
+
+		final double cost_SEK = -tour.getMoney_SEK();
+		if (cost_SEK < 0) {
+			throw new RuntimeException("tour cost = " + cost_SEK + " SEK");
+		}
+		if (cost_SEK > eps) {
+			result += this.utlParams.getLinMoneyCoeff_1_SEK(purpose, income_SEK) * cost_SEK
+					+ this.utlParams.getLnMoneyCoeff_lnArgInSEK(purpose, income_SEK) * Math.log(cost_SEK);
 		}
 
 		return result;
 	}
-
 }

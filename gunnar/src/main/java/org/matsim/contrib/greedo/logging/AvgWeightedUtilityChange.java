@@ -19,23 +19,21 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import floetteroed.utilities.statisticslogging.Statistic;
-
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class ExpectedDeltaUtilityUniform implements Statistic<LogDataWrapper> {
+public class AvgWeightedUtilityChange extends PopulationAverageStatistic {
 
-	@Override
-	public String label() {
-		return ExpectedDeltaUtilityUniform.class.getSimpleName();
-	}
+	// @Override
+	// public String label() {
+	// return AverageWeightedUtilityChange.class.getSimpleName();
+	// }
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getLastExpectedUtilityChangeSumUniform());
+		return this.averageOrEmpty(arg0.getSumOfWeightedUtilityChanges(), arg0.getPopulationSize());
 	}
 
 }

@@ -19,24 +19,21 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import floetteroed.utilities.statisticslogging.Statistic;
-
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class SumOfUnweightedCountDifferences2 implements Statistic<LogDataWrapper> {
+public class AvgWeightedNonReplannerUtilityChange extends PopulationAverageStatistic {
 
-	@Override
-	public String label() {
-		return SumOfUnweightedCountDifferences2.class.getSimpleName();
-	}
+	// @Override
+	// public String label() {
+	// return this.getClass().getSimpleName();
+	// }
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getSumOfUnweightedCountDifferences2());
+		return this.averageOrEmpty(arg0.getWeightedNonReplannerUtilityChangeSum(), arg0.getNumberOfNonReplanners());
 	}
 
 }
-

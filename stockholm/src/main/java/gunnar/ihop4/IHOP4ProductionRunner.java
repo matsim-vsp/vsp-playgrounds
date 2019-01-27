@@ -776,36 +776,6 @@ public class IHOP4ProductionRunner {
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		keepOnlyStrictCarUsers(scenario);
 		
-		// >>>>> TODO FOR DEBUGGING ONLY >>>>> 
-		
-		for (Person person : scenario.getPopulation().getPersons().values()) {
-			Plan plan = person.getSelectedPlan();
-			for (PlanElement pe : plan.getPlanElements()) {
-				if (pe instanceof Activity) {
-					Activity act = (Activity) pe;
-					if ("work".equals(act.getType()) || "other".equals(act.getType())) {
-						Object opens_h = act.getAttributes().getAttribute(SampersParameterUtils.ActivityAttribute.opens_h.toString());
-						Object closes_h = act.getAttributes().getAttribute(SampersParameterUtils.ActivityAttribute.closes_h.toString());
-						Object duration_h = act.getAttributes().getAttribute(SampersParameterUtils.ActivityAttribute.duration_h.toString());
-
-						System.out.println("person = " + person);
-						System.out.println("act = " + act);
-						System.out.println("opens_h = " + opens_h);
-						System.out.println("closes_h = " + closes_h);
-						System.out.println("duration_h = " + duration_h);
-
-						if (opens_h == null || closes_h == null || duration_h == null) {
-							System.exit(0);
-						}
-					
-					}
-				}
-			}
-		}
-		
-		// <<<<< TODO FOR DEBUGGING ONLY <<<<<
-		
-
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
 		controler.addOverridingModule(new SampersScoringFunctionModule());

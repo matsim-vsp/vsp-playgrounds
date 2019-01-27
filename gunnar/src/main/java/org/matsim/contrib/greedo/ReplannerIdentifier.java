@@ -263,16 +263,16 @@ public class ReplannerIdentifier {
 					scoreUpdater.getScoreChangeIfZero());
 			if (replanner) {
 				replanners.add(personId);
-				CountIndicatorUtils.addIndicatorsToTotals(weightedReplannerCountDifferences,
+				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedReplannerCountDifferences,
 						unweightedReplannerCountDifferences, this.personId2pseudoSimSlotUsage.get(personId), +1.0);
-				CountIndicatorUtils.addIndicatorsToTotals(weightedReplannerCountDifferences,
+				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedReplannerCountDifferences,
 						unweightedReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId), -1.0);
 				this.unweightedReplannerUtilityChangeSum += this.personId2unweightedUtilityChange.get(personId);
 				this.weightedReplannerUtilityChangeSum += this.personId2weightedUtilityChange.get(personId);
 			} else {
-				CountIndicatorUtils.addIndicatorsToTotals(weightedNonReplannerCountDifferences,
+				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedNonReplannerCountDifferences,
 						unweightedNonReplannerCountDifferences, this.personId2pseudoSimSlotUsage.get(personId), +1.0);
-				CountIndicatorUtils.addIndicatorsToTotals(weightedNonReplannerCountDifferences,
+				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedNonReplannerCountDifferences,
 						unweightedNonReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId), -1.0);
 				this.unweightedNonReplannerUtilityChangeSum += this.personId2unweightedUtilityChange.get(personId);
 				this.weightedNonReplannerUtilityChangeSum += this.personId2weightedUtilityChange.get(personId);

@@ -19,24 +19,21 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import floetteroed.utilities.statisticslogging.Statistic;
-
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class AverageAgeWeight implements Statistic<LogDataWrapper> {
+public class AvgUnweightedUtilityChange extends PopulationAverageStatistic {
 
-	@Override
-	public String label() {
-		return AverageAgeWeight.class.getSimpleName();
-	}
+	// @Override
+	// public String label() {
+	// return AverageUnweightedUtilityChange.class.getSimpleName();
+	// }
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getAverageWeight());
+		return this.averageOrEmpty(arg0.getSumOfUnweightedUtilityChanges(), arg0.getPopulationSize());
 	}
 
 }
-

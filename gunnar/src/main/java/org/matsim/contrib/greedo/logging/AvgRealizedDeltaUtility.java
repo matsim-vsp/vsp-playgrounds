@@ -19,23 +19,21 @@
  */
 package org.matsim.contrib.greedo.logging;
 
-import floetteroed.utilities.statisticslogging.Statistic;
-
 /**
  *
  * @author Gunnar Flötteröd
  *
  */
-public class SumOfWeightedReplannerCountDifferences2 implements Statistic<LogDataWrapper> {
+public class AvgRealizedDeltaUtility extends PopulationAverageStatistic {
 
-	@Override
-	public String label() {
-		return this.getClass().getSimpleName();
-	}
+	// @Override
+	// public String label() {
+	// return AverageRealizedDeltaUtility.class.getSimpleName();
+	// }
 
 	@Override
 	public String value(LogDataWrapper arg0) {
-		return Statistic.toString(arg0.getSumOfWeightedReplannerCountDifferences2());
+		return this.averageOrEmpty(arg0.getLastRealizedUtilityChangeSum(), arg0.getPopulationSize());
 	}
 
 }

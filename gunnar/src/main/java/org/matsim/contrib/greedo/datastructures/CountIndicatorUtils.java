@@ -50,17 +50,19 @@ public class CountIndicatorUtils {
 			// unweightedCounts.add(visit.spaceObject, bin, 1.0);
 			// }
 			// }
-			addIndicatorsToTotals(weightedCounts, unweightedCounts, indicators, 1.0);
+			addIndicatorsToTotalsTreatingNullAsZero(weightedCounts, unweightedCounts, indicators, 1.0);
 		}
 		return new Tuple<>(weightedCounts, unweightedCounts);
 	}
 
-	public static <L> void addIndicatorsToTotals(final DynamicData<L> weightedTotals,
+	public static <L> void addIndicatorsToTotalsTreatingNullAsZero(final DynamicData<L> weightedTotals,
 			final DynamicData<L> unweightedTotals, final SpaceTimeIndicators<L> indicators, final double factor) {
-		for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
-			for (SpaceTimeIndicators<L>.Visit visit : indicators.getVisits(bin)) {
-				weightedTotals.add(visit.spaceObject, bin, visit.weight);
-				unweightedTotals.add(visit.spaceObject, bin, 1.0);
+		if (indicators != null) {
+			for (int bin = 0; bin < indicators.getTimeBinCnt(); bin++) {
+				for (SpaceTimeIndicators<L>.Visit visit : indicators.getVisits(bin)) {
+					weightedTotals.add(visit.spaceObject, bin, factor * visit.weight);
+					unweightedTotals.add(visit.spaceObject, bin, factor * 1.0);
+				}
 			}
 		}
 	}
