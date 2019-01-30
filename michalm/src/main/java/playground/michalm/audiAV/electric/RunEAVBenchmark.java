@@ -23,6 +23,9 @@ import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.schedule.Schedule;
 import org.matsim.contrib.dvrp.schedule.Schedule.ScheduleStatus;
+import org.matsim.contrib.ev.EvConfigGroup;
+import org.matsim.contrib.ev.discharging.AuxEnergyConsumption;
+import org.matsim.contrib.ev.dvrp.DvrpAuxConsumptionFactory;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.schedule.TaxiTask;
 import org.matsim.core.config.Config;
@@ -31,9 +34,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.vsp.edvrp.etaxi.run.RunETaxiBenchmark;
-import org.matsim.vsp.ev.EvConfigGroup;
-import org.matsim.vsp.ev.discharging.AuxEnergyConsumption;
-import org.matsim.vsp.ev.dvrp.DvrpAuxConsumptionFactory;
 
 public class RunEAVBenchmark {
 	private static final double TEMPERATURE = 20;// 20 oC
