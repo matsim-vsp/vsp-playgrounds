@@ -22,12 +22,12 @@ package playground.michalm.drt.run;
 import org.matsim.contrib.drt.optimizer.rebalancing.mincostflow.MinCostFlowRebalancingParams;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.edrt.run.RunEDrtScenario;
 import org.matsim.contrib.ev.EvConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import org.matsim.vsp.edvrp.edrt.run.RunEDrtScenario;
 
 public class RunSharedRebalancableETaxiMielec {
 	public static void main(String[] args) {
