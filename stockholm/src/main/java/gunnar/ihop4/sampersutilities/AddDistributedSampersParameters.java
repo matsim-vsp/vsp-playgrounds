@@ -164,7 +164,7 @@ public class AddDistributedSampersParameters {
 		enricher.enrich(scenario.getPopulation());
 
 		PopulationUtils.writePopulation(scenario.getPopulation(),
-				"/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/enriched.xml");
+				"/Users/GunnarF/NoBackup/data-workspace/ihop4/production-scenario/1PctAllModes_enriched.xml");
 
 	}
 }

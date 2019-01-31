@@ -44,8 +44,6 @@ class SampersTour {
 
 	private Leg secondLeg = null;
 
-	private int stuck = 0;
-
 	private double money_SEK = 0.0;
 
 	// -------------------- CONSTRUCTION / BUILDING --------------------
@@ -77,10 +75,6 @@ class SampersTour {
 		} else {
 			throw new RuntimeException("Cannot add an activity: " + this.buildStatus());
 		}
-	}
-
-	void addStuck(final int stuck) {
-		this.stuck += stuck;
 	}
 
 	void addMoney_SEK(final double money_SEK) {
@@ -121,10 +115,6 @@ class SampersTour {
 		System.out.println(this.buildStatus());
 		// legs contain travel time in seconds
 		return (this.firstLeg.getTravelTime() + this.secondLeg.getTravelTime()) / 60.0;
-	}
-
-	int getStuck() {
-		return this.stuck;
 	}
 
 	double getMoney_SEK() {

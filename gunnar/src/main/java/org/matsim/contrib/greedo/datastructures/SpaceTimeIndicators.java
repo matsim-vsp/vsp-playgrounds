@@ -78,6 +78,16 @@ public class SpaceTimeIndicators<L> {
 		return this.data.size();
 	}
 
+	public int size() {
+		int result = 0;
+		for (List<Visit> visits : this.data) {
+			if (visits != null) {
+				result += visits.size();
+			}
+		}
+		return result;
+	}
+
 	// public Iterable<L> getVisitedSpaceObjects(final int timeBin) {
 	// if (this.data.get(timeBin) != null) {
 	// return this.data.get(timeBin);

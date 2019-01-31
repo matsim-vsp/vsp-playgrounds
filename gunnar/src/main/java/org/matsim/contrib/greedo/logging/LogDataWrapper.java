@@ -156,4 +156,12 @@ public class LogDataWrapper {
 		return this.accelerator.getPopulationSize();
 	}
 
+	public Double getReplannerSizeSum() {
+		return this.identifier.getReplannerSizeSum();
+	}
+	
+	public Double getNonReplannerSizeSum() {
+		return this.identifier.getNonReplannerSizeSum();
+	}
+	
 }

@@ -39,9 +39,9 @@ import saleem.stockholmmodel.utils.StockholmTransformationFactory;
  * @author Gunnar Flötteröd
  *
  */
-public class ProductionRunner {
+public class IHOP2ProductionRunner {
 
-	public ProductionRunner() {
+	public IHOP2ProductionRunner() {
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -68,8 +68,8 @@ public class ProductionRunner {
 		final String buildingShapeFileName = path + "demand-input/by_full_EPSG3857_2.shp";
 		final String populationFileName = path + "demand-input/trips.xml";
 
-		final double populationSample = 0.25;
-		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/25PctAllModes.xml";
+		final double populationSample = 0.01;
+		final String initialPlansFile = "/Users/GunnarF/NoBackup/data-workspace/wum/production-scenario/1PctAllModes_NONSENSE.xml";
 
 		final String configFileName = path + "matsim-input/matsim-config.xml";
 		final double networkUpscaleFactor = 2;
@@ -84,7 +84,7 @@ public class ProductionRunner {
 		 */
 
 		final boolean doNetworkConversion = false;
-		final boolean doPopulationGeneration = false;
+		final boolean doPopulationGeneration = true;
 		final boolean checkPopulation = false;
 		final boolean runMATSim = false;
 

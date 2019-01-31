@@ -84,6 +84,9 @@ public class ReplannerIdentifier {
 	private Double unweightedNonReplannerUtilityChangeSum = null;
 	private Double weightedNonReplannerUtilityChangeSum = null;
 
+	private Double replannerSizeSum = null;
+	private Double nonReplannerSizeSum = null;
+
 	// -------------------- CONSTRUCTION --------------------
 
 	ReplannerIdentifier(final GreedoConfigGroup greedoConfig, final int greedoIteration,
@@ -202,6 +205,14 @@ public class ReplannerIdentifier {
 		return this.weightedNonReplannerUtilityChangeSum;
 	}
 
+	public Double getReplannerSizeSum() {
+		return this.replannerSizeSum;
+	}
+
+	public Double getNonReplannerSizeSum() {
+		return this.nonReplannerSizeSum;
+	}
+
 	// -------------------- IMPLEMENTATION --------------------
 
 	Set<Id<Person>> drawReplanners() {
@@ -250,6 +261,9 @@ public class ReplannerIdentifier {
 		this.weightedReplannerUtilityChangeSum = 0.0;
 		this.weightedNonReplannerUtilityChangeSum = 0.0;
 
+		this.replannerSizeSum = 0.0;
+		this.nonReplannerSizeSum = 0.0;
+
 		for (Id<Person> personId : allPersonIdsShuffled) {
 
 			final ScoreUpdater<Id<?>> scoreUpdater = new ScoreUpdater<>(this.personId2physicalSlotUsage.get(personId),
@@ -269,6 +283,9 @@ public class ReplannerIdentifier {
 						unweightedReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId), -1.0);
 				this.unweightedReplannerUtilityChangeSum += this.personId2unweightedUtilityChange.get(personId);
 				this.weightedReplannerUtilityChangeSum += this.personId2weightedUtilityChange.get(personId);
+				if (this.personId2physicalSlotUsage.containsKey(personId)) {
+					this.replannerSizeSum += this.personId2physicalSlotUsage.get(personId).size();
+				}
 			} else {
 				CountIndicatorUtils.addIndicatorsToTotalsTreatingNullAsZero(weightedNonReplannerCountDifferences,
 						unweightedNonReplannerCountDifferences, this.personId2pseudoSimSlotUsage.get(personId), +1.0);
@@ -276,6 +293,9 @@ public class ReplannerIdentifier {
 						unweightedNonReplannerCountDifferences, this.personId2physicalSlotUsage.get(personId), -1.0);
 				this.unweightedNonReplannerUtilityChangeSum += this.personId2unweightedUtilityChange.get(personId);
 				this.weightedNonReplannerUtilityChangeSum += this.personId2weightedUtilityChange.get(personId);
+				if (this.personId2physicalSlotUsage.containsKey(personId)) {
+					this.nonReplannerSizeSum += this.personId2physicalSlotUsage.get(personId).size();
+				}
 			}
 
 			// interaction residuals are updated by reference

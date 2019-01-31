@@ -49,29 +49,31 @@ import org.matsim.contrib.greedo.listeners.SlotUsageListener;
 import org.matsim.contrib.greedo.logging.AgePercentile;
 import org.matsim.contrib.greedo.logging.AvgAge;
 import org.matsim.contrib.greedo.logging.AvgAgeWeight;
+import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
+import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
+import org.matsim.contrib.greedo.logging.AvgNonReplannerSize;
+import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
+import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
+import org.matsim.contrib.greedo.logging.AvgReplannerSize;
+import org.matsim.contrib.greedo.logging.AvgUnweightedNonReplannerUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgUnweightedReplannerUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgUnweightedUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgWeightedNonReplannerUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgWeightedReplannerUtilityChange;
+import org.matsim.contrib.greedo.logging.AvgWeightedUtilityChange;
 import org.matsim.contrib.greedo.logging.Beta;
 import org.matsim.contrib.greedo.logging.Delta;
 import org.matsim.contrib.greedo.logging.DriversInPhysicalSim;
 import org.matsim.contrib.greedo.logging.DriversInPseudoSim;
-import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityAccelerated;
-import org.matsim.contrib.greedo.logging.AvgExpectedDeltaUtilityUniform;
 import org.matsim.contrib.greedo.logging.LambdaBar;
 import org.matsim.contrib.greedo.logging.LambdaRealized;
 import org.matsim.contrib.greedo.logging.LogDataWrapper;
-import org.matsim.contrib.greedo.logging.AvgRealizedDeltaUtility;
-import org.matsim.contrib.greedo.logging.AvgRealizedUtility;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedNonReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedUnweightedReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedNonReplannerCountDifferences2;
 import org.matsim.contrib.greedo.logging.NormalizedWeightedReplannerCountDifferences2;
-import org.matsim.contrib.greedo.logging.AvgUnweightedUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgUnweightedNonReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgUnweightedReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedNonReplannerUtilityChange;
-import org.matsim.contrib.greedo.logging.AvgWeightedReplannerUtilityChange;
 import org.matsim.contrib.pseudosimulation.MobSimSwitcher;
 import org.matsim.contrib.pseudosimulation.PSim;
 import org.matsim.contrib.pseudosimulation.PSimConfigGroup;
@@ -229,7 +231,7 @@ public class WireGreedoIntoMATSimControlerListener
 			return (this.getPopulationSize() - this.replanners.size());
 		}
 	}
-	
+
 	// --------------- IMPLEMENTATION OF StartupListener ---------------
 
 	private GreedoConfigGroup greedoConfig = null;
@@ -261,6 +263,9 @@ public class WireGreedoIntoMATSimControlerListener
 
 		this.statsWriter.addSearchStatistic(new AvgAge());
 		this.statsWriter.addSearchStatistic(new AvgAgeWeight());
+
+		this.statsWriter.addSearchStatistic(new AvgReplannerSize());
+		this.statsWriter.addSearchStatistic(new AvgNonReplannerSize());
 
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedCountDifferences2());
 		this.statsWriter.addSearchStatistic(new NormalizedUnweightedReplannerCountDifferences2());

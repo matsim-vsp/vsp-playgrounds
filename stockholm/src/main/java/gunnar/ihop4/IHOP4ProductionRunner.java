@@ -32,10 +32,8 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.greedo.Greedo;
 import org.matsim.contrib.greedo.GreedoConfigGroup;
@@ -72,7 +70,6 @@ import org.matsim.roadpricing.RoadPricingConfigGroup;
 import cadyts.utilities.misc.Units;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.utilities.TimeDiscretization;
-import gunnar.ihop4.sampersutilities.SampersParameterUtils;
 import gunnar.ihop4.sampersutilities.SampersScoringFunctionModule;
 import gunnar.ihop4.tollzonepassagedata.TollZoneMeasurementReader;
 
@@ -238,48 +235,52 @@ public class IHOP4ProductionRunner {
 			final TotalDeviationObjectiveFunctionEXPERIMENTAL overallObjectiveFunction,
 			final List<AbstractModule> modules, final TrajectoryPlotter trajectoryPlotter, final Config config) {
 
-		final int simulatedSensorDataExtractionInterval;
-		if (config.getModules().containsKey(PSimConfigGroup.GROUP_NAME)) {
-			simulatedSensorDataExtractionInterval = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class)
-					.getIterationsPerCycle();
-		} else {
-			simulatedSensorDataExtractionInterval = 1;
-		}
+		if (ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder() != null) {
 
-		// final TollZoneMeasurementReader measReader = new
-		// TollZoneMeasurementReader(config);
-		final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(
-				ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
-				new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24),
-				simulatedSensorDataExtractionInterval);
+			final int simulatedSensorDataExtractionInterval;
+			if (config.getModules().containsKey(PSimConfigGroup.GROUP_NAME)) {
+				simulatedSensorDataExtractionInterval = ConfigUtils.addOrGetModule(config, PSimConfigGroup.class)
+						.getIterationsPerCycle();
+			} else {
+				simulatedSensorDataExtractionInterval = 1;
+			}
 
-		measReader.setStartEndTime_s(startTime_s, endTime_s);
-		measReader.run();
+			// final TollZoneMeasurementReader measReader = new
+			// TollZoneMeasurementReader(config);
+			final TollZoneMeasurementReader measReader = new TollZoneMeasurementReader(
+					ConfigUtils.addOrGetModule(config, IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
+					new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24),
+					simulatedSensorDataExtractionInterval);
 
-		// final double normalizingFactor = 1.0
-		// /
-		// (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
-		// +
-		// measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
+			measReader.setStartEndTime_s(startTime_s, endTime_s);
+			measReader.run();
 
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader.getAllDayMeasurements()
-				.getObjectiveFunctions()) {
-			// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
-			overallObjectiveFunction.addDataSource(objectiveFunctionComponent);
-			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
-		}
-		for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
-			modules.add(module);
-		}
+			// final double normalizingFactor = 1.0
+			// /
+			// (measReader.getAllDayMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation()
+			// +
+			// measReader.getOnlyTollTimeMeasurements().getSumOfEvaluatdResidualsAtZeroSimulation());
 
-		for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
-				.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
-			// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
-			overallObjectiveFunction.addDataSource(objectiveFunctionComponent);
-			trajectoryPlotter.addDataSource(objectiveFunctionComponent);
-		}
-		for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
-			modules.add(module);
+			for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
+					.getAllDayMeasurements().getObjectiveFunctions()) {
+				// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+				overallObjectiveFunction.addDataSource(objectiveFunctionComponent);
+				trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+			}
+			for (AbstractModule module : measReader.getAllDayMeasurements().getModules()) {
+				modules.add(module);
+			}
+
+			for (LinkEntryCountDeviationObjectiveFunction objectiveFunctionComponent : measReader
+					.getOnlyTollTimeMeasurements().getObjectiveFunctions()) {
+				// overallObjectiveFunction.add(objectiveFunctionComponent, normalizingFactor);
+				overallObjectiveFunction.addDataSource(objectiveFunctionComponent);
+				trajectoryPlotter.addDataSource(objectiveFunctionComponent);
+			}
+			for (AbstractModule module : measReader.getOnlyTollTimeMeasurements().getModules()) {
+				modules.add(module);
+			}
+
 		}
 	}
 
@@ -769,16 +770,23 @@ public class IHOP4ProductionRunner {
 
 	static void runWithSampersDynamics(final Config config) {
 
+		config.plans().setInputFile("1PctAllModes_enriched.xml");
+
 		config.getModules().remove(IhopConfigGroup.GROUP_NAME);
-		config.getModules().remove(PSimConfigGroup.GROUP_NAME);
-		config.getModules().remove(GreedoConfigGroup.GROUP_NAME);
+		// config.getModules().remove(PSimConfigGroup.GROUP_NAME);
+		// config.getModules().remove(GreedoConfigGroup.GROUP_NAME);
+
+		final Greedo greedo = new Greedo();
+		greedo.meet(config);
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		keepOnlyStrictCarUsers(scenario);
-		
+		greedo.meet(scenario);
+
 		final Controler controler = new Controler(scenario);
 		controler.setModules(new ControlerDefaultsWithRoadPricingModule());
 		controler.addOverridingModule(new SampersScoringFunctionModule());
+		controler.addOverridingModule(greedo);
 
 		controler.run();
 
@@ -790,13 +798,12 @@ public class IHOP4ProductionRunner {
 
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
-			throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is missing.");
-		}
-		run(config);
+		// if (!config.getModules().containsKey(IhopConfigGroup.GROUP_NAME)) {
+		// throw new RuntimeException(IhopConfigGroup.GROUP_NAME + " config module is
+		// missing.");
+		// }
+		// run(config);
 
-//		config.plans().setInputFile("enriched.xml");
-//		runWithSampersDynamics(config);
-
+		runWithSampersDynamics(config);
 	}
 }

@@ -56,11 +56,16 @@ class SampersTourUtilityFunction {
 
 	// -------------------- IMPLEMENTATION --------------------
 
+	double getStuckScore(final Person person) {
+		return this.utlParams.getStuckScore(SampersParameterUtils.Purpose.work, 
+				SampersParameterUtils.getIncome_SEK_yr(person));
+	}
+	
 	double getUtility(final SampersTour tour, final Person person) {
 
 		final Purpose purpose = tour.getPurpose();
 		final double income_SEK = SampersParameterUtils.getIncome_SEK_yr(person);
-		
+
 		double result = this.utlParams.getScheduleDelayCostEarly_1_min(purpose, income_SEK)
 				* this.earlyArrivalTimeLoss_min(tour)
 				+ this.utlParams.getScheduleDelayCostLate_1_min(purpose, income_SEK)
@@ -69,11 +74,6 @@ class SampersTourUtilityFunction {
 		final double travelTime_min = tour.getTravelTime_min();
 		if (travelTime_min > eps) {
 			result += this.utlParams.getLinTimeCoeff_1_min(purpose, income_SEK) * travelTime_min;
-		}
-
-		final int stuck = tour.getStuck();
-		if (stuck > 0) {
-			result += this.utlParams.getStuckScore(tour, income_SEK) * stuck;
 		}
 
 		final double cost_SEK = -tour.getMoney_SEK();

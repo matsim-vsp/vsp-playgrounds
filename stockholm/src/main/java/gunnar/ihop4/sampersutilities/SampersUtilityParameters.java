@@ -247,9 +247,8 @@ class SampersUtilityParameters {
 		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money);
 	}
 
-	double getStuckScore(final SampersTour tour, final Double income_money) {
+	double getStuckScore(final Purpose purpose, final Double income_money) {
 		// A hopefully not completely nonsensical guess.
-		return this.linTimeCoeff_1_min.getOrZero(tour.getPurpose(), income_money)
-				* SampersParameterUtils.getActivityDuration_min(tour);
-	}
+		return this.linTimeCoeff_1_min.getOrZero(purpose, income_money) * 24 * 60;
+	}	
 }
