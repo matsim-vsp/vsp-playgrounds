@@ -28,6 +28,10 @@ import floetteroed.opdyts.DecisionVariable;
  */
 public interface ScalarDecisionVariable<U extends ScalarDecisionVariable<U>> extends DecisionVariable {
 
+	/**
+	 * If the decision variable is limited to a particular value range, the
+	 * implementing class is responsible for adjusting the set value accordingly.
+	 */
 	public void setValue(double val);
 
 	public double getValue();

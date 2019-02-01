@@ -53,6 +53,10 @@ import playground.dgrether.koehlerstrehlersignal.data.DgStreet;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdConverter;
 import playground.dgrether.koehlerstrehlersignal.ids.DgIdPool;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -67,7 +71,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 	private static final int CYCLE_TIME = 90;
 	private static final int STEP_TIME = 1;
 	
-	private static void convertOptimalSignalPlans(String directory, String inputFile) {
+	private static CtenSignalPlanXMLParser convertOptimalSignalPlans(String directory, String inputFile) {
 		CtenSignalPlanXMLParser solutionParser = new CtenSignalPlanXMLParser();
 		solutionParser.readFile(directory + inputFile);
 		Map<Id<DgCrossing>, CtenCrossingSolution> crossings = solutionParser.getCrossings();
@@ -78,6 +82,8 @@ public class RunCtenSignalPlans2MatsimConversion {
 
 		convertSignalPlans(crossings, idPool, signalsData, scenario.getNetwork(), scenario.getLanes());
 		writeOptimizedSignalControl(directory, inputFile, signalsData);
+		
+		return solutionParser;
 	}
 	
 	private static void convertSignalPlans(Map<Id<DgCrossing>, CtenCrossingSolution> crossings, DgIdPool idPool,
@@ -204,7 +210,7 @@ public class RunCtenSignalPlans2MatsimConversion {
 	private static void writeOptimizedSignalControl(String directoryPath, String inputFilename,
 			SignalsData signalsData) {
 		SignalsScenarioWriter writer = new SignalsScenarioWriter();
-		String postFix = "opt_expanded";
+		String postFix = inputFilename.substring(inputFilename.lastIndexOf("/")+1,inputFilename.length()-4);
 		String subdirectory = inputFilename.substring(0,inputFilename.lastIndexOf("/")+1);
 		
 		writer.setSignalSystemsOutputFilename(directoryPath + subdirectory
@@ -218,9 +224,31 @@ public class RunCtenSignalPlans2MatsimConversion {
 		writer.writeSignalControlData(signalsData.getSignalControlData());
 	}
 	
-	public static void main(String[] args) {
-		convertOptimalSignalPlans("../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-06-7_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/",
-				"btu/solution_splits_expanded.xml");
+	public static void main(String[] args) throws IOException {
+//		String inputFilename = "btu/solution_splits_expanded.xml";
+		String inputFilename = "btu/optimized.xml";
+		String directory = "../../shared-svn/projects/cottbus/data/optimization/cb2ks2010/2018-11-20-v1_minflow_50.0_time19800.0-34200.0_speedFilter15.0_SP_tt_cBB50.0_sBB500.0/";
+		
+//		FileWriter fw = new FileWriter(new File(directory + "randoms/tt_cten.txt"));
+//		BufferedWriter out = new BufferedWriter(fw);
+//		out.write("coord \ttotal_cost_cten \ttotal_driving_time_cten \ttotal_waiting_time_cten");
+//		out.newLine();
+
+//		for (int i=0; i<=49; i++) {
+//			inputFilename = "randoms/coord" + i + ".xml";
+			CtenSignalPlanXMLParser solParser = convertOptimalSignalPlans(
+					directory,
+					inputFilename);
+			
+			// write out total cost and delay for plotting
+//			out.write("coord" + i + "\t" + solParser.getTotalCost()/solParser.getCycleTime() 
+//					+ "\t" + solParser.getTotalDrivingTime()/solParser.getCycleTime()
+//					+ "\t" + solParser.getTotalWaitingTime()/solParser.getCycleTime());
+//			out.newLine();
+//		}
+//		
+//		out.close();
+		System.out.println("done :)");
 	}
 
 }

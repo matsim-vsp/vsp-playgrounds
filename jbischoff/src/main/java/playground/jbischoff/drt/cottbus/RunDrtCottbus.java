@@ -21,6 +21,9 @@ package playground.jbischoff.drt.cottbus;/*
  * created by jbischoff, 12.09.2018
  */
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -28,9 +31,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class RunDrtCottbus {
     public static void main(String[] args) {
@@ -56,7 +56,7 @@ public class RunDrtCottbus {
             drt.setMaxWalkDistance(350);
             drt.setOperationalScheme(DrtConfigGroup.OperationalScheme.stopbased.toString());
             drt.setRequestRejection(true);
-            Controler controler = DrtControlerCreator.createControler(config, false);
+            Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
 
             controler.run();
         }

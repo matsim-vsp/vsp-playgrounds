@@ -1,5 +1,6 @@
 package playground.kturner.freightKt.analyse;
 
+//TODO: warum wird dies hier genutzt -> Nutze doch einfach CarrierVehicleType (freight contrib) kmt, mai 18
 public class VehicleTypeSpezificCapabilities{
 	private double fixCosts;
 	private double costsPerMeter;

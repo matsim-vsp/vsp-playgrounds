@@ -211,7 +211,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 			throw new RuntimeException(e);
 		}
 
-		Set<Id<Link>> tolledLinkIds = scheme.getTolledLinkIds();  //Link-Ids des MautSchemas			//TODO: Umbenennen, sodass nicht mehr direkt auf Mautlinks abziehlt. Belieferungszone kann ja auch ohne Maut-Szenario exisiteren ;)
+		Set<Id<Link>> lezLinkIds = scheme.getTolledLinkIds();  //Link-Ids der Umweltzone (LEZ)
 		//Liste der zum UCC-Carrier übertragenen Services -> wird später aus normalen Carrier entfernt
 		Set<CarrierService> serviceToRemove= new HashSet<CarrierService>(); 	
 
@@ -219,7 +219,7 @@ private static final Logger log = Logger.getLogger(UccCarrierCreator.class);		//
 			Carrier uccCarrier = CarrierImpl.newInstance(Id.create(uccC_prefix + carrier.getId() , Carrier.class));
 
 			for (CarrierService service: carrier.getServices()) {
-				if (tolledLinkIds.contains(service.getLocationLinkId())){	//Service liegt in der Maut-Zone (=Umweltzone)
+				if (lezLinkIds.contains(service.getLocationLinkId())){	//Service liegt in der Maut-Zone (=Umweltzone)
 					uccCarrier.getServices().add(service);		//Füge Service zum UCC_Carrier hinzu
 					serviceToRemove.add(service);
 				}

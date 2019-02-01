@@ -19,9 +19,6 @@
 
 package playground.vsp.cadyts.marginals;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -38,6 +35,12 @@ import org.matsim.facilities.ActivityFacilities;
 import playground.vsp.cadyts.marginals.prep.DistanceBin;
 import playground.vsp.cadyts.marginals.prep.DistanceDistribution;
 import playground.vsp.cadyts.marginals.prep.DistanceDistributionUtils;
+
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by amit on 20.06.18.
@@ -59,6 +62,7 @@ class EventsToBeelinDistanceRange {
     private final Map<Id<Person>, String> personToMode = new HashMap<>();
 
     private int stuckEventsCounter = 0;
+    private Set<String> warnedAboutExclusion = new HashSet<>();
 
     @Inject
     EventsToBeelinDistanceRange(Scenario scenario, DistanceDistribution inputDistanceDistribution){
@@ -72,7 +76,8 @@ class EventsToBeelinDistanceRange {
         if (agentFilter!=null && !agentFilter.includeAgent(event.getPersonId())) return null;
 
         String mode  = personToMode.get(event.getPersonId());
-        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty()){
+        if (this.inputDistanceDistribution.getDistanceRanges(mode).isEmpty() && !warnedAboutExclusion.contains(mode)) {
+            warnedAboutExclusion.add(mode);
             LOG.warn("The distance range for mode "+mode+" in the input distance distribution is empty. This will be excluded from the calibration.");
             return null;
         }

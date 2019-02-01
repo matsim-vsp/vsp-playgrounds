@@ -256,7 +256,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 	
 	private void runGnuplotScript(String gnuplotScriptName, String pathToInputDir) {	
 		// 'Users/theresa/workspace/' is the common top level, i.e. subtract 3 levels
-		int noLevels = pathToInputDir.trim().split("/").length - 3; 
+		int noLevels = pathToInputDir.trim().split("/").length - 4;
 		String levels = "";
 		for (int i=0; i<noLevels; i++) {
 			levels += "../";

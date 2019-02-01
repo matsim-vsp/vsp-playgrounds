@@ -30,11 +30,10 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.dynagent.DynAction;
 import org.matsim.contrib.dynagent.DynLeg;
-import org.matsim.contrib.dynagent.StaticDynActivity;
+import org.matsim.contrib.dynagent.IdleDynActivity;
 import org.matsim.contrib.dynagent.StaticPassengerDynLeg;
-import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.DynAgent.agentLogic.ParkingAgentLogic;
-import org.matsim.contrib.parking.parkingsearch.DynAgent.agentLogic.ParkingAgentLogic.LastParkActionState;
+import org.matsim.contrib.parking.parkingsearch.ParkingUtils;
 import org.matsim.contrib.parking.parkingsearch.manager.ParkingSearchManager;
 import org.matsim.contrib.parking.parkingsearch.manager.WalkLegFactory;
 import org.matsim.contrib.parking.parkingsearch.manager.vehicleteleportationlogic.VehicleTeleportationLogic;
@@ -97,7 +96,8 @@ public class CarsharingParkingAgentLogic extends ParkingAgentLogic {
 		this.lastParkActionState = LastParkActionState.PARKACTIVITY;
 		this.currentlyAssignedVehicleId = null;
 		this.parkingLogic.reset();
-		return new StaticDynActivity(this.stageInteractionType,now + configGroup.getParkduration());}
+			return new IdleDynActivity(this.stageInteractionType, now + configGroup.getParkduration());
+		}
 		else throw new RuntimeException ("No parking possible");
 	}
 	

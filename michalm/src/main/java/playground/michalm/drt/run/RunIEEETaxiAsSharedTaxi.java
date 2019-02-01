@@ -36,6 +36,6 @@ public class RunIEEETaxiAsSharedTaxi {
 	public static void run(String configFile, boolean otfvis) {
 		Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
 				new OTFVisConfigGroup(), new TaxiFareConfigGroup());
-		DrtControlerCreator.createControler(config, otfvis).run();
+		DrtControlerCreator.createControlerWithSingleModeDrt(config, otfvis).run();
 	}
 }

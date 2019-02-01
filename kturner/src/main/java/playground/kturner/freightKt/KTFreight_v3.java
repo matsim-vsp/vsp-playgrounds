@@ -124,12 +124,12 @@ import playground.kturner.utils.MoveDirVisitor;
 public class KTFreight_v3 {
 
 	private static final Logger log = Logger.getLogger(KTFreight_v3.class);
-	private static final Level loggingLevel = Level.INFO; 		//Set to info to avoid all Debug-Messages, e.g. from VehicleRountingAlgorithm, but can be set to other vaules if needed. KMT feb/18. 
+	private static final Level loggingLevel = Level.INFO; 		//Set to info to avoid all Debug-Messages, e.g. from VehicleRountingAlgorithm, but can be set to other values if needed. KMT feb/18. 
 
 
 	//Beginn Namesdefinition KT Für Berlin-Szenario 
 	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/" ;
-	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin_20180910/Base_Ia/" ;
+	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IVa-UCCE/" ;
 	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/Temp/";
 	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 
@@ -137,11 +137,13 @@ public class KTFreight_v3 {
 	private static final String NETFILE_NAME = "network.xml" ;
 	private static final String VEHTYPEFILE_NAME = "vehicleTypes.xml" ;
 //	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet.xml" ; //Hat keine Eletrofzg zur Verfügung
-	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet_withElectro.xml"; // With elektrovehicles available.
+//	private static final String CARRIERFILE_NAME = "carrierLEH_v2_withFleet_withElectro.xml"; // With elektrovehicles available.
+	private static final String CARRIERFILE_NAME = "CarriersWShipments/IVa-UCCE_carrierLEH_v2_withFleet_Shipment.xml"; //Based on shipments for multiple tours
 	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
-	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung
-	private static final String TOLLAREAFILE_NAME = "toll_area.xml";  //Zonendefinition (Links) für anhand eines Maut-Files
-
+	private static final String TOLLFILE_NAME = "toll_cordon20.xml";		//Zur Mautberechnung (Fzgtypen unten auswählen "onlytollVehTypes"
+//	private static final String TOLLFILE_NAME = "toll_cordon1000.xml";		//Maut zur Sperrung der Innenstadt (Fzgtypen unten auswählen "onlytollVehTypes"
+	
+	private static final String LEZAREAFILE_NAME = "lez_area.xml";  //Zonendefinition (Links) für Umweltzone anhand eines Maut-Files -> Services hier werden im UCC-Case von den UCC beliefert. !File dient NICHT der Mautberechnung
 	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId).
 	private static final String uccC_prefix = "UCC-";	
 
@@ -153,14 +155,14 @@ public class KTFreight_v3 {
 			new ArrayList<String>(Arrays.asList("6874", "3058", "5468")); 
 	// VehicleTypes die vom Maut betroffen seien sollen. null, wenn alle (ohne Einschränkung) bemautet werden sollen
 	private static final ArrayList<String> onlyTollVehTypes = 
-			//				new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen", "medium18t", "light8t", "light8t_frozen"));
-			new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen"));
+							new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen", "medium18t", "light8t", "light8t_frozen")); 
+//			new ArrayList<String>(Arrays.asList("heavy40t", "heavy26t", "heavy26t_frozen"));
 	//Ende  Namesdefinition Berlin
 
 
 //	////Beginn Namesdefinition KT Für Test-Szenario (Grid)
 //	private static final String INPUT_DIR = "../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Grid_Szenario/" ;
-//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/VehTypeReader1/" ;
+//	private static final String OUTPUT_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/Base/" ;
 //	private static final String TEMP_DIR = "../../OutputKMT/projects/freight/studies/testing/Temp/";
 //	private static final String LOG_DIR = OUTPUT_DIR + "Logs/";
 //	
@@ -170,14 +172,14 @@ public class KTFreight_v3 {
 //	private static final String VEHTYPEFILE_NAME = "grid-vehTypes_kt.xml" ;
 //	private static final String CARRIERFILE_NAME = "grid-carrier_kt.xml" ;
 //	private static final String ALGORITHMFILE_NAME = "mdvrp_algorithmConfig_2.xml" ;
-//	private static final String TOLLFILE_NAME = "grid-tollDistance.xml";
-//	private static final String TOLLAREAFILE_NAME = "grid-tollArea.xml"; 
+//	private static final String TOLLFILE_NAME = "grid-tollCordon.xml";
+//	private static final String LEZAREAFILE_NAME = "grid-tollArea.xml"; 
 //	//Prefix mit denen UCC-CarrierIds beginnen (Rest identisch mit CarrierId). Vermeide "_", 
 //	//um die Analyse der MATSIMEvents einfacher zu gestalten (Dort ist "_" als Trennzeichen verwendet.
 //	private static final String uccC_prefix = "UCC-";		
 //	// All retailer/carrier to handle in UCC-Case. (begin of CarrierId); null if all should be used.
-//	private static final ArrayList<String> selectRetailers = null ;
-////			new ArrayList<String>(Arrays.asList("gridCarrier3"));
+//	private static final ArrayList<String> selectRetailers =//null ;
+//			new ArrayList<String>(Arrays.asList("gridCarrier3"));
 ////		= new ArrayList<String>("gridCarrier", "gridCarrier1", "gridCarrier2", "gridCarrier3"); 
 //	//Location of UCC
 //	private static final ArrayList<String> uccDepotsLinkIdsString = new ArrayList<String>(Arrays.asList("j(0,5)", "j(10,5)")); 
@@ -195,12 +197,12 @@ public class KTFreight_v3 {
 	private static final String CARRIERFILE = INPUT_DIR + CARRIERFILE_NAME;
 	private static final String ALGORITHMFILE = INPUT_DIR + ALGORITHMFILE_NAME;
 	private static final String TOLLFILE = INPUT_DIR + TOLLFILE_NAME;
-	private static final String TOLLAREAFILE = INPUT_DIR + TOLLAREAFILE_NAME;
+	private static final String LEZAREAFILE = INPUT_DIR + LEZAREAFILE_NAME;
 
 
 	// Einstellungen für den Run	
 	private static final boolean addingCongestion = true ;  //uses NetworkChangeEvents to reduce freespeed.
-	private static final boolean addingToll = false;  //added, kt. 07.08.2014
+	private static final boolean addingToll = true;  //added, kt. 07.08.2014
 	private static final boolean usingUCC = false;	 //Using Transshipment-Center, added kt 30.04.2015
 	private static final boolean runMatsim = true;	 //when false only jsprit run will be performed
 	private static final int LAST_MATSIM_ITERATION = 0;  //only one iteration for writing events.
@@ -255,7 +257,7 @@ public class KTFreight_v3 {
 ////		private static final String CARRIERFILE = INPUT_DIR + CARRIERFILE_NAME;
 ////		private static final String ALGORITHMFILE = INPUT_DIR + ALGORITHMFILE_NAME;
 ////		private static final String TOLLFILE = INPUT_DIR + TOLLFILE_NAME;
-////		private static final String TOLLAREAFILE = INPUT_DIR + TOLLAREAFILE_NAME;
+////		private static final String LEZAREAFILE = INPUT_DIR + TOLLAREAFILE_NAME;
 //		
 //	}
 
@@ -372,7 +374,7 @@ public class KTFreight_v3 {
 				}
 			}
 
-			UccCarrierCreator uccCarrierCreator = new UccCarrierCreator(carriers, vehicleTypes, TOLLAREAFILE, uccC_prefix, selectRetailers, uccDepotsLinkIds, 0.0, 0.0 );
+			UccCarrierCreator uccCarrierCreator = new UccCarrierCreator(carriers, vehicleTypes, LEZAREAFILE, uccC_prefix, selectRetailers, uccDepotsLinkIds, 0.0, 0.0 );
 			uccCarrierCreator.createSplittedUccCarrriers();
 			carriers = uccCarrierCreator.getSplittedCarriers();
 
@@ -448,8 +450,7 @@ public class KTFreight_v3 {
 			VehicleRoutingAlgorithm algorithm = VehicleRoutingAlgorithms.readAndCreateAlgorithm(vrp, ALGORITHMFILE);
 			algorithm.setMaxIterations(MAX_JSPRIT_ITERATION);
 
-			Collection<VehicleRoutingProblemSolution> solutions = (algorithm.searchSolutions()); 
-			VehicleRoutingProblemSolution solution = Solutions.bestOf(solutions);
+			VehicleRoutingProblemSolution solution = Solutions.bestOf(algorithm.searchSolutions());
 			CarrierPlan newPlan = MatsimJspritFactory.createPlan(carrier, solution) ;
 
 			NetworkRouter.routePlan(newPlan,netBasedCosts) ;
@@ -462,9 +463,6 @@ public class KTFreight_v3 {
 
 			//Ausgabe der Ergebnisse auf der Console
 			//SolutionPrinter.print(vrp,solution,Print.VERBOSE);
-			
-			//Write the VRP with the best solution of jsprit
-			new VrpXMLWriter(vrp, solutions, true).write(TEMP_DIR + RUN + runIndex + "/jsprit_vrp_with_solution_"+ carrier.getId().toString() +".xml");
 
 		}
 	}
@@ -788,7 +786,7 @@ public class KTFreight_v3 {
 			writer.write("VehType: \t" + VEHTYPEFILE_NAME +System.getProperty("line.separator"));
 			writer.write("Algorithm: \t" + ALGORITHMFILE_NAME +System.getProperty("line.separator"));
 			writer.write("Toll: \t" + TOLLFILE_NAME +System.getProperty("line.separator"));
-			writer.write("LowEmissionZone: \t" + TOLLAREAFILE_NAME +System.getProperty("line.separator"));
+			writer.write("LowEmissionZone: \t" + LEZAREAFILE_NAME +System.getProperty("line.separator"));
 
 			writer.write(System.getProperty("line.separator"));
 			writer.write("##Run Settings:" +System.getProperty("line.separator"));

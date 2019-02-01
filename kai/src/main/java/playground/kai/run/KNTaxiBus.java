@@ -40,7 +40,8 @@ public final class KNTaxiBus {
 		
 		config.checkConsistency();
 
-		Controler controler = DrtControlerCreator.createControler(config, true, KNTaxiBus::createCustomizedDrtScenario);
+		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, true,
+				KNTaxiBus::createCustomizedDrtScenario);
 		controler.run() ;
 	}
 

@@ -26,6 +26,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.utils.misc.Time;
 
+import floetteroed.utilities.Units;
+
 /**
  *
  * @author Gunnar Flötteröd
@@ -39,16 +41,26 @@ public class ActivityTimesUtils {
 		for (ActivityParams actParams : config.planCalcScore().getActivityParams()) {
 			if (!"dummy".equals(actParams.getActivityType())) { // magic act in PlanCalcScoreConfigGroup
 				if (!Time.isUndefinedTime(actParams.getOpeningTime())) {
-					builder.add(new OpeningTime(config, actParams.getActivityType(), actParams.getOpeningTime()),
+					final OpeningTime openingTime = new OpeningTime(config, actParams.getActivityType(),
+							actParams.getOpeningTime());
+					openingTime.setMinValue_s(0);
+					openingTime.setMaxValue_s(Units.S_PER_D);
+					builder.add(openingTime,
 							new ScalarRandomizer<OpeningTime>(timeVariationStepSize_s, searchStageExponent));
 				}
 				if (!Time.isUndefinedTime(actParams.getClosingTime())) {
-					builder.add(new ClosingTime(config, actParams.getActivityType(), actParams.getClosingTime()),
+					final ClosingTime closingTime = new ClosingTime(config, actParams.getActivityType(),
+							actParams.getClosingTime());
+					closingTime.setMinValue_s(0);
+					closingTime.setMaxValue_s(Units.S_PER_D);
+					builder.add(closingTime,
 							new ScalarRandomizer<ClosingTime>(timeVariationStepSize_s, searchStageExponent));
 				}
 				if (!Time.isUndefinedTime(actParams.getTypicalDuration())) {
-					builder.add(
-							new TypicalDuration(config, actParams.getActivityType(), actParams.getTypicalDuration()),
+					final TypicalDuration typicalDuration = new TypicalDuration(config, actParams.getActivityType(),
+							actParams.getTypicalDuration());
+					typicalDuration.setMinValue_s(15 * Units.S_PER_MIN);
+					builder.add(typicalDuration,
 							new ScalarRandomizer<TypicalDuration>(timeVariationStepSize_s, searchStageExponent));
 				}
 			}

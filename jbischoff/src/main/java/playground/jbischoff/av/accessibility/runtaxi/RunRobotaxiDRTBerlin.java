@@ -19,7 +19,6 @@
 
 package playground.jbischoff.av.accessibility.runtaxi;
 
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -27,6 +26,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+
+import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 
 /**
  * This class runs an example robotaxi scenario including fares. The simulation runs for 10 iterations, this takes
@@ -54,7 +55,7 @@ public class RunRobotaxiDRTBerlin {
         DrtConfigGroup.get(config).setMaxWaitTime(180);
         config.controler().setOutputDirectory(config.controler().getOutputDirectory() + run);
         config.plans().setInputFile("taxiplans_" + run + ".xml.gz");
-        Controler controler = DrtControlerCreator.createControler(config, false);
+        Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
         controler.addOverridingModule(new SwissRailRaptorModule());
         controler.run();
     }

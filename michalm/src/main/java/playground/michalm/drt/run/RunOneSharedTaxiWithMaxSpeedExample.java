@@ -43,7 +43,7 @@ public class RunOneSharedTaxiWithMaxSpeedExample {
 				new OTFVisConfigGroup());
 		config.controler().setLastIteration(lastIteration);
 		config.controler().setWriteEventsInterval(lastIteration);
-		Controler controler = DrtControlerCreator.createControler(config, otfvis);
+		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, otfvis);
 		VehicleType vehicleType = new VehicleTypeImpl(Id.create("autonomousVehicleType", VehicleType.class));
 		vehicleType.setMaximumVelocity(1);
 		controler.addOverridingModule(new DvrpTravelTimeWithMaxSpeedLimitModule(vehicleType));

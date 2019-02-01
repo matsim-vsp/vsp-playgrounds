@@ -64,7 +64,7 @@ public class PrivateAVRequestInserter implements UnplannedRequestInserter {
 		Iterator<TaxiRequest> reqIter = unplannedRequests.iterator();
 		while (reqIter.hasNext()) {
 			TaxiRequest req = reqIter.next();
-			Id<Vehicle> personalAV = Id.create(req.getPassenger().getId().toString() + "_av", Vehicle.class);
+			Id<Vehicle> personalAV = Id.create(req.getPassengerId().toString() + "_av", Vehicle.class);
 			Vehicle veh = fleet.getVehicles().get(personalAV);
 			if (veh == null) {
 				throw new RuntimeException("Vehicle " + personalAV.toString() + "does not exist.");
