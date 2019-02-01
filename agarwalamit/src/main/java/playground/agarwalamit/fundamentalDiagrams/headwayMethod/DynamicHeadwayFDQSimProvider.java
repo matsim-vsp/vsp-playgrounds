@@ -18,6 +18,7 @@ import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicleImpl;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 
@@ -64,7 +65,7 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
 				.useDefaults() //
 				.removeModule(PopulationModule.class) //
-				.addOverridingControllerModule(new AbstractModule() {
+				.addOverridingModule(new AbstractModule() {
 					@Override
 					public void install() {
 						bind(QNetworkFactory.class).toInstance(qnetworkFactory);
@@ -93,7 +94,7 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 
 					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
 					attributableVehicle.getAttributes().putAttribute("headway", 3600./fdConfigGroup.getTrackLinkCapacity() ); //initialize
-					final QVehicle vehicle = new QVehicle(
+					final QVehicle vehicle = new QVehicleImpl(
 //							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class),
 							attributableVehicle);
 					vehicle.setDriver(agent);

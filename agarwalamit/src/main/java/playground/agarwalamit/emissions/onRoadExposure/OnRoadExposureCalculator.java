@@ -66,21 +66,27 @@ public class OnRoadExposureCalculator {
      * <p>t --> travelTime</p>
      */
     private double calculateForSinglePollutant(String pollutant, double pollutantValue, String mode, double travelTime) {
-        double val = (config.getPollutantToBackgroundConcentration_gm().get(pollutant)
-                * config.getModeToOccupancy().get(mode)
-                * config.getModeToBreathingRate().get(mode)
-                * config.getPollutantToPenetrationRate(mode).get(pollutant)
-                * travelTime)
-                + (pollutantValue / config.getDispersionRate()
-                * config.getModeToOccupancy().get(mode)
-                * config.getModeToBreathingRate().get(mode)
-                * config.getPollutantToPenetrationRate(mode).get(pollutant));
-
-        if (this.config.isUsingMicroGramUnits()) {
-            return val * Math.pow(10,6);
+        if (config.getPollutantToBackgroundConcentration_gm().get(pollutant) == null) {
+        	LOGGER.warn("No background concentration for " + pollutant);
+        	return 0.;
         } else {
-            return val;
+        	double val = (config.getPollutantToBackgroundConcentration_gm().get(pollutant)
+                    * config.getModeToOccupancy().get(mode)
+                    * config.getModeToBreathingRate().get(mode)
+                    * config.getPollutantToPenetrationRate(mode).get(pollutant)
+                    * travelTime)
+                    + (pollutantValue / config.getDispersionRate()
+                    * config.getModeToOccupancy().get(mode)
+                    * config.getModeToBreathingRate().get(mode)
+                    * config.getPollutantToPenetrationRate(mode).get(pollutant));
+
+            if (this.config.isUsingMicroGramUnits()) {
+                return val * Math.pow(10,6);
+            } else {
+                return val;
+            }
         }
+
     }
 
 }

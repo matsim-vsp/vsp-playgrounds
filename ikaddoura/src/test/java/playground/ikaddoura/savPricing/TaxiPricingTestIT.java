@@ -27,8 +27,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.noise.NoiseConfigGroup;
@@ -37,7 +37,6 @@ import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiControlerCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
@@ -83,13 +82,8 @@ public class TaxiPricingTestIT {
 		optAVParams1.setAccountForCongestion(false);
 		
 		Controler controler1 = TaxiControlerCreator.createControler(config1, false);
-		// drt fares
-		controler1.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		// fares
+		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));		
 
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
@@ -126,13 +120,8 @@ public class TaxiPricingTestIT {
 		optAVParams2.setChargeTollsFromSAVDriver(true);
 
 		Controler controler2 = TaxiControlerCreator.createControler(config2, false);
-		// drt fares
-		controler2.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		// fares
+		controler2.addOverridingModule(new TaxiFareModule());
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
@@ -171,12 +160,7 @@ public class TaxiPricingTestIT {
 		
 		Controler controler3 = TaxiControlerCreator.createControler(config3, false);
 		// drt fares
-		controler3.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler3.addOverridingModule(new TaxiFareModule());
 		controler3.addOverridingModule(new SAVPricingModule(controler3.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler3.addOverridingModule(new OTFVisLiveModule());
@@ -243,12 +227,7 @@ public class TaxiPricingTestIT {
 
 		Controler controler1 = TaxiControlerCreator.createControler(config1, false);
 		// drt fares
-		controler1.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
 		
 		LinkDemandEventHandler handler1 = new LinkDemandEventHandler(controler1.getScenario().getNetwork());
@@ -290,13 +269,7 @@ public class TaxiPricingTestIT {
 
 		Controler controler2 = TaxiControlerCreator.createControler(config2, false);
 		// taxi fares
-		controler2.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
-		
+		controler2.addOverridingModule(new TaxiFareModule());
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());

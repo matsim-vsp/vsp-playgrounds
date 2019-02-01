@@ -1,21 +1,13 @@
 package playground.vsptelematics.ha2;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import javax.inject.Singleton;
-
-import org.matsim.core.mobsim.framework.listeners.MobsimListener;
+import com.google.inject.Provides;
 import org.matsim.core.mobsim.qsim.AbstractQSimModule;
-import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
 import org.matsim.core.mobsim.qsim.components.QSimComponentsConfig;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Module;
-import com.google.inject.Provides;
+import javax.inject.Singleton;
 
 public class GuidanceQSimModule extends AbstractQSimModule {
 	static public String GUIDANCE_AGENT_SOURCE = "GuidanceAgentSource";

@@ -17,47 +17,24 @@
  * *********************************************************************** */
 
 /**
- * 
+ *
  */
 package playground.tschlenther.pave.initialSetup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.data.Fleet;
-import org.matsim.contrib.dvrp.data.file.FleetProvider;
-import org.matsim.contrib.dvrp.optimizer.VrpOptimizer;
-import org.matsim.contrib.dvrp.passenger.PassengerEngine;
-import org.matsim.contrib.dvrp.passenger.PassengerRequestCreator;
-import org.matsim.contrib.dvrp.router.TimeAsTravelDisutility;
+import org.matsim.contrib.dvrp.router.DvrpRoutingNetworkProvider;
+import org.matsim.contrib.dvrp.run.AbstractDvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModes;
 import org.matsim.contrib.dvrp.run.DvrpModule;
-import org.matsim.contrib.dvrp.run.MobsimTimerProvider;
-import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelDisutilityProvider;
+import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.dvrp.trafficmonitoring.DvrpTravelTimeModule;
-import org.matsim.contrib.dvrp.vrpagent.VrpAgentLogic.DynActionCreator;
-import org.matsim.contrib.dynagent.run.DynRoutingModule;
-import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.data.validator.DefaultTaxiRequestValidator;
-import org.matsim.contrib.taxi.data.validator.TaxiRequestValidator;
-import org.matsim.contrib.taxi.optimizer.DefaultTaxiOptimizerProvider;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
-import org.matsim.contrib.taxi.passenger.SubmittedTaxiRequestsCollector;
-import org.matsim.contrib.taxi.passenger.TaxiRequestCreator;
-import org.matsim.contrib.taxi.run.Taxi;
 import org.matsim.contrib.taxi.run.TaxiConfigConsistencyChecker;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
 import org.matsim.contrib.taxi.run.TaxiModule;
-import org.matsim.contrib.taxi.run.TaxiQSimModule;
 import org.matsim.contrib.taxi.scheduler.TaxiScheduler;
-import org.matsim.contrib.taxi.util.TaxiSimulationConsistencyChecker;
-import org.matsim.contrib.taxi.util.stats.TaxiStatsDumper;
-import org.matsim.contrib.taxi.util.stats.TaxiStatusTimeProfileCollectorProvider;
-import org.matsim.contrib.taxi.vrpagent.TaxiActionCreator;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
@@ -67,21 +44,15 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import com.google.inject.Inject;
-import com.google.inject.Key;
+import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 
-import playground.jbischoff.avparking.AvParkingContext;
-import playground.jbischoff.avparking.ParkingTaxiModule;
-import playground.jbischoff.avparking.PrivateAVFleetGenerator;
-import playground.jbischoff.avparking.optimizer.PrivateAVOptimizerProvider;
 import playground.jbischoff.avparking.optimizer.PrivateAVScheduler;
 import playground.tschlenther.pave.av.TSPrivateAVFleetGenerator;
-import playground.tschlenther.pave.av.TSPrivateAVOptimizerProvider;
 
 /**
  * @author tschlenther
@@ -91,7 +62,7 @@ public class RunMaasScenario {
 
 	public static final String CONFIG_FILE_RULEBASED = "C:/TU Berlin/MasterArbeit/input/mielec_taxi_config_rulebased.xml";
 	public static final String CONFIG_FILE_ASSIGNMENT = "C:/TU Berlin/MasterArbeit/input/mielec_taxi_config_assigment.xml";
-	
+
 	/**
 	 * @param args
 	 */
@@ -99,13 +70,13 @@ public class RunMaasScenario {
 		// TODO Auto-generated method stub
 		run();
 	}
-	
+
 	static void run() {
-		
+
 		TaxiConfigGroup taxiCfg = new TaxiConfigGroup();
 		Config config = ConfigUtils.loadConfig(CONFIG_FILE_RULEBASED, new DvrpConfigGroup(), taxiCfg);
 		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		
+
 		config.controler().setLastIteration(1);
 		config.controler().setOutputDirectory("output/test/");
 		config.qsim().setStartTime(0);
@@ -117,44 +88,52 @@ public class RunMaasScenario {
 		final Scenario scenario = ScenarioUtils.loadScenario(config);
 		Controler controler = new Controler(scenario);
 
-		TSPrivateAVFleetGenerator  fleet = new TSPrivateAVFleetGenerator(scenario);  
-		
-	
-		controler.addOverridingModule(DvrpModule.createModule(taxiCfg.getMode(),
-				Collections.singleton(TaxiOptimizer.class)));
-		
+		TSPrivateAVFleetGenerator fleet = new TSPrivateAVFleetGenerator(scenario);
+
+		controler.addOverridingModule(new DvrpModule());
+		controler.configureQSimComponents(DvrpQSimComponents.activateModes(taxiCfg.getMode()));
+
+		controler.addOverridingModule(new TaxiModule());
+
 		controler.addOverridingModule(new AbstractModule() {
+			@Inject
+			private TaxiConfigGroup taxiCfg;
+
 			@Override
 			public void install() {
-				bind(Fleet.class).annotatedWith(Taxi.class).toInstance(fleet);
-				bind(Fleet.class).toInstance(fleet);
-				
-				addControlerListenerBinding().toInstance(fleet);	
-				
-				DvrpTravelDisutilityProvider.bindTravelDisutilityForOptimizer(binder(), Taxi.class);
-				bind(PrivateAVScheduler.class).asEagerSingleton();
-			
+				bind(Fleet.class).annotatedWith(DvrpModes.mode(taxiCfg.getMode())).toInstance(fleet);
+				addControlerListenerBinding().toInstance(fleet);
 
-				bind(SubmittedTaxiRequestsCollector.class).toInstance(new SubmittedTaxiRequestsCollector());
-				addControlerListenerBinding().to(SubmittedTaxiRequestsCollector.class);
+				installQSimModule(new AbstractDvrpModeQSimModule(taxiCfg.getMode()) {
+					@Override
+					protected void configureQSim() {
+						bindModal(TaxiScheduler.class).toProvider(new Provider<TaxiScheduler>() {
+							@Inject
+							@Named(DvrpRoutingNetworkProvider.DVRP_ROUTING)
+							private Network network;
 
-				addControlerListenerBinding().to(TaxiSimulationConsistencyChecker.class);
-				addControlerListenerBinding().to(TaxiStatsDumper.class);
+							@Inject
+							private MobsimTimer timer;
 
-				addRoutingModuleBinding(taxiCfg.getMode()).toInstance(
-						new DynRoutingModule(taxiCfg.getMode()));
+							@Inject
+							@Named(DvrpTravelTimeModule.DVRP_ESTIMATED)
+							private TravelTime travelTime;
 
-				if (taxiCfg.getTimeProfiles()) {
-					addMobsimListenerBinding().toProvider(TaxiStatusTimeProfileCollectorProvider.class);
-					// add more time profiles if necessary
-				}
-				
-				bind(TaxiRequestValidator.class).to(DefaultTaxiRequestValidator.class);
+							@Inject
+							private TravelDisutilityFactory travelDisutilityFactory;
+
+							@Override
+							public TaxiScheduler get() {
+								return new PrivateAVScheduler(taxiCfg, fleet, network, timer, travelTime,
+										travelDisutilityFactory.createTravelDisutility(travelTime));
+							}
+						}).asEagerSingleton();
+					}
+				});
 			}
 		});
 
 		controler.run();
-		
 	}
 
 }

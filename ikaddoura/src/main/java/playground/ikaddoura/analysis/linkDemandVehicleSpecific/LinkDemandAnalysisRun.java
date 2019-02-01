@@ -27,13 +27,25 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.collections.Tuple;
 
 public class LinkDemandAnalysisRun {
 	
-	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/optAV_new/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT";
-	private String runId = "run1";
+//	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0";
+//	private String runId = "bc-0";
+
+//	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d";
+//	private String runId = "savA-0d";
+	
+//	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-2d";
+//	private String runId = "savA-2d";
+	
+	private static String OUTPUT_BASE_DIR = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-3d";
+	private String runId = "savA-3d";
+
+	private String vehicleTypePrefix = "rt";
+	private Tuple<Double, Double> timeBin = new Tuple<Double, Double>(8. * 3600, 9. * 3600);
 	private String outputDirectory;
-	private String taxiPrefix = "rt";
 
 	public LinkDemandAnalysisRun(String outputDirectory) {
 		this.outputDirectory = outputDirectory;
@@ -50,23 +62,50 @@ public class LinkDemandAnalysisRun {
 			outputDirectory = outputDirectory + "/";
 		}
 	
-		Config config = ConfigUtils.loadConfig(outputDirectory + runId + ".output_config.xml");
-		config.plans().setInputFile(null);
-		config.plans().setInputPersonAttributeFile(null);
-		config.network().setChangeEventsInputFile(null);
-		config.vehicles().setVehiclesFile(null);
-		config.network().setInputFile(outputDirectory + runId + ".output_network.xml.gz");
+		Config config;
+		if (runId != null) {
+			config = ConfigUtils.loadConfig(outputDirectory + runId + ".output_config.xml");
+			config.plans().setInputFile(null);
+			config.plans().setInputPersonAttributeFile(null);
+			config.network().setChangeEventsInputFile(null);
+			config.vehicles().setVehiclesFile(null);
+			config.network().setInputFile(outputDirectory + runId + ".output_network.xml.gz");
+		} else {
+			config = ConfigUtils.loadConfig(outputDirectory + "output_config.xml");
+			config.plans().setInputFile(null);
+			config.plans().setInputPersonAttributeFile(null);
+			config.network().setChangeEventsInputFile(null);
+			config.vehicles().setVehiclesFile(null);
+			config.network().setInputFile(outputDirectory + "output_network.xml.gz");
+		}
+		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		EventsManager events = EventsUtils.createEventsManager();
 				
-		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork(), taxiPrefix);
+		LinkDemandEventHandler handler = new LinkDemandEventHandler(scenario.getNetwork(), vehicleTypePrefix, timeBin);
 		events.addHandler(handler);
 		
-		String eventsFile = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + runId + "." + config.controler().getLastIteration() + ".events.xml.gz";
+		String eventsFile;
+		String analysis_output_file;
+		if (runId != null) {
+			eventsFile = outputDirectory + runId + ".output_events.xml.gz";
+			if (timeBin == null) {
+				analysis_output_file = outputDirectory + runId + ".link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
+			} else {
+				analysis_output_file = outputDirectory + runId + ".link_dailyDemand_" + this.vehicleTypePrefix + "_" + timeBin.getFirst() + "-" + timeBin.getSecond() + ".csv";
+			}
+		} else {
+			eventsFile = outputDirectory + "output_events.xml.gz";
+			if (timeBin == null) {
+				analysis_output_file = outputDirectory  + "link_dailyDemand_" + this.vehicleTypePrefix + ".csv";
+			} else {
+				analysis_output_file = outputDirectory + "link_dailyDemand_" + this.vehicleTypePrefix + "_" + timeBin.getFirst() + "-" + timeBin.getSecond() + ".csv";
+			}
+		}
+		
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(eventsFile);
 		
-		String analysis_output_file = outputDirectory + "ITERS/it." + config.controler().getLastIteration() + "/" + runId + ".link_dailyDemand_vehicleType.csv";
 		handler.printResults(analysis_output_file);
 	}
 			 

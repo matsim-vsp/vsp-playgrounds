@@ -22,8 +22,9 @@
  */
 package playground.jbischoff.sharedTaxiBerlin.run;
 
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.run.*;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -59,7 +60,7 @@ public class RunSharedTaxiBatch {
 			config.controler().setRunId(runId);
 			config.controler().setOutputDirectory("D:/runs-svn/bvg_sharedTaxi/demand02/c"+capacity[c]+"/"+runId);
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-			DrtControlerCreator.createControler(config, false).run();
+			DrtControlerCreator.createControlerWithSingleModeDrt(config, false).run();
 		}
 		}
 		

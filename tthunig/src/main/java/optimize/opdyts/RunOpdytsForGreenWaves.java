@@ -20,11 +20,12 @@
  */
 package optimize.opdyts;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import analysis.TtAnalyzedGeneralResultsWriter;
+import analysis.TtGeneralAnalysis;
+import analysis.TtListenerToBindGeneralAnalysis;
+import analysis.TtTotalTravelTime;
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -33,29 +34,18 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.opdyts.MATSimSimulator2;
 import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
 import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
 import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
+import org.matsim.contrib.signals.data.signalgroups.v20.*;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
@@ -76,17 +66,15 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import analysis.TtAnalyzedGeneralResultsWriter;
-import analysis.TtGeneralAnalysis;
-import analysis.TtListenerToBindGeneralAnalysis;
-import analysis.TtTotalTravelTime;
-import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisWriter;
+import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import utils.OutputUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author tthunig
@@ -182,7 +170,11 @@ public class RunOpdytsForGreenWaves {
 					});
 				}
 			});
-			simulator.addOverridingModule(new SignalsModule());
+//			simulator.addOverridingModule(new SignalsModule());
+			if ( true ) {
+				throw new RuntimeException( "MATSimSimulator2 would need to implement AllowsConfiguration in order to make progress here.  However, the newest version of" +
+										" opdyts is different anyways.  So I am not repairing this here.  kai, dec'18") ;
+			}
 			runner.addNetworkModeOccupancyAnalyzr(simulator);
 
 			runner.run(simulator, new OffsetRandomizer(scenario), new OffsetDecisionVariable(
@@ -191,7 +183,8 @@ public class RunOpdytsForGreenWaves {
 		} else {
 			// simply start a matsim simulation
 			Controler controler = new Controler(scenario);
-			controler.addOverridingModule(new SignalsModule());
+//			controler.addOverridingModule(new SignalsModule());
+			Signals.configure( controler );
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {

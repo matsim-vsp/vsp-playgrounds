@@ -27,8 +27,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareModule;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
@@ -37,7 +37,6 @@ import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.testcases.MatsimTestUtils;
@@ -82,15 +81,10 @@ public class DrtPricingTestIT {
 		optAVParams1.setAccountForNoise(false);
 		optAVParams1.setAccountForCongestion(false);
 		optAVParams1.setSavMode(TransportMode.drt);
-		
-		Controler controler1 = DrtControlerCreator.createControler(config1, false);
+
+		Controler controler1 = DrtControlerCreator.createControlerWithSingleModeDrt(config1, false);
 		// drt fares
-		controler1.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));		
 
 		if (otfvis) controler1.addOverridingModule(new OTFVisLiveModule());	
@@ -127,14 +121,11 @@ public class DrtPricingTestIT {
 		optAVParams2.setChargeTollsFromSAVDriver(true);
 		optAVParams2.setSavMode(TransportMode.drt);
 
-		Controler controler2 = DrtControlerCreator.createControler(config2, false);
+		Controler controler2 = DrtControlerCreator.createControlerWithSingleModeDrt(config2, false);
+		
 		// drt fares
-		controler2.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler2.addOverridingModule(new TaxiFareModule());
+
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());
@@ -172,14 +163,11 @@ public class DrtPricingTestIT {
 		optAVParams3.setChargeTollsFromCarUsers(false);
 		optAVParams3.setSavMode(TransportMode.drt);
 
-		Controler controler3 = DrtControlerCreator.createControler(config3, false);
+		Controler controler3 = DrtControlerCreator.createControlerWithSingleModeDrt(config3, false);
+		
 		// drt fares
-		controler3.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler3.addOverridingModule(new TaxiFareModule());
+
 		controler3.addOverridingModule(new SAVPricingModule(controler3.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler3.addOverridingModule(new OTFVisLiveModule());
@@ -245,14 +233,9 @@ public class DrtPricingTestIT {
 		
 		// taxi
 
-		Controler controler1 = DrtControlerCreator.createControler(config1, false);
+		Controler controler1 = DrtControlerCreator.createControlerWithSingleModeDrt(config1, false);
 		// drt fares
-		controler1.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler1.addOverridingModule(new TaxiFareModule());
 		controler1.addOverridingModule(new SAVPricingModule(controler1.getScenario(), TransportMode.car));
 		
 		LinkDemandEventHandler handler1 = new LinkDemandEventHandler(controler1.getScenario().getNetwork());
@@ -293,14 +276,9 @@ public class DrtPricingTestIT {
 		decongestionSettings.setWriteLinkInfoCharts(false);
 		decongestionSettings.setRunFinalAnalysis(false);
 
-		Controler controler2 = DrtControlerCreator.createControler(config2, false);
+		Controler controler2 = DrtControlerCreator.createControlerWithSingleModeDrt(config2, false);
 		// drt fares
-		controler2.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
+		controler2.addOverridingModule(new TaxiFareModule());
 		controler2.addOverridingModule(new SAVPricingModule(controler2.getScenario(), TransportMode.car));
 		
 		if (otfvis) controler2.addOverridingModule(new OTFVisLiveModule());

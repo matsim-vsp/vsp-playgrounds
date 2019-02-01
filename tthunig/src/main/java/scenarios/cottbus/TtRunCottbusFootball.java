@@ -21,22 +21,13 @@
  */
 package scenarios.cottbus;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup.IntersectionLogic;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.StabilizationStrategy;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
@@ -48,7 +39,6 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.dgrether.signalsystems.cottbus.CottbusFansControlerListener;
 import playground.dgrether.signalsystems.cottbus.CottbusFootballAnalysisControllerListener;
 import playground.dgrether.signalsystems.cottbus.footballdemand.CottbusFanCreator;
@@ -58,6 +48,15 @@ import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.ModifyNetwork;
+
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author tthunig, based on dgrether CottbusFootballBatch
@@ -269,16 +268,17 @@ public class TtRunCottbusFootball {
 			CottbusFootballAnalysisControllerListener cbfbControllerListener = new CottbusFootballAnalysisControllerListener();
 			controler.addControlerListener(cbfbControllerListener);
 			//add the signals module
-			SignalsModule signalsModule = new SignalsModule();
+//			SignalsModule signalsModule = new SignalsModule();
+			Signals.Configurator configurator = new Signals.Configurator( controler ) ;
 			// the signals module works for planbased, sylvia and laemmer signal controller
 			// by default and is pluggable for your own signal controller like this:
-			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+			configurator.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
 					DownstreamPlanbasedSignalController.DownstreamFactory.class);
-			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+			configurator.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
 					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+			configurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 					GershensonSignalController.GershensonFactory.class);
-			controler.addOverridingModule(signalsModule);
+//			controler.addOverridingModule(configurator);
 
 			// bind gershenson config
 			controler.addOverridingModule(new AbstractModule() {

@@ -20,8 +20,11 @@
 package playground.agarwalamit.munich.analysis.userGroup;
 
 import java.io.BufferedWriter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.apache.log4j.Logger;
@@ -93,7 +96,8 @@ public class EmissionsPerPersonPerUserGroup {
 			ema.postProcessData();
 
 			Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-			emissionsPerPerson = EmissionUtils.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions);
+			Set<String> pollutants = new HashSet<>(Arrays.asList("CO", "CO2(total)", "FC", "HC", "NMHC", "NOx", "NO2","PM", "SO2"));
+			emissionsPerPerson = EmissionUtils.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions, pollutants);
 
 			getTotalEmissionsPerUserGroup(this.emissionsPerPerson);
 			writeTotalEmissionsPerUserGroup(this.outputDir+runCase+"/analysis/userGrpEmissions.txt");

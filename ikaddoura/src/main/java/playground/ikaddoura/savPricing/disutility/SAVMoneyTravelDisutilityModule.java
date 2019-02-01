@@ -19,9 +19,7 @@
 
 package playground.ikaddoura.savPricing.disutility;
 
-import java.lang.annotation.Annotation;
-
-import org.matsim.core.controler.AbstractModule;
+import org.matsim.contrib.dvrp.run.AbstractDvrpModeModule;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 
 import com.google.inject.Inject;
@@ -33,26 +31,25 @@ import playground.ikaddoura.moneyTravelDisutility.data.AgentFilter;
 * @author ikaddoura
 */
 
-public class SAVMoneyTravelDisutilityModule extends AbstractModule {
+public class SAVMoneyTravelDisutilityModule extends AbstractDvrpModeModule {
 	
-	private final Class<? extends Annotation> savOptimizerModeAnnotation;
 	private final SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory;
 	
 	@Inject(optional = true)
 	private AgentFilter agentFilter;
 	
 	private final AgentFilter agentFilterToBind;
-	
-	public SAVMoneyTravelDisutilityModule(Class<? extends Annotation> savOptimizerModeAnnotation, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory, AgentFilter agentFilter) {
-		this.savOptimizerModeAnnotation = savOptimizerModeAnnotation;
+
+	public SAVMoneyTravelDisutilityModule(String savMode, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory,
+			AgentFilter agentFilter) {
+		super(savMode);
 		this.factory = factory;
 		this.agentFilterToBind = agentFilter;
 	}
 
-	public SAVMoneyTravelDisutilityModule(Class<? extends Annotation> savOptimizerModeAnnotation, SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory) {
-		this.savOptimizerModeAnnotation = savOptimizerModeAnnotation;
-		this.factory = factory;
-		this.agentFilterToBind = null;
+	public SAVMoneyTravelDisutilityModule(String savMode,
+			SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory factory) {
+		this(savMode, factory, null);
 	}
 
 	@Override
@@ -61,8 +58,8 @@ public class SAVMoneyTravelDisutilityModule extends AbstractModule {
 		if (agentFilterToBind != null && agentFilter == null ) {
 			this.bind(AgentFilter.class).toInstance(agentFilterToBind);
 		}
-		
-		this.bind(TravelDisutilityFactory.class).annotatedWith(savOptimizerModeAnnotation).toInstance(factory);
+
+		this.bindModal(TravelDisutilityFactory.class).toInstance(factory);
 		
 		this.bind(MoneyEventAnalysis.class).asEagerSingleton();	
 		this.addControlerListenerBinding().to(MoneyEventAnalysis.class);

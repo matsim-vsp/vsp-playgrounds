@@ -21,10 +21,8 @@
  */
 package scenarios.illustrative.braess.run;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-
+import analysis.signals.SignalAnalysisListener;
+import analysis.signals.SignalAnalysisWriter;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -37,7 +35,7 @@ import org.matsim.contrib.decongestion.DecongestionModule;
 import org.matsim.contrib.decongestion.routing.TollTimeDistanceTravelDisutilityFactory;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.sylvia.SylviaConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
@@ -65,17 +63,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.LanesWriter;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
-import analysis.signals.SignalAnalysisListener;
-import analysis.signals.SignalAnalysisWriter;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV10;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV7;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV8;
-import playground.vsp.congestion.handlers.CongestionHandlerImplV9;
-import playground.vsp.congestion.handlers.TollHandler;
+import playground.vsp.congestion.handlers.*;
 import playground.vsp.congestion.routing.CongestionTollTimeDistanceTravelDisutilityFactory;
 import scenarios.illustrative.analysis.TtAbstractAnalysisTool;
 import scenarios.illustrative.analysis.TtAnalyzedResultsWriter;
@@ -96,6 +85,10 @@ import signals.gershenson.GershensonConfig;
 import signals.gershenson.GershensonSignalController;
 import signals.laemmerFlex.FullyAdaptiveLaemmerSignalController;
 import utils.OutputUtils;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 
 /**
  * Class to run a simulation of the braess scenario with or without signals. 
@@ -175,8 +168,8 @@ public final class RunBraessSimulation {
 		
 		SylviaConfigGroup sylviaConfig = ConfigUtils.addOrGetModule(config, SylviaConfigGroup.class);
 		// TODO modify sylvia config parameter here if you like
-		sylviaConfig.setSignalGroupMaxGreenScale(2);
-		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(true);
+		sylviaConfig.setSignalGroupMaxGreenScale(1.5);
+		sylviaConfig.setUseFixedTimeCycleAsMaximalExtension(false);
 
 		// set brain exp beta
 		config.planCalcScore().setBrainExpBeta(2);
@@ -347,16 +340,17 @@ public final class RunBraessSimulation {
 			});
 			break;
 		default:
-			SignalsModule signalsModule = new SignalsModule();
+//			SignalsModule signalsModule = new SignalsModule();
+			Signals.Configurator cc = new Signals.Configurator( controler ) ;
 			// the signals module works for planbased, sylvia and laemmer signal controller
 			// by default and is pluggable for your own signal controller like this:
-			signalsModule.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
+			cc.addSignalControllerFactory(DownstreamPlanbasedSignalController.IDENTIFIER,
 					DownstreamPlanbasedSignalController.DownstreamFactory.class);
-			signalsModule.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
+			cc.addSignalControllerFactory(FullyAdaptiveLaemmerSignalController.IDENTIFIER,
 					FullyAdaptiveLaemmerSignalController.LaemmerFlexFactory.class);
-			signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+			cc.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 					GershensonSignalController.GershensonFactory.class);
-			controler.addOverridingModule(signalsModule);
+//			controler.addOverridingModule(signalsModule);
 
 			// bind gershenson config
 			controler.addOverridingModule(new AbstractModule() {

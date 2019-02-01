@@ -21,13 +21,14 @@
  */
 package scenarios.cottbus;
 
+import analysis.TtTotalTravelTime;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.core.config.Config;
@@ -41,8 +42,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
-
-import analysis.TtTotalTravelTime;
 import scenarios.cottbus.TtRunCottbusSimulation.NetworkType;
 import scenarios.cottbus.TtRunCottbusSimulation.PopulationType;
 import scenarios.cottbus.TtRunCottbusSimulation.SignalType;
@@ -82,7 +81,8 @@ public class FixCottbusResultsIT {
 		
 		Controler controler = new Controler(scenario);
 		// add missing modules
-		controler.addOverridingModule(new SignalsModule());
+//		controler.addOverridingModule(new SignalsModule());
+		Signals.configure( controler );
 
 		TtTotalTravelTime handler = new TtTotalTravelTime();
 		controler.addOverridingModule(new AbstractModule() {			

@@ -38,6 +38,8 @@ import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.vehicles.Vehicle;
 
+import playground.agarwalamit.utils.MapUtils;
+
 /**
  * EmissionEvents only have vehicle id, which looks fine, however, to collect emissions for every person, one need
  * a connector, which is only available via normal events file. Thus, both emission and normal event files are required.
@@ -50,10 +52,10 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
 
     private final Map<Id<Vehicle>, Id<Person>> vehicle2DriverIdCollector = new HashMap<>();
 
-    private final Map<Id<Person>, Map<ColdPollutant, Double>> personId2ColdEmissions = new HashMap<>();
-    private final Map<Id<Person>, Map<WarmPollutant, Double>> personId2WarmEmissions = new HashMap<>();
-    private final Map<Id<Vehicle>, Map<ColdPollutant, Double>> vehicleId2ColdEmissions = new HashMap<>();
-    private final Map<Id<Vehicle>, Map<WarmPollutant, Double>> vehicleId2WarmEmissions = new HashMap<>();
+    private final Map<Id<Person>, Map<String, Double>> personId2ColdEmissions = new HashMap<>();
+    private final Map<Id<Person>, Map<String, Double>> personId2WarmEmissions = new HashMap<>();
+    private final Map<Id<Vehicle>, Map<String, Double>> vehicleId2ColdEmissions = new HashMap<>();
+    private final Map<Id<Vehicle>, Map<String, Double>> vehicleId2WarmEmissions = new HashMap<>();
 
     @Override
     public void handleEvent(WarmEmissionEvent event) {
@@ -72,20 +74,14 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
 //            }
             this.personId2WarmEmissions.merge(driverId,
                     event.getWarmEmissions(),
-                    (a, b) -> Arrays.stream(WarmPollutant.values()).collect(
-                            Collectors.toMap(wp -> wp,
-                                    wp -> a.get(wp) + b.get(wp))));
-
-
+                    (a, b) -> MapUtils.mergeMaps(a, b) );
         }
 
         {
 
             this.vehicleId2WarmEmissions.merge(event.getVehicleId(),
                     event.getWarmEmissions(),
-                    (a, b) -> Arrays.stream(WarmPollutant.values()).collect(
-                            Collectors.toMap(wp -> wp,
-                                    wp -> a.get(wp) + b.get(wp))));
+                    (a, b) -> MapUtils.mergeMaps(a, b) );
         }
     }
 
@@ -96,18 +92,14 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
 
             this.personId2ColdEmissions.merge(driverId,
                     event.getColdEmissions(),
-                    (a, b) -> Arrays.stream(ColdPollutant.values()).collect(
-                            Collectors.toMap(cp -> cp,
-                                    cp -> a.get(cp) + b.get(cp))));
+                    (a, b) -> MapUtils.mergeMaps(a, b));
         }
 
         {
 
             this.vehicleId2ColdEmissions.merge(event.getVehicleId(),
                     event.getColdEmissions(),
-                    (a, b) -> Arrays.stream(ColdPollutant.values()).collect(
-                            Collectors.toMap(cp -> cp,
-                                    cp -> a.get(cp) + b.get(cp))));
+                    (a, b) -> MapUtils.mergeMaps(a, b));
         }
 
     }
@@ -135,19 +127,19 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
         return this.vehicle2DriverIdCollector.get(vehicleId);
     }
 
-    public Map<Id<Person>, Map<ColdPollutant, Double>> getPersonId2ColdEmissions() {
+    public Map<Id<Person>, Map<String, Double>> getPersonId2ColdEmissions() {
         return personId2ColdEmissions;
     }
 
-    public Map<Id<Person>, Map<WarmPollutant, Double>> getPersonId2WarmEmissions() {
+    public Map<Id<Person>, Map<String, Double>> getPersonId2WarmEmissions() {
         return personId2WarmEmissions;
     }
 
-    public Map<Id<Vehicle>, Map<ColdPollutant, Double>> getVehicleId2ColdEmissions() {
+    public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2ColdEmissions() {
         return vehicleId2ColdEmissions;
     }
 
-    public Map<Id<Vehicle>, Map<WarmPollutant, Double>> getVehicleId2WarmEmissions() {
+    public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2WarmEmissions() {
         return vehicleId2WarmEmissions;
     }
 

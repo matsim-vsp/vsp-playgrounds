@@ -21,10 +21,6 @@
  */
 package signals.gershenson;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -43,15 +39,10 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
+import org.matsim.contrib.signals.data.signalgroups.v20.*;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
@@ -70,8 +61,11 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.Default
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
-
 import scenarios.illustrative.singleCrossing.SingleCrossingScenario;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Test gershenson logic at an intersection with four incoming links and one signal each. No lanes are used.
@@ -361,10 +355,11 @@ public class GershensonIT {
 
 		Controler controler = new Controler(scenario);
 		// add the signals module with gershenson controller
-		SignalsModule signalsModule = new SignalsModule();
-		signalsModule.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
+//		SignalsModule signalsModule = new SignalsModule();
+		Signals.Configurator configurator = new Signals.Configurator( controler ) ;
+		configurator.addSignalControllerFactory(GershensonSignalController.IDENTIFIER,
 				GershensonSignalController.GershensonFactory.class);
-		controler.addOverridingModule(signalsModule);
+//		controler.addOverridingModule(signalsModule);
         
         // bind gershenson config
         controler.addOverridingModule(new AbstractModule() {

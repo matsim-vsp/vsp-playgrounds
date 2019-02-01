@@ -44,10 +44,10 @@ import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEvent;
-import org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEventHandler;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEventHandler;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEvent;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEventHandler;
 import org.matsim.core.api.experimental.events.AgentWaitingForPtEvent;
 import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.api.experimental.events.handler.AgentWaitingForPtEventHandler;
@@ -97,8 +97,8 @@ import org.matsim.vehicles.Vehicle;
  */
 public class DrtPtTripEventHandler implements ActivityStartEventHandler, ActivityEndEventHandler,
 PersonDepartureEventHandler, PersonArrivalEventHandler, PersonEntersVehicleEventHandler, 
-LinkEnterEventHandler, TeleportationArrivalEventHandler, AgentWaitingForPtEventHandler, 
-DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
+LinkEnterEventHandler, TeleportationArrivalEventHandler, AgentWaitingForPtEventHandler, DrtRequestSubmittedEventHandler,
+		PassengerRequestRejectedEventHandler {
 	
 	private final static Logger log = Logger.getLogger(DrtPtTripEventHandler.class);
 	
@@ -106,6 +106,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 //	private Map<Id<Person>, Boolean> agentHasDrtLeg = new HashMap<>();
 	private Network network;
 	private TransitSchedule ptSchedule;
+	private String drtName = TransportMode.drt;
 	
 	private Map<Id<Person>, List<ExperiencedTrip>> person2ExperiencedTrips = new HashMap<>();
 	
@@ -141,11 +142,12 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	 * @param monitoredStartAndEndLinks : only trips which start or end on one these links will be monitored. 
 	 * Set to null if you want to have all trips from all origins and to all destinations
 	 */
-	public DrtPtTripEventHandler(Network network, TransitSchedule ptSchedule, Set<String> monitoredModes, Set<Id<Link>> monitoredStartAndEndLinks){
+	public DrtPtTripEventHandler(Network network, TransitSchedule ptSchedule, Set<String> monitoredModes, Set<Id<Link>> monitoredStartAndEndLinks, String drtName){
 		this.network = network;
 		this.ptSchedule = ptSchedule;
 		this.monitoredModes = monitoredModes; // pt, transit_walk, drt: walk eigentlich nicht, aber in FixedDistanceBased falsch als walk statt transit_walk gesetzt
 		this.monitoredStartAndEndLinks = monitoredStartAndEndLinks;
+		this.drtName = drtName;
 	}
 
 	@Override
@@ -169,7 +171,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	 */
 	@Override
 	public void handleEvent(ActivityEndEvent event) {
-		if(! (event.getActType().equals("pt interaction") || event.getActType().equals("drt interaction")) ){
+		if(! (event.getActType().equals("pt interaction") || event.getActType().equals(drtName + " interaction")) ){
 			agent2CurrentTripActivityBefore.put(event.getPersonId(), event.getActType());			
 		}
 	}
@@ -287,7 +289,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 							agent2CurrentLegDistanceOffsetAtEnteringVehicle.get(event.getPersonId());
 					waitTime = agent2CurrentLegEnterVehicleTime.get(event.getPersonId()) -
 							agent2CurrentLegStartTime.get(event.getPersonId());
-					if (event.getLegMode().equals("drt")) {
+					if (event.getLegMode().equals(drtName)) {
 						grossWaitTime = agent2CurrentLegEnterVehicleTime.get(event.getPersonId()) -
 								agent2CurrentLegDrtRequestTime.get(event.getPersonId());
 						agent2CurrentLegDrtRequestTime.remove(event.getPersonId());
@@ -339,7 +341,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	public void handleEvent(ActivityStartEvent event) {
 		if(agent2CurrentTripStartLink.containsKey(event.getPersonId())){
 			// Check if this a real activity or whether the trip will continue with another leg after an "pt interaction"
-			if(! (event.getActType().equals("pt interaction") || event.getActType().equals("drt interaction")) ){				
+			if(! (event.getActType().equals("pt interaction") || event.getActType().equals(drtName + " interaction")) ){				
 				//Check if trip starts or ends in the monitored area, that means on the monitored start and end links
 				//monitoredStartAndEndLinks=null -> all links are to be monitored
 				if(monitoredStartAndEndLinks.size() == 0 || 
@@ -385,7 +387,7 @@ DrtRequestSubmittedEventHandler, DrtRequestRejectedEventHandler {
 	}
 
 	@Override
-	public void handleEvent(DrtRequestRejectedEvent event) {
+	public void handleEvent(PassengerRequestRejectedEvent event) {
 		// Save ExperiencedLeg and remove temporary data
 //		agent2CurrentTripExperiencedLegs.get(event.getPersonId()).add(new ExperiencedLeg(
 //				event.getPersonId(), agent2CurrentLegStartLink.get(event.getPersonId()), 

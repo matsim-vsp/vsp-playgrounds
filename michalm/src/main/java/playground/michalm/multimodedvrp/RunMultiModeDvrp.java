@@ -21,18 +21,15 @@
 package playground.michalm.multimodedvrp;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.drt.optimizer.DrtOptimizer;
-import org.matsim.contrib.drt.optimizer.insertion.DefaultUnplannedRequestInserter;
-import org.matsim.contrib.drt.optimizer.insertion.ParallelPathDataProvider;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.DrtModule;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.run.DvrpModeQSimModule;
 import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.contrib.otfvis.OTFVisLiveModule;
-import org.matsim.contrib.taxi.optimizer.TaxiOptimizer;
 import org.matsim.contrib.taxi.run.TaxiConfigGroup;
-import org.matsim.contrib.taxi.run.TaxiControlerCreator;
+import org.matsim.contrib.taxi.run.TaxiModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
@@ -54,20 +51,14 @@ public class RunMultiModeDvrp {
 		config.controler()
 				.setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		Controler controler = new Controler(scenario);
-		DrtControlerCreator.addDrtWithoutDvrpModuleToControler(controler);
-		TaxiControlerCreator.addTaxiWithoutDvrpModuleToControler(controler);
+		controler.addOverridingModule(new DrtModule());
+		controler.addOverridingModule(new TaxiModule());
 
 		String taxiMode = TaxiConfigGroup.get(controler.getConfig()).getMode();
-		DvrpModeQSimModule taxiModeQSimModule = new DvrpModeQSimModule.Builder(taxiMode).addListener(
-				TaxiOptimizer.class).build();
-
 		String drtMode = DrtConfigGroup.get(controler.getConfig()).getMode();
-		DvrpModeQSimModule drtModeQSimModule = new DvrpModeQSimModule.Builder(drtMode).addListener(DrtOptimizer.class)
-				.addListener(DefaultUnplannedRequestInserter.class)
-				.addListener(ParallelPathDataProvider.class)
-				.build();
+		controler.addOverridingModule(new DvrpModule());
+		controler.configureQSimComponents(DvrpQSimComponents.activateModes(taxiMode, drtMode));
 
-		controler.addOverridingModule(new DvrpModule(taxiModeQSimModule, drtModeQSimModule));
 		if (otfvis) {
 			controler.addOverridingModule(new OTFVisLiveModule());
 		}

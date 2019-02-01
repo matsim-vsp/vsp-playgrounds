@@ -1,18 +1,10 @@
 package playground.dgrether;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Collection;
-
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
@@ -20,23 +12,19 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.ControlerDefaultsModule;
-import org.matsim.core.controler.Injector;
-import org.matsim.core.controler.NewControlerModule;
-import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModule;
-import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.framework.listeners.MobsimListener;
+import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
-import org.matsim.core.scenario.ScenarioByInstanceModule;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OnTheFlyServer;
 
-import com.google.inject.Key;
-import com.google.inject.Provider;
-import com.google.inject.util.Types;
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /* *********************************************************************** *
  * project: org.matsim.*
@@ -101,27 +89,38 @@ public class DgOTFVisReplayLastIteration {
 		final Scenario sc = ScenarioUtils.loadScenario(config);
 		sc.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 
-		com.google.inject.Injector injector = Injector.createInjector(config, new AbstractModule() {
-			@Override
-			public void install() {
-				// defaults
-				install(new NewControlerModule());
-				install(new ControlerDefaultCoreListenersModule());
-				install(new ControlerDefaultsModule());
-				install(new ScenarioByInstanceModule(sc));
-				// signal specific module
-				install(new SignalsModule());
-			}
-		});
+//		com.google.inject.Injector injector = Injector.createInjector(config, new AbstractModule() {
+//			@Override
+//			public void install() {
+//				// defaults
+//				install(new NewControlerModule());
+//				install(new ControlerDefaultCoreListenersModule());
+//				install(new ControlerDefaultsModule());
+//				install(new ScenarioByInstanceModule(sc));
+//				// signal specific module
+//				install(new SignalsModule());
+//			}
+//		});
+//
+//		EventsManager events = injector.getInstance(EventsManager.class);
+//		events.initProcessing();
+//
+//		QSim qSim = (QSim) injector.getInstance(Mobsim.class);
 
-		EventsManager events = injector.getInstance(EventsManager.class);
+		EventsManager events = EventsUtils.createEventsManager() ;
 		events.initProcessing();
 
-		QSim qSim = (QSim) injector.getInstance(Mobsim.class);
-		Collection<Provider<MobsimListener>> mobsimListeners = (Collection<Provider<MobsimListener>>) injector.getInstance(Key.get(Types.collectionOf(Types.providerOf(MobsimListener.class))));
-		for (Provider<MobsimListener> provider : mobsimListeners) {
-			qSim.addQueueSimulationListeners(provider.get());
+		QSimBuilder builder = new QSimBuilder( sc.getConfig() ) ;
+		Signals.configure( builder );
+		QSim qSim = builder.build( sc, events ) ;
+
+		if ( true ) {
+			throw new RuntimeException("are the following three lines still necessary after using the builder?  kai, dec'18") ;
 		}
+//		Collection<Provider<MobsimListener>> mobsimListeners = (Collection<Provider<MobsimListener>>) injector.getInstance(Key.get(Types.collectionOf(Types.providerOf(MobsimListener.class))));
+//		for (Provider<MobsimListener> provider : mobsimListeners) {
+//			qSim.addQueueSimulationListeners(provider.get());
+//		}
 
 		OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(sc.getConfig(), sc, events, qSim);
 		OTFClientLive.run(sc.getConfig(), server);

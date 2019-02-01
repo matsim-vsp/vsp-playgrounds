@@ -24,7 +24,7 @@ public class Trip {
 	private Id<Zone> departureZoneId;
 	private double departureTime_s;
 	private String departureLegMode;
-	private List<Id<Link>> links = new LinkedList<Id<Link>>();
+	private List<Id<Link>> links = new LinkedList<>();
 	private int useHouseholdCar;
 	private int useOtherCar;
 	private int useHouseholdCarPool;

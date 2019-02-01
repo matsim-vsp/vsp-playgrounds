@@ -120,7 +120,7 @@ public class EmissionResponsibilityTollTimeDistanceTravelDisutility implements T
 		location choice (not implemented)! */
 
         WarmEmissionAnalysisModule warmEmissionAnalysisModule = this.emissionModule.getWarmEmissionAnalysisModule();
-        Map<WarmPollutant, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
+        Map<String, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
                 vehicle,
 ////                NetworkUtils.getType(((Link) link)),
 //                    EmissionUtils.getHbefaRoadType( link ),

@@ -25,13 +25,16 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.drt.data.validator.DrtRequestValidator;
 import org.matsim.contrib.drt.routing.DrtRoute;
 import org.matsim.contrib.drt.routing.DrtRouteFactory;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtConfigs;
-import org.matsim.contrib.drt.run.DrtControlerCreator;
+import org.matsim.contrib.drt.run.DrtModule;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestValidator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
+import org.matsim.contrib.dvrp.run.DvrpModes;
+import org.matsim.contrib.dvrp.run.DvrpModule;
+import org.matsim.contrib.dvrp.run.DvrpQSimComponents;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.controler.AbstractModule;
@@ -49,9 +52,10 @@ import org.matsim.run.RunBerlinScenario;
 import org.matsim.sav.DailyRewardHandlerSAVInsteadOfCar;
 import org.matsim.sav.SAVPassengerTracker;
 import org.matsim.sav.SAVPassengerTrackerImpl;
+import org.matsim.sav.ServiceAreaRequestValidator;
 import org.matsim.sav.prepare.BerlinShpUtils;
 import org.matsim.sav.prepare.PersonAttributesModification;
-import org.matsim.sav.runDRT.DrtServiceAreaRequestValidator;
+import org.matsim.sav.runDRT.RunBerlinDrtScenarioA;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -143,13 +147,17 @@ public final class RunBerlinDrtScenarioB {
 		controler = berlin.prepareControler();
 		
 		// drt + dvrp module
-		DrtControlerCreator.addDrtAsSingleDvrpModeToControler(controler);
-		
+		controler.addOverridingModule(new DrtModule());
+		controler.addOverridingModule(new DvrpModule());
+		controler.configureQSimComponents(
+				DvrpQSimComponents.activateModes(DrtConfigGroup.get(controler.getConfig()).getMode()));
+
 		// reject drt requests outside the service area
-		controler.addOverridingModule(new AbstractModule() {	
+		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				this.bind(DrtRequestValidator.class).toInstance(new DrtServiceAreaRequestValidator());
+				this.bind(PassengerRequestValidator.class).annotatedWith(DvrpModes.mode(TransportMode.drt))
+						.toInstance(new ServiceAreaRequestValidator(RunBerlinDrtScenarioA.drtServiceAreaAttribute));
 			}
 		});
 		

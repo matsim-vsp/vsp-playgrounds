@@ -81,8 +81,8 @@ public class Assignment extends PApplet {
 			float length = sqrt( (x0-x1)*(x0-x1) + (y0-y1)*(y0-y1) ) ;
 			
 			float boxX = length ;
-			float boxY = 10 ;
-			float boxZ = 50 ;
+			float boxY = 20 ;
+			float boxZ = 20 ;
 			translate(boxX/2,boxY/2,-boxZ/2-boxZ*level) ;
 			this.box( boxX, boxY, boxZ ) ;
 		}

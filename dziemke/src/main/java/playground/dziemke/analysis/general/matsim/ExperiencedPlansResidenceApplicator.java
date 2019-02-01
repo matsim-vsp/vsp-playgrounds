@@ -43,6 +43,7 @@ public class ExperiencedPlansResidenceApplicator {
 
         //convert events to output_experiencedPlans
         Config config = ConfigUtils.createConfig();
+        config.global().setCoordinateSystem("GK4");
         config.network().setInputFile(networkFile);
         config.transit().setTransitScheduleFile(transitSchedule);
         config.plans().setInputFile(plansFile);
@@ -60,6 +61,7 @@ public class ExperiencedPlansResidenceApplicator {
 
         //apply residenceFilter to experienced plans
         Config config = ConfigUtils.createConfig();
+        config.global().setCoordinateSystem("GK4");
         config.network().setInputFile(networkFile);
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Network network = scenario.getNetwork();

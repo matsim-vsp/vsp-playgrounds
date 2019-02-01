@@ -39,9 +39,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.agarwalamit.analysis.emission.AirPollutionExposureAnalysisControlerListener;
-import playground.agarwalamit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
-import playground.agarwalamit.utils.PersonFilter;
+//import playground.agarwalamit.analysis.emission.AirPollutionExposureAnalysisControlerListener;
+//import playground.agarwalamit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
 import playground.ikaddoura.analysis.vtts.VTTSHandler;
 import playground.ikaddoura.analysis.vtts.VTTScomputation;
 import playground.ikaddoura.moneyTravelDisutility.MoneyEventAnalysis;
@@ -80,7 +79,7 @@ public class CNEIntegration {
 	
 	private CongestionTollingApproach congestionTollingApproach = CongestionTollingApproach.DecongestionPID;
 
-	private PersonFilter personFilter = null; // TODO : i think, we can somehow merge the personFilter or agentFilter. amit
+//	private PersonFilter personFilter = null; // TODO : i think, we can somehow merge the personFilter or agentFilter. amit
 	private AgentFilter agentFilter  = null;
 
 	private final GridTools gridTools;
@@ -252,12 +251,13 @@ public class CNEIntegration {
 						bind(GridTools.class).toInstance(gridTools);
 						bind(ResponsibilityGridTools.class).toInstance(responsibilityGridTools);
 						bind(EmissionResponsibilityCostModule.class).asEagerSingleton();
-
 						bind(EmissionModule.class).asEagerSingleton();
 
-						if(personFilter!=null) bind(PersonFilter.class).toInstance(personFilter);
-						bind(ExperiencedEmissionCostHandler.class);
-						addControlerListenerBinding().to(AirPollutionExposureAnalysisControlerListener.class);
+						// removed analysis to avoid dependency to amit's playground; no real change in functionality
+						
+//						if(personFilter!=null) bind(PersonFilter.class).toInstance(personFilter);						
+//						bind(ExperiencedEmissionCostHandler.class);
+//						addControlerListenerBinding().to(AirPollutionExposureAnalysisControlerListener.class);
 					}
 				});
 			}
@@ -340,9 +340,9 @@ public class CNEIntegration {
 		this.congestionTollingApproach = congestionTollingApproach;
 	}
 
-	public void setPersonFilter(PersonFilter personFilter) {
-		this.personFilter = personFilter;
-	}
+//	public void setPersonFilter(PersonFilter personFilter) {
+//		this.personFilter = personFilter;
+//	}
 	
 	public void setAgentFilter(AgentFilter agentFilter) {
 		this.agentFilter = agentFilter;

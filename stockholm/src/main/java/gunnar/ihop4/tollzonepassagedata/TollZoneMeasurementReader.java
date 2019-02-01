@@ -19,25 +19,30 @@
  */
 package gunnar.ihop4.tollzonepassagedata;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.AbsoluteLinkEntryCountDeviationObjectiveFunction;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.CountMeasurementSpecification;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.CountMeasurements;
 import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.Filter;
+import org.matsim.contrib.opdyts.buildingblocks.calibration.counting.LinkEntryCountDeviationObjectiveFunction;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
 import org.matsim.vehicles.Vehicle;
 
+import cadyts.utilities.misc.Units;
 import floetteroed.utilities.DynamicData;
 import floetteroed.utilities.TimeDiscretization;
+import gunnar.ihop4.IhopConfigGroup;
 
 /**
  *
@@ -58,11 +63,13 @@ public class TollZoneMeasurementReader {
 
 	private final TimeDiscretization tollTimeOnlyTimeDiscr;
 
-	private final List<String> days;
-
-	private final double simulatedPopulationShare;
+	private final int simulatedSensorDataExtractionInterval;
 
 	// -------------------- MEMBERS --------------------
+
+	private int startTime_s = 0;
+
+	private int endTime_s = (int) Units.S_PER_D;
 
 	private CountMeasurements allDayMeasurements = null;
 
@@ -72,25 +79,28 @@ public class TollZoneMeasurementReader {
 
 	public TollZoneMeasurementReader(final String path, final Config config, final int maxVehicleLength_m,
 			final TimeDiscretization allDayTimeDiscr, final TimeDiscretization tollTimeOnlyTimeDiscr,
-			final List<String> days, final double simulatedPopulationShare) {
+			final int simulatedSensorDataExtractionInterval) {
 		this.pathStr = path;
 		this.config = config;
 		this.maxVehicleLength_m = maxVehicleLength_m;
 		this.allDayTimeDiscr = allDayTimeDiscr;
 		this.tollTimeOnlyTimeDiscr = tollTimeOnlyTimeDiscr;
-		this.days = days;
-		this.simulatedPopulationShare = simulatedPopulationShare;
+		this.simulatedSensorDataExtractionInterval = simulatedSensorDataExtractionInterval;
 	}
 
-	public TollZoneMeasurementReader(final Config config, final double simulatedPopulationShare) {
-		this("/Users/GunnarF/NoBackup/data-workspace/ihop4/2016-10-xx_passagedata", config, 20,
-				new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 * 60, 1800, 24),
-				Arrays.asList("2016-10-11", "2016-10-12", "2016-10-13", "2016-10-18", "2016-10-19", "2016-10-20",
-						"2016-10-25", "2016-10-26", "2016-10-27"),
-				simulatedPopulationShare);
-	}
+	// public TollZoneMeasurementReader(final Config config) {
+	// this(ConfigUtils.addOrGetModule(config,
+	// IhopConfigGroup.class).getTollZoneCountsFolder(), config, 20,
+	// new TimeDiscretization(0, 1800, 48), new TimeDiscretization(6 * 3600 + 30 *
+	// 60, 1800, 24));
+	// }
 
 	// -------------------- IMPLEMENTATION --------------------
+
+	public void setStartEndTime_s(final int startTime_s, final int endTime_s) {
+		this.startTime_s = startTime_s;
+		this.endTime_s = endTime_s;
+	}
 
 	private void replaceByInterpolation(final DynamicData<String> data, final int interpolateTime_s) {
 		int bin = data.bin(interpolateTime_s);
@@ -123,13 +133,21 @@ public class TollZoneMeasurementReader {
 
 	public void run() {
 
-		final List<String> files = new ArrayList<>(this.days.size() * 2);
-		for (String day : this.days) {
-			for (String postfix : new String[] { "-01", "-02" }) {
-				final Path path = Paths.get(this.pathStr, "wsp-passages-vtr-" + day + postfix + ".csv");
-				files.add(path.toString());
-			}
+		List<String> files;
+		try {
+			files = Files.list(Paths.get(this.pathStr)).map(e -> e.toString()).collect(Collectors.toList());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
+
+		// final List<String> files = new ArrayList<>(this.days.size() * 2);
+		// for (String day : this.days) {
+		// for (String postfix : new String[] { "-01", "-02" }) {
+		// final Path path = Paths.get(this.pathStr, "wsp-passages-vtr-" + day + postfix
+		// + ".csv");
+		// files.add(path.toString());
+		// }
+		// }
 
 		final SizeAnalyzer sizeAnalyzer = new SizeAnalyzer(this.maxVehicleLength_m);
 		for (String file : files) {
@@ -152,8 +170,21 @@ public class TollZoneMeasurementReader {
 
 		// CREATION OF ACTUAL SENSOR DATA
 
-		this.allDayMeasurements = new CountMeasurements(this.simulatedPopulationShare);
-		this.onlyTollTimeMeasurements = new CountMeasurements(this.simulatedPopulationShare);
+		final double dayCount = files.size() / 2.0; // two files per day ...
+		Logger.getLogger(TollZoneMeasurementReader.class)
+				.warn("Assuming that there are two measurement files per day, meaning that there are in total "
+						+ dayCount + " observed days.");
+
+		final IhopConfigGroup ihopConfig = ConfigUtils.addOrGetModule(this.config, IhopConfigGroup.class);
+
+		this.allDayMeasurements = new CountMeasurements(() -> ihopConfig.getSimulatedPopulationShare(),
+				ihopConfig.newCountResidualMagnitudeFunction());
+		this.allDayMeasurements.setSimulatedSensorDataExtractionInterval(this.simulatedSensorDataExtractionInterval);
+
+		this.onlyTollTimeMeasurements = new CountMeasurements(() -> ihopConfig.getSimulatedPopulationShare(),
+				ihopConfig.newCountResidualMagnitudeFunction());
+		this.onlyTollTimeMeasurements
+				.setSimulatedSensorDataExtractionInterval(this.simulatedSensorDataExtractionInterval);
 
 		final DynamicData<String> allData = dataAnalyzer.getData();
 		final Set<String> linksWithDataOutsideOfTollTime = keysWithDataOutsideOfTollTime(allData, 6 * 3600, 19 * 3600);
@@ -180,7 +211,7 @@ public class TollZoneMeasurementReader {
 					.getBinCnt(); singleSensorTimeBin++) {
 				final int allDayTimeBin = this.allDayTimeDiscr
 						.getBin(singleSensorTimeDiscr.getBinCenterTime_s(singleSensorTimeBin));
-				singleSensorData[singleSensorTimeBin] = allData.getBinValue(linkStr, allDayTimeBin);
+				singleSensorData[singleSensorTimeBin] = allData.getBinValue(linkStr, allDayTimeBin) / dayCount;
 			}
 
 			if (linksWithDataOutsideOfTollTime.contains(linkStr)) {
@@ -190,12 +221,11 @@ public class TollZoneMeasurementReader {
 			}
 		}
 
-		this.allDayMeasurements.build();
-		this.onlyTollTimeMeasurements.build();
+		this.allDayMeasurements.build(this.startTime_s, this.endTime_s);
+		this.onlyTollTimeMeasurements.build(this.startTime_s, this.endTime_s);
 
 		System.out.println("\nALL-DAY SENSORS");
-		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : this.allDayMeasurements
-				.getObjectiveFunctions()) {
+		for (LinkEntryCountDeviationObjectiveFunction objFct : this.allDayMeasurements.getObjectiveFunctions()) {
 			System.out.print(objFct.getSpecification().getLinks() + ": "
 					+ objFct.getSpecification().getTimeDiscretization() + ": ");
 			for (double val : objFct.getRealData()) {
@@ -205,8 +235,7 @@ public class TollZoneMeasurementReader {
 		}
 
 		System.out.println("\nONLY-TOLL SENSORS");
-		for (AbsoluteLinkEntryCountDeviationObjectiveFunction objFct : this.onlyTollTimeMeasurements
-				.getObjectiveFunctions()) {
+		for (LinkEntryCountDeviationObjectiveFunction objFct : this.onlyTollTimeMeasurements.getObjectiveFunctions()) {
 			System.out.print(objFct.getSpecification().getLinks() + ": "
 					+ objFct.getSpecification().getTimeDiscretization() + ": ");
 			for (double val : objFct.getRealData()) {
@@ -223,14 +252,4 @@ public class TollZoneMeasurementReader {
 	public CountMeasurements getOnlyTollTimeMeasurements() {
 		return this.onlyTollTimeMeasurements;
 	}
-
-	public static void main(String[] args) {
-
-		TollZoneMeasurementReader reader = new TollZoneMeasurementReader(null, 1.0);
-		reader.run();
-
-		System.out.println("DONE");
-
-	}
-
 }

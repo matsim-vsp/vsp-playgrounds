@@ -19,24 +19,24 @@
  * *********************************************************************** */
 package playground.jbischoff.drt.cottbus.analysis;
 
+import java.util.Map;
+import java.util.Stack;
+
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.GenericEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.drt.passenger.events.DrtRequestRejectedEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestScheduledEvent;
 import org.matsim.contrib.drt.passenger.events.DrtRequestSubmittedEvent;
 import org.matsim.contrib.dvrp.data.Request;
 import org.matsim.contrib.dvrp.data.Vehicle;
+import org.matsim.contrib.dvrp.passenger.PassengerRequestRejectedEvent;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsReaderXMLv1;
 import org.matsim.core.events.EventsReaderXMLv1.CustomEventMapper;
 import org.matsim.core.utils.io.MatsimXmlParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-
-import java.util.Map;
-import java.util.Stack;
 
 /**
  * An events reader which reads the default events and the additional custom events CongestionEvent, NoiseEventAffected, NoiseEventCaused.
@@ -63,6 +63,7 @@ public class DrtEventsReader extends MatsimXmlParser {
                 Map<String, String> attributes = event.getAttributes();
 
                 Double time = Double.parseDouble(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_TIME));
+				String mode = attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_MODE);
                 Id<Request> requestId = Id.create(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_REQUEST), Request.class);
                 Id<Person> personId = Id.createPersonId(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_PERSON));
                 Id<Link> fromLinkId = Id.createLinkId(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_FROM_LINK));
@@ -70,29 +71,31 @@ public class DrtEventsReader extends MatsimXmlParser {
                 Double unsharedRideTime = Double.parseDouble(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_UNSHARED_RIDE_TIME));
                 Double unsharedRideDistance = Double.parseDouble(attributes.get(DrtRequestSubmittedEvent.ATTRIBUTE_UNSHARED_RIDE_DISTANCE));
 
-                return new DrtRequestSubmittedEvent(time, requestId, personId, fromLinkId,
+				return new DrtRequestSubmittedEvent(time, mode, requestId, personId, fromLinkId,
                         toLinkId, unsharedRideTime, unsharedRideDistance);
             }
         };
 
         delegate.addCustomEventMapper(DrtRequestSubmittedEvent.EVENT_TYPE, drtRequestSubmittedMapper);
 
-        CustomEventMapper<DrtRequestRejectedEvent> drtRequestRejectedMapper = new CustomEventMapper<DrtRequestRejectedEvent>() {
+		CustomEventMapper<PassengerRequestRejectedEvent> drtRequestRejectedMapper = new CustomEventMapper<PassengerRequestRejectedEvent>() {
 
             @Override
-            public DrtRequestRejectedEvent apply(GenericEvent event) {
+			public PassengerRequestRejectedEvent apply(GenericEvent event) {
 
                 Map<String, String> attributes = event.getAttributes();
 
-                Double time = Double.parseDouble(attributes.get(DrtRequestRejectedEvent.ATTRIBUTE_TIME));
-                Id<Request> requestId = Id.create(attributes.get(DrtRequestRejectedEvent.ATTRIBUTE_REQUEST), Request.class);
-                String cause = attributes.get(DrtRequestRejectedEvent.ATTRIBUTE_CAUSE);
+				Double time = Double.parseDouble(attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_TIME));
+				String mode = attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_MODE);
+				Id<Request> requestId = Id.create(attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_REQUEST),
+						Request.class);
+				String cause = attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_CAUSE);
 
-                return new DrtRequestRejectedEvent(time, requestId, cause);
+				return new PassengerRequestRejectedEvent(time, mode, requestId, cause);
             }
         };
 
-        delegate.addCustomEventMapper(DrtRequestRejectedEvent.EVENT_TYPE, drtRequestRejectedMapper);
+		delegate.addCustomEventMapper(PassengerRequestRejectedEvent.EVENT_TYPE, drtRequestRejectedMapper);
 
         CustomEventMapper<DrtRequestScheduledEvent> drtRequestScheduledMapper = new CustomEventMapper<DrtRequestScheduledEvent>() {
 
@@ -102,12 +105,13 @@ public class DrtEventsReader extends MatsimXmlParser {
                 Map<String, String> attributes = event.getAttributes();
 
                 double time = Double.parseDouble(attributes.get(DrtRequestScheduledEvent.ATTRIBUTE_TIME));
+				String mode = attributes.get(PassengerRequestRejectedEvent.ATTRIBUTE_MODE);
                 Id<Request> requestId = Id.create(attributes.get(DrtRequestScheduledEvent.ATTRIBUTE_REQUEST), Request.class);
                 Id<Vehicle> vehicleId = Id.create(attributes.get(DrtRequestScheduledEvent.ATTRIBUTE_VEHICLE), Vehicle.class);
                 double pickUpTime = Double.parseDouble(attributes.get(DrtRequestScheduledEvent.ATTRIBUTE_PICKUP_TIME));
                 double dropOffDistance = Double.parseDouble(attributes.get(DrtRequestScheduledEvent.ATTRIBUTE_DROPOFF_TIME));
 
-                return new DrtRequestScheduledEvent(time, requestId, vehicleId, pickUpTime, dropOffDistance);
+				return new DrtRequestScheduledEvent(time, mode, requestId, vehicleId, pickUpTime, dropOffDistance);
             }
         };
 

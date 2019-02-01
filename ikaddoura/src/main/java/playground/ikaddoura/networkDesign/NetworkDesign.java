@@ -24,6 +24,7 @@
 
 package playground.ikaddoura.networkDesign;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,10 +34,17 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.controler.listener.IterationStartsListener;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import com.google.inject.Inject;
+
+import playground.ikaddoura.analysis.shapes.Network2Shape;
 
 /**
  * 
@@ -46,19 +54,24 @@ import com.google.inject.Inject;
  *
  */
 
-public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandler {
+public class NetworkDesign implements IterationStartsListener, IterationEndsListener, LinkEnterEventHandler {
 	
 	private static final Logger log = Logger.getLogger(NetworkDesign.class);
 
-	private final int networkAdjustmentInterval = 5;
+	private final String crs = TransformationFactory.DHDN_GK4;
+	private final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(crs, crs);
+	
+	private final double sampleSize = 100;
+	private final int networkAdjustmentInterval = 1;
 	private final int networkAdjustmentStartIteration = 0;
+	private final int writeNetworkInterval = 10;
 		
 	private final double minimumCapacity = 250.;
 	private final double minimumNumberOfLanes = 1.;
 
-	private final boolean accountForProfit = false;
-	private final double revenuesPerCarUserAndMeter = 0.006; // Energiesteuer 0.60 EUR / l ; 10 l pro 100 km
-	private final double infrastructureCostPerLaneAndMeter = 0.05; // 20. / 365.
+	private final boolean accountForProfit = true;
+	private final double revenuesPerCarUserAndMeter = 0.001;
+	private final double infrastructureCostPerLaneAndMeter = 2.5;
 	
 	private final double absoluteCapacityAdjustment = 250;
 	private final double absoluteLaneAdjustment = 0.25;
@@ -78,15 +91,17 @@ public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandl
 				Link link = scenario.getNetwork().getLinks().get(linkId);
 
 				double volume = 0;
-				if (linkId2Volume.get(linkId) != null) volume = linkId2Volume.get(linkId) / scenario.getConfig().qsim().getFlowCapFactor();
+				if (linkId2Volume.get(linkId) != null) volume = linkId2Volume.get(linkId) * sampleSize;
 								
-				if (volume > link.getCapacity()) {
+				if (volume > link.getCapacity() * 24) {
 					
 					if (accountForProfit) {
 						final double revenues = volume  * link.getLength() * revenuesPerCarUserAndMeter;
 						final double infrastructureCosts = link.getNumberOfLanes() * link.getLength() * infrastructureCostPerLaneAndMeter;	
+						
 						final double subsidy = 0.; // TODO: account for user benefits, accessibility, ...
 						final double toll = 0.; // TODO: noise, ...
+						
 						final double profit = revenues - infrastructureCosts + subsidy - toll;
 						
 						if (profit > 0.) {
@@ -108,11 +123,27 @@ public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandl
 	private void increaseCapacity(Link link) {
 		link.setCapacity(link.getCapacity() + absoluteCapacityAdjustment);
 		link.setNumberOfLanes(link.getNumberOfLanes() + absoluteLaneAdjustment);
+		link.setFreespeed(getFreeSpeed(link.getCapacity(), link.getNumberOfLanes()));
+	}
+
+	private double getFreeSpeed(double capacity, double numberOfLanes) {
+		double freeSpeed = 0.;
+		if (capacity < 500.) {
+			freeSpeed = 15/3.6;
+		} else if (capacity >= 500. && capacity < 1000.) {
+			freeSpeed = 30/3.6;
+		} else if (capacity >= 1000. && capacity < 2000.) {
+			freeSpeed = 50/3.6;
+		} else if (capacity >= 2000.) {
+			freeSpeed = 80/3.6;
+		}
+		return freeSpeed;
 	}
 
 	private void reduceCapacity(Link link) {
 		link.setCapacity(link.getCapacity() - absoluteCapacityAdjustment);
 		link.setNumberOfLanes(link.getNumberOfLanes() - absoluteLaneAdjustment);
+		link.setFreespeed(getFreeSpeed(link.getCapacity(), link.getNumberOfLanes()));
 	
 		if (Double.isInfinite(link.getCapacity()) || link.getCapacity() < minimumCapacity ||
 				Double.isInfinite(link.getNumberOfLanes()) || link.getNumberOfLanes() < minimumNumberOfLanes) {
@@ -134,6 +165,21 @@ public class NetworkDesign implements IterationEndsListener, LinkEnterEventHandl
 		} else {
 			linkId2Volume.put(linkId, linkId2Volume.get(linkId) + 1);
 		}
+	}
+
+	@Override
+	public void notifyIterationStarts(IterationStartsEvent event) {
+				
+		if (event.getIteration() % writeNetworkInterval == 0) {
+			log.info("Writing adjusted network...");
+			new NetworkWriter(scenario.getNetwork()).write(scenario.getConfig().controler().getOutputDirectory() + "/" + event.getIteration() + ".adjusted-network.xml.gz");
+			String shpDir = scenario.getConfig().controler().getOutputDirectory() + "/" + event.getIteration() + ".adjusted-network/";
+			File file = new File(shpDir);
+			file.mkdirs();
+			Network2Shape.exportNetwork2Shp(scenario, shpDir, crs, ct);
+			log.info("Writing adjusted network... Done.");
+		}
+		
 	}
 	
 }

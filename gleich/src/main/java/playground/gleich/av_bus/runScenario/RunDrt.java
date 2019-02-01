@@ -42,7 +42,7 @@ public class RunDrt {
 		config.checkConsistency();
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		Controler controler = DrtControlerCreator.createControler(config, false);
+		Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
 		controler.addOverridingModule(new VariableAccessTransitRouterModule());
 		controler.run();
 		
@@ -72,7 +72,7 @@ public class RunDrt {
 		}
 		
 		DrtPtTripEventHandler eventHandler = new DrtPtTripEventHandler(scenario.getNetwork(), scenario.getTransitSchedule(), 
-				monitoredModes, monitoredStartAndEndLinks);
+				monitoredModes, monitoredStartAndEndLinks, TransportMode.drt);
 		events.addHandler(eventHandler);
 		new DrtEventsReader(events).readFile(config.controler().getOutputDirectory() + "/output_events.xml.gz");
 		

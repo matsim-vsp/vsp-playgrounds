@@ -53,17 +53,39 @@ public class CtenSignalPlanXMLParser extends MatsimXmlParser {
 	private final static String GREEN_START = "greenStart";
 	private final static String GREEN_END = "greenEnd";
 	
+	private final static String TOTAL_COST = "totalCost";
+	private final static String TOTAL_DRIVING_TIME = "totalDrivingTime";
+	private final static String TOTAL_WAITING_TIME = "totalWaitingTime";
+	private final static String CYCLE_TIME = "cycleTime";
+	private final static String STEP_TIME = "stepTime";
 	
 	private Map<Id<DgCrossing>, CtenCrossingSolution> crossings = new HashMap<>();
 	
 	private FlexCrossingSolution currentFlexCrossing;
+	
+	private double totalCost;
+	private double totalDrivingTime;
+	private double totalWaitingTime;
+	private int cycleTime;
+	private int stepTime;
 	
 	public CtenSignalPlanXMLParser() {
 		this.setValidating(false);
 	}
 	
 	@Override
-	public void endTag(String arg0, String arg1, Stack<String> arg2) {
+	public void endTag(String name, String characterContent, Stack<String> context) {
+		if (name.equals(TOTAL_COST)) {
+			totalCost = Double.parseDouble(characterContent);
+		} else if (name.equals(TOTAL_DRIVING_TIME)) {
+			totalDrivingTime = Double.parseDouble(characterContent);
+		} else if (name.equals(TOTAL_WAITING_TIME)) {
+			totalWaitingTime = Double.parseDouble(characterContent);
+		} else if (name.equals(CYCLE_TIME)) {
+			cycleTime = Integer.parseInt(characterContent);
+		} else if (name.equals(STEP_TIME)) {
+			stepTime = Integer.parseInt(characterContent);
+		}
 	}
 
 	@Override
@@ -82,11 +104,30 @@ public class CtenSignalPlanXMLParser extends MatsimXmlParser {
 			FlexibleLight light = new FlexibleLight(Id.create(atts.getValue(ID), DgGreen.class), 
 					Integer.parseInt(atts.getValue(GREEN_START)), Integer.parseInt(atts.getValue(GREEN_END)));
 			currentFlexCrossing.addLight(light);
-		}
+		} 
 	}
 	
 	public Map<Id<DgCrossing>, CtenCrossingSolution> getCrossings() {
 		return crossings;
 	}
 
+	public double getTotalCost() {
+		return totalCost;
+	}
+
+	public double getTotalDrivingTime() {
+		return totalDrivingTime;
+	}
+
+	public double getTotalWaitingTime() {
+		return totalWaitingTime;
+	}
+
+	public int getCycleTime() {
+		return cycleTime;
+	}
+
+	public int getStepTime() {
+		return stepTime;
+	}
 }

@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.contrib.emissions.utils.EmissionUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 
@@ -111,7 +110,8 @@ public class MultiAnalyzerWriter {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
 
 			bw.write("user group");
-			for(String pollutant : EmissionUtils.getListOfPollutants()){
+//			for(String pollutant : EmissionUtils.getListOfPollutants()){
+			for(String pollutant : group2TotalEmissions.get(group2TotalEmissions.firstKey()).keySet()){
 				bw.write("\t" + pollutant);
 			}
 			bw.newLine();

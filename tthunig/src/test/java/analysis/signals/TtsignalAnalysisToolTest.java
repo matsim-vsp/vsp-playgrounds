@@ -3,12 +3,31 @@ package analysis.signals;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.*;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkFactory;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
+import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.builder.Signals;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.SignalsDataLoader;
+import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
+import org.matsim.contrib.signals.data.signalgroups.v20.*;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
+import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactoryImpl;
+import org.matsim.contrib.signals.model.Signal;
+import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.model.SignalPlan;
+import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -20,29 +39,6 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.testcases.MatsimTestUtils;
-import org.matsim.contrib.signals.SignalSystemsConfigGroup;
-import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.builder.SignalsModule;
-import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.data.SignalsData;
-import org.matsim.contrib.signals.data.SignalsDataLoader;
-import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalControlDataFactory;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalPlanData;
-import org.matsim.contrib.signals.data.signalgroups.v20.SignalSystemControllerData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactoryImpl;
-import org.matsim.contrib.signals.model.Signal;
-import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.contrib.signals.model.SignalPlan;
-import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.utils.SignalUtils;
 
 /**
  * @author sbraun
@@ -138,7 +134,8 @@ public class TtsignalAnalysisToolTest {
 			eventsManager.addHandler(signalAnalysishandler);
 			
 			Controler controler = new Controler(scenario);
-			controler.addOverridingModule(new SignalsModule());
+//			controler.addOverridingModule(new SignalsModule());
+			Signals.configure( controler );
 			
 			// add signal analysis handler
 			controler.addOverridingModule(new AbstractModule() {			

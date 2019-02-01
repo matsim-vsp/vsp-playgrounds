@@ -19,7 +19,6 @@
 
 package playground.jbischoff.av.accessibility.runtaxi;
 
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import org.matsim.contrib.drt.run.DrtConfigGroup;
 import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -28,8 +27,10 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
+import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
+
 /**
- * This class runs an example robotaxi scenario including scoring. The simulation runs for 10 iterations, this takes
+ * This class runs an example robotaxi scenario including fares. The simulation runs for 10 iterations, this takes
  * quite a bit time (25 minutes or so). You may switch on OTFVis visualisation in the main method below. The scenario
  * should run out of the box without any additional files. If required, you may find all input files in the resource
  * path or in the jar maven has downloaded). There are two vehicle files: 2000 vehicles and 5000, which may be set in
@@ -39,7 +40,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 public class RunRobotaxiDRTBerlin {
 
     public static void main(String[] args) {
-        for (int i = 3; i < 4; i++) {
+        for (int i = 8; i < 10; i++) {
             String configFile = "D:/runs-svn/avsim/av_accessibility/input/drtconfig.xml";
 
             RunRobotaxiDRTBerlin.run(configFile, false, i);
@@ -51,10 +52,10 @@ public class RunRobotaxiDRTBerlin {
         Config config = ConfigUtils.loadConfig(configFile, new DvrpConfigGroup(), new DrtConfigGroup(),
                 new OTFVisConfigGroup());
         DrtConfigGroup.get(config).setRequestRejection(false);
-        DrtConfigGroup.get(config).setMaxWaitTime(400);
+        DrtConfigGroup.get(config).setMaxWaitTime(180);
         config.controler().setOutputDirectory(config.controler().getOutputDirectory() + run);
         config.plans().setInputFile("taxiplans_" + run + ".xml.gz");
-        Controler controler = DrtControlerCreator.createControler(config, false);
+        Controler controler = DrtControlerCreator.createControlerWithSingleModeDrt(config, false);
         controler.addOverridingModule(new SwissRailRaptorModule());
         controler.run();
     }

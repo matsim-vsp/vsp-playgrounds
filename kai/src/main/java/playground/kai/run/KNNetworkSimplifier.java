@@ -20,20 +20,20 @@
 
 package playground.kai.run;
 
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.matsim4urbansim.utils.network.NetworkSimplifier;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.algorithms.NetworkCalcTopoType;
 import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.network.algorithms.NetworkSimplifier;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.ArgumentParser;
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Reads a network from file and simplifies it, using various methods
@@ -71,7 +71,7 @@ public class KNNetworkSimplifier {
 		NetworkCleaner cleaner = new org.matsim.core.network.algorithms.NetworkCleaner() ;
 		cleaner.run( network) ;
 		
-		NetworkSimplifier simplifier = new org.matsim.contrib.matsim4urbansim.utils.network.NetworkSimplifier() ;
+		NetworkSimplifier simplifier = new NetworkSimplifier() ;
 		simplifier.setMergeLinkStats(true);
 		Set<Integer> nodeTypesToMerge = new TreeSet<Integer>();
 		nodeTypesToMerge.add( NetworkCalcTopoType.PASS1WAY );

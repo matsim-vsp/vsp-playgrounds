@@ -26,8 +26,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.drt.run.*;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
+import org.matsim.contrib.drt.run.DrtConfigGroup;
+import org.matsim.contrib.drt.run.DrtControlerCreator;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -70,7 +71,7 @@ public class RunSharedBerlinBatch {
 			config.controler().setRunId(runId);
 			config.controler().setOutputDirectory("/net/ils4/jbischoff/sharedTaxi/parameterizedRuns/"+runId+"/");
 			config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-			DrtControlerCreator.createControler(config, false).run();
+						DrtControlerCreator.createControlerWithSingleModeDrt(config, false).run();
 					}
 					catch (Exception e){
 						System.err.println("Run "+runId+ " failed." );

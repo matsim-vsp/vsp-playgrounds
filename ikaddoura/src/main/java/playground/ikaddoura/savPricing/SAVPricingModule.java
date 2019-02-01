@@ -19,16 +19,12 @@
 
 package playground.ikaddoura.savPricing;
 
-import java.lang.annotation.Annotation;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
+import org.matsim.contrib.av.robotaxi.fares.taxi.TaxiFareConfigGroup;
 import org.matsim.contrib.decongestion.DecongestionConfigGroup;
-import org.matsim.contrib.drt.run.Drt;
 import org.matsim.contrib.noise.NoiseConfigGroup;
-import org.matsim.contrib.taxi.run.Taxi;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
@@ -74,13 +70,10 @@ public class SAVPricingModule extends AbstractModule {
 
 		String savMode = savPricingParams.getSavMode();
 		String savOptimizerMode;
-		Class<? extends Annotation> savOptimizerModeAnnotation;
 		if (savMode.equals(TransportMode.taxi)) {
 			savOptimizerMode = TAXI_OPTIMIZER;
-			savOptimizerModeAnnotation = Taxi.class;
 		} else if (savMode.equals(TransportMode.drt)) {
 			savOptimizerMode = DRT_OPTIMIZER;
-			savOptimizerModeAnnotation = Drt.class;
 		} else {
 			throw new RuntimeException("Unknown sav mode. Aborting...");
 		}
@@ -187,7 +180,8 @@ public class SAVPricingModule extends AbstractModule {
 			
 			log.info("Charge tolls from SAV drivers. Modify the default travel disutility of the sav optimizer.");
 			if (savOptimizerModeParams == null) throw new RuntimeException("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Aborting...");
-			install(new SAVMoneyTravelDisutilityModule(savOptimizerModeAnnotation, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
+			install(new SAVMoneyTravelDisutilityModule(savMode,
+					new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
 		
 		} else {
 			
@@ -197,7 +191,8 @@ public class SAVPricingModule extends AbstractModule {
 				log.info("Using the default travel disutility for the SAV optimizer.");
 			} else {
 				if (savOptimizerModeParams == null) throw new RuntimeException("There is no 'taxi_optimizer/drt_optimizer' mode in the planCalcScore config group. Aborting...");
-				install(new SAVMoneyTravelDisutilityModule(savOptimizerModeAnnotation, new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
+				install(new SAVMoneyTravelDisutilityModule(savMode,
+						new SAVOptimizerMoneyTimeDistanceTravelDisutilityFactory(savOptimizerMode)));
 			}
 		}
 		

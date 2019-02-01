@@ -36,6 +36,8 @@ public class MobSimSwitcher implements IterationEndsListener, IterationStartsLis
 
 	private boolean isQSimIteration = true;
 
+	private final boolean simulateAll = false;
+
 	// ---------------------- GETTERS ----------------------
 
 	public boolean isQSimIteration() {
@@ -47,7 +49,7 @@ public class MobSimSwitcher implements IterationEndsListener, IterationStartsLis
 	}
 
 	// ---------------------- LISTENER IMPLEMENTATIONS ----------------------
-	
+
 	@Override
 	public void notifyIterationStarts(final IterationStartsEvent event) {
 		this.isQSimIteration = (event.getIteration()
@@ -67,16 +69,23 @@ public class MobSimSwitcher implements IterationEndsListener, IterationStartsLis
 	public void notifyBeforeMobsim(final BeforeMobsimEvent event) {
 		if (!this.isQSimIteration()) {
 			this.selectedUnchangedPlanScores.clear();
-			for (Person person : this.scenario.getPopulation().getPersons().values()) {
-				final Plan plan = person.getSelectedPlan();
-				if (this.plansForPSim.get(plan.getPerson().getId()) == plan) {
-					// Same plan as before; does not need to be evaluated again in pSim.
-					this.plansForPSim.remove(plan.getPerson().getId());
-					// Memorize this plan's score because leaving it out will mess up the scoring.
-					this.selectedUnchangedPlanScores.put(plan.getPerson().getId(), plan.getScore());
-				} else
-					// A different plan than before; needs to be evaluated in pSim.
-					this.plansForPSim.put(plan.getPerson().getId(), plan);
+			if (this.simulateAll) {
+				this.plansForPSim.clear();
+				for (Person person : this.scenario.getPopulation().getPersons().values()) {
+					this.plansForPSim.put(person.getId(), person.getSelectedPlan());
+				}
+			} else {
+				for (Person person : this.scenario.getPopulation().getPersons().values()) {
+					final Plan plan = person.getSelectedPlan();
+					if (this.plansForPSim.get(plan.getPerson().getId()) == plan) {
+						// Same plan as before; does not need to be evaluated again in pSim.
+						this.plansForPSim.remove(plan.getPerson().getId());
+						// Memorize this plan's score because leaving it out will mess up the scoring.
+						this.selectedUnchangedPlanScores.put(plan.getPerson().getId(), plan.getScore());
+					} else
+						// A different plan than before; needs to be evaluated in pSim.
+						this.plansForPSim.put(plan.getPerson().getId(), plan);
+				}
 			}
 		}
 	}
@@ -84,8 +93,13 @@ public class MobSimSwitcher implements IterationEndsListener, IterationStartsLis
 	@Override
 	public void notifyIterationEnds(final IterationEndsEvent event) {
 		if (!this.isQSimIteration()) {
-			for (Map.Entry<Id<Person>, Double> entry : this.selectedUnchangedPlanScores.entrySet()) {
-				this.scenario.getPopulation().getPersons().get(entry.getKey()).getSelectedPlan().setScore(entry.getValue());
+			if (this.simulateAll) {
+				// nothing to do
+			} else {
+				for (Map.Entry<Id<Person>, Double> entry : this.selectedUnchangedPlanScores.entrySet()) {
+					this.scenario.getPopulation().getPersons().get(entry.getKey()).getSelectedPlan()
+							.setScore(entry.getValue());
+				}
 			}
 		}
 	}

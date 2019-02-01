@@ -50,24 +50,24 @@ public class ModeSwitchAnalysisMain {
     }
 
     public void analyze() throws IOException {
-
-    	int finalIteration = 200;
+    	
+		final String subpopulation = "person_potential-sav-user";
     	
         // 0: base case
-    	String directory0 = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingF/";
-    	String runId0 = "run0";
+    	String directory0 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_bc-0/";
+    	String runId0 = "bc-0";
     	
 		// 1: policy case
-    	String directory1 = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/output_v0_SAVuserOpCostPricingF_SAVuserExtCostPricingF_SAVdriverExtCostPricingF_CCuserExtCostPricingT/";
-    	String runId1 = "run1";
+    	String directory1 = "/Users/ihab/Documents/workspace/runs-svn/sav-pricing-setupA/output_savA-0d/";
+    	String runId1 = "savA-0d";
     	
     	// ################
     	
-		String dir0lastIterationFile = directory0 + "ITERS/it." + finalIteration +"/"+ runId0 + "." + finalIteration +".events.xml.gz";
+		String dir0lastIterationFile = directory0 + runId0 + ".output_events.xml.gz";
 	    String dir0networkFile = directory0 + runId0 + ".output_network.xml.gz";
 	    String dir0populationFile = directory0 + runId0 + ".output_plans.xml.gz";
 	    
-	    String dir1lastIterationFile = directory1 + "ITERS/it." + finalIteration +"/"+ runId1 + "." + finalIteration +".events.xml.gz";
+	    String dir1lastIterationFile = directory1 + runId0 + ".output_events.xml.gz";
 	    String dir1networkFile = directory1 + runId1 + ".output_network.xml.gz";
 	    String dir1populationFile = directory1 + runId1 + ".output_plans.xml.gz";	  
 		
@@ -86,6 +86,8 @@ public class ModeSwitchAnalysisMain {
 			log.info("Loading scenario0 and reading events...");
 
 			Config config = ConfigUtils.createConfig();	
+			config.network().setInputCRS("GK4");
+			config.global().setCoordinateSystem("GK4");
 			config.plans().setInputFile(dir0populationFile);
 			config.network().setInputFile(dir0networkFile);
 			
@@ -134,7 +136,7 @@ public class ModeSwitchAnalysisMain {
 		List<String> modes = new ArrayList<>();
 		modes.add(TransportMode.car);
 		modes.add(TransportMode.taxi);
-		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison("home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes);
+		PersonTripScenarioComparison modeSwitchAnalysis = new PersonTripScenarioComparison(subpopulation, "home", analysisOutputFolder, scenario1, basicHandler1, scenario0, basicHandler0, modes);
 		modeSwitchAnalysis.analyzeByMode();
     }
 }

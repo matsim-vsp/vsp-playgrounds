@@ -83,7 +83,7 @@ public class RunAnalysis {
             }
         }
 
-        final BufferedWriter bw = IOUtils.getBufferedWriter("D:\\runs-svn\\avsim\\av_accessibility\\output/averageTaxiWaitTimes_with_rebalancing_10runs.csv");
+        final BufferedWriter bw = IOUtils.getBufferedWriter("D:\\runs-svn\\avsim\\av_accessibility\\output/averageTaxiWaitTimes_with_rebalancing_10runs_limitedwait.csv");
         try {
             bw.write("zoneId");
             for (int i = 0; i < 24; i++) {

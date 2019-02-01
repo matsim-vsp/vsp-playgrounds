@@ -271,7 +271,9 @@ class AssignmentEmulatingQLane implements QLaneI {
 
 		double now = context.getSimTimer().getTimeOfDay() ;
 
-		qLink.activateLink();
+//		qLink.activateLink();
+		// yyyyyyyy
+
 		veh.setLinkEnterTime(now);
 
 

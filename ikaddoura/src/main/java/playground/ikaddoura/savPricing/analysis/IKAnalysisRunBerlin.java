@@ -143,7 +143,7 @@ public class IKAnalysisRunBerlin {
 				modes,
 				taxiMode,
 				carMode,
-				rewardSAVformerCarUser);
+				rewardSAVformerCarUser, null);
 		analysis.run();
 	
 		log.info("Done.");

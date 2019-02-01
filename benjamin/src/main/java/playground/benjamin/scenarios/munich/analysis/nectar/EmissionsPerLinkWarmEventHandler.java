@@ -36,7 +36,7 @@ import org.matsim.contrib.emissions.types.WarmPollutant;
 public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandler{
 	private static final Logger logger = Logger.getLogger(EmissionsPerLinkWarmEventHandler.class);
 
-	Map<Double, Map<Id<Link>, Map<WarmPollutant, Double>>> time2warmEmissionsTotal = new HashMap<>();
+	Map<Double, Map<Id<Link>, Map<String, Double>>> time2warmEmissionsTotal = new HashMap<>();
 	Map<Double, Map<Id<Link>, Double>> time2linkIdLeaveCount = new HashMap<>();
 	
 	final int noOfTimeBins;
@@ -61,18 +61,18 @@ public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandle
 		Double time = event.getTime(); 
 		if(time ==0.0) time = this.timeBinSize;
 		Id<Link> linkId = event.getLinkId();
-		Map<WarmPollutant, Double> warmEmissionsOfEvent = event.getWarmEmissions();
+		Map<String, Double> warmEmissionsOfEvent = event.getWarmEmissions();
 		double endOfTimeInterval = 0.0;
 		
 		if(warmEmissionsOfEvent==null){
-			warmEmissionsOfEvent = new HashMap<WarmPollutant, Double>();
+			warmEmissionsOfEvent = new HashMap<String, Double>();
 			for(WarmPollutant wp: WarmPollutant.values()){
-				warmEmissionsOfEvent.put(wp, 0.0);
+				warmEmissionsOfEvent.put(wp.getText(), 0.0);
 			}
 		}else{
 			for(WarmPollutant wp: WarmPollutant.values()){
-				if(warmEmissionsOfEvent.get(wp)==null){
-					warmEmissionsOfEvent.put(wp, 0.0);
+				if(warmEmissionsOfEvent.get(wp.getText())==null){
+					warmEmissionsOfEvent.put(wp.getText(), 0.0);
 				}
 			}
 		}
@@ -81,7 +81,7 @@ public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandle
 		if(endOfTimeInterval<=0.0)endOfTimeInterval=timeBinSize;
 		
 
-				Map<Id<Link>, Map<WarmPollutant, Double>> warmEmissionsTotal;
+				Map<Id<Link>, Map<String, Double>> warmEmissionsTotal;
 				Map<Id<Link>, Double> countTotal;
 				
 				if(this.time2warmEmissionsTotal.get(endOfTimeInterval) != null){
@@ -90,10 +90,10 @@ public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandle
 					
 					
 					if(warmEmissionsTotal.get(linkId) != null){
-						Map<WarmPollutant, Double> warmEmissionsSoFar = warmEmissionsTotal.get(linkId);
+						Map<String, Double> warmEmissionsSoFar = warmEmissionsTotal.get(linkId);
 						
 						for(WarmPollutant wp : WarmPollutant.values()){
-							warmEmissionsSoFar.put(wp, warmEmissionsOfEvent.get(wp)+warmEmissionsSoFar.get(wp));
+							warmEmissionsSoFar.put(wp.getText(), warmEmissionsOfEvent.get(wp.getText())+warmEmissionsSoFar.get(wp.getText()));
 						}
 						
 						double countsSoFar = countTotal.get(linkId);
@@ -106,7 +106,7 @@ public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandle
 					}
 				} else {
 					countTotal = new HashMap<>();
-					warmEmissionsTotal = new HashMap<Id<Link>, Map<WarmPollutant,Double>>();
+					warmEmissionsTotal = new HashMap<Id<Link>, Map<String,Double>>();
 					warmEmissionsTotal.put(linkId, warmEmissionsOfEvent);
 					countTotal.put(linkId, 1.);
 				}
@@ -120,7 +120,7 @@ public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandle
 		return this.time2linkIdLeaveCount;
 	}
 
-	public Map<Double, Map<Id<Link>, Map<WarmPollutant, Double>>> getWarmEmissionsPerLinkAndTimeInterval() {
+	public Map<Double, Map<Id<Link>, Map<String, Double>>> getWarmEmissionsPerLinkAndTimeInterval() {
 		return time2warmEmissionsTotal;
 	}
 }

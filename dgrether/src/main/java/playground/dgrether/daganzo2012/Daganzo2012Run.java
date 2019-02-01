@@ -19,14 +19,9 @@
  * *********************************************************************** */
 package playground.dgrether.daganzo2012;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.signals.builder.SignalsModule;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.controler.Controler;
@@ -40,11 +35,15 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.dgrether.linkanalysis.TTInOutflowEventHandler;
 import playground.dgrether.signalsystems.analysis.DgGreenSplitWriter;
 import playground.dgrether.signalsystems.analysis.DgSignalGreenSplitHandler;
 import playground.dgrether.signalsystems.analysis.DgSignalGroupAnalysisData;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 
 /**
@@ -78,8 +77,9 @@ public class Daganzo2012Run {
 //		sylviaSignalsModule.setSylviaConfig(sylviaConfig);
 //		controler.addOverridingModule(sylviaSignalsModule);
 		/* sylvia moved to playground tthunig. If you want to use sylvia use e.g. TtBasicController in playground tthunig. theresa, apr'17 */
-		controler.addOverridingModule(new SignalsModule());
-		
+//		controler.addOverridingModule(new SignalsModule());
+		Signals.configure( controler );
+
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 		controler.getConfig().controler().setCreateGraphs(false);
         addControlerListener(controler);
