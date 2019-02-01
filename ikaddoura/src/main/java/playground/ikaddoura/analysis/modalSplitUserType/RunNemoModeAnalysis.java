@@ -42,16 +42,17 @@ public class RunNemoModeAnalysis {
 //		final String runId = "test";
 		
 		final String runId = "nemo_baseCase_032";
-		final String runDirectory = "/Users/ihab/Desktop/ils3a/kaddoura/output0/";
+		final String runDirectory = "/Users/ihab/Desktop/ils3a/laudan/nemo-mercartor/nemo_baseCase/nemo_baseCase_032/output/";
+		final String outputBaseDirectory = "/Users/ihab/Desktop/";
 		
 		// if iteration < 0 --> analysis of the final iteration
 		int iteration = -1;
 		
 		final String outputDirectory;
 		if (iteration >= 0) {
-			outputDirectory = runDirectory + "/modal-split-analysis_" + "it." + iteration + "/";
+			outputDirectory = outputBaseDirectory + "/" + runId + "_modal-split-analysis_" + "it." + iteration + "/";
 		} else {
-			outputDirectory = runDirectory + "/modal-split-analysis/";
+			outputDirectory = outputBaseDirectory + "/" + runId + "_modal-split-analysis/";
 		}
 		
 		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file; null --> using the output person attributes file
