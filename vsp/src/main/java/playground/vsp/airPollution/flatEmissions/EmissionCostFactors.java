@@ -35,7 +35,7 @@ public enum EmissionCostFactors {
 	// (It is not clear if HBEFA reports PM10 or PM2.5.  It seems more plausible that they report all PM.  It also seems that there is no PM above size 10, so this would
 	// be equivalent to PM10.  Meaning that we should use the PM10 cost factor from Maibach, not the PM2.5 factor as currently used.)
 	CO (0.), // not in Maibach et al
-	FC (0.), // not in Maibach et al
+	FC (0.), // (= fuel consumption) not in Maibach et al
 	CO2_TOTAL (70. / (1000. * 1000.)); //EURO_PER_GRAMM_CO2
 
 	private double costFactor;
