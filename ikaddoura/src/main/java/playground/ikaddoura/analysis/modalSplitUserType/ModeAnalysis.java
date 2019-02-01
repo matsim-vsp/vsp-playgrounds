@@ -33,14 +33,11 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.router.MainModeIdentifierImpl;
 import org.matsim.core.router.StageActivityTypes;
 import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordUtils;
 
@@ -65,64 +62,6 @@ public class ModeAnalysis {
 	public ModeAnalysis(Scenario scenario, AgentAnalysisFilter filter) {
 		this.scenario = scenario;
 		this.filter = filter;
-	}
-
-	public static void main(String[] args) {
-		
-//		final String runDirectory = "/Users/ihab/Desktop/test-run-directory_transit-walk/";
-//		final String outputDirectory = "/Users/ihab/Desktop/modal-split-analysis-transit-walk/";
-//		final String runId = "test";
-		
-		final String runId = "berlin-v5.2-1pct";
-		final String runDirectory = "/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-1pct/output-berlin-v5.2-1pct/";
-		
-		// if iteration < 0 --> analysis of the final iteration
-		int iteration = -1;
-		
-		final String outputDirectory;
-		if (iteration >= 0) {
-			outputDirectory = runDirectory + "/modal-split-analysis_" + "it." + iteration + "/";
-		} else {
-			outputDirectory = runDirectory + "/modal-split-analysis_new/";
-		}
-		
-		// optional: Provide a personAttributes file which is used instead of the normal output person attributes file; null --> using the output person attributes file
-//		final String personAttributesFile = "/Users/ihab/Desktop/ils4a/ziemke/open_berlin_scenario/input/be_5_ik/population/personAttributes_500_10pct.xml.gz";
-		final String personAttributesFile = null;
-
-		Scenario scenario = loadScenario(runDirectory, runId, personAttributesFile, iteration);
-		
-		AgentAnalysisFilter filter = new AgentAnalysisFilter(scenario);
-		
-//		filter.setSubpopulation("person");
-		
-//		filter.setPersonAttribute("berlin");
-//		filter.setPersonAttributeName("home-activity-zone");
-		
-		filter.setZoneFile("/Users/ihab/Documents/workspace/public-svn/matsim/scenarios/countries/de/berlin/berlin-v5.2-10pct/input/berlin-shp/berlin.shp");
-		filter.setRelevantActivityType("home");
-		
-		filter.preProcess(scenario);
-				
-		ModeAnalysis analysis = new ModeAnalysis(scenario, filter);
-		analysis.run();
-		
-		File directory = new File(outputDirectory);
-		directory.mkdirs();
-		
-		analysis.writeModeShares(outputDirectory);
-		analysis.writeTripRouteDistances(outputDirectory);
-		analysis.writeTripEuclideanDistances(outputDirectory);
-		
-		final List<Tuple<Double, Double>> distanceGroups = new ArrayList<>();
-		distanceGroups.add(new Tuple<>(0., 1000.));
-		distanceGroups.add(new Tuple<>(1000., 3000.));
-		distanceGroups.add(new Tuple<>(3000., 5000.));
-		distanceGroups.add(new Tuple<>(5000., 10000.));
-		distanceGroups.add(new Tuple<>(10000., 20000.));
-		distanceGroups.add(new Tuple<>(20000., 100000.));
-		analysis.writeTripRouteDistances(outputDirectory, distanceGroups);
-		analysis.writeTripEuclideanDistances(outputDirectory, distanceGroups);
 	}
 
 	public void run() {
@@ -359,66 +298,6 @@ public class ModeAnalysis {
 		}
 		writeDistances(outputDirectory, outputFileName, distanceGroups, this.mode2TripRouteDistancesFiltered);
 
-	}
-
-	private static Scenario loadScenario(String runDirectory, String runId, String personAttributesFile, int iteration) {
-		Scenario scenario;
-		if (iteration < 0) {
-			if (runId == null) {
-				Config config = ConfigUtils.loadConfig(runDirectory + "output_config.xml");
-				config.network().setInputFile(null);
-				config.plans().setInputFile(runDirectory + "output_plans.xml.gz");
-				if (personAttributesFile == null) {
-					config.plans().setInputPersonAttributeFile(runDirectory + "output_personAttributes.xml.gz");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				config.vehicles().setVehiclesFile(null);
-				config.transit().setTransitScheduleFile(null);
-				config.transit().setVehiclesFile(null);
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-				
-			} else {
-				Config config = ConfigUtils.loadConfig(runDirectory + runId + ".output_config.xml");
-				config.network().setInputFile(null);
-				config.plans().setInputFile(runDirectory + runId + ".output_plans.xml.gz");
-				if (personAttributesFile == null) {
-					config.plans().setInputPersonAttributeFile(runDirectory + runId + ".output_personAttributes.xml.gz");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				config.vehicles().setVehiclesFile(null);
-				config.transit().setTransitScheduleFile(null);
-				config.transit().setVehiclesFile(null);
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-			}
-		} else {
-			Config config = ConfigUtils.createConfig();
-
-			if (runId == null) {
-				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile == null) {
-					throw new RuntimeException("Person attributes file required. Aborting...");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-				
-			} else {
-				config.plans().setInputFile(runDirectory + "ITERS/it." + iteration + "/" + runId + "." + iteration + "." + "plans.xml.gz");
-				if (personAttributesFile == null) {
-					throw new RuntimeException("Person attributes file required. Aborting...");
-				} else {
-					config.plans().setInputPersonAttributeFile(personAttributesFile);
-				}
-				scenario = ScenarioUtils.loadScenario(config);
-				return scenario;
-			}
-		}
-		
 	}
 		
 }
