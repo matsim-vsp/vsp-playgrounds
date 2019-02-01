@@ -2,8 +2,12 @@ package playground.kturner.freightKt.analyse;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.freight.carrier.Carrier;
 import org.matsim.contrib.freight.carrier.CarrierPlanXmlReaderV2;
 import org.matsim.contrib.freight.carrier.CarrierVehicleTypeReader;
@@ -18,33 +22,37 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.UncheckedIOException;
+import org.matsim.roadpricing.RoadPricingReaderXMLv1;
+import org.matsim.roadpricing.RoadPricingSchemeImpl;
 
-public class FreightAnalyseKT {
+public class FreightAnalyseWithLEZ_KMT {
 
 	/**
 	 *  Calculates and writes some analysis for the defined Runs.
 	 *  
 	 *  @author kturner
 	 */
-	
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleToursSingleTimeWindow/I-Base/Run_1/" ;
+
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/I-Base/Run_1/" ;
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/Ia-BaseE/Run_1/" ; 		// Base mit Electro ab Depot
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/II-CityMaut/Run_1/" ;		//City-Maut
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/II-CityMaut/Run_1/" ;		//City-Maut
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIa-CityMautE/Run_1/" ;; 	//City-Maut mit electro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IIIa-LEZE/Run_1/" ; //CO2-free City mit Elektro ab Depot
 //	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/IV-UCC/Run_1/" ;	//CO2-freie city mit UCC
-	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleToursSingleTimeWindow/IVa-UCCE/Run_1/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
-
-//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin/I-Base/Run_1/" ;
+	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/reAnalysing_MA/MATSim/Berlin-MultipleTours/IVa-UCCE/Run_1/"; 	//CO2-freie city mit UCC mit Elektro ab Depot
 	
-	private static final String OUTPUT_DIR = RUN_DIR + "Analysis/" ;
+//	private static final String RUN_DIR = "../../OutputKMT/projects/freight/studies/testing/Grid/Base/Run_1/" ;
+
+	
+	private static final String OUTPUT_DIR = RUN_DIR + "Analysis_LEZ/" ;
 		
-	private static final Logger log = Logger.getLogger(FreightAnalyseKT.class);
+	private static final Logger log = Logger.getLogger(FreightAnalyseWithLEZ_KMT.class);
 	
 	public static void main(String[] args) throws UncheckedIOException, IOException {
+		log.setLevel(Level.DEBUG);
 		OutputDirectoryLogging.initLoggingWithOutputDirectory(OUTPUT_DIR);
 		
-		FreightAnalyseKT analysis = new FreightAnalyseKT();
+		FreightAnalyseWithLEZ_KMT analysis = new FreightAnalyseWithLEZ_KMT();
 		analysis.run();
 		log.info("### Finished ###");
 		OutputDirectoryLogging.closeOutputDirLogging();
@@ -59,6 +67,8 @@ public class FreightAnalyseKT {
 			File networkFile = new File(RUN_DIR+ "output_network.xml.gz");
 			File carrierFile = new File(RUN_DIR+ "output_carriers.xml.gz");
 			File vehicleTypefile = new File(RUN_DIR+ "output_vehicleTypes.xml.gz");
+//			File lezZonefile = new File("../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/Berlin_Szenario/lez_area.xml"); 
+			File lezZonefile = new File("../../shared-svn/projects/freight/studies/MA_Turner-Kai/input/grid_Szenario/grid-tollArea.xml"); 
 			
 			Config config = ConfigUtils.loadConfig(configFile.getAbsolutePath());		
 			config.plans().setInputFile(populationFile.getAbsolutePath());
@@ -72,26 +82,38 @@ public class FreightAnalyseKT {
 			
 			Carriers carriers = new Carriers() ;
 			new CarrierPlanXmlReaderV2(carriers).readFile(carrierFile.getAbsolutePath()) ;
+			
+			//TODO: Add switch with/without LEZ 
+			//reading in lowEmissionZone
+			final RoadPricingSchemeImpl scheme = new RoadPricingSchemeImpl();
+			RoadPricingReaderXMLv1 rpReader = new RoadPricingReaderXMLv1(scheme);
+			try {
+				rpReader.readFile(lezZonefile.getAbsolutePath());
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 
-			TripEventHandler tripHandler = new TripEventHandler(scenario, vehicleTypes);
+			Set<Id<Link>> lezLinkIds = scheme.getTolledLinkIds();  //Link-Ids der Umweltzone (LEZ)
+
+			FreightAnalyseWithLEZ_KmtEventHandler tripHandler = new FreightAnalyseWithLEZ_KmtEventHandler(scenario, vehicleTypes, lezLinkIds);
 			eventsManager.addHandler(tripHandler);
 					
 			int iteration = config.controler().getLastIteration();
-			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml.gz";
+			String eventsFile = RUN_DIR + "ITERS/it." + iteration + "/" + iteration + ".events.xml";		//TODO: Temporar nicht. .gz
 			
 			log.info("Reading the event file...");
 			MatsimEventsReader reader = new MatsimEventsReader(eventsManager);
 			reader.readFile(eventsFile);
 			log.info("Reading the event file... Done.");
 			
-			TripWriter tripWriter = new TripWriter(tripHandler, OUTPUT_DIR);
-//			for (Carrier carrier : carriers.getCarriers().values()){
-//				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
-//				tripWriter.writeTourResultsSingleCarrier(carrier.getId().toString());
-//			}
-//			
-//			tripWriter.writeResultsPerVehicleTypes();
-			tripWriter.writeTourResultsAllCarrier();
+			FreightAnalyseWithLEZ_KmtWriter tripWriter = new FreightAnalyseWithLEZ_KmtWriter(tripHandler, OUTPUT_DIR);
+			//TODO: Writer hat Werte fuer innerhalb der LEZ bisher noch nicht fur die ganzen Carrier.
+			for (Carrier carrier : carriers.getCarriers().values()){
+				tripWriter.writeDetailedResultsSingleCarrier(carrier.getId().toString());
+				tripWriter.writeVehicleResultsSingleCarrier(carrier.getId().toString());
+			}
+			
+			tripWriter.writeResultsPerVehicleTypes();
 			
 			
 			log.info("### Analysis DONE");

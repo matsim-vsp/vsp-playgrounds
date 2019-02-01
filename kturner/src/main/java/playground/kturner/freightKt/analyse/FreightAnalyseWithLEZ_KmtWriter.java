@@ -38,16 +38,16 @@ import org.matsim.contrib.freight.carrier.CarrierVehicleTypes;
 import org.matsim.vehicles.VehicleType;
 
 /**
- * @author ikaddoura , lkroeger
+ * @author kturner based on ikaddoura , lkroeger
  *
  */
-public class TripWriter {
-	private static final Logger log = Logger.getLogger(TripWriter.class);
+public class FreightAnalyseWithLEZ_KmtWriter {
+	private static final Logger log = Logger.getLogger(FreightAnalyseWithLEZ_KmtWriter.class);
 
-	TripEventHandler handler;
+	FreightAnalyseWithLEZ_KmtEventHandler handler;
 	String outputFolder;
 	
-	public TripWriter(TripEventHandler handler, String outputFolder) {
+	public FreightAnalyseWithLEZ_KmtWriter(FreightAnalyseWithLEZ_KmtEventHandler handler, String outputFolder) {
 		this.handler = handler;
 		String directory = outputFolder + (outputFolder.endsWith("/") ? "" : "/");
 		this.outputFolder = directory;
@@ -61,6 +61,7 @@ public class TripWriter {
  * Schreibt die Informationen (TripDistance, diastance Tour) des Carriers für jeden Trip einzeln auf.
  * TODO: TravelTime, 
  * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
+ * TODO: fuer wihtinLEZ, mai/18
  * @param carrierIdString
  */
 	public void writeDetailedResultsSingleCarrier(String carrierIdString) {
@@ -119,9 +120,10 @@ public class TripWriter {
 	/**
 	 * Schreibt die Informationen (tour distance, tour travelTime) des Carriers für jede Tour (= jedes Fzg) einzeln auf.
 	 * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
+	 * TODO: fuer wihtinLEZ, mai/18
 	 * @param carrierIdString
 	 */
-	public void writeTourResultsSingleCarrier(String carrierIdString) {
+	public void writeVehicleResultsSingleCarrier(String carrierIdString) {
 		
 		String fileName = this.outputFolder + "tour_infos_" + carrierIdString + ".csv";
 		File file = new File(fileName);
@@ -178,7 +180,6 @@ public class TripWriter {
 	 * des Carriers für jeden FahrzeugTyp einzeln auf und bildet auch Gesamtsumme.
 	 * TODO: gesamte Reisezeit (Ende "start"-act bis Beginn "end"-act)
 	 */
-	//TODO: Ergebnisse können nicht stimmen: Entfernung in m und km haben gleichen Wert. // für _frozen Carrier ist Faktor 10. eigentlich müsste aber Faktor 1000 sein ... KMT feb/18
 	public void writeResultsPerVehicleTypes() {
 		
 		String fileName = this.outputFolder + "total_infos_per_vehicleType.csv";
@@ -192,15 +193,16 @@ public class TripWriter {
 			bw.newLine();
 
 //			bw.write("departure time [sec];person Id;amount per trip [monetary units];distance [m];travel time [sec]");
-			bw.write("vehType Id;#ofVehicles;distance [m] ; distance [km] ;TravelTime [s]  ; " +
-					"FuelConsumption[l]; Emission [t Co2];  FuelConsumptionRate[l/100m]; " +
-					"EmissionRate [g/m]; ");
+			bw.write("vehType Id;#ofVehicles;distance [m] ; distance [km] ;TravelTime [s] ; FuelConsumption[l]; Emission [t Co2]; FuelConsumptionRate[l/100m]; EmissionRate [g/m]; " 
+					+ "distanceInLEZ [m] ; distanceInLEZ [km] ;TravelTimeInLEZ [s] ; FuelConsumptioninLEZ[l]; EmissionInLEZ [t Co2]; FuelConsumptionRate[l/100m]; EmissionRate [g/m]; \" ");
 			bw.newLine();
 	
 		
 //			KT:
 			Map<Id<VehicleType>,Double> vehTypeId2TourDistances = new TreeMap<Id<VehicleType>,Double>();
 			Map<Id<VehicleType>,Double> vehTypeId2TravelTimes = new TreeMap<Id<VehicleType>,Double>();
+			Map<Id<VehicleType>,Double> vehTypeId2TourDistancesInLEZ = new TreeMap<Id<VehicleType>,Double>();
+			Map<Id<VehicleType>,Double> vehTypeId2TravelTimesInLEZ = new TreeMap<Id<VehicleType>,Double>();
 			Map<Id<VehicleType>,Integer> vehTypeId2NumberOfVehicles = new TreeMap<Id<VehicleType>,Integer>();
 			Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> vehTypId2Capabilities = new TreeMap<Id<VehicleType>, VehicleTypeSpezificCapabilities>();
 			
@@ -212,14 +214,22 @@ public class TripWriter {
 				} else { //TODO: umschreiben, dass nur die Werte bestimmt werden... oder man die Map einmal bestimmt.
 					log.debug(vehicleTypeId + " added mit Entfernung " +  this.handler.getVehTypId2TourDistances(vehicleTypeId).get(vehicleTypeId));
 					Double distance = this.handler.getVehTypId2TourDistances(vehicleTypeId).get(vehicleTypeId);
+					Double distanceInLEZ = this.handler.getVehTypId2TourDistancesInLEZ(vehicleTypeId).get(vehicleTypeId);			
 					Double travelTime = this.handler.getVehTypId2TravelTimes(vehicleTypeId).get(vehicleTypeId);
+					Double travelTimeInLEZ = this.handler.getVehTypId2TravelTimesInLEZ(vehicleTypeId).get(vehicleTypeId);
 					Integer nuOfVeh = this.handler.getVehTypId2VehicleNumber(vehicleTypeId).get(vehicleTypeId);
 					VehicleTypeSpezificCapabilities capabilities = this.handler.getVehTypId2Capabilities().get(vehicleTypeId);
 					if (distance != null) {
 						vehTypeId2TourDistances.put(vehicleTypeId, distance );
 					}
+					if (distanceInLEZ != null) {
+						vehTypeId2TourDistancesInLEZ.put(vehicleTypeId, distanceInLEZ );
+					}
 					if (travelTime != null){
 						vehTypeId2TravelTimes.put(vehicleTypeId, travelTime);
+					}
+					if (travelTimeInLEZ != null){
+						vehTypeId2TravelTimesInLEZ.put(vehicleTypeId, travelTimeInLEZ);
 					}
 					if (nuOfVeh != null){
 						vehTypeId2NumberOfVehicles.put(vehicleTypeId, nuOfVeh);
@@ -233,16 +243,24 @@ public class TripWriter {
 			
 			//Gesamtsumme
 			Double totalDistance = 0.0;
+			Double totalDistanceInLEZ = 0.0;
 			Double totalTravelTime = 0.0;
+			Double totalTravelTimeInLEZ = 0.0;
 			Integer totalNumberofVehicles = 0;
 			Double totalFuelConsumtion = 0.0;
+			Double totalFuelConsumtionInLEZ = 0.0;
 			Double totalEmissions = 0.0;
+			Double totalEmissionsInLEZ = 0.0;
 			for (Id<VehicleType> vehTypeId : vehTypeId2TourDistances.keySet()) {
 				totalDistance = totalDistance + vehTypeId2TourDistances.get(vehTypeId);
+				totalDistanceInLEZ = totalDistanceInLEZ + vehTypeId2TourDistancesInLEZ.get(vehTypeId);
 				totalTravelTime = totalTravelTime + vehTypeId2TravelTimes.get(vehTypeId);
+	//				totalTravelTimeInLEZ = totalTravelTimeInLEZ + vehTypeId2TravelTimesInLEZ.get(vehTypeId); //TODO: Muss noch ordentlich im Eventhandler hinterlegt werden.
 				totalNumberofVehicles = totalNumberofVehicles + vehTypeId2NumberOfVehicles.get(vehTypeId);
 				totalFuelConsumtion = totalFuelConsumtion + vehTypeId2TourDistances.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getFuelConsumtion()/100;
+				totalFuelConsumtionInLEZ = totalFuelConsumtionInLEZ + vehTypeId2TourDistancesInLEZ.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getFuelConsumtion()/100;
 				totalEmissions = totalEmissions + vehTypeId2TourDistances.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getEmissionsPerMeter()/1000000;
+				totalEmissionsInLEZ = totalEmissions + vehTypeId2TourDistancesInLEZ.get(vehTypeId)*vehTypId2Capabilities.get(vehTypeId).getEmissionsPerMeter()/1000000;
 			}
 			
 			// Gesamtsumme
@@ -251,8 +269,15 @@ public class TripWriter {
 					totalDistance + ";" +
 					totalDistance/1000 + ";" +
 					totalTravelTime + ";" +
-					totalFuelConsumtion + ";" +  // Spritverbrauch in Liter
-					totalEmissions	// CO2-Ausstoss in t
+					totalFuelConsumtion + ";" +  // Spritverbrauch in Liter		
+					totalEmissions + ";" +	// CO2-Ausstoss in t				
+					";;"+					//Raten für gesamtflotte nicht gegeben. 
+					//values within LEZ
+					totalDistanceInLEZ + ";" +
+					totalDistanceInLEZ/1000 + ";" +
+					totalTravelTimeInLEZ + ";" +
+					totalFuelConsumtionInLEZ + ";" +  // Spritverbrauch in Liter	
+					totalEmissionsInLEZ	// CO2-Ausstoss in t						
 					);
 			bw.newLine();
 			
@@ -260,7 +285,9 @@ public class TripWriter {
 			for (Id<VehicleType> vehTypeId : vehTypeId2TourDistances.keySet()) {
 
 				Double tourDistance = vehTypeId2TourDistances.get(vehTypeId);
+				Double tourDistanceInLEZ = vehTypeId2TourDistancesInLEZ.get(vehTypeId);
 				Double tourTravelTime = vehTypeId2TravelTimes.get(vehTypeId);
+				Double tourTravelTimeInLEZ = vehTypeId2TravelTimesInLEZ.get(vehTypeId);
 				Integer numberofVehicles = vehTypeId2NumberOfVehicles.get(vehTypeId);
 				VehicleTypeSpezificCapabilities capabilites = vehTypId2Capabilities.get(vehTypeId);
 				
@@ -271,6 +298,13 @@ public class TripWriter {
 						tourTravelTime + ";" + 
 						tourDistance*capabilites.getFuelConsumtion()/100 + ";" +  // Spritverbrauch in Liter (Faktor wg l/100km als Grundangabe)
 						tourDistance*capabilites.getEmissionsPerMeter()/1000000 +";" + 	// CO2-Ausstoss in t (= 1Mio g)
+						capabilites.getFuelConsumtion() + ";" + 
+						capabilites.getEmissionsPerMeter() + ";" + 
+						tourDistanceInLEZ + ";" + 
+						tourDistanceInLEZ/1000 + ";" + 
+						tourTravelTimeInLEZ + ";" + 
+						tourDistanceInLEZ*capabilites.getFuelConsumtion()/100 + ";" +  // Spritverbrauch in Liter (Faktor wg l/100km als Grundangabe)
+						tourDistanceInLEZ*capabilites.getEmissionsPerMeter()/1000000 +";" + 	// CO2-Ausstoss in t (= 1Mio g)
 						capabilites.getFuelConsumtion() + ";" + 
 						capabilites.getEmissionsPerMeter() 
 						);
@@ -287,95 +321,6 @@ public class TripWriter {
 			e.printStackTrace();
 		}
 	}
-
-	
-	/**
-	 * Writes out the information of all tours in one file. One line per tour
-	 */
-	public void writeTourResultsAllCarrier() {
-		String fileName = this.outputFolder + "total_tour_infos_per_vehicleType.csv";
-		File file = new File(fileName);
-
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			bw.write(fileName);
-			bw.newLine();
-			bw.write("____________________________________________________________________________");
-			bw.newLine();
-
-			bw.write("personId; vehType Id;distance [m] ; distance [km] ;TravelTime [s]; TravelTime [h];" +
-					"FuelConsumption[l]; Emission [t Co2];  FuelConsumptionRate[l/100m]; " +
-					"EmissionRate [g/m]; ");
-			bw.newLine();
-
-
-
-			//			KT:
-			Map<Id<Person>, Double> personId2tourDistance = this.handler.getPersonId2TourDistances();
-			Map<Id<Person>, Double> personId2tourTravelTimes = this.handler.getPersonId2TravelTimes();
-
-			Map<Id<VehicleType>, VehicleTypeSpezificCapabilities> vehTypId2Capabilities = new TreeMap<Id<VehicleType>, VehicleTypeSpezificCapabilities>();
-
-			CarrierVehicleTypes vehicleTypes = this.handler.getVehicleTypes();
-
-			//preparation:
-			for (Id<VehicleType> vehicleTypeId : vehicleTypes.getVehicleTypes().keySet()){
-				VehicleTypeSpezificCapabilities capabilities = this.handler.getVehTypId2Capabilities().get(vehicleTypeId);
-				if (capabilities != null){
-					vehTypId2Capabilities.put(vehicleTypeId, capabilities);
-				}
-
-			}
-
-			//write results:
-			for (Id<Person> personId :personId2tourDistance.keySet()) {
-
-				Double tourDistanceMeter = personId2tourDistance.get(personId);
-				Double tourTravelTimeSec = personId2tourTravelTimes.get(personId);
-
-				Id<VehicleType> vehTypeId = null;
-
-				for (Id<VehicleType> vehTypeIdsAvail : vehicleTypes.getVehicleTypes().keySet()) {
-					if(personId.toString().contains("_"+vehTypeIdsAvail.toString()+"_")){
-						if (vehTypeIdsAvail.toString().endsWith("frozen") == personId.toString().contains("frozen")) {//only frozen
-							vehTypeId = vehTypeIdsAvail;
-						} else { //not "frozen"
-							vehTypeId = vehTypeIdsAvail;
-						}
-					}
-				}
-				
-				if (vehTypeId == null) {
-					log.error("Vehicle type for person not defined: " + personId);
-				}
-
-				double fuelConsuptionRate = (vehTypId2Capabilities.get(vehTypeId)).getFuelConsumtion()*1000; // Usually in  l/100km
-				double emissionsRatePerMeter = vehTypId2Capabilities.get(vehTypeId).getEmissionsPerMeter(); 
-
-				bw.write(personId + ";" +
-						vehTypeId + ";" +
-						tourDistanceMeter + ";" + 
-						tourDistanceMeter/1000 + ";" +  //km
-						tourTravelTimeSec + ";" + 
-						tourTravelTimeSec/3600 + ";" + 	//h
-						tourDistanceMeter*fuelConsuptionRate/100/1000 + ";" +  // rate is in [liter/100km]
-						tourDistanceMeter*emissionsRatePerMeter /1000000 +";" + 	// CO2-Ausstoss in t (= 1Mio g)
-						fuelConsuptionRate+ ";" + 
-						emissionsRatePerMeter  
-						);
-				bw.newLine();
-
-			}	
-			
-			log.info("Output written to " + fileName);
-			bw.close();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-		
-
 	
 	
 	
